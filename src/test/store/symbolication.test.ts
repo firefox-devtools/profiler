@@ -7,6 +7,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import {
   completeSymbolTable,
   partialSymbolTable,
+  jitDumpSymbolTable,
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import type { MarkerPayload } from 'firefox-profiler/types';
@@ -29,6 +30,7 @@ import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
+  changeImplementationFilter,
 } from '../../actions/profile-view';
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -44,18 +46,17 @@ import { SymbolsNotFoundError } from '../../profile-logic/errors';
  */
 describe('doSymbolicateProfile', function () {
   // Initialize a store, an unsymbolicated profile, and helper functions.
-  function init() {
+  function init(profile = _createUnsymbolicatedProfile()) {
     // The rejection in `requestSymbolsFromServer` outputs an error log, let's
     // silence it here. The fact that we call it is tested in
     // symbol-store.test.js.
     jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    const profile = _createUnsymbolicatedProfile();
     const store = storeWithProfile(profile);
 
-    let symbolTable = completeSymbolTable;
+    let firefoxSymbolTable = completeSymbolTable;
     function switchSymbolTable(otherSymbolTable: ExampleSymbolTable) {
-      symbolTable = otherSymbolTable;
+      firefoxSymbolTable = otherSymbolTable;
     }
     let symbolicationProviderMode: 'from-server' | 'from-browser' =
       'from-browser';
@@ -67,12 +68,19 @@ describe('doSymbolicateProfile', function () {
       requestSymbolsFromServer: async (requests: LibSymbolicationRequest[]) =>
         requests.map<LibSymbolicationResponse>((request) => {
           const { lib, addresses } = request;
-          if (lib.debugName !== 'firefox.pdb') {
+
+          const symbolTables: Partial<Record<string, ExampleSymbolTable>> = {
+            'firefox.pdb': firefoxSymbolTable,
+            'jit-52344.dump': jitDumpSymbolTable,
+          };
+
+          const symbolTable = symbolTables[lib.debugName];
+          if (symbolTable === undefined) {
             return {
               type: 'ERROR' as const,
               request,
               error: new SymbolsNotFoundError(
-                'Should only have lib called firefox.pdb',
+                `Lib name ${lib.debugName} is not in the list of known names: ${Object.keys(symbolTables).join(', ')}`,
                 lib
               ),
             };
@@ -123,7 +131,7 @@ describe('doSymbolicateProfile', function () {
         }
         return readSymbolsFromSymbolTable(
           addresses,
-          symbolTable.asTuple,
+          firefoxSymbolTable.asTuple,
           (s: string) => s
         );
       },
@@ -478,6 +486,28 @@ describe('doSymbolicateProfile', function () {
     ]);
   });
 
+  it('inline frames for JS functions appear in the JS-only call tree after symbolication', async () => {
+    const {
+      store: { dispatch, getState },
+      profile,
+      symbolStore,
+      switchSymbolProviderMode,
+    } = init(_createUnsymbolicatedJitProfile());
+
+    switchSymbolProviderMode('from-server');
+
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
+
+    // Check that the `useState.js` node shows up in the JS-only call tree.
+    // This function is an inline frame from the jitdump symbol info.
+    dispatch(changeImplementationFilter('js'));
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      '- renderButton.js (total: 1, self: —)',
+      '  - useState.js (total: 1, self: 1)',
+      '- runJobs.js (total: 1, self: 1)',
+    ]);
+  });
+
   it('can re-symbolicate a partially-symbolicated profile even if it needs to add funcs to the funcTable', async () => {
     const {
       store: { dispatch, getState },
@@ -621,5 +651,13 @@ function _createUnsymbolicatedProfile() {
 
   thread.markers = markers;
 
+  return profile;
+}
+
+function _createUnsymbolicatedJitProfile() {
+  // See jitDumpSyms (in example-symbol-table.ts) for the corresponding symbols.
+  const { profile } = getProfileFromTextSamples(`
+    renderButton.js[lib:jit-52344.dump][address:a]  runJobs.js[lib:jit-52344.dump][address:2000]
+  `);
   return profile;
 }
