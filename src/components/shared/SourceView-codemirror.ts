@@ -41,6 +41,10 @@ const languageConf = new Compartment();
 // This "compartment" allows us to swap the highlighted line when it changes.
 const highlightedLineConf = new Compartment();
 
+// This "compartment" allows us to reconfigure the line number formatter when
+// startLine changes.
+const lineNumbersConf = new Compartment();
+
 // Detect the right language based on the file extension.
 function _languageExtForPath(
   path: string | null
@@ -85,6 +89,16 @@ const codeViewerExtension = [
   EditorView.contentAttributes.of({ tabindex: '0' }),
 ];
 
+// Creates a lineNumbers extension that displays line numbers offset by startLine - 1.
+function _lineNumbersForStartLine(startLine: number) {
+  if (startLine <= 1) {
+    return lineNumbers();
+  }
+  return lineNumbers({
+    formatNumber: (n) => String(n + startLine - 1),
+  });
+}
+
 export class SourceViewEditor {
   _view: EditorView;
 
@@ -94,13 +108,14 @@ export class SourceViewEditor {
     path: string,
     timings: LineTimings,
     highlightedLine: number | null,
+    startLine: number,
     domParent: Element
   ) {
     let state = EditorState.create({
       doc: initialText,
       extensions: [
         timingsExtension,
-        lineNumbers(),
+        lineNumbersConf.of(_lineNumbersForStartLine(startLine)),
         languageConf.of(_languageExtForPath(path)),
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
@@ -149,6 +164,13 @@ export class SourceViewEditor {
       effects: highlightedLineConf.reconfigure(
         createHighlightedLineExtension(lineNumber)
       ),
+    });
+  }
+
+  setStartLine(startLine: number) {
+    // Reconfigure the line numbers extension to display the new offset.
+    this._view.dispatch({
+      effects: lineNumbersConf.reconfigure(_lineNumbersForStartLine(startLine)),
     });
   }
 
