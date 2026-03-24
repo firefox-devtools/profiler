@@ -1765,6 +1765,7 @@ Object {
       "value": 2,
     },
   },
+  "isInvertedRoot": false,
   "rootTime": 2,
 }
 `;
@@ -2347,6 +2348,7 @@ CallTree {
       0,
       0,
     ],
+    "hasCPUDeltas": false,
     "length": 2,
     "stack": Array [
       6,
@@ -2355,6 +2357,11 @@ CallTree {
     "subcategory": Uint8Array [
       0,
       0,
+    ],
+    "threadCPUPercent": Uint8Array [
+      100,
+      100,
+      100,
     ],
     "time": Array [
       4,
@@ -2601,6 +2608,7 @@ CallTree {
         0,
         0,
       ],
+      "hasCPUDeltas": false,
       "length": 4,
       "stack": Array [
         6,
@@ -2613,6 +2621,13 @@ CallTree {
         0,
         0,
         0,
+      ],
+      "threadCPUPercent": Uint8Array [
+        100,
+        100,
+        100,
+        100,
+        100,
       ],
       "time": Array [
         3,
@@ -2952,6 +2967,7 @@ Object {
       0,
       0,
     ],
+    "hasCPUDeltas": false,
     "length": 4,
     "stack": Array [
       6,
@@ -2964,6 +2980,13 @@ Object {
       0,
       0,
       0,
+    ],
+    "threadCPUPercent": Uint8Array [
+      100,
+      100,
+      100,
+      100,
+      100,
     ],
     "time": Array [
       3,
@@ -3377,6 +3400,7 @@ Object {
       0,
       0,
     ],
+    "hasCPUDeltas": false,
     "length": 2,
     "stack": Array [
       6,
@@ -3385,6 +3409,11 @@ Object {
     "subcategory": Uint8Array [
       0,
       0,
+    ],
+    "threadCPUPercent": Uint8Array [
+      100,
+      100,
+      100,
     ],
     "time": Array [
       4,
@@ -3720,6 +3749,7 @@ Object {
       0,
       0,
     ],
+    "hasCPUDeltas": false,
     "length": 4,
     "stack": Array [
       6,
@@ -3732,6 +3762,13 @@ Object {
       0,
       0,
       0,
+    ],
+    "threadCPUPercent": Uint8Array [
+      100,
+      100,
+      100,
+      100,
+      100,
     ],
     "time": Array [
       3,
@@ -4069,6 +4106,7 @@ Object {
       0,
       0,
     ],
+    "hasCPUDeltas": false,
     "length": 4,
     "stack": Array [
       6,
@@ -4081,6 +4119,13 @@ Object {
       0,
       0,
       0,
+    ],
+    "threadCPUPercent": Uint8Array [
+      100,
+      100,
+      100,
+      100,
+      100,
     ],
     "time": Array [
       3,

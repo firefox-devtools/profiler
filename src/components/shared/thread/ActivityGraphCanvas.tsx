@@ -4,11 +4,15 @@
  * */
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
+import memoizeOne from 'memoize-one';
 import type {
   ActivityFillGraphQuerier,
   CategoryDrawStyles,
 } from './ActivityGraphFills';
-import { computeActivityGraphFills } from './ActivityGraphFills';
+import {
+  computeActivityGraphFills,
+  precomputePositions,
+} from './ActivityGraphFills';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
@@ -37,7 +41,6 @@ type CanvasProps = {
   readonly categories: CategoryList;
   readonly passFillsQuerier: (param: ActivityFillGraphQuerier) => void;
   readonly onClick: (param: React.MouseEvent<HTMLCanvasElement>) => void;
-  readonly enableCPUUsage: boolean;
 } & SizeProps;
 
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
@@ -47,6 +50,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     renderScheduled: false,
     inView: false,
   };
+  _memoizedPrecomputePositions = memoizeOne(precomputePositions);
 
   _renderCanvas() {
     if (!this._canvasState.inView) {
@@ -132,7 +136,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       sampleIndexOffset,
       sampleSelectedStates,
       treeOrderSampleComparator,
-      enableCPUUsage,
       width,
       height,
     } = this.props;
@@ -142,6 +145,17 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     const canvasPixelHeight = Math.round(height * window.devicePixelRatio);
     canvas.width = canvasPixelWidth;
     canvas.height = canvasPixelHeight;
+
+    const xPixelsPerMs = canvasPixelWidth / (rangeEnd - rangeStart);
+    const precomputedPositions = this._memoizedPrecomputePositions(
+      fullThread.samples.time,
+      sampleIndexOffset,
+      rangeFilteredThread.samples.length,
+      rangeStart,
+      xPixelsPerMs,
+      interval,
+      canvasPixelWidth
+    );
 
     const { fills, fillsQuerier } = computeActivityGraphFills({
       canvasPixelWidth,
@@ -153,10 +167,10 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeEnd,
       sampleIndexOffset,
       sampleSelectedStates,
-      enableCPUUsage,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx!),
+      precomputedPositions,
     });
 
     // The value in fillsQuerier is needed in ActivityGraph but is computed in this method

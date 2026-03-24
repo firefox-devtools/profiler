@@ -4,7 +4,10 @@
 import { PureComponent } from 'react';
 import classNames from 'classnames';
 import { timeCode } from 'firefox-profiler/utils/time-code';
-import { getSampleIndexClosestToStartTime } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getSampleIndexClosestToStartTime,
+  toSelectedState,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import { BLUE_70, BLUE_40 } from 'photon-colors';
 import './HeightGraph.css';
@@ -14,6 +17,7 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
   Milliseconds,
+  SampleRelationToNode,
 } from 'firefox-profiler/types';
 import { SelectedState } from 'firefox-profiler/types';
 
@@ -129,7 +133,9 @@ export class ThreadHeightGraph extends PureComponent<Props> {
         continue;
       }
 
-      const state = sampleSelectedStates[i] as SelectedState;
+      const state = toSelectedState(
+        sampleSelectedStates[i] as SampleRelationToNode
+      );
       if (state === SelectedState.FilteredOutByTransform) {
         continue;
       }
