@@ -902,13 +902,13 @@ export function getSampleIndexToCallNodeIndex(
 }
 
 /**
- * This is an implementation of getSamplesSelectedStates for just the case where
+ * This is an implementation of getSampleSelectedStates for just the case where
  * no call node is selected.
  */
-function _getSamplesSelectedStatesForNoSelection(
+function _getSampleSelectedStatesForNoSelection(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
-): SelectedState[] {
-  const result = new Array(sampleCallNodes.length);
+): Uint8Array {
+  const result = new Uint8Array(sampleCallNodes.length);
   for (
     let sampleIndex = 0;
     sampleIndex < sampleCallNodes.length;
@@ -978,16 +978,16 @@ function _getSamplesSelectedStatesForNoSelection(
  * In this example, the selected node has index 13 and the "selected index range"
  * is the range from 13 to 21 (not including 21).
  */
-function _getSamplesSelectedStatesNonInverted(
+function _getSampleSelectedStatesNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
-): SelectedState[] {
+): Uint8Array {
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const selectedCallNodeDescendantsEndIndex =
     callNodeTable.subtreeRangeEnd[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;
-  const samplesSelectedStates = new Array(sampleCount);
+  const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
     let sampleSelectedState: SelectedState = SelectedState.Selected;
     const callNodeIndex = sampleCallNodes[sampleIndex];
@@ -1003,28 +1003,28 @@ function _getSamplesSelectedStatesNonInverted(
       // This sample was filtered out.
       sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
-    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+    sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
-  return samplesSelectedStates;
+  return sampleSelectedStates;
 }
 
 /**
- * The implementation of getSamplesSelectedStates for the inverted tree.
+ * The implementation of getSampleSelectedStates for the inverted tree.
  *
  * This uses the suffix order, see the documentation of CallNodeInfoInverted.
  */
-function _getSamplesSelectedStatesInverted(
+function _getSampleSelectedStatesInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
-): SelectedState[] {
+): Uint8Array {
   const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
   const [selectedSubtreeRangeStart, selectedSubtreeRangeEnd] =
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(
       selectedInvertedCallNodeIndex
     );
   const sampleCount = sampleNonInvertedCallNodes.length;
-  const samplesSelectedStates = new Array(sampleCount);
+  const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
     let sampleSelectedState: SelectedState = SelectedState.Selected;
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
@@ -1039,9 +1039,9 @@ function _getSamplesSelectedStatesInverted(
       // This sample was filtered out.
       sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
-    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+    sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
-  return samplesSelectedStates;
+  return sampleSelectedStates;
 }
 
 /**
@@ -1051,23 +1051,23 @@ function _getSamplesSelectedStatesInverted(
  * This is used in the activity graph. The "ordering" is used so that samples
  * from the same subtree (in the call tree) "clump together" in the graph.
  */
-export function getSamplesSelectedStates(
+export function getSampleSelectedStates(
   callNodeInfo: CallNodeInfo,
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
-): SelectedState[] {
+): Uint8Array {
   if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
-    return _getSamplesSelectedStatesForNoSelection(sampleNonInvertedCallNodes);
+    return _getSampleSelectedStatesForNoSelection(sampleNonInvertedCallNodes);
   }
 
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
-    ? _getSamplesSelectedStatesInverted(
+    ? _getSampleSelectedStatesInverted(
         sampleNonInvertedCallNodes,
         selectedCallNodeIndex,
         callNodeInfoInverted
       )
-    : _getSamplesSelectedStatesNonInverted(
+    : _getSampleSelectedStatesNonInverted(
         sampleNonInvertedCallNodes,
         selectedCallNodeIndex,
         callNodeInfo
@@ -2715,6 +2715,34 @@ export function createThreadFromDerivedTables(
 }
 
 /**
+ * Throws if the column lengths of a StackTable don't match stackTable.length.
+ * Call this after constructing a new StackTable to catch bugs early.
+ */
+export function validateStackTableShape(stackTable: StackTable): void {
+  const { length, frame, prefix, category, subcategory } = stackTable;
+  if (frame.length !== length) {
+    throw new Error(
+      `StackTable frame column length ${frame.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (prefix.length !== length) {
+    throw new Error(
+      `StackTable prefix column length ${prefix.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (category.length !== length) {
+    throw new Error(
+      `StackTable category column length ${category.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (subcategory.length !== length) {
+    throw new Error(
+      `StackTable subcategory column length ${subcategory.length} does not match stackTable.length ${length}`
+    );
+  }
+}
+
+/**
  * Sometimes we want to update the stacks for a thread, for instance while searching
  * for a text string, or doing a call tree transformation. This function abstracts
  * out the manipulation of the data structures so that we can properly update
@@ -2738,6 +2766,7 @@ export function updateThreadStacksByGeneratingNewStackColumns(
     markerData: Array<MarkerPayload | null>
   ) => Array<MarkerPayload | null>
 ): Thread {
+  validateStackTableShape(newStackTable);
   const { jsAllocations, nativeAllocations, samples, markers } = thread;
 
   const newSamples = {
