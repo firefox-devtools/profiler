@@ -13,7 +13,6 @@ import type {
   RawSamplesTable,
   FrameTable,
   RawStackTable,
-  StackTable,
   FuncTable,
   RawMarkerTable,
   JsAllocationsTable,
@@ -32,20 +31,6 @@ import type {
 /**
  * This module collects all of the creation of new empty profile data structures.
  */
-
-export function getEmptyStackTable(): StackTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    frame: [],
-    prefix: [],
-    category: new Uint8Array(),
-    subcategory: new Uint8Array(),
-    length: 0,
-  };
-}
 
 export function getEmptySamplesTable(): RawSamplesTable {
   return {

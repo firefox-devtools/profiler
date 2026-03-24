@@ -20,7 +20,6 @@ import {
   getSearchFilteredMarkerIndexes,
   stringsToMarkerRegExps,
 } from '../profile-logic/marker-data';
-import { getEmptyStackTable } from './data-structures';
 import { getFunctionName } from './function-info';
 import { splitSearchString } from '../utils/string';
 
@@ -766,7 +765,11 @@ export function mergeCallNode(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newStackTable = getEmptyStackTable();
+    const newFrameCol = [];
+    const newPrefixCol = [];
+    const newCategoryCol = [];
+    const newSubcategoryCol = [];
+    let newLength = 0;
     // Provide two arrays to efficiently cache values for the algorithm. This probably
     // could be refactored to use only one array here.
     const stackDepths = [];
@@ -822,16 +825,27 @@ export function mergeCallNode(
           newStackPrefix === undefined ? null : newStackPrefix
         );
       } else {
-        const newStackIndex = newStackTable.length++;
+        const newStackIndex = newLength++;
         const newStackPrefix = oldStackToNewStack.get(prefix);
-        newStackTable.prefix[newStackIndex] =
+        newPrefixCol[newStackIndex] =
           newStackPrefix === undefined ? null : newStackPrefix;
-        newStackTable.frame[newStackIndex] = frameIndex;
-        newStackTable.category[newStackIndex] = category;
-        newStackTable.subcategory[newStackIndex] = subcategory;
+        newFrameCol[newStackIndex] = frameIndex;
+        newCategoryCol[newStackIndex] = category;
+        newSubcategoryCol[newStackIndex] = subcategory;
         oldStackToNewStack.set(stackIndex, newStackIndex);
       }
     }
+
+    const newStackTable = {
+      frame: newFrameCol,
+      prefix: newPrefixCol,
+      category: new Uint8Array(newCategoryCol),
+      subcategory:
+        stackTable.subcategory instanceof Uint8Array
+          ? new Uint8Array(newSubcategoryCol)
+          : new Uint16Array(newSubcategoryCol),
+      length: newLength,
+    };
 
     return updateThreadStacks(
       thread,
@@ -1247,7 +1261,11 @@ export function focusSubtree(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newStackTable = getEmptyStackTable();
+    const newFrameCol = [];
+    const newPrefixCol = [];
+    const newCategoryCol = [];
+    const newSubcategoryCol = [];
+    let newLength = 0;
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const prefixMatchesUpTo = prefix !== null ? stackMatches[prefix] : 0;
@@ -1267,17 +1285,28 @@ export function focusSubtree(
           }
         }
         if (stackMatchesUpTo === prefixDepth) {
-          const newStackIndex = newStackTable.length++;
+          const newStackIndex = newLength++;
           const newStackPrefix = oldStackToNewStack.get(prefix);
-          newStackTable.prefix[newStackIndex] = newStackPrefix ?? null;
-          newStackTable.frame[newStackIndex] = frame;
-          newStackTable.category[newStackIndex] = category;
-          newStackTable.subcategory[newStackIndex] = subcategory;
+          newPrefixCol[newStackIndex] = newStackPrefix ?? null;
+          newFrameCol[newStackIndex] = frame;
+          newCategoryCol[newStackIndex] = category;
+          newSubcategoryCol[newStackIndex] = subcategory;
           oldStackToNewStack.set(stackIndex, newStackIndex);
         }
       }
       stackMatches[stackIndex] = stackMatchesUpTo;
     }
+
+    const newStackTable = {
+      frame: newFrameCol,
+      prefix: newPrefixCol,
+      category: new Uint8Array(newCategoryCol),
+      subcategory:
+        stackTable.subcategory instanceof Uint8Array
+          ? new Uint8Array(newSubcategoryCol)
+          : new Uint16Array(newSubcategoryCol),
+      length: newLength,
+    };
 
     return updateThreadStacks(thread, newStackTable, (oldStack) => {
       if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
@@ -1359,7 +1388,12 @@ export function focusFunction(
     // Typed arrays are initialized to zero, which we interpret as null.
     const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
 
-    const newStackTable = getEmptyStackTable();
+    const newFrameCol = [];
+    const newPrefixCol = [];
+    const newCategoryCol = [];
+    const newSubcategoryCol = [];
+    let newLength = 0;
+
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
@@ -1369,15 +1403,25 @@ export function focusFunction(
         prefix === null ? 0 : oldStackToNewStackPlusOne[prefix];
       const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
       if (newPrefix !== null || funcIndex === funcIndexToFocus) {
-        const newStackIndex = newStackTable.length++;
-        newStackTable.prefix[newStackIndex] = newPrefix;
-        newStackTable.frame[newStackIndex] = frameIndex;
-        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
-        newStackTable.subcategory[newStackIndex] =
-          stackTable.subcategory[stackIndex];
+        const newStackIndex = newLength++;
+        newPrefixCol[newStackIndex] = newPrefix;
+        newFrameCol[newStackIndex] = frameIndex;
+        newCategoryCol[newStackIndex] = stackTable.category[stackIndex];
+        newSubcategoryCol[newStackIndex] = stackTable.subcategory[stackIndex];
         oldStackToNewStackPlusOne[stackIndex] = newStackIndex + 1;
       }
     }
+
+    const newStackTable = {
+      frame: newFrameCol,
+      prefix: newPrefixCol,
+      category: new Uint8Array(newCategoryCol),
+      subcategory:
+        stackTable.subcategory instanceof Uint8Array
+          ? new Uint8Array(newSubcategoryCol)
+          : new Uint16Array(newSubcategoryCol),
+      length: newLength,
+    };
 
     return updateThreadStacks(thread, newStackTable, (oldStack) => {
       if (oldStack === null) {
@@ -1445,7 +1489,11 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
     > = new Map();
     oldStackToNewStack.set(null, null);
 
-    const newStackTable = getEmptyStackTable();
+    const newFrameCol = [];
+    const newPrefixCol = [];
+    const newCategoryCol = [];
+    const newSubcategoryCol = [];
+    let newLength = 0;
 
     // fill the new stack table with the kept frames
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
@@ -1460,14 +1508,25 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
         continue;
       }
 
-      const newStackIndex = newStackTable.length++;
-      newStackTable.prefix[newStackIndex] = newPrefix;
-      newStackTable.frame[newStackIndex] = stackTable.frame[stackIndex];
-      newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
-      newStackTable.subcategory[newStackIndex] =
-        stackTable.subcategory[stackIndex];
+      const newStackIndex = newLength++;
+      newPrefixCol[newStackIndex] = newPrefix;
+      newFrameCol[newStackIndex] = stackTable.frame[stackIndex];
+      newCategoryCol[newStackIndex] = stackTable.category[stackIndex];
+      newSubcategoryCol[newStackIndex] = stackTable.subcategory[stackIndex];
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
+
+    const newStackTable = {
+      frame: newFrameCol,
+      prefix: newPrefixCol,
+      category: new Uint8Array(newCategoryCol),
+      subcategory:
+        stackTable.subcategory instanceof Uint8Array
+          ? new Uint8Array(newSubcategoryCol)
+          : new Uint16Array(newSubcategoryCol),
+      length: newLength,
+    };
+
     const updated = updateThreadStacks(
       thread,
       newStackTable,
