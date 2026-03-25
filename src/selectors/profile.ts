@@ -969,3 +969,10 @@ export const getSourceViewSourceId: Selector<string | null> = createSelector(
   (sources, sourceIndex) =>
     sourceIndex !== null ? sources.id[sourceIndex] : null
 );
+
+export const getSourceViewStartLine: Selector<number> = createSelector(
+  getSourceTable,
+  UrlState.getSourceViewSourceIndex,
+  (sources, sourceIndex) =>
+    sourceIndex !== null ? sources.startLine[sourceIndex] : 1
+);

@@ -344,6 +344,9 @@ Home--record-instructions =
     Pro comenciar le profilage, clicca sur le button de profilage o usa le
     claves de accesso directe. Le icone es blau quando un profilo se registra.
     Pulsa <kbd>Capturar</kbd> pro cargar le datos in profiler.firefox.com.
+Home--instructions-content2 =
+    Registrar profilos de prestation require <a>{ -firefox-brand-name } pro scriptorio</a>.
+    Totevia, le profilos existente pote esser vidite in qualcunque navigator moderne.
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } pote esser profilate directemente sur iste
     apparato. Pro altere informationes, lege <a>Profilar { -firefox-android-brand-name }
