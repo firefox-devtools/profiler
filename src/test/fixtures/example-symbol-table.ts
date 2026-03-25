@@ -280,3 +280,45 @@ export const partialSymbolTable: ExampleSymbolTable = {
 
 export const completeSymbolTableAsTuple = completeSymbolTable.asTuple;
 export const partialSymbolTableAsTuple = partialSymbolTable.asTuple;
+
+// A symbol table for a JIT dump file (e.g. jit-52344.dump), simulating JS
+// functions symbolicated from samply + jitdump. The outer function
+// "renderButton.js" has an inlined call to "useState.js" at address 0x000a.
+const jitDumpSyms = [
+  {
+    address: 0,
+    name: 'renderButton.js',
+    file: 'Button.tsx',
+    lineRanges: [
+      {
+        startAddress: 0x0,
+        line: 42,
+      },
+      {
+        startAddress: 0x8,
+        line: 45,
+        inlinedCall: {
+          name: 'useState.js',
+          file: 'react.js',
+          lineRanges: [
+            {
+              startAddress: 0x8,
+              line: 100,
+            },
+          ],
+        },
+      },
+    ],
+  },
+  {
+    address: 0x2000,
+    name: 'runJobs.js',
+    file: 'scheduler.js',
+  },
+];
+
+export const jitDumpSymbolTable: ExampleSymbolTable = {
+  symbols: jitDumpSyms,
+  asTuple: _makeSymbolTableAsTuple(jitDumpSyms),
+  getAddressResult: _makeGetAddressResultFunction(jitDumpSyms),
+};
