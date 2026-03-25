@@ -1404,6 +1404,24 @@ export function viewProfileFromPostMessage(
   };
 }
 
+// Given a profile view URL, extract the raw URL needed to fetch the profile
+// data. This mirrors the manual pathname splitting done in retrieveProfileForRawUrl,
+// so we can fetch the profile before calling stateFromLocation.
+function getProfileFetchUrl(urlString: string): string {
+  const pathParts = new URL(urlString).pathname.split('/').filter((d) => d);
+  const dataSource = ensureIsValidDataSource(pathParts[0]);
+  switch (dataSource) {
+    case 'public':
+      return getProfileUrlForHash(pathParts[1]);
+    case 'from-url':
+      return decodeURIComponent(pathParts[1]);
+    default:
+      throw new Error(
+        'Only public uploaded profiles are supported by the comparison function.'
+      );
+  }
+}
+
 /**
  * This action retrieves several profiles and push them into 1 profile using the
  * information contained in the query.
@@ -1416,9 +1434,7 @@ export function retrieveProfilesToCompare(
     dispatch(waitingForProfileFromUrl());
 
     try {
-      // First we get a state from each URL. From these states we'll get all the
-      // data we need to fetch and process the profiles.
-      const profileStates = await Promise.all(
+      const profilesAndStates = await Promise.all(
         profileViewUrls.map(async (url) => {
           if (
             url.startsWith('https://perfht.ml/') ||
@@ -1427,28 +1443,9 @@ export function retrieveProfilesToCompare(
           ) {
             url = await expandUrl(url);
           }
-          // TODO: Pass the profileUpgradeInfo here. See #5871.
-          return stateFromLocation(new URL(url));
-        })
-      );
 
-      // Then we retrieve the profiles from the online store, and unserialize
-      // and process them if needed.
-      const promises = profileStates.map(
-        async ({ dataSource, hash, profileUrl }) => {
-          switch (dataSource) {
-            case 'public':
-              // Use a URL from the public store.
-              profileUrl = getProfileUrlForHash(hash);
-              break;
-            case 'from-url':
-              // Use the profile URL in the decoded state, decoded from the input URL.
-              break;
-            default:
-              throw new Error(
-                'Only public uploaded profiles are supported by the comparison function.'
-              );
-          }
+          const profileUrl = getProfileFetchUrl(url);
+
           const response: ProfileOrZip = await _fetchProfile({
             url: profileUrl,
             onTemporaryError: (e: TemporaryError) => {
@@ -1458,18 +1455,27 @@ export function retrieveProfilesToCompare(
           if (response.responseType !== 'PROFILE') {
             throw new Error('Expected to receive a profile from _fetchProfile');
           }
-          const serializedProfile = response.profile;
 
-          const profile =
-            unserializeProfileOfArbitraryFormat(serializedProfile);
-          return profile;
-        }
+          const upgradeInfo: ProfileUpgradeInfo = {};
+          const profile = await unserializeProfileOfArbitraryFormat(
+            response.profile,
+            profileUrl,
+            upgradeInfo
+          );
+
+          const profileState = stateFromLocation(new URL(url), {
+            profile,
+            upgradeInfo,
+          });
+
+          return { profile, profileState };
+        })
       );
 
-      // Once all profiles have been fetched and unserialized, we can start
-      // pushing them to a brand new profile. This resulting profile will keep
-      // only the 2 selected threads from the 2 profiles.
-      const profiles = await Promise.all(promises);
+      const profiles = profilesAndStates.map(({ profile }) => profile);
+      const profileStates = profilesAndStates.map(
+        ({ profileState }) => profileState
+      );
 
       const {
         profile: resultProfile,

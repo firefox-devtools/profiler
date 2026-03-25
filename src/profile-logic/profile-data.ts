@@ -15,7 +15,7 @@ import {
   CallNodeInfoNonInverted,
   CallNodeInfoInverted,
 } from './call-node-info';
-import { computeThreadCPURatio } from './cpu';
+import { computeThreadCPUPercent } from './cpu';
 import {
   INSTANT,
   INTERVAL,
@@ -1996,6 +1996,11 @@ export function filterThreadSamplesToRange(
       : null,
     weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    threadCPUPercent: samples.threadCPUPercent.subarray(
+      beginSampleIndex,
+      endSampleIndex + 1 // one extra element for "after last sample"
+    ),
+    hasCPUDeltas: samples.hasCPUDeltas,
     category: samples.category.subarray(beginSampleIndex, endSampleIndex),
     subcategory: samples.subcategory.subarray(beginSampleIndex, endSampleIndex),
   };
@@ -2007,13 +2012,6 @@ export function filterThreadSamplesToRange(
     );
   } else if (samples.responsiveness) {
     newSamples.responsiveness = samples.responsiveness.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadCPURatio) {
-    newSamples.threadCPURatio = samples.threadCPURatio.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2596,6 +2594,7 @@ export function computeSamplesTableFromRawSamplesTable(
     eventDelay,
     argumentValues,
     stack,
+    threadCPUDelta,
     weight,
     weightType,
     threadId,
@@ -2606,10 +2605,19 @@ export function computeSamplesTableFromRawSamplesTable(
     rawSamples.time !== undefined
       ? numberSeriesToDeltas(rawSamples.time)
       : ensureExists(rawSamples.timeDeltas);
-  const threadCPURatio =
-    sampleUnits !== undefined
-      ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
-      : undefined;
+
+  const threadCPUPercentOrNull =
+    sampleUnits !== undefined && threadCPUDelta !== undefined
+      ? computeThreadCPUPercent(
+          threadCPUDelta,
+          timeDeltas,
+          referenceCPUDeltaPerMs
+        )
+      : null;
+  const hasCPUDeltas = threadCPUPercentOrNull !== null;
+  const threadCPUPercent =
+    threadCPUPercentOrNull ?? new Uint8Array(rawSamples.length + 1).fill(100);
+
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
   const { sampleCategories, sampleSubcategories } =
     computeSampleCategoriesAndSubcategories(
@@ -2631,7 +2639,8 @@ export function computeSamplesTableFromRawSamplesTable(
 
     // These fields are derived:
     time,
-    threadCPURatio,
+    threadCPUPercent,
+    hasCPUDeltas,
     category: sampleCategories,
     subcategory: sampleSubcategories,
   };
@@ -2715,6 +2724,34 @@ export function createThreadFromDerivedTables(
 }
 
 /**
+ * Throws if the column lengths of a StackTable don't match stackTable.length.
+ * Call this after constructing a new StackTable to catch bugs early.
+ */
+export function validateStackTableShape(stackTable: StackTable): void {
+  const { length, frame, prefix, category, subcategory } = stackTable;
+  if (frame.length !== length) {
+    throw new Error(
+      `StackTable frame column length ${frame.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (prefix.length !== length) {
+    throw new Error(
+      `StackTable prefix column length ${prefix.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (category.length !== length) {
+    throw new Error(
+      `StackTable category column length ${category.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (subcategory.length !== length) {
+    throw new Error(
+      `StackTable subcategory column length ${subcategory.length} does not match stackTable.length ${length}`
+    );
+  }
+}
+
+/**
  * Sometimes we want to update the stacks for a thread, for instance while searching
  * for a text string, or doing a call tree transformation. This function abstracts
  * out the manipulation of the data structures so that we can properly update
@@ -2738,6 +2775,7 @@ export function updateThreadStacksByGeneratingNewStackColumns(
     markerData: Array<MarkerPayload | null>
   ) => Array<MarkerPayload | null>
 ): Thread {
+  validateStackTableShape(newStackTable);
   const { jsAllocations, nativeAllocations, samples, markers } = thread;
 
   const newSamples = {
