@@ -32,6 +32,7 @@ import type {
   TabID,
   IndexIntoSourceTable,
   MarkerIndex,
+  CallNodePath,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -124,6 +125,8 @@ export const getSelectedTab: Selector<TabSlug> = (state) =>
 export const getInvertCallstack: Selector<boolean> = (state) =>
   getSelectedTab(state) === 'calltree' &&
   getProfileSpecificState(state).invertCallstack;
+export const getZoomedInCallNodePath: Selector<CallNodePath | null> = (state) =>
+  getProfileSpecificState(state).zoomedInCallNodePath;
 
 export const getSelectedThreadIndexesOrNull: Selector<
   Set<ThreadIndex> | null
