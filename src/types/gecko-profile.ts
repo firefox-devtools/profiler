@@ -13,6 +13,7 @@ import type {
   VisualMetrics,
   ProfilerConfiguration,
   SampleUnits,
+  GraphColor,
 } from './profile';
 import type {
   MarkerPayload_Gecko,
@@ -316,10 +317,23 @@ export type GeckoExtensionMeta = {
   data: Array<[string, string, string]>;
 };
 
+/**
+ * Optional display hints that the backend can provide to control how a counter
+ * is rendered in the profiler UI. When absent, the frontend derives defaults
+ * from the counter's category and name.
+ */
+export type GeckoCounterDisplayHints = {
+  graphType?: 'line-accumulated' | 'line-rate';
+  unit?: string;
+  hasMarkers?: boolean;
+  color?: GraphColor;
+};
+
 export type GeckoCounter = {
   name: string;
   category: string;
   description: string;
+  display: GeckoCounterDisplayHints;
   samples: {
     schema: {
       time: 0;

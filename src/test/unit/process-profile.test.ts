@@ -216,6 +216,12 @@ describe('gecko counters processing', function () {
       name: 'Empty counter',
       category: 'Some category',
       description: 'Some description',
+      display: {
+        graphType: 'line-rate',
+        unit: '',
+        color: 'grey',
+        hasMarkers: false,
+      },
       samples: {
         schema: {
           time: 0,

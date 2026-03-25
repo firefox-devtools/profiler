@@ -33,6 +33,7 @@ import type {
   CategoryList,
   JsTracerTable,
   RawCounter,
+  CounterDisplayConfig,
   TabID,
   MarkerPayload,
   NetworkPayload,
@@ -1480,6 +1481,21 @@ export function getProfileWithJsTracerEvents(
 }
 
 /**
+ * Default display configuration for test counters.
+ */
+const DEFAULT_TEST_COUNTER_DISPLAY: CounterDisplayConfig = {
+  graphType: 'line-rate',
+  unit: '',
+  color: 'grey',
+  useDecimation: false,
+  hasMarkers: false,
+  tooltipType: 'generic',
+  height: 25,
+  sortOrder: 9,
+  label: 'My Counter',
+};
+
+/**
  * Creates a Counter fixture for a given thread.
  */
 export function getCounterForThread(
@@ -1504,6 +1520,7 @@ export function getCounterForThread(
       count: sampleTimes.map((_, i) => Math.sin(i)),
       length: thread.samples.length,
     },
+    display: DEFAULT_TEST_COUNTER_DISPLAY,
   };
   return counter;
 }
@@ -1541,6 +1558,7 @@ export function getCounterForThreadWithSamples(
     pid: thread.pid,
     mainThreadIndex,
     samples: newSamples,
+    display: DEFAULT_TEST_COUNTER_DISPLAY,
   };
   return counter;
 }

@@ -3049,6 +3049,82 @@ const _upgraders: {
     }
   },
 
+  [62]: (profile: any) => {
+    // Added CounterDisplayConfig to counters. This metadata controls how a
+    // counter is rendered (graph type, color, unit, tooltip style, etc.).
+    // Derive defaults from the counter's category and name.
+    if (profile.counters) {
+      for (const counter of profile.counters) {
+        if (counter.display !== undefined) {
+          continue;
+        }
+        const { category, name } = counter;
+        // sortOrder values match old LOCAL_TRACK_INDEX_ORDER for URL compat.
+        if (category === 'Memory') {
+          counter.display = {
+            graphType: 'line-accumulated',
+            unit: 'bytes',
+            color: 'orange',
+            useDecimation: false,
+            hasMarkers: true,
+            tooltipType: 'memory',
+            height: 40,
+            sortOrder: 2,
+            label: 'Memory',
+          };
+        } else if (category === 'power') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'pWh',
+            color: 'grey',
+            useDecimation: true,
+            hasMarkers: false,
+            tooltipType: 'power',
+            height: 25,
+            sortOrder: 6,
+            label: name,
+          };
+        } else if (category === 'Bandwidth') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'bytes/s',
+            color: 'blue',
+            useDecimation: true,
+            hasMarkers: false,
+            tooltipType: 'bandwidth',
+            height: 25,
+            sortOrder: 8,
+            label: 'Bandwidth',
+          };
+        } else if (category === 'CPU' && name === 'processCPU') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'percent',
+            color: 'grey',
+            useDecimation: false,
+            hasMarkers: false,
+            tooltipType: 'cpu-percent',
+            height: 25,
+            sortOrder: 5,
+            label: 'Process CPU',
+          };
+        } else {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: '',
+            color: 'grey',
+            useDecimation: false,
+            hasMarkers: false,
+            tooltipType: 'generic',
+            height: 25,
+            sortOrder: 9,
+            label: name,
+          };
+        }
+      }
+    }
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

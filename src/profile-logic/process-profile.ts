@@ -97,6 +97,8 @@ import type {
   GeckoSourceTable,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
+  CounterDisplayConfig,
+  GeckoCounterDisplayHints,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -973,6 +975,85 @@ function _processSamples(
 }
 
 /**
+ * Resolve the display configuration for a counter. If the backend provides
+ * display hints they take precedence; otherwise we derive sensible defaults
+ * from the counter's category and name.
+ */
+function _resolveCounterDisplayConfig(
+  category: string,
+  name: string,
+  display?: GeckoCounterDisplayHints
+): CounterDisplayConfig {
+  // Default configuration for unknown counter types.
+  // sortOrder values match the old LOCAL_TRACK_INDEX_ORDER for backward compat:
+  // memory=2, process-cpu=5, power=6, bandwidth=8, generic=9
+  const defaults: CounterDisplayConfig = {
+    graphType: 'line-rate',
+    unit: '',
+    color: 'grey',
+    useDecimation: false,
+    hasMarkers: false,
+    tooltipType: 'generic',
+    height: 25,
+    sortOrder: 9,
+    label: name, // Fallback to counter name for unknown types.
+  };
+
+  // Derive known configurations from category/name.
+  if (category === 'Memory') {
+    defaults.graphType = 'line-accumulated';
+    defaults.unit = 'bytes';
+    defaults.color = 'orange';
+    defaults.hasMarkers = true;
+    defaults.tooltipType = 'memory';
+    defaults.height = 40; // 25 graph + 15 markers
+    defaults.sortOrder = 2;
+    defaults.label = 'Memory';
+  } else if (category === 'power') {
+    defaults.graphType = 'line-rate';
+    defaults.unit = 'pWh';
+    defaults.color = 'grey';
+    defaults.useDecimation = true;
+    defaults.tooltipType = 'power';
+    defaults.sortOrder = 6;
+    defaults.label = name; // Power counters use their name (e.g., "Process Power")
+  } else if (category === 'Bandwidth') {
+    defaults.graphType = 'line-rate';
+    defaults.unit = 'bytes/s';
+    defaults.color = 'blue';
+    defaults.useDecimation = true;
+    defaults.tooltipType = 'bandwidth';
+    defaults.sortOrder = 8;
+    defaults.label = 'Bandwidth';
+  } else if (category === 'CPU' && name === 'processCPU') {
+    defaults.graphType = 'line-rate';
+    defaults.unit = 'percent';
+    defaults.color = 'grey';
+    defaults.tooltipType = 'cpu-percent';
+    defaults.sortOrder = 5;
+    defaults.label = 'Process CPU';
+  }
+
+  // Apply backend-provided display hints as overrides.
+  if (display) {
+    if (display.graphType !== undefined) {
+      defaults.graphType = display.graphType;
+    }
+    if (display.unit !== undefined) {
+      defaults.unit = display.unit;
+    }
+    if (display.color !== undefined) {
+      defaults.color = display.color;
+    }
+    if (display.hasMarkers !== undefined) {
+      defaults.hasMarkers = display.hasMarkers;
+    }
+  }
+
+  return defaults;
+}
+
+/**
  * Converts the Gecko list of counters into the processed format.
  */
 function _processCounters(
@@ -1012,7 +1093,7 @@ function _processCounters(
   }
 
   return geckoCounters.reduce<RawCounter[]>(
-    (result, { name, category, description, samples }) => {
+    (result, { name, category, description, samples, display }) => {
       if (samples.data.length === 0) {
         // It's possible that no sample has been collected during our capture
         // session, ignore this counter if that's the case.
@@ -1031,6 +1112,7 @@ function _processCounters(
         pid: mainThreadPid,
         mainThreadIndex,
         samples: adjustTableTimeDeltas(processedCounterSamples, delta),
+        display: _resolveCounterDisplayConfig(category, name, display),
       });
       return result;
     },
