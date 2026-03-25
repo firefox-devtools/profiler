@@ -1061,6 +1061,12 @@ export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
+    display: {
+      graphType: 'line-rate',
+      unit: '',
+      color: 'grey',
+      hasMarkers: false,
+    },
     samples: {
       schema: {
         time: 0,

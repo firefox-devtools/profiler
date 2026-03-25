@@ -529,6 +529,38 @@ export type GraphColor =
   | 'teal'
   | 'yellow';
 
+/**
+ * Specifies how a counter should be displayed in the UI. This metadata is
+ * resolved during profile processing: if the backend provides display hints
+ * they are used, otherwise defaults are derived from the counter's category
+ * and name.
+ */
+export type CounterGraphType = 'line-accumulated' | 'line-rate';
+export type CounterTooltipType =
+  | 'memory'
+  | 'power'
+  | 'cpu-percent'
+  | 'bandwidth'
+  | 'generic';
+
+export type CounterDisplayConfig = {
+  graphType: CounterGraphType;
+  unit: string;
+  color: GraphColor;
+  useDecimation: boolean;
+  hasMarkers: boolean;
+  tooltipType: CounterTooltipType;
+  height: number;
+  // Controls the position of this counter track in the local tracks list.
+  // Matches the old LOCAL_TRACK_INDEX_ORDER values for known counter types
+  // to preserve URL backward compatibility. New counter types use 9.
+  sortOrder: number;
+  // The human-readable label shown in the track sidebar. For known counter
+  // types this is a friendly name (eg, "Memory"); for generic counters
+  // it falls back to counter.name.
+  label: string;
+};
+
 export type RawCounter = {
   name: string;
   category: string;
@@ -537,6 +569,7 @@ export type RawCounter = {
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: RawCounterSamplesTable;
+  display: CounterDisplayConfig;
 };
 
 /**

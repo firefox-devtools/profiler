@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 62
+
+A new `display` field of type `CounterDisplayConfig` was added to `RawCounter`.
+This metadata makes counters self-describing, controlling how they are rendered in the UI (graph type, color, unit, tooltip style, track height, sort order, and label).
+For existing profiles, the display config is derived from the counter's `category` and `name`.
+
 ### Version 61
 
 The `SourceTable` in `profile.shared.sources` was updated:
@@ -144,6 +150,12 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
+
+### Version 35
+
+A new `display` field of type `GeckoCounterDisplayHints` was added to `GeckoCounter`.
+This field contains display hints (`graphType`, `unit`, `hasMarkers`, `color`) that control how the counter is rendered.
+The upgrader adds the `display` field with derived values to old profiles.
 
 ### Version 34
 

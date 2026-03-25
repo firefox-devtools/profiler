@@ -33,6 +33,7 @@ import type {
   IndexIntoFrameTable,
   SourceTable,
   IndexIntoSourceTable,
+  CounterDisplayConfig,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
@@ -191,6 +192,7 @@ export type Counter = {
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: CounterSamplesTable;
+  display: CounterDisplayConfig;
 };
 
 /**
