@@ -46,6 +46,7 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
+      shouldRemoveArgumentValues: false,
     };
 
     const PIIToRemove: RemoveProfileInformation = {
@@ -132,9 +133,12 @@ describe('sanitizePII', function () {
       },
     };
 
+    const tracedValuesBuffers = originalProfile.threads.map(() => undefined);
+
     const sanitizedProfile = sanitizePII(
       originalProfile,
       derivedMarkerInfoForAllThreads,
+      tracedValuesBuffers,
       PIIToRemove,
       markerSchemaByName
     ).profile;

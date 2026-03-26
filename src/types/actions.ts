@@ -151,6 +151,7 @@ export type CheckedSharingOptions = {
   includeExtension: boolean;
   includePreferenceValues: boolean;
   includePrivateBrowsingData: boolean;
+  includeArgumentValues: boolean;
 };
 
 // This type is used when selecting tracks in the timeline. Ctrl and Meta are
