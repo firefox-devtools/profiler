@@ -676,6 +676,8 @@ export type RemoveProfileInformation = {
   readonly shouldRemovePreferenceValues: boolean;
   // Remove the private browsing data if it's true.
   readonly shouldRemovePrivateBrowsingData: boolean;
+  // Remove the argument values captured by the JS execution tracer if it's true.
+  readonly shouldRemoveArgumentValues: boolean;
 };
 
 /**

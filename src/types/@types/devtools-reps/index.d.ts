@@ -18,11 +18,20 @@ declare module 'devtools-reps' {
   export function maybeEscapePropertyName(name: string): string;
   export function getGripPreviewItems(grip: any): any[];
 
+  type FilterValuesBufferResult = {
+    valuesBuffer: ArrayBuffer;
+    entryIndices: Array<number | null>;
+  };
+
   export const ValueSummaryReader: {
     getArgumentSummaries: (
       valuesBuffer: ArrayBuffer,
       shapes: Array<string[] | null>,
       valuesBufferIndex: number
     ) => Array<object> | string;
+    filterValuesBufferToEntries: (
+      srcBuffer: ArrayBuffer,
+      entryIndices: Array<number | null>
+    ) => FilterValuesBufferResult;
   };
 }

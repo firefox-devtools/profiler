@@ -13,6 +13,7 @@ import {
   getLocalTracksByPid,
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
+  getHasArgumentValues,
   getThreads,
   getMarkerSchemaByName,
 } from './profile';
@@ -80,6 +81,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getLocalTracksByPid,
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
+    getHasArgumentValues,
     (
       checkedSharingOptions,
       profile,
@@ -89,14 +91,15 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       globalTracks,
       localTracksByPid,
       hasPreferenceMarkers,
-      containsPrivateBrowsingInformation
+      containsPrivateBrowsingInformation,
+      hasArgumentValues
     ) => {
       let isIncludingEverything = true;
       for (const [prop, value] of Object.entries(checkedSharingOptions)) {
-        // Do not include preference values or private browsing checkboxes if
-        // they're hidden. Even though `includePreferenceValues` is not taken
-        // into account, it is false, if the profile updateChannel is not
-        // nightly or custom build.
+        // Do not include preference values, private browsing, or argument
+        // values checkboxes if they're hidden. Even though
+        // `includePreferenceValues` is not taken into account, it is false, if
+        // the profile updateChannel is not nightly or custom build.
         if (prop === 'includePreferenceValues' && !hasPreferenceMarkers) {
           continue;
         }
@@ -104,6 +107,9 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           prop === 'includePrivateBrowsingData' &&
           !containsPrivateBrowsingInformation
         ) {
+          continue;
+        }
+        if (prop === 'includeArgumentValues' && !hasArgumentValues) {
           continue;
         }
         isIncludingEverything = isIncludingEverything && value;
@@ -177,6 +183,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
+        shouldRemoveArgumentValues:
+          !checkedSharingOptions.includeArgumentValues,
       };
     }
   );
@@ -203,6 +211,25 @@ function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
 }
 
 /**
+ * The traced values buffers are needed for profile sanitization when filtering
+ * argument values to a time range. Similar memoization approach as above.
+ */
+let _threadsForBuffers: any = null;
+let _tracedValuesBuffers: Array<ArrayBuffer | undefined> | null = null;
+function getTracedValuesBuffersForAllThreads(
+  state: State
+): Array<ArrayBuffer | undefined> {
+  const threads = getThreads(state);
+  if (_threadsForBuffers !== threads || _tracedValuesBuffers === null) {
+    _threadsForBuffers = threads;
+    _tracedValuesBuffers = threads.map((_: any, threadIndex: ThreadIndex) =>
+      getThreadSelectors(threadIndex).getTracedValuesBuffer(state)
+    );
+  }
+  return _tracedValuesBuffers;
+}
+
+/**
  * Run the profile sanitization step, and also get information about how any
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
@@ -211,6 +238,7 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> =
   createSelector(
     getProfile,
     getDerivedMarkerInfoForAllThreads,
+    getTracedValuesBuffersForAllThreads,
     getRemoveProfileInformation,
     getMarkerSchemaByName,
     sanitizePII

@@ -102,6 +102,8 @@ import type {
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import { bytesToBase64 } from 'firefox-profiler/utils/base64';
+import { ValueSummaryReader } from 'devtools-reps';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -2263,12 +2265,44 @@ export function filterCounterSamplesToRange(
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
       : undefined,
-    argumentValues: samples.argumentValues
-      ? samples.argumentValues.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
   };
 
   return newCounter;
+}
+
+/**
+ * Filter a traced values buffer to only include entries that are referenced
+ * by the given argument values array. This is used during sanitization when
+ * filtering to a committed time range.
+ */
+export function filterTracedValuesBufferToEntries(
+  tracedValuesBuffer: ArrayBuffer,
+  thread: RawThread
+): RawThread {
+  if (
+    !thread.samples.argumentValues ||
+    !thread.tracedValuesBuffer ||
+    !thread.tracedObjectShapes
+  ) {
+    throw new Error(
+      'filterTracedValuesBufferToEntries should only be called with JS Execution Tracer profiles'
+    );
+  }
+
+  const newThread: RawThread = { ...thread };
+  const argumentValues: Array<number | null> = [
+    ...thread.samples.argumentValues,
+  ];
+
+  const filtered = ValueSummaryReader.filterValuesBufferToEntries(
+    tracedValuesBuffer,
+    argumentValues
+  );
+
+  newThread.tracedValuesBuffer = bytesToBase64(filtered.valuesBuffer);
+  newThread.samples.argumentValues = filtered.entryIndices;
+
+  return newThread;
 }
 
 /**
