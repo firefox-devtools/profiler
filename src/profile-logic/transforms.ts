@@ -12,6 +12,8 @@ import {
   updateThreadStacksByGeneratingNewStackColumns,
   getMapStackUpdater,
   getOriginAnnotationForFunc,
+  createStackTableBySkippingDiscarded,
+  applyTransformOutputToThread,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/types';
@@ -54,6 +56,7 @@ import {
   translateFuncIndex,
   translateResourceIndex,
 } from './index-translation';
+import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
 
 /**
  * This file contains the functions and logic for working with and applying transforms
@@ -1443,40 +1446,52 @@ export function focusSelf(
 
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
-    const shouldKeepStack = new Uint8Array(stackTable.length);
+    const shouldKeepStack = makeBitSet(stackTable.length);
 
-    const newPrefixCol = stackTable.prefix.slice();
+    const newPrefixCol = new Array<IndexIntoStackTable | null>();
+    const oldStackToNewStack = new Int32Array(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
       if (funcIndex === funcIndexToFocus) {
-        shouldKeepStack[stackIndex] = 1;
-        newPrefixCol[stackIndex] = null;
+        setBit(shouldKeepStack, stackIndex);
+        const newStackIndex = newPrefixCol.length;
+        newPrefixCol[newStackIndex] = null;
+        oldStackToNewStack[stackIndex] = newStackIndex;
       } else {
-        const prefix = newPrefixCol[stackIndex];
+        const oldPrefix = stackTable.prefix[stackIndex];
         if (
-          prefix !== null &&
-          shouldKeepStack[prefix] === 1 &&
+          oldPrefix !== null &&
+          checkBit(shouldKeepStack, oldPrefix) &&
           !funcMatchesImplementation(thread, funcIndex)
         ) {
-          shouldKeepStack[stackIndex] = 1;
+          setBit(shouldKeepStack, stackIndex);
+          const newPrefix = oldStackToNewStack[oldPrefix];
+          const newStackIndex = newPrefixCol.length;
+          newPrefixCol[newStackIndex] = newPrefix;
+          oldStackToNewStack[stackIndex] = newStackIndex;
         }
       }
     }
 
-    const newStackTable = {
-      ...stackTable,
-      prefix: newPrefixCol,
-    };
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      shouldKeepStack
+    );
 
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null || shouldKeepStack[oldStack] === 0) {
-        return null;
-      }
-      return oldStack;
-    });
+    return applyTransformOutputToThread(
+      {
+        newStackTable,
+        effectOnThreadData: {
+          dropIfOldStackIsNot: shouldKeepStack,
+          oldStackToNewStack,
+        },
+      },
+      thread
+    );
   });
 }
 
