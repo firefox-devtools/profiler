@@ -116,6 +116,8 @@ import {
   toInt32Array,
   toUint8Array,
 } from 'firefox-profiler/utils/typed-arrays';
+import { bytesToBase64 } from 'firefox-profiler/utils/base64';
+import { ValueSummaryReader } from 'devtools-reps';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -2402,6 +2404,60 @@ export function filterCounterSamplesToRange(
   };
 
   return newCounter;
+}
+
+/**
+ * Filter a traced values buffer to only include entries that are referenced
+ * by the given argument values array. This is used during sanitization when
+ * filtering to a committed time range.
+ *
+ * Returns null when the buffer can't be read, so that the caller drops the
+ * argument values instead of exporting them.
+ */
+export function filterTracedValuesBufferToEntries(
+  tracedValuesBuffer: ArrayBuffer,
+  thread: RawThread
+): RawThread | null {
+  if (
+    !thread.samples.argumentValues ||
+    !thread.tracedValuesBuffer ||
+    !thread.tracedObjectShapes
+  ) {
+    throw new Error(
+      'filterTracedValuesBufferToEntries should only be called with JS Execution Tracer profiles'
+    );
+  }
+
+  const newThread: RawThread = { ...thread };
+  const argumentValues: Array<number | null> = [
+    ...thread.samples.argumentValues,
+  ];
+
+  let filtered;
+  try {
+    filtered = ValueSummaryReader.filterValuesBufferToEntries(
+      tracedValuesBuffer,
+      argumentValues
+    );
+  } catch (error) {
+    // The reader throws on a buffer format it doesn't know, which shouldn't
+    // happen since we update it before Gecko emits a new format version. But a
+    // buffer we can't filter must not be exported as it is, so the caller drops
+    // the argument values instead.
+    console.error(
+      'Failed to filter the traced values buffer, the argument values will be removed from the sanitized profile.',
+      error
+    );
+    return null;
+  }
+
+  newThread.tracedValuesBuffer = bytesToBase64(filtered.valuesBuffer);
+  newThread.samples = {
+    ...newThread.samples,
+    argumentValues: filtered.entryIndices,
+  };
+
+  return newThread;
 }
 
 /**

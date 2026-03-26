@@ -46,6 +46,7 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
+      shouldRemoveArgumentValues: false,
     };
 
     const PIIToRemove: RemoveProfileInformation = {
@@ -132,9 +133,18 @@ describe('sanitizePII', function () {
       },
     };
 
+    // Mirror what the `getTracedValuesBuffer` selector hands to `sanitizePII`
+    // in the app, instead of pretending that no thread has a buffer.
+    const tracedValuesBuffers = originalProfile.threads.map((thread) =>
+      thread.tracedValuesBuffer
+        ? base64StringToBytes(thread.tracedValuesBuffer)
+        : undefined
+    );
+
     const sanitizedProfile = sanitizePII(
       originalProfile,
       derivedMarkerInfoForAllThreads,
+      tracedValuesBuffers,
       PIIToRemove,
       markerSchemaByName
     ).profile;
@@ -1285,7 +1295,13 @@ describe('sanitizePII', function () {
 
     // A null `RemoveProfileInformation` means the user kept all sharing options
     // checked, so no other sanitization happens.
-    const { profile: sanitizedProfile } = sanitizePII(profile, [], null, {});
+    const { profile: sanitizedProfile } = sanitizePII(
+      profile,
+      [],
+      [],
+      null,
+      {}
+    );
 
     expect(sanitizedProfile.shared.sources.content.length).toEqual(
       profile.shared.sources.content.length

@@ -22,6 +22,7 @@ import { getSchemaFromMarker } from './marker-schema';
 import {
   filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
+  filterTracedValuesBufferToEntries,
 } from './profile-data';
 import type {
   Profile,
@@ -58,6 +59,7 @@ const PRIVATE_BROWSING_STACK = 1;
 export function sanitizePII(
   profile: Profile,
   derivedMarkerInfoForAllThreads: DerivedMarkerInfo[],
+  tracedValuesBuffers: Array<ArrayBuffer | undefined>,
   maybePIIToBeRemoved: RemoveProfileInformation | null,
   markerSchemaByName: MarkerSchemaByName
 ): SanitizeProfileResult {
@@ -319,6 +321,7 @@ export function sanitizePII(
         thread,
         stringTable,
         derivedMarkerInfoForAllThreads[threadIndex],
+        tracedValuesBuffers[threadIndex],
         threadIndex,
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
@@ -433,6 +436,7 @@ function sanitizeThreadPII(
   thread: RawThread,
   stringTable: StringTable,
   derivedMarkerInfo: DerivedMarkerInfo,
+  tracedValuesBuffer: ArrayBuffer | undefined,
   threadIndex: number,
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
@@ -605,9 +609,6 @@ function sanitizeThreadPII(
     delete newThread['eTLD+1'];
   }
 
-  delete newThread.tracedValuesBuffer;
-  delete newThread.tracedObjectShapes;
-
   const { samples } = newThread;
   if (stackFlags !== null && windowIdFromPrivateBrowsing.size > 0) {
     // Now we'll remove samples related to the frames
@@ -615,6 +616,9 @@ function sanitizeThreadPII(
       ...samples,
       stack: samples.stack.slice(),
     });
+    if (newSamples.argumentValues) {
+      newSamples.argumentValues = newSamples.argumentValues.slice();
+    }
 
     for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
       const stackIndex = samples.stack[sampleIndex];
@@ -625,9 +629,38 @@ function sanitizeThreadPII(
       const stackFlag = stackFlags[stackIndex];
       if (stackFlag === PRIVATE_BROWSING_STACK) {
         newSamples.stack[sampleIndex] = null;
+        if (newSamples.argumentValues) {
+          // The traced argument values belong to this private browsing stack,
+          // so they need to go as well. Doing this before the buffer is
+          // rewritten below means the entries they point to are dropped from
+          // the exported buffer.
+          newSamples.argumentValues[sampleIndex] = null;
+        }
         continue;
       }
     }
+  }
+
+  let threadWithFilteredValues: RawThread | null = null;
+  if (
+    newThread.samples.argumentValues &&
+    tracedValuesBuffer &&
+    newThread.tracedObjectShapes &&
+    !PIIToBeRemoved.shouldRemoveArgumentValues
+  ) {
+    threadWithFilteredValues = filterTracedValuesBufferToEntries(
+      tracedValuesBuffer,
+      newThread
+    );
+  }
+
+  if (threadWithFilteredValues !== null) {
+    newThread = threadWithFilteredValues;
+  } else {
+    delete newThread.tracedValuesBuffer;
+    delete newThread.tracedObjectShapes;
+    newThread.samples = { ...newThread.samples };
+    delete newThread.samples.argumentValues;
   }
 
   // Remove the old markerTable and replace it with the new updated one.

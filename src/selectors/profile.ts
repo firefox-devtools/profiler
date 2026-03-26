@@ -1078,6 +1078,21 @@ export const getContainsPrivateBrowsingInformation: Selector<boolean> =
     return hasPrivateThreads;
   });
 
+// Gets whether this profile contains argument values from JS execution tracing.
+// Gecko emits the `argumentValues` column even when it didn't trace anything, so
+// the values buffer and the object shapes are what tell us there is really
+// something here.
+export const getHasJSTracingArgumentValues: Selector<boolean> = createSelector(
+  getThreads,
+  (threads) =>
+    threads.some(
+      (thread) =>
+        thread.samples.argumentValues !== undefined &&
+        thread.tracedValuesBuffer !== undefined &&
+        thread.tracedObjectShapes !== undefined
+    )
+);
+
 /**
  * Returns the TIDs of the threads that are profiled.
  */
