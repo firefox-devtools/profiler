@@ -4,6 +4,10 @@
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
 import { isPerfScriptFormat } from '../../profile-logic/import/linux-perf';
 import { isFlameGraphFormat } from '../../profile-logic/import/flame-graph';
+import {
+  isStreamedProfileFormat,
+  convertStreamedProfile,
+} from '../../profile-logic/import/streamed-profile';
 import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 
 import { storeWithProfile } from '../fixtures/stores';
@@ -579,5 +583,327 @@ describe('converting flamegraph profile', function () {
 
     checkProfileContainsUniqueTid(profile);
     expect(profile).toMatchSnapshot();
+  });
+});
+
+describe('converting streamed profile', function () {
+  const metaLine = JSON.stringify({
+    type: 'meta',
+    product: 'mach',
+    interval: 500,
+    startTime: 1000000,
+    logicalCPUs: 4,
+    physicalCPUs: 2,
+    version: 27,
+    preprocessedProfileVersion: 47,
+    categories: [{ name: 'Other', color: 'grey', subcategories: ['Other'] }],
+    markerSchema: [
+      {
+        name: 'Text',
+        tooltipLabel: '{marker.name}',
+        display: ['marker-chart', 'marker-table'],
+        data: [{ key: 'text', label: 'Description', format: 'string' }],
+      },
+    ],
+  });
+
+  const threadLine = '{"type":"thread"}';
+
+  it('should detect streamed profile format', function () {
+    const input =
+      metaLine +
+      '\n' +
+      '{"type":"marker","name":"test","startTime":0,"endTime":null,"data":null}';
+    expect(isStreamedProfileFormat(input)).toBe(true);
+  });
+
+  it('should not detect object without type:meta first key', function () {
+    const input = JSON.stringify({ markerSchema: [], categories: [] });
+    expect(isStreamedProfileFormat(input)).toBe(false);
+  });
+
+  it('should not detect regular JSON object', function () {
+    expect(isStreamedProfileFormat('{"meta": {"product": "Firefox"}}')).toBe(
+      false
+    );
+  });
+
+  it('should not detect non-JSON', function () {
+    expect(isStreamedProfileFormat('hello world')).toBe(false);
+  });
+
+  it('should not detect empty string', function () {
+    expect(isStreamedProfileFormat('')).toBe(false);
+  });
+
+  it('should apply thread configuration from type=thread line', function () {
+    const lines = [
+      metaLine,
+      JSON.stringify({
+        type: 'thread',
+        name: '',
+        processName: 'mach',
+        isMainThread: false,
+        showMarkersInTimeline: true,
+        pid: '0',
+        tid: 0,
+      }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'test',
+        startTime: 0,
+        endTime: 100,
+        data: null,
+      }),
+    ];
+    const profile = convertStreamedProfile(lines.join('\n'));
+    const thread = profile.threads[0];
+
+    expect(thread.name).toBe('');
+    expect(thread.processName).toBe('mach');
+    expect(thread.isMainThread).toBe(false);
+    expect(thread.showMarkersInTimeline).toBe(true);
+    expect(thread.pid).toBe('0');
+    expect(thread.tid).toBe(0);
+    expect(thread.markers.length).toBe(1);
+  });
+
+  it('should error if no thread is declared', function () {
+    const lines = [metaLine];
+    expect(() => convertStreamedProfile(lines.join('\n'))).toThrow(
+      'no thread declaration'
+    );
+  });
+
+  it('should error if a marker appears before any thread', function () {
+    const lines = [
+      metaLine,
+      JSON.stringify({
+        type: 'marker',
+        name: 'test',
+        startTime: 0,
+        endTime: null,
+        data: null,
+      }),
+    ];
+    expect(() => convertStreamedProfile(lines.join('\n'))).toThrow(
+      'before any thread declaration'
+    );
+  });
+
+  it('should convert a simple streamed profile', function () {
+    const lines = [
+      metaLine,
+      threadLine,
+      JSON.stringify({
+        type: 'marker',
+        name: 'test_start',
+        startTime: 100,
+        endTime: null,
+        data: { type: 'Text', text: 'Starting test' },
+      }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'test',
+        startTime: 100,
+        endTime: 200,
+        data: {
+          type: 'Test',
+          test: 'test.js',
+          name: 'test.js',
+          status: 'PASS',
+          color: 'green',
+        },
+      }),
+    ];
+    const profile = convertStreamedProfile(lines.join('\n'));
+
+    expect(profile.meta.product).toBe('mach');
+    expect(profile.meta.interval).toBe(500);
+    expect(profile.meta.startTime).toBe(1000000);
+    expect(profile.threads).toHaveLength(1);
+
+    const thread = profile.threads[0];
+    expect(thread.markers.length).toBe(2);
+
+    // First marker: instant (endTime is null)
+    expect(thread.markers.startTime[0]).toBe(100);
+    expect(thread.markers.endTime[0]).toBe(null);
+    expect(thread.markers.phase[0]).toBe(0); // INSTANT
+
+    // Second marker: interval
+    expect(thread.markers.startTime[1]).toBe(100);
+    expect(thread.markers.endTime[1]).toBe(200);
+    expect(thread.markers.phase[1]).toBe(1); // INTERVAL
+
+    // All markers have category 0
+    expect(thread.markers.category[0]).toBe(0);
+    expect(thread.markers.category[1]).toBe(0);
+
+    // Marker data is preserved
+    expect(thread.markers.data[0]).toEqual({
+      type: 'Text',
+      text: 'Starting test',
+    });
+  });
+
+  it('should import via unserializeProfileOfArbitraryFormat', async function () {
+    // The full thread structure required at version 47 so that upgraders
+    // can process it. The producing tool emits this at the version it declares.
+    const fullThreadLine = JSON.stringify({
+      type: 'thread',
+      name: '',
+      processType: 'default',
+      processStartupTime: 0,
+      processShutdownTime: null,
+      registerTime: 0,
+      unregisterTime: null,
+      pausedRanges: [],
+      isMainThread: false,
+      pid: '0',
+      tid: 0,
+      samples: {
+        weightType: 'samples',
+        weight: null,
+        eventDelay: [],
+        stack: [],
+        time: [],
+        length: 0,
+      },
+      stackTable: { frame: [], prefix: [], length: 0 },
+      frameTable: {
+        address: [],
+        inlineDepth: [],
+        category: [],
+        subcategory: [],
+        func: [],
+        nativeSymbol: [],
+        innerWindowID: [],
+        line: [],
+        column: [],
+        length: 0,
+      },
+      funcTable: {
+        isJS: [],
+        relevantForJS: [],
+        name: [],
+        resource: [],
+        fileName: [],
+        lineNumber: [],
+        columnNumber: [],
+        length: 0,
+      },
+      resourceTable: { lib: [], name: [], host: [], type: [], length: 0 },
+      nativeSymbols: {
+        libIndex: [],
+        address: [],
+        name: [],
+        functionSize: [],
+        length: 0,
+      },
+    });
+    const lines = [
+      metaLine,
+      fullThreadLine,
+      JSON.stringify({
+        type: 'marker',
+        name: 'CPU Use',
+        startTime: 0,
+        endTime: 500,
+        data: { type: 'CPU', cpuPercent: '4.2%' },
+      }),
+    ];
+    const profile = await unserializeProfileOfArbitraryFormat(lines.join('\n'));
+
+    expect(profile.threads).toHaveLength(1);
+    expect(profile.threads[0].markers.length).toBe(1);
+  });
+
+  it('should skip unknown line types', function () {
+    const lines = [
+      metaLine,
+      threadLine,
+      JSON.stringify({ type: 'unknown_future_type', data: {} }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'test',
+        startTime: 0,
+        endTime: 100,
+        data: null,
+      }),
+    ];
+    const profile = convertStreamedProfile(lines.join('\n'));
+    expect(profile.threads[0].markers.length).toBe(1);
+  });
+
+  it('should use per-marker category when provided', function () {
+    const lines = [
+      metaLine,
+      threadLine,
+      JSON.stringify({
+        type: 'marker',
+        name: 'Phase',
+        startTime: 0,
+        endTime: 100,
+        data: null,
+        category: 2,
+      }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'test',
+        startTime: 0,
+        endTime: null,
+        data: null,
+      }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'Phase',
+        startTime: 100,
+        endTime: 200,
+        data: null,
+        category: 1,
+      }),
+    ];
+    const profile = convertStreamedProfile(lines.join('\n'));
+    const { markers } = profile.threads[0];
+
+    expect(markers.category[0]).toBe(2);
+    expect(markers.category[1]).toBe(0); // default when absent
+    expect(markers.category[2]).toBe(1);
+  });
+
+  it('should deduplicate marker name strings', function () {
+    const lines = [
+      metaLine,
+      threadLine,
+      JSON.stringify({
+        type: 'marker',
+        name: 'CPU Use',
+        startTime: 0,
+        endTime: 500,
+        data: null,
+      }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'CPU Use',
+        startTime: 500,
+        endTime: 1000,
+        data: null,
+      }),
+      JSON.stringify({
+        type: 'marker',
+        name: 'Memory',
+        startTime: 0,
+        endTime: 500,
+        data: null,
+      }),
+    ];
+    const profile = convertStreamedProfile(lines.join('\n'));
+    const { markers } = profile.threads[0];
+
+    // Both "CPU Use" markers should share the same name index
+    expect(markers.name[0]).toBe(markers.name[1]);
+    // "Memory" should have a different index
+    expect(markers.name[2]).not.toBe(markers.name[0]);
   });
 });
