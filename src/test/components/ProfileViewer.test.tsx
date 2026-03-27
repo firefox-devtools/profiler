@@ -4,7 +4,10 @@
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import {
+  render,
+  fireEvent,
+} from 'firefox-profiler/test/fixtures/testing-library';
 import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
 import { updateUrlState } from 'firefox-profiler/actions/app';
@@ -13,6 +16,7 @@ import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 
 import { blankStore } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { getMarkerTableProfile } from '../fixtures/profiles/processed-profile';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import {
@@ -34,7 +38,7 @@ describe('ProfileViewer', function () {
       );
   });
 
-  function setup() {
+  function setup(profile = getProfileWithNiceTracks()) {
     // WithSize uses requestAnimationFrame
     const flushRafCalls = mockRaf();
 
@@ -48,7 +52,7 @@ describe('ProfileViewer', function () {
         })
       )
     );
-    store.dispatch(viewProfile(getProfileWithNiceTracks()));
+    store.dispatch(viewProfile(profile));
 
     const renderResult = render(
       <Provider store={store}>
@@ -67,5 +71,80 @@ describe('ProfileViewer', function () {
 
     // Note: You should update this total height if you changed the height calculation algorithm.
     expect(getTimelineHeight(getState())).toBe(1224);
+  });
+
+  it('does not show a button to reset the zeroAt when not overridden', () => {
+    const { container } = setup(getMarkerTableProfile());
+
+    const button = container.querySelector(
+      '.menuButtonsResetZeroAtButton'
+    )! as HTMLElement;
+    expect(button).toBeNull();
+  });
+
+  it('shows a button to reset the zeroAt when overridden', () => {
+    const { container, getByText } = setup(getMarkerTableProfile());
+
+    const tab = getByText('Marker Table');
+    fireEvent.click(tab);
+
+    const row1 = container.querySelector(
+      '.treeViewRowFixedColumns:nth-child(1)'
+    )! as HTMLElement;
+    {
+      const start = row1.querySelector('.start')! as HTMLElement;
+      expect(start).toHaveTextContent('0s');
+    }
+
+    const row3 = container.querySelector(
+      '.treeViewRowFixedColumns:nth-child(3)'
+    )! as HTMLElement;
+    {
+      const start = row3.querySelector('.start')! as HTMLElement;
+      expect(start).toHaveTextContent('0.108s');
+    }
+
+    // The following mousedown will trigger a warning due to the limitation
+    // on the test env.
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+    fireEvent.mouseDown(row3, { button: 2 });
+
+    const item = container.querySelector(
+      '.markerContextMenuIconOverrideZeroAtMarkerStart'
+    )! as HTMLElement;
+
+    fireEvent.click(item);
+
+    {
+      const start = row1.querySelector('.start')! as HTMLElement;
+      expect(start).toHaveTextContent('-0.108s');
+    }
+    {
+      const start = row3.querySelector('.start')! as HTMLElement;
+      expect(start).toHaveTextContent('0s');
+    }
+
+    // After overriding the zeroAt, the button should be shown.
+    const button = container.querySelector(
+      '.menuButtonsResetZeroAtButton'
+    )! as HTMLElement;
+    expect(button).toHaveTextContent('Starting point moved to ⁨107.50ms⁩');
+
+    // Clicking the button should reset the override.
+    fireEvent.click(button);
+
+    const button2 = container.querySelector(
+      '.menuButtonsResetZeroAtButton'
+    )! as HTMLElement;
+    expect(button2).toBeNull();
+
+    {
+      const start = row1.querySelector('.start')! as HTMLElement;
+      expect(start).toHaveTextContent('0s');
+    }
+    {
+      const start = row3.querySelector('.start')! as HTMLElement;
+      expect(start).toHaveTextContent('0.108s');
+    }
   });
 });
