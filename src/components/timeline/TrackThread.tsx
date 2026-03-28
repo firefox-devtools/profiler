@@ -239,8 +239,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
           />
         ) : null}
 
-        {(timelineType === 'category' || timelineType === 'cpu-category') &&
-        !filteredThread.isJsTracer ? (
+        {timelineType !== 'stack' && !filteredThread.isJsTracer ? (
           <>
             <ThreadActivityGraph
               className="threadActivityGraph"

@@ -4305,8 +4305,7 @@ export function getNativeSymbolInfo(
 /**
  * Determines the timeline type by looking at the profile data.
  *
- * 'cpu-category': If a profile has both category and cpu usage information.
- * 'category':     If a profile has category information but not cpu usage.
+ * 'cpu-category': If a profile has category information.
  * 'stack':        If a profile doesn't have category information.
  */
 export function determineTimelineType(profile: Profile): TimelineType {
@@ -4317,16 +4316,6 @@ export function determineTimelineType(profile: Profile): TimelineType {
     return 'stack';
   }
 
-  if (
-    !profile.meta.sampleUnits ||
-    !profile.threads.some((thread) => thread.samples.threadCPUDelta)
-  ) {
-    // Have category information but doesn't have the CPU usage information.
-    // Use 'category'.
-    return 'category';
-  }
-
-  // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
 }
 
