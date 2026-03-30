@@ -14,7 +14,7 @@ import type {
 
 export type RightClickedCallNodeInfo = {
   readonly threadsKey: ThreadsKey;
-  readonly area: CallNodeArea;
+  readonly area: CallNodeArea,
   readonly callNodePath: CallNodePath;
 };
 
