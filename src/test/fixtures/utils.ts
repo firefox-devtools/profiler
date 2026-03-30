@@ -7,6 +7,7 @@ import {
   computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
   computeFunctionListTimings,
+  computeLowerWingTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
@@ -261,6 +262,55 @@ export function functionListTreeFromProfile(
     ensureExists(profile.meta.categories),
     thread.samples,
     { type: 'FUNCTION_LIST', timings: functionListTimings },
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "lower wing" CallTree for a profile and a selected
+ * function. The lower wing is an inverted call tree where each root's total
+ * counts only samples where the selected function appears in the call stack.
+ */
+export function lowerWingTreeFromProfile(
+  profile: Profile,
+  selectedFuncName: string,
+  threadIndex: number = 0
+): CallTree {
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const invertedCallNodeInfo = getInvertedCallNodeInfo(
+    callNodeInfo,
+    defaultCategory,
+    thread.funcTable.length
+  );
+  const selectedFunc =
+    thread.funcTable.name.findIndex(
+      (i) => thread.stringTable.getString(i) === selectedFuncName
+    ) ?? null;
+  const selfAndSummary = computeCallNodeSelfAndSummary(
+    thread.samples,
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    ),
+    callNodeInfo.getCallNodeTable().length
+  );
+  const timings = computeLowerWingTimings(
+    invertedCallNodeInfo,
+    selfAndSummary,
+    selectedFunc === -1 ? null : selectedFunc
+  );
+  return getCallTree(
+    thread,
+    invertedCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    thread.samples,
+    timings,
     'samples'
   );
 }

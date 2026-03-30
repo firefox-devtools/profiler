@@ -47,6 +47,7 @@ import type {
   ApiQueryError,
   TableViewOptions,
   DecodedInstruction,
+  CallNodeArea,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -187,7 +188,7 @@ type ProfileAction =
     }
   | {
       readonly type: 'CHANGE_SELECTED_CALL_NODE';
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly threadsKey: ThreadsKey;
       readonly selectedCallNodePath: CallNodePath;
       readonly optionalExpandedToCallNodePath: CallNodePath | undefined;
@@ -207,6 +208,7 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE';
       readonly threadsKey: ThreadsKey;
+      readonly area: CallNodeArea;
       readonly callNodePath: CallNodePath | null;
     }
   | {
@@ -220,7 +222,7 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_EXPANDED_CALL_NODES';
       readonly threadsKey: ThreadsKey;
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly expandedCallNodePaths: Array<CallNodePath>;
     }
   | {

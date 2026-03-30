@@ -4417,6 +4417,9 @@ Object {
   "expandedInvertedCallNodePaths": PathSet {
     "_table": Map {},
   },
+  "expandedLowerWingCallNodePaths": PathSet {
+    "_table": Map {},
+  },
   "expandedNonInvertedCallNodePaths": PathSet {
     "_table": Map {
       "0" => Array [
@@ -4431,6 +4434,7 @@ Object {
   "lastSeenTransformCount": 1,
   "selectedFunctionIndex": null,
   "selectedInvertedCallNodePath": Array [],
+  "selectedLowerWingCallNodePath": Array [],
   "selectedNetworkMarker": null,
   "selectedNonInvertedCallNodePath": Array [
     0,

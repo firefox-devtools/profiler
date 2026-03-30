@@ -24,6 +24,7 @@ import { ResourceType } from 'firefox-profiler/types';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
+  lowerWingTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
   addSourceToTable,
@@ -576,6 +577,47 @@ describe('function list', function () {
       '- F (total: 1, self: —)',
       '- G (total: 1, self: 1)',
     ]);
+  });
+});
+
+describe('lower wing', function () {
+  // Samples:  A->B->C, A->B->D, A->E->C, A->E->F
+  const textSamples = `
+    A  A  A  A
+    B  B  E  E
+    C  D  C  F
+  `;
+
+  it('shows callers of the selected function as inverted roots', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // Select C: C has self-time in both A->B->C and A->E->C, so C becomes the
+    // inverted root with total 2. Its callers B and E appear as children.
+    const callTree = lowerWingTreeFromProfile(profile, 'C');
+    expect(formatTree(callTree)).toEqual([
+      '- C (total: 2, self: 2)',
+      '  - B (total: 1, self: —)',
+      '    - A (total: 1, self: —)',
+      '  - E (total: 1, self: —)',
+      '    - A (total: 1, self: —)',
+    ]);
+  });
+
+  it('only counts samples where the selected function is present', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // Select B: the self-time of B's subtree (C and D) gets attributed to B in
+    // the non-inverted table, so the inverted tree shows B as the root with
+    // total 2, and its caller A as a child.
+    const callTree = lowerWingTreeFromProfile(profile, 'B');
+    expect(formatTree(callTree)).toEqual([
+      '- B (total: 2, self: 2)',
+      '  - A (total: 2, self: —)',
+    ]);
+  });
+
+  it('returns an empty tree when no function is selected', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    const callTree = lowerWingTreeFromProfile(profile, 'NONEXISTENT');
+    expect(formatTree(callTree)).toEqual([]);
   });
 });
 
