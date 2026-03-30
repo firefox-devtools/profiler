@@ -4257,6 +4257,9 @@ Object {
       ],
     },
   },
+  "expandedUpperWingCallNodePaths": PathSet {
+    "_table": Map {},
+  },
   "lastSeenTransformCount": 1,
   "selectedFunctionIndex": null,
   "selectedInvertedCallNodePath": Array [],
@@ -4266,5 +4269,6 @@ Object {
     0,
     1,
   ],
+  "selectedUpperWingCallNodePath": Array [],
 }
 `;

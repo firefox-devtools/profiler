@@ -23,6 +23,7 @@ import { ResourceType } from 'firefox-profiler/types';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
+  upperWingTreeFromProfile,
   lowerWingTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
@@ -576,6 +577,41 @@ describe('function list', function () {
       '- F (total: 1, self: —)',
       '- G (total: 1, self: 1)',
     ]);
+  });
+});
+
+describe('upper wing', function () {
+  // Samples:  A->B->C, A->B->D, A->E->C, A->E->F
+  const textSamples = `
+    A  A  A  A
+    B  B  E  E
+    C  D  C  F
+  `;
+
+  it('shows all callee subtrees of the selected function', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // Select B: show subtrees rooted at B (i.e. B->C and B->D)
+    const callTree = upperWingTreeFromProfile(profile, 'B');
+    expect(formatTree(callTree)).toEqual([
+      '- B (total: 2, self: —)',
+      '  - C (total: 1, self: 1)',
+      '  - D (total: 1, self: 1)',
+    ]);
+  });
+
+  it('merges call nodes with the same function across different callers', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // C appears under both B and E; the upper wing for C should show both
+    // subtrees merged into one root C node
+    const callTree = upperWingTreeFromProfile(profile, 'C');
+    expect(formatTree(callTree)).toEqual(['- C (total: 2, self: 2)']);
+  });
+
+  it('returns an empty tree when no function is selected', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // null selection: no subtrees to show
+    const callTree = upperWingTreeFromProfile(profile, 'NONEXISTENT');
+    expect(formatTree(callTree)).toEqual([]);
   });
 });
 
