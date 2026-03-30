@@ -37,7 +37,7 @@ import {
 } from '../profile-logic/symbolication';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
-import { objectMap } from '../utils/types';
+import { assertExhaustiveCheck, objectMap } from '../utils/types';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
@@ -140,8 +140,10 @@ const symbolicationStatus: Reducer<SymbolicationStatus> = (
 export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedNonInvertedCallNodePath: [],
   selectedInvertedCallNodePath: [],
+  selectedLowerWingCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
+  expandedLowerWingCallNodePaths: new PathSet(),
   selectedFunctionIndex: null,
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
@@ -209,7 +211,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
       const {
-        isInverted,
+        area,
         selectedCallNodePath,
         threadsKey,
         optionalExpandedToCallNodePath,
@@ -217,9 +219,11 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
 
       const threadState = _getThreadViewOptions(state, threadsKey);
 
-      const previousSelectedCallNodePath = isInverted
-        ? threadState.selectedInvertedCallNodePath
-        : threadState.selectedNonInvertedCallNodePath;
+      const previousSelectedCallNodePath = {
+        INVERTED_TREE: threadState.selectedInvertedCallNodePath,
+        NON_INVERTED_TREE: threadState.selectedNonInvertedCallNodePath,
+        LOWER_WING: threadState.selectedLowerWingCallNodePath,
+      }[area];
 
       // If the selected node doesn't actually change, let's return the previous
       // state to avoid rerenders.
@@ -230,9 +234,11 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      let expandedCallNodePaths = isInverted
-        ? threadState.expandedInvertedCallNodePaths
-        : threadState.expandedNonInvertedCallNodePaths;
+      let expandedCallNodePaths = {
+        INVERTED_TREE: threadState.expandedInvertedCallNodePaths,
+        NON_INVERTED_TREE: threadState.expandedNonInvertedCallNodePaths,
+        LOWER_WING: threadState.expandedLowerWingCallNodePaths,
+      }[area];
       const expandToNode = optionalExpandedToCallNodePath
         ? optionalExpandedToCallNodePath
         : selectedCallNodePath;
@@ -256,19 +262,25 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         );
       }
 
-      return _updateThreadViewOptions(
-        state,
-        threadsKey,
-        isInverted
-          ? {
-              selectedInvertedCallNodePath: selectedCallNodePath,
-              expandedInvertedCallNodePaths: expandedCallNodePaths,
-            }
-          : {
-              selectedNonInvertedCallNodePath: selectedCallNodePath,
-              expandedNonInvertedCallNodePaths: expandedCallNodePaths,
-            }
-      );
+      switch (area) {
+        case 'INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedInvertedCallNodePath: selectedCallNodePath,
+            expandedInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'NON_INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedNonInvertedCallNodePath: selectedCallNodePath,
+            expandedNonInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'LOWER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedLowerWingCallNodePath: selectedCallNodePath,
+            expandedLowerWingCallNodePaths: expandedCallNodePaths,
+          });
+        default:
+          throw assertExhaustiveCheck(area, 'Unhandled case');
+      }
     }
     case 'CHANGE_SELECTED_FUNCTION': {
       const { selectedFunctionIndex, threadsKey } = action;
@@ -321,16 +333,25 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       });
     }
     case 'CHANGE_EXPANDED_CALL_NODES': {
-      const { threadsKey, isInverted } = action;
+      const { threadsKey, area } = action;
       const expandedCallNodePaths = new PathSet(action.expandedCallNodePaths);
 
-      return _updateThreadViewOptions(
-        state,
-        threadsKey,
-        isInverted
-          ? { expandedInvertedCallNodePaths: expandedCallNodePaths }
-          : { expandedNonInvertedCallNodePaths: expandedCallNodePaths }
-      );
+      switch (area) {
+        case 'INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'NON_INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedNonInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'LOWER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedLowerWingCallNodePaths: expandedCallNodePaths,
+          });
+        default:
+          throw assertExhaustiveCheck(area, 'Unhandled case');
+      }
     }
     case 'CHANGE_SELECTED_NETWORK_MARKER': {
       const { threadsKey, selectedNetworkMarker } = action;
@@ -733,6 +754,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
       if (action.callNodePath !== null) {
         return {
           threadsKey: action.threadsKey,
+          area: action.area,
           callNodePath: action.callNodePath,
         };
       }
