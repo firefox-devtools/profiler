@@ -125,6 +125,10 @@ export type AppViewState =
         readonly attempt: Attempt | null;
         readonly message: string;
       };
+      readonly downloadProgress?: {
+        readonly receivedBytes: number;
+        readonly totalBytes: number | null;
+      };
     };
 
 export type Phase = AppViewState['phase'];

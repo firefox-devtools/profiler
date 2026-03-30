@@ -974,6 +974,12 @@ describe('actions/receive-profile', function () {
             message: errorMessage,
           },
         },
+        expect.objectContaining({
+          phase: 'INITIALIZING',
+          downloadProgress: expect.objectContaining({
+            receivedBytes: expect.any(Number),
+          }),
+        }),
         { phase: 'PROFILE_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
@@ -1098,6 +1104,12 @@ describe('actions/receive-profile', function () {
             message: errorMessage,
           },
         },
+        expect.objectContaining({
+          phase: 'INITIALIZING',
+          downloadProgress: expect.objectContaining({
+            receivedBytes: expect.any(Number),
+          }),
+        }),
         { phase: 'PROFILE_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
