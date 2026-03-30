@@ -180,14 +180,10 @@ export function addDataToWindowObject(
   };
 
   target.toggleTimelineType = function (timelineType?: string) {
-    if (
-      timelineType !== 'cpu-category' &&
-      timelineType !== 'category' &&
-      timelineType !== 'stack'
-    ) {
+    if (timelineType !== 'cpu-category' && timelineType !== 'stack') {
       console.log(stripIndent`
         ❗ The timeline type "${timelineType}" is unknown.
-        💡 Valid types are: "cpu-category", "category", or "stack".
+        💡 Valid types are: "cpu-category" or "stack".
         Please try again 😊
       `);
       return;
@@ -421,7 +417,7 @@ export function logFriendlyPreamble() {
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
-      %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
+      %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category" or "stack".
       %cwindow.toggleDarkMode%c - Cycle through theme preferences: system, light, dark.
       %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it, and use saveToDisk to save it.
       %cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with "copy" or "saveToDisk".

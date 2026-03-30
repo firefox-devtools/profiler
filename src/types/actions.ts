@@ -85,7 +85,10 @@ export type DataSource =
   // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
 
-export type TimelineType = 'stack' | 'category' | 'cpu-category';
+// Controls which graph is shown in thread tracks.
+// 'cpu-category': Shows the category activity graph.
+// 'stack':        Shows the stack graph, for profiles without category information.
+export type TimelineType = 'stack' | 'cpu-category';
 export type PreviewSelection = {
   readonly isModifying: boolean;
   readonly selectionStart: number;

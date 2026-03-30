@@ -37,7 +37,6 @@ type CanvasProps = {
   readonly categories: CategoryList;
   readonly passFillsQuerier: (param: ActivityFillGraphQuerier) => void;
   readonly onClick: (param: React.MouseEvent<HTMLCanvasElement>) => void;
-  readonly enableCPUUsage: boolean;
 } & SizeProps;
 
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
@@ -132,7 +131,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       sampleIndexOffset,
       sampleSelectedStates,
       treeOrderSampleComparator,
-      enableCPUUsage,
       width,
       height,
     } = this.props;
@@ -153,7 +151,6 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeEnd,
       sampleIndexOffset,
       sampleSelectedStates,
-      enableCPUUsage,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx!),
