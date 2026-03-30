@@ -193,6 +193,7 @@ class CallTreeImpl extends PureComponent<Props> {
       rightClickedCallNodeIndex,
       handleCallNodeTransformShortcut,
       threadsKey,
+      callNodeInfo,
     } = this.props;
     const nodeIndex =
       rightClickedCallNodeIndex !== null
@@ -201,7 +202,7 @@ class CallTreeImpl extends PureComponent<Props> {
     if (nodeIndex === null) {
       return;
     }
-    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+    handleCallNodeTransformShortcut(event, threadsKey, callNodeInfo, nodeIndex);
   };
 
   _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
