@@ -20,6 +20,7 @@ import {
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
   computeSamplesTableFromRawSamplesTable,
+  createUpperWingCallNodeInfo,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
 import { StringTable } from '../../utils/string-table';
@@ -261,6 +262,55 @@ export function functionListTreeFromProfile(
     ensureExists(profile.meta.categories),
     thread.samples,
     { type: 'FUNCTION_LIST', timings: functionListTimings },
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "upper wing" CallTree for a profile and a selected
+ * function. The upper wing shows the call subtrees that are rooted at the
+ * selected function, i.e. it answers "where is this function called from / what
+ * does it call".
+ */
+export function upperWingTreeFromProfile(
+  profile: Profile,
+  selectedFuncName: string,
+  threadIndex: number = 0
+): CallTree {
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const selectedFunc =
+    thread.funcTable.name.findIndex(
+      (i) => thread.stringTable.getString(i) === selectedFuncName
+    ) ?? null;
+  const upperWingCallNodeInfo = createUpperWingCallNodeInfo(
+    callNodeInfo,
+    selectedFunc === -1 ? null : selectedFunc,
+    thread.stackTable,
+    thread.frameTable,
+    thread.funcTable.length,
+    defaultCategory
+  );
+  const selfAndSummary = computeCallNodeSelfAndSummary(
+    thread.samples,
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      upperWingCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    ),
+    upperWingCallNodeInfo.getCallNodeTable().length
+  );
+  const timings = computeCallTreeTimings(upperWingCallNodeInfo, selfAndSummary);
+  return getCallTree(
+    thread,
+    upperWingCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    thread.samples,
+    timings,
     'samples'
   );
 }
