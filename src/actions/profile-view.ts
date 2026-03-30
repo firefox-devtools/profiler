@@ -2092,6 +2092,7 @@ export function toggleBottomBoxFullscreen(): ThunkAction<void> {
 export function handleCallNodeTransformShortcut(
   event: React.KeyboardEvent<HTMLElement>,
   threadsKey: ThreadsKey,
+  callNodeInfo: CallNodeInfo,
   callNodeIndex: IndexIntoCallNodeTable
 ): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -2100,7 +2101,6 @@ export function handleCallNodeTransformShortcut(
     }
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const unfilteredThread = threadSelectors.getThread(getState());
-    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
     const implementation = getImplementationFilter(getState());
     const inverted = getInvertCallstack(getState());
     const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
