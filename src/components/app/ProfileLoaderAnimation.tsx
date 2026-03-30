@@ -65,12 +65,16 @@ class ProfileLoaderAnimationImpl extends PureComponent<ProfileLoaderAnimationPro
       dataSource === 'from-file'
     );
 
+    const downloadProgress =
+      'downloadProgress' in view ? view.downloadProgress : null;
+
     return (
       <Localized id={message} attrs={{ title: true }} elems={{ a: <span /> }}>
         <ProfileRootMessage
           additionalMessage={this._renderAdditionalMessage()}
           showLoader={showLoader}
           showBackHomeLink={showBackHomeLink}
+          downloadProgress={downloadProgress}
         >{`Untranslated ${message}`}</ProfileRootMessage>
       </Localized>
     );

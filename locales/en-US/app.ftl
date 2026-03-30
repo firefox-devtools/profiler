@@ -836,6 +836,18 @@ ProfileLoaderAnimation--loading-view-not-found = View not found
 
 ProfileRootMessage--title = { -profiler-brand-name }
 ProfileRootMessage--additional = Back to home
+# This string is used as the accessible label for the download progress bar.
+ProfileRootMessage--download-progress-label =
+    .aria-label = Download progress
+# This string is displayed when the total download size is known.
+# Variables:
+#   $receivedSize (String) - Amount of data received so far, e.g. "3.2 MB"
+#   $totalSize (String) - Total download size, e.g. "14.5 MB"
+ProfileRootMessage--download-progress-known = { $receivedSize } / { $totalSize }
+# This string is displayed when the total download size is unknown.
+# Variables:
+#   $receivedSize (String) - Amount of data received so far, e.g. "3.2 MB"
+ProfileRootMessage--download-progress-unknown = { $receivedSize } downloaded
 
 ## Root
 

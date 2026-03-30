@@ -43,6 +43,56 @@
   font-size: 12px;
 }
 
+.downloadProgress {
+  margin-top: 16px;
+}
+
+.downloadProgressBarTrack {
+  overflow: hidden;
+  height: 8px;
+  border-radius: 4px;
+  background-color: var(--grey-30);
+}
+
+.downloadProgressBarFill {
+  height: 100%;
+  border-radius: 4px;
+  background-color: var(--blue-60);
+  transition: width 150ms ease-out;
+}
+
+.downloadProgressBarFillIndeterminate {
+  width: 30%;
+  height: 100%;
+  border-radius: 4px;
+  animation: indeterminateProgress 1.5s ease-in-out infinite;
+  background-color: var(--blue-60);
+}
+
+@keyframes indeterminateProgress {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(433%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .downloadProgressBarFillIndeterminate {
+    width: 100%;
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+.downloadProgressText {
+  margin-top: 4px;
+  color: var(--grey-50);
+  font-size: 12px;
+}
+
 .loading {
   position: relative;
   height: 40px;
