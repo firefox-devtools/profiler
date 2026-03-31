@@ -431,7 +431,7 @@ export function logFriendlyPreamble() {
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
-      %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c
+      %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.ts%c
     `,
     // "The following profiler..."
     intro,
@@ -490,7 +490,7 @@ export function logFriendlyPreamble() {
     // "processed-profile-format.md"
     link,
     reset,
-    // "call-tree.js"
+    // "call-tree.ts"
     link,
     reset
   );
