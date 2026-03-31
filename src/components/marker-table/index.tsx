@@ -6,7 +6,7 @@ import { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
-import { TreeView } from '../shared/TreeView';
+import { type SortableColumn, type Tree, TreeView } from '../shared/TreeView';
 import { MarkerTableEmptyReasons } from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
@@ -50,7 +50,7 @@ type MarkerDisplayData = {
   details: string;
 };
 
-class MarkerTree {
+class MarkerTree implements Tree<MarkerDisplayData> {
   _getMarker: (param: MarkerIndex) => Marker;
   _markerIndexes: MarkerIndex[];
   _zeroAt: Milliseconds;
@@ -71,6 +71,10 @@ class MarkerTree {
     this._displayDataByIndex = new Map();
     this._markerSchemaByName = markerSchemaByName;
     this._getMarkerLabel = getMarkerLabel;
+  }
+
+  getSortableColumns(): SortableColumn[] {
+    return [];
   }
 
   copyTable = (
@@ -180,7 +184,7 @@ class MarkerTree {
   }
 
   getAllDescendants() {
-    return new Set();
+    return new Set<number>();
   }
 
   getParent(): MarkerIndex {
@@ -366,7 +370,7 @@ class MarkerTableImpl extends PureComponent<Props> {
         ) : (
           <TreeView
             maxNodeDepth={0}
-            tree={tree as any}
+            tree={tree}
             fixedColumns={this._fixedColumns}
             mainColumn={this._mainColumn}
             onSelectionChange={this._onSelectionChange}
