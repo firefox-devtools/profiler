@@ -6,7 +6,7 @@ runs:
     - name: Setup Node.js
       uses: actions/setup-node@v6
       with:
-        node-version: '22.14'
+        node-version: '24.14'
         cache: 'yarn'
 
     - name: Install dependencies
