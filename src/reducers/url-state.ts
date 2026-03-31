@@ -27,6 +27,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import { translateThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
 import { translateTransformStack } from 'firefox-profiler/profile-logic/transforms';
 
@@ -188,6 +189,18 @@ const markersSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_MARKER_SEARCH_STRING':
       return action.searchString;
+    default:
+      return state;
+  }
+};
+
+const markerTableSort: Reducer<SingleColumnSortState[]> = (
+  state = [],
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_MARKER_TABLE_SORT':
+      return action.sort;
     default:
       return state;
   }
@@ -780,6 +793,7 @@ const profileSpecific = combineReducers({
   showJsTracerSummary,
   tabFilter,
   selectedMarkers,
+  markerTableSort,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

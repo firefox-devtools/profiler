@@ -112,12 +112,12 @@
 }
 
 .treeViewHeaderColumn {
-  position: relative;
   line-height: 15px;
   white-space: nowrap;
 }
 
 .treeViewHeaderColumn,
+.treeViewSortButton,
 .treeViewRowColumn,
 .treeViewRowScrolledColumns {
   box-sizing: border-box;
@@ -128,6 +128,31 @@
 .treeViewFixedColumn {
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.treeViewSortButton {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+.treeViewSortButton:active:hover {
+  background-color: var(--clickable-ghost-active-background-color);
+}
+
+.treeViewSortButton.sortInactive::after {
+  content: ' ▲';
+  opacity: 0;
+}
+
+.treeViewSortButton.sortAscending::after {
+  content: ' ▲';
+}
+
+.treeViewSortButton.sortDescending::after {
+  content: ' ▼';
 }
 
 .treeViewHeaderColumnDivider,
