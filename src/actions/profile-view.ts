@@ -82,6 +82,7 @@ import {
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -1612,6 +1613,13 @@ export function changeMarkersSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_MARKER_SEARCH_STRING',
     searchString,
+  };
+}
+
+export function changeMarkerTableSort(sort: SingleColumnSortState[]): Action {
+  return {
+    type: 'CHANGE_MARKER_TABLE_SORT',
+    sort,
   };
 }
 
