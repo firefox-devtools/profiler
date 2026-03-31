@@ -106,7 +106,8 @@ interface CallTreeInternal {
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean;
   createChildren(nodeIndex: IndexIntoCallNodeTable): CallNodeChildren;
   createRoots(): CallNodeChildren;
-  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal;
+  getSelf(nodeIndex: IndexIntoCallNodeTable): number;
+  getTotal(nodeIndex: IndexIntoCallNodeTable): number;
   findHeaviestPathInSubtree(
     callNodeIndex: IndexIntoCallNodeTable
   ): CallNodePath;
@@ -172,10 +173,12 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
     return this._callNodeHasChildren[callNodeIndex] !== 0;
   }
 
-  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
-    const self = this._callTreeTimings.self[callNodeIndex];
-    const total = this._callTreeTimings.total[callNodeIndex];
-    return { self, total };
+  getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callTreeTimings.self[callNodeIndex];
+  }
+
+  getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callTreeTimings.total[callNodeIndex];
   }
 
   findHeaviestPathInSubtree(
@@ -217,11 +220,12 @@ export class CallTreeInternalFunctionList implements CallTreeInternal {
     return this._timings.sortedFuncs;
   }
 
-  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
-    return {
-      self: this._timings.funcSelf[nodeIndex],
-      total: this._timings.funcTotal[nodeIndex],
-    };
+  getSelf(nodeIndex: IndexIntoCallNodeTable): number {
+    return this._timings.funcSelf[nodeIndex];
+  }
+
+  getTotal(nodeIndex: IndexIntoCallNodeTable): number {
+    return this._timings.funcTotal[nodeIndex];
   }
 
   findHeaviestPathInSubtree(
@@ -289,13 +293,19 @@ class CallTreeInternalInverted implements CallTreeInternal {
     return children;
   }
 
-  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
+  getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      const total = this._totalPerRootFunc[callNodeIndex];
-      return { self: total, total };
+      return this._totalPerRootFunc[callNodeIndex];
+    }
+    return 0;
+  }
+
+  getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
+    if (this._callNodeInfo.isRoot(callNodeIndex)) {
+      return this._totalPerRootFunc[callNodeIndex];
     }
     const { total } = this._getTotalAndHasChildren(callNodeIndex);
-    return { self: 0, total };
+    return total;
   }
 
   _getTotalAndHasChildren(
@@ -450,7 +460,8 @@ export class CallTree {
       this._thread.funcTable.name[funcIndex]
     );
 
-    const { self, total } = this._internal.getSelfAndTotal(callNodeIndex);
+    const total = this._internal.getTotal(callNodeIndex);
+    const self = this._internal.getSelf(callNodeIndex);
     const totalRelative = total / this._rootTotalSummary;
     const selfRelative = self / this._rootTotalSummary;
 
