@@ -22,6 +22,7 @@ import {
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
   changeSelectedMarker,
+  changeMarkerTableSort,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -490,6 +491,62 @@ describe('search strings', function () {
     dispatch(changeSelectedTab('network-chart'));
     const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`networkSearch=${networkSearchString}`);
+  });
+});
+
+describe('marker table sort', function () {
+  function _getStoreOnMarkerTable() {
+    const store = _getStoreWithURL();
+    store.dispatch(changeSelectedTab('marker-table'));
+    return store;
+  }
+
+  it('omits the default sort from the URL', function () {
+    const { getState } = _getStoreOnMarkerTable();
+    expect(getQueryStringFromState(getState())).not.toContain('markerSort');
+  });
+
+  it('serializes a non-default sort with primary first', function () {
+    const { getState, dispatch } = _getStoreOnMarkerTable();
+    // duration desc primary, name asc tiebreaker
+    dispatch(
+      changeMarkerTableSort([
+        { column: 'duration', ascending: false },
+        { column: 'name', ascending: true },
+      ])
+    );
+    expect(getQueryStringFromState(getState())).toContain(
+      'markerSort=duration-desc~name-asc'
+    );
+  });
+
+  it('round-trips a non-default sort through the URL', function () {
+    const { getState, dispatch } = _getStoreOnMarkerTable();
+    dispatch(changeMarkerTableSort([{ column: 'duration', ascending: false }]));
+    const url = urlFromState(getState().urlState);
+    const restored = stateFromLocation({
+      pathname: new URL(url, 'http://localhost').pathname,
+      search: new URL(url, 'http://localhost').search,
+      hash: '',
+    });
+    expect(restored.profileSpecific.markerTableSort).toEqual([
+      { column: 'duration', ascending: false },
+    ]);
+  });
+
+  it('falls back to the default when the URL has an invalid column', function () {
+    const { getState } = _getStoreWithURL({
+      pathname: '/public/abc/marker-table/',
+      search: '?markerSort=bogus-desc',
+    });
+    expect(getState().urlState.profileSpecific.markerTableSort).toBeNull();
+  });
+
+  it('omits the sort from the URL on the marker chart panel', function () {
+    const { getState, dispatch } = _getStoreWithURL();
+    dispatch(changeSelectedTab('marker-chart'));
+    dispatch(changeMarkerTableSort([{ column: 'duration', ascending: false }]));
+    expect(getQueryStringFromState(getState())).not.toContain('markerSort');
   });
 });
 
