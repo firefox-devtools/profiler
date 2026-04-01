@@ -5,7 +5,6 @@
 .dragAndDropArea {
   display: inherit;
   width: 100%;
-  isolation: isolate;
 }
 
 .dragAndDropOverlayWrapper {
