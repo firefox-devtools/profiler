@@ -112,6 +112,56 @@ describe('console-accessible values on the window object', function () {
     `);
   });
 
+  it('can extract gecko logs in new structured format', function () {
+    const profile = getProfileWithMarkers([
+      [
+        'nsHttp',
+        170,
+        null,
+        {
+          type: 'Log',
+          level: 1,
+          message:
+            'ParentChannelListener::ParentChannelListener [this=7fb5e19b98d0]',
+        },
+      ],
+      [
+        'nsJarProtocol',
+        190,
+        null,
+        {
+          type: 'Log',
+          level: 2,
+          message: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+        },
+      ],
+      ['cubeb', 200, null, { type: 'Log', level: 3, message: 'cubeb_init' }],
+      [
+        'AudioStream',
+        210,
+        null,
+        { type: 'Log', level: 4, message: 'AudioStream init\n' },
+      ],
+      [
+        'VideoSink',
+        220,
+        null,
+        { type: 'Log', level: 5, message: 'VideoSink::VideoSink' },
+      ],
+    ]);
+    const store = storeWithProfile(profile);
+    const target: MixedObject = {};
+    addDataToWindowObject(store.getState, store.dispatch, target);
+    const result = (target as any).extractGeckoLogs();
+    expect(result).toBe(stripIndent`
+      1970-01-01 00:00:00.170000000 UTC - [Unknown Process 0: Empty]: E/nsHttp ParentChannelListener::ParentChannelListener [this=7fb5e19b98d0]
+      1970-01-01 00:00:00.190000000 UTC - [Unknown Process 0: Empty]: W/nsJarProtocol nsJARChannel::nsJARChannel [this=0x87f1ec80]
+      1970-01-01 00:00:00.200000000 UTC - [Unknown Process 0: Empty]: I/cubeb cubeb_init
+      1970-01-01 00:00:00.210000000 UTC - [Unknown Process 0: Empty]: D/AudioStream AudioStream init
+      1970-01-01 00:00:00.220000000 UTC - [Unknown Process 0: Empty]: V/VideoSink VideoSink::VideoSink
+    `);
+  });
+
   describe('totalMarkerDuration', function () {
     function setup(): ExtraPropertiesOnWindowForConsole {
       jest.spyOn(console, 'log').mockImplementation(() => {});
