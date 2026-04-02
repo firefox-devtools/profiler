@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { FunctionList } from './FunctionList';
+import { SelfWing } from './SelfWing';
 import { UpperWing } from './UpperWing';
 import { LowerWing } from './LowerWing';
 import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
@@ -31,6 +32,7 @@ export const ProfileFunctionListView = () => (
       >
         <UpperWing />
         <LowerWing />
+        <SelfWing />
       </ResizableWithSplitter>
     </div>
   </div>
