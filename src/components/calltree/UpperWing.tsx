@@ -3,11 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import * as React from 'react';
 import { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
+import { UpperWingFlameGraph } from './UpperWingFlameGraph';
 import {
   treeColumnsForTracingMs,
   treeColumnsForSamples,
@@ -263,7 +265,7 @@ class UpperWingImpl extends PureComponent<Props> {
     }
   }
 
-  override render() {
+  _renderCallTree() {
     const {
       tree,
       selectedCallNodeIndex,
@@ -305,6 +307,10 @@ class UpperWingImpl extends PureComponent<Props> {
         onViewOptionsChange={onTableViewOptionsChange}
       />
     );
+  }
+
+  override render() {
+    return <UpperWingFlameGraph />;
   }
 }
 

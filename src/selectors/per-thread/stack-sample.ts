@@ -657,6 +657,31 @@ export function getStackAndSampleSelectorsPerThread(
       FlameGraph.getFlameGraphTiming
     );
 
+  const _getUpperWingCallTreeTimingsNonInverted: Selector<CallTree.CallTreeTimingsNonInverted> =
+    createSelector(
+      getUpperWingCallNodeInfo,
+      getUpperWingCallNodeSelfAndSummary,
+      CallTree.computeCallTreeTimingsNonInverted
+    );
+
+  const getUpperWingFlameGraphRows: Selector<FlameGraph.FlameGraphRows> =
+    createSelector(
+      (state: State) => getUpperWingCallNodeInfo(state).getCallNodeTable(),
+      (state: State) =>
+        threadSelectors.getPreviewFilteredThread(state).funcTable,
+      (state: State) =>
+        threadSelectors.getPreviewFilteredThread(state).stringTable,
+      FlameGraph.computeFlameGraphRows
+    );
+
+  const getUpperWingFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      getUpperWingFlameGraphRows,
+      (state: State) => getUpperWingCallNodeInfo(state).getCallNodeTable(),
+      _getUpperWingCallTreeTimingsNonInverted,
+      FlameGraph.getFlameGraphTiming
+    );
+
   const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
     createSelector(
       getRightClickedCallNodeInfo,
@@ -788,6 +813,7 @@ export function getStackAndSampleSelectorsPerThread(
     getFunctionListTimings,
     getLowerWingCallTree,
     getUpperWingCallTree,
+    getUpperWingFlameGraphTiming,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
