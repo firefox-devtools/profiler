@@ -5942,10 +5942,10 @@ internal-slot@^1.1.0:
     hasown "^2.0.2"
     side-channel "^1.1.0"
 
-iongraph-web@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/iongraph-web/-/iongraph-web-0.2.0.tgz#d666b09404001c57a473544454c38b65d827e93d"
-  integrity sha512-PXXv/vNoEt4ylNuPJTZrnDGonChbr2nwrjgg6yJhKtOUhbqxoThacBz/vLG7ockZLK3AUZFS0PvkdGBzS8PcsA==
+iongraph-web@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/iongraph-web/-/iongraph-web-0.2.1.tgz#cde4ce880d25b3b46ffa26ccbb8d23c7b98aeedd"
+  integrity sha512-c/cDUUpHFVaz1Ashk1lOgXqtFbOI2Ignr292bE4mzFlcQzHqm4C+srBlJ8a5CSCtEfmpeLSeHDv8iJVMe/hHig==
 
 is-alphabetical@^2.0.0:
   version "2.0.0"
@@ -11090,10 +11090,10 @@ typescript-eslint@^8.56.0:
     "@typescript-eslint/typescript-estree" "8.56.0"
     "@typescript-eslint/utils" "8.56.0"
 
-typescript@^5.9.3:
-  version "5.9.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.9.3.tgz#5b4f59e15310ab17a216f5d6cf53ee476ede670f"
-  integrity sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==
+typescript@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-6.0.2.tgz#0b1bfb15f68c64b97032f3d78abbf98bdbba501f"
+  integrity sha512-bGdAIrZ0wiGDo5l8c++HWtbaNCWTS4UTv7RaTH/ThVIgjkveJt83m74bBHMJkuCbslY8ixgLBVZJIOiQlQTjfQ==
 
 typical@^5.0.0, typical@^5.2.0:
   version "5.2.0"
