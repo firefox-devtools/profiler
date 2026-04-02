@@ -2,25 +2,33 @@
 
 exports[`EmptyThreadIndicator rendering matches the snapshot when rendering all three types of indicators 1`] = `
 <div
-  class="timelineEmptyThreadIndicator"
+  style="display: contents;"
 >
   <div
-    class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
-    style="left: 0px; width: 30px;"
-  />
-  <div
-    class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
-    style="right: 0px; width: 10px;"
-  />
-  <div
-    class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
-    style="left: 30px; width: 20px;"
-  />
+    class="timelineEmptyThreadIndicator"
+  >
+    <div
+      class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
+      style="left: 0px; width: 0px;"
+    />
+    <div
+      class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
+      style="right: 0px; width: 0px;"
+    />
+    <div
+      class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
+      style="left: 0px; width: 0px;"
+    />
+  </div>
 </div>
 `;
 
 exports[`EmptyThreadIndicator rendering matches the snapshot when rendering no indicators 1`] = `
 <div
-  class="timelineEmptyThreadIndicator"
-/>
+  style="display: contents;"
+>
+  <div
+    class="timelineEmptyThreadIndicator"
+  />
+</div>
 `;
