@@ -169,6 +169,11 @@ export function mergeProfilesForDiffing(
       );
     }
     const profile = profiles[i];
+    if (selectedThreadIndex >= profile.threads.length) {
+      throw new Error(
+        `Thread index ${selectedThreadIndex} is out of bounds for profile ${i} (${profile.threads.length} threads).`
+      );
+    }
     let thread = { ...profile.threads[selectedThreadIndex] };
 
     transformStacks[i] = translateTransformStack(

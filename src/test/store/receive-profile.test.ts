@@ -1986,6 +1986,23 @@ describe('actions/receive-profile', function () {
         'show [thread Diff between 1 and 2 comparison]',
       ]);
     });
+
+    it('gives a fatal error when the selected thread index is out of bounds', async function () {
+      const { dispatch, getState } = blankStore();
+      const { profile1, profile2 } = getSomeProfiles();
+      window.fetchMock.getOnce('*', profile1).getOnce('*', profile2);
+
+      await dispatch(
+        retrieveProfilesToCompare([
+          'https://fakeurl.com/public/fakehash1/?thread=5&v=3',
+          'https://fakeurl.com/public/fakehash2/?thread=0&v=3',
+        ])
+      );
+
+      const view = getView(getState());
+      expect(view.phase).toBe('FATAL_ERROR');
+      expect((view as any).error.message).toMatch(/out of bounds/);
+    });
   });
 
   describe('retrieveProfileForRawUrl', function () {

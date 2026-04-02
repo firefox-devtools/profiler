@@ -60,6 +60,7 @@ export function autoMockIntersectionObserver(autoTrigger: boolean = true) {
           observers.delete(instance);
         }),
         takeRecords: jest.fn(),
+        scrollMargin: options.scrollMargin ?? '',
       };
 
       observers.set(instance, item);

@@ -4,7 +4,6 @@
 import { PureComponent } from 'react';
 
 import { ThreadHeightGraph } from './HeightGraph';
-import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type {
   Thread,
@@ -43,7 +42,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     if (sampleIndex >= samples.length - 1) {
       return 0;
     }
-    return ensureExists(samples.threadCPURatio)[sampleIndex + 1] || 0;
+    return samples.threadCPUPercent[sampleIndex + 1] || 0;
   };
 
   override render() {
@@ -65,7 +64,7 @@ export class ThreadCPUGraph extends PureComponent<Props> {
     return (
       <ThreadHeightGraph
         heightFunc={this._heightFunction}
-        maxValue={1}
+        maxValue={100}
         className={className}
         trackName={trackName}
         interval={interval}

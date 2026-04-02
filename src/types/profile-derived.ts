@@ -133,9 +133,16 @@ export type SamplesTable = {
   // See the WeightType type for more information.
   weight: null | number[];
   weightType: WeightType;
-  // The CPU ratio, between 0 and 1, over the time between the previous sample
+  // The CPU percentage, between 0 and 100, over the time between the previous sample
   // and this sample.
-  threadCPURatio?: Float64Array | undefined;
+  // This array has length + 1. The extra element at the end is the CPU percentage
+  // after the last sample. For a range-filtered thread, this is the corresponding
+  // element from the full thread.
+  // If the original thread has no CPU delta information, this array will contain
+  // synthetic values (all 100) and hasCPUDeltas will be false.
+  threadCPUPercent: Uint8Array;
+  // Whether the original thread information contained CPU delta information.
+  hasCPUDeltas: boolean;
   // The category of each sample's stack in the unfiltered thread.
   category: Uint8Array;
   // The subcategory of each sample's stack in the unfiltered thread.
