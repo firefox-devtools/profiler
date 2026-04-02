@@ -23,6 +23,7 @@ import {
   getStackChartSameWidths,
   getShowUserTimings,
   getSelectedThreadsKey,
+  getSearchStringsAsRegExp,
 } from 'firefox-profiler/selectors/url-state';
 import type { SameWidthsIndexToTimestampMap } from 'firefox-profiler/profile-logic/stack-timing';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -87,6 +88,7 @@ type StateProps = {
   readonly hasFilteredCtssSamples: boolean;
   readonly useStackChartSameWidths: boolean;
   readonly timelineUnit: TimelineUnit;
+  readonly searchStringsRegExp: RegExp | null;
 };
 
 type DispatchProps = {
@@ -244,6 +246,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       hasFilteredCtssSamples,
       useStackChartSameWidths,
       timelineUnit,
+      searchStringsRegExp,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -304,6 +307,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   displayStackType: displayStackType,
                   useStackChartSameWidths,
                   timelineUnit,
+                  searchStringsRegExp,
                 }}
               />
             </div>
@@ -347,6 +351,7 @@ export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
       useStackChartSameWidths: getStackChartSameWidths(state),
       timelineUnit: getProfileTimelineUnit(state),
+      searchStringsRegExp: getSearchStringsAsRegExp(state),
     };
   },
   mapDispatchToProps: {

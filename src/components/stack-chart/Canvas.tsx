@@ -15,6 +15,7 @@ import type { changeMouseTimePosition } from '../../actions/profile-view';
 type ChangeMouseTimePosition = typeof changeMouseTimePosition;
 import {
   mapCategoryColorNameToStackChartStyles,
+  getDimmedStyles,
   getForegroundColor,
   getBackgroundColor,
 } from '../../utils/colors';
@@ -78,6 +79,7 @@ type OwnProps = {
   readonly displayStackType: boolean;
   readonly useStackChartSameWidths: boolean;
   readonly timelineUnit: TimelineUnit;
+  readonly searchStringsRegExp: RegExp | null;
 };
 
 type Props = Readonly<
@@ -183,6 +185,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       getMarker,
       marginLeft,
       useStackChartSameWidths,
+      searchStringsRegExp,
       viewport: {
         containerWidth,
         containerHeight,
@@ -359,6 +362,48 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
 
+    // Pre-compute which call nodes match the search string so we can dim
+    // non-matching nodes when a search is active.
+    let searchMatchedCallNodes: Set<IndexIntoCallNodeTable> | null = null;
+    if (searchStringsRegExp) {
+      searchMatchedCallNodes = new Set();
+      const { funcTable, resourceTable, sources, stringTable } = thread;
+      for (
+        let callNodeIndex = 0;
+        callNodeIndex < callNodeTable.length;
+        callNodeIndex++
+      ) {
+        const funcIndex = callNodeTable.func[callNodeIndex];
+        searchStringsRegExp.lastIndex = 0;
+        const funcName = stringTable.getString(funcTable.name[funcIndex]);
+        if (searchStringsRegExp.test(funcName)) {
+          searchMatchedCallNodes.add(callNodeIndex);
+          continue;
+        }
+
+        const sourceIndex = funcTable.source[funcIndex];
+        if (sourceIndex !== null) {
+          searchStringsRegExp.lastIndex = 0;
+          const fileName = stringTable.getString(sources.filename[sourceIndex]);
+          if (searchStringsRegExp.test(fileName)) {
+            searchMatchedCallNodes.add(callNodeIndex);
+            continue;
+          }
+        }
+
+        const resourceIndex = funcTable.resource[funcIndex];
+        if (resourceIndex !== -1) {
+          searchStringsRegExp.lastIndex = 0;
+          const resourceName = stringTable.getString(
+            resourceTable.name[resourceIndex]
+          );
+          if (searchStringsRegExp.test(resourceName)) {
+            searchMatchedCallNodes.add(callNodeIndex);
+          }
+        }
+      }
+    }
+
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
@@ -480,8 +525,10 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
         // Look up information about this stack frame.
         let text, category, isSelected;
+        let currentCallNodeIndex: IndexIntoCallNodeTable | null = null;
         if ('callNode' in stackTiming && stackTiming.callNode) {
           const callNodeIndex = stackTiming.callNode[i];
+          currentCallNodeIndex = callNodeIndex;
           const funcIndex = callNodeTable.func[callNodeIndex];
           const funcNameIndex = thread.funcTable.name[funcIndex];
           text = thread.stringTable.getString(funcNameIndex);
@@ -507,9 +554,19 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
           depth === hoveredItem.depth &&
           i === hoveredItem.stackTimingIndex;
 
-        const colorStyles = mapCategoryColorNameToStackChartStyles(
-          category.color
-        );
+        // When a search is active, use the dimmed style for non-matching nodes
+        // so that matching nodes stand out with their category color.
+        // Hovered or selected nodes always use their real category color.
+        const isDimmed =
+          searchMatchedCallNodes !== null &&
+          currentCallNodeIndex !== null &&
+          !searchMatchedCallNodes.has(currentCallNodeIndex) &&
+          !isHovered &&
+          !isSelected;
+        const colorStyles = isDimmed
+          ? getDimmedStyles()
+          : mapCategoryColorNameToStackChartStyles(category.color);
+
         // Draw the box.
         fastFillStyle.set(
           isHovered || isSelected
@@ -542,11 +599,11 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         if (textW > textMeasurement.minWidth) {
           const fittedText = textMeasurement.getFittedText(text, textW);
           if (fittedText) {
-            fastFillStyle.set(
-              isHovered || isSelected
-                ? colorStyles.getSelectedTextColor()
-                : getForegroundColor()
-            );
+            if (isHovered || isSelected || isDimmed) {
+              fastFillStyle.set(colorStyles.getSelectedTextColor());
+            } else {
+              fastFillStyle.set(getForegroundColor());
+            }
             ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
           }
         }
