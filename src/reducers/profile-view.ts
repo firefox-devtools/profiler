@@ -653,6 +653,8 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
     case 'CHANGE_MARKER_SEARCH_STRING':
     case 'CHANGE_NETWORK_SEARCH_STRING':
+    case 'ADD_TRANSFORM_TO_STACK':
+    case 'POP_TRANSFORMS_FROM_STACK':
       return state + 1;
     case 'CHANGE_SELECTED_CALL_NODE':
     case 'CHANGE_SELECTED_FUNCTION':
