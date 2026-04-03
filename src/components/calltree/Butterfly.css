@@ -44,3 +44,12 @@
 .butterflyWrapper .resizableWithSplitterSplitter.resizesHeight::before {
   inset: -3px 0;
 }
+
+.functionListTreeWrapper {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.functionListTreeWrapper .treeRowToggleButton {
+  display: none;
+}
