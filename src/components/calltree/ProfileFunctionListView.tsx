@@ -13,7 +13,7 @@ export const ProfileFunctionListView = () => (
     role="tabpanel"
     aria-labelledby="function-list-tab-button"
   >
-    <StackSettings />
+    <StackSettings hideInvertCallstack />
     <TransformNavigator />
     <FunctionList />
   </div>
