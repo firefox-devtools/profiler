@@ -2176,3 +2176,100 @@ export function handleCallNodeTransformShortcut(
     }
   };
 }
+
+export function handleFunctionTransformShortcut(
+  event: React.KeyboardEvent<HTMLElement>,
+  threadsKey: ThreadsKey,
+  funcIndex: IndexIntoFuncTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const implementation = getImplementationFilter(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const unfilteredThread = threadSelectors.getThread(getState());
+
+    switch (event.key) {
+      case 'f':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-function',
+            funcIndex,
+          })
+        );
+        break;
+      case 'S':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-self',
+            funcIndex,
+            implementation,
+          })
+        );
+        break;
+      case 'm':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-function',
+            funcIndex,
+          })
+        );
+        break;
+      case 'd':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'drop-function',
+            funcIndex,
+          })
+        );
+        break;
+      case 'C': {
+        const resourceIndex = unfilteredThread.funcTable.resource[funcIndex];
+        dispatch(
+          addCollapseResourceTransformToStack(
+            threadsKey,
+            resourceIndex,
+            implementation
+          )
+        );
+        break;
+      }
+      case 'r': {
+        if (funcHasRecursiveCall(callNodeTable, funcIndex)) {
+          dispatch(
+            addTransformToStack(threadsKey, {
+              type: 'collapse-recursion',
+              funcIndex,
+            })
+          );
+        }
+        break;
+      }
+      case 'R': {
+        if (funcHasDirectRecursiveCall(callNodeTable, funcIndex)) {
+          dispatch(
+            addTransformToStack(threadsKey, {
+              type: 'collapse-direct-recursion',
+              funcIndex,
+              implementation,
+            })
+          );
+        }
+        break;
+      }
+      case 'c':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'collapse-function-subtree',
+            funcIndex,
+          })
+        );
+        break;
+      default:
+      // This did not match a function transform.
+    }
+  };
+}

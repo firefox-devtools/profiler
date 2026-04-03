@@ -30,6 +30,7 @@ import {
   changeTableViewOptions,
   updateBottomBoxContentsAndMaybeOpen,
   changeFunctionListSort,
+  handleFunctionTransformShortcut,
 } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
@@ -81,6 +82,7 @@ type DispatchProps = {
   readonly changeRightClickedFunctionIndex: typeof changeRightClickedFunctionIndex;
   readonly addTransformToStack: typeof addTransformToStack;
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly handleFunctionTransformShortcut: typeof handleFunctionTransformShortcut;
   readonly onTableViewOptionsChange: (opts: TableViewOptions) => any;
   readonly changeFunctionListSort: typeof changeFunctionListSort;
 };
@@ -180,20 +182,21 @@ class FunctionListImpl extends PureComponent<Props> {
     _newExpandedCallNodeIndexes: Array<IndexIntoFuncTable | null>
   ) => {};
 
-  _onKeyDown = (_event: React.KeyboardEvent<HTMLElement>) => {
-    // const {
-    //   selectedFunctionIndex,
-    //   rightClickedFunctionIndex,
-    //   threadsKey,
-    // } = this.props;
-    // const nodeIndex =
-    //   rightClickedFunctionIndex !== null
-    //     ? rightClickedFunctionIndex
-    //     : selectedFunctionIndex;
-    // if (nodeIndex === null) {
-    //   return;
-    // }
-    // handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+  _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const {
+      selectedFunctionIndex,
+      rightClickedFunctionIndex,
+      threadsKey,
+      handleFunctionTransformShortcut,
+    } = this.props;
+    const funcIndex =
+      rightClickedFunctionIndex !== null
+        ? rightClickedFunctionIndex
+        : selectedFunctionIndex;
+    if (funcIndex === null) {
+      return;
+    }
+    handleFunctionTransformShortcut(event, threadsKey, funcIndex);
   };
 
   _onEnterOrDoubleClick = (_nodeId: IndexIntoFuncTable) => {
@@ -269,6 +272,7 @@ export const FunctionList = explicitConnect<{}, StateProps, DispatchProps>({
     changeRightClickedFunctionIndex,
     addTransformToStack,
     updateBottomBoxContentsAndMaybeOpen,
+    handleFunctionTransformShortcut,
     onTableViewOptionsChange: (options: TableViewOptions) =>
       changeTableViewOptions('calltree', options),
     changeFunctionListSort,
