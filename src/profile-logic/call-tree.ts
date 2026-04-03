@@ -54,6 +54,7 @@ export type CallTreeTimingsNonInverted = {
   self: Float64Array;
   total: Float64Array;
   rootTotalSummary: number; // sum of absolute values, this is used for computing percentages
+  flameGraphTotalForScaling: number; // used as 100% reference for flame graph box widths
 };
 
 type TotalAndHasChildren = { total: number; hasChildren: boolean };
@@ -748,7 +749,7 @@ export function computeCallNodeSelfAndSummary(
     rootTotalSummary += abs(callNodeSelf[callNodeIndex]);
   }
 
-  return { callNodeSelf, rootTotalSummary };
+  return { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling: rootTotalSummary };
 }
 
 export function getSelfAndTotalForCallNode(
@@ -936,6 +937,7 @@ export function computeLowerWingTimings(
     timings: computeCallTreeTimingsInverted(callNodeInfo, {
       callNodeSelf: mappedSelf,
       rootTotalSummary,
+      flameGraphTotalForScaling: rootTotalSummary,
     }),
   };
 }
@@ -972,7 +974,7 @@ export function computeCallTreeTimingsNonInverted(
   callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimingsNonInverted {
   const callNodeTable = callNodeInfo.getCallNodeTable();
-  const { callNodeSelf, rootTotalSummary } = callNodeSelfAndSummary;
+  const { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling } = callNodeSelfAndSummary;
 
   // Compute the following variables:
   const callNodeTotal = new Float64Array(callNodeTable.length);
@@ -1010,6 +1012,7 @@ export function computeCallTreeTimingsNonInverted(
     total: callNodeTotal,
     callNodeHasChildren,
     rootTotalSummary,
+    flameGraphTotalForScaling,
   };
 }
 
@@ -1412,5 +1415,5 @@ export function computeCallNodeTracedSelfAndSummary(
     }
   }
 
-  return { callNodeSelf, rootTotalSummary };
+  return { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling: rootTotalSummary };
 }

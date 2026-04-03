@@ -471,12 +471,20 @@ export function getStackAndSampleSelectorsPerThread(
         regularTreeSelfAndSummary
       ) => {
         const { rootTotalSummary } = regularTreeSelfAndSummary;
-        const { callNodeSelf } = CallTree.computeCallNodeSelfAndSummary(
+        const upperWingSelfAndSummary = CallTree.computeCallNodeSelfAndSummary(
           samples,
           sampleIndexToCallNodeIndex,
           callNodeInfo.getCallNodeTable().length
         );
-        return { rootTotalSummary, callNodeSelf };
+        const { callNodeSelf } = upperWingSelfAndSummary;
+        // Use the upper wing's own total as the flame graph scaling reference,
+        // so that the root node (the selected function) fills the full flame
+        // graph width. The rootTotalSummary from the regular tree is kept for
+        // percentage display, so tooltips show percentages relative to all
+        // filtered samples (e.g. "80%" if 800 of 1000 samples contain the
+        // selected function).
+        const flameGraphTotalForScaling = upperWingSelfAndSummary.rootTotalSummary;
+        return { rootTotalSummary, callNodeSelf, flameGraphTotalForScaling };
       }
     );
 
@@ -729,7 +737,23 @@ export function getStackAndSampleSelectorsPerThread(
       _getSelfWingSampleIndexToCallNodeIndex,
       (state: State) =>
         _getSelfWingCallNodeInfo(state).getCallNodeTable().length,
-      CallTree.computeCallNodeSelfAndSummary
+      getCallNodeSelfAndSummary,
+      (samples, sampleIndexToCallNodeIndex, callNodeCount, regularTreeSelfAndSummary) => {
+        const selfWingSelfAndSummary = CallTree.computeCallNodeSelfAndSummary(
+          samples,
+          sampleIndexToCallNodeIndex,
+          callNodeCount
+        );
+        // Keep flameGraphTotalForScaling as the self wing's own total so the
+        // root fills the full flame graph width. Override rootTotalSummary with
+        // the regular tree's value so tooltips show percentages relative to all
+        // filtered samples.
+        return {
+          callNodeSelf: selfWingSelfAndSummary.callNodeSelf,
+          flameGraphTotalForScaling: selfWingSelfAndSummary.rootTotalSummary,
+          rootTotalSummary: regularTreeSelfAndSummary.rootTotalSummary,
+        };
+      }
     );
 
   const _getSelfWingCallTreeTimings: Selector<CallTree.CallTreeTimings> =

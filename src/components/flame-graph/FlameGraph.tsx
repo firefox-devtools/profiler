@@ -120,7 +120,7 @@ class FlameGraphImpl
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
-    const row = flameGraphTiming[depth];
+    const row = flameGraphTiming.rows[depth];
     const columnIndex = row.callNode.indexOf(callNodeIndex);
     return row.end[columnIndex] - row.start[columnIndex] > SELECTABLE_THRESHOLD;
   };
@@ -145,7 +145,7 @@ class FlameGraphImpl
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
-    const row = flameGraphTiming[depth];
+    const row = flameGraphTiming.rows[depth];
     let columnIndex = row.callNode.indexOf(callNodeIndex);
 
     do {
