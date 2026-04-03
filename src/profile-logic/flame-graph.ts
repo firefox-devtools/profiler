@@ -30,13 +30,28 @@ export type IndexIntoFlameGraphTiming = number;
  * selfRelative contains the self time relative to the total time,
  * which is used to color the drawn functions.
  */
-export type FlameGraphTiming = Array<{
+export type FlameGraphTimingRow = {
   start: UnitIntervalOfProfileRange[];
   end: UnitIntervalOfProfileRange[];
   selfRelative: Array<number>;
   callNode: IndexIntoCallNodeTable[];
   length: number;
-}>;
+};
+
+/**
+ * FlameGraphTiming is an array of rows plus a scalar adjustment factor.
+ *
+ * tooltipRatioMultiplier converts a box's (end - start) width to a percentage
+ * relative to all filtered samples. Multiply (end - start) by this to get the
+ * tooltip percentage. It equals flameGraphTotalForScaling / rootTotalSummary,
+ * which is 1.0 for normal flame graphs and < 1.0 for the upper wing (where
+ * boxes are scaled so that the root fills the full width, but tooltips still
+ * show percentages relative to all filtered samples).
+ */
+export type FlameGraphTiming = {
+  rows: FlameGraphTimingRow[];
+  tooltipRatioMultiplier: number;
+};
 
 /**
  * FlameGraphRows is an array of rows, where each row is an array of call node
@@ -232,7 +247,7 @@ export function getFlameGraphTiming(
   callNodeTable: CallNodeTable,
   callTreeTimings: CallTreeTimingsNonInverted
 ): FlameGraphTiming {
-  const { total, self, rootTotalSummary } = callTreeTimings;
+  const { total, self, rootTotalSummary, flameGraphTotalForScaling } = callTreeTimings;
   const { prefix } = callNodeTable;
 
   // This is where we build up the return value, one row at a time.
@@ -284,8 +299,8 @@ export function getFlameGraphTiming(
       startPerCallNode[nodeIndex] = currentStart;
 
       // Take the absolute value, as native deallocations can be negative.
-      const totalRelativeVal = abs(totalVal / rootTotalSummary);
-      const selfRelativeVal = abs(self[nodeIndex] / rootTotalSummary);
+      const totalRelativeVal = abs(totalVal / flameGraphTotalForScaling);
+      const selfRelativeVal = abs(self[nodeIndex] / flameGraphTotalForScaling);
 
       const currentEnd = currentStart + totalRelativeVal;
       start.push(currentStart);
@@ -305,5 +320,8 @@ export function getFlameGraphTiming(
     };
   }
 
-  return timing;
+  return {
+    rows: timing,
+    tooltipRatioMultiplier: flameGraphTotalForScaling / rootTotalSummary,
+  };
 }

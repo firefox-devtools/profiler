@@ -245,7 +245,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     // The graph is drawn from bottom to top, in order of increasing depth.
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
-      const stackTiming = flameGraphTiming[depth];
+      const stackTiming = flameGraphTiming.rows[depth];
 
       if (!stackTiming) {
         continue;
@@ -373,7 +373,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const stackTiming = flameGraphTiming[depth];
+    const stackTiming = flameGraphTiming.rows[depth];
     if (!stackTiming) {
       return null;
     }
@@ -383,8 +383,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
 
     const ratio =
-      stackTiming.end[flameGraphTimingIndex] -
-      stackTiming.start[flameGraphTimingIndex];
+      (stackTiming.end[flameGraphTimingIndex] -
+        stackTiming.start[flameGraphTimingIndex]) *
+      flameGraphTiming.tooltipRatioMultiplier;
 
     let percentage = formatPercent(ratio);
     if (tracedTiming) {
@@ -443,7 +444,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
     const { depth, flameGraphTimingIndex } = hoveredItem;
     const { flameGraphTiming } = this.props;
-    const stackTiming = flameGraphTiming[depth];
+    const stackTiming = flameGraphTiming.rows[depth];
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
     return callNodeIndex;
   }
@@ -477,7 +478,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const depth = Math.floor(
       maxStackDepthPlusOne - (y + viewportTop) / ROW_HEIGHT
     );
-    const stackTiming = flameGraphTiming[depth];
+    const stackTiming = flameGraphTiming.rows[depth];
 
     if (!stackTiming) {
       return null;
