@@ -42,7 +42,10 @@ import type {
   ColumnSortState,
   SortableColumn,
 } from '../components/shared/TreeView';
-import { getBottomBoxInfoForCallNode } from './bottom-box';
+import {
+  getBottomBoxInfoForCallNode,
+  getBottomBoxInfoForFunction,
+} from './bottom-box';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
@@ -672,6 +675,14 @@ export class CallTree {
     return getBottomBoxInfoForCallNode(
       callNodeIndex,
       this._callNodeInfo,
+      this._thread,
+      this._previewFilteredCtssSamples
+    );
+  }
+
+  getBottomBoxInfoForFunction(funcIndex: IndexIntoFuncTable): BottomBoxInfo {
+    return getBottomBoxInfoForFunction(
+      funcIndex,
       this._thread,
       this._previewFilteredCtssSamples
     );
