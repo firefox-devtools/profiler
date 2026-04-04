@@ -28,6 +28,7 @@ import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { CallNodeContextMenu } from 'firefox-profiler/components/shared/CallNodeContextMenu';
 import { FunctionListContextMenu } from 'firefox-profiler/components/shared/FunctionListContextMenu';
+import { LowerWingContextMenu } from 'firefox-profiler/components/shared/LowerWingContextMenu';
 import { MaybeMarkerContextMenu } from 'firefox-profiler/components/shared/MarkerContextMenu';
 import { toValidTabSlug } from 'firefox-profiler/utils/types';
 
@@ -137,6 +138,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
         </Localized>
         <CallNodeContextMenu />
         <FunctionListContextMenu />
+        <LowerWingContextMenu />
         <MaybeMarkerContextMenu />
       </div>
     );
