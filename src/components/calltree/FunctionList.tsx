@@ -136,6 +136,7 @@ class FunctionListImpl extends PureComponent<Props> {
 
   override componentDidMount() {
     this.focus();
+    this.maybeProcureInitialSelection();
 
     if (this.props.selectedFunctionIndex !== null && this._treeView) {
       this._treeView.scrollSelectionIntoView();
@@ -156,6 +157,17 @@ class FunctionListImpl extends PureComponent<Props> {
       this._treeView
     ) {
       this._treeView.scrollSelectionIntoView();
+    }
+  }
+
+  maybeProcureInitialSelection() {
+    if (this.props.selectedFunctionIndex !== null) {
+      return;
+    }
+    const { tree, threadsKey, changeSelectedFunctionIndex } = this.props;
+    const firstRoot = tree.getRoots()[0];
+    if (firstRoot !== undefined) {
+      changeSelectedFunctionIndex(threadsKey, firstRoot, { source: 'auto' });
     }
   }
 
