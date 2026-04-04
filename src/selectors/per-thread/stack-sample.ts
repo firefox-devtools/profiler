@@ -580,7 +580,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getLowerWingRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
     createSelector(
       getRightClickedCallNodeInfo,
-      getCallNodeInfo,
+      getLowerWingCallNodeInfo,
       (rightClickedCallNodeInfo, callNodeInfo) => {
         if (
           rightClickedCallNodeInfo !== null &&
@@ -593,6 +593,28 @@ export function getStackAndSampleSelectorsPerThread(
         }
 
         return null;
+      }
+    );
+
+  const getLowerWingRightClickedFuncIndex: Selector<null | IndexIntoFuncTable> =
+    createSelector(
+      getRightClickedCallNodeInfo,
+      getLowerWingCallNodeInfo,
+      (rightClickedCallNodeInfo, callNodeInfo) => {
+        if (
+          rightClickedCallNodeInfo === null ||
+          rightClickedCallNodeInfo.threadsKey !== threadsKey ||
+          rightClickedCallNodeInfo.area !== 'LOWER_WING'
+        ) {
+          return null;
+        }
+        const callNodeIndex = callNodeInfo.getCallNodeIndexFromPath(
+          rightClickedCallNodeInfo.callNodePath
+        );
+        if (callNodeIndex === null) {
+          return null;
+        }
+        return callNodeInfo.funcForNode(callNodeIndex);
       }
     );
 
@@ -649,5 +671,6 @@ export function getStackAndSampleSelectorsPerThread(
     getRightClickedCallNodeIndex,
     getRightClickedFunctionIndex,
     getLowerWingRightClickedCallNodeIndex,
+    getLowerWingRightClickedFuncIndex,
   };
 }

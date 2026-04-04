@@ -196,7 +196,7 @@ export function changeRightClickedFunctionIndex(
 export function changeLowerWingRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
-) {
+): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
