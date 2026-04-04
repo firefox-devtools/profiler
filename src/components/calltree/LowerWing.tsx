@@ -294,7 +294,7 @@ class LowerWingImpl extends PureComponent<Props> {
         highlightRegExp={searchStringsRegExp}
         disableOverscan={disableOverscan}
         ref={this._takeTreeViewRef}
-        contextMenuId="CallNodeContextMenu"
+        contextMenuId="LowerWingContextMenu"
         maxNodeDepth={callNodeMaxDepthPlusOne}
         rowHeight={16}
         indentWidth={10}
