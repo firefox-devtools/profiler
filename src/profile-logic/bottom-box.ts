@@ -8,12 +8,14 @@ import type {
   Thread,
   IndexIntoStackTable,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
   BottomBoxInfo,
   SamplesLikeTable,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from './call-node-info';
 import {
   getCallNodeFramePerStack,
+  getFunctionFramePerStack,
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
   getTotalNativeSymbolTimingsForCallNode,
@@ -187,5 +189,104 @@ export function getBottomBoxInfoForStackFrame(
       instructionAddress !== -1 ? instructionAddress : undefined,
     highlightedInstructionAddress:
       instructionAddress !== -1 ? instructionAddress : null,
+  };
+}
+
+/**
+ * Calculate the BottomBoxInfo for a function, i.e. information about which
+ * things should be shown in the profiler UI's "bottom box" when a function is
+ * double-clicked in the function list.
+ *
+ * Unlike getBottomBoxInfoForCallNode, this considers all stacks where the
+ * function appears anywhere (not just as the self function), using the
+ * innermost (leaf-most) frame when the function appears multiple times in one
+ * stack due to recursion.
+ */
+export function getBottomBoxInfoForFunction(
+  funcIndex: IndexIntoFuncTable,
+  thread: Thread,
+  samples: SamplesLikeTable
+): BottomBoxInfo {
+  const {
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    resourceTable,
+    nativeSymbols,
+  } = thread;
+
+  const sourceIndex = funcTable.source[funcIndex];
+  const resource = funcTable.resource[funcIndex];
+  const libIndex =
+    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
+      ? resourceTable.lib[resource]
+      : null;
+
+  const funcFramePerStack = getFunctionFramePerStack(
+    funcIndex,
+    stackTable,
+    frameTable
+  );
+
+  const nativeSymbolsForFunc = getNativeSymbolsForCallNode(
+    funcFramePerStack,
+    frameTable
+  );
+  let initialNativeSymbol = null;
+  const nativeSymbolTimings = getTotalNativeSymbolTimingsForCallNode(
+    samples,
+    funcFramePerStack,
+    frameTable
+  );
+  const hottestNativeSymbol = mapGetKeyWithMaxValue(nativeSymbolTimings);
+  if (hottestNativeSymbol !== undefined) {
+    nativeSymbolsForFunc.add(hottestNativeSymbol);
+    initialNativeSymbol = hottestNativeSymbol;
+  }
+  const nativeSymbolsForFuncArr = [...nativeSymbolsForFunc];
+  nativeSymbolsForFuncArr.sort((a, b) => a - b);
+  if (nativeSymbolsForFuncArr.length !== 0 && initialNativeSymbol === null) {
+    initialNativeSymbol = nativeSymbolsForFuncArr[0];
+  }
+
+  const nativeSymbolInfosForFunc = nativeSymbolsForFuncArr.map(
+    (nativeSymbolIndex) =>
+      getNativeSymbolInfo(
+        nativeSymbolIndex,
+        nativeSymbols,
+        frameTable,
+        stringTable
+      )
+  );
+
+  const funcLine = funcTable.lineNumber[funcIndex];
+  const lineTimings = getTotalLineTimingsForCallNode(
+    samples,
+    funcFramePerStack,
+    frameTable,
+    funcLine
+  );
+  const hottestLine = mapGetKeyWithMaxValue(lineTimings);
+  const addressTimings = getTotalAddressTimingsForCallNode(
+    samples,
+    funcFramePerStack,
+    frameTable,
+    initialNativeSymbol
+  );
+  const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
+
+  return {
+    libIndex,
+    sourceIndex,
+    nativeSymbols: nativeSymbolInfosForFunc,
+    initialNativeSymbol:
+      initialNativeSymbol !== null
+        ? nativeSymbolsForFuncArr.indexOf(initialNativeSymbol)
+        : null,
+    scrollToLineNumber: hottestLine,
+    scrollToInstructionAddress: hottestInstructionAddress,
+    highlightedLineNumber: null,
+    highlightedInstructionAddress: null,
   };
 }

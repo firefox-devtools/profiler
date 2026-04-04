@@ -211,10 +211,10 @@ class FunctionListImpl extends PureComponent<Props> {
     handleFunctionTransformShortcut(event, threadsKey, funcIndex);
   };
 
-  _onEnterOrDoubleClick = (_nodeId: IndexIntoFuncTable) => {
-    // const { tree, updateBottomBoxContentsAndMaybeOpen } = this.props;
-    // const bottomBoxInfo = tree.getBottomBoxInfoForCallNode(nodeId);
-    // updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo);
+  _onEnterOrDoubleClick = (nodeId: IndexIntoFuncTable) => {
+    const { tree, updateBottomBoxContentsAndMaybeOpen } = this.props;
+    const bottomBoxInfo = tree.getBottomBoxInfoForFunction(nodeId);
+    updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo);
   };
 
   override render() {
