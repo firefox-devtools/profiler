@@ -26,6 +26,10 @@ import {
 } from './import/flame-graph';
 import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
+  isStreamedProfileFormat,
+  convertStreamedProfile,
+} from './import/streamed-profile';
+import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
   INTERVAL_END,
@@ -1993,6 +1997,8 @@ export async function unserializeProfileOfArbitraryFormat(
         arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
       } else if (isFlameGraphFormat(arbitraryFormat)) {
         arbitraryFormat = convertFlameGraphProfile(arbitraryFormat);
+      } else if (isStreamedProfileFormat(arbitraryFormat)) {
+        arbitraryFormat = convertStreamedProfile(arbitraryFormat);
       } else {
         // Try parsing as JSON.
         arbitraryFormat = JSON.parse(arbitraryFormat);
