@@ -1,12 +1,12 @@
 {
   "private": true,
   "engines": {
-    "node": ">= 22 < 23"
+    "node": ">= 24 < 25"
   },
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": ">= 22 < 23"
+      "version": ">= 24 < 25"
     }
   },
   "browser": {
@@ -83,7 +83,7 @@
     "escape-string-regexp": "^4.0.0",
     "gecko-profiler-demangle": "^0.4.0",
     "idb": "^8.0.3",
-    "iongraph-web": "0.2.0",
+    "iongraph-web": "0.2.1",
     "jszip": "^3.10.1",
     "long": "^5.3.2",
     "memoize-immutable": "^3.0.0",
@@ -134,8 +134,8 @@
     "@types/react-transition-group": "^4.4.5",
     "@types/redux-logger": "^3.0.6",
     "@types/tgwf__co2": "^0.14.2",
-    "@typescript-eslint/eslint-plugin": "^8.56.0",
-    "@typescript-eslint/parser": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
     "alex": "^11.0.1",
     "babel-jest": "^30.2.0",
     "babel-plugin-module-resolver": "^5.0.2",
@@ -176,8 +176,8 @@
     "stylelint": "^17.3.0",
     "stylelint-config-idiomatic-order": "^10.0.0",
     "stylelint-config-standard": "^40.0.0",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.58.0",
     "workbox-cli": "^7.4.0",
     "yargs": "^18.0.0"
   },

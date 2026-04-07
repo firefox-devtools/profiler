@@ -3869,12 +3869,14 @@ describe('timeline type', function () {
     );
   });
 
-  it('should use the category view when cpu is not provided', () => {
+  it('should use the cpu-category view even if no cpu is provided', () => {
     const { profile } = getProfileFromTextSamples('A');
 
     // Load the store after mutating the profile.
     const { getState } = storeWithProfile(profile);
-    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual(
+      'cpu-category'
+    );
   });
 
   it('should use the stack height view when category and cpu is not provided', () => {

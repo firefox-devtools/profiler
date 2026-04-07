@@ -4,5 +4,5 @@
 /locales/en-US/**/*.ftl @firefox-devtools/performance-l10n
 
 # Automatically request reviews for the dependency updates
-/package.json @canova
-/yarn.lock @canova
+/package.json @canova @fatadel
+/yarn.lock @canova @fatadel

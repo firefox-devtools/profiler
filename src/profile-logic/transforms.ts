@@ -10,8 +10,9 @@ import {
   toValidImplementationFilter,
   updateThreadStacks,
   updateThreadStacksByGeneratingNewStackColumns,
-  getMapStackUpdater,
   getOriginAnnotationForFunc,
+  createStackTableBySkippingDiscarded,
+  applyTransformOutputToThread,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/types';
@@ -54,6 +55,7 @@ import {
   translateFuncIndex,
   translateResourceIndex,
 } from './index-translation';
+import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
 
 /**
  * This file contains the functions and logic for working with and applying transforms
@@ -756,102 +758,78 @@ export function mergeCallNode(
 ): Thread {
   return timeCode('mergeCallNode', () => {
     const { stackTable, frameTable } = thread;
-    // Depth here is 0 indexed.
-    const depthAtCallNodePathLeaf = callNodePath.length - 1;
-    const oldStackToNewStack: Map<
+
+    // Maps merged stacks to their effective parent (the stack that samples pointing
+    // to the merged stack should be attributed to). Only contains entries for merged
+    // stacks; the vast majority of stacks are not merged and map to themselves.
+    const mergedStackToEffectiveParent = new Map<
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
-    > = new Map();
-    // A root stack's prefix will be null. Maintain that relationship from old to new
-    // stacks by mapping from null to null.
-    oldStackToNewStack.set(null, null);
-    const newFrameCol = [];
-    const newPrefixCol = [];
-    const newCategoryCol = [];
-    const newSubcategoryCol = [];
-    let newLength = 0;
-    // Provide two arrays to efficiently cache values for the algorithm. This probably
-    // could be refactored to use only one array here.
-    const stackDepths = [];
-    const stackMatches = [];
+    >();
+    const newPrefixCol = new Array<IndexIntoStackTable | null>(
+      stackTable.length
+    );
+
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
+
+    const callNodePathLength = callNodePath.length;
+    // A map to keep track of whether a stack matches (part of) the call node path.
+    // If undefined: no match
+    // Otherwise: length of the partial match, including this stack
+    // All values are < callNodePathLength.
+    const partialMatchLengthAtStack = new Map<
+      IndexIntoStackTable | null,
+      number
+    >();
+    partialMatchLengthAtStack.set(null, 0);
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
+
+      // If our prefix got merged away, remap it to its parent.
+      const parentOfPrefix = mergedStackToEffectiveParent.get(prefix);
+      const effectivePrefix =
+        parentOfPrefix !== undefined ? parentOfPrefix : prefix;
+      newPrefixCol[stackIndex] = effectivePrefix;
+
+      const prefixPartialMatchLength = partialMatchLengthAtStack.get(prefix);
+      if (prefixPartialMatchLength === undefined) {
+        // No match, nothing else to do here
+        continue;
+      }
+
+      // Now we know that this stack's prefix was a (partial) match for our CallNodePath.
       const frameIndex = stackTable.frame[stackIndex];
-      const category = stackTable.category[stackIndex];
-      const subcategory = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
-      const doesPrefixMatch = prefix === null ? true : stackMatches[prefix];
-      const prefixDepth: number = prefix === null ? -1 : stackDepths[prefix];
-      const currentFuncOnPath = callNodePath[prefixDepth + 1];
-
-      let doMerge = false;
-      let stackDepth: number = prefixDepth;
-      let doesMatchCallNodePath;
-      if (doesPrefixMatch && stackDepth < depthAtCallNodePathLeaf) {
-        // This stack's prefixes were in our CallNodePath.
-        if (currentFuncOnPath === funcIndex) {
-          // This stack's function matches too!
-          doesMatchCallNodePath = true;
-          if (stackDepth + 1 === depthAtCallNodePathLeaf) {
-            // Holy cow, we found a match for our merge operation and can merge this stack.
-            doMerge = true;
-          } else {
-            // Since we found a match, increase the stack depth. This should match
-            // the depth of the implementation filtered stacks.
-            stackDepth++;
-          }
-        } else if (!funcMatchesImplementation(thread, funcIndex)) {
-          // This stack's function does not match the CallNodePath, however it's not part
-          // of the CallNodePath's implementation filter. Go ahead and keep it.
-          doesMatchCallNodePath = true;
+      if (funcIndex === callNodePath[prefixPartialMatchLength]) {
+        // This stack's function matches too!
+        const matchLength = prefixPartialMatchLength + 1;
+        if (matchLength === callNodePathLength) {
+          // The entire path matched and we found a node that needs to be merged away.
+          mergedStackToEffectiveParent.set(stackIndex, effectivePrefix);
         } else {
-          // While all of the predecessors matched, this stack's function does not :(
-          doesMatchCallNodePath = false;
+          // Not reached the end yet, store the partial match length.
+          partialMatchLengthAtStack.set(stackIndex, matchLength);
         }
+      } else if (!funcMatchesImplementation(thread, funcIndex)) {
+        // This stack's function does not match the CallNodePath, however it's not part
+        // of the CallNodePath's implementation filter. Inherit the parent's partial
+        // match length
+        partialMatchLengthAtStack.set(stackIndex, prefixPartialMatchLength);
       } else {
-        // This stack is not part of a matching branch of the tree.
-        doesMatchCallNodePath = false;
-      }
-      stackMatches[stackIndex] = doesMatchCallNodePath;
-      stackDepths[stackIndex] = stackDepth;
-
-      // Map the oldStackToNewStack, and only push on the stacks that aren't merged.
-      if (doMerge) {
-        const newStackPrefix = oldStackToNewStack.get(prefix);
-        oldStackToNewStack.set(
-          stackIndex,
-          newStackPrefix === undefined ? null : newStackPrefix
-        );
-      } else {
-        const newStackIndex = newLength++;
-        const newStackPrefix = oldStackToNewStack.get(prefix);
-        newPrefixCol[newStackIndex] =
-          newStackPrefix === undefined ? null : newStackPrefix;
-        newFrameCol[newStackIndex] = frameIndex;
-        newCategoryCol[newStackIndex] = category;
-        newSubcategoryCol[newStackIndex] = subcategory;
-        oldStackToNewStack.set(stackIndex, newStackIndex);
+        // While all of the predecessors matched, this stack's function does not :(
       }
     }
 
     const newStackTable = {
-      frame: newFrameCol,
+      ...stackTable,
       prefix: newPrefixCol,
-      category: new Uint8Array(newCategoryCol),
-      subcategory:
-        stackTable.subcategory instanceof Uint8Array
-          ? new Uint8Array(newSubcategoryCol)
-          : new Uint16Array(newSubcategoryCol),
-      length: newLength,
     };
 
-    return updateThreadStacks(
-      thread,
-      newStackTable,
-      getMapStackUpdater(oldStackToNewStack)
-    );
+    return updateThreadStacks(thread, newStackTable, (oldStack) => {
+      const effectiveParent = mergedStackToEffectiveParent.get(oldStack);
+      return effectiveParent !== undefined ? effectiveParent : oldStack;
+    });
   });
 }
 
@@ -1254,29 +1232,18 @@ export function focusSubtree(
     const prefixDepth = callNodePath.length;
     const stackMatches = new Int32Array(stackTable.length);
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
-    const oldStackToNewStack: Map<
-      IndexIntoStackTable | null,
-      IndexIntoStackTable | null
-    > = new Map();
-    // A root stack's prefix will be null. Maintain that relationship from old to new
-    // stacks by mapping from null to null.
-    oldStackToNewStack.set(null, null);
-    const newFrameCol = [];
-    const newPrefixCol = [];
-    const newCategoryCol = [];
-    const newSubcategoryCol = [];
-    let newLength = 0;
+    const oldStackToNewStack = new Int32Array(stackTable.length).fill(-1);
+    const newPrefixCol: Array<IndexIntoStackTable | null> = [];
+    const keepStack = makeBitSet(stackTable.length);
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const prefixMatchesUpTo = prefix !== null ? stackMatches[prefix] : 0;
       let stackMatchesUpTo = -1;
       if (prefixMatchesUpTo !== -1) {
-        const frame = stackTable.frame[stackIndex];
-        const category = stackTable.category[stackIndex];
-        const subcategory = stackTable.subcategory[stackIndex];
         if (prefixMatchesUpTo === prefixDepth) {
           stackMatchesUpTo = prefixDepth;
         } else {
+          const frame = stackTable.frame[stackIndex];
           const funcIndex = frameTable.func[frame];
           if (funcIndex === callNodePath[prefixMatchesUpTo]) {
             stackMatchesUpTo = prefixMatchesUpTo + 1;
@@ -1285,41 +1252,25 @@ export function focusSubtree(
           }
         }
         if (stackMatchesUpTo === prefixDepth) {
-          const newStackIndex = newLength++;
-          const newStackPrefix = oldStackToNewStack.get(prefix);
-          newPrefixCol[newStackIndex] = newStackPrefix ?? null;
-          newFrameCol[newStackIndex] = frame;
-          newCategoryCol[newStackIndex] = category;
-          newSubcategoryCol[newStackIndex] = subcategory;
-          oldStackToNewStack.set(stackIndex, newStackIndex);
+          const prefixNewStack =
+            prefix === null ? -1 : oldStackToNewStack[prefix];
+          oldStackToNewStack[stackIndex] = newPrefixCol.length;
+          newPrefixCol.push(prefixNewStack === -1 ? null : prefixNewStack);
+          setBit(keepStack, stackIndex);
         }
       }
       stackMatches[stackIndex] = stackMatchesUpTo;
     }
 
-    const newStackTable = {
-      frame: newFrameCol,
-      prefix: newPrefixCol,
-      category: new Uint8Array(newCategoryCol),
-      subcategory:
-        stackTable.subcategory instanceof Uint8Array
-          ? new Uint8Array(newSubcategoryCol)
-          : new Uint16Array(newSubcategoryCol),
-      length: newLength,
-    };
-
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
-        return null;
-      }
-      const newStack = oldStackToNewStack.get(oldStack);
-      if (newStack === undefined) {
-        throw new Error(
-          'Converting from the old stack to a new stack cannot be undefined'
-        );
-      }
-      return newStack;
-    });
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      keepStack
+    );
+    return applyTransformOutputToThread(
+      { newStackTable, effectOnThreadData: { oldStackToNewStack } },
+      thread
+    );
   });
 }
 
@@ -1383,53 +1334,32 @@ export function focusFunction(
 ): Thread {
   return timeCode('focusFunction', () => {
     const { stackTable, frameTable } = thread;
-    // A map oldStack -> newStack+1, implemented as a Uint32Array for performance.
-    // If newStack+1 is zero it means "null", i.e. this stack was filtered out.
-    // Typed arrays are initialized to zero, which we interpret as null.
-    const oldStackToNewStackPlusOne = new Uint32Array(stackTable.length);
-
-    const newFrameCol = [];
-    const newPrefixCol = [];
-    const newCategoryCol = [];
-    const newSubcategoryCol = [];
-    let newLength = 0;
+    const oldStackToNewStack = new Int32Array(stackTable.length).fill(-1);
+    const newPrefixCol: Array<IndexIntoStackTable | null> = [];
+    const keepStack = makeBitSet(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
-      const newPrefixPlusOne =
-        prefix === null ? 0 : oldStackToNewStackPlusOne[prefix];
-      const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
-      if (newPrefix !== null || funcIndex === funcIndexToFocus) {
-        const newStackIndex = newLength++;
-        newPrefixCol[newStackIndex] = newPrefix;
-        newFrameCol[newStackIndex] = frameIndex;
-        newCategoryCol[newStackIndex] = stackTable.category[stackIndex];
-        newSubcategoryCol[newStackIndex] = stackTable.subcategory[stackIndex];
-        oldStackToNewStackPlusOne[stackIndex] = newStackIndex + 1;
+      const prefixNewStack = prefix === null ? -1 : oldStackToNewStack[prefix];
+      if (prefixNewStack !== -1 || funcIndex === funcIndexToFocus) {
+        oldStackToNewStack[stackIndex] = newPrefixCol.length;
+        newPrefixCol.push(prefixNewStack === -1 ? null : prefixNewStack);
+        setBit(keepStack, stackIndex);
       }
     }
 
-    const newStackTable = {
-      frame: newFrameCol,
-      prefix: newPrefixCol,
-      category: new Uint8Array(newCategoryCol),
-      subcategory:
-        stackTable.subcategory instanceof Uint8Array
-          ? new Uint8Array(newSubcategoryCol)
-          : new Uint16Array(newSubcategoryCol),
-      length: newLength,
-    };
-
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null) {
-        return null;
-      }
-      const newStackPlusOne = oldStackToNewStackPlusOne[oldStack];
-      return newStackPlusOne === 0 ? null : newStackPlusOne - 1;
-    });
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      keepStack
+    );
+    return applyTransformOutputToThread(
+      { newStackTable, effectOnThreadData: { oldStackToNewStack } },
+      thread
+    );
   });
 }
 
@@ -1443,96 +1373,86 @@ export function focusSelf(
 
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
-    const shouldKeepStack = new Uint8Array(stackTable.length);
+    const shouldKeepStack = makeBitSet(stackTable.length);
 
-    const newPrefixCol = stackTable.prefix.slice();
+    const newPrefixCol = new Array<IndexIntoStackTable | null>();
+    const oldStackToNewStack = new Int32Array(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
       if (funcIndex === funcIndexToFocus) {
-        shouldKeepStack[stackIndex] = 1;
-        newPrefixCol[stackIndex] = null;
+        setBit(shouldKeepStack, stackIndex);
+        const newStackIndex = newPrefixCol.length;
+        newPrefixCol[newStackIndex] = null;
+        oldStackToNewStack[stackIndex] = newStackIndex;
       } else {
-        const prefix = newPrefixCol[stackIndex];
+        const oldPrefix = stackTable.prefix[stackIndex];
         if (
-          prefix !== null &&
-          shouldKeepStack[prefix] === 1 &&
+          oldPrefix !== null &&
+          checkBit(shouldKeepStack, oldPrefix) &&
           !funcMatchesImplementation(thread, funcIndex)
         ) {
-          shouldKeepStack[stackIndex] = 1;
+          setBit(shouldKeepStack, stackIndex);
+          const newPrefix = oldStackToNewStack[oldPrefix];
+          const newStackIndex = newPrefixCol.length;
+          newPrefixCol[newStackIndex] = newPrefix;
+          oldStackToNewStack[stackIndex] = newStackIndex;
         }
       }
     }
 
-    const newStackTable = {
-      ...stackTable,
-      prefix: newPrefixCol,
-    };
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      shouldKeepStack
+    );
 
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null || shouldKeepStack[oldStack] === 0) {
-        return null;
-      }
-      return oldStack;
-    });
+    return applyTransformOutputToThread(
+      {
+        newStackTable,
+        effectOnThreadData: {
+          dropIfOldStackIsNot: shouldKeepStack,
+          oldStackToNewStack,
+        },
+      },
+      thread
+    );
   });
 }
 
 export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
   return timeCode('focusCategory', () => {
     const { stackTable } = thread;
-    const oldStackToNewStack: Map<
-      IndexIntoStackTable | null,
-      IndexIntoStackTable | null
-    > = new Map();
-    oldStackToNewStack.set(null, null);
-
-    const newFrameCol = [];
-    const newPrefixCol = [];
-    const newCategoryCol = [];
-    const newSubcategoryCol = [];
-    let newLength = 0;
+    const oldStackToNewStack = new Int32Array(stackTable.length).fill(-1);
+    const newPrefixCol: Array<IndexIntoStackTable | null> = [];
+    const keepStack = makeBitSet(stackTable.length);
 
     // fill the new stack table with the kept frames
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
-      const newPrefix = oldStackToNewStack.get(prefix);
-      if (newPrefix === undefined) {
-        throw new Error('The prefix should not map to an undefined value');
-      }
+      const prefixNewStack = prefix === null ? -1 : oldStackToNewStack[prefix];
 
       if (stackTable.category[stackIndex] !== category) {
-        oldStackToNewStack.set(stackIndex, newPrefix);
+        oldStackToNewStack[stackIndex] = prefixNewStack;
         continue;
       }
 
-      const newStackIndex = newLength++;
-      newPrefixCol[newStackIndex] = newPrefix;
-      newFrameCol[newStackIndex] = stackTable.frame[stackIndex];
-      newCategoryCol[newStackIndex] = stackTable.category[stackIndex];
-      newSubcategoryCol[newStackIndex] = stackTable.subcategory[stackIndex];
-      oldStackToNewStack.set(stackIndex, newStackIndex);
+      oldStackToNewStack[stackIndex] = newPrefixCol.length;
+      newPrefixCol.push(prefixNewStack === -1 ? null : prefixNewStack);
+      setBit(keepStack, stackIndex);
     }
 
-    const newStackTable = {
-      frame: newFrameCol,
-      prefix: newPrefixCol,
-      category: new Uint8Array(newCategoryCol),
-      subcategory:
-        stackTable.subcategory instanceof Uint8Array
-          ? new Uint8Array(newSubcategoryCol)
-          : new Uint16Array(newSubcategoryCol),
-      length: newLength,
-    };
-
-    const updated = updateThreadStacks(
-      thread,
-      newStackTable,
-      getMapStackUpdater(oldStackToNewStack)
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      keepStack
     );
-    return updated;
+    return applyTransformOutputToThread(
+      { newStackTable, effectOnThreadData: { oldStackToNewStack } },
+      thread
+    );
   });
 }
 

@@ -309,7 +309,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : urlState.profileSpecific.implementation,
     timelineType:
       // The default is the cpu-category view, so only add it to the URL if it's
-      // the stack or category view.
+      // the stack view.
       urlState.profileSpecific.timelineType === 'cpu-category'
         ? undefined
         : urlState.profileSpecific.timelineType,
@@ -1445,14 +1445,10 @@ function getVersion4JSCallNodePathFromStackIndex(
 function validateTimelineType(
   timelineType: string | null | undefined
 ): TimelineType {
-  const VALID_TIMELINE_TYPES: Record<TimelineType, true> = {
-    stack: true,
-    category: true,
-    'cpu-category': true,
-  };
-  if (timelineType && timelineType in VALID_TIMELINE_TYPES) {
-    return timelineType as TimelineType;
+  if (timelineType === 'stack') {
+    return 'stack';
   }
+  // 'category' is an old value that is treated as 'cpu-category'.
   return 'cpu-category';
 }
 

@@ -1234,14 +1234,19 @@ describe('url upgrading', function () {
       expect(query.timelineType).toBeFalsy();
     });
 
-    it('add an explicit category from the url', function () {
+    it('maps the implicit category type to cpu-category', function () {
+      // In v6, the default timeline type was 'category'. The v7 upgrader adds
+      // an explicit 'category' to the URL, which is then parsed as 'cpu-category'
+      // since the two are now equivalent.
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
         search: '',
         v: 6,
       });
 
-      expect(urlStateSelectors.getTimelineType(getState())).toBe('category');
+      expect(urlStateSelectors.getTimelineType(getState())).toBe(
+        'cpu-category'
+      );
 
       const newUrl = new URL(
         urlFromState(urlStateSelectors.getUrlState(getState())),
@@ -1250,7 +1255,7 @@ describe('url upgrading', function () {
       const query = queryString.parse(newUrl.search.substr(1), {
         arrayFormat: 'bracket',
       });
-      expect(query.timelineType).toBe('category');
+      expect(query.timelineType).toBeFalsy();
     });
 
     it('keeps stack category the same', function () {
