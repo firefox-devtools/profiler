@@ -49,25 +49,28 @@ pq thread info --thread t-0 # View info for specific thread without selecting
 ## Project Structure
 
 ```
-src/profile-query-cli/
-├── index.ts       # CLI entry point, argument parsing, command routing
-├── client.ts      # Client logic: spawn daemon, send commands via socket
-├── daemon.ts      # Daemon logic: load profile, listen on socket, handle commands
-├── session.ts     # Session file management, socket paths, validation
-├── protocol.ts    # TypeScript types for IPC messages
-├── webpack.config.js  # Build config with shebang and Node.js polyfills
-├── package.json   # npm distribution metadata (dependencies defined in root)
-└── tests/         # CLI integration tests
+profile-query-cli/
+├── src/
+│   ├── index.ts       # CLI entry point, argument parsing, command routing
+│   ├── client.ts      # Client logic: spawn daemon, send commands via socket
+│   ├── daemon.ts      # Daemon logic: load profile, listen on socket, handle commands
+│   ├── session.ts     # Session file management, socket paths, validation
+│   ├── protocol.ts    # TypeScript types for IPC messages
+│   └── test/
+│       ├── unit/          # CLI unit tests
+│       └── integration/   # CLI integration tests
+├── package.json       # npm distribution metadata (dependencies defined in root)
+└── dist/              # Bundled executable output
 ```
 
 ## Build & Distribution
 
 This package uses a **bundled distribution approach**:
 
-- **Source code**: Lives in `src/profile-query-cli/` within the firefox-devtools/profiler monorepo
+- **Source code**: Lives in `profile-query-cli/src/` within the firefox-devtools/profiler monorepo
 - **Dependencies**: Defined in the root `package.json` (react, redux, protobufjs, etc.)
-- **Build process**: Webpack bundles and minifies everything into a single ~640KB `dist/pq.js` file (~187KB gzipped) with zero runtime dependencies
-- **Published artifact**: Just the `dist/pq.js` executable is published to npm as `@firefox-profiler/pq`
+- **Build process**: The CLI build writes a single ~640KB executable to `profile-query-cli/dist/pq.js` (~187KB gzipped) with zero runtime dependencies
+- **Published artifact**: `profile-query-cli/dist/pq.js` is published to npm as `@firefox-profiler/pq`
 - **Package.json**: Contains only npm metadata - it does NOT list dependencies since they're pre-bundled
 
 This means:
@@ -81,7 +84,7 @@ To publish:
 ```bash
 # From repository root
 yarn build-profile-query-cli
-cd src/profile-query-cli
+cd profile-query-cli
 npm publish
 ```
 
@@ -128,7 +131,7 @@ All test scripts automatically set `PQ_SESSION_DIR="./.pq-dev"` to avoid polluti
 **Build:**
 
 ```bash
-yarn build-profile-query-cli # Creates ./dist/pq.js, global `pq` forwards to this
+yarn build-profile-query-cli # Creates ./dist/pq.js
 ```
 
 **Unit tests:**
@@ -140,7 +143,7 @@ yarn test profile-query
 **CLI integration tests:**
 
 ```bash
-yarn test:cli
+yarn test-cli
 ```
 
 ## Implementation Details
@@ -223,13 +226,13 @@ type ServerResponse =
 
 ## Build Configuration
 
-**Key webpack settings:**
+**Current build behavior:**
 
-- `target: 'node'` - Node.js output
-- `stats: 'errors-warnings'` - Quiet builds
-- `BannerPlugin` - Adds `#!/usr/bin/env node` shebang
-- `BannerPlugin` - Adds `globalThis.self = globalThis` polyfill for browser globals
-- `optimization.minimize: false` - Keep readable stack traces
+- esbuild bundles the CLI for Node.js
+- A build banner adds the `#!/usr/bin/env node` shebang
+- The banner also sets `globalThis.self = globalThis` for browser-oriented shared code
+- `__BUILD_HASH__` is injected at build time
+- `gecko-profiler-demangle` is left external to keep the CLI lean
 - Postbuild: `chmod +x dist/pq.js`
 
 ## Adding New Commands

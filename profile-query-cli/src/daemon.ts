@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /**
  * Daemon process for pq.
  * Loads a profile and listens for commands on a Unix socket (or named pipe on Windows).
@@ -5,7 +9,7 @@
 
 import * as net from 'net';
 import * as fs from 'fs';
-import { ProfileQuerier } from '../profile-query';
+import { ProfileQuerier } from '../../src/profile-query';
 import type {
   ClientCommand,
   ClientMessage,
@@ -183,7 +187,7 @@ export class Daemon {
         .catch((error) => {
           const errorResponse: ServerResponse = {
             type: 'error',
-            error: String(error),
+            error: error instanceof Error ? error.message : String(error),
           };
           socket.write(JSON.stringify(errorResponse) + '\n');
         });
@@ -191,7 +195,7 @@ export class Daemon {
       console.error(`Failed to parse message: ${error}`);
       const errorResponse: ServerResponse = {
         type: 'error',
-        error: `Failed to parse message: ${error}`,
+        error: `Failed to parse message: ${error instanceof Error ? error.message : String(error)}`,
       };
       socket.write(JSON.stringify(errorResponse) + '\n');
     }

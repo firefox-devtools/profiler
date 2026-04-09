@@ -18,7 +18,7 @@ export default defineConfig(
     ignores: [
       'src/profile-logic/import/proto/**',
       'src/types/libdef/npm/**',
-      'src/profile-query-cli/dist/**',
+      'profile-query-cli/dist/**',
       'res/**',
       'dist/**',
       'docs-user/**',

@@ -29,8 +29,8 @@ import {
   cleanupSession,
   validateSession,
   listSessions,
-} from 'firefox-profiler/profile-query-cli/session';
-import type { SessionMetadata } from 'firefox-profiler/profile-query-cli/protocol';
+} from '../../session';
+import type { SessionMetadata } from '../../protocol';
 
 const TEST_BUILD_HASH = 'test-build-hash';
 

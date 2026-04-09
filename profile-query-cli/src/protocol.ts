@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /**
  * Protocol for communication between pq client and daemon.
  * Messages are sent as line-delimited JSON over Unix domain sockets.
@@ -28,8 +32,8 @@ export type {
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
-} from '../profile-query/types';
-export type { CallTreeCollectionOptions } from '../profile-query/formatters/call-tree';
+} from '../../src/profile-query/types';
+export type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
 // Import types for use in type definitions
 import type {
@@ -49,8 +53,8 @@ import type {
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadFunctionsResult,
-} from '../profile-query/types';
-import type { CallTreeCollectionOptions } from '../profile-query/formatters/call-tree';
+} from '../../src/profile-query/types';
+import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
 export type ClientMessage =
   | { type: 'command'; command: ClientCommand }

@@ -2,77 +2,89 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// Shared config for projects that need a browser-like (jsdom) environment.
+// CLI unit tests use the same environment because they import browser-side
+// fixtures to construct profile data.
+const browserEnvConfig = {
+  testEnvironment: './src/test/custom-environment',
+  setupFilesAfterEnv: ['jest-extended/all', './src/test/setup.ts'],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  resolver: './jest-resolver.js',
+
+  transform: {
+    '\\.([jt]sx?|mjs)$': 'babel-jest',
+  },
+
+  // Transform ESM modules to CommonJS for Jest
+  // These packages ship as pure ESM and need to be transformed by Babel
+  transformIgnorePatterns: [
+    '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps)/)',
+  ],
+
+  // Mock static assets (images, CSS, etc.)
+  moduleNameMapper: {
+    '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$':
+      '<rootDir>/src/test/fixtures/mocks/file-mock.ts',
+    '\\.(css|less)$': '<rootDir>/src/test/fixtures/mocks/style-mock.ts',
+  },
+
+  globals: {
+    AVAILABLE_STAGING_LOCALES: null,
+  },
+
+  snapshotFormat: {
+    escapeString: true,
+    printBasicPrototype: true,
+  },
+};
+
 module.exports = {
   projects: [
     // ========================================================================
     // Browser Tests (React/browser environment)
     // ========================================================================
     {
+      ...browserEnvConfig,
       displayName: 'browser',
       testMatch: ['<rootDir>/src/**/*.test.{js,jsx,ts,tsx}'],
-      testPathIgnorePatterns: ['<rootDir>/src/profile-query-cli/tests/'],
-      moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
-
-      // Use custom resolver that respects the "browser" field in package.json
-      resolver: './jest-resolver.js',
-
-      testEnvironment: './src/test/custom-environment',
-      setupFilesAfterEnv: ['jest-extended/all', './src/test/setup.ts'],
 
       collectCoverageFrom: [
         'src/**/*.{js,jsx,ts,tsx}',
         '!**/node_modules/**',
         '!src/types/libdef/**',
       ],
+    },
+
+    // ========================================================================
+    // CLI Unit Tests (browser/jsdom environment - imports browser-side fixtures)
+    // ========================================================================
+    {
+      ...browserEnvConfig,
+      displayName: 'cli',
+      testMatch: ['<rootDir>/profile-query-cli/src/test/unit/**/*.test.ts'],
+    },
+
+    // ========================================================================
+    // CLI Integration Tests (Node.js environment - spawns real processes)
+    // ========================================================================
+    {
+      displayName: 'cli-integration',
+      testMatch: [
+        '<rootDir>/profile-query-cli/src/test/integration/**/*.test.ts',
+      ],
+
+      testEnvironment: 'node',
+
+      setupFilesAfterEnv: ['./profile-query-cli/src/test/integration/setup.ts'],
+
+      // Integration tests can be slow (loading profiles, spawning processes)
+      testTimeout: 30000,
+
+      moduleFileExtensions: ['ts', 'js'],
 
       transform: {
         '\\.([jt]sx?|mjs)$': 'babel-jest',
       },
-
-      // Transform ESM modules to CommonJS for Jest
-      // These packages ship as pure ESM and need to be transformed by Babel
-      transformIgnorePatterns: [
-        '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps)/)',
-      ],
-
-      // Mock static assets (images, CSS, etc.)
-      moduleNameMapper: {
-        '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$':
-          '<rootDir>/src/test/fixtures/mocks/file-mock.ts',
-        '\\.(css|less)$': '<rootDir>/src/test/fixtures/mocks/style-mock.ts',
-      },
-
-      globals: {
-        AVAILABLE_STAGING_LOCALES: null,
-      },
-
-      snapshotFormat: {
-        escapeString: true,
-        printBasicPrototype: true,
-      },
-    },
-
-    // ========================================================================
-    // CLI Tests (Node.js environment)
-    // ========================================================================
-    {
-      displayName: 'cli',
-      testMatch: ['<rootDir>/src/profile-query-cli/tests/**/*.test.ts'],
-
-      // Use Node.js environment (not browser/jsdom)
-      testEnvironment: 'node',
-
-      // CLI-specific setup (just jest-extended for matchers)
-      setupFilesAfterEnv: ['./src/profile-query-cli/tests/setup.ts'],
-
-      // CLI operations can be slow (loading profiles, spawning processes)
-      testTimeout: 30000,
-
-      // File extensions for CLI tests
-      moduleFileExtensions: ['ts', 'js'],
-
-      // No need for asset mocks in CLI tests
-      // No transformIgnorePatterns needed - we don't use ESM-only deps here
     },
   ],
 };

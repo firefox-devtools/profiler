@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /**
  * Utilities for CLI integration tests.
  */
@@ -7,7 +11,7 @@ import { mkdtemp, readdir, readFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-const PQ_BIN = './src/profile-query-cli/dist/pq.js';
+const PQ_BIN = './profile-query-cli/dist/pq.js';
 
 /**
  * Simple command execution result.

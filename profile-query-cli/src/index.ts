@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /**
  * CLI entry point for pq (Profile Querier).
  *
@@ -14,7 +18,7 @@
  *
  * Run:
  *   pq <command>                    (if pq is in PATH)
- *   ./dist/pq.js <command>          (direct invocation)
+ *   ./profile-query-cli/dist/pq.js <command>  (direct invocation)
  *
  * Helper scripts:
  *   ./bin/pq-test          Quick smoke test
@@ -25,7 +29,7 @@
 
 import * as path from 'path';
 import * as os from 'os';
-import guideText from './guide.txt';
+import guideText from '../guide.txt';
 import minimist from 'minimist';
 import { startDaemon } from './daemon';
 import { sendCommand, startNewDaemon, stopDaemon } from './client';

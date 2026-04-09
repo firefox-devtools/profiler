@@ -2,16 +2,16 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import esbuild from 'esbuild';
-import { execSync } from 'child_process';
+import { chmodSync } from 'fs';
 import { nodeBaseConfig } from './lib/esbuild-configs.mjs';
 
 const BUILD_HASH = Date.now().toString(36);
 
 const profileQueryCliConfig = {
   ...nodeBaseConfig,
-  entryPoints: ['src/profile-query-cli/index.ts'],
+  entryPoints: ['profile-query-cli/src/index.ts'],
   loader: { ...nodeBaseConfig.loader, '.txt': 'text' },
-  outfile: 'src/profile-query-cli/dist/pq.js',
+  outfile: 'profile-query-cli/dist/pq.js',
   minify: true,
   banner: {
     js: '#!/usr/bin/env node\n\n// Polyfill browser globals for Node.js\nglobalThis.self = globalThis;',
@@ -24,7 +24,7 @@ const profileQueryCliConfig = {
 
 async function build() {
   await esbuild.build(profileQueryCliConfig);
-  execSync('chmod +x src/profile-query-cli/dist/pq.js');
+  chmodSync('profile-query-cli/dist/pq.js', 0o755);
   console.log('✅ Profile-query-cli build completed');
 }
 

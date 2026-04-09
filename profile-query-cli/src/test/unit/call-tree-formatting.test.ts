@@ -2,22 +2,22 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { FunctionMap } from '../../../profile-query/function-map';
-import { collectCallTree } from '../../../profile-query/formatters/call-tree';
+import { FunctionMap } from 'firefox-profiler/profile-query/function-map';
+import { collectCallTree } from 'firefox-profiler/profile-query/formatters/call-tree';
 import type {
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   SessionContext,
   WithContext,
-} from '../../../profile-query/types';
-import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
-import { storeWithProfile } from '../../fixtures/stores';
+} from 'firefox-profiler/profile-query/types';
+import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
+import { storeWithProfile } from 'firefox-profiler/test/fixtures/stores';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   formatThreadSamplesTopDownResult,
   formatThreadSamplesBottomUpResult,
-} from '../../../profile-query-cli/formatters';
-import type { CallTreeCollectionOptions } from '../../../profile-query/formatters/call-tree';
+} from '../../formatters';
+import type { CallTreeCollectionOptions } from 'firefox-profiler/profile-query/formatters/call-tree';
 import {
   getCallTree,
   computeCallTreeTimings,

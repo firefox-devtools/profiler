@@ -1,3 +1,7 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
 /**
  * Text formatters for CommandResult types.
  * These functions convert structured JSON results into human-readable text output.
@@ -22,7 +26,7 @@ import type {
   MarkerGroupData,
   CallTreeNode,
 } from './protocol';
-import { truncateFunctionName } from '../profile-query/function-list';
+import { truncateFunctionName } from '../../src/profile-query/function-list';
 
 /**
  * Format a SessionContext as a compact header line.

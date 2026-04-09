@@ -19,7 +19,7 @@ CORE WORKFLOW
   Step 1: Load a profile
     pq load profile.json.gz
 
-  Step 2: Explore the profile structure
+  Step 2: Explore the profile
     pq profile info          Overview: processes, threads, time range, CPU activity
     pq profile info --all    Show all processes and threads (not just top 5)
     pq profile info --search GeckoMain   Filter by process/thread name, pid, or tid
@@ -71,6 +71,7 @@ ZOOM: FOCUS ON A TIME RANGE
     pq status                  Show current thread selection and active zoom ranges
 
   After zooming, all thread/marker/sample commands automatically apply the filter.
+  Use "pq status" to confirm the active zoom stack (along with thread and filters).
 
 
 JSON OUTPUT
