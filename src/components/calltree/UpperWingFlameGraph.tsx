@@ -25,6 +25,7 @@ import {
 import {
   changeUpperWingSelectedCallNode,
   changeUpperWingRightClickedCallNode,
+  changeRightClickedFunctionIndex,
   handleCallNodeTransformShortcut,
   updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
@@ -83,6 +84,7 @@ type StateProps = {
 type DispatchProps = {
   readonly changeUpperWingSelectedCallNode: typeof changeUpperWingSelectedCallNode;
   readonly changeUpperWingRightClickedCallNode: typeof changeUpperWingRightClickedCallNode;
+  readonly changeRightClickedFunctionIndex: typeof changeRightClickedFunctionIndex;
   readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
 };
@@ -119,12 +121,19 @@ class UpperWingFlameGraphImpl
   _onRightClickedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const { callNodeInfo, threadsKey, changeUpperWingRightClickedCallNode } =
-      this.props;
+    const {
+      callNodeInfo,
+      threadsKey,
+      changeUpperWingRightClickedCallNode,
+      changeRightClickedFunctionIndex,
+    } = this.props;
     changeUpperWingRightClickedCallNode(
       threadsKey,
       callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
+    const funcIndex =
+      callNodeIndex !== null ? callNodeInfo.funcForNode(callNodeIndex) : null;
+    changeRightClickedFunctionIndex(threadsKey, funcIndex);
   };
 
   _onCallNodeEnterOrDoubleClick = (
@@ -135,7 +144,7 @@ class UpperWingFlameGraphImpl
     }
     const { callTree, updateBottomBoxContentsAndMaybeOpen } = this.props;
     const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(callNodeIndex);
-    updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo);
+    updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo);
   };
 
   _onKeyboardTransformShortcut = (
@@ -198,6 +207,7 @@ class UpperWingFlameGraphImpl
         }
         tracedTiming={tracedTiming}
         displayStackType={displayStackType}
+        contextMenuId="FunctionListContextMenu"
         onSelectedCallNodeChange={this._onSelectedCallNodeChange}
         onRightClickedCallNodeChange={this._onRightClickedCallNodeChange}
         onCallNodeEnterOrDoubleClick={this._onCallNodeEnterOrDoubleClick}
@@ -247,6 +257,7 @@ export const UpperWingFlameGraph = explicitConnectWithForwardRef<
   mapDispatchToProps: {
     changeUpperWingSelectedCallNode,
     changeUpperWingRightClickedCallNode,
+    changeRightClickedFunctionIndex,
     handleCallNodeTransformShortcut,
     updateBottomBoxContentsAndMaybeOpen,
   },

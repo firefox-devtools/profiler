@@ -202,7 +202,7 @@ class LowerWingImpl extends PureComponent<Props> {
   _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
     const { tree, updateBottomBoxContentsAndMaybeOpen } = this.props;
     const bottomBoxInfo = tree.getBottomBoxInfoForCallNode(nodeId);
-    updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo);
+    updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo);
   };
 
   maybeProcureInterestingInitialSelection() {

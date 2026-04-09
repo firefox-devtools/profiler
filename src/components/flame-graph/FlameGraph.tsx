@@ -65,6 +65,7 @@ export type Props = {
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
+  readonly contextMenuId?: string;
   readonly onSelectedCallNodeChange: (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => void;
@@ -282,6 +283,7 @@ class FlameGraphImpl
       ctssSampleCategoriesAndSubcategories,
       tracedTiming,
       displayStackType,
+      contextMenuId = 'CallNodeContextMenu',
       onSelectedCallNodeChange,
       onRightClickedCallNodeChange,
       onCallNodeEnterOrDoubleClick,
@@ -305,7 +307,7 @@ class FlameGraphImpl
     return (
       <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
         <ContextMenuTrigger
-          id="CallNodeContextMenu"
+          id={contextMenuId}
           attributes={{
             className: 'treeViewContextMenu',
           }}
