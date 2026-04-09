@@ -144,7 +144,7 @@
     "caniuse-lite": "^1.0.30001770",
     "cross-env": "^10.1.0",
     "devtools-license-check": "^0.9.0",
-    "esbuild": "^0.27.0",
+    "esbuild": "^0.28.0",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-wasm": "^1.1.0",
     "eslint": "^9.39.4",
