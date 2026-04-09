@@ -22,7 +22,10 @@ import {
   getSelectedThreadsKey,
   getInvertCallstack,
 } from 'firefox-profiler/selectors/url-state';
-import { updateBottomBoxContentsAndMaybeOpen } from 'firefox-profiler/actions/profile-view';
+import {
+  updateBottomBoxContentsAndMaybeOpen,
+  changeRightClickedFunctionIndex,
+} from 'firefox-profiler/actions/profile-view';
 
 import type {
   Thread,
@@ -69,6 +72,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly changeRightClickedFunctionIndex: typeof changeRightClickedFunctionIndex;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -108,6 +112,11 @@ class SelfWingImpl extends React.PureComponent<Props, LocalState> {
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
     this.setState({ rightClickedCallNodeIndex: callNodeIndex });
+    const { callNodeInfo, threadsKey, changeRightClickedFunctionIndex } =
+      this.props;
+    const funcIndex =
+      callNodeIndex !== null ? callNodeInfo.funcForNode(callNodeIndex) : null;
+    changeRightClickedFunctionIndex(threadsKey, funcIndex);
   };
 
   _onCallNodeEnterOrDoubleClick = (
@@ -118,7 +127,7 @@ class SelfWingImpl extends React.PureComponent<Props, LocalState> {
     }
     const { callTree, updateBottomBoxContentsAndMaybeOpen } = this.props;
     const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(callNodeIndex);
-    updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo);
+    updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo);
   };
 
   // Transforms are disabled in the SelfWing because it operates on an ephemeral
@@ -177,6 +186,7 @@ class SelfWingImpl extends React.PureComponent<Props, LocalState> {
         }
         tracedTiming={null}
         displayStackType={displayStackType}
+        contextMenuId="FunctionListContextMenu"
         onSelectedCallNodeChange={this._onSelectedCallNodeChange}
         onRightClickedCallNodeChange={this._onRightClickedCallNodeChange}
         onCallNodeEnterOrDoubleClick={this._onCallNodeEnterOrDoubleClick}
@@ -215,6 +225,7 @@ export const SelfWing = explicitConnect<{}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     updateBottomBoxContentsAndMaybeOpen,
+    changeRightClickedFunctionIndex,
   },
   component: SelfWingImpl,
 });
