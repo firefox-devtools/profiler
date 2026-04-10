@@ -22,10 +22,107 @@ import {
   getCurrentSessionId,
   getCurrentSocketPath,
   getSocketPath,
+  isProcessRunning,
   loadSessionMetadata,
   validateSession,
+  waitForProcessExit,
 } from './session';
 import { BUILD_HASH } from './constants';
+
+type BuildMismatchShutdownResult = 'stopped' | 'already-dead' | 'still-running';
+
+async function sendMessageToSocket(
+  socketPath: string,
+  message: ClientMessage,
+  timeoutMs: number = 30000
+): Promise<ServerResponse> {
+  return new Promise((resolve, reject) => {
+    const socket = net.connect(socketPath);
+    let buffer = '';
+
+    socket.on('connect', () => {
+      socket.write(JSON.stringify(message) + '\n');
+    });
+
+    socket.on('data', (data) => {
+      buffer += data.toString();
+
+      const newlineIndex = buffer.indexOf('\n');
+      if (newlineIndex !== -1) {
+        const line = buffer.substring(0, newlineIndex);
+        try {
+          const response = JSON.parse(line) as ServerResponse;
+          socket.end();
+          resolve(response);
+        } catch (error) {
+          reject(new Error(`Failed to parse response: ${error}`));
+        }
+      }
+    });
+
+    socket.on('error', (error) => {
+      reject(new Error(`Socket error: ${error.message}`));
+    });
+
+    socket.on('timeout', () => {
+      socket.destroy();
+      reject(new Error('Connection timeout'));
+    });
+
+    socket.setTimeout(timeoutMs);
+  });
+}
+
+async function attemptShutdownOnBuildMismatch(
+  sessionDir: string,
+  sessionId: string,
+  socketPath: string,
+  pid: number
+): Promise<BuildMismatchShutdownResult> {
+  if (process.platform !== 'win32' && !fs.existsSync(socketPath)) {
+    if (!isProcessRunning(pid)) {
+      cleanupSession(sessionDir, sessionId);
+      return 'already-dead';
+    }
+    return 'still-running';
+  }
+
+  try {
+    const response = await sendMessageToSocket(
+      socketPath,
+      { type: 'shutdown' },
+      2000
+    );
+
+    if (response.type !== 'success') {
+      console.error(
+        `Failed to stop mismatched daemon for session ${sessionId}: unexpected response ${response.type}`
+      );
+      return isProcessRunning(pid) ? 'still-running' : 'already-dead';
+    }
+
+    const exited = await waitForProcessExit(pid);
+    if (!exited) {
+      console.error(
+        `Mismatched daemon for session ${sessionId} acknowledged shutdown but did not exit within timeout`
+      );
+      return 'still-running';
+    }
+
+    cleanupSession(sessionDir, sessionId);
+    return 'stopped';
+  } catch (error) {
+    if (!isProcessRunning(pid)) {
+      cleanupSession(sessionDir, sessionId);
+      return 'already-dead';
+    }
+
+    console.error(
+      `Failed to stop mismatched daemon for session ${sessionId}: ${error}`
+    );
+    return 'still-running';
+  }
+}
 
 /**
  * Send a message to the daemon and return the raw response.
@@ -52,9 +149,20 @@ async function sendRawMessage(
   // Check build hash matches
   const metadata = loadSessionMetadata(sessionDir, resolvedSessionId);
   if (metadata && metadata.buildHash !== BUILD_HASH) {
-    cleanupSession(sessionDir, resolvedSessionId);
+    const shutdownResult = await attemptShutdownOnBuildMismatch(
+      sessionDir,
+      resolvedSessionId,
+      metadata.socketPath,
+      metadata.pid
+    );
+
+    const shutdownMessage =
+      shutdownResult === 'stopped' || shutdownResult === 'already-dead'
+        ? 'The daemon is no longer running.'
+        : 'The daemon may still be running; stop it before reusing this session id.';
+
     throw new Error(
-      `Session ${resolvedSessionId} was built with a different version (daemon: ${metadata.buildHash}, client: ${BUILD_HASH}). The daemon has been stopped. Please run "pq load <PATH>" again.`
+      `Session ${resolvedSessionId} was built with a different version (daemon: ${metadata.buildHash}, client: ${BUILD_HASH}). ${shutdownMessage} Please run "pq load <PATH>" again.`
     );
   }
 
@@ -70,43 +178,7 @@ async function sendRawMessage(
     throw new Error(`Socket not found for session ${resolvedSessionId}`);
   }
 
-  return new Promise((resolve, reject) => {
-    const socket = net.connect(socketPath);
-    let buffer = '';
-
-    socket.on('connect', () => {
-      // Send the message
-      socket.write(JSON.stringify(message) + '\n');
-    });
-
-    socket.on('data', (data) => {
-      buffer += data.toString();
-
-      // Look for complete response (newline-delimited JSON)
-      const newlineIndex = buffer.indexOf('\n');
-      if (newlineIndex !== -1) {
-        const line = buffer.substring(0, newlineIndex);
-        try {
-          const response = JSON.parse(line) as ServerResponse;
-          socket.end();
-          resolve(response);
-        } catch (error) {
-          reject(new Error(`Failed to parse response: ${error}`));
-        }
-      }
-    });
-
-    socket.on('error', (error) => {
-      reject(new Error(`Socket error: ${error.message}`));
-    });
-
-    socket.on('timeout', () => {
-      socket.destroy();
-      reject(new Error('Connection timeout'));
-    });
-
-    socket.setTimeout(30000); // 30 second timeout
-  });
+  return sendMessageToSocket(socketPath, message);
 }
 
 /**

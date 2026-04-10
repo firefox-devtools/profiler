@@ -7,7 +7,8 @@
  * Migrated from bin/pq-test bash script.
  */
 
-import { readdir } from 'fs/promises';
+import { readdir, readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
 import {
   createTestContext,
   cleanupTestContext,
@@ -96,4 +97,58 @@ describe('pq basic functionality', () => {
     expect(result2.exitCode).toBe(0);
     expect(result2.stdout).toEqual(result1.stdout);
   });
+
+  test('build hash mismatch stops the daemon before cleaning up the session', async () => {
+    const loadResult = await pq(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-1.json',
+    ]);
+
+    expect(typeof loadResult.stdout).toBe('string');
+    const match = loadResult.stdout.match(/Session started: (\w+)/);
+    expect(match).toBeTruthy();
+    const sessionId = match![1];
+
+    const metadataPath = join(ctx.sessionDir, `${sessionId}.json`);
+    const metadata = JSON.parse(await readFile(metadataPath, 'utf-8')) as {
+      buildHash: string;
+      pid: number;
+    };
+
+    await writeFile(
+      metadataPath,
+      JSON.stringify({ ...metadata, buildHash: 'intentionally-mismatched' })
+    );
+
+    const result = await pqFail(ctx, ['profile', 'info']);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('was built with a different version');
+    expect(output).toContain('The daemon is no longer running');
+
+    await expectDaemonToExit(metadata.pid);
+
+    const files = await readdir(ctx.sessionDir);
+    expect(files).not.toContain(`${sessionId}.json`);
+    expect(files).not.toContain(`${sessionId}.sock`);
+  });
 });
+
+async function expectDaemonToExit(pid: number): Promise<void> {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    if (!isProcessRunning(pid)) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+
+  throw new Error(`Daemon process ${pid} did not exit in time`);
+}
+
+function isProcessRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}

@@ -14,9 +14,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
+import { spawn } from 'child_process';
 import {
   ensureSessionDir,
   generateSessionId,
+  getSessionDirNamespace,
   getSocketPath,
   getLogPath,
   getMetadataPath,
@@ -26,6 +28,7 @@ import {
   getCurrentSessionId,
   getCurrentSocketPath,
   isProcessRunning,
+  waitForProcessExit,
   cleanupSession,
   validateSession,
   listSessions,
@@ -36,6 +39,10 @@ const TEST_BUILD_HASH = 'test-build-hash';
 
 describe('profile-query-cli session management', function () {
   let testSessionDir: string;
+  const platformDescriptor = Object.getOwnPropertyDescriptor(
+    process,
+    'platform'
+  );
 
   beforeEach(function () {
     // Create a unique temp directory for each test
@@ -43,6 +50,10 @@ describe('profile-query-cli session management', function () {
   });
 
   afterEach(function () {
+    if (platformDescriptor) {
+      Object.defineProperty(process, 'platform', platformDescriptor);
+    }
+
     // Clean up test directory
     if (fs.existsSync(testSessionDir)) {
       fs.rmSync(testSessionDir, { recursive: true, force: true });
@@ -87,6 +98,35 @@ describe('profile-query-cli session management', function () {
       const sessionId = 'test123';
       const socketPath = getSocketPath(testSessionDir, sessionId);
       expect(socketPath).toBe(path.join(testSessionDir, 'test123.sock'));
+    });
+
+    it('namespaces Windows pipe paths by session directory', function () {
+      Object.defineProperty(process, 'platform', {
+        value: 'win32',
+      });
+
+      const firstSocketPath = getSocketPath('C:\\pq\\alpha', 'test123');
+      const secondSocketPath = getSocketPath('C:\\pq\\beta', 'test123');
+      const thirdSocketPath = getSocketPath('C:\\PQ\\ALPHA', 'test123');
+
+      expect(firstSocketPath).toMatch(
+        /^\\\\\.\\pipe\\pq-[0-9a-f]{12}-test123$/
+      );
+      expect(secondSocketPath).toMatch(
+        /^\\\\\.\\pipe\\pq-[0-9a-f]{12}-test123$/
+      );
+      expect(firstSocketPath).not.toBe(secondSocketPath);
+      expect(firstSocketPath).toBe(thirdSocketPath);
+    });
+
+    it('generates a stable namespace from the session directory', function () {
+      const firstNamespace = getSessionDirNamespace('C:\\pq\\alpha');
+      const secondNamespace = getSessionDirNamespace('C:\\pq\\beta');
+      const thirdNamespace = getSessionDirNamespace('C:\\PQ\\ALPHA');
+
+      expect(firstNamespace).toMatch(/^[0-9a-f]{12}$/);
+      expect(firstNamespace).not.toBe(secondNamespace);
+      expect(firstNamespace).toBe(thirdNamespace);
     });
 
     it('getLogPath returns correct path', function () {
@@ -184,6 +224,32 @@ describe('profile-query-cli session management', function () {
 
     it('returns false for non-existent PID', function () {
       expect(isProcessRunning(999999)).toBe(false);
+    });
+
+    it('waits for a process to exit', async function () {
+      const child = spawn(process.execPath, [
+        '-e',
+        'setTimeout(() => process.exit(0), 100)',
+      ]);
+
+      const exited = await waitForProcessExit(child.pid!, 2000, 10);
+
+      expect(exited).toBe(true);
+    });
+
+    it('times out if a process does not exit', async function () {
+      const child = spawn(process.execPath, [
+        '-e',
+        'setTimeout(() => process.exit(0), 5000)',
+      ]);
+
+      try {
+        const exited = await waitForProcessExit(child.pid!, 50, 10);
+        expect(exited).toBe(false);
+      } finally {
+        child.kill('SIGTERM');
+        await waitForProcessExit(child.pid!, 2000, 10);
+      }
     });
   });
 
