@@ -11,6 +11,7 @@ import {
   createTestContext,
   cleanupTestContext,
   pq,
+  pqFail,
   type PqTestContext,
 } from './utils';
 
@@ -117,5 +118,32 @@ describe('pq multiple concurrent sessions', () => {
     // Verify no sessions
     const result = await pq(ctx, ['list-sessions']);
     expect(result.stdout).toContain('Found 0 running sessions');
+  });
+
+  test('reusing a live explicit session id fails without replacing the daemon', async () => {
+    const sessionId = 'shared-session';
+
+    await pq(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-1.json',
+      '--session',
+      sessionId,
+    ]);
+
+    const secondLoad = await pqFail(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-2.json',
+      '--session',
+      sessionId,
+    ]);
+
+    expect(secondLoad.exitCode).not.toBe(0);
+    const output =
+      String(secondLoad.stdout || '') + String(secondLoad.stderr || '');
+    expect(output).toContain(`Session ${sessionId} is already running`);
+
+    const result = await pq(ctx, ['profile', 'info', '--session', sessionId]);
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('This profile contains');
   });
 });

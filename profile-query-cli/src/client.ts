@@ -251,6 +251,19 @@ export async function startNewDaemon(
   // session to wait for (avoids race condition with existing sessions)
   const targetSessionId = sessionId || generateSessionId();
 
+  if (sessionId) {
+    const existingSession = validateSession(sessionDir, targetSessionId);
+    if (existingSession) {
+      throw new Error(
+        `Session ${targetSessionId} is already running. Stop it first or choose a different session id.`
+      );
+    }
+
+    if (loadSessionMetadata(sessionDir, targetSessionId)) {
+      cleanupSession(sessionDir, targetSessionId);
+    }
+  }
+
   // Get the path to the current script (pq.js)
   const scriptPath = process.argv[1];
 
