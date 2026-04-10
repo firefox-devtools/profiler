@@ -188,6 +188,7 @@ export type ThreadSamplesResult = {
   threadHandle: string;
   friendlyThreadName: string;
   activeOnly?: boolean;
+  search?: string;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {
@@ -209,6 +210,7 @@ export type ThreadSamplesTopDownResult = {
   threadHandle: string;
   friendlyThreadName: string;
   activeOnly?: boolean;
+  search?: string;
   regularCallTree: CallTreeNode;
 };
 
@@ -217,6 +219,7 @@ export type ThreadSamplesBottomUpResult = {
   threadHandle: string;
   friendlyThreadName: string;
   activeOnly?: boolean;
+  search?: string;
   invertedCallTree: CallTreeNode | null;
 };
 

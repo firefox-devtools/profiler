@@ -102,7 +102,8 @@ Options:
   --thread <handle>        Specify thread by handle (e.g., t-0, t-1)
   --marker <handle>        Specify marker by handle (e.g., m-1, m-2)
   --function <handle>      Specify function by handle (e.g., f-1, f-2)
-  --search <term>          Search/filter by substring (for 'thread markers' and 'thread functions')
+  --search <term>          Search/filter by substring (markers, functions, and samples call trees)
+  --include-idle           Include idle samples in percentages (samples commands exclude idle by default)
   --category <name>        Filter markers by category name (case-insensitive substring match)
   --min-duration <ms>      Filter markers by minimum duration in milliseconds
   --max-duration <ms>      Filter markers by maximum duration in milliseconds
@@ -155,7 +156,10 @@ Examples:
   pq list-sessions
   pq thread samples-top-down --max-lines 50
   pq thread samples-top-down --scoring exponential-0.8
+  pq thread samples-top-down --search GC
   pq thread samples-bottom-up --max-lines 200 --scoring harmonic-1.0
+  pq thread samples-bottom-up --search "JS::Compile"
+  pq thread samples --include-idle
 `);
 }
 
@@ -487,6 +491,14 @@ async function main(): Promise<void> {
             subcommand === 'functions') &&
           argv['include-idle'] === true;
 
+        const samplesSearch =
+          (subcommand === 'samples' ||
+            subcommand === 'samples-top-down' ||
+            subcommand === 'samples-bottom-up') &&
+          typeof argv.search === 'string'
+            ? (argv.search as string)
+            : undefined;
+
         if (
           subcommand === 'info' ||
           subcommand === 'select' ||
@@ -503,6 +515,7 @@ async function main(): Promise<void> {
               subcommand,
               thread,
               includeIdle: includeIdle || undefined,
+              search: samplesSearch,
               markerFilters,
               functionFilters,
               callTreeOptions,

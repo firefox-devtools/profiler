@@ -299,19 +299,22 @@ export class Daemon {
           case 'samples':
             return this.querier!.threadSamples(
               command.thread,
-              command.includeIdle
+              command.includeIdle,
+              command.search
             );
           case 'samples-top-down':
             return this.querier!.threadSamplesTopDown(
               command.thread,
               command.callTreeOptions,
-              command.includeIdle
+              command.includeIdle,
+              command.search
             );
           case 'samples-bottom-up':
             return this.querier!.threadSamplesBottomUp(
               command.thread,
               command.callTreeOptions,
-              command.includeIdle
+              command.includeIdle,
+              command.search
             );
           case 'markers':
             return this.querier!.threadMarkers(

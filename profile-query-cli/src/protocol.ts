@@ -80,6 +80,7 @@ export type ClientCommand =
         | 'functions';
       thread?: string;
       includeIdle?: boolean;
+      search?: string;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
       callTreeOptions?: CallTreeCollectionOptions;

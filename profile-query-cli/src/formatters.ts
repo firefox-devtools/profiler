@@ -497,9 +497,10 @@ export function formatThreadSamplesResult(
   const activeOnlyNote = result.activeOnly
     ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
     : '';
+  const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
 
   // Top functions by total time
   output += 'Top Functions (by total time):\n';
@@ -585,9 +586,10 @@ export function formatThreadSamplesTopDownResult(
   const activeOnlyNote = result.activeOnly
     ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
     : '';
+  const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
 
   // Top-down call tree
   output += formatCallTree(result.regularCallTree, 'Top-Down');
@@ -605,9 +607,10 @@ export function formatThreadSamplesBottomUpResult(
   const activeOnlyNote = result.activeOnly
     ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
     : '';
+  const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
 
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {

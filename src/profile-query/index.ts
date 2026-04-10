@@ -26,12 +26,14 @@ import {
   getAllCommittedRanges,
   getSelectedThreadIndexes,
   getTransformStack,
+  getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
 import {
   commitRange,
   popCommittedRanges,
   changeSelectedThreads,
   addTransformToStack,
+  changeCallTreeSearchString,
 } from '../actions/profile-view';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
@@ -137,7 +139,8 @@ export class ProfileQuerier {
 
   async threadSamples(
     threadHandle?: string,
-    includeIdle: boolean = false
+    includeIdle: boolean = false,
+    search?: string
   ): Promise<WithContext<ThreadSamplesResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -151,16 +154,25 @@ export class ProfileQuerier {
         this._functionMap,
         threadHandle
       );
-    const result = activeOnly
-      ? this._withDroppedIdle(threadIndexes, collect)
-      : collect();
-    return { ...result, activeOnly, context: this._getContext() };
+    const withIdle = activeOnly
+      ? () => this._withDroppedIdle(threadIndexes, collect)
+      : collect;
+    const result = search
+      ? this._withCallTreeSearch(search, withIdle)
+      : withIdle();
+    return {
+      ...result,
+      activeOnly,
+      search: search || undefined,
+      context: this._getContext(),
+    };
   }
 
   async threadSamplesTopDown(
     threadHandle?: string,
     callTreeOptions?: CallTreeCollectionOptions,
-    includeIdle: boolean = false
+    includeIdle: boolean = false,
+    search?: string
   ): Promise<WithContext<ThreadSamplesTopDownResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -175,16 +187,25 @@ export class ProfileQuerier {
         threadHandle,
         callTreeOptions
       );
-    const result = activeOnly
-      ? this._withDroppedIdle(threadIndexes, collect)
-      : collect();
-    return { ...result, activeOnly, context: this._getContext() };
+    const withIdle = activeOnly
+      ? () => this._withDroppedIdle(threadIndexes, collect)
+      : collect;
+    const result = search
+      ? this._withCallTreeSearch(search, withIdle)
+      : withIdle();
+    return {
+      ...result,
+      activeOnly,
+      search: search || undefined,
+      context: this._getContext(),
+    };
   }
 
   async threadSamplesBottomUp(
     threadHandle?: string,
     callTreeOptions?: CallTreeCollectionOptions,
-    includeIdle: boolean = false
+    includeIdle: boolean = false,
+    search?: string
   ): Promise<WithContext<ThreadSamplesBottomUpResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -199,10 +220,18 @@ export class ProfileQuerier {
         threadHandle,
         callTreeOptions
       );
-    const result = activeOnly
-      ? this._withDroppedIdle(threadIndexes, collect)
-      : collect();
-    return { ...result, activeOnly, context: this._getContext() };
+    const withIdle = activeOnly
+      ? () => this._withDroppedIdle(threadIndexes, collect)
+      : collect;
+    const result = search
+      ? this._withCallTreeSearch(search, withIdle)
+      : withIdle();
+    return {
+      ...result,
+      activeOnly,
+      search: search || undefined,
+      context: this._getContext(),
+    };
   }
 
   /**
@@ -463,6 +492,20 @@ export class ProfileQuerier {
         threadsKey,
         firstPoppedFilterIndex: stackLengthBefore,
       });
+    }
+  }
+
+  /**
+   * Set the call tree search string around a computation, then restore the
+   * previous search string.
+   */
+  private _withCallTreeSearch<T>(searchString: string, fn: () => T): T {
+    const previousSearch = getCurrentSearchString(this._store.getState());
+    this._store.dispatch(changeCallTreeSearchString(searchString));
+    try {
+      return fn();
+    } finally {
+      this._store.dispatch(changeCallTreeSearchString(previousSearch));
     }
   }
 

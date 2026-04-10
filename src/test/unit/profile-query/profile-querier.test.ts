@@ -208,6 +208,142 @@ describe('ProfileQuerier', function () {
     });
   });
 
+  describe('search', function () {
+    // Helper to collect all function names in a call tree
+    function collectTreeNames(node: {
+      name: string;
+      children?: { name: string; children?: unknown[] }[];
+    }): string[] {
+      const names: string[] = [node.name];
+      if (node.children) {
+        for (const child of node.children) {
+          names.push(
+            ...collectTreeNames(child as Parameters<typeof collectTreeNames>[0])
+          );
+        }
+      }
+      return names;
+    }
+
+    it('threadSamplesTopDown with search only shows branches containing the search term', async function () {
+      // Two separate call trees:
+      //   A → B → C (3 samples)
+      //   X → Y → Z (2 samples)
+      const { profile } = getProfileFromTextSamples(`
+        0   1   2   3   4
+        A   A   A   X   X
+        B   B   B   Y   Y
+        C   C   C   Z   Z
+      `);
+
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const result = await querier.threadSamplesTopDown(
+        undefined,
+        undefined,
+        false,
+        'X'
+      );
+
+      expect(result.search).toBe('X');
+      const names = collectTreeNames(result.regularCallTree);
+      expect(names).toContain('X');
+      expect(names).toContain('Y');
+      expect(names).toContain('Z');
+      expect(names).not.toContain('A');
+      expect(names).not.toContain('B');
+      expect(names).not.toContain('C');
+    });
+
+    it('threadSamplesBottomUp with search only shows branches containing the search term', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0   1   2   3   4
+        A   A   A   X   X
+        B   B   B   Y   Y
+        C   C   C   Z   Z
+      `);
+
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const result = await querier.threadSamplesBottomUp(
+        undefined,
+        undefined,
+        false,
+        'X'
+      );
+
+      expect(result.search).toBe('X');
+      const names = result.invertedCallTree
+        ? collectTreeNames(result.invertedCallTree)
+        : [];
+      // Bottom-up tree roots by leaf function — X branch leaves should appear
+      expect(names.some((n) => ['X', 'Y', 'Z'].includes(n))).toBe(true);
+      expect(names).not.toContain('A');
+      expect(names).not.toContain('B');
+      expect(names).not.toContain('C');
+    });
+
+    it('threadSamples with search filters the top functions list', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0   1   2   3   4
+        A   A   A   X   X
+        B   B   B   Y   Y
+        C   C   C   Z   Z
+      `);
+
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const result = await querier.threadSamples(undefined, false, 'X');
+
+      expect(result.search).toBe('X');
+      const allNames = [
+        ...result.topFunctionsByTotal.map((f) => f.name),
+        ...result.topFunctionsBySelf.map((f) => f.name),
+      ];
+      expect(allNames.some((n) => ['X', 'Y', 'Z'].includes(n))).toBe(true);
+      expect(allNames).not.toContain('A');
+      expect(allNames).not.toContain('B');
+      expect(allNames).not.toContain('C');
+    });
+
+    it('search does not persist to subsequent calls', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0   1   2   3   4
+        A   A   A   X   X
+        B   B   B   Y   Y
+        C   C   C   Z   Z
+      `);
+
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      // Call with search
+      await querier.threadSamplesTopDown(undefined, undefined, false, 'X');
+
+      // Call without search — should restore and show all branches
+      const result = await querier.threadSamplesTopDown();
+      const names = collectTreeNames(result.regularCallTree);
+      expect(names).toContain('A');
+      expect(names).toContain('X');
+      expect(result.search).toBeUndefined();
+    });
+  });
+
   describe('threadSamples', function () {
     it('searches all roots when choosing the heaviest stack', async function () {
       const { profile } = getProfileFromTextSamples(`

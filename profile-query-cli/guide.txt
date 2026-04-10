@@ -28,10 +28,18 @@ CORE WORKFLOW
     pq thread select t-0     Select a specific thread (persists for future commands)
 
   Step 4: Analyze CPU usage
-    pq thread samples             Hot functions list (self time, sorted by impact)
-    pq thread samples-top-down    Top-down call tree (where does CPU time originate)
-    pq thread samples-bottom-up   Bottom-up call tree (what calls the hot functions)
-    pq thread functions           All functions with self/total CPU percentages
+    pq thread samples                             Hot functions list (self time, sorted by impact)
+    pq thread samples-top-down                    Top-down call tree (where does CPU time originate)
+    pq thread samples-bottom-up                   Bottom-up call tree (what calls the hot functions)
+    pq thread functions                           All functions with self/total CPU percentages
+
+    All samples commands exclude idle by default so percentages reflect active CPU time.
+    Use --include-idle to include idle samples (e.g. to see what fraction of wall time is idle).
+
+    Use --search to focus the call tree on paths containing a specific function:
+    pq thread samples-top-down --search GC
+    pq thread samples-bottom-up --search "JS::Compile"
+    pq thread samples --search malloc
 
   Step 5: Analyze markers (browser events, timers, etc.)
     pq thread markers                          All markers with aggregated stats
@@ -88,8 +96,9 @@ COMMON ANALYSIS PATTERNS
   Find what's consuming CPU:
     pq thread info                          Pick the main thread (usually GeckoMain)
     pq thread select t-0
-    pq thread samples                       Top hot functions by self time
+    pq thread samples                       Top hot functions by self time (active only)
     pq thread samples-top-down             See the full call tree
+    pq thread samples-top-down --search GC  Focus tree on paths through "GC"
 
   Investigate a jank/slow period:
     pq thread markers --min-duration 50    Find long-running markers (>50ms = jank)
@@ -131,6 +140,10 @@ UNDERSTANDING THE OUTPUT
     of the call stack. Higher sample counts = more time spent. Counts are relative
     within a profile.
 
+    By default, samples commands drop idle samples before computing percentages, so
+    percentages reflect how the thread spent its active CPU time. Pass --include-idle
+    to include idle samples and see percentages relative to wall time instead.
+
   Call tree views:
     samples-top-down    Root frames at top, drilling down to leaves.
                         Use to understand the calling structure and where time originates.
@@ -149,10 +162,12 @@ TIPS
     process and thread, or --search <term> to filter by name, pid, or tid
   - Select a thread before querying -- GeckoMain is usually the main thread
   - Self time is more actionable: focus on high self-time functions for optimization
-  - Idle self time is not a finding on its own -- a longer profile or an inactive thread will
-    naturally show more idle time. Only investigate idle time if it appears during a period the
-    thread should be busy (e.g. inside a zoom on a slow operation), which may indicate lock
+  - Samples percentages are relative to active (non-idle) time by default. Use --include-idle
+    to see wall-time percentages. Idle time is not a finding on its own -- only investigate it
+    during a period the thread should be busy (e.g. inside a zoom), which may indicate lock
     contention or blocking on another thread.
+  - Use --search to narrow the call tree to branches you care about: --search GC shows only
+    call paths that pass through a GC-related function
   - Zoom into slow periods: use "zoom push m-<handle>" to focus on a slow marker
   - Use --json when you need to process or filter results programmatically
   - Marker handles are stable: you can refer back to m-1234 multiple times
