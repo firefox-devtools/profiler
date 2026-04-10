@@ -84,6 +84,63 @@ describe('buildProcessThreadList', function () {
     expect(result.processes.map((p) => p.pid)).toContain('p2');
   });
 
+  it('summarizes only hidden processes in remainingProcesses', function () {
+    const threads: ThreadInfo[] = [
+      createThread(0, 'p1', 'P1-A', 110),
+      createThread(1, 'p1', 'P1-B', 109),
+      createThread(2, 'p1', 'P1-C', 108),
+      createThread(3, 'p1', 'P1-D', 107),
+      createThread(4, 'p2', 'P2-A', 106),
+      createThread(5, 'p2', 'P2-B', 105),
+      createThread(6, 'p2', 'P2-C', 104),
+      createThread(7, 'p2', 'P2-D', 103),
+      createThread(8, 'p3', 'P3-A', 102),
+      createThread(9, 'p3', 'P3-B', 101),
+      createThread(10, 'p3', 'P3-C', 100),
+      createThread(11, 'p3', 'P3-D', 99),
+      createThread(12, 'p4', 'P4-A', 98),
+      createThread(13, 'p4', 'P4-B', 97),
+      createThread(14, 'p4', 'P4-C', 96),
+      createThread(15, 'p4', 'P4-D', 95),
+      createThread(16, 'p5', 'P5-A', 94),
+      createThread(17, 'p5', 'P5-B', 93),
+      createThread(18, 'p5', 'P5-C', 92),
+      createThread(19, 'p6', 'P6-top-thread', 91),
+      createThread(20, 'p6', 'P6-low-thread', 1),
+      createThread(21, 'p7', 'P7-A', 30),
+      createThread(22, 'p7', 'P7-B', 28),
+      createThread(23, 'p8', 'P8-A', 29),
+      createThread(24, 'p8', 'P8-B', 28),
+    ];
+
+    const processIndexMap = new Map<string, number>([
+      ['p1', 0],
+      ['p2', 1],
+      ['p3', 2],
+      ['p4', 3],
+      ['p5', 4],
+      ['p6', 5],
+      ['p7', 6],
+      ['p8', 7],
+    ]);
+
+    const result = buildProcessThreadList(threads, processIndexMap);
+
+    expect(result.processes.map((p) => p.pid)).toEqual([
+      'p1',
+      'p2',
+      'p3',
+      'p4',
+      'p5',
+      'p6',
+    ]);
+    expect(result.remainingProcesses).toEqual({
+      count: 2,
+      combinedCpuMs: 115,
+      maxCpuMs: 58,
+    });
+  });
+
   it('shows up to 5 threads per process when none are in top 20', function () {
     // Create 4 high-CPU processes that will be in top 5
     const threads: ThreadInfo[] = [];

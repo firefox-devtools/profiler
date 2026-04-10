@@ -134,6 +134,7 @@ export function buildProcessThreadList(
   const processesToShow = allProcesses.filter(
     (p) => top5ProcessPids.has(p.pid) || top20ThreadPids.has(p.pid)
   );
+  const shownProcessPids = new Set(processesToShow.map((p) => p.pid));
 
   // Build the result list
   const result: ProcessListItem[] = processesToShow.map((processInfo) => {
@@ -180,7 +181,9 @@ export function buildProcessThreadList(
   });
 
   // Calculate remaining processes summary
-  const remainingProcesses = allProcesses.slice(processesToShow.length);
+  const remainingProcesses = allProcesses.filter(
+    (processInfo) => !shownProcessPids.has(processInfo.pid)
+  );
   let remainingProcessesInfo: ProcessThreadListResult['remainingProcesses'] =
     undefined;
 

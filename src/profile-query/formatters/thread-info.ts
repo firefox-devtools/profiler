@@ -199,8 +199,24 @@ export function collectThreadSamples(
   };
 
   if (roots.length > 0) {
-    const heaviestPath: CallNodePath =
-      callTree._internal.findHeaviestPathInSubtree(roots[0]);
+    let heaviestPath: CallNodePath = [];
+    let maxSelfSamples = Number.NEGATIVE_INFINITY;
+
+    for (const root of roots) {
+      const candidatePath = callTree._internal.findHeaviestPathInSubtree(root);
+      const leafNodeIndex =
+        callTree._callNodeInfo.getCallNodeIndexFromPath(candidatePath);
+
+      if (leafNodeIndex === null) {
+        continue;
+      }
+
+      const candidateSelfSamples = callTree.getNodeData(leafNodeIndex).self;
+      if (candidateSelfSamples > maxSelfSamples) {
+        heaviestPath = candidatePath;
+        maxSelfSamples = candidateSelfSamples;
+      }
+    }
 
     if (heaviestPath.length > 0) {
       const callNodeInfo = callTree._callNodeInfo;

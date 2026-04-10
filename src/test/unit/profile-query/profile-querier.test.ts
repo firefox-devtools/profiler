@@ -207,4 +207,27 @@ describe('ProfileQuerier', function () {
       expect(hasD || hasE).toBe(true);
     });
   });
+
+  describe('threadSamples', function () {
+    it('searches all roots when choosing the heaviest stack', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0   1   2   3   4
+        A   A   A   X   X
+        B   C   D   Y   Y
+      `);
+
+      const store = storeWithProfile(profile);
+      const state = store.getState();
+      const rootRange = getProfileRootRange(state);
+      const querier = new ProfileQuerier(store, rootRange);
+
+      const samples = await querier.threadSamples();
+
+      expect(samples.heaviestStack.selfSamples).toBe(2);
+      expect(samples.heaviestStack.frames.map((frame) => frame.name)).toEqual([
+        'X',
+        'Y',
+      ]);
+    });
+  });
 });
