@@ -297,16 +297,21 @@ export class Daemon {
             }
             return this.querier!.threadSelect(command.thread);
           case 'samples':
-            return this.querier!.threadSamples(command.thread);
+            return this.querier!.threadSamples(
+              command.thread,
+              command.includeIdle
+            );
           case 'samples-top-down':
             return this.querier!.threadSamplesTopDown(
               command.thread,
-              command.callTreeOptions
+              command.callTreeOptions,
+              command.includeIdle
             );
           case 'samples-bottom-up':
             return this.querier!.threadSamplesBottomUp(
               command.thread,
-              command.callTreeOptions
+              command.callTreeOptions,
+              command.includeIdle
             );
           case 'markers':
             return this.querier!.threadMarkers(
@@ -316,7 +321,8 @@ export class Daemon {
           case 'functions':
             return this.querier!.threadFunctions(
               command.thread,
-              command.functionFilters
+              command.functionFilters,
+              command.includeIdle
             );
           default:
             throw assertExhaustiveCheck(command);

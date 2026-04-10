@@ -494,9 +494,12 @@ export function formatThreadSamplesResult(
   result: WithContext<ThreadSamplesResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const activeOnlyNote = result.activeOnly
+    ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
+    : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}`;
 
   // Top functions by total time
   output += 'Top Functions (by total time):\n';
@@ -579,9 +582,12 @@ export function formatThreadSamplesTopDownResult(
   result: WithContext<ThreadSamplesTopDownResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const activeOnlyNote = result.activeOnly
+    ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
+    : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}`;
 
   // Top-down call tree
   output += formatCallTree(result.regularCallTree, 'Top-Down');
@@ -596,9 +602,12 @@ export function formatThreadSamplesBottomUpResult(
   result: WithContext<ThreadSamplesBottomUpResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const activeOnlyNote = result.activeOnly
+    ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
+    : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}`;
 
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {
@@ -797,6 +806,12 @@ export function formatThreadFunctionsResult(
   lines.push(
     `Functions in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredFunctionCount} functions${filterSuffix}\n`
   );
+
+  if (result.activeOnly) {
+    lines.push(
+      'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n'
+    );
+  }
 
   if (result.filteredFunctionCount === 0) {
     if (hasFilters) {

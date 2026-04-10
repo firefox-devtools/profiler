@@ -187,6 +187,7 @@ export type ThreadSamplesResult = {
   type: 'thread-samples';
   threadHandle: string;
   friendlyThreadName: string;
+  activeOnly?: boolean;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {
@@ -207,6 +208,7 @@ export type ThreadSamplesTopDownResult = {
   type: 'thread-samples-top-down';
   threadHandle: string;
   friendlyThreadName: string;
+  activeOnly?: boolean;
   regularCallTree: CallTreeNode;
 };
 
@@ -214,6 +216,7 @@ export type ThreadSamplesBottomUpResult = {
   type: 'thread-samples-bottom-up';
   threadHandle: string;
   friendlyThreadName: string;
+  activeOnly?: boolean;
   invertedCallTree: CallTreeNode | null;
 };
 
@@ -315,6 +318,7 @@ export type ThreadFunctionsResult = {
   type: 'thread-functions';
   threadHandle: string;
   friendlyThreadName: string;
+  activeOnly?: boolean;
   totalFunctionCount: number;
   filteredFunctionCount: number;
   filters?: {

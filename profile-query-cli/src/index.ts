@@ -480,6 +480,13 @@ async function main(): Promise<void> {
           }
         }
 
+        const includeIdle =
+          (subcommand === 'samples' ||
+            subcommand === 'samples-top-down' ||
+            subcommand === 'samples-bottom-up' ||
+            subcommand === 'functions') &&
+          argv['include-idle'] === true;
+
         if (
           subcommand === 'info' ||
           subcommand === 'select' ||
@@ -495,6 +502,7 @@ async function main(): Promise<void> {
               command: 'thread',
               subcommand,
               thread,
+              includeIdle: includeIdle || undefined,
               markerFilters,
               functionFilters,
               callTreeOptions,

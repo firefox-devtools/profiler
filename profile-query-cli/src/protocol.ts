@@ -79,6 +79,7 @@ export type ClientCommand =
         | 'markers'
         | 'functions';
       thread?: string;
+      includeIdle?: boolean;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
       callTreeOptions?: CallTreeCollectionOptions;

@@ -25,11 +25,13 @@ import {
 import {
   getAllCommittedRanges,
   getSelectedThreadIndexes,
+  getTransformStack,
 } from 'firefox-profiler/selectors/url-state';
 import {
   commitRange,
   popCommittedRanges,
   changeSelectedThreads,
+  addTransformToStack,
 } from '../actions/profile-view';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
@@ -72,7 +74,8 @@ import type {
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
-import type { StartEndRange } from 'firefox-profiler/types';
+import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
+import type { StartEndRange, ThreadIndex } from 'firefox-profiler/types';
 import type { Store } from '../types/store';
 
 export class ProfileQuerier {
@@ -133,43 +136,73 @@ export class ProfileQuerier {
   }
 
   async threadSamples(
-    threadHandle?: string
+    threadHandle?: string,
+    includeIdle: boolean = false
   ): Promise<WithContext<ThreadSamplesResult>> {
-    const result = await collectThreadSamples(
-      this._store,
-      this._threadMap,
-      this._functionMap,
-      threadHandle
-    );
-    return { ...result, context: this._getContext() };
+    const activeOnly = !includeIdle;
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const collect = () =>
+      collectThreadSamples(
+        this._store,
+        this._threadMap,
+        this._functionMap,
+        threadHandle
+      );
+    const result = activeOnly
+      ? this._withDroppedIdle(threadIndexes, collect)
+      : collect();
+    return { ...result, activeOnly, context: this._getContext() };
   }
 
   async threadSamplesTopDown(
     threadHandle?: string,
-    callTreeOptions?: CallTreeCollectionOptions
+    callTreeOptions?: CallTreeCollectionOptions,
+    includeIdle: boolean = false
   ): Promise<WithContext<ThreadSamplesTopDownResult>> {
-    const result = await collectThreadSamplesTopDown(
-      this._store,
-      this._threadMap,
-      this._functionMap,
-      threadHandle,
-      callTreeOptions
-    );
-    return { ...result, context: this._getContext() };
+    const activeOnly = !includeIdle;
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const collect = () =>
+      collectThreadSamplesTopDown(
+        this._store,
+        this._threadMap,
+        this._functionMap,
+        threadHandle,
+        callTreeOptions
+      );
+    const result = activeOnly
+      ? this._withDroppedIdle(threadIndexes, collect)
+      : collect();
+    return { ...result, activeOnly, context: this._getContext() };
   }
 
   async threadSamplesBottomUp(
     threadHandle?: string,
-    callTreeOptions?: CallTreeCollectionOptions
+    callTreeOptions?: CallTreeCollectionOptions,
+    includeIdle: boolean = false
   ): Promise<WithContext<ThreadSamplesBottomUpResult>> {
-    const result = await collectThreadSamplesBottomUp(
-      this._store,
-      this._threadMap,
-      this._functionMap,
-      threadHandle,
-      callTreeOptions
-    );
-    return { ...result, context: this._getContext() };
+    const activeOnly = !includeIdle;
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const collect = () =>
+      collectThreadSamplesBottomUp(
+        this._store,
+        this._threadMap,
+        this._functionMap,
+        threadHandle,
+        callTreeOptions
+      );
+    const result = activeOnly
+      ? this._withDroppedIdle(threadIndexes, collect)
+      : collect();
+    return { ...result, activeOnly, context: this._getContext() };
   }
 
   /**
@@ -395,6 +428,42 @@ export class ProfileQuerier {
       .map((idx) => profile.threads[idx].name)
       .join(', ');
     return `Selected ${threadIndexes.size} threads: ${threadHandle} (${names})`;
+  }
+
+  /**
+   * Apply a drop-category transform for the Idle category around a computation,
+   * then restore the transform stack to its previous state.
+   * If the profile has no Idle category, fn() is called without changes.
+   */
+  private _withDroppedIdle<T>(threadIndexes: Set<ThreadIndex>, fn: () => T): T {
+    const state = this._store.getState();
+    const profile = getProfile(state);
+    const idleCategoryIndex =
+      profile.meta.categories?.findIndex((c) => c.name === 'Idle') ?? -1;
+
+    if (idleCategoryIndex === -1) {
+      return fn();
+    }
+
+    const threadsKey = getThreadsKey(threadIndexes);
+    const stackLengthBefore = getTransformStack(state, threadsKey).length;
+
+    this._store.dispatch(
+      addTransformToStack(threadsKey, {
+        type: 'drop-category',
+        category: idleCategoryIndex,
+      })
+    );
+
+    try {
+      return fn();
+    } finally {
+      this._store.dispatch({
+        type: 'POP_TRANSFORMS_FROM_STACK',
+        threadsKey,
+        firstPoppedFilterIndex: stackLengthBefore,
+      });
+    }
   }
 
   /**
@@ -643,16 +712,26 @@ export class ProfileQuerier {
    */
   async threadFunctions(
     threadHandle?: string,
-    filterOptions?: FunctionFilterOptions
+    filterOptions?: FunctionFilterOptions,
+    includeIdle: boolean = false
   ): Promise<WithContext<ThreadFunctionsResult>> {
-    const result = await collectThreadFunctions(
-      this._store,
-      this._threadMap,
-      this._functionMap,
-      threadHandle,
-      filterOptions
-    );
-    return { ...result, context: this._getContext() };
+    const activeOnly = !includeIdle;
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const collect = () =>
+      collectThreadFunctions(
+        this._store,
+        this._threadMap,
+        this._functionMap,
+        threadHandle,
+        filterOptions
+      );
+    const result = activeOnly
+      ? this._withDroppedIdle(threadIndexes, collect)
+      : collect();
+    return { ...result, activeOnly, context: this._getContext() };
   }
 
   /**
