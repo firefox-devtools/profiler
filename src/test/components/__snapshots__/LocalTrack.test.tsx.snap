@@ -27,7 +27,7 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackMemory"
+        class="timelineTrackCounter"
         style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
       >
         <div
@@ -47,11 +47,11 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
           </div>
         </div>
         <div
-          class="timelineTrackMemoryGraph"
+          class="timelineTrackCounterGraph"
         >
           <div>
             <canvas
-              class="timelineTrackMemoryCanvas"
+              class="timelineTrackCounterCanvas"
               height="25"
               width="400"
             />

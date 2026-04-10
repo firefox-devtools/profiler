@@ -2,7 +2,7 @@
 
 exports[`TrackPower draws a dot that matches the snapshot 1`] = `
 <div
-  class="timelineTrackPowerGraphDot"
+  class="timelineTrackCounterGraphDot"
   style="left: 15px; top: 24.872px; background-color: rgb(74, 74, 79);"
 />
 `;
@@ -146,15 +146,15 @@ Array [
 
 exports[`TrackPower matches the component snapshot 1`] = `
 <div
-  class="timelineTrackPower"
-  style="height: 25px; --graph-height: 25px;"
+  class="timelineTrackCounter"
+  style="height: 25px; --graph-height: 25px; --markers-height: 15px;"
 >
   <div
-    class="timelineTrackPowerGraph"
+    class="timelineTrackCounterGraph"
   >
     <div>
       <canvas
-        class="timelineTrackPowerCanvas"
+        class="timelineTrackCounterCanvas"
         height="25"
         width="120"
       />

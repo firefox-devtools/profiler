@@ -9,21 +9,20 @@ import {
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
 } from './url-state';
-import { getGlobalTracks, getLocalTracksByPid } from './profile';
+import { getGlobalTracks, getLocalTracksByPid, getCounters } from './profile';
 import { getZipFileState } from './zipped-profiles';
 import { assertExhaustiveCheck, ensureExists } from '../utils/types';
 import {
   FULL_TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,
-  TRACK_MEMORY_HEIGHT,
-  TRACK_BANDWIDTH_HEIGHT,
   TRACK_IPC_HEIGHT,
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
   TRACK_VISUAL_PROGRESS_HEIGHT,
   TRACK_EVENT_DELAY_HEIGHT,
-  TRACK_PROCESS_CPU_HEIGHT,
   TRACK_MARKER_HEIGHT,
+  TRACK_COUNTER_GRAPH_HEIGHT,
+  TRACK_COUNTER_MARKERS_HEIGHT,
 } from '../app-logic/constants';
 
 import type {
@@ -106,12 +105,14 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getTrackThreadHeights,
+  getCounters,
   (
     globalTracks,
     localTracksByPid,
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
-    trackThreadHeights
+    trackThreadHeights,
+    counters
   ) => {
     let height = TIMELINE_RULER_HEIGHT;
     const border = 1;
@@ -186,21 +187,23 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
             case 'network':
               height += TRACK_NETWORK_HEIGHT + border;
               break;
-            case 'memory':
-              height += TRACK_MEMORY_HEIGHT + border;
+            case 'counter': {
+              // Counter track height depends on whether it has markers.
+              const counter = counters?.[localTrack.counterIndex];
+              const hasMarkers =
+                counter?.display.markerSchemaLocation !== null &&
+                counter?.display.markerSchemaLocation !== undefined;
+              height += hasMarkers
+                ? TRACK_COUNTER_GRAPH_HEIGHT + TRACK_COUNTER_MARKERS_HEIGHT
+                : TRACK_COUNTER_GRAPH_HEIGHT;
+              height += border;
               break;
-            case 'bandwidth':
-              height += TRACK_BANDWIDTH_HEIGHT + border;
-              break;
+            }
             case 'event-delay':
               height += TRACK_EVENT_DELAY_HEIGHT + border;
               break;
             case 'ipc':
               height += TRACK_IPC_HEIGHT + border;
-              break;
-            case 'process-cpu':
-            case 'power':
-              height += TRACK_PROCESS_CPU_HEIGHT + border;
               break;
             case 'marker':
               height += TRACK_MARKER_HEIGHT + border;

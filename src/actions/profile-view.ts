@@ -347,10 +347,7 @@ function getInformationFromTrackReference(
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: null,
           };
-        case 'memory':
-        case 'bandwidth':
-        case 'process-cpu':
-        case 'power': {
+        case 'counter': {
           const counterSelectors = getCounterSelectors(localTrack.counterIndex);
           const counter = counterSelectors.getCounter(state);
           return {

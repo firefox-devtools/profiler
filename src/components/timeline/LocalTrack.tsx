@@ -26,11 +26,8 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimelineTrackThread } from './TrackThread';
 import { TrackEventDelay } from './TrackEventDelay';
 import { TrackNetwork } from './TrackNetwork';
-import { TrackMemory } from './TrackMemory';
-import { TrackBandwidth } from './TrackBandwidth';
+import { TrackCounter } from './TrackCounter';
 import { TrackIPC } from './TrackIPC';
-import { TrackProcessCPU } from './TrackProcessCPU';
-import { TrackPower } from './TrackPower';
 import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import type {
   TrackReference,
@@ -106,18 +103,12 @@ class LocalTrackComponent extends PureComponent<Props> {
         );
       case 'network':
         return <TrackNetwork threadIndex={localTrack.threadIndex} />;
-      case 'memory':
-        return <TrackMemory counterIndex={localTrack.counterIndex} />;
-      case 'bandwidth':
-        return <TrackBandwidth counterIndex={localTrack.counterIndex} />;
+      case 'counter':
+        return <TrackCounter counterIndex={localTrack.counterIndex} />;
       case 'ipc':
         return <TrackIPC threadIndex={localTrack.threadIndex} />;
       case 'event-delay':
         return <TrackEventDelay threadIndex={localTrack.threadIndex} />;
-      case 'process-cpu':
-        return <TrackProcessCPU counterIndex={localTrack.counterIndex} />;
-      case 'power':
-        return <TrackPower counterIndex={localTrack.counterIndex} />;
       case 'marker':
         return (
           <TrackCustomMarker
@@ -241,10 +232,7 @@ export const TimelineLocalTrack = explicitConnect<
           'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;
       }
-      case 'memory':
-      case 'bandwidth':
-      case 'process-cpu':
-      case 'power': {
+      case 'counter': {
         titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
           state
         );

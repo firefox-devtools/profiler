@@ -1013,7 +1013,7 @@ function _deriveCounterDisplay(
       unit: 'percent',
       color: 'grey',
       markerSchemaLocation: null,
-      sortWeight: 40,
+      sortWeight: 70,
       label: 'Process CPU',
     };
   }
@@ -1023,7 +1023,7 @@ function _deriveCounterDisplay(
     unit: '',
     color: 'grey',
     markerSchemaLocation: null,
-    sortWeight: 50,
+    sortWeight: 35,
     label: name,
   };
 }

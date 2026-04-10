@@ -8,22 +8,25 @@ import {
   getCommittedRange,
   getCounterSelectors,
 } from 'firefox-profiler/selectors/profile';
+import { TimelineMarkersMemory } from './Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
-import { TrackPowerGraph } from './TrackPowerGraph';
+import { TrackCounterGraph } from './TrackCounterGraph';
 import {
-  TRACK_POWER_HEIGHT,
-  TRACK_POWER_LINE_WIDTH,
+  TRACK_COUNTER_GRAPH_HEIGHT,
+  TRACK_COUNTER_MARKERS_HEIGHT,
+  TRACK_COUNTER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
   ThreadIndex,
   Milliseconds,
+  CounterDisplayConfig,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
-import './TrackPower.css';
+import './TrackCounter.css';
 
 type OwnProps = {
   readonly counterIndex: CounterIndex;
@@ -33,6 +36,7 @@ type StateProps = {
   readonly threadIndex: ThreadIndex;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
+  readonly display: CounterDisplayConfig;
 };
 
 type DispatchProps = {
@@ -41,32 +45,60 @@ type DispatchProps = {
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type State = {};
+export class TrackCounterImpl extends React.PureComponent<Props> {
+  _onMarkerSelect = (start: Milliseconds, end: Milliseconds) => {
+    const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
+    updatePreviewSelection({
+      isModifying: false,
+      selectionStart: Math.max(rangeStart, start),
+      selectionEnd: Math.min(rangeEnd, end),
+    });
+  };
 
-export class TrackPowerImpl extends React.PureComponent<Props, State> {
   override render() {
-    const { counterIndex } = this.props;
+    const { counterIndex, rangeStart, rangeEnd, threadIndex, display } =
+      this.props;
+
+    const hasMarkers = display.markerSchemaLocation !== null;
+    const graphHeight = TRACK_COUNTER_GRAPH_HEIGHT;
+    const totalHeight = hasMarkers
+      ? graphHeight + TRACK_COUNTER_MARKERS_HEIGHT
+      : graphHeight;
+
     return (
       <div
-        className="timelineTrackPower"
+        className="timelineTrackCounter"
         style={
           {
-            height: TRACK_POWER_HEIGHT,
-            '--graph-height': `${TRACK_POWER_HEIGHT}px`,
+            height: totalHeight,
+            '--graph-height': `${graphHeight}px`,
+            '--markers-height': `${TRACK_COUNTER_MARKERS_HEIGHT}px`,
           } as React.CSSProperties
         }
       >
-        <TrackPowerGraph
+        {hasMarkers ? (
+          <TimelineMarkersMemory
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadsKey={threadIndex}
+            onSelect={this._onMarkerSelect}
+          />
+        ) : null}
+        <TrackCounterGraph
           counterIndex={counterIndex}
-          lineWidth={TRACK_POWER_LINE_WIDTH}
-          graphHeight={TRACK_POWER_HEIGHT}
+          lineWidth={TRACK_COUNTER_LINE_WIDTH}
+          graphHeight={graphHeight}
         />
       </div>
     );
   }
 }
 
-export const TrackPower = explicitConnect<OwnProps, StateProps, DispatchProps>({
+export const TrackCounter = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;
     const counterSelectors = getCounterSelectors(counterIndex);
@@ -76,8 +108,9 @@ export const TrackPower = explicitConnect<OwnProps, StateProps, DispatchProps>({
       threadIndex: counter.mainThreadIndex,
       rangeStart: start,
       rangeEnd: end,
+      display: counter.display,
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
-  component: TrackPowerImpl,
+  component: TrackCounterImpl,
 });

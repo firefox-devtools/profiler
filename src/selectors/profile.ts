@@ -549,10 +549,19 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
  */
 export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
   getLocalTracksByPid,
-  (localTracksByPid) => {
+  getCounters,
+  (localTracksByPid, counters) => {
     const processesWithMemoryTrack = new Set<Pid>();
     for (const [pid, localTracks] of localTracksByPid.entries()) {
-      if (localTracks.some((track) => track.type === 'memory')) {
+      if (
+        localTracks.some(
+          (track) =>
+            track.type === 'counter' &&
+            counters !== null &&
+            counters[track.counterIndex].display.markerSchemaLocation ===
+              'timeline-memory'
+        )
+      ) {
         processesWithMemoryTrack.add(pid);
       }
     }

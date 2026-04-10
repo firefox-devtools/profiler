@@ -511,8 +511,8 @@ describe('actions/ProfileView', function () {
             store.getState(),
             memoryTrackReference
           );
-          if (memoryTrack.type !== 'memory') {
-            throw new Error('Expected to get memory track.');
+          if (memoryTrack.type !== 'counter') {
+            throw new Error('Expected to get counter track.');
           }
         }
 

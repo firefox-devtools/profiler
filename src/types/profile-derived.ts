@@ -636,12 +636,9 @@ export type GlobalTrack =
 export type LocalTrack =
   | { readonly type: 'thread'; readonly threadIndex: ThreadIndex }
   | { readonly type: 'network'; readonly threadIndex: ThreadIndex }
-  | { readonly type: 'memory'; readonly counterIndex: CounterIndex }
-  | { readonly type: 'bandwidth'; readonly counterIndex: CounterIndex }
+  | { readonly type: 'counter'; readonly counterIndex: CounterIndex }
   | { readonly type: 'ipc'; readonly threadIndex: ThreadIndex }
   | { readonly type: 'event-delay'; readonly threadIndex: ThreadIndex }
-  | { readonly type: 'process-cpu'; readonly counterIndex: CounterIndex }
-  | { readonly type: 'power'; readonly counterIndex: CounterIndex }
   | {
       readonly type: 'marker';
       readonly threadIndex: ThreadIndex;
