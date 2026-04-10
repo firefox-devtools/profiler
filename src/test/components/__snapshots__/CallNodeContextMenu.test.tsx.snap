@@ -144,6 +144,30 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
       tabindex="-1"
     >
       <span
+        class="react-contextmenu-icon callNodeContextMenuIconDrop"
+      />
+      <div
+        class="react-contextmenu-item-content"
+        title="Dropping samples with a category removes all samples whose leaf frame belongs to that category."
+      >
+        Drop samples with category 
+        <strong>
+          ⁨Other⁩
+        </strong>
+      </div>
+      <kbd
+        class="callNodeContextMenuShortcut"
+      >
+        G
+      </kbd>
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item"
+      role="menuitem"
+      tabindex="-1"
+    >
+      <span
         class="react-contextmenu-icon callNodeContextMenuIconCollapse"
       />
       <div

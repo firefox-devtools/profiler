@@ -74,6 +74,7 @@ const TRANSFORM_OBJ: { [key in TransformType]: true } = {
   'collapse-recursion': true,
   'collapse-function-subtree': true,
   'focus-category': true,
+  'drop-category': true,
   'filter-samples': true,
 };
 export const ALL_TRANSFORM_TYPES: TransformType[] = Object.keys(
@@ -99,6 +100,9 @@ ALL_TRANSFORM_TYPES.forEach((transform: TransformType) => {
       break;
     case 'focus-category':
       shortKey = 'fg';
+      break;
+    case 'drop-category':
+      shortKey = 'dg';
       break;
     case 'merge-call-node':
       shortKey = 'mcn';
@@ -277,6 +281,19 @@ export function parseTransforms(transformString: string): TransformStack {
         }
         break;
       }
+      case 'drop-category': {
+        // e.g. "dg-3"
+        const [, categoryRaw] = tuple;
+        const category = parseInt(categoryRaw, 10);
+        // Validate that the category makes sense.
+        if (!isNaN(category) && category >= 0) {
+          transforms.push({
+            type: 'drop-category',
+            category,
+          });
+        }
+        break;
+      }
       case 'focus-subtree':
       case 'merge-call-node': {
         // e.g. "f-js-xFFpUMl-i" or "f-cpp-0KV4KV5KV61KV7KV8K"
@@ -378,6 +395,7 @@ export function stringifyTransforms(transformStack: TransformStack): string {
         case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
         case 'focus-category':
+        case 'drop-category':
           return `${shortKey}-${transform.category}`;
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
@@ -445,6 +463,16 @@ export function getTransformLabelL10nIds(
       }
       return {
         l10nId: 'TransformNavigator--focus-category',
+        item: categories[transform.category].name,
+      };
+    }
+
+    if (transform.type === 'drop-category') {
+      if (categories === undefined) {
+        throw new Error('Expected categories to be defined.');
+      }
+      return {
+        l10nId: 'TransformNavigator--drop-category',
         item: categories[transform.category].name,
       };
     }
@@ -547,6 +575,12 @@ export function applyTransformToCallNodePath(
       );
     case 'focus-category':
       return _removeOtherCategoryFunctionsInNodePathWithFunction(
+        transform.category,
+        callNodePath,
+        callNodeInfo
+      );
+    case 'drop-category':
+      return _dropCategoryInCallNodePath(
         transform.category,
         callNodePath,
         callNodeInfo
@@ -670,6 +704,23 @@ function _removeOtherCategoryFunctionsInNodePathWithFunction(
   }
 
   return newCallNodePath;
+}
+
+// If the leaf node of the call node path belongs to the dropped category,
+// return an empty path — the whole sample is gone.
+function _dropCategoryInCallNodePath(
+  category: IndexIntoCategoryList,
+  callNodePath: CallNodePath,
+  callNodeInfo: CallNodeInfo
+): CallNodePath {
+  const leafCallNodeIndex = callNodeInfo.getCallNodeIndexFromPath(callNodePath);
+  if (
+    leafCallNodeIndex !== null &&
+    callNodeInfo.categoryForNode(leafCallNodeIndex) === category
+  ) {
+    return [];
+  }
+  return callNodePath;
 }
 
 function _collapseResourceInCallNodePath(
@@ -1457,6 +1508,20 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
 }
 
 /**
+ * Drop any samples whose leaf stack frame belongs to the given category.
+ */
+export function dropCategory(thread: Thread, category: IndexIntoCategoryList) {
+  return timeCode('dropCategory', () => {
+    const { stackTable } = thread;
+
+    return updateThreadStacks(thread, stackTable, (stack) =>
+      // Drop any sample whose leaf frame belongs to the given category.
+      stack !== null && stackTable.category[stack] === category ? null : stack
+    );
+  });
+}
+
+/**
  * When restoring function in a CallNodePath there can be multiple correct CallNodePaths
  * that could be restored. The best approach would probably be to restore to the
  * "heaviest" callstack in the call tree (i.e. the one that is displayed first in the
@@ -1834,6 +1899,8 @@ export function applyTransform(
       return focusSelf(thread, transform.funcIndex, transform.implementation);
     case 'focus-category':
       return focusCategory(thread, transform.category);
+    case 'drop-category':
+      return dropCategory(thread, transform.category);
     case 'collapse-resource':
       return collapseResource(
         thread,
@@ -2059,7 +2126,8 @@ export function translateTransform(
         funcIndex: newFuncIndex,
       };
     }
-    case 'focus-category': {
+    case 'focus-category':
+    case 'drop-category': {
       // We don't sanitize-away categories, so this transform doesn't need to
       // be translated.
       return transform;

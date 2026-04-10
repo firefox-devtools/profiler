@@ -125,7 +125,8 @@ describe('calltree/CallNodeContextMenu', function () {
       { matcher: /Merge node only/, type: 'merge-call-node' },
       { matcher: /Focus on subtree only/, type: 'focus-subtree' },
       { matcher: /Focus on function/, type: 'focus-function' },
-      { matcher: /Other/, type: 'focus-category' },
+      { matcher: /Focus on category/, type: 'focus-category' },
+      { matcher: /Drop samples with category/, type: 'drop-category' },
       { matcher: /Collapse function/, type: 'collapse-function-subtree' },
       { matcher: /XUL/, type: 'collapse-resource' },
       {
@@ -136,7 +137,7 @@ describe('calltree/CallNodeContextMenu', function () {
         matcher: /Collapse direct recursion/,
         type: 'collapse-direct-recursion',
       },
-      { matcher: /Drop samples/, type: 'drop-function' },
+      { matcher: /Drop samples with this function/, type: 'drop-function' },
     ];
 
     fixtures.forEach(({ matcher, type }) => {

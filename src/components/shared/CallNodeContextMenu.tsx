@@ -422,6 +422,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         });
         break;
       }
+      case 'drop-category': {
+        addTransformToStack(threadsKey, {
+          type: 'drop-category',
+          category,
+        });
+        break;
+      }
       case 'filter-samples':
         throw new Error(
           "Filter samples transform can't be applied from the call node context menu."
@@ -711,6 +718,22 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               transform: 'focus-category',
               title: '',
               content: 'Focus on category',
+            })
+          : null}
+
+        {hasCategory
+          ? this.renderTransformMenuItem({
+              l10nId: 'CallNodeContextMenu--transform-drop-category',
+              l10nProps: {
+                vars: { categoryName },
+                elems: { strong: <strong /> },
+              },
+              shortcut: 'G',
+              icon: 'Drop',
+              onClick: this._handleClick,
+              transform: 'drop-category',
+              title: '',
+              content: 'Drop samples with this category',
             })
           : null}
 

@@ -2103,6 +2103,14 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
+      case 'G':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'drop-category',
+            category,
+          })
+        );
+        break;
       default:
       // This did not match a call tree transform.
     }

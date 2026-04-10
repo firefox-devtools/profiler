@@ -125,6 +125,15 @@ CallNodeContextMenu--transform-focus-category = Focus on category <strong>{ $cat
     .title =
         Focusing on the nodes that belong to the same category as the selected node,
         thereby merging all nodes that belong to another category.
+
+# This is used as the context menu item to apply the "Drop category" transform.
+# Variables:
+#   $categoryName (String) - Name of the category to drop.
+CallNodeContextMenu--transform-drop-category = Drop samples with category <strong>{ $categoryName }</strong>
+    .title =
+        Dropping samples with a category removes all samples whose leaf frame
+        belongs to that category.
+
 CallNodeContextMenu--transform-collapse-function-subtree = Collapse function
     .title =
         Collapsing a function will remove everything it called, and assign
@@ -1179,6 +1188,11 @@ TransformNavigator--focus-self = Focus Self: { $item }
 # Variables:
 #   $item (String) - Name of the category that transform applied to.
 TransformNavigator--focus-category = Focus category: { $item }
+
+# "Drop samples with category" transform (drop is a verb, as in remove).
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--drop-category = Drop samples with category: { $item }
 
 # "Merge call node" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge

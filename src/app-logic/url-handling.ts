@@ -53,7 +53,7 @@ import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
 
-export const CURRENT_URL_VERSION = 15;
+export const CURRENT_URL_VERSION = 16;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -1350,6 +1350,10 @@ const _upgraders: {
       .split('~')
       .map(mapIndexesInTransform)
       .join('~');
+  },
+  [16]: (_) => {
+    // Added the 'drop-category' transform (short key 'dg'). No existing URLs
+    // need rewriting; this is a new transform with no prior encoding to migrate.
   },
 };
 

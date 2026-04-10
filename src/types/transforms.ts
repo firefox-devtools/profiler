@@ -369,6 +369,32 @@ export type TransformDefinitions = {
   };
 
   /**
+   * Drop any samples whose leaf stack frame belongs to the specified category.
+   * Only the leaf (innermost) frame is checked — if a non-leaf frame belongs to
+   * the category the sample is kept. An example with 'function:category' as the
+   * node name, dropping the Native category:
+   *
+   *            A:JS                      A:JS
+   *           /    \                       \
+   *          v      v    Drop Native        v
+   *        B:JS     E:JS       ->          E:JS
+   *         |        |                      |
+   *         v        v                      v
+   *     C:Native    B:JS                   B:JS
+   *                  |                      |
+   *                  v                      v
+   *              D:JS                   D:JS
+   *
+   * The left branch (B:JS → C:Native) is removed because the leaf C:Native
+   * belongs to the Native category. The right branch is kept in full because
+   * its leaf D:JS is not Native, even though no Native frames appear there.
+   */
+  'drop-category': {
+    readonly type: 'drop-category';
+    readonly category: IndexIntoCategoryList;
+  };
+
+  /**
    * Filter the samples in the thread by the filter.
    * Currently it only supports filtering by the marker name but can be extended
    * to support more filters in the future.

@@ -1031,6 +1031,128 @@ describe('"focus-category" transform', function () {
   });
 });
 
+describe('"drop-category" transform', function () {
+  function setup(textSamples: string) {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
+    const threadIndex = 0;
+    if (profile.meta.categories === undefined) {
+      throw new Error('Expected profile to have categories');
+    }
+    const categoryIndex = profile.meta.categories
+      .map((c, i) => (c.name === 'Graphics' ? i : -1))
+      .filter((i) => i !== -1)[0];
+
+    return {
+      threadIndex,
+      categoryIndex,
+      funcNamesDict,
+      ...storeWithProfile(profile),
+    };
+  }
+
+  describe('drops samples where the leaf frame is in the category, keeps others', function () {
+    // Sample 1: C (leaf) is Graphics -> entire sample dropped
+    // Sample 2: E (leaf) is Layout -> kept
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
+      A[cat:Layout]     A[cat:Layout]
+      B[cat:Layout]     D[cat:Layout]
+      C[cat:Graphics]   E[cat:Layout]
+    `);
+    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+
+    it('starts as an unfiltered call tree', function () {
+      expect(formatTree(originalCallTree)).toEqual([
+        '- A (total: 2, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+        '  - D (total: 1, self: —)',
+        '    - E (total: 1, self: 1)',
+      ]);
+    });
+
+    it('drops the sample with a Graphics leaf, keeps the one without', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'drop-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - D (total: 1, self: —)',
+        '    - E (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('does not drop a sample when only the root frame is in the category', function () {
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
+      A[cat:Graphics]
+      B[cat:Layout]
+    `);
+
+    it('keeps the sample since the leaf is not in the category', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'drop-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 1, self: —)',
+        '  - B (total: 1, self: 1)',
+      ]);
+    });
+  });
+
+  describe('drops a sample when a leaf frame is in the category', function () {
+    const { threadIndex, categoryIndex, getState, dispatch } = setup(`
+      A[cat:Layout]
+      B[cat:Layout]
+      C[cat:Graphics]
+    `);
+
+    it('results in an empty call tree', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'drop-category',
+          category: categoryIndex,
+        })
+      );
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([]);
+    });
+  });
+
+  describe('selected call node path is cleared when the leaf is in the category', function () {
+    const { threadIndex, categoryIndex, getState, dispatch, funcNamesDict } =
+      setup(`
+        A[cat:Layout]     A[cat:Layout]
+        B[cat:Layout]     D[cat:Layout]
+        C[cat:Graphics]   E[cat:Layout]
+      `);
+
+    it('clears selected path when the leaf node is in the Graphics category', function () {
+      const { A, B, C } = funcNamesDict;
+      dispatch(changeSelectedCallNode(threadIndex, [A, B, C]));
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'drop-category',
+          category: categoryIndex,
+        })
+      );
+      const selectedCallNodePath =
+        selectedThreadSelectors.getSelectedCallNodePath(getState());
+      expect(selectedCallNodePath).toEqual([]);
+    });
+  });
+});
+
 describe('"collapse-resource" transform', function () {
   describe('combined implementation', function () {
     /**

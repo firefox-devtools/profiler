@@ -68,6 +68,15 @@ function testTransformKeyboardShortcuts(setup: () => TestSetup) {
     });
   });
 
+  it('handles drop-category', () => {
+    const { pressKey, getTransform, expectedCategory } = setup();
+    pressKey({ key: 'G' });
+    expect(getTransform()).toEqual({
+      type: 'drop-category',
+      category: expectedCategory,
+    });
+  });
+
   it('handles merge call node', () => {
     const { pressKey, getTransform, expectedCallNodePath } = setup();
     pressKey({ key: 'M' });
