@@ -98,6 +98,57 @@ describe('pq basic functionality', () => {
     expect(result2.stdout).toEqual(result1.stdout);
   });
 
+  test('numeric zero marker filters are preserved instead of being ignored', async () => {
+    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const minDurationResult = await pq(ctx, [
+      'thread',
+      'markers',
+      '--json',
+      '--min-duration',
+      '0',
+    ]);
+    expect(minDurationResult.stdout).toContain('"minDuration": 0');
+
+    const maxDurationResult = await pq(ctx, [
+      'thread',
+      'markers',
+      '--json',
+      '--max-duration',
+      '0',
+    ]);
+    expect(maxDurationResult.stdout).toContain('"maxDuration": 0');
+  });
+
+  test('numeric zero function filters are preserved instead of being ignored', async () => {
+    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await pq(ctx, [
+      'thread',
+      'functions',
+      '--json',
+      '--min-self',
+      '0',
+    ]);
+
+    expect(result.stdout).toContain('"minSelf": 0');
+  });
+
+  test('max-lines=0 is rejected instead of silently falling back to the default', async () => {
+    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await pqFail(ctx, [
+      'thread',
+      'samples-top-down',
+      '--max-lines',
+      '0',
+    ]);
+
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('--max-lines must be a positive integer');
+  });
+
   test('build hash mismatch stops the daemon before cleaning up the session', async () => {
     const loadResult = await pq(ctx, [
       'load',

@@ -339,13 +339,13 @@ async function main(): Promise<void> {
         let functionFilters: FunctionFilterOptions | undefined;
 
         if (subcommand === 'markers') {
-          const hasSearch = !!argv.search;
-          const hasMinDuration = !!argv['min-duration'];
-          const hasMaxDuration = !!argv['max-duration'];
-          const hasCategory = !!argv.category;
+          const hasSearch = argv.search !== undefined;
+          const hasMinDuration = argv['min-duration'] !== undefined;
+          const hasMaxDuration = argv['max-duration'] !== undefined;
+          const hasCategory = argv.category !== undefined;
           const hasStack = argv['has-stack'];
-          const hasLimit = !!argv.limit;
-          const hasGroupBy = !!argv['group-by'];
+          const hasLimit = argv.limit !== undefined;
+          const hasGroupBy = argv['group-by'] !== undefined;
           const hasAutoGroup = argv['auto-group'];
 
           if (
@@ -407,9 +407,9 @@ async function main(): Promise<void> {
 
         // Parse function filter options if this is a functions command
         if (subcommand === 'functions') {
-          const hasSearch = !!argv.search;
-          const hasMinSelf = !!argv['min-self'];
-          const hasLimit = !!argv.limit;
+          const hasSearch = argv.search !== undefined;
+          const hasMinSelf = argv['min-self'] !== undefined;
+          const hasLimit = argv.limit !== undefined;
 
           if (hasSearch || hasMinSelf || hasLimit) {
             functionFilters = {};
@@ -443,8 +443,8 @@ async function main(): Promise<void> {
           subcommand === 'samples-top-down' ||
           subcommand === 'samples-bottom-up'
         ) {
-          const hasMaxLines = !!argv['max-lines'];
-          const hasScoring = !!argv.scoring;
+          const hasMaxLines = argv['max-lines'] !== undefined;
+          const hasScoring = argv.scoring !== undefined;
 
           if (hasMaxLines || hasScoring) {
             callTreeOptions = {};
