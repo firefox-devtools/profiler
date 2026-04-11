@@ -912,6 +912,13 @@ export const getContainsPrivateBrowsingInformation: Selector<boolean> =
     return hasPrivateThreads;
   });
 
+// Gets whether this profile contains argument values from JS execution tracing.
+export const getHasArgumentValues: Selector<boolean> = createSelector(
+  getThreads,
+  (threads) =>
+    threads.some((thread) => thread.samples.argumentValues !== undefined)
+);
+
 /**
  * Returns the TIDs of the threads that are profiled.
  */

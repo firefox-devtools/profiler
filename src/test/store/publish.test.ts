@@ -73,6 +73,7 @@ describe('getCheckedSharingOptions', function () {
   describe('default filtering by channel', function () {
     const isFiltering = {
       includeExtension: false,
+      includeArgumentValues: false,
       includeFullTimeRange: false,
       includeHiddenThreads: false,
       includeAllTabs: false,
@@ -83,6 +84,7 @@ describe('getCheckedSharingOptions', function () {
     };
     const isNotFiltering = {
       includeExtension: true,
+      includeArgumentValues: false,
       includeFullTimeRange: true,
       includeHiddenThreads: true,
       includeAllTabs: true,

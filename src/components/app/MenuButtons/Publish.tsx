@@ -16,6 +16,7 @@ import {
   getProfileRootRange,
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
+  getHasArgumentValues,
 } from 'firefox-profiler/selectors/profile';
 import {
   getAbortFunction,
@@ -58,6 +59,7 @@ type StateProps = {
   readonly rootRange: StartEndRange;
   readonly shouldShowPreferenceOption: boolean;
   readonly profileContainsPrivateBrowsingInformation: boolean;
+  readonly profileHasArgumentValues: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
@@ -123,6 +125,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     const {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
+      profileHasArgumentValues,
       sanitizedProfileEncodingState,
       downloadFileName,
       shouldSanitizeByDefault,
@@ -208,6 +211,12 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                       title="This profile contains private browsing data"
                     />
                   </Localized>
+                )
+              : null}
+            {profileHasArgumentValues
+              ? this._renderCheckbox(
+                  'includeArgumentValues',
+                  'MenuButtons--publish--renderCheckbox-label-argument-values'
                 )
               : null}
           </div>
@@ -361,6 +370,7 @@ export const PublishPanel = explicitConnect<
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
+    profileHasArgumentValues: getHasArgumentValues(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
     downloadFileName: getFilenameString(state),
     sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
