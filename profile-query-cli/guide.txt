@@ -13,11 +13,19 @@ SESSION MODEL
 
   The daemon persists your selected thread, zoom ranges, and filter stacks across queries.
 
+  For automation or concurrent work, prefer an explicit session ID so each workflow
+  gets isolated state:
+    pq load profile.json.gz --session run-a
+    pq profile info --session run-a
+    pq thread select t-0 --session run-a
+    pq thread samples --session run-a
+
 
 CORE WORKFLOW
 
   Step 1: Load a profile
     pq load profile.json.gz
+    pq load profile.json.gz --session run-a   Recommended for automation or concurrent work
 
   Step 2: Explore the profile
     pq profile info          Overview: processes, threads, time range, CPU activity
