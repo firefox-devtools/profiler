@@ -46,6 +46,21 @@ jobs:
         with:
           fail_ci_if_error: false
 
+  cli-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js and install dependencies
+        uses: ./.github/actions/setup-node-and-install
+
+      - name: Run CLI tests
+        run: yarn test-cli
+
   build-prod:
     runs-on: ${{ matrix.os }}
     strategy:
