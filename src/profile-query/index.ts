@@ -106,6 +106,11 @@ export class ProfileQuerier {
     uniquePids.forEach((pid, index) => {
       this._processIndexMap.set(pid, index);
     });
+
+    // Seed thread handles eagerly so they are available immediately after load.
+    profile.threads.forEach((_, index) => {
+      this._threadMap.handleForThreadIndex(index);
+    });
   }
 
   static async load(filePathOrUrl: string): Promise<ProfileQuerier> {

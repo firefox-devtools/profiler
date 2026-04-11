@@ -60,6 +60,16 @@ describe('pq basic functionality', () => {
     expect(result.stdout).toContain('This profile contains');
   });
 
+  test('thread select works immediately after load', async () => {
+    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await pq(ctx, ['thread', 'select', 't-0']);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('Selected thread');
+    expect(result.stdout).toContain('t-0');
+  });
+
   test('stop cleans up session', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
     await pq(ctx, ['stop']);
