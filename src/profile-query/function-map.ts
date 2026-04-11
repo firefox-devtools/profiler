@@ -2,68 +2,34 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
-import type {
-  ThreadIndex,
-  IndexIntoFuncTable,
-  ThreadsKey,
-} from 'firefox-profiler/types';
+import type { IndexIntoFuncTable } from 'firefox-profiler/types';
 
 /**
- * Represents a function identified by its thread and function index.
+ * A handle like "f-123" always refers to funcTable index 123 for this profile,
+ * making handles stable across sessions for the same processed profile data.
  */
-export type FunctionId = {
-  threadIndexes: Set<ThreadIndex>;
-  threadsKey: ThreadsKey;
-  funcIndex: IndexIntoFuncTable;
-};
+export function getFunctionHandle(
+  funcIndex: IndexIntoFuncTable
+): `f-${number}` {
+  return `f-${funcIndex}`;
+}
 
 /**
- * Maps function handles (like "f-1", "f-2") to (threadIndex, funcIndex) pairs.
- * This provides a user-friendly way to reference functions in the CLI.
- *
- * Since each thread has its own funcTable, we need to store both the thread
- * index and the function index to uniquely identify a function.
+ * Parse a function handle and validate it against the shared funcTable length.
  */
-export class FunctionMap {
-  _handleToFunction: Map<string, FunctionId> = new Map();
-  _nextHandleId: number = 1;
-
-  /**
-   * Get or create a handle for a function.
-   * Returns the same handle if called multiple times with the same function.
-   */
-  handleForFunction(
-    threadIndexes: Set<ThreadIndex>,
-    funcIndex: IndexIntoFuncTable
-  ): string {
-    // Check if we already have a handle for this function
-    const threadsKey = getThreadsKey(threadIndexes);
-    for (const [handle, funcId] of this._handleToFunction.entries()) {
-      if (funcId.threadsKey === threadsKey && funcId.funcIndex === funcIndex) {
-        return handle;
-      }
-    }
-
-    // Create a new handle
-    const handle = 'f-' + this._nextHandleId++;
-    this._handleToFunction.set(handle, {
-      threadIndexes,
-      threadsKey,
-      funcIndex,
-    });
-    return handle;
+export function parseFunctionHandle(
+  functionHandle: string,
+  funcCount: number
+): IndexIntoFuncTable {
+  const match = /^f-(\d+)$/.exec(functionHandle);
+  if (match === null) {
+    throw new Error(`Unknown function ${functionHandle}`);
   }
 
-  /**
-   * Look up a function by its handle.
-   * Throws an error if the handle is unknown.
-   */
-  functionForHandle(functionHandle: string): FunctionId {
-    const funcId = this._handleToFunction.get(functionHandle);
-    if (funcId === undefined) {
-      throw new Error(`Unknown function ${functionHandle}`);
-    }
-    return funcId;
+  const funcIndex = Number(match[1]);
+  if (!Number.isInteger(funcIndex) || funcIndex < 0 || funcIndex >= funcCount) {
+    throw new Error(`Unknown function ${functionHandle}`);
   }
+
+  return funcIndex;
 }

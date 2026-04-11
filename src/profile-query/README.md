@@ -53,6 +53,9 @@ The library is built on top of the Firefox Profiler's Redux store and selectors:
 - **ProfileQuerier**: Main class that wraps a Redux store and provides query methods
 - **TimestampManager**: Manages timestamp naming for time range queries
 - **ThreadMap**: Maps thread handles (e.g., "t-0", "t-1") to thread indices
+- **Function handles**: Canonical handles like `f-123` refer to shared
+  `profile.shared.funcTable` indices and are stable across sessions for the same
+  processed profile data
 - **Formatters**: Format query results as human-readable text
 
 All query results are returned as formatted strings, suitable for display in a terminal or log file.

@@ -88,7 +88,7 @@ Commands:
   thread functions            List all functions with CPU percentages
   marker info <handle>        Show detailed marker information (e.g., m-1234)
   marker stack <handle>       Show full stack trace for a marker (e.g., m-1234)
-  function expand <handle>    Show full untruncated function name (e.g., f-1)
+  function expand <handle>    Show full untruncated function name (e.g., f-123)
   function info <handle>     Show detailed function information
   zoom push <range>          Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
   zoom pop                   Pop the most recent zoom range
@@ -101,7 +101,7 @@ Options:
   --session <id>           Use a specific session (default: current session)
   --thread <handle>        Specify thread by handle (e.g., t-0, t-1)
   --marker <handle>        Specify marker by handle (e.g., m-1, m-2)
-  --function <handle>      Specify function by handle (e.g., f-1, f-2)
+  --function <handle>      Specify function by handle (e.g., f-123, f-456)
   --search <term>          Search/filter by substring (markers, functions, and samples call trees)
   --include-idle           Include idle samples in percentages (samples commands exclude idle by default)
   --category <name>        Filter markers by category name (case-insensitive substring match)
@@ -145,8 +145,8 @@ Examples:
   pq thread markers --search DOMEvent --group-by field:eventType
   pq marker info m-1234
   pq marker stack m-1234
-  pq function expand f-12
-  pq function info f-12
+  pq function expand f-123
+  pq function info f-123
   pq zoom push 2.7,3.1
   pq zoom push m-158
   pq zoom pop

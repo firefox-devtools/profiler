@@ -37,7 +37,7 @@ import { getInvertedCallNodeInfo } from 'firefox-profiler/profile-logic/profile-
 import type { Store } from '../../types/store';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
-import type { FunctionMap } from '../function-map';
+import { getFunctionHandle } from '../function-map';
 import type { CallNodePath } from 'firefox-profiler/types';
 
 export function formatThreadInfo(
@@ -123,7 +123,6 @@ export function collectThreadInfo(
 export function collectThreadSamples(
   store: Store,
   threadMap: ThreadMap,
-  functionMap: FunctionMap,
   threadHandle?: string
 ): ThreadSamplesResult {
   const state = store.getState();
@@ -158,10 +157,7 @@ export function collectThreadSamples(
 
   // Convert top functions to structured format
   const topFunctionsByTotal: TopFunctionInfo[] = sortedByTotal.map((func) => ({
-    functionHandle: functionMap.handleForFunction(
-      threadIndexes,
-      func.funcIndex
-    ),
+    functionHandle: getFunctionHandle(func.funcIndex),
     functionIndex: func.funcIndex,
     name: func.funcName,
     nameWithLibrary: func.funcName, // Already includes library from extractFunctionData
@@ -173,10 +169,7 @@ export function collectThreadSamples(
   }));
 
   const topFunctionsBySelf: TopFunctionInfo[] = sortedBySelf.map((func) => ({
-    functionHandle: functionMap.handleForFunction(
-      threadIndexes,
-      func.funcIndex
-    ),
+    functionHandle: getFunctionHandle(func.funcIndex),
     functionIndex: func.funcIndex,
     name: func.funcName,
     nameWithLibrary: func.funcName, // Already includes library from extractFunctionData
@@ -267,7 +260,6 @@ export function collectThreadSamples(
 export function collectThreadSamplesBottomUp(
   store: Store,
   threadMap: ThreadMap,
-  functionMap: FunctionMap,
   threadHandle?: string,
   callTreeOptions?: CallTreeCollectionOptions
 ): ThreadSamplesBottomUpResult {
@@ -321,15 +313,8 @@ export function collectThreadSamplesBottomUp(
       weightType
     );
 
-    // Note: Bottom-up tree uses the same threadIndexes to generate function handles
     const libs = getProfile(state).libs;
-    invertedCallTree = collectCallTree(
-      invertedTree,
-      functionMap,
-      threadIndexes,
-      libs,
-      callTreeOptions
-    );
+    invertedCallTree = collectCallTree(invertedTree, libs, callTreeOptions);
   } catch (_e) {
     // Inverted tree creation failed, leave as null
   }
@@ -349,7 +334,6 @@ export function collectThreadSamplesBottomUp(
 export function collectThreadSamplesTopDown(
   store: Store,
   threadMap: ThreadMap,
-  functionMap: FunctionMap,
   threadHandle?: string,
   callTreeOptions?: CallTreeCollectionOptions
 ): ThreadSamplesTopDownResult {
@@ -365,13 +349,7 @@ export function collectThreadSamplesTopDown(
   const libs = getProfile(state).libs;
 
   // Collect regular call tree
-  const regularCallTree = collectCallTree(
-    callTree,
-    functionMap,
-    threadIndexes,
-    libs,
-    callTreeOptions
-  );
+  const regularCallTree = collectCallTree(callTree, libs, callTreeOptions);
 
   return {
     type: 'thread-samples-top-down',
@@ -388,7 +366,6 @@ export function collectThreadSamplesTopDown(
 export function collectThreadFunctions(
   store: Store,
   threadMap: ThreadMap,
-  functionMap: FunctionMap,
   threadHandle?: string,
   filterOptions?: FunctionFilterOptions
 ): ThreadFunctionsResult {
@@ -475,10 +452,7 @@ export function collectThreadFunctions(
       }
 
       return {
-        functionHandle: functionMap.handleForFunction(
-          threadIndexes,
-          func.funcIndex
-        ),
+        functionHandle: getFunctionHandle(func.funcIndex),
         functionIndex: func.funcIndex,
         name,
         nameWithLibrary,

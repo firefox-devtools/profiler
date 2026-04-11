@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { FunctionMap } from '../../../profile-query/function-map';
 import { collectCallTree } from '../../../profile-query/formatters/call-tree';
 import type { CallTreeNode } from '../../../profile-query/types';
 import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
@@ -24,20 +23,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // Collect with budget of 3 nodes
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 3,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 3,
+      });
 
       // Count nodes (excluding virtual root)
       const nodeCount = countNodes(result) - 1;
@@ -56,20 +47,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // With small budget, should still include D (100% at depth 3)
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 4,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 4,
+      });
 
       // Should include: A, B, C, D
       const nodeNames = collectNodeNames(result);
@@ -92,20 +75,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // With budget of 4: should get A, B (50%), D (50%), C (50%)
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 4,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 4,
+      });
 
       const nodeNames = collectNodeNames(result);
       expect(nodeNames).toContain('A');
@@ -124,20 +99,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // With budget of 2: A and B, should show C/D/E as elided
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 2,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 2,
+      });
 
       const aNode = result.children[0];
       expect(aNode.name).toBe('A');
@@ -158,20 +125,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 4,
-          scoringStrategy: 'exponential-0.9',
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 4,
+        scoringStrategy: 'exponential-0.9',
+      });
 
       const nodeNames = collectNodeNames(result);
       expect(nodeNames).toContain('A'); // 66% at depth 0
@@ -190,20 +149,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 4,
-          scoringStrategy: 'percentage-only',
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 4,
+        scoringStrategy: 'percentage-only',
+      });
 
       // All nodes should have same priority (100%), so all included
       const nodeCount = countNodes(result) - 1;
@@ -224,20 +175,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 10,
-          scoringStrategy: 'exponential-0.9',
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 10,
+        scoringStrategy: 'exponential-0.9',
+      });
 
       const nodeNames = collectNodeNames(result);
       // Should include high-percentage nodes
@@ -260,20 +203,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // Small budget to force truncation
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 3,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 3,
+      });
 
       const aNode = result.children[0];
       expect(aNode.name).toBe('A');
@@ -302,8 +237,6 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // First verify that A has many children
@@ -313,16 +246,10 @@ describe('call-tree collection', function () {
       const aChildren = callTree.getChildren(aCallNode);
       expect(aChildren.length).toBe(16); // B through Q
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 5, // Small budget to ensure truncation
-          maxChildrenPerNode: 10,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 5, // Small budget to ensure truncation
+        maxChildrenPerNode: 10,
+      });
 
       const aNode = result.children[0];
       expect(aNode.name).toBe('A');
@@ -345,19 +272,11 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 10,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 10,
+      });
 
       const aNode = result.children[0];
       expect(aNode.name).toBe('A');
@@ -383,20 +302,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 8,
-          scoringStrategy: 'exponential-0.9',
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 8,
+        scoringStrategy: 'exponential-0.9',
+      });
 
       const nodeNames = collectNodeNames(result);
       // Should include deep path A->D->E->F->G even though it's deep
@@ -420,20 +331,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 100,
-          maxDepth: 20,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 100,
+        maxDepth: 20,
+      });
 
       const maxDepth = findMaxDepth(result);
       expect(maxDepth).toBeLessThanOrEqual(20);
@@ -451,20 +354,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
       // Budget that includes A and B, but not the other children
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 2,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 2,
+      });
 
       const aNode = result.children[0];
       expect(aNode.name).toBe('A');
@@ -497,19 +392,11 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 2,
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 2,
+      });
 
       const aNode = result.children[0];
       const bNode = aNode.children[0];
@@ -535,20 +422,12 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const functionMap = new FunctionMap();
-      const threadIndexes = new Set([0]);
       const libs = profile.libs;
 
-      const result = collectCallTree(
-        callTree,
-        functionMap,
-        threadIndexes,
-        libs,
-        {
-          maxNodes: 1000, // High budget
-          maxDepth: 10, // But limited depth
-        }
-      );
+      const result = collectCallTree(callTree, libs, {
+        maxNodes: 1000, // High budget
+        maxDepth: 10, // But limited depth
+      });
 
       const maxDepthFound = findMaxDepth(result);
       expect(maxDepthFound).toBeLessThanOrEqual(10);

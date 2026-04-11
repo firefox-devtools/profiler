@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { FunctionMap } from 'firefox-profiler/profile-query/function-map';
 import {
   extractFunctionData,
   sortByTotal,
@@ -181,9 +180,7 @@ describe('function-list', function () {
         'Top Functions',
         functions,
         10,
-        'total',
-        new Set([0]),
-        new FunctionMap()
+        'total'
       );
 
       expect(result.title).toBe('Top Functions');
@@ -238,14 +235,7 @@ describe('function-list', function () {
         },
       ];
 
-      const result = formatFunctionList(
-        'Top Functions',
-        functions,
-        3,
-        'self',
-        new Set([0]),
-        new FunctionMap()
-      );
+      const result = formatFunctionList('Top Functions', functions, 3, 'self');
 
       expect(result.title).toBe('Top Functions');
       expect(result.lines.length).toBe(5); // 3 functions + blank line + stats line
@@ -278,9 +268,7 @@ describe('function-list', function () {
         'Top Functions',
         functions,
         10,
-        'total',
-        new Set([0]),
-        new FunctionMap()
+        'total'
       );
 
       expect(result.lines[0]).toMatch(/total:.*self:/);
@@ -300,14 +288,7 @@ describe('function-list', function () {
         },
       ];
 
-      const result = formatFunctionList(
-        'Top Functions',
-        functions,
-        10,
-        'self',
-        new Set([0]),
-        new FunctionMap()
-      );
+      const result = formatFunctionList('Top Functions', functions, 10, 'self');
 
       expect(result.lines[0]).toMatch(/self:.*total:/);
       expect(result.lines[0]).toContain('self: 50 (25.0%)');
@@ -344,12 +325,7 @@ describe('function-list', function () {
         },
       ];
 
-      const result = createTopFunctionLists(
-        functions,
-        10,
-        new Set([0]),
-        new FunctionMap()
-      );
+      const result = createTopFunctionLists(functions, 10);
 
       expect(result.byTotal.title).toBe('Top Functions (by total time)');
       expect(result.bySelf.title).toBe('Top Functions (by self time)');
@@ -393,12 +369,7 @@ describe('function-list', function () {
         },
       ];
 
-      const result = createTopFunctionLists(
-        functions,
-        2,
-        new Set([0]),
-        new FunctionMap()
-      );
+      const result = createTopFunctionLists(functions, 2);
 
       // Each list should have 2 functions + blank + stats = 4 lines
       expect(result.byTotal.lines.length).toBe(4);

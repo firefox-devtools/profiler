@@ -160,6 +160,10 @@ Regular Call Tree (showing top 30 functions, 249 lines omitted):
 
 When zoomed, shows both view and full profile percentages:
 
+Note: In the current implementation, function handles are canonical shared
+`funcTable` indices. `f-123` means "function at shared funcTable index 123", not
+the first function encountered in the current session.
+
 ```bash
 # When zoomed:
 Functions (by self time):
@@ -184,9 +188,11 @@ pq thread markers --thread t-93 --search Paint
 
 The `pq function info` command displays both full and short names:
 
+Note: Function info is resolved from `profile.shared.funcTable`, so the handle is
+profile-global rather than thread-local.
+
 ```bash
 Function f-1:
-  Thread: t-0 (GeckoMain)
   Full name: win32u.dll!ZwUserMsgWaitForMultipleObjectsEx
   Short name: ZwUserMsgWaitForMultipleObjectsEx
   Is JS: false

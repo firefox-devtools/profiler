@@ -3,13 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-import type {
-  IndexIntoCallNodeTable,
-  ThreadIndex,
-  Lib,
-} from 'firefox-profiler/types';
+import type { IndexIntoCallNodeTable, Lib } from 'firefox-profiler/types';
 import type { CallTreeNode, CallTreeScoringStrategy } from '../types';
-import type { FunctionMap } from '../function-map';
+import { getFunctionHandle } from '../function-map';
 import { formatFunctionNameWithLibrary } from '../function-list';
 
 /**
@@ -153,8 +149,6 @@ export type CallTreeCollectionOptions = {
  */
 export function collectCallTree(
   tree: CallTree,
-  functionMap: FunctionMap,
-  threadIndexes: Set<ThreadIndex>,
   libs: Lib[],
   options: CallTreeCollectionOptions = {}
 ): CallTreeNode {
@@ -227,13 +221,7 @@ export function collectCallTree(
     }
   }
 
-  return buildTreeStructure(
-    tree,
-    includedNodes,
-    functionMap,
-    threadIndexes,
-    libs
-  );
+  return buildTreeStructure(tree, includedNodes, libs);
 }
 
 /**
@@ -242,8 +230,6 @@ export function collectCallTree(
 function buildTreeStructure(
   tree: CallTree,
   includedNodes: Set<IndexIntoCallNodeTable>,
-  functionMap: FunctionMap,
-  threadIndexes: Set<ThreadIndex>,
   libs: Lib[]
 ): CallTreeNode {
   // Get total sample count from the tree for percentage calculations
@@ -295,7 +281,7 @@ function buildTreeStructure(
 
       const childNode: CallTreeNode = {
         callNodeIndex,
-        functionHandle: functionMap.handleForFunction(threadIndexes, funcIndex),
+        functionHandle: getFunctionHandle(funcIndex),
         functionIndex: funcIndex,
         name: childNodeData.funcName,
         nameWithLibrary,

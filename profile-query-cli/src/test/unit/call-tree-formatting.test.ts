@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { FunctionMap } from 'firefox-profiler/profile-query/function-map';
 import { collectCallTree } from 'firefox-profiler/profile-query/formatters/call-tree';
 import type {
   ThreadSamplesTopDownResult,
@@ -53,17 +52,9 @@ function buildTopDownResult(
   const state = store.getState();
   const threadSelectors = getThreadSelectors(0);
   const callTree = threadSelectors.getCallTree(state);
-  const functionMap = new FunctionMap();
-  const threadIndexes = new Set([0]);
   const libs = profile.libs;
 
-  const regularCallTree = collectCallTree(
-    callTree,
-    functionMap,
-    threadIndexes,
-    libs,
-    options
-  );
+  const regularCallTree = collectCallTree(callTree, libs, options);
 
   return {
     type: 'thread-samples-top-down',
@@ -85,8 +76,6 @@ function buildBottomUpResult(
   const store = storeWithProfile(profile);
   const state = store.getState();
   const threadSelectors = getThreadSelectors(0);
-  const functionMap = new FunctionMap();
-  const threadIndexes = new Set([0]);
   const libs = profile.libs;
 
   // Build inverted call tree (bottom-up view)
@@ -129,13 +118,7 @@ function buildBottomUpResult(
       weightType
     );
 
-    collectedInvertedTree = collectCallTree(
-      invertedTree,
-      functionMap,
-      threadIndexes,
-      libs,
-      options
-    );
+    collectedInvertedTree = collectCallTree(invertedTree, libs, options);
   } catch (e) {
     // Failed to create inverted tree
     console.error('Failed to create inverted call tree:', e);

@@ -38,7 +38,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
 import { ThreadMap } from './thread-map';
-import { FunctionMap } from './function-map';
+import { parseFunctionHandle } from './function-map';
 import { MarkerMap } from './marker-map';
 import { loadProfileFromFileOrUrl } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
@@ -85,7 +85,6 @@ export class ProfileQuerier {
   _processIndexMap: Map<string, number>;
   _timestampManager: TimestampManager;
   _threadMap: ThreadMap;
-  _functionMap: FunctionMap;
   _markerMap: MarkerMap;
 
   constructor(store: Store, rootRange: StartEndRange) {
@@ -93,12 +92,11 @@ export class ProfileQuerier {
     this._processIndexMap = new Map();
     this._timestampManager = new TimestampManager(rootRange);
     this._threadMap = new ThreadMap();
-    this._functionMap = new FunctionMap();
-    this._markerMap = new MarkerMap();
 
     // Build process index map
     const state = this._store.getState();
     const profile = getProfile(state);
+    this._markerMap = new MarkerMap();
     const uniquePids = Array.from(new Set(profile.threads.map((t) => t.pid)));
     uniquePids.forEach((pid, index) => {
       this._processIndexMap.set(pid, index);
@@ -148,12 +146,7 @@ export class ProfileQuerier {
         ? this._threadMap.threadIndexesForHandle(threadHandle)
         : getSelectedThreadIndexes(this._store.getState());
     const collect = () =>
-      collectThreadSamples(
-        this._store,
-        this._threadMap,
-        this._functionMap,
-        threadHandle
-      );
+      collectThreadSamples(this._store, this._threadMap, threadHandle);
     const withIdle = activeOnly
       ? () => this._withDroppedIdle(threadIndexes, collect)
       : collect;
@@ -183,7 +176,6 @@ export class ProfileQuerier {
       collectThreadSamplesTopDown(
         this._store,
         this._threadMap,
-        this._functionMap,
         threadHandle,
         callTreeOptions
       );
@@ -216,7 +208,6 @@ export class ProfileQuerier {
       collectThreadSamplesBottomUp(
         this._store,
         this._threadMap,
-        this._functionMap,
         threadHandle,
         callTreeOptions
       );
@@ -620,22 +611,17 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionExpandResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
+    const { funcTable, resourceTable, stringArray } = profile.shared;
 
     // Look up the function
-    const { threadIndexes, funcIndex } =
-      this._functionMap.functionForHandle(functionHandle);
-
-    const threadSelectors = getThreadSelectors(threadIndexes);
-    const thread = threadSelectors.getFilteredThread(state);
-    const funcName = thread.stringTable.getString(
-      thread.funcTable.name[funcIndex]
-    );
-    const resourceIndex = thread.funcTable.resource[funcIndex];
+    const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
+    const funcName = stringArray[funcTable.name[funcIndex]];
+    const resourceIndex = funcTable.resource[funcIndex];
 
     // Get library prefix if available
     let library: string | undefined;
-    if (resourceIndex !== -1 && thread.resourceTable) {
-      const libIndex = thread.resourceTable.lib[resourceIndex];
+    if (resourceIndex !== -1) {
+      const libIndex = resourceTable.lib[resourceIndex];
       if (libIndex !== null && libIndex !== undefined && profile.libs) {
         const lib = profile.libs[libIndex];
         library = lib.name;
@@ -643,13 +629,11 @@ export class ProfileQuerier {
     }
 
     const fullName = library ? `${library}!${funcName}` : funcName;
-    const threadHandle = this._threadMap.handleForThreadIndexes(threadIndexes);
 
     return {
       type: 'function-expand',
       functionHandle,
       funcIndex,
-      threadHandle,
       name: funcName,
       fullName,
       library,
@@ -665,37 +649,28 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionInfoResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
+    const { funcTable, resourceTable, stringArray } = profile.shared;
 
     // Look up the function
-    const { threadIndexes, funcIndex } =
-      this._functionMap.functionForHandle(functionHandle);
-
-    const threadSelectors = getThreadSelectors(threadIndexes);
-    const thread = threadSelectors.getFilteredThread(state);
-    const threadHandle = this._threadMap.handleForThreadIndexes(threadIndexes);
-
-    const funcName = thread.stringTable.getString(
-      thread.funcTable.name[funcIndex]
-    );
-    const resourceIndex = thread.funcTable.resource[funcIndex];
-    const isJS = thread.funcTable.isJS[funcIndex];
-    const relevantForJS = thread.funcTable.relevantForJS[funcIndex];
+    const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
+    const funcName = stringArray[funcTable.name[funcIndex]];
+    const resourceIndex = funcTable.resource[funcIndex];
+    const isJS = funcTable.isJS[funcIndex];
+    const relevantForJS = funcTable.relevantForJS[funcIndex];
 
     let resource: FunctionInfoResult['resource'];
     let library: FunctionInfoResult['library'];
     let libraryName: string | undefined;
 
     // Add resource info if available
-    if (resourceIndex !== -1 && thread.resourceTable) {
-      const resourceName = thread.stringTable.getString(
-        thread.resourceTable.name[resourceIndex]
-      );
+    if (resourceIndex !== -1) {
+      const resourceName = stringArray[resourceTable.name[resourceIndex]];
       resource = {
         name: resourceName,
         index: resourceIndex,
       };
 
-      const libIndex = thread.resourceTable.lib[resourceIndex];
+      const libIndex = resourceTable.lib[resourceIndex];
       if (
         libIndex !== null &&
         libIndex !== undefined &&
@@ -720,8 +695,6 @@ export class ProfileQuerier {
       type: 'function-info',
       functionHandle,
       funcIndex,
-      threadHandle,
-      threadName: thread.name,
       name: funcName,
       fullName,
       isJS,
@@ -767,7 +740,6 @@ export class ProfileQuerier {
       collectThreadFunctions(
         this._store,
         this._threadMap,
-        this._functionMap,
         threadHandle,
         filterOptions
       );

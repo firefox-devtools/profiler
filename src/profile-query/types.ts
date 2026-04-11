@@ -95,7 +95,6 @@ export type FunctionExpandResult = {
   type: 'function-expand';
   functionHandle: string;
   funcIndex: number;
-  threadHandle: string;
   name: string;
   fullName: string;
   library?: string;
@@ -105,8 +104,6 @@ export type FunctionInfoResult = {
   type: 'function-info';
   functionHandle: string;
   funcIndex: number;
-  threadHandle: string;
-  threadName: string;
   name: string;
   fullName: string;
   isJS: boolean;

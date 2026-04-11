@@ -20,7 +20,7 @@ Based on feedback, this proposal includes:
 7. ✅ **Balanced zoom syntax** - `zoom push ts-6,ts-7` and `zoom push --marker m-158`
 8. ✅ **Single filter stack** - one ordered stack for sample/stack filters (order matters for dependencies)
 9. ✅ **Prefix means exact sequence** - `--includes-prefix A,B,C` means starts with A→B→C exactly
-10. ✅ **Per-thread filter stacks** - each thread has its own filter context (handles are thread-specific!)
+10. ✅ **Per-thread filter stacks** - each thread has its own filter context
 11. ✅ **Separate marker filters** - marker display filtering independent from sample/stack filtering
 
 ---
@@ -114,7 +114,12 @@ pq zoom push --spike 1             # Zoom to first CPU spike (future feature)
 
 ### 4. Sticky Sample/Stack Filters (Per-Thread)
 
-Each thread has its own filter stack. Filters are **scoped to the current thread** because function handles (f-142) are thread-specific.
+Each thread has its own filter stack. Filters are **scoped to the current thread** because they apply to that thread's sample data and transforms.
+
+Function handles in filter expressions refer to canonical shared `funcTable`
+indices, e.g. `f-142` means shared function index 142 for the loaded profile.
+The filter state remains per-thread because the sample data and transform stacks
+are per-thread.
 
 ```bash
 # Select thread first
@@ -509,7 +514,10 @@ $ pq thread samples
 
 ### Per-Thread Filter Scoping
 
-**Why per-thread?** Function handles (e.g., `f-142`) are thread-specific. A function handle on thread t-0 has no meaning on thread t-93.
+**Why per-thread?** Filter state is thread-scoped because it operates on a thread's sample data and transform stack.
+
+Function handles themselves are not thread-local in the current implementation;
+they identify shared functions for the loaded profile.
 
 ```bash
 pq thread select t-0
@@ -519,7 +527,6 @@ pq thread functions --search Present
 pq filter push --includes-function f-142  # Filter for t-0
 
 pq thread select t-93
-# f-142 on t-93 is a DIFFERENT function!
 # t-93 has its own independent filter stack (empty initially)
 ```
 

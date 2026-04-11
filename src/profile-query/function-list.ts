@@ -2,8 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { Thread, Lib, ThreadIndex } from 'firefox-profiler/types';
-import type { FunctionMap } from './function-map';
+import type { Thread, Lib } from 'firefox-profiler/types';
+import { getFunctionHandle } from './function-map';
 
 export type FunctionData = {
   funcName: string;
@@ -413,9 +413,7 @@ export function sortBySelf(functions: FunctionData[]): FunctionData[] {
  */
 function formatFunctionEntry(
   func: FunctionData,
-  sortKey: 'total' | 'self',
-  threadIndexes: Set<ThreadIndex>,
-  functionMap: FunctionMap
+  sortKey: 'total' | 'self'
 ): string {
   const totalPct = (func.totalRelative * 100).toFixed(1);
   const selfPct = (func.selfRelative * 100).toFixed(1);
@@ -425,8 +423,7 @@ function formatFunctionEntry(
   // Truncate function name to 120 characters (smart truncation preserves meaning)
   const displayName = truncateFunctionName(func.funcName, 120);
 
-  // Generate handle if FunctionMap is provided
-  const handle = functionMap.handleForFunction(threadIndexes, func.funcIndex);
+  const handle = getFunctionHandle(func.funcIndex);
   const handleStr = `${handle}. `;
 
   if (sortKey === 'total') {
@@ -464,15 +461,13 @@ export function formatFunctionList(
   title: string,
   functions: FunctionData[],
   limit: number,
-  sortKey: 'total' | 'self',
-  threadIndexes: Set<ThreadIndex>,
-  functionMap: FunctionMap
+  sortKey: 'total' | 'self'
 ): FormattedFunctionList {
   const displayedFunctions = functions.slice(0, limit);
   const omittedFunctions = functions.slice(limit);
 
   const lines = displayedFunctions.map((func) =>
-    formatFunctionEntry(func, sortKey, threadIndexes, functionMap)
+    formatFunctionEntry(func, sortKey)
   );
 
   const stats = computeOmittedStats(omittedFunctions);
@@ -499,26 +494,20 @@ export function formatFunctionList(
  */
 export function createTopFunctionLists(
   functions: FunctionData[],
-  limit: number,
-  threadIndexes: Set<ThreadIndex>,
-  functionMap: FunctionMap
+  limit: number
 ): { byTotal: FormattedFunctionList; bySelf: FormattedFunctionList } {
   const byTotal = formatFunctionList(
     'Top Functions (by total time)',
     sortByTotal(functions),
     limit,
-    'total',
-    threadIndexes,
-    functionMap
+    'total'
   );
 
   const bySelf = formatFunctionList(
     'Top Functions (by self time)',
     sortBySelf(functions),
     limit,
-    'self',
-    threadIndexes,
-    functionMap
+    'self'
   );
 
   return { byTotal, bySelf };

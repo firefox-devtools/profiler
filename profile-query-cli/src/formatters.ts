@@ -106,7 +106,7 @@ export function formatFunctionExpandResult(
   const contextHeader = formatContextHeader(result.context);
   return `${contextHeader}
 
-Function ${result.functionHandle} (thread ${result.threadHandle}):
+Function ${result.functionHandle}:
 ${result.fullName}`;
 }
 
@@ -120,7 +120,6 @@ export function formatFunctionInfoResult(
   let output = `${contextHeader}
 
 Function ${result.functionHandle}:
-  Thread: ${result.threadHandle} (${result.threadName})
   Full name: ${result.fullName}
   Short name: ${result.name}
   Is JS: ${result.isJS}
