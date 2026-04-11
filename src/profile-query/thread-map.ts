@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { ThreadIndex } from 'firefox-profiler/types';
+import type { ThreadIndex, ThreadsKey } from 'firefox-profiler/types';
 
 /**
  * Maps thread handles (like "t-0", "t-1") to thread indices.
@@ -43,5 +43,22 @@ export class ThreadMap {
   handleForThreadIndexes(threadIndexes: Set<ThreadIndex>): string {
     const sorted = Array.from(threadIndexes).sort((a, b) => a - b);
     return sorted.map((idx) => this.handleForThreadIndex(idx)).join(',');
+  }
+
+  /**
+   * Convert a ThreadsKey back to a user-facing handle string (e.g. "t-0" or "t-0,t-1").
+   * ThreadsKey can be a single ThreadIndex (number) or a comma-separated string of
+   * descending-sorted thread indexes.
+   */
+  handleForKey(threadsKey: ThreadsKey): string {
+    if (typeof threadsKey === 'number') {
+      return this.handleForThreadIndex(threadsKey);
+    }
+    // String of comma-separated thread indexes (descending) → sort ascending for display.
+    const indexes = threadsKey
+      .split(',')
+      .map(Number)
+      .sort((a, b) => a - b);
+    return indexes.map((idx) => this.handleForThreadIndex(idx)).join(',');
   }
 }

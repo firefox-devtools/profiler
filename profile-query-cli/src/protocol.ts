@@ -11,6 +11,9 @@
 export type {
   MarkerFilterOptions,
   FunctionFilterOptions,
+  SampleFilterSpec,
+  FilterEntry,
+  FilterStackResult,
   SessionContext,
   WithContext,
   StatusResult,
@@ -39,6 +42,7 @@ export type { CallTreeCollectionOptions } from '../../src/profile-query/formatte
 import type {
   MarkerFilterOptions,
   FunctionFilterOptions,
+  SampleFilterSpec,
   WithContext,
   StatusResult,
   FunctionExpandResult,
@@ -53,6 +57,7 @@ import type {
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadFunctionsResult,
+  FilterStackResult,
 } from '../../src/profile-query/types';
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -84,6 +89,8 @@ export type ClientCommand =
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
       callTreeOptions?: CallTreeCollectionOptions;
+      /** Ephemeral sample filters applied only to this command invocation */
+      sampleFilters?: SampleFilterSpec[];
     }
   | {
       command: 'marker';
@@ -100,6 +107,13 @@ export type ClientCommand =
       command: 'zoom';
       subcommand: 'push' | 'pop' | 'clear';
       range?: string;
+    }
+  | {
+      command: 'filter';
+      subcommand: 'push' | 'pop' | 'list' | 'clear';
+      thread?: string;
+      spec?: SampleFilterSpec;
+      count?: number;
     }
   | { command: 'status' };
 
@@ -118,6 +132,7 @@ export type CommandResult =
   | WithContext<FunctionExpandResult>
   | WithContext<FunctionInfoResult>
   | ViewRangeResult
+  | FilterStackResult
   | WithContext<ThreadInfoResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>

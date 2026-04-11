@@ -37,6 +37,7 @@ import { cleanupSession, listSessions, validateSession } from './session';
 import type {
   MarkerFilterOptions,
   FunctionFilterOptions,
+  SampleFilterSpec,
   CommandResult,
   CallTreeCollectionOptions,
   CallTreeScoringStrategy,
@@ -46,6 +47,7 @@ import {
   formatFunctionExpandResult,
   formatFunctionInfoResult,
   formatViewRangeResult,
+  formatFilterStackResult,
   formatThreadInfoResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
@@ -71,6 +73,20 @@ interface Args {
   json?: boolean;
   'max-lines'?: number;
   scoring?: string;
+  // filter command flags (value-taking)
+  'excludes-function'?: string;
+  'excludes-any-function'?: string;
+  merge?: string;
+  'root-at'?: string;
+  'includes-function'?: string;
+  'includes-any-function'?: string;
+  'includes-prefix'?: string;
+  'includes-suffix'?: string;
+  count?: string;
+  // filter command presence flags
+  'during-marker'?: boolean;
+  'outside-marker'?: boolean;
+  search?: string;
 }
 
 function printUsage(): void {
@@ -93,7 +109,11 @@ Commands:
   zoom push <range>          Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
   zoom pop                   Pop the most recent zoom range
   zoom clear                 Clear all zoom ranges (return to full profile)
-  status                     Show session status (selected thread, zoom ranges)
+  filter push                Push a sticky sample filter (see filter flags below)
+  filter pop [N]             Pop the last N filters (default: 1)
+  filter list                List active filters for current thread
+  filter clear               Remove all filters for current thread
+  status                     Show session status (selected thread, zoom ranges, filters)
   stop                       Stop the daemon session
   list-sessions              List all running daemon sessions
 
@@ -120,6 +140,22 @@ Options:
   --guide                  Show detailed usage guide (commands, patterns, tips)
   --help, -h               Show this help message
 
+Sample filter flags (work on 'thread samples/functions' ephemerally AND with 'filter push' for sticky use):
+  --excludes-function <f-N>         Drop samples containing this function
+  --excludes-any-function <f-N,...> Drop samples containing any of these functions (OR)
+  --merge <f-N,...>                 Merge (remove) functions from stacks
+  --root-at <f-N>                   Re-root stacks at this function
+  --includes-function <f-N,...>     Keep only samples whose stack contains any of these functions
+  --includes-any-function <f-N,...> Alias for --includes-function (explicit OR form)
+  --includes-prefix <f-N,...>       Keep only samples whose stack starts with this root-first sequence
+  --includes-suffix <f-N>           Keep only samples whose leaf frame is this function
+  --during-marker --search <text>   Keep only samples during matching markers
+  --outside-marker --search <text>  Keep only samples outside matching markers
+
+  For 'filter push': exactly one filter flag per push.
+  For 'thread samples/functions': multiple flags may be combined; applied in left-to-right order.
+    The same flag may also be repeated (e.g. --merge f-1 --merge f-2) to apply it multiple times.
+
 Examples:
   pq load profile.json.gz
   pq profile info
@@ -136,13 +172,9 @@ Examples:
   pq thread markers --max-duration 100
   pq thread markers --has-stack
   pq thread markers --limit 1000
-  pq thread markers --category Layout --min-duration 5
-  pq thread markers --search Reflow --min-duration 5 --max-duration 50
-  pq thread markers --has-stack --category Other --limit 500
   pq thread markers --group-by type,name
   pq thread markers --group-by type,field:eventType
   pq thread markers --auto-group
-  pq thread markers --search DOMEvent --group-by field:eventType
   pq marker info m-1234
   pq marker stack m-1234
   pq function expand f-123
@@ -151,6 +183,19 @@ Examples:
   pq zoom push m-158
   pq zoom pop
   pq zoom clear
+  pq filter push --excludes-function f-184
+  pq filter push --merge f-142,f-143
+  pq filter push --includes-function f-500
+  pq filter push --during-marker --search Paint
+  pq filter push --outside-marker --search GC
+  pq filter pop
+  pq filter pop 3
+  pq filter list
+  pq filter clear
+  pq thread samples --excludes-function f-184
+  pq thread samples --merge f-1 --merge f-2 --root-at f-500
+  pq thread samples --root-at f-500 --limit 30
+  pq thread functions --includes-function f-500 --limit 20
   pq status
   pq stop
   pq list-sessions
@@ -158,7 +203,6 @@ Examples:
   pq thread samples-top-down --scoring exponential-0.8
   pq thread samples-top-down --search GC
   pq thread samples-bottom-up --max-lines 200 --scoring harmonic-1.0
-  pq thread samples-bottom-up --search "JS::Compile"
   pq thread samples --include-idle
 `);
 }
@@ -193,6 +237,8 @@ function formatOutput(
   switch (result.type) {
     case 'status':
       return formatStatusResult(result);
+    case 'filter-stack':
+      return formatFilterStackResult(result);
     case 'function-expand':
       return formatFunctionExpandResult(result);
     case 'function-info':
@@ -223,6 +269,207 @@ function formatOutput(
   }
 }
 
+/**
+ * Parse zero or more ephemeral SampleFilterSpecs from CLI arguments.
+ * Used for `pq thread samples/functions` etc. to apply filters for one invocation.
+ * Multiple flags are collected in order; each produces one spec. The same flag may be
+ * repeated (e.g. --merge f-1 --merge f-2) to apply it multiple times.
+ */
+function parseEphemeralFilters(argv: Args): SampleFilterSpec[] {
+  function parseFuncList(value: string): number[] {
+    return value.split(',').map((s) => {
+      const m = /^f-(\d+)$/.exec(s.trim());
+      if (!m) {
+        console.error(
+          `Error: invalid function handle "${s.trim()}" (expected f-<N>)`
+        );
+        process.exit(1);
+      }
+      return parseInt(m[1], 10);
+    });
+  }
+
+  // Normalize a flag value to an array to support repeated flags (e.g. --merge x --merge y).
+  function toArray(value: unknown): string[] {
+    if (value === undefined) return [];
+    return Array.isArray(value) ? value : [value as string];
+  }
+
+  const specs: SampleFilterSpec[] = [];
+
+  for (const v of toArray(argv['excludes-function'])) {
+    specs.push({ type: 'excludes-function', funcIndexes: parseFuncList(v) });
+  }
+  for (const v of toArray(argv['excludes-any-function'])) {
+    specs.push({ type: 'excludes-function', funcIndexes: parseFuncList(v) });
+  }
+  for (const v of toArray(argv.merge)) {
+    specs.push({ type: 'merge', funcIndexes: parseFuncList(v) });
+  }
+  for (const v of toArray(argv['root-at'])) {
+    const indexes = parseFuncList(v);
+    if (indexes.length !== 1) {
+      console.error('Error: --root-at takes exactly one function handle');
+      process.exit(1);
+    }
+    specs.push({ type: 'root-at', funcIndex: indexes[0] });
+  }
+  for (const v of toArray(argv['includes-function'])) {
+    specs.push({ type: 'includes-function', funcIndexes: parseFuncList(v) });
+  }
+  for (const v of toArray(argv['includes-any-function'])) {
+    specs.push({ type: 'includes-function', funcIndexes: parseFuncList(v) });
+  }
+  for (const v of toArray(argv['includes-prefix'])) {
+    specs.push({ type: 'includes-prefix', funcIndexes: parseFuncList(v) });
+  }
+  for (const v of toArray(argv['includes-suffix'])) {
+    const indexes = parseFuncList(v);
+    if (indexes.length !== 1) {
+      console.error(
+        'Error: --includes-suffix takes exactly one function handle'
+      );
+      process.exit(1);
+    }
+    specs.push({ type: 'includes-suffix', funcIndex: indexes[0] });
+  }
+  if (argv['during-marker'] === true) {
+    if (!argv.search) {
+      console.error('Error: --during-marker requires --search <text>');
+      process.exit(1);
+    }
+    specs.push({ type: 'during-marker', searchString: argv.search });
+  }
+  if (argv['outside-marker'] === true) {
+    if (!argv.search) {
+      console.error('Error: --outside-marker requires --search <text>');
+      process.exit(1);
+    }
+    specs.push({ type: 'outside-marker', searchString: argv.search });
+  }
+
+  return specs;
+}
+
+/**
+ * Parse a SampleFilterSpec from CLI arguments for `pq filter push`.
+ * Exactly one filter flag must be provided.
+ */
+function parseFilterSpec(argv: Args): SampleFilterSpec {
+  // Parse a comma-separated list of function handles (e.g. "f-1,f-2") into funcIndexes.
+  function parseFuncList(value: string): number[] {
+    return value.split(',').map((s) => {
+      const m = /^f-(\d+)$/.exec(s.trim());
+      if (!m) {
+        console.error(
+          `Error: invalid function handle "${s.trim()}" (expected f-<N>)`
+        );
+        process.exit(1);
+      }
+      return parseInt(m[1], 10);
+    });
+  }
+
+  const flags = [
+    'excludes-function',
+    'excludes-any-function',
+    'merge',
+    'root-at',
+    'includes-function',
+    'includes-any-function',
+    'includes-prefix',
+    'includes-suffix',
+  ] as const;
+
+  const markerFlags = ['during-marker', 'outside-marker'] as const;
+  const activeFlags = flags.filter((f) => argv[f] !== undefined);
+  const activeMarkerFlags = markerFlags.filter((f) => argv[f] === true);
+
+  const totalActive = activeFlags.length + activeMarkerFlags.length;
+  if (totalActive === 0) {
+    console.error(
+      'Error: filter push requires one of: ' +
+        [...flags, ...markerFlags].map((f) => `--${f}`).join(', ')
+    );
+    process.exit(1);
+  }
+  if (totalActive > 1) {
+    console.error('Error: filter push accepts only one filter flag per push');
+    process.exit(1);
+  }
+
+  if (argv['excludes-function'] !== undefined) {
+    return {
+      type: 'excludes-function',
+      funcIndexes: parseFuncList(argv['excludes-function']),
+    };
+  }
+  if (argv['excludes-any-function'] !== undefined) {
+    return {
+      type: 'excludes-function',
+      funcIndexes: parseFuncList(argv['excludes-any-function']),
+    };
+  }
+  if (argv.merge !== undefined) {
+    return { type: 'merge', funcIndexes: parseFuncList(argv.merge) };
+  }
+  if (argv['root-at'] !== undefined) {
+    const indexes = parseFuncList(argv['root-at']);
+    if (indexes.length !== 1) {
+      console.error('Error: --root-at takes exactly one function handle');
+      process.exit(1);
+    }
+    return { type: 'root-at', funcIndex: indexes[0] };
+  }
+  if (argv['includes-function'] !== undefined) {
+    return {
+      type: 'includes-function',
+      funcIndexes: parseFuncList(argv['includes-function']),
+    };
+  }
+  if (argv['includes-any-function'] !== undefined) {
+    return {
+      type: 'includes-function',
+      funcIndexes: parseFuncList(argv['includes-any-function']),
+    };
+  }
+  if (argv['includes-prefix'] !== undefined) {
+    return {
+      type: 'includes-prefix',
+      funcIndexes: parseFuncList(argv['includes-prefix']),
+    };
+  }
+  if (argv['includes-suffix'] !== undefined) {
+    const indexes = parseFuncList(argv['includes-suffix']);
+    if (indexes.length !== 1) {
+      console.error(
+        'Error: --includes-suffix takes exactly one function handle'
+      );
+      process.exit(1);
+    }
+    return { type: 'includes-suffix', funcIndex: indexes[0] };
+  }
+  if (argv['during-marker'] === true) {
+    if (!argv.search) {
+      console.error('Error: --during-marker requires --search <text>');
+      process.exit(1);
+    }
+    return { type: 'during-marker', searchString: argv.search };
+  }
+  if (argv['outside-marker'] === true) {
+    if (!argv.search) {
+      console.error('Error: --outside-marker requires --search <text>');
+      process.exit(1);
+    }
+    return { type: 'outside-marker', searchString: argv.search };
+  }
+
+  // Should not be reachable.
+  console.error('Error: no valid filter flag found');
+  process.exit(1);
+  throw new Error('unreachable');
+}
+
 async function main(): Promise<void> {
   const argv = minimist<Args>(process.argv.slice(2), {
     string: [
@@ -240,6 +487,16 @@ async function main(): Promise<void> {
       'group-by',
       'max-lines',
       'scoring',
+      // filter command flags (value-taking)
+      'excludes-function',
+      'excludes-any-function',
+      'merge',
+      'root-at',
+      'includes-function',
+      'includes-any-function',
+      'includes-prefix',
+      'includes-suffix',
+      'count',
     ],
     boolean: [
       'daemon',
@@ -250,6 +507,9 @@ async function main(): Promise<void> {
       'has-stack',
       'auto-group',
       'json',
+      // filter command presence flags
+      'during-marker',
+      'outside-marker',
     ],
     alias: { h: 'help' },
   });
@@ -508,6 +768,15 @@ async function main(): Promise<void> {
           subcommand === 'markers' ||
           subcommand === 'functions'
         ) {
+          // Parse ephemeral sample filters for commands that support them.
+          const sampleFilters =
+            subcommand === 'samples' ||
+            subcommand === 'samples-top-down' ||
+            subcommand === 'samples-bottom-up' ||
+            subcommand === 'functions'
+              ? parseEphemeralFilters(argv)
+              : undefined;
+
           const result = await sendCommand(
             SESSION_DIR,
             {
@@ -519,6 +788,7 @@ async function main(): Promise<void> {
               markerFilters,
               functionFilters,
               callTreeOptions,
+              sampleFilters: sampleFilters?.length ? sampleFilters : undefined,
             },
             argv.session
           );
@@ -598,6 +868,60 @@ async function main(): Promise<void> {
           console.log(formatOutput(result, argv.json || false));
         } else {
           console.error(`Error: Unknown command ${command} ${subcommand}`);
+          process.exit(1);
+        }
+        break;
+      }
+
+      case 'filter': {
+        const explicitSubcommand = argv._[1];
+        const subcommand = explicitSubcommand ?? 'list';
+
+        const thread = argv.thread ?? undefined;
+
+        if (subcommand === 'push') {
+          // Parse the filter spec from flags.
+          const spec = parseFilterSpec(argv);
+          const result = await sendCommand(
+            SESSION_DIR,
+            { command: 'filter', subcommand: 'push', thread, spec },
+            argv.session
+          );
+          console.log(formatOutput(result, argv.json || false));
+        } else if (subcommand === 'pop') {
+          // Accept count as positional arg ("pq filter pop 2") or --count flag.
+          const rawCount = argv._[2] ?? argv.count;
+          const count =
+            rawCount !== undefined ? parseInt(String(rawCount), 10) : 1;
+          if (isNaN(count) || count <= 0) {
+            console.error('Error: count must be a positive integer');
+            process.exit(1);
+          }
+          const result = await sendCommand(
+            SESSION_DIR,
+            { command: 'filter', subcommand: 'pop', thread, count },
+            argv.session
+          );
+          console.log(formatOutput(result, argv.json || false));
+        } else if (subcommand === 'list') {
+          const result = await sendCommand(
+            SESSION_DIR,
+            { command: 'filter', subcommand: 'list', thread },
+            argv.session
+          );
+          console.log(formatOutput(result, argv.json || false));
+          if (!explicitSubcommand) {
+            console.log('Other options: pq filter <push|pop|clear> [options]');
+          }
+        } else if (subcommand === 'clear') {
+          const result = await sendCommand(
+            SESSION_DIR,
+            { command: 'filter', subcommand: 'clear', thread },
+            argv.session
+          );
+          console.log(formatOutput(result, argv.json || false));
+        } else {
+          console.error(`Error: Unknown command filter ${subcommand}`);
           process.exit(1);
         }
         break;

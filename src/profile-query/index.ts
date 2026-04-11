@@ -55,6 +55,7 @@ import {
   collectMarkerInfo,
 } from './formatters/marker-info';
 import { parseTimeValue } from './time-range-parser';
+import { FilterStack, pushSpecTransforms } from './filter-stack';
 import type {
   StatusResult,
   SessionContext,
@@ -73,6 +74,8 @@ import type {
   ThreadFunctionsResult,
   MarkerFilterOptions,
   FunctionFilterOptions,
+  SampleFilterSpec,
+  FilterStackResult,
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
@@ -86,12 +89,14 @@ export class ProfileQuerier {
   _timestampManager: TimestampManager;
   _threadMap: ThreadMap;
   _markerMap: MarkerMap;
+  _filterStack: FilterStack;
 
   constructor(store: Store, rootRange: StartEndRange) {
     this._store = store;
     this._processIndexMap = new Map();
     this._timestampManager = new TimestampManager(rootRange);
     this._threadMap = new ThreadMap();
+    this._filterStack = new FilterStack();
 
     // Build process index map
     const state = this._store.getState();
@@ -138,7 +143,8 @@ export class ProfileQuerier {
   async threadSamples(
     threadHandle?: string,
     includeIdle: boolean = false,
-    search?: string
+    search?: string,
+    sampleFilters?: SampleFilterSpec[]
   ): Promise<WithContext<ThreadSamplesResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -150,13 +156,21 @@ export class ProfileQuerier {
     const withIdle = activeOnly
       ? () => this._withDroppedIdle(threadIndexes, collect)
       : collect;
-    const result = search
-      ? this._withCallTreeSearch(search, withIdle)
-      : withIdle();
+    const withSearch = search
+      ? () => this._withCallTreeSearch(search, withIdle)
+      : withIdle;
+    const result =
+      sampleFilters && sampleFilters.length > 0
+        ? this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
+        : withSearch();
+    const activeFilters = this._filterStack.list(getThreadsKey(threadIndexes));
     return {
       ...result,
       activeOnly,
       search: search || undefined,
+      activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
+      ephemeralFilters:
+        sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
       context: this._getContext(),
     };
   }
@@ -165,7 +179,8 @@ export class ProfileQuerier {
     threadHandle?: string,
     callTreeOptions?: CallTreeCollectionOptions,
     includeIdle: boolean = false,
-    search?: string
+    search?: string,
+    sampleFilters?: SampleFilterSpec[]
   ): Promise<WithContext<ThreadSamplesTopDownResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -182,13 +197,21 @@ export class ProfileQuerier {
     const withIdle = activeOnly
       ? () => this._withDroppedIdle(threadIndexes, collect)
       : collect;
-    const result = search
-      ? this._withCallTreeSearch(search, withIdle)
-      : withIdle();
+    const withSearch = search
+      ? () => this._withCallTreeSearch(search, withIdle)
+      : withIdle;
+    const result =
+      sampleFilters && sampleFilters.length > 0
+        ? this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
+        : withSearch();
+    const activeFilters = this._filterStack.list(getThreadsKey(threadIndexes));
     return {
       ...result,
       activeOnly,
       search: search || undefined,
+      activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
+      ephemeralFilters:
+        sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
       context: this._getContext(),
     };
   }
@@ -197,7 +220,8 @@ export class ProfileQuerier {
     threadHandle?: string,
     callTreeOptions?: CallTreeCollectionOptions,
     includeIdle: boolean = false,
-    search?: string
+    search?: string,
+    sampleFilters?: SampleFilterSpec[]
   ): Promise<WithContext<ThreadSamplesBottomUpResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -214,13 +238,21 @@ export class ProfileQuerier {
     const withIdle = activeOnly
       ? () => this._withDroppedIdle(threadIndexes, collect)
       : collect;
-    const result = search
-      ? this._withCallTreeSearch(search, withIdle)
-      : withIdle();
+    const withSearch = search
+      ? () => this._withCallTreeSearch(search, withIdle)
+      : withIdle;
+    const result =
+      sampleFilters && sampleFilters.length > 0
+        ? this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
+        : withSearch();
+    const activeFilters = this._filterStack.list(getThreadsKey(threadIndexes));
     return {
       ...result,
       activeOnly,
       search: search || undefined,
+      activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
+      ephemeralFilters:
+        sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
       context: this._getContext(),
     };
   }
@@ -451,6 +483,143 @@ export class ProfileQuerier {
   }
 
   /**
+   * Push a new filter onto the current thread's filter stack.
+   */
+  filterPush(spec: SampleFilterSpec, threadHandle?: string): FilterStackResult {
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const threadsKey = getThreadsKey(threadIndexes);
+    const actualHandle =
+      threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
+
+    const entry = this._filterStack.push(this._store, threadsKey, spec);
+    const filters = this._filterStack.list(threadsKey);
+
+    return {
+      type: 'filter-stack',
+      threadHandle: actualHandle,
+      filters,
+      action: 'push',
+      message: `Pushed filter ${entry.index}: ${entry.description}`,
+    };
+  }
+
+  /**
+   * Pop the last `count` filters from the current thread's filter stack.
+   */
+  filterPop(count: number = 1, threadHandle?: string): FilterStackResult {
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const threadsKey = getThreadsKey(threadIndexes);
+    const actualHandle =
+      threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
+
+    const removed = this._filterStack.pop(this._store, threadsKey, count);
+    const filters = this._filterStack.list(threadsKey);
+
+    let msg;
+    if (removed.length === 0) {
+      msg = 'No filters to pop';
+    } else if (removed.length === 1) {
+      msg = `Popped filter: ${removed[0].description}`;
+    } else {
+      msg = `Popped ${removed.length} filters`;
+    }
+
+    return {
+      type: 'filter-stack',
+      threadHandle: actualHandle,
+      filters,
+      action: 'pop',
+      message: msg,
+    };
+  }
+
+  /**
+   * Clear all filters from the current thread's filter stack.
+   */
+  filterClear(threadHandle?: string): FilterStackResult {
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const threadsKey = getThreadsKey(threadIndexes);
+    const actualHandle =
+      threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
+
+    const removed = this._filterStack.clear(this._store, threadsKey);
+    const msg =
+      removed.length === 0
+        ? 'No filters to clear'
+        : `Cleared ${removed.length} filter(s)`;
+
+    return {
+      type: 'filter-stack',
+      threadHandle: actualHandle,
+      filters: [],
+      action: 'clear',
+      message: msg,
+    };
+  }
+
+  /**
+   * List all active filters for the current thread.
+   */
+  filterList(threadHandle?: string): FilterStackResult {
+    const threadIndexes =
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : getSelectedThreadIndexes(this._store.getState());
+    const threadsKey = getThreadsKey(threadIndexes);
+    const actualHandle =
+      threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
+
+    const filters = this._filterStack.list(threadsKey);
+    return {
+      type: 'filter-stack',
+      threadHandle: actualHandle,
+      filters,
+    };
+  }
+
+  /**
+   * Temporarily push a list of sample filter specs as Redux transforms, run fn(),
+   * then pop them. Used to apply ephemeral (one-shot) filters to a single command.
+   */
+  private _withEphemeralFilters<T>(
+    threadIndexes: Set<ThreadIndex>,
+    filters: SampleFilterSpec[],
+    fn: () => T
+  ): T {
+    if (filters.length === 0) {
+      return fn();
+    }
+    const threadsKey = getThreadsKey(threadIndexes);
+    const stackLengthBefore = getTransformStack(
+      this._store.getState(),
+      threadsKey
+    ).length;
+
+    for (const spec of filters) {
+      pushSpecTransforms(this._store, threadsKey, spec);
+    }
+
+    try {
+      return fn();
+    } finally {
+      this._store.dispatch({
+        type: 'POP_TRANSFORMS_FROM_STACK',
+        threadsKey,
+        firstPoppedFilterIndex: stackLengthBefore,
+      });
+    }
+  }
+
+  /**
    * Apply a drop-category transform for the Idle category around a computation,
    * then restore the transform stack to its previous state.
    * If the profile has no Idle category, fn() is called without changes.
@@ -591,6 +760,15 @@ export class ProfileQuerier {
       };
     });
 
+    // Collect active filter stacks
+    const filterStacks = this._filterStack
+      .activeThreadsKeys()
+      .map((threadsKey) => ({
+        threadsKey,
+        threadHandle: this._threadMap.handleForKey(threadsKey),
+        filters: this._filterStack.list(threadsKey),
+      }));
+
     return {
       type: 'status',
       selectedThreadHandle,
@@ -600,6 +778,7 @@ export class ProfileQuerier {
         start: rootRange.start,
         end: rootRange.end,
       },
+      filterStacks,
     };
   }
 
@@ -729,7 +908,8 @@ export class ProfileQuerier {
   async threadFunctions(
     threadHandle?: string,
     filterOptions?: FunctionFilterOptions,
-    includeIdle: boolean = false
+    includeIdle: boolean = false,
+    sampleFilters?: SampleFilterSpec[]
   ): Promise<WithContext<ThreadFunctionsResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -743,10 +923,22 @@ export class ProfileQuerier {
         threadHandle,
         filterOptions
       );
-    const result = activeOnly
-      ? this._withDroppedIdle(threadIndexes, collect)
-      : collect();
-    return { ...result, activeOnly, context: this._getContext() };
+    const withIdle = activeOnly
+      ? () => this._withDroppedIdle(threadIndexes, collect)
+      : collect;
+    const result =
+      sampleFilters && sampleFilters.length > 0
+        ? this._withEphemeralFilters(threadIndexes, sampleFilters, withIdle)
+        : withIdle();
+    const activeFilters = this._filterStack.list(getThreadsKey(threadIndexes));
+    return {
+      ...result,
+      activeOnly,
+      activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
+      ephemeralFilters:
+        sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
+      context: this._getContext(),
+    };
   }
 
   /**

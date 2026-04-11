@@ -14,6 +14,7 @@ import type {
   FunctionExpandResult,
   FunctionInfoResult,
   ViewRangeResult,
+  FilterStackResult,
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
@@ -25,14 +26,21 @@ import type {
   ThreadFunctionsResult,
   MarkerGroupData,
   CallTreeNode,
+  FilterEntry,
+  SampleFilterSpec,
 } from './protocol';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
+import { describeSpec } from '../../src/profile-query/filter-stack';
 
 /**
  * Format a SessionContext as a compact header line.
  * Shows current thread selection, zoom range, and full profile duration.
  */
-export function formatContextHeader(context: SessionContext): string {
+export function formatContextHeader(
+  context: SessionContext,
+  activeFilters?: FilterEntry[],
+  ephemeralFilters?: SampleFilterSpec[]
+): string {
   // Thread info
   let threadInfo = 'No thread selected';
   if (context.selectedThreadHandle && context.selectedThreads.length > 0) {
@@ -65,7 +73,11 @@ export function formatContextHeader(context: SessionContext): string {
 
   const fullInfo = formatDuration(rootDuration);
 
-  return `[Thread: ${threadInfo} | View: ${viewInfo} | Full: ${fullInfo}]`;
+  const totalFilterCount =
+    (activeFilters?.length ?? 0) + (ephemeralFilters?.length ?? 0);
+  const filterInfo =
+    totalFilterCount > 0 ? ` | Filters: ${totalFilterCount}` : '';
+  return `[Thread: ${threadInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
 }
 
 /**
@@ -91,10 +103,42 @@ export function formatStatusResult(result: StatusResult): string {
     rangesInfo = rangeStrs.join(' > ');
   }
 
+  const filterLines: string[] = [];
+  for (const stack of result.filterStacks) {
+    if (stack.filters.length === 0) continue;
+    filterLines.push(`  Filters for ${stack.threadHandle}:`);
+    for (const f of stack.filters) {
+      filterLines.push(`    ${f.index}. [${f.spec.type}] ${f.description}`);
+    }
+  }
+  const filterSection =
+    filterLines.length > 0
+      ? '\n' + filterLines.join('\n')
+      : '\n  Filters: none';
+
   return `\
 Session Status:
   Selected thread: ${threadInfo}
-  View range: ${rangesInfo}`;
+  View range: ${rangesInfo}${filterSection}`;
+}
+
+/**
+ * Format a FilterStackResult as plain text.
+ */
+export function formatFilterStackResult(result: FilterStackResult): string {
+  const lines: string[] = [];
+  if (result.message) {
+    lines.push(result.message);
+  }
+  if (result.filters.length === 0) {
+    lines.push(`No active filters for ${result.threadHandle}`);
+  } else {
+    lines.push(`Filters for ${result.threadHandle} (applied in order):`);
+    for (const f of result.filters) {
+      lines.push(`  ${f.index}. [${f.spec.type}] ${f.description}`);
+    }
+  }
+  return lines.join('\n');
 }
 
 /**
@@ -492,14 +536,25 @@ function formatCallTree(tree: CallTreeNode, title: string): string {
 export function formatThreadSamplesResult(
   result: WithContext<ThreadSamplesResult>
 ): string {
-  const contextHeader = formatContextHeader(result.context);
+  const contextHeader = formatContextHeader(
+    result.context,
+    result.activeFilters,
+    result.ephemeralFilters
+  );
   const activeOnlyNote = result.activeOnly
     ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
     : '';
   const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
+  const filtersParts: string[] = [
+    ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
+      []),
+    ...(result.ephemeralFilters?.map((f) => `[~] ${describeSpec(f)}`) ?? []),
+  ];
+  const filtersNote =
+    filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
 
   // Top functions by total time
   output += 'Top Functions (by total time):\n';
@@ -581,14 +636,25 @@ Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
 export function formatThreadSamplesTopDownResult(
   result: WithContext<ThreadSamplesTopDownResult>
 ): string {
-  const contextHeader = formatContextHeader(result.context);
+  const contextHeader = formatContextHeader(
+    result.context,
+    result.activeFilters,
+    result.ephemeralFilters
+  );
   const activeOnlyNote = result.activeOnly
     ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
     : '';
   const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
+  const filtersParts: string[] = [
+    ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
+      []),
+    ...(result.ephemeralFilters?.map((f) => `[~] ${describeSpec(f)}`) ?? []),
+  ];
+  const filtersNote =
+    filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
 
   // Top-down call tree
   output += formatCallTree(result.regularCallTree, 'Top-Down');
@@ -602,14 +668,25 @@ Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
 export function formatThreadSamplesBottomUpResult(
   result: WithContext<ThreadSamplesBottomUpResult>
 ): string {
-  const contextHeader = formatContextHeader(result.context);
+  const contextHeader = formatContextHeader(
+    result.context,
+    result.activeFilters,
+    result.ephemeralFilters
+  );
   const activeOnlyNote = result.activeOnly
     ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
     : '';
   const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
+  const filtersParts: string[] = [
+    ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
+      []),
+    ...(result.ephemeralFilters?.map((f) => `[~] ${describeSpec(f)}`) ?? []),
+  ];
+  const filtersNote =
+    filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
   let output = `${contextHeader}
 
-Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}`;
+Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
 
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {
@@ -795,7 +872,11 @@ function formatDuration(ms: number): string {
 export function formatThreadFunctionsResult(
   result: WithContext<ThreadFunctionsResult>
 ): string {
-  const contextHeader = formatContextHeader(result.context);
+  const contextHeader = formatContextHeader(
+    result.context,
+    result.activeFilters,
+    result.ephemeralFilters
+  );
   const lines: string[] = [contextHeader, ''];
 
   // Check if filters are active
@@ -825,8 +906,8 @@ export function formatThreadFunctionsResult(
   }
 
   // Show active filters if any
+  const filterParts: string[] = [];
   if (hasFilters && result.filters) {
-    const filterParts: string[] = [];
     if (result.filters.searchString) {
       filterParts.push(`search: "${result.filters.searchString}"`);
     }
@@ -836,9 +917,19 @@ export function formatThreadFunctionsResult(
     if (result.filters.limit !== undefined) {
       filterParts.push(`limit: ${result.filters.limit}`);
     }
-    if (filterParts.length > 0) {
-      lines.push(`Filters: ${filterParts.join(', ')}\n`);
+  }
+  if (result.activeFilters) {
+    for (const f of result.activeFilters) {
+      filterParts.push(`[${f.index}] ${f.description}`);
     }
+  }
+  if (result.ephemeralFilters) {
+    for (const f of result.ephemeralFilters) {
+      filterParts.push(`[~] ${describeSpec(f)}`);
+    }
+  }
+  if (filterParts.length > 0) {
+    lines.push(`Filters: ${filterParts.join(', ')}\n`);
   }
 
   // List functions sorted by self time

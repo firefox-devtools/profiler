@@ -42,6 +42,42 @@ export type FunctionFilterOptions = {
   limit?: number; // Limit the number of functions in output
 };
 
+// ===== Sample Filter Stack =====
+
+/**
+ * The specification for a single entry on the pq filter stack.
+ * Each entry corresponds to one `pq filter push` invocation.
+ */
+export type SampleFilterSpec =
+  // Phase 1: Redux transform-backed filters
+  | { type: 'excludes-function'; funcIndexes: number[] }
+  | { type: 'merge'; funcIndexes: number[] }
+  | { type: 'root-at'; funcIndex: number }
+  | { type: 'during-marker'; searchString: string }
+  // Phase 2: Extended filter-samples transforms
+  | { type: 'includes-function'; funcIndexes: number[] }
+  | { type: 'includes-prefix'; funcIndexes: number[] }
+  | { type: 'includes-suffix'; funcIndex: number }
+  | { type: 'outside-marker'; searchString: string };
+
+export type FilterEntry = {
+  /** 1-based sequential index for display */
+  index: number;
+  spec: SampleFilterSpec;
+  /** Human-readable description */
+  description: string;
+  /** Number of Redux transforms this entry pushed (0 for querier-layer-only entries) */
+  reduxTransformCount: number;
+};
+
+export type FilterStackResult = {
+  type: 'filter-stack';
+  threadHandle: string;
+  filters: FilterEntry[];
+  action?: 'push' | 'pop' | 'clear';
+  message?: string;
+};
+
 // ===== Session Context =====
 // Context information included in all command results for persistent display
 
@@ -87,6 +123,12 @@ export type StatusResult = {
     start: number;
     end: number;
   };
+  /** Filter stacks for all threads that have active filters */
+  filterStacks: Array<{
+    threadsKey: string | number;
+    threadHandle: string;
+    filters: FilterEntry[];
+  }>;
 };
 
 // ===== Function Commands =====
@@ -186,6 +228,8 @@ export type ThreadSamplesResult = {
   friendlyThreadName: string;
   activeOnly?: boolean;
   search?: string;
+  activeFilters?: FilterEntry[];
+  ephemeralFilters?: SampleFilterSpec[];
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {
@@ -208,6 +252,8 @@ export type ThreadSamplesTopDownResult = {
   friendlyThreadName: string;
   activeOnly?: boolean;
   search?: string;
+  activeFilters?: FilterEntry[];
+  ephemeralFilters?: SampleFilterSpec[];
   regularCallTree: CallTreeNode;
 };
 
@@ -217,6 +263,8 @@ export type ThreadSamplesBottomUpResult = {
   friendlyThreadName: string;
   activeOnly?: boolean;
   search?: string;
+  activeFilters?: FilterEntry[];
+  ephemeralFilters?: SampleFilterSpec[];
   invertedCallTree: CallTreeNode | null;
 };
 
@@ -319,6 +367,8 @@ export type ThreadFunctionsResult = {
   threadHandle: string;
   friendlyThreadName: string;
   activeOnly?: boolean;
+  activeFilters?: FilterEntry[];
+  ephemeralFilters?: SampleFilterSpec[];
   totalFunctionCount: number;
   filteredFunctionCount: number;
   filters?: {

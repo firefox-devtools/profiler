@@ -300,21 +300,24 @@ export class Daemon {
             return this.querier!.threadSamples(
               command.thread,
               command.includeIdle,
-              command.search
+              command.search,
+              command.sampleFilters
             );
           case 'samples-top-down':
             return this.querier!.threadSamplesTopDown(
               command.thread,
               command.callTreeOptions,
               command.includeIdle,
-              command.search
+              command.search,
+              command.sampleFilters
             );
           case 'samples-bottom-up':
             return this.querier!.threadSamplesBottomUp(
               command.thread,
               command.callTreeOptions,
               command.includeIdle,
-              command.search
+              command.search,
+              command.sampleFilters
             );
           case 'markers':
             return this.querier!.threadMarkers(
@@ -325,7 +328,8 @@ export class Daemon {
             return this.querier!.threadFunctions(
               command.thread,
               command.functionFilters,
-              command.includeIdle
+              command.includeIdle,
+              command.sampleFilters
             );
           default:
             throw assertExhaustiveCheck(command);
@@ -384,6 +388,22 @@ export class Daemon {
             return this.querier!.popViewRange();
           case 'clear':
             return this.querier!.clearViewRange();
+          default:
+            throw assertExhaustiveCheck(command);
+        }
+      case 'filter':
+        switch (command.subcommand) {
+          case 'push':
+            if (!command.spec) {
+              throw new Error('spec is required for filter push');
+            }
+            return this.querier!.filterPush(command.spec, command.thread);
+          case 'pop':
+            return this.querier!.filterPop(command.count ?? 1, command.thread);
+          case 'list':
+            return this.querier!.filterList(command.thread);
+          case 'clear':
+            return this.querier!.filterClear(command.thread);
           default:
             throw assertExhaustiveCheck(command);
         }

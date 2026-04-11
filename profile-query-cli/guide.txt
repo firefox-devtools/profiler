@@ -11,7 +11,7 @@ SESSION MODEL
     2. Query the loaded profile with any other commands
     3. Stop with "pq stop" when done
 
-  The daemon persists your selected thread and zoom ranges across queries.
+  The daemon persists your selected thread, zoom ranges, and filter stacks across queries.
 
 
 CORE WORKFLOW
@@ -51,8 +51,22 @@ CORE WORKFLOW
   Step 6: Drill into specifics
     pq marker info m-1234     Full details for a marker (from handles in marker list)
     pq marker stack m-1234    Full stack trace at the time of a marker
-    pq function info f-12     Function details (callers/callees, source location)
+    pq function info f-12     Function details (source location, library)
     pq function expand f-12   Show full untruncated function name
+
+  Step 7: Filter to focus the analysis (see FILTERS section below)
+
+    Ephemeral -- applies only to that one command, sticky state unchanged:
+    pq thread samples --excludes-function f-184     Ignore one noisy function
+    pq thread samples --root-at f-500               Show only work inside f-500
+    pq thread samples --during-marker --search Paint  Only samples during Paint markers
+
+    Sticky -- persists across all subsequent commands until popped:
+    pq filter push --merge f-142,f-143             Merge allocators out of stacks
+    pq filter push --includes-function f-500       Keep only samples containing f-500
+    pq thread samples                              Uses sticky filters automatically
+    pq filter pop                                  Remove last filter
+    pq filter clear                                Remove all filters
 
 
 HANDLE SYSTEM
@@ -63,7 +77,9 @@ HANDLE SYSTEM
     f-12       Function handles (from "thread samples", "thread functions")
     ts-6       Timestamp handles (named points in time, usable with "zoom push")
 
-  Handles are stable within a session but may differ across sessions.
+  Thread and marker handles are stable within a session.
+  Function handles (f-N) are stable across sessions for the same profile --
+  they are direct indices into the shared function table.
 
 
 ZOOM: FOCUS ON A TIME RANGE
@@ -76,10 +92,73 @@ ZOOM: FOCUS ON A TIME RANGE
     pq zoom push ts-6,ts-12    Zoom to the range between two named timestamps
     pq zoom pop                Undo the last zoom
     pq zoom clear              Return to full profile view
-    pq status                  Show current thread selection and active zoom ranges
 
   After zooming, all thread/marker/sample commands automatically apply the filter.
   Use "pq status" to confirm the active zoom stack (along with thread and filters).
+
+
+FILTERS
+
+  Filters narrow which samples appear in analysis results. They work in two modes:
+
+  EPHEMERAL (one command only)
+    Add filter flags directly to thread samples/functions commands. They apply
+    only to that invocation; the sticky filter stack is unchanged. Multiple flags
+    may be combined on one command and are applied left to right.
+
+      pq thread samples --excludes-function f-184
+      pq thread samples --merge f-142,f-143 --root-at f-500 --limit 30
+      pq thread functions --includes-function f-500
+
+  STICKY (persists across commands)
+    Use "pq filter push" to add a filter to the current thread's stack.
+    Every subsequent analysis command sees all pushed filters automatically.
+    Filters are per-thread: each thread has its own independent filter stack.
+    Exactly one filter flag per "filter push" command.
+
+      pq filter push --merge f-142,f-143         # add filter 1
+      pq filter push --includes-function f-500   # add filter 2 (AND: both must pass)
+      pq thread samples                          # both filters active
+      pq thread functions                        # both filters active
+      pq filter pop                              # remove filter 2
+      pq filter pop 2                            # remove last 2 filters
+      pq filter list                             # show active filters in push order
+      pq filter clear                            # remove all filters
+
+  Use "pq status" to inspect the full session state: selected thread, zoom stack, and
+  all per-thread filters.
+
+  Sticky + ephemeral compose: sticky filters apply first (already in the transform
+  stack), then ephemeral filters layer on top for that one invocation only.
+
+  AVAILABLE FILTER FLAGS
+
+    Inclusion -- keep only samples whose stack matches:
+      --includes-function f-N,...       stack contains any of these funcs (OR)
+      --includes-any-function f-N,...   alias for --includes-function
+      --includes-prefix f-N,...         stack starts with this root-first sequence
+      --includes-suffix f-N             leaf (innermost) frame is f-N
+      --during-marker --search <text>   sample timestamp inside a matching marker
+      --outside-marker --search <text>  sample timestamp outside all matching markers
+
+    Exclusion -- drop matching samples:
+      --excludes-function f-N,...       stack contains any of these funcs
+      --excludes-any-function f-N,...   alias for --excludes-function
+
+    Stack transforms -- modify stack structure:
+      --merge f-N,...                   remove funcs from stacks (A→f-N→B becomes A→B)
+      --root-at f-N                     re-root all stacks at f-N (subtree within f-N)
+
+  COMBINING FILTERS
+
+    OR within one push: --includes-function f-1,f-2 keeps samples with f-1 OR f-2.
+    AND across pushes: two separate "filter push" calls both must pass.
+    Push order matters: each filter sees the stack as left by the prior filter.
+
+    Example -- only samples containing f-500, during Paint markers, after merging noise:
+      pq filter push --merge f-142,f-143
+      pq filter push --includes-function f-500
+      pq filter push --during-marker --search Paint
 
 
 JSON OUTPUT
@@ -105,6 +184,27 @@ COMMON ANALYSIS PATTERNS
     pq zoom push m-158                     Zoom into that marker's time range
     pq thread samples                      What was executing during that period?
     pq zoom pop                            Back to full profile
+
+  Eliminate allocator noise from a call tree:
+    pq thread functions --search malloc    Find allocator function handles (e.g. f-142)
+    pq thread samples --merge f-142        Try ephemerally first
+    pq filter push --merge f-142,f-143     Make it sticky for all subsequent commands
+    pq thread samples                      Clean call tree, filters persist
+    pq filter clear
+
+  Focus on work inside a specific function:
+    pq thread functions --search PresentImpl   Note the handle (e.g. f-500)
+    pq thread samples --root-at f-500          Ephemeral: subtree rooted at f-500
+    pq filter push --includes-function f-500   Sticky: only samples containing f-500
+    pq filter push --root-at f-500             Sticky: re-root at f-500
+    pq thread samples-top-down                 Call tree within f-500 only
+
+  Correlate CPU with a specific event type:
+    pq thread markers --search Paint           Check Paint marker frequency/duration
+    pq filter push --during-marker --search Paint
+    pq thread samples                          What runs during Paint?
+    pq thread functions                        Which functions are active during Paint?
+    pq filter clear
 
   Find slow layout or script execution:
     pq thread markers --category Layout --min-duration 5
@@ -169,11 +269,16 @@ TIPS
   - Use --search to narrow the call tree to branches you care about: --search GC shows only
     call paths that pass through a GC-related function
   - Zoom into slow periods: use "zoom push m-<handle>" to focus on a slow marker
+  - Try filters ephemerally first (as flags on thread commands) before committing with "filter push"
+  - "filter push --merge" is great for hiding allocator/profiler noise without losing context
+  - "filter push --root-at f-N" + "filter push --includes-function f-N" tightly focuses
+    analysis on one function's work
+  - "filter push --during-marker --search X" is powerful for correlating CPU work with events
+  - Sticky filters compose: each push narrows further (AND semantics across pushes)
+  - "filter list" shows filters in push order; "filter pop" removes from the end
   - Use --json when you need to process or filter results programmatically
-  - Marker handles are stable: you can refer back to m-1234 multiple times
-  - JS vs native: JS functions show source locations; native functions show C++/Rust names
-  - Category filters: use --category with values like Layout, JavaScript, Network, GC, etc.
-  - Check "status": run "pq status" to confirm selected thread and active zoom ranges
+  - Marker handles are stable within a session; function handles (f-N) are stable across sessions
+  - Check "status": run "pq status" to confirm selected thread, active zoom, and active filters
 
 
 SESSION MANAGEMENT
