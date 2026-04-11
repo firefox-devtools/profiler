@@ -681,7 +681,7 @@ describe('app/MenuButtons', function () {
         return setupResult;
       }
 
-      test('does not display the delete button if the profile is public but without uploaded data', async () => {
+      it('does not display the delete button if the profile is public but without uploaded data', async () => {
         const { getMetaInfoPanel } = await setupForDeletion();
         // We wait a bit using the "find" flavor of the queries because this is
         // reached asynchronously.
@@ -690,7 +690,7 @@ describe('app/MenuButtons', function () {
         expect(getMetaInfoPanel()).toMatchSnapshot();
       });
 
-      test('displays the delete button if we have the uploaded data but no JWT token', async () => {
+      it('displays the delete button if we have the uploaded data but no JWT token', async () => {
         await addUploadedProfileInformation();
         const { getMetaInfoPanel } = await setupForDeletion();
         expect(await screen.findByText('Uploaded:')).toBeInTheDocument();
@@ -698,7 +698,7 @@ describe('app/MenuButtons', function () {
         expect(getMetaInfoPanel()).toMatchSnapshot();
       });
 
-      test('displays the delete button if we have the uploaded data and some JWT token', async () => {
+      it('displays the delete button if we have the uploaded data and some JWT token', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
         const { getMetaInfoPanel } = await setupForDeletion();
         expect(await screen.findByText('Uploaded:')).toBeInTheDocument();
@@ -706,7 +706,7 @@ describe('app/MenuButtons', function () {
         expect(getMetaInfoPanel()).toMatchSnapshot();
       });
 
-      test('clicking on the button shows the confirmation', async () => {
+      it('clicking on the button shows the confirmation', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
         const { getMetaInfoPanel } = await setupForDeletion();
         fireFullClick(await screen.findByText('Delete'));
@@ -716,7 +716,7 @@ describe('app/MenuButtons', function () {
         expect(getMetaInfoPanel()).toMatchSnapshot();
       });
 
-      test('clicking on the "cancel" button will move back to the profile information', async () => {
+      it('clicking on the "cancel" button will move back to the profile information', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
         await setupForDeletion();
         fireFullClick(await screen.findByText('Delete'));
@@ -728,7 +728,7 @@ describe('app/MenuButtons', function () {
         expect(screen.getByText('Profile Information')).toBeInTheDocument();
       });
 
-      test('dismissing the panel will move back to the profile information when opened again', async () => {
+      it('dismissing the panel will move back to the profile information when opened again', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
         const { displayMetaInfoPanel, waitForPanelToBeRemoved } =
           await setupForDeletion();
@@ -743,7 +743,7 @@ describe('app/MenuButtons', function () {
         expect(screen.getByText('Profile Information')).toBeInTheDocument();
       });
 
-      test('confirming the delete should delete on the server and in the db', async () => {
+      it('confirming the delete should delete on the server and in the db', async () => {
         await addUploadedProfileInformation({ jwtToken: 'FAKE_TOKEN' });
         const {
           getMetaInfoPanel,

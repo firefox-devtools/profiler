@@ -253,7 +253,7 @@ export default defineConfig(
 
   // Test files override
   {
-    files: ['src/test/**/*'],
+    files: ['src/test/**/*', 'profile-query-cli/src/test/**/*'],
     languageOptions: {
       globals: {
         ...globals.jest,

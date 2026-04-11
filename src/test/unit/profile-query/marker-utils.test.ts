@@ -5,8 +5,13 @@
 import {
   computeDurationStats,
   computeRateStats,
+  collectThreadMarkers,
   formatDuration,
-} from '../../profile-query/formatters/marker-info';
+} from 'firefox-profiler/profile-query/formatters/marker-info';
+import { MarkerMap } from 'firefox-profiler/profile-query/marker-map';
+import { ThreadMap } from 'firefox-profiler/profile-query/thread-map';
+import { getProfileWithMarkers } from '../../fixtures/profiles/processed-profile';
+import { storeWithProfile } from '../../fixtures/stores';
 
 import type { Marker } from 'firefox-profiler/types';
 
@@ -203,6 +208,59 @@ describe('marker-info utility functions', function () {
       expect(stats.minGap).toBe(0);
       expect(stats.avgGap).toBe(50);
       expect(stats.maxGap).toBe(100);
+    });
+  });
+
+  describe('collectThreadMarkers', function () {
+    it('creates nested custom groups for multi-key marker grouping', function () {
+      const profile = getProfileWithMarkers([
+        [
+          'DOMEvent',
+          0,
+          2,
+          { eventType: 'click', latency: 1 } as Record<string, unknown>,
+        ],
+        [
+          'DOMEvent',
+          3,
+          6,
+          { eventType: 'keydown', latency: 2 } as Record<string, unknown>,
+        ],
+        [
+          'DOMEvent',
+          7,
+          9,
+          { eventType: 'click', latency: 3 } as Record<string, unknown>,
+        ],
+      ]);
+      const store = storeWithProfile(profile);
+      const threadMap = new ThreadMap();
+      const markerMap = new MarkerMap();
+
+      const result = collectThreadMarkers(
+        store,
+        threadMap,
+        markerMap,
+        undefined,
+        {
+          groupBy: 'type,field:eventType',
+        }
+      );
+
+      expect(result.customGroups).toBeDefined();
+      expect(result.customGroups).toHaveLength(1);
+      expect(result.customGroups?.[0].groupName).toBe('DOMEvent');
+      expect(result.customGroups?.[0].count).toBe(3);
+      expect(result.customGroups?.[0].subGroups).toEqual([
+        expect.objectContaining({
+          groupName: 'click',
+          count: 2,
+        }),
+        expect.objectContaining({
+          groupName: 'keydown',
+          count: 1,
+        }),
+      ]);
     });
   });
 });

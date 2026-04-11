@@ -28,7 +28,7 @@ describe('pq basic functionality', () => {
     await cleanupTestContext(ctx);
   });
 
-  test('load creates a session', async () => {
+  it('load creates a session', async () => {
     const result = await pq(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
@@ -51,7 +51,7 @@ describe('pq basic functionality', () => {
     expect(files).toContain('current.txt');
   });
 
-  test('profile info works after load', async () => {
+  it('profile info works after load', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     const result = await pq(ctx, ['profile', 'info']);
@@ -60,7 +60,7 @@ describe('pq basic functionality', () => {
     expect(result.stdout).toContain('This profile contains');
   });
 
-  test('thread select works immediately after load', async () => {
+  it('thread select works immediately after load', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     const result = await pq(ctx, ['thread', 'select', 't-0']);
@@ -70,7 +70,7 @@ describe('pq basic functionality', () => {
     expect(result.stdout).toContain('t-0');
   });
 
-  test('stop cleans up session', async () => {
+  it('stop cleans up session', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
     await pq(ctx, ['stop']);
 
@@ -79,7 +79,7 @@ describe('pq basic functionality', () => {
     expect(files.filter((f) => f.endsWith('.sock'))).toHaveLength(0);
   });
 
-  test('load fails for missing file', async () => {
+  it('load fails for missing file', async () => {
     const result = await pqFail(ctx, ['load', '/nonexistent/file.json']);
 
     expect(result.exitCode).not.toBe(0);
@@ -87,7 +87,7 @@ describe('pq basic functionality', () => {
     expect(output).toContain('not found');
   });
 
-  test('profile info fails without active session', async () => {
+  it('profile info fails without active session', async () => {
     const result = await pqFail(ctx, ['profile', 'info']);
 
     expect(result.exitCode).not.toBe(0);
@@ -95,7 +95,7 @@ describe('pq basic functionality', () => {
     expect(output).toContain('No active session');
   });
 
-  test('multiple profile info calls work (daemon stays running)', async () => {
+  it('multiple profile info calls work (daemon stays running)', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     // First call
@@ -108,7 +108,7 @@ describe('pq basic functionality', () => {
     expect(result2.stdout).toEqual(result1.stdout);
   });
 
-  test('numeric zero marker filters are preserved instead of being ignored', async () => {
+  it('numeric zero marker filters are preserved instead of being ignored', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     const minDurationResult = await pq(ctx, [
@@ -130,7 +130,7 @@ describe('pq basic functionality', () => {
     expect(maxDurationResult.stdout).toContain('"maxDuration": 0');
   });
 
-  test('numeric zero function filters are preserved instead of being ignored', async () => {
+  it('numeric zero function filters are preserved instead of being ignored', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     const result = await pq(ctx, [
@@ -144,7 +144,130 @@ describe('pq basic functionality', () => {
     expect(result.stdout).toContain('"minSelf": 0');
   });
 
-  test('max-lines=0 is rejected instead of silently falling back to the default', async () => {
+  it('sticky filters are isolated per thread and reported in status', async () => {
+    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await pq(ctx, ['thread', 'select', 't-0']);
+
+    await pq(ctx, ['filter', 'push', '--merge', 'f-1']);
+
+    const filterListResult = await pq(ctx, ['filter', 'list', '--json']);
+    const filterList = JSON.parse(filterListResult.stdout) as {
+      type: string;
+      threadHandle: string;
+      filters: Array<{
+        spec: { type: string; funcIndexes?: number[] };
+      }>;
+    };
+
+    expect(filterList.type).toBe('filter-stack');
+    expect(filterList.threadHandle).toBe('t-0');
+    expect(filterList.filters).toHaveLength(1);
+    expect(filterList.filters[0].spec).toEqual({
+      type: 'merge',
+      funcIndexes: [1],
+    });
+
+    const statusResult = await pq(ctx, ['status', '--json']);
+    const status = JSON.parse(statusResult.stdout) as {
+      type: string;
+      filterStacks: Array<{
+        threadHandle: string;
+        filters: Array<{
+          spec: { type: string; funcIndexes?: number[] };
+        }>;
+      }>;
+    };
+
+    expect(status.type).toBe('status');
+    expect(status.filterStacks).toHaveLength(1);
+    expect(status.filterStacks[0]).toEqual(
+      expect.objectContaining({
+        threadHandle: 't-0',
+        filters: [
+          expect.objectContaining({
+            spec: { type: 'merge', funcIndexes: [1] },
+          }),
+        ],
+      })
+    );
+
+    await pq(ctx, ['thread', 'select', 't-1']);
+
+    const otherThreadFilterListResult = await pq(ctx, [
+      'filter',
+      'list',
+      '--json',
+    ]);
+    const otherThreadFilterList = JSON.parse(
+      otherThreadFilterListResult.stdout
+    ) as {
+      threadHandle: string;
+      filters: unknown[];
+    };
+
+    expect(otherThreadFilterList.threadHandle).toBe('t-1');
+    expect(otherThreadFilterList.filters).toHaveLength(0);
+
+    const explicitThreadFilterListResult = await pq(ctx, [
+      'filter',
+      'list',
+      '--thread',
+      't-0',
+      '--json',
+    ]);
+    const explicitThreadFilterList = JSON.parse(
+      explicitThreadFilterListResult.stdout
+    ) as {
+      threadHandle: string;
+      filters: Array<{
+        spec: { type: string; funcIndexes?: number[] };
+      }>;
+    };
+
+    expect(explicitThreadFilterList.threadHandle).toBe('t-0');
+    expect(explicitThreadFilterList.filters).toHaveLength(1);
+    expect(explicitThreadFilterList.filters[0].spec).toEqual({
+      type: 'merge',
+      funcIndexes: [1],
+    });
+  });
+
+  it('ephemeral sample filters do not persist into session state', async () => {
+    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const samplesResult = await pq(ctx, [
+      'thread',
+      'samples',
+      '--json',
+      '--merge',
+      'f-1',
+    ]);
+    const samples = JSON.parse(samplesResult.stdout) as {
+      type: string;
+      ephemeralFilters?: Array<{ type: string; funcIndexes?: number[] }>;
+      activeFilters?: unknown[];
+    };
+
+    expect(samples.type).toBe('thread-samples');
+    expect(samples.ephemeralFilters).toEqual([
+      { type: 'merge', funcIndexes: [1] },
+    ]);
+    expect(samples.activeFilters).toBeUndefined();
+
+    const filterListResult = await pq(ctx, ['filter', 'list', '--json']);
+    const filterList = JSON.parse(filterListResult.stdout) as {
+      filters: unknown[];
+    };
+    expect(filterList.filters).toHaveLength(0);
+
+    const statusResult = await pq(ctx, ['status', '--json']);
+    const status = JSON.parse(statusResult.stdout) as {
+      filterStacks: unknown[];
+    };
+    expect(status.filterStacks).toHaveLength(0);
+  });
+
+  it('max-lines=0 is rejected instead of silently falling back to the default', async () => {
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     const result = await pqFail(ctx, [
@@ -159,7 +282,7 @@ describe('pq basic functionality', () => {
     expect(output).toContain('--max-lines must be a positive integer');
   });
 
-  test('build hash mismatch stops the daemon before cleaning up the session', async () => {
+  it('build hash mismatch stops the daemon before cleaning up the session', async () => {
     const loadResult = await pq(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',

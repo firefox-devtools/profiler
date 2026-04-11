@@ -29,7 +29,7 @@ describe('daemon startup (two-phase)', () => {
     await cleanupTestContext(ctx);
   });
 
-  test('daemon creates socket and metadata before loading profile', async () => {
+  it('daemon creates socket and metadata before loading profile', async () => {
     const startTime = Date.now();
 
     const result = await pq(ctx, [
@@ -62,7 +62,7 @@ describe('daemon startup (two-phase)', () => {
     expect(metadata.profilePath).toContain('processed-1.json');
   });
 
-  test('load returns non-zero exit code on profile load failure', async () => {
+  it('load returns non-zero exit code on profile load failure', async () => {
     // Create an invalid JSON file
     const invalidProfile = join(ctx.sessionDir, 'invalid.json');
     const { writeFile } = await import('fs/promises');
@@ -75,7 +75,7 @@ describe('daemon startup (two-phase)', () => {
     expect(output).toMatch(/Profile load failed|Failed to|parse|invalid/i);
   });
 
-  test('daemon startup fails fast with short timeout', async () => {
+  it('daemon startup fails fast with short timeout', async () => {
     // This test verifies Phase 1 timeout behavior
     // We can't easily force a daemon startup failure, but we can
     // verify the timeout is reasonable by checking it doesn't wait forever
@@ -86,7 +86,7 @@ describe('daemon startup (two-phase)', () => {
     expect(result.exitCode).not.toBe(0);
   });
 
-  test('load blocks until profile is fully loaded', async () => {
+  it('load blocks until profile is fully loaded', async () => {
     // Start loading
     await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
@@ -96,7 +96,7 @@ describe('daemon startup (two-phase)', () => {
     expect(result.stdout).toContain('This profile contains');
   });
 
-  test('validates session before returning (checks process + socket)', async () => {
+  it('validates session before returning (checks process + socket)', async () => {
     const result = await pq(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
@@ -110,10 +110,10 @@ describe('daemon startup (two-phase)', () => {
     const socketPath = getSocketPath(ctx.sessionDir, sessionId);
     const metadataPath = join(ctx.sessionDir, `${sessionId}.json`);
 
-    // Named pipes on Windows are not filesystem files, skip the access check there
-    if (process.platform !== 'win32') {
-      await expect(access(socketPath)).resolves.toBeUndefined();
-    }
+    // Named pipes on Windows are not filesystem files, so treat that case as a no-op.
+    const socketAccessPromise =
+      process.platform === 'win32' ? Promise.resolve() : access(socketPath);
+    await expect(socketAccessPromise).resolves.toBeUndefined();
     await expect(access(metadataPath)).resolves.toBeUndefined();
 
     // Process should be running (metadata contains PID)

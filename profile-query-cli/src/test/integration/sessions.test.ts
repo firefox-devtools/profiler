@@ -7,6 +7,8 @@
  * Migrated from bin/pq-test-multi bash script.
  */
 
+import { access, writeFile } from 'fs/promises';
+import { join } from 'path';
 import {
   createTestContext,
   cleanupTestContext,
@@ -26,7 +28,7 @@ describe('pq multiple concurrent sessions', () => {
     await cleanupTestContext(ctx);
   });
 
-  test('can run multiple sessions with explicit IDs', async () => {
+  it('can run multiple sessions with explicit IDs', async () => {
     const session1 = 'test-session-1';
     const session2 = 'test-session-2';
     const session3 = 'test-session-3';
@@ -71,7 +73,7 @@ describe('pq multiple concurrent sessions', () => {
     await pq(ctx, ['stop', '--session', session3]);
   });
 
-  test('list-sessions shows running sessions', async () => {
+  it('list-sessions shows running sessions', async () => {
     // Start two sessions
     await pq(ctx, [
       'load',
@@ -97,7 +99,7 @@ describe('pq multiple concurrent sessions', () => {
     await pq(ctx, ['stop', '--all']);
   });
 
-  test('stop --all stops all sessions', async () => {
+  it('stop --all stops all sessions', async () => {
     // Start multiple sessions
     await pq(ctx, [
       'load',
@@ -120,7 +122,7 @@ describe('pq multiple concurrent sessions', () => {
     expect(result.stdout).toContain('Found 0 running sessions');
   });
 
-  test('reusing a live explicit session id fails without replacing the daemon', async () => {
+  it('reusing a live explicit session id fails without replacing the daemon', async () => {
     const sessionId = 'shared-session';
 
     await pq(ctx, [
@@ -145,5 +147,37 @@ describe('pq multiple concurrent sessions', () => {
     const result = await pq(ctx, ['profile', 'info', '--session', sessionId]);
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('This profile contains');
+  });
+
+  it('list-sessions cleans up stale session metadata files', async () => {
+    const staleSessionId = 'stale-session';
+    const metadataPath = join(ctx.sessionDir, `${staleSessionId}.json`);
+    const socketPath = join(ctx.sessionDir, `${staleSessionId}.sock`);
+    const currentPath = join(ctx.sessionDir, 'current.txt');
+
+    await writeFile(socketPath, '', 'utf-8');
+    await writeFile(currentPath, staleSessionId, 'utf-8');
+    await writeFile(
+      metadataPath,
+      JSON.stringify({
+        id: staleSessionId,
+        socketPath,
+        logPath: join(ctx.sessionDir, `${staleSessionId}.log`),
+        pid: 999999,
+        profilePath: '/tmp/does-not-exist.json',
+        createdAt: '2026-04-11T00:00:00.000Z',
+        buildHash: 'stale-build',
+      }),
+      'utf-8'
+    );
+
+    const result = await pq(ctx, ['list-sessions']);
+
+    expect(result.stdout).toContain('Cleaned up 1 stale sessions.');
+    expect(result.stdout).toContain('Found 0 running sessions');
+
+    await expect(access(metadataPath)).rejects.toThrow();
+    await expect(access(socketPath)).rejects.toThrow();
+    await expect(access(currentPath)).rejects.toThrow();
   });
 });
