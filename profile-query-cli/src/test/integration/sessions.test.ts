@@ -155,7 +155,10 @@ describe('pq multiple concurrent sessions', () => {
     const socketPath = join(ctx.sessionDir, `${staleSessionId}.sock`);
     const currentPath = join(ctx.sessionDir, 'current.txt');
 
-    await writeFile(socketPath, '', 'utf-8');
+    if (process.platform !== 'win32') {
+      // Named pipes on Windows are not filesystem files
+      await writeFile(socketPath, '', 'utf-8');
+    }
     await writeFile(currentPath, staleSessionId, 'utf-8');
     await writeFile(
       metadataPath,

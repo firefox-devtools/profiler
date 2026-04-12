@@ -94,15 +94,26 @@ describe('profile-query-cli session management', function () {
   });
 
   describe('path generation', function () {
-    it('getSocketPath returns correct path', function () {
+    it('getSocketPath returns correct Unix path', function () {
+      const originalPlatform = process.platform;
+      Object.defineProperty(process, 'platform', {
+        value: 'linux',
+        configurable: true,
+      });
       const sessionId = 'test123';
       const socketPath = getSocketPath(testSessionDir, sessionId);
       expect(socketPath).toBe(path.join(testSessionDir, 'test123.sock'));
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+        configurable: true,
+      });
     });
 
     it('namespaces Windows pipe paths by session directory', function () {
+      const originalPlatform = process.platform;
       Object.defineProperty(process, 'platform', {
         value: 'win32',
+        configurable: true,
       });
 
       const firstSocketPath = getSocketPath('C:\\pq\\alpha', 'test123');
@@ -117,6 +128,11 @@ describe('profile-query-cli session management', function () {
       );
       expect(firstSocketPath).not.toBe(secondSocketPath);
       expect(firstSocketPath).toBe(thirdSocketPath);
+
+      Object.defineProperty(process, 'platform', {
+        value: originalPlatform,
+        configurable: true,
+      });
     });
 
     it('generates a stable namespace from the session directory', function () {
@@ -177,9 +193,6 @@ describe('profile-query-cli session management', function () {
   describe('current session tracking', function () {
     it('sets and gets current session via symlink', function () {
       const sessionId = 'test123';
-      const socketPath = getSocketPath(testSessionDir, sessionId);
-      fs.writeFileSync(socketPath, '');
-
       setCurrentSession(testSessionDir, sessionId);
 
       const currentId = getCurrentSessionId(testSessionDir);
@@ -193,14 +206,10 @@ describe('profile-query-cli session management', function () {
 
     it('replaces existing current session symlink', function () {
       // Create first session
-      const socket1 = getSocketPath(testSessionDir, 'session1');
-      fs.writeFileSync(socket1, '');
       setCurrentSession(testSessionDir, 'session1');
       expect(getCurrentSessionId(testSessionDir)).toBe('session1');
 
       // Create second session
-      const socket2 = getSocketPath(testSessionDir, 'session2');
-      fs.writeFileSync(socket2, '');
       setCurrentSession(testSessionDir, 'session2');
       expect(getCurrentSessionId(testSessionDir)).toBe('session2');
     });
@@ -208,8 +217,6 @@ describe('profile-query-cli session management', function () {
     it('getCurrentSocketPath resolves to correct path', function () {
       const sessionId = 'test123';
       const socketPath = getSocketPath(testSessionDir, sessionId);
-      fs.writeFileSync(socketPath, '');
-
       setCurrentSession(testSessionDir, sessionId);
 
       const currentPath = getCurrentSocketPath(testSessionDir);
@@ -259,8 +266,10 @@ describe('profile-query-cli session management', function () {
       const socketPath = getSocketPath(testSessionDir, sessionId);
       const metadataPath = getMetadataPath(testSessionDir, sessionId);
 
-      fs.writeFileSync(socketPath, '');
       fs.writeFileSync(metadataPath, '{}');
+      if (process.platform !== 'win32') {
+        fs.writeFileSync(socketPath, '');
+      }
 
       cleanupSession(testSessionDir, sessionId);
 
@@ -280,8 +289,6 @@ describe('profile-query-cli session management', function () {
 
     it('removes current session symlink if it points to this session', function () {
       const sessionId = 'test123';
-      const socketPath = getSocketPath(testSessionDir, sessionId);
-      fs.writeFileSync(socketPath, '');
       setCurrentSession(testSessionDir, sessionId);
 
       cleanupSession(testSessionDir, sessionId);
@@ -291,8 +298,6 @@ describe('profile-query-cli session management', function () {
 
     it('does not remove current session symlink if it points to different session', function () {
       // Set current session to session1
-      const socket1 = getSocketPath(testSessionDir, 'session1');
-      fs.writeFileSync(socket1, '');
       setCurrentSession(testSessionDir, 'session1');
 
       // Clean up session2
@@ -321,12 +326,18 @@ describe('profile-query-cli session management', function () {
       };
 
       saveSessionMetadata(testSessionDir, metadata);
-      fs.writeFileSync(metadata.socketPath, '');
 
       expect(validateSession(testSessionDir, sessionId)).toBe(null);
     });
 
     it('returns false for session with missing socket', function () {
+      if (process.platform === 'win32') {
+        // Not applicable on Windows: named pipes are self-cleaning and disappear
+        // automatically when the server stops, so a session can't have a live PID
+        // but a missing socket. validateSession skips the socket check on Windows
+        // for this reason.
+        return;
+      }
       const sessionId = 'test123';
       const metadata: SessionMetadata = {
         id: sessionId,
@@ -357,7 +368,9 @@ describe('profile-query-cli session management', function () {
       };
 
       saveSessionMetadata(testSessionDir, metadata);
-      fs.writeFileSync(metadata.socketPath, '');
+      if (process.platform !== 'win32') {
+        fs.writeFileSync(metadata.socketPath, '');
+      }
 
       expect(validateSession(testSessionDir, sessionId)).not.toBe(null);
     });

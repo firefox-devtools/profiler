@@ -152,7 +152,7 @@ export async function runPq(
     timeout?: number;
   }
 ): Promise<CommandResult> {
-  const result = await exec(PQ_BIN, args, {
+  const result = await exec(process.execPath, [PQ_BIN, ...args], {
     env: ctx.env,
     timeout: options?.timeout ?? 30000,
   });

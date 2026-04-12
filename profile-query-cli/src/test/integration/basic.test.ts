@@ -46,8 +46,12 @@ describe('pq basic functionality', () => {
 
     // Verify session files exist
     const files = await readdir(ctx.sessionDir);
-    expect(files).toContain(`${sessionId}.sock`);
-    expect(files).toContain(`${sessionId}.json`);
+    // Named pipes on Windows are not filesystem files, so no .sock file is created
+    const expectedFiles = [
+      `${sessionId}.json`,
+      ...(process.platform !== 'win32' ? [`${sessionId}.sock`] : []),
+    ];
+    expect(files).toEqual(expect.arrayContaining(expectedFiles));
     expect(files).toContain('current.txt');
   });
 
