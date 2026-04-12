@@ -61,7 +61,7 @@ pq thread samples                # View samples for selected thread
 pq thread info --thread t-0      # View info for specific thread without selecting
 ```
 
-Run `pq --guide` for a detailed usage guide with patterns and tips. Run `pq --help` for the full options reference.
+Run `pq guide` for a detailed usage guide with patterns and tips. Run `pq --help` for the full options reference.
 
 ### Common options
 
