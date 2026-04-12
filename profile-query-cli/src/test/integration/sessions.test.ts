@@ -67,13 +67,13 @@ describe('pq multiple concurrent sessions', () => {
     // Note: We don't assert that results differ, as different test profiles
     // might coincidentally have identical summaries.
 
-    // Stop all sessions
-    await pq(ctx, ['stop', '--session', session1]);
+    // Stop all sessions (mix of positional arg and --session flag)
+    await pq(ctx, ['stop', session1]);
     await pq(ctx, ['stop', '--session', session2]);
-    await pq(ctx, ['stop', '--session', session3]);
+    await pq(ctx, ['stop', session3]);
   });
 
-  it('list-sessions shows running sessions', async () => {
+  it('session list shows running sessions and marks the current one', async () => {
     // Start two sessions
     await pq(ctx, [
       'load',
@@ -88,14 +88,40 @@ describe('pq multiple concurrent sessions', () => {
       'session-b',
     ]);
 
-    // List sessions
-    const result = await pq(ctx, ['list-sessions']);
+    // List sessions — session-b was loaded last, so it should be current
+    const result = await pq(ctx, ['session', 'list']);
 
     expect(result.stdout).toContain('Found 2 running sessions');
     expect(result.stdout).toContain('session-a');
     expect(result.stdout).toContain('session-b');
+    expect(result.stdout).toMatch(/\* session-b/);
 
     // Clean up
+    await pq(ctx, ['stop', '--all']);
+  });
+
+  it('session use switches the current session', async () => {
+    await pq(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-1.json',
+      '--session',
+      'session-a',
+    ]);
+    await pq(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-2.json',
+      '--session',
+      'session-b',
+    ]);
+
+    // session-b is current; switch to session-a
+    const switchResult = await pq(ctx, ['session', 'use', 'session-a']);
+    expect(switchResult.stdout).toContain('Switched to session session-a');
+
+    // session list should now mark session-a as current
+    const listResult = await pq(ctx, ['session', 'list']);
+    expect(listResult.stdout).toMatch(/\* session-a/);
+
     await pq(ctx, ['stop', '--all']);
   });
 
@@ -118,8 +144,43 @@ describe('pq multiple concurrent sessions', () => {
     await pq(ctx, ['stop', '--all']);
 
     // Verify no sessions
-    const result = await pq(ctx, ['list-sessions']);
+    const result = await pq(ctx, ['session', 'list']);
     expect(result.stdout).toContain('Found 0 running sessions');
+  });
+
+  it('session use with unknown id fails', async () => {
+    const result = await pqFail(ctx, ['session', 'use', 'does-not-exist']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('does-not-exist');
+  });
+
+  it('session use causes unqualified commands to target the switched session', async () => {
+    await pq(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-1.json',
+      '--session',
+      'session-a',
+    ]);
+    await pq(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-2.json',
+      '--session',
+      'session-b',
+    ]);
+
+    // Switch to session-a (session-b is current)
+    await pq(ctx, ['session', 'use', 'session-a']);
+
+    // Unqualified stop should stop session-a
+    await pq(ctx, ['stop']);
+
+    // session-a is gone; session-b is still running
+    await pqFail(ctx, ['profile', 'info', '--session', 'session-a']);
+    const result = await pq(ctx, ['profile', 'info', '--session', 'session-b']);
+    expect(result.exitCode).toBe(0);
+
+    await pq(ctx, ['stop', '--all']);
   });
 
   it('reusing a live explicit session id fails without replacing the daemon', async () => {
@@ -149,7 +210,7 @@ describe('pq multiple concurrent sessions', () => {
     expect(result.stdout).toContain('This profile contains');
   });
 
-  it('list-sessions cleans up stale session metadata files', async () => {
+  it('session list cleans up stale session metadata files', async () => {
     const staleSessionId = 'stale-session';
     const metadataPath = join(ctx.sessionDir, `${staleSessionId}.json`);
     const socketPath = join(ctx.sessionDir, `${staleSessionId}.sock`);
@@ -174,7 +235,7 @@ describe('pq multiple concurrent sessions', () => {
       'utf-8'
     );
 
-    const result = await pq(ctx, ['list-sessions']);
+    const result = await pq(ctx, ['session', 'list']);
 
     expect(result.stdout).toContain('Cleaned up 1 stale sessions.');
     expect(result.stdout).toContain('Found 0 running sessions');

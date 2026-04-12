@@ -45,13 +45,15 @@ pq filter pop [N]                # Pop the last N filters (default: 1)
 pq filter list                   # List active filters for current thread
 pq filter clear                  # Remove all filters for current thread
 pq status                        # Show session status (selected thread, zoom ranges, filters)
-pq stop                          # Stop daemon
-pq list-sessions                 # List all running daemon sessions
+pq stop                          # Stop current daemon
+pq stop <id>                     # Stop a specific session
+pq stop --all                    # Stop all sessions
+pq session list                  # List all running daemon sessions (* marks current)
+pq session use <id>              # Switch the current session
 
 # Multiple sessions
 pq load <PATH> --session <id>
 pq profile info --session <id>
-pq stop --session <id>
 
 # Thread selection
 pq thread select t-93            # Select thread t-93

@@ -10,8 +10,9 @@
  *   pq profile info [--session <id>]         Print profile summary
  *   pq thread info [--thread <handle>]       Print thread information
  *   pq thread samples [--thread <handle>]    Show thread call tree and top functions
- *   pq stop [--session <id>] [--all]         Stop the daemon
- *   pq list-sessions                          List all running sessions
+ *   pq stop [<id>] [--all]                   Stop the daemon
+ *   pq session list                          List all running sessions
+ *   pq session use <id>                      Switch the current session
  *
  * Build:
  *   yarn build-profile-query-cli
@@ -33,7 +34,13 @@ import guideText from '../guide.txt';
 import minimist from 'minimist';
 import { startDaemon } from './daemon';
 import { sendCommand, startNewDaemon, stopDaemon } from './client';
-import { cleanupSession, listSessions, validateSession } from './session';
+import {
+  cleanupSession,
+  getCurrentSessionId,
+  listSessions,
+  setCurrentSession,
+  validateSession,
+} from './session';
 import type {
   MarkerFilterOptions,
   FunctionFilterOptions,
@@ -114,8 +121,9 @@ Commands:
   filter list                List active filters for current thread
   filter clear               Remove all filters for current thread
   status                     Show session status (selected thread, zoom ranges, filters)
-  stop                       Stop the daemon session
-  list-sessions              List all running daemon sessions
+  stop [<id>]                Stop the current session, a specific session, or all with --all
+  session list               List all running daemon sessions
+  session use <id>           Switch the current session
 
 Options:
   --session <id>           Use a specific session (default: current session)
@@ -198,7 +206,10 @@ Examples:
   pq thread functions --includes-function f-500 --limit 20
   pq status
   pq stop
-  pq list-sessions
+  pq stop abc123
+  pq stop --all
+  pq session list
+  pq session use abc123
   pq thread samples-top-down --max-lines 50
   pq thread samples-top-down --scoring exponential-0.8
   pq thread samples-top-down --search GC
@@ -986,40 +997,68 @@ async function main(): Promise<void> {
             sessionIds.map((id) => stopDaemon(SESSION_DIR, id))
           );
         } else {
-          await stopDaemon(SESSION_DIR, argv.session);
+          // Accept session id as positional arg (pq stop <id>) or --session flag
+          const sessionId = argv._[1] ?? argv.session;
+          await stopDaemon(SESSION_DIR, sessionId);
         }
         break;
       }
 
-      case 'list-sessions': {
-        const sessionIds = listSessions(SESSION_DIR);
-        let numCleaned = 0;
-        const runningSessionMetadata = [];
-        for (const sessionId of sessionIds) {
+      case 'session': {
+        const subcommand = argv._[1];
+        if (!subcommand || subcommand === 'list') {
+          const sessionIds = listSessions(SESSION_DIR);
+          let numCleaned = 0;
+          const runningSessionMetadata = [];
+          for (const sessionId of sessionIds) {
+            const metadata = validateSession(SESSION_DIR, sessionId);
+            if (metadata === null) {
+              cleanupSession(SESSION_DIR, sessionId);
+              numCleaned++;
+              continue;
+            }
+            runningSessionMetadata.push(metadata);
+          }
+
+          if (numCleaned !== 0) {
+            console.log(`Cleaned up ${numCleaned} stale sessions.`);
+            console.log();
+          }
+          runningSessionMetadata.sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+          const currentSessionId = getCurrentSessionId(SESSION_DIR);
+          console.log(
+            `Found ${runningSessionMetadata.length} running sessions:`
+          );
+          for (const metadata of runningSessionMetadata) {
+            const isCurrent = metadata.id === currentSessionId;
+            const marker = isCurrent ? '* ' : '  ';
+            console.log(
+              `${marker}${metadata.id}, created at ${metadata.createdAt} [daemon pid: ${metadata.pid}]`
+            );
+          }
+        } else if (subcommand === 'use') {
+          const sessionId = argv._[2];
+          if (!sessionId) {
+            console.error('Error: session use requires a session id');
+            console.error('Usage: pq session use <id>');
+            process.exit(1);
+          }
           const metadata = validateSession(SESSION_DIR, sessionId);
           if (metadata === null) {
-            cleanupSession(SESSION_DIR, sessionId);
-            numCleaned++;
-            continue;
+            console.error(
+              `Error: session "${sessionId}" not found or not running`
+            );
+            process.exit(1);
           }
-          runningSessionMetadata.push(metadata);
+          setCurrentSession(SESSION_DIR, sessionId);
+          console.log(`Switched to session ${sessionId}`);
+        } else {
+          console.error(`Error: Unknown command session ${subcommand}`);
+          process.exit(1);
         }
-
-        if (numCleaned !== 0) {
-          console.log(`Cleaned up ${numCleaned} stale sessions.`);
-          console.log();
-        }
-        runningSessionMetadata.sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        );
-        console.log(`Found ${runningSessionMetadata.length} running sessions:`);
-        for (const metadata of runningSessionMetadata) {
-          console.log(
-            `- ${metadata.id}, created at ${metadata.createdAt} [daemon pid: ${metadata.pid}]`
-          );
-        }
-
         break;
       }
 

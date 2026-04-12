@@ -291,8 +291,10 @@ TIPS
 
 SESSION MANAGEMENT
 
-    pq list-sessions                              List all running daemon sessions
+    pq session list                               List all running daemon sessions (* marks current)
+    pq session use <id>                           Switch the current session
     pq stop                                       Stop the current session
+    pq stop <id>                                  Stop a specific session
     pq stop --all                                 Stop all sessions
     pq load profile.json.gz --session my-session  Named session
     pq thread info --session my-session           Query a specific session
