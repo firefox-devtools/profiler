@@ -5,6 +5,7 @@
 import {
   collectMarkerInfo,
   collectMarkerStack,
+  collectThreadMarkers,
   formatMarkerInfo,
   formatMarkerStackFull,
   formatThreadMarkers,
@@ -277,6 +278,54 @@ describe('collectMarkerInfo', function () {
     // Hidden fields should not appear
     const hiddenField = result.fields?.find((f) => f.key === 'hiddenString');
     expect(hiddenField).toBeUndefined();
+  });
+});
+
+describe('collectThreadMarkers topN option', function () {
+  it('defaults to 5 top markers per group', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['Phase', 0, 1, { type: 'tracing', interval: 'start' }],
+      ['Phase', 1, 2, { type: 'tracing', interval: 'start' }],
+      ['Phase', 2, 3, { type: 'tracing', interval: 'start' }],
+      ['Phase', 3, 4, { type: 'tracing', interval: 'start' }],
+      ['Phase', 4, 5, { type: 'tracing', interval: 'start' }],
+      ['Phase', 5, 6, { type: 'tracing', interval: 'start' }],
+      ['Phase', 6, 7, { type: 'tracing', interval: 'start' }],
+    ]);
+
+    const result = collectThreadMarkers(store, threadMap, markerMap);
+
+    const phaseStats = result.byType.find((s) => s.markerName === 'Phase');
+    expect(phaseStats).toBeDefined();
+    expect(phaseStats!.count).toBe(7);
+    expect(phaseStats!.topMarkers).toHaveLength(5);
+  });
+
+  it('respects topN option', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['Phase', 0, 1, { type: 'tracing', interval: 'start' }],
+      ['Phase', 1, 2, { type: 'tracing', interval: 'start' }],
+      ['Phase', 2, 3, { type: 'tracing', interval: 'start' }],
+      ['Phase', 3, 4, { type: 'tracing', interval: 'start' }],
+      ['Phase', 4, 5, { type: 'tracing', interval: 'start' }],
+      ['Phase', 5, 6, { type: 'tracing', interval: 'start' }],
+      ['Phase', 6, 7, { type: 'tracing', interval: 'start' }],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        topN: 10,
+      }
+    );
+
+    const phaseStats = result.byType.find((s) => s.markerName === 'Phase');
+    expect(phaseStats).toBeDefined();
+    expect(phaseStats!.count).toBe(7);
+    expect(phaseStats!.topMarkers).toHaveLength(7);
   });
 });
 

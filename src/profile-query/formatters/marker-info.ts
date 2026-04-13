@@ -482,7 +482,8 @@ function groupMarkers(
   threadIndexes: Set<number>,
   markerMap: MarkerMap,
   getMarkerLabel: (markerIndex: MarkerIndex) => string,
-  depth: number = 0
+  depth: number = 0,
+  maxTopMarkers: number = 5
 ): MarkerGroup[] {
   if (groupingKeys.length === 0 || markerGroup.length === 0) {
     return [];
@@ -515,7 +516,8 @@ function groupMarkers(
       items,
       threadIndexes,
       markerMap,
-      getMarkerLabel
+      getMarkerLabel,
+      maxTopMarkers
     );
 
     // Recursively group by remaining keys (limit depth to 3)
@@ -528,7 +530,8 @@ function groupMarkers(
             threadIndexes,
             markerMap,
             getMarkerLabel,
-            depth + 1
+            depth + 1,
+            maxTopMarkers
           )
         : undefined;
 
@@ -560,7 +563,8 @@ function aggregateMarkersByType(
   markerMap: MarkerMap,
   getMarkerLabel: (markerIndex: MarkerIndex) => string,
   categories: CategoryList,
-  autoGroup: boolean = false
+  autoGroup: boolean = false,
+  maxTopMarkers: number = 5
 ): MarkerTypeStats[] {
   // Convert Set to number if needed
   const groups = new Map<
@@ -586,12 +590,13 @@ function aggregateMarkersByType(
     const durationStats = hasEnd ? computeDurationStats(markerList) : undefined;
     const rateStats = computeRateStats(markerList);
 
-    // Get top 5 markers by duration (or just first 5 for instant markers)
+    // Get top N markers by duration (or just first N for instant markers)
     const topMarkers = createTopMarkersArray(
       markerGroup,
       threadIndexes,
       markerMap,
-      getMarkerLabel
+      getMarkerLabel,
+      maxTopMarkers
     );
 
     // Apply auto-grouping if enabled
@@ -608,7 +613,8 @@ function aggregateMarkersByType(
           threadIndexes,
           markerMap,
           getMarkerLabel,
-          1
+          1,
+          maxTopMarkers
         );
         subGroupKey = fieldInfo.field;
       }
@@ -751,7 +757,8 @@ export function formatThreadMarkers(
       return lines.join('\n');
     }
 
-    const { groupBy, autoGroup } = filterOptions;
+    const { groupBy, autoGroup, topN } = filterOptions;
+    const maxTopMarkers = topN ?? 5;
 
     // Handle custom grouping if groupBy is specified
     if (groupBy) {
@@ -771,7 +778,8 @@ export function formatThreadMarkers(
         threadIndexes,
         markerMap,
         getMarkerLabel,
-        0
+        0,
+        maxTopMarkers
       );
 
       // Format and display hierarchical groups
@@ -785,7 +793,8 @@ export function formatThreadMarkers(
         markerMap,
         getMarkerLabel,
         categories,
-        autoGroup || false
+        autoGroup || false,
+        maxTopMarkers
       );
 
       // Show top 15 marker names
@@ -869,7 +878,7 @@ export function formatThreadMarkers(
     }
 
     lines.push(
-      'Use --search <term>, --category <name>, --min-duration <ms>, --max-duration <ms>, --has-stack, --limit <N>, --group-by <keys>, or --auto-group to filter/group markers, or m-<N> handles to inspect individual markers.'
+      'Use --search <term>, --category <name>, --min-duration <ms>, --max-duration <ms>, --has-stack, --limit <N>, --group-by <keys>, --auto-group, or --top-n <N> to filter/group markers, or m-<N> handles to inspect individual markers.'
     );
 
     return lines.join('\n');
@@ -941,7 +950,8 @@ export function collectThreadMarkers(
     const displayThreadHandle =
       threadHandle ?? threadMap.handleForThreadIndexes(threadIndexes);
 
-    const { groupBy, autoGroup } = filterOptions;
+    const { groupBy, autoGroup, topN } = filterOptions;
+    const maxTopMarkers = topN ?? 5;
 
     // Handle custom grouping if groupBy is specified
     let customGroups: MarkerGroupData[] | undefined;
@@ -962,7 +972,8 @@ export function collectThreadMarkers(
         threadIndexes,
         markerMap,
         getMarkerLabel,
-        0
+        0,
+        maxTopMarkers
       );
 
       // Add markerIndex to topMarkers in groups
@@ -977,7 +988,8 @@ export function collectThreadMarkers(
       markerMap,
       getMarkerLabel,
       categories,
-      autoGroup || false
+      autoGroup || false,
+      maxTopMarkers
     );
 
     // Convert typeStats to include markerIndex

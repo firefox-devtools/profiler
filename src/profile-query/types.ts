@@ -34,6 +34,7 @@ export type MarkerFilterOptions = {
   limit?: number; // Limit the number of markers in aggregation (not output lines)
   groupBy?: string; // Grouping strategy (e.g., "type,name" or "type,field:eventType")
   autoGroup?: boolean; // Automatically determine grouping based on field variance
+  topN?: number; // Number of top markers to include per group in JSON output (default: 5)
 };
 
 export type FunctionFilterOptions = {

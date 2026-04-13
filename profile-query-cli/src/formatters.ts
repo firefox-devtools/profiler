@@ -839,7 +839,7 @@ export function formatThreadMarkersResult(
   }
 
   lines.push(
-    'Use --search <term>, --category <name>, --min-duration <ms>, --max-duration <ms>, --has-stack, --limit <N>, --group-by <keys>, or --auto-group to filter/group markers, or m-<N> handles to inspect individual markers.'
+    'Use --search <term>, --category <name>, --min-duration <ms>, --max-duration <ms>, --has-stack, --limit <N>, --group-by <keys>, --auto-group, or --top-n <N> to filter/group markers, or m-<N> handles to inspect individual markers.'
   );
 
   return lines.join('\n');

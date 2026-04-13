@@ -238,6 +238,10 @@ export function registerThreadCommand(
         '--auto-group',
         'Automatically determine grouping based on field variance'
       )
+      .option(
+        '--top-n <N>',
+        'Number of top markers to include per group in JSON output (default: 5)'
+      )
   ).action(async (opts) => {
     let markerFilters: MarkerFilterOptions | undefined;
 
@@ -249,7 +253,8 @@ export function registerThreadCommand(
       opts.hasStack ||
       opts.limit !== undefined ||
       opts.groupBy !== undefined ||
-      opts.autoGroup
+      opts.autoGroup ||
+      opts.topN !== undefined
     ) {
       markerFilters = {};
       if (opts.search !== undefined) markerFilters.searchString = opts.search;
@@ -285,6 +290,14 @@ export function registerThreadCommand(
           process.exit(1);
         }
         markerFilters.limit = limit;
+      }
+      if (opts.topN !== undefined) {
+        const topN = parseInt(opts.topN, 10);
+        if (isNaN(topN) || topN <= 0) {
+          console.error('Error: --top-n must be a positive integer');
+          process.exit(1);
+        }
+        markerFilters.topN = topN;
       }
     }
 
