@@ -514,7 +514,11 @@ function formatCallTreeNode(
 /**
  * Helper function to format a call tree.
  */
-function formatCallTree(tree: CallTreeNode, title: string): string {
+function formatCallTree(
+  tree: CallTreeNode,
+  title: string,
+  emptyMessage?: string
+): string {
   const lines: string[] = [`${title} Call Tree:`];
 
   // The root node is virtual, so format its children
@@ -525,6 +529,8 @@ function formatCallTree(tree: CallTreeNode, title: string): string {
       // Root-level nodes don't use tree symbols (they are the starting points)
       formatCallTreeNode(child, '', false, isLast, 0, lines);
     }
+  } else if (emptyMessage) {
+    lines.push(emptyMessage);
   }
 
   return lines.join('\n');
@@ -555,6 +561,15 @@ export function formatThreadSamplesResult(
   let output = `${contextHeader}
 
 Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
+
+  if (result.search && result.topFunctionsByTotal.length === 0) {
+    output +=
+      `No samples matched --search "${result.search}".\n` +
+      'Tip: --search keeps samples with a matching frame anywhere in the stack.\n' +
+      '     Use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
+      '     "|" is treated as a literal character, not OR.\n';
+    return output;
+  }
 
   // Top functions by total time
   output += 'Top Functions (by total time):\n';
@@ -657,7 +672,12 @@ export function formatThreadSamplesTopDownResult(
 Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
 
   // Top-down call tree
-  output += formatCallTree(result.regularCallTree, 'Top-Down');
+  const topDownEmpty = result.search
+    ? `No samples matched --search "${result.search}".\n` +
+      'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
+      '     "|" is treated as a literal character, not OR.'
+    : undefined;
+  output += formatCallTree(result.regularCallTree, 'Top-Down', topDownEmpty);
 
   return output;
 }
@@ -690,7 +710,16 @@ Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersN
 
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {
-    output += formatCallTree(result.invertedCallTree, 'Bottom-Up');
+    const bottomUpEmpty = result.search
+      ? `No samples matched --search "${result.search}".\n` +
+        'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
+        '     "|" is treated as a literal character, not OR.'
+      : undefined;
+    output += formatCallTree(
+      result.invertedCallTree,
+      'Bottom-Up',
+      bottomUpEmpty
+    );
   } else {
     output += 'Bottom-Up Call Tree:\n  (unable to create bottom-up tree)';
   }
@@ -899,6 +928,11 @@ export function formatThreadFunctionsResult(
   if (result.filteredFunctionCount === 0) {
     if (hasFilters) {
       lines.push('No functions match the specified filters.');
+      if (result.filters?.searchString) {
+        lines.push(
+          'Tip: --search matches as a substring of the full function name (including library prefix).'
+        );
+      }
     } else {
       lines.push('No functions in this thread.');
     }

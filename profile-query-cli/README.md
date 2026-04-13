@@ -68,7 +68,7 @@ Run `pq guide` for a detailed usage guide with patterns and tips. Run `pq --help
 | Flag                   | Description                                                                                                                                              |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--thread <handle>`    | Specify thread (e.g., `t-0`)                                                                                                                             |
-| `--search <term>`      | Filter results by substring                                                                                                                              |
+| `--search <term>`      | Filter results by substring. For samples commands, comma-separates multiple terms that all must match (AND); `\|` is literal, not OR.                    |
 | `--include-idle`       | Include idle samples (excluded by default in samples commands)                                                                                           |
 | `--json`               | Output as JSON (for use with `jq`, etc.)                                                                                                                 |
 | `--limit <N>`          | Limit number of results shown                                                                                                                            |

@@ -33,7 +33,10 @@ function addSamplesOptions(cmd: Command): Command {
     addGlobalOptions(cmd)
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
       .option('--include-idle', 'Include idle samples in percentages')
-      .option('--search <term>', 'Filter by substring')
+      .option(
+        '--search <term>',
+        'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
+      )
       .option('--limit <N>', 'Limit the number of results shown')
   );
 }
