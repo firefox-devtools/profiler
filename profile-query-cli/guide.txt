@@ -4,6 +4,17 @@ pq (Profile Querier) queries Firefox performance profiles loaded into a persiste
 daemon. Load a profile once, then query it interactively without reloading.
 
 
+QUICK START
+
+  pq load profile.json.gz
+  pq profile info                  Find threads; note handles (e.g. t-0, t-1)
+  pq thread select t-0
+  pq thread samples                Hot functions by self time
+  pq thread samples-top-down       Full top-down call tree
+
+  The rest of this guide covers filtering, zooming, markers, and advanced analysis.
+
+
 SESSION MODEL
 
   pq uses a daemon/session model:
@@ -13,7 +24,7 @@ SESSION MODEL
 
   The daemon persists your selected thread, zoom ranges, and filter stacks across queries.
 
-  For automation or concurrent work, prefer an explicit session ID so each workflow
+  For scripting or concurrent work, prefer an explicit session ID so each workflow
   gets isolated state:
     pq load profile.json.gz --session run-a
     pq profile info --session run-a
@@ -25,14 +36,14 @@ CORE WORKFLOW
 
   Step 1: Load a profile
     pq load profile.json.gz
-    pq load profile.json.gz --session run-a   Recommended for automation or concurrent work
+    pq load profile.json.gz --session run-a   Recommended for scripting or concurrent work
 
   Step 2: Explore the profile
     pq profile info          Overview: processes, threads, time range, CPU activity
     pq profile info --all    Show all processes and threads (not just top 5)
     pq profile info --search GeckoMain   Filter by process/thread name, pid, or tid
 
-  Step 3: Select a thread to analyze (requires Step 2 -- profile info builds thread handles)
+  Step 3: Select a thread to analyze
     pq thread select t-0     Select a specific thread (persists for future commands)
 
   Step 4: Analyze CPU usage
@@ -77,6 +88,17 @@ CORE WORKFLOW
     pq filter clear                                Remove all filters
 
 
+SESSION STATE
+
+  Three pieces of mutable state persist across commands:
+
+    selected_thread   set by "thread select"; required by all thread/* commands
+    zoom_stack        set by zoom push/pop/clear; restricts all queries to a time window
+    filter_stack[t]   set by filter push/pop/clear; per-thread, independent stacks
+
+  Use "pq status" to inspect all session state at any time.
+
+
 HANDLE SYSTEM
 
   Handles are short IDs shown in command output that reference specific items:
@@ -85,9 +107,19 @@ HANDLE SYSTEM
     f-12       Function handles (from "thread samples", "thread functions")
     ts-6       Timestamp handles (named points in time, usable with "zoom push")
 
-  Thread and marker handles are stable within a session.
-  Function handles (f-N) are stable across sessions for the same profile --
-  they are direct indices into the shared function table.
+  Handle lifetime and stability:
+
+    Handle   Populated by      Stable across sessions?
+    ──────────────────────────────────────────────────────────────────────────
+    t-N      profile info      Yes, if the same profile is loaded
+    m-N      thread markers    No -- rebuilt each time the daemon starts
+    f-N      thread samples,   Yes -- direct index into the profile's function
+             thread functions  table; same profile always yields the same f-N
+    ts-N     thread markers    No -- position-based, session-scoped
+    ──────────────────────────────────────────────────────────────────────────
+
+  Function handles (f-N) can be saved and reused across sessions for the same profile.
+  For all other handles, re-run the command that generates them after each daemon restart.
 
 
 ZOOM: FOCUS ON A TIME RANGE
@@ -171,11 +203,14 @@ FILTERS
 
 JSON OUTPUT
 
-  Add --json to any command to get structured JSON output, useful for piping to jq:
+  Add --json to any command to get structured JSON output, suitable for piping to jq
+  or processing programmatically.
 
-    pq thread samples --json | jq '.rows[0]'
-    pq thread markers --json | jq '[.rows[] | select(.totalDuration > 50)]'
-    pq profile info --json | jq '.threads | length'
+    pq thread samples --json | jq '.topFunctionsBySelf[0]'
+    pq thread markers --json | jq '[.byType[] | select(.durationStats.max > 50)]'
+    pq profile info --json | jq '.processes[].threads[] | {handle: .threadHandle, name}'
+
+  Run "pq schemas" for the full JSON schema reference.
 
 
 COMMON ANALYSIS PATTERNS
@@ -266,28 +301,49 @@ UNDERSTANDING THE OUTPUT
 
 TIPS
 
-  - Start with "profile info" to understand what's in the profile; use --all to see every
-    process and thread, or --search <term> to filter by name, pid, or tid
-  - Select a thread before querying -- GeckoMain is usually the main thread
+  - Start with "profile info"; GeckoMain is usually the main thread -- use
+    "--search GeckoMain" to find it quickly
   - Self time is more actionable: focus on high self-time functions for optimization
-  - Samples percentages are relative to active (non-idle) time by default. Use --include-idle
-    to see wall-time percentages. Idle time is not a finding on its own -- only investigate it
-    during a period the thread should be busy (e.g. inside a zoom), which may indicate lock
-    contention or blocking on another thread.
-  - Use --search to narrow the call tree to branches you care about: --search GC shows only
-    call paths that pass through a GC-related function
-  - Zoom into slow periods: use "zoom push m-<handle>" to focus on a slow marker
-  - Try filters ephemerally first (as flags on thread commands) before committing with "filter push"
-  - "filter push --merge" is great for hiding allocator/profiler noise without losing context
-  - "filter push --root-at f-N" + "filter push --includes-function f-N" tightly focuses
-    analysis on one function's work
-  - "filter push --during-marker --search X" is powerful for correlating CPU work with events
-  - Sticky filters compose: each push narrows further (AND semantics across pushes)
-  - "filter list" shows filters in push order; "filter pop" removes from the end
-  - Use --json when you need to process or filter results programmatically
-  - Marker handles are stable within a session; function handles (f-N) are stable across sessions
-  - Check "status": run "pq status" to confirm selected thread, active zoom, and active filters
+  - Idle time alone is not a finding: only investigate idle during a period when the
+    thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
+    lock contention or blocking on another thread
+  - --search narrows call PATHS: "samples-top-down --search GC" shows only call
+    paths that pass through a GC-related function, not just functions named "GC"
+  - Try filters ephemerally first (as flags on thread commands) before committing
+    with "filter push"
+  - "filter push --during-marker --search X" is powerful for correlating CPU work
+    with specific event types
+  - Check "pq status" after any state changes to confirm selected thread, active
+    zoom, and active filters before running analysis
 
+
+SCRIPTING
+
+  When using pq in scripts or pipelines:
+
+  Always use a named session for isolation:
+    pq load profile.json.gz --session my-analysis
+    pq profile info --session my-analysis
+    pq thread select t-0 --session my-analysis
+
+  Always use --json for reliable output parsing. Plain text output is for human
+  reading and may change; the JSON schema is stable.
+
+  Prerequisite chain -- commands depend on prior state:
+    load  →  thread select  →  analysis commands
+    (run "profile info" to discover thread handles before selecting)
+
+  Extracting handles with jq:
+    # Find the GeckoMain thread handle
+    pq profile info --json | \
+      jq -r '.processes[].threads[] | select(.name | test("GeckoMain")) | .threadHandle'
+
+    # Get the top self-time function handle
+    pq thread samples --json | jq -r '.topFunctionsBySelf[0].functionHandle'
+
+    # List marker handles for markers longer than 50ms
+    pq thread markers --json | \
+      jq -r '[.byType[].topMarkers[] | select(.duration > 50) | .handle][]'
 
 SESSION MANAGEMENT
 
@@ -302,6 +358,31 @@ SESSION MANAGEMENT
 
 ERROR HANDLING
 
-  "No running session"  Run "pq load <profile>" first
-  "Thread not found"    Run "pq profile info" to see valid thread handles
-  "Marker not found"    Handles are session-scoped; reload if session restarted
+  "No running session"
+    Run "pq load <profile>" first. If using a named session, ensure --session matches.
+    Run "pq session list" to see what sessions are currently active.
+
+  "Thread not found"
+    The handle does not exist in this profile. Run "pq profile info" to see valid
+    thread handles, then re-run "pq thread select" with a handle from that list.
+
+  "No thread selected"
+    Run "pq thread select <handle>" before querying thread data. Use "pq profile info"
+    first to get valid handles.
+
+  "Marker not found"
+    Marker handles (m-N) are session-scoped. If the daemon was restarted, re-run
+    "pq thread markers" to get fresh handles for the new session.
+
+  "Function not found"
+    Function handles (f-N) are stable across sessions for the same profile, but only
+    valid after the profile is loaded. Verify the correct profile is loaded with
+    "pq status" (check the profile path).
+
+  "Session not found" / "No such session"
+    The session has exited or was stopped. Run "pq session list" to see active sessions.
+    Run "pq load <profile> --session <id>" to start a new session with that ID.
+
+  "Profile load failed"
+    Check that the path is correct and the file is a valid supported profile format.
+    The daemon log at ~/.pq/<session-id>.log contains the full error detail.

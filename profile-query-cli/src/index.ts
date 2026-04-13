@@ -26,6 +26,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { Command } from 'commander';
 import guideText from '../guide.txt';
+import schemasText from '../schemas.txt';
 import { startDaemon } from './daemon';
 import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
@@ -148,6 +149,14 @@ Examples:
     .description('Show detailed usage guide (commands, patterns, tips)')
     .action(() => {
       console.log(guideText);
+    });
+
+  // pq schemas
+  program
+    .command('schemas')
+    .description('Show JSON output schemas for all commands')
+    .action(() => {
+      console.log(schemasText);
     });
 
   registerProfileCommand(program, SESSION_DIR);
