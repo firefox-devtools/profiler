@@ -144,19 +144,34 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -937,19 +952,34 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -1730,19 +1760,34 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -2511,19 +2556,34 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -3292,19 +3352,34 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -3891,19 +3966,34 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty Thread⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty Thread⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="EmptyReasons"
   >
@@ -4041,19 +4131,34 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Thread with samples⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Thread with samples⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="EmptyReasons"
   >
@@ -4191,19 +4296,34 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Thread with samples⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Thread with samples⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="EmptyReasons"
   >
@@ -4222,49 +4342,60 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
 `;
 
 exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple transforms applied 1`] = `
-<ol
-  class="filterNavigatorBar calltreeTransformNavigator"
+<div
+  class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+  data-testid="FilterNavigatorBarScrollParent"
 >
-  <li
-    class="filterNavigatorBarItem filterNavigatorBarRootItem"
+  <div
+    class="filterNavigatorBarScrollContent"
+    data-testid="FilterNavigatorBarScrollContent"
+    style="left: 0px;"
   >
-    <button
-      class="filterNavigatorBarItemContent"
-      type="button"
+    <ol
+      class="filterNavigatorBar calltreeTransformNavigator"
     >
-      Complete “⁨Thread with samples⁩”
-    </button>
-  </li>
-  <li
-    class="filterNavigatorBarItem"
-  >
-    <button
-      class="filterNavigatorBarItemContent"
-      type="button"
-    >
-      Focus Node: ⁨A⁩
-    </button>
-  </li>
-  <li
-    class="filterNavigatorBarItem"
-  >
-    <button
-      class="filterNavigatorBarItemContent"
-      type="button"
-    >
-      Focus Node: ⁨B⁩
-    </button>
-  </li>
-  <li
-    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-  >
-    <span
-      class="filterNavigatorBarItemContent"
-    >
-      Focus Node: ⁨C⁩
-    </span>
-  </li>
-</ol>
+      <li
+        class="filterNavigatorBarItem filterNavigatorBarRootItem"
+      >
+        <button
+          class="filterNavigatorBarItemContent"
+          type="button"
+        >
+          Complete “⁨Thread with samples⁩”
+        </button>
+      </li>
+      <li
+        class="filterNavigatorBarItem"
+      >
+        <button
+          class="filterNavigatorBarItemContent"
+          type="button"
+        >
+          Focus Node: ⁨A⁩
+        </button>
+      </li>
+      <li
+        class="filterNavigatorBarItem"
+      >
+        <button
+          class="filterNavigatorBarItemContent"
+          type="button"
+        >
+          Focus Node: ⁨B⁩
+        </button>
+      </li>
+      <li
+        class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      >
+        <span
+          class="filterNavigatorBarItemContent"
+        >
+          Focus Node: ⁨C⁩
+        </span>
+      </li>
+    </ol>
+  </div>
+</div>
 `;
 
 exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
@@ -4388,19 +4519,34 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -5136,19 +5282,34 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -5884,19 +6045,34 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -6416,19 +6592,34 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -7164,19 +7355,34 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -7840,19 +8046,34 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -8516,19 +8737,34 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -9049,19 +9285,34 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >
@@ -9582,19 +9833,34 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </div>
     </div>
   </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
+  <div
+    class="filterNavigatorBarScrollContainer"
   >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    <div
+      class="filterNavigatorBarScrollParent calltreeTransformNavigator"
+      data-testid="FilterNavigatorBarScrollParent"
     >
-      <span
-        class="filterNavigatorBarItemContent"
+      <div
+        class="filterNavigatorBarScrollContent"
+        data-testid="FilterNavigatorBarScrollContent"
+        style="left: 0px;"
       >
-        Complete “⁨Empty⁩”
-      </span>
-    </li>
-  </ol>
+        <ol
+          class="filterNavigatorBar calltreeTransformNavigator"
+        >
+          <li
+            class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+          >
+            <span
+              class="filterNavigatorBarItemContent"
+            >
+              Complete “⁨Empty⁩”
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
   <div
     class="treeView"
   >

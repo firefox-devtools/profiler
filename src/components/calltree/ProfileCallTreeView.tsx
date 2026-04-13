@@ -6,7 +6,12 @@ import { CallTree } from './CallTree';
 import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
 import { TransformNavigator } from 'firefox-profiler/components/shared/TransformNavigator';
 
-export const ProfileCallTreeView = () => (
+type Props = {
+  readonly filterScrollPos?: number;
+  readonly setFilterScrollPos?: (pos: number) => void;
+};
+
+export const ProfileCallTreeView = (props: Props) => (
   <div
     className="treeAndSidebarWrapper"
     id="calltree-tab"
@@ -14,7 +19,10 @@ export const ProfileCallTreeView = () => (
     aria-labelledby="calltree-tab-button"
   >
     <StackSettings />
-    <TransformNavigator />
+    <TransformNavigator
+      filterScrollPos={props.filterScrollPos}
+      setFilterScrollPos={props.setFilterScrollPos}
+    />
     <CallTree />
   </div>
 );

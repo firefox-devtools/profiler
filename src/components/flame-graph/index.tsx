@@ -6,7 +6,12 @@ import { StackSettings } from '../shared/StackSettings';
 import { TransformNavigator } from '../shared/TransformNavigator';
 import { MaybeFlameGraph } from './MaybeFlameGraph';
 
-const FlameGraphView = () => (
+type Props = {
+  readonly filterScrollPos?: number;
+  readonly setFilterScrollPos?: (pos: number) => void;
+};
+
+const FlameGraphView = (props: Props) => (
   <div
     className="flameGraph"
     id="flame-graph-tab"
@@ -14,7 +19,10 @@ const FlameGraphView = () => (
     aria-labelledby="flame-graph-tab-button"
   >
     <StackSettings hideInvertCallstack={true} />
-    <TransformNavigator />
+    <TransformNavigator
+      filterScrollPos={props.filterScrollPos}
+      setFilterScrollPos={props.setFilterScrollPos}
+    />
     <MaybeFlameGraph />
   </div>
 );

@@ -47,9 +47,25 @@ type DispatchProps = {
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
+type State = {
+  // The scroll position of the FilterNavigatorBar, shared among
+  // the call tree, the frame graph, and the stack chart.
+  readonly filterScrollPos: number;
+};
+
 const SMALL_SCREEN_WIDTH = 768;
 
-class ProfileViewerImpl extends PureComponent<Props> {
+class ProfileViewerImpl extends PureComponent<Props, State> {
+  override state = {
+    filterScrollPos: 0,
+  };
+
+  _setFilterScrollPos = (pos: number) => {
+    this.setState({
+      filterScrollPos: pos,
+    });
+  };
+
   _onSelectTab = (selectedTab: string) => {
     const { changeSelectedTab } = this.props;
     const tabSlug = toValidTabSlug(selectedTab);
@@ -75,6 +91,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
 
   override render() {
     const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
+    const { filterScrollPos } = this.state;
     const hasSidebar = selectSidebar(selectedTab) !== null;
     return (
       <div className="Details">
@@ -121,9 +138,24 @@ class ProfileViewerImpl extends PureComponent<Props> {
           >
             {
               {
-                calltree: <ProfileCallTreeView />,
-                'flame-graph': <FlameGraph />,
-                'stack-chart': <StackChart />,
+                calltree: (
+                  <ProfileCallTreeView
+                    filterScrollPos={filterScrollPos}
+                    setFilterScrollPos={this._setFilterScrollPos}
+                  />
+                ),
+                'flame-graph': (
+                  <FlameGraph
+                    filterScrollPos={filterScrollPos}
+                    setFilterScrollPos={this._setFilterScrollPos}
+                  />
+                ),
+                'stack-chart': (
+                  <StackChart
+                    filterScrollPos={filterScrollPos}
+                    setFilterScrollPos={this._setFilterScrollPos}
+                  />
+                ),
                 'marker-chart': <MarkerChart />,
                 'marker-table': <MarkerTable />,
                 'network-chart': <NetworkChart />,
