@@ -348,6 +348,13 @@ export class ProfileQuerier {
         })();
     }
 
+    // Warn if the requested range extends outside the profile bounds
+    let warning: string | undefined;
+    if (startTimestamp < rootRange.start || endTimestamp > rootRange.end) {
+      const profileDuration = (rootRange.end - rootRange.start) / 1000;
+      warning = `Range extends outside the profile duration (${profileDuration.toFixed(3)}s). Did you mean to use milliseconds? Use the "ms" suffix for milliseconds (e.g. 0ms,400ms).`;
+    }
+
     // Get or create timestamp names for display
     const startName = this._timestampManager.nameForTimestamp(startTimestamp);
     const endName = this._timestampManager.nameForTimestamp(endTimestamp);
@@ -385,6 +392,7 @@ export class ProfileQuerier {
       duration,
       zoomDepth,
       markerInfo,
+      warning,
     };
   }
 

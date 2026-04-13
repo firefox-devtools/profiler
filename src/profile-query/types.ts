@@ -185,6 +185,7 @@ export type ViewRangeResult = {
     threadHandle: string;
     threadName: string;
   };
+  warning?: string; // Present if the range extends outside the profile duration
 };
 
 // ===== Thread Commands =====

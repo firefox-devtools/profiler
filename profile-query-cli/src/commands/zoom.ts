@@ -20,7 +20,9 @@ export function registerZoomCommand(
   addGlobalOptions(
     zoom
       .command('push <range>')
-      .description('Push a zoom range (e.g. 2.7,3.1 or m-158)')
+      .description(
+        'Push a zoom range (e.g. 2.7,3.1 in seconds, 2700ms,3100ms in milliseconds, 10%,20% as percentage, or m-158 for a marker)'
+      )
   ).action(async (range: string, opts) => {
     const result = await sendCommand(
       sessionDir,

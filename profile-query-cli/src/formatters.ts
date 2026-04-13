@@ -213,6 +213,10 @@ export function formatViewRangeResult(result: ViewRangeResult): string {
     }
   }
 
+  if (result.warning) {
+    output += `\nWarning: ${result.warning}`;
+  }
+
   return output;
 }
 
