@@ -1,0 +1,384 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+import {
+  collectMarkerInfo,
+  collectMarkerStack,
+  formatMarkerInfo,
+  formatMarkerStackFull,
+  formatThreadMarkers,
+} from 'firefox-profiler/profile-query/formatters/marker-info';
+import { MarkerMap } from 'firefox-profiler/profile-query/marker-map';
+import { ThreadMap } from 'firefox-profiler/profile-query/thread-map';
+import {
+  getProfileWithMarkers,
+  getProfileFromTextSamples,
+} from '../../fixtures/profiles/processed-profile';
+import { storeWithProfile } from '../../fixtures/stores';
+import { StringTable } from 'firefox-profiler/utils/string-table';
+import { INTERVAL } from 'firefox-profiler/app-logic/constants';
+
+/**
+ * Sets up a store, threadMap, and markerMap for a single-thread profile with
+ * the given markers. Returns helpers to register marker handles.
+ */
+function setupWithMarkers(
+  markers: Parameters<typeof getProfileWithMarkers>[0]
+) {
+  const profile = getProfileWithMarkers(markers);
+  const store = storeWithProfile(profile);
+  const threadMap = new ThreadMap();
+  const markerMap = new MarkerMap();
+  threadMap.handleForThreadIndex(0);
+
+  function registerMarker(markerIndex: number): string {
+    return markerMap.handleForMarker(new Set([0]), markerIndex);
+  }
+
+  return { store, threadMap, markerMap, registerMarker };
+}
+
+describe('formatThreadMarkers', function () {
+  it('shows interval markers with duration stats', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+      [
+        'DOMEvent',
+        20,
+        40,
+        { type: 'DOMEvent', eventType: 'click', latency: 5 },
+      ],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap);
+
+    expect(result).toContain('2 markers');
+    expect(result).toContain('DOMEvent');
+    // Interval markers should show duration stats, not "(instant)"
+    expect(result).toContain('interval');
+    expect(result).not.toContain('(instant)');
+  });
+
+  it('shows instant markers with (instant) label', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, null, { type: 'DOMEvent', eventType: 'click' }],
+      ['DOMEvent', 5, null, { type: 'DOMEvent', eventType: 'keydown' }],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap);
+
+    expect(result).toContain('(instant)');
+  });
+
+  it('shows filtered count annotation when search reduces marker count', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 5, { type: 'DOMEvent', eventType: 'click', latency: 1 }],
+      [
+        'UserTiming',
+        10,
+        15,
+        { type: 'UserTiming', name: 'myMark', entryType: 'measure' },
+      ],
+      [
+        'DOMEvent',
+        20,
+        25,
+        { type: 'DOMEvent', eventType: 'keydown', latency: 2 },
+      ],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap, undefined, {
+      searchString: 'DOMEvent',
+    });
+
+    // Should show 2 matches filtered from 3 total
+    expect(result).toContain('2 markers');
+    expect(result).toContain('(filtered from 3)');
+  });
+
+  it('shows nested sub-groups when groupBy specifies multiple keys', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 2, { type: 'DOMEvent', eventType: 'click', latency: 1 }],
+      [
+        'DOMEvent',
+        3,
+        5,
+        { type: 'DOMEvent', eventType: 'keydown', latency: 1 },
+      ],
+      ['DOMEvent', 6, 8, { type: 'DOMEvent', eventType: 'click', latency: 1 }],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap, undefined, {
+      groupBy: 'type,field:eventType',
+    });
+
+    // Top-level group for DOMEvent, with sub-groups for click and keydown
+    expect(result).toContain('DOMEvent');
+    expect(result).toContain('click');
+    expect(result).toContain('keydown');
+    // click sub-group appears before keydown because it has more markers
+    const clickPos = result.indexOf('click');
+    const keydownPos = result.indexOf('keydown');
+    expect(clickPos).toBeLessThan(keydownPos);
+  });
+
+  it('shows overflow notice when more than 15 groups exist', function () {
+    // Create 16 markers with distinct names so each forms its own group
+    const markers: Parameters<typeof getProfileWithMarkers>[0] = Array.from(
+      { length: 16 },
+      (_, i): [string, number, number, Record<string, unknown>] => [
+        `Marker${i}`,
+        i * 10,
+        i * 10 + 5,
+        { type: `Marker${i}` },
+      ]
+    );
+    const { store, threadMap, markerMap } = setupWithMarkers(markers);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap);
+
+    expect(result).toContain('more types');
+  });
+});
+
+describe('formatMarkerInfo', function () {
+  it('shows schema fields for a marker with data', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+    ]);
+    const handle = registerMarker(0);
+
+    const result = formatMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(result).toContain('DOMEvent');
+    // Schema field label: "Event Type" with value "click"
+    expect(result).toContain('Event Type');
+    expect(result).toContain('click');
+    // Schema field label: "Latency" with value for latency
+    expect(result).toContain('Latency');
+  });
+
+  it('shows duration for interval markers and "instant" for instant markers', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      ['DOMEvent', 0, 20, { type: 'DOMEvent', eventType: 'click', latency: 1 }],
+      ['DOMEvent', 30, null, { type: 'DOMEvent', eventType: 'hover' }],
+    ]);
+    const intervalHandle = registerMarker(0);
+    const instantHandle = registerMarker(1);
+
+    const intervalResult = formatMarkerInfo(
+      store,
+      markerMap,
+      threadMap,
+      intervalHandle
+    );
+    const instantResult = formatMarkerInfo(
+      store,
+      markerMap,
+      threadMap,
+      instantHandle
+    );
+
+    // Interval: shows duration in ms
+    expect(intervalResult).toContain('20.00ms');
+    // Instant: shows "(instant)" label
+    expect(instantResult).toContain('(instant)');
+  });
+
+  it('excludes hidden fields from output', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      [
+        'MarkerWithHiddenField',
+        0,
+        5,
+        { type: 'MarkerWithHiddenField', hiddenString: 'secret-value' },
+      ],
+    ]);
+    const handle = registerMarker(0);
+
+    const result = formatMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(result).not.toContain('secret-value');
+    expect(result).not.toContain('Hidden string');
+  });
+
+  it('shows schema description when available', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      [
+        'UserTiming',
+        0,
+        10,
+        { type: 'UserTiming', name: 'myMeasure', entryType: 'measure' },
+      ],
+    ]);
+    const handle = registerMarker(0);
+
+    const result = formatMarkerInfo(store, markerMap, threadMap, handle);
+
+    // UserTiming has a schema description
+    expect(result).toContain('performance.mark()');
+  });
+});
+
+describe('collectMarkerInfo', function () {
+  it('returns structured data with correct fields for an interval marker', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      [
+        'DOMEvent',
+        10,
+        30,
+        { type: 'DOMEvent', eventType: 'click', latency: 5 },
+      ],
+    ]);
+    const handle = registerMarker(0);
+
+    const result = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(result.type).toBe('marker-info');
+    expect(result.name).toBe('DOMEvent');
+    expect(result.markerType).toBe('DOMEvent');
+    expect(result.start).toBe(10);
+    expect(result.end).toBe(30);
+    expect(result.duration).toBe(20);
+    // Fields from schema
+    expect(result.fields).toBeDefined();
+    const eventTypeField = result.fields!.find((f) => f.key === 'eventType');
+    expect(eventTypeField).toBeDefined();
+    expect(eventTypeField!.label).toBe('Event Type');
+    expect(eventTypeField!.value).toBe('click');
+  });
+
+  it('returns undefined duration for instant markers', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      ['DOMEvent', 5, null, { type: 'DOMEvent', eventType: 'scroll' }],
+    ]);
+    const handle = registerMarker(0);
+
+    const result = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(result.end).toBeNull();
+    expect(result.duration).toBeUndefined();
+  });
+
+  it('excludes hidden fields from result', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      [
+        'MarkerWithHiddenField',
+        0,
+        5,
+        { type: 'MarkerWithHiddenField', hiddenString: 'secret' },
+      ],
+    ]);
+    const handle = registerMarker(0);
+
+    const result = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    // Hidden fields should not appear
+    const hiddenField = result.fields?.find((f) => f.key === 'hiddenString');
+    expect(hiddenField).toBeUndefined();
+  });
+});
+
+describe('collectMarkerStack and formatMarkerStackFull', function () {
+  describe('for a marker without a cause', function () {
+    it('collectMarkerStack returns null stack', function () {
+      const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+        [
+          'DOMEvent',
+          0,
+          5,
+          { type: 'DOMEvent', eventType: 'click', latency: 1 },
+        ],
+      ]);
+      const handle = registerMarker(0);
+
+      const result = collectMarkerStack(store, markerMap, threadMap, handle);
+
+      expect(result.type).toBe('marker-stack');
+      expect(result.markerName).toBe('DOMEvent');
+      expect(result.stack).toBeNull();
+    });
+
+    it('formatMarkerStackFull reports no stack trace', function () {
+      const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+        [
+          'DOMEvent',
+          0,
+          5,
+          { type: 'DOMEvent', eventType: 'click', latency: 1 },
+        ],
+      ]);
+      const handle = registerMarker(0);
+
+      const result = formatMarkerStackFull(store, markerMap, threadMap, handle);
+
+      expect(result).toContain('DOMEvent');
+      expect(result).toContain('no stack trace');
+    });
+  });
+
+  describe('for a marker with a cause stack', function () {
+    function setupWithCauseStack() {
+      const { profile } = getProfileFromTextSamples(`
+        rootFunc
+        leafFunc
+      `);
+      // profile.threads[0] has a stack table from the text samples
+      const thread = profile.threads[0];
+      // samples.stack[0] is the stack index for the leaf frame of the first sample
+      const stackIndex = thread.samples.stack[0];
+
+      if (stackIndex === null || stackIndex === undefined) {
+        throw new Error('Expected a non-null stack index from text samples');
+      }
+
+      // Add a marker with a cause pointing to that stack
+      const stringTable = StringTable.withBackingArray(
+        profile.shared.stringArray
+      );
+      const markerNameIdx = stringTable.indexForString('TestMarker');
+      thread.markers.name.push(markerNameIdx);
+      thread.markers.startTime.push(1);
+      thread.markers.endTime.push(5);
+      thread.markers.phase.push(INTERVAL);
+      thread.markers.category.push(0);
+      thread.markers.data.push({
+        type: 'Text',
+        name: 'TestMarker',
+        cause: { stack: stackIndex },
+      });
+      thread.markers.length++;
+
+      const store = storeWithProfile(profile);
+      const threadMap = new ThreadMap();
+      const markerMap = new MarkerMap();
+      threadMap.handleForThreadIndex(0);
+      // The marker we added is at the end of the marker list, but after processing
+      // markers are time-sorted. Since our marker is at time 1 and there are no
+      // other markers, it will be at index 0.
+      const handle = markerMap.handleForMarker(new Set([0]), 0);
+      return { store, threadMap, markerMap, handle };
+    }
+
+    it('collectMarkerStack returns stack frames', function () {
+      const { store, threadMap, markerMap, handle } = setupWithCauseStack();
+
+      const result = collectMarkerStack(store, markerMap, threadMap, handle);
+
+      expect(result.stack).not.toBeNull();
+      expect(result.stack!.frames.length).toBeGreaterThan(0);
+      // The leaf frame should be "leafFunc"
+      expect(result.stack!.frames[0].name).toBe('leafFunc');
+    });
+
+    it('formatMarkerStackFull shows numbered frames', function () {
+      const { store, threadMap, markerMap, handle } = setupWithCauseStack();
+
+      const result = formatMarkerStackFull(store, markerMap, threadMap, handle);
+
+      expect(result).toContain('[1]');
+      expect(result).toContain('leafFunc');
+    });
+  });
+});
