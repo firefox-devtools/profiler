@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Shared option helpers for pq CLI commands.
+ * Shared option helpers for profiler-cli commands.
  */
 
 import type { Command } from 'commander';
@@ -14,8 +14,8 @@ import { collectStrings } from '../utils/parse';
  * Returns true if the given subcommand was explicitly typed by the user.
  * Used to decide whether to print a "other subcommands" hint after a default action.
  *
- * e.g. `pq session`       → wasExplicit('session', 'list') === false
- *      `pq session list`  → wasExplicit('session', 'list') === true
+ * e.g. `profiler-cli session`       → wasExplicit('session', 'list') === false
+ *      `profiler-cli session list`  → wasExplicit('session', 'list') === true
  */
 export function wasExplicit(parent: string, subcommand: string): boolean {
   const args = process.argv;

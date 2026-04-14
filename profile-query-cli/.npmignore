@@ -1,10 +1,10 @@
-# Source files - only publish the built dist/pq.js
+# Source files - only publish the built dist/profiler-cli.js
 *.ts
 webpack.config.js
 
-# Build artifacts (except dist/pq.js which is in "files")
+# Build artifacts (except dist/profiler-cli.js which is in "files")
 dist/*
-!dist/pq.js
+!dist/profiler-cli.js
 
 # Development files
 node_modules/

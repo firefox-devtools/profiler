@@ -3,23 +3,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * CLI entry point for pq (Profile Querier).
+ * CLI entry point for profiler-cli (Profile Querier).
  *
  * Usage:
- *   pq load <PATH> [--session <id>]          Start a new daemon and load a profile
- *   pq profile info [--session <id>]         Print profile summary
- *   pq thread info [--thread <handle>]       Print thread information
- *   pq thread samples [--thread <handle>]    Show thread call tree and top functions
- *   pq stop [<id>] [--all]                   Stop the daemon
- *   pq session list                          List all running sessions
- *   pq session use <id>                      Switch the current session
+ *   profiler-cli load <PATH> [--session <id>]          Start a new daemon and load a profile
+ *   profiler-cli profile info [--session <id>]         Print profile summary
+ *   profiler-cli thread info [--thread <handle>]       Print thread information
+ *   profiler-cli thread samples [--thread <handle>]    Show thread call tree and top functions
+ *   profiler-cli stop [<id>] [--all]                   Stop the daemon
+ *   profiler-cli session list                          List all running sessions
+ *   profiler-cli session use <id>                      Switch the current session
  *
  * Build:
  *   yarn build-profile-query-cli
  *
  * Run:
- *   pq <command>                    (if pq is in PATH)
- *   ./profile-query-cli/dist/pq.js <command>  (direct invocation)
+ *   profiler-cli <command>                              (if profiler-cli is in PATH)
+ *   ./profile-query-cli/dist/profiler-cli.js <command>  (direct invocation)
  */
 
 import * as path from 'path';
@@ -42,7 +42,7 @@ import { registerSessionCommand } from './commands/session';
 
 // Read session directory from environment (only place this is read)
 const SESSION_DIR =
-  process.env.PQ_SESSION_DIR || path.join(os.homedir(), '.pq');
+  process.env.PROFILER_CLI_SESSION_DIR || path.join(os.homedir(), '.profiler-cli');
 
 async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2);
@@ -65,7 +65,7 @@ async function main(): Promise<void> {
 
   const program = new Command();
   program
-    .name('pq')
+    .name('profiler-cli')
     .description('Profile Querier — query Firefox profiles from the terminal')
     .helpOption('-h, --help', 'Show help')
     .addHelpCommand('help [command]', 'Show help for a command')
@@ -73,26 +73,26 @@ async function main(): Promise<void> {
       'after',
       `
 Examples:
-  pq load profile.json.gz
-  pq profile info
-  pq thread info
-  pq thread samples
-  pq thread functions --search GC --min-self 1
-  pq thread markers --search DOMEvent --category Graphics
-  pq zoom push 2.7,3.1
-  pq filter push --excludes-function f-184
-  pq status
-  pq stop --all`
+  profiler-cli load profile.json.gz
+  profiler-cli profile info
+  profiler-cli thread info
+  profiler-cli thread samples
+  profiler-cli thread functions --search GC --min-self 1
+  profiler-cli thread markers --search DOMEvent --category Graphics
+  profiler-cli zoom push 2.7,3.1
+  profiler-cli filter push --excludes-function f-184
+  profiler-cli status
+  profiler-cli stop --all`
     );
 
-  // Bare `pq` with no arguments
+  // Bare `profiler-cli` with no arguments
   program.action(() => {
     console.error('Error: No command specified\n');
     program.outputHelp();
     process.exit(1);
   });
 
-  // pq load <path>
+  // profiler-cli load <path>
   addGlobalOptions(
     program
       .command('load <path>')
@@ -107,7 +107,7 @@ Examples:
     console.log(`Session started: ${sessionId}`);
   });
 
-  // pq status
+  // profiler-cli status
   addGlobalOptions(
     program
       .command('status')
@@ -123,7 +123,7 @@ Examples:
     console.log(formatOutput(result, opts.json ?? false));
   });
 
-  // pq stop [id]
+  // profiler-cli stop [id]
   addGlobalOptions(
     program
       .command('stop [id]')
@@ -143,7 +143,7 @@ Examples:
     }
   });
 
-  // pq guide
+  // profiler-cli guide
   program
     .command('guide')
     .description('Show detailed usage guide (commands, patterns, tips)')
@@ -151,7 +151,7 @@ Examples:
       console.log(guideText);
     });
 
-  // pq schemas
+  // profiler-cli schemas
   program
     .command('schemas')
     .description('Show JSON output schemas for all commands')

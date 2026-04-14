@@ -1,4 +1,4 @@
-# Profile Query CLI (pq) - Case Study Report
+# Profile Query CLI (profiler-cli) - Case Study Report
 
 ## Profile Investigation Summary
 
@@ -29,7 +29,7 @@ The profile shows **bursty rendering activity** rather than sustained performanc
 
 ---
 
-## pq Usability Evaluation
+## profiler-cli Usability Evaluation
 
 ### What Worked Well
 
@@ -223,7 +223,7 @@ No way to save investigation results. Had to pipe to `head` manually. Would want
 
 - Remembering timestamp names (ts-6, ts-7) is awkward
 - Have to remember which thread is selected
-- No way to see "current state" - need `pq status` showing:
+- No way to see "current state" - need `profiler-cli status` showing:
   - Current session
   - Selected thread
   - Current view range stack
@@ -586,7 +586,7 @@ See **Design Recommendations** section above for detailed proposals on command s
 
 ### Comparison to Web UI
 
-**pq Advantages:**
+**profiler-cli Advantages:**
 
 - Much faster for quick triage
 - Easy to script/automate
@@ -603,7 +603,7 @@ See **Design Recommendations** section above for detailed proposals on command s
 - Source view integration
 - Network panel, memory tracks, etc.
 
-**Ideal Use Cases for pq:**
+**Ideal Use Cases for profiler-cli:**
 
 - Quick "what's slow?" triage
 - CI/CD performance monitoring
@@ -611,7 +611,7 @@ See **Design Recommendations** section above for detailed proposals on command s
 - Server-side investigation (no GUI)
 - Extracting specific data for reports
 
-**Where pq Falls Short:**
+**Where profiler-cli Falls Short:**
 
 - Complex multi-thread timing issues
 - Understanding frame scheduling
@@ -625,7 +625,7 @@ See **Design Recommendations** section above for detailed proposals on command s
 
 **Current State: Promising Foundation (60% there)**
 
-pq successfully demonstrates that CLI profiling is viable and valuable. The core architecture (daemon model, thread selection, view ranges) is sound. For profiles where you can identify which libraries are consuming time and single-threaded bottlenecks, it works reasonably well.
+profiler-cli successfully demonstrates that CLI profiling is viable and valuable. The core architecture (daemon model, thread selection, view ranges) is sound. For profiles where you can identify which libraries are consuming time and single-threaded bottlenecks, it works reasonably well.
 
 **Critical Gaps:**
 
@@ -637,7 +637,7 @@ pq successfully demonstrates that CLI profiling is viable and valuable. The core
 Fix the three critical gaps above before adding new features. A tool that shows incomplete information (truncated trees, missing module context, no markers) frustrates users more than missing features.
 
 **Potential:**
-If library names, depth, and markers are addressed, pq could become the standard first-response tool for performance issues. "Run pq first, open web UI if needed" would be a great workflow.
+If library names, depth, and markers are addressed, profiler-cli could become the standard first-response tool for performance issues. "Run profiler-cli first, open web UI if needed" would be a great workflow.
 
 **Estimated to "Production Ready":**
 

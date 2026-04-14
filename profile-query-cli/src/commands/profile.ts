@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * `pq profile` command.
+ * `profiler-cli profile` command.
  */
 
 import type { Command } from 'commander';

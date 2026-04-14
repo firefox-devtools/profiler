@@ -11,7 +11,7 @@ const profileQueryCliConfig = {
   ...nodeBaseConfig,
   entryPoints: ['profile-query-cli/src/index.ts'],
   loader: { ...nodeBaseConfig.loader, '.txt': 'text' },
-  outfile: 'profile-query-cli/dist/pq.js',
+  outfile: 'profile-query-cli/dist/profiler-cli.js',
   minify: true,
   banner: {
     js: '#!/usr/bin/env node\n\n// Polyfill browser globals for Node.js\nglobalThis.self = globalThis;',
@@ -24,7 +24,7 @@ const profileQueryCliConfig = {
 
 async function build() {
   await esbuild.build(profileQueryCliConfig);
-  chmodSync('profile-query-cli/dist/pq.js', 0o755);
+  chmodSync('profile-query-cli/dist/profiler-cli.js', 0o755);
   console.log('✅ Profile-query-cli build completed');
 }
 

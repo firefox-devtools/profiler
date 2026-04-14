@@ -209,7 +209,7 @@ export function formatViewRangeResult(result: ViewRangeResult): string {
 
     // Show zoom depth if available
     if (result.zoomDepth !== undefined) {
-      output += `\n  Zoom depth: ${result.zoomDepth}${result.zoomDepth > 1 ? ' (use "pq zoom pop" to go back)' : ''}`;
+      output += `\n  Zoom depth: ${result.zoomDepth}${result.zoomDepth > 1 ? ' (use "profiler-cli zoom pop" to go back)' : ''}`;
     }
   }
 
@@ -347,7 +347,7 @@ Marker ${result.markerHandle}: ${result.name}`;
     }
 
     if (result.stack.truncated) {
-      output += `\nUse 'pq marker stack ${result.markerHandle}' for the full stack trace.\n`;
+      output += `\nUse 'profiler-cli marker stack ${result.markerHandle}' for the full stack trace.\n`;
     }
   }
 
@@ -578,7 +578,7 @@ Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersN
   // Top functions by total time
   output += 'Top Functions (by total time):\n';
   output +=
-    '  (For a call tree starting from these functions, use: pq thread samples-top-down)\n\n';
+    '  (For a call tree starting from these functions, use: profiler-cli thread samples-top-down)\n\n';
   for (const func of result.topFunctionsByTotal) {
     const totalCount = Math.round(func.totalSamples);
     const totalPct = func.totalPercentage.toFixed(1);
@@ -591,7 +591,7 @@ Thread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersN
   // Top functions by self time
   output += 'Top Functions (by self time):\n';
   output +=
-    '  (For a call tree showing what calls these functions, use: pq thread samples-bottom-up)\n\n';
+    '  (For a call tree showing what calls these functions, use: profiler-cli thread samples-bottom-up)\n\n';
   for (const func of result.topFunctionsBySelf) {
     const selfCount = Math.round(func.selfSamples);
     const selfPct = func.selfPercentage.toFixed(1);
@@ -839,7 +839,7 @@ export function formatThreadMarkersResult(
   }
 
   lines.push(
-    'Use --search <term>, --category <name>, --min-duration <ms>, --max-duration <ms>, --has-stack, --limit <N>, --group-by <keys>, --auto-group, or --top-n <N> to filter/group markers, or m-<N> handles to inspect individual markers or zoom into their time range (pq zoom push m-<N>).'
+    'Use --search <term>, --category <name>, --min-duration <ms>, --max-duration <ms>, --has-stack, --limit <N>, --group-by <keys>, --auto-group, or --top-n <N> to filter/group markers, or m-<N> handles to inspect individual markers or zoom into their time range (profiler-cli zoom push m-<N>).'
   );
 
   return lines.join('\n');

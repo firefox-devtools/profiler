@@ -335,9 +335,9 @@ export function parseTransforms(transformString: string): TransformStack {
         const filterType = convertToFullFilterType(shortFilterType);
 
         if (filterType !== 'marker-search') {
-          // pq-only filter types are not supported in the frontend.
+          // profiler-cli-only filter types are not supported in the frontend.
           console.error(
-            'A pq-only filter-samples type was found in the URL and will be ignored.',
+            'A profiler-cli-only filter-samples type was found in the URL and will be ignored.',
             filterType
           );
           break;
@@ -364,7 +364,7 @@ function convertToFullFilterType(shortFilterType: string): FilterSamplesType {
   switch (shortFilterType) {
     case 'm':
       return 'marker-search';
-    // pq-only types:
+    // profiler-cli-only types:
     case 'om':
       return 'outside-marker';
     case 'fi':
@@ -385,7 +385,7 @@ function convertToShortFilterType(filterType: FilterSamplesType): string {
   switch (filterType) {
     case 'marker-search':
       return 'm';
-    // pq-only types:
+    // profiler-cli-only types:
     case 'outside-marker':
       return 'om';
     case 'function-include':
@@ -512,13 +512,13 @@ export function getTransformLabelL10nIds(
               'TransformNavigator--drop-samples-outside-of-markers-matching',
             item: transform.filter,
           };
-        // pq-only filter types:
+        // profiler-cli-only filter types:
         case 'outside-marker':
         case 'function-include':
         case 'stack-prefix':
         case 'stack-suffix':
           throw new Error(
-            `getTransformLabelL10nIds: pq-only filter type "${transform.filterType}" is not supported in the frontend transform navigator.`
+            `getTransformLabelL10nIds: profiler-cli-only filter type "${transform.filterType}" is not supported in the frontend transform navigator.`
           );
         default:
           throw assertExhaustiveCheck(transform.filterType);

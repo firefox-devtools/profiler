@@ -4,7 +4,7 @@ A library for programmatically querying the contents of a Firefox Profiler profi
 
 ## Usage
 
-**Note:** Most users should use the [profile-query-cli](../profile-query-cli/README.md) (`pq` command) instead of using this library directly.
+**Note:** Most users should use the [profile-query-cli](../profile-query-cli/README.md) (`profiler-cli` command) instead of using this library directly.
 
 ### Building
 

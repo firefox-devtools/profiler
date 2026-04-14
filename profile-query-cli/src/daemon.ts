@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Daemon process for pq.
+ * Daemon process for profiler-cli.
  * Loads a profile and listens for commands on a Unix socket (or named pipe on Windows).
  */
 

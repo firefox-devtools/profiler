@@ -13,8 +13,8 @@
  *
  * Instead, client functionality is tested through integration tests in bash
  * scripts:
- * - bin/pq-test: Basic daemon lifecycle and client-server communication
- * - bin/pq-test-multi: Concurrent client sessions
+ * - bin/profiler-cli-test: Basic daemon lifecycle and client-server communication
+ * - bin/profiler-cli-test-multi: Concurrent client sessions
  *
  * Do not add unit tests here. If you need to test pure utility functions from
  * client.ts, extract them to a separate module and test that module instead.

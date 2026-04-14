@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * `pq filter` command.
+ * `profiler-cli filter` command.
  */
 
 import type { Command } from 'commander';
@@ -88,7 +88,7 @@ export function registerFilterCommand(
     console.log(formatOutput(result, opts.json ?? false));
 
     if (!wasExplicit('filter', 'list')) {
-      console.log('\nOther subcommands: pq filter <push|pop|clear> [options]');
+      console.log('\nOther subcommands: profiler-cli filter <push|pop|clear> [options]');
     }
   });
 

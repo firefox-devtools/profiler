@@ -1,99 +1,99 @@
-pq: Usage Guide
+profiler-cli: Usage Guide
 
-pq (Profile Querier) queries Firefox performance profiles loaded into a persistent
+profiler-cli (Profile Querier) queries Firefox performance profiles loaded into a persistent
 daemon. Load a profile once, then query it interactively without reloading.
 
 
 QUICK START
 
-  pq load profile.json.gz
-  pq profile info                  Find threads; note handles (e.g. t-0, t-1)
-  pq thread select t-0
-  pq thread samples                Hot functions by self time
-  pq thread samples-top-down       Full top-down call tree
+  profiler-cli load profile.json.gz
+  profiler-cli profile info                  Find threads; note handles (e.g. t-0, t-1)
+  profiler-cli thread select t-0
+  profiler-cli thread samples                Hot functions by self time
+  profiler-cli thread samples-top-down       Full top-down call tree
 
   The rest of this guide covers filtering, zooming, markers, and advanced analysis.
 
 
 SESSION MODEL
 
-  pq uses a daemon/session model:
-    1. Load a profile with "pq load" -- starts a background daemon
+  profiler-cli uses a daemon/session model:
+    1. Load a profile with "profiler-cli load" -- starts a background daemon
     2. Query the loaded profile with any other commands
-    3. Stop with "pq stop" when done
+    3. Stop with "profiler-cli stop" when done
 
   The daemon persists your selected thread, zoom ranges, and filter stacks across queries.
 
   For scripting or concurrent work, prefer an explicit session ID so each workflow
   gets isolated state:
-    pq load profile.json.gz --session run-a
-    pq profile info --session run-a
-    pq thread select t-0 --session run-a
-    pq thread samples --session run-a
+    profiler-cli load profile.json.gz --session run-a
+    profiler-cli profile info --session run-a
+    profiler-cli thread select t-0 --session run-a
+    profiler-cli thread samples --session run-a
 
 
 CORE WORKFLOW
 
   Step 1: Load a profile
-    pq load profile.json.gz
-    pq load profile.json.gz --session run-a   Recommended for scripting or concurrent work
+    profiler-cli load profile.json.gz
+    profiler-cli load profile.json.gz --session run-a   Recommended for scripting or concurrent work
 
   Step 2: Explore the profile
-    pq profile info          Overview: processes, threads, time range, CPU activity
-    pq profile info --all    Show all processes and threads (not just top 5)
-    pq profile info --search GeckoMain   Filter by process/thread name, pid, or tid
+    profiler-cli profile info          Overview: processes, threads, time range, CPU activity
+    profiler-cli profile info --all    Show all processes and threads (not just top 5)
+    profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
 
   Step 3: Select a thread to analyze
-    pq thread select t-0     Select a specific thread (persists for future commands)
+    profiler-cli thread select t-0     Select a specific thread (persists for future commands)
 
   Step 4: Analyze CPU usage
-    pq thread samples                             Hot functions list (self time, sorted by impact)
-    pq thread samples-top-down                    Top-down call tree (where does CPU time originate)
-    pq thread samples-bottom-up                   Bottom-up call tree (what calls the hot functions)
-    pq thread functions                           All functions with self/total CPU percentages
+    profiler-cli thread samples                             Hot functions list (self time, sorted by impact)
+    profiler-cli thread samples-top-down                    Top-down call tree (where does CPU time originate)
+    profiler-cli thread samples-bottom-up                   Bottom-up call tree (what calls the hot functions)
+    profiler-cli thread functions                           All functions with self/total CPU percentages
 
     All samples commands exclude idle by default so percentages reflect active CPU time.
     Use --include-idle to include idle samples (e.g. to see what fraction of wall time is idle).
 
     Use --search to focus the call tree on paths containing a specific function:
-    pq thread samples-top-down --search GC
-    pq thread samples-bottom-up --search "JS::Compile"
-    pq thread samples --search malloc
+    profiler-cli thread samples-top-down --search GC
+    profiler-cli thread samples-bottom-up --search "JS::Compile"
+    profiler-cli thread samples --search malloc
 
     Search syntax for samples commands:
     - Matches any frame in the call stack (case-insensitive substring)
     - Comma joins multiple terms with AND: both must appear somewhere in the stack
-      pq thread samples-top-down --search "GC,malloc"   paths through both GC and malloc
+      profiler-cli thread samples-top-down --search "GC,malloc"   paths through both GC and malloc
     - "|" is a literal character, not OR — it will match nothing unless a function
       name actually contains "|"
     - To see results matching either of two terms, run two separate searches
 
   Step 5: Analyze markers (browser events, timers, etc.)
-    pq thread markers                          All markers with aggregated stats
-    pq thread markers --category Layout        Filter by category
-    pq thread markers --search DOMEvent        Filter by name substring
-    pq thread markers --min-duration 10        Only markers >= 10ms
-    pq thread markers --has-stack              Only markers with stack traces
+    profiler-cli thread markers                          All markers with aggregated stats
+    profiler-cli thread markers --category Layout        Filter by category
+    profiler-cli thread markers --search DOMEvent        Filter by name substring
+    profiler-cli thread markers --min-duration 10        Only markers >= 10ms
+    profiler-cli thread markers --has-stack              Only markers with stack traces
 
   Step 6: Drill into specifics
-    pq marker info m-1234     Full details for a marker (from handles in marker list)
-    pq marker stack m-1234    Full stack trace at the time of a marker
-    pq function info f-12     Function details (source location, library)
-    pq function expand f-12   Show full untruncated function name
+    profiler-cli marker info m-1234     Full details for a marker (from handles in marker list)
+    profiler-cli marker stack m-1234    Full stack trace at the time of a marker
+    profiler-cli function info f-12     Function details (source location, library)
+    profiler-cli function expand f-12   Show full untruncated function name
 
   Step 7: Filter to focus the analysis (see FILTERS section below)
 
     Ephemeral -- applies only to that one command, sticky state unchanged:
-    pq thread samples --excludes-function f-184     Ignore one noisy function
-    pq thread samples --root-at f-500               Show only work inside f-500
-    pq thread samples --during-marker --search Paint  Only samples during Paint markers
+    profiler-cli thread samples --excludes-function f-184     Ignore one noisy function
+    profiler-cli thread samples --root-at f-500               Show only work inside f-500
+    profiler-cli thread samples --during-marker --search Paint  Only samples during Paint markers
 
     Sticky -- persists across all subsequent commands until popped:
-    pq filter push --merge f-142,f-143             Merge allocators out of stacks
-    pq filter push --includes-function f-500       Keep only samples containing f-500
-    pq thread samples                              Uses sticky filters automatically
-    pq filter pop                                  Remove last filter
-    pq filter clear                                Remove all filters
+    profiler-cli filter push --merge f-142,f-143             Merge allocators out of stacks
+    profiler-cli filter push --includes-function f-500       Keep only samples containing f-500
+    profiler-cli thread samples                              Uses sticky filters automatically
+    profiler-cli filter pop                                  Remove last filter
+    profiler-cli filter clear                                Remove all filters
 
 
 SESSION STATE
@@ -104,7 +104,7 @@ SESSION STATE
     zoom_stack        set by zoom push/pop/clear; restricts all queries to a time window
     filter_stack[t]   set by filter push/pop/clear; per-thread, independent stacks
 
-  Use "pq status" to inspect all session state at any time.
+  Use "profiler-cli status" to inspect all session state at any time.
 
 
 HANDLE SYSTEM
@@ -135,14 +135,14 @@ ZOOM: FOCUS ON A TIME RANGE
   Zoom restricts all subsequent queries to a specific time window. Useful for
   drilling into a specific jank period, page load phase, or marker duration.
 
-    pq zoom push 2.7,3.1       Zoom to 2.7s-3.1s (relative to profile start)
-    pq zoom push m-158         Zoom to the time range of marker m-158
-    pq zoom push ts-6,ts-12    Zoom to the range between two named timestamps
-    pq zoom pop                Undo the last zoom
-    pq zoom clear              Return to full profile view
+    profiler-cli zoom push 2.7,3.1       Zoom to 2.7s-3.1s (relative to profile start)
+    profiler-cli zoom push m-158         Zoom to the time range of marker m-158
+    profiler-cli zoom push ts-6,ts-12    Zoom to the range between two named timestamps
+    profiler-cli zoom pop                Undo the last zoom
+    profiler-cli zoom clear              Return to full profile view
 
   After zooming, all thread/marker/sample commands automatically apply the filter.
-  Use "pq status" to confirm the active zoom stack (along with thread and filters).
+  Use "profiler-cli status" to confirm the active zoom stack (along with thread and filters).
 
 
 FILTERS
@@ -154,26 +154,26 @@ FILTERS
     only to that invocation; the sticky filter stack is unchanged. Multiple flags
     may be combined on one command and are applied left to right.
 
-      pq thread samples --excludes-function f-184
-      pq thread samples --merge f-142,f-143 --root-at f-500 --limit 30
-      pq thread functions --includes-function f-500
+      profiler-cli thread samples --excludes-function f-184
+      profiler-cli thread samples --merge f-142,f-143 --root-at f-500 --limit 30
+      profiler-cli thread functions --includes-function f-500
 
   STICKY (persists across commands)
-    Use "pq filter push" to add a filter to the current thread's stack.
+    Use "profiler-cli filter push" to add a filter to the current thread's stack.
     Every subsequent analysis command sees all pushed filters automatically.
     Filters are per-thread: each thread has its own independent filter stack.
     Exactly one filter flag per "filter push" command.
 
-      pq filter push --merge f-142,f-143         # add filter 1
-      pq filter push --includes-function f-500   # add filter 2 (AND: both must pass)
-      pq thread samples                          # both filters active
-      pq thread functions                        # both filters active
-      pq filter pop                              # remove filter 2
-      pq filter pop 2                            # remove last 2 filters
-      pq filter list                             # show active filters in push order
-      pq filter clear                            # remove all filters
+      profiler-cli filter push --merge f-142,f-143         # add filter 1
+      profiler-cli filter push --includes-function f-500   # add filter 2 (AND: both must pass)
+      profiler-cli thread samples                          # both filters active
+      profiler-cli thread functions                        # both filters active
+      profiler-cli filter pop                              # remove filter 2
+      profiler-cli filter pop 2                            # remove last 2 filters
+      profiler-cli filter list                             # show active filters in push order
+      profiler-cli filter clear                            # remove all filters
 
-  Use "pq status" to inspect the full session state: selected thread, zoom stack, and
+  Use "profiler-cli status" to inspect the full session state: selected thread, zoom stack, and
   all per-thread filters.
 
   Sticky + ephemeral compose: sticky filters apply first (already in the transform
@@ -204,9 +204,9 @@ FILTERS
     Push order matters: each filter sees the stack as left by the prior filter.
 
     Example -- only samples containing f-500, during Paint markers, after merging noise:
-      pq filter push --merge f-142,f-143
-      pq filter push --includes-function f-500
-      pq filter push --during-marker --search Paint
+      profiler-cli filter push --merge f-142,f-143
+      profiler-cli filter push --includes-function f-500
+      profiler-cli filter push --during-marker --search Paint
 
 
 JSON OUTPUT
@@ -214,68 +214,68 @@ JSON OUTPUT
   Add --json to any command to get structured JSON output, suitable for piping to jq
   or processing programmatically.
 
-    pq thread samples --json | jq '.topFunctionsBySelf[0]'
-    pq thread markers --json | jq '[.byType[] | select(.durationStats.max > 50)]'
-    pq profile info --json | jq '.processes[].threads[] | {handle: .threadHandle, name}'
+    profiler-cli thread samples --json | jq '.topFunctionsBySelf[0]'
+    profiler-cli thread markers --json | jq '[.byType[] | select(.durationStats.max > 50)]'
+    profiler-cli profile info --json | jq '.processes[].threads[] | {handle: .threadHandle, name}'
 
-  Run "pq schemas" for the full JSON schema reference.
+  Run "profiler-cli schemas" for the full JSON schema reference.
 
 
 COMMON ANALYSIS PATTERNS
 
   Find what's consuming CPU:
-    pq thread info                          Pick the main thread (usually GeckoMain)
-    pq thread select t-0
-    pq thread samples                       Top hot functions by self time (active only)
-    pq thread samples-top-down             See the full call tree
-    pq thread samples-top-down --search GC  Focus tree on paths through "GC"
+    profiler-cli thread info                          Pick the main thread (usually GeckoMain)
+    profiler-cli thread select t-0
+    profiler-cli thread samples                       Top hot functions by self time (active only)
+    profiler-cli thread samples-top-down             See the full call tree
+    profiler-cli thread samples-top-down --search GC  Focus tree on paths through "GC"
 
   Investigate a jank/slow period:
-    pq thread markers --min-duration 50    Find long-running markers (>50ms = jank)
-    pq zoom push m-158                     Zoom into that marker's time range
-    pq thread samples                      What was executing during that period?
-    pq zoom pop                            Back to full profile
+    profiler-cli thread markers --min-duration 50    Find long-running markers (>50ms = jank)
+    profiler-cli zoom push m-158                     Zoom into that marker's time range
+    profiler-cli thread samples                      What was executing during that period?
+    profiler-cli zoom pop                            Back to full profile
 
   Eliminate allocator noise from a call tree:
-    pq thread functions --search malloc    Find allocator function handles (e.g. f-142)
-    pq thread samples --merge f-142        Try ephemerally first
-    pq filter push --merge f-142,f-143     Make it sticky for all subsequent commands
-    pq thread samples                      Clean call tree, filters persist
-    pq filter clear
+    profiler-cli thread functions --search malloc    Find allocator function handles (e.g. f-142)
+    profiler-cli thread samples --merge f-142        Try ephemerally first
+    profiler-cli filter push --merge f-142,f-143     Make it sticky for all subsequent commands
+    profiler-cli thread samples                      Clean call tree, filters persist
+    profiler-cli filter clear
 
   Focus on work inside a specific function:
-    pq thread functions --search PresentImpl   Note the handle (e.g. f-500)
-    pq thread samples --root-at f-500          Ephemeral: subtree rooted at f-500
-    pq filter push --includes-function f-500   Sticky: only samples containing f-500
-    pq filter push --root-at f-500             Sticky: re-root at f-500
-    pq thread samples-top-down                 Call tree within f-500 only
+    profiler-cli thread functions --search PresentImpl   Note the handle (e.g. f-500)
+    profiler-cli thread samples --root-at f-500          Ephemeral: subtree rooted at f-500
+    profiler-cli filter push --includes-function f-500   Sticky: only samples containing f-500
+    profiler-cli filter push --root-at f-500             Sticky: re-root at f-500
+    profiler-cli thread samples-top-down                 Call tree within f-500 only
 
   Correlate CPU with a specific event type:
-    pq thread markers --search Paint           Check Paint marker frequency/duration
-    pq filter push --during-marker --search Paint
-    pq thread samples                          What runs during Paint?
-    pq thread functions                        Which functions are active during Paint?
-    pq filter clear
+    profiler-cli thread markers --search Paint           Check Paint marker frequency/duration
+    profiler-cli filter push --during-marker --search Paint
+    profiler-cli thread samples                          What runs during Paint?
+    profiler-cli thread functions                        Which functions are active during Paint?
+    profiler-cli filter clear
 
   Find slow layout or script execution:
-    pq thread markers --category Layout --min-duration 5
-    pq thread markers --category JavaScript --min-duration 10
-    pq thread markers --search Reflow --min-duration 5
+    profiler-cli thread markers --category Layout --min-duration 5
+    profiler-cli thread markers --category JavaScript --min-duration 10
+    profiler-cli thread markers --search Reflow --min-duration 5
 
   Deep dive on a specific function:
-    pq thread samples                   Find hot function, note its handle (f-12)
-    pq function info f-12               See callers, callees, source location
-    pq function expand f-12             See full name if truncated
+    profiler-cli thread samples                   Find hot function, note its handle (f-12)
+    profiler-cli function info f-12               See callers, callees, source location
+    profiler-cli function expand f-12             See full name if truncated
 
   Group markers by event type:
-    pq thread markers --search DOMEvent --group-by field:eventType
-    pq thread markers --auto-group
-    pq thread markers --group-by type,name
+    profiler-cli thread markers --search DOMEvent --group-by field:eventType
+    profiler-cli thread markers --auto-group
+    profiler-cli thread markers --group-by type,name
 
   Analyze network activity:
-    pq thread markers --category Network
-    pq thread markers --category Network --min-duration 100
-    pq thread markers --search "http" --category Network
+    profiler-cli thread markers --category Network
+    profiler-cli thread markers --category Network --min-duration 100
+    profiler-cli thread markers --search "http" --category Network
 
 
 UNDERSTANDING THE OUTPUT
@@ -324,18 +324,18 @@ TIPS
     with "filter push"
   - "filter push --during-marker --search X" is powerful for correlating CPU work
     with specific event types
-  - Check "pq status" after any state changes to confirm selected thread, active
+  - Check "profiler-cli status" after any state changes to confirm selected thread, active
     zoom, and active filters before running analysis
 
 
 SCRIPTING
 
-  When using pq in scripts or pipelines:
+  When using profiler-cli in scripts or pipelines:
 
   Always use a named session for isolation:
-    pq load profile.json.gz --session my-analysis
-    pq profile info --session my-analysis
-    pq thread select t-0 --session my-analysis
+    profiler-cli load profile.json.gz --session my-analysis
+    profiler-cli profile info --session my-analysis
+    profiler-cli thread select t-0 --session my-analysis
 
   Always use --json for reliable output parsing. Plain text output is for human
   reading and may change; the JSON schema is stable.
@@ -346,54 +346,54 @@ SCRIPTING
 
   Extracting handles with jq:
     # Find the GeckoMain thread handle
-    pq profile info --json | \
+    profiler-cli profile info --json | \
       jq -r '.processes[].threads[] | select(.name | test("GeckoMain")) | .threadHandle'
 
     # Get the top self-time function handle
-    pq thread samples --json | jq -r '.topFunctionsBySelf[0].functionHandle'
+    profiler-cli thread samples --json | jq -r '.topFunctionsBySelf[0].functionHandle'
 
     # List marker handles for markers longer than 50ms
-    pq thread markers --json | \
+    profiler-cli thread markers --json | \
       jq -r '[.byType[].topMarkers[] | select(.duration > 50) | .handle][]'
 
 SESSION MANAGEMENT
 
-    pq session list                               List all running daemon sessions (* marks current)
-    pq session use <id>                           Switch the current session
-    pq stop                                       Stop the current session
-    pq stop <id>                                  Stop a specific session
-    pq stop --all                                 Stop all sessions
-    pq load profile.json.gz --session my-session  Named session
-    pq thread info --session my-session           Query a specific session
+    profiler-cli session list                               List all running daemon sessions (* marks current)
+    profiler-cli session use <id>                           Switch the current session
+    profiler-cli stop                                       Stop the current session
+    profiler-cli stop <id>                                  Stop a specific session
+    profiler-cli stop --all                                 Stop all sessions
+    profiler-cli load profile.json.gz --session my-session  Named session
+    profiler-cli thread info --session my-session           Query a specific session
 
 
 ERROR HANDLING
 
   "No running session"
-    Run "pq load <profile>" first. If using a named session, ensure --session matches.
-    Run "pq session list" to see what sessions are currently active.
+    Run "profiler-cli load <profile>" first. If using a named session, ensure --session matches.
+    Run "profiler-cli session list" to see what sessions are currently active.
 
   "Thread not found"
-    The handle does not exist in this profile. Run "pq profile info" to see valid
-    thread handles, then re-run "pq thread select" with a handle from that list.
+    The handle does not exist in this profile. Run "profiler-cli profile info" to see valid
+    thread handles, then re-run "profiler-cli thread select" with a handle from that list.
 
   "No thread selected"
-    Run "pq thread select <handle>" before querying thread data. Use "pq profile info"
+    Run "profiler-cli thread select <handle>" before querying thread data. Use "profiler-cli profile info"
     first to get valid handles.
 
   "Marker not found"
     Marker handles (m-N) are session-scoped. If the daemon was restarted, re-run
-    "pq thread markers" to get fresh handles for the new session.
+    "profiler-cli thread markers" to get fresh handles for the new session.
 
   "Function not found"
     Function handles (f-N) are stable across sessions for the same profile, but only
     valid after the profile is loaded. Verify the correct profile is loaded with
-    "pq status" (check the profile path).
+    "profiler-cli status" (check the profile path).
 
   "Session not found" / "No such session"
-    The session has exited or was stopped. Run "pq session list" to see active sessions.
-    Run "pq load <profile> --session <id>" to start a new session with that ID.
+    The session has exited or was stopped. Run "profiler-cli session list" to see active sessions.
+    Run "profiler-cli load <profile> --session <id>" to start a new session with that ID.
 
   "Profile load failed"
     Check that the path is correct and the file is a valid supported profile format.
-    The daemon log at ~/.pq/<session-id>.log contains the full error detail.
+    The daemon log at ~/.profiler-cli/<session-id>.log contains the full error detail.

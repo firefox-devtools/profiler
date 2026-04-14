@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Output formatting for pq CLI commands.
+ * Output formatting for profiler-cli commands.
  */
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';

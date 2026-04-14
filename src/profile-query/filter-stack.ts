@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * FilterStack manages the per-thread sample filter stacks for the pq CLI.
+ * FilterStack manages the per-thread sample filter stacks for the profiler-cli CLI.
  *
  * Each thread (identified by its ThreadsKey) has an independent stack of filter
- * entries. Each entry corresponds to one `pq filter push` invocation and may
+ * entries. Each entry corresponds to one `profiler-cli filter push` invocation and may
  * have dispatched one or more Redux transforms to the store.
  *
  * Popping entries removes both the in-memory records and the corresponding Redux

@@ -46,8 +46,8 @@ export type FunctionFilterOptions = {
 // ===== Sample Filter Stack =====
 
 /**
- * The specification for a single entry on the pq filter stack.
- * Each entry corresponds to one `pq filter push` invocation.
+ * The specification for a single entry on the profiler-cli filter stack.
+ * Each entry corresponds to one `profiler-cli filter push` invocation.
  */
 export type SampleFilterSpec =
   // Phase 1: Redux transform-backed filters

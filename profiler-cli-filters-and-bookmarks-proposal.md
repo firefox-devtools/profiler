@@ -1,9 +1,9 @@
-# pq Filters and Bookmarks Proposal
+# profiler-cli Filters and Bookmarks Proposal
 
 **Status:** Phase 1 + Phase 2 implemented; Phase 3 (strip-prefix, strip-suffix, merge-regex) and marker display filters and bookmarks are future work
 **Created:** 2025-01-04
 **Last Updated:** 2026-04-11
-**Related:** pq-todo.md
+**Related:** profiler-cli-todo.md
 
 ---
 
@@ -28,7 +28,7 @@ Based on feedback, this proposal includes:
 
 ## Overview
 
-This proposal defines a comprehensive system for managing analysis state in pq with **four independent dimensions**:
+This proposal defines a comprehensive system for managing analysis state in profiler-cli with **four independent dimensions**:
 
 1. **Thread selection** (global) - which thread(s) you're analyzing
 2. **Zoom** (global) - time range you're focused on
@@ -47,7 +47,7 @@ Each dimension supports:
 
 1. **Ephemeral by default** - All commands accept filter flags that apply only to that invocation
 2. **Explicit stickiness** - Making state sticky requires explicit commands (`select`, `zoom push`, `filter push`)
-3. **Clear state** - `pq status` always shows current thread, zoom, and active filters
+3. **Clear state** - `profiler-cli status` always shows current thread, zoom, and active filters
 4. **Composable** - Filters, zoom, and thread selection are independent dimensions
 5. **Saveable** - Complex views can be bookmarked and recalled ⏳ future
 
@@ -63,69 +63,69 @@ invocation and do not affect the sticky filter stack.
 
 ```bash
 # Ephemeral sample inclusion/exclusion
-pq thread samples --includes-function f-142
-pq thread samples --includes-any-function f-142,f-143
-pq thread samples --includes-prefix f-100,f-101,f-142
-pq thread samples --includes-suffix f-142
-pq thread samples --excludes-function f-142
-pq thread samples --excludes-any-function f-142,f-143
+profiler-cli thread samples --includes-function f-142
+profiler-cli thread samples --includes-any-function f-142,f-143
+profiler-cli thread samples --includes-prefix f-100,f-101,f-142
+profiler-cli thread samples --includes-suffix f-142
+profiler-cli thread samples --excludes-function f-142
+profiler-cli thread samples --excludes-any-function f-142,f-143
 
 # Ephemeral marker-based filters
-pq thread samples --during-marker --search Paint
-pq thread samples --outside-marker --search GC
+profiler-cli thread samples --during-marker --search Paint
+profiler-cli thread samples --outside-marker --search GC
 
 # Ephemeral stack transforms
-pq thread samples --merge f-142,f-143
-pq thread samples --root-at f-142
+profiler-cli thread samples --merge f-142,f-143
+profiler-cli thread samples --root-at f-142
 
 # Multiple ephemeral filters on one command — applied in left-to-right order
-pq thread samples --excludes-function f-142 --merge f-143 --during-marker --search Paint
+profiler-cli thread samples --excludes-function f-142 --merge f-143 --during-marker --search Paint
 
 # Ephemeral and sticky filters compose:
 # sticky filters are applied first (already in the Redux transform stack),
 # then ephemeral filters are layered on top for that one invocation.
-pq thread functions --limit 20 --excludes-function f-142
+profiler-cli thread functions --limit 20 --excludes-function f-142
 ```
 
 **Not yet implemented for ephemeral use:**
 
-- `--zoom <range>` on thread commands (use `pq zoom push` instead)
-- `--threads t-0,t-93` on thread commands (use `pq thread select` instead)
+- `--zoom <range>` on thread commands (use `profiler-cli zoom push` instead)
+- `--threads t-0,t-93` on thread commands (use `profiler-cli thread select` instead)
 - `--strip-prefix`, `--strip-suffix`, `--merge-regex` (Phase 3, see below)
 - `--during-marker --category` (only `--search` is supported)
 
 ### 2. Sticky Thread Selection ✅ implemented
 
 ```bash
-pq thread select t-93              # Select single thread (sticky)
-pq thread samples                  # Uses t-93
+profiler-cli thread select t-93              # Select single thread (sticky)
+profiler-cli thread samples                  # Uses t-93
 
-pq thread select t-0,t-93          # Select multiple threads (sticky)
-pq thread samples                  # Uses both threads
+profiler-cli thread select t-0,t-93          # Select multiple threads (sticky)
+profiler-cli thread samples                  # Uses both threads
 
-pq thread select t-0               # Switch to different thread
+profiler-cli thread select t-0               # Switch to different thread
 ```
 
 ### 3. Sticky Zoom (Stack-based) ✅ implemented
 
 ```bash
-pq zoom push ts-6,ts-7             # Push zoom level
-pq thread samples                  # Uses zoomed range
+profiler-cli zoom push ts-6,ts-7             # Push zoom level
+profiler-cli thread samples                  # Uses zoomed range
 
-pq zoom push ts-6a,ts-6c           # Zoom further (within previous range)
-pq thread samples                  # Uses nested zoom
+profiler-cli zoom push ts-6a,ts-6c           # Zoom further (within previous range)
+profiler-cli thread samples                  # Uses nested zoom
 
-pq zoom pop                        # Pop one zoom level (back to ts-6,ts-7)
-pq zoom pop                        # Pop again (back to full profile)
+profiler-cli zoom pop                        # Pop one zoom level (back to ts-6,ts-7)
+profiler-cli zoom pop                        # Pop again (back to full profile)
 
-pq zoom clear                      # Clear entire zoom stack
+profiler-cli zoom clear                      # Clear entire zoom stack
 
-pq zoom push m-158                 # Zoom to marker's time range
+profiler-cli zoom push m-158                 # Zoom to marker's time range
 ```
 
 ### 4. Sticky Sample/Stack Filters (Per-Thread) ✅ implemented
 
-Each thread has its own filter stack. `pq filter push` appends a filter that
+Each thread has its own filter stack. `profiler-cli filter push` appends a filter that
 persists across all subsequent analysis commands until popped.
 
 Function handles (`f-N`) identify index N in the shared funcTable — they are
@@ -133,43 +133,43 @@ stable across sessions for the same profile.
 
 ```bash
 # Select thread first
-pq thread select t-93
+profiler-cli thread select t-93
 
 # Push filters onto THIS THREAD's stack (applied in push order)
 
 # Include/exclude samples
-pq filter push --includes-function f-142       # keep samples whose stack contains f-142
-pq filter push --includes-any-function f-142,f-143  # keep samples with f-142 OR f-143
-pq filter push --includes-prefix f-100,f-200   # keep samples whose stack starts f-100→f-200
-pq filter push --includes-suffix f-142         # keep samples whose leaf frame is f-142
-pq filter push --excludes-function f-142       # drop samples containing f-142
-pq filter push --excludes-any-function f-142,f-143  # drop samples containing f-142 or f-143
-pq filter push --during-marker --search Paint  # keep samples during Paint markers
-pq filter push --outside-marker --search GC    # keep samples outside GC markers
+profiler-cli filter push --includes-function f-142       # keep samples whose stack contains f-142
+profiler-cli filter push --includes-any-function f-142,f-143  # keep samples with f-142 OR f-143
+profiler-cli filter push --includes-prefix f-100,f-200   # keep samples whose stack starts f-100→f-200
+profiler-cli filter push --includes-suffix f-142         # keep samples whose leaf frame is f-142
+profiler-cli filter push --excludes-function f-142       # drop samples containing f-142
+profiler-cli filter push --excludes-any-function f-142,f-143  # drop samples containing f-142 or f-143
+profiler-cli filter push --during-marker --search Paint  # keep samples during Paint markers
+profiler-cli filter push --outside-marker --search GC    # keep samples outside GC markers
 
 # Stack transforms
-pq filter push --merge f-142,f-143,f-144       # collapse these functions out of stacks
-pq filter push --root-at f-142                 # re-root all stacks at f-142
+profiler-cli filter push --merge f-142,f-143,f-144       # collapse these functions out of stacks
+profiler-cli filter push --root-at f-142                 # re-root all stacks at f-142
 
 # Order matters — each filter sees stacks as left by the previous filter:
-pq filter push --root-at f-100                 # 1. re-root at f-100
-pq filter push --includes-prefix f-100         # 2. keep only stacks starting with f-100
+profiler-cli filter push --root-at f-100                 # 1. re-root at f-100
+profiler-cli filter push --includes-prefix f-100         # 2. keep only stacks starting with f-100
 # Filter 2 operates on stacks already transformed by filter 1
 
 # Management
-pq filter list                     # Show filters for current thread
-pq filter pop                      # Pop most recent filter
-pq filter pop 3                    # Pop 3 most recent filters
-pq filter clear                    # Clear all filters for current thread
+profiler-cli filter list                     # Show filters for current thread
+profiler-cli filter pop                      # Pop most recent filter
+profiler-cli filter pop 3                    # Pop 3 most recent filters
+profiler-cli filter clear                    # Clear all filters for current thread
 
 # Switch threads — different filter stack!
-pq thread select t-0
-pq filter list                     # t-0's filters (independent from t-93)
+profiler-cli thread select t-0
+profiler-cli filter list                     # t-0's filters (independent from t-93)
 
 # All analysis commands use current thread's filters automatically
-pq thread samples
-pq thread functions
-pq thread samples-top-down
+profiler-cli thread samples
+profiler-cli thread functions
+profiler-cli thread samples-top-down
 ```
 
 **Not yet implemented (Phase 3 / deferred):**
@@ -181,15 +181,15 @@ pq thread samples-top-down
 ### 5. Sticky Marker Filters (Per-Thread) ⏳ not yet implemented
 
 Planned: each thread will also have its own marker filter stack controlling
-which markers appear in `pq thread markers` output.
+which markers appear in `profiler-cli thread markers` output.
 
 ```bash
 # Future syntax (not yet implemented)
-pq marker filter push --search Paint
-pq marker filter push --category Graphics
-pq marker filter push --min-duration 5
-pq marker filter pop
-pq marker filter clear
+profiler-cli marker filter push --search Paint
+profiler-cli marker filter push --category Graphics
+profiler-cli marker filter push --min-duration 5
+profiler-cli marker filter pop
+profiler-cli marker filter clear
 ```
 
 Note: sample filters that reference markers (`--during-marker`, `--outside-marker`)
@@ -202,12 +202,12 @@ Planned: save and restore complex views (zoom + thread selection, or filter stac
 
 ```bash
 # Future syntax (not yet implemented)
-pq bookmark view spike1 --zoom ts-6,ts-7 --threads t-0,t-93
-pq bookmark filter no-allocators --merge f-142,f-143
-pq thread samples --view spike1          # ephemeral bookmark use
-pq bookmark load view spike1             # sticky bookmark use
-pq bookmark list
-pq bookmark delete spike1
+profiler-cli bookmark view spike1 --zoom ts-6,ts-7 --threads t-0,t-93
+profiler-cli bookmark filter no-allocators --merge f-142,f-143
+profiler-cli thread samples --view spike1          # ephemeral bookmark use
+profiler-cli bookmark load view spike1             # sticky bookmark use
+profiler-cli bookmark list
+profiler-cli bookmark delete spike1
 ```
 
 ### 7. Status Command ✅ implemented
@@ -215,7 +215,7 @@ pq bookmark delete spike1
 Shows current thread, zoom stack, and all active filter stacks:
 
 ```bash
-pq status
+profiler-cli status
 
 # Example output:
 Session Status:
@@ -252,8 +252,8 @@ Control which samples are included in analysis. All take `f-N` function handles.
 --outside-marker --search GC           # timestamp outside matching markers
 
 # AND semantics via repeated push:
-pq filter push --includes-function f-1   # keep samples with f-1
-pq filter push --includes-function f-2   # AND also with f-2
+profiler-cli filter push --includes-function f-1   # keep samples with f-1
+profiler-cli filter push --includes-function f-2   # AND also with f-2
 ```
 
 **Not yet implemented:**
@@ -286,86 +286,86 @@ Modify the structure of stacks before or after sample filtering.
 
 ```bash
 # See profile overview
-$ pq profile info
+$ profiler-cli profile info
 # Output shows a spike around ts-6,ts-7
 
 # Quick peek at that spike
-$ pq zoom push ts-6,ts-7
-$ pq thread samples --limit 20
+$ profiler-cli zoom push ts-6,ts-7
+$ profiler-cli thread samples --limit 20
 
 # Check what's happening in the Renderer thread during that time
-$ pq thread samples --thread t-26 --limit 20
+$ profiler-cli thread samples --thread t-26 --limit 20
 
 # Make thread selection sticky and investigate further
-$ pq thread select t-26
-$ pq thread samples
+$ profiler-cli thread select t-26
+$ profiler-cli thread samples
 
 # Done with spike
-$ pq zoom pop
+$ profiler-cli zoom pop
 ```
 
 ### Scenario 2: Eliminating Allocator Noise
 
 ```bash
 # Call tree shows allocator noise
-$ pq thread functions --search malloc
+$ profiler-cli thread functions --search malloc
 # → f-142. libmalloc!malloc_zone_malloc - self: 8.2%
 
 # Try merging ephemerally first
-$ pq thread samples --merge f-142,f-143 --limit 30
+$ profiler-cli thread samples --merge f-142,f-143 --limit 30
 # Better! See actual work
 
 # Make it sticky
-$ pq filter push --merge f-142,f-143
-$ pq thread samples
+$ profiler-cli filter push --merge f-142,f-143
+$ profiler-cli thread samples
 # Clean call tree across all subsequent commands
 
 # Remove when done
-$ pq filter clear
+$ profiler-cli filter clear
 ```
 
 ### Scenario 3: Analyzing Time in a Specific Function
 
 ```bash
 # Find an expensive function
-$ pq thread functions --search PresentImpl
+$ profiler-cli thread functions --search PresentImpl
 # → f-500. XUL!CDXGISwapChain::PresentImpl - self: 16.4%
 
 # Ephemeral: see the subtree rooted at it
-$ pq thread samples --root-at f-500 --limit 30
+$ profiler-cli thread samples --root-at f-500 --limit 30
 
 # Sticky: focus all analysis on samples containing it
-$ pq filter push --includes-function f-500
-$ pq filter push --root-at f-500
-$ pq thread samples
-$ pq thread functions
+$ profiler-cli filter push --includes-function f-500
+$ profiler-cli filter push --root-at f-500
+$ profiler-cli thread samples
+$ profiler-cli thread functions
 
 # Clear when done
-$ pq filter clear
+$ profiler-cli filter clear
 ```
 
 ### Scenario 4: Cross-Thread Causality
 
 ```bash
 # Look at main thread markers
-$ pq thread select t-0
-$ pq marker info m-158
+$ profiler-cli thread select t-0
+$ profiler-cli marker info m-158
 # WindowProc WM_PAINT at ... (33.52ms)
 
 # Zoom to that marker
-$ pq zoom push m-158
+$ profiler-cli zoom push m-158
 
 # See what the Renderer thread was doing during the same window
-$ pq thread samples --thread t-26 --limit 20
+$ profiler-cli thread samples --thread t-26 --limit 20
 
 # Make it sticky and drill further
-$ pq thread select t-26
-$ pq filter push --during-marker --search Paint
-$ pq thread samples
+$ profiler-cli thread select t-26
+$ profiler-cli filter push --during-marker --search Paint
+$ profiler-cli thread samples
 # Now only see Renderer work that happened during Paint markers
-$ pq filter clear
+$ profiler-cli filter clear
 
-$ pq zoom pop
+$ profiler-cli zoom pop
 ```
 
 ---
@@ -404,7 +404,7 @@ New `FilterSamplesType` values in `src/types/transforms.ts` / `src/profile-logic
 - **`ProfileQuerier`** — `filterPush/Pop/List/Clear` for sticky filters; `_withEphemeralFilters()` for one-shot use; filter state in `getStatus()`
 - Sticky filters live in the Redux transform stack and are automatically applied by all analysis commands via `getFilteredThread()`
 - Ephemeral filters are pushed on top of sticky ones for the duration of one call, then popped
-- `outside-marker`, `function-include`, `stack-prefix`, `stack-suffix` are pq-only and not URL-serializable
+- `outside-marker`, `function-include`, `stack-prefix`, `stack-suffix` are profiler-cli-only and not URL-serializable
 
 ---
 
@@ -417,11 +417,11 @@ New `FilterSamplesType` values in `src/types/transforms.ts` / `src/profile-logic
 Function handles themselves are global (index into `profile.shared.funcTable`), so `f-142` means the same function regardless of which thread's filter stack it is pushed onto.
 
 ```bash
-pq thread select t-0
-pq filter push --includes-function f-142  # on t-0's transform stack
+profiler-cli thread select t-0
+profiler-cli filter push --includes-function f-142  # on t-0's transform stack
 
-pq thread select t-26
-pq filter list                            # t-26's stack (empty — independent from t-0)
+profiler-cli thread select t-26
+profiler-cli filter list                            # t-26's stack (empty — independent from t-0)
 ```
 
 ### Filter Application Order
@@ -431,15 +431,15 @@ as transformed by all previous filters, the order determines the semantics:
 
 ```bash
 # Root-at first, then include-prefix: the prefix check runs on re-rooted stacks
-pq filter push --root-at f-100
-pq filter push --includes-prefix f-100
+profiler-cli filter push --root-at f-100
+profiler-cli filter push --includes-prefix f-100
 
 # Merge first, then include: only samples where f-142 appears AFTER merging allocators
-pq filter push --merge f-300,f-301
-pq filter push --includes-function f-142
+profiler-cli filter push --merge f-300,f-301
+profiler-cli filter push --includes-function f-142
 ```
 
-### Actual `pq status` Output Format
+### Actual `profiler-cli status` Output Format
 
 ```
 Session Status:
@@ -471,7 +471,7 @@ Filter type labels in output match the `SampleFilterSpec.type` field:
 
 ## Summary
 
-This proposal creates a consistent, composable system for managing analysis state in pq:
+This proposal creates a consistent, composable system for managing analysis state in profiler-cli:
 
 - **Ephemeral filters** via flags on any thread analysis command — not persisted ✅
 - **Sticky filters** via `filter push/pop/clear` — persists across commands ✅

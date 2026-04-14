@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Client for communicating with the pq daemon.
+ * Client for communicating with the profiler-cli daemon.
  */
 
 import * as net from 'net';
@@ -135,7 +135,7 @@ async function sendRawMessage(
   const resolvedSessionId = sessionId || getCurrentSessionId(sessionDir);
 
   if (!resolvedSessionId) {
-    throw new Error('No active session. Run "pq load <PATH>" first.');
+    throw new Error('No active session. Run "profiler-cli load <PATH>" first.');
   }
 
   // Validate the session
@@ -162,7 +162,7 @@ async function sendRawMessage(
         : 'The daemon may still be running; stop it before reusing this session id.';
 
     throw new Error(
-      `Session ${resolvedSessionId} was built with a different version (daemon: ${metadata.buildHash}, client: ${BUILD_HASH}). ${shutdownMessage} Please run "pq load <PATH>" again.`
+      `Session ${resolvedSessionId} was built with a different version (daemon: ${metadata.buildHash}, client: ${BUILD_HASH}). ${shutdownMessage} Please run "profiler-cli load <PATH>" again.`
     );
   }
 
@@ -264,7 +264,7 @@ export async function startNewDaemon(
     }
   }
 
-  // Get the path to the current script (pq.js)
+  // Get the path to the current script (profiler-cli.js)
   const scriptPath = process.argv[1];
 
   // Spawn the daemon process (detached from parent)
@@ -274,7 +274,7 @@ export async function startNewDaemon(
     {
       detached: true,
       stdio: 'ignore', // Don't pipe stdin/stdout/stderr
-      env: { ...process.env, PQ_SESSION_DIR: sessionDir }, // Pass sessionDir via env
+      env: { ...process.env, PROFILER_CLI_SESSION_DIR: sessionDir }, // Pass sessionDir via env
     }
   );
 

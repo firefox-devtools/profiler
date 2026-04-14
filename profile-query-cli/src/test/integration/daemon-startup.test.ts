@@ -12,14 +12,14 @@ import { join } from 'path';
 import {
   createTestContext,
   cleanupTestContext,
-  pq,
-  pqFail,
-  type PqTestContext,
+  cli,
+  cliFail,
+  type CliTestContext,
 } from './utils';
 import { getSocketPath } from '../../session';
 
 describe('daemon startup (two-phase)', () => {
-  let ctx: PqTestContext;
+  let ctx: CliTestContext;
 
   beforeEach(async () => {
     ctx = await createTestContext();
@@ -32,7 +32,7 @@ describe('daemon startup (two-phase)', () => {
   it('daemon creates socket and metadata before loading profile', async () => {
     const startTime = Date.now();
 
-    const result = await pq(ctx, [
+    const result = await cli(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
     ]);
@@ -68,7 +68,7 @@ describe('daemon startup (two-phase)', () => {
     const { writeFile } = await import('fs/promises');
     await writeFile(invalidProfile, '{ invalid json content', 'utf-8');
 
-    const result = await pqFail(ctx, ['load', invalidProfile]);
+    const result = await cliFail(ctx, ['load', invalidProfile]);
 
     expect(result.exitCode).not.toBe(0);
     const output = String(result.stdout || '') + String(result.stderr || '');
@@ -80,7 +80,7 @@ describe('daemon startup (two-phase)', () => {
     // We can't easily force a daemon startup failure, but we can
     // verify the timeout is reasonable by checking it doesn't wait forever
 
-    const result = await pqFail(ctx, ['load', '/nonexistent/file.json']);
+    const result = await cliFail(ctx, ['load', '/nonexistent/file.json']);
 
     // Should fail quickly (Phase 1: 500ms for daemon, Phase 2: fails on validation)
     expect(result.exitCode).not.toBe(0);
@@ -88,16 +88,16 @@ describe('daemon startup (two-phase)', () => {
 
   it('load blocks until profile is fully loaded', async () => {
     // Start loading
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     // If load returned, profile should be ready immediately
-    const result = await pq(ctx, ['profile', 'info']);
+    const result = await cli(ctx, ['profile', 'info']);
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('This profile contains');
   });
 
   it('validates session before returning (checks process + socket)', async () => {
-    const result = await pq(ctx, [
+    const result = await cli(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
     ]);

@@ -13,8 +13,8 @@
  *
  * Instead, daemon functionality is tested through integration tests in bash
  * scripts:
- * - bin/pq-test: Basic daemon lifecycle (start, connect, stop)
- * - bin/pq-test-multi: Multiple concurrent daemon sessions
+ * - bin/profiler-cli-test: Basic daemon lifecycle (start, connect, stop)
+ * - bin/profiler-cli-test-multi: Multiple concurrent daemon sessions
  *
  * Do not add unit tests here. If you need to test pure utility functions from
  * daemon.ts, extract them to a separate module and test that module instead.

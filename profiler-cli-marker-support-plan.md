@@ -1,8 +1,8 @@
-# Marker Support Implementation Plan for `pq` CLI
+# Marker Support Implementation Plan for `profiler-cli` CLI
 
 ## Overview
 
-This document outlines the implementation plan for adding comprehensive marker support to the profile-query CLI (`pq`). Markers provide ~50% of profiling insight (Layout/Reflow, JavaScript names, IPC messages, GPU boundaries) and are a critical missing feature.
+This document outlines the implementation plan for adding comprehensive marker support to the profile-query CLI (`profiler-cli`). Markers provide ~50% of profiling insight (Layout/Reflow, JavaScript names, IPC messages, GPU boundaries) and are a critical missing feature.
 
 ## Background
 
@@ -57,12 +57,12 @@ We cannot naively print all markers and their fields to the CLI because:
 **Commands:**
 
 ```bash
-pq thread markers                     # List marker groups with counts
-pq thread markers --summary           # Show aggregate statistics
-pq marker info <marker-handle>        # Show details for a specific marker
+profiler-cli thread markers                     # List marker groups with counts
+profiler-cli thread markers --summary           # Show aggregate statistics
+profiler-cli marker info <marker-handle>        # Show details for a specific marker
 ```
 
-**`pq thread markers` output:**
+**`profiler-cli thread markers` output:**
 
 ```
 Markers in thread t-93 (Renderer) — 14,523 markers
@@ -92,7 +92,7 @@ Rate Analysis (markers/second):
 Use --type <name> to filter, --details for per-marker info, or m-<N> handles to inspect individual markers.
 ```
 
-**`pq thread markers --summary` output:**
+**`profiler-cli thread markers --summary` output:**
 
 ```
 Marker Summary for thread t-93 (Renderer)
@@ -199,25 +199,25 @@ Phase 2 provides both text-based search and duration-based filtering:
 **Commands:**
 
 ```bash
-pq thread markers --search DOMEvent                        # Search for "DOMEvent" markers
-pq thread markers --search Stack                           # Search for markers with "Stack" in name
-pq thread markers --category Graphics                      # Filter by Graphics category
-pq thread markers --category GC                            # Partial match: matches "GC / CC"
-pq thread markers --has-stack                              # Only markers with stack traces
-pq thread markers --min-duration 10                        # Markers with duration >= 10ms
-pq thread markers --max-duration 100                       # Markers with duration <= 100ms
-pq thread markers --limit 1000                             # Limit to first 1000 markers
-pq thread markers --min-duration 5 --max-duration 50       # Markers between 5-50ms
-pq thread markers --category Other --min-duration 10       # Combined category and duration
-pq thread markers --has-stack --category Layout --min-duration 1  # All filters combined
-pq thread markers --category Layout --limit 50             # Limit after filtering
-pq thread markers --search Reflow --min-duration 5         # Combined search and duration
+profiler-cli thread markers --search DOMEvent                        # Search for "DOMEvent" markers
+profiler-cli thread markers --search Stack                           # Search for markers with "Stack" in name
+profiler-cli thread markers --category Graphics                      # Filter by Graphics category
+profiler-cli thread markers --category GC                            # Partial match: matches "GC / CC"
+profiler-cli thread markers --has-stack                              # Only markers with stack traces
+profiler-cli thread markers --min-duration 10                        # Markers with duration >= 10ms
+profiler-cli thread markers --max-duration 100                       # Markers with duration <= 100ms
+profiler-cli thread markers --limit 1000                             # Limit to first 1000 markers
+profiler-cli thread markers --min-duration 5 --max-duration 50       # Markers between 5-50ms
+profiler-cli thread markers --category Other --min-duration 10       # Combined category and duration
+profiler-cli thread markers --has-stack --category Layout --min-duration 1  # All filters combined
+profiler-cli thread markers --category Layout --limit 50             # Limit after filtering
+profiler-cli thread markers --search Reflow --min-duration 5         # Combined search and duration
 ```
 
 **Output example:**
 
 ```bash
-$ pq thread markers --search DOMEvent
+$ profiler-cli thread markers --search DOMEvent
 
 Markers in thread t-0 (Parent Process) — 2849 markers (filtered from 258060)
 
@@ -313,17 +313,17 @@ Phase 3 provides multi-level marker grouping with both manual and automatic grou
 **Commands:**
 
 ```bash
-pq thread markers --group-by type,name             # Group by type, then name
-pq thread markers --group-by type,field:eventType  # Group by type, then eventType field
-pq thread markers --group-by category,type         # Group by category, then type
-pq thread markers --auto-group                     # Automatic smart grouping
-pq thread markers --search DOMEvent --group-by field:eventType  # Filter + custom grouping
+profiler-cli thread markers --group-by type,name             # Group by type, then name
+profiler-cli thread markers --group-by type,field:eventType  # Group by type, then eventType field
+profiler-cli thread markers --group-by category,type         # Group by category, then type
+profiler-cli thread markers --auto-group                     # Automatic smart grouping
+profiler-cli thread markers --search DOMEvent --group-by field:eventType  # Filter + custom grouping
 ```
 
 **Output example:**
 
 ```bash
-$ pq thread markers --search DOMEvent --auto-group --limit 200
+$ profiler-cli thread markers --search DOMEvent --auto-group --limit 200
 
 Markers in thread t-0 (Parent Process) — 200 markers (filtered from 258060)
 
@@ -359,14 +359,14 @@ Phase 4 provides comprehensive marker inspection with detailed field display and
 **Commands:**
 
 ```bash
-pq marker info <handle>           # Full marker details with stack preview
-pq marker stack <handle>          # Complete stack trace (all frames)
+profiler-cli marker info <handle>           # Full marker details with stack preview
+profiler-cli marker stack <handle>          # Complete stack trace (all frames)
 ```
 
 **Actual output:**
 
 ```bash
-$ pq thread markers --has-stack --limit 3
+$ profiler-cli thread markers --has-stack --limit 3
 
 Markers in thread t-0 (Parent Process) — 3 markers (filtered from 258060)
 
@@ -378,7 +378,7 @@ By Type (top 15):
   FlowMarker                    1 markers  (instant)
     Examples: m-3
 
-$ pq marker info m-1
+$ profiler-cli marker info m-1
 
 Marker m-1: NotifyObservers - NotifyObservers
 
@@ -399,9 +399,9 @@ Stack trace:
   [20] xul.dll!js::InternalCallOrConstruct(JSContext*, JS::CallArgs const&, js::)
   ... (101 more frames)
 
-Use 'pq marker stack m-1' for the full stack trace.
+Use 'profiler-cli marker stack m-1' for the full stack trace.
 
-$ pq marker stack m-1
+$ profiler-cli marker stack m-1
 
 Stack trace for marker m-1: NotifyObservers
 
@@ -418,8 +418,8 @@ Captured at: 1h2m
 **Implementation details:**
 
 - **Marker handles visible**: Top 3 example markers shown for each type with handles and durations
-- **`pq marker info`**: Shows full marker details with stack trace preview (first 20 frames)
-- **`pq marker stack`**: Displays complete stack traces without frame limit
+- **`profiler-cli marker info`**: Shows full marker details with stack trace preview (first 20 frames)
+- **`profiler-cli marker stack`**: Displays complete stack traces without frame limit
 - **Stack formatting**: Reuses formatFunctionNameWithLibrary() for consistent display with library names
 - **MarkerSchema integration**: Fields formatted using existing MarkerSchema formatters from web UI
 
@@ -435,7 +435,7 @@ Captured at: 1h2m
 
 **Future enhancements (not yet implemented):**
 
-- [ ] `pq marker expand <handle>` - Show full field values for truncated fields
+- [ ] `profiler-cli marker expand <handle>` - Show full field values for truncated fields
 - [ ] `--format json` option for machine-readable output
 
 ### Phase 5: Temporal Visualization (ASCII Charts)
@@ -445,15 +445,15 @@ Captured at: 1h2m
 **Commands:**
 
 ```bash
-pq thread markers --timeline                       # ASCII timeline
-pq thread markers --type Reflow --timeline         # Timeline for specific type
-pq thread markers --histogram                      # Duration histogram
+profiler-cli thread markers --timeline                       # ASCII timeline
+profiler-cli thread markers --type Reflow --timeline         # Timeline for specific type
+profiler-cli thread markers --histogram                      # Duration histogram
 ```
 
 **Output example:**
 
 ```bash
-$ pq thread markers --type Reflow --timeline
+$ profiler-cli thread markers --type Reflow --timeline
 
 Reflow markers timeline (thread t-93, 2.145s - 15.891s, 13.746s total)
 
@@ -506,16 +506,16 @@ Peak activity: 8.123s - 8.456s (23 markers in 333ms window)
 **Commands:**
 
 ```bash
-pq thread markers --rate-analysis                  # Analyze marker rate patterns
-pq thread markers --type Network --waterfall       # Network waterfall chart
-pq thread markers --overlap-analysis               # Find overlapping markers
-pq thread markers --critical-path                  # Identify critical path markers
+profiler-cli thread markers --rate-analysis                  # Analyze marker rate patterns
+profiler-cli thread markers --type Network --waterfall       # Network waterfall chart
+profiler-cli thread markers --overlap-analysis               # Find overlapping markers
+profiler-cli thread markers --critical-path                  # Identify critical path markers
 ```
 
 **Rate Analysis Output:**
 
 ```bash
-$ pq thread markers --type DOMEvent --rate-analysis
+$ profiler-cli thread markers --type DOMEvent --rate-analysis
 
 Rate analysis for DOMEvent markers (thread t-93)
 
@@ -544,7 +544,7 @@ Idle periods (>1000ms without markers):
 **Network Waterfall Output:**
 
 ```bash
-$ pq thread markers --type Network --waterfall
+$ profiler-cli thread markers --type Network --waterfall
 
 Network waterfall (thread t-93, 50 requests)
 
@@ -747,7 +747,7 @@ interface MarkerListOptions {
 ## Open Questions / Design Decisions
 
 1. **Handle Persistence**: Should marker handles (m-N) be stable across sessions, or ephemeral?
-   - **Decision**: Ephemeral within session (like function handles), reset on each `pq load`
+   - **Decision**: Ephemeral within session (like function handles), reset on each `profiler-cli load`
 
 2. **Default Grouping**: What should be the default grouping strategy?
    - **Decision**: Group by type first, with option to drill down

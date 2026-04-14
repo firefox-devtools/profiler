@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * `pq session` command.
+ * `profiler-cli session` command.
  */
 
 import type { Command } from 'commander';
@@ -63,7 +63,7 @@ export function registerSessionCommand(
       }
 
       if (!wasExplicit('session', 'list')) {
-        console.log('\nOther subcommands: pq session use <id>');
+        console.log('\nOther subcommands: profiler-cli session use <id>');
       }
     });
 

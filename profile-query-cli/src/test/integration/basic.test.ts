@@ -4,7 +4,6 @@
 
 /**
  * Basic CLI functionality tests.
- * Migrated from bin/pq-test bash script.
  */
 
 import { readdir, readFile, writeFile } from 'fs/promises';
@@ -12,13 +11,13 @@ import { join } from 'path';
 import {
   createTestContext,
   cleanupTestContext,
-  pq,
-  pqFail,
-  type PqTestContext,
+  cli,
+  cliFail,
+  type CliTestContext,
 } from './utils';
 
-describe('pq basic functionality', () => {
-  let ctx: PqTestContext;
+describe('profiler-cli basic functionality', () => {
+  let ctx: CliTestContext;
 
   beforeEach(async () => {
     ctx = await createTestContext();
@@ -29,7 +28,7 @@ describe('pq basic functionality', () => {
   });
 
   it('load creates a session', async () => {
-    const result = await pq(ctx, [
+    const result = await cli(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
     ]);
@@ -56,18 +55,18 @@ describe('pq basic functionality', () => {
   });
 
   it('profile info works after load', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
-    const result = await pq(ctx, ['profile', 'info']);
+    const result = await cli(ctx, ['profile', 'info']);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('This profile contains');
   });
 
   it('thread select works immediately after load', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
-    const result = await pq(ctx, ['thread', 'select', 't-0']);
+    const result = await cli(ctx, ['thread', 'select', 't-0']);
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Selected thread');
@@ -75,8 +74,8 @@ describe('pq basic functionality', () => {
   });
 
   it('stop cleans up session', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-    await pq(ctx, ['stop']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['stop']);
 
     // Verify socket is removed (the main cleanup requirement)
     const files = await readdir(ctx.sessionDir);
@@ -84,7 +83,7 @@ describe('pq basic functionality', () => {
   });
 
   it('load fails for missing file', async () => {
-    const result = await pqFail(ctx, ['load', '/nonexistent/file.json']);
+    const result = await cliFail(ctx, ['load', '/nonexistent/file.json']);
 
     expect(result.exitCode).not.toBe(0);
     const output = String(result.stdout || '') + String(result.stderr || '');
@@ -92,7 +91,7 @@ describe('pq basic functionality', () => {
   });
 
   it('profile info fails without active session', async () => {
-    const result = await pqFail(ctx, ['profile', 'info']);
+    const result = await cliFail(ctx, ['profile', 'info']);
 
     expect(result.exitCode).not.toBe(0);
     const output = String(result.stdout || '') + String(result.stderr || '');
@@ -100,22 +99,22 @@ describe('pq basic functionality', () => {
   });
 
   it('multiple profile info calls work (daemon stays running)', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
     // First call
-    const result1 = await pq(ctx, ['profile', 'info']);
+    const result1 = await cli(ctx, ['profile', 'info']);
     expect(result1.exitCode).toBe(0);
 
     // Second call - should still work (daemon running)
-    const result2 = await pq(ctx, ['profile', 'info']);
+    const result2 = await cli(ctx, ['profile', 'info']);
     expect(result2.exitCode).toBe(0);
     expect(result2.stdout).toEqual(result1.stdout);
   });
 
   it('numeric zero marker filters are preserved instead of being ignored', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
-    const minDurationResult = await pq(ctx, [
+    const minDurationResult = await cli(ctx, [
       'thread',
       'markers',
       '--json',
@@ -124,7 +123,7 @@ describe('pq basic functionality', () => {
     ]);
     expect(minDurationResult.stdout).toContain('"minDuration": 0');
 
-    const maxDurationResult = await pq(ctx, [
+    const maxDurationResult = await cli(ctx, [
       'thread',
       'markers',
       '--json',
@@ -135,9 +134,9 @@ describe('pq basic functionality', () => {
   });
 
   it('numeric zero function filters are preserved instead of being ignored', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
-    const result = await pq(ctx, [
+    const result = await cli(ctx, [
       'thread',
       'functions',
       '--json',
@@ -149,12 +148,12 @@ describe('pq basic functionality', () => {
   });
 
   it('sticky filters are isolated per thread and reported in status', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-    await pq(ctx, ['thread', 'select', 't-0']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['thread', 'select', 't-0']);
 
-    await pq(ctx, ['filter', 'push', '--merge', 'f-1']);
+    await cli(ctx, ['filter', 'push', '--merge', 'f-1']);
 
-    const filterListResult = await pq(ctx, ['filter', 'list', '--json']);
+    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
     const filterList = JSON.parse(filterListResult.stdout) as {
       type: string;
       threadHandle: string;
@@ -171,7 +170,7 @@ describe('pq basic functionality', () => {
       funcIndexes: [1],
     });
 
-    const statusResult = await pq(ctx, ['status', '--json']);
+    const statusResult = await cli(ctx, ['status', '--json']);
     const status = JSON.parse(statusResult.stdout) as {
       type: string;
       filterStacks: Array<{
@@ -195,9 +194,9 @@ describe('pq basic functionality', () => {
       })
     );
 
-    await pq(ctx, ['thread', 'select', 't-1']);
+    await cli(ctx, ['thread', 'select', 't-1']);
 
-    const otherThreadFilterListResult = await pq(ctx, [
+    const otherThreadFilterListResult = await cli(ctx, [
       'filter',
       'list',
       '--json',
@@ -212,7 +211,7 @@ describe('pq basic functionality', () => {
     expect(otherThreadFilterList.threadHandle).toBe('t-1');
     expect(otherThreadFilterList.filters).toHaveLength(0);
 
-    const explicitThreadFilterListResult = await pq(ctx, [
+    const explicitThreadFilterListResult = await cli(ctx, [
       'filter',
       'list',
       '--thread',
@@ -237,9 +236,9 @@ describe('pq basic functionality', () => {
   });
 
   it('ephemeral sample filters do not persist into session state', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
-    const samplesResult = await pq(ctx, [
+    const samplesResult = await cli(ctx, [
       'thread',
       'samples',
       '--json',
@@ -258,13 +257,13 @@ describe('pq basic functionality', () => {
     ]);
     expect(samples.activeFilters).toBeUndefined();
 
-    const filterListResult = await pq(ctx, ['filter', 'list', '--json']);
+    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
     const filterList = JSON.parse(filterListResult.stdout) as {
       filters: unknown[];
     };
     expect(filterList.filters).toHaveLength(0);
 
-    const statusResult = await pq(ctx, ['status', '--json']);
+    const statusResult = await cli(ctx, ['status', '--json']);
     const status = JSON.parse(statusResult.stdout) as {
       filterStacks: unknown[];
     };
@@ -272,9 +271,9 @@ describe('pq basic functionality', () => {
   });
 
   it('max-lines=0 is rejected instead of silently falling back to the default', async () => {
-    await pq(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
-    const result = await pqFail(ctx, [
+    const result = await cliFail(ctx, [
       'thread',
       'samples-top-down',
       '--max-lines',
@@ -287,7 +286,7 @@ describe('pq basic functionality', () => {
   });
 
   it('build hash mismatch stops the daemon before cleaning up the session', async () => {
-    const loadResult = await pq(ctx, [
+    const loadResult = await cli(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
     ]);
@@ -308,7 +307,7 @@ describe('pq basic functionality', () => {
       JSON.stringify({ ...metadata, buildHash: 'intentionally-mismatched' })
     );
 
-    const result = await pqFail(ctx, ['profile', 'info']);
+    const result = await cliFail(ctx, ['profile', 'info']);
     const output = String(result.stdout || '') + String(result.stderr || '');
     expect(output).toContain('was built with a different version');
     expect(output).toContain('The daemon is no longer running');

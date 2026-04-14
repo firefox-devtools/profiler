@@ -11,7 +11,7 @@ import { mkdtemp, readdir, readFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-const PQ_BIN = './profile-query-cli/dist/pq.js';
+const CLI_BIN = './profile-query-cli/dist/profiler-cli.js';
 
 /**
  * Simple command execution result.
@@ -82,9 +82,9 @@ function exec(
 }
 
 /**
- * Context for a pq test session.
+ * Context for a profiler-cli test session.
  */
-export interface PqTestContext {
+export interface CliTestContext {
   sessionDir: string;
   env: Record<string, string>;
 }
@@ -93,11 +93,11 @@ export interface PqTestContext {
  * Create a test context with isolated session directory.
  * Each test should call this in beforeEach() for maximum isolation.
  */
-export async function createTestContext(): Promise<PqTestContext> {
-  const sessionDir = await mkdtemp(join(tmpdir(), 'pq-test-'));
+export async function createTestContext(): Promise<CliTestContext> {
+  const sessionDir = await mkdtemp(join(tmpdir(), 'profiler-cli-test-'));
   return {
     sessionDir,
-    env: { PQ_SESSION_DIR: sessionDir },
+    env: { PROFILER_CLI_SESSION_DIR: sessionDir },
   };
 }
 
@@ -136,23 +136,23 @@ async function killSessionDaemons(sessionDir: string): Promise<void> {
  * Clean up test context.
  * Each test should call this in afterEach() to remove temp directory.
  */
-export async function cleanupTestContext(ctx: PqTestContext): Promise<void> {
+export async function cleanupTestContext(ctx: CliTestContext): Promise<void> {
   await killSessionDaemons(ctx.sessionDir);
   await rm(ctx.sessionDir, { recursive: true, force: true });
 }
 
 /**
- * Run a pq command.
+ * Run a profiler-cli command.
  */
-export async function runPq(
-  ctx: PqTestContext,
+export async function runCli(
+  ctx: CliTestContext,
   args: string[],
   options?: {
     reject?: boolean;
     timeout?: number;
   }
 ): Promise<CommandResult> {
-  const result = await exec(process.execPath, [PQ_BIN, ...args], {
+  const result = await exec(process.execPath, [CLI_BIN, ...args], {
     env: ctx.env,
     timeout: options?.timeout ?? 30000,
   });
@@ -168,24 +168,24 @@ export async function runPq(
 }
 
 /**
- * Run a pq command and expect it to succeed.
+ * Run a profiler-cli command and expect it to succeed.
  */
-export async function pq(
-  ctx: PqTestContext,
+export async function cli(
+  ctx: CliTestContext,
   args: string[]
 ): Promise<CommandResult> {
-  return runPq(ctx, args);
+  return runCli(ctx, args);
 }
 
 /**
- * Run a pq command and expect it to fail.
+ * Run a profiler-cli command and expect it to fail.
  */
-export async function pqFail(
-  ctx: PqTestContext,
+export async function cliFail(
+  ctx: CliTestContext,
   args: string[]
 ): Promise<CommandResult> {
   try {
-    await runPq(ctx, args);
+    await runCli(ctx, args);
     throw new Error('Expected command to fail but it succeeded');
   } catch (error) {
     if (error instanceof Error && error.message.includes('Expected command')) {

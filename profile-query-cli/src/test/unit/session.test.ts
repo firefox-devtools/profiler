@@ -7,8 +7,8 @@
  *
  * These tests cover only the session.ts utility functions.
  * Integration tests that spawn daemons and test IPC are in bash scripts:
- * - bin/pq-test: Basic daemon lifecycle
- * - bin/pq-test-multi: Concurrent sessions
+ * - bin/profiler-cli-test: Basic daemon lifecycle
+ * - bin/profiler-cli-test-multi: Concurrent sessions
  */
 
 import * as fs from 'fs';
@@ -46,7 +46,7 @@ describe('profile-query-cli session management', function () {
 
   beforeEach(function () {
     // Create a unique temp directory for each test
-    testSessionDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pq-test-'));
+    testSessionDir = fs.mkdtempSync(path.join(os.tmpdir(), 'profiler-cli-test-'));
   });
 
   afterEach(function () {
@@ -116,15 +116,15 @@ describe('profile-query-cli session management', function () {
         configurable: true,
       });
 
-      const firstSocketPath = getSocketPath('C:\\pq\\alpha', 'test123');
-      const secondSocketPath = getSocketPath('C:\\pq\\beta', 'test123');
-      const thirdSocketPath = getSocketPath('C:\\PQ\\ALPHA', 'test123');
+      const firstSocketPath = getSocketPath('C:\\profiler-cli\\alpha', 'test123');
+      const secondSocketPath = getSocketPath('C:\\profiler-cli\\beta', 'test123');
+      const thirdSocketPath = getSocketPath('C:\\PROFILER-CLI\\ALPHA', 'test123');
 
       expect(firstSocketPath).toMatch(
-        /^\\\\\.\\pipe\\pq-[0-9a-f]{12}-test123$/
+        /^\\\\\.\\pipe\\profiler-cli-[0-9a-f]{12}-test123$/
       );
       expect(secondSocketPath).toMatch(
-        /^\\\\\.\\pipe\\pq-[0-9a-f]{12}-test123$/
+        /^\\\\\.\\pipe\\profiler-cli-[0-9a-f]{12}-test123$/
       );
       expect(firstSocketPath).not.toBe(secondSocketPath);
       expect(firstSocketPath).toBe(thirdSocketPath);
@@ -136,9 +136,9 @@ describe('profile-query-cli session management', function () {
     });
 
     it('generates a stable namespace from the session directory', function () {
-      const firstNamespace = getSessionDirNamespace('C:\\pq\\alpha');
-      const secondNamespace = getSessionDirNamespace('C:\\pq\\beta');
-      const thirdNamespace = getSessionDirNamespace('C:\\PQ\\ALPHA');
+      const firstNamespace = getSessionDirNamespace('C:\\profiler-cli\\alpha');
+      const secondNamespace = getSessionDirNamespace('C:\\profiler-cli\\beta');
+      const thirdNamespace = getSessionDirNamespace('C:\\PROFILER-CLI\\ALPHA');
 
       expect(firstNamespace).toMatch(/^[0-9a-f]{12}$/);
       expect(firstNamespace).not.toBe(secondNamespace);

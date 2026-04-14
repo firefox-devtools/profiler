@@ -35,7 +35,7 @@ import type { ImplementationFilter } from './actions';
  *   (encoded as a single funcIndex).
  *
  * Note: 'outside-marker', 'function-include', 'stack-prefix', and 'stack-suffix' are used
- * by the pq CLI tool only and are not serialized to profile URLs.
+ * by the profiler-cli tool only and are not serialized to profile URLs.
  */
 export type FilterSamplesType =
   | 'marker-search'

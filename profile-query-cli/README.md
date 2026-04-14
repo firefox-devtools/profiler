@@ -1,4 +1,4 @@
-# Profile Query CLI (`pq`)
+# Profile Query CLI (`profiler-cli`)
 
 A command-line interface for querying Firefox Profiler profiles with persistent daemon sessions.
 
@@ -11,57 +11,57 @@ A command-line interface for querying Firefox Profiler profiles with persistent 
 
 **IPC:** Unix domain sockets (named pipes on Windows) with line-delimited JSON messages
 
-**Session storage:** `~/.pq/` (or `$PQ_SESSION_DIR` for development)
+**Session storage:** `~/.profiler-cli/` (or `$PROFILER_CLI_SESSION_DIR` for development)
 
 `ProfileQuerier` lives in `src/profile-query/` in the main profiler repo and is shared with the web app. The CLI daemon is just an IPC wrapper around it — query logic belongs in `src/profile-query/`, not in `daemon.ts`.
 
 ## Commands
 
-**Note:** On machines with `pq` in PATH, you can use `pq` instead of `./dist/pq.js` for shorter commands.
+**Note:** On machines with `profiler-cli` in PATH, you can use `profiler-cli` instead of `./dist/profiler-cli.js` for shorter commands.
 
 ```bash
 # Build the CLI
 yarn build-profile-query-cli
 
 # Basic usage
-pq load <PATH>                   # Start daemon and load profile (PATH can be a file or http/https URL)
-pq profile info                  # Print profile summary [--all] [--search <term>]
-pq thread info                   # Print detailed thread information
-pq thread select <handle>        # Select a thread (e.g., t-0, t-1)
-pq thread samples                # Show hot functions list for current thread
-pq thread samples-top-down       # Show top-down call tree (where CPU time is spent)
-pq thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
-pq thread markers                # List markers with aggregated statistics
-pq thread functions              # List all functions with CPU percentages
-pq marker info <handle>          # Show detailed marker information (e.g., m-1234)
-pq marker stack <handle>         # Show full stack trace for a marker
-pq function expand <handle>      # Show full untruncated function name (e.g., f-123)
-pq function info <handle>        # Show detailed function information
-pq zoom push <range>             # Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
-pq zoom pop                      # Pop the most recent zoom range
-pq zoom clear                    # Clear all zoom ranges (return to full profile)
-pq filter push <filter-flag>     # Push a sticky sample filter (see filter flags below)
-pq filter pop [N]                # Pop the last N filters (default: 1)
-pq filter list                   # List active filters for current thread
-pq filter clear                  # Remove all filters for current thread
-pq status                        # Show session status (selected thread, zoom ranges, filters)
-pq stop                          # Stop current daemon
-pq stop <id>                     # Stop a specific session
-pq stop --all                    # Stop all sessions
-pq session list                  # List all running daemon sessions (* marks current)
-pq session use <id>              # Switch the current session
+profiler-cli load <PATH>                   # Start daemon and load profile (PATH can be a file or http/https URL)
+profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
+profiler-cli thread info                   # Print detailed thread information
+profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
+profiler-cli thread samples                # Show hot functions list for current thread
+profiler-cli thread samples-top-down       # Show top-down call tree (where CPU time is spent)
+profiler-cli thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
+profiler-cli thread markers                # List markers with aggregated statistics
+profiler-cli thread functions              # List all functions with CPU percentages
+profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
+profiler-cli marker stack <handle>         # Show full stack trace for a marker
+profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
+profiler-cli function info <handle>        # Show detailed function information
+profiler-cli zoom push <range>             # Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
+profiler-cli zoom pop                      # Pop the most recent zoom range
+profiler-cli zoom clear                    # Clear all zoom ranges (return to full profile)
+profiler-cli filter push <filter-flag>     # Push a sticky sample filter (see filter flags below)
+profiler-cli filter pop [N]                # Pop the last N filters (default: 1)
+profiler-cli filter list                   # List active filters for current thread
+profiler-cli filter clear                  # Remove all filters for current thread
+profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
+profiler-cli stop                          # Stop current daemon
+profiler-cli stop <id>                     # Stop a specific session
+profiler-cli stop --all                    # Stop all sessions
+profiler-cli session list                  # List all running daemon sessions (* marks current)
+profiler-cli session use <id>              # Switch the current session
 
 # Multiple sessions
-pq load <PATH> --session <id>
-pq profile info --session <id>
+profiler-cli load <PATH> --session <id>
+profiler-cli profile info --session <id>
 
 # Thread selection
-pq thread select t-93            # Select thread t-93
-pq thread samples                # View samples for selected thread
-pq thread info --thread t-0      # View info for specific thread without selecting
+profiler-cli thread select t-93            # Select thread t-93
+profiler-cli thread samples                # View samples for selected thread
+profiler-cli thread info --thread t-0      # View info for specific thread without selecting
 ```
 
-Run `pq guide` for a detailed usage guide with patterns and tips. Run `pq --help` for the full options reference.
+Run `profiler-cli guide` for a detailed usage guide with patterns and tips. Run `profiler-cli --help` for the full options reference.
 
 ### Common options
 
@@ -119,8 +119,8 @@ This package uses a **bundled distribution approach**:
 
 - **Source code**: Lives in `profile-query-cli/src/` within the firefox-devtools/profiler monorepo
 - **Dependencies**: Defined in the root `package.json` (react, redux, protobufjs, etc.)
-- **Build process**: The CLI build writes a single ~640KB executable to `profile-query-cli/dist/pq.js` (~187KB gzipped) with zero runtime dependencies
-- **Published artifact**: `profile-query-cli/dist/pq.js` is published to npm as `@firefox-profiler/pq`
+- **Build process**: The CLI build writes a single ~640KB executable to `profile-query-cli/dist/profiler-cli.js` (~187KB gzipped) with zero runtime dependencies
+- **Published artifact**: `profile-query-cli/dist/profiler-cli.js` is published to npm as `@firefox-profiler/profiler-cli`
 - **Package.json**: Contains only npm metadata - it does NOT list dependencies since they're pre-bundled
 
 This means:
@@ -140,27 +140,27 @@ npm publish
 
 ## Session Management
 
-**Session directory:** `~/.pq/` or `$PQ_SESSION_DIR`
+**Session directory:** `~/.profiler-cli/` or `$PROFILER_CLI_SESSION_DIR`
 
 **Files per session:**
 
 ```
-~/.pq/
+~/.profiler-cli/
 ├── current                    # Symlink to current session socket
 ├── <session-id>.sock          # Unix domain socket for IPC (Unix only)
 ├── <session-id>.json          # Session metadata (PID, profile path, timestamps)
 └── <session-id>.log           # Daemon logs (kept for debugging)
 ```
 
-On Windows, IPC uses a named pipe (`\\.\pipe\pq-<session-id>`) instead of a `.sock` file.
+On Windows, IPC uses a named pipe (`\\.\pipe\profiler-cli-<session-id>`) instead of a `.sock` file.
 
 **Session metadata example:**
 
 ```json
 {
   "id": "abc123xyz",
-  "socketPath": "/Users/user/.pq/abc123xyz.sock", // or \\.\pipe\pq-abc123xyz on Windows
-  "logPath": "/Users/user/.pq/abc123xyz.log",
+  "socketPath": "/Users/user/.profiler-cli/abc123xyz.sock", // or \\.\pipe\profiler-cli-abc123xyz on Windows
+  "logPath": "/Users/user/.profiler-cli/abc123xyz.log",
   "pid": 12345,
   "profilePath": "/path/to/profile.json",
   "createdAt": "2025-10-31T10:00:00.000Z",
@@ -173,16 +173,16 @@ On Windows, IPC uses a named pipe (`\\.\pipe\pq-<session-id>`) instead of a `.so
 **Environment variable isolation:**
 
 ```bash
-export PQ_SESSION_DIR="./.pq-dev"  # Use local directory instead of ~/.pq
-pq load profile.json               # or: ./dist/pq.js load profile.json
+export PROFILER_CLI_SESSION_DIR="./.profiler-cli-dev"  # Use local directory instead of ~/.profiler-cli
+profiler-cli load profile.json               # or: ./dist/profiler-cli.js load profile.json
 ```
 
-All test scripts automatically set `PQ_SESSION_DIR="./.pq-dev"` to avoid polluting global state.
+All test scripts automatically set `PROFILER_CLI_SESSION_DIR="./.profiler-cli-dev"` to avoid polluting global state.
 
 **Build:**
 
 ```bash
-yarn build-profile-query-cli # Creates ./dist/pq.js
+yarn build-profile-query-cli # Creates ./dist/profiler-cli.js
 ```
 
 **Unit tests:**
@@ -264,11 +264,11 @@ These commands are parsed and routed but throw "unimplemented" in the daemon:
 - The banner also sets `globalThis.self = globalThis` for browser-oriented shared code
 - `__BUILD_HASH__` is injected at build time
 - `gecko-profiler-demangle` is left external to keep the CLI lean
-- Postbuild: `chmod +x dist/pq.js`
+- Postbuild: `chmod +x dist/profiler-cli.js`
 
 ## Adding New Commands
 
-To add a new command, you need to modify **5 files** (client.ts doesn't need changes as it generically forwards commands). The example below adds a hypothetical `pq allocation info` command.
+To add a new command, you need to modify **5 files** (client.ts doesn't need changes as it generically forwards commands). The example below adds a hypothetical `profiler-cli allocation info` command.
 
 ### Step 1: Define types in `protocol.ts`
 

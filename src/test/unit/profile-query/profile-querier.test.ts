@@ -8,7 +8,7 @@
  * NOTE: Currently minimal tests.
  *
  * The ProfileQuerier class is tested through integration tests in bash scripts
- * (bin/pq-test) that load real profiles and verify the output.
+ * (bin/profiler-cli-test) that load real profiles and verify the output.
  *
  * Unit tests can be added here for specific utility methods or edge cases that
  * are easier to test in isolation. The summarize() method uses the

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Protocol for communication between pq client and daemon.
+ * Protocol for communication between profiler-cli client and daemon.
  * Messages are sent as line-delimited JSON over Unix domain sockets.
  */
 

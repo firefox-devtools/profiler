@@ -1,20 +1,20 @@
-# pq Case Study 2: Investigating Repeated Rendering Spikes in Firefox
+# profiler-cli Case Study 2: Investigating Repeated Rendering Spikes in Firefox
 
 **Profile:** https://share.firefox.dev/4oLEjCw
 **Date:** November 4, 2025
-**Investigator:** Claude (via pq CLI)
+**Investigator:** Claude (via profiler-cli CLI)
 
 ## Executive Summary
 
-Using pq, I investigated a Firefox performance profile showing repeated GPU rendering spikes. The investigation revealed that the GPU Renderer thread was spending ~27% of spike time in Present operations (DirectComposition/DXGI), triggered by a loop of WM_PAINT messages on the main thread. The main thread would trigger rendering work, wait for the GPU (FlushRendering), and repeat.
+Using profiler-cli, I investigated a Firefox performance profile showing repeated GPU rendering spikes. The investigation revealed that the GPU Renderer thread was spending ~27% of spike time in Present operations (DirectComposition/DXGI), triggered by a loop of WM_PAINT messages on the main thread. The main thread would trigger rendering work, wait for the GPU (FlushRendering), and repeat.
 
 ## Investigation Process
 
 ### Initial Exploration
 
 ```bash
-pq load 'https://share.firefox.dev/4oLEjCw'
-pq profile info
+profiler-cli load 'https://share.firefox.dev/4oLEjCw'
+profiler-cli profile info
 ```
 
 **Observation:** The profile overview immediately showed the GPU process (p-14) consuming 16.1s of CPU, with the Renderer thread (t-93) at 7.9s being the hottest thread. Multiple CPU spike periods were visible at 160% (2 cores).
@@ -22,8 +22,8 @@ pq profile info
 ### Deep Dive into GPU Thread
 
 ```bash
-pq thread select t-93
-pq thread samples
+profiler-cli thread select t-93
+profiler-cli thread samples
 ```
 
 **Problem:** The output was **extremely verbose** - over 2000 lines for the full profile view. While comprehensive, it required significant scrolling and cognitive effort to digest. The top functions list showed 50 entries before truncating 2224 more.
@@ -38,8 +38,8 @@ pq thread samples
 ### Zooming into Spike Periods
 
 ```bash
-pq view push ts-6,ts-7
-pq thread samples | head -n 100
+profiler-cli view push ts-6,ts-7
+profiler-cli thread samples | head -n 100
 ```
 
 **Positive Experience:** After zooming into a specific spike period (391ms), the output became **much more manageable** - only 179 samples vs 14,466 for the full profile. The percentages shifted dramatically:
@@ -51,8 +51,8 @@ pq thread samples | head -n 100
 This focused view made it easy to see that during spikes, the thread was spending proportionally more time presenting frames.
 
 ```bash
-pq status
-pq view pop
+profiler-cli status
+profiler-cli view pop
 ```
 
 **Positive Experience:** The `status` command clearly showed my current context (selected thread and view range). `view pop` cleanly restored the previous view.
@@ -60,8 +60,8 @@ pq view pop
 ### Investigating the Trigger
 
 ```bash
-pq thread select t-0
-pq thread samples | head -n 80
+profiler-cli thread select t-0
+profiler-cli thread samples | head -n 80
 ```
 
 **Finding:** The main thread (GeckoMain) was:
@@ -104,7 +104,7 @@ This immediately highlighted where to investigate, with ready-to-use timestamp r
 
 Commands followed predictable patterns:
 
-- `pq <noun> <verb>` (e.g., `thread select`, `view push`)
+- `profiler-cli <noun> <verb>` (e.g., `thread select`, `view push`)
 - Optional flags for refinement (`--thread t-0`)
 - Clear, descriptive output
 
@@ -123,7 +123,7 @@ Commands followed predictable patterns:
 **Suggestion:** Add a `--limit N` flag to truncate output:
 
 ```bash
-pq thread samples --limit 20  # Show only top 20 functions
+profiler-cli thread samples --limit 20  # Show only top 20 functions
 ```
 
 Or make the default output more concise (e.g., top 15-20 functions only, with an explicit "use --verbose for full output" message).
@@ -139,9 +139,9 @@ Or make the default output more concise (e.g., top 15-20 functions only, with an
 **Suggestion:** Add function search/filter:
 
 ```bash
-pq thread search "Present"
-pq thread functions --filter "atidxx64"  # Show only AMD driver functions
-pq function info "DCSwapChain::Present"   # Details about a specific function
+profiler-cli thread search "Present"
+profiler-cli thread functions --filter "atidxx64"  # Show only AMD driver functions
+profiler-cli function info "DCSwapChain::Present"   # Details about a specific function
 ```
 
 ### 3. **Call Tree Format is Hard to Parse**
@@ -183,7 +183,7 @@ After 10+ levels of nesting, it's **visually overwhelming** and hard to follow l
 **Suggestion:** Add range comparison:
 
 ```bash
-pq view compare ts-6,ts-7 vs ts-8,ts-9
+profiler-cli view compare ts-6,ts-7 vs ts-8,ts-9
 # Shows side-by-side differences in top functions
 ```
 
@@ -194,9 +194,9 @@ pq view compare ts-6,ts-7 vs ts-8,ts-9
 **Suggestion:** Implement marker commands:
 
 ```bash
-pq thread markers                    # List recent markers
-pq thread markers --type Reflow      # Filter by type
-pq marker info <marker-handle>       # Marker details
+profiler-cli thread markers                    # List recent markers
+profiler-cli thread markers --type Reflow      # Filter by type
+profiler-cli marker info <marker-handle>       # Marker details
 ```
 
 ### 6. **Missing Symbol Information is Opaque** 🔶
@@ -208,7 +208,7 @@ atidxx64.dll!fun_3e8f0 - total: 2354 (16.3%)
 atidxx64.dll!fun_a56960 - self: 598 (4.1%)
 ```
 
-These are **meaningless** for diagnosis. While it's expected that third-party binaries lack symbols, pq provides **no indication** that:
+These are **meaningless** for diagnosis. While it's expected that third-party binaries lack symbols, profiler-cli provides **no indication** that:
 
 - These are unsymbolicated
 - What type of component this is (GPU driver)
@@ -233,20 +233,20 @@ These are **meaningless** for diagnosis. While it's expected that third-party bi
 **Suggestion:**
 
 ```bash
-pq thread waits                      # Show all wait operations
-pq thread waits --min-duration 10ms  # Filter significant waits
+profiler-cli thread waits                      # Show all wait operations
+profiler-cli thread waits --min-duration 10ms  # Filter significant waits
 ```
 
 ### 8. **No "Heaviest Stack" or Sample View** ❌
 
-**Problem:** The profiler UI shows "heaviest stack" (the single most expensive call stack). This is often the smoking gun. pq only shows aggregated functions and trees.
+**Problem:** The profiler UI shows "heaviest stack" (the single most expensive call stack). This is often the smoking gun. profiler-cli only shows aggregated functions and trees.
 
 **Suggestion:**
 
 ```bash
-pq thread stacks                     # Show heaviest individual stacks
-pq thread stacks --limit 5           # Top 5 heaviest
-pq sample info <sample-handle>       # Details about a specific sample
+profiler-cli thread stacks                     # Show heaviest individual stacks
+profiler-cli thread stacks --limit 5           # Top 5 heaviest
+profiler-cli sample info <sample-handle>       # Details about a specific sample
 ```
 
 ## Cognitive Load Assessment
@@ -299,34 +299,34 @@ pq sample info <sample-handle>       # Details about a specific sample
 ### Natural Commands ✓
 
 ```bash
-pq load <url>              # Obvious
-pq profile info            # Logical
-pq thread select t-93      # Clear
-pq thread samples          # Descriptive
-pq view push ts-6,ts-7     # Intuitive
-pq status                  # Expected
+profiler-cli load <url>              # Obvious
+profiler-cli profile info            # Logical
+profiler-cli thread select t-93      # Clear
+profiler-cli thread samples          # Descriptive
+profiler-cli view push ts-6,ts-7     # Intuitive
+profiler-cli status                  # Expected
 ```
 
 ### Awkward Commands ⚠️
 
-- **Piping to head:** `pq thread samples | head -n 100` - shouldn't need shell plumbing for basic limiting
+- **Piping to head:** `profiler-cli thread samples | head -n 100` - shouldn't need shell plumbing for basic limiting
 - **Filtering not built-in:** Must use `grep` externally
-- **No inline thread selection:** `pq thread samples --thread t-93` doesn't work, must select first
+- **No inline thread selection:** `profiler-cli thread samples --thread t-93` doesn't work, must select first
 
 ### Missing Commands ❌
 
 ```bash
-pq thread markers          # Not implemented
-pq thread waits            # Not implemented
-pq thread stacks           # Not implemented
-pq function info <name>    # Not implemented
-pq view compare            # Not implemented
-pq thread functions        # Not implemented (list top functions only, no tree)
+profiler-cli thread markers          # Not implemented
+profiler-cli thread waits            # Not implemented
+profiler-cli thread stacks           # Not implemented
+profiler-cli function info <name>    # Not implemented
+profiler-cli view compare            # Not implemented
+profiler-cli thread functions        # Not implemented (list top functions only, no tree)
 ```
 
 ## Handling of Missing Symbols
 
-The profile includes AMD GPU driver code (`atidxx64.dll`) with no symbols. pq handled this **functionally** but **poorly for UX**:
+The profile includes AMD GPU driver code (`atidxx64.dll`) with no symbols. profiler-cli handled this **functionally** but **poorly for UX**:
 
 ### What Works ✓
 
@@ -398,7 +398,7 @@ Either:
 
 ## Overall Assessment
 
-### pq Strengths 💪
+### profiler-cli Strengths 💪
 
 1. **Progressive exploration** model is natural and effective
 2. **Time range navigation** (timestamps + view stack) is excellent
@@ -406,7 +406,7 @@ Either:
 4. **Profile overview** immediately surfaces hot spots
 5. **Consistent command structure** reduces learning curve
 
-### pq Weaknesses 😓
+### profiler-cli Weaknesses 😓
 
 1. **Output verbosity** makes wide-scope views painful
 2. **No filtering or search** forces manual grepping
@@ -414,7 +414,7 @@ Either:
 4. **Poor symbol UX:** Unsymbolicated code looks like real function names
 5. **Call tree format** is hard to parse at depth
 
-### Would I Use pq for Real Investigations?
+### Would I Use profiler-cli for Real Investigations?
 
 **Yes, but with caveats:**
 
@@ -427,7 +427,7 @@ Either:
 - Manually grep for function names
 - Copy/paste outputs for comparison
 
-**pq is currently a "first-look tool"** - great for initial exploration, but you'll switch to the profiler UI for serious debugging.
+**profiler-cli is currently a "first-look tool"** - great for initial exploration, but you'll switch to the profiler UI for serious debugging.
 
 ## Priority Improvements
 
@@ -435,7 +435,7 @@ Either:
 
 1. **Add `--limit` flag** to all commands that generate lists
 2. **Implement marker viewing** (thread markers is wired up but not functional)
-3. **Add function search/filter** (`pq thread functions --filter "Present"`)
+3. **Add function search/filter** (`profiler-cli thread functions --filter "Present"`)
 
 ### P1 (High Value)
 
@@ -516,12 +516,12 @@ The **high degree of overlap** between independent investigations of the same pr
 
 ## Conclusion
 
-pq is a **promising tool** that successfully enables command-line profile investigation. The core workflow is solid, and for focused investigations (zoomed into specific time ranges), it's quite effective.
+profiler-cli is a **promising tool** that successfully enables command-line profile investigation. The core workflow is solid, and for focused investigations (zoomed into specific time ranges), it's quite effective.
 
-However, **output verbosity and missing features** significantly limit its utility for complex investigations. Adding filtering, limiting, and marker viewing would transform pq from a "triage tool" into a "primary investigation tool."
+However, **output verbosity and missing features** significantly limit its utility for complex investigations. Adding filtering, limiting, and marker viewing would transform profiler-cli from a "triage tool" into a "primary investigation tool."
 
 The handling of unsymbolicated code is **functional but needs UX work** - it's not a blocker, but better clarity would help users understand what they're looking at.
 
-**Bottom line:** pq has excellent bones, but needs refinement to handle the scale and complexity of real-world performance profiles.
+**Bottom line:** profiler-cli has excellent bones, but needs refinement to handle the scale and complexity of real-world performance profiles.
 
 **Cross-validation with Case Study 1:** The independent investigation reached nearly identical conclusions, confirming these findings are robust and actionable.

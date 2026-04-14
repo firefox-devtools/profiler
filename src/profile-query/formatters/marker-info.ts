@@ -1521,7 +1521,7 @@ export function formatMarkerInfo(
 
     if (stackLines.length > 21) {
       lines.push(
-        `\nUse 'pq marker stack ${markerHandle}' for the full stack trace.`
+        `\nUse 'profiler-cli marker stack ${markerHandle}' for the full stack trace.`
       );
     }
   }

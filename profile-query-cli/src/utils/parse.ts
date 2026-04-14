@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Shared argument parsing utilities for pq CLI commands.
+ * Shared argument parsing utilities for profiler-cli commands.
  */
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
@@ -115,7 +115,7 @@ export function parseEphemeralFilters(
 }
 
 /**
- * Parse exactly one SampleFilterSpec from CLI options for `pq filter push`.
+ * Parse exactly one SampleFilterSpec from CLI options for `profiler-cli filter push`.
  * Exactly one filter flag must be provided.
  */
 export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {

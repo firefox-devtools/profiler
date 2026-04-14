@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Session management for pq daemon.
+ * Session management for profiler-cli daemon.
  * Handles session files, socket paths, and current session tracking.
  *
  * All functions take an explicit sessionDir parameter for testability
- * and to avoid global state. The CLI entry point reads PQ_SESSION_DIR
+ * and to avoid global state. The CLI entry point reads PROFILER_CLI_SESSION_DIR
  * once and passes it through.
  */
 
@@ -51,7 +51,7 @@ export function getSessionDirNamespace(sessionDir: string): string {
 export function getSocketPath(sessionDir: string, sessionId: string): string {
   if (process.platform === 'win32') {
     const sessionDirNamespace = getSessionDirNamespace(sessionDir);
-    return `\\\\.\\pipe\\pq-${sessionDirNamespace}-${sessionId}`;
+    return `\\\\.\\pipe\\profiler-cli-${sessionDirNamespace}-${sessionId}`;
   }
   return path.join(sessionDir, `${sessionId}.sock`);
 }
