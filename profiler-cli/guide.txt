@@ -12,24 +12,10 @@ QUICK START
   profiler-cli thread samples                Hot functions by self time
   profiler-cli thread samples-top-down       Full top-down call tree
 
+  profiler-cli uses a daemon model: "profiler-cli load" starts a background daemon that
+  persists your selected thread, zoom ranges, and filter stacks. Stop it with "profiler-cli stop".
+
   The rest of this guide covers filtering, zooming, markers, and advanced analysis.
-
-
-SESSION MODEL
-
-  profiler-cli uses a daemon/session model:
-    1. Load a profile with "profiler-cli load" -- starts a background daemon
-    2. Query the loaded profile with any other commands
-    3. Stop with "profiler-cli stop" when done
-
-  The daemon persists your selected thread, zoom ranges, and filter stacks across queries.
-
-  For scripting or concurrent work, prefer an explicit session ID so each workflow
-  gets isolated state:
-    profiler-cli load profile.json.gz --session run-a
-    profiler-cli profile info --session run-a
-    profiler-cli thread select t-0 --session run-a
-    profiler-cli thread samples --session run-a
 
 
 CORE WORKFLOW
@@ -83,17 +69,10 @@ CORE WORKFLOW
 
   Step 7: Filter to focus the analysis (see FILTERS section below)
 
-    Ephemeral -- applies only to that one command, sticky state unchanged:
-    profiler-cli thread samples --excludes-function f-184     Ignore one noisy function
-    profiler-cli thread samples --root-at f-500               Show only work inside f-500
-    profiler-cli thread samples --during-marker --search Paint  Only samples during Paint markers
-
-    Sticky -- persists across all subsequent commands until popped:
-    profiler-cli filter push --merge f-142,f-143             Merge allocators out of stacks
-    profiler-cli filter push --includes-function f-500       Keep only samples containing f-500
-    profiler-cli thread samples                              Uses sticky filters automatically
-    profiler-cli filter pop                                  Remove last filter
-    profiler-cli filter clear                                Remove all filters
+    profiler-cli thread samples --excludes-function f-184     Ephemeral: one command only
+    profiler-cli filter push --includes-function f-500        Sticky: persists until popped
+    profiler-cli filter pop                                   Remove last filter
+    profiler-cli filter clear                                 Remove all filters
 
 
 SESSION STATE
@@ -183,7 +162,6 @@ FILTERS
 
     Inclusion -- keep only samples whose stack matches:
       --includes-function f-N,...       stack contains any of these funcs (OR)
-      --includes-any-function f-N,...   alias for --includes-function
       --includes-prefix f-N,...         stack starts with this root-first sequence
       --includes-suffix f-N             leaf (innermost) frame is f-N
       --during-marker --search <text>   sample timestamp inside a matching marker
@@ -191,7 +169,6 @@ FILTERS
 
     Exclusion -- drop matching samples:
       --excludes-function f-N,...       stack contains any of these funcs
-      --excludes-any-function f-N,...   alias for --excludes-function
 
     Stack transforms -- modify stack structure:
       --merge f-N,...                   remove funcs from stacks (A→f-N→B becomes A→B)
@@ -222,13 +199,6 @@ JSON OUTPUT
 
 
 COMMON ANALYSIS PATTERNS
-
-  Find what's consuming CPU:
-    profiler-cli thread info                          Pick the main thread (usually GeckoMain)
-    profiler-cli thread select t-0
-    profiler-cli thread samples                       Top hot functions by self time (active only)
-    profiler-cli thread samples-top-down             See the full call tree
-    profiler-cli thread samples-top-down --search GC  Focus tree on paths through "GC"
 
   Investigate a jank/slow period:
     profiler-cli thread markers --min-duration 50    Find long-running markers (>50ms = jank)
@@ -301,22 +271,13 @@ UNDERSTANDING THE OUTPUT
     samples-bottom-up   Hot leaf functions at top with their callers.
                         Use to understand what calls a frequently-seen function.
 
-  Scoring strategies (controls node ranking when tree is truncated with --max-lines):
-    exponential-0.9 (default)  Balances depth vs breadth
-    percentage-only            Rank purely by CPU percentage (flatter output)
-    harmonic-1.0               Emphasizes deeper paths in the tree
-
-
 TIPS
 
   - Start with "profile info"; GeckoMain is usually the main thread -- use
     "--search GeckoMain" to find it quickly
-  - Self time is more actionable: focus on high self-time functions for optimization
   - Idle time alone is not a finding: only investigate idle during a period when the
     thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
     lock contention or blocking on another thread
-  - --search narrows call PATHS: "samples-top-down --search GC" shows only call
-    paths that pass through a GC-related function, not just functions named "GC"
   - --search with comma is AND, not OR: "--search foo,bar" keeps only samples where
     BOTH "foo" and "bar" appear somewhere in the stack; to get OR behavior, run two
     separate searches; "|" is a literal character and will match nothing
