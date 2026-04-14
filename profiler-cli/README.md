@@ -40,6 +40,7 @@ profiler-cli marker info <handle>          # Show detailed marker information (e
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
 profiler-cli function info <handle>        # Show detailed function information
+profiler-cli function annotate <handle>    # Show annotated source/assembly with timing data [--mode src|asm|all] [--context 2|file|N] [--symbol-server <url>]
 profiler-cli zoom push <range>             # Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
 profiler-cli zoom pop                      # Pop the most recent zoom range
 profiler-cli zoom clear                    # Clear all zoom ranges (return to full profile)

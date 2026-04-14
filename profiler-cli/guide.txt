@@ -69,10 +69,14 @@ CORE WORKFLOW
     profiler-cli thread network --limit 50               Show up to 50 requests
 
   Step 6: Drill into specifics
-    profiler-cli marker info m-1234     Full details for a marker (from handles in marker list)
-    profiler-cli marker stack m-1234    Full stack trace at the time of a marker
-    profiler-cli function info f-12     Function details (source location, library)
-    profiler-cli function expand f-12   Show full untruncated function name
+    profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
+    profiler-cli marker stack m-1234         Full stack trace at the time of a marker
+    profiler-cli function info f-12          Function details (source location, library)
+    profiler-cli function expand f-12        Show full untruncated function name
+    profiler-cli function annotate f-12      Annotated source with per-line self/total timing
+    profiler-cli function annotate f-12 --mode asm   Annotated assembly (requires local symbol server)
+    profiler-cli function annotate f-12 --mode all   Both source and assembly
+    profiler-cli function annotate f-12 --context file   Show entire source file instead of snippets
 
   Step 7: Filter to focus the analysis (see FILTERS section below)
 
@@ -240,9 +244,13 @@ COMMON ANALYSIS PATTERNS
     profiler-cli thread markers --search Reflow --min-duration 5
 
   Deep dive on a specific function:
-    profiler-cli thread samples                   Find hot function, note its handle (f-12)
-    profiler-cli function info f-12               See callers, callees, source location
-    profiler-cli function expand f-12             See full name if truncated
+    profiler-cli thread samples                        Find hot function, note its handle (f-12)
+    profiler-cli function info f-12                    See callers, callees, source location
+    profiler-cli function expand f-12                  See full name if truncated
+    profiler-cli function annotate f-12                Annotated source: per-line self/total timing
+    profiler-cli function annotate f-12 --context file Full source file with all timings inline
+    profiler-cli function annotate f-12 --mode asm     Annotated assembly (needs local symbol server)
+    profiler-cli function annotate f-12 --mode all     Source + assembly together
 
   Group markers by event type:
     profiler-cli thread markers --search DOMEvent --group-by field:eventType

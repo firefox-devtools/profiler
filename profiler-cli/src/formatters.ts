@@ -13,6 +13,7 @@ import type {
   WithContext,
   FunctionExpandResult,
   FunctionInfoResult,
+  FunctionAnnotateResult,
   ViewRangeResult,
   FilterStackResult,
   ThreadInfoResult,
@@ -1143,4 +1144,116 @@ export function formatThreadNetworkResult(
   }
 
   return lines.join('\n');
+}
+
+export function formatFunctionAnnotateResult(
+  result: WithContext<FunctionAnnotateResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const out: string[] = [];
+  const RULER = '─'.repeat(80);
+
+  out.push(contextHeader, '');
+  out.push(`Function ${result.functionHandle}: ${result.name}`);
+  out.push(`Thread: ${result.friendlyThreadName} (${result.threadHandle})`, '');
+  out.push(
+    `Self time: ${Math.round(result.totalSelfSamples)} samples, ` +
+      `Total time: ${Math.round(result.totalTotalSamples)} samples`
+  );
+  out.push(`Mode: ${result.mode}`);
+
+  for (const w of result.warnings) {
+    out.push('', `Warning: ${w}`);
+  }
+
+  // Source annotation
+  const src = result.srcAnnotation;
+  if (src) {
+    const fileSuffix =
+      src.totalFileLines !== null ? ` (${src.totalFileLines} lines)` : '';
+    out.push('', `Source file: ${src.filename}${fileSuffix}`);
+    out.push(
+      `  ${Math.round(src.samplesWithLineInfo)} of ${Math.round(src.samplesWithFunction)} ` +
+        `samples have line number information`
+    );
+    out.push(`  Showing: ${src.contextMode}`, '');
+
+    const W_LINE = 5;
+    const W_SELF = 6;
+    const W_TOTAL = 7;
+
+    out.push(
+      `${'Line'.padStart(W_LINE)}  ${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Source`
+    );
+    out.push(RULER);
+
+    const showGaps = src.contextMode !== 'full file';
+    let prevLine: number | null = null;
+    for (const line of src.lines) {
+      if (showGaps && prevLine !== null && line.lineNumber > prevLine + 1) {
+        out.push(' '.repeat(W_LINE + 2) + '...');
+      }
+      prevLine = line.lineNumber;
+
+      const selfStr =
+        line.selfSamples > 0
+          ? String(Math.round(line.selfSamples)).padStart(W_SELF)
+          : ' '.repeat(W_SELF);
+      const totalStr =
+        line.totalSamples > 0
+          ? String(Math.round(line.totalSamples)).padStart(W_TOTAL)
+          : ' '.repeat(W_TOTAL);
+      const srcText = line.sourceText !== null ? `  ${line.sourceText}` : '';
+      out.push(
+        `${String(line.lineNumber).padStart(W_LINE)}  ${selfStr}  ${totalStr}${srcText}`
+      );
+    }
+  }
+
+  // Assembly annotations
+  for (const asm of result.asmAnnotations) {
+    out.push('', `Compilation ${asm.compilationIndex}:`);
+    out.push(`  Name: ${asm.symbolName}`);
+    out.push(`  Address: 0x${asm.symbolAddress.toString(16)}`);
+    if (asm.functionSize !== null) {
+      out.push(`  Function size: ${asm.functionSize} bytes`);
+    }
+    out.push(`  Native symbols: ${asm.nativeSymbolCount}`);
+
+    if (asm.fetchError !== null) {
+      out.push(`  (Assembly unavailable: ${asm.fetchError})`);
+      continue;
+    }
+
+    out.push('');
+    out.push(
+      `  ${'Address'.padEnd(18)}${'Self'.padStart(6)}  ${'Total'.padStart(7)}  Instruction`
+    );
+    out.push('  ' + '─'.repeat(70));
+
+    for (const instr of asm.instructions) {
+      const addrStr = `0x${instr.address.toString(16)}`.padEnd(18);
+      const selfStr =
+        instr.selfSamples > 0
+          ? String(Math.round(instr.selfSamples)).padStart(6)
+          : ' '.repeat(6);
+      const totalStr =
+        instr.totalSamples > 0
+          ? String(Math.round(instr.totalSamples)).padStart(7)
+          : ' '.repeat(7);
+      out.push(`  ${addrStr}${selfStr}  ${totalStr}  ${instr.decodedString}`);
+    }
+  }
+
+  if (
+    result.srcAnnotation &&
+    result.srcAnnotation.contextMode !== 'full file'
+  ) {
+    out.push(
+      '',
+      `Tip: use --context file to show the full source file, or --context <N> for more context lines.`
+    );
+  }
+
+  return out.join('\n');
 }

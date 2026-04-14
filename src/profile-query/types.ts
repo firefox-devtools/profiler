@@ -164,6 +164,60 @@ export type FunctionInfoResult = {
   };
 };
 
+// ===== Function Annotate =====
+
+export type AnnotateMode = 'src' | 'asm' | 'all';
+
+export type AnnotatedSourceLine = {
+  lineNumber: number;
+  selfSamples: number;
+  totalSamples: number;
+  sourceText: string | null;
+};
+
+export type FunctionSourceAnnotation = {
+  filename: string;
+  totalFileLines: number | null;
+  samplesWithFunction: number;
+  samplesWithLineInfo: number;
+  // Human-readable description of how lines were selected, e.g. "±2 lines context", "full function", "full file"
+  contextMode: string;
+  lines: AnnotatedSourceLine[];
+};
+
+export type AnnotatedInstruction = {
+  address: number;
+  selfSamples: number;
+  totalSamples: number;
+  decodedString: string;
+};
+
+export type FunctionAsmAnnotation = {
+  compilationIndex: number;
+  symbolName: string;
+  symbolAddress: number;
+  functionSize: number | null;
+  nativeSymbolCount: number;
+  fetchError: string | null;
+  instructions: AnnotatedInstruction[];
+};
+
+export type FunctionAnnotateResult = {
+  type: 'function-annotate';
+  functionHandle: string;
+  funcIndex: number;
+  name: string;
+  fullName: string;
+  threadHandle: string;
+  friendlyThreadName: string;
+  totalSelfSamples: number;
+  totalTotalSamples: number;
+  mode: AnnotateMode;
+  srcAnnotation: FunctionSourceAnnotation | null;
+  asmAnnotations: FunctionAsmAnnotation[];
+  warnings: string[];
+};
+
 // ===== View Range Commands =====
 
 export type ViewRangeResult = {

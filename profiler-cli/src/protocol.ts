@@ -19,6 +19,8 @@ export type {
   StatusResult,
   FunctionExpandResult,
   FunctionInfoResult,
+  FunctionAnnotateResult,
+  AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
   ThreadSamplesResult,
@@ -50,6 +52,8 @@ import type {
   StatusResult,
   FunctionExpandResult,
   FunctionInfoResult,
+  FunctionAnnotateResult,
+  AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
   MarkerStackResult,
@@ -111,8 +115,12 @@ export type ClientCommand =
   | { command: 'sample'; subcommand: 'info' | 'select'; sample?: string }
   | {
       command: 'function';
-      subcommand: 'info' | 'select' | 'expand';
+      subcommand: 'info' | 'select' | 'expand' | 'annotate';
       function?: string;
+      annotateMode?: AnnotateMode;
+      symbolServerUrl?: string;
+      /** "file", "function", or a number of context lines (e.g. "2") */
+      annotateContext?: string;
     }
   | {
       command: 'zoom';
@@ -153,7 +161,8 @@ export type CommandResult =
   | WithContext<ThreadSamplesBottomUpResult>
   | WithContext<ThreadMarkersResult>
   | WithContext<ThreadFunctionsResult>
-  | WithContext<ThreadNetworkResult>;
+  | WithContext<ThreadNetworkResult>
+  | WithContext<FunctionAnnotateResult>;
 
 export interface SessionMetadata {
   id: string;

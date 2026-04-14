@@ -379,6 +379,16 @@ export class Daemon {
             return this.querier!.functionExpand(command.function);
           case 'select':
             throw new Error('unimplemented');
+          case 'annotate':
+            if (!command.function) {
+              throw new Error('function handle required for function annotate');
+            }
+            return this.querier!.functionAnnotate(
+              command.function,
+              command.annotateMode ?? 'src',
+              command.symbolServerUrl ?? 'http://localhost:3000',
+              command.annotateContext ?? '2'
+            );
           default:
             throw assertExhaustiveCheck(command);
         }

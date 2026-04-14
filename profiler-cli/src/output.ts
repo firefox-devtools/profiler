@@ -12,6 +12,7 @@ import {
   formatStatusResult,
   formatFunctionExpandResult,
   formatFunctionInfoResult,
+  formatFunctionAnnotateResult,
   formatViewRangeResult,
   formatFilterStackResult,
   formatThreadInfoResult,
@@ -54,6 +55,8 @@ export function formatOutput(
       return formatFunctionExpandResult(result);
     case 'function-info':
       return formatFunctionInfoResult(result);
+    case 'function-annotate':
+      return formatFunctionAnnotateResult(result);
     case 'view-range':
       return formatViewRangeResult(result);
     case 'thread-info':

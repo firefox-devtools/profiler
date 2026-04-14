@@ -46,4 +46,43 @@ export function registerFunctionCommand(
     );
     console.log(formatOutput(result, opts.json ?? false));
   });
+
+  addGlobalOptions(
+    fn
+      .command('annotate [handle]')
+      .description(
+        'Show annotated source/assembly with timing data (e.g. f-123)'
+      )
+      .option('--function <handle>', 'Function handle')
+      .option(
+        '--mode <mode>',
+        'Annotation mode: src, asm, or all (default: src)',
+        'src'
+      )
+      .option(
+        '--symbol-server <url>',
+        'Symbol server URL for asm mode (default: http://localhost:3000)',
+        'http://localhost:3000'
+      )
+      .option(
+        '--context <context>',
+        'Source context: number of lines around annotated lines, or "file" for the whole file (default: 2)',
+        '2'
+      )
+  ).action(async (handleArg: string | undefined, opts) => {
+    const funcHandle = handleArg ?? opts.function;
+    const result = await sendCommand(
+      sessionDir,
+      {
+        command: 'function',
+        subcommand: 'annotate',
+        function: funcHandle,
+        annotateMode: opts.mode,
+        symbolServerUrl: opts.symbolServer,
+        annotateContext: opts.context,
+      },
+      opts.session
+    );
+    console.log(formatOutput(result, opts.json ?? false));
+  });
 }
