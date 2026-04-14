@@ -243,11 +243,9 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
-    selectedThreadSelectors.getThread,
-    selectedThreadSelectors.getPreviewFilteredCtssSampleIndexOffset,
     ProfileSelectors.getCategories,
     selectedThreadSelectors.getPreviewFilteredCtssSamples,
-    selectedThreadSelectors.getUnfilteredCtssSamples,
+    selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories,
     ProfileData.getTimingsForPath
   );
 

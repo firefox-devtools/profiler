@@ -22,7 +22,10 @@ import {
   getProcessIdToNameMap,
   getThreadSelectorsFromThreadsKey,
 } from 'firefox-profiler/selectors';
-import { changeMarkersSearchString } from 'firefox-profiler/actions/profile-view';
+import {
+  changeMarkersSearchString,
+  changeNetworkSearchString,
+} from 'firefox-profiler/actions/profile-view';
 
 import {
   TooltipNetworkMarkerPhases,
@@ -112,6 +115,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly changeMarkersSearchString: typeof changeMarkersSearchString;
+  readonly changeNetworkSearchString: typeof changeNetworkSearchString;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -493,10 +497,18 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 
   _onFilterButtonClick = () => {
-    const { markerIndex, getMarkerSearchTerm, changeMarkersSearchString } =
-      this.props;
+    const {
+      marker,
+      markerIndex,
+      getMarkerSearchTerm,
+      changeMarkersSearchString,
+      changeNetworkSearchString,
+    } = this.props;
     const searchTerm = getMarkerSearchTerm(markerIndex);
     changeMarkersSearchString(searchTerm);
+    if (marker.data && marker.data.type === 'Network') {
+      changeNetworkSearchString(searchTerm);
+    }
   };
 
   /**
@@ -718,7 +730,7 @@ const ConnectedMarkerTooltipContents = explicitConnect<
       categories: getCategories(state),
     };
   },
-  mapDispatchToProps: { changeMarkersSearchString },
+  mapDispatchToProps: { changeMarkersSearchString, changeNetworkSearchString },
   component: MarkerTooltipContents,
 });
 

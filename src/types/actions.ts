@@ -5,6 +5,7 @@
 import type JSZip from 'jszip';
 import type {
   Profile,
+  RawProfileSharedData,
   RawThread,
   ThreadIndex,
   Pid,
@@ -23,6 +24,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  ProfileIndexTranslationMaps,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -83,7 +85,10 @@ export type DataSource =
   // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
 
-export type TimelineType = 'stack' | 'category' | 'cpu-category';
+// Controls which graph is shown in thread tracks.
+// 'cpu-category': Shows the category activity graph.
+// 'stack':        Shows the stack graph, for profiles without category information.
+export type TimelineType = 'stack' | 'cpu-category';
 export type PreviewSelection = {
   readonly isModifying: boolean;
   readonly selectionStart: number;
@@ -316,9 +321,6 @@ type ProfileAction =
       readonly type: 'SET_CONTEXT_MENU_VISIBILITY';
       readonly isVisible: boolean;
     }
-  | {
-      readonly type: 'INCREMENT_PANEL_LAYOUT_GENERATION';
-    }
   | { readonly type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' }
   | { readonly type: 'DISMISS_NEWLY_PUBLISHED' }
   | {
@@ -370,7 +372,8 @@ type ReceiveProfileAction =
   | {
       readonly type: 'BULK_SYMBOLICATION';
       readonly symbolicatedThreads: RawThread[];
-      readonly oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap>;
+      readonly symbolicatedShared: RawProfileSharedData;
+      readonly oldFuncToNewFuncsMap: FuncToFuncsMap;
     }
   | {
       readonly type: 'DONE_SYMBOLICATING';
@@ -548,7 +551,7 @@ type UrlStateAction =
       readonly type: 'SANITIZED_PROFILE_PUBLISHED';
       readonly hash: string;
       readonly committedRanges: StartEndRange[] | null;
-      readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+      readonly translationMaps: ProfileIndexTranslationMaps | null;
       readonly profileName: string;
       readonly prePublishedState: State | null;
     }

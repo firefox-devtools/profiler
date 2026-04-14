@@ -9,6 +9,7 @@
   --internal-label-foreground-color: var(--grey-60);
 
   position: fixed;
+  z-index: var(--z-tooltip);
   display: inline-block;
   overflow: hidden;
   max-width: 600px;

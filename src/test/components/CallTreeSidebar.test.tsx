@@ -48,7 +48,7 @@ describe('CallTreeSidebar', function () {
       ).find((category) => category.name === 'Layout'),
       'Could not find Layout category.'
     );
-    const [{ frameTable }] = profile.threads;
+    const { frameTable } = profile.shared;
     const fakeC = layout.subcategories.length;
     layout.subcategories.push('FakeSubCategoryC');
     const fakeD = layout.subcategories.length;

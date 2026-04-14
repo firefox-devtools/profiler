@@ -7,7 +7,6 @@ import type {
   CategoryList,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
-  IndexIntoFuncTable,
   IndexIntoStackTable,
   Profile,
 } from 'firefox-profiler/types/profile';
@@ -60,12 +59,13 @@ export function convertFlameGraphProfile(profileText: string): Profile {
     tid: 0,
   });
 
-  const { frameTable, funcTable, stackTable, samples } = thread;
+  const frameTable = globalDataCollector.getFrameTable();
+  const stackTable = globalDataCollector.getStackTable();
+  const { samples } = thread;
 
   // Maps to deduplicate stacks, frames, and functions.
   const stackMap = new Map<string, IndexIntoStackTable>();
   const frameMap = new Map<string, IndexIntoFrameTable>();
-  const funcMap = new Map<string, IndexIntoFuncTable>();
 
   function getOrCreateStack(
     frameIndex: IndexIntoFrameTable,
@@ -100,19 +100,16 @@ export function convertFlameGraphProfile(profileText: string): Profile {
     }
 
     // Create or get function.
-    let funcIndex = funcMap.get(cleanedName);
-    if (funcIndex === undefined) {
-      funcIndex = funcTable.length;
-      funcTable.isJS.push(false);
-      funcTable.relevantForJS.push(false);
-      funcTable.name.push(stringTable.indexForString(cleanedName));
-      funcTable.resource.push(-1);
-      funcTable.source.push(null);
-      funcTable.lineNumber.push(null);
-      funcTable.columnNumber.push(null);
-      funcTable.length++;
-      funcMap.set(cleanedName, funcIndex);
-    }
+    const nameIndex = stringTable.indexForString(cleanedName);
+    const funcIndex = globalDataCollector.indexForFunc(
+      nameIndex,
+      false,
+      false,
+      -1,
+      null,
+      null,
+      null
+    );
 
     // Create frame.
     frameIndex = frameTable.length;

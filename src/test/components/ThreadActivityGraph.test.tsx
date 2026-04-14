@@ -96,7 +96,7 @@ describe('ThreadActivityGraph', function () {
       `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
     ) as HTMLElement;
     const thread = profile.threads[0];
-    const { stringArray } = profile.shared;
+    const { funcTable, stringArray } = profile.shared;
 
     // Perform a click on the activity graph.
     function clickActivityGraph(
@@ -113,7 +113,7 @@ describe('ThreadActivityGraph', function () {
     function getCallNodePath() {
       return selectedThreadSelectors
         .getSelectedCallNodePath(getState())
-        .map((funcIndex) => stringArray[thread.funcTable.name[funcIndex]]);
+        .map((funcIndex) => stringArray[funcTable.name[funcIndex]]);
     }
 
     /**
@@ -165,6 +165,22 @@ describe('ThreadActivityGraph', function () {
     const drawCalls = getContextDrawCalls();
     // We want to ensure that we redraw the activity graph and not something
     // else like the sample graph.
+    expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
+      true
+    );
+  });
+
+  it('redraws when the system theme changes', () => {
+    const { getContextDrawCalls } = setup();
+
+    // Flush out any existing draw calls.
+    getContextDrawCalls();
+    expect(getContextDrawCalls().length).toEqual(0);
+
+    // Simulate a theme change.
+    window.dispatchEvent(new CustomEvent('profiler-theme-change'));
+
+    const drawCalls = getContextDrawCalls();
     expect(drawCalls.some(([operation]) => operation === 'beginPath')).toBe(
       true
     );

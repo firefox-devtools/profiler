@@ -31,7 +31,6 @@ import type {
   IndexIntoStackTable,
   WeightType,
   IndexIntoFrameTable,
-  IndexIntoSubcategoryListForCategory,
   SourceTable,
   IndexIntoSourceTable,
 } from './profile';
@@ -39,6 +38,10 @@ import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
 import type { StackTiming } from '../profile-logic/stack-timing';
 import type { StringTable } from '../utils/string-table';
+import type {
+  IndexIntoSetCollectionTable,
+  SetCollectionTable,
+} from 'firefox-profiler/utils/set-collection';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -130,9 +133,20 @@ export type SamplesTable = {
   // See the WeightType type for more information.
   weight: null | number[];
   weightType: WeightType;
-  // The CPU ratio, between 0 and 1, over the time between the previous sample
+  // The CPU percentage, between 0 and 100, over the time between the previous sample
   // and this sample.
-  threadCPURatio?: Float64Array | undefined;
+  // This array has length + 1. The extra element at the end is the CPU percentage
+  // after the last sample. For a range-filtered thread, this is the corresponding
+  // element from the full thread.
+  // If the original thread has no CPU delta information, this array will contain
+  // synthetic values (all 100) and hasCPUDeltas will be false.
+  threadCPUPercent: Uint8Array;
+  // Whether the original thread information contained CPU delta information.
+  hasCPUDeltas: boolean;
+  // The category of each sample's stack in the unfiltered thread.
+  category: Uint8Array;
+  // The subcategory of each sample's stack in the unfiltered thread.
+  subcategory: Uint16Array | Uint8Array;
   // This property isn't present in normal threads. However it's present for
   // merged threads, so that we know the origin thread for these samples.
   threadId?: Tid[];
@@ -140,7 +154,14 @@ export type SamplesTable = {
   length: number;
 };
 
-type SamplesLikeTableShape = {
+export type SampleCategoriesAndSubcategories = {
+  // represents a Map<IndexIntoSamplesTable, IndexIntoCategoryList>
+  sampleCategories: Uint8Array;
+  // represents a Map<IndexIntoSamplesTable, IndexIntoSubcategoryListForCategory>
+  sampleSubcategories: Uint16Array | Uint8Array;
+};
+
+export type SamplesLikeTable = {
   stack: Array<IndexIntoStackTable | null>;
   time: Milliseconds[];
   // An optional weight array. If not present, then the weight is assumed to be 1.
@@ -150,12 +171,6 @@ type SamplesLikeTableShape = {
   argumentValues?: Array<number | null>;
   length: number;
 };
-
-export type SamplesLikeTable =
-  | SamplesLikeTableShape
-  | SamplesTable
-  | NativeAllocationsTable
-  | JsAllocationsTable;
 
 export type CounterSamplesTable = {
   time: Milliseconds[];
@@ -213,8 +228,8 @@ export type StackTable = {
   length: number;
 
   // Derived from RawStackTable + FrameTable
-  category: IndexIntoCategoryList[];
-  subcategory: IndexIntoSubcategoryListForCategory[];
+  category: Uint8Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoCategoryList>
+  subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoSubcategoryListForCategory>
 };
 
 /**
@@ -342,19 +357,15 @@ export type LineNumber = number;
 // stackLine may be null. This is fine because their values are not accessed
 // during the LineTimings computation.
 export type StackLineInfo = {
-  // An array that contains, for each "self" stack, the line number that this stack
-  // spends its self time in, in this file, or null if the self time of the
-  // stack is in a different file or if the line number is not known.
-  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
-  // never referred to from a SamplesLikeTable, the value may be null.
-  selfLine: Array<LineNumber | null>;
-  // An array that contains, for each "self" stack, all the lines that the frames in
-  // this stack hit in this file, or null if this stack does not hit any line
-  // in the given file.
-  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
-  // never referred to from a SamplesLikeTable, the value may be null.
-  stackLines: Array<Set<LineNumber> | null>;
+  // Represents a Map<IndexIntoStackTable, IndexIntoLineSetTable | -1>
+  stackIndexToLineSetIndex: Int32Array;
+  // Stores entries representing a pair of (set of lines, self line), usually
+  // much much smaller than the stackTable because it only stores entries for
+  // the current source.
+  lineSetTable: SetCollectionTable<LineNumber>;
 };
+
+export type IndexIntoLineSetTable = IndexIntoSetCollectionTable;
 
 // Stores, for all lines of one specific file, how many times each line is hit
 // by samples in a thread. The maps only contain non-zero values.
@@ -382,19 +393,15 @@ export type LineTimings = {
 // stackAddress may be null. This is fine because their values are not accessed
 // during the AddressTimings computation.
 export type StackAddressInfo = {
-  // An array that contains, for each "self" stack, the address that this stack
-  // spends its self time in, in this native symbol, or null if the self time of
-  // the stack is in a different native symbol or if the address is not known.
-  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
-  // never referred to from a SamplesLikeTable, the value may be null.
-  selfAddress: Array<Address | null>;
-  // An array that contains, for each "self" stack, all the addresses that the
-  // frames in this stack hit in this native symbol, or null if this stack does
-  // not hit any address in the given native symbol.
-  // For non-"self" stacks, i.e. stacks which are only used as prefix stacks and
-  // never referred to from a SamplesLikeTable, the value may be null.
-  stackAddresses: Array<Set<Address> | null>;
+  // Represents a Map<IndexIntoStackTable, IndexIntoAddressSetTable | -1>
+  stackIndexToAddressSetIndex: Int32Array;
+  // Stores entries representing the pair (set of addresses, self address), usually
+  // much much smaller than the stackTable because it only stores entries for the
+  // current native symbol.
+  addressSetTable: SetCollectionTable<Address>;
 };
+
+export type IndexIntoAddressSetTable = IndexIntoSetCollectionTable;
 
 // Stores, for all addresses of one specific library, how many times each
 // address is hit by samples in a thread. The maps only contain non-zero values.
@@ -518,8 +525,8 @@ export type CallNodeDisplayData = Readonly<{
   ariaLabel: string;
 }>;
 
-export type ThreadWithReservedFunctions = {
-  thread: Thread;
+export type FuncTableWithReservedFunctions = {
+  funcTable: FuncTable;
   reservedFunctionsForResources: Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
@@ -672,22 +679,23 @@ export type RemoveProfileInformation = {
 };
 
 /**
- * This type is used to decide how to highlight and stripe areas in the
+ * This const enum is used to decide how to highlight and stripe areas in the
  * timeline.
  */
-export type SelectedState =
+export const enum SelectedState {
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
-  | 'FILTERED_OUT_BY_TRANSFORM'
+  FilteredOutByTransform,
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
-  | 'SELECTED'
+  Selected,
   // This call node is not selected, and the stacks are ordered before the selected
   // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  UnselectedOrderedBeforeSelected,
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+  UnselectedOrderedAfterSelected,
+}
 
 /**
  * It holds the initially selected track's HTMLElement. This allows the timeline
@@ -796,4 +804,32 @@ export type BottomBoxInfo = {
 export type FaviconData = {
   readonly data: ArrayBuffer;
   readonly mimeType: string;
+};
+
+/**
+ * Information about how the indexes in a profile have changed, for example
+ * after profile compaction.
+ */
+export type ProfileIndexTranslationMaps = {
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+  oldFuncCount: number;
+  newFuncCount: number;
+  oldStackToNewStackPlusOne: Int32Array;
+  oldFrameToNewFramePlusOne: Int32Array;
+  oldFuncToNewFuncPlusOne: Int32Array;
+  oldResourceToNewResourcePlusOne: Int32Array;
+  oldNativeSymbolToNewNativeSymbolPlusOne: Int32Array;
+  oldSourceToNewSourcePlusOne: Int32Array;
+  oldStringToNewStringPlusOne: Int32Array;
+  oldLibToNewLibPlusOne: Int32Array;
+};
+
+export type TransformEffectOnThreadData = {
+  dropIfOldStackIsNot?: BitSet;
+  oldStackToNewStack?: Int32Array; // drop if oldStackToNewStack[oldStack] === -1
+};
+
+export type TransformOutput = {
+  newStackTable: StackTable;
+  effectOnThreadData: TransformEffectOnThreadData;
 };

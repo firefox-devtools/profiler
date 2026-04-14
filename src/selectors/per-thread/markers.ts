@@ -551,8 +551,16 @@ export function getMarkerSelectorsPerThread(
   /**
    * This returns the marker index for the currently selected marker.
    */
-  const getSelectedMarkerIndex: Selector<MarkerIndex | null> = (state) =>
-    threadSelectors.getViewOptions(state).selectedMarker;
+  const getSelectedMarkerIndex: Selector<MarkerIndex | null> = createSelector(
+    getMarkerListLength,
+    (state: State) => UrlState.getSelectedMarker(state, threadsKey),
+    (markerListLength, markerIndex) => {
+      if (markerIndex === null || markerIndex >= markerListLength) {
+        return null;
+      }
+      return markerIndex;
+    }
+  );
 
   /**
    * From the previous value, this returns the full marker object for the

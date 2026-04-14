@@ -634,11 +634,17 @@ export type ChromeEventPayload = {
  * Gecko includes rich log information. This marker payload is used to mirror that
  * log information in the profile.
  */
-export type LogMarkerPayload = {
-  type: 'Log';
-  name: string;
-  module: string;
-};
+export type LogMarkerPayload =
+  | {
+      type: 'Log';
+      name: string;
+      module: string;
+    }
+  | {
+      type: 'Log';
+      level: number;
+      message: string;
+    };
 
 export type DOMEventMarkerPayload = {
   type: 'DOMEvent';

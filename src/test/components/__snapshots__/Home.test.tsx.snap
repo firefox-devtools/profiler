@@ -975,9 +975,9 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           <p>
             Recording performance profiles requires 
             <a
-              href="https://www.mozilla.org/en-US/firefox/new/"
+              href="https://www.firefox.com"
             >
-              ⁨Firefox⁩
+              ⁨Firefox⁩ for desktop
             </a>
             .
 However, existing profiles can be viewed in any modern browser.

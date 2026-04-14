@@ -15,7 +15,6 @@ import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 import type {
   Thread,
   Milliseconds,
-  SelectedState,
   IndexIntoSamplesTable,
   CategoryList,
 } from 'firefox-profiler/types';
@@ -30,7 +29,7 @@ type CanvasProps = {
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
   readonly sampleIndexOffset: number;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
@@ -38,7 +37,6 @@ type CanvasProps = {
   readonly categories: CategoryList;
   readonly passFillsQuerier: (param: ActivityFillGraphQuerier) => void;
   readonly onClick: (param: React.MouseEvent<HTMLCanvasElement>) => void;
-  readonly enableCPUUsage: boolean;
 } & SizeProps;
 
 export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
@@ -105,7 +103,19 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
 
   override componentDidMount() {
     this._renderCanvas();
+    window.addEventListener('profiler-theme-change', this._onThemeChange);
   }
+
+  override componentWillUnmount() {
+    window.removeEventListener('profiler-theme-change', this._onThemeChange);
+  }
+
+  _onThemeChange = () => {
+    // Invalidate the cached category draw styles,
+    // so they are recreated with the new theme colors.
+    this._categoryDrawStyles = null;
+    this._renderCanvas();
+  };
 
   override componentDidUpdate() {
     this._renderCanvas();
@@ -119,10 +129,8 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
-      categories,
-      enableCPUUsage,
       width,
       height,
     } = this.props;
@@ -142,11 +150,9 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      samplesSelectedStates,
-      enableCPUUsage,
+      sampleSelectedStates,
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
-      greyCategoryIndex: categories.findIndex((c) => c.color === 'grey') || 0,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx!),
     });
 

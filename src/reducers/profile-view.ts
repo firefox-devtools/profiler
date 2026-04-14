@@ -51,8 +51,12 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
       if (!state.threads.length) {
         return state;
       }
-      const { symbolicatedThreads } = action;
-      return { ...state, threads: symbolicatedThreads };
+      const { symbolicatedShared, symbolicatedThreads } = action;
+      return {
+        ...state,
+        shared: symbolicatedShared,
+        threads: symbolicatedThreads,
+      };
     }
     case 'DONE_SYMBOLICATING': {
       if (state === null) {
@@ -137,7 +141,6 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedInvertedCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
-  selectedMarker: null,
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
 };
@@ -175,26 +178,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       // The view options are lazily initialized. Reset to the default values.
       return {};
     case 'BULK_SYMBOLICATION': {
-      const { oldFuncToNewFuncsMaps } = action;
-      // For each thread, apply oldFuncToNewFuncsMap to that thread's
-      // selectedCallNodePath and expandedCallNodePaths.
-      const newState = objectMap(state, (threadViewOptions, threadsKey) => {
-        // Multiple selected threads are not supported, note that transforming
-        // the threadKey with multiple threads into a number will result in a NaN.
-        // This should be fine here, as the oldFuncToNewFuncsMaps only supports
-        // single thread indexes.
-        const threadIndex = +threadsKey;
-        if (Number.isNaN(threadIndex)) {
-          throw new Error(
-            'Bulk symbolication only supports a single thread, and a ThreadsKey with ' +
-              'multiple threads was used.'
-          );
-        }
-        const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(threadIndex);
-        if (oldFuncToNewFuncsMap === undefined) {
-          return threadViewOptions;
-        }
-
+      const { oldFuncToNewFuncsMap } = action;
+      const newState = objectMap(state, (threadViewOptions) => {
         return {
           ...threadViewOptions,
           selectedNonInvertedCallNodePath: applyFuncSubstitutionToCallPath(
@@ -327,10 +312,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
           ? { expandedInvertedCallNodePaths: expandedCallNodePaths }
           : { expandedNonInvertedCallNodePaths: expandedCallNodePaths }
       );
-    }
-    case 'CHANGE_SELECTED_MARKER': {
-      const { threadsKey, selectedMarker } = action;
-      return _updateThreadViewOptions(state, threadsKey, { selectedMarker });
     }
     case 'CHANGE_SELECTED_NETWORK_MARKER': {
       const { threadsKey, selectedNetworkMarker } = action;
@@ -718,17 +699,10 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
         return null;
       }
 
-      const { oldFuncToNewFuncsMaps } = action;
-      // This doesn't support a ThreadsKey with multiple threads.
-      const oldFuncToNewFuncsMap = oldFuncToNewFuncsMaps.get(+state.threadsKey);
-      if (oldFuncToNewFuncsMap === undefined) {
-        return state;
-      }
-
       return {
         ...state,
         callNodePath: applyFuncSubstitutionToCallPath(
-          oldFuncToNewFuncsMap,
+          action.oldFuncToNewFuncsMap,
           state.callNodePath
         ),
       };

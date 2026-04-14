@@ -683,6 +683,220 @@ describe('Network Chart/tooltip behavior', () => {
   });
 });
 
+describe('Network Chart/sticky tooltip behavior', () => {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  function setupForStickyTooltip(uris: string[] = ['https://mozilla.org/1']) {
+    const markers: TestDefinedMarker[] = [];
+    uris.forEach((uri, i) => {
+      markers.push(
+        ...getNetworkMarkers({
+          uri,
+          id: i,
+          startTime: 10 + i * 10,
+          endTime: 19 + i * 10,
+        })
+      );
+    });
+
+    const result = setupWithPayload(markers);
+    const { container } = result;
+
+    function rowItems(): HTMLElement[] {
+      return Array.from(
+        container.querySelectorAll('.networkChartRowItem')
+      ) as HTMLElement[];
+    }
+
+    return { ...result, rowItems };
+  }
+
+  it('persists tooltip when clicking a row (sticky)', () => {
+    const { rowItem, getByTestId, getAllByTestId } = setupForStickyTooltip();
+    const row = rowItem();
+
+    // Hover to show tooltip
+    fireEvent(row, getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
+    expect(getByTestId('tooltip')).toBeInTheDocument();
+
+    // Click to make sticky
+    fireFullClick(row, { pageX: 25, pageY: 25 });
+
+    // Mouse out — tooltip should still be present
+    fireEvent(row, getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(getAllByTestId('tooltip').length).toBeGreaterThanOrEqual(1);
+
+    // Verify the tooltip has the clickable class
+    const tooltips = getAllByTestId('tooltip');
+    const hasClickable = tooltips.some((t) =>
+      t.classList.contains('clickable')
+    );
+    expect(hasClickable).toBe(true);
+  });
+
+  it('dismisses sticky tooltip when clicking the same row again', () => {
+    const { rowItem, getByTestId, queryByTestId } = setupForStickyTooltip();
+    const row = rowItem();
+
+    // Click to make sticky
+    fireFullClick(row, { pageX: 25, pageY: 25 });
+    fireEvent(row, getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(getByTestId('tooltip')).toBeInTheDocument();
+
+    // Click again to dismiss
+    fireFullClick(row, { pageX: 25, pageY: 25 });
+    fireEvent(row, getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('moves sticky tooltip when clicking a different row', () => {
+    const { rowItems, queryAllByTestId } = setupForStickyTooltip([
+      'https://mozilla.org/1',
+      'https://mozilla.org/2',
+    ]);
+    const rows = rowItems();
+    expect(rows.length).toBe(2);
+
+    // Click first row to make sticky
+    fireFullClick(rows[0], { pageX: 25, pageY: 25 });
+    fireEvent(rows[0], getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+
+    let tooltips = queryAllByTestId('tooltip');
+    expect(tooltips.length).toBe(1);
+    expect(tooltips[0]).toHaveClass('clickable');
+
+    // Click second row — first row tooltip should go, second should appear
+    fireFullClick(rows[1], { pageX: 25, pageY: 50 });
+    fireEvent(rows[1], getMouseEvent('mouseout', { pageX: 25, pageY: 50 }));
+
+    tooltips = queryAllByTestId('tooltip');
+    expect(tooltips.length).toBe(1);
+    expect(tooltips[0]).toHaveClass('clickable');
+  });
+
+  it('dismisses sticky tooltip on Escape key', () => {
+    const { rowItem, container, getByTestId, queryByTestId } =
+      setupForStickyTooltip();
+    const row = rowItem();
+
+    // Click to make sticky
+    fireFullClick(row, { pageX: 25, pageY: 25 });
+    fireEvent(row, getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(getByTestId('tooltip')).toBeInTheDocument();
+
+    // Press Escape
+    const treeViewBody = ensureExists(
+      container.querySelector('.treeViewBody'),
+      `Couldn't find the tree view body`
+    );
+    fireEvent.keyDown(treeViewBody, { key: 'Escape' });
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('shows filter button in both hover and sticky tooltips', () => {
+    const { rowItem } = setupForStickyTooltip();
+    const row = rowItem();
+
+    // Hover tooltip should show filter button
+    fireEvent(row, getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
+    expect(
+      document.querySelector('.tooltipTitleFilterButton')
+    ).toBeInTheDocument();
+
+    // Move mouse away to dismiss hover tooltip
+    fireEvent(row, getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+
+    // Click to make sticky — filter button should still be present
+    fireFullClick(row, { pageX: 25, pageY: 25 });
+    expect(
+      document.querySelector('.tooltipTitleFilterButton')
+    ).toBeInTheDocument();
+  });
+
+  it('filters network panel when clicking filter button in tooltip', () => {
+    const { rowItems } = setupForStickyTooltip([
+      'https://mozilla.org/1',
+      'https://example.com/2',
+    ]);
+    const rows = rowItems();
+
+    // Click first row to make sticky
+    fireFullClick(rows[0], { pageX: 25, pageY: 25 });
+
+    // Click the filter button
+    const filterButton = ensureExists(
+      document.querySelector('.tooltipTitleFilterButton'),
+      `Couldn't find the filter button`
+    ) as HTMLElement;
+    fireFullClick(filterButton);
+
+    // Network search string should be set, filtering down the rows
+    const rowsAfter = rowItems();
+    expect(rowsAfter.length).toBeLessThan(rows.length);
+  });
+
+  it('dismisses sticky tooltip when opening context menu on the same row', () => {
+    jest.useFakeTimers();
+
+    const { rowItems, getByTestId, queryByTestId } = setupForStickyTooltip([
+      'https://mozilla.org/1',
+    ]);
+    const rows = rowItems();
+
+    // Click row to make sticky
+    fireFullClick(rows[0], { pageX: 25, pageY: 25 });
+    fireEvent(rows[0], getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(getByTestId('tooltip')).toBeInTheDocument();
+
+    // Right-click the same row to open context menu
+    fireFullContextMenu(rows[0]);
+
+    // The sticky tooltip should be dismissed
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('dismisses sticky tooltip when opening context menu on another row', () => {
+    jest.useFakeTimers();
+
+    const { rowItems, getByTestId, queryByTestId } = setupForStickyTooltip([
+      'https://mozilla.org/1',
+      'https://mozilla.org/2',
+    ]);
+    const rows = rowItems();
+
+    // Click row 1 to make sticky
+    fireFullClick(rows[0], { pageX: 25, pageY: 25 });
+    fireEvent(rows[0], getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(getByTestId('tooltip')).toBeInTheDocument();
+
+    // Right-click row 2 to open context menu
+    fireFullContextMenu(rows[1]);
+
+    // The sticky tooltip should be dismissed
+    expect(queryByTestId('tooltip')).not.toBeInTheDocument();
+  });
+
+  it('does not show tooltip on other rows when sticky tooltip is present', () => {
+    const { rowItems, queryAllByTestId } = setupForStickyTooltip([
+      'https://mozilla.org/1',
+      'https://mozilla.org/2',
+    ]);
+    const rows = rowItems();
+
+    // Click row 1 to make sticky
+    fireFullClick(rows[0], { pageX: 25, pageY: 25 });
+    fireEvent(rows[0], getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+
+    // Hover row 2 — only the sticky tooltip should be visible
+    fireEvent(rows[1], getMouseEvent('mouseover', { pageX: 25, pageY: 50 }));
+
+    const tooltips = queryAllByTestId('tooltip');
+    expect(tooltips.length).toBe(1);
+    expect(tooltips[0]).toHaveClass('clickable');
+  });
+});
+
 describe('calltree/ProfileCallTreeView navigation keys', () => {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);

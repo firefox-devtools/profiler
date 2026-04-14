@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { resourceTypes } from './data-structures';
+import { ResourceType } from 'firefox-profiler/types';
 
 import type {
   Thread,
@@ -49,7 +49,7 @@ export function getBottomBoxInfoForCallNode(
   const sourceIndex = funcTable.source[funcIndex];
   const resource = funcTable.resource[funcIndex];
   const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
+    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
       ? resourceTable.lib[resource]
       : null;
   const callNodeFramePerStack = getCallNodeFramePerStack(
@@ -152,7 +152,7 @@ export function getBottomBoxInfoForStackFrame(
   const sourceIndex = funcTable.source[funcIndex];
   const resource = funcTable.resource[funcIndex];
   const libIndex =
-    resource !== -1 && resourceTable.type[resource] === resourceTypes.library
+    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
       ? resourceTable.lib[resource]
       : null;
 

@@ -97,6 +97,11 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   override componentDidMount() {
     this.focus();
     this.scrollSelectionIntoView();
+    document.addEventListener('contextmenu', this._onContextMenu, true);
+  }
+
+  override componentWillUnmount() {
+    document.removeEventListener('contextmenu', this._onContextMenu, true);
   }
 
   override componentDidUpdate(prevProps: Props) {
@@ -143,6 +148,13 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   };
 
   _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Escape') {
+      event.stopPropagation();
+      event.preventDefault();
+      this._onSelectionChange(null, { source: 'keyboard' });
+      return;
+    }
+
     const hasModifier = event.ctrlKey || event.altKey;
     const isNavigationKey =
       event.key.startsWith('Arrow') ||
@@ -226,13 +238,25 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     }
   };
 
+  _onContextMenu = () => {
+    if (this.props.selectedNetworkMarkerIndex !== null) {
+      this._onSelectionChange(null, { source: 'pointer' });
+    }
+  };
+
   _onRightClick = (selectedNetworkMarkerIndex: MarkerIndex) => {
     const { threadsKey, changeRightClickedMarker } = this.props;
     changeRightClickedMarker(threadsKey, selectedNetworkMarkerIndex);
   };
 
   _onLeftClick = (selectedNetworkMarkerIndex: MarkerIndex) => {
-    this._onSelectionChange(selectedNetworkMarkerIndex, { source: 'pointer' });
+    if (this.props.selectedNetworkMarkerIndex === selectedNetworkMarkerIndex) {
+      this._onSelectionChange(null, { source: 'pointer' });
+    } else {
+      this._onSelectionChange(selectedNetworkMarkerIndex, {
+        source: 'pointer',
+      });
+    }
   };
 
   _selectWithKeyboard(selectedNetworkMarkerIndex: MarkerIndex) {
@@ -240,7 +264,7 @@ class NetworkChartImpl extends React.PureComponent<Props> {
   }
 
   _onSelectionChange = (
-    selectedNetworkMarkerIndex: MarkerIndex,
+    selectedNetworkMarkerIndex: MarkerIndex | null,
     context: SelectionContext
   ) => {
     const { threadsKey, changeSelectedNetworkMarker } = this.props;
@@ -292,7 +316,9 @@ class NetworkChartImpl extends React.PureComponent<Props> {
     this.props.changeMouseTimePosition(null);
   };
 
-  _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
+  _shouldDisplayTooltips = () =>
+    this.props.rightClickedMarkerIndex === null &&
+    this.props.selectedNetworkMarkerIndex === null;
 
   _renderRow = (markerIndex: MarkerIndex, index: number): React.ReactNode => {
     const {

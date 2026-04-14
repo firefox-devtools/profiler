@@ -9,6 +9,7 @@ import type {
   Profile,
   Thread,
   Marker,
+  LogMarkerPayload,
 } from 'firefox-profiler/types';
 import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from 'firefox-profiler/actions';
@@ -180,14 +181,10 @@ export function addDataToWindowObject(
   };
 
   target.toggleTimelineType = function (timelineType?: string) {
-    if (
-      timelineType !== 'cpu-category' &&
-      timelineType !== 'category' &&
-      timelineType !== 'stack'
-    ) {
+    if (timelineType !== 'cpu-category' && timelineType !== 'stack') {
       console.log(stripIndent`
         ❗ The timeline type "${timelineType}" is unknown.
-        💡 Valid types are: "cpu-category", "category", or "stack".
+        💡 Valid types are: "cpu-category" or "stack".
         Please try again 😊
       `);
       return;
@@ -301,36 +298,45 @@ export function addDataToWindowObject(
     const range =
       selectorsForConsole.profile.getPreviewSelectionRange(getState());
 
+    const LOG_LEVEL_LETTER: Record<number, string> = {
+      1: 'E',
+      2: 'W',
+      3: 'I',
+      4: 'D',
+      5: 'V',
+    };
+
     for (const thread of profile.threads) {
       const { markers } = thread;
+
       for (let i = 0; i < markers.length; i++) {
         const startTime = markers.startTime[i];
-        // Note that Log markers are instant markers, so they only have a start time.
         if (
           startTime !== null &&
-          markers.data[i] &&
           markers.data[i]?.type === 'Log' &&
           startTime >= range.start &&
           startTime <= range.end
         ) {
-          const data = markers.data[i];
-          const markerStartTime = markers.startTime[i];
-          if (
-            data &&
-            markerStartTime !== null &&
-            (data as any).module &&
-            (data as any).name
-          ) {
-            const strTimestamp = d2s(profile.meta.startTime + markerStartTime);
-            const processName = thread.processName ?? 'Unknown Process';
+          const data = markers.data[i] as LogMarkerPayload;
+          const strTimestamp = d2s(profile.meta.startTime + startTime);
+          const processName = thread.processName ?? 'Unknown Process';
 
-            // The log module may contain the log level for profiles captured after bug 1995503.
-            // If the log module does not contain /, we fake it to D/module
-            const logModule = (data as any).module;
-            const prefix = logModule.includes('/') ? '' : 'D/';
-            const statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${prefix}${logModule} ${(data as any).name.trim()}`;
-            logs.push(statement);
+          let statement;
+          if ('message' in data) {
+            if (!data.message) {
+              continue;
+            }
+            const moduleName = profile.shared.stringArray[markers.name[i]];
+            const levelLetter = LOG_LEVEL_LETTER[data.level] ?? 'D';
+            statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${levelLetter}/${moduleName} ${data.message.trim()}`;
+          } else {
+            if (!data.name) {
+              continue;
+            }
+            const prefix = data.module.includes('/') ? '' : 'D/';
+            statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${prefix}${data.module} ${data.name.trim()}`;
           }
+          logs.push(statement);
         }
       }
     }
@@ -421,7 +427,7 @@ export function logFriendlyPreamble() {
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
       %cwindow.experimental%c - The object that holds flags of all the experimental features.
       %cwindow.togglePseudoLocalization%c - Enable pseudo localizations by passing "accented" or "bidi" to this function, or disable using no parameters.
-      %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category", "category", or "stack".
+      %cwindow.toggleTimelineType%c - Toggle timeline graph type by passing "cpu-category" or "stack".
       %cwindow.toggleDarkMode%c - Cycle through theme preferences: system, light, dark.
       %cwindow.retrieveRawProfileDataFromBrowser%c - Retrieve the profile attached to the current tab and returns it. Use "await" to call it, and use saveToDisk to save it.
       %cwindow.extractGeckoLogs%c - Retrieve recorded logs in the current range, using the MOZ_LOG format. Use with "copy" or "saveToDisk".
@@ -431,7 +437,7 @@ export function logFriendlyPreamble() {
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
-      %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.js%c
+      %chttps://github.com/firefox-devtools/profiler/blob/main/src/profile-logic/call-tree.ts%c
     `,
     // "The following profiler..."
     intro,
@@ -490,7 +496,7 @@ export function logFriendlyPreamble() {
     // "processed-profile-format.md"
     link,
     reset,
-    // "call-tree.js"
+    // "call-tree.ts"
     link,
     reset
   );

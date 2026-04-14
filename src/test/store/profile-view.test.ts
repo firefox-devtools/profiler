@@ -1046,11 +1046,11 @@ describe('actions/ProfileView', function () {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+        selectedThreadSelectors.getSelectedMarkerIndex(getState())
       ).toEqual(null);
       dispatch(ProfileView.changeSelectedMarker(0, 0));
       expect(
-        selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+        selectedThreadSelectors.getSelectedMarkerIndex(getState())
       ).toEqual(0);
     });
   });
@@ -1971,12 +1971,12 @@ describe('snapshots of selectors/profile', function () {
     const G = funcNames.indexOf('G');
     for (
       let frameIdx = 0;
-      frameIdx < samplesThread.frameTable.length;
+      frameIdx < profile.shared.frameTable.length;
       frameIdx++
     ) {
-      const func = samplesThread.frameTable.func[frameIdx];
+      const func = profile.shared.frameTable.func[frameIdx];
       if (func === G) {
-        samplesThread.frameTable.innerWindowID[frameIdx] = innerWindowID;
+        profile.shared.frameTable.innerWindowID[frameIdx] = innerWindowID;
       }
     }
     samplesThread.usedInnerWindowIDs = [innerWindowID];
@@ -3869,12 +3869,14 @@ describe('timeline type', function () {
     );
   });
 
-  it('should use the category view when cpu is not provided', () => {
+  it('should use the cpu-category view even if no cpu is provided', () => {
     const { profile } = getProfileFromTextSamples('A');
 
     // Load the store after mutating the profile.
     const { getState } = storeWithProfile(profile);
-    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual(
+      'cpu-category'
+    );
   });
 
   it('should use the stack height view when category and cpu is not provided', () => {

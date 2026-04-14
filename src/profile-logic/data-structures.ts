@@ -8,11 +8,11 @@ import {
 } from '../app-logic/constants';
 
 import type {
+  RawProfileSharedData,
   RawThread,
   RawSamplesTable,
   FrameTable,
   RawStackTable,
-  StackTable,
   FuncTable,
   RawMarkerTable,
   JsAllocationsTable,
@@ -31,20 +31,6 @@ import type {
 /**
  * This module collects all of the creation of new empty profile data structures.
  */
-
-export function getEmptyStackTable(): StackTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    frame: [],
-    prefix: [],
-    category: [],
-    subcategory: [],
-    length: 0,
-  };
-}
 
 export function getEmptySamplesTable(): RawSamplesTable {
   return {
@@ -298,15 +284,6 @@ export function shallowCloneRawMarkerTable(
   };
 }
 
-export const resourceTypes = {
-  unknown: 0,
-  library: 1,
-  addon: 2,
-  webhost: 3,
-  otherhost: 4,
-  url: 5,
-};
-
 export function getEmptyExtensions(): ExtensionTable {
   return {
     // Important!
@@ -356,8 +333,11 @@ export function getEmptySourceTable(): SourceTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    uuid: [],
+    id: [],
     filename: [],
+    startLine: [],
+    startColumn: [],
+    sourceMapURL: [],
     length: 0,
   };
 }
@@ -377,16 +357,23 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     // Creating samples with event delay since it's the new samples table.
     samples: getEmptySamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
-    stackTable: getEmptyRawStackTable(),
-    frameTable: getEmptyFrameTable(),
-    funcTable: getEmptyFuncTable(),
-    resourceTable: getEmptyResourceTable(),
-    nativeSymbols: getEmptyNativeSymbolTable(),
   };
 
   return {
     ...defaultThread,
     ...overrides,
+  };
+}
+
+export function getEmptySharedData(): RawProfileSharedData {
+  return {
+    stackTable: getEmptyRawStackTable(),
+    frameTable: getEmptyFrameTable(),
+    funcTable: getEmptyFuncTable(),
+    resourceTable: getEmptyResourceTable(),
+    nativeSymbols: getEmptyNativeSymbolTable(),
+    sources: getEmptySourceTable(),
+    stringArray: [],
   };
 }
 
@@ -417,10 +404,7 @@ export function getEmptyProfile(): Profile {
     },
     libs: [],
     pages: [],
-    shared: {
-      stringArray: [],
-      sources: getEmptySourceTable(),
-    },
+    shared: getEmptySharedData(),
     threads: [],
   };
 }

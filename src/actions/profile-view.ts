@@ -15,6 +15,7 @@ import {
   getLocalTracksByPid,
   getThreads,
   getLastNonShiftClick,
+  getReservedFunctionsForResources,
 } from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
@@ -1829,9 +1830,8 @@ export function addCollapseResourceTransformToStack(
   implementation: ImplementationFilter
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const reservedFunctionsForResources =
-      threadSelectors.getReservedFunctionsForResources(getState());
+      getReservedFunctionsForResources(getState());
     const collapsedFuncIndex = ensureExists(
       ensureExists(reservedFunctionsForResources).get(resourceIndex)
     );

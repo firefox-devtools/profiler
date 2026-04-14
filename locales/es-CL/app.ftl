@@ -284,9 +284,11 @@ Home--enable-button-unavailable =
 # This message can be seen on https://main--perf-html.netlify.app/ .
 Home--web-channel-unavailable = Esta instancia del perfilador no pudo conectarse a WebChannel. Esto usualmente significa que está ejecutándose en un servidor diferente del especificado en la preferencia <code>devtools.performance.recording.ui-base-url</code>. Si quieres capturar nuevos perfiles con esta instancia, y otorgarle control programático del botón del menú del perfilador, puedes ir a <code>about:config</code> y cambiar la preferencia.
 Home--record-instructions = Para empezar a perfilar, haz clic en el botón de perfilado o utiliza los atajos del teclado. El icono se torna azul cuando se está grabando un perfil. Pulsa <kbd>Capturar</kbd> para cargar los datos en profiler.firefox.com.
-Home--instructions-content =
-    Registrar perfiles de rendimiento requiere de <a>{ -firefox-brand-name }</a>.
+Home--instructions-content2 =
+    Registrar perfiles de rendimiento requiere de <a>{ -firefox-brand-name } para escritorio</a>.
     Sin embargo, los perfiles existentes pueden ser vistos en cualquier navegador moderno.
+Home--fenix-instructions-directly = { -firefox-android-brand-name } puede ser perfilado directamente en este dispositivo. Para más información, consulta <a>Perfilar { -firefox-android-brand-name } directamente en el dispositivo</a>.
+Home--fenix-instructions-remotely = También puedes perfilar { -firefox-android-brand-name } de forma remota desde { -firefox-brand-name } para escritorio. Para más información, consulta esta documentación: <a>Perfilar { -firefox-android-brand-name } de forma remota</a>.
 Home--record-instructions-start-stop = Detener e iniciar perfilado
 Home--record-instructions-capture-load = Capturar y cargar perfil
 Home--profiler-motto = Captura un perfil de rendimiento. Analízalo. Compártelo. Haz que la web sea más rápida.

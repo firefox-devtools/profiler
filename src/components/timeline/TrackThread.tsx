@@ -53,7 +53,6 @@ import type {
   StartEndRange,
   ImplementationFilter,
   IndexIntoCallNodeTable,
-  SelectedState,
   State,
   ThreadsKey,
 } from 'firefox-profiler/types';
@@ -81,14 +80,13 @@ type StateProps = {
   readonly categories: CategoryList;
   readonly timelineType: TimelineType;
   readonly hasFileIoMarkers: boolean;
-  readonly samplesSelectedStates: null | SelectedState[];
+  readonly sampleSelectedStates: Uint8Array;
   readonly sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
   ) => number;
   readonly selectedThreadIndexes: Set<ThreadIndex>;
-  readonly enableCPUUsage: boolean;
   readonly isExperimentalCPUGraphsEnabled: boolean;
   readonly implementationFilter: ImplementationFilter;
   readonly callTreeVisible: boolean;
@@ -183,11 +181,10 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
       hasFileIoMarkers,
       showMemoryMarkers,
       sampleNonInvertedCallNodes,
-      samplesSelectedStates,
+      sampleSelectedStates,
       treeOrderSampleComparator,
       trackType,
       trackName,
-      enableCPUUsage,
       isExperimentalCPUGraphsEnabled,
       implementationFilter,
       zeroAt,
@@ -242,8 +239,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
           />
         ) : null}
 
-        {(timelineType === 'category' || timelineType === 'cpu-category') &&
-        !filteredThread.isJsTracer ? (
+        {timelineType !== 'stack' && !filteredThread.isJsTracer ? (
           <>
             <ThreadActivityGraph
               className="threadActivityGraph"
@@ -256,11 +252,9 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
               sampleIndexOffset={sampleIndexOffset}
               onSampleClick={this._onSampleClick}
               categories={categories}
-              samplesSelectedStates={samplesSelectedStates}
+              sampleSelectedStates={sampleSelectedStates}
               treeOrderSampleComparator={treeOrderSampleComparator}
-              enableCPUUsage={enableCPUUsage}
               implementationFilter={implementationFilter}
-              timelineType={timelineType}
               zeroAt={zeroAt}
               profileTimelineUnit={profileTimelineUnit}
             />
@@ -272,17 +266,16 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 thread={filteredThread}
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
-                samplesSelectedStates={samplesSelectedStates}
+                sampleSelectedStates={sampleSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
-                timelineType={timelineType}
                 implementationFilter={implementationFilter}
                 zeroAt={zeroAt}
                 profileTimelineUnit={profileTimelineUnit}
               />
             ) : null}
             {isExperimentalCPUGraphsEnabled &&
-            rangeFilteredThread.samples.threadCPURatio !== undefined ? (
+            rangeFilteredThread.samples.hasCPUDeltas ? (
               <ThreadCPUGraph
                 className="threadCPUGraph"
                 trackName={trackName}
@@ -291,7 +284,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
                 rangeStart={rangeStart}
                 rangeEnd={rangeEnd}
                 callNodeInfo={callNodeInfo}
-                samplesSelectedStates={samplesSelectedStates}
+                sampleSelectedStates={sampleSelectedStates}
                 categories={categories}
                 onSampleClick={this._onSampleClick}
               />
@@ -307,7 +300,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             callNodeInfo={callNodeInfo}
             sampleNonInvertedCallNodes={sampleNonInvertedCallNodes}
-            samplesSelectedStates={samplesSelectedStates}
+            sampleSelectedStates={sampleSelectedStates}
             categories={categories}
             onSampleClick={this._onSampleClick}
           />
@@ -336,9 +329,6 @@ export const TimelineTrackThread = explicitConnect<
     const committedRange = getCommittedRange(state);
     const fullThread = selectors.getThread(state);
     const timelineType = getTimelineType(state);
-    const enableCPUUsage =
-      timelineType === 'cpu-category' &&
-      fullThread.samples.threadCPURatio !== undefined;
 
     return {
       fullThread,
@@ -358,12 +348,11 @@ export const TimelineTrackThread = explicitConnect<
       timelineType,
       hasFileIoMarkers:
         selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
-      samplesSelectedStates:
-        selectors.getSamplesSelectedStatesInFilteredThread(state),
+      sampleSelectedStates:
+        selectors.getSampleSelectedStatesInFilteredThread(state),
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,
-      enableCPUUsage,
       isExperimentalCPUGraphsEnabled: getIsExperimentalCPUGraphsEnabled(state),
       implementationFilter: getImplementationFilter(state),
       callTreeVisible: selectors.getUsefulTabs(state).includes('calltree'),

@@ -350,9 +350,16 @@ Home--record-instructions =
     Чтобы начать профилирование, нажмите кнопку профилирования или используйте горячие
     клавиши. Значок синий, когда профиль записывает.
     Нажмите <kbd>Запись</kbd>, чтобы загрузить данные на profiler.firefox.com.
-Home--instructions-content =
-    Для записи профилей производительности требуется <a>{ -firefox-brand-name }</a>.
+Home--instructions-content2 =
+    Для записи профилей производительности требуется <a>{ -firefox-brand-name } для ПК</a>.
     Однако существующие профили можно просматривать в любом современном браузере.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } может быть профилирован непосредственно на этом устройстве. Для
+    для получения дополнительной информации прочитайте <a>Профилирование { -firefox-android-brand-name } непосредственно на устройстве</a>.
+Home--fenix-instructions-remotely =
+    Вы также можете профилировать { -firefox-android-brand-name } удалённо из { -firefox-brand-name }
+    для компьютера. Для получения дополнительной информации, пожалуйста, обратитесь к этой документации:
+    <a>Удалённое профилирование { -firefox-android-brand-name }</a>.
 Home--record-instructions-start-stop = Остановить и начать профилирование
 Home--record-instructions-capture-load = Запись и загрузка профиля
 Home--profiler-motto = Запишите профиль производительности. Проанализируйте его. Поделитесь им. Сделайте Интернет быстрее.
@@ -736,7 +743,7 @@ ProfileDeletePanel--delete-error = При удалении этого профи
 # This is the title of the dialog
 # Variables:
 #   $profileName (string) - Some string that identifies the profile
-ProfileDeletePanel--dialog-title = Удалить { $profileName }
+ProfileDeletePanel--dialog-title = Удалить «{ $profileName }»
 ProfileDeletePanel--dialog-confirmation-question =
     Вы уверены, что хотите удалить загруженные данные для этого профиля? Ссылки,
     которые ранее были общими, больше не будут работать.

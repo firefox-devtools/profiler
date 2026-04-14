@@ -20,7 +20,7 @@
  */
 import { EditorView, lineNumbers } from '@codemirror/view';
 import { EditorState, Compartment } from '@codemirror/state';
-import { syntaxHighlighting } from '@codemirror/language';
+import { type LanguageSupport, syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import { cpp } from '@codemirror/lang-cpp';
 import { rust } from '@codemirror/lang-rust';
@@ -41,10 +41,12 @@ const languageConf = new Compartment();
 // This "compartment" allows us to swap the highlighted line when it changes.
 const highlightedLineConf = new Compartment();
 
+// This "compartment" allows us to reconfigure the line number formatter when
+// startLine changes.
+const lineNumbersConf = new Compartment();
+
 // Detect the right language based on the file extension.
-function _languageExtForPath(
-  path: string | null
-): any /* LanguageSupport | [] */ {
+function _languageExtForPath(path: string | null): LanguageSupport | [] {
   if (path === null) {
     return [];
   }
@@ -73,7 +75,11 @@ function _languageExtForPath(
   ) {
     return cpp();
   }
-  return [];
+
+  // Fallback to JavaScript highlighting. Inline scripts share the page URL, so
+  // their path won't have a .js extension. This may be incorrect for
+  // unknown/unsupported file types, but is the best guess for the common case.
+  return javascript();
 }
 
 // Adjustments to make a CodeMirror editor work as a non-editable code viewer.
@@ -85,6 +91,16 @@ const codeViewerExtension = [
   EditorView.contentAttributes.of({ tabindex: '0' }),
 ];
 
+// Creates a lineNumbers extension that displays line numbers offset by startLine - 1.
+function _lineNumbersForStartLine(startLine: number) {
+  if (startLine <= 1) {
+    return lineNumbers();
+  }
+  return lineNumbers({
+    formatNumber: (n) => String(n + startLine - 1),
+  });
+}
+
 export class SourceViewEditor {
   _view: EditorView;
 
@@ -94,13 +110,14 @@ export class SourceViewEditor {
     path: string,
     timings: LineTimings,
     highlightedLine: number | null,
+    startLine: number,
     domParent: Element
   ) {
     let state = EditorState.create({
       doc: initialText,
       extensions: [
         timingsExtension,
-        lineNumbers(),
+        lineNumbersConf.of(_lineNumbersForStartLine(startLine)),
         languageConf.of(_languageExtForPath(path)),
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
@@ -149,6 +166,13 @@ export class SourceViewEditor {
       effects: highlightedLineConf.reconfigure(
         createHighlightedLineExtension(lineNumber)
       ),
+    });
+  }
+
+  setStartLine(startLine: number) {
+    // Reconfigure the line numbers extension to display the new offset.
+    this._view.dispatch({
+      effects: lineNumbersConf.reconfigure(_lineNumbersForStartLine(startLine)),
     });
   }
 

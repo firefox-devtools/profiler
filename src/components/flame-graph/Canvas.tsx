@@ -32,6 +32,7 @@ import type {
   SamplesLikeTable,
   InnerWindowID,
   Page,
+  SampleCategoriesAndSubcategories,
 } from 'firefox-profiler/types';
 
 import type {
@@ -55,8 +56,6 @@ export type OwnProps = {
   readonly thread: Thread;
   readonly weightType: WeightType;
   readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
-  readonly unfilteredThread: Thread;
-  readonly ctssSampleIndexOffset: number;
   readonly maxStackDepthPlusOne: number;
   readonly flameGraphTiming: FlameGraphTiming;
   readonly callNodeInfo: CallNodeInfo;
@@ -74,7 +73,7 @@ export type OwnProps = {
   readonly isInverted: boolean;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
-  readonly unfilteredCtssSamples: SamplesLikeTable;
+  readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
   readonly tracedTiming: CallTreeTimingsNonInverted | null;
   readonly displayStackType: boolean;
 };
@@ -355,8 +354,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   }: HoveredStackTiming): React.ReactNode => {
     const {
       thread,
-      unfilteredThread,
-      ctssSampleIndexOffset,
       flameGraphTiming,
       callTree,
       callNodeInfo,
@@ -367,7 +364,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       innerWindowIDToPageMap,
       weightType,
       ctssSamples,
-      unfilteredCtssSamples,
+      ctssSampleCategoriesAndSubcategories,
       tracedTiming,
       displayStackType,
     } = this.props;
@@ -426,11 +423,9 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
             ? this._getTimingsForCallNodeIndex(
                 callNodeIndex,
                 callNodeInfo,
-                unfilteredThread,
-                ctssSampleIndexOffset,
                 categories,
                 ctssSamples,
-                unfilteredCtssSamples
+                ctssSampleCategoriesAndSubcategories
               )
             : undefined
         }

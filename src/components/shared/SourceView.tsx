@@ -43,9 +43,32 @@ type SourceViewProps = {
   readonly scrollGeneration: number;
   readonly scrollToLineNumber?: number;
   readonly highlightedLine: number | null;
+  // 1-based line number for the start of the source in the full document.
+  readonly startLine: number;
 };
 
 let editorModulePromise: Promise<any> | null = null;
+
+// Remap absolute line timings to document-relative (1-based) line numbers.
+// Timings keys are absolute line numbers; CodeMirror uses doc-relative line numbers.
+function remapTimingsToRelative(
+  timings: LineTimings,
+  startLine: number
+): LineTimings {
+  if (startLine <= 1) {
+    return timings;
+  }
+  const offset = startLine - 1;
+  const totalLineHits = new Map<number, number>();
+  for (const [line, hits] of timings.totalLineHits) {
+    totalLineHits.set(line - offset, hits);
+  }
+  const selfLineHits = new Map<number, number>();
+  for (const [line, hits] of timings.selfLineHits) {
+    selfLineHits.set(line - offset, hits);
+  }
+  return { totalLineHits, selfLineHits };
+}
 
 export class SourceView extends React.PureComponent<SourceViewProps> {
   _ref = React.createRef<HTMLDivElement>();
@@ -57,8 +80,28 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     }
   }
 
+  _toRelativeLine(absoluteLine: number): number {
+    return Math.max(1, absoluteLine - (this.props.startLine - 1));
+  }
+
+  // Convert an absolute scroll-to line number to a doc-relative line number.
+  _getRelativeScrollToLineNumber(): number | undefined {
+    const { scrollToLineNumber } = this.props;
+    return scrollToLineNumber === undefined
+      ? undefined
+      : this._toRelativeLine(scrollToLineNumber);
+  }
+
+  // Convert an absolute highlighted line number to a doc-relative line number.
+  _getRelativeHighlightedLine(): number | null {
+    const { highlightedLine } = this.props;
+    return highlightedLine === null
+      ? null
+      : this._toRelativeLine(highlightedLine);
+  }
+
   _getMaxLineNumber() {
-    const { sourceCode, timings } = this.props;
+    const { sourceCode, timings, startLine } = this.props;
     const sourceLines = sourceCode.split('\n');
     let maxLineNumber = sourceLines.length;
     if (maxLineNumber <= 1) {
@@ -69,7 +112,9 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       // isn't too constrained - if the last known line is chosen as the "hot spot",
       // this extra space allows us to display it in the top half of the viewport,
       // if the viewport is small enough.
-      maxLineNumber = Math.max(1, ...timings.totalLineHits.keys()) + 10;
+      // timings keys are absolute line numbers; convert to doc-relative count.
+      const maxAbsoluteLine = Math.max(1, ...timings.totalLineHits.keys());
+      maxLineNumber = Math.max(1, maxAbsoluteLine - startLine + 1) + 10;
     }
     return maxLineNumber;
   }
@@ -108,14 +153,16 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       const editor = new SourceViewEditor(
         this._getSourceCodeOrFallback(),
         this.props.filePath,
-        this.props.timings,
-        this.props.highlightedLine,
+        remapTimingsToRelative(this.props.timings, this.props.startLine),
+        this._getRelativeHighlightedLine(),
+        this.props.startLine,
         domParent
       );
       this._editor = editor;
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
-      if (this.props.scrollToLineNumber !== undefined) {
-        this._scrollToLine(Math.max(1, this.props.scrollToLineNumber - 5));
+      const relativeScrollTo = this._getRelativeScrollToLineNumber();
+      if (relativeScrollTo !== undefined) {
+        this._scrollToLine(Math.max(1, relativeScrollTo - 5));
       }
     })();
   }
@@ -129,6 +176,11 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
 
     if (this.props.filePath !== prevProps.filePath) {
       this._editor.updateLanguageForFilePath(this.props.filePath);
+    }
+
+    const startLineChanged = this.props.startLine !== prevProps.startLine;
+    if (startLineChanged) {
+      this._editor.setStartLine(this.props.startLine);
     }
 
     let contentsChanged = false;
@@ -147,17 +199,23 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       this.props.scrollGeneration !== prevProps.scrollGeneration
     ) {
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
-      if (this.props.scrollToLineNumber !== undefined) {
-        this._scrollToLine(Math.max(1, this.props.scrollToLineNumber - 5));
+      const relativeScrollTo = this._getRelativeScrollToLineNumber();
+      if (relativeScrollTo !== undefined) {
+        this._scrollToLine(Math.max(1, relativeScrollTo - 5));
       }
     }
 
-    if (this.props.timings !== prevProps.timings) {
-      this._editor.setTimings(this.props.timings);
+    if (this.props.timings !== prevProps.timings || startLineChanged) {
+      this._editor.setTimings(
+        remapTimingsToRelative(this.props.timings, this.props.startLine)
+      );
     }
 
-    if (this.props.highlightedLine !== prevProps.highlightedLine) {
-      this._editor.setHighlightedLine(this.props.highlightedLine);
+    if (
+      this.props.highlightedLine !== prevProps.highlightedLine ||
+      startLineChanged
+    ) {
+      this._editor.setHighlightedLine(this._getRelativeHighlightedLine());
     }
   }
 }

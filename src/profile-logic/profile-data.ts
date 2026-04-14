@@ -6,7 +6,6 @@ import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
-  resourceTypes,
   getEmptyRawStackTable,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
@@ -16,7 +15,7 @@ import {
   CallNodeInfoNonInverted,
   CallNodeInfoInverted,
 } from './call-node-info';
-import { computeThreadCPURatio } from './cpu';
+import { computeThreadCPUPercent } from './cpu';
 import {
   INSTANT,
   INTERVAL,
@@ -25,7 +24,13 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { bisectionRight, bisectionLeft } from 'firefox-profiler/utils/bisect';
-import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
+import {
+  type BitSet,
+  checkBit,
+  combineTwoBitSetsWithAnd,
+  makeBitSet,
+  setBit,
+} from 'firefox-profiler/utils/bitset';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   ensureExists,
@@ -75,7 +80,6 @@ import type {
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
   SamplesLikeTable,
-  SelectedState,
   ProfileFilterPageData,
   Milliseconds,
   StartEndRange,
@@ -83,18 +87,20 @@ import type {
   CallTreeSummaryStrategy,
   EventDelayInfo,
   ThreadsKey,
-  ResourceTypeEnum,
   MarkerPayload,
   Address,
   AddressProof,
   TimelineType,
   NativeSymbolInfo,
   Bytes,
-  ThreadWithReservedFunctions,
+  FuncTableWithReservedFunctions,
   TabID,
   SourceTable,
   IndexIntoSourceTable,
+  TransformOutput,
+  SampleCategoriesAndSubcategories,
 } from 'firefox-profiler/types';
+import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 
 /**
@@ -896,13 +902,13 @@ export function getSampleIndexToCallNodeIndex(
 }
 
 /**
- * This is an implementation of getSamplesSelectedStates for just the case where
+ * This is an implementation of getSampleSelectedStates for just the case where
  * no call node is selected.
  */
-function _getSamplesSelectedStatesForNoSelection(
+function _getSampleSelectedStatesForNoSelection(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>
-): SelectedState[] {
-  const result = new Array(sampleCallNodes.length);
+): Uint8Array {
+  const result = new Uint8Array(sampleCallNodes.length);
   for (
     let sampleIndex = 0;
     sampleIndex < sampleCallNodes.length;
@@ -912,12 +918,12 @@ function _getSamplesSelectedStatesForNoSelection(
     // because everything is unselected. So let's pretend that
     // everything is selected so that anything not filtered out will be nicely
     // visible.
-    let sampleSelectedState = 'SELECTED';
+    let sampleSelectedState = SelectedState.Selected;
 
     // But we still want to display filtered-out samples differently.
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex === null) {
-      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
 
     result[sampleIndex] = sampleSelectedState;
@@ -972,70 +978,70 @@ function _getSamplesSelectedStatesForNoSelection(
  * In this example, the selected node has index 13 and the "selected index range"
  * is the range from 13 to 21 (not including 21).
  */
-function _getSamplesSelectedStatesNonInverted(
+function _getSampleSelectedStatesNonInverted(
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo
-): SelectedState[] {
+): Uint8Array {
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const selectedCallNodeDescendantsEndIndex =
     callNodeTable.subtreeRangeEnd[selectedCallNodeIndex];
   const sampleCount = sampleCallNodes.length;
-  const samplesSelectedStates = new Array(sampleCount);
+  const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = 'SELECTED';
+    let sampleSelectedState: SelectedState = SelectedState.Selected;
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       if (callNodeIndex < selectedCallNodeIndex) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
       } else if (callNodeIndex < selectedCallNodeDescendantsEndIndex) {
-        sampleSelectedState = 'SELECTED';
+        sampleSelectedState = SelectedState.Selected;
       } else {
-        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
       }
     } else {
       // This sample was filtered out.
-      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
-    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+    sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
-  return samplesSelectedStates;
+  return sampleSelectedStates;
 }
 
 /**
- * The implementation of getSamplesSelectedStates for the inverted tree.
+ * The implementation of getSampleSelectedStates for the inverted tree.
  *
  * This uses the suffix order, see the documentation of CallNodeInfoInverted.
  */
-function _getSamplesSelectedStatesInverted(
+function _getSampleSelectedStatesInverted(
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedInvertedCallNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfoInverted
-): SelectedState[] {
+): Uint8Array {
   const suffixOrderIndexes = callNodeInfo.getSuffixOrderIndexes();
   const [selectedSubtreeRangeStart, selectedSubtreeRangeEnd] =
     callNodeInfo.getSuffixOrderIndexRangeForCallNode(
       selectedInvertedCallNodeIndex
     );
   const sampleCount = sampleNonInvertedCallNodes.length;
-  const samplesSelectedStates = new Array(sampleCount);
+  const sampleSelectedStates = new Uint8Array(sampleCount);
   for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
-    let sampleSelectedState: SelectedState = 'SELECTED';
+    let sampleSelectedState: SelectedState = SelectedState.Selected;
     const callNodeIndex = sampleNonInvertedCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const suffixOrderIndex = suffixOrderIndexes[callNodeIndex];
       if (suffixOrderIndex < selectedSubtreeRangeStart) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_BEFORE_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedBeforeSelected;
       } else if (suffixOrderIndex >= selectedSubtreeRangeEnd) {
-        sampleSelectedState = 'UNSELECTED_ORDERED_AFTER_SELECTED';
+        sampleSelectedState = SelectedState.UnselectedOrderedAfterSelected;
       }
     } else {
       // This sample was filtered out.
-      sampleSelectedState = 'FILTERED_OUT_BY_TRANSFORM';
+      sampleSelectedState = SelectedState.FilteredOutByTransform;
     }
-    samplesSelectedStates[sampleIndex] = sampleSelectedState;
+    sampleSelectedStates[sampleIndex] = sampleSelectedState;
   }
-  return samplesSelectedStates;
+  return sampleSelectedStates;
 }
 
 /**
@@ -1045,23 +1051,23 @@ function _getSamplesSelectedStatesInverted(
  * This is used in the activity graph. The "ordering" is used so that samples
  * from the same subtree (in the call tree) "clump together" in the graph.
  */
-export function getSamplesSelectedStates(
+export function getSampleSelectedStates(
   callNodeInfo: CallNodeInfo,
   sampleNonInvertedCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
-): SelectedState[] {
+): Uint8Array {
   if (selectedCallNodeIndex === null || selectedCallNodeIndex === -1) {
-    return _getSamplesSelectedStatesForNoSelection(sampleNonInvertedCallNodes);
+    return _getSampleSelectedStatesForNoSelection(sampleNonInvertedCallNodes);
   }
 
   const callNodeInfoInverted = callNodeInfo.asInverted();
   return callNodeInfoInverted !== null
-    ? _getSamplesSelectedStatesInverted(
+    ? _getSampleSelectedStatesInverted(
         sampleNonInvertedCallNodes,
         selectedCallNodeIndex,
         callNodeInfoInverted
       )
-    : _getSamplesSelectedStatesNonInverted(
+    : _getSampleSelectedStatesNonInverted(
         sampleNonInvertedCallNodes,
         selectedCallNodeIndex,
         callNodeInfo
@@ -1111,20 +1117,16 @@ export type TimingsForPath = {
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  unfilteredThread: Thread,
-  sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ) {
   return getTimingsForCallNodeIndex(
     callNodeInfo.getCallNodeIndexFromPath(needlePath),
     callNodeInfo,
-    unfilteredThread,
-    sampleIndexOffset,
     categories,
     samples,
-    unfilteredSamples
+    sampleCategoriesAndSubcategories
   );
 }
 
@@ -1139,18 +1141,14 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   callNodeInfo: CallNodeInfo,
-  unfilteredThread: Thread,
-  sampleIndexOffset: number,
   categories: CategoryList,
   samples: SamplesLikeTable,
-  unfilteredSamples: SamplesLikeTable
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
 
-  // This is the data from the unfiltered thread that we'll use to gather
-  // category and JS implementation information. Note that samples are offset by
-  // `sampleIndexOffset` because of range filtering.
-  const { stackTable: unfilteredStackTable } = unfilteredThread;
+  const { sampleCategories, sampleSubcategories } =
+    sampleCategoriesAndSubcategories;
 
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
@@ -1189,28 +1187,21 @@ export function getTimingsForCallNodeIndex(
     // Step 1: increment the total value
     timings.value += duration;
 
-    // step 2: find the category value for this stack. We want to use the
-    // category of the unfilteredThread.
-    const unfilteredStackIndex =
-      unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
-    if (unfilteredStackIndex !== null) {
-      const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
-      const subcategoryIndex =
-        unfilteredStackTable.subcategory[unfilteredStackIndex];
+    // step 2: find the category value for this stack.
+    const categoryIndex = sampleCategories[sampleIndex];
+    const subcategoryIndex = sampleSubcategories[sampleIndex];
 
-      // step 3: increment the right value in the category breakdown
-      if (timings.breakdownByCategory === null) {
-        timings.breakdownByCategory = categories.map((category) => ({
-          entireCategoryValue: 0,
-          subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-        }));
-      }
-      timings.breakdownByCategory[categoryIndex].entireCategoryValue +=
-        duration;
-      timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-        subcategoryIndex
-      ] += duration;
+    // step 3: increment the right value in the category breakdown
+    if (timings.breakdownByCategory === null) {
+      timings.breakdownByCategory = categories.map((category) => ({
+        entireCategoryValue: 0,
+        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
+      }));
     }
+    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
+    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
+      subcategoryIndex
+    ] += duration;
   }
   /* ------------- End of function definitions ------------- */
 
@@ -1557,51 +1548,123 @@ export function toValidCallTreeSummaryStrategy(
 
 export function filterThreadByImplementation(
   thread: Thread,
-  implementation: string
+  implementation: ImplementationFilter
 ): Thread {
-  const { funcTable, stringTable } = thread;
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
+  const transformOutput = computeTransformOutputForImplementationFilter(
+    stackTable,
+    frameTable,
+    funcTable,
+    stringTable,
+    implementation
+  );
+  return applyTransformOutputToThread(transformOutput, thread);
+}
 
+export function computeTransformOutputForImplementationFilter(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  stringTable: StringTable,
+  implementation: ImplementationFilter
+): TransformOutput {
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(thread, (funcIndex) => {
-        // Return quickly if this is a JS frame.
-        if (funcTable.isJS[funcIndex]) {
-          return false;
+      return _computeTransformOutputForMergingFuncs(
+        stackTable,
+        frameTable,
+        (funcIndex) => {
+          // Return quickly if this is a JS frame.
+          if (funcTable.isJS[funcIndex]) {
+            return false;
+          }
+          // Regular C++ functions are associated with a resource that describes the
+          // shared library that these C++ functions were loaded from. Jitcode is not
+          // loaded from shared libraries but instead generated at runtime, so Jitcode
+          // frames are not associated with a shared library and thus have no resource
+          const locationString = stringTable.getString(
+            funcTable.name[funcIndex]
+          );
+          const isProbablyJitCode =
+            funcTable.resource[funcIndex] === -1 &&
+            locationString.startsWith('0x');
+          return !isProbablyJitCode;
         }
-        // Regular C++ functions are associated with a resource that describes the
-        // shared library that these C++ functions were loaded from. Jitcode is not
-        // loaded from shared libraries but instead generated at runtime, so Jitcode
-        // frames are not associated with a shared library and thus have no resource
-        const locationString = stringTable.getString(funcTable.name[funcIndex]);
-        const isProbablyJitCode =
-          funcTable.resource[funcIndex] === -1 &&
-          locationString.startsWith('0x');
-        return !isProbablyJitCode;
-      });
+      );
     case 'js':
-      return _filterThreadByFunc(thread, (funcIndex) => {
-        return funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex];
-      });
+      return _computeTransformOutputForMergingFuncs(
+        stackTable,
+        frameTable,
+        (funcIndex) => {
+          return (
+            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
+          );
+        }
+      );
     default:
-      return thread;
+      return {
+        newStackTable: stackTable,
+        effectOnThreadData: {},
+      };
   }
 }
 
-function _filterThreadByFunc(
-  thread: Thread,
-  shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
-): Thread {
-  return timeCode('_filterThreadByFunc', () => {
-    const { stackTable, frameTable } = thread;
+/**
+ * A helper function for creating a new StackTable.
+ *
+ * The caller passes in the prefix column of the new StackTable,
+ * and a bitset about which stacks to keep. Then this function
+ * computes the remaining columns by copying over the information
+ * from the original StackTable, skipping (discarding) values for
+ * any stacks that we don't keep.
+ *
+ * When this function is called, the length of the new StackTable
+ * is already known, and the new category/subcategory columns (which are
+ * typed arrays) can immediately be created with the correct length.
+ */
+export function createStackTableBySkippingDiscarded(
+  stackTable: StackTable,
+  newPrefixCol: Array<IndexIntoStackTable | null>,
+  keepStack: BitSet
+): StackTable {
+  const newStackCount = newPrefixCol.length;
+  const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
+  const newCategoryCol = new Uint8Array(newStackCount);
+  const newSubcategoryCol =
+    stackTable.subcategory instanceof Uint16Array
+      ? new Uint16Array(newStackCount)
+      : new Uint8Array(newStackCount);
 
-    const newStackTable: StackTable = {
-      length: 0,
-      frame: [],
-      prefix: [],
-      category: [],
-      subcategory: [],
-    };
+  let nextNewStackIndex = 0;
+  for (let i = 0; i < stackTable.length; i++) {
+    if (!checkBit(keepStack, i)) {
+      continue;
+    }
+
+    const newStackIndex = nextNewStackIndex++;
+    newFrameCol[newStackIndex] = stackTable.frame[i];
+    newCategoryCol[newStackIndex] = stackTable.category[i];
+    newSubcategoryCol[newStackIndex] = stackTable.subcategory[i];
+  }
+
+  return {
+    frame: newFrameCol,
+    prefix: newPrefixCol,
+    length: newStackCount,
+    category: newCategoryCol,
+    subcategory: newSubcategoryCol,
+  };
+}
+
+function _computeTransformOutputForMergingFuncs(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
+): TransformOutput {
+  return timeCode('_computeTransformOutputForMergingFuncs', () => {
+    const newPrefixCol = new Array<IndexIntoStackTable | null>();
     const oldStackToNewStack = new Int32Array(stackTable.length);
+    const keepStack = makeBitSet(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const oldPrefix = stackTable.prefix[stackIndex];
@@ -1609,62 +1672,114 @@ function _filterThreadByFunc(
       const func = frameTable.func[frame];
       const newPrefix = oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
       if (shouldIncludeFuncInFilteredThread(func)) {
-        const newStackIndex = newStackTable.length++;
-        newStackTable.frame[newStackIndex] = frame;
-        newStackTable.prefix[newStackIndex] =
-          newPrefix !== -1 ? newPrefix : null;
-        newStackTable.category[newStackIndex] = stackTable.category[stackIndex];
-        newStackTable.subcategory[newStackIndex] =
-          stackTable.subcategory[stackIndex];
+        const newStackIndex = newPrefixCol.length;
+        newPrefixCol[newStackIndex] = newPrefix !== -1 ? newPrefix : null;
         oldStackToNewStack[stackIndex] = newStackIndex;
+        setBit(keepStack, stackIndex);
       } else {
         oldStackToNewStack[stackIndex] = newPrefix;
       }
     }
 
-    return updateThreadStacks(thread, newStackTable, (oldStack) => {
-      if (oldStack === null) {
+    const newStackTable = createStackTableBySkippingDiscarded(
+      stackTable,
+      newPrefixCol,
+      keepStack
+    );
+    return {
+      newStackTable,
+      effectOnThreadData: {
+        oldStackToNewStack,
+      },
+    };
+  });
+}
+
+export function applyTransformOutputToThread(
+  transformOutput: TransformOutput,
+  thread: Thread
+): Thread {
+  const { newStackTable, effectOnThreadData } = transformOutput;
+
+  return updateThreadStacks(thread, newStackTable, (oldStack) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const { oldStackToNewStack, dropIfOldStackIsNot } = effectOnThreadData;
+    if (dropIfOldStackIsNot !== undefined) {
+      const shouldKeep = checkBit(dropIfOldStackIsNot, oldStack);
+      if (!shouldKeep) {
         return null;
       }
+    }
+    if (oldStackToNewStack !== undefined) {
       const newStack = oldStackToNewStack[oldStack];
       return newStack !== -1 ? newStack : null;
-    });
+    }
+    return oldStack;
   });
 }
 
-export function filterThreadToSearchStrings(
-  thread: Thread,
+export function computeTransformOutputForSearchStringFilter(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
   searchStrings: string[] | null
-): Thread {
-  return timeCode('filterThreadToSearchStrings', () => {
-    if (!searchStrings || !searchStrings.length) {
-      return thread;
+): TransformOutput {
+  return timeCode('computeTransformOutputForSearchStringFilter', () => {
+    if (!searchStrings) {
+      return { newStackTable: stackTable, effectOnThreadData: {} };
     }
 
-    return searchStrings.reduce(
-      (accThread, searchString) =>
-        filterThreadToSearchString(accThread, searchString),
-      thread
-    );
+    const stackMatchesAllSearchStrings = searchStrings
+      .filter((s) => s)
+      .reduce(
+        (
+          stackMatchesPreviousSearchStrings: BitSet | undefined,
+          searchString: string
+        ) => {
+          const stackMatchesThisString = _computeStackMatchesSearchString(
+            stackTable,
+            frameTable,
+            funcTable,
+            resourceTable,
+            sources,
+            stringTable,
+            searchString
+          );
+          if (stackMatchesPreviousSearchStrings !== undefined) {
+            return combineTwoBitSetsWithAnd(
+              stackMatchesThisString,
+              stackMatchesPreviousSearchStrings
+            );
+          }
+          return stackMatchesThisString;
+        },
+        undefined
+      );
+
+    return {
+      newStackTable: stackTable,
+      effectOnThreadData: {
+        dropIfOldStackIsNot: stackMatchesAllSearchStrings,
+      },
+    };
   });
 }
 
-export function filterThreadToSearchString(
-  thread: Thread,
+function _computeStackMatchesSearchString(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
   searchString: string
-): Thread {
-  if (!searchString) {
-    return thread;
-  }
+): BitSet {
   const lowercaseSearchString = searchString.toLowerCase();
-  const {
-    funcTable,
-    frameTable,
-    stackTable,
-    stringTable,
-    resourceTable,
-    sources,
-  } = thread;
 
   function computeFuncMatchesSearch(func: IndexIntoFuncTable) {
     const nameIndex = funcTable.name[func];
@@ -1714,13 +1829,7 @@ export function filterThreadToSearchString(
     }
   }
 
-  // Set any stacks which don't include the search string to null.
-  // TODO: This includes stacks in markers; maybe we shouldn't clear marker stacks?
-  return updateThreadStacks(thread, stackTable, (stackIndex) =>
-    stackIndex !== null && checkBit(stackMatchesSearch, stackIndex)
-      ? stackIndex
-      : null
-  );
+  return stackMatchesSearch;
 }
 
 export function computeTimeColumnForRawSamplesTable(
@@ -1730,17 +1839,43 @@ export function computeTimeColumnForRawSamplesTable(
   return time ?? numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
 
+export function computeSampleCategoriesAndSubcategories(
+  sampleStacks: Array<IndexIntoStackTable | null>,
+  stackTable: StackTable,
+  defaultCategory: IndexIntoCategoryList
+): SampleCategoriesAndSubcategories {
+  const sampleCount = sampleStacks.length;
+  const {
+    category: stackTableCategoryCol,
+    subcategory: stackTableSubcategoryCol,
+  } = stackTable;
+  const sampleCategories = new Uint8Array(sampleCount);
+  const sampleSubcategories =
+    stackTableSubcategoryCol instanceof Uint16Array
+      ? new Uint16Array(sampleCount)
+      : new Uint8Array(sampleCount);
+  for (let i = 0; i < sampleCount; i++) {
+    const stackIndex = sampleStacks[i];
+    if (stackIndex !== null) {
+      sampleCategories[i] = stackTableCategoryCol[stackIndex];
+      sampleSubcategories[i] = stackTableSubcategoryCol[stackIndex];
+    } else {
+      sampleCategories[i] = defaultCategory;
+      sampleSubcategories[i] = 0;
+    }
+  }
+  return { sampleCategories, sampleSubcategories };
+}
+
 /**
  * Checks if a sample table has any useful samples.
  * A useful sample being one that isn't a "(root)" sample.
  */
 export function hasUsefulSamples(
   sampleStacks: Array<IndexIntoStackTable | null> | undefined,
-  thread: RawThread,
   shared: RawProfileSharedData
 ): boolean {
-  const { stringArray } = shared;
-  const { stackTable, frameTable, funcTable } = thread;
+  const { stackTable, frameTable, funcTable, stringArray } = shared;
   if (
     sampleStacks === undefined ||
     sampleStacks.length === 0 ||
@@ -1861,6 +1996,13 @@ export function filterThreadSamplesToRange(
       : null,
     weightType: samples.weightType,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    threadCPUPercent: samples.threadCPUPercent.subarray(
+      beginSampleIndex,
+      endSampleIndex + 1 // one extra element for "after last sample"
+    ),
+    hasCPUDeltas: samples.hasCPUDeltas,
+    category: samples.category.subarray(beginSampleIndex, endSampleIndex),
+    subcategory: samples.subcategory.subarray(beginSampleIndex, endSampleIndex),
   };
 
   if (samples.eventDelay) {
@@ -1870,13 +2012,6 @@ export function filterThreadSamplesToRange(
     );
   } else if (samples.responsiveness) {
     newSamples.responsiveness = samples.responsiveness.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadCPURatio) {
-    newSamples.threadCPURatio = samples.threadCPURatio.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2449,14 +2584,17 @@ export function computeCallNodeMaxDepthPlusOne(
  */
 export function computeSamplesTableFromRawSamplesTable(
   rawSamples: RawSamplesTable,
+  stackTable: StackTable,
   sampleUnits: SampleUnits | undefined,
-  referenceCPUDeltaPerMs: number
+  referenceCPUDeltaPerMs: number,
+  defaultCategory: IndexIntoCategoryList
 ): SamplesTable {
   const {
     responsiveness,
     eventDelay,
     argumentValues,
     stack,
+    threadCPUDelta,
     weight,
     weightType,
     threadId,
@@ -2467,11 +2605,26 @@ export function computeSamplesTableFromRawSamplesTable(
     rawSamples.time !== undefined
       ? numberSeriesToDeltas(rawSamples.time)
       : ensureExists(rawSamples.timeDeltas);
-  const threadCPURatio =
-    sampleUnits !== undefined
-      ? computeThreadCPURatio(rawSamples, timeDeltas, referenceCPUDeltaPerMs)
-      : undefined;
+
+  const threadCPUPercentOrNull =
+    sampleUnits !== undefined && threadCPUDelta !== undefined
+      ? computeThreadCPUPercent(
+          threadCPUDelta,
+          timeDeltas,
+          referenceCPUDeltaPerMs
+        )
+      : null;
+  const hasCPUDeltas = threadCPUPercentOrNull !== null;
+  const threadCPUPercent =
+    threadCPUPercentOrNull ?? new Uint8Array(rawSamples.length + 1).fill(100);
+
   const time = computeTimeColumnForRawSamplesTable(rawSamples);
+  const { sampleCategories, sampleSubcategories } =
+    computeSampleCategoriesAndSubcategories(
+      rawSamples.stack,
+      stackTable,
+      defaultCategory
+    );
 
   return {
     // These fields are copied from the raw samples table:
@@ -2486,7 +2639,10 @@ export function computeSamplesTableFromRawSamplesTable(
 
     // These fields are derived:
     time,
-    threadCPURatio,
+    threadCPUPercent,
+    hasCPUDeltas,
+    category: sampleCategories,
+    subcategory: sampleSubcategories,
   };
 }
 
@@ -2497,6 +2653,10 @@ export function createThreadFromDerivedTables(
   rawThread: RawThread,
   samples: SamplesTable,
   stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  nativeSymbols: NativeSymbolTable,
+  resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
   tracedValuesBuffer: ArrayBuffer | undefined
@@ -2519,10 +2679,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
     jsTracer,
     isPrivateBrowsing,
     userContextId,
@@ -2548,10 +2704,6 @@ export function createThreadFromDerivedTables(
     jsAllocations,
     nativeAllocations,
     markers,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
     jsTracer,
     isPrivateBrowsing,
     userContextId,
@@ -2560,11 +2712,43 @@ export function createThreadFromDerivedTables(
     // These fields are derived:
     samples,
     stackTable,
+    frameTable,
+    funcTable,
+    resourceTable,
+    nativeSymbols,
     stringTable,
     sources,
     tracedValuesBuffer,
   };
   return thread;
+}
+
+/**
+ * Throws if the column lengths of a StackTable don't match stackTable.length.
+ * Call this after constructing a new StackTable to catch bugs early.
+ */
+export function validateStackTableShape(stackTable: StackTable): void {
+  const { length, frame, prefix, category, subcategory } = stackTable;
+  if (frame.length !== length) {
+    throw new Error(
+      `StackTable frame column length ${frame.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (prefix.length !== length) {
+    throw new Error(
+      `StackTable prefix column length ${prefix.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (category.length !== length) {
+    throw new Error(
+      `StackTable category column length ${category.length} does not match stackTable.length ${length}`
+    );
+  }
+  if (subcategory.length !== length) {
+    throw new Error(
+      `StackTable subcategory column length ${subcategory.length} does not match stackTable.length ${length}`
+    );
+  }
 }
 
 /**
@@ -2591,6 +2775,7 @@ export function updateThreadStacksByGeneratingNewStackColumns(
     markerData: Array<MarkerPayload | null>
   ) => Array<MarkerPayload | null>
 ): Thread {
+  validateStackTableShape(newStackTable);
   const { jsAllocations, nativeAllocations, samples, markers } = thread;
 
   const newSamples = {
@@ -2677,23 +2862,17 @@ export function updateThreadStacks(
 }
 
 /**
- * Updates the stackTable and all references to stacks in the raw thread.
+ * Updates all references to stacks in the raw threads.
  *
  * This function is used by symbolication, which acts on the raw thread.
  */
 export function updateRawThreadStacks(
-  thread: RawThread,
-  newStackTable: RawStackTable,
+  threads: RawThread[],
   convertStack: (
     oldStack: IndexIntoStackTable | null
   ) => IndexIntoStackTable | null
-): RawThread {
-  return updateRawThreadStacksSeparate(
-    thread,
-    newStackTable,
-    convertStack,
-    convertStack
-  );
+): RawThread[] {
+  return updateRawThreadStacksSeparate(threads, convertStack, convertStack);
 }
 
 /**
@@ -2708,8 +2887,25 @@ export function updateRawThreadStacks(
  * which act on the raw thread.
  */
 export function updateRawThreadStacksSeparate(
+  threads: RawThread[],
+  convertStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null,
+  convertSyncBacktraceStack: (
+    oldStack: IndexIntoStackTable | null
+  ) => IndexIntoStackTable | null
+): RawThread[] {
+  return threads.map((thread) =>
+    updateSingleRawThreadStacksSeparate(
+      thread,
+      convertStack,
+      convertSyncBacktraceStack
+    )
+  );
+}
+
+export function updateSingleRawThreadStacksSeparate(
   thread: RawThread,
-  newStackTable: RawStackTable,
   convertStack: (
     oldStack: IndexIntoStackTable | null
   ) => IndexIntoStackTable | null,
@@ -2749,7 +2945,6 @@ export function updateRawThreadStacksSeparate(
     ...thread,
     samples: newSamples,
     markers: newMarkers,
-    stackTable: newStackTable,
   };
 
   if (jsAllocations) {
@@ -2990,7 +3185,7 @@ export function getThreadProcessDetails(
 function _shouldShowBothOriginAndFileName(
   fileName: string,
   origin: string,
-  resourceType: ResourceTypeEnum | null
+  resourceType: ResourceType | null
 ): boolean {
   // If the origin string is just a URL prefix that's part of the
   // filename, it doesn't add any useful information, so only show
@@ -3001,7 +3196,7 @@ function _shouldShowBothOriginAndFileName(
 
   // For native code (resource type "library"), if we have the filename of the
   // source code, only show the filename and not the library name.
-  if (resourceType === resourceTypes.library) {
+  if (resourceType === ResourceType.Library) {
     return false;
   }
 
@@ -3089,21 +3284,21 @@ export function getOriginAnnotationForFunc(
  * At the moment, the only functions we reserve are "collapsed resource" functions.
  * These are used by the "collapse resource" transform.
  */
-export function reserveFunctionsInThread(
-  thread: Thread
-): ThreadWithReservedFunctions {
-  const funcTable = shallowCloneFuncTable(thread.funcTable);
+export function reserveFunctionsForCollapsedResources(
+  originalFuncTable: FuncTable,
+  resourceTable: ResourceTable
+): FuncTableWithReservedFunctions {
+  const funcTable = shallowCloneFuncTable(originalFuncTable);
   const reservedFunctionsForResources = new Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
   >();
   const jsResourceTypes = [
-    resourceTypes.addon,
-    resourceTypes.url,
-    resourceTypes.webhost,
-    resourceTypes.otherhost,
+    ResourceType.Addon,
+    ResourceType.Url,
+    ResourceType.Webhost,
+    ResourceType.OtherHost,
   ];
-  const { resourceTable } = thread;
   for (
     let resourceIndex = 0;
     resourceIndex < resourceTable.length;
@@ -3124,7 +3319,7 @@ export function reserveFunctionsInThread(
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
   return {
-    thread: { ...thread, funcTable },
+    funcTable,
     reservedFunctionsForResources,
   };
 }
@@ -3532,59 +3727,6 @@ export function extractProfileFilterPageData(
   return pageDataByTabID;
 }
 
-// Returns the resource index for a "url" or "webhost" resource which is created
-// on demand based on the script URI.
-export function getOrCreateURIResource(
-  scriptURI: string,
-  resourceTable: ResourceTable,
-  stringTable: StringTable,
-  originToResourceIndex: Map<string, IndexIntoResourceTable>
-): IndexIntoResourceTable {
-  // Figure out the origin and host.
-  let origin;
-  let host;
-  try {
-    const url = new URL(scriptURI);
-    if (
-      !(
-        url.protocol === 'http:' ||
-        url.protocol === 'https:' ||
-        url.protocol === 'moz-extension:'
-      )
-    ) {
-      throw new Error('not a webhost or extension protocol');
-    }
-    origin = url.origin;
-    host = url.host;
-  } catch (_e) {
-    origin = scriptURI;
-    host = null;
-  }
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex !== undefined) {
-    return resourceIndex;
-  }
-
-  resourceIndex = resourceTable.length++;
-  originToResourceIndex.set(origin, resourceIndex);
-  if (host) {
-    // This is a webhost URL.
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(origin);
-    resourceTable.host[resourceIndex] = stringTable.indexForString(host);
-    resourceTable.type[resourceIndex] = resourceTypes.webhost;
-  } else {
-    // This is a URL, but it doesn't point to something on the web, e.g. a
-    // chrome url.
-    resourceTable.lib[resourceIndex] = null;
-    resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
-    resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = resourceTypes.url;
-  }
-  return resourceIndex;
-}
-
 /**
  * See the ThreadsKey type for an explanation.
  */
@@ -3596,6 +3738,30 @@ export function getThreadsKey(threadIndexes: Set<ThreadIndex>): ThreadsKey {
   }
 
   return [...threadIndexes].sort((a, b) => b - a).join(',');
+}
+
+/**
+ * Apply a Map<ThreadIndex, ThreadIndex> to a threads key.
+ *
+ * This is used after profile sanitization when a thread was removed from a profile,
+ * to update state such as the applied transforms of each threadsKey.
+ */
+export function translateThreadsKey(
+  threadsKey: ThreadsKey,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): ThreadsKey | null {
+  const threadIndexes = new Set(('' + threadsKey).split(',').map((n) => +n));
+  const newThreadIndexes = new Set<ThreadIndex>();
+  for (const threadIndex of threadIndexes) {
+    const newThreadIndex = oldThreadIndexToNew.get(threadIndex);
+    if (newThreadIndex !== undefined) {
+      newThreadIndexes.add(newThreadIndex);
+    }
+  }
+  if (newThreadIndexes.size === 0) {
+    return null;
+  }
+  return getThreadsKey(newThreadIndexes);
 }
 
 /**
@@ -3637,10 +3803,25 @@ export type StackReferences = {
  * samples, and stacks referenced by sync backtraces (e.g. marker causes).
  * The two have slightly different properties, see the type definition.
  */
-export function gatherStackReferences(thread: RawThread): StackReferences {
+export function gatherStackReferences(threads: RawThread[]): StackReferences {
   const samplingSelfStacks: Set<IndexIntoStackTable> = new Set();
   const syncBacktraceSelfStacks: Set<IndexIntoStackTable> = new Set();
+  for (const thread of threads) {
+    _gatherSingleThreadStackReferences(
+      thread,
+      samplingSelfStacks,
+      syncBacktraceSelfStacks
+    );
+  }
 
+  return { samplingSelfStacks, syncBacktraceSelfStacks };
+}
+
+export function _gatherSingleThreadStackReferences(
+  thread: RawThread,
+  samplingSelfStacks: Set<IndexIntoStackTable>,
+  syncBacktraceSelfStacks: Set<IndexIntoStackTable>
+) {
   const { samples, markers, jsAllocations, nativeAllocations } = thread;
 
   // Samples
@@ -3681,8 +3862,6 @@ export function gatherStackReferences(thread: RawThread): StackReferences {
       }
     }
   }
-
-  return { samplingSelfStacks, syncBacktraceSelfStacks };
 }
 
 /**
@@ -3808,11 +3987,12 @@ export function gatherStackReferences(thread: RawThread): StackReferences {
  *     used in both contexts. If we detect that this happened, we need to duplicate
  *     the frame and the stack node and pick the right one depending on the use.
  */
-export function nudgeReturnAddresses(thread: RawThread): RawThread {
-  const { samplingSelfStacks, syncBacktraceSelfStacks } =
-    gatherStackReferences(thread);
+export function nudgeReturnAddresses(profile: Profile): Profile {
+  const { samplingSelfStacks, syncBacktraceSelfStacks } = gatherStackReferences(
+    profile.threads
+  );
 
-  const { stackTable, frameTable } = thread;
+  const { stackTable, frameTable } = profile.shared;
 
   // Collect frames that were obtained from the instruction pointer.
   // These are the top ("self") frames of stacks from sampling.
@@ -3855,7 +4035,7 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
 
   if (ipFrames.size === 0 && returnAddressFrames.size === 0) {
     // Nothing to do, use the original thread.
-    return thread;
+    return profile;
   }
 
   // Create the new frame table.
@@ -3941,17 +4121,25 @@ export function nudgeReturnAddresses(thread: RawThread): RawThread {
     }
   }
 
-  const newThread: RawThread = {
-    ...thread,
+  const newShared: RawProfileSharedData = {
+    ...profile.shared,
     frameTable: newFrameTable,
+    stackTable: newStackTable,
   };
 
-  return updateRawThreadStacksSeparate(
-    newThread,
-    newStackTable,
+  const newThreads = updateRawThreadStacksSeparate(
+    profile.threads,
     getMapStackUpdater(mapForSamplingSelfStacks),
     getMapStackUpdater(mapForBacktraceSelfStacks)
   );
+
+  const newProfile: Profile = {
+    ...profile,
+    shared: newShared,
+    threads: newThreads,
+  };
+
+  return newProfile;
 }
 
 /**
@@ -3963,37 +4151,34 @@ export function findAddressProofForFile(
   sourceIndex: IndexIntoSourceTable
 ): AddressProof | null {
   const { libs } = profile;
-  for (const thread of profile.threads) {
-    const { frameTable, funcTable, resourceTable } = thread;
-    const func = funcTable.source.indexOf(sourceIndex);
-    if (func === -1) {
-      continue;
-    }
-    const frame = frameTable.func.indexOf(func);
-    if (frame === -1) {
-      continue;
-    }
-    const address = frameTable.address[frame];
-    if (address === null) {
-      continue;
-    }
-    const resource = funcTable.resource[func];
-    if (resourceTable.type[resource] !== resourceTypes.library) {
-      continue;
-    }
-    const libIndex = resourceTable.lib[resource];
-    if (libIndex === null) {
-      continue;
-    }
-    const lib = libs[libIndex];
-    const { debugName, breakpadId } = lib;
-    return {
-      debugName,
-      breakpadId,
-      address,
-    };
+  const { frameTable, funcTable, resourceTable } = profile.shared;
+  const func = funcTable.source.indexOf(sourceIndex);
+  if (func === -1) {
+    return null;
   }
-  return null;
+  const frame = frameTable.func.indexOf(func);
+  if (frame === -1) {
+    return null;
+  }
+  const address = frameTable.address[frame];
+  if (address === null) {
+    return null;
+  }
+  const resource = funcTable.resource[func];
+  if (resourceTable.type[resource] !== ResourceType.Library) {
+    return null;
+  }
+  const libIndex = resourceTable.lib[resource];
+  if (libIndex === null) {
+    return null;
+  }
+  const lib = libs[libIndex];
+  const { debugName, breakpadId } = lib;
+  return {
+    debugName,
+    breakpadId,
+    address,
+  };
 }
 
 /**
@@ -4120,10 +4305,8 @@ export function getNativeSymbolInfo(
 /**
  * Determines the timeline type by looking at the profile data.
  *
- * There are three options:
- * 'cpu-category': If a profile has both category and cpu usage information.
- * 'category': If a profile has category information but not the cpu usage.
- * 'stack': If a profile doesn't have category or cpu usage information.
+ * 'cpu-category': If a profile has category information.
+ * 'stack':        If a profile doesn't have category information.
  */
 export function determineTimelineType(profile: Profile): TimelineType {
   if (!profile.meta.categories) {
@@ -4133,16 +4316,6 @@ export function determineTimelineType(profile: Profile): TimelineType {
     return 'stack';
   }
 
-  if (
-    !profile.meta.sampleUnits ||
-    !profile.threads.some((thread) => thread.samples.threadCPUDelta)
-  ) {
-    // Have category information but doesn't have the CPU usage information.
-    // Use 'category'.
-    return 'category';
-  }
-
-  // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
 }
 
@@ -4200,11 +4373,27 @@ export function computeTabToThreadIndexesMap(
 export function computeStackTableFromRawStackTable(
   rawStackTable: RawStackTable,
   frameTable: FrameTable,
+  categories: CategoryList | undefined,
   defaultCategory: IndexIntoCategoryList
 ): StackTable {
   // Compute a non-null category for every stack
-  const categoryColumn = new Array(rawStackTable.length);
-  const subcategoryColumn = new Array(rawStackTable.length);
+  if (categories && categories.length > 256) {
+    console.error(
+      `This profile has ${categories.length} categories, which is more than 256 and not supported.`
+    );
+  }
+  const maxSubcategoryCount = categories
+    ? categories.reduce(
+        (maxSoFar, category) =>
+          Math.max(maxSoFar, category.subcategories.length),
+        0
+      )
+    : 1;
+  const categoryColumn = new Uint8Array(rawStackTable.length);
+  const subcategoryColumn =
+    maxSubcategoryCount < 256
+      ? new Uint8Array(rawStackTable.length)
+      : new Uint16Array(rawStackTable.length);
   for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
     const frameIndex = rawStackTable.frame[stackIndex];
     const frameCategory = frameTable.category[frameIndex];

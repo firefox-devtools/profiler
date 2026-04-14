@@ -7,7 +7,6 @@ import {
   getOriginAnnotationForFunc,
   getCategoryPairLabel,
 } from './profile-data';
-import { resourceTypes } from './data-structures';
 import { getFunctionName } from './function-info';
 import type {
   CategoryList,
@@ -27,7 +26,10 @@ import type {
   CallNodeSelfAndSummary,
   SelfAndTotal,
   BalancedNativeAllocationsTable,
+  SampleCategoriesAndSubcategories,
+  IndexIntoCategoryList,
 } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
@@ -511,9 +513,9 @@ export class CallTree {
       let iconSrc = null;
       let icon = null;
 
-      if (resourceType === resourceTypes.webhost) {
+      if (resourceType === ResourceType.Webhost) {
         icon = iconSrc = extractFaviconFromLibname(libName);
-      } else if (resourceType === resourceTypes.addon) {
+      } else if (resourceType === ResourceType.Addon) {
         iconSrc = ExtensionIcon;
 
         const resourceNameIndex =
@@ -1223,6 +1225,25 @@ export function extractUnfilteredSamplesLikeTable(
     default:
       throw assertExhaustiveCheck(strategy);
   }
+}
+
+export function computeUnfilteredCtssSampleCategoriesAndSubcategories(
+  thread: Thread,
+  ctssSamples: SamplesLikeTable,
+  defaultCategory: IndexIntoCategoryList
+): SampleCategoriesAndSubcategories {
+  if (ctssSamples === thread.samples) {
+    const { category, subcategory } = thread.samples;
+    return {
+      sampleCategories: category,
+      sampleSubcategories: subcategory,
+    };
+  }
+  return ProfileData.computeSampleCategoriesAndSubcategories(
+    ctssSamples.stack,
+    thread.stackTable,
+    defaultCategory
+  );
 }
 
 /**

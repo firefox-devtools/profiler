@@ -578,22 +578,29 @@ export type ProfilingLog = {
 
 /**
  * Table containing source code file references in the Gecko profile format.
- * Each entry maps a unique UUID to a filename, allowing frames to reference
- * their source files for displaying source code context in the profiler UI.
- * This table is optional and only present in newer Firefox versions.
+ * Each entry maps a unique ID to a filename and optional metadata, allowing
+ * frames to reference their source files for displaying source code context
+ * in the profiler UI. This table is optional and only present in newer
+ * Firefox versions.
  *
  * Note: In Gecko profiles, this table only contains sources for JavaScript code.
  * The processed profile format expands this to include native code sources as well.
  */
 export type GeckoSourceTable = {
   schema: {
-    uuid: 0;
+    id: 0;
     filename: 1;
+    startLine: 2;
+    startColumn: 3;
+    sourceMapURL: 4;
   };
   data: Array<
     [
-      string, // UUID for the source
-      string, // Filename of the source
+      string, // ID for the source.
+      string, // Filename of the source.
+      number, // Start line of the source (1-based).
+      number, // Start column of the source (1-based).
+      string | null, // URL to the source map for this source, if available.
     ]
   >;
 };

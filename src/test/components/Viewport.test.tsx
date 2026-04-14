@@ -17,8 +17,6 @@ import {
   getPreviewSelection,
 } from '../../selectors/profile';
 
-import { changeSidebarOpenState } from '../../actions/app';
-
 import explicitConnect from '../../utils/connect';
 import { ensureExists } from '../../utils/types';
 
@@ -27,6 +25,7 @@ import {
   autoMockElementSize,
   setMockedElementSize,
 } from '../fixtures/mocks/element-size';
+import { triggerResizeObservers } from '../fixtures/mocks/resize-observer';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -589,8 +588,8 @@ describe('Viewport', function () {
     });
   });
 
-  it('reacts to changes to the panel layout generation', function () {
-    const { dispatch, getChartViewport, flushRafCalls } = setup();
+  it('reacts to container size changes', function () {
+    const { getChartViewport } = setup();
 
     expect(getChartViewport()).toMatchObject({
       containerWidth: BOUNDING_BOX_WIDTH,
@@ -606,10 +605,7 @@ describe('Viewport', function () {
       ...INITIAL_ELEMENT_SIZE,
       width: BOUNDING_BOX_WIDTH - boundingWidthDiff,
     });
-    act(() => {
-      dispatch(changeSidebarOpenState('calltree', true));
-    });
-    flushRafCalls();
+    triggerResizeObservers();
 
     expect(getChartViewport()).toMatchObject({
       containerWidth: BOUNDING_BOX_WIDTH - boundingWidthDiff,

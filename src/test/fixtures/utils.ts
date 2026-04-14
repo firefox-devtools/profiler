@@ -36,6 +36,7 @@ import type {
   IndexIntoCategoryList,
   SampleUnits,
   SourceTable,
+  CategoryList,
 } from 'firefox-profiler/types';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -139,20 +140,24 @@ export function getMouseEvent(
 export function computeThreadFromRawThread(
   rawThread: RawThread,
   shared: RawProfileSharedData,
+  categories: CategoryList | undefined,
   sampleUnits: SampleUnits | undefined,
   referenceCPUDeltaPerMs: number,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const stackTable = computeStackTableFromRawStackTable(
-    rawThread.stackTable,
-    rawThread.frameTable,
+    shared.stackTable,
+    shared.frameTable,
+    categories,
     defaultCategory
   );
   const samples = computeSamplesTableFromRawSamplesTable(
     rawThread.samples,
+    stackTable,
     sampleUnits,
-    referenceCPUDeltaPerMs
+    referenceCPUDeltaPerMs,
+    defaultCategory
   );
   const tracedValuesBuffer = rawThread.tracedValuesBuffer
     ? base64StringToBytes(rawThread.tracedValuesBuffer)
@@ -161,6 +166,10 @@ export function computeThreadFromRawThread(
     rawThread,
     samples,
     stackTable,
+    shared.frameTable,
+    shared.funcTable,
+    shared.nativeSymbols,
+    shared.resourceTable,
     stringTable,
     shared.sources,
     tracedValuesBuffer
@@ -633,6 +642,26 @@ function isControlInput(element: HTMLElement): boolean {
 }
 
 /**
+ * Returns an ArrayBuffer which contains only the bytes that are covered by the
+ * Uint8Array, making a copy if needed.
+ */
+export function extractArrayBuffer(
+  bufferView: Uint8Array<ArrayBuffer>
+): ArrayBuffer {
+  if (
+    bufferView.byteOffset === 0 &&
+    bufferView.byteLength === bufferView.buffer.byteLength
+  ) {
+    return bufferView.buffer;
+  }
+
+  // There was extra data at the start or at the end. Make a copy.
+  const copy = new Uint8Array(bufferView.byteLength);
+  copy.set(bufferView);
+  return copy.buffer;
+}
+
+/**
  * Adds a source entry to the sources table and returns the index.
  * If a source with the same URL already exists, returns the existing index.
  * This is a test utility for setting up test profiles.
@@ -640,11 +669,14 @@ function isControlInput(element: HTMLElement): boolean {
 export function addSourceToTable(
   sources: SourceTable,
   urlStringIndex: number,
-  uuid: string | null = null
+  id: string | null = null,
+  startLine: number = 1,
+  startColumn: number = 1,
+  sourceMapURLStringIndex: number | null = null
 ): number {
   // Check if source already exists
   for (let i = 0; i < sources.filename.length; i++) {
-    if (sources.filename[i] === urlStringIndex && sources.uuid[i] === uuid) {
+    if (sources.filename[i] === urlStringIndex && sources.id[i] === id) {
       return i;
     }
   }
@@ -652,7 +684,10 @@ export function addSourceToTable(
   // Add new source entry
   const sourceIndex = sources.filename.length;
   sources.filename.push(urlStringIndex);
-  sources.uuid.push(uuid);
+  sources.id.push(id);
+  sources.startLine.push(startLine);
+  sources.startColumn.push(startColumn);
+  sources.sourceMapURL.push(sourceMapURLStringIndex);
   sources.length = sources.filename.length;
 
   return sourceIndex;

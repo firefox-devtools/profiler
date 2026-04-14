@@ -16,6 +16,7 @@ import type {
   ResourceTable,
   RawSamplesTable,
   Profile,
+  RawProfileSharedData,
   RawThread,
   RawStackTable,
 } from 'firefox-profiler/types/profile';
@@ -215,6 +216,27 @@ class FirefoxSampleTable {
   }
 }
 
+class FirefoxSharedData {
+  stringArray = [];
+  stringTable = StringTable.withBackingArray(this.stringArray);
+  stackTable = new FirefoxSampleTable(this.stringTable);
+  frameTable = new FirefoxFrameTable(this.stringTable);
+  funcTable = new FirefoxFuncTable(this.stringTable);
+  resourceTable = new FirefoxResourceTable(this.stringTable);
+
+  toJson(): RawProfileSharedData {
+    return {
+      stackTable: this.stackTable.toJson(),
+      frameTable: this.frameTable.toJson(),
+      funcTable: this.funcTable.toJson(),
+      resourceTable: this.resourceTable.toJson(),
+      nativeSymbols: getEmptyNativeSymbolTable(),
+      sources: getEmptySourceTable(),
+      stringArray: this.stringArray,
+    };
+  }
+}
+
 class FirefoxThread {
   name: string;
   isMainThread: boolean;
@@ -233,19 +255,18 @@ class FirefoxThread {
 
   cpuClockEventId: number = -1;
 
-  constructor(thread: report.IThread, stringTable: StringTable) {
+  constructor(thread: report.IThread, shared: FirefoxSharedData) {
     this.tid = thread.threadId!;
     this.pid = thread.processId!;
 
     this.isMainThread = thread.threadId === thread.processId;
     this.name = thread.threadName ?? '';
 
-    this.strings = stringTable;
-
-    this.stackTable = new FirefoxSampleTable(this.strings);
-    this.frameTable = new FirefoxFrameTable(this.strings);
-    this.funcTable = new FirefoxFuncTable(this.strings);
-    this.resourceTable = new FirefoxResourceTable(this.strings);
+    this.strings = shared.stringTable;
+    this.stackTable = shared.stackTable;
+    this.frameTable = shared.frameTable;
+    this.funcTable = shared.funcTable;
+    this.resourceTable = shared.resourceTable;
   }
 
   toJson(): RawThread {
@@ -262,11 +283,6 @@ class FirefoxThread {
       tid: this.tid,
       samples: this.sampleTable,
       markers: getEmptyRawMarkerTable(),
-      stackTable: this.stackTable.toJson(),
-      frameTable: this.frameTable.toJson(),
-      funcTable: this.funcTable.toJson(),
-      resourceTable: this.resourceTable.toJson(),
-      nativeSymbols: getEmptyNativeSymbolTable(),
     };
   }
 
@@ -362,17 +378,13 @@ class FirefoxProfile {
   sampleCount: number = 0;
   lostCount: number = 0;
 
-  stringArray = [];
-  stringTable = StringTable.withBackingArray(this.stringArray);
+  shared = new FirefoxSharedData();
 
   toJson(): Profile {
     return {
       meta: this.getProfileMeta(),
       libs: [],
-      shared: {
-        stringArray: this.stringArray,
-        sources: getEmptySourceTable(),
-      },
+      shared: this.shared.toJson(),
       threads: this.threads.map((thread) => thread.toJson()),
     };
   }
@@ -450,7 +462,7 @@ class FirefoxProfile {
   }
 
   addThread(thread: report.IThread) {
-    const firefoxThread = new FirefoxThread(thread, this.stringTable);
+    const firefoxThread = new FirefoxThread(thread, this.shared);
     this.threads.push(firefoxThread);
     this.threadMap.set(thread.threadId!, firefoxThread);
   }

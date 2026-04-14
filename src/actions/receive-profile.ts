@@ -2,6 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { oneLine } from 'common-tags';
+import {
+  fetchProfile,
+  getProfileUrlForHash,
+  type ProfileOrZip,
+  deduceContentType,
+  extractJsonFromArrayBuffer,
+} from 'firefox-profiler/utils/profile-fetch';
 import queryString from 'query-string';
 import type JSZip from 'jszip';
 import {
@@ -20,10 +27,8 @@ import {
 } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
 import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
-import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { expandUrl } from 'firefox-profiler/utils/shorten-url';
 import { TemporaryError } from 'firefox-profiler/utils/errors';
-import { isLocalURL } from 'firefox-profiler/utils/url';
 import {
   getSelectedThreadIndexesOrNull,
   getGlobalTrackOrder,
@@ -67,7 +72,6 @@ import {
 import { setDataSource } from './profile-view';
 import { fatalError } from './errors';
 import { batchLoadDataUrlIcons } from './icons';
-import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import {
   determineTimelineType,
   hasUsefulSamples,
@@ -87,10 +91,7 @@ import type {
   MixedObject,
 } from 'firefox-profiler/types';
 
-import type {
-  FuncToFuncsMap,
-  SymbolicationStepInfo,
-} from '../profile-logic/symbolication';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck } from '../utils/types';
 import { bytesToBase64DataUrl } from 'firefox-profiler/utils/base64';
 import type {
@@ -105,6 +106,7 @@ import type {
 } from '../profile-logic/symbol-store';
 import type { SymbolTableAsTuple } from 'firefox-profiler/profile-logic/symbol-store-db';
 import SymbolStoreDB from 'firefox-profiler/profile-logic/symbol-store-db';
+import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -347,7 +349,7 @@ export function finalizeFullProfileView(
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;
@@ -456,28 +458,20 @@ export function doneSymbolicating(): Action {
 // reach the screen because it would be invalidated by the next symbolication update.
 // So we queue up symbolication steps and run the update from requestIdleCallback.
 export function bulkProcessSymbolicationSteps(
-  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+  symbolicationSteps: SymbolicationStepInfo[]
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const { threads, shared } = getProfile(getState());
-    const oldFuncToNewFuncsMaps: Map<ThreadIndex, FuncToFuncsMap> = new Map();
-    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
-      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
-      if (symbolicationSteps === undefined) {
-        return oldThread;
-      }
-      const { thread, oldFuncToNewFuncsMap } = applySymbolicationSteps(
-        oldThread,
-        shared,
-        symbolicationSteps
-      );
-      oldFuncToNewFuncsMaps.set(threadIndex, oldFuncToNewFuncsMap);
-      return thread;
-    });
+    const {
+      threads: symbolicatedThreads,
+      shared: symbolicatedShared,
+      oldFuncToNewFuncsMap,
+    } = applySymbolicationSteps(threads, shared, symbolicationSteps);
     dispatch({
       type: 'BULK_SYMBOLICATION',
-      oldFuncToNewFuncsMaps,
+      oldFuncToNewFuncsMap,
       symbolicatedThreads,
+      symbolicatedShared,
     });
   };
 }
@@ -499,12 +493,12 @@ if (typeof window === 'object' && window.requestIdleCallback) {
 // Queues up symbolication steps and bulk-processes them from requestIdleCallback,
 // in order to improve UI responsiveness during symbolication.
 class SymbolicationStepQueue {
-  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updates: SymbolicationStepInfo[];
   _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
 
   constructor() {
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
   }
@@ -522,7 +516,7 @@ class SymbolicationStepQueue {
   _dispatchUpdate(dispatch: Dispatch) {
     const updates = this._updates;
     const observers = this._updateObservers;
-    this._updates = new Map();
+    this._updates = [];
     this._updateObservers = [];
     this._requestedUpdate = false;
 
@@ -535,17 +529,11 @@ class SymbolicationStepQueue {
 
   enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
-    threadIndex: ThreadIndex,
     symbolicationStepInfo: SymbolicationStepInfo,
     completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
-    let threadSteps = this._updates.get(threadIndex);
-    if (threadSteps === undefined) {
-      threadSteps = [];
-      this._updates.set(threadIndex, threadSteps);
-    }
-    threadSteps.push(symbolicationStepInfo);
+    this._updates.push(symbolicationStepInfo);
     this._updateObservers.push(completionHandler);
   }
 }
@@ -563,7 +551,7 @@ async function _unpackGeckoProfileFromBrowser(
   // global. This happens especially with tests but could happen in the future
   // in Firefox too.
   if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
-    return _extractJsonFromArrayBuffer(profile as ArrayBuffer);
+    return extractJsonFromArrayBuffer(profile as ArrayBuffer);
   }
   return profile;
 }
@@ -573,9 +561,9 @@ function getSymbolStore(
   symbolServerUrl: string,
   browserConnection: BrowserConnection | null
 ): SymbolStore | null {
-  if (!window.indexedDB) {
-    // We could be running in a test environment with no indexedDB support. Do not
-    // return a symbol store in this case.
+  if (typeof window === 'undefined' || !window.indexedDB) {
+    // We could be running in a test environment or Node.js with no indexedDB support.
+    // Do not return a symbol store in this case.
     return null;
   }
 
@@ -804,15 +792,11 @@ export async function doSymbolicateProfile(
   await symbolicateProfile(
     profile,
     symbolStore,
-    (
-      threadIndex: ThreadIndex,
-      symbolicationStepInfo: SymbolicationStepInfo
-    ) => {
+    (symbolicationStepInfo: SymbolicationStepInfo) => {
       completionPromises.push(
         new Promise((resolve) => {
           _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
             dispatch,
-            threadIndex,
             symbolicationStepInfo,
             () => resolve(undefined)
           );
@@ -1003,269 +987,10 @@ export function temporaryError(error: TemporaryError): Action {
   };
 }
 
-function _wait(delayMs: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, delayMs));
-}
-
-function _loadProbablyFailedDueToSafariLocalhostHTTPRestriction(
-  url: string,
-  error: Error
-): boolean {
-  if (!navigator.userAgent.match(/Safari\/\d+\.\d+/)) {
-    return false;
-  }
-  // Check if Safari considers this mixed content.
-  const parsedUrl = new URL(url);
-  return (
-    error.name === 'TypeError' &&
-    parsedUrl.protocol === 'http:' &&
-    isLocalURL(parsedUrl) &&
-    location.protocol === 'https:'
-  );
-}
-
-class SafariLocalhostHTTPLoadError extends Error {
-  override name = 'SafariLocalhostHTTPLoadError';
-}
-
-type FetchProfileArgs = {
-  url: string;
-  onTemporaryError: (param: TemporaryError) => void;
-  // Allow tests to capture the reported error, but normally use console.error.
-  reportError?: (...data: Array<any>) => void;
-};
-
-type ProfileOrZip =
-  | { responseType: 'PROFILE'; profile: unknown }
-  | { responseType: 'ZIP'; zip: JSZip };
-
-/**
- * Tries to fetch a profile on `url`. If the profile is not found,
- * `onTemporaryError` is called with an appropriate error, we wait 1 second, and
- * then tries again. If we still can't find the profile after 11 tries, the
- * returned promise is rejected with a fatal error.
- * If we can retrieve the profile properly, the returned promise is resolved
- * with the JSON.parsed profile.
- */
-export async function _fetchProfile(
-  args: FetchProfileArgs
-): Promise<ProfileOrZip> {
-  const MAX_WAIT_SECONDS = 10;
-  let i = 0;
-  const { url, onTemporaryError } = args;
-  // Allow tests to capture the reported error, but normally use console.error.
-  const reportError = args.reportError || console.error;
-
-  while (true) {
-    let response;
-    try {
-      response = await fetch(url);
-    } catch (e) {
-      // Case 1: Exception.
-      if (_loadProbablyFailedDueToSafariLocalhostHTTPRestriction(url, e)) {
-        throw new SafariLocalhostHTTPLoadError();
-      }
-      throw e;
-    }
-
-    // Case 2: successful answer.
-    if (response.ok) {
-      return _extractProfileOrZipFromResponse(url, response, reportError);
-    }
-
-    // case 3: unrecoverable error.
-    if (response.status !== 403) {
-      throw new Error(oneLine`
-          Could not fetch the profile on remote server.
-          Response was: ${response.status} ${response.statusText}.
-        `);
-    }
-
-    // case 4: 403 errors can be transient while a profile is uploaded.
-
-    if (i++ === MAX_WAIT_SECONDS) {
-      // In the last iteration we don't send a temporary error because we'll
-      // throw an error right after the while loop.
-      break;
-    }
-
-    onTemporaryError(
-      new TemporaryError(
-        'Profile not found on remote server.',
-        { count: i, total: MAX_WAIT_SECONDS + 1 } // 11 tries during 10 seconds
-      )
-    );
-
-    await _wait(1000);
-  }
-
-  throw new Error(oneLine`
-    Could not fetch the profile on remote server:
-    still not found after ${MAX_WAIT_SECONDS} seconds.
-  `);
-}
-
-/**
- * Deduce the file type from a url and content type. Third parties can give us
- * arbitrary information, so make sure that we try out best to extract the proper
- * information about it.
- */
-function _deduceContentType(
-  url: string,
-  contentType: string | null
-): 'application/json' | 'application/zip' | null {
-  if (contentType === 'application/zip' || contentType === 'application/json') {
-    return contentType;
-  }
-  if (url.match(/\.zip$/)) {
-    return 'application/zip';
-  }
-  if (url.match(/\.json/)) {
-    return 'application/json';
-  }
-  return null;
-}
-
-/**
- * This function guesses the correct content-type (even if one isn't sent) and then
- * attempts to use the proper method to extract the response.
- */
-async function _extractProfileOrZipFromResponse(
-  url: string,
-  response: Response,
-  reportError: (...data: Array<any>) => void
-): Promise<ProfileOrZip> {
-  const contentType = _deduceContentType(
-    url,
-    response.headers.get('content-type')
-  );
-  switch (contentType) {
-    case 'application/zip':
-      return {
-        responseType: 'ZIP',
-        zip: await _extractZipFromResponse(response, reportError),
-      };
-    case 'application/json':
-    case null:
-      // The content type is null if it is unknown, or an unsupported type. Go ahead
-      // and try to process it as a profile.
-      return {
-        responseType: 'PROFILE',
-        profile: await _extractJsonFromResponse(
-          response,
-          reportError,
-          contentType
-        ),
-      };
-    default:
-      throw assertExhaustiveCheck(contentType);
-  }
-}
-
-/**
- * Attempt to load a zip file from a third party. This process can fail, so make sure
- * to handle and report the error if it does.
- */
-async function _extractZipFromResponse(
-  response: Response,
-  reportError: (...data: Array<any>) => void
-): Promise<JSZip> {
-  const buffer = await response.arrayBuffer();
-  // Workaround for https://github.com/Stuk/jszip/issues/941
-  // When running this code in tests, `buffer` doesn't inherits from _this_
-  // realm's ArrayBuffer object, and this breaks JSZip which doesn't account for
-  // this case. We workaround the issue by wrapping the buffer in an Uint8Array
-  // that comes from this realm.
-  const typedBuffer = new Uint8Array(buffer);
-  try {
-    const JSZip = await import('jszip');
-    const zip = await JSZip.loadAsync(typedBuffer);
-    // Catch the error if unable to load the zip.
-    return zip;
-  } catch (error) {
-    const message = 'Unable to open the archive file.';
-    reportError(message);
-    reportError('Error:', error);
-    reportError('Fetch response:', response);
-    throw new Error(
-      `${message} The full error information has been printed out to the DevTool’s console.`
-    );
-  }
-}
-
-/**
- * Parse JSON from an optionally gzipped array buffer.
- */
-async function _extractJsonFromArrayBuffer(
-  arrayBuffer: ArrayBuffer
-): Promise<unknown> {
-  let profileBytes = new Uint8Array(arrayBuffer);
-  // Check for the gzip magic number in the header.
-  if (isGzip(profileBytes)) {
-    profileBytes = await decompress(profileBytes);
-  }
-
-  const textDecoder = new TextDecoder();
-  return JSON.parse(textDecoder.decode(profileBytes));
-}
-
-/**
- * Don't trust third party responses, try and handle a variety of responses gracefully.
- */
-async function _extractJsonFromResponse(
-  response: Response,
-  reportError: (...data: Array<any>) => void,
-  fileType: 'application/json' | null
-): Promise<unknown> {
-  let arrayBuffer: ArrayBuffer | null = null;
-  try {
-    // await before returning so that we can catch JSON parse errors.
-    arrayBuffer = await response.arrayBuffer();
-    return await _extractJsonFromArrayBuffer(arrayBuffer);
-  } catch (error) {
-    // Change the error message depending on the circumstance:
-    let message;
-    if (error && typeof error === 'object' && error.name === 'AbortError') {
-      message = 'The network request to load the profile was aborted.';
-    } else if (fileType === 'application/json') {
-      message = 'The profile’s JSON could not be decoded.';
-    } else if (fileType === null && arrayBuffer !== null) {
-      // If the content type is not specified, use a raw array buffer
-      // to fallback to other supported profile formats.
-      return arrayBuffer;
-    } else {
-      message = oneLine`
-        The profile could not be downloaded and decoded. This does not look like a supported file
-        type.
-      `;
-    }
-
-    // Provide helpful debugging information to the console.
-    reportError(message);
-    reportError('JSON parsing error:', error);
-    reportError('Fetch response:', response);
-
-    throw new Error(
-      `${message} The full error information has been printed out to the DevTool’s console.`
-    );
-  }
-}
-
-export function getProfileUrlForHash(hash: string): string {
-  // See https://cloud.google.com/storage/docs/access-public-data
-  // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
-  // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
-  // is not documented nowadays.
-
-  // By convention, "profile-store" is the name of our bucket, and the file path
-  // is the hash we receive in the URL.
-  return `https://storage.googleapis.com/${GOOGLE_STORAGE_BUCKET}/${hash}`;
-}
-
 export function retrieveProfileFromStore(
   hash: string,
   initialLoad: boolean = false
-): ThunkAction<Promise<void>> {
+): ThunkAction<Promise<ProfileUpgradeInfo>> {
   return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash), initialLoad);
 }
 
@@ -1277,12 +1002,12 @@ export function retrieveProfileFromStore(
 export function retrieveProfileOrZipFromUrl(
   profileUrl: string,
   initialLoad: boolean = false
-): ThunkAction<Promise<void>> {
+): ThunkAction<Promise<ProfileUpgradeInfo>> {
   return async function (dispatch) {
     dispatch(waitingForProfileFromUrl(profileUrl));
 
     try {
-      const response: ProfileOrZip = await _fetchProfile({
+      const response: ProfileOrZip = await fetchProfile({
         url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
           dispatch(temporaryError(e));
@@ -1292,30 +1017,33 @@ export function retrieveProfileOrZipFromUrl(
       switch (response.responseType) {
         case 'PROFILE': {
           const serializedProfile = response.profile;
+          const profileUpgradeInfo = {};
           const profile = await unserializeProfileOfArbitraryFormat(
             serializedProfile,
-            profileUrl
+            profileUrl,
+            profileUpgradeInfo
           );
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }
 
           await dispatch(loadProfile(profile, {}, initialLoad));
-          break;
+          return profileUpgradeInfo;
         }
         case 'ZIP': {
           const zip = response.zip;
           await dispatch(receiveZipFile(zip));
-          break;
+          return {};
         }
         default:
           throw assertExhaustiveCheck(
             response as never,
-            'Expected to receive an archive or profile from _fetchProfile.'
+            'Expected to receive an archive or profile from fetchProfile.'
           );
       }
     } catch (error) {
       dispatch(fatalError(error));
+      return {};
     }
   };
 }
@@ -1366,10 +1094,10 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      if (_deduceContentType(file.name, file.type) === 'application/zip') {
+      if (deduceContentType(file.name, file.type) === 'application/zip') {
         // Open a zip file in the zip file viewer
         const buffer = await fileReader(file).asArrayBuffer();
-        const JSZip = await import('jszip');
+        const { default: JSZip } = await import('jszip');
         const zip = await JSZip.loadAsync(buffer);
         await dispatch(receiveZipFile(zip));
       } else {
@@ -1421,6 +1149,24 @@ export function viewProfileFromPostMessage(
   };
 }
 
+// Given a profile view URL, extract the raw URL needed to fetch the profile
+// data. This mirrors the manual pathname splitting done in retrieveProfileForRawUrl,
+// so we can fetch the profile before calling stateFromLocation.
+function getProfileFetchUrl(urlString: string): string {
+  const pathParts = new URL(urlString).pathname.split('/').filter((d) => d);
+  const dataSource = ensureIsValidDataSource(pathParts[0]);
+  switch (dataSource) {
+    case 'public':
+      return getProfileUrlForHash(pathParts[1]);
+    case 'from-url':
+      return decodeURIComponent(pathParts[1]);
+    default:
+      throw new Error(
+        'Only public uploaded profiles are supported by the comparison function.'
+      );
+  }
+}
+
 /**
  * This action retrieves several profiles and push them into 1 profile using the
  * information contained in the query.
@@ -1433,9 +1179,7 @@ export function retrieveProfilesToCompare(
     dispatch(waitingForProfileFromUrl());
 
     try {
-      // First we get a state from each URL. From these states we'll get all the
-      // data we need to fetch and process the profiles.
-      const profileStates = await Promise.all(
+      const profilesAndStates = await Promise.all(
         profileViewUrls.map(async (url) => {
           if (
             url.startsWith('https://perfht.ml/') ||
@@ -1444,48 +1188,39 @@ export function retrieveProfilesToCompare(
           ) {
             url = await expandUrl(url);
           }
-          return stateFromLocation(new URL(url));
-        })
-      );
 
-      // Then we retrieve the profiles from the online store, and unserialize
-      // and process them if needed.
-      const promises = profileStates.map(
-        async ({ dataSource, hash, profileUrl }) => {
-          switch (dataSource) {
-            case 'public':
-              // Use a URL from the public store.
-              profileUrl = getProfileUrlForHash(hash);
-              break;
-            case 'from-url':
-              // Use the profile URL in the decoded state, decoded from the input URL.
-              break;
-            default:
-              throw new Error(
-                'Only public uploaded profiles are supported by the comparison function.'
-              );
-          }
-          const response: ProfileOrZip = await _fetchProfile({
+          const profileUrl = getProfileFetchUrl(url);
+
+          const response: ProfileOrZip = await fetchProfile({
             url: profileUrl,
             onTemporaryError: (e: TemporaryError) => {
               dispatch(temporaryError(e));
             },
           });
           if (response.responseType !== 'PROFILE') {
-            throw new Error('Expected to receive a profile from _fetchProfile');
+            throw new Error('Expected to receive a profile from fetchProfile');
           }
-          const serializedProfile = response.profile;
 
-          const profile =
-            unserializeProfileOfArbitraryFormat(serializedProfile);
-          return profile;
-        }
+          const upgradeInfo: ProfileUpgradeInfo = {};
+          const profile = await unserializeProfileOfArbitraryFormat(
+            response.profile,
+            profileUrl,
+            upgradeInfo
+          );
+
+          const profileState = stateFromLocation(new URL(url), {
+            profile,
+            upgradeInfo,
+          });
+
+          return { profile, profileState };
+        })
       );
 
-      // Once all profiles have been fetched and unserialized, we can start
-      // pushing them to a brand new profile. This resulting profile will keep
-      // only the 2 selected threads from the 2 profiles.
-      const profiles = await Promise.all(promises);
+      const profiles = profilesAndStates.map(({ profile }) => profile);
+      const profileStates = profilesAndStates.map(
+        ({ profileState }) => profileState
+      );
 
       const {
         profile: resultProfile,
@@ -1515,14 +1250,20 @@ export function retrieveProfilesToCompare(
   };
 }
 
+export type ProfileAndProfileUpgradeInfo = {
+  profile: Profile;
+  upgradeInfo: ProfileUpgradeInfo;
+};
+
 // This function takes location(most probably `window.location`) as parameter
 // and loads the profile in that given location, then returns the profile data.
 // This function is being used to get the initial profile data before upgrading
 // the url and processing the UrlState.
+// `profileUpgradeInfo` is an outparam that will be popuplated by this function.
 export function retrieveProfileForRawUrl(
   location: Location,
   browserConnectionStatus?: BrowserConnectionStatus
-): ThunkAction<Promise<Profile | null>> {
+): ThunkAction<Promise<ProfileAndProfileUpgradeInfo | null>> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter((d) => d);
     let possibleDataSource = pathParts[0];
@@ -1541,8 +1282,10 @@ export function retrieveProfileForRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
+    let profileUpgradeInfo = {};
+
     switch (dataSource) {
-      case 'from-browser':
+      case 'from-browser': {
         if (browserConnectionStatus === undefined) {
           throw new Error(
             'Error: all callers of this function should supply a browserConnectionStatus argument for from-browser'
@@ -1552,11 +1295,14 @@ export function retrieveProfileForRawUrl(
           retrieveProfileFromBrowser(browserConnectionStatus, true)
         );
         break;
+      }
       case 'public':
-        await dispatch(retrieveProfileFromStore(pathParts[1], true));
+        profileUpgradeInfo = await dispatch(
+          retrieveProfileFromStore(pathParts[1], true)
+        );
         break;
       case 'from-url':
-        await dispatch(
+        profileUpgradeInfo = await dispatch(
           retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
         );
         break;
@@ -1619,7 +1365,12 @@ export function retrieveProfileForRawUrl(
     }
 
     // Profile may be null if the response was a zip file.
-    return getProfileOrNull(getState());
+    const profileOrNull = getProfileOrNull(getState());
+    if (profileOrNull === null) {
+      return null;
+    }
+
+    return { profile: profileOrNull, upgradeInfo: profileUpgradeInfo };
   };
 }
 
@@ -1708,7 +1459,7 @@ export function changeTabFilter(tabID: TabID | null): ThunkAction<void> {
         const thread = profile.threads[threadIndex];
         const { samples, jsAllocations, nativeAllocations } = thread;
         hasSamples = [samples, jsAllocations, nativeAllocations].some((table) =>
-          hasUsefulSamples(table?.stack, thread, profile.shared)
+          hasUsefulSamples(table?.stack, profile.shared)
         );
         if (hasSamples) {
           break;

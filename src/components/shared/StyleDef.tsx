@@ -11,6 +11,7 @@
 // duplication.
 
 import { PureComponent } from 'react';
+import { escapeCssUrl } from 'firefox-profiler/utils/url';
 
 type StyleDefProps = {
   readonly content: string;
@@ -59,7 +60,7 @@ export class BackgroundImageStyleDef extends PureComponent<BackgroundImageStyleD
   override render(): React.ReactElement {
     const content = `
       .${this.props.className} {
-        background-image: url(${this.props.url});
+        background-image: url("${escapeCssUrl(this.props.url)}");
       }
     `;
     return <StyleDef content={content} />;
