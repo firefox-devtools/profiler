@@ -52,6 +52,7 @@ type StateProps = {
   readonly threadsKey: ThreadsKey | null;
   readonly rightClickedFunctionIndex: IndexIntoFuncTable | null;
   readonly callNodeTable: CallNodeTable | null;
+  readonly selfWingCallNodeTable: CallNodeTable | null;
   readonly implementation: ImplementationFilter;
   readonly displaySearchfox: boolean;
 };
@@ -86,9 +87,15 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
     readonly threadsKey: ThreadsKey;
     readonly funcIndex: IndexIntoFuncTable;
     readonly callNodeTable: CallNodeTable;
+    readonly selfWingCallNodeTable: CallNodeTable | null;
   } {
-    const { thread, threadsKey, rightClickedFunctionIndex, callNodeTable } =
-      this.props;
+    const {
+      thread,
+      threadsKey,
+      rightClickedFunctionIndex,
+      callNodeTable,
+      selfWingCallNodeTable,
+    } = this.props;
     if (
       thread !== null &&
       threadsKey !== null &&
@@ -100,6 +107,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
         threadsKey,
         funcIndex: rightClickedFunctionIndex,
         callNodeTable,
+        selfWingCallNodeTable,
       };
     }
     return null;
@@ -312,7 +320,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
       return <div />;
     }
 
-    const { funcIndex, callNodeTable } = info;
+    const { funcIndex, callNodeTable, selfWingCallNodeTable } = info;
     const nameForResource = this.getNameForSelectedResource();
 
     return (
@@ -371,7 +379,9 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
             })
           : null}
 
-        {funcHasRecursiveCall(callNodeTable, funcIndex)
+        {funcHasRecursiveCall(callNodeTable, funcIndex) ||
+        (selfWingCallNodeTable !== null &&
+          funcHasRecursiveCall(selfWingCallNodeTable, funcIndex))
           ? this.renderTransformMenuItem({
               l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
               shortcut: 'r',
@@ -383,7 +393,9 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
             })
           : null}
 
-        {funcHasDirectRecursiveCall(callNodeTable, funcIndex)
+        {funcHasDirectRecursiveCall(callNodeTable, funcIndex) ||
+        (selfWingCallNodeTable !== null &&
+          funcHasDirectRecursiveCall(selfWingCallNodeTable, funcIndex))
           ? this.renderTransformMenuItem({
               l10nId:
                 'CallNodeContextMenu--transform-collapse-direct-recursion-only',
@@ -458,6 +470,7 @@ export const FunctionListContextMenu = explicitConnect<
     let threadsKey = null;
     let rightClickedFunctionIndex = null;
     let callNodeTable = null;
+    let selfWingCallNodeTable = null;
 
     if (rightClickedFunction !== null) {
       const selectors = getThreadSelectorsFromThreadsKey(
@@ -468,6 +481,11 @@ export const FunctionListContextMenu = explicitConnect<
       rightClickedFunctionIndex = rightClickedFunction.functionIndex;
       // Use the non-inverted call node table for recursion detection.
       callNodeTable = selectors.getCallNodeInfo(state).getCallNodeTable();
+      // Also check the self wing's call node table, which may reveal recursion
+      // not visible in the regular call node table due to the focusSelf filter.
+      selfWingCallNodeTable = selectors
+        .getSelfWingCallNodeInfo(state)
+        .getCallNodeTable();
     }
 
     return {
@@ -475,6 +493,7 @@ export const FunctionListContextMenu = explicitConnect<
       threadsKey,
       rightClickedFunctionIndex,
       callNodeTable,
+      selfWingCallNodeTable,
       implementation: getImplementationFilter(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
     };
