@@ -1,8 +1,10 @@
 {
-  "_comment": "This is a distribution package for a pre-bundled CLI artifact. Build dependencies are defined in the root package.json. Run 'yarn build-profiler-cli' from the repository root to build dist/profiler-cli.js.",
   "name": "@firefox-profiler/profiler-cli",
   "version": "0.1.0",
   "description": "Command-line interface for querying Firefox Profiler profiles with persistent daemon sessions",
+  "scripts": {
+    "prepublishOnly": "test -f dist/profiler-cli.js || (echo 'Run yarn build-profiler-cli from the repo root first' && exit 1)"
+  },
   "main": "./dist/profiler-cli.js",
   "bin": {
     "profiler-cli": "./dist/profiler-cli.js"
@@ -11,12 +13,12 @@
     "dist/profiler-cli.js"
   ],
   "engines": {
-    "node": ">= 24 < 25"
+    "node": ">= 24"
   },
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": ">= 24 < 25"
+      "version": ">= 24"
     }
   },
   "keywords": [
