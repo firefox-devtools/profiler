@@ -88,7 +88,9 @@ export function registerFilterCommand(
     console.log(formatOutput(result, opts.json ?? false));
 
     if (!wasExplicit('filter', 'list')) {
-      console.log('\nOther subcommands: profiler-cli filter <push|pop|clear> [options]');
+      console.log(
+        '\nOther subcommands: profiler-cli filter <push|pop|clear> [options]'
+      );
     }
   });
 

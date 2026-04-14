@@ -11,7 +11,7 @@ import { mkdtemp, readdir, readFile, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 
-const CLI_BIN = './profile-query-cli/dist/profiler-cli.js';
+const CLI_BIN = './profiler-cli/dist/profiler-cli.js';
 
 /**
  * Simple command execution result.
@@ -61,7 +61,9 @@ function exec(
     });
 
     proc.on('close', (code) => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
 
       if (timedOut) {
         reject(new Error(`Command timed out after ${options.timeout}ms`));
@@ -75,7 +77,9 @@ function exec(
     });
 
     proc.on('error', (err) => {
-      if (timeoutId) clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       reject(err);
     });
   });

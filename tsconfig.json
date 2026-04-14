@@ -41,7 +41,7 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
-    "profile-query-cli/**/*.ts",
+    "profiler-cli/**/*.ts",
     "__mocks__/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]

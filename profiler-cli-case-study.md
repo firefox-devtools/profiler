@@ -1,4 +1,4 @@
-# Profile Query CLI (profiler-cli) - Case Study Report
+# Profiler CLI - Case Study Report
 
 ## Profile Investigation Summary
 

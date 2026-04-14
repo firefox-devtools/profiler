@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Unit tests for profile-query-cli client.
+ * Unit tests for profiler-cli client.
  *
  * NOTE: This file intentionally contains no tests.
  *
@@ -20,7 +20,7 @@
  * client.ts, extract them to a separate module and test that module instead.
  */
 
-describe('profile-query-cli client', function () {
+describe('profiler-cli client', function () {
   it('has no unit tests (see comment above)', function () {
     // This test exists only to prevent Jest from complaining about an empty suite
     expect(true).toBe(true);

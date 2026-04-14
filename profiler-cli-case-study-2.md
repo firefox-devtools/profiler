@@ -1,4 +1,4 @@
-# profiler-cli Case Study 2: Investigating Repeated Rendering Spikes in Firefox
+# Profiler CLI Case Study 2: Investigating Repeated Rendering Spikes in Firefox
 
 **Profile:** https://share.firefox.dev/4oLEjCw
 **Date:** November 4, 2025

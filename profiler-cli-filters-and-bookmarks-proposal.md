@@ -1,4 +1,4 @@
-# profiler-cli Filters and Bookmarks Proposal
+# Profiler CLI Filters and Bookmarks Proposal
 
 **Status:** Phase 1 + Phase 2 implemented; Phase 3 (strip-prefix, strip-suffix, merge-regex) and marker display filters and bookmarks are future work
 **Created:** 2025-01-04

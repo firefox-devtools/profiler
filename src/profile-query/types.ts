@@ -4,7 +4,7 @@
 
 /**
  * Shared types for profile querying.
- * These types are used by both profile-query (the library) and profile-query-cli.
+ * These types are used by both profile-query (the library) and profiler-cli.
  */
 
 // ===== Utility types =====

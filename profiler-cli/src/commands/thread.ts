@@ -338,7 +338,9 @@ export function registerThreadCommand(
       opts.limit !== undefined
     ) {
       functionFilters = {};
-      if (opts.search !== undefined) functionFilters.searchString = opts.search;
+      if (opts.search !== undefined) {
+        functionFilters.searchString = opts.search;
+      }
       if (opts.minSelf !== undefined) {
         const minSelf = parseFloat(opts.minSelf);
         if (isNaN(minSelf) || minSelf < 0 || minSelf > 100) {

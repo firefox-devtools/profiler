@@ -105,7 +105,9 @@ export function formatStatusResult(result: StatusResult): string {
 
   const filterLines: string[] = [];
   for (const stack of result.filterStacks) {
-    if (stack.filters.length === 0) continue;
+    if (stack.filters.length === 0) {
+      continue;
+    }
     filterLines.push(`  Filters for ${stack.threadHandle}:`);
     for (const f of stack.filters) {
       filterLines.push(`    ${f.index}. [${f.spec.type}] ${f.description}`);
@@ -828,7 +830,9 @@ export function formatThreadMarkersResult(
       .slice(0, 5);
 
     for (const stats of topRateTypes) {
-      if (!stats.rateStats) continue;
+      if (!stats.rateStats) {
+        continue;
+      }
       const { markersPerSecond, minGap, avgGap, maxGap } = stats.rateStats;
       lines.push(
         `  ${stats.markerName}: ${markersPerSecond.toFixed(1)} markers/sec (interval: min=${formatDuration(minGap)}, avg=${formatDuration(avgGap)}, max=${formatDuration(maxGap)})`

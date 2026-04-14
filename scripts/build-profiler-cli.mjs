@@ -7,11 +7,11 @@ import { nodeBaseConfig } from './lib/esbuild-configs.mjs';
 
 const BUILD_HASH = Date.now().toString(36);
 
-const profileQueryCliConfig = {
+const profilerCliConfig = {
   ...nodeBaseConfig,
-  entryPoints: ['profile-query-cli/src/index.ts'],
+  entryPoints: ['profiler-cli/src/index.ts'],
   loader: { ...nodeBaseConfig.loader, '.txt': 'text' },
-  outfile: 'profile-query-cli/dist/profiler-cli.js',
+  outfile: 'profiler-cli/dist/profiler-cli.js',
   minify: true,
   banner: {
     js: '#!/usr/bin/env node\n\n// Polyfill browser globals for Node.js\nglobalThis.self = globalThis;',
@@ -23,9 +23,9 @@ const profileQueryCliConfig = {
 };
 
 async function build() {
-  await esbuild.build(profileQueryCliConfig);
-  chmodSync('profile-query-cli/dist/profiler-cli.js', 0o755);
-  console.log('✅ Profile-query-cli build completed');
+  await esbuild.build(profilerCliConfig);
+  chmodSync('profiler-cli/dist/profiler-cli.js', 0o755);
+  console.log('✅ profiler-cli build completed');
 }
 
 build().catch(console.error);

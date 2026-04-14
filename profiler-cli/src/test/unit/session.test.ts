@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Unit tests for profile-query CLI session management.
+ * Unit tests for profiler-cli session management.
  *
  * These tests cover only the session.ts utility functions.
  * Integration tests that spawn daemons and test IPC are in bash scripts:
@@ -37,7 +37,7 @@ import type { SessionMetadata } from '../../protocol';
 
 const TEST_BUILD_HASH = 'test-build-hash';
 
-describe('profile-query-cli session management', function () {
+describe('profiler-cli session management', function () {
   let testSessionDir: string;
   const platformDescriptor = Object.getOwnPropertyDescriptor(
     process,
@@ -46,7 +46,9 @@ describe('profile-query-cli session management', function () {
 
   beforeEach(function () {
     // Create a unique temp directory for each test
-    testSessionDir = fs.mkdtempSync(path.join(os.tmpdir(), 'profiler-cli-test-'));
+    testSessionDir = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'profiler-cli-test-')
+    );
   });
 
   afterEach(function () {
@@ -116,9 +118,18 @@ describe('profile-query-cli session management', function () {
         configurable: true,
       });
 
-      const firstSocketPath = getSocketPath('C:\\profiler-cli\\alpha', 'test123');
-      const secondSocketPath = getSocketPath('C:\\profiler-cli\\beta', 'test123');
-      const thirdSocketPath = getSocketPath('C:\\PROFILER-CLI\\ALPHA', 'test123');
+      const firstSocketPath = getSocketPath(
+        'C:\\profiler-cli\\alpha',
+        'test123'
+      );
+      const secondSocketPath = getSocketPath(
+        'C:\\profiler-cli\\beta',
+        'test123'
+      );
+      const thirdSocketPath = getSocketPath(
+        'C:\\PROFILER-CLI\\ALPHA',
+        'test123'
+      );
 
       expect(firstSocketPath).toMatch(
         /^\\\\\.\\pipe\\profiler-cli-[0-9a-f]{12}-test123$/

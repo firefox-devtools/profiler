@@ -1,4 +1,4 @@
-# Profile Query CLI (`profiler-cli`)
+# Profiler CLI
 
 A command-line interface for querying Firefox Profiler profiles with persistent daemon sessions.
 
@@ -21,7 +21,7 @@ A command-line interface for querying Firefox Profiler profiles with persistent 
 
 ```bash
 # Build the CLI
-yarn build-profile-query-cli
+yarn build-profiler-cli
 
 # Basic usage
 profiler-cli load <PATH>                   # Start daemon and load profile (PATH can be a file or http/https URL)
@@ -97,7 +97,7 @@ For `filter push`, exactly one flag per push. For ephemeral use, multiple flags 
 ## Project Structure
 
 ```
-profile-query-cli/
+profiler-cli/
 ├── src/
 │   ├── index.ts       # CLI entry point, argument parsing, command routing
 │   ├── client.ts      # Client logic: spawn daemon, send commands via socket
@@ -117,10 +117,10 @@ profile-query-cli/
 
 This package uses a **bundled distribution approach**:
 
-- **Source code**: Lives in `profile-query-cli/src/` within the firefox-devtools/profiler monorepo
+- **Source code**: Lives in `profiler-cli/src/` within the firefox-devtools/profiler monorepo
 - **Dependencies**: Defined in the root `package.json` (react, redux, protobufjs, etc.)
-- **Build process**: The CLI build writes a single ~640KB executable to `profile-query-cli/dist/profiler-cli.js` (~187KB gzipped) with zero runtime dependencies
-- **Published artifact**: `profile-query-cli/dist/profiler-cli.js` is published to npm as `@firefox-profiler/profiler-cli`
+- **Build process**: The CLI build writes a single ~640KB executable to `profiler-cli/dist/profiler-cli.js` (~187KB gzipped) with zero runtime dependencies
+- **Published artifact**: `profiler-cli/dist/profiler-cli.js` is published to npm as `@firefox-profiler/profiler-cli`
 - **Package.json**: Contains only npm metadata - it does NOT list dependencies since they're pre-bundled
 
 This means:
@@ -133,8 +133,8 @@ To publish:
 
 ```bash
 # From repository root
-yarn build-profile-query-cli
-cd profile-query-cli
+yarn build-profiler-cli
+cd profiler-cli
 npm publish
 ```
 
@@ -182,7 +182,7 @@ All test scripts automatically set `PROFILER_CLI_SESSION_DIR="./.profiler-cli-de
 **Build:**
 
 ```bash
-yarn build-profile-query-cli # Creates ./dist/profiler-cli.js
+yarn build-profiler-cli # Creates ./dist/profiler-cli.js
 ```
 
 **Unit tests:**

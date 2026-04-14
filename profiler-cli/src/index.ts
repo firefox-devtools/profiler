@@ -15,11 +15,11 @@
  *   profiler-cli session use <id>                      Switch the current session
  *
  * Build:
- *   yarn build-profile-query-cli
+ *   yarn build-profiler-cli
  *
  * Run:
  *   profiler-cli <command>                              (if profiler-cli is in PATH)
- *   ./profile-query-cli/dist/profiler-cli.js <command>  (direct invocation)
+ *   ./profiler-cli/dist/profiler-cli.js <command>  (direct invocation)
  */
 
 import * as path from 'path';
@@ -42,7 +42,8 @@ import { registerSessionCommand } from './commands/session';
 
 // Read session directory from environment (only place this is read)
 const SESSION_DIR =
-  process.env.PROFILER_CLI_SESSION_DIR || path.join(os.homedir(), '.profiler-cli');
+  process.env.PROFILER_CLI_SESSION_DIR ||
+  path.join(os.homedir(), '.profiler-cli');
 
 async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2);

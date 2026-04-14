@@ -61,7 +61,7 @@ module.exports = {
     {
       ...browserEnvConfig,
       displayName: 'cli',
-      testMatch: ['<rootDir>/profile-query-cli/src/test/unit/**/*.test.ts'],
+      testMatch: ['<rootDir>/profiler-cli/src/test/unit/**/*.test.ts'],
     },
 
     // ========================================================================
@@ -69,13 +69,11 @@ module.exports = {
     // ========================================================================
     {
       displayName: 'cli-integration',
-      testMatch: [
-        '<rootDir>/profile-query-cli/src/test/integration/**/*.test.ts',
-      ],
+      testMatch: ['<rootDir>/profiler-cli/src/test/integration/**/*.test.ts'],
 
       testEnvironment: 'node',
 
-      setupFilesAfterEnv: ['./profile-query-cli/src/test/integration/setup.ts'],
+      setupFilesAfterEnv: ['./profiler-cli/src/test/integration/setup.ts'],
 
       // Integration tests can be slow (loading profiles, spawning processes)
       testTimeout: 30000,

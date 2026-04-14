@@ -1,4 +1,4 @@
-# profiler-cli To-Do List
+# Profiler CLI To-Do List
 
 Feature wishlist and improvement ideas for the profiler-cli profile query tool.
 

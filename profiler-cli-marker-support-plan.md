@@ -1,8 +1,8 @@
-# Marker Support Implementation Plan for `profiler-cli` CLI
+# Marker Support Implementation Plan for Profiler CLI
 
 ## Overview
 
-This document outlines the implementation plan for adding comprehensive marker support to the profile-query CLI (`profiler-cli`). Markers provide ~50% of profiling insight (Layout/Reflow, JavaScript names, IPC messages, GPU boundaries) and are a critical missing feature.
+This document outlines the implementation plan for adding comprehensive marker support to profiler-cli. Markers provide ~50% of profiling insight (Layout/Reflow, JavaScript names, IPC messages, GPU boundaries) and are a critical missing feature.
 
 ## Background
 

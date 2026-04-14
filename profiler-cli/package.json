@@ -1,5 +1,5 @@
 {
-  "_comment": "This is a distribution package for a pre-bundled CLI artifact. Build dependencies are defined in the root package.json. Run 'yarn build-profile-query-cli' from the repository root to build dist/profiler-cli.js.",
+  "_comment": "This is a distribution package for a pre-bundled CLI artifact. Build dependencies are defined in the root package.json. Run 'yarn build-profiler-cli' from the repository root to build dist/profiler-cli.js.",
   "name": "@firefox-profiler/profiler-cli",
   "version": "0.1.0",
   "description": "Command-line interface for querying Firefox Profiler profiles with persistent daemon sessions",
@@ -32,7 +32,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/firefox-devtools/profiler",
-    "directory": "profile-query-cli"
+    "directory": "profiler-cli"
   },
   "homepage": "https://profiler.firefox.com",
   "bugs": {
