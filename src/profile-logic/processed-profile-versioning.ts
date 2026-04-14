@@ -3063,7 +3063,7 @@ const _upgraders: {
           counter.display = {
             graphType: 'line-accumulated',
             unit: 'bytes',
-            color: 'orange',
+            color: counter.color ?? 'orange',
             markerSchemaLocation: 'timeline-memory',
             sortWeight: 20,
             label: 'Memory',
@@ -3072,7 +3072,7 @@ const _upgraders: {
           counter.display = {
             graphType: 'line-rate',
             unit: 'pWh',
-            color: 'grey',
+            color: counter.color ?? 'grey',
             markerSchemaLocation: null,
             sortWeight: 30,
             label: name,
@@ -3081,7 +3081,7 @@ const _upgraders: {
           counter.display = {
             graphType: 'line-rate',
             unit: 'bytes',
-            color: 'blue',
+            color: counter.color ?? 'blue',
             markerSchemaLocation: null,
             sortWeight: 10,
             label: 'Bandwidth',
@@ -3090,7 +3090,7 @@ const _upgraders: {
           counter.display = {
             graphType: 'line-rate',
             unit: 'percent',
-            color: 'grey',
+            color: counter.color ?? 'grey',
             markerSchemaLocation: null,
             sortWeight: 40,
             label: 'Process CPU',
@@ -3099,12 +3099,13 @@ const _upgraders: {
           counter.display = {
             graphType: 'line-rate',
             unit: '',
-            color: 'grey',
+            color: counter.color ?? 'grey',
             markerSchemaLocation: null,
             sortWeight: 50,
             label: name,
           };
         }
+        delete counter.color;
       }
     }
   },

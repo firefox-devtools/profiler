@@ -63,9 +63,12 @@ describe('TrackMemory', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    profile.counters = [
-      getCounterForThread(thread, threadIndex, counterConfig),
-    ];
+    const counter = getCounterForThread(thread, threadIndex, counterConfig);
+    counter.display = {
+      ...counter.display,
+      color: 'orange',
+    };
+    profile.counters = [counter];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();

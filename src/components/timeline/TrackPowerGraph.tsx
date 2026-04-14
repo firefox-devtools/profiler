@@ -21,7 +21,6 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { TRACK_POWER_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
@@ -122,10 +121,8 @@ class TrackPowerCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = getStrokeColor(
-        counter.color || TRACK_POWER_DEFAULT_COLOR
-      );
-      ctx.fillStyle = getFillColor(counter.color || TRACK_POWER_DEFAULT_COLOR);
+      ctx.strokeStyle = getStrokeColor(counter.display.color);
+      ctx.fillStyle = getFillColor(counter.display.color);
       ctx.beginPath();
 
       const getX = (i: number) =>
@@ -483,9 +480,7 @@ class TrackPowerGraphImpl extends React.PureComponent<Props, State> {
         style={{
           left,
           top,
-          backgroundColor: getDotColor(
-            counter.color || TRACK_POWER_DEFAULT_COLOR
-          ),
+          backgroundColor: getDotColor(counter.display.color),
         }}
         className="timelineTrackPowerGraphDot"
       />

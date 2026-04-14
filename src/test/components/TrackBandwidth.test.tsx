@@ -66,23 +66,26 @@ describe('TrackBandwidth', function () {
     for (let i = 7; i < thread.samples.length - 1; ++i) {
       sampleTimes[i] = 7 + i / 100;
     }
-    profile.counters = [
-      getCounterForThreadWithSamples(
-        thread,
-        threadIndex,
-        {
-          time: sampleTimes.slice(),
-          // Bandwidth usage numbers. They are bytes.
-          count: [
-            10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
-            20000, 1, 12000, 100000,
-          ],
-          length: SAMPLE_COUNT,
-        },
-        'SystemBandwidth',
-        'bandwidth'
-      ),
-    ];
+    const counter = getCounterForThreadWithSamples(
+      thread,
+      threadIndex,
+      {
+        time: sampleTimes.slice(),
+        // Bandwidth usage numbers. They are bytes.
+        count: [
+          10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000, 20000,
+          1, 12000, 100000,
+        ],
+        length: SAMPLE_COUNT,
+      },
+      'SystemBandwidth',
+      'bandwidth'
+    );
+    counter.display = {
+      ...counter.display,
+      color: 'blue',
+    };
+    profile.counters = [counter];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
