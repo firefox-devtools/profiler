@@ -1,6 +1,6 @@
 profiler-cli: Usage Guide
 
-profiler-cli (Profile Querier) queries Firefox performance profiles loaded into a persistent
+profiler-cli (Profiler CLI) queries Firefox performance profiles loaded into a persistent
 daemon. Load a profile once, then query it interactively without reloading.
 
 

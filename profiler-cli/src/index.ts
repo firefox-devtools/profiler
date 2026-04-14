@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * CLI entry point for profiler-cli (Profile Querier).
+ * CLI entry point for profiler-cli (Profiler CLI).
  *
  * Usage:
  *   profiler-cli load <PATH> [--session <id>]          Start a new daemon and load a profile
@@ -67,7 +67,7 @@ async function main(): Promise<void> {
   const program = new Command();
   program
     .name('profiler-cli')
-    .description('Profile Querier — query Firefox profiles from the terminal')
+    .description('Profiler CLI — query Firefox profiles from the terminal')
     .helpOption('-h, --help', 'Show help')
     .addHelpCommand('help [command]', 'Show help for a command')
     .addHelpText(
