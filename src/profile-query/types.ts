@@ -493,6 +493,7 @@ export type ProfileInfoResult = {
     processIndex: number;
     pid: string;
     name: string;
+    etld1?: string;
     cpuMs: number;
     startTime?: number;
     startTimeName?: string;

@@ -27,6 +27,7 @@ export type ProcessListItem = {
   processIndex: number;
   pid: string;
   name: string;
+  etld1?: string;
   cpuMs: number;
   threads: Array<{
     threadIndex: number;

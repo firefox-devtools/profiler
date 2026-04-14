@@ -397,7 +397,8 @@ Name: ${result.name}\n`;
       }
     }
 
-    output += `  p-${process.processIndex}: ${process.name} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
+    const etld1Suffix = process.etld1 ? ` [${process.etld1}]` : '';
+    output += `  p-${process.processIndex}: ${process.name}${etld1Suffix} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
 
     for (const thread of process.threads) {
       output += `    ${thread.threadHandle}: ${thread.name} [tid ${thread.tid}] - ${thread.cpuMs.toFixed(3)}ms\n`;

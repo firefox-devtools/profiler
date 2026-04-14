@@ -86,7 +86,7 @@ export function collectProfileInfo(
     showAll || search !== undefined
   );
 
-  // Apply process names and timing from the profile
+  // Apply process names, eTLD+1, and timing from the profile
   result.processes.forEach((processItem) => {
     const threadFromProcess = profile.threads.find(
       (t) => t.pid === processItem.pid
@@ -96,6 +96,7 @@ export function collectProfileInfo(
         threadFromProcess.processName ||
         threadFromProcess.processType ||
         'unknown';
+      processItem.etld1 = threadFromProcess['eTLD+1'];
       processItem.startTime = threadFromProcess.processStartupTime;
       processItem.endTime = threadFromProcess.processShutdownTime;
     }
@@ -126,6 +127,7 @@ export function collectProfileInfo(
         processIndex: processItem.processIndex,
         pid: processItem.pid,
         name: processItem.name,
+        etld1: processItem.etld1,
         cpuMs: processItem.cpuMs,
         startTime: processItem.startTime,
         startTimeName,
