@@ -24,6 +24,8 @@ import type {
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadFunctionsResult,
+  ThreadNetworkResult,
+  NetworkPhaseTimings,
   MarkerGroupData,
   CallTreeNode,
   FilterEntry,
@@ -1011,6 +1013,133 @@ export function formatThreadFunctionsResult(
   lines.push(
     'Use --search <term>, --min-self <percent>, or --limit <N> to filter functions, or f-<N> handles to inspect individual functions.'
   );
+
+  return lines.join('\n');
+}
+
+function formatNetworkPhases(phases: NetworkPhaseTimings): string {
+  const parts: string[] = [];
+  if (phases.dns !== undefined) {
+    parts.push(`DNS=${formatDuration(phases.dns)}`);
+  }
+  if (phases.tcp !== undefined) {
+    parts.push(`TCP=${formatDuration(phases.tcp)}`);
+  }
+  if (phases.tls !== undefined) {
+    parts.push(`TLS=${formatDuration(phases.tls)}`);
+  }
+  if (phases.ttfb !== undefined) {
+    parts.push(`TTFB=${formatDuration(phases.ttfb)}`);
+  }
+  if (phases.download !== undefined) {
+    parts.push(`DL=${formatDuration(phases.download)}`);
+  }
+  if (phases.mainThread !== undefined) {
+    parts.push(`wait=${formatDuration(phases.mainThread)}`);
+  }
+  return parts.join('  ');
+}
+
+export function formatThreadNetworkResult(
+  result: WithContext<ThreadNetworkResult>
+): string {
+  const lines: string[] = [formatContextHeader(result.context), ''];
+
+  const filterSuffix =
+    result.filters !== undefined &&
+    result.filteredRequestCount !== result.totalRequestCount
+      ? ` (filtered from ${result.totalRequestCount})`
+      : '';
+
+  const truncated = result.requests.length < result.filteredRequestCount;
+  const countStr = truncated
+    ? `${result.requests.length} of ${result.filteredRequestCount} requests`
+    : `${result.filteredRequestCount} requests`;
+
+  lines.push(
+    `Network requests in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${countStr}${filterSuffix}`
+  );
+  lines.push('');
+
+  // Summary
+  const s = result.summary;
+  lines.push('Summary:');
+  lines.push(
+    `  Cache: ${s.cacheHit} hit, ${s.cacheMiss} miss, ${s.cacheUnknown} unknown`
+  );
+
+  const pt = s.phaseTotals;
+  const hasPhaseTotals =
+    pt.dns !== undefined ||
+    pt.tcp !== undefined ||
+    pt.tls !== undefined ||
+    pt.ttfb !== undefined ||
+    pt.download !== undefined ||
+    pt.mainThread !== undefined;
+
+  if (hasPhaseTotals) {
+    lines.push('  Phase totals:');
+    if (pt.dns !== undefined) {
+      lines.push(`    DNS:              ${formatDuration(pt.dns)}`);
+    }
+    if (pt.tcp !== undefined) {
+      lines.push(`    TCP connect:      ${formatDuration(pt.tcp)}`);
+    }
+    if (pt.tls !== undefined) {
+      lines.push(`    TLS:              ${formatDuration(pt.tls)}`);
+    }
+    if (pt.ttfb !== undefined) {
+      lines.push(`    TTFB:             ${formatDuration(pt.ttfb)}`);
+    }
+    if (pt.download !== undefined) {
+      lines.push(`    Download:         ${formatDuration(pt.download)}`);
+    }
+    if (pt.mainThread !== undefined) {
+      lines.push(`    Main thread wait: ${formatDuration(pt.mainThread)}`);
+    }
+  }
+
+  lines.push('');
+
+  if (result.requests.length === 0) {
+    lines.push('No network requests match the specified filters.');
+    return lines.join('\n');
+  }
+
+  for (const req of result.requests) {
+    const url = req.url.length > 100 ? req.url.slice(0, 97) + '...' : req.url;
+    const status =
+      req.httpStatus !== undefined ? String(req.httpStatus) : '???';
+    const version = req.httpVersion !== undefined ? `  ${req.httpVersion}` : '';
+    const cache =
+      req.cacheStatus !== undefined ? `  cache=${req.cacheStatus}` : '';
+    const size =
+      req.transferSizeKB !== undefined
+        ? `  size=${req.transferSizeKB.toFixed(1)}KB`
+        : '';
+
+    lines.push(`  ${url}`);
+    lines.push(
+      `    ${status}${version}${cache}${size}  duration=${formatDuration(req.duration)}`
+    );
+
+    const phaseStr = formatNetworkPhases(req.phases);
+    if (phaseStr) {
+      lines.push(`    Phases: ${phaseStr}`);
+    }
+
+    lines.push('');
+  }
+
+  if (truncated) {
+    lines.push(
+      `Use --limit 0 to show all requests, or --limit <N> to set a different limit.`
+    );
+  } else {
+    lines.push(
+      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, or --limit <N> to filter.'
+    );
+  }
 
   return lines.join('\n');
 }

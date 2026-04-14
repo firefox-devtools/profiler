@@ -61,6 +61,13 @@ CORE WORKFLOW
     profiler-cli thread markers --min-duration 10        Only markers >= 10ms
     profiler-cli thread markers --has-stack              Only markers with stack traces
 
+    profiler-cli thread network                          First 20 requests with timing phases (default)
+    profiler-cli thread network --limit 0                All requests (no limit)
+    profiler-cli thread network --search "api.example"  Filter by URL substring
+    profiler-cli thread network --min-duration 200       Only requests >= 200ms
+    profiler-cli thread network --max-duration 50        Only requests <= 50ms
+    profiler-cli thread network --limit 50               Show up to 50 requests
+
   Step 6: Drill into specifics
     profiler-cli marker info m-1234     Full details for a marker (from handles in marker list)
     profiler-cli marker stack m-1234    Full stack trace at the time of a marker
@@ -243,9 +250,10 @@ COMMON ANALYSIS PATTERNS
     profiler-cli thread markers --group-by type,name
 
   Analyze network activity:
-    profiler-cli thread markers --category Network
-    profiler-cli thread markers --category Network --min-duration 100
-    profiler-cli thread markers --search "http" --category Network
+    profiler-cli thread network                      All requests with timing phases
+    profiler-cli thread network --min-duration 200   Slow requests only (>= 200ms)
+    profiler-cli thread network --search "api"       Filter by URL substring
+    profiler-cli thread markers --category Network   Cross-reference with marker view
 
 
 UNDERSTANDING THE OUTPUT

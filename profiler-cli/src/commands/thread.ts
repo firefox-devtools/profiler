@@ -314,6 +314,79 @@ export function registerThreadCommand(
     console.log(formatOutput(result, opts.json ?? false));
   });
 
+  // thread network
+  addGlobalOptions(
+    thread
+      .command('network')
+      .description('Show network requests with timing phases')
+      .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+      .option('--search <term>', 'Filter by URL substring')
+      .option(
+        '--min-duration <ms>',
+        'Filter by minimum total request duration in milliseconds'
+      )
+      .option(
+        '--max-duration <ms>',
+        'Filter by maximum total request duration in milliseconds'
+      )
+      .option('--limit <N>', 'Max requests to show (default: 20, 0 = show all)')
+  ).action(async (opts) => {
+    const networkFilters: {
+      searchString?: string;
+      minDuration?: number;
+      maxDuration?: number;
+      limit?: number;
+    } = {};
+
+    if (opts.search !== undefined) {
+      networkFilters.searchString = opts.search;
+    }
+    if (opts.minDuration !== undefined) {
+      const v = parseFloat(opts.minDuration);
+      if (isNaN(v) || v < 0) {
+        console.error(
+          'Error: --min-duration must be a positive number (in milliseconds)'
+        );
+        process.exit(1);
+      }
+      networkFilters.minDuration = v;
+    }
+    if (opts.maxDuration !== undefined) {
+      const v = parseFloat(opts.maxDuration);
+      if (isNaN(v) || v < 0) {
+        console.error(
+          'Error: --max-duration must be a positive number (in milliseconds)'
+        );
+        process.exit(1);
+      }
+      networkFilters.maxDuration = v;
+    }
+    if (opts.limit !== undefined) {
+      const v = parseInt(opts.limit, 10);
+      if (isNaN(v) || v < 0) {
+        console.error(
+          'Error: --limit must be a non-negative integer (0 = show all)'
+        );
+        process.exit(1);
+      }
+      networkFilters.limit = v;
+    } else {
+      networkFilters.limit = 20;
+    }
+
+    const result = await sendCommand(
+      sessionDir,
+      {
+        command: 'thread',
+        subcommand: 'network',
+        thread: opts.thread,
+        networkFilters,
+      },
+      opts.session
+    );
+    console.log(formatOutput(result, opts.json ?? false));
+  });
+
   // thread functions
   addSampleFilterOptions(
     addGlobalOptions(

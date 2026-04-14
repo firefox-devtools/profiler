@@ -305,6 +305,47 @@ export type CallTreeNode = FunctionDisplayInfo & {
   };
 };
 
+export type NetworkPhaseTimings = {
+  dns?: number;
+  tcp?: number;
+  tls?: number;
+  ttfb?: number;
+  download?: number;
+  mainThread?: number;
+};
+
+export type NetworkRequestEntry = {
+  url: string;
+  httpStatus?: number;
+  httpVersion?: string;
+  cacheStatus?: string;
+  transferSizeKB?: number;
+  startTime: number;
+  duration: number;
+  phases: NetworkPhaseTimings;
+};
+
+export type ThreadNetworkResult = {
+  type: 'thread-network';
+  threadHandle: string;
+  friendlyThreadName: string;
+  totalRequestCount: number;
+  filteredRequestCount: number;
+  filters?: {
+    searchString?: string;
+    minDuration?: number;
+    maxDuration?: number;
+    limit?: number;
+  };
+  summary: {
+    cacheHit: number;
+    cacheMiss: number;
+    cacheUnknown: number;
+    phaseTotals: NetworkPhaseTimings;
+  };
+  requests: NetworkRequestEntry[];
+};
+
 export type ThreadMarkersResult = {
   type: 'thread-markers';
   threadHandle: string;

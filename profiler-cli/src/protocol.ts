@@ -27,6 +27,9 @@ export type {
   CallTreeNode,
   CallTreeScoringStrategy,
   ThreadMarkersResult,
+  ThreadNetworkResult,
+  NetworkRequestEntry,
+  NetworkPhaseTimings,
   ThreadFunctionsResult,
   DurationStats,
   RateStats,
@@ -56,6 +59,7 @@ import type {
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
+  ThreadNetworkResult,
   ThreadFunctionsResult,
   FilterStackResult,
 } from '../../src/profile-query/types';
@@ -82,13 +86,20 @@ export type ClientCommand =
         | 'samples-top-down'
         | 'samples-bottom-up'
         | 'markers'
-        | 'functions';
+        | 'functions'
+        | 'network';
       thread?: string;
       includeIdle?: boolean;
       search?: string;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
       callTreeOptions?: CallTreeCollectionOptions;
+      networkFilters?: {
+        searchString?: string;
+        minDuration?: number;
+        maxDuration?: number;
+        limit?: number;
+      };
       /** Ephemeral sample filters applied only to this command invocation */
       sampleFilters?: SampleFilterSpec[];
     }
@@ -141,7 +152,8 @@ export type CommandResult =
   | WithContext<ThreadSamplesTopDownResult>
   | WithContext<ThreadSamplesBottomUpResult>
   | WithContext<ThreadMarkersResult>
-  | WithContext<ThreadFunctionsResult>;
+  | WithContext<ThreadFunctionsResult>
+  | WithContext<ThreadNetworkResult>;
 
 export interface SessionMetadata {
   id: string;

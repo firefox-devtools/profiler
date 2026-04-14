@@ -36,11 +36,16 @@ import type {
   MarkerInfoResult,
   StackTraceData,
   ThreadMarkersResult,
+  ThreadNetworkResult,
+  NetworkRequestEntry,
+  NetworkPhaseTimings,
   MarkerGroupData,
   DurationStats,
   RateStats,
   MarkerFilterOptions,
 } from '../types';
+import { isNetworkMarker } from 'firefox-profiler/profile-logic/marker-data';
+import type { NetworkPayload } from 'firefox-profiler/types/markers';
 
 /**
  * Aggregated statistics for a group of markers.
@@ -1527,4 +1532,191 @@ export function formatMarkerInfo(
   }
 
   return lines.join('\n');
+}
+
+function buildNetworkPhases(data: NetworkPayload): NetworkPhaseTimings {
+  const phases: NetworkPhaseTimings = {};
+  if (
+    data.domainLookupStart !== undefined &&
+    data.domainLookupEnd !== undefined
+  ) {
+    phases.dns = data.domainLookupEnd - data.domainLookupStart;
+  }
+  if (data.connectStart !== undefined && data.tcpConnectEnd !== undefined) {
+    phases.tcp = data.tcpConnectEnd - data.connectStart;
+  }
+  if (
+    data.secureConnectionStart !== undefined &&
+    data.secureConnectionStart > 0 &&
+    data.connectEnd !== undefined
+  ) {
+    phases.tls = data.connectEnd - data.secureConnectionStart;
+  }
+  if (data.requestStart !== undefined && data.responseStart !== undefined) {
+    phases.ttfb = data.responseStart - data.requestStart;
+  }
+  if (data.responseStart !== undefined && data.responseEnd !== undefined) {
+    phases.download = data.responseEnd - data.responseStart;
+  }
+  if (data.responseEnd !== undefined) {
+    phases.mainThread = data.endTime - data.responseEnd;
+  }
+  return phases;
+}
+
+export function collectThreadNetwork(
+  store: Store,
+  threadMap: ThreadMap,
+  threadHandle?: string,
+  filterOptions: {
+    searchString?: string;
+    minDuration?: number;
+    maxDuration?: number;
+    limit?: number;
+  } = {}
+): ThreadNetworkResult {
+  const { searchString, minDuration, maxDuration, limit } = filterOptions;
+
+  const state = store.getState();
+  const threadIndexes =
+    threadHandle !== undefined
+      ? threadMap.threadIndexesForHandle(threadHandle)
+      : getSelectedThreadIndexes(state);
+
+  const threadSelectors = getThreadSelectors(threadIndexes);
+  const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
+  const fullMarkerList = threadSelectors.getFullMarkerList(state);
+  const allMarkerIndexes = threadSelectors.getFullMarkerListIndexes(state);
+
+  // Filter to completed (STOP) network markers only.
+  // STOP markers are the merged markers that carry full timing data.
+  const stopIndexes = allMarkerIndexes.filter((i) => {
+    const m = fullMarkerList[i];
+    if (!isNetworkMarker(m)) {
+      return false;
+    }
+    const data = m.data as NetworkPayload;
+    return data.status === 'STATUS_STOP';
+  });
+  const totalRequestCount = stopIndexes.length;
+
+  // Apply filters
+  let filteredIndexes = stopIndexes;
+
+  if (searchString) {
+    const lowerSearch = searchString.toLowerCase();
+    filteredIndexes = filteredIndexes.filter((i) => {
+      const data = fullMarkerList[i].data as NetworkPayload;
+      return data.URI.toLowerCase().includes(lowerSearch);
+    });
+  }
+
+  if (minDuration !== undefined || maxDuration !== undefined) {
+    filteredIndexes = filteredIndexes.filter((i) => {
+      const data = fullMarkerList[i].data as NetworkPayload;
+      const duration = data.endTime - data.startTime;
+      if (minDuration !== undefined && duration < minDuration) {
+        return false;
+      }
+      if (maxDuration !== undefined && duration > maxDuration) {
+        return false;
+      }
+      return true;
+    });
+  }
+
+  const filteredRequestCount = filteredIndexes.length;
+
+  // Accumulate summary stats across all filtered requests (before limit)
+  const phaseTotals: NetworkPhaseTimings = {};
+  let cacheHit = 0;
+  let cacheMiss = 0;
+  let cacheUnknown = 0;
+
+  for (const i of filteredIndexes) {
+    const data = fullMarkerList[i].data as NetworkPayload;
+    const cache = data.cache;
+    if (cache === 'Hit' || cache === 'MemoryHit' || cache === 'Prefetched') {
+      cacheHit++;
+    } else if (
+      cache === 'Miss' ||
+      cache === 'Unresolved' ||
+      cache === 'DiskStorage' ||
+      cache === 'Push'
+    ) {
+      cacheMiss++;
+    } else {
+      cacheUnknown++;
+    }
+
+    const phases = buildNetworkPhases(data);
+    if (phases.dns !== undefined) {
+      phaseTotals.dns = (phaseTotals.dns ?? 0) + phases.dns;
+    }
+    if (phases.tcp !== undefined) {
+      phaseTotals.tcp = (phaseTotals.tcp ?? 0) + phases.tcp;
+    }
+    if (phases.tls !== undefined) {
+      phaseTotals.tls = (phaseTotals.tls ?? 0) + phases.tls;
+    }
+    if (phases.ttfb !== undefined) {
+      phaseTotals.ttfb = (phaseTotals.ttfb ?? 0) + phases.ttfb;
+    }
+    if (phases.download !== undefined) {
+      phaseTotals.download = (phaseTotals.download ?? 0) + phases.download;
+    }
+    if (phases.mainThread !== undefined) {
+      phaseTotals.mainThread =
+        (phaseTotals.mainThread ?? 0) + phases.mainThread;
+    }
+  }
+
+  // Apply limit after accumulating summary stats.
+  // limit === 0 means "show all" (no limit).
+  const limitedIndexes =
+    limit !== undefined && limit > 0
+      ? filteredIndexes.slice(0, limit)
+      : filteredIndexes;
+
+  // Build per-request entries
+  const requests: NetworkRequestEntry[] = limitedIndexes.map((i) => {
+    const data = fullMarkerList[i].data as NetworkPayload;
+    const duration = data.endTime - data.startTime;
+
+    return {
+      url: data.URI,
+      httpStatus: data.responseStatus,
+      httpVersion: data.httpVersion,
+      cacheStatus: data.cache,
+      transferSizeKB: data.count !== undefined ? data.count / 1024 : undefined,
+      startTime: data.startTime,
+      duration,
+      phases: buildNetworkPhases(data),
+    };
+  });
+
+  const displayThreadHandle =
+    threadHandle ?? threadMap.handleForThreadIndexes(threadIndexes);
+
+  return {
+    type: 'thread-network',
+    threadHandle: displayThreadHandle,
+    friendlyThreadName,
+    totalRequestCount,
+    filteredRequestCount,
+    filters:
+      searchString !== undefined ||
+      minDuration !== undefined ||
+      maxDuration !== undefined ||
+      limit !== undefined
+        ? { searchString, minDuration, maxDuration, limit }
+        : undefined,
+    summary: {
+      cacheHit,
+      cacheMiss,
+      cacheUnknown,
+      phaseTotals,
+    },
+    requests,
+  };
 }

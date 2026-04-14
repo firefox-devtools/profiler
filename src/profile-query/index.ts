@@ -51,6 +51,7 @@ import {
 } from './formatters/thread-info';
 import {
   collectThreadMarkers,
+  collectThreadNetwork,
   collectMarkerStack,
   collectMarkerInfo,
 } from './formatters/marker-info';
@@ -71,6 +72,7 @@ import type {
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
+  ThreadNetworkResult,
   ThreadFunctionsResult,
   MarkerFilterOptions,
   FunctionFilterOptions,
@@ -908,6 +910,27 @@ export class ProfileQuerier {
       this._store,
       this._threadMap,
       this._markerMap,
+      threadHandle,
+      filterOptions
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * List completed network requests for a thread with timing phases.
+   */
+  async threadNetwork(
+    threadHandle?: string,
+    filterOptions?: {
+      searchString?: string;
+      minDuration?: number;
+      maxDuration?: number;
+      limit?: number;
+    }
+  ): Promise<WithContext<ThreadNetworkResult>> {
+    const result = collectThreadNetwork(
+      this._store,
+      this._threadMap,
       threadHandle,
       filterOptions
     );

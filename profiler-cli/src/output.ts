@@ -23,6 +23,7 @@ import {
   formatThreadSamplesBottomUpResult,
   formatThreadMarkersResult,
   formatThreadFunctionsResult,
+  formatThreadNetworkResult,
 } from './formatters';
 
 /**
@@ -73,6 +74,8 @@ export function formatOutput(
       return formatThreadMarkersResult(result);
     case 'thread-functions':
       return formatThreadFunctionsResult(result);
+    case 'thread-network':
+      return formatThreadNetworkResult(result);
     default:
       throw assertExhaustiveCheck(result);
   }

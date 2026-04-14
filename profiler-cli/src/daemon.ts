@@ -331,6 +331,11 @@ export class Daemon {
               command.includeIdle,
               command.sampleFilters
             );
+          case 'network':
+            return this.querier!.threadNetwork(
+              command.thread,
+              command.networkFilters
+            );
           default:
             throw assertExhaustiveCheck(command);
         }
