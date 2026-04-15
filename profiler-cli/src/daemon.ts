@@ -284,6 +284,8 @@ export class Daemon {
             return this.querier!.profileInfo(command.all, command.search);
           case 'threads':
             throw new Error('unimplemented');
+          case 'logs':
+            return this.querier!.profileLogs(command.logFilters);
           default:
             throw assertExhaustiveCheck(command);
         }

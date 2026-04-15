@@ -459,6 +459,19 @@ export type MarkerGroupData = {
   subGroups?: MarkerGroupData[];
 };
 
+export type ProfileLogsResult = {
+  type: 'profile-logs';
+  entries: string[];
+  totalCount: number;
+  filters?: {
+    thread?: string;
+    module?: string;
+    level?: string;
+    search?: string;
+    limit?: number;
+  };
+};
+
 export type ThreadFunctionsResult = {
   type: 'thread-functions';
   threadHandle: string;

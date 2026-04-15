@@ -31,6 +31,7 @@ import type {
   CallTreeNode,
   FilterEntry,
   SampleFilterSpec,
+  ProfileLogsResult,
 } from './protocol';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
@@ -1256,4 +1257,46 @@ export function formatFunctionAnnotateResult(
   }
 
   return out.join('\n');
+}
+
+export function formatProfileLogsResult(
+  result: WithContext<ProfileLogsResult>
+): string {
+  const lines: string[] = [formatContextHeader(result.context), ''];
+
+  const { filters } = result;
+  const isFiltered =
+    filters !== undefined &&
+    (filters.thread !== undefined ||
+      filters.module !== undefined ||
+      filters.level !== undefined ||
+      filters.search !== undefined ||
+      filters.limit !== undefined);
+
+  const shown = result.entries.length;
+  const total = result.totalCount;
+
+  if (total === 0) {
+    lines.push(
+      isFiltered
+        ? 'No log entries match the specified filters.'
+        : 'No Log markers found in this profile.'
+    );
+    return lines.join('\n');
+  }
+
+  if (isFiltered && shown < total) {
+    lines.push(`Showing ${shown} of ${total} log entries (filtered/limited)`);
+  } else if (isFiltered) {
+    lines.push(`${total} log entries (filtered)`);
+  } else {
+    lines.push(`${total} log entries`);
+  }
+  lines.push('');
+
+  for (const entry of result.entries) {
+    lines.push(entry);
+  }
+
+  return lines.join('\n');
 }

@@ -43,9 +43,19 @@ import type {
   DurationStats,
   RateStats,
   MarkerFilterOptions,
+  ProfileLogsResult,
 } from '../types';
-import { isNetworkMarker } from 'firefox-profiler/profile-logic/marker-data';
-import type { NetworkPayload } from 'firefox-profiler/types/markers';
+import {
+  isNetworkMarker,
+  LOG_LEVEL_STRING_TO_LETTER,
+  LOG_LETTER_TO_LEVEL,
+  formatLogTimestamp,
+  formatLogStatement,
+} from 'firefox-profiler/profile-logic/marker-data';
+import type {
+  NetworkPayload,
+  LogMarkerPayload,
+} from 'firefox-profiler/types/markers';
 
 /**
  * Aggregated statistics for a group of markers.
@@ -1718,5 +1728,156 @@ export function collectThreadNetwork(
       phaseTotals,
     },
     requests,
+  };
+}
+
+export function collectProfileLogs(
+  store: Store,
+  threadMap: ThreadMap,
+  filterOptions: {
+    thread?: string;
+    module?: string;
+    level?: string;
+    search?: string;
+    limit?: number;
+  } = {}
+): ProfileLogsResult {
+  const { module, level, search, limit } = filterOptions;
+  const state = store.getState();
+  const profile = getProfile(state);
+  const profileStartTime = profile.meta.startTime;
+  const stringArray = profile.shared.stringArray;
+
+  // Resolve which thread indexes to include.
+  const threadIndexes: Set<number> | null =
+    filterOptions.thread !== undefined
+      ? new Set(threadMap.threadIndexesForHandle(filterOptions.thread))
+      : null;
+
+  // Map level filter string to the numeric threshold.
+  const LEVEL_NAMES: Record<string, number> = {
+    error: 1,
+    warn: 2,
+    info: 3,
+    debug: 4,
+    verbose: 5,
+  };
+  const maxLevel =
+    level !== undefined ? (LEVEL_NAMES[level.toLowerCase()] ?? 5) : 5;
+
+  const lowerModule = module?.toLowerCase();
+  const lowerSearch = search?.toLowerCase();
+
+  const entries: string[] = [];
+
+  for (
+    let threadIndex = 0;
+    threadIndex < profile.threads.length;
+    threadIndex++
+  ) {
+    if (threadIndexes !== null && !threadIndexes.has(threadIndex)) {
+      continue;
+    }
+    const thread = profile.threads[threadIndex];
+    const { markers } = thread;
+    const processName = thread.processName ?? 'Unknown Process';
+    const pid = thread.pid;
+    const threadName = thread.name;
+
+    for (let i = 0; i < markers.length; i++) {
+      const startTime = markers.startTime[i];
+      if (startTime === null) {
+        continue;
+      }
+
+      const data = markers.data[i];
+      if (data?.type !== 'Log') {
+        continue;
+      }
+
+      const logData = data as LogMarkerPayload;
+      let moduleName: string;
+      let message: string;
+      let levelLetter: string;
+
+      if ('message' in logData) {
+        if (!logData.message) {
+          continue;
+        }
+        moduleName = stringArray[markers.name[i]] ?? '';
+        const levelStr = stringArray[logData.level] ?? '';
+        levelLetter = LOG_LEVEL_STRING_TO_LETTER[levelStr] ?? 'D';
+        message = logData.message.trim();
+      } else {
+        if (!logData.name) {
+          continue;
+        }
+        // Legacy format: data.module is either "D/nsHttp" or just "nsHttp".
+        const rawModule = logData.module;
+        const slashIdx = rawModule.indexOf('/');
+        if (slashIdx !== -1) {
+          levelLetter = rawModule.slice(0, slashIdx);
+          moduleName = rawModule.slice(slashIdx + 1);
+        } else {
+          levelLetter = 'D';
+          moduleName = rawModule;
+        }
+        message = logData.name.trim();
+      }
+
+      if (
+        lowerModule !== undefined &&
+        !moduleName.toLowerCase().includes(lowerModule)
+      ) {
+        continue;
+      }
+
+      if ((LOG_LETTER_TO_LEVEL[levelLetter] ?? 5) > maxLevel) {
+        continue;
+      }
+
+      if (
+        lowerSearch !== undefined &&
+        !message.toLowerCase().includes(lowerSearch)
+      ) {
+        continue;
+      }
+
+      const timestampStr = formatLogTimestamp(profileStartTime + startTime);
+      const formatted = formatLogStatement(
+        timestampStr,
+        processName,
+        pid,
+        threadName,
+        logData,
+        moduleName,
+        stringArray
+      );
+      if (formatted !== null) {
+        entries.push(formatted);
+      }
+    }
+  }
+
+  // Lexicographic sort equals chronological order since the timestamp prefix
+  // is ISO-like ("YYYY-MM-DD HH:MM:SS..."), matching extractGeckoLogs behavior.
+  entries.sort();
+
+  const totalCount = entries.length;
+  const limitedEntries =
+    limit !== undefined ? entries.slice(0, limit) : entries;
+
+  return {
+    type: 'profile-logs',
+    entries: limitedEntries,
+    totalCount,
+    filters:
+      filterOptions.thread !== undefined ||
+      module !== undefined ||
+      level !== undefined ||
+      search !== undefined ||
+      limit !== undefined
+        ? { thread: filterOptions.thread, module, level, search, limit }
+        : undefined,
   };
 }

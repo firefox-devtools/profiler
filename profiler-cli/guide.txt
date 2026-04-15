@@ -28,6 +28,7 @@ CORE WORKFLOW
     profiler-cli profile info          Overview: processes, threads, time range, CPU activity
     profiler-cli profile info --all    Show all processes and threads (not just top 5)
     profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
+    profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
 
   Step 3: Select a thread to analyze
     profiler-cli thread select t-0     Select a specific thread (persists for future commands)
@@ -70,6 +71,13 @@ CORE WORKFLOW
     profiler-cli thread network --min-duration 200       Only requests >= 200ms
     profiler-cli thread network --max-duration 50        Only requests <= 50ms
     profiler-cli thread network --limit 50               Show up to 50 requests
+
+    profiler-cli profile logs                            All Log markers in MOZ_LOG format (all threads)
+    profiler-cli profile logs --module nsHttp            Filter by module name (substring match)
+    profiler-cli profile logs --level info               Minimum level: error, warn, info, debug, verbose
+    profiler-cli profile logs --search "connect"         Filter by substring in message
+    profiler-cli profile logs --thread t-0               Restrict to a specific thread
+    profiler-cli profile logs --limit 200                Show only the first 200 entries
 
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)

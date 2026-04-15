@@ -25,6 +25,7 @@ import {
   formatThreadMarkersResult,
   formatThreadFunctionsResult,
   formatThreadNetworkResult,
+  formatProfileLogsResult,
 } from './formatters';
 
 /**
@@ -79,6 +80,8 @@ export function formatOutput(
       return formatThreadFunctionsResult(result);
     case 'thread-network':
       return formatThreadNetworkResult(result);
+    case 'profile-logs':
+      return formatProfileLogsResult(result);
     default:
       throw assertExhaustiveCheck(result);
   }

@@ -54,6 +54,7 @@ import {
   collectThreadNetwork,
   collectMarkerStack,
   collectMarkerInfo,
+  collectProfileLogs,
 } from './formatters/marker-info';
 import { parseTimeValue } from './time-range-parser';
 import { FilterStack, pushSpecTransforms } from './filter-stack';
@@ -94,6 +95,7 @@ import type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   ThreadFunctionsResult,
+  ProfileLogsResult,
   MarkerFilterOptions,
   FunctionFilterOptions,
   SampleFilterSpec,
@@ -974,6 +976,27 @@ export class ProfileQuerier {
       this._store,
       this._threadMap,
       threadHandle,
+      filterOptions
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * Extract Log-type markers from the profile in MOZ_LOG format.
+   * Iterates all threads by default; supports filtering by thread, module, level, search, and limit.
+   */
+  async profileLogs(
+    filterOptions: {
+      thread?: string;
+      module?: string;
+      level?: string;
+      search?: string;
+      limit?: number;
+    } = {}
+  ): Promise<WithContext<ProfileLogsResult>> {
+    const result = collectProfileLogs(
+      this._store,
+      this._threadMap,
       filterOptions
     );
     return { ...result, context: this._getContext() };

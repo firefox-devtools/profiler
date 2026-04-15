@@ -40,6 +40,7 @@ export type {
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
+  ProfileLogsResult,
 } from '../../src/profile-query/types';
 export type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -66,6 +67,7 @@ import type {
   ThreadNetworkResult,
   ThreadFunctionsResult,
   FilterStackResult,
+  ProfileLogsResult,
 } from '../../src/profile-query/types';
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -80,6 +82,17 @@ export type ClientCommand =
       subcommand: 'info' | 'threads';
       all?: boolean;
       search?: string;
+    }
+  | {
+      command: 'profile';
+      subcommand: 'logs';
+      logFilters?: {
+        thread?: string;
+        module?: string;
+        level?: string;
+        search?: string;
+        limit?: number;
+      };
     }
   | {
       command: 'thread';
@@ -162,7 +175,8 @@ export type CommandResult =
   | WithContext<ThreadMarkersResult>
   | WithContext<ThreadFunctionsResult>
   | WithContext<ThreadNetworkResult>
-  | WithContext<FunctionAnnotateResult>;
+  | WithContext<FunctionAnnotateResult>
+  | WithContext<ProfileLogsResult>;
 
 export interface SessionMetadata {
   id: string;
