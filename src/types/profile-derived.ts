@@ -13,7 +13,6 @@ import type {
   IndexIntoResourceTable,
   IndexIntoLibs,
   CounterIndex,
-  GraphColor,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
@@ -33,6 +32,7 @@ import type {
   IndexIntoFrameTable,
   SourceTable,
   IndexIntoSourceTable,
+  CounterDisplayConfig,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
@@ -187,10 +187,10 @@ export type Counter = {
   name: string;
   category: string;
   description: string;
-  color?: GraphColor;
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: CounterSamplesTable;
+  display: CounterDisplayConfig;
 };
 
 /**

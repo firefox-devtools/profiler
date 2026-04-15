@@ -2304,10 +2304,9 @@ export function processCounter(rawCounter: RawCounter): Counter {
     name: rawCounter.name,
     category: rawCounter.category,
     description: rawCounter.description,
-    color: rawCounter.color,
     pid: rawCounter.pid,
     mainThreadIndex: rawCounter.mainThreadIndex,
-
+    display: rawCounter.display,
     samples,
   };
 
