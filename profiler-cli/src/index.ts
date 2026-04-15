@@ -86,9 +86,9 @@ Examples:
   profiler-cli stop --all`
     );
 
-  // Bare `profiler-cli` with no arguments
-  program.action(() => {
-    console.error('Error: No command specified\n');
+  // Unknown commands
+  program.on('command:*', (operands: string[]) => {
+    console.error(`Error: Unknown command '${operands[0]}'\n`);
     program.outputHelp();
     process.exit(1);
   });
