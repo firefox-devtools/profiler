@@ -50,9 +50,12 @@ CORE WORKFLOW
     - Matches any frame in the call stack (case-insensitive substring)
     - Comma joins multiple terms with AND: both must appear somewhere in the stack
       profiler-cli thread samples-top-down --search "GC,malloc"   paths through both GC and malloc
-    - "|" is a literal character, not OR — it will match nothing unless a function
-      name actually contains "|"
-    - To see results matching either of two terms, run two separate searches
+    - "|" IS A LITERAL CHARACTER, NOT OR. There is no OR operator in --search.
+      ✗ WRONG: --search "foo|bar"     matches nothing (no function is named "foo|bar")
+      ✗ WRONG: --search "foo\|bar"    same — the backslash doesn't help
+      ✓ RIGHT:  run two separate commands, one per term:
+                profiler-cli thread functions --search "foo"
+                profiler-cli thread functions --search "bar"
 
   Step 5: Analyze markers (browser events, timers, etc.)
     profiler-cli thread markers                          All markers with aggregated stats
@@ -294,9 +297,9 @@ TIPS
   - Idle time alone is not a finding: only investigate idle during a period when the
     thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
     lock contention or blocking on another thread
-  - --search with comma is AND, not OR: "--search foo,bar" keeps only samples where
-    BOTH "foo" and "bar" appear somewhere in the stack; to get OR behavior, run two
-    separate searches; "|" is a literal character and will match nothing
+  - --search has no OR operator. "|" and "\|" are literal characters that will match
+    nothing. "--search foo,bar" is AND (both must appear). To get OR behavior, run two
+    separate commands: once with "--search foo", once with "--search bar".
   - Try filters ephemerally first (as flags on thread commands) before committing
     with "filter push"
   - "filter push --during-marker --search X" is powerful for correlating CPU work
