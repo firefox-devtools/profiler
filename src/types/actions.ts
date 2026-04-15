@@ -321,9 +321,6 @@ type ProfileAction =
       readonly type: 'SET_CONTEXT_MENU_VISIBILITY';
       readonly isVisible: boolean;
     }
-  | {
-      readonly type: 'INCREMENT_PANEL_LAYOUT_GENERATION';
-    }
   | { readonly type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' }
   | { readonly type: 'DISMISS_NEWLY_PUBLISHED' }
   | {

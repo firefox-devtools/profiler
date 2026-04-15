@@ -7,7 +7,6 @@ import SplitterLayout from 'react-splitter-layout';
 import { Details } from './Details';
 import { selectSidebar } from 'firefox-profiler/components/sidebar';
 
-import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
 import explicitConnect from 'firefox-profiler/utils/connect';
@@ -22,17 +21,9 @@ type StateProps = {
   readonly isSidebarOpen: boolean;
 };
 
-type DispatchProps = {
-  readonly invalidatePanelLayout: typeof invalidatePanelLayout;
-};
+type Props = ConnectedProps<{}, StateProps, {}>;
 
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
-
-function DetailsContainerImpl({
-  selectedTab,
-  isSidebarOpen,
-  invalidatePanelLayout,
-}: Props) {
+function DetailsContainerImpl({ selectedTab, isSidebarOpen }: Props) {
   const Sidebar = selectSidebar(selectedTab);
 
   return (
@@ -40,7 +31,6 @@ function DetailsContainerImpl({
       customClassName="DetailsContainer"
       percentage
       secondaryInitialSize={20}
-      onDragEnd={invalidatePanelLayout}
     >
       <Details />
       {Sidebar && isSidebarOpen ? <Sidebar /> : null}
@@ -48,13 +38,11 @@ function DetailsContainerImpl({
   );
 }
 
-export const DetailsContainer = explicitConnect<{}, StateProps, DispatchProps>({
+export const DetailsContainer = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
-  mapDispatchToProps: {
-    invalidatePanelLayout,
-  },
+  mapDispatchToProps: {},
   component: DetailsContainerImpl,
 });
