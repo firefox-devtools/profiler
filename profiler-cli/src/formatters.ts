@@ -26,6 +26,7 @@ import type {
   ThreadMarkersResult,
   ThreadFunctionsResult,
   ThreadNetworkResult,
+  ThreadPageLoadResult,
   NetworkPhaseTimings,
   MarkerGroupData,
   CallTreeNode,
@@ -1296,6 +1297,203 @@ export function formatProfileLogsResult(
 
   for (const entry of result.entries) {
     lines.push(entry);
+  }
+
+  return lines.join('\n');
+}
+
+export function formatThreadPageLoadResult(
+  result: WithContext<ThreadPageLoadResult>
+): string {
+  const lines: string[] = [formatContextHeader(result.context), ''];
+
+  if (result.navigationTotal === 0) {
+    lines.push(
+      'No page load markers found in this thread.',
+      'Try a different thread or check that the profile includes a web page load.'
+    );
+    return lines.join('\n');
+  }
+
+  const navLabel =
+    result.navigationTotal > 1
+      ? `  [Navigation ${result.navigationIndex} of ${result.navigationTotal}]`
+      : '';
+
+  lines.push(
+    `Page Load Summary — ${result.friendlyThreadName} (${result.threadHandle})${navLabel}`
+  );
+  lines.push('');
+
+  if (result.url) {
+    lines.push(`  URL: ${result.url}`);
+    lines.push('');
+  }
+
+  // ── Navigation Timing ──────────────────────────────────────────────────────
+
+  lines.push('──── Navigation Timing ────');
+  lines.push('');
+
+  const milestones = result.milestones;
+
+  if (milestones.length === 0) {
+    lines.push('  No navigation timing data available.');
+  } else {
+    const TIMELINE_WIDTH = 60;
+    // Axis max = largest non-TTFI milestone. TTFI is shown with ▶ if it
+    // exceeds this, since it's post-load and can dwarf everything else.
+    const nonTtfiMilestones = milestones.filter((m) => m.name !== 'TTFI');
+    const axisMax =
+      nonTtfiMilestones.length > 0
+        ? Math.max(...nonTtfiMilestones.map((m) => m.timeMs))
+        : milestones[milestones.length - 1].timeMs;
+
+    // Label column: name (right-aligned) + space + handle (left-aligned)
+    const maxLabelLen = Math.max(...milestones.map((m) => m.name.length));
+    const labelWidth = Math.max(maxLabelLen, 3);
+    const maxHandleLen = Math.max(
+      ...milestones.map((m) => m.markerHandle.length)
+    );
+    // Total prefix width before the bar: labelWidth + 1 (space) + maxHandleLen + 2 (gap)
+    const prefixWidth = labelWidth + 1 + maxHandleLen + 2;
+
+    // Time header line
+    const startLabel = '0ms';
+    const endLabel = `${Math.round(axisMax)}ms`;
+    const padding = TIMELINE_WIDTH - startLabel.length - endLabel.length;
+    lines.push(
+      `  ${' '.repeat(prefixWidth)}${startLabel}${' '.repeat(Math.max(0, padding))}${endLabel}`
+    );
+
+    // Axis line
+    lines.push(`  ${' '.repeat(prefixWidth)}${'─'.repeat(TIMELINE_WIDTH)}`);
+
+    // One row per milestone
+    for (const m of milestones) {
+      const label = m.name.padStart(labelWidth);
+      const handle = m.markerHandle.padEnd(maxHandleLen);
+      let bar: string;
+      if (m.timeMs > axisMax) {
+        bar = '─'.repeat(TIMELINE_WIDTH) + '▶';
+      } else {
+        const pos =
+          axisMax > 0
+            ? Math.round((m.timeMs / axisMax) * TIMELINE_WIDTH)
+            : TIMELINE_WIDTH;
+        // Clamp to TIMELINE_WIDTH - 1 so │ always fits within the axis width
+        const drawPos = Math.min(pos, TIMELINE_WIDTH - 1);
+        bar = '─'.repeat(Math.max(0, drawPos)) + '│';
+      }
+      lines.push(`  ${label} ${handle}  ${bar}  ${Math.round(m.timeMs)}ms`);
+    }
+  }
+
+  lines.push('');
+
+  // ── Resources ─────────────────────────────────────────────────────────────
+
+  lines.push(`──── Resources (${result.resourceCount} requests) ────`);
+  lines.push('');
+
+  if (result.resourceCount === 0) {
+    lines.push('  No network requests recorded during page load.');
+  } else {
+    if (result.resourceAvgMs !== null) {
+      lines.push(`  Avg duration:  ${formatDuration(result.resourceAvgMs)}`);
+    }
+    if (result.resourceMaxMs !== null) {
+      lines.push(`  Max duration:  ${formatDuration(result.resourceMaxMs)}`);
+    }
+    lines.push('');
+
+    if (result.resourcesByType.length > 0) {
+      lines.push('  By type:');
+      for (const t of result.resourcesByType) {
+        const countStr = String(t.count).padStart(4);
+        const pctStr = t.percentage.toFixed(1).padStart(5);
+        lines.push(`    ${t.type.padEnd(8)}  ${countStr}  (${pctStr}%)`);
+      }
+      lines.push('');
+    }
+
+    if (result.topResources.length > 0) {
+      lines.push('  Top 10 longest:');
+      result.topResources.forEach((r, idx) => {
+        const num = String(idx + 1).padStart(3);
+        const dur = formatDuration(r.durationMs).padStart(7);
+        const file = r.filename.padEnd(50);
+        lines.push(
+          `  ${num}.  ${dur}   ${file}  ${r.resourceType}  ${r.markerHandle}`
+        );
+      });
+    }
+  }
+
+  lines.push('');
+
+  // ── CPU Categories ─────────────────────────────────────────────────────────
+
+  lines.push(`──── CPU Categories (${result.totalSamples} samples) ────`);
+  lines.push('');
+
+  if (result.categories.length === 0) {
+    lines.push('  No sample data available during page load.');
+  } else {
+    const BAR_WIDTH = 28;
+    const maxCount = result.categories[0].count;
+    const maxNameLen = Math.max(...result.categories.map((c) => c.name.length));
+
+    for (const cat of result.categories) {
+      const barLen =
+        maxCount > 0 ? Math.round((cat.count / maxCount) * BAR_WIDTH) : 0;
+      const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
+      const name = cat.name.padEnd(maxNameLen);
+      const countStr = String(cat.count).padStart(6);
+      const pctStr = cat.percentage.toFixed(1).padStart(5);
+      lines.push(`  ${name}  ${bar}  ${countStr}  ${pctStr}%`);
+    }
+  }
+
+  lines.push('');
+
+  // ── Jank ──────────────────────────────────────────────────────────────────
+
+  lines.push(`──── Jank (${result.jankTotal} periods) ────`);
+  lines.push('');
+
+  if (result.jankTotal === 0) {
+    lines.push('  No jank detected during page load.');
+  } else {
+    const shown = result.jankPeriods.length;
+    result.jankPeriods.forEach((jank, idx) => {
+      lines.push(
+        `  Jank ${idx + 1} (${jank.markerHandle})   at ${Math.round(jank.startMs)}ms   ${Math.round(jank.durationMs)}ms duration   [${jank.startHandle} → ${jank.endHandle}]`
+      );
+
+      if (jank.topFunctions.length > 0) {
+        lines.push('    Top functions:');
+        for (const fn of jank.topFunctions) {
+          const name = truncateFunctionName(fn.name, 60);
+          lines.push(`      ${name.padEnd(60)}  ${fn.sampleCount} samples`);
+        }
+      }
+
+      if (jank.categories.length > 0) {
+        const catStr = jank.categories
+          .map((c) => `${c.name}: ${c.count}`)
+          .join('  ');
+        lines.push(`    Categories: ${catStr}`);
+      }
+
+      lines.push('');
+    });
+
+    if (shown < result.jankTotal) {
+      lines.push(
+        `  Showing ${shown} of ${result.jankTotal} jank periods. Use --jank-limit <N> or --jank-limit 0 to show more.`
+      );
+    }
   }
 
   return lines.join('\n');

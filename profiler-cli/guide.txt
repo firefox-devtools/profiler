@@ -268,6 +268,16 @@ COMMON ANALYSIS PATTERNS
     profiler-cli thread markers --auto-group
     profiler-cli thread markers --group-by type,name
 
+  Investigate a page load:
+    profiler-cli thread page-load                    Overview: milestones, top resources, CPU categories, jank
+    profiler-cli thread page-load --navigation 2     If multiple navigations, inspect each one separately (1-based)
+    profiler-cli thread page-load --jank-limit 0     Show all jank periods (default: first 10)
+    profiler-cli zoom push m-<jank-handle>           Zoom into a specific jank period (handle from page-load output)
+    profiler-cli thread samples                      What was executing during the jank?
+    profiler-cli zoom pop
+    Requires page load markers in the selected thread (typically GeckoMain or a content process thread).
+    Marker handles shown in page-load output can be passed to "marker info" or "zoom push".
+
   Analyze network activity:
     profiler-cli thread network                      All requests with timing phases
     profiler-cli thread network --min-duration 200   Slow requests only (>= 200ms)

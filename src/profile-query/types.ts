@@ -546,6 +546,66 @@ export type StackTraceData = {
   truncated: boolean;
 };
 
+// ===== Thread Page Load Command =====
+
+export type NavigationMilestone = {
+  name: string; // 'FCP', 'LCP', 'DCL', 'Load', 'TTI'
+  timeMs: number; // relative to navStart
+  markerHandle: string; // e.g. "m-3"
+};
+
+export type PageLoadResourceEntry = {
+  filename: string; // last URL path segment, truncated to 50 chars
+  url: string;
+  durationMs: number;
+  resourceType: string; // 'JS', 'CSS', 'Image', 'HTML', 'JSON', 'Font', 'Wasm', 'Other'
+  markerHandle: string; // e.g. "m-5"
+};
+
+export type PageLoadCategoryEntry = {
+  name: string;
+  count: number;
+  percentage: number;
+};
+
+export type JankFunction = {
+  name: string;
+  sampleCount: number;
+};
+
+export type JankPeriod = {
+  startMs: number; // relative to navStart
+  durationMs: number;
+  markerHandle: string; // e.g. "m-7"
+  startHandle: string; // timestamp handle for zoom, e.g. "ts-3"
+  endHandle: string; // timestamp handle for zoom, e.g. "ts-4"
+  topFunctions: JankFunction[];
+  categories: PageLoadCategoryEntry[];
+};
+
+export type ThreadPageLoadResult = {
+  type: 'thread-page-load';
+  threadHandle: string;
+  friendlyThreadName: string;
+  url: string | null;
+  navigationIndex: number; // 1-based
+  navigationTotal: number;
+  navStartMs: number; // absolute profile time of nav start
+  milestones: NavigationMilestone[];
+  // Resources
+  resourceCount: number;
+  resourceAvgMs: number | null;
+  resourceMaxMs: number | null;
+  resourcesByType: Array<{ type: string; count: number; percentage: number }>;
+  topResources: PageLoadResourceEntry[]; // top 10 by duration
+  // CPU categories
+  totalSamples: number;
+  categories: PageLoadCategoryEntry[];
+  // Jank
+  jankTotal: number;
+  jankPeriods: JankPeriod[]; // limited by jankLimit
+};
+
 // ===== Profile Commands =====
 
 export type ProfileInfoResult = {

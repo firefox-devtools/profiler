@@ -387,6 +387,60 @@ export function registerThreadCommand(
     console.log(formatOutput(result, opts.json ?? false));
   });
 
+  // thread page-load
+  addGlobalOptions(
+    thread
+      .command('page-load')
+      .description(
+        'Show page load summary: navigation timing, resources, CPU categories, and jank'
+      )
+      .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+      .option(
+        '--navigation <N>',
+        'Select which navigation to show (1-based, default: last completed)'
+      )
+      .option(
+        '--jank-limit <N>',
+        'Max jank periods to show (default: 10, 0 = show all)'
+      )
+  ).action(async (opts) => {
+    const pageLoadOptions: { navigationIndex?: number; jankLimit?: number } =
+      {};
+
+    if (opts.navigation !== undefined) {
+      const v = parseInt(opts.navigation, 10);
+      if (isNaN(v) || v < 1) {
+        console.error(
+          'Error: --navigation must be a positive integer (1-based index)'
+        );
+        process.exit(1);
+      }
+      pageLoadOptions.navigationIndex = v;
+    }
+    if (opts.jankLimit !== undefined) {
+      const v = parseInt(opts.jankLimit, 10);
+      if (isNaN(v) || v < 0) {
+        console.error(
+          'Error: --jank-limit must be a non-negative integer (0 = show all)'
+        );
+        process.exit(1);
+      }
+      pageLoadOptions.jankLimit = v === 0 ? undefined : v;
+    }
+
+    const result = await sendCommand(
+      sessionDir,
+      {
+        command: 'thread',
+        subcommand: 'page-load',
+        thread: opts.thread,
+        pageLoadOptions,
+      },
+      opts.session
+    );
+    console.log(formatOutput(result, opts.json ?? false));
+  });
+
   // thread functions
   addSampleFilterOptions(
     addGlobalOptions(

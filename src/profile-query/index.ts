@@ -56,6 +56,7 @@ import {
   collectMarkerInfo,
   collectProfileLogs,
 } from './formatters/marker-info';
+import { collectThreadPageLoad } from './formatters/page-load';
 import { parseTimeValue } from './time-range-parser';
 import { FilterStack, pushSpecTransforms } from './filter-stack';
 import {
@@ -95,6 +96,7 @@ import type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   ThreadFunctionsResult,
+  ThreadPageLoadResult,
   ProfileLogsResult,
   MarkerFilterOptions,
   FunctionFilterOptions,
@@ -977,6 +979,24 @@ export class ProfileQuerier {
       this._threadMap,
       threadHandle,
       filterOptions
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * Summarize a page load: navigation timing, resource stats, CPU categories, and jank.
+   */
+  async threadPageLoad(
+    threadHandle?: string,
+    options?: { navigationIndex?: number; jankLimit?: number }
+  ): Promise<WithContext<ThreadPageLoadResult>> {
+    const result = collectThreadPageLoad(
+      this._store,
+      this._threadMap,
+      this._timestampManager,
+      this._markerMap,
+      threadHandle,
+      options
     );
     return { ...result, context: this._getContext() };
   }

@@ -41,6 +41,7 @@ profiler-cli thread samples-top-down       # Show top-down call tree (where CPU 
 profiler-cli thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
 profiler-cli thread markers                # List markers with aggregated statistics
 profiler-cli thread functions              # List all functions with CPU percentages
+profiler-cli thread page-load              # Show page load summary (navigation timing, resources, CPU, jank)
 profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
@@ -87,6 +88,8 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | `--limit <N>`          | Limit number of results shown                                                                                                                            |
 | `--max-lines <N>`      | Limit call tree nodes for `samples-top-down`/`samples-bottom-up` (default: 100)                                                                          |
 | `--scoring <strategy>` | Call tree scoring: `exponential-0.95`, `exponential-0.9` (default), `exponential-0.8`, `harmonic-0.1`, `harmonic-0.5`, `harmonic-1.0`, `percentage-only` |
+| `--navigation <N>`     | Select which navigation to show in `thread page-load` (1-based, default: last completed)                                                                 |
+| `--jank-limit <N>`     | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |
 | `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
 | `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
 

@@ -33,6 +33,12 @@ export type {
   NetworkRequestEntry,
   NetworkPhaseTimings,
   ThreadFunctionsResult,
+  ThreadPageLoadResult,
+  NavigationMilestone,
+  PageLoadResourceEntry,
+  PageLoadCategoryEntry,
+  JankPeriod,
+  JankFunction,
   DurationStats,
   RateStats,
   MarkerGroupData,
@@ -66,6 +72,7 @@ import type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   ThreadFunctionsResult,
+  ThreadPageLoadResult,
   FilterStackResult,
   ProfileLogsResult,
 } from '../../src/profile-query/types';
@@ -104,7 +111,8 @@ export type ClientCommand =
         | 'samples-bottom-up'
         | 'markers'
         | 'functions'
-        | 'network';
+        | 'network'
+        | 'page-load';
       thread?: string;
       includeIdle?: boolean;
       search?: string;
@@ -116,6 +124,10 @@ export type ClientCommand =
         minDuration?: number;
         maxDuration?: number;
         limit?: number;
+      };
+      pageLoadOptions?: {
+        navigationIndex?: number;
+        jankLimit?: number;
       };
       /** Ephemeral sample filters applied only to this command invocation */
       sampleFilters?: SampleFilterSpec[];
@@ -176,7 +188,8 @@ export type CommandResult =
   | WithContext<ThreadFunctionsResult>
   | WithContext<ThreadNetworkResult>
   | WithContext<FunctionAnnotateResult>
-  | WithContext<ProfileLogsResult>;
+  | WithContext<ProfileLogsResult>
+  | WithContext<ThreadPageLoadResult>;
 
 export interface SessionMetadata {
   id: string;

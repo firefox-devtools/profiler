@@ -338,6 +338,11 @@ export class Daemon {
               command.thread,
               command.networkFilters
             );
+          case 'page-load':
+            return this.querier!.threadPageLoad(
+              command.thread,
+              command.pageLoadOptions
+            );
           default:
             throw assertExhaustiveCheck(command);
         }
