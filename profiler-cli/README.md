@@ -2,10 +2,12 @@
 
 A command-line interface for querying Firefox Profiler profiles with persistent daemon sessions.
 
+> **Alpha release** — this package is in early development. Commands and options may change between versions.
+
 ## Installation
 
 ```bash
-npm install -g @firefox-profiler/profiler-cli
+npm install -g @firefox-devtools/profiler-cli@alpha
 ```
 
 Requires Node.js >= 24.
@@ -20,6 +22,8 @@ profiler-cli thread select t-0            # Select a thread
 profiler-cli thread samples               # Show hot functions
 profiler-cli stop                         # Stop the daemon
 ```
+
+`profiler-cli` is also available as `pq` for shorter invocations (e.g. `pq thread samples`).
 
 Run `profiler-cli guide` for a detailed usage guide with patterns and tips.  
 Run `profiler-cli --help` for the full options reference.
