@@ -554,7 +554,6 @@ export type RawCounter = {
   name: string;
   category: string;
   description: string;
-  color?: GraphColor;
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: RawCounterSamplesTable;

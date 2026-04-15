@@ -13,7 +13,6 @@ import type {
   IndexIntoResourceTable,
   IndexIntoLibs,
   CounterIndex,
-  GraphColor,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
@@ -188,7 +187,6 @@ export type Counter = {
   name: string;
   category: string;
   description: string;
-  color?: GraphColor;
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: CounterSamplesTable;

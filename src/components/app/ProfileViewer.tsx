@@ -21,7 +21,6 @@ import { returnToZipFileList } from 'firefox-profiler/actions/zipped-profiles';
 import { Timeline } from 'firefox-profiler/components/timeline';
 import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
-import { invalidatePanelLayout } from 'firefox-profiler/actions/app';
 import { getTimelineHeight } from 'firefox-profiler/selectors/app';
 import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
 import {
@@ -54,7 +53,6 @@ type StateProps = {
 
 type DispatchProps = {
   readonly returnToZipFileList: typeof returnToZipFileList;
-  readonly invalidatePanelLayout: typeof invalidatePanelLayout;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -64,7 +62,6 @@ class ProfileViewerImpl extends PureComponent<Props> {
     const {
       hasZipFile,
       returnToZipFileList,
-      invalidatePanelLayout,
       timelineHeight,
       isUploading,
       uploadProgress,
@@ -136,7 +133,6 @@ class ProfileViewerImpl extends PureComponent<Props> {
             primaryIndex={1}
             // The Timeline is secondary.
             secondaryInitialSize={270}
-            onDragEnd={invalidatePanelLayout}
           >
             <Timeline />
             <SplitterLayout
@@ -146,7 +142,6 @@ class ProfileViewerImpl extends PureComponent<Props> {
               primaryIndex={0}
               // The BottomBox is secondary.
               secondaryInitialSize={40}
-              onDragEnd={invalidatePanelLayout}
             >
               <DetailsContainer />
               {isBottomBoxOpen ? <BottomBox /> : null}
@@ -178,7 +173,6 @@ export const ProfileViewer = explicitConnect<{}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     returnToZipFileList,
-    invalidatePanelLayout,
   },
   component: ProfileViewerImpl,
 });

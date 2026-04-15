@@ -199,17 +199,20 @@
 
 /* Only show the home transition when reduced motion is not preferred */
 @media (prefers-reduced-motion: no-preference) {
-  .homeTransition-enter {
-    opacity: 0.1;
-    transform: translateX(100px);
+  @keyframes homeSlideIn {
+    from {
+      opacity: 0.1;
+      transform: translateX(100px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
-  .homeTransition-enter.homeTransition-enter-active {
-    opacity: 1;
-    transform: translateX(0);
-    transition:
-      opacity 300ms ease-out,
-      transform 300ms ease-out;
+  .homeInstructions-animate {
+    animation: homeSlideIn 300ms ease-out;
   }
 }
 
