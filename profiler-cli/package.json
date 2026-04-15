@@ -7,7 +7,8 @@
   },
   "main": "./dist/profiler-cli.js",
   "bin": {
-    "profiler-cli": "./dist/profiler-cli.js"
+    "profiler-cli": "./dist/profiler-cli.js",
+    "pq": "./dist/profiler-cli.js"
   },
   "files": [
     "dist/profiler-cli.js"
