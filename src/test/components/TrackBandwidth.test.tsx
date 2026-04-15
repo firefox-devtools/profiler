@@ -79,7 +79,7 @@ describe('TrackBandwidth', function () {
         length: SAMPLE_COUNT,
       },
       'SystemBandwidth',
-      'bandwidth'
+      'Bandwidth'
     );
     counter.display = {
       ...counter.display,

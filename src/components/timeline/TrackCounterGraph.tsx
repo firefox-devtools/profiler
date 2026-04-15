@@ -47,7 +47,6 @@ import type {
   CssPixels,
   StartEndRange,
   IndexIntoSamplesTable,
-  CounterDisplayConfig,
 } from 'firefox-profiler/types';
 
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
@@ -69,7 +68,6 @@ type CanvasProps = {
   readonly width: CssPixels;
   readonly height: CssPixels;
   readonly lineWidth: CssPixels;
-  readonly display: CounterDisplayConfig;
 };
 
 /**
@@ -97,8 +95,8 @@ class TrackCounterCanvas extends React.PureComponent<CanvasProps> {
       accumulatedSamples,
       maxCounterSampleCountPerMs,
       counterSampleRange,
-      display,
     } = this.props;
+    const { display } = counter;
     if (width === 0) {
       // Attempt to draw before the canvas was laid out.
       return;
@@ -372,7 +370,6 @@ type StateProps = {
   readonly filteredThread: Thread;
   readonly unfilteredSamplesRange: StartEndRange | null;
   readonly previewSelection: PreviewSelection | null;
-  readonly display: CounterDisplayConfig;
 };
 
 type DispatchProps = {};
@@ -387,8 +384,9 @@ type State = {
 
 /**
  * The generic counter track graph component. It renders information from any counters
- * (eg, Memory, Power, etc.) as a graph in the timeline. It handles all counter types by
- * branching on `display.graphType` for drawing and `display.unit` for tooltips.
+ * (eg, Memory, Power, etc.) as a graph in the timeline. It branches on
+ * `display.graphType` for drawing, and on `counter.category`/`counter.name`
+ * for tooltip rendering of known counter types.
  */
 class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
   override state = {
@@ -458,7 +456,7 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
 
         // For rate-based graphs with decimation, find the sample with the
         // highest value at the same pixel position.
-        if (this.props.display.graphType === 'line-rate') {
+        if (this.props.counter.display.graphType === 'line-rate') {
           const mouseAtTime = (t: number) =>
             Math.round(((t - rangeStart) / rangeLength) * width + left);
           for (
@@ -535,10 +533,10 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
       interval,
-      display,
       maxCounterSampleCountPerMs,
       previewSelection,
     } = this.props;
+    const { display } = counter;
     const { mouseX, mouseY } = this.state;
     const { samples } = counter;
 
@@ -555,10 +553,10 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const { unit } = display;
+    const { category, name } = counter;
 
     // Power tooltip — delegate to the dedicated component.
-    if (unit === 'pWh') {
+    if (category === 'power') {
       return (
         <Tooltip mouseX={mouseX} mouseY={mouseY}>
           <TooltipTrackPower
@@ -570,7 +568,7 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     }
 
     // Process CPU tooltip.
-    if (unit === 'percent') {
+    if (category === 'CPU' && name === 'processCPU') {
       const cpuUsage = samples.count[counterIndex];
       const sampleTimeDeltaInMs =
         counterIndex === 0
@@ -593,7 +591,7 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     }
 
     // Bandwidth tooltip — bytes with rate, CO2, and accumulated total.
-    if (unit === 'bytes' && display.graphType === 'line-rate') {
+    if (category === 'Bandwidth') {
       const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
       const bytes = accumulatedCounts[counterIndex] - minCount;
       const operations =
@@ -666,7 +664,7 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     }
 
     // Memory tooltip — accumulated bytes with operations count.
-    if (unit === 'bytes' && display.graphType === 'line-accumulated') {
+    if (category === 'Memory') {
       const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
       const bytes = accumulatedCounts[counterIndex] - minCount;
       const operations =
@@ -706,15 +704,28 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
       );
     }
 
-    // Default tooltip for unknown units — show the raw value.
+    // Generic tooltip for unknown counter types - format the value based on
+    // the counter's unit.
+    const value = samples.count[counterIndex];
+    let formattedValue;
+    if (display.unit === 'bytes') {
+      formattedValue = formatBytes(value);
+    } else if (display.unit === 'percent') {
+      formattedValue = formatPercent(value);
+    } else if (display.unit) {
+      // Bypasses i18n but this is hit only for unknown counters.
+      formattedValue = `${formatNumber(value)} ${display.unit}`;
+    } else {
+      formattedValue = formatNumber(value);
+    }
     return (
       <Tooltip mouseX={mouseX} mouseY={mouseY}>
         <div className="timelineTrackCounterTooltip">
           <div className="timelineTrackCounterTooltipLine">
             <span className="timelineTrackCounterTooltipNumber">
-              {formatNumber(samples.count[counterIndex])}
+              {formattedValue}
             </span>
-            {counter.name}
+            {display.label || name}
           </div>
         </div>
       </Tooltip>
@@ -736,10 +747,9 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
       accumulatedSamples,
       maxCounterSampleCountPerMs,
       interval,
-      display,
     } = this.props;
 
-    const { samples } = counter;
+    const { samples, display } = counter;
     if (samples.length === 0) {
       throw new Error('No sample found for counter');
     }
@@ -804,7 +814,6 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
       lineWidth,
       accumulatedSamples,
       maxCounterSampleCountPerMs,
-      display,
     } = this.props;
 
     return (
@@ -824,7 +833,6 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
           interval={interval}
           accumulatedSamples={accumulatedSamples}
           maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
-          display={display}
         />
         {hoveredCounter === null ? null : (
           <>
@@ -870,7 +878,6 @@ export const TrackCounterGraph = explicitConnect<
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       previewSelection: getPreviewSelection(state),
-      display: counter.display,
     };
   },
   component: withSize(TrackCounterGraphImpl),
