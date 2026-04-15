@@ -1,4 +1,4 @@
-# Profiler CLI
+# Firefox Profiler CLI
 
 A command-line interface for querying Firefox Profiler profiles with persistent daemon sessions.
 
@@ -25,7 +25,7 @@ profiler-cli stop                         # Stop the daemon
 
 `profiler-cli` is also available as `pq` for shorter invocations (e.g. `pq thread samples`).
 
-Run `profiler-cli guide` for a detailed usage guide with patterns and tips.  
+Run `profiler-cli guide` for a detailed usage guide with patterns and tips.
 Run `profiler-cli --help` for the full options reference.
 
 ## Commands
