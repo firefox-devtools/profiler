@@ -32,6 +32,7 @@ import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
 import { formatOutput } from './output';
 import { addGlobalOptions } from './commands/shared';
+import { VERSION } from './constants';
 import { registerProfileCommand } from './commands/profile';
 import { registerThreadCommand } from './commands/thread';
 import { registerMarkerCommand } from './commands/marker';
@@ -68,6 +69,7 @@ async function main(): Promise<void> {
   program
     .name('profiler-cli')
     .description('Profiler CLI — query Firefox profiles from the terminal')
+    .version(VERSION, '-V, --version', 'Print the version number')
     .helpOption('-h, --help', 'Show help')
     .addHelpCommand('help [command]', 'Show help for a command')
     .addHelpText(
