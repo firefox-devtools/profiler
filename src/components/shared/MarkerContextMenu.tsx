@@ -13,6 +13,7 @@ import {
   setContextMenuVisibility,
   updatePreviewSelection,
   selectTrackFromTid,
+  overrideZeroAt,
 } from 'firefox-profiler/actions/profile-view';
 import {
   getPreviewSelection,
@@ -65,6 +66,7 @@ type DispatchProps = {
   readonly updatePreviewSelection: typeof updatePreviewSelection;
   readonly setContextMenuVisibility: typeof setContextMenuVisibility;
   readonly selectTrackFromTid: typeof selectTrackFromTid;
+  readonly overrideZeroAt: typeof overrideZeroAt;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -139,6 +141,11 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
       selectionStart: marker.start,
       selectionEnd: marker.end,
     });
+  };
+
+  overrideZeroAtMarkerStart = () => {
+    const { marker, overrideZeroAt } = this.props;
+    overrideZeroAt(marker.start);
   };
 
   _isZeroDurationMarker(marker: Marker | null): boolean {
@@ -483,6 +490,15 @@ class MarkerContextMenuImpl extends PureComponent<Props> {
         )}
 
         <div className="react-contextmenu-separator" />
+
+        <MenuItem onClick={this.overrideZeroAtMarkerStart}>
+          <span className="react-contextmenu-icon markerContextMenuIconOverrideZeroAtMarkerStart" />
+          <Localized id="MarkerContextMenu--align-timeline-start-with-marker-start">
+            Align the timeline start with the marker start
+          </Localized>
+        </MenuItem>
+
+        <div className="react-contextmenu-separator" />
         <MenuItem onClick={this.copyMarkerDescription}>
           <span className="react-contextmenu-icon markerContextMenuIconCopyDescription" />
           <Localized id="MarkerContextMenu--copy-description">
@@ -539,6 +555,7 @@ const MarkerContextMenu = explicitConnect<OwnProps, StateProps, DispatchProps>({
     updatePreviewSelection,
     setContextMenuVisibility,
     selectTrackFromTid,
+    overrideZeroAt,
   },
   component: MarkerContextMenuImpl,
 });

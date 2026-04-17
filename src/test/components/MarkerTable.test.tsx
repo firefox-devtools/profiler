@@ -240,6 +240,25 @@ describe('MarkerTable', function () {
     );
   });
 
+  it('can align the timeline start to marker using the context menu', () => {
+    const { getRowElement } = setup();
+
+    const startNode = ensureExists(
+      getRowElement(/setTimeout/).querySelector('.start')
+    );
+    expect(startNode).toHaveTextContent('0.153s');
+
+    fireFullContextMenu(getRowElement(/setTimeout/) as HTMLElement);
+    fireFullClick(
+      screen.getByText('Align the timeline start with the marker start')
+    );
+
+    const startNode2 = ensureExists(
+      getRowElement(/setTimeout/).querySelector('.start')
+    );
+    expect(startNode2).toHaveTextContent('0s');
+  });
+
   describe('EmptyReasons', () => {
     it('shows reasons when a profile has no non-network markers', () => {
       const { profile } = getProfileFromTextSamples('A'); // Just a simple profile without any marker.
