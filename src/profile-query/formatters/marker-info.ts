@@ -43,6 +43,7 @@ import type {
   DurationStats,
   RateStats,
   MarkerFilterOptions,
+  FlatMarkerItem,
   ProfileLogsResult,
 } from '../types';
 import {
@@ -772,6 +773,28 @@ export function formatThreadMarkers(
       return lines.join('\n');
     }
 
+    if (filterOptions.list) {
+      for (const markerIndex of filteredIndexes) {
+        const marker = fullMarkerList[markerIndex];
+        const handle = markerMap.handleForMarker(threadIndexes, markerIndex);
+        const stackIndicator =
+          marker.data && 'cause' in marker.data && marker.data.cause
+            ? '✓'
+            : '✗';
+        const startStr = `t=${formatDuration(marker.start)}`;
+        const durationStr =
+          marker.end !== null
+            ? formatDuration(marker.end - marker.start)
+            : 'instant';
+        const label = getMarkerLabel(markerIndex);
+        const labelSuffix = label && label !== marker.name ? `  ${label}` : '';
+        lines.push(
+          `  ${handle.padEnd(8)}  ${marker.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
+        );
+      }
+      return lines.join('\n');
+    }
+
     const { groupBy, autoGroup, topN } = filterOptions;
     const maxTopMarkers = topN ?? 5;
 
@@ -1063,6 +1086,31 @@ export function collectThreadMarkers(
           }
         : undefined;
 
+    let flatMarkers: FlatMarkerItem[] | undefined;
+    if (filterOptions.list) {
+      flatMarkers = [];
+      for (const markerIndex of filteredIndexes) {
+        const marker = fullMarkerList[markerIndex];
+        const handle = markerMap.handleForMarker(threadIndexes, markerIndex);
+        const duration =
+          marker.end !== null ? marker.end - marker.start : undefined;
+        const hasStack = Boolean(
+          marker.data && 'cause' in marker.data && marker.data.cause
+        );
+        const categoryName = categories[marker.category]?.name ?? 'Other';
+        const label = getMarkerLabel(markerIndex);
+        flatMarkers.push({
+          handle,
+          name: marker.name,
+          label: label || marker.name,
+          start: marker.start,
+          duration,
+          hasStack,
+          category: categoryName,
+        });
+      }
+    }
+
     return {
       type: 'thread-markers',
       threadHandle: displayThreadHandle,
@@ -1073,6 +1121,7 @@ export function collectThreadMarkers(
       byType,
       byCategory,
       customGroups,
+      flatMarkers,
     };
   } finally {
     // Always clear the search string to avoid affecting other queries

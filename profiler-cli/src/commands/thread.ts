@@ -242,6 +242,7 @@ export function registerThreadCommand(
         '--top-n <N>',
         'Number of top markers to include per group in JSON output (default: 5)'
       )
+      .option('--list', 'Show a flat chronological list of individual markers')
   ).action(async (opts) => {
     let markerFilters: MarkerFilterOptions | undefined;
 
@@ -254,7 +255,8 @@ export function registerThreadCommand(
       opts.limit !== undefined ||
       opts.groupBy !== undefined ||
       opts.autoGroup ||
-      opts.topN !== undefined
+      opts.topN !== undefined ||
+      opts.list
     ) {
       markerFilters = {};
       if (opts.search !== undefined) markerFilters.searchString = opts.search;
@@ -262,6 +264,7 @@ export function registerThreadCommand(
       if (opts.hasStack) markerFilters.hasStack = true;
       if (opts.autoGroup) markerFilters.autoGroup = true;
       if (opts.groupBy !== undefined) markerFilters.groupBy = opts.groupBy;
+      if (opts.list) markerFilters.list = true;
 
       if (opts.minDuration !== undefined) {
         const minDuration = parseFloat(opts.minDuration);

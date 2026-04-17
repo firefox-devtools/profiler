@@ -10,6 +10,7 @@
 // Re-export shared types from profile-query
 export type {
   MarkerFilterOptions,
+  FlatMarkerItem,
   FunctionFilterOptions,
   SampleFilterSpec,
   FilterEntry,

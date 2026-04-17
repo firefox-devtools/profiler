@@ -35,6 +35,17 @@ export type MarkerFilterOptions = {
   groupBy?: string; // Grouping strategy (e.g., "type,name" or "type,field:eventType")
   autoGroup?: boolean; // Automatically determine grouping based on field variance
   topN?: number; // Number of top markers to include per group in JSON output (default: 5)
+  list?: boolean; // Return a flat chronological list of all individual markers
+};
+
+export type FlatMarkerItem = {
+  handle: string;
+  name: string;
+  label: string; // Schema-derived table label (may equal name if no schema)
+  start: number; // Absolute milliseconds
+  duration?: number; // Milliseconds if interval marker
+  hasStack: boolean;
+  category: string;
 };
 
 export type FunctionFilterOptions = {
@@ -431,6 +442,7 @@ export type ThreadMarkersResult = {
     percentage: number;
   }>;
   customGroups?: MarkerGroupData[];
+  flatMarkers?: FlatMarkerItem[];
 };
 
 export type DurationStats = {

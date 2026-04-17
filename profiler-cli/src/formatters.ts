@@ -769,6 +769,22 @@ export function formatThreadMarkersResult(
     return lines.join('\n');
   }
 
+  // Flat list mode: one row per marker in chronological order
+  if (result.flatMarkers) {
+    const rootStart = result.context.rootRange.start;
+    for (const m of result.flatMarkers) {
+      const stackIndicator = m.hasStack ? '✓' : '✗';
+      const startStr = `t=${formatDuration(m.start - rootStart)}`;
+      const durationStr =
+        m.duration !== undefined ? formatDuration(m.duration) : 'instant';
+      const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
+      lines.push(
+        `  ${m.handle.padEnd(8)}  ${m.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
+      );
+    }
+    return lines.join('\n');
+  }
+
   // Handle custom grouping if present
   if (result.customGroups && result.customGroups.length > 0) {
     formatMarkerGroupsForDisplay(lines, result.customGroups, 0);

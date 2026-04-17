@@ -332,6 +332,198 @@ describe('collectThreadMarkers topN option', function () {
   });
 });
 
+describe('collectThreadMarkers list option', function () {
+  it('returns flatMarkers when list: true', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+      ['DOMEvent', 20, null, { type: 'DOMEvent', eventType: 'keydown' }],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    expect(result.flatMarkers).toBeDefined();
+    expect(result.flatMarkers).toHaveLength(2);
+  });
+
+  it('flatMarkers is undefined without list option', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+    ]);
+
+    const result = collectThreadMarkers(store, threadMap, markerMap);
+
+    expect(result.flatMarkers).toBeUndefined();
+  });
+
+  it('each flat marker has correct fields', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 5, 15, { type: 'DOMEvent', eventType: 'click', latency: 1 }],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.handle).toMatch(/^m-/);
+    expect(m.name).toBe('DOMEvent');
+    expect(m.start).toBe(5);
+    expect(m.duration).toBe(10);
+    expect(m.hasStack).toBe(false);
+    expect(m.category).toBeDefined();
+  });
+
+  it('instant markers have undefined duration', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 5, null, { type: 'DOMEvent', eventType: 'scroll' }],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    expect(result.flatMarkers![0].duration).toBeUndefined();
+  });
+
+  it('uses schema-derived label separate from name', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.name).toBe('DOMEvent');
+    // DOMEvent table label includes the eventType from the schema
+    expect(m.label).toContain('click');
+    expect(m.label).not.toBe(m.name);
+  });
+
+  it('search filter applies to flat list', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 5, { type: 'DOMEvent', eventType: 'click', latency: 1 }],
+      [
+        'UserTiming',
+        10,
+        15,
+        { type: 'UserTiming', name: 'myMark', entryType: 'measure' },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+        searchString: 'DOMEvent',
+      }
+    );
+
+    expect(result.flatMarkers).toHaveLength(1);
+    expect(result.flatMarkers![0].name).toBe('DOMEvent');
+  });
+});
+
+describe('formatThreadMarkers list option', function () {
+  it('shows one row per marker with handle and name', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+      [
+        'DOMEvent',
+        20,
+        30,
+        { type: 'DOMEvent', eventType: 'keydown', latency: 2 },
+      ],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap, undefined, {
+      list: true,
+    });
+
+    expect(result).toMatch(/m-\d+/);
+    expect(result).toContain('DOMEvent');
+  });
+
+  it('does not show aggregated By Name header', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 5 }],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap, undefined, {
+      list: true,
+    });
+
+    expect(result).not.toContain('By Name');
+  });
+
+  it('appends schema label when it differs from the marker name', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, null, { type: 'DOMEvent', eventType: 'click' }],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap, undefined, {
+      list: true,
+    });
+
+    expect(result).toContain('click');
+  });
+
+  it('shows "instant" for instant markers and omits it for interval markers', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['DOMEvent', 0, null, { type: 'DOMEvent', eventType: 'click' }],
+      [
+        'DOMEvent',
+        10,
+        20,
+        { type: 'DOMEvent', eventType: 'keydown', latency: 1 },
+      ],
+    ]);
+
+    const result = formatThreadMarkers(store, threadMap, markerMap, undefined, {
+      list: true,
+    });
+
+    expect(result).toContain('instant');
+    // Interval marker should show a duration, not "instant"
+    const lines = result.split('\n').filter((l) => l.includes('m-'));
+    expect(lines).toHaveLength(2);
+    const instantLine = lines.find((l) => l.includes('instant'));
+    const intervalLine = lines.find((l) => !l.includes('instant'));
+    expect(instantLine).toBeDefined();
+    expect(intervalLine).toBeDefined();
+  });
+});
+
 describe('collectMarkerStack and formatMarkerStackFull', function () {
   describe('for a marker without a cause', function () {
     it('collectMarkerStack returns null stack', function () {

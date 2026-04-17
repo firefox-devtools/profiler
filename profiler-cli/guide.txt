@@ -64,6 +64,8 @@ CORE WORKFLOW
     profiler-cli thread markers --search DOMEvent        Filter by name substring
     profiler-cli thread markers --min-duration 10        Only markers >= 10ms
     profiler-cli thread markers --has-stack              Only markers with stack traces
+    profiler-cli thread markers --list                   Flat chronological list (one row per marker)
+    profiler-cli thread markers --search X --list        List all individual X markers with handles
 
     profiler-cli thread network                          First 20 requests with timing phases (default)
     profiler-cli thread network --limit 0                All requests (no limit)
@@ -268,6 +270,12 @@ COMMON ANALYSIS PATTERNS
     profiler-cli thread markers --auto-group
     profiler-cli thread markers --group-by type,name
 
+  List all occurrences of a specific marker type:
+    profiler-cli thread markers --search "Histogram::Add" --list
+    profiler-cli thread markers --search "Paint" --list | head -50
+    profiler-cli thread markers --search "GC" --min-duration 5 --list
+    profiler-cli thread markers --list --limit 100         First 100 markers in chronological order
+
   Investigate a page load:
     profiler-cli thread page-load                    Overview: milestones, top resources, CPU categories, jank
     profiler-cli thread page-load --navigation 2     If multiple navigations, inspect each one separately (1-based)
@@ -353,6 +361,10 @@ SCRIPTING
     # List marker handles for markers longer than 50ms
     profiler-cli thread markers --json | \
       jq -r '[.byType[].topMarkers[] | select(.duration > 50) | .handle][]'
+
+    # List all handles for a specific marker type (flat list mode)
+    profiler-cli thread markers --search "Histogram::Add" --list --json | \
+      jq -r '.flatMarkers[].handle'
 
 SESSION MANAGEMENT
 
