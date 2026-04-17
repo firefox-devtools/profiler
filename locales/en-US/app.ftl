@@ -1266,7 +1266,7 @@ BottomBox--hide-fullscreen =
 
 # The toggle button for making the bottom box fullscreen.
 BottomBox--show-fullscreen =
-    .title = Show fullscreen
+    .title = Fullscreen
 
 SourceView--close-button =
     .title = Close the source view
