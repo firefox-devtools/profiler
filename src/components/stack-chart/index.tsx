@@ -23,7 +23,6 @@ import {
   getStackChartSameWidths,
   getShowUserTimings,
   getSelectedThreadsKey,
-  getSearchStringsAsRegExp,
 } from 'firefox-profiler/selectors/url-state';
 import type { SameWidthsIndexToTimestampMap } from 'firefox-profiler/profile-logic/stack-timing';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -59,6 +58,7 @@ import type {
   Page,
   TimelineUnit,
 } from 'firefox-profiler/types';
+import type { BitSet } from 'firefox-profiler/utils/bitset';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -88,7 +88,7 @@ type StateProps = {
   readonly hasFilteredCtssSamples: boolean;
   readonly useStackChartSameWidths: boolean;
   readonly timelineUnit: TimelineUnit;
-  readonly searchStringsRegExp: RegExp | null;
+  readonly searchFilteredFuncMatchesBitSet: BitSet | null;
 };
 
 type DispatchProps = {
@@ -246,7 +246,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       hasFilteredCtssSamples,
       useStackChartSameWidths,
       timelineUnit,
-      searchStringsRegExp,
+      searchFilteredFuncMatchesBitSet,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -307,7 +307,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   displayStackType: displayStackType,
                   useStackChartSameWidths,
                   timelineUnit,
-                  searchStringsRegExp,
+                  searchFilteredFuncMatchesBitSet,
                 }}
               />
             </div>
@@ -351,7 +351,8 @@ export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
       useStackChartSameWidths: getStackChartSameWidths(state),
       timelineUnit: getProfileTimelineUnit(state),
-      searchStringsRegExp: getSearchStringsAsRegExp(state),
+      searchFilteredFuncMatchesBitSet:
+        selectedThreadSelectors.getSearchFilteredFuncMatchesBitSet(state),
     };
   },
   mapDispatchToProps: {

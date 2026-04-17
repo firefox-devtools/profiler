@@ -41,6 +41,8 @@ import type {
   Page,
   TimelineUnit,
 } from 'firefox-profiler/types';
+import type { BitSet } from 'firefox-profiler/utils/bitset';
+import { checkBit } from 'firefox-profiler/utils/bitset';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type {
@@ -79,7 +81,7 @@ type OwnProps = {
   readonly displayStackType: boolean;
   readonly useStackChartSameWidths: boolean;
   readonly timelineUnit: TimelineUnit;
-  readonly searchStringsRegExp: RegExp | null;
+  readonly searchFilteredFuncMatchesBitSet: BitSet | null;
 };
 
 type Props = Readonly<
@@ -185,7 +187,7 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
       getMarker,
       marginLeft,
       useStackChartSameWidths,
-      searchStringsRegExp,
+      searchFilteredFuncMatchesBitSet,
       viewport: {
         containerWidth,
         containerHeight,
@@ -362,48 +364,6 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
 
-    // Pre-compute which call nodes match the search string so we can dim
-    // non-matching nodes when a search is active.
-    let searchMatchedCallNodes: Set<IndexIntoCallNodeTable> | null = null;
-    if (searchStringsRegExp) {
-      searchMatchedCallNodes = new Set();
-      const { funcTable, resourceTable, sources, stringTable } = thread;
-      for (
-        let callNodeIndex = 0;
-        callNodeIndex < callNodeTable.length;
-        callNodeIndex++
-      ) {
-        const funcIndex = callNodeTable.func[callNodeIndex];
-        searchStringsRegExp.lastIndex = 0;
-        const funcName = stringTable.getString(funcTable.name[funcIndex]);
-        if (searchStringsRegExp.test(funcName)) {
-          searchMatchedCallNodes.add(callNodeIndex);
-          continue;
-        }
-
-        const sourceIndex = funcTable.source[funcIndex];
-        if (sourceIndex !== null) {
-          searchStringsRegExp.lastIndex = 0;
-          const fileName = stringTable.getString(sources.filename[sourceIndex]);
-          if (searchStringsRegExp.test(fileName)) {
-            searchMatchedCallNodes.add(callNodeIndex);
-            continue;
-          }
-        }
-
-        const resourceIndex = funcTable.resource[funcIndex];
-        if (resourceIndex !== -1) {
-          searchStringsRegExp.lastIndex = 0;
-          const resourceName = stringTable.getString(
-            resourceTable.name[resourceIndex]
-          );
-          if (searchStringsRegExp.test(resourceName)) {
-            searchMatchedCallNodes.add(callNodeIndex);
-          }
-        }
-      }
-    }
-
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
       // Get the timing information for a row of stack frames.
@@ -525,11 +485,11 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
 
         // Look up information about this stack frame.
         let text, category, isSelected;
-        let currentCallNodeIndex: IndexIntoCallNodeTable | null = null;
+        let currentFuncIndex: number | null = null;
         if ('callNode' in stackTiming && stackTiming.callNode) {
           const callNodeIndex = stackTiming.callNode[i];
-          currentCallNodeIndex = callNodeIndex;
           const funcIndex = callNodeTable.func[callNodeIndex];
+          currentFuncIndex = funcIndex;
           const funcNameIndex = thread.funcTable.name[funcIndex];
           text = thread.stringTable.getString(funcNameIndex);
           const categoryIndex = callNodeTable.category[callNodeIndex];
@@ -558,9 +518,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
         // so that matching nodes stand out with their category color.
         // Hovered or selected nodes always use their real category color.
         const isDimmed =
-          searchMatchedCallNodes !== null &&
-          currentCallNodeIndex !== null &&
-          !searchMatchedCallNodes.has(currentCallNodeIndex) &&
+          searchFilteredFuncMatchesBitSet !== null &&
+          currentFuncIndex !== null &&
+          !checkBit(searchFilteredFuncMatchesBitSet, currentFuncIndex) &&
           !isHovered &&
           !isSelected;
         const colorStyles = isDimmed

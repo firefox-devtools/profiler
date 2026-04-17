@@ -1770,9 +1770,12 @@ export function computeTransformOutputForSearchStringFilter(
   });
 }
 
-function _computeStackMatchesSearchString(
-  stackTable: StackTable,
-  frameTable: FrameTable,
+/**
+ * Compute a BitSet of functions whose name, source filename, or resource name
+ * matches the given search string. This is used both for filtering stacks and
+ * for dimming non-matching nodes in the stack chart.
+ */
+export function computeFuncMatchesSearchString(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   sources: SourceTable,
@@ -1815,6 +1818,25 @@ function _computeStackMatchesSearchString(
       setBit(funcMatchesSearch, funcIndex);
     }
   }
+  return funcMatchesSearch;
+}
+
+function _computeStackMatchesSearchString(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  stringTable: StringTable,
+  searchString: string
+): BitSet {
+  const funcMatchesSearch = computeFuncMatchesSearchString(
+    funcTable,
+    resourceTable,
+    sources,
+    stringTable,
+    searchString
+  );
 
   const stackMatchesSearch = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {

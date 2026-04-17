@@ -46,6 +46,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
+import type { BitSet } from 'firefox-profiler/utils/bitset';
 import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
@@ -64,6 +65,12 @@ const globallyMemoizedComputeTransformOutputForImplementationFilter = memoize(
 );
 const globallyMemoizedComputeTransformOutputForSearchStringFilter = memoize(
   ProfileData.computeTransformOutputForSearchStringFilter,
+  {
+    limit: 2,
+  }
+);
+const globallyMemoizedComputeFuncMatchesSearchString = memoize(
+  ProfileData.computeFuncMatchesSearchString,
   {
     limit: 2,
   }
@@ -507,6 +514,51 @@ export function getThreadSelectorsWithMarkersPerThread(
     }
   );
 
+  /**
+   * Get a BitSet of func indices that match the current search strings.
+   * Returns null when there is no active search. This is used by the stack
+   * chart to dim non-matching nodes without recomputing on every draw call.
+   */
+  const getSearchFilteredFuncMatchesBitSet: Selector<BitSet | null> =
+    createSelector(
+      _getImplementationFilteredThread,
+      UrlState.getSearchStrings,
+      (thread: Thread, searchStrings): BitSet | null => {
+        const nonEmptySearchStrings = searchStrings
+          ? searchStrings.filter((s) => s)
+          : [];
+        if (nonEmptySearchStrings.length === 0) {
+          return null;
+        }
+        // Compute a BitSet per search string and AND them together.
+        let combined: BitSet = globallyMemoizedComputeFuncMatchesSearchString(
+          thread.funcTable,
+          thread.resourceTable,
+          thread.sources,
+          thread.stringTable,
+          nonEmptySearchStrings[0]
+        );
+        for (let i = 1; i < nonEmptySearchStrings.length; i++) {
+          const matches = globallyMemoizedComputeFuncMatchesSearchString(
+            thread.funcTable,
+            thread.resourceTable,
+            thread.sources,
+            thread.stringTable,
+            nonEmptySearchStrings[i]
+          );
+          if (i === 1) {
+            // Copy before mutating so we don't modify the memoized result.
+            combined = new Int32Array(combined);
+          }
+          // AND with previous results — a func must match all strings.
+          for (let j = 0; j < combined.length; j++) {
+            combined[j] &= matches[j];
+          }
+        }
+        return combined;
+      }
+    );
+
   const getPreviewFilteredThread: Selector<Thread> = createSelector(
     getFilteredThread,
     ProfileSelectors.getPreviewSelection,
@@ -613,6 +665,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getTransformStack,
     getRangeAndTransformFilteredThread,
     getFilteredThread,
+    getSearchFilteredFuncMatchesBitSet,
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,
