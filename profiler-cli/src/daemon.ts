@@ -38,13 +38,21 @@ export class Daemon {
   private logPath: string;
   private logStream: fs.WriteStream;
   private profilePath: string;
+  private symbolServerUrl?: string;
   private loadingProfile: boolean = false;
+  private symbolicating: boolean = false;
   private profileLoadError: Error | null = null;
 
-  constructor(sessionDir: string, profilePath: string, sessionId?: string) {
+  constructor(
+    sessionDir: string,
+    profilePath: string,
+    sessionId?: string,
+    symbolServerUrl?: string
+  ) {
     this.sessionDir = sessionDir;
     this.profilePath = profilePath;
     this.sessionId = sessionId || generateSessionId();
+    this.symbolServerUrl = symbolServerUrl;
     this.socketPath = getSocketPath(sessionDir, this.sessionId);
     this.logPath = getLogPath(sessionDir, this.sessionId);
     this.logStream = fs.createWriteStream(this.logPath, { flags: 'a' });
@@ -135,14 +143,24 @@ export class Daemon {
     this.loadingProfile = true;
     try {
       console.log('Loading profile...');
-      this.querier = await ProfileQuerier.load(this.profilePath);
-      console.log('Profile loaded successfully');
+      this.querier = await ProfileQuerier.load(
+        this.profilePath,
+        this.symbolServerUrl,
+        () => {
+          this.loadingProfile = false;
+          this.symbolicating = true;
+          console.log('Symbolicating profile...');
+        }
+      );
+      this.symbolicating = false;
       this.loadingProfile = false;
+      console.log('Profile loaded successfully');
     } catch (error) {
       console.error(`Failed to load profile: ${error}`);
       this.profileLoadError =
         error instanceof Error ? error : new Error(String(error));
       this.loadingProfile = false;
+      this.symbolicating = false;
     }
   }
 
@@ -215,6 +233,9 @@ export class Daemon {
         }
         if (this.loadingProfile) {
           return { type: 'loading' };
+        }
+        if (this.symbolicating) {
+          return { type: 'symbolicating' };
         }
         if (this.querier) {
           return { type: 'ready' };
@@ -460,8 +481,14 @@ export class Daemon {
 export async function startDaemon(
   sessionDir: string,
   profilePath: string,
-  sessionId?: string
+  sessionId?: string,
+  symbolServerUrl?: string
 ): Promise<void> {
-  const daemon = new Daemon(sessionDir, profilePath, sessionId);
+  const daemon = new Daemon(
+    sessionDir,
+    profilePath,
+    sessionId,
+    symbolServerUrl
+  );
   await daemon.start();
 }

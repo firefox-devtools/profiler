@@ -233,7 +233,8 @@ export async function sendCommand(
 export async function startNewDaemon(
   sessionDir: string,
   profilePath: string,
-  sessionId?: string
+  sessionId?: string,
+  symbolServerUrl?: string
 ): Promise<string> {
   // Check if this is a URL
   const isUrl =
@@ -267,10 +268,21 @@ export async function startNewDaemon(
   // Get the path to the current script (profiler-cli.js)
   const scriptPath = process.argv[1];
 
+  const daemonArgs = [
+    scriptPath,
+    '--daemon',
+    absolutePath,
+    '--session',
+    targetSessionId,
+  ];
+  if (symbolServerUrl) {
+    daemonArgs.push('--symbol-server', symbolServerUrl);
+  }
+
   // Spawn the daemon process (detached from parent)
   const child = child_process.spawn(
     process.execPath, // node
-    [scriptPath, '--daemon', absolutePath, '--session', targetSessionId],
+    daemonArgs,
     {
       detached: true,
       stdio: 'ignore', // Don't pipe stdin/stdout/stderr
@@ -306,6 +318,7 @@ export async function startNewDaemon(
   // Phase 2: Wait for profile to load by checking status (longer timeout)
   const profileLoadMaxAttempts = 600; // 600 * 100ms = 60 seconds
   attempts = 0;
+  let printedSymbolicating = false;
 
   while (attempts < profileLoadMaxAttempts) {
     await new Promise((resolve) => setTimeout(resolve, 100));
@@ -321,6 +334,13 @@ export async function startNewDaemon(
 
         case 'loading':
           // Still loading, keep waiting
+          continue;
+
+        case 'symbolicating':
+          if (!printedSymbolicating) {
+            console.log('Symbolicating...');
+            printedSymbolicating = true;
+          }
           continue;
 
         case 'error':

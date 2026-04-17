@@ -161,8 +161,16 @@ export class ProfileQuerier {
     });
   }
 
-  static async load(filePathOrUrl: string): Promise<ProfileQuerier> {
-    const { store, rootRange } = await loadProfileFromFileOrUrl(filePathOrUrl);
+  static async load(
+    filePathOrUrl: string,
+    symbolServerUrl?: string,
+    onSymbolicating?: () => void
+  ): Promise<ProfileQuerier> {
+    const { store, rootRange } = await loadProfileFromFileOrUrl(
+      filePathOrUrl,
+      symbolServerUrl,
+      onSymbolicating
+    );
     return new ProfileQuerier(store, rootRange);
   }
 

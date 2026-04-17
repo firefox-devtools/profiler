@@ -166,6 +166,7 @@ export type ServerResponse =
   | { type: 'success'; result: string | CommandResult }
   | { type: 'error'; error: string }
   | { type: 'loading' }
+  | { type: 'symbolicating' }
   | { type: 'ready' };
 
 /**

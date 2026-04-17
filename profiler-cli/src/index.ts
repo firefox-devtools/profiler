@@ -57,11 +57,14 @@ async function main(): Promise<void> {
     );
     const sessionIdx = rawArgs.indexOf('--session');
     const sessionId = sessionIdx !== -1 ? rawArgs[sessionIdx + 1] : undefined;
+    const symbolServerIdx = rawArgs.indexOf('--symbol-server');
+    const symbolServerUrl =
+      symbolServerIdx !== -1 ? rawArgs[symbolServerIdx + 1] : undefined;
     if (!profilePath) {
       console.error('Error: Profile path required for daemon mode');
       process.exit(1);
     }
-    await startDaemon(SESSION_DIR, profilePath, sessionId);
+    await startDaemon(SESSION_DIR, profilePath, sessionId, symbolServerUrl);
     return;
   }
 
@@ -100,12 +103,17 @@ Examples:
     program
       .command('load <path>')
       .description('Load a profile and start a daemon session')
+      .option(
+        '--symbol-server <url>',
+        'Symbol server URL for symbolication (overrides URL param and default Mozilla server)'
+      )
   ).action(async (profilePath: string, opts) => {
     console.log(`Loading profile from ${profilePath}...`);
     const sessionId = await startNewDaemon(
       SESSION_DIR,
       profilePath,
-      opts.session
+      opts.session,
+      opts.symbolServer
     );
     console.log(`Session started: ${sessionId}`);
   });

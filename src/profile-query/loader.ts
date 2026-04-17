@@ -14,13 +14,76 @@ import {
 } from '../utils/profile-fetch';
 import type { TemporaryError } from '../utils/errors';
 import type { Store } from '../types/store';
-import type { StartEndRange } from 'firefox-profiler/types';
+import type { StartEndRange, Profile } from 'firefox-profiler/types';
+import { SymbolStore } from '../profile-logic/symbol-store';
+import {
+  symbolicateProfile,
+  applySymbolicationSteps,
+} from '../profile-logic/symbolication';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
+import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 
 /**
  * Helper function to detect if the input is a URL
  */
 function isUrl(input: string): boolean {
   return input.startsWith('http://') || input.startsWith('https://');
+}
+
+/**
+ * Extract a ?symbolServer= query parameter from a profiler.firefox.com URL.
+ */
+function extractSymbolServerFromUrl(url: string): string | undefined {
+  try {
+    return new URL(url).searchParams.get('symbolServer') ?? undefined;
+  } catch (_) {
+    return undefined;
+  }
+}
+
+async function symbolicateInPlace(
+  profile: Profile,
+  symbolServerUrl: string,
+  onSymbolicating: () => void
+): Promise<void> {
+  onSymbolicating();
+  console.log(`Symbolicating profile using ${symbolServerUrl}...`);
+
+  const symbolStore = new SymbolStore({
+    requestSymbolsFromServer: async (requests) => {
+      return MozillaSymbolicationAPI.requestSymbols(
+        'symbol server',
+        requests,
+        async (path, json) => {
+          const response = await fetch(symbolServerUrl + path, {
+            body: json,
+            method: 'POST',
+          });
+          return response.json();
+        }
+      );
+    },
+    requestSymbolsFromBrowser: async () => [],
+    requestSymbolsViaSymbolTableFromBrowser: async () => {
+      throw new Error('Not supported in this context');
+    },
+  });
+
+  const symbolicationSteps: SymbolicationStepInfo[] = [];
+  await symbolicateProfile(profile, symbolStore, (step) => {
+    symbolicationSteps.push(step);
+  });
+
+  const { shared, threads } = applySymbolicationSteps(
+    profile.threads,
+    profile.shared,
+    symbolicationSteps
+  );
+  profile.shared = shared;
+  profile.threads = threads;
+  profile.meta.symbolicated = true;
+  console.log('Symbolication complete');
 }
 
 /**
@@ -43,12 +106,30 @@ export interface LoadResult {
 /**
  * Load a profile from a file path or URL.
  * Returns a store and root range that can be used to construct a ProfileQuerier.
+ *
+ * If the profile is not already symbolicated, symbolication is performed
+ * automatically. The symbol server URL is resolved in this order:
+ *   1. Explicit `symbolServerUrl` argument
+ *   2. `?symbolServer=` query param in the input URL (for profiler.firefox.com URLs)
+ *   3. The default Mozilla symbolication server
+ *
+ * `onSymbolicating` is called just before symbolication begins, so callers can
+ * update their loading state (e.g. to show a "Symbolicating…" message).
  */
 export async function loadProfileFromFileOrUrl(
-  filePathOrUrl: string
+  filePathOrUrl: string,
+  symbolServerUrl?: string,
+  onSymbolicating?: () => void
 ): Promise<LoadResult> {
   const store = createStore();
   console.log(`Loading profile from ${filePathOrUrl}`);
+
+  // Extract ?symbolServer= from the URL. For short URLs (share.firefox.dev)
+  // we re-extract after following the redirect, since the param lives on the
+  // resolved profiler.firefox.com URL, not the short URL itself.
+  let urlSymbolServer = isUrl(filePathOrUrl)
+    ? extractSymbolServerFromUrl(filePathOrUrl)
+    : undefined;
 
   if (isUrl(filePathOrUrl)) {
     // Handle URL input
@@ -65,6 +146,7 @@ export async function loadProfileFromFileOrUrl(
         console.log('Following redirect from short URL...');
         finalUrl = await followRedirects(filePathOrUrl);
         console.log(`Redirected to: ${finalUrl}`);
+        urlSymbolServer = extractSymbolServerFromUrl(finalUrl);
       }
 
       // Extract the profile URL from the profiler.firefox.com URL
@@ -104,6 +186,13 @@ export async function loadProfileFromFileOrUrl(
       throw new Error('Unable to parse the profile.');
     }
 
+    await maybeSymbolicate(
+      profile,
+      symbolServerUrl,
+      urlSymbolServer,
+      onSymbolicating
+    );
+
     await store.dispatch(loadProfile(profile, {}, true));
     await store.dispatch(finalizeProfileView());
     const state = store.getState();
@@ -123,9 +212,35 @@ export async function loadProfileFromFileOrUrl(
     throw new Error('Unable to parse the profile.');
   }
 
+  await maybeSymbolicate(
+    profile,
+    symbolServerUrl,
+    urlSymbolServer,
+    onSymbolicating
+  );
+
   await store.dispatch(loadProfile(profile, {}, true));
   await store.dispatch(finalizeProfileView());
   const state = store.getState();
   const rootRange = getProfileRootRange(state);
   return { store, rootRange };
+}
+
+async function maybeSymbolicate(
+  profile: Profile,
+  symbolServerUrl: string | undefined,
+  urlSymbolServer: string | undefined,
+  onSymbolicating: (() => void) | undefined
+): Promise<void> {
+  if (profile.meta.symbolicated === true) {
+    return;
+  }
+  const serverUrl = symbolServerUrl ?? urlSymbolServer ?? SYMBOL_SERVER_URL;
+  try {
+    await symbolicateInPlace(profile, serverUrl, onSymbolicating ?? (() => {}));
+  } catch (e) {
+    console.warn(
+      `Symbolication failed: ${e}. Loading profile without symbols.`
+    );
+  }
 }
