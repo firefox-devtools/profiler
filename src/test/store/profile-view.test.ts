@@ -48,6 +48,7 @@ import {
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
 import { getSelfAndTotalForCallNode } from '../../profile-logic/call-tree';
+import { checkBit } from '../../utils/bitset';
 
 import type {
   TrackReference,
@@ -919,6 +920,91 @@ describe('actions/ProfileView', function () {
         '      - D (total: 1, self: 1)',
         '- D (total: 1, self: 1)',
       ]);
+    });
+  });
+
+  /**
+   * Covers the bitset returned by `getSearchFilteredFuncMatchesBitSet`, which
+   * the stack chart uses to dim non-matching nodes. The stack filter above
+   * only exercises whether each stack is kept; these tests pin down the
+   * per-func match semantics across name, filename, and library fields, and
+   * the OR semantics when multiple search strings are provided.
+   */
+  describe('getSearchFilteredFuncMatchesBitSet', function () {
+    // Each func's three searchable fields (name, resource/lib, filename) use
+    // distinct prefixes ("fn", "rs", "sc") and a unique per-func index, so
+    // every search string used below appears in exactly one field on exactly
+    // one func. That lets us assert unambiguously which field triggered a
+    // match.
+    function setup() {
+      const {
+        profile,
+        funcNamesPerThread: [funcNames],
+      } = getProfileFromTextSamples(`
+        fn1[lib:rs1][file:sc1]  fn2[lib:rs2][file:sc2]  fn3[lib:rs3][file:sc3]
+        fn4[lib:rs4][file:sc4]
+      `);
+      const { dispatch, getState } = storeWithProfile(profile);
+      return { dispatch, getState, funcNames };
+    }
+
+    function getMatchingFuncNames(
+      getState: () => any,
+      funcNames: string[]
+    ): string[] {
+      const bitSet =
+        selectedThreadSelectors.getSearchFilteredFuncMatchesBitSet(getState());
+      if (bitSet === null) {
+        return [];
+      }
+      const matched: string[] = [];
+      for (let i = 0; i < funcNames.length; i++) {
+        if (checkBit(bitSet, i)) {
+          matched.push(funcNames[i]);
+        }
+      }
+      return matched.sort();
+    }
+
+    it('returns null when there is no active search', function () {
+      const { getState } = setup();
+      expect(
+        selectedThreadSelectors.getSearchFilteredFuncMatchesBitSet(getState())
+      ).toBeNull();
+    });
+
+    it('matches a single func by its name', function () {
+      const { dispatch, getState, funcNames } = setup();
+      dispatch(ProfileView.changeCallTreeSearchString('fn1'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1']);
+    });
+
+    it('matches a func by its filename', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // sc2 is only set on fn2.
+      dispatch(ProfileView.changeCallTreeSearchString('sc2'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn2']);
+    });
+
+    it('matches a func by its resource/library name', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // rs3 is only set on fn3. Match is case-insensitive.
+      dispatch(ProfileView.changeCallTreeSearchString('RS3'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn3']);
+    });
+
+    it('matches every func matching any of several search strings (OR)', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // "fn1" matches only func fn1; "fn3" matches only func fn3.
+      dispatch(ProfileView.changeCallTreeSearchString('fn1,fn3'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1', 'fn3']);
+    });
+
+    it('combines matches across different fields with OR', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // "sc1" matches fn1 by filename; "rs4" matches fn4 by lib name.
+      dispatch(ProfileView.changeCallTreeSearchString('sc1,rs4'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1', 'fn4']);
     });
   });
 
