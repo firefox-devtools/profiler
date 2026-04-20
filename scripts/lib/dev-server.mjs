@@ -128,7 +128,9 @@ export async function startDevServer(buildConfig, options = {}) {
   // Graceful shutdown
   let isShuttingDown = false;
   process.on('SIGINT', async () => {
-    if (isShuttingDown) return;
+    if (isShuttingDown) {
+      return;
+    }
     isShuttingDown = true;
 
     console.log('\nShutting down...');

@@ -682,7 +682,9 @@ class StackChartCanvasImpl extends React.PureComponent<Props> {
   };
 
   _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
-    if (!hoveredItem) return;
+    if (!hoveredItem) {
+      return;
+    }
 
     const result =
       this._getCallNodeIndexOrMarkerIndexFromHoveredItem(hoveredItem);

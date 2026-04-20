@@ -259,7 +259,9 @@ describe('doSymbolicateProfile', function () {
       // Helper function to get filename from source index
       const getFileName = (funcIndex: number): string | null => {
         const sourceIndex = funcTable.source[funcIndex];
-        if (sourceIndex === null) return null;
+        if (sourceIndex === null) {
+          return null;
+        }
         const urlIndex = sources.filename[sourceIndex];
         return stringTable.getString(urlIndex);
       };
