@@ -1733,7 +1733,7 @@ export function applyTransformOutputToThread(
  */
 export type SearchStringFilterOutput = {
   transformOutput: TransformOutput;
-  funcMatches: BitSet | null;
+  funcMatchesSearchStrings: BitSet | null;
 };
 
 export function computeSearchStringFilterOutput(
@@ -1746,19 +1746,14 @@ export function computeSearchStringFilterOutput(
   searchStrings: string[] | null
 ): SearchStringFilterOutput {
   return timeCode('computeSearchStringFilterOutput', () => {
-    const nonEmptySearchStrings = searchStrings
-      ? searchStrings.filter((s) => s)
-      : [];
-    if (nonEmptySearchStrings.length === 0) {
+    if (!searchStrings || searchStrings.length === 0) {
       return {
         transformOutput: { newStackTable: stackTable, effectOnThreadData: {} },
-        funcMatches: null,
+        funcMatchesSearchStrings: null,
       };
     }
 
-    let combinedFuncMatches: BitSet | undefined;
-    let combinedStackMatches: BitSet | undefined;
-    for (const searchString of nonEmptySearchStrings) {
+    const computeMatchesForString = (searchString: string) => {
       const funcMatches = computeFuncMatchesSearchString(
         funcTable,
         resourceTable,
@@ -1771,14 +1766,25 @@ export function computeSearchStringFilterOutput(
         frameTable,
         funcMatches
       );
-      combinedFuncMatches =
-        combinedFuncMatches === undefined
-          ? funcMatches
-          : combineTwoBitSetsWithOr(funcMatches, combinedFuncMatches);
-      combinedStackMatches =
-        combinedStackMatches === undefined
-          ? stackMatches
-          : combineTwoBitSetsWithAnd(stackMatches, combinedStackMatches);
+      return { funcMatches, stackMatches };
+    };
+
+    let {
+      funcMatches: combinedFuncMatches,
+      stackMatches: combinedStackMatches,
+    } = computeMatchesForString(searchStrings[0]);
+    for (let i = 1; i < searchStrings.length; i++) {
+      const { funcMatches, stackMatches } = computeMatchesForString(
+        searchStrings[i]
+      );
+      combinedFuncMatches = combineTwoBitSetsWithOr(
+        funcMatches,
+        combinedFuncMatches
+      );
+      combinedStackMatches = combineTwoBitSetsWithAnd(
+        stackMatches,
+        combinedStackMatches
+      );
     }
 
     return {
@@ -1788,7 +1794,7 @@ export function computeSearchStringFilterOutput(
           dropIfOldStackIsNot: combinedStackMatches,
         },
       },
-      funcMatches: combinedFuncMatches ?? null,
+      funcMatchesSearchStrings: combinedFuncMatches,
     };
   });
 }

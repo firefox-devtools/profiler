@@ -523,7 +523,7 @@ export function getThreadSelectorsWithMarkersPerThread(
    * chart to dim non-matching nodes without recomputing on every draw call.
    */
   const getSearchFilteredFuncMatchesBitSet: Selector<BitSet | null> = (state) =>
-    _getSearchStringFilterOutput(state).funcMatches;
+    _getSearchStringFilterOutput(state).funcMatchesSearchStrings;
 
   const getPreviewFilteredThread: Selector<Thread> = createSelector(
     getFilteredThread,
