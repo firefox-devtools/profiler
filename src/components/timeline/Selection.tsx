@@ -38,6 +38,7 @@ type OwnProps = {
   readonly width: number;
   readonly children: React.ReactNode;
   readonly className?: string;
+  readonly onSelectionMove?: () => void;
 };
 
 type StateProps = {
@@ -98,7 +99,11 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     // browsers.
     event.preventDefault();
 
-    const { committedRange } = this.props;
+    const { committedRange, onSelectionMove } = this.props;
+    if (onSelectionMove) {
+      onSelectionMove();
+    }
+
     const minSelectionStartWidth: CssPixels = 3;
     const mouseDownX = event.pageX;
     const mouseDownTime =
@@ -286,7 +291,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props> {
     dx: number,
     isModifying: boolean
   ) {
-    const { committedRange, width, updatePreviewSelection } = this.props;
+    const { committedRange, width, updatePreviewSelection, onSelectionMove } =
+      this.props;
+    if (onSelectionMove) {
+      onSelectionMove();
+    }
+
     const delta = (dx / width) * (committedRange.end - committedRange.start);
     const selectionDeltas = selectionDeltasForDx(delta);
     let selectionStart = clamp(

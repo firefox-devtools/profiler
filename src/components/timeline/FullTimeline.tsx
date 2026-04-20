@@ -49,6 +49,7 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 type OwnProps = {
   // This ref will be added to the inner container.
   readonly innerElementRef?: React.Ref<any>;
+  readonly onSelectionMove?: () => void;
 };
 
 type StateProps = {
@@ -146,11 +147,12 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       trackCount,
       changeRightClickedTrack,
       innerElementRef,
+      onSelectionMove,
     } = this.props;
 
     return (
       <>
-        <TimelineSelection width={width}>
+        <TimelineSelection width={width} onSelectionMove={onSelectionMove}>
           <div className="timelineHeader">
             {trackCount.total > 1 ? (
               <TimelineSettingsHiddenTracks
