@@ -8,7 +8,7 @@ const symbolicatorConfig = {
   ...nodeBaseConfig,
   metafile: true,
   entryPoints: ['src/symbolicator-cli/index.ts'],
-  outfile: 'dist/symbolicator-cli.js',
+  outfile: 'dist/node-tools/symbolicator-cli.js',
 };
 
 async function build() {

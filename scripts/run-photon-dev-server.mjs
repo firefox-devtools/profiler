@@ -10,9 +10,9 @@ const host = process.env.FX_PROFILER_PHOTON_HOST || 'localhost';
 startDevServer(photonConfig, {
   port,
   host,
-  distDir: 'dist',
+  distDir: 'dist/browser',
   fallback: 'photon/index.html',
-  cleanDist: false, // Don't clean the whole dist, just photon
+  cleanDist: false, // Don't clean the whole dist/browser, just photon
   onServerStart: (url) => {
     console.log(`> Photon styling is listening at: ${url}/photon/\n`);
   },

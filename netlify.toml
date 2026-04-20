@@ -1,2 +1,5 @@
+[build]
+  publish = "dist/browser"
+
 [context.l10n]
   command = "yarn build-l10n-prod"

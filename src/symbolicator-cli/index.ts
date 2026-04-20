@@ -5,11 +5,11 @@
  * To use it it first needs to be built:
  *   yarn build-symbolicator-cli
  *
- * Then it can be run from the `dist` directory:
- *   node dist/symbolicator-cli.js --input <input profile> --output <symbolicated profile> --server <symbol server URL>
+ * Then it can be run from the `dist/node-tools` directory:
+ *   node dist/node-tools/symbolicator-cli.js --input <input profile> --output <symbolicated profile> --server <symbol server URL>
  *
  * For example:
- *   node dist/symbolicator-cli.js --input samply-profile.json --output profile-symbolicated.json --server http://localhost:3000
+ *   node dist/node-tools/symbolicator-cli.js --input samply-profile.json --output profile-symbolicated.json --server http://localhost:3000
  *
  */
 

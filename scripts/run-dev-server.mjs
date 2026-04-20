@@ -20,7 +20,7 @@ const argv = yargs(hideBin(process.argv))
 startDevServer(mainBundleConfig, {
   port,
   host,
-  distDir: 'dist',
+  distDir: 'dist/browser',
   cleanDist: true,
   onServerStart: (profilerUrl) => {
     const barAscii =

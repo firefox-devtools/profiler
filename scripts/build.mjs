@@ -7,7 +7,7 @@ import { mainBundleConfig } from './lib/esbuild-configs.mjs';
 import { cleanDist, saveMetafile } from './lib/build-utils.mjs';
 
 async function build() {
-  cleanDist();
+  cleanDist('dist/browser');
   const buildResult = await esbuild.build(mainBundleConfig);
   saveMetafile(buildResult);
   console.log('✅ Main browser build completed');

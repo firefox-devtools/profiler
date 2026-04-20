@@ -19,6 +19,7 @@ const __dirname = path.dirname(__filename);
 const projectRoot = path.normalize(path.join(__dirname, '..', '..'));
 
 const isProduction = process.env.NODE_ENV === 'production';
+const browserDistDir = 'dist/browser';
 
 // Configuration shared by both node and browser builds
 const baseConfig = {
@@ -68,7 +69,7 @@ export const mainBundleConfig = {
   sourcemap: true,
   splitting: true,
   entryPoints: ['src/index.tsx'],
-  outdir: 'dist',
+  outdir: browserDistDir,
   metafile: true,
   publicPath: '/',
   entryNames: '[name]-[hash]',
@@ -90,14 +91,14 @@ export const mainBundleConfig = {
     copy({
       resolveFrom: projectRoot,
       assets: [
-        { from: ['res/_headers'], to: ['dist'] },
-        { from: ['res/_redirects'], to: ['dist'] },
-        { from: ['res/contribute.json'], to: ['dist'] },
-        { from: ['res/robots.txt'], to: ['dist'] },
-        { from: ['res/service-worker-compat.js'], to: ['dist'] },
-        { from: ['res/img/favicon.png'], to: ['dist/res/img'] },
-        { from: ['docs-user/**/*'], to: ['dist/docs'] },
-        { from: ['locales/**/*'], to: ['dist/locales'] },
+        { from: ['res/_headers'], to: [browserDistDir] },
+        { from: ['res/_redirects'], to: [browserDistDir] },
+        { from: ['res/contribute.json'], to: [browserDistDir] },
+        { from: ['res/robots.txt'], to: [browserDistDir] },
+        { from: ['res/service-worker-compat.js'], to: [browserDistDir] },
+        { from: ['res/img/favicon.png'], to: [`${browserDistDir}/res/img`] },
+        { from: ['docs-user/**/*'], to: [`${browserDistDir}/docs`] },
+        { from: ['locales/**/*'], to: [`${browserDistDir}/locales`] },
       ],
     }),
     generateHtmlPlugin({
@@ -122,7 +123,7 @@ export const photonConfig = {
   sourcemap: true,
   publicPath: '/photon/',
   entryPoints: ['res/photon/index.js'],
-  outdir: 'dist/photon',
+  outdir: `${browserDistDir}/photon`,
   metafile: true,
   plugins: [
     generateHtmlPlugin({

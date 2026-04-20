@@ -2,6 +2,9 @@
 
 Our hosting service is [Netlify](https://www.netlify.com/). Deploying on a nginx instance is also possible, see below.
 
+The repository config sets Netlify's publish directory to `dist/browser` in
+[`netlify.toml`](/netlify.toml).
+
 ## Deploy to production
 
 The `production` branch is configured to be automatically deployed to
@@ -94,6 +97,6 @@ document](https://docs.google.com/document/d/16YRafdIbk4aFgu4EZjMEjX4F6jIcUJQsaz
 # Deploying on a nginx instance
 
 To deploy on nginx (without support for direct upload from the Firefox UI), run `yarn build-prod`
-and point nginx at the `dist` directory, which needs to be at the root of the webserver. Additionally,
+and point nginx at the `dist/browser` directory, which needs to be at the root of the webserver. Additionally,
 a `error_page 404 =200 /index.html;` directive needs to be added so that unknown URLs respond with index.html.
 For a more production-ready configuration, have a look at the netlify [`_headers`](/res/_headers) file.

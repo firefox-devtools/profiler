@@ -37,7 +37,7 @@ module.exports = {
     // convenient that we can just access it from a browser.
     /^\/sw\.js/,
   ],
-  globDirectory: 'dist',
+  globDirectory: 'dist/browser',
   globPatterns: ['**/*'],
   globIgnores: [
     // exclude user docs and photon from the cache
@@ -55,5 +55,5 @@ module.exports = {
   // This is the service worker file name. It should never change if we want
   // that the browser updates it. If this changes it will never be updated
   // and the user will be stuck with an old version.
-  swDest: 'dist/sw.js',
+  swDest: 'dist/browser/sw.js',
 };
