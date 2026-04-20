@@ -63,14 +63,8 @@ const globallyMemoizedComputeTransformOutputForImplementationFilter = memoize(
     limit: 2,
   }
 );
-const globallyMemoizedComputeTransformOutputForSearchStringFilter = memoize(
-  ProfileData.computeTransformOutputForSearchStringFilter,
-  {
-    limit: 2,
-  }
-);
-const globallyMemoizedComputeFuncMatchesSearchString = memoize(
-  ProfileData.computeFuncMatchesSearchString,
+const globallyMemoizedComputeSearchStringFilterOutput = memoize(
+  ProfileData.computeSearchStringFilterOutput,
   {
     limit: 2,
   }
@@ -495,13 +489,17 @@ export function getThreadSelectorsWithMarkersPerThread(
     }
   );
 
-  const getFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationFilteredThread,
-    UrlState.getSearchStrings,
-    (thread: Thread, searchStrings) => {
-      // Apply the search string filter.
-      const transformOutput =
-        globallyMemoizedComputeTransformOutputForSearchStringFilter(
+  /**
+   * Single memoized computation of the search string filter, shared by
+   * `getFilteredThread` (which needs the stack-drop bitset) and
+   * `getSearchFilteredFuncMatchesBitSet` (which needs the func-match bitset).
+   */
+  const _getSearchStringFilterOutput: Selector<ProfileData.SearchStringFilterOutput> =
+    createSelector(
+      _getImplementationFilteredThread,
+      UrlState.getSearchStrings,
+      (thread: Thread, searchStrings) =>
+        globallyMemoizedComputeSearchStringFilterOutput(
           thread.stackTable,
           thread.frameTable,
           thread.funcTable,
@@ -509,9 +507,14 @@ export function getThreadSelectorsWithMarkersPerThread(
           thread.sources,
           thread.stringTable,
           searchStrings
-        );
-      return ProfileData.applyTransformOutputToThread(transformOutput, thread);
-    }
+        )
+    );
+
+  const getFilteredThread: Selector<Thread> = createSelector(
+    _getImplementationFilteredThread,
+    _getSearchStringFilterOutput,
+    (thread: Thread, { transformOutput }) =>
+      ProfileData.applyTransformOutputToThread(transformOutput, thread)
   );
 
   /**
@@ -519,45 +522,8 @@ export function getThreadSelectorsWithMarkersPerThread(
    * Returns null when there is no active search. This is used by the stack
    * chart to dim non-matching nodes without recomputing on every draw call.
    */
-  const getSearchFilteredFuncMatchesBitSet: Selector<BitSet | null> =
-    createSelector(
-      _getImplementationFilteredThread,
-      UrlState.getSearchStrings,
-      (thread: Thread, searchStrings): BitSet | null => {
-        const nonEmptySearchStrings = searchStrings
-          ? searchStrings.filter((s) => s)
-          : [];
-        if (nonEmptySearchStrings.length === 0) {
-          return null;
-        }
-        // Compute a BitSet per search string and AND them together.
-        let combined: BitSet = globallyMemoizedComputeFuncMatchesSearchString(
-          thread.funcTable,
-          thread.resourceTable,
-          thread.sources,
-          thread.stringTable,
-          nonEmptySearchStrings[0]
-        );
-        for (let i = 1; i < nonEmptySearchStrings.length; i++) {
-          const matches = globallyMemoizedComputeFuncMatchesSearchString(
-            thread.funcTable,
-            thread.resourceTable,
-            thread.sources,
-            thread.stringTable,
-            nonEmptySearchStrings[i]
-          );
-          if (i === 1) {
-            // Copy before mutating so we don't modify the memoized result.
-            combined = new Int32Array(combined);
-          }
-          // AND with previous results — a func must match all strings.
-          for (let j = 0; j < combined.length; j++) {
-            combined[j] &= matches[j];
-          }
-        }
-        return combined;
-      }
-    );
+  const getSearchFilteredFuncMatchesBitSet: Selector<BitSet | null> = (state) =>
+    _getSearchStringFilterOutput(state).funcMatches;
 
   const getPreviewFilteredThread: Selector<Thread> = createSelector(
     getFilteredThread,

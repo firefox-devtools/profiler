@@ -28,6 +28,7 @@ import {
   type BitSet,
   checkBit,
   combineTwoBitSetsWithAnd,
+  combineTwoBitSetsWithOr,
   makeBitSet,
   setBit,
 } from 'firefox-profiler/utils/bitset';
@@ -1720,7 +1721,22 @@ export function applyTransformOutputToThread(
   });
 }
 
-export function computeTransformOutputForSearchStringFilter(
+/**
+ * Output of the search string filter: both the filter's TransformOutput (used
+ * to drop non-matching stacks) and the combined func bitset (used to highlight
+ * matching nodes in the stack chart). Exposed together so both are computed
+ * once and memoized together.
+ *
+ * Stacks are AND-combined across search strings (a stack is kept only if it
+ * contains a match for every search string), while funcs are OR-combined (a
+ * func is highlighted if it matches any of the search strings).
+ */
+export type SearchStringFilterOutput = {
+  transformOutput: TransformOutput;
+  funcMatches: BitSet | null;
+};
+
+export function computeSearchStringFilterOutput(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
@@ -1728,44 +1744,51 @@ export function computeTransformOutputForSearchStringFilter(
   sources: SourceTable,
   stringTable: StringTable,
   searchStrings: string[] | null
-): TransformOutput {
-  return timeCode('computeTransformOutputForSearchStringFilter', () => {
-    if (!searchStrings) {
-      return { newStackTable: stackTable, effectOnThreadData: {} };
+): SearchStringFilterOutput {
+  return timeCode('computeSearchStringFilterOutput', () => {
+    const nonEmptySearchStrings = searchStrings
+      ? searchStrings.filter((s) => s)
+      : [];
+    if (nonEmptySearchStrings.length === 0) {
+      return {
+        transformOutput: { newStackTable: stackTable, effectOnThreadData: {} },
+        funcMatches: null,
+      };
     }
 
-    const stackMatchesAllSearchStrings = searchStrings
-      .filter((s) => s)
-      .reduce(
-        (
-          stackMatchesPreviousSearchStrings: BitSet | undefined,
-          searchString: string
-        ) => {
-          const stackMatchesThisString = _computeStackMatchesSearchString(
-            stackTable,
-            frameTable,
-            funcTable,
-            resourceTable,
-            sources,
-            stringTable,
-            searchString
-          );
-          if (stackMatchesPreviousSearchStrings !== undefined) {
-            return combineTwoBitSetsWithAnd(
-              stackMatchesThisString,
-              stackMatchesPreviousSearchStrings
-            );
-          }
-          return stackMatchesThisString;
-        },
-        undefined
+    let combinedFuncMatches: BitSet | undefined;
+    let combinedStackMatches: BitSet | undefined;
+    for (const searchString of nonEmptySearchStrings) {
+      const funcMatches = computeFuncMatchesSearchString(
+        funcTable,
+        resourceTable,
+        sources,
+        stringTable,
+        searchString
       );
+      const stackMatches = _computeStackMatchesFromFuncMatches(
+        stackTable,
+        frameTable,
+        funcMatches
+      );
+      combinedFuncMatches =
+        combinedFuncMatches === undefined
+          ? funcMatches
+          : combineTwoBitSetsWithOr(funcMatches, combinedFuncMatches);
+      combinedStackMatches =
+        combinedStackMatches === undefined
+          ? stackMatches
+          : combineTwoBitSetsWithAnd(stackMatches, combinedStackMatches);
+    }
 
     return {
-      newStackTable: stackTable,
-      effectOnThreadData: {
-        dropIfOldStackIsNot: stackMatchesAllSearchStrings,
+      transformOutput: {
+        newStackTable: stackTable,
+        effectOnThreadData: {
+          dropIfOldStackIsNot: combinedStackMatches,
+        },
       },
+      funcMatches: combinedFuncMatches ?? null,
     };
   });
 }
@@ -1821,23 +1844,11 @@ export function computeFuncMatchesSearchString(
   return funcMatchesSearch;
 }
 
-function _computeStackMatchesSearchString(
+function _computeStackMatchesFromFuncMatches(
   stackTable: StackTable,
   frameTable: FrameTable,
-  funcTable: FuncTable,
-  resourceTable: ResourceTable,
-  sources: SourceTable,
-  stringTable: StringTable,
-  searchString: string
+  funcMatchesSearch: BitSet
 ): BitSet {
-  const funcMatchesSearch = computeFuncMatchesSearchString(
-    funcTable,
-    resourceTable,
-    sources,
-    stringTable,
-    searchString
-  );
-
   const stackMatchesSearch = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
