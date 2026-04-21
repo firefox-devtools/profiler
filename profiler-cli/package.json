@@ -1,6 +1,6 @@
 {
   "name": "@firefox-devtools/profiler-cli",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.4",
   "description": "Command-line interface for querying Firefox Profiler profiles with persistent daemon sessions",
   "scripts": {
     "prepublishOnly": "test -f dist/profiler-cli.js || (echo 'Run yarn build-profiler-cli from the repo root first' && exit 1)"
