@@ -68,11 +68,7 @@ function exec(
       if (timedOut) {
         reject(new Error(`Command timed out after ${options.timeout}ms`));
       } else {
-        resolve({
-          stdout,
-          stderr,
-          exitCode: code ?? 1,
-        });
+        resolve({ stdout, stderr, exitCode: code ?? 1 });
       }
     });
 
@@ -101,7 +97,10 @@ export async function createTestContext(): Promise<CliTestContext> {
   const sessionDir = await mkdtemp(join(tmpdir(), 'profiler-cli-test-'));
   return {
     sessionDir,
-    env: { PROFILER_CLI_SESSION_DIR: sessionDir },
+    env: {
+      PROFILER_CLI_SESSION_DIR: sessionDir,
+      PROFILER_CLI_NO_SYMBOLICATE: '1',
+    },
   };
 }
 

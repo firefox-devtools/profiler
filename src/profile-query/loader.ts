@@ -119,7 +119,8 @@ export interface LoadResult {
 export async function loadProfileFromFileOrUrl(
   filePathOrUrl: string,
   symbolServerUrl?: string,
-  onSymbolicating?: () => void
+  onSymbolicating?: () => void,
+  skipSymbolication?: boolean
 ): Promise<LoadResult> {
   const store = createStore();
   console.log(`Loading profile from ${filePathOrUrl}`);
@@ -190,7 +191,8 @@ export async function loadProfileFromFileOrUrl(
       profile,
       symbolServerUrl,
       urlSymbolServer,
-      onSymbolicating
+      onSymbolicating,
+      skipSymbolication
     );
 
     await store.dispatch(loadProfile(profile, {}, true));
@@ -216,7 +218,8 @@ export async function loadProfileFromFileOrUrl(
     profile,
     symbolServerUrl,
     urlSymbolServer,
-    onSymbolicating
+    onSymbolicating,
+    skipSymbolication
   );
 
   await store.dispatch(loadProfile(profile, {}, true));
@@ -230,9 +233,10 @@ async function maybeSymbolicate(
   profile: Profile,
   symbolServerUrl: string | undefined,
   urlSymbolServer: string | undefined,
-  onSymbolicating: (() => void) | undefined
+  onSymbolicating: (() => void) | undefined,
+  skipSymbolication?: boolean
 ): Promise<void> {
-  if (profile.meta.symbolicated === true) {
+  if (profile.meta.symbolicated === true || skipSymbolication === true) {
     return;
   }
   const serverUrl = symbolServerUrl ?? urlSymbolServer ?? SYMBOL_SERVER_URL;

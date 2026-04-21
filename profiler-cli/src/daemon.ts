@@ -143,6 +143,7 @@ export class Daemon {
     this.loadingProfile = true;
     try {
       console.log('Loading profile...');
+      const skipSymbolication = process.env.PROFILER_CLI_NO_SYMBOLICATE === '1';
       this.querier = await ProfileQuerier.load(
         this.profilePath,
         this.symbolServerUrl,
@@ -150,7 +151,8 @@ export class Daemon {
           this.loadingProfile = false;
           this.symbolicating = true;
           console.log('Symbolicating profile...');
-        }
+        },
+        skipSymbolication
       );
       this.symbolicating = false;
       this.loadingProfile = false;

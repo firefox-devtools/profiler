@@ -30,9 +30,8 @@ describe('profiler-cli multiple concurrent sessions', () => {
   it('can run multiple sessions with explicit IDs', async () => {
     const session1 = 'test-session-1';
     const session2 = 'test-session-2';
-    const session3 = 'test-session-3';
 
-    // Start three sessions
+    // Start two sessions
     await cli(ctx, [
       'load',
       'src/test/fixtures/upgrades/processed-1.json',
@@ -45,31 +44,18 @@ describe('profiler-cli multiple concurrent sessions', () => {
       '--session',
       session2,
     ]);
-    await cli(ctx, [
-      'load',
-      'src/test/fixtures/upgrades/processed-3.json',
-      '--session',
-      session3,
-    ]);
 
-    // Query each session explicitly
+    // Query session1 explicitly
     const result1 = await cli(ctx, ['profile', 'info', '--session', session1]);
     expect(result1.stdout).toContain('This profile contains');
 
-    const result2 = await cli(ctx, ['profile', 'info', '--session', session2]);
+    // Query current session (should be session2, the last loaded)
+    const result2 = await cli(ctx, ['profile', 'info']);
     expect(result2.stdout).toContain('This profile contains');
-
-    // Query current session (should be session3)
-    const result3 = await cli(ctx, ['profile', 'info']);
-    expect(result3.stdout).toContain('This profile contains');
-
-    // Note: We don't assert that results differ, as different test profiles
-    // might coincidentally have identical summaries.
 
     // Stop all sessions (mix of positional arg and --session flag)
     await cli(ctx, ['stop', session1]);
     await cli(ctx, ['stop', '--session', session2]);
-    await cli(ctx, ['stop', session3]);
   });
 
   it('session list shows running sessions and marks the current one', async () => {

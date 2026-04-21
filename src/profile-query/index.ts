@@ -164,12 +164,14 @@ export class ProfileQuerier {
   static async load(
     filePathOrUrl: string,
     symbolServerUrl?: string,
-    onSymbolicating?: () => void
+    onSymbolicating?: () => void,
+    skipSymbolication?: boolean
   ): Promise<ProfileQuerier> {
     const { store, rootRange } = await loadProfileFromFileOrUrl(
       filePathOrUrl,
       symbolServerUrl,
-      onSymbolicating
+      onSymbolicating,
+      skipSymbolication
     );
     return new ProfileQuerier(store, rootRange);
   }
