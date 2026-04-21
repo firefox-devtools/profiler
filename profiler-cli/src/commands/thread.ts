@@ -259,12 +259,24 @@ export function registerThreadCommand(
       opts.list
     ) {
       markerFilters = {};
-      if (opts.search !== undefined) markerFilters.searchString = opts.search;
-      if (opts.category !== undefined) markerFilters.category = opts.category;
-      if (opts.hasStack) markerFilters.hasStack = true;
-      if (opts.autoGroup) markerFilters.autoGroup = true;
-      if (opts.groupBy !== undefined) markerFilters.groupBy = opts.groupBy;
-      if (opts.list) markerFilters.list = true;
+      if (opts.search !== undefined) {
+        markerFilters.searchString = opts.search;
+      }
+      if (opts.category !== undefined) {
+        markerFilters.category = opts.category;
+      }
+      if (opts.hasStack) {
+        markerFilters.hasStack = true;
+      }
+      if (opts.autoGroup) {
+        markerFilters.autoGroup = true;
+      }
+      if (opts.groupBy !== undefined) {
+        markerFilters.groupBy = opts.groupBy;
+      }
+      if (opts.list) {
+        markerFilters.list = true;
+      }
 
       if (opts.minDuration !== undefined) {
         const minDuration = parseFloat(opts.minDuration);
