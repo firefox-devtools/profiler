@@ -61,7 +61,7 @@ Array [
   Array [
     "lineTo",
     15,
-    18,
+    17.866666666666667,
   ],
   Array [
     "lineTo",
@@ -76,27 +76,27 @@ Array [
   Array [
     "lineTo",
     40,
-    19,
+    19.4,
   ],
   Array [
     "lineTo",
     50,
-    13,
+    12.5,
   ],
   Array [
     "lineTo",
     60,
-    17,
+    17.1,
   ],
   Array [
     "lineTo",
     70,
-    22,
+    21.7,
   ],
   Array [
     "lineTo",
     80,
-    22,
+    21.7,
   ],
   Array [
     "stroke",
@@ -120,7 +120,6 @@ Array [
 exports[`TrackProcessCPU matches the component snapshot 1`] = `
 <div
   class="timelineTrackCounter"
-  style="height: 25px; --graph-height: 25px; --markers-height: 15px;"
 >
   <div
     class="timelineTrackCounterGraph"

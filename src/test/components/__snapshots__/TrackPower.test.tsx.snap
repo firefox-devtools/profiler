@@ -68,22 +68,22 @@ Array [
   Array [
     "lineTo",
     15,
-    24,
+    23.877333333333333,
   ],
   Array [
     "lineTo",
     20,
-    24,
+    23.54,
   ],
   Array [
     "lineTo",
     30,
-    24,
+    23.54,
   ],
   Array [
     "lineTo",
     40,
-    15,
+    14.799999999999999,
   ],
   Array [
     "lineTo",
@@ -93,37 +93,37 @@ Array [
   Array [
     "lineTo",
     60,
-    24,
+    23.862,
   ],
   Array [
     "lineTo",
     71,
-    20,
+    19.700934579439256,
   ],
   Array [
     "lineTo",
     71,
-    24,
+    23.99954,
   ],
   Array [
     "lineTo",
     71,
-    15,
+    14.799999999999804,
   ],
   Array [
     "lineTo",
     71,
-    18,
+    18.479999999999883,
   ],
   Array [
     "lineTo",
     110,
-    24,
+    23.882051282051282,
   ],
   Array [
     "lineTo",
     120,
-    24,
+    23.882051282051282,
   ],
   Array [
     "stroke",
@@ -147,7 +147,6 @@ Array [
 exports[`TrackPower matches the component snapshot 1`] = `
 <div
   class="timelineTrackCounter"
-  style="height: 25px; --graph-height: 25px; --markers-height: 15px;"
 >
   <div
     class="timelineTrackCounterGraph"

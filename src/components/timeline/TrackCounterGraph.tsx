@@ -34,6 +34,7 @@ import {
 } from 'firefox-profiler/components/tooltip/TooltipDetails';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { co2 } from '@tgwf/co2';
 
 import type {
@@ -146,151 +147,160 @@ class TrackCounterCanvas extends React.PureComponent<CanvasProps> {
       ctx.fillStyle = getFillColor(display.color);
       ctx.beginPath();
 
-      if (display.graphType === 'line-accumulated') {
-        // Accumulated graph: plot the running total.
-        const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+      switch (display.graphType) {
+        case 'line-accumulated': {
+          // Accumulated graph: plot the running total.
+          const { minCount, countRange, accumulatedCounts } =
+            accumulatedSamples;
 
-        // The x and y are used after the loop.
-        let x = 0;
-        let y = 0;
-        let firstX = 0;
-        for (let i = sampleStart; i < sampleEnd; i++) {
-          // Create a path for the top of the chart. This is the line that will have
-          // a stroke applied to it.
-          x = (samples.time[i] - rangeStart) * millisecondWidth;
-          // Add on half the stroke's line width so that it won't be cut off the edge
-          // of the graph.
-          const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
-          y =
-            innerDeviceHeight -
-            innerDeviceHeight * unitGraphCount +
-            deviceLineHalfWidth;
-          if (i === sampleStart) {
-            // This is the first iteration, only move the line, do not draw it. Also
-            // remember this first X, as the bottom of the graph will need to connect
-            // back up to it.
-            firstX = x;
-            ctx.moveTo(x, y);
-          } else {
-            ctx.lineTo(x, y);
+          // The x and y are used after the loop.
+          let x = 0;
+          let y = 0;
+          let firstX = 0;
+          for (let i = sampleStart; i < sampleEnd; i++) {
+            // Create a path for the top of the chart. This is the line that will have
+            // a stroke applied to it.
+            x = (samples.time[i] - rangeStart) * millisecondWidth;
+            // Add on half the stroke's line width so that it won't be cut off the edge
+            // of the graph.
+            const unitGraphCount =
+              (accumulatedCounts[i] - minCount) / countRange;
+            y =
+              innerDeviceHeight -
+              innerDeviceHeight * unitGraphCount +
+              deviceLineHalfWidth;
+            if (i === sampleStart) {
+              // This is the first iteration, only move the line, do not draw it. Also
+              // remember this first X, as the bottom of the graph will need to connect
+              // back up to it.
+              firstX = x;
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
           }
+          // The samples range ends at the time of the last sample, plus the interval.
+          // Draw this last bit.
+          ctx.lineTo(x + intervalWidth, y);
+
+          // Don't do the fill yet, just stroke the top line. This will draw a line from
+          // point 1 to 2 in the diagram above.
+          ctx.stroke();
+
+          // After doing the stroke, continue the path to complete the fill to the bottom
+          // of the canvas. This continues the path to point 3 and then 4.
+
+          // Create a line from 2 to 3.
+          ctx.lineTo(x + intervalWidth, deviceHeight);
+
+          // Create a line from 3 to 4.
+          ctx.lineTo(firstX, deviceHeight);
+
+          // The line from 4 to 1 will be implicitly filled in.
+          ctx.fill();
+          break;
         }
-        // The samples range ends at the time of the last sample, plus the interval.
-        // Draw this last bit.
-        ctx.lineTo(x + intervalWidth, y);
+        case 'line-rate': {
+          // Rate graph: plot count / timeDelta with min-max decimation.
+          const countRangePerMs = maxCounterSampleCountPerMs;
 
-        // Don't do the fill yet, just stroke the top line. This will draw a line from
-        // point 1 to 2 in the diagram above.
-        ctx.stroke();
-
-        // After doing the stroke, continue the path to complete the fill to the bottom
-        // of the canvas. This continues the path to point 3 and then 4.
-
-        // Create a line from 2 to 3.
-        ctx.lineTo(x + intervalWidth, deviceHeight);
-
-        // Create a line from 3 to 4.
-        ctx.lineTo(firstX, deviceHeight);
-
-        // The line from 4 to 1 will be implicitly filled in.
-        ctx.fill();
-      } else {
-        // Rate graph: plot count / timeDelta with min-max decimation.
-        const countRangePerMs = maxCounterSampleCountPerMs;
-
-        const getX = (i: number) =>
-          Math.round((samples.time[i] - rangeStart) * millisecondWidth);
-        const getY = (rawY: number) => {
-          if (!rawY) {
-            // Make the 0 values invisible so that 'almost 0' is noticeable.
-            return deviceHeight + deviceLineHalfWidth;
-          }
-          const unitGraphCount = rawY / countRangePerMs;
-          return Math.round(
-            innerDeviceHeight -
+          const getX = (i: number) =>
+            Math.round((samples.time[i] - rangeStart) * millisecondWidth);
+          const getY = (rawY: number) => {
+            if (!rawY) {
+              // Make the 0 values invisible so that 'almost 0' is noticeable.
+              return deviceHeight + deviceLineHalfWidth;
+            }
+            const unitGraphCount = rawY / countRangePerMs;
+            return (
+              innerDeviceHeight -
               innerDeviceHeight * unitGraphCount +
               // Add on half the stroke's line width so that it won't be cut off the edge
               // of the graph.
               deviceLineHalfWidth
-          );
-        };
+            );
+          };
 
-        const getRate = (i: number) => {
-          const sampleTimeDeltaInMs =
-            i === 0 ? interval : samples.time[i] - samples.time[i - 1];
-          return samples.count[i] / sampleTimeDeltaInMs;
-        };
+          const getRate = (i: number) => {
+            const sampleTimeDeltaInMs =
+              i === 0 ? interval : samples.time[i] - samples.time[i - 1];
+            return samples.count[i] / sampleTimeDeltaInMs;
+          };
 
-        // The x and y are used after the loop.
-        const firstX = getX(sampleStart);
-        let x = firstX;
-        let y = getY(getRate(sampleStart));
+          // The x and y are used after the loop.
+          const firstX = getX(sampleStart);
+          let x = firstX;
+          let y = getY(getRate(sampleStart));
 
-        // For the first sample, only move the line, do not draw it. Also
-        // remember this first X, as the bottom of the graph will need to connect
-        // back up to it.
-        ctx.moveTo(x, y);
+          // For the first sample, only move the line, do not draw it. Also
+          // remember this first X, as the bottom of the graph will need to connect
+          // back up to it.
+          ctx.moveTo(x, y);
 
-        // Create a path for the top of the chart. This is the line that will have
-        // a stroke applied to it.
-        for (let i = sampleStart + 1; i < sampleEnd; i++) {
-          const rateValues = [getRate(i)];
-          x = getX(i);
-          y = getY(rateValues[0]);
-          ctx.lineTo(x, y);
-
-          // If we have multiple samples to draw on the same horizontal pixel,
-          // we process all of them together with a max-min decimation algorithm
-          // to save time:
-          // - We draw the first and last samples to ensure the display is
-          //   correct if there are sampling gaps.
-          // - For the values in between, we only draw the min and max values,
-          //   to draw a vertical line covering all the other sample values.
-          while (i + 1 < sampleEnd && getX(i + 1) === x) {
-            rateValues.push(getRate(++i));
-          }
-
-          // Looking for the min and max only makes sense if we have more than 2
-          // samples to draw.
-          if (rateValues.length > 2) {
-            const minY = getY(Math.min(...rateValues));
-            if (minY !== y) {
-              y = minY;
-              ctx.lineTo(x, y);
-            }
-            const maxY = getY(Math.max(...rateValues));
-            if (maxY !== y) {
-              y = maxY;
-              ctx.lineTo(x, y);
-            }
-          }
-
-          const lastY = getY(rateValues[rateValues.length - 1]);
-          if (lastY !== y) {
-            y = lastY;
+          // Create a path for the top of the chart. This is the line that will have
+          // a stroke applied to it.
+          for (let i = sampleStart + 1; i < sampleEnd; i++) {
+            const rateValues = [getRate(i)];
+            x = getX(i);
+            y = getY(rateValues[0]);
             ctx.lineTo(x, y);
+
+            // If we have multiple samples to draw on the same horizontal pixel,
+            // we process all of them together with a max-min decimation algorithm
+            // to save time:
+            // - We draw the first and last samples to ensure the display is
+            //   correct if there are sampling gaps.
+            // - For the values in between, we only draw the min and max values,
+            //   to draw a vertical line covering all the other sample values.
+            while (i + 1 < sampleEnd && getX(i + 1) === x) {
+              rateValues.push(getRate(++i));
+            }
+
+            // Looking for the min and max only makes sense if we have more than 2
+            // samples to draw.
+            if (rateValues.length > 2) {
+              const minY = getY(Math.min(...rateValues));
+              if (minY !== y) {
+                y = minY;
+                ctx.lineTo(x, y);
+              }
+              const maxY = getY(Math.max(...rateValues));
+              if (maxY !== y) {
+                y = maxY;
+                ctx.lineTo(x, y);
+              }
+            }
+
+            const lastY = getY(rateValues[rateValues.length - 1]);
+            if (lastY !== y) {
+              y = lastY;
+              ctx.lineTo(x, y);
+            }
           }
+
+          // The samples range ends at the time of the last sample, plus the interval.
+          // Draw this last bit.
+          ctx.lineTo(x + intervalWidth, y);
+
+          // Don't do the fill yet, just stroke the top line. This will draw a line from
+          // point 1 to 2 in the diagram above.
+          ctx.stroke();
+
+          // After doing the stroke, continue the path to complete the fill to the bottom
+          // of the canvas. This continues the path to point 3 and then 4.
+
+          // Create a line from 2 to 3.
+          ctx.lineTo(x + intervalWidth, deviceHeight);
+
+          // Create a line from 3 to 4.
+          ctx.lineTo(firstX, deviceHeight);
+
+          // The line from 4 to 1 will be implicitly filled in.
+          ctx.fill();
+          break;
         }
-
-        // The samples range ends at the time of the last sample, plus the interval.
-        // Draw this last bit.
-        ctx.lineTo(x + intervalWidth, y);
-
-        // Don't do the fill yet, just stroke the top line. This will draw a line from
-        // point 1 to 2 in the diagram above.
-        ctx.stroke();
-
-        // After doing the stroke, continue the path to complete the fill to the bottom
-        // of the canvas. This continues the path to point 3 and then 4.
-
-        // Create a line from 2 to 3.
-        ctx.lineTo(x + intervalWidth, deviceHeight);
-
-        // Create a line from 3 to 4.
-        ctx.lineTo(firstX, deviceHeight);
-
-        // The line from 4 to 1 will be implicitly filled in.
-        ctx.fill();
+        default:
+          throw assertExhaustiveCheck(display.graphType);
       }
     }
   }
@@ -768,23 +778,30 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     const innerTrackHeight = graphHeight - lineWidth / 2;
     let top;
 
-    if (display.graphType === 'line-accumulated') {
-      const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
-      const unitSampleCount =
-        (accumulatedCounts[counterIndex] - minCount) / countRange;
-      top =
-        innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
-    } else {
-      const sampleTimeDeltaInMs =
-        counterIndex === 0
-          ? interval
-          : samples.time[counterIndex] - samples.time[counterIndex - 1];
-      const unitSampleCount =
-        samples.count[counterIndex] /
-        sampleTimeDeltaInMs /
-        maxCounterSampleCountPerMs;
-      top =
-        innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
+    switch (display.graphType) {
+      case 'line-accumulated': {
+        const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+        const unitSampleCount =
+          (accumulatedCounts[counterIndex] - minCount) / countRange;
+        top =
+          innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
+        break;
+      }
+      case 'line-rate': {
+        const sampleTimeDeltaInMs =
+          counterIndex === 0
+            ? interval
+            : samples.time[counterIndex] - samples.time[counterIndex - 1];
+        const unitSampleCount =
+          samples.count[counterIndex] /
+          sampleTimeDeltaInMs /
+          maxCounterSampleCountPerMs;
+        top =
+          innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(display.graphType);
     }
 
     return (

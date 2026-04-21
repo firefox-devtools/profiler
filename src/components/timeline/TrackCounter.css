@@ -5,7 +5,7 @@
 .timelineTrackCounterGraph {
   position: relative;
   width: 100%;
-  height: var(--graph-height);
+  height: 25px;
 }
 
 .timelineTrackCounterCanvas {
@@ -35,7 +35,7 @@
   font-weight: bold;
 }
 
-.timelineTrackCounterMarkers {
-  height: var(--markers-height, 15px);
+.timelineMarkersMemory {
+  height: 15px;
   opacity: 1;
 }

@@ -13,7 +13,6 @@ import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackCounterGraph } from './TrackCounterGraph';
 import {
   TRACK_COUNTER_GRAPH_HEIGHT,
-  TRACK_COUNTER_MARKERS_HEIGHT,
   TRACK_COUNTER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
@@ -21,7 +20,6 @@ import type {
   CounterIndex,
   ThreadIndex,
   Milliseconds,
-  CounterDisplayConfig,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -36,7 +34,7 @@ type StateProps = {
   readonly threadIndex: ThreadIndex;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
-  readonly display: CounterDisplayConfig;
+  readonly hasMarkers: boolean;
 };
 
 type DispatchProps = {
@@ -56,26 +54,11 @@ export class TrackCounterImpl extends React.PureComponent<Props> {
   };
 
   override render() {
-    const { counterIndex, rangeStart, rangeEnd, threadIndex, display } =
+    const { counterIndex, rangeStart, rangeEnd, threadIndex, hasMarkers } =
       this.props;
 
-    const hasMarkers = display.markerSchemaLocation !== null;
-    const graphHeight = TRACK_COUNTER_GRAPH_HEIGHT;
-    const totalHeight = hasMarkers
-      ? graphHeight + TRACK_COUNTER_MARKERS_HEIGHT
-      : graphHeight;
-
     return (
-      <div
-        className="timelineTrackCounter"
-        style={
-          {
-            height: totalHeight,
-            '--graph-height': `${graphHeight}px`,
-            '--markers-height': `${TRACK_COUNTER_MARKERS_HEIGHT}px`,
-          } as React.CSSProperties
-        }
-      >
+      <div className="timelineTrackCounter">
         {hasMarkers ? (
           <TimelineMarkersMemory
             rangeStart={rangeStart}
@@ -87,7 +70,7 @@ export class TrackCounterImpl extends React.PureComponent<Props> {
         <TrackCounterGraph
           counterIndex={counterIndex}
           lineWidth={TRACK_COUNTER_LINE_WIDTH}
-          graphHeight={graphHeight}
+          graphHeight={TRACK_COUNTER_GRAPH_HEIGHT}
         />
       </div>
     );
@@ -108,7 +91,7 @@ export const TrackCounter = explicitConnect<
       threadIndex: counter.mainThreadIndex,
       rangeStart: start,
       rangeEnd: end,
-      display: counter.display,
+      hasMarkers: Boolean(counter.display.markerSchemaLocation),
     };
   },
   mapDispatchToProps: { updatePreviewSelection },

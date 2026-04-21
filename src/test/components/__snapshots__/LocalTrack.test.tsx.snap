@@ -28,7 +28,6 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
     >
       <div
         class="timelineTrackCounter"
-        style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
       >
         <div
           class="timelineMarkers timelineMarkersMemory"

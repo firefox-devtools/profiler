@@ -557,9 +557,7 @@ export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
         localTracks.some(
           (track) =>
             track.type === 'counter' &&
-            counters !== null &&
-            counters[track.counterIndex].display.markerSchemaLocation ===
-              'timeline-memory'
+            ensureExists(counters)[track.counterIndex].category === 'Memory'
         )
       ) {
         processesWithMemoryTrack.add(pid);

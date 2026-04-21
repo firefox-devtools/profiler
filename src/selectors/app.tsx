@@ -186,12 +186,10 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
               height += TRACK_NETWORK_HEIGHT + border;
               break;
             case 'counter': {
-              // Counter track height depends on whether it has markers.
-              const counter = counters?.[localTrack.counterIndex];
-              const hasMarkers =
-                counter?.display.markerSchemaLocation !== null &&
-                counter?.display.markerSchemaLocation !== undefined;
-              height += hasMarkers
+              // Counter track height depends on whether the counter asks for
+              // markers to be rendered above the graph.
+              const counter = ensureExists(counters)[localTrack.counterIndex];
+              height += counter.display.markerSchemaLocation
                 ? TRACK_COUNTER_GRAPH_HEIGHT + TRACK_COUNTER_MARKERS_HEIGHT
                 : TRACK_COUNTER_GRAPH_HEIGHT;
               height += border;
