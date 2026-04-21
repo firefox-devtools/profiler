@@ -53,7 +53,7 @@ import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
 
-export const CURRENT_URL_VERSION = 15;
+export const CURRENT_URL_VERSION = 16;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -1351,7 +1351,264 @@ const _upgraders: {
       .map(mapIndexesInTransform)
       .join('~');
   },
+  [16]: (
+    processedLocation: ProcessedLocationBeforeUpgrade,
+    profile?: Profile
+  ) => {
+    // The 'memory', 'power', 'bandwidth', and 'process-cpu' LocalTrack types
+    // have been collapsed into a single 'counter' type. This moves counter
+    // tracks into a single group inside each PID's local track array, which
+    // shifts the track indexes that older URLs recorded. Remap
+    // localTrackOrderByPid and hiddenLocalTracksByPid so existing URLs keep
+    // pointing at the same tracks.
+    const { query } = processedLocation;
+    if (!profile || !profile.counters || profile.counters.length === 0) {
+      return;
+    }
+    if (!query.localTrackOrderByPid && !query.hiddenLocalTracksByPid) {
+      return;
+    }
+
+    const oldToNewIndexByPid = _computeV16LocalTrackIndexRemap(profile);
+
+    if (query.localTrackOrderByPid) {
+      query.localTrackOrderByPid = (query.localTrackOrderByPid as string)
+        .split('~')
+        .map((pidAndTracks) => {
+          const dash = pidAndTracks.indexOf('-');
+          if (dash === -1) {
+            return pidAndTracks;
+          }
+          const pid = pidAndTracks.slice(0, dash);
+          const encoded = pidAndTracks.slice(dash + 1);
+          const remap = oldToNewIndexByPid.get(pid);
+          if (!remap) {
+            return pidAndTracks;
+          }
+          const oldOrder = decodeUintArrayFromUrlComponent(encoded);
+          const newOrder = [];
+          for (const oldIndex of oldOrder) {
+            const newIndex = remap[oldIndex];
+            if (newIndex !== undefined && newIndex !== null) {
+              newOrder.push(newIndex);
+            }
+          }
+          return `${pid}-${encodeUintArrayForUrlComponent(newOrder)}`;
+        })
+        .join('~');
+    }
+
+    if (query.hiddenLocalTracksByPid) {
+      query.hiddenLocalTracksByPid = (query.hiddenLocalTracksByPid as string)
+        .split('~')
+        .map((pidAndTracks) => {
+          const dash = pidAndTracks.indexOf('-');
+          if (dash === -1) {
+            return pidAndTracks;
+          }
+          const pid = pidAndTracks.slice(0, dash);
+          const encoded = pidAndTracks.slice(dash + 1);
+          const remap = oldToNewIndexByPid.get(pid);
+          if (!remap) {
+            return pidAndTracks;
+          }
+          const oldHidden = decodeUintArrayFromUrlComponent(encoded);
+          const newHidden = new Set<number>();
+          for (const oldIndex of oldHidden) {
+            const newIndex = remap[oldIndex];
+            if (newIndex !== undefined && newIndex !== null) {
+              newHidden.add(newIndex);
+            }
+          }
+          return `${pid}-${encodeUintSetForUrlComponent(newHidden)}`;
+        })
+        .join('~');
+    }
+  },
 };
+
+/**
+ * Produce a per-PID mapping from old local-track indexes (using the pre-v16
+ * LOCAL_TRACK_INDEX_ORDER) to new local-track indexes (post-v16). Used by the
+ * v16 URL upgrader.
+ *
+ * The two layouts share the same set of tracks; only the relative positions of
+ * counter tracks differ. The helper reconstructs both layouts by simulating
+ * what computeLocalTracksByPid would have produced under each.
+ */
+function _computeV16LocalTrackIndexRemap(
+  profile: Profile
+): Map<Pid, Array<number | null>> {
+  // Pre-v16 (main) LOCAL_TRACK_INDEX_ORDER. Frozen snapshot — do not change.
+  const OLD_SLOT = {
+    thread: 0,
+    network: 1,
+    memory: 2,
+    ipc: 3,
+    marker: 7,
+    power: 6,
+    bandwidth: 8,
+  };
+  // Post-v16 LOCAL_TRACK_INDEX_ORDER. Frozen snapshot — do not change even if
+  // production LOCAL_TRACK_INDEX_ORDER evolves later.
+  const NEW_SLOT = {
+    thread: 0,
+    network: 1,
+    counter: 2,
+    ipc: 3,
+    marker: 5,
+  };
+
+  type Entry = {
+    id: string;
+    oldSlot: number | null;
+    newSlot: number | null;
+  };
+
+  const entriesByPid = new Map<Pid, Entry[]>();
+  const ensurePid = (pid: Pid): Entry[] => {
+    let entries = entriesByPid.get(pid);
+    if (entries === undefined) {
+      entries = [];
+      entriesByPid.set(pid, entries);
+    }
+    return entries;
+  };
+
+  const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
+    (schema) => Array.isArray(schema.graphs) && schema.graphs.length > 0
+  );
+
+  for (
+    let threadIndex = 0;
+    threadIndex < profile.threads.length;
+    threadIndex++
+  ) {
+    const thread = profile.threads[threadIndex];
+    const { pid, markers } = thread;
+
+    if (!thread.isMainThread) {
+      ensurePid(pid).push({
+        id: `t:${threadIndex}`,
+        oldSlot: OLD_SLOT.thread,
+        newSlot: NEW_SLOT.thread,
+      });
+    }
+    if (markers.data.some((datum) => datum && datum.type === 'Network')) {
+      ensurePid(pid).push({
+        id: `n:${threadIndex}`,
+        oldSlot: OLD_SLOT.network,
+        newSlot: NEW_SLOT.network,
+      });
+    }
+    if (markers.data.some((datum) => datum && datum.type === 'IPC')) {
+      ensurePid(pid).push({
+        id: `i:${threadIndex}`,
+        oldSlot: OLD_SLOT.ipc,
+        newSlot: NEW_SLOT.ipc,
+      });
+    }
+
+    if (markerSchemasWithGraphs.length > 0) {
+      const markerTracksBySchemaName: Map<
+        string,
+        { keys: string[]; markerNames: Set<number> }
+      > = new Map();
+      for (const markerSchema of markerSchemasWithGraphs) {
+        markerTracksBySchemaName.set(markerSchema.name, {
+          keys: (markerSchema.graphs || []).map((graph) => graph.key),
+          markerNames: new Set(),
+        });
+      }
+      for (let i = 0; i < markers.length; ++i) {
+        const markerNameIndex = markers.name[i];
+        const markerData = markers.data[i];
+        if (markerData && markerData.type) {
+          const mapEntry = markerTracksBySchemaName.get(markerData.type);
+          if (mapEntry && mapEntry.keys.every((k) => k in markerData)) {
+            mapEntry.markerNames.add(markerNameIndex);
+          }
+        }
+      }
+      for (const [schemaName, { markerNames }] of markerTracksBySchemaName) {
+        for (const markerName of markerNames) {
+          ensurePid(pid).push({
+            id: `m:${threadIndex}:${schemaName}:${markerName}`,
+            oldSlot: OLD_SLOT.marker,
+            newSlot: NEW_SLOT.marker,
+          });
+        }
+      }
+    }
+  }
+
+  const { counters } = profile;
+  if (counters) {
+    for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
+      const counter = counters[counterIndex];
+      const { pid, category, name, samples } = counter;
+
+      // OLD behavior: only Memory / Bandwidth / Power produced tracks.
+      let oldSlot: number | null;
+      if (category === 'Memory') {
+        oldSlot = OLD_SLOT.memory;
+      } else if (category === 'Bandwidth') {
+        oldSlot = OLD_SLOT.bandwidth;
+      }
+      // We assume there is no data when <= 2 samples
+      else if (category === 'power' && samples.length > 2) {
+        oldSlot = OLD_SLOT.power;
+      } else {
+        oldSlot = null;
+      }
+
+      // NEW behavior: mirror computeLocalTracksByPid. processCPU counters are
+      // added later by addProcessCPUTracksForProcess when the experimental
+      // toggle fires, every other counter becomes a track.
+      let newSlot: number | null;
+      if (category === 'CPU' && name === 'processCPU') {
+        newSlot = null;
+      } else if (category === 'power' && samples.length <= 2) {
+        newSlot = null;
+      } else {
+        newSlot = NEW_SLOT.counter;
+      }
+
+      if (oldSlot === null && newSlot === null) {
+        continue;
+      }
+
+      ensurePid(pid).push({
+        id: `c:${counterIndex}`,
+        oldSlot,
+        newSlot,
+      });
+    }
+  }
+
+  const remapByPid = new Map<Pid, Array<number | null>>();
+  for (const [pid, entries] of entriesByPid) {
+    const oldList = entries
+      .filter((e) => e.oldSlot !== null)
+      .slice()
+      .sort((a, b) => (a.oldSlot as number) - (b.oldSlot as number));
+    const newList = entries
+      .filter((e) => e.newSlot !== null)
+      .slice()
+      .sort((a, b) => (a.newSlot as number) - (b.newSlot as number));
+
+    const newIdToIndex = new Map<string, number>();
+    newList.forEach((entry, i) => newIdToIndex.set(entry.id, i));
+
+    const remap: Array<number | null> = oldList.map((entry) => {
+      const newIndex = newIdToIndex.get(entry.id);
+      return newIndex === undefined ? null : newIndex;
+    });
+    remapByPid.set(pid, remap);
+  }
+
+  return remapByPid;
+}
 
 for (let destVersion = 1; destVersion <= CURRENT_URL_VERSION; destVersion++) {
   if (!_upgraders[destVersion]) {

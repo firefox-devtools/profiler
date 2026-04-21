@@ -1488,7 +1488,7 @@ const DEFAULT_TEST_COUNTER_DISPLAY: CounterDisplayConfig = {
   unit: '',
   color: 'grey',
   markerSchemaLocation: null,
-  sortWeight: 35,
+  sortWeight: 50,
   label: 'My Counter',
 };
 

@@ -56,48 +56,23 @@ export type HiddenTracks = {
 const LOCAL_TRACK_INDEX_ORDER = {
   thread: 0,
   network: 1,
-  // Needed only for ts types; counter tracks use _getCounterTrackIndexOrder().
-  counter: -1,
+  counter: 2,
   ipc: 3,
   'event-delay': 4,
-  marker: 7,
+  marker: 5,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
-  // Needed only for ts types; counter tracks use display.sortWeight.
-  counter: -1,
+  counter: 1,
   // IPC tracks that belong to the global track will appear right after network
   // and counter tracks. But we want to show the IPC tracks that belong to the
   // local threads right after their track. This special handling happens inside
   // the sort function.
-  ipc: 40,
-  thread: 50,
-  'event-delay': 60,
-  marker: 80,
+  ipc: 2,
+  thread: 3,
+  'event-delay': 4,
+  marker: 5,
 };
-
-/**
- * Map a counter's category and name to the old LOCAL_TRACK_INDEX_ORDER value
- * that was used before all counter types were unified. This is needed for
- * backward compatibility of URL-encoded track indexes.
- */
-function _getCounterTrackIndexOrder(counter: RawCounter): number {
-  const { category, name } = counter;
-  if (category === 'Memory') {
-    return 2;
-  }
-  if (category === 'CPU' && name === 'processCPU') {
-    return 5;
-  }
-  if (category === 'power') {
-    return 6;
-  }
-  if (category === 'Bandwidth') {
-    return 8;
-  }
-  // Unknown counter types go after all known types.
-  return 9;
-}
 
 const GLOBAL_TRACK_INDEX_ORDER = {
   process: 0,
@@ -122,6 +97,27 @@ function _getDefaultLocalTrackOrder(
   const naturalSort = new Intl.Collator('en-US', { numeric: true });
   // In place sort!
   trackOrder.sort((a, b) => {
+    // Tie-break between two counter tracks using their display.sortWeight.
+    // Cross-type ordering is handled below by LOCAL_TRACK_DISPLAY_ORDER.
+    if (
+      tracks[a].type === 'counter' &&
+      tracks[b].type === 'counter' &&
+      profile &&
+      profile.counters
+    ) {
+      const counterA = profile.counters[tracks[a].counterIndex];
+      const counterB = profile.counters[tracks[b].counterIndex];
+      const sortWeightDiff =
+        counterA.display.sortWeight - counterB.display.sortWeight;
+      if (sortWeightDiff !== 0) {
+        return sortWeightDiff;
+      }
+      if (profile.meta.keepProfileThreadOrder) {
+        return tracks[a].counterIndex - tracks[b].counterIndex;
+      }
+      return naturalSort.compare(counterA.name, counterB.name);
+    }
+
     if (
       tracks[a].type === 'thread' &&
       tracks[b].type === 'ipc' &&
@@ -140,27 +136,6 @@ function _getDefaultLocalTrackOrder(
       // If the IPC track belongs to that local thread, put the IPC tracks right
       // after it.
       return 1;
-    }
-
-    if (
-      profile &&
-      profile.counters &&
-      tracks[a].type === 'counter' &&
-      tracks[b].type === 'counter'
-    ) {
-      const counterA = profile.counters[tracks[a].counterIndex];
-      const counterB = profile.counters[tracks[b].counterIndex];
-      // Sort counter tracks by their display.sortWeight first.
-      const sortWeightDiff =
-        counterA.display.sortWeight - counterB.display.sortWeight;
-      if (sortWeightDiff !== 0) {
-        return sortWeightDiff;
-      }
-      // Within the same sortWeight, sort by name.
-      if (profile.meta.keepProfileThreadOrder) {
-        return tracks[a].counterIndex - tracks[b].counterIndex;
-      }
-      return naturalSort.compare(counterA.name, counterB.name);
     }
 
     // If the tracks are both threads, sort them by thread name, and then by
@@ -182,15 +157,10 @@ function _getDefaultLocalTrackOrder(
       );
     }
 
-    const displayA =
-      tracks[a].type === 'counter' && profile && profile.counters
-        ? profile.counters[tracks[a].counterIndex].display.sortWeight
-        : LOCAL_TRACK_DISPLAY_ORDER[tracks[a].type];
-    const displayB =
-      tracks[b].type === 'counter' && profile && profile.counters
-        ? profile.counters[tracks[b].counterIndex].display.sortWeight
-        : LOCAL_TRACK_DISPLAY_ORDER[tracks[b].type];
-    return displayA - displayB;
+    return (
+      LOCAL_TRACK_DISPLAY_ORDER[tracks[a].type] -
+      LOCAL_TRACK_DISPLAY_ORDER[tracks[b].type]
+    );
   });
 
   return trackOrder;
@@ -459,17 +429,10 @@ export function computeLocalTracksByPid(
   // added at the end so that the local track indexes are stable and backwards compatible.
   for (const localTracks of localTracksByPid.values()) {
     // In place sort!
-    localTracks.sort((a: LocalTrack, b: LocalTrack) => {
-      const orderA =
-        a.type === 'counter' && counters
-          ? _getCounterTrackIndexOrder(counters[a.counterIndex])
-          : LOCAL_TRACK_INDEX_ORDER[a.type];
-      const orderB =
-        b.type === 'counter' && counters
-          ? _getCounterTrackIndexOrder(counters[b.counterIndex])
-          : LOCAL_TRACK_INDEX_ORDER[b.type];
-      return orderA - orderB;
-    });
+    localTracks.sort(
+      (a: LocalTrack, b: LocalTrack) =>
+        LOCAL_TRACK_INDEX_ORDER[a.type] - LOCAL_TRACK_INDEX_ORDER[b.type]
+    );
   }
 
   return localTracksByPid;
