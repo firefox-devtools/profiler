@@ -437,6 +437,11 @@ type ReceiveProfileAction =
     }
   | { readonly type: 'TRIGGER_LOADING_FROM_URL'; readonly profileUrl: string }
   | {
+      readonly type: 'PROFILE_DOWNLOAD_PROGRESS';
+      readonly receivedBytes: number;
+      readonly totalBytes: number | null;
+    }
+  | {
       readonly type: 'UPDATE_PAGES';
       readonly newPages: PageList;
     };
