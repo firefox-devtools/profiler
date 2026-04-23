@@ -10,14 +10,23 @@
  * Examples:
  *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json \
  *     --symbolicate-with-server http://localhost:8001/abcdef/
+ *
+ *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
+ *     --insert-label-frames known-functions.toml
+ *
+ *   node node-tools-dist/profiler-edit.js -i profile.json -o out.json \
+ *     --symbolicate-with-server http://localhost:8001/abcdef/ \
+ *     --insert-label-frames known-functions.toml
  */
 
 import fs from 'fs';
 import minimist from 'minimist';
+import { parse as parseToml } from 'smol-toml';
 
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
+import { insertStackLabels } from 'firefox-profiler/profile-logic/insert-stack-labels';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
@@ -37,6 +46,72 @@ export interface CliOptions {
   input: ProfileSource;
   output: string;
   symbolicateWithServer?: string;
+  insertLabelFrames?: string;
+}
+
+interface Template {
+  name: string;
+  patterns: string[];
+}
+
+interface BucketConfig {
+  name: string;
+  funcPrefixes?: string[];
+  apply?: Array<{ template: string; [key: string]: string }>;
+}
+
+export function applyModifier(
+  value: string,
+  modifier: string | undefined
+): string {
+  switch (modifier) {
+    case 'pascal':
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    case 'snake':
+      return value
+        .replace(/([a-z])([A-Z])/g, '$1_$2')
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .toLowerCase();
+    case undefined:
+      return value;
+    default:
+      throw new Error(`Unknown template modifier: ${modifier}`);
+  }
+}
+
+export function expandPattern(
+  pattern: string,
+  vars: Record<string, string>
+): string {
+  return pattern.replace(
+    /\{(\w+)(?::(\w+))?\}/g,
+    (_match, name: string, modifier: string | undefined) => {
+      if (!(name in vars)) {
+        throw new Error(`Template variable "${name}" not provided`);
+      }
+      return applyModifier(vars[name], modifier);
+    }
+  );
+}
+
+export function resolveTemplates(
+  bucketConfigs: BucketConfig[],
+  templates: Template[]
+): Array<{ name: string; funcPrefixes: string[] }> {
+  const templateMap = new Map(templates.map((t) => [t.name, t]));
+  return bucketConfigs.map((bucket) => {
+    const funcPrefixes = [...(bucket.funcPrefixes ?? [])];
+    for (const { template: templateName, ...vars } of bucket.apply ?? []) {
+      const template = templateMap.get(templateName);
+      if (!template) {
+        throw new Error(`Unknown template: "${templateName}"`);
+      }
+      for (const pattern of template.patterns) {
+        funcPrefixes.push(expandPattern(pattern, vars));
+      }
+    }
+    return { name: bucket.name, funcPrefixes };
+  });
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -81,7 +156,7 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
 }
 
 export async function run(options: CliOptions) {
-  const profile = await loadProfile(options.input);
+  let profile = await loadProfile(options.input);
 
   if (options.symbolicateWithServer !== undefined) {
     const server = options.symbolicateWithServer;
@@ -128,6 +203,19 @@ export async function run(options: CliOptions) {
     profile.shared = shared;
     profile.threads = threads;
     profile.meta.symbolicated = true;
+  }
+
+  if (options.insertLabelFrames !== undefined) {
+    const tomlText = fs.readFileSync(options.insertLabelFrames, 'utf8');
+    const { buckets: bucketConfigs, templates = [] } = parseToml(
+      tomlText
+    ) as unknown as {
+      buckets: BucketConfig[];
+      templates?: Template[];
+    };
+    const buckets = resolveTemplates(bucketConfigs, templates);
+    console.log('Inserting label frames...');
+    profile = insertStackLabels(profile, buckets);
   }
 
   console.log(`Saving profile to ${options.output}`);
@@ -185,6 +273,11 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       typeof argv['symbolicate-with-server'] === 'string' &&
       argv['symbolicate-with-server'] !== ''
         ? argv['symbolicate-with-server']
+        : undefined,
+    insertLabelFrames:
+      typeof argv['insert-label-frames'] === 'string' &&
+      argv['insert-label-frames'] !== ''
+        ? argv['insert-label-frames']
         : undefined,
   };
 }

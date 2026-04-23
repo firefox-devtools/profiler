@@ -20,6 +20,7 @@ describe('makeOptionsFromArgv', function () {
     });
     expect(options.output).toEqual('/path/to/output.json');
     expect(options.symbolicateWithServer).toBeUndefined();
+    expect(options.insertLabelFrames).toBeUndefined();
   });
 
   it('recognizes -i with an http URL', function () {
@@ -111,6 +112,19 @@ describe('makeOptionsFromArgv', function () {
       'http://localhost:8001/',
     ]);
     expect(options.symbolicateWithServer).toEqual('http://localhost:8001/');
+  });
+
+  it('recognizes optional --insert-label-frames', function () {
+    const options = makeOptionsFromArgv([
+      ...commonArgs,
+      '-i',
+      '/path/to/profile.json',
+      '-o',
+      '/path/to/output.json',
+      '--insert-label-frames',
+      '/path/to/labels.toml',
+    ]);
+    expect(options.insertLabelFrames).toEqual('/path/to/labels.toml');
   });
 
   it('throws when no input is provided', function () {
