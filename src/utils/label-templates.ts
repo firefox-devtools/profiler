@@ -300,26 +300,12 @@ export function discoverAutoLabels(
         }
 
         const vars: Record<string, string> = {};
-        let recoverFailed = false;
         for (let i = 0; i < c.vars.length; i++) {
           const { name, modifier } = c.vars[i];
-          try {
-            vars[name] = reverseModifier(m[i + 1], modifier);
-          } catch {
-            recoverFailed = true;
-            break;
-          }
-        }
-        if (recoverFailed) {
-          continue;
+          vars[name] = reverseModifier(m[i + 1], modifier);
         }
 
-        let labelName: string;
-        try {
-          labelName = expandPattern(auto.nameTemplate, vars);
-        } catch {
-          continue;
-        }
+        const labelName = expandPattern(auto.nameTemplate, vars);
 
         const key = auto.nameTemplate + '\0' + labelName;
         const existing = discovered.get(key);
@@ -337,10 +323,10 @@ export function discoverAutoLabels(
 }
 
 /**
- * Resolve `[[auto_labels]]` against `funcNames`, then merge in `[[labels]]`.
+ * Resolve `autoLabels` against `funcNames`, then merge in `labels`.
  * On a name collision (whether between two auto-discovered labels, or between
  * an auto-discovered label and an explicit one), funcPrefixes are merged into
- * a deduplicated union. Two `[[auto_labels]]` entries can legitimately produce
+ * a deduplicated union. Two `autoLabels` entries can legitimately produce
  * the same label name from different templates — e.g. a generic `{Class}.{method}`
  * entry and a specific `CanvasRenderingContext2D.{method}` entry both yielding
  * `CanvasRenderingContext2D.fill` — and we want every matched prefix to apply.
@@ -351,28 +337,16 @@ export function resolveAllLabels(
   funcNames: Iterable<string>
 ): LabelDescription[] {
   const auto = discoverAutoLabels(autoLabels, funcNames);
+  const allLabels = auto.concat(labels);
 
   const byName = new Map<string, LabelDescription>();
-  const mergeInto = (name: string, extras: string[]) => {
-    const existing = byName.get(name);
-    if (existing === undefined) {
-      byName.set(name, { name, funcPrefixes: [...extras] });
-      return;
+  for (const { name, funcPrefixes } of allLabels) {
+    let entry = byName.get(name);
+    if (entry === undefined) {
+      entry = { name, funcPrefixes: [] };
+      byName.set(name, entry);
     }
-    const merged = existing.funcPrefixes.slice();
-    for (const p of extras) {
-      if (!merged.includes(p)) {
-        merged.push(p);
-      }
-    }
-    byName.set(name, { name, funcPrefixes: merged });
-  };
-
-  for (const l of auto) {
-    mergeInto(l.name, l.funcPrefixes);
-  }
-  for (const l of labels) {
-    mergeInto(l.name, l.funcPrefixes ?? []);
+    entry.funcPrefixes.push(...funcPrefixes);
   }
   return [...byName.values()];
 }

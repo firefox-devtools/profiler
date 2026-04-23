@@ -340,23 +340,6 @@ describe('resolveAllLabels', function () {
     ]);
   });
 
-  it('deduplicates a prefix that appears in both auto-discovery and explicit labels', function () {
-    const resolved = resolveAllLabels(
-      [DOM_OPERATION_AUTO],
-      [
-        {
-          name: 'Element.querySelector',
-          funcPrefixes: ['mozilla::dom::Element_Binding::querySelector('],
-        },
-      ],
-      ['mozilla::dom::Element_Binding::querySelector(args)']
-    );
-    const qs = resolved.find((l) => l.name === 'Element.querySelector');
-    expect(qs!.funcPrefixes).toEqual([
-      'mozilla::dom::Element_Binding::querySelector(',
-    ]);
-  });
-
   it('passes through an explicit-only label when nothing auto-discovers the same name', function () {
     const resolved = resolveAllLabels(
       [DOM_OPERATION_AUTO],

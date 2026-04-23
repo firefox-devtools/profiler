@@ -10217,6 +10217,11 @@ smob@^1.0.0:
   resolved "https://registry.yarnpkg.com/smob/-/smob-1.5.0.tgz#85d79a1403abf128d24d3ebc1cdc5e1a9548d3ab"
   integrity sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig==
 
+smol-toml@^1.6.1:
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/smol-toml/-/smol-toml-1.6.1.tgz#4fceb5f7c4b86c2544024ef686e12ff0983465be"
+  integrity sha512-dWUG8F5sIIARXih1DTaQAX4SsiTXhInKf1buxdY9DIg4ZYPZK5nGM1VRIYmEbDbsHt7USo99xSLFu5Q1IqTmsg==
+
 source-map-js@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/source-map-js/-/source-map-js-1.2.1.tgz#1ce5650fddd87abc099eda37dcff024c2667ae46"
