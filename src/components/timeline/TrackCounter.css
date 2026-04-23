@@ -35,6 +35,7 @@
   font-weight: bold;
 }
 
+.timelineMarkersCounter,
 .timelineMarkersMemory {
   height: 15px;
   opacity: 1;

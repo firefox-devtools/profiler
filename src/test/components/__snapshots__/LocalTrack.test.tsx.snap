@@ -30,8 +30,8 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
         class="timelineTrackCounter"
       >
         <div
-          class="timelineMarkers timelineMarkersMemory"
-          data-testid="TimelineMarkersMemory"
+          class="timelineMarkers timelineMarkersCounter"
+          data-testid="TimelineMarkersCounter"
         >
           <div
             class="react-contextmenu-wrapper"

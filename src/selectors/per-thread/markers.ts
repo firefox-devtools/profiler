@@ -21,6 +21,7 @@ import type {
   MarkerIndex,
   Marker,
   MarkerSchema,
+  MarkerDisplayLocation,
   MarkerTiming,
   MarkerTimingAndBuckets,
   DerivedMarkerInfo,
@@ -517,6 +518,37 @@ export function getMarkerSelectorsPerThread(
   );
 
   /**
+   * Returns markers for an arbitrary schema location. The inner selectors are
+   * memoized per location string so repeated lookups with the same location
+   * reuse a single reselect instance.
+   */
+  const _timelineMarkerIndexesSelectorsBySchemaLocation: Map<
+    string,
+    Selector<MarkerIndex[]>
+  > = new Map();
+  const getTimelineMarkerIndexesBySchemaLocation = (
+    schemaLocation: string
+  ): Selector<MarkerIndex[]> => {
+    let selector =
+      _timelineMarkerIndexesSelectorsBySchemaLocation.get(schemaLocation);
+    if (selector === undefined) {
+      selector = createSelector(
+        getMarkerGetter,
+        getCommittedRangeFilteredMarkerIndexes,
+        ProfileSelectors.getMarkerSchema,
+        ProfileSelectors.getMarkerSchemaByName,
+        () => schemaLocation as MarkerDisplayLocation,
+        MarkerData.filterMarkerByDisplayLocation
+      );
+      _timelineMarkerIndexesSelectorsBySchemaLocation.set(
+        schemaLocation,
+        selector
+      );
+    }
+    return selector;
+  };
+
+  /**
    * This organizes the network markers in rows so that they're nicely displayed
    * in the header.
    */
@@ -783,6 +815,7 @@ export function getMarkerSelectorsPerThread(
     getTimelineFileIoMarkerIndexes,
     getTimelineMemoryMarkerIndexes,
     getTimelineIPCMarkerIndexes,
+    getTimelineMarkerIndexesBySchemaLocation,
     getNetworkTrackTiming,
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkerIndexes,

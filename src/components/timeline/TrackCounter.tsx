@@ -8,7 +8,7 @@ import {
   getCommittedRange,
   getCounterSelectors,
 } from 'firefox-profiler/selectors/profile';
-import { TimelineMarkersMemory } from './Markers';
+import { TimelineMarkersCounter } from './Markers';
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackCounterGraph } from './TrackCounterGraph';
 import {
@@ -34,7 +34,7 @@ type StateProps = {
   readonly threadIndex: ThreadIndex;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
-  readonly hasMarkers: boolean;
+  readonly markerSchemaLocation: string | null;
 };
 
 type DispatchProps = {
@@ -54,16 +54,22 @@ export class TrackCounterImpl extends React.PureComponent<Props> {
   };
 
   override render() {
-    const { counterIndex, rangeStart, rangeEnd, threadIndex, hasMarkers } =
-      this.props;
+    const {
+      counterIndex,
+      rangeStart,
+      rangeEnd,
+      threadIndex,
+      markerSchemaLocation,
+    } = this.props;
 
     return (
       <div className="timelineTrackCounter">
-        {hasMarkers ? (
-          <TimelineMarkersMemory
+        {markerSchemaLocation !== null ? (
+          <TimelineMarkersCounter
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             threadsKey={threadIndex}
+            markerSchemaLocation={markerSchemaLocation}
             onSelect={this._onMarkerSelect}
           />
         ) : null}
@@ -91,7 +97,7 @@ export const TrackCounter = explicitConnect<
       threadIndex: counter.mainThreadIndex,
       rangeStart: start,
       rangeEnd: end,
-      hasMarkers: Boolean(counter.display.markerSchemaLocation),
+      markerSchemaLocation: counter.display.markerSchemaLocation,
     };
   },
   mapDispatchToProps: { updatePreviewSelection },
