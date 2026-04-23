@@ -376,6 +376,7 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  zoomedInCallNodePath: CallNodePath | null;
 };
 
 export type UrlState = {

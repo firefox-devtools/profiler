@@ -130,6 +130,19 @@ export function changeSelectedCallNode(
 }
 
 /**
+ * Zoom in a call node. This action is used when the user clicks on a call node in
+ * the flame chart panel.
+ */
+export function changeZoomedInCallNode(
+  zoomedInCallNodePath: CallNodePath | null
+): Action {
+  return {
+    type: 'CHANGE_ZOOMED_IN_CALL_NODE',
+    zoomedInCallNodePath,
+  };
+}
+
+/**
  * This action is used when the user right clicks on a call node (in panels such
  * as the call tree, the flame chart, or the stack chart). It's especially used
  * to display the context menu.

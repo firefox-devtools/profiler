@@ -23,6 +23,7 @@ import {
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   changeSelectedCallNode,
+  changeZoomedInCallNode,
   changeRightClickedCallNode,
   handleCallNodeTransformShortcut,
   updateBottomBoxContentsAndMaybeOpen,
@@ -79,6 +80,7 @@ type StateProps = {
   readonly callNodeInfo: CallNodeInfo;
   readonly threadsKey: ThreadsKey;
   readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
+  readonly zoomedInCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly scrollToSelectionGeneration: number;
   readonly categories: CategoryList;
@@ -92,6 +94,7 @@ type StateProps = {
 };
 type DispatchProps = {
   readonly changeSelectedCallNode: typeof changeSelectedCallNode;
+  readonly changeZoomedInCallNode: typeof changeZoomedInCallNode;
   readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
   readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
@@ -119,9 +122,17 @@ class FlameGraphImpl
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
-    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
+    const {
+      callNodeInfo,
+      threadsKey,
+      changeSelectedCallNode,
+      changeZoomedInCallNode,
+    } = this.props;
     changeSelectedCallNode(
       threadsKey,
+      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
+    );
+    changeZoomedInCallNode(
       callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
     );
   };
@@ -332,6 +343,7 @@ class FlameGraphImpl
       previewSelection,
       rightClickedCallNodeIndex,
       selectedCallNodeIndex,
+      zoomedInCallNodeIndex,
       scrollToSelectionGeneration,
       callTreeSummaryStrategy,
       categories,
@@ -394,6 +406,7 @@ class FlameGraphImpl
               callNodeInfo,
               categories,
               selectedCallNodeIndex,
+              zoomedInCallNodeIndex,
               rightClickedCallNodeIndex,
               scrollToSelectionGeneration,
               callTreeSummaryStrategy,
@@ -446,6 +459,8 @@ export const FlameGraph = explicitConnectWithForwardRef<
     threadsKey: getSelectedThreadsKey(state),
     selectedCallNodeIndex:
       selectedThreadSelectors.getSelectedCallNodeIndex(state),
+    zoomedInCallNodeIndex:
+      selectedThreadSelectors.getZoomedInCallNodeIndex(state),
     rightClickedCallNodeIndex:
       selectedThreadSelectors.getRightClickedCallNodeIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -464,6 +479,7 @@ export const FlameGraph = explicitConnectWithForwardRef<
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
+    changeZoomedInCallNode,
     changeRightClickedCallNode,
     handleCallNodeTransformShortcut,
     updateBottomBoxContentsAndMaybeOpen,

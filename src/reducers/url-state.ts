@@ -24,6 +24,7 @@ import type {
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
+  CallNodePath,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -732,6 +733,18 @@ const selectedMarkers: Reducer<SelectedMarkersPerThread> = (
   }
 };
 
+const zoomedInCallNodePath: Reducer<CallNodePath | null> = (
+  state = null,
+  action
+): CallNodePath | null => {
+  switch (action.type) {
+    case 'CHANGE_ZOOMED_IN_CALL_NODE':
+      return action.zoomedInCallNodePath;
+    default:
+      return state;
+  }
+};
+
 /**
  * These values are specific to an individual profile.
  */
@@ -759,6 +772,7 @@ const profileSpecific = combineReducers({
   showJsTracerSummary,
   tabFilter,
   selectedMarkers,
+  zoomedInCallNodePath,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

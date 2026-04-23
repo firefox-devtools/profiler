@@ -217,6 +217,9 @@ type Query = BaseQuery & {
   sourceViewIndex?: number;
   assemblyView?: string;
 
+  // FlameGraph specific
+  zoomedInNode?: string;
+
   // StackChart specific
   showUserTimings?: null | undefined;
   sameWidths?: null | undefined;
@@ -338,6 +341,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
         : undefined;
+      if (urlState.profileSpecific.zoomedInCallNodePath !== null) {
+        query.zoomedInNode = encodeUintArrayForUrlComponent(
+          urlState.profileSpecific.zoomedInCallNodePath
+        );
+      }
       if (
         selectedThreadsKey !== null &&
         urlState.profileSpecific.transforms[selectedThreadsKey]
@@ -525,6 +533,11 @@ export function stateFromLocation(
     }
   }
 
+  const zoomedInCallNodePath: CallNodePath | null =
+    selectedThreadsKey !== null && query.zoomedInNode !== undefined
+      ? decodeUintArrayFromUrlComponent(query.zoomedInNode)
+      : null;
+
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -614,6 +627,7 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      zoomedInCallNodePath,
     },
   };
 }
