@@ -7,6 +7,7 @@ import minimist from 'minimist';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
+import { insertStackLabels } from 'firefox-profiler/profile-logic/insert-stack-labels';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
@@ -20,6 +21,10 @@ import {
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
 import type { Profile } from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import {
+  parseLabelToml,
+  resolveAllLabels,
+} from 'firefox-profiler/utils/label-templates';
 
 /**
  * A CLI tool for editing profiles.
@@ -37,6 +42,9 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  *   node node-tools-dist/profiler-edit.js -i input.json.gz -o out.json.gz \
  *     --symbolicate-wasm http://host/a.wasm=./a-unstripped.wasm \
  *     --symbolicate-wasm http://host/b.wasm=./b-unstripped.wasm
+ *
+ *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
+ *     --insert-label-frames known-functions.toml
  */
 
 type ProfileSource =
@@ -54,6 +62,7 @@ export interface CliOptions {
   output: string;
   symbolicateWithServer?: string;
   symbolicateWasm?: WasmSymbolicationCliSpec[];
+  insertLabelFrames?: string;
 }
 
 function loadWasmSymbolicationSpecs(
@@ -68,6 +77,34 @@ function loadWasmSymbolicationSpecs(
       label: spec.path,
     };
   });
+}
+
+/**
+ * Reconstruct the func-name strings used by insertStackLabels' prefix matcher
+ * (mirrors getLabelIndexForFunc in insert-stack-labels.ts), so auto-discovery
+ * sees the same strings the labeler will compare against.
+ */
+function collectFuncNames(profile: Profile): string[] {
+  const { funcTable, sources, stringArray } = profile.shared;
+  const result: string[] = [];
+  for (let i = 0; i < funcTable.length; i++) {
+    let name = stringArray[funcTable.name[i]];
+    const sourceIndex = funcTable.source[i];
+    if (sourceIndex !== null) {
+      const filename = stringArray[sources.filename[sourceIndex]];
+      const line = funcTable.lineNumber[i];
+      const col = funcTable.columnNumber[i];
+      if (line !== null && col !== null) {
+        name += ` (${filename}:${line}:${col})`;
+      } else if (line !== null) {
+        name += ` (${filename}:${line})`;
+      } else {
+        name += ` (${filename})`;
+      }
+    }
+    result.push(name);
+  }
+  return result;
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -122,7 +159,7 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
 }
 
 export async function run(options: CliOptions) {
-  const profile = await loadProfile(options.input);
+  let profile = await loadProfile(options.input);
 
   if (options.symbolicateWithServer !== undefined) {
     const server = options.symbolicateWithServer;
@@ -176,6 +213,15 @@ export async function run(options: CliOptions) {
       profile,
       loadWasmSymbolicationSpecs(options.symbolicateWasm)
     );
+  }
+
+  if (options.insertLabelFrames !== undefined) {
+    console.log('Inserting label frames...');
+    const tomlText = fs.readFileSync(options.insertLabelFrames, 'utf8');
+    const parsed = parseLabelToml(tomlText);
+    const funcNames = collectFuncNames(profile);
+    const labels = resolveAllLabels(parsed, funcNames);
+    profile = insertStackLabels(profile, labels);
   }
 
   console.log(`Saving profile to ${options.output}`);
@@ -264,6 +310,11 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         ? argv['symbolicate-with-server']
         : undefined,
     symbolicateWasm,
+    insertLabelFrames:
+      typeof argv['insert-label-frames'] === 'string' &&
+      argv['insert-label-frames'] !== ''
+        ? argv['insert-label-frames']
+        : undefined,
   };
 }
 
