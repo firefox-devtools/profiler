@@ -61,8 +61,8 @@ jobs:
       - name: Build production
         run: yarn build-prod:quiet
 
-      - name: Build symbolicator CLI
-        run: yarn build-symbolicator-cli:quiet
+      - name: Build node tools
+        run: yarn build-node-tools
 
   licence-check:
     runs-on: ${{ matrix.os }}

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`symbolicator-cli tool is symbolicating a .json.gz trace correctly 1`] = `
+exports[`profiler-edit tool is symbolicating a .json.gz trace correctly 1`] = `
 Object {
   "counters": Array [],
   "libs": Array [
@@ -1328,7 +1328,7 @@ Object {
 }
 `;
 
-exports[`symbolicator-cli tool is symbolicating a trace correctly 1`] = `
+exports[`profiler-edit tool is symbolicating a trace correctly 1`] = `
 Object {
   "counters": Array [],
   "libs": Array [

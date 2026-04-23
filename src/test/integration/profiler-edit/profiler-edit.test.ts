@@ -4,26 +4,26 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import type { CliOptions } from '../../../symbolicator-cli';
-import { run } from '../../../symbolicator-cli';
+import type { CliOptions } from '../../../node-tools/profiler-edit';
+import { run } from '../../../node-tools/profiler-edit';
 
-// An end-to-end test for the symbolicator-cli tool.
+// An end-to-end test for the profiler-edit tool's symbolication feature.
 
 // Note that this test is running in a Jest environment which includes
 // various mocks / shims that makes it feel more like a browser environment.
 // For example, window.Worker is available.
 //
-// This is somewhat unfortunate because symbolicator-cli is intended to
+// This is somewhat unfortunate because profiler-edit is intended to
 // run in vanilla Node, not in a browser, so we're not really testing
 // under realistic conditions here.
 //
 // It may be worth splitting this test off into a separate "vanilla Node"
 // testing environment at some point.
 
-describe('symbolicator-cli tool', function () {
+describe('profiler-edit tool', function () {
   async function runToTempFileAndReturnOutput(options: CliOptions) {
     const tempDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), 'symbolicator-cli-test')
+      path.join(os.tmpdir(), 'profiler-edit-test')
     );
     const tempFile = path.join(tempDir, 'temp.json');
     options.output = tempFile;
@@ -41,7 +41,7 @@ describe('symbolicator-cli tool', function () {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     const symbolsJson = fs.readFileSync(
-      'src/test/integration/symbolicator-cli/symbol-server-response.json'
+      'src/test/integration/profiler-edit/symbol-server-response.json'
     );
 
     window.fetchMock.post(
@@ -49,10 +49,13 @@ describe('symbolicator-cli tool', function () {
       new Response(symbolsJson as any)
     );
 
-    const options = {
-      input: 'src/test/integration/symbolicator-cli/unsymbolicated.json',
+    const options: CliOptions = {
+      input: {
+        type: 'FILE',
+        path: 'src/test/integration/profiler-edit/unsymbolicated.json',
+      },
       output: '',
-      server: 'http://symbol.server',
+      symbolicateWithServer: 'http://symbol.server',
     };
 
     const result = await runToTempFileAndReturnOutput(options);
@@ -66,7 +69,7 @@ describe('symbolicator-cli tool', function () {
     jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     const symbolsJson = fs.readFileSync(
-      'src/test/integration/symbolicator-cli/symbol-server-response.json'
+      'src/test/integration/profiler-edit/symbol-server-response.json'
     );
 
     window.fetchMock.post(
@@ -74,10 +77,13 @@ describe('symbolicator-cli tool', function () {
       new Response(symbolsJson as any)
     );
 
-    const options = {
-      input: 'src/test/integration/symbolicator-cli/unsymbolicated.json.gz',
+    const options: CliOptions = {
+      input: {
+        type: 'FILE',
+        path: 'src/test/integration/profiler-edit/unsymbolicated.json.gz',
+      },
       output: '',
-      server: 'http://symbol.server',
+      symbolicateWithServer: 'http://symbol.server',
     };
 
     const result = await runToTempFileAndReturnOutput(options);
