@@ -58,6 +58,7 @@ import type {
   Page,
   TimelineUnit,
 } from 'firefox-profiler/types';
+import type { BitSet } from 'firefox-profiler/utils/bitset';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -87,6 +88,7 @@ type StateProps = {
   readonly hasFilteredCtssSamples: boolean;
   readonly useStackChartSameWidths: boolean;
   readonly timelineUnit: TimelineUnit;
+  readonly searchFilteredFuncMatchesBitSet: BitSet | null;
 };
 
 type DispatchProps = {
@@ -244,6 +246,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       hasFilteredCtssSamples,
       useStackChartSameWidths,
       timelineUnit,
+      searchFilteredFuncMatchesBitSet,
     } = this.props;
 
     const maxViewportHeight = combinedTimingRows.length * STACK_FRAME_HEIGHT;
@@ -304,6 +307,7 @@ class StackChartImpl extends React.PureComponent<Props> {
                   displayStackType: displayStackType,
                   useStackChartSameWidths,
                   timelineUnit,
+                  searchFilteredFuncMatchesBitSet,
                 }}
               />
             </div>
@@ -347,6 +351,8 @@ export const StackChart = explicitConnect<{}, StateProps, DispatchProps>({
         selectedThreadSelectors.getHasFilteredCtssSamples(state),
       useStackChartSameWidths: getStackChartSameWidths(state),
       timelineUnit: getProfileTimelineUnit(state),
+      searchFilteredFuncMatchesBitSet:
+        selectedThreadSelectors.getSearchFilteredFuncMatchesBitSet(state),
     };
   },
   mapDispatchToProps: {

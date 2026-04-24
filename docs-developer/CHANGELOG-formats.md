@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 62
+
+A new `display` field of type `CounterDisplayConfig` was added to `RawCounter`.
+This metadata makes counters self-describing in terms of how they are rendered in the UI.
+For existing profiles, the display config is derived from the counter's `category` and `name`.
+
 ### Version 61
 
 The `SourceTable` in `profile.shared.sources` was updated:

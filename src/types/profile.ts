@@ -529,14 +529,35 @@ export type GraphColor =
   | 'teal'
   | 'yellow';
 
+export type CounterGraphType = 'line-accumulated' | 'line-rate';
+
+/**
+ * Specifies how a counter should be displayed in the UI.
+ */
+export type CounterDisplayConfig = {
+  graphType: CounterGraphType;
+  unit: string;
+  color: GraphColor;
+  // The marker schema display location to filter markers for this track,
+  // e.g., "timeline-memory". If null, no markers are shown.
+  markerSchemaLocation: string | null;
+  // Controls the default display position of this counter track relative to
+  // other tracks. Tracks with lower values appear closer to the top.
+  sortWeight: number;
+  // The human-readable label shown in the track sidebar. For known counter
+  // types this is a friendly name (eg, "Memory"); for generic counters
+  // it falls back to counter.name.
+  label: string;
+};
+
 export type RawCounter = {
   name: string;
   category: string;
   description: string;
-  color?: GraphColor;
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: RawCounterSamplesTable;
+  display: CounterDisplayConfig;
 };
 
 /**

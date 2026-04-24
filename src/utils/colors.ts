@@ -10,12 +10,14 @@ import {
   GREEN_50,
   GREEN_60,
   GREEN_70,
+  GREY_10,
   GREY_20,
   GREY_30,
   GREY_40,
   GREY_50,
   GREY_60,
   GREY_70,
+  GREY_80,
   MAGENTA_60,
   MAGENTA_70,
   ORANGE_50,
@@ -207,6 +209,23 @@ export function mapCategoryColorNameToStackChartStyles(
     return PSEUDO_TRANSPARENT_STYLE;
   }
   return mapCategoryColorNameToStyles(colorName);
+}
+
+/**
+ * A neutral style used to dim non-matching nodes in the stack chart when a
+ * search filter is active. Closer to the background than any category color
+ * so that matching nodes stand out clearly.
+ */
+const DIMMED_STYLE: ColorStyles = {
+  ...DEFAULT_STYLE,
+  _selectedFillStyle: [GREY_10, GREY_80],
+  _unselectedFillStyle: [GREY_10, GREY_80],
+  _selectedTextColor: [GREY_50, GREY_40],
+  gravity: 0,
+};
+
+export function getDimmedStyles(): ColorStyles {
+  return DIMMED_STYLE;
 }
 
 export function getForegroundColor(): string {

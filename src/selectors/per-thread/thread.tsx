@@ -46,6 +46,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
+import type { BitSet } from 'firefox-profiler/utils/bitset';
 import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
@@ -62,8 +63,8 @@ const globallyMemoizedComputeTransformOutputForImplementationFilter = memoize(
     limit: 2,
   }
 );
-const globallyMemoizedComputeTransformOutputForSearchStringFilter = memoize(
-  ProfileData.computeTransformOutputForSearchStringFilter,
+const globallyMemoizedComputeSearchStringFilterOutput = memoize(
+  ProfileData.computeSearchStringFilterOutput,
   {
     limit: 2,
   }
@@ -488,13 +489,17 @@ export function getThreadSelectorsWithMarkersPerThread(
     }
   );
 
-  const getFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationFilteredThread,
-    UrlState.getSearchStrings,
-    (thread: Thread, searchStrings) => {
-      // Apply the search string filter.
-      const transformOutput =
-        globallyMemoizedComputeTransformOutputForSearchStringFilter(
+  /**
+   * Single memoized computation of the search string filter, shared by
+   * `getFilteredThread` (which needs the stack-drop bitset) and
+   * `getSearchFilteredFuncMatchesBitSet` (which needs the func-match bitset).
+   */
+  const _getSearchStringFilterOutput: Selector<ProfileData.SearchStringFilterOutput> =
+    createSelector(
+      _getImplementationFilteredThread,
+      UrlState.getSearchStrings,
+      (thread: Thread, searchStrings) =>
+        globallyMemoizedComputeSearchStringFilterOutput(
           thread.stackTable,
           thread.frameTable,
           thread.funcTable,
@@ -502,10 +507,23 @@ export function getThreadSelectorsWithMarkersPerThread(
           thread.sources,
           thread.stringTable,
           searchStrings
-        );
-      return ProfileData.applyTransformOutputToThread(transformOutput, thread);
-    }
+        )
+    );
+
+  const getFilteredThread: Selector<Thread> = createSelector(
+    _getImplementationFilteredThread,
+    _getSearchStringFilterOutput,
+    (thread: Thread, { transformOutput }) =>
+      ProfileData.applyTransformOutputToThread(transformOutput, thread)
   );
+
+  /**
+   * Get a BitSet of func indices that match the current search strings.
+   * Returns null when there is no active search. This is used by the stack
+   * chart to dim non-matching nodes without recomputing on every draw call.
+   */
+  const getSearchFilteredFuncMatchesBitSet: Selector<BitSet | null> = (state) =>
+    _getSearchStringFilterOutput(state).funcMatchesSearchStrings;
 
   const getPreviewFilteredThread: Selector<Thread> = createSelector(
     getFilteredThread,
@@ -613,6 +631,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getTransformStack,
     getRangeAndTransformFilteredThread,
     getFilteredThread,
+    getSearchFilteredFuncMatchesBitSet,
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,

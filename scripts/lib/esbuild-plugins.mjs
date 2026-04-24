@@ -24,7 +24,9 @@ export function circularDependencyPlugin() {
     setup(build) {
       build.initialOptions.metafile = true;
       build.onEnd((result) => {
-        if (!result.metafile?.inputs) return;
+        if (!result.metafile?.inputs) {
+          return;
+        }
 
         const { inputs } = result.metafile;
         const recursionStack = new Set();

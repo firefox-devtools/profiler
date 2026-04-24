@@ -97,6 +97,7 @@ import type {
   GeckoSourceTable,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
+  CounterDisplayConfig,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 
@@ -973,6 +974,61 @@ function _processSamples(
 }
 
 /**
+ * Derive a CounterDisplayConfig from a counter's category and name.
+ */
+function _deriveCounterDisplay(
+  category: string,
+  name: string
+): CounterDisplayConfig {
+  if (category === 'Memory') {
+    return {
+      graphType: 'line-accumulated',
+      unit: 'bytes',
+      color: 'orange',
+      markerSchemaLocation: 'timeline-memory',
+      sortWeight: 20,
+      label: 'Memory',
+    };
+  } else if (category === 'power') {
+    return {
+      graphType: 'line-rate',
+      unit: 'pWh',
+      color: 'grey',
+      markerSchemaLocation: null,
+      sortWeight: 30,
+      label: name,
+    };
+  } else if (category === 'Bandwidth') {
+    return {
+      graphType: 'line-rate',
+      unit: 'bytes',
+      color: 'blue',
+      markerSchemaLocation: null,
+      sortWeight: 10,
+      label: 'Bandwidth',
+    };
+  } else if (category === 'CPU' && name === 'processCPU') {
+    return {
+      graphType: 'line-rate',
+      unit: 'percent',
+      color: 'grey',
+      markerSchemaLocation: null,
+      sortWeight: 40,
+      label: 'Process CPU',
+    };
+  }
+
+  return {
+    graphType: 'line-rate',
+    unit: '',
+    color: 'grey',
+    markerSchemaLocation: null,
+    sortWeight: 50,
+    label: name,
+  };
+}
+
+/**
  * Converts the Gecko list of counters into the processed format.
  */
 function _processCounters(
@@ -1031,6 +1087,7 @@ function _processCounters(
         pid: mainThreadPid,
         mainThreadIndex,
         samples: adjustTableTimeDeltas(processedCounterSamples, delta),
+        display: _deriveCounterDisplay(category, name),
       });
       return result;
     },

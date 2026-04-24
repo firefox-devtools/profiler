@@ -25,7 +25,6 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { TRACK_MEMORY_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 
 import type {
   CounterIndex,
@@ -130,10 +129,8 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = getStrokeColor(
-        counter.color || TRACK_MEMORY_DEFAULT_COLOR
-      );
-      ctx.fillStyle = getFillColor(counter.color || TRACK_MEMORY_DEFAULT_COLOR);
+      ctx.strokeStyle = getStrokeColor(counter.display.color);
+      ctx.fillStyle = getFillColor(counter.display.color);
       ctx.beginPath();
 
       // The x and y are used after the loop.
@@ -460,9 +457,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
         style={{
           left,
           top,
-          backgroundColor: getDotColor(
-            counter.color || TRACK_MEMORY_DEFAULT_COLOR
-          ),
+          backgroundColor: getDotColor(counter.display.color),
         }}
         className="timelineTrackMemoryGraphDot"
       />

@@ -28,6 +28,7 @@ import {
   type BitSet,
   checkBit,
   combineTwoBitSetsWithAnd,
+  combineTwoBitSetsWithOr,
   makeBitSet,
   setBit,
 } from 'firefox-profiler/utils/bitset';
@@ -1720,7 +1721,22 @@ export function applyTransformOutputToThread(
   });
 }
 
-export function computeTransformOutputForSearchStringFilter(
+/**
+ * Output of the search string filter: both the filter's TransformOutput (used
+ * to drop non-matching stacks) and the combined func bitset (used to highlight
+ * matching nodes in the stack chart). Exposed together so both are computed
+ * once and memoized together.
+ *
+ * Stacks are AND-combined across search strings (a stack is kept only if it
+ * contains a match for every search string), while funcs are OR-combined (a
+ * func is highlighted if it matches any of the search strings).
+ */
+export type SearchStringFilterOutput = {
+  transformOutput: TransformOutput;
+  funcMatchesSearchStrings: BitSet | null;
+};
+
+export function computeSearchStringFilterOutput(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
@@ -1728,51 +1744,67 @@ export function computeTransformOutputForSearchStringFilter(
   sources: SourceTable,
   stringTable: StringTable,
   searchStrings: string[] | null
-): TransformOutput {
-  return timeCode('computeTransformOutputForSearchStringFilter', () => {
-    if (!searchStrings) {
-      return { newStackTable: stackTable, effectOnThreadData: {} };
+): SearchStringFilterOutput {
+  return timeCode('computeSearchStringFilterOutput', () => {
+    if (!searchStrings || searchStrings.length === 0) {
+      return {
+        transformOutput: { newStackTable: stackTable, effectOnThreadData: {} },
+        funcMatchesSearchStrings: null,
+      };
     }
 
-    const stackMatchesAllSearchStrings = searchStrings
-      .filter((s) => s)
-      .reduce(
-        (
-          stackMatchesPreviousSearchStrings: BitSet | undefined,
-          searchString: string
-        ) => {
-          const stackMatchesThisString = _computeStackMatchesSearchString(
-            stackTable,
-            frameTable,
-            funcTable,
-            resourceTable,
-            sources,
-            stringTable,
-            searchString
-          );
-          if (stackMatchesPreviousSearchStrings !== undefined) {
-            return combineTwoBitSetsWithAnd(
-              stackMatchesThisString,
-              stackMatchesPreviousSearchStrings
-            );
-          }
-          return stackMatchesThisString;
-        },
-        undefined
+    const computeMatchesForString = (searchString: string) => {
+      const funcMatches = computeFuncMatchesSearchString(
+        funcTable,
+        resourceTable,
+        sources,
+        stringTable,
+        searchString
       );
+      const stackMatches = _computeStackMatchesFromFuncMatches(
+        stackTable,
+        frameTable,
+        funcMatches
+      );
+      return { funcMatches, stackMatches };
+    };
+
+    let {
+      funcMatches: combinedFuncMatches,
+      stackMatches: combinedStackMatches,
+    } = computeMatchesForString(searchStrings[0]);
+    for (let i = 1; i < searchStrings.length; i++) {
+      const { funcMatches, stackMatches } = computeMatchesForString(
+        searchStrings[i]
+      );
+      combinedFuncMatches = combineTwoBitSetsWithOr(
+        funcMatches,
+        combinedFuncMatches
+      );
+      combinedStackMatches = combineTwoBitSetsWithAnd(
+        stackMatches,
+        combinedStackMatches
+      );
+    }
 
     return {
-      newStackTable: stackTable,
-      effectOnThreadData: {
-        dropIfOldStackIsNot: stackMatchesAllSearchStrings,
+      transformOutput: {
+        newStackTable: stackTable,
+        effectOnThreadData: {
+          dropIfOldStackIsNot: combinedStackMatches,
+        },
       },
+      funcMatchesSearchStrings: combinedFuncMatches,
     };
   });
 }
 
-function _computeStackMatchesSearchString(
-  stackTable: StackTable,
-  frameTable: FrameTable,
+/**
+ * Compute a BitSet of functions whose name, source filename, or resource name
+ * matches the given search string. This is used both for filtering stacks and
+ * for dimming non-matching nodes in the stack chart.
+ */
+export function computeFuncMatchesSearchString(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   sources: SourceTable,
@@ -1815,7 +1847,14 @@ function _computeStackMatchesSearchString(
       setBit(funcMatchesSearch, funcIndex);
     }
   }
+  return funcMatchesSearch;
+}
 
+function _computeStackMatchesFromFuncMatches(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcMatchesSearch: BitSet
+): BitSet {
   const stackMatchesSearch = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
@@ -2304,10 +2343,9 @@ export function processCounter(rawCounter: RawCounter): Counter {
     name: rawCounter.name,
     category: rawCounter.category,
     description: rawCounter.description,
-    color: rawCounter.color,
     pid: rawCounter.pid,
     mainThreadIndex: rawCounter.mainThreadIndex,
-
+    display: rawCounter.display,
     samples,
   };
 

@@ -34,6 +34,11 @@ export default defineConfig(
   // React config
   reactPlugin.configs.flat.recommended,
 
+  // Prettier config must be placed here to disable formatting rules from the
+  // base configs above, while allowing our custom rules below to take
+  // precedence.
+  prettierConfig,
+
   // Custom configuration for all files
   {
     files: ['**/*.js', '**/*.mjs', '**/*.cjs', '**/*.ts', '**/*.tsx'],
@@ -311,8 +316,5 @@ export default defineConfig(
         ...globals.jest,
       },
     },
-  },
-
-  // Prettier config (must be last to override other formatting rules)
-  prettierConfig
+  }
 );

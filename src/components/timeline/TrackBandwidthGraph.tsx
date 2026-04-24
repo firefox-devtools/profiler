@@ -31,7 +31,6 @@ import {
   TooltipDetailSeparator,
 } from 'firefox-profiler/components/tooltip/TooltipDetails';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { TRACK_BANDWIDTH_DEFAULT_COLOR } from 'firefox-profiler/app-logic/constants';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import { co2 } from '@tgwf/co2';
 
@@ -140,12 +139,8 @@ class TrackBandwidthCanvas extends React.PureComponent<CanvasProps> {
 
       ctx.lineWidth = deviceLineWidth;
       ctx.lineJoin = 'bevel';
-      ctx.strokeStyle = getStrokeColor(
-        counter.color || TRACK_BANDWIDTH_DEFAULT_COLOR
-      );
-      ctx.fillStyle = getFillColor(
-        counter.color || TRACK_BANDWIDTH_DEFAULT_COLOR
-      );
+      ctx.strokeStyle = getStrokeColor(counter.display.color);
+      ctx.fillStyle = getFillColor(counter.display.color);
       ctx.beginPath();
 
       const getX = (i: number) =>
@@ -618,9 +613,7 @@ class TrackBandwidthGraphImpl extends React.PureComponent<Props, State> {
         style={{
           left,
           top,
-          backgroundColor: getDotColor(
-            counter.color || TRACK_BANDWIDTH_DEFAULT_COLOR
-          ),
+          backgroundColor: getDotColor(counter.display.color),
         }}
         className="timelineTrackBandwidthGraphDot"
       />

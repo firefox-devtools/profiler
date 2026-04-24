@@ -3049,6 +3049,67 @@ const _upgraders: {
     }
   },
 
+  [62]: (profile: any) => {
+    // Added CounterDisplayConfig to counters. This metadata controls how a
+    // counter is rendered (graph type, color, unit, etc.).
+    // Derive defaults from the counter's category and name.
+    if (profile.counters) {
+      for (const counter of profile.counters) {
+        if (counter.display !== undefined) {
+          continue;
+        }
+        const { category, name } = counter;
+        if (category === 'Memory') {
+          counter.display = {
+            graphType: 'line-accumulated',
+            unit: 'bytes',
+            color: counter.color ?? 'orange',
+            markerSchemaLocation: 'timeline-memory',
+            sortWeight: 20,
+            label: 'Memory',
+          };
+        } else if (category === 'power') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'pWh',
+            color: counter.color ?? 'grey',
+            markerSchemaLocation: null,
+            sortWeight: 30,
+            label: name,
+          };
+        } else if (category === 'Bandwidth') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'bytes',
+            color: counter.color ?? 'blue',
+            markerSchemaLocation: null,
+            sortWeight: 10,
+            label: 'Bandwidth',
+          };
+        } else if (category === 'CPU' && name === 'processCPU') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'percent',
+            color: counter.color ?? 'grey',
+            markerSchemaLocation: null,
+            sortWeight: 40,
+            label: 'Process CPU',
+          };
+        } else {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: '',
+            color: counter.color ?? 'grey',
+            markerSchemaLocation: null,
+            sortWeight: 50,
+            label: name,
+          };
+        }
+        delete counter.color;
+      }
+    }
+  },
+
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
