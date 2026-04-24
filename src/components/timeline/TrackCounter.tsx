@@ -13,6 +13,7 @@ import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackCounterGraph } from './TrackCounterGraph';
 import {
   TRACK_COUNTER_GRAPH_HEIGHT,
+  TRACK_COUNTER_MARKERS_HEIGHT,
   TRACK_COUNTER_LINE_WIDTH,
 } from 'firefox-profiler/app-logic/constants';
 
@@ -63,7 +64,15 @@ export class TrackCounterImpl extends React.PureComponent<Props> {
     } = this.props;
 
     return (
-      <div className="timelineTrackCounter">
+      <div
+        className="timelineTrackCounter"
+        style={
+          {
+            '--graph-height': `${TRACK_COUNTER_GRAPH_HEIGHT}px`,
+            '--markers-height': `${TRACK_COUNTER_MARKERS_HEIGHT}px`,
+          } as React.CSSProperties
+        }
+      >
         {markerSchemaLocation !== null ? (
           <TimelineMarkersCounter
             rangeStart={rangeStart}

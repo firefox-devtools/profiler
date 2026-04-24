@@ -147,6 +147,7 @@ Array [
 exports[`TrackPower matches the component snapshot 1`] = `
 <div
   class="timelineTrackCounter"
+  style="--graph-height: 25px; --markers-height: 15px;"
 >
   <div
     class="timelineTrackCounterGraph"

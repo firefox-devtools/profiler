@@ -936,7 +936,7 @@ class TimelineTrackContextMenuImpl extends PureComponent<
 
     const ALLOWED_TYPES = [
       'screenshots',
-      'memory',
+      'counter',
       'network',
       'ipc',
       'event-delay',

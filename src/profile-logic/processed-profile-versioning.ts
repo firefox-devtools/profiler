@@ -3059,7 +3059,16 @@ const _upgraders: {
           continue;
         }
         const { category, name } = counter;
-        if (category === 'Memory') {
+        if (category === 'Bandwidth') {
+          counter.display = {
+            graphType: 'line-rate',
+            unit: 'bytes',
+            color: counter.color ?? 'blue',
+            markerSchemaLocation: null,
+            sortWeight: 10,
+            label: 'Bandwidth',
+          };
+        } else if (category === 'Memory') {
           counter.display = {
             graphType: 'line-accumulated',
             unit: 'bytes',
@@ -3076,15 +3085,6 @@ const _upgraders: {
             markerSchemaLocation: null,
             sortWeight: 30,
             label: name,
-          };
-        } else if (category === 'Bandwidth') {
-          counter.display = {
-            graphType: 'line-rate',
-            unit: 'bytes',
-            color: counter.color ?? 'blue',
-            markerSchemaLocation: null,
-            sortWeight: 10,
-            label: 'Bandwidth',
           };
         } else if (category === 'CPU' && name === 'processCPU') {
           counter.display = {

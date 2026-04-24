@@ -518,7 +518,7 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     // Because we already have power tracks showing the power use and estimated
     // emissions of the device, set the 'device' grid intensity to 0 to avoid
     // double counting.
-    const co2eq = this._co2!.perByteTrace(bytes, false, {
+    const co2eq = this._co2.perByteTrace(bytes, false, {
       gridIntensity: { device: 0 },
     });
     const carbonValue = formatNumber(

@@ -105,15 +105,15 @@ function _getDefaultLocalTrackOrder(
       profile &&
       profile.counters
     ) {
+      if (profile.meta.keepProfileThreadOrder) {
+        return tracks[a].counterIndex - tracks[b].counterIndex;
+      }
       const counterA = profile.counters[tracks[a].counterIndex];
       const counterB = profile.counters[tracks[b].counterIndex];
       const sortWeightDiff =
         counterA.display.sortWeight - counterB.display.sortWeight;
       if (sortWeightDiff !== 0) {
         return sortWeightDiff;
-      }
-      if (profile.meta.keepProfileThreadOrder) {
-        return tracks[a].counterIndex - tracks[b].counterIndex;
       }
       return naturalSort.compare(counterA.name, counterB.name);
     }
@@ -399,7 +399,7 @@ export function computeLocalTracksByPid(
   const { counters } = profile;
   if (counters) {
     for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
-      const { pid, category, name, samples } = counters[counterIndex];
+      const { pid, category, name } = counters[counterIndex];
       if (!availablePids.has(pid)) {
         // If the global track is filtered out ignore it here too.
         continue;
@@ -408,11 +408,6 @@ export function computeLocalTracksByPid(
       // Skip processCPU counters — they are added separately by
       // addProcessCPUTracksForProcess when the experimental flag is enabled.
       if (category === 'CPU' && name === 'processCPU') {
-        continue;
-      }
-
-      if (category === 'power' && samples.length <= 2) {
-        // If we have only 2 samples, they are likely both 0 and we don't have a real counter.
         continue;
       }
 
@@ -1572,8 +1567,6 @@ export function getSearchFilteredLocalTracksByPid(
           break;
         }
         case 'counter': {
-          // Match against the counter's display label (e.g., "Memory",
-          // "Bandwidth") rather than the generic type string 'counter'.
           const trackName = localTrackNames[trackIndex];
           if (searchRegExp.test(trackName)) {
             searchFilteredLocalTracks.add(trackIndex);
@@ -1761,6 +1754,9 @@ export function getTrackReferenceFromThreadIndex(
  * If the track is not a thread, some of them can be visible by default and some
  * of them can be hidden to reduce the noise. This mostly depends on either the
  * usefulness or the activity of that track.
+ *
+ * TODO: Check the counter track activity here to decide if it should be visible,
+ *   see https://github.com/firefox-devtools/profiler/issues/5967.
  */
 function _isLocalTrackVisible(
   localTrack: LocalTrack,

@@ -1439,7 +1439,9 @@ const _upgraders: {
 function _computeV16LocalTrackIndexRemap(
   profile: Profile
 ): Map<Pid, Array<number | null>> {
-  // Pre-v16 (main) LOCAL_TRACK_INDEX_ORDER. Frozen snapshot — do not change.
+  // Pre-v16 LOCAL_TRACK_INDEX_ORDER.
+  // Note: we don't preserve 'event-delay' and 'process-cpu' in URLs,
+  // as they are experimental.
   const OLD_SLOT = {
     thread: 0,
     network: 1,
@@ -1449,8 +1451,7 @@ function _computeV16LocalTrackIndexRemap(
     power: 6,
     bandwidth: 8,
   };
-  // Post-v16 LOCAL_TRACK_INDEX_ORDER. Frozen snapshot — do not change even if
-  // production LOCAL_TRACK_INDEX_ORDER evolves later.
+  // Post-v16 LOCAL_TRACK_INDEX_ORDER.
   const NEW_SLOT = {
     thread: 0,
     network: 1,
@@ -1555,7 +1556,7 @@ function _computeV16LocalTrackIndexRemap(
       } else if (category === 'Bandwidth') {
         oldSlot = OLD_SLOT.bandwidth;
       }
-      // We assume there is no data when <= 2 samples
+      // We assumed there was no data when <= 2 samples.
       else if (category === 'power' && samples.length > 2) {
         oldSlot = OLD_SLOT.power;
       } else {
@@ -1565,14 +1566,8 @@ function _computeV16LocalTrackIndexRemap(
       // NEW behavior: mirror computeLocalTracksByPid. processCPU counters are
       // added later by addProcessCPUTracksForProcess when the experimental
       // toggle fires, every other counter becomes a track.
-      let newSlot: number | null;
-      if (category === 'CPU' && name === 'processCPU') {
-        newSlot = null;
-      } else if (category === 'power' && samples.length <= 2) {
-        newSlot = null;
-      } else {
-        newSlot = NEW_SLOT.counter;
-      }
+      const newSlot: number | null =
+        category === 'CPU' && name === 'processCPU' ? null : NEW_SLOT.counter;
 
       if (oldSlot === null && newSlot === null) {
         continue;
