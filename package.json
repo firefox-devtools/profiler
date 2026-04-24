@@ -168,7 +168,7 @@
     "npm-run-all2": "^8.0.4",
     "open": "^11.0.0",
     "patch-package": "^8.0.1",
-    "postcss": "^8.5.9",
+    "postcss": "^8.5.10",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.8.3",
     "rimraf": "^6.1.3",
