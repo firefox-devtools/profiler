@@ -15,6 +15,8 @@
   --internal-sourceview-background-color: var(--grey-20);
   --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
   --internal-assembly-icon: url(../../../res/img/svg/asm-icon.svg);
+  --internal-fullscreen-icon: url(../../../res/img/svg/fullscreen.svg);
+  --internal-fullscreen-exit-icon: url(../../../res/img/svg/fullscreen-exit.svg);
 
   display: flex;
   height: 100%; /* direct child of SplitterLayout */
@@ -113,11 +115,11 @@
 }
 
 .bottom-fullscreen-show-button {
-  background-image: url(firefox-profiler-res/img/svg/fullscreen.svg);
+  background-image: var(--internal-fullscreen-icon);
 }
 
 .bottom-fullscreen-hide-button {
-  background-image: url(firefox-profiler-res/img/svg/fullscreen-exit.svg);
+  background-image: var(--internal-fullscreen-exit-icon);
 }
 
 .codeLoadingOverlay,
@@ -181,6 +183,8 @@
     --internal-sourceview-background-color: var(--grey-80);
     --internal-close-icon: url(../../../res/img/svg/close-light.svg);
     --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
+    --internal-fullscreen-icon: url(../../../res/img/svg/fullscreen-light.svg);
+    --internal-fullscreen-exit-icon: url(../../../res/img/svg/fullscreen-exit-light.svg);
   }
 
   .codeLoadingOverlay,
