@@ -3405,16 +3405,25 @@ export function getOriginAnnotationForFunc(
  *
  * This returns a new thread with an extended funcTable.
  *
- * At the moment, the only functions we reserve are "collapsed resource" functions.
- * These are used by the "collapse resource" transform.
+ * We reserve two sets of functions:
+ * - "collapsed resource" functions (used by the "collapse-resource" transform)
+ * - "collapsed source" functions (used by the "collapse-source" transform)
+ *
+ * Resource reserved funcs occupy indices [funcCount, funcCount + resourceCount).
+ * Source reserved funcs occupy indices [funcCount + resourceCount, funcCount + resourceCount + sourceCount).
  */
 export function reserveFunctionsForCollapsedResources(
   originalFuncTable: FuncTable,
-  resourceTable: ResourceTable
+  resourceTable: ResourceTable,
+  sourceTable: SourceTable
 ): FuncTableWithReservedFunctions {
   const funcTable = shallowCloneFuncTable(originalFuncTable);
   const reservedFunctionsForResources = new Map<
     IndexIntoResourceTable,
+    IndexIntoFuncTable
+  >();
+  const reservedFunctionsForSources = new Map<
+    IndexIntoSourceTable,
     IndexIntoFuncTable
   >();
   const jsResourceTypes = [
@@ -3442,9 +3451,23 @@ export function reserveFunctionsForCollapsedResources(
     funcTable.length++;
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
+  for (let sourceIndex = 0; sourceIndex < sourceTable.length; sourceIndex++) {
+    const name = sourceTable.filename[sourceIndex];
+    const funcIndex = funcTable.length;
+    funcTable.isJS.push(true);
+    funcTable.relevantForJS.push(true);
+    funcTable.name.push(name);
+    funcTable.resource.push(-1);
+    funcTable.source.push(sourceIndex);
+    funcTable.lineNumber.push(null);
+    funcTable.columnNumber.push(null);
+    funcTable.length++;
+    reservedFunctionsForSources.set(sourceIndex, funcIndex);
+  }
   return {
     funcTable,
     reservedFunctionsForResources,
+    reservedFunctionsForSources,
   };
 }
 

@@ -6,6 +6,7 @@ import type {
   CallNodePath,
   IndexIntoFuncTable,
   IndexIntoResourceTable,
+  IndexIntoSourceTable,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 
@@ -21,9 +22,20 @@ export function translateResourceIndex(
   return newResourceIndexPlusOne !== 0 ? newResourceIndexPlusOne - 1 : null;
 }
 
+// Returns the new source index for the given old source index.
+// Returns null if the index has no new index equivalent.
+export function translateSourceIndex(
+  sourceIndex: IndexIntoSourceTable,
+  translationMaps: ProfileIndexTranslationMaps
+): IndexIntoSourceTable | null {
+  const newSourceIndexPlusOne =
+    translationMaps.oldSourceToNewSourcePlusOne[sourceIndex];
+  return newSourceIndexPlusOne !== 0 ? newSourceIndexPlusOne - 1 : null;
+}
+
 // Returns the new func index for the given old func index.
-// This handles indexes for "reserved funcs" for collapsed resources, which
-// are located after the regular funcTable.
+// This handles indexes for "reserved funcs" for collapsed resources and
+// collapsed sources, which are located after the regular funcTable.
 // Returns null if the index has no new index equivalent.
 export function translateFuncIndex(
   funcIndex: IndexIntoFuncTable,
@@ -35,14 +47,26 @@ export function translateFuncIndex(
       translationMaps.oldFuncToNewFuncPlusOne[funcIndex];
     return newFuncIndexPlusOne !== 0 ? newFuncIndexPlusOne - 1 : null;
   }
-  // This must be a funcIndex from the "func table with reserved functions for collapsed resources".
-  const resourceIndex = funcIndex - oldFuncCount;
-  const newResourceIndex = translateResourceIndex(
-    resourceIndex,
-    translationMaps
-  );
-  return newResourceIndex !== null
-    ? translationMaps.newFuncCount + newResourceIndex
+  const reservedOffset = funcIndex - oldFuncCount;
+  const oldResourceCount = translationMaps.oldResourceCount;
+  if (reservedOffset < oldResourceCount) {
+    // This is a reserved func for a collapsed resource.
+    const resourceIndex = reservedOffset;
+    const newResourceIndex = translateResourceIndex(
+      resourceIndex,
+      translationMaps
+    );
+    return newResourceIndex !== null
+      ? translationMaps.newFuncCount + newResourceIndex
+      : null;
+  }
+  // This is a reserved func for a collapsed source.
+  const sourceIndex = reservedOffset - oldResourceCount;
+  const newSourceIndex = translateSourceIndex(sourceIndex, translationMaps);
+  return newSourceIndex !== null
+    ? translationMaps.newFuncCount +
+        translationMaps.newResourceCount +
+        newSourceIndex
     : null;
 }
 

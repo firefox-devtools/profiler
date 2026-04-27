@@ -531,6 +531,7 @@ export type FuncTableWithReservedFunctions = {
     IndexIntoResourceTable,
     IndexIntoFuncTable
   >;
+  reservedFunctionsForSources: Map<IndexIntoSourceTable, IndexIntoFuncTable>;
 };
 
 /**
@@ -814,6 +815,8 @@ export type ProfileIndexTranslationMaps = {
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
   oldFuncCount: number;
   newFuncCount: number;
+  oldResourceCount: number;
+  newResourceCount: number;
   oldStackToNewStackPlusOne: Int32Array;
   oldFrameToNewFramePlusOne: Int32Array;
   oldFuncToNewFuncPlusOne: Int32Array;

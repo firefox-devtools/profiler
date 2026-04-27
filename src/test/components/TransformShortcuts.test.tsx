@@ -12,10 +12,10 @@ import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
+import { addSourceToTable, fireFullKeyPress } from '../fixtures/utils';
 import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
 import { ensureExists, objectEntries } from '../../utils/types';
-import { fireFullKeyPress } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
 import { StackChart } from 'firefox-profiler/components/stack-chart';
@@ -325,4 +325,74 @@ describe('stack chart transform shortcuts', () => {
       });
     });
   }
+});
+
+describe('collapse-source shortcut (X)', () => {
+  function setupWithJsSource() {
+    const {
+      profile,
+      stringTable,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A.js
+      B.js
+    `);
+    const fileNameIndex = stringTable.indexForString(
+      'https://example.com/script.js'
+    );
+    const sourceIndex = addSourceToTable(profile.shared.sources, fileNameIndex);
+
+    const { funcTable } = profile.shared;
+    const funcIndexB = funcNames.indexOf('B.js');
+    funcTable.source[funcIndexB] = sourceIndex;
+
+    const store = storeWithProfile(profile);
+    const { getState } = store;
+
+    render(
+      <Provider store={store}>
+        <ProfileCallTreeView />
+      </Provider>
+    );
+
+    act(() => {
+      store.dispatch(
+        changeSelectedCallNode(0, [funcNames.indexOf('A.js'), funcIndexB])
+      );
+    });
+
+    return {
+      store,
+      sourceIndex,
+      funcIndexB,
+      getTransform: () => {
+        const stack = selectedThreadSelectors.getTransformStack(getState());
+        return stack.length === 1 ? stack[0] : null;
+      },
+      pressKey: pressKeyBuilder('treeViewBody'),
+    };
+  }
+
+  it('handles collapse source', () => {
+    const { pressKey, getTransform, sourceIndex } = setupWithJsSource();
+    pressKey({ key: 'X' });
+    expect(getTransform()).toMatchObject({
+      type: 'collapse-source',
+      sourceIndex,
+    });
+  });
+
+  it('ignores X when no source is set', () => {
+    // setupStore creates a profile where functions have no source entries
+    const { store, funcNames, getTransform } = setupStore(
+      <ProfileCallTreeView />
+    );
+    const { A, B } = funcNames;
+    act(() => {
+      store.dispatch(changeSelectedCallNode(0, [A, B]));
+    });
+    const pressKey = pressKeyBuilder('treeViewBody');
+    pressKey({ key: 'X' });
+    expect(getTransform()).toBeNull();
+  });
 });

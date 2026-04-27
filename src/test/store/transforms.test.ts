@@ -8,7 +8,7 @@ import {
   getProfileWithJsAllocations,
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, addSourceToTable } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import {
@@ -19,6 +19,7 @@ import {
 import {
   addTransformToStack,
   addCollapseResourceTransformToStack,
+  addCollapseSourceTransformToStack,
   popTransformsFromStack,
   changeInvertCallstack,
   changeImplementationFilter,
@@ -1228,6 +1229,85 @@ describe('"collapse-resource" transform', function () {
         selectedThreadSelectors.getSelectedCallNodePath(getState())
       ).toEqual(['firefox'].map((name) => collapsedFuncNames.indexOf(name)));
     });
+  });
+});
+
+describe('"collapse-source" transform', function () {
+  /**
+   *                A                                   A
+   *          -----´ `-----                             |
+   *         /             \                            v
+   *        v               v        Collapse foo.js  foo.js
+   *  B[src:foo.js]  E[src:foo.js]        ->          /     \
+   *        |               |                        D       F
+   *        v               v
+   *  C[src:foo.js]         F
+   *        |
+   *        v
+   *        D
+   */
+  const {
+    profile,
+    stringTable,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
+    A               A
+    B               E
+    C               F
+    D
+  `);
+  const fooUrlIndex = stringTable.indexForString('foo.js');
+  const fooSourceIndex = addSourceToTable(profile.shared.sources, fooUrlIndex);
+  const { funcTable } = profile.shared;
+  funcTable.source[funcNames.indexOf('B')] = fooSourceIndex;
+  funcTable.source[funcNames.indexOf('C')] = fooSourceIndex;
+  funcTable.source[funcNames.indexOf('E')] = fooSourceIndex;
+  const collapsedFuncNames = [...funcNames, 'foo.js'];
+  const threadIndex = 0;
+
+  it('starts as an unfiltered call tree', function () {
+    const { getState } = storeWithProfile(profile);
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 2, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '  - E (total: 1, self: —)',
+        '    - F (total: 1, self: 1)',
+      ]
+    );
+  });
+
+  it('can collapse functions from "foo.js"', function () {
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(
+      addCollapseSourceTransformToStack(threadIndex, fooSourceIndex, 'combined')
+    );
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 2, self: —)',
+        '  - foo.js (total: 2, self: —)',
+        '    - D (total: 1, self: 1)',
+        '    - F (total: 1, self: 1)',
+      ]
+    );
+  });
+
+  it('can apply the transform to the selected CallNodePaths', function () {
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(
+      changeSelectedCallNode(
+        threadIndex,
+        ['A', 'B', 'C', 'D'].map((name) => collapsedFuncNames.indexOf(name))
+      )
+    );
+    dispatch(
+      addCollapseSourceTransformToStack(threadIndex, fooSourceIndex, 'combined')
+    );
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      ['A', 'foo.js', 'D'].map((name) => collapsedFuncNames.indexOf(name))
+    );
   });
 });
 

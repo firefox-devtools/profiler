@@ -503,6 +503,8 @@ export function mergeSharedData(profiles: Profile[]): {
       oldThreadIndexToNew: null,
       oldFuncCount: profile.shared.funcTable.length,
       newFuncCount: newFuncTable.length,
+      oldResourceCount: profile.shared.resourceTable.length,
+      newResourceCount: newResourceTable.length,
       oldLibToNewLibPlusOne,
       oldStringToNewStringPlusOne,
       oldSourceToNewSourcePlusOne,

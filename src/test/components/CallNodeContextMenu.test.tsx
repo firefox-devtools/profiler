@@ -148,6 +148,14 @@ describe('calltree/CallNodeContextMenu', function () {
         ).toBe(type);
       });
     });
+
+    it('adds a transform for "collapse-source"', function () {
+      const { getState } = setup(createStoreWithJsCallStack());
+      fireFullClick(screen.getByText(/Collapse source/));
+      expect(
+        selectedThreadSelectors.getTransformStack(getState())[0].type
+      ).toBe('collapse-source');
+    });
   });
 
   describe('clicking on the rest of the menu items', function () {

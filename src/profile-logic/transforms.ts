@@ -31,6 +31,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStackTable,
   IndexIntoResourceTable,
+  IndexIntoSourceTable,
   CallNodePath,
   CallNodeTable,
   StackType,
@@ -54,6 +55,7 @@ import {
   translateCallNodePath,
   translateFuncIndex,
   translateResourceIndex,
+  translateSourceIndex,
 } from './index-translation';
 import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
 
@@ -70,6 +72,7 @@ const TRANSFORM_OBJ: { [key in TransformType]: true } = {
   'merge-function': true,
   'drop-function': true,
   'collapse-resource': true,
+  'collapse-source': true,
   'collapse-direct-recursion': true,
   'collapse-recursion': true,
   'collapse-function-subtree': true,
@@ -111,6 +114,9 @@ ALL_TRANSFORM_TYPES.forEach((transform: TransformType) => {
       break;
     case 'collapse-resource':
       shortKey = 'cr';
+      break;
+    case 'collapse-source':
+      shortKey = 'cs';
       break;
     case 'collapse-direct-recursion':
       shortKey = 'drec';
@@ -176,6 +182,25 @@ export function parseTransforms(transformString: string): TransformStack {
           transforms.push({
             type,
             resourceIndex,
+            collapsedFuncIndex,
+            implementation: toValidImplementationFilter(implementation),
+          });
+        }
+
+        break;
+      }
+      case 'collapse-source': {
+        // e.g. "cs-js-325-8"
+        const [, implementation, sourceIndexRaw, collapsedFuncIndexRaw] = tuple;
+        const sourceIndex = parseInt(sourceIndexRaw, 10);
+        const collapsedFuncIndex = parseInt(collapsedFuncIndexRaw, 10);
+        if (isNaN(sourceIndex) || isNaN(collapsedFuncIndex)) {
+          break;
+        }
+        if (sourceIndex >= 0) {
+          transforms.push({
+            type,
+            sourceIndex,
             collapsedFuncIndex,
             implementation: toValidImplementationFilter(implementation),
           });
@@ -381,6 +406,8 @@ export function stringifyTransforms(transformStack: TransformStack): string {
           return `${shortKey}-${transform.category}`;
         case 'collapse-resource':
           return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
+        case 'collapse-source':
+          return `${shortKey}-${transform.implementation}-${transform.sourceIndex}-${transform.collapsedFuncIndex}`;
         case 'collapse-recursion':
           return `${shortKey}-${transform.funcIndex}`;
         case 'collapse-direct-recursion':
@@ -426,7 +453,7 @@ export function getTransformLabelL10nIds(
   threadName: string,
   transforms: Transform[]
 ): Array<TransformLabeL10nIds> {
-  const { funcTable, stringTable, resourceTable } = thread;
+  const { funcTable, stringTable, resourceTable, sources } = thread;
   const { categories } = meta;
   const labels: TransformLabeL10nIds[] = transforms.map((transform) => {
     // Lookup library information.
@@ -436,6 +463,15 @@ export function getTransformLabelL10nIds(
       return {
         l10nId: 'TransformNavigator--collapse-resource',
         item: resourceName,
+      };
+    }
+
+    if (transform.type === 'collapse-source') {
+      const nameIndex = sources.filename[transform.sourceIndex];
+      const sourceName = stringTable.getString(nameIndex);
+      return {
+        l10nId: 'TransformNavigator--collapse-source',
+        item: sourceName,
       };
     }
 
@@ -564,6 +600,13 @@ export function applyTransformToCallNodePath(
         transformedThread.funcTable,
         callNodePath
       );
+    case 'collapse-source':
+      return _collapseSourceInCallNodePath(
+        transform.sourceIndex,
+        transform.collapsedFuncIndex,
+        transformedThread.funcTable,
+        callNodePath
+      );
     case 'collapse-direct-recursion':
       return _collapseDirectRecursionInCallNodePath(
         transform.funcIndex,
@@ -683,6 +726,32 @@ function _collapseResourceInCallNodePath(
       // Map any collapsed functions into the collapsedFuncIndex
       .map((pathFuncIndex) => {
         return funcTable.resource[pathFuncIndex] === resourceIndex
+          ? collapsedFuncIndex
+          : pathFuncIndex;
+      })
+      // De-duplicate contiguous collapsed funcs
+      .filter(
+        (pathFuncIndex, pathIndex, path) =>
+          // This function doesn't match the previous one, so keep it.
+          pathFuncIndex !== path[pathIndex - 1] ||
+          // This function matched the previous, only keep it if doesn't match the
+          // collapsed func.
+          pathFuncIndex !== collapsedFuncIndex
+      )
+  );
+}
+
+function _collapseSourceInCallNodePath(
+  sourceIndex: IndexIntoSourceTable,
+  collapsedFuncIndex: IndexIntoFuncTable,
+  funcTable: FuncTable,
+  callNodePath: CallNodePath
+) {
+  return (
+    callNodePath
+      // Map any collapsed functions into the collapsedFuncIndex
+      .map((pathFuncIndex) => {
+        return funcTable.source[pathFuncIndex] === sourceIndex
           ? collapsedFuncIndex
           : pathFuncIndex;
       })
@@ -970,6 +1039,46 @@ export function collapseResource(
 
   // Now collapse consecutive runs of collapsedFuncIndex frames, taking the
   // implementation filter into account to determine "consecutiveness".
+  return collapseDirectRecursion(newThread, collapsedFuncIndex, implementation);
+}
+
+/**
+ * Substitute any functions from a given source file with the source's
+ * "collapsed source function", and then collapse consecutive frames with that
+ * function into a single frame.
+ *
+ * This is the source-based counterpart of collapseResource, using the source
+ * table (specific JS file paths) instead of the resource table (script origins).
+ */
+export function collapseSource(
+  thread: Thread,
+  sourceIndexToCollapse: IndexIntoSourceTable,
+  collapsedFuncIndex: IndexIntoFuncTable,
+  implementation: ImplementationFilter
+): Thread {
+  // Strategy: remap all frames from the given source to collapsedFuncIndex,
+  // then delegate to collapseDirectRecursion to merge consecutive frames with
+  // that func into one.
+  const { funcTable, frameTable } = thread;
+
+  // Remap every frame whose func belongs to the collapsed source.
+  const newFrameTableFuncCol = frameTable.func.slice();
+  for (let i = 0; i < frameTable.length; i++) {
+    const funcIndex = frameTable.func[i];
+    const sourceIndex = funcTable.source[funcIndex];
+    if (sourceIndex === sourceIndexToCollapse) {
+      newFrameTableFuncCol[i] = collapsedFuncIndex;
+    }
+  }
+
+  const newThread = {
+    ...thread,
+    frameTable: {
+      ...frameTable,
+      func: newFrameTableFuncCol,
+    },
+  };
+
   return collapseDirectRecursion(newThread, collapsedFuncIndex, implementation);
 }
 
@@ -1841,6 +1950,13 @@ export function applyTransform(
         transform.collapsedFuncIndex,
         transform.implementation
       );
+    case 'collapse-source':
+      return collapseSource(
+        thread,
+        transform.sourceIndex,
+        transform.collapsedFuncIndex,
+        transform.implementation
+      );
     case 'collapse-direct-recursion':
       return collapseDirectRecursion(
         thread,
@@ -2000,6 +2116,30 @@ export function translateTransform(
       return {
         type,
         resourceIndex: newResourceIndex,
+        implementation: transform.implementation,
+        collapsedFuncIndex: newCollapsedFuncIndex,
+      };
+    }
+    case 'collapse-source': {
+      const newSourceIndex = translateSourceIndex(
+        transform.sourceIndex,
+        translationMaps
+      );
+      if (newSourceIndex === null) {
+        // If the collapsed source is missing, that means we don't have any
+        // samples in the sanitized thread which contain any function with this
+        // source in their stack, which means that this transform was a no-op
+        // in the range filtered thread.
+        // We can just drop this transform.
+        return null;
+      }
+      const newCollapsedFuncIndex =
+        translationMaps.newFuncCount +
+        translationMaps.newResourceCount +
+        newSourceIndex;
+      return {
+        type,
+        sourceIndex: newSourceIndex,
         implementation: transform.implementation,
         collapsedFuncIndex: newCollapsedFuncIndex,
       };

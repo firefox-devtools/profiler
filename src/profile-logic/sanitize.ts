@@ -390,6 +390,9 @@ export function sanitizePII(
       oldFuncCount: profile.shared.funcTable.length,
       newFuncCount:
         compactedProfileWithTranslationMaps.profile.shared.funcTable.length,
+      oldResourceCount: profile.shared.resourceTable.length,
+      newResourceCount:
+        compactedProfileWithTranslationMaps.profile.shared.resourceTable.length,
       ...compactedProfileWithTranslationMaps.translationMaps,
     },
   };

@@ -16,6 +16,7 @@ import {
   getThreads,
   getLastNonShiftClick,
   getReservedFunctionsForResources,
+  getReservedFunctionsForSources,
 } from 'firefox-profiler/selectors/profile';
 import {
   getThreadSelectors,
@@ -63,6 +64,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   IndexIntoResourceTable,
+  IndexIntoSourceTable,
   TrackIndex,
   MarkerIndex,
   Transform,
@@ -1858,6 +1860,29 @@ export function addCollapseResourceTransformToStack(
   };
 }
 
+export function addCollapseSourceTransformToStack(
+  threadsKey: ThreadsKey,
+  sourceIndex: IndexIntoSourceTable,
+  implementation: ImplementationFilter
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const reservedFunctionsForSources =
+      getReservedFunctionsForSources(getState());
+    const collapsedFuncIndex = ensureExists(
+      ensureExists(reservedFunctionsForSources).get(sourceIndex)
+    );
+
+    dispatch(
+      addTransformToStack(threadsKey, {
+        type: 'collapse-source',
+        sourceIndex,
+        collapsedFuncIndex,
+        implementation,
+      })
+    );
+  };
+}
+
 export function popTransformsFromStack(
   firstPoppedFilterIndex: number
 ): ThunkAction<void> {
@@ -2122,6 +2147,20 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
+      case 'X': {
+        const { funcTable } = unfilteredThread;
+        const sourceIndex = funcTable.source[funcIndex];
+        if (sourceIndex !== null) {
+          dispatch(
+            addCollapseSourceTransformToStack(
+              threadsKey,
+              sourceIndex,
+              implementation
+            )
+          );
+        }
+        break;
+      }
       default:
       // This did not match a call tree transform.
     }

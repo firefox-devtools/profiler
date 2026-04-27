@@ -21,6 +21,7 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   addCollapseResourceTransformToStack,
+  addCollapseSourceTransformToStack,
   expandAllCallNodeDescendants,
   updateBottomBoxContentsAndMaybeOpen,
   setContextMenuVisibility,
@@ -80,6 +81,7 @@ type StateProps = {
 type DispatchProps = {
   readonly addTransformToStack: typeof addTransformToStack;
   readonly addCollapseResourceTransformToStack: typeof addCollapseResourceTransformToStack;
+  readonly addCollapseSourceTransformToStack: typeof addCollapseSourceTransformToStack;
   readonly expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants;
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
   readonly setContextMenuVisibility: typeof setContextMenuVisibility;
@@ -326,6 +328,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const {
       addTransformToStack,
       addCollapseResourceTransformToStack,
+      addCollapseSourceTransformToStack,
       implementation,
       inverted,
     } = this.props;
@@ -389,6 +392,21 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         addCollapseResourceTransformToStack(
           threadsKey,
           resourceIndex,
+          implementation
+        );
+        break;
+      }
+      case 'collapse-source': {
+        const { funcTable } = thread;
+        const sourceIndex = funcTable.source[selectedFunc];
+        if (sourceIndex === null) {
+          throw new Error(
+            'collapse-source was triggered on a function without a source'
+          );
+        }
+        addCollapseSourceTransformToStack(
+          threadsKey,
+          sourceIndex,
           implementation
         );
         break;
@@ -539,6 +557,36 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     return stringTable.getString(resNameStringIndex);
   }
 
+  getNameForSelectedSource(): string | null {
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
+
+    if (rightClickedCallNodeInfo === null) {
+      throw new Error(
+        "The context menu assumes there is a selected call node and there wasn't one."
+      );
+    }
+
+    const {
+      callNodeInfo,
+      callNodeIndex,
+      thread: { funcTable, stringTable, sources },
+    } = rightClickedCallNodeInfo;
+
+    const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+    if (funcIndex === undefined) {
+      return null;
+    }
+    if (!funcTable.isJS[funcIndex]) {
+      return null;
+    }
+    const sourceIndex = funcTable.source[funcIndex];
+    if (sourceIndex === null) {
+      return null;
+    }
+    const fileNameIndex = sources.filename[sourceIndex];
+    return stringTable.getString(fileNameIndex);
+  }
+
   getRightClickedCallNodeInfo(): null | {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
@@ -602,6 +650,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     const hasCategory = categoryIndex !== -1;
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();
+    const nameForSource = this.getNameForSelectedSource();
     const categoryName: string = hasCategory
       ? categories[categoryIndex].name
       : '';
@@ -737,6 +786,22 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
               transform: 'collapse-resource',
               title: '',
               content: `Collapse <strong>${nameForResource}</strong>`,
+            })
+          : null}
+
+        {nameForSource
+          ? this.renderTransformMenuItem({
+              l10nId: 'CallNodeContextMenu--transform-collapse-source',
+              l10nProps: {
+                vars: { nameForSource: nameForSource },
+                elems: { strong: <strong /> },
+              },
+              shortcut: 'X',
+              icon: 'Collapse',
+              onClick: this._handleClick,
+              transform: 'collapse-source',
+              title: '',
+              content: `Collapse source <strong>${nameForSource}</strong>`,
             })
           : null}
 
@@ -951,6 +1016,7 @@ export const CallNodeContextMenu = explicitConnect<
   mapDispatchToProps: {
     addTransformToStack,
     addCollapseResourceTransformToStack,
+    addCollapseSourceTransformToStack,
     expandAllCallNodeDescendants,
     updateBottomBoxContentsAndMaybeOpen,
     setContextMenuVisibility,

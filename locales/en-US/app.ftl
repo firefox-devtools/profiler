@@ -139,6 +139,14 @@ CallNodeContextMenu--transform-collapse-resource =
     .title =
         Collapsing a resource will flatten out all the calls to that
         resource into a single collapsed call node.
+# This is used as the context menu item to apply the "Collapse source" transform.
+# Variables:
+#   $nameForSource (String) - Name of the source file to collapse.
+CallNodeContextMenu--transform-collapse-source =
+    Collapse source <strong>{ $nameForSource }</strong>
+    .title =
+        Collapsing a source file will flatten out all the calls from that
+        source file into a single collapsed call node.
 CallNodeContextMenu--transform-collapse-recursion = Collapse recursion
     .title =
         Collapsing recursion removes calls that repeatedly recurse into
@@ -1156,6 +1164,11 @@ TransformNavigator--complete = Complete “{ $item }”
 # Variables:
 #   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
 TransformNavigator--collapse-resource = Collapse: { $item }
+
+# "Collapse source" transform.
+# Variables:
+#   $item (String) - Name of the source file that was collapsed. E.g.: foo.js.
+TransformNavigator--collapse-source = Collapse source: { $item }
 
 # "Focus subtree" transform.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus

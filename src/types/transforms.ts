@@ -17,6 +17,7 @@
 import type {
   IndexIntoFuncTable,
   IndexIntoResourceTable,
+  IndexIntoSourceTable,
   IndexIntoCategoryList,
 } from './profile';
 import type { CallNodePath, ThreadsKey } from './profile-derived';
@@ -276,6 +277,31 @@ export type TransformDefinitions = {
   'collapse-resource': {
     readonly type: 'collapse-resource';
     readonly resourceIndex: IndexIntoResourceTable;
+    // This is the index of the newly created function that represents the collapsed stack.
+    readonly collapsedFuncIndex: IndexIntoFuncTable;
+    readonly implementation: ImplementationFilter;
+  };
+
+  /**
+   * Collapse source takes CallNodes that are from a consecutive source file, and
+   * collapses them into a new collapsed pseudo-stack. This is the same operation
+   * as collapse-resource, but it uses the source table (specific JS file paths)
+   * instead of the resource table (script origins/hosts).
+   *
+   *               A                                   A
+   *             /   \                                 |
+   *            v     v        Collapse foo.js          v
+   *    B:foo.js    E:foo.js       ->               foo.js
+   *        |            |                         /       \
+   *        v            v                        D        F
+   *    C:foo.js        F
+   *        |
+   *        v
+   *        D
+   */
+  'collapse-source': {
+    readonly type: 'collapse-source';
+    readonly sourceIndex: IndexIntoSourceTable;
     // This is the index of the newly created function that represents the collapsed stack.
     readonly collapsedFuncIndex: IndexIntoFuncTable;
     readonly implementation: ImplementationFilter;
