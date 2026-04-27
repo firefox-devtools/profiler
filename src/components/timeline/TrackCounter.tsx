@@ -21,6 +21,7 @@ import type {
   CounterIndex,
   ThreadIndex,
   Milliseconds,
+  MarkerDisplayLocation,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -35,7 +36,7 @@ type StateProps = {
   readonly threadIndex: ThreadIndex;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
-  readonly markerSchemaLocation: string | null;
+  readonly markerSchemaLocation: MarkerDisplayLocation | null;
 };
 
 type DispatchProps = {

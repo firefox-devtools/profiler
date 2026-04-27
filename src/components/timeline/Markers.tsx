@@ -27,6 +27,7 @@ import type {
   CssPixels,
   Marker,
   MarkerIndex,
+  MarkerDisplayLocation,
   ThreadsKey,
 } from 'firefox-profiler/types';
 
@@ -665,7 +666,7 @@ export const TimelineMarkersIPC = explicitConnect<
  * own marker row without the component having to know which category it is.
  */
 type TimelineMarkersCounterOwnProps = OwnProps & {
-  readonly markerSchemaLocation: string;
+  readonly markerSchemaLocation: MarkerDisplayLocation;
 };
 
 // Drops the counter-specific own prop before forwarding to the base markers

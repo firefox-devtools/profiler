@@ -493,41 +493,16 @@ export function getMarkerSelectorsPerThread(
     );
 
   /**
-   * This returns only memory markers.
-   */
-  const getTimelineMemoryMarkerIndexes: Selector<MarkerIndex[]> =
-    createSelector(
-      getMarkerGetter,
-      getCommittedRangeFilteredMarkerIndexes,
-      ProfileSelectors.getMarkerSchema,
-      ProfileSelectors.getMarkerSchemaByName,
-      () => 'timeline-memory' as const,
-      MarkerData.filterMarkerByDisplayLocation
-    );
-
-  /**
-   * This returns only IPC markers.
-   */
-  const getTimelineIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
-    getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
-    ProfileSelectors.getMarkerSchema,
-    ProfileSelectors.getMarkerSchemaByName,
-    () => 'timeline-ipc' as const,
-    MarkerData.filterMarkerByDisplayLocation
-  );
-
-  /**
    * Returns markers for an arbitrary schema location. The inner selectors are
-   * memoized per location string so repeated lookups with the same location
-   * reuse a single reselect instance.
+   * memoized per location so repeated lookups with the same location reuse a
+   * single reselect instance.
    */
   const _timelineMarkerIndexesSelectorsBySchemaLocation: Map<
-    string,
+    MarkerDisplayLocation,
     Selector<MarkerIndex[]>
   > = new Map();
   const getTimelineMarkerIndexesBySchemaLocation = (
-    schemaLocation: string
+    schemaLocation: MarkerDisplayLocation
   ): Selector<MarkerIndex[]> => {
     let selector =
       _timelineMarkerIndexesSelectorsBySchemaLocation.get(schemaLocation);
@@ -537,7 +512,7 @@ export function getMarkerSelectorsPerThread(
         getCommittedRangeFilteredMarkerIndexes,
         ProfileSelectors.getMarkerSchema,
         ProfileSelectors.getMarkerSchemaByName,
-        () => schemaLocation as MarkerDisplayLocation,
+        () => schemaLocation,
         MarkerData.filterMarkerByDisplayLocation
       );
       _timelineMarkerIndexesSelectorsBySchemaLocation.set(
@@ -547,6 +522,11 @@ export function getMarkerSelectorsPerThread(
     }
     return selector;
   };
+
+  const getTimelineMemoryMarkerIndexes =
+    getTimelineMarkerIndexesBySchemaLocation('timeline-memory');
+  const getTimelineIPCMarkerIndexes =
+    getTimelineMarkerIndexesBySchemaLocation('timeline-ipc');
 
   /**
    * This organizes the network markers in rows so that they're nicely displayed
