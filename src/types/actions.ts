@@ -363,6 +363,9 @@ type ProfileAction =
   | {
       readonly type: 'CLOSE_BOTTOM_BOX_FOR_TAB';
       readonly tab: TabSlug;
+    }
+  | {
+      readonly type: 'TOGGLE_BOTTOM_BOX_FULLSCREEN';
     };
 
 type ReceiveProfileAction =
@@ -522,6 +525,10 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_SHOW_USER_TIMINGS';
       readonly showUserTimings: boolean;
+    }
+  | {
+      readonly type: 'CHANGE_INCLUDE_IDLE_SAMPLES';
+      readonly includeIdleSamples: boolean;
     }
   | {
       readonly type: 'CHANGE_STACK_CHART_SAME_WIDTHS';

@@ -20,6 +20,7 @@ import {
   closeBottomBox,
   changeShowUserTimings,
   changeStackChartSameWidths,
+  changeIncludeIdleSamples,
   changeSelectedMarker,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
@@ -1798,6 +1799,28 @@ describe('stack chart specific queries', function () {
     expect(
       urlStateSelectors.getStackChartSameWidths(storeAfterReload.getState())
     ).toBe(true);
+  });
+});
+
+describe('"include idle samples" query', function () {
+  it('defaults to true and is absent from the URL', function () {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateSelectors.getIncludeIdleSamples(getState())).toBe(true);
+    expect(getQueryStringFromState(getState())).not.toContain(
+      'hideIdleSamples'
+    );
+  });
+
+  it('persists hideIdleSamples through a URL roundtrip when toggled off', function () {
+    const { getState, dispatch } = _getStoreWithURL();
+
+    dispatch(changeIncludeIdleSamples(false));
+    expect(getQueryStringFromState(getState())).toContain('hideIdleSamples');
+
+    const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getIncludeIdleSamples(storeAfterReload.getState())
+    ).toBe(false);
   });
 });
 

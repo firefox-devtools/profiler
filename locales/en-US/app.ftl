@@ -888,6 +888,8 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocation Site
 
 StackSettings--invert-call-stack = Invert call stack
     .title = Sort by the time spent in a call node, ignoring its children.
+StackSettings--include-idle-samples = Include idle samples
+    .title = Uncheck to hide samples whose leaf frame is in the Idle category.
 StackSettings--show-user-timing = Show user timing
 StackSettings--use-stack-chart-same-widths = Use the same width for each stack
 
@@ -1259,6 +1261,14 @@ BottomBox--assembly-code-not-available-title = Assembly code not available
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text =
     See <a>issue #4520</a> for supported scenarios and planned improvements.
+
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Exit fullscreen
+
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Fullscreen
 
 SourceView--close-button =
     .title = Close the source view

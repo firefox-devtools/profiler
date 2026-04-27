@@ -312,6 +312,15 @@ const invertCallstack: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const includeIdleSamples: Reducer<boolean> = (state = true, action) => {
+  switch (action.type) {
+    case 'CHANGE_INCLUDE_IDLE_SAMPLES':
+      return action.includeIdleSamples;
+    default:
+      return state;
+  }
+};
+
 /**
  * Signals whether user timing markers will be shown in the stack chart.
  */
@@ -707,6 +716,16 @@ const isBottomBoxOpenPerPanel: Reducer<IsOpenPerPanelState> = (
   }
 };
 
+const isBottomBoxFullscreen: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'TOGGLE_BOTTOM_BOX_FULLSCREEN': {
+      return !state;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * This value is only set from the URL and never changed.
  */
@@ -740,6 +759,7 @@ const profileSpecific = combineReducers({
   implementation,
   lastSelectedCallTreeSummaryStrategy,
   invertCallstack,
+  includeIdleSamples,
   showUserTimings,
   stackChartSameWidths,
   committedRanges,
@@ -750,6 +770,7 @@ const profileSpecific = combineReducers({
   sourceView,
   assemblyView,
   isBottomBoxOpenPerPanel,
+  isBottomBoxFullscreen,
   timelineType,
   globalTrackOrder,
   hiddenGlobalTracks,

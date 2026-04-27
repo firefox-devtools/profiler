@@ -7,18 +7,23 @@ import { Localized } from '@fluent/react';
 
 import {
   changeInvertCallstack,
+  changeIncludeIdleSamples,
   changeCallTreeSearchString,
   changeShowUserTimings,
   changeStackChartSameWidths,
 } from 'firefox-profiler/actions/profile-view';
 import {
   getInvertCallstack,
+  getIncludeIdleSamples,
   getSelectedTab,
   getShowUserTimings,
   getStackChartSameWidths,
   getCurrentSearchString,
 } from 'firefox-profiler/selectors/url-state';
-import { getProfileUsesMultipleStackTypes } from 'firefox-profiler/selectors/profile';
+import {
+  getIdleCategoryIndex,
+  getProfileUsesMultipleStackTypes,
+} from 'firefox-profiler/selectors/profile';
 import { PanelSearch } from './PanelSearch';
 import { StackImplementationSetting } from './StackImplementationSetting';
 import { CallTreeStrategySetting } from './CallTreeStrategySetting';
@@ -39,6 +44,8 @@ type StateProps = {
   readonly selectedTab: string;
   readonly allowSwitchingStackType: boolean;
   readonly invertCallstack: boolean;
+  readonly includeIdleSamples: boolean;
+  readonly hasIdleCategory: boolean;
   readonly showUserTimings: boolean;
   readonly stackChartSameWidths: boolean;
   readonly currentSearchString: string;
@@ -48,6 +55,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly changeInvertCallstack: typeof changeInvertCallstack;
+  readonly changeIncludeIdleSamples: typeof changeIncludeIdleSamples;
   readonly changeShowUserTimings: typeof changeShowUserTimings;
   readonly changeCallTreeSearchString: typeof changeCallTreeSearchString;
   readonly changeStackChartSameWidths: typeof changeStackChartSameWidths;
@@ -58,6 +66,10 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 class StackSettingsImpl extends PureComponent<Props> {
   _onInvertCallstackClick = (e: React.ChangeEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
+  };
+
+  _onIncludeIdleSamplesClick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.changeIncludeIdleSamples(e.currentTarget.checked);
   };
 
   _onShowUserTimingsClick = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,6 +88,8 @@ class StackSettingsImpl extends PureComponent<Props> {
     const {
       allowSwitchingStackType,
       invertCallstack,
+      includeIdleSamples,
+      hasIdleCategory,
       selectedTab,
       showUserTimings,
       stackChartSameWidths,
@@ -86,6 +100,10 @@ class StackSettingsImpl extends PureComponent<Props> {
     } = this.props;
 
     const hasAllocations = hasUsefulJsAllocations || hasUsefulNativeAllocations;
+    const showInvertCallstack = !hideInvertCallstack;
+    const showStackChartOptions = selectedTab === 'stack-chart';
+    const showSettingsItem =
+      showInvertCallstack || showStackChartOptions || hasIdleCategory;
 
     return (
       <div className="stackSettings">
@@ -100,9 +118,9 @@ class StackSettingsImpl extends PureComponent<Props> {
               <CallTreeStrategySetting />
             </li>
           ) : null}
-          {hideInvertCallstack && selectedTab !== 'stack-chart' ? null : (
+          {showSettingsItem ? (
             <li className="panelSettingsListItem">
-              {hideInvertCallstack ? null : (
+              {showInvertCallstack ? (
                 <label className="photon-label photon-label-micro photon-label-horiz-padding">
                   <input
                     type="checkbox"
@@ -117,8 +135,24 @@ class StackSettingsImpl extends PureComponent<Props> {
                     <span>Invert call stack</span>
                   </Localized>
                 </label>
-              )}
-              {selectedTab !== 'stack-chart' ? null : (
+              ) : null}
+              {hasIdleCategory ? (
+                <label className="photon-label photon-label-micro photon-label-horiz-padding">
+                  <input
+                    type="checkbox"
+                    className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                    onChange={this._onIncludeIdleSamplesClick}
+                    checked={includeIdleSamples}
+                  />
+                  <Localized
+                    id="StackSettings--include-idle-samples"
+                    attrs={{ title: true }}
+                  >
+                    <span>Include idle samples</span>
+                  </Localized>
+                </label>
+              ) : null}
+              {showStackChartOptions ? (
                 <>
                   <label className="photon-label photon-label-micro photon-label-horiz-padding">
                     <input
@@ -143,9 +177,9 @@ class StackSettingsImpl extends PureComponent<Props> {
                     </Localized>
                   </label>
                 </>
-              )}
+              ) : null}
             </li>
-          )}
+          ) : null}
         </ul>
         <Localized
           id="StackSettings--panel-search"
@@ -172,6 +206,8 @@ export const StackSettings = explicitConnect<
   mapStateToProps: (state) => ({
     allowSwitchingStackType: getProfileUsesMultipleStackTypes(state),
     invertCallstack: getInvertCallstack(state),
+    includeIdleSamples: getIncludeIdleSamples(state),
+    hasIdleCategory: getIdleCategoryIndex(state) !== null,
     selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
     stackChartSameWidths: getStackChartSameWidths(state),
@@ -183,6 +219,7 @@ export const StackSettings = explicitConnect<
   }),
   mapDispatchToProps: {
     changeInvertCallstack,
+    changeIncludeIdleSamples,
     changeCallTreeSearchString,
     changeShowUserTimings,
     changeStackChartSameWidths,

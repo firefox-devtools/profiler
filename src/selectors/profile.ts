@@ -192,6 +192,12 @@ export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
   getCategories(state).findIndex((c) => c.color === 'grey');
+export const getIdleCategoryIndex: Selector<IndexIntoCategoryList | null> = (
+  state
+) => {
+  const index = getCategories(state).findIndex((c) => c.name === 'Idle');
+  return index === -1 ? null : index;
+};
 export const getThreads: Selector<RawThread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>

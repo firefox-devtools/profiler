@@ -17,7 +17,7 @@ import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelectionIsBeingModified,
-  getCategories,
+  getIdleCategoryIndex,
   getCurrentTableViewOptions,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -36,7 +36,7 @@ import type {
   State,
   ImplementationFilter,
   ThreadsKey,
-  CategoryList,
+  IndexIntoCategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
@@ -60,7 +60,7 @@ type StateProps = {
   readonly focusCallTreeGeneration: number;
   readonly tree: CallTreeType;
   readonly callNodeInfo: CallNodeInfo;
-  readonly categories: CategoryList;
+  readonly idleCategoryIndex: IndexIntoCategoryList | null;
   readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>;
@@ -300,17 +300,13 @@ class CallTreeImpl extends PureComponent<Props> {
       expandedCallNodeIndexes,
       selectedCallNodeIndex,
       callNodeInfo,
-      categories,
+      idleCategoryIndex,
     } = this.props;
 
     if (selectedCallNodeIndex !== null || expandedCallNodeIndexes.length > 0) {
       // Let's not change some existing state.
       return;
     }
-
-    const idleCategoryIndex = categories.findIndex(
-      (category) => category.name === 'Idle'
-    );
 
     const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
@@ -402,7 +398,7 @@ export const CallTree = explicitConnect<{}, StateProps, DispatchProps>({
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getCallTree(state),
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    categories: getCategories(state),
+    idleCategoryIndex: getIdleCategoryIndex(state),
     selectedCallNodeIndex:
       selectedThreadSelectors.getSelectedCallNodeIndex(state),
     rightClickedCallNodeIndex:

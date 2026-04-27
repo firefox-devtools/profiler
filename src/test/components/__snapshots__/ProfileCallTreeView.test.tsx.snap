@@ -109,6 +109,20 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -900,6 +914,20 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>
@@ -1695,6 +1723,20 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -2474,6 +2516,20 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>
@@ -3257,6 +3313,20 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -3856,6 +3926,20 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -4006,6 +4090,20 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -4154,6 +4252,20 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>
@@ -4351,6 +4463,20 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>
@@ -5101,6 +5227,20 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -5849,6 +5989,20 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -6379,6 +6533,20 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>
@@ -7129,6 +7297,20 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -7803,6 +7985,20 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>
@@ -8481,6 +8677,20 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -9014,6 +9224,20 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             Invert call stack
           </span>
         </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
       </li>
     </ul>
     <div
@@ -9545,6 +9769,20 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             title="Sort by the time spent in a call node, ignoring its children."
           >
             Invert call stack
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
           </span>
         </label>
       </li>

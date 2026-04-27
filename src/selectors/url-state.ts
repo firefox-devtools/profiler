@@ -124,6 +124,8 @@ export const getSelectedTab: Selector<TabSlug> = (state) =>
 export const getInvertCallstack: Selector<boolean> = (state) =>
   getSelectedTab(state) === 'calltree' &&
   getProfileSpecificState(state).invertCallstack;
+export const getIncludeIdleSamples: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).includeIdleSamples;
 
 export const getSelectedThreadIndexesOrNull: Selector<
   Set<ThreadIndex> | null
@@ -246,6 +248,10 @@ export const getSelectedMarker: DangerousSelectorWithArguments<
 export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
   const tab = getSelectedTab(state);
   return getProfileSpecificState(state).isBottomBoxOpenPerPanel[tab];
+};
+
+export const getIsBottomBoxFullscreen: Selector<boolean> = (state) => {
+  return getProfileSpecificState(state).isBottomBoxFullscreen;
 };
 
 /**

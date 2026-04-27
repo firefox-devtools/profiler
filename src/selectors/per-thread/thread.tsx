@@ -46,6 +46,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TransformLabeL10nIds } from 'firefox-profiler/profile-logic/transforms';
+import type { BitSet } from 'firefox-profiler/utils/bitset';
 import type { MarkerSelectorsPerThread } from './markers';
 
 import { mergeThreads } from '../../profile-logic/merge-compare';
@@ -62,8 +63,8 @@ const globallyMemoizedComputeTransformOutputForImplementationFilter = memoize(
     limit: 2,
   }
 );
-const globallyMemoizedComputeTransformOutputForSearchStringFilter = memoize(
-  ProfileData.computeTransformOutputForSearchStringFilter,
+const globallyMemoizedComputeSearchStringFilterOutput = memoize(
+  ProfileData.computeSearchStringFilterOutput,
   {
     limit: 2,
   }
@@ -156,9 +157,10 @@ export function getBasicThreadSelectorsPerThread(
    * 3. Reserved functions - New funcTable with reserved functions for collapsed resources.
    * 4. Range - New samples table with only samples in the committed range.
    * 5. Transform - Apply the transform stack that modifies the stacks and samples.
-   * 6. Implementation - Modify stacks and samples to only show a single implementation.
-   * 7. Search - Exclude samples that don't include some text in the stack.
-   * 8. Preview - Only include samples that are within a user's preview range selection.
+   * 6. Idle - Optionally null out the stack of samples whose leaf frame is idle.
+   * 7. Implementation - Modify stacks and samples to only show a single implementation.
+   * 8. Search - Exclude samples that don't include some text in the stack.
+   * 9. Preview - Only include samples that are within a user's preview range selection.
    */
 
   const getThread: Selector<Thread> = createSelector(
@@ -471,8 +473,23 @@ export function getThreadSelectorsWithMarkersPerThread(
     }
   );
 
-  const _getImplementationFilteredThread: Selector<Thread> = createSelector(
+  const _getIdleFilteredThread: Selector<Thread> = createSelector(
     getRangeAndTransformFilteredThread,
+    UrlState.getIncludeIdleSamples,
+    ProfileSelectors.getIdleCategoryIndex,
+    (thread, includeIdleSamples, idleCategoryIndex) => {
+      if (includeIdleSamples || idleCategoryIndex === null) {
+        return thread;
+      }
+      return ProfileData.filterThreadSamplesByLeafCategory(
+        thread,
+        idleCategoryIndex
+      );
+    }
+  );
+
+  const _getImplementationFilteredThread: Selector<Thread> = createSelector(
+    _getIdleFilteredThread,
     UrlState.getImplementationFilter,
     (thread: Thread, implementationFilter: ImplementationFilter) => {
       // Apply the implementation filter.
@@ -488,13 +505,17 @@ export function getThreadSelectorsWithMarkersPerThread(
     }
   );
 
-  const getFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationFilteredThread,
-    UrlState.getSearchStrings,
-    (thread: Thread, searchStrings) => {
-      // Apply the search string filter.
-      const transformOutput =
-        globallyMemoizedComputeTransformOutputForSearchStringFilter(
+  /**
+   * Single memoized computation of the search string filter, shared by
+   * `getFilteredThread` (which needs the stack-drop bitset) and
+   * `getSearchFilteredFuncMatchesBitSet` (which needs the func-match bitset).
+   */
+  const _getSearchStringFilterOutput: Selector<ProfileData.SearchStringFilterOutput> =
+    createSelector(
+      _getImplementationFilteredThread,
+      UrlState.getSearchStrings,
+      (thread: Thread, searchStrings) =>
+        globallyMemoizedComputeSearchStringFilterOutput(
           thread.stackTable,
           thread.frameTable,
           thread.funcTable,
@@ -502,10 +523,23 @@ export function getThreadSelectorsWithMarkersPerThread(
           thread.sources,
           thread.stringTable,
           searchStrings
-        );
-      return ProfileData.applyTransformOutputToThread(transformOutput, thread);
-    }
+        )
+    );
+
+  const getFilteredThread: Selector<Thread> = createSelector(
+    _getImplementationFilteredThread,
+    _getSearchStringFilterOutput,
+    (thread: Thread, { transformOutput }) =>
+      ProfileData.applyTransformOutputToThread(transformOutput, thread)
   );
+
+  /**
+   * Get a BitSet of func indices that match the current search strings.
+   * Returns null when there is no active search. This is used by the stack
+   * chart to dim non-matching nodes without recomputing on every draw call.
+   */
+  const getSearchFilteredFuncMatchesBitSet: Selector<BitSet | null> = (state) =>
+    _getSearchStringFilterOutput(state).funcMatchesSearchStrings;
 
   const getPreviewFilteredThread: Selector<Thread> = createSelector(
     getFilteredThread,
@@ -613,6 +647,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getTransformStack,
     getRangeAndTransformFilteredThread,
     getFilteredThread,
+    getSearchFilteredFuncMatchesBitSet,
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,

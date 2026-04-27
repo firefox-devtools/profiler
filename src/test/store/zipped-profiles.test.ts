@@ -15,6 +15,9 @@ import JSZip from 'jszip';
 import * as ZippedProfilesActions from '../../actions/zipped-profiles';
 import * as ReceiveProfileActions from '../../actions/receive-profile';
 import * as ProfileViewActions from '../../actions/profile-view';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { serializeProfile } from '../../profile-logic/process-profile';
+import { compress } from '../../utils/gz';
 import type { PreviewSelection } from 'firefox-profiler/types';
 
 describe('reducer zipFileState', function () {
@@ -99,6 +102,33 @@ describe('reducer zipFileState', function () {
         profileNameFromURL
       );
     });
+  });
+
+  it('can load a gzipped profile from a zip file', async function () {
+    const store = createStore();
+    const { getState, dispatch } = store;
+    const { profile } = getProfileFromTextSamples('A');
+    // Re-wrap in this realm's Uint8Array: the worker-backed `compress`
+    // returns a typed array whose `instanceof Uint8Array` check fails against
+    // the main realm's global, so JSZip wouldn't recognize it directly.
+    const gzippedProfile = new Uint8Array(
+      await compress(serializeProfile(profile))
+    );
+
+    const zip = new JSZip();
+    zip.file('profile.json.gz', gzippedProfile);
+    const zipBytes = await zip.generateAsync({ type: 'uint8array' });
+    const loadedZip = await JSZip.loadAsync(zipBytes);
+    dispatch(ReceiveProfileActions.receiveZipFile(loadedZip));
+
+    await dispatch(
+      ZippedProfilesActions.viewProfileFromPathInZipFile('profile.json.gz')
+    );
+
+    expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toBe(
+      'VIEW_PROFILE_IN_ZIP_FILE'
+    );
+    expect(ProfileViewSelectors.getProfile(getState())).toBeTruthy();
   });
 
   it('will fail when trying to load an invalid profile', async function () {

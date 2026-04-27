@@ -183,6 +183,7 @@ type BaseQuery = {
 type CallTreeQuery = BaseQuery & {
   search: string; // "js::RunScript"
   invertCallstack: null | undefined;
+  hideIdleSamples: null | undefined;
   ctSummary: string;
 };
 
@@ -198,6 +199,7 @@ type NetworkQuery = BaseQuery & {
 type StackChartQuery = BaseQuery & {
   search: string; // "js::RunScript"
   invertCallstack: null | undefined;
+  hideIdleSamples: null | undefined;
   showUserTimings: null | undefined;
   sameWidths: null | undefined;
   ctSummary: string;
@@ -212,10 +214,12 @@ type Query = BaseQuery & {
   // CallTree/StackChart specific
   search?: string;
   invertCallstack?: null | undefined;
+  hideIdleSamples?: null | undefined;
   ctSummary?: string;
   transforms?: string;
   sourceViewIndex?: number;
   assemblyView?: string;
+  bottomFullscreen?: boolean;
 
   // StackChart specific
   showUserTimings?: null | undefined;
@@ -338,6 +342,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.invertCallstack = urlState.profileSpecific.invertCallstack
         ? null
         : undefined;
+      // The URL param is inverted (`hideIdleSamples`) so the default-on state
+      // doesn't clutter the URL; only the non-default "hide" case is encoded.
+      query.hideIdleSamples = urlState.profileSpecific.includeIdleSamples
+        ? undefined
+        : null;
       if (
         selectedThreadsKey !== null &&
         urlState.profileSpecific.transforms[selectedThreadsKey]
@@ -352,8 +361,12 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         'timing'
           ? undefined
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
-      const { sourceView, assemblyView, isBottomBoxOpenPerPanel } =
-        urlState.profileSpecific;
+      const {
+        sourceView,
+        assemblyView,
+        isBottomBoxOpenPerPanel,
+        isBottomBoxFullscreen,
+      } = urlState.profileSpecific;
 
       if (isBottomBoxOpenPerPanel[selectedTab]) {
         if (sourceView.sourceIndex !== null) {
@@ -364,6 +377,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           query.assemblyView = stringifyAssemblyViewSymbol(
             nativeSymbols[currentNativeSymbol]
           );
+        }
+        if (isBottomBoxFullscreen) {
+          query.bottomFullscreen = true;
         }
       }
       break;
@@ -582,6 +598,7 @@ export function stateFromLocation(
         query.ctSummary || undefined
       ),
       invertCallstack: query.invertCallstack === undefined ? false : true,
+      includeIdleSamples: query.hideIdleSamples === undefined,
       showUserTimings: query.showUserTimings === undefined ? false : true,
       stackChartSameWidths: query.sameWidths === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
@@ -593,6 +610,7 @@ export function stateFromLocation(
       sourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
+      isBottomBoxFullscreen: query.bottomFullscreen || false,
       timelineType: validateTimelineType(query.timelineType),
       showJsTracerSummary: query.summary === undefined ? false : true,
       globalTrackOrder: convertGlobalTrackOrderFromString(

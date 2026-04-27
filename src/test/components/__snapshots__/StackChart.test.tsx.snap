@@ -173,6 +173,20 @@ exports[`CombinedChart renders combined stack chart 1`] = `
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
@@ -674,6 +688,20 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
       <li
         class="panelSettingsListItem"
       >
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
         <label
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
@@ -1233,6 +1261,20 @@ exports[`StackChart matches the snapshot and can display a tooltip with the same
           <li
             class="panelSettingsListItem"
           >
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+            >
+              <input
+                checked=""
+                class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                type="checkbox"
+              />
+              <span
+                title="Uncheck to hide samples whose leaf frame is in the Idle category."
+              >
+                Include idle samples
+              </span>
+            </label>
             <label
               class="photon-label photon-label-micro photon-label-horiz-padding"
             >
@@ -1943,6 +1985,20 @@ exports[`StackChart matches the snapshot and can display a tooltip: dom 1`] = `
           class="photon-label photon-label-micro photon-label-horiz-padding"
         >
           <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
           />
@@ -2474,6 +2530,20 @@ exports[`StackChart works when the user selects the JS allocations option 1`] = 
           <li
             class="panelSettingsListItem"
           >
+            <label
+              class="photon-label photon-label-micro photon-label-horiz-padding"
+            >
+              <input
+                checked=""
+                class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                type="checkbox"
+              />
+              <span
+                title="Uncheck to hide samples whose leaf frame is in the Idle category."
+              >
+                Include idle samples
+              </span>
+            </label>
             <label
               class="photon-label photon-label-micro photon-label-horiz-padding"
             >

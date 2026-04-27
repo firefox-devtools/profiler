@@ -33,6 +33,7 @@ import {
   changeImplementationFilter,
   changeCallTreeSummaryStrategy,
   updatePreviewSelection,
+  changeCallTreeSearchString,
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -269,6 +270,56 @@ describe('StackChart', function () {
     drawnFrames = getDrawnFrames();
     expect(drawnFrames).toContain('A');
     expect(drawnFrames).not.toContain('Z');
+  });
+
+  it('dims non-matching boxes when searching', function () {
+    const { dispatch, flushRafCalls } = setupSamples();
+    flushDrawLog();
+
+    // Dispatch a search string that matches some function names.
+    act(() => {
+      dispatch(changeCallTreeSearchString('B'));
+    });
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
+
+    // Non-matching boxes should be drawn with the dimmed style.
+    const dimmedFillCalls = drawCalls.filter(
+      ([fn, value]) => fn === 'set fillStyle' && value === '#f9f9fa'
+    );
+    expect(dimmedFillCalls.length).toBeGreaterThan(0);
+  });
+
+  it('does not dim boxes that match the search string', function () {
+    // Use a single-node call stack so there is exactly one box.
+    const { dispatch, flushRafCalls } = setupSamples(`
+      A[cat:DOM]
+    `);
+    flushDrawLog();
+
+    // Search for "A" — the only node matches, so nothing should be dimmed.
+    act(() => {
+      dispatch(changeCallTreeSearchString('A'));
+    });
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
+    const dimmedFillCalls = drawCalls.filter(
+      ([fn, value]) => fn === 'set fillStyle' && value === '#f9f9fa'
+    );
+    expect(dimmedFillCalls).toHaveLength(0);
+  });
+
+  it('does not dim any boxes when there is no search string', function () {
+    setupSamples();
+    const drawCalls = flushDrawLog();
+
+    // No dimmed fill should be applied without a search.
+    const dimmedFillCalls = drawCalls.filter(
+      ([fn, value]) => fn === 'set fillStyle' && value === '#f9f9fa'
+    );
+    expect(dimmedFillCalls).toHaveLength(0);
   });
 
   describe('EmptyReasons', () => {

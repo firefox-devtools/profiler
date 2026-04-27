@@ -247,8 +247,8 @@ describe('doSymbolicateProfile', function () {
         '  - second symbol (total: 1, self: —)',
         '    - last symbol (total: 1, self: 1)',
         '  - last symbol (total: 1, self: 1)',
-        '- third symbol (total: 1, self: 1)',
         '- second symbol (total: 1, self: 1)',
+        '- third symbol (total: 1, self: 1)',
       ]);
 
       const thread = getThread(getState());
@@ -259,7 +259,9 @@ describe('doSymbolicateProfile', function () {
       // Helper function to get filename from source index
       const getFileName = (funcIndex: number): string | null => {
         const sourceIndex = funcTable.source[funcIndex];
-        if (sourceIndex === null) return null;
+        if (sourceIndex === null) {
+          return null;
+        }
         const urlIndex = sources.filename[sourceIndex];
         return stringTable.getString(urlIndex);
       };
@@ -481,8 +483,8 @@ describe('doSymbolicateProfile', function () {
       '  - second symbol (total: 1, self: —)',
       '    - last symbol (total: 1, self: 1)',
       '  - last symbol (total: 1, self: 1)',
-      '- third symbol (total: 1, self: 1)',
       '- second symbol (total: 1, self: 1)',
+      '- third symbol (total: 1, self: 1)',
     ]);
   });
 
@@ -585,8 +587,8 @@ describe('doSymbolicateProfile', function () {
       '  - second symbol (total: 1, self: —)',
       '    - last symbol (total: 1, self: 1)',
       '  - last symbol (total: 1, self: 1)',
-      '- third symbol (total: 1, self: 1)',
       '- second symbol (total: 1, self: 1)',
+      '- third symbol (total: 1, self: 1)',
     ]);
   });
 });
