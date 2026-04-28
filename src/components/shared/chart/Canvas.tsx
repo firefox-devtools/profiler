@@ -85,10 +85,9 @@ export class ChartCanvas<Item> extends React.Component<
   State<Item>
 > {
   _devicePixelRatio: number = 1;
-  // The current mouse position. Needs to be stored for tooltip
-  // hit-test if props update.
-  _offsetX: CssPixels = 0;
-  _offsetY: CssPixels = 0;
+  // The current mouse position inside the canvas, or null if the mouse
+  // is outside. Needs to be stored for tooltip hit-test if props update.
+  _mousePosition: { x: CssPixels; y: CssPixels } | null = null;
   // The position of the most recent mouse down event. Needed for
   // comparison with the current mouse position in order to
   // distinguish between clicks and drags.
@@ -267,8 +266,9 @@ export class ChartCanvas<Item> extends React.Component<
       this.props.onMouseMove(event);
     }
 
-    this._offsetX = event.nativeEvent.offsetX;
-    this._offsetY = event.nativeEvent.offsetY;
+    const offsetX = event.nativeEvent.offsetX;
+    const offsetY = event.nativeEvent.offsetY;
+    this._mousePosition = { x: offsetX, y: offsetY };
     // event.buttons is a bitfield representing which buttons are pressed at the
     // time of the mousemove event. The first bit is for the left click.
     // This operation checks if the left button is clicked, but this will also
@@ -281,15 +281,15 @@ export class ChartCanvas<Item> extends React.Component<
     if (
       !this._mouseMovedWhileClicked &&
       hasLeftClick &&
-      (Math.abs(this._offsetX - this._mouseDownOffsetX) >
+      (Math.abs(offsetX - this._mouseDownOffsetX) >
         MOUSE_CLICK_MAX_MOVEMENT_DELTA ||
-        Math.abs(this._offsetY - this._mouseDownOffsetY) >
+        Math.abs(offsetY - this._mouseDownOffsetY) >
           MOUSE_CLICK_MAX_MOVEMENT_DELTA)
     ) {
       this._mouseMovedWhileClicked = true;
     }
 
-    const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
+    const maybeHoveredItem = this.props.hitTest(offsetX, offsetY);
     if (maybeHoveredItem !== null) {
       if (this.state.selectedItem === null) {
         // Update both the hovered item and the pageX and pageY values. The
@@ -323,6 +323,7 @@ export class ChartCanvas<Item> extends React.Component<
   };
 
   _onMouseOut = () => {
+    this._mousePosition = null;
     if (
       this.state.hoveredItem !== null &&
       // This persistTooltips property is part of the web console API. It helps
@@ -390,18 +391,16 @@ export class ChartCanvas<Item> extends React.Component<
   };
 
   override UNSAFE_componentWillReceiveProps() {
-    // It is possible that the data backing the chart has been
-    // changed, for instance after symbolication. Clear the
-    // hoveredItem if the mouse no longer hovers over it.
-    const { hoveredItem } = this.state;
-    if (
-      hoveredItem !== null &&
-      !hoveredItemsAreEqual(
-        this.props.hitTest(this._offsetX, this._offsetY),
-        hoveredItem
-      )
-    ) {
-      this.setState({ hoveredItem: null });
+    // Update the hovered item if the rendered data has changed or if
+    // the chart has been scrolled so that a new element is under the
+    // mouse cursor.
+    if (!this._mousePosition) {
+      return;
+    }
+    const { x, y } = this._mousePosition;
+    const newHoveredItem = this.props.hitTest(x, y);
+    if (!hoveredItemsAreEqual(newHoveredItem, this.state.hoveredItem)) {
+      this.setState({ hoveredItem: newHoveredItem });
     }
   }
 

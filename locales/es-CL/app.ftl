@@ -1068,6 +1068,12 @@ BottomBox--assembly-code-not-available-title = Código de ensamblaje no disponib
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Consulta el <a>problema #4520</a> para conocer los escenarios compatibles y las mejoras planificadas.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Salir de pantalla completa
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Pantalla completa
 SourceView--close-button =
     .title = Cerrar la vista de fuente
 

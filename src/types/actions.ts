@@ -85,7 +85,10 @@ export type DataSource =
   // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
 
-export type TimelineType = 'stack' | 'category' | 'cpu-category';
+// Controls which graph is shown in thread tracks.
+// 'cpu-category': Shows the category activity graph.
+// 'stack':        Shows the stack graph, for profiles without category information.
+export type TimelineType = 'stack' | 'cpu-category';
 export type PreviewSelection = {
   readonly isModifying: boolean;
   readonly selectionStart: number;
@@ -318,9 +321,6 @@ type ProfileAction =
       readonly type: 'SET_CONTEXT_MENU_VISIBILITY';
       readonly isVisible: boolean;
     }
-  | {
-      readonly type: 'INCREMENT_PANEL_LAYOUT_GENERATION';
-    }
   | { readonly type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' }
   | { readonly type: 'DISMISS_NEWLY_PUBLISHED' }
   | {
@@ -363,6 +363,9 @@ type ProfileAction =
   | {
       readonly type: 'CLOSE_BOTTOM_BOX_FOR_TAB';
       readonly tab: TabSlug;
+    }
+  | {
+      readonly type: 'TOGGLE_BOTTOM_BOX_FULLSCREEN';
     };
 
 type ReceiveProfileAction =
@@ -522,6 +525,10 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_SHOW_USER_TIMINGS';
       readonly showUserTimings: boolean;
+    }
+  | {
+      readonly type: 'CHANGE_INCLUDE_IDLE_SAMPLES';
+      readonly includeIdleSamples: boolean;
     }
   | {
       readonly type: 'CHANGE_STACK_CHART_SAME_WIDTHS';

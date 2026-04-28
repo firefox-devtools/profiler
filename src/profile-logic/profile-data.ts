@@ -28,6 +28,7 @@ import {
   type BitSet,
   checkBit,
   combineTwoBitSetsWithAnd,
+  combineTwoBitSetsWithOr,
   makeBitSet,
   setBit,
 } from 'firefox-profiler/utils/bitset';
@@ -223,6 +224,9 @@ type CallNodeTableHierarchy = {
   prefix: Array<IndexIntoCallNodeTable>;
   firstChild: Array<IndexIntoFuncTable>;
   nextSibling: Array<IndexIntoFuncTable>;
+  // The smallest-func root, i.e. the head of the roots' sibling list. -1 when
+  // there are no call nodes.
+  firstRoot: IndexIntoCallNodeTable;
   length: number;
   stackIndexToCallNodeIndex: Int32Array;
 };
@@ -268,6 +272,19 @@ type CallNodeTableExtraColumns = {
  * structure represented by those columns only has a very basic property, which
  * is "a prefix always comes before its children".
  *
+ * Sibling lists are kept sorted by func (ascending). This speeds up the "is
+ * there already a sibling with this func?" lookup: we can stop scanning as
+ * soon as we see a sibling with a greater func.
+ *
+ * On top of that, for each parent we remember the child we most recently
+ * matched or inserted. Consecutive stacks that share a prefix very often also
+ * share a func (different frames of the same function), so checking the
+ * last-used child first catches those repeats in O(1). When the last-used
+ * child's func is less than the new func, we can start the scan from it
+ * rather than from the head; in the common case where the last-used child is
+ * also the tail (because funcs have been arriving in ascending order), that
+ * scan starts at -1 and we append without any work.
+ *
  * This function does not compute the other columns yet, because at this point
  * we don't know the final order of the call nodes. And we want to store those
  * other values in typed arrays, for which we need to know the size upfront, and
@@ -287,14 +304,14 @@ function _computeCallNodeTableHierarchy(
   let length = 0;
 
   // An extra column that only gets used while the table is built up: For each
-  // node A, currentLastChild[A] tracks the last currently-known child node of A.
-  // It is updated whenever a new node is created; e.g. creating node B updates
-  // currentLastChild[prefix[B]].
-  // currentLastChild[A] is -1 while A has no children.
-  const currentLastChild: Array<IndexIntoCallNodeTable> = [];
+  // node A, lastUsedChild[A] is the child of A that we most recently matched
+  // or inserted. It is -1 while A has no children.
+  const lastUsedChild: Array<IndexIntoCallNodeTable> = [];
 
-  // The last currently-known root node, i.e. the last known "child of -1".
-  let currentLastRoot = -1;
+  // The root counterparts to firstChild / lastUsedChild for the "virtual"
+  // parent -1.
+  let firstRoot = -1;
+  let lastUsedRoot = -1;
 
   // Go through each stack, and create a new callNode table, which is based off of
   // functions rather than frames.
@@ -307,25 +324,63 @@ function _computeCallNodeTableHierarchy(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
-    // Check if the call node for this stack already exists.
+    const firstSibling =
+      prefixCallNode === -1 ? firstRoot : firstChild[prefixCallNode];
+
+    // Locate this (prefixCallNode, funcIndex) in the sorted sibling list.
+    // Either we find an existing match and reuse it, or we find the insertion
+    // point for a new node. When we need to insert, prevSibling is the node
+    // our new node should be linked after, or -1 if it should become the new
+    // head of the sibling list.
     let callNodeIndex = -1;
-    if (stackIndex !== 0) {
-      const currentFirstSibling =
-        prefixCallNode === -1 ? 0 : firstChild[prefixCallNode];
-      for (
-        let currentSibling = currentFirstSibling;
-        currentSibling !== -1;
-        currentSibling = nextSibling[currentSibling]
-      ) {
-        if (func[currentSibling] === funcIndex) {
-          callNodeIndex = currentSibling;
-          break;
+    let prevSibling = -1; // used for insertion, if callNodeIndex === -1
+
+    if (firstSibling !== -1) {
+      // Get the sibling that we used most recently for this parent.
+      // We know lastUsed is !== -1 because we know there is at least one sibling.
+      const lastUsed =
+        prefixCallNode === -1 ? lastUsedRoot : lastUsedChild[prefixCallNode];
+
+      if (funcIndex === func[lastUsed]) {
+        // Hot path: same func as the last child we touched for this parent.
+        callNodeIndex = lastUsed;
+      } else {
+        // We'll have to scan (at least part of) the list of siblings.
+        let sibling = firstSibling;
+        if (funcIndex > func[lastUsed]) {
+          // Since the list of siblings is ordered by func, we now know that can
+          // skip the part of the list that's before lastUsed.
+          // If lastUsed is the tail, sibling starts at -1 and we append without
+          // scanning.
+          prevSibling = lastUsed;
+          sibling = nextSibling[lastUsed];
+        }
+        while (sibling !== -1) {
+          const siblingFunc = func[sibling];
+          if (siblingFunc === funcIndex) {
+            // Found a match!
+            callNodeIndex = sibling;
+            break;
+          }
+          if (siblingFunc > funcIndex) {
+            // No match, and we can stop scanning here due to the ordering.
+            // We'll insert the new node before `sibling`; prevSibling is
+            // already its predecessor.
+            break;
+          }
+          prevSibling = sibling;
+          sibling = nextSibling[sibling];
         }
       }
     }
 
     if (callNodeIndex !== -1) {
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
+      if (prefixCallNode === -1) {
+        lastUsedRoot = callNodeIndex;
+      } else {
+        lastUsedChild[prefixCallNode] = callNodeIndex;
+      }
       continue;
     }
 
@@ -335,39 +390,34 @@ function _computeCallNodeTableHierarchy(
 
     prefix[callNodeIndex] = prefixCallNode;
     func[callNodeIndex] = funcIndex;
-
-    // Initialize these firstChild and nextSibling to -1. They will be updated
-    // once this node's first child or next sibling gets created.
     firstChild[callNodeIndex] = -1;
-    nextSibling[callNodeIndex] = -1;
-    currentLastChild[callNodeIndex] = -1;
+    lastUsedChild[callNodeIndex] = -1;
 
-    // Update the next sibling of our previous sibling, and the first child of
-    // our prefix (if we're the first child).
-    // Also set this node's depth.
-    if (prefixCallNode === -1) {
-      // This node is a root. Just update the previous root's nextSibling. Because
-      // this node has no parent, there's also no firstChild information to update.
-      if (currentLastRoot !== -1) {
-        nextSibling[currentLastRoot] = callNodeIndex;
-      }
-      currentLastRoot = callNodeIndex;
-    } else {
-      // This node is not a root: update both firstChild and nextSibling information
-      // when appropriate.
-      const prevSiblingIndex = currentLastChild[prefixCallNode];
-      if (prevSiblingIndex === -1) {
-        // This is the first child for this prefix.
-        firstChild[prefixCallNode] = callNodeIndex;
+    // Splice the new node into the sibling list.
+    if (prevSibling === -1) {
+      // Insert at head.
+      nextSibling[callNodeIndex] = firstSibling;
+      if (prefixCallNode === -1) {
+        firstRoot = callNodeIndex;
       } else {
-        nextSibling[prevSiblingIndex] = callNodeIndex;
+        firstChild[prefixCallNode] = callNodeIndex;
       }
-      currentLastChild[prefixCallNode] = callNodeIndex;
+    } else {
+      // Insert after prevSibling.
+      nextSibling[callNodeIndex] = nextSibling[prevSibling];
+      nextSibling[prevSibling] = callNodeIndex;
+    }
+
+    if (prefixCallNode === -1) {
+      lastUsedRoot = callNodeIndex;
+    } else {
+      lastUsedChild[prefixCallNode] = callNodeIndex;
     }
   }
   return {
     prefix,
     firstChild,
+    firstRoot,
     nextSibling,
     length,
     stackIndexToCallNodeIndex,
@@ -389,15 +439,21 @@ function _computeCallNodeTableHierarchy(
  * column and allows other parts of the codebase to perform cheap "is descendant"
  * checks.
  *
- * We do not order siblings by func. The order of siblings is meaningless, and
- * is based on the somewhat arbitrary order in which we encounter the original
- * stack nodes in the stack table.
+ * Sibling nodes are ordered by func, though this happens in
+ * _computeCallNodeTableHierarchy. (This function just keeps the same order of
+ * siblings as what's in the `hierarchy` argument.)
  */
 function _computeCallNodeTableDFSOrder(
   hierarchy: CallNodeTableHierarchy
 ): CallNodeTableDFSOrder {
-  const { prefix, firstChild, nextSibling, length, stackIndexToCallNodeIndex } =
-    hierarchy;
+  const {
+    prefix,
+    firstChild,
+    firstRoot,
+    nextSibling,
+    length,
+    stackIndexToCallNodeIndex,
+  } = hierarchy;
 
   const prefixSorted = new Int32Array(length);
   const nextSiblingSorted = new Int32Array(length);
@@ -422,8 +478,10 @@ function _computeCallNodeTableDFSOrder(
   //     the unsorted columns into the sorted columns.
   //  2. Find the next node in DFS order, set nextOldIndex to it, and continue
   //     to the next loop iteration.
+  // Start at firstRoot because, with func-sorted siblings, the head of the
+  // roots' sibling list is not necessarily call node 0.
   const oldIndexToNewIndex = new Uint32Array(length);
-  let nextOldIndex = 0;
+  let nextOldIndex = firstRoot;
   let nextNewIndex = 0;
   let currentDepth = 0;
   let currentOldPrefix = -1;
@@ -1720,7 +1778,22 @@ export function applyTransformOutputToThread(
   });
 }
 
-export function computeTransformOutputForSearchStringFilter(
+/**
+ * Output of the search string filter: both the filter's TransformOutput (used
+ * to drop non-matching stacks) and the combined func bitset (used to highlight
+ * matching nodes in the stack chart). Exposed together so both are computed
+ * once and memoized together.
+ *
+ * Stacks are AND-combined across search strings (a stack is kept only if it
+ * contains a match for every search string), while funcs are OR-combined (a
+ * func is highlighted if it matches any of the search strings).
+ */
+export type SearchStringFilterOutput = {
+  transformOutput: TransformOutput;
+  funcMatchesSearchStrings: BitSet | null;
+};
+
+export function computeSearchStringFilterOutput(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
@@ -1728,51 +1801,67 @@ export function computeTransformOutputForSearchStringFilter(
   sources: SourceTable,
   stringTable: StringTable,
   searchStrings: string[] | null
-): TransformOutput {
-  return timeCode('computeTransformOutputForSearchStringFilter', () => {
-    if (!searchStrings) {
-      return { newStackTable: stackTable, effectOnThreadData: {} };
+): SearchStringFilterOutput {
+  return timeCode('computeSearchStringFilterOutput', () => {
+    if (!searchStrings || searchStrings.length === 0) {
+      return {
+        transformOutput: { newStackTable: stackTable, effectOnThreadData: {} },
+        funcMatchesSearchStrings: null,
+      };
     }
 
-    const stackMatchesAllSearchStrings = searchStrings
-      .filter((s) => s)
-      .reduce(
-        (
-          stackMatchesPreviousSearchStrings: BitSet | undefined,
-          searchString: string
-        ) => {
-          const stackMatchesThisString = _computeStackMatchesSearchString(
-            stackTable,
-            frameTable,
-            funcTable,
-            resourceTable,
-            sources,
-            stringTable,
-            searchString
-          );
-          if (stackMatchesPreviousSearchStrings !== undefined) {
-            return combineTwoBitSetsWithAnd(
-              stackMatchesThisString,
-              stackMatchesPreviousSearchStrings
-            );
-          }
-          return stackMatchesThisString;
-        },
-        undefined
+    const computeMatchesForString = (searchString: string) => {
+      const funcMatches = computeFuncMatchesSearchString(
+        funcTable,
+        resourceTable,
+        sources,
+        stringTable,
+        searchString
       );
+      const stackMatches = _computeStackMatchesFromFuncMatches(
+        stackTable,
+        frameTable,
+        funcMatches
+      );
+      return { funcMatches, stackMatches };
+    };
+
+    let {
+      funcMatches: combinedFuncMatches,
+      stackMatches: combinedStackMatches,
+    } = computeMatchesForString(searchStrings[0]);
+    for (let i = 1; i < searchStrings.length; i++) {
+      const { funcMatches, stackMatches } = computeMatchesForString(
+        searchStrings[i]
+      );
+      combinedFuncMatches = combineTwoBitSetsWithOr(
+        funcMatches,
+        combinedFuncMatches
+      );
+      combinedStackMatches = combineTwoBitSetsWithAnd(
+        stackMatches,
+        combinedStackMatches
+      );
+    }
 
     return {
-      newStackTable: stackTable,
-      effectOnThreadData: {
-        dropIfOldStackIsNot: stackMatchesAllSearchStrings,
+      transformOutput: {
+        newStackTable: stackTable,
+        effectOnThreadData: {
+          dropIfOldStackIsNot: combinedStackMatches,
+        },
       },
+      funcMatchesSearchStrings: combinedFuncMatches,
     };
   });
 }
 
-function _computeStackMatchesSearchString(
-  stackTable: StackTable,
-  frameTable: FrameTable,
+/**
+ * Compute a BitSet of functions whose name, source filename, or resource name
+ * matches the given search string. This is used both for filtering stacks and
+ * for dimming non-matching nodes in the stack chart.
+ */
+export function computeFuncMatchesSearchString(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   sources: SourceTable,
@@ -1815,7 +1904,14 @@ function _computeStackMatchesSearchString(
       setBit(funcMatchesSearch, funcIndex);
     }
   }
+  return funcMatchesSearch;
+}
 
+function _computeStackMatchesFromFuncMatches(
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcMatchesSearch: BitSet
+): BitSet {
   const stackMatchesSearch = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
@@ -1960,6 +2056,35 @@ export function getInclusiveIndexRangeForSelection(
   }
 
   return [sampleStart, sampleEnd];
+}
+
+/**
+ * Return a thread where samples whose leaf stack frame is in the given
+ * category have had their stack nulled out. These samples are still present in
+ * the samples table (indexes are preserved), but they become invisible to the
+ * call tree, stack chart, and flame graph.
+ *
+ * This is used by the "Include idle samples" toggle to hide idle time from
+ * the call tree.
+ */
+export function filterThreadSamplesByLeafCategory(
+  thread: Thread,
+  categoryToExclude: IndexIntoCategoryList
+): Thread {
+  const { samples } = thread;
+  const newStackCol = samples.stack.slice();
+  for (let i = 0; i < samples.length; i++) {
+    if (samples.category[i] === categoryToExclude) {
+      newStackCol[i] = null;
+    }
+  }
+  return {
+    ...thread,
+    samples: {
+      ...samples,
+      stack: newStackCol,
+    },
+  };
 }
 
 /**
@@ -2304,10 +2429,9 @@ export function processCounter(rawCounter: RawCounter): Counter {
     name: rawCounter.name,
     category: rawCounter.category,
     description: rawCounter.description,
-    color: rawCounter.color,
     pid: rawCounter.pid,
     mainThreadIndex: rawCounter.mainThreadIndex,
-
+    display: rawCounter.display,
     samples,
   };
 
@@ -4305,10 +4429,8 @@ export function getNativeSymbolInfo(
 /**
  * Determines the timeline type by looking at the profile data.
  *
- * There are three options:
- * 'cpu-category': If a profile has both category and cpu usage information.
- * 'category': If a profile has category information but not the cpu usage.
- * 'stack': If a profile doesn't have category or cpu usage information.
+ * 'cpu-category': If a profile has category information.
+ * 'stack':        If a profile doesn't have category information.
  */
 export function determineTimelineType(profile: Profile): TimelineType {
   if (!profile.meta.categories) {
@@ -4318,16 +4440,6 @@ export function determineTimelineType(profile: Profile): TimelineType {
     return 'stack';
   }
 
-  if (
-    !profile.meta.sampleUnits ||
-    !profile.threads.some((thread) => thread.samples.threadCPUDelta)
-  ) {
-    // Have category information but doesn't have the CPU usage information.
-    // Use 'category'.
-    return 'category';
-  }
-
-  // Have both category and CPU usage information. Use 'cpu-category'.
   return 'cpu-category';
 }
 

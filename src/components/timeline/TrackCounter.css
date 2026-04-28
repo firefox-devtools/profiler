@@ -2,19 +2,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.timelineTrackPowerGraph {
+.timelineTrackCounterGraph {
   position: relative;
   width: 100%;
   height: var(--graph-height);
 }
 
-.timelineTrackPowerCanvas {
+.timelineTrackCounterCanvas {
   position: absolute;
   width: 100%;
   height: 100%;
 }
 
-.timelineTrackPowerGraphDot {
+.timelineTrackCounterGraphDot {
   position: absolute;
   width: 6px;
   height: 6px;
@@ -22,4 +22,21 @@
   margin-top: -3px;
   margin-left: -3px;
   pointer-events: none;
+}
+
+.timelineTrackCounterTooltipLine {
+  white-space: nowrap;
+}
+
+.timelineTrackCounterTooltipNumber {
+  display: inline-block;
+  min-width: 60px;
+  color: var(--tooltip-number-foreground-color);
+  font-weight: bold;
+}
+
+.timelineMarkersCounter,
+.timelineMarkersMemory {
+  height: var(--markers-height);
+  opacity: 1;
 }

@@ -2,7 +2,7 @@
 
 exports[`TrackBandwidth draws a dot that matches the snapshot 1`] = `
 <div
-  class="timelineTrackBandwidthGraphDot"
+  class="timelineTrackCounterGraphDot"
   style="left: 15px; top: 24.872px; background-color: rgb(0, 96, 223);"
 />
 `;
@@ -121,15 +121,15 @@ Array [
 
 exports[`TrackBandwidth matches the component snapshot 1`] = `
 <div
-  class="timelineTrackBandwidth"
-  style="height: 25px; --graph-height: 25px;"
+  class="timelineTrackCounter"
+  style="--graph-height: 25px; --markers-height: 15px;"
 >
   <div
-    class="timelineTrackBandwidthGraph"
+    class="timelineTrackCounterGraph"
   >
     <div>
       <canvas
-        class="timelineTrackBandwidthCanvas"
+        class="timelineTrackCounterCanvas"
         height="25"
         width="120"
       />

@@ -4,16 +4,15 @@
 import esbuild from 'esbuild';
 import { nodeBaseConfig } from './lib/esbuild-configs.mjs';
 
-const symbolicatorConfig = {
+const profilerEditConfig = {
   ...nodeBaseConfig,
-  metafile: true,
-  entryPoints: ['src/symbolicator-cli/index.ts'],
-  outfile: 'dist/symbolicator-cli.js',
+  entryPoints: ['src/node-tools/profiler-edit.ts'],
+  outfile: 'node-tools-dist/profiler-edit.js',
 };
 
 async function build() {
-  await esbuild.build(symbolicatorConfig);
-  console.log('✅ Symbolicator-cli build completed');
+  await esbuild.build(profilerEditConfig);
+  console.log('✅ profiler-edit build completed');
 }
 
 build().catch(console.error);

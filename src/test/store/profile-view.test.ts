@@ -48,6 +48,7 @@ import {
   type BreakdownByCategory,
 } from '../../profile-logic/profile-data';
 import { getSelfAndTotalForCallNode } from '../../profile-logic/call-tree';
+import { checkBit } from '../../utils/bitset';
 
 import type {
   TrackReference,
@@ -511,8 +512,8 @@ describe('actions/ProfileView', function () {
             store.getState(),
             memoryTrackReference
           );
-          if (memoryTrack.type !== 'memory') {
-            throw new Error('Expected to get memory track.');
+          if (memoryTrack.type !== 'counter') {
+            throw new Error('Expected to get counter track.');
           }
         }
 
@@ -838,8 +839,8 @@ describe('actions/ProfileView', function () {
         '    - C (total: 1, self: —)',
         '      - D (total: 1, self: 1)',
         '  - E (total: 1, self: 1)',
-        '- D (total: 1, self: 1)',
         '- C (total: 1, self: 1)',
+        '- D (total: 1, self: 1)',
       ]);
     });
 
@@ -919,6 +920,91 @@ describe('actions/ProfileView', function () {
         '      - D (total: 1, self: 1)',
         '- D (total: 1, self: 1)',
       ]);
+    });
+  });
+
+  /**
+   * Covers the bitset returned by `getSearchFilteredFuncMatchesBitSet`, which
+   * the stack chart uses to dim non-matching nodes. The stack filter above
+   * only exercises whether each stack is kept; these tests pin down the
+   * per-func match semantics across name, filename, and library fields, and
+   * the OR semantics when multiple search strings are provided.
+   */
+  describe('getSearchFilteredFuncMatchesBitSet', function () {
+    // Each func's three searchable fields (name, resource/lib, filename) use
+    // distinct prefixes ("fn", "rs", "sc") and a unique per-func index, so
+    // every search string used below appears in exactly one field on exactly
+    // one func. That lets us assert unambiguously which field triggered a
+    // match.
+    function setup() {
+      const {
+        profile,
+        funcNamesPerThread: [funcNames],
+      } = getProfileFromTextSamples(`
+        fn1[lib:rs1][file:sc1]  fn2[lib:rs2][file:sc2]  fn3[lib:rs3][file:sc3]
+        fn4[lib:rs4][file:sc4]
+      `);
+      const { dispatch, getState } = storeWithProfile(profile);
+      return { dispatch, getState, funcNames };
+    }
+
+    function getMatchingFuncNames(
+      getState: () => any,
+      funcNames: string[]
+    ): string[] {
+      const bitSet =
+        selectedThreadSelectors.getSearchFilteredFuncMatchesBitSet(getState());
+      if (bitSet === null) {
+        return [];
+      }
+      const matched: string[] = [];
+      for (let i = 0; i < funcNames.length; i++) {
+        if (checkBit(bitSet, i)) {
+          matched.push(funcNames[i]);
+        }
+      }
+      return matched.sort();
+    }
+
+    it('returns null when there is no active search', function () {
+      const { getState } = setup();
+      expect(
+        selectedThreadSelectors.getSearchFilteredFuncMatchesBitSet(getState())
+      ).toBeNull();
+    });
+
+    it('matches a single func by its name', function () {
+      const { dispatch, getState, funcNames } = setup();
+      dispatch(ProfileView.changeCallTreeSearchString('fn1'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1']);
+    });
+
+    it('matches a func by its filename', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // sc2 is only set on fn2.
+      dispatch(ProfileView.changeCallTreeSearchString('sc2'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn2']);
+    });
+
+    it('matches a func by its resource/library name', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // rs3 is only set on fn3. Match is case-insensitive.
+      dispatch(ProfileView.changeCallTreeSearchString('RS3'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn3']);
+    });
+
+    it('matches every func matching any of several search strings (OR)', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // "fn1" matches only func fn1; "fn3" matches only func fn3.
+      dispatch(ProfileView.changeCallTreeSearchString('fn1,fn3'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1', 'fn3']);
+    });
+
+    it('combines matches across different fields with OR', function () {
+      const { dispatch, getState, funcNames } = setup();
+      // "sc1" matches fn1 by filename; "rs4" matches fn4 by lib name.
+      dispatch(ProfileView.changeCallTreeSearchString('sc1,rs4'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1', 'fn4']);
     });
   });
 
@@ -1626,6 +1712,78 @@ describe('actions/ProfileView', function () {
         });
       });
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+    });
+  });
+
+  describe('changeIncludeIdleSamples', function () {
+    function setup() {
+      // Four samples: two with an Idle leaf, two with a non-idle leaf.
+      const { profile } = getProfileFromTextSamples(`
+        A          A              A          A
+        B[cat:DOM] B[cat:Idle]    B[cat:DOM] B[cat:Idle]
+      `);
+      return storeWithProfile(profile);
+    }
+
+    it('defaults to true and toggles through the reducer', function () {
+      const { dispatch, getState } = setup();
+
+      expect(UrlStateSelectors.getIncludeIdleSamples(getState())).toEqual(true);
+      dispatch(ProfileView.changeIncludeIdleSamples(false));
+      expect(UrlStateSelectors.getIncludeIdleSamples(getState())).toEqual(
+        false
+      );
+    });
+
+    it('nulls out stacks of samples whose leaf frame is idle when off', function () {
+      const { dispatch, getState } = setup();
+
+      const beforeThread =
+        selectedThreadSelectors.getFilteredThread(getState());
+      expect(beforeThread.samples.stack.every((s) => s !== null)).toBe(true);
+
+      dispatch(ProfileView.changeIncludeIdleSamples(false));
+
+      const afterThread = selectedThreadSelectors.getFilteredThread(getState());
+      const idleCategoryIndex = ensureExists(
+        ProfileViewSelectors.getIdleCategoryIndex(getState()),
+        'Expected the test profile to have an Idle category'
+      );
+
+      // Samples 0 and 2 have DOM leaves; 1 and 3 have Idle leaves.
+      expect(afterThread.samples.stack[0]).not.toBe(null);
+      expect(afterThread.samples.stack[1]).toBe(null);
+      expect(afterThread.samples.stack[2]).not.toBe(null);
+      expect(afterThread.samples.stack[3]).toBe(null);
+
+      // The stackTable is untouched. Only sample.stack entries are nulled.
+      expect(afterThread.stackTable).toBe(beforeThread.stackTable);
+      // The kept samples still point at a stack whose category is not idle.
+      const keptStackCategories = afterThread.samples.stack
+        .filter((s): s is number => s !== null)
+        .map((s) => afterThread.stackTable.category[s]);
+      expect(keptStackCategories).not.toContain(idleCategoryIndex);
+    });
+
+    it('is a no-op when the profile has no idle category', function () {
+      const { profile } = getProfileFromTextSamples(`
+        A          A
+        B[cat:DOM] B[cat:DOM]
+      `);
+      // Replace categories with a set that has no "Idle" entry.
+      profile.meta.categories = [
+        { name: 'Other', color: 'grey', subcategories: ['Other'] },
+        { name: 'DOM', color: 'blue', subcategories: ['Other'] },
+      ];
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(ProfileViewSelectors.getIdleCategoryIndex(getState())).toBe(null);
+
+      const before = selectedThreadSelectors.getFilteredThread(getState());
+      dispatch(ProfileView.changeIncludeIdleSamples(false));
+      const after = selectedThreadSelectors.getFilteredThread(getState());
+      // Without an idle category there is nothing to filter.
+      expect(after).toBe(before);
     });
   });
 
@@ -3869,12 +4027,14 @@ describe('timeline type', function () {
     );
   });
 
-  it('should use the category view when cpu is not provided', () => {
+  it('should use the cpu-category view even if no cpu is provided', () => {
     const { profile } = getProfileFromTextSamples('A');
 
     // Load the store after mutating the profile.
     const { getState } = storeWithProfile(profile);
-    expect(UrlStateSelectors.getTimelineType(getState())).toEqual('category');
+    expect(UrlStateSelectors.getTimelineType(getState())).toEqual(
+      'cpu-category'
+    );
   });
 
   it('should use the stack height view when category and cpu is not provided', () => {

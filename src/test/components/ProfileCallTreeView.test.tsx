@@ -25,6 +25,7 @@ import {
 import {
   changeCallTreeSearchString,
   changeImplementationFilter,
+  changeIncludeIdleSamples,
   changeInvertCallstack,
   commitRange,
   addTransformToStack,
@@ -342,6 +343,27 @@ describe('calltree/ProfileCallTreeView', function () {
     const { getRowElement } = setup(profile);
     expect(getRowElement('E', { selected: true })).toHaveClass('isSelected');
     expect(getRowElement('B', { expanded: true })).toBeInTheDocument();
+  });
+
+  it('hides samples whose leaf frame is idle when "Include idle samples" is unchecked', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A  A            A  A
+      B  B            B  B
+      C  D[cat:Idle]  C  D[cat:Idle]
+    `);
+    const { dispatch } = setup(profile);
+
+    expect(screen.getByRole('treeitem', { name: /^C/ })).toBeInTheDocument();
+    expect(screen.getByRole('treeitem', { name: /^D/ })).toBeInTheDocument();
+
+    act(() => {
+      dispatch(changeIncludeIdleSamples(false));
+    });
+
+    expect(screen.getByRole('treeitem', { name: /^C/ })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('treeitem', { name: /^D/ })
+    ).not.toBeInTheDocument();
   });
 });
 

@@ -468,6 +468,24 @@ exports[`FlameGraph matches the snapshot 1`] = `
           </span>
         </label>
       </li>
+      <li
+        class="panelSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro photon-label-horiz-padding"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+          <span
+            title="Uncheck to hide samples whose leaf frame is in the Idle category."
+          >
+            Include idle samples
+          </span>
+        </label>
+      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"

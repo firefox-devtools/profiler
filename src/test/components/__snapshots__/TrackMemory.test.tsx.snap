@@ -2,40 +2,40 @@
 
 exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
 <div
-  class="timelineTrackMemoryGraphDot"
+  class="timelineTrackCounterGraphDot"
   style="left: 20px; top: 2.697563250235465px; background-color: rgb(215, 110, 0);"
 />
 `;
 
 exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
 <div
-  class="timelineTrackMemoryTooltip"
+  class="timelineTrackCounterTooltip"
 >
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackCounterTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackCounterTooltipNumber"
     >
       0B
     </span>
     relative memory at this time
   </div>
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackCounterTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackCounterTooltipNumber"
     >
       2B
     </span>
     memory range in graph
   </div>
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackCounterTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackCounterTooltipNumber"
     >
       36
     </span>
@@ -46,23 +46,23 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
 
 exports[`TrackMemory has a tooltip that matches the snapshot for counts equalling zero 1`] = `
 <div
-  class="timelineTrackMemoryTooltip"
+  class="timelineTrackCounterTooltip"
 >
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackCounterTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackCounterTooltipNumber"
     >
       0B
     </span>
     relative memory at this time
   </div>
   <div
-    class="timelineTrackMemoryTooltipLine"
+    class="timelineTrackCounterTooltipLine"
   >
     <span
-      class="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackCounterTooltipNumber"
     >
       2B
     </span>
@@ -182,12 +182,12 @@ Array [
 
 exports[`TrackMemory matches the component snapshot 1`] = `
 <div
-  class="timelineTrackMemory"
-  style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
+  class="timelineTrackCounter"
+  style="--graph-height: 25px; --markers-height: 15px;"
 >
   <div
-    class="timelineMarkers timelineMarkersMemory selected"
-    data-testid="TimelineMarkersMemory"
+    class="timelineMarkers timelineMarkersCounter selected"
+    data-testid="TimelineMarkersCounter"
   >
     <div
       class="react-contextmenu-wrapper"
@@ -202,11 +202,11 @@ exports[`TrackMemory matches the component snapshot 1`] = `
     </div>
   </div>
   <div
-    class="timelineTrackMemoryGraph"
+    class="timelineTrackCounterGraph"
   >
     <div>
       <canvas
-        class="timelineTrackMemoryCanvas"
+        class="timelineTrackCounterCanvas"
         height="25"
         width="80"
       />

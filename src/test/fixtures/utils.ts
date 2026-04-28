@@ -642,6 +642,26 @@ function isControlInput(element: HTMLElement): boolean {
 }
 
 /**
+ * Returns an ArrayBuffer which contains only the bytes that are covered by the
+ * Uint8Array, making a copy if needed.
+ */
+export function extractArrayBuffer(
+  bufferView: Uint8Array<ArrayBuffer>
+): ArrayBuffer {
+  if (
+    bufferView.byteOffset === 0 &&
+    bufferView.byteLength === bufferView.buffer.byteLength
+  ) {
+    return bufferView.buffer;
+  }
+
+  // There was extra data at the start or at the end. Make a copy.
+  const copy = new Uint8Array(bufferView.byteLength);
+  copy.set(bufferView);
+  return copy.buffer;
+}
+
+/**
  * Adds a source entry to the sources table and returns the index.
  * If a source with the same URL already exists, returns the existing index.
  * This is a test utility for setting up test profiles.

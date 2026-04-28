@@ -88,22 +88,11 @@ export function getHumanReadableTracks(state: State): string[] {
       for (const trackIndex of trackOrder) {
         const track = tracks[trackIndex];
         let trackName;
-        if (track.type === 'memory') {
-          trackName = profileViewSelectors
+        if (track.type === 'counter') {
+          const counter = profileViewSelectors
             .getCounterSelectors(track.counterIndex)
-            .getPid(state);
-        } else if (track.type === 'bandwidth') {
-          trackName = profileViewSelectors
-            .getCounterSelectors(track.counterIndex)
-            .getPid(state);
-        } else if (track.type === 'process-cpu') {
-          trackName = profileViewSelectors
-            .getCounterSelectors(track.counterIndex)
-            .getPid(state);
-        } else if (track.type === 'power') {
-          trackName = profileViewSelectors
-            .getCounterSelectors(track.counterIndex)
-            .getCounter(state).name;
+            .getCounter(state);
+          trackName = counter.display.label || counter.name;
         } else if (track.type === 'marker') {
           trackName = stringArray[track.markerName];
         } else {
@@ -297,6 +286,15 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
     thread.pid = pid;
     const counter = getCounterForThread(thread, threadIndex);
     counter.category = 'Memory';
+    counter.display = {
+      ...counter.display,
+      graphType: 'line-accumulated',
+      unit: 'bytes',
+      color: 'orange',
+      markerSchemaLocation: 'timeline-memory',
+      sortWeight: 20,
+      label: 'Memory',
+    };
     profile.counters = [counter];
   }
 
@@ -306,8 +304,8 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
     trackReference
   );
 
-  if (localTrack.type !== 'memory') {
-    throw new Error('Expected a memory track.');
+  if (localTrack.type !== 'counter') {
+    throw new Error('Expected a counter track.');
   }
   return { store, ...store, profile, trackReference, localTrack, threadIndex };
 }

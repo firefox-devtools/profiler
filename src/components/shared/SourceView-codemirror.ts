@@ -20,7 +20,7 @@
  */
 import { EditorView, lineNumbers } from '@codemirror/view';
 import { EditorState, Compartment } from '@codemirror/state';
-import { syntaxHighlighting } from '@codemirror/language';
+import { type LanguageSupport, syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import { cpp } from '@codemirror/lang-cpp';
 import { rust } from '@codemirror/lang-rust';
@@ -46,9 +46,7 @@ const highlightedLineConf = new Compartment();
 const lineNumbersConf = new Compartment();
 
 // Detect the right language based on the file extension.
-function _languageExtForPath(
-  path: string | null
-): any /* LanguageSupport | [] */ {
+function _languageExtForPath(path: string | null): LanguageSupport | [] {
   if (path === null) {
     return [];
   }
@@ -77,7 +75,11 @@ function _languageExtForPath(
   ) {
     return cpp();
   }
-  return [];
+
+  // Fallback to JavaScript highlighting. Inline scripts share the page URL, so
+  // their path won't have a .js extension. This may be incorrect for
+  // unknown/unsupported file types, but is the best guess for the common case.
+  return javascript();
 }
 
 // Adjustments to make a CodeMirror editor work as a non-editable code viewer.

@@ -799,6 +799,8 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Freigegebene Webs
     .title = Zusammenfassung erstellen mit freigegebenen Speicherbytes, von der Website, auf der der Speicher alloziert wurde
 StackSettings--invert-call-stack = Aufrufstack umkehren
     .title = Sortieren nach in einem Aufrufknoten, die Unterpunkte werden ignoriert.
+StackSettings--include-idle-samples = Untätige Samples einschließen
+    .title = Deaktivieren Sie dieses Kontrollkästchen, um Samples auszublenden, deren Leaf-Frame der Kategorie „untätig“ angehört.
 StackSettings--show-user-timing = Nutzer-Zeitrechnung anzeigen
 StackSettings--use-stack-chart-same-widths = Für jeden Stapel die gleiche Breite verwenden
 StackSettings--panel-search =
@@ -1125,6 +1127,12 @@ BottomBox--assembly-code-not-available-title = Assembly-Code nicht verfügbar
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = <a>Bericht #4520</a> beschreibt unterstützte Szenarien und geplante Verbesserungen.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Vollbild beenden
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Vollbild
 SourceView--close-button =
     .title = Quelltextansicht schließen
 

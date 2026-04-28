@@ -347,10 +347,7 @@ function getInformationFromTrackReference(
             relatedThreadIndex: localTrack.threadIndex,
             relatedTab: null,
           };
-        case 'memory':
-        case 'bandwidth':
-        case 'process-cpu':
-        case 'power': {
+        case 'counter': {
           const counterSelectors = getCounterSelectors(localTrack.counterIndex);
           const counter = counterSelectors.getCounter(state);
           return {
@@ -1711,6 +1708,17 @@ export function changeShowUserTimings(
   };
 }
 
+export function changeIncludeIdleSamples(
+  includeIdleSamples: boolean
+): ThunkAction<void> {
+  return (dispatch) => {
+    dispatch({
+      type: 'CHANGE_INCLUDE_IDLE_SAMPLES',
+      includeIdleSamples,
+    });
+  };
+}
+
 export function changeStackChartSameWidths(
   stackChartSameWidths: boolean
 ): ThunkAction<void> {
@@ -1983,6 +1991,14 @@ export function closeBottomBox(): ThunkAction<void> {
     dispatch({
       type: 'CLOSE_BOTTOM_BOX_FOR_TAB',
       tab,
+    });
+  };
+}
+
+export function toggleBottomBoxFullscreen(): ThunkAction<void> {
+  return (dispatch) => {
+    dispatch({
+      type: 'TOGGLE_BOTTOM_BOX_FULLSCREEN',
     });
   };
 }

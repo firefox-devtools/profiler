@@ -729,6 +729,8 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Deallocazione sit
     .title = Sintetizza usando i byte di memoria deallocati, in base dal sito in cui la memoria è stata deallocata
 StackSettings--invert-call-stack = Inverti stack di chiamata
     .title = Ordina in base al tempo trascorso in un nodo di chiamata, ignorando i nodi figlio.
+StackSettings--include-idle-samples = Includi campioni inattivi
+    .title = Deseleziona per nascondere i campioni il cui frame foglia è nella categoria inattivi.
 StackSettings--show-user-timing = Mostra tempo utente
 StackSettings--use-stack-chart-same-widths = Utilizza la stessa larghezza per ogni stack
 StackSettings--panel-search =
@@ -1055,6 +1057,12 @@ BottomBox--assembly-code-not-available-title = Codice assembly non disponibile
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Vedi <a>issue #4520</a> per gli scenari supportati e i miglioramenti in programma.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Esci da schermo intero
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Schermo intero
 SourceView--close-button =
     .title = Chiudi la vista sorgente
 

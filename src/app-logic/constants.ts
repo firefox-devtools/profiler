@@ -12,7 +12,7 @@ export const GECKO_PROFILE_VERSION = 34;
 // The current version of the "processed" profile format.
 // Please don't forget to update the processed profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const PROCESSED_PROFILE_VERSION = 61;
+export const PROCESSED_PROFILE_VERSION = 62;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
@@ -29,18 +29,10 @@ export const TRACK_NETWORK_ROW_REPEAT = 7;
 export const TRACK_NETWORK_HEIGHT =
   TRACK_NETWORK_ROW_HEIGHT * TRACK_NETWORK_ROW_REPEAT;
 
-// The following values are for memory track.
-export const TRACK_MEMORY_GRAPH_HEIGHT = 25;
-export const TRACK_MEMORY_MARKERS_HEIGHT = 15;
-export const TRACK_MEMORY_HEIGHT =
-  TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
-export const TRACK_MEMORY_LINE_WIDTH = 2;
-export const TRACK_MEMORY_DEFAULT_COLOR = 'orange';
-
-// The following values are for the bandwidth track.
-export const TRACK_BANDWIDTH_HEIGHT = 25;
-export const TRACK_BANDWIDTH_LINE_WIDTH = 2;
-export const TRACK_BANDWIDTH_DEFAULT_COLOR = 'blue';
+// The following values are for counter tracks (Memory, Power, Bandwidth, etc.).
+export const TRACK_COUNTER_GRAPH_HEIGHT = 25;
+export const TRACK_COUNTER_MARKERS_HEIGHT = 15;
+export const TRACK_COUNTER_LINE_WIDTH = 2;
 
 // The following values are for experimental event delay track.
 export const TRACK_EVENT_DELAY_HEIGHT = 40;
@@ -60,15 +52,6 @@ export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 
 // Height of timeline ruler.
 export const TIMELINE_RULER_HEIGHT = 20;
-
-// Height of the power track.
-export const TRACK_POWER_HEIGHT = 25;
-export const TRACK_POWER_LINE_WIDTH = 2;
-export const TRACK_POWER_DEFAULT_COLOR = 'grey';
-
-// Height of the process cpu track.
-export const TRACK_PROCESS_CPU_HEIGHT = 25;
-export const TRACK_PROCESS_CPU_LINE_WIDTH = 2;
 
 // JS Tracer has very high fidelity information, and needs a more fine-grained zoom.
 export const JS_TRACER_MAXIMUM_CHART_ZOOM = 0.001;

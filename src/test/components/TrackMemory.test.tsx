@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
-import { TrackMemory } from '../../components/timeline/TrackMemory';
+import { TrackCounter } from '../../components/timeline/TrackCounter';
 import { ensureExists } from '../../utils/types';
 
 import {
@@ -63,16 +63,25 @@ describe('TrackMemory', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    profile.counters = [
-      getCounterForThread(thread, threadIndex, counterConfig),
-    ];
+    const counter = getCounterForThread(thread, threadIndex, counterConfig);
+    counter.category = 'Memory';
+    counter.display = {
+      ...counter.display,
+      graphType: 'line-accumulated',
+      unit: 'bytes',
+      color: 'orange',
+      markerSchemaLocation: 'timeline-memory',
+      sortWeight: 20,
+      label: 'Memory',
+    };
+    profile.counters = [counter];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackMemory counterIndex={0} />
+        <TrackCounter counterIndex={0} />
       </Provider>
     );
     const { container } = renderResult;
@@ -81,13 +90,13 @@ describe('TrackMemory', function () {
     flushRafCalls();
 
     const canvas = ensureExists(
-      container.querySelector('.timelineTrackMemoryCanvas'),
-      `Couldn't find the memory canvas, with selector .timelineTrackMemoryCanvas`
+      container.querySelector('.timelineTrackCounterCanvas'),
+      `Couldn't find the memory canvas, with selector .timelineTrackCounterCanvas`
     );
     const getTooltipContents = () =>
-      document.querySelector('.timelineTrackMemoryTooltip');
+      document.querySelector('.timelineTrackCounterTooltip');
     const getMemoryDot = () =>
-      container.querySelector('.timelineTrackMemoryGraphDot');
+      container.querySelector('.timelineTrackCounterGraphDot');
     const moveMouseAtCounter = (index: number, pos: number) =>
       fireEvent(
         canvas,
@@ -194,7 +203,7 @@ describe('TrackMemory with intersection observer', function () {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackMemory counterIndex={0} />
+        <TrackCounter counterIndex={0} />
       </Provider>
     );
 

@@ -1149,6 +1149,12 @@ BottomBox--assembly-code-not-available-title = Assembly code not available
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = See <a>issue #4520</a> for supported scenarios and planned improvements.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Exit fullscreen
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Fullscreen
 SourceView--close-button =
     .title = Close the source view
 

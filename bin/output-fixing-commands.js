@@ -5,7 +5,7 @@
 // This file runs before linting commands and intercept errors so that more
 // friendly errors can be output.
 
-const cp = require('child_process');
+const spawn = require('cross-spawn');
 
 const fixingCommands = {
   lint: 'lint-fix',
@@ -21,14 +21,22 @@ const currentScriptName = process.env.npm_lifecycle_event;
 // Redirect the main lint command, but not individual commands.
 if (currentScriptName === 'lint' && command.includes('--fix')) {
   console.log(`🔧 Detected --fix flag, running: yarn lint-fix`);
-  const result = cp.spawnSync('yarn', ['lint-fix'], { stdio: 'inherit' });
-  process.exitCode = result.status;
+  const result = spawn.sync('yarn', ['lint-fix'], { stdio: 'inherit' });
+  if (result.error) {
+    console.error(`❌ Failed to spawn command: ${result.error.message}`);
+    process.exitCode = 1;
+  } else {
+    process.exitCode = result.status;
+  }
   process.exit();
 }
 
-const result = cp.spawnSync(command[0], command.slice(1), { stdio: 'inherit' });
+const result = spawn.sync(command[0], command.slice(1), { stdio: 'inherit' });
 
-if (result.status !== 0) {
+if (result.error) {
+  console.error(`❌ Failed to spawn command: ${result.error.message}`);
+  process.exitCode = 1;
+} else if (result.status !== 0) {
   process.exitCode = result.status;
   if (currentScriptName && currentScriptName in fixingCommands) {
     console.log(

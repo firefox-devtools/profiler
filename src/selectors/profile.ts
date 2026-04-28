@@ -192,6 +192,12 @@ export const getPageList = (state: State): PageList | null =>
   getProfile(state).pages || null;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = (state) =>
   getCategories(state).findIndex((c) => c.color === 'grey');
+export const getIdleCategoryIndex: Selector<IndexIntoCategoryList | null> = (
+  state
+) => {
+  const index = getCategories(state).findIndex((c) => c.name === 'Idle');
+  return index === -1 ? null : index;
+};
 export const getThreads: Selector<RawThread[]> = (state) =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = (state) =>
@@ -549,10 +555,17 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
  */
 export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
   getLocalTracksByPid,
-  (localTracksByPid) => {
+  getCounters,
+  (localTracksByPid, counters) => {
     const processesWithMemoryTrack = new Set<Pid>();
     for (const [pid, localTracks] of localTracksByPid.entries()) {
-      if (localTracks.some((track) => track.type === 'memory')) {
+      if (
+        localTracks.some(
+          (track) =>
+            track.type === 'counter' &&
+            ensureExists(counters)[track.counterIndex].category === 'Memory'
+        )
+      ) {
         processesWithMemoryTrack.add(pid);
       }
     }

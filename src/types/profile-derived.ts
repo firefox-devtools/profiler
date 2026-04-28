@@ -13,7 +13,6 @@ import type {
   IndexIntoResourceTable,
   IndexIntoLibs,
   CounterIndex,
-  GraphColor,
   IndexIntoRawMarkerTable,
   IndexIntoStringTable,
   TabID,
@@ -33,6 +32,7 @@ import type {
   IndexIntoFrameTable,
   SourceTable,
   IndexIntoSourceTable,
+  CounterDisplayConfig,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
@@ -187,10 +187,10 @@ export type Counter = {
   name: string;
   category: string;
   description: string;
-  color?: GraphColor;
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: CounterSamplesTable;
+  display: CounterDisplayConfig;
 };
 
 /**
@@ -634,12 +634,9 @@ export type GlobalTrack =
 export type LocalTrack =
   | { readonly type: 'thread'; readonly threadIndex: ThreadIndex }
   | { readonly type: 'network'; readonly threadIndex: ThreadIndex }
-  | { readonly type: 'memory'; readonly counterIndex: CounterIndex }
-  | { readonly type: 'bandwidth'; readonly counterIndex: CounterIndex }
+  | { readonly type: 'counter'; readonly counterIndex: CounterIndex }
   | { readonly type: 'ipc'; readonly threadIndex: ThreadIndex }
   | { readonly type: 'event-delay'; readonly threadIndex: ThreadIndex }
-  | { readonly type: 'process-cpu'; readonly counterIndex: CounterIndex }
-  | { readonly type: 'power'; readonly counterIndex: CounterIndex }
   | {
       readonly type: 'marker';
       readonly threadIndex: ThreadIndex;

@@ -56,28 +56,22 @@ export type HiddenTracks = {
 const LOCAL_TRACK_INDEX_ORDER = {
   thread: 0,
   network: 1,
-  memory: 2,
+  counter: 2,
   ipc: 3,
   'event-delay': 4,
-  'process-cpu': 5,
-  power: 6,
-  marker: 7,
-  bandwidth: 8,
+  marker: 5,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
-  bandwidth: 1,
-  memory: 2,
-  power: 3,
+  counter: 1,
   // IPC tracks that belong to the global track will appear right after network
   // and counter tracks. But we want to show the IPC tracks that belong to the
   // local threads right after their track. This special handling happens inside
   // the sort function.
-  ipc: 4,
-  thread: 5,
-  'event-delay': 6,
-  'process-cpu': 7,
-  marker: 8,
+  ipc: 2,
+  thread: 3,
+  'event-delay': 4,
+  marker: 5,
 };
 
 const GLOBAL_TRACK_INDEX_ORDER = {
@@ -103,6 +97,27 @@ function _getDefaultLocalTrackOrder(
   const naturalSort = new Intl.Collator('en-US', { numeric: true });
   // In place sort!
   trackOrder.sort((a, b) => {
+    // Tie-break between two counter tracks using their display.sortWeight.
+    // Cross-type ordering is handled below by LOCAL_TRACK_DISPLAY_ORDER.
+    if (
+      tracks[a].type === 'counter' &&
+      tracks[b].type === 'counter' &&
+      profile &&
+      profile.counters
+    ) {
+      if (profile.meta.keepProfileThreadOrder) {
+        return tracks[a].counterIndex - tracks[b].counterIndex;
+      }
+      const counterA = profile.counters[tracks[a].counterIndex];
+      const counterB = profile.counters[tracks[b].counterIndex];
+      const sortWeightDiff =
+        counterA.display.sortWeight - counterB.display.sortWeight;
+      if (sortWeightDiff !== 0) {
+        return sortWeightDiff;
+      }
+      return naturalSort.compare(counterA.name, counterB.name);
+    }
+
     if (
       tracks[a].type === 'thread' &&
       tracks[b].type === 'ipc' &&
@@ -121,22 +136,6 @@ function _getDefaultLocalTrackOrder(
       // If the IPC track belongs to that local thread, put the IPC tracks right
       // after it.
       return 1;
-    }
-
-    if (
-      profile &&
-      profile.counters &&
-      tracks[a].type === 'power' &&
-      tracks[b].type === 'power'
-    ) {
-      const idxA = tracks[a].counterIndex;
-      const idxB = tracks[b].counterIndex;
-      if (profile.meta.keepProfileThreadOrder) {
-        return idxA - idxB;
-      }
-      const nameA = profile.counters[idxA].name;
-      const nameB = profile.counters[idxB].name;
-      return naturalSort.compare(nameA, nameB);
     }
 
     // If the tracks are both threads, sort them by thread name, and then by
@@ -400,30 +399,24 @@ export function computeLocalTracksByPid(
   const { counters } = profile;
   if (counters) {
     for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
-      const { pid, category, samples } = counters[counterIndex];
+      const { pid, category, name } = counters[counterIndex];
       if (!availablePids.has(pid)) {
         // If the global track is filtered out ignore it here too.
         continue;
       }
 
-      if (['Memory', 'power', 'Bandwidth'].includes(category)) {
-        if (category === 'power' && samples.length <= 2) {
-          // If we have only 2 samples, they are likely both 0 and we don't have a real counter.
-          continue;
-        }
-        let tracks = localTracksByPid.get(pid);
-        if (tracks === undefined) {
-          tracks = [];
-          localTracksByPid.set(pid, tracks);
-        }
-        if (category === 'Memory') {
-          tracks.push({ type: 'memory', counterIndex });
-        } else if (category === 'Bandwidth') {
-          tracks.push({ type: 'bandwidth', counterIndex });
-        } else {
-          tracks.push({ type: 'power', counterIndex });
-        }
+      // Skip processCPU counters — they are added separately by
+      // addProcessCPUTracksForProcess when the experimental flag is enabled.
+      if (category === 'CPU' && name === 'processCPU') {
+        continue;
       }
+
+      let tracks = localTracksByPid.get(pid);
+      if (tracks === undefined) {
+        tracks = [];
+        localTracksByPid.set(pid, tracks);
+      }
+      tracks.push({ type: 'counter', counterIndex });
     }
   }
 
@@ -496,7 +489,7 @@ export function addProcessCPUTracksForProcess(
     let localTracks = newLocalTracksByPid.get(pid) ?? [];
 
     // Do not mutate the current state.
-    localTracks = [...localTracks, { type: 'process-cpu', counterIndex }];
+    localTracks = [...localTracks, { type: 'counter', counterIndex }];
     newLocalTracksByPid.set(pid, localTracks);
   }
 
@@ -1116,10 +1109,10 @@ export function getLocalTrackName(
       return getFriendlyThreadName(threads, threads[localTrack.threadIndex]);
     case 'network':
       return 'Network';
-    case 'memory':
-      return 'Memory';
-    case 'bandwidth':
-      return 'Bandwidth';
+    case 'counter': {
+      const counter = counters[localTrack.counterIndex];
+      return counter.display.label || counter.name;
+    }
     case 'ipc':
       return `IPC — ${getFriendlyThreadName(
         threads,
@@ -1130,10 +1123,6 @@ export function getLocalTrackName(
         getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
         ' Event Delay'
       );
-    case 'process-cpu':
-      return 'Process CPU';
-    case 'power':
-      return counters[localTrack.counterIndex].name;
     case 'marker':
       return shared.stringArray[localTrack.markerName];
     default:
@@ -1577,14 +1566,18 @@ export function getSearchFilteredLocalTracksByPid(
           }
           break;
         }
+        case 'counter': {
+          const trackName = localTrackNames[trackIndex];
+          if (searchRegExp.test(trackName)) {
+            searchFilteredLocalTracks.add(trackIndex);
+            continue;
+          }
+          break;
+        }
         case 'network':
-        case 'memory':
-        case 'bandwidth':
         case 'marker':
         case 'ipc':
-        case 'event-delay':
-        case 'power':
-        case 'process-cpu': {
+        case 'event-delay': {
           const { type } = localTrack;
           if (searchRegExp.test(type)) {
             searchFilteredLocalTracks.add(trackIndex);
@@ -1762,7 +1755,8 @@ export function getTrackReferenceFromThreadIndex(
  * of them can be hidden to reduce the noise. This mostly depends on either the
  * usefulness or the activity of that track.
  *
- * TODO: Check the memory track activity here to decide if it should be visible.
+ * TODO: Check the counter track activity here to decide if it should be visible,
+ *   see https://github.com/firefox-devtools/profiler/issues/5967.
  */
 function _isLocalTrackVisible(
   localTrack: LocalTrack,
@@ -1774,15 +1768,10 @@ function _isLocalTrackVisible(
       return visibleThreadIndexes.has(localTrack.threadIndex);
     case 'marker':
     case 'network':
-    case 'memory':
-    case 'bandwidth':
-    // 'event-delay' and 'process-cpu' tracks are experimental and they should
-    // be visible by default whenever they are included in a profile. (fallthrough)
+    case 'counter':
+    // 'event-delay' track is experimental, and it should be visible by default
+    // whenever it is included in a profile. (fallthrough)
     case 'event-delay':
-    case 'process-cpu':
-    // Power tracks are there only if the power feature is enabled. So they should
-    // be visible by default whenever they're included in a profile. (fallthrough)
-    case 'power':
       // Keep non-thread local tracks visible.
       return true;
     case 'ipc':

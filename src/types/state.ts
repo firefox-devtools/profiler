@@ -186,7 +186,6 @@ export type AppState = {
   readonly hasZoomedViaMousewheel: boolean;
   readonly isSidebarOpenPerPanel: IsOpenPerPanelState;
   readonly sidebarOpenCategories: Map<string, Set<number>>;
-  readonly panelLayoutGeneration: number;
   readonly lastVisibleThreadTabSlug: TabSlug;
   readonly trackThreadHeights: Record<ThreadsKey, CssPixels>;
   readonly isNewlyPublished: boolean;
@@ -356,6 +355,7 @@ export type ProfileSpecificUrlState = {
   implementation: ImplementationFilter;
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy;
   invertCallstack: boolean;
+  includeIdleSamples: boolean;
   showUserTimings: boolean;
   stackChartSameWidths: boolean;
   committedRanges: StartEndRange[];
@@ -367,6 +367,7 @@ export type ProfileSpecificUrlState = {
   sourceView: SourceViewState;
   assemblyView: AssemblyViewState;
   isBottomBoxOpenPerPanel: IsOpenPerPanelState;
+  isBottomBoxFullscreen: boolean;
   globalTrackOrder: TrackIndex[];
   hiddenGlobalTracks: Set<TrackIndex>;
   hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>;

@@ -815,6 +815,11 @@ TrackPower--tooltip-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
     .label = Puissance
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Puissance
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -1035,6 +1040,12 @@ BottomBox--assembly-code-not-available-title = Code assembleur non disponible
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Consultez le <a>ticket n°4520</a> pour les scénarios pris en charge et les améliorations prévues.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Quitter le mode plein écran
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Plein écran
 SourceView--close-button =
     .title = Fermer la vue du code source
 

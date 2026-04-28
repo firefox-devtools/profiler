@@ -1133,6 +1133,12 @@ BottomBox--assembly-code-not-available-title = Codice assembly non disponibile
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Vide <a>issue #4520</a> pro scenarios supportate e meliorationes planate.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Exir del plen schermo
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Plen schermo
 SourceView--close-button =
     .title = Clauder le vista fonte
 

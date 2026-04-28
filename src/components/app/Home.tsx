@@ -16,7 +16,6 @@ import {
   triggerLoadingFromUrl,
 } from 'firefox-profiler/actions/receive-profile';
 import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
-import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import {
   queryIsMenuButtonEnabled,
   enableMenuButton,
@@ -182,17 +181,6 @@ function DocsButton() {
   );
 }
 
-function InstructionTransition(props: { children: React.ReactNode }) {
-  return (
-    <CSSTransition
-      {...props}
-      classNames="homeTransition"
-      timeout={300}
-      exit={false}
-    />
-  );
-}
-
 type OwnHomeProps = {
   readonly specialMessage?: string;
 };
@@ -264,6 +252,18 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
   }
 
   _renderInstructions() {
+    // The returned element's `key` controls whether React remounts the element
+    // or reuses it when the phase changes. Remounting triggers the CSS slide-in
+    // animation. All setup phases share key="setup" so they transition without
+    // animation; switching to key="record" forces a remount and plays the animation.
+    //
+    // Transition scenarios:
+    //   Initial page load                            → no animation (first paint)
+    //   checking-webchannel → suggest-enable-popup   → no animation (same key)
+    //   checking-webchannel → webchannel-unavailable → no animation (same key)
+    //   checking-webchannel → popup-enabled          → animates (key change)
+    //   suggest-enable-popup → popup-enabled         → animates (key change, user clicked)
+    //   All other phases (android, chrome, other)    → fixed at initial state, never change
     const { popupInstallPhase } = this.state;
     switch (popupInstallPhase) {
       case 'checking-webchannel':
@@ -302,137 +302,137 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
 
   _renderEnablePopupInstructions(webChannelAvailable: boolean) {
     return (
-      <InstructionTransition key={0}>
-        <div
-          className="homeInstructions"
-          data-testid="home-enable-popup-instructions"
-        >
-          {/* Grid container: homeInstructions */}
-          {/* Left column: img */}
-          <img
-            className="homeSectionScreenshot"
-            src={PerfScreenshot}
-            alt="screenshot of profiler.firefox.com"
-          />
-          {/* Right column: instructions */}
-          <div>
-            <Localized
-              id="Home--enable-button-unavailable"
-              attrs={{ title: !webChannelAvailable }}
+      <div
+        key="setup"
+        className="homeInstructions"
+        data-testid="home-enable-popup-instructions"
+      >
+        {/* Grid container: homeInstructions */}
+        {/* Left column: img */}
+        <img
+          className="homeSectionScreenshot"
+          src={PerfScreenshot}
+          alt="screenshot of profiler.firefox.com"
+        />
+        {/* Right column: instructions */}
+        <div>
+          <Localized
+            id="Home--enable-button-unavailable"
+            attrs={{ title: !webChannelAvailable }}
+          >
+            <button
+              type="button"
+              className="homeSectionButton"
+              onClick={this._enableMenuButton}
+              disabled={!webChannelAvailable}
+              title={
+                webChannelAvailable
+                  ? undefined
+                  : 'This profiler instance was unable to connect to the WebChannel, so it cannot enable the profiler menu button.'
+              }
             >
-              <button
-                type="button"
-                className="homeSectionButton"
-                onClick={this._enableMenuButton}
-                disabled={!webChannelAvailable}
-                title={
-                  webChannelAvailable
-                    ? undefined
-                    : 'This profiler instance was unable to connect to the WebChannel, so it cannot enable the profiler menu button.'
-                }
-              >
-                <span className="homeSectionPlus">+</span>
-                <Localized id="Home--menu-button">
-                  Enable Profiler Menu Button
-                </Localized>
-              </button>
+              <span className="homeSectionPlus">+</span>
+              <Localized id="Home--menu-button">
+                Enable Profiler Menu Button
+              </Localized>
+            </button>
+          </Localized>
+          <DocsButton />
+          {webChannelAvailable ? (
+            <Localized id="Home--menu-button-instructions">
+              <p>
+                Enable the profiler menu button to start recording a performance
+                profile in Firefox, then analyze it and share it with
+                profiler.firefox.com.
+              </p>
             </Localized>
-            <DocsButton />
-            {webChannelAvailable ? (
-              <Localized id="Home--menu-button-instructions">
-                <p>
-                  Enable the profiler menu button to start recording a
-                  performance profile in Firefox, then analyze it and share it
-                  with profiler.firefox.com.
-                </p>
-              </Localized>
-            ) : (
-              <Localized
-                id="Home--web-channel-unavailable"
-                elems={{
-                  code: <code />,
-                }}
-              >
-                <p>
-                  This profiler instance was unable to connect to the
-                  WebChannel. This usually means that it’s running on a
-                  different host from the one that is specified in the
-                  preference{' '}
-                  <code>devtools.performance.recording.ui-base-url</code>. If
-                  you would like to capture new profiles with this instance, and
-                  give it programmatic control of the profiler menu button, you
-                  can go to <code>about:config</code>
-                  and change the preference.
-                </p>
-              </Localized>
-            )}
+          ) : (
             <Localized
-              id="Home--profile-firefox-android-instructions"
+              id="Home--web-channel-unavailable"
               elems={{
-                a: (
-                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
-                ),
+                code: <code />,
               }}
             >
               <p>
-                You can also profile Firefox for Android. For more information,
-                please consult this documentation:{' '}
-                <a>Profiling Firefox for Android directly on device</a>.
+                This profiler instance was unable to connect to the WebChannel.
+                This usually means that it’s running on a different host from
+                the one that is specified in the preference{' '}
+                <code>devtools.performance.recording.ui-base-url</code>. If you
+                would like to capture new profiles with this instance, and give
+                it programmatic control of the profiler menu button, you can go
+                to <code>about:config</code>
+                and change the preference.
               </p>
             </Localized>
-          </div>
-          {/* end of grid container */}
+          )}
+          <Localized
+            id="Home--profile-firefox-android-instructions"
+            elems={{
+              a: (
+                <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+              ),
+            }}
+          >
+            <p>
+              You can also profile Firefox for Android. For more information,
+              please consult this documentation:{' '}
+              <a>Profiling Firefox for Android directly on device</a>.
+            </p>
+          </Localized>
         </div>
-      </InstructionTransition>
+        {/* end of grid container */}
+      </div>
     );
   }
 
   _renderFenixInstructions() {
     return (
-      <InstructionTransition key={0}>
-        <div className="homeInstructions" data-testid="home-fenix-instructions">
-          {/* Grid container: homeInstructions */}
-          {/* Left column: img */}
-          <img
-            className="homeSectionScreenshot"
-            src={PerfScreenshot}
-            alt="screenshot of profiler.firefox.com"
-          />
-          {/* Right column: instructions */}
-          <div>
-            <DocsButton />
-            <Localized
-              id="Home--fenix-instructions-directly"
-              elems={{
-                a: (
-                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
-                ),
-              }}
-            >
-              <p>
-                Firefox for Android can be profiled directly on this device. For
-                more information, read{' '}
-                <a>Profiling Firefox for Android directly on device</a>.
-              </p>
-            </Localized>
-            <Localized
-              id="Home--fenix-instructions-remotely"
-              elems={{
-                a: (
-                  <a href="https://profiler.firefox.com/docs/#/./guide-remote-profiling?id=remote-profiling-firefox-for-android" />
-                ),
-              }}
-            >
-              <p>
-                You can also profile Firefox for Android remotely from Firefox
-                for desktop. For more information, please consult this
-                documentation: <a>Profiling Firefox for Android remotely</a>.
-              </p>
-            </Localized>
-          </div>
-          {/* end of grid container */}
+      <div
+        key="setup"
+        className="homeInstructions"
+        data-testid="home-fenix-instructions"
+      >
+        {/* Grid container: homeInstructions */}
+        {/* Left column: img */}
+        <img
+          className="homeSectionScreenshot"
+          src={PerfScreenshot}
+          alt="screenshot of profiler.firefox.com"
+        />
+        {/* Right column: instructions */}
+        <div>
+          <DocsButton />
+          <Localized
+            id="Home--fenix-instructions-directly"
+            elems={{
+              a: (
+                <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+              ),
+            }}
+          >
+            <p>
+              Firefox for Android can be profiled directly on this device. For
+              more information, read{' '}
+              <a>Profiling Firefox for Android directly on device</a>.
+            </p>
+          </Localized>
+          <Localized
+            id="Home--fenix-instructions-remotely"
+            elems={{
+              a: (
+                <a href="https://profiler.firefox.com/docs/#/./guide-remote-profiling?id=remote-profiling-firefox-for-android" />
+              ),
+            }}
+          >
+            <p>
+              You can also profile Firefox for Android remotely from Firefox for
+              desktop. For more information, please consult this documentation:{' '}
+              <a>Profiling Firefox for Android remotely</a>.
+            </p>
+          </Localized>
         </div>
-      </InstructionTransition>
+        {/* end of grid container */}
+      </div>
     );
   }
 
@@ -440,164 +440,155 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
     const chromeExtensionUrl =
       'https://chromewebstore.google.com/detail/firefox-profiler/ljmahpnflmbkgaipnfbpgjipcnahlghn';
     return (
-      <InstructionTransition key={0}>
-        <div
-          className="homeInstructions"
-          data-testid="home-enable-popup-instructions"
-        >
-          {/* Grid container: homeInstructions */}
-          {/* Left column: img */}
-          <img
-            className="homeSectionScreenshot"
-            src={PerfScreenshot}
-            alt="screenshot of profiler.firefox.com"
-          />
-          {/* Right column: instructions */}
-          <div>
-            <a
-              className="homeSectionButton"
-              href={chromeExtensionUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="homeSectionPlus">+</span>
-              <Localized id="Home--install-chrome-extension">
-                Install the Chrome extension
-              </Localized>
-            </a>
-            <DocsButton />
-            <Localized
-              id="Home--chrome-extension-instructions"
-              elems={{
-                a: (
-                  <a
-                    href={chromeExtensionUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  />
-                ),
-              }}
-            >
-              <p>
-                Use the <a>Firefox Profiler extension for Chrome</a> to capture
-                performance profiles in Chrome and analyze them in the Firefox
-                Profiler. Install the extension from the Chrome Web Store.
-              </p>
+      <div
+        key="setup"
+        className="homeInstructions"
+        data-testid="home-enable-popup-instructions"
+      >
+        {/* Grid container: homeInstructions */}
+        {/* Left column: img */}
+        <img
+          className="homeSectionScreenshot"
+          src={PerfScreenshot}
+          alt="screenshot of profiler.firefox.com"
+        />
+        {/* Right column: instructions */}
+        <div>
+          <a
+            className="homeSectionButton"
+            href={chromeExtensionUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            <span className="homeSectionPlus">+</span>
+            <Localized id="Home--install-chrome-extension">
+              Install the Chrome extension
             </Localized>
-            <Localized id="Home--chrome-extension-recording-instructions">
-              <p>
-                Once installed, use the extension’s toolbar icon or the
-                shortcuts to start and stop profiling. You can also export
-                profiles and load them here for detailed analysis.
-              </p>
-            </Localized>
-            {this._renderShortcuts()}
-          </div>
-          {/* end of grid container */}
+          </a>
+          <DocsButton />
+          <Localized
+            id="Home--chrome-extension-instructions"
+            elems={{
+              a: (
+                <a href={chromeExtensionUrl} target="_blank" rel="noreferrer" />
+              ),
+            }}
+          >
+            <p>
+              Use the <a>Firefox Profiler extension for Chrome</a> to capture
+              performance profiles in Chrome and analyze them in the Firefox
+              Profiler. Install the extension from the Chrome Web Store.
+            </p>
+          </Localized>
+          <Localized id="Home--chrome-extension-recording-instructions">
+            <p>
+              Once installed, use the extension’s toolbar icon or the shortcuts
+              to start and stop profiling. You can also export profiles and load
+              them here for detailed analysis.
+            </p>
+          </Localized>
+          {this._renderShortcuts()}
         </div>
-      </InstructionTransition>
+        {/* end of grid container */}
+      </div>
     );
   }
 
   _renderRecordInstructions(screenshotSrc: string) {
     return (
-      <InstructionTransition key={1}>
-        <div
-          className="homeInstructions"
-          data-testid="home-record-instructions"
-        >
-          {/* Grid container: homeInstructions */}
-          {/* Left column: img */}
-          <img
-            className="homeSectionScreenshot"
-            src={screenshotSrc}
-            alt="Screenshot of the profiler settings from the Firefox menu."
-          />
-          {/* Right column: instructions */}
-          <div>
-            <DocsButton />
-            <Localized
-              id="Home--record-instructions"
-              elems={{
-                kbd: <kbd />,
-              }}
-            >
-              <p>
-                To start profiling, click on the profiling button, or use the
-                keyboard shortcuts. The icon is blue when a profile is
-                recording. Hit <kbd>Capture</kbd> to load the data into
-                profiler.firefox.com.
-              </p>
-            </Localized>
-            {this._renderShortcuts()}
-            <Localized
-              id="Home--profile-firefox-android-instructions"
-              elems={{
-                a: (
-                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
-                ),
-              }}
-            >
-              <p>
-                You can also profile Firefox for Android. For more information,
-                please consult this documentation:{' '}
-                <a>Profiling Firefox for Android directly on device</a>.
-              </p>
-            </Localized>
-          </div>
-          {/* end of grid container */}
+      <div
+        key="record"
+        className="homeInstructions homeInstructions-animate"
+        data-testid="home-record-instructions"
+      >
+        {/* Grid container: homeInstructions */}
+        {/* Left column: img */}
+        <img
+          className="homeSectionScreenshot"
+          src={screenshotSrc}
+          alt="Screenshot of the profiler settings from the Firefox menu."
+        />
+        {/* Right column: instructions */}
+        <div>
+          <DocsButton />
+          <Localized
+            id="Home--record-instructions"
+            elems={{
+              kbd: <kbd />,
+            }}
+          >
+            <p>
+              To start profiling, click on the profiling button, or use the
+              keyboard shortcuts. The icon is blue when a profile is recording.
+              Hit <kbd>Capture</kbd> to load the data into profiler.firefox.com.
+            </p>
+          </Localized>
+          {this._renderShortcuts()}
+          <Localized
+            id="Home--profile-firefox-android-instructions"
+            elems={{
+              a: (
+                <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+              ),
+            }}
+          >
+            <p>
+              You can also profile Firefox for Android. For more information,
+              please consult this documentation:{' '}
+              <a>Profiling Firefox for Android directly on device</a>.
+            </p>
+          </Localized>
         </div>
-      </InstructionTransition>
+        {/* end of grid container */}
+      </div>
     );
   }
 
   _renderOtherBrowserInstructions() {
     return (
-      <InstructionTransition key={0}>
-        <div
-          className="homeInstructions"
-          data-testid="home-other-browser-instructions"
-        >
-          {/* Grid container: homeInstructions */}
-          {/* Left column: img */}
-          <img
-            className="homeSectionScreenshot"
-            src={PerfScreenshot}
-            alt="screenshot of profiler.firefox.com"
-          />
-          {/* Right column: instructions */}
-          <div>
-            <DocsButton />
-            <Localized
-              id="Home--instructions-content2"
-              elems={{
-                a: <a href="https://www.firefox.com" />,
-              }}
-            >
-              <p>
-                Recording performance profiles requires{' '}
-                <a>Firefox for desktop</a>. However, existing profiles can be
-                viewed in any modern browser.
-              </p>
-            </Localized>
-            <Localized
-              id="Home--profile-firefox-android-instructions"
-              elems={{
-                a: (
-                  <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
-                ),
-              }}
-            >
-              <p>
-                You can also profile Firefox for Android. For more information,
-                please consult this documentation:{' '}
-                <a>Profiling Firefox for Android directly on device</a>.
-              </p>
-            </Localized>
-          </div>
-          {/* end of grid container */}
+      <div
+        key="setup"
+        className="homeInstructions"
+        data-testid="home-other-browser-instructions"
+      >
+        {/* Grid container: homeInstructions */}
+        {/* Left column: img */}
+        <img
+          className="homeSectionScreenshot"
+          src={PerfScreenshot}
+          alt="screenshot of profiler.firefox.com"
+        />
+        {/* Right column: instructions */}
+        <div>
+          <DocsButton />
+          <Localized
+            id="Home--instructions-content2"
+            elems={{
+              a: <a href="https://www.firefox.com" />,
+            }}
+          >
+            <p>
+              Recording performance profiles requires <a>Firefox for desktop</a>
+              . However, existing profiles can be viewed in any modern browser.
+            </p>
+          </Localized>
+          <Localized
+            id="Home--profile-firefox-android-instructions"
+            elems={{
+              a: (
+                <a href="https://profiler.firefox.com/docs/#/./guide-profiling-android-directly-on-device?id=profiling-firefox-for-android-directly-on-device" />
+              ),
+            }}
+          >
+            <p>
+              You can also profile Firefox for Android. For more information,
+              please consult this documentation:{' '}
+              <a>Profiling Firefox for Android directly on device</a>.
+            </p>
+          </Localized>
         </div>
-      </InstructionTransition>
+        {/* end of grid container */}
+      </div>
     );
   }
 
@@ -644,9 +635,9 @@ class HomeImpl extends React.PureComponent<HomeProps, HomeState> {
               faster.
             </p>
           </Localized>
-          <TransitionGroup className="homeInstructionsTransitionGroup">
+          <div className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
-          </TransitionGroup>
+          </div>
           <section className="homeAdditionalContent">
             {/* Grid container: homeAdditionalContent */}
             <h2 className="homeAdditionalContentTitle protocol-display-xs">

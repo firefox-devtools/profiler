@@ -789,8 +789,8 @@ function _partiallyApplySymbolicationStep(
         if (funcIndex === undefined) {
           // Need a new func.
           funcIndex = funcTable.length;
-          funcTable.isJS[funcIndex] = false;
-          funcTable.relevantForJS[funcIndex] = false;
+          funcTable.isJS[funcIndex] = funcTable.isJS[oldFunc];
+          funcTable.relevantForJS[funcIndex] = funcTable.relevantForJS[oldFunc];
           funcTable.resource[funcIndex] = resourceIndex;
           funcTable.source[funcIndex] = null;
           funcTable.lineNumber[funcIndex] = null;

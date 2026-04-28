@@ -2,10 +2,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+.bottom-box-fullscreen {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 .bottom-box-pane {
   --internal-sourceview-background-color: var(--grey-20);
   --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
   --internal-assembly-icon: url(../../../res/img/svg/asm-icon.svg);
+  --internal-fullscreen-icon: url(../../../res/img/svg/fullscreen.svg);
+  --internal-fullscreen-exit-icon: url(../../../res/img/svg/fullscreen-exit.svg);
 
   display: flex;
   height: 100%; /* direct child of SplitterLayout */
@@ -73,6 +84,8 @@
 
 .bottom-close-button,
 .bottom-assembly-button,
+.bottom-fullscreen-hide-button,
+.bottom-fullscreen-show-button,
 .bottom-prev-button,
 .bottom-next-button {
   width: 24px;
@@ -99,6 +112,14 @@
 
 .bottom-assembly-button {
   background-image: var(--internal-assembly-icon);
+}
+
+.bottom-fullscreen-show-button {
+  background-image: var(--internal-fullscreen-icon);
+}
+
+.bottom-fullscreen-hide-button {
+  background-image: var(--internal-fullscreen-exit-icon);
 }
 
 .codeLoadingOverlay,
@@ -162,6 +183,8 @@
     --internal-sourceview-background-color: var(--grey-80);
     --internal-close-icon: url(../../../res/img/svg/close-light.svg);
     --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
+    --internal-fullscreen-icon: url(../../../res/img/svg/fullscreen-light.svg);
+    --internal-fullscreen-exit-icon: url(../../../res/img/svg/fullscreen-exit-light.svg);
   }
 
   .codeLoadingOverlay,

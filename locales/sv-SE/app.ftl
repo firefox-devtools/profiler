@@ -1144,6 +1144,12 @@ BottomBox--assembly-code-not-available-title = Assembly-koden inte tillgänglig
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Se <a>problem #4520</a> för scenarier som stöds och planerade förbättringar.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Avsluta helskärm
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Helskärm
 SourceView--close-button =
     .title = Stäng källvyn
 

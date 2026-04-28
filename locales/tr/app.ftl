@@ -421,6 +421,7 @@ MenuButtons--metaInfo--profile-not-symbolicated = Profil sembolleştirilmemiş
 MenuButtons--metaInfo--resymbolicate-profile = Profili yeniden sembolleştir
 MenuButtons--metaInfo--symbolicate-profile = Profili sembolleştir
 MenuButtons--metaInfo--attempting-resymbolicate = Profil yeniden sembolleştirilmeye çalışılıyor
+MenuButtons--metaInfo--currently-symbolicating = Şu anda profil sembolleştiriliyor
 MenuButtons--metaInfo--cpu-model = İşlemci modeli:
 MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
 MenuButtons--metaInfo--main-memory = Ana bellek:
@@ -1009,6 +1010,12 @@ BottomBox--assembly-code-not-available-title = Assembly kodu mevcut değil
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Desteklenen senaryolar ve planlanan iyileştirmeler için <a>sorun #4520</a>’ye bakabilirsiniz.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Tam ekrandan çık
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Tam ekran
 SourceView--close-button =
     .title = Kaynak görünümünü kapat
 

@@ -7,7 +7,7 @@ import { Provider } from 'react-redux';
 import { fireEvent } from '@testing-library/react';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
-import { TrackProcessCPU } from '../../components/timeline/TrackProcessCPU';
+import { TrackCounter } from '../../components/timeline/TrackCounter';
 import { ensureExists } from '../../utils/types';
 
 import {
@@ -55,27 +55,33 @@ describe('TrackProcessCPU', function () {
     const sampleTimes = ensureExists(thread.samples.time);
     // Changing one of the sample times, so we can test different intervals.
     sampleTimes[1] = 1.5; // It was 1 before.
-    profile.counters = [
-      getCounterForThreadWithSamples(
-        thread,
-        threadIndex,
-        {
-          time: sampleTimes.slice(),
-          // CPU usage numbers for the per-process CPU.
-          count: [100, 400, 500, 1000, 200, 500, 300, 100],
-          length: SAMPLE_COUNT,
-        },
-        'processCPU',
-        'CPU'
-      ),
-    ];
+    const counter = getCounterForThreadWithSamples(
+      thread,
+      threadIndex,
+      {
+        time: sampleTimes.slice(),
+        // CPU usage numbers for the per-process CPU.
+        count: [100, 400, 500, 1000, 200, 500, 300, 100],
+        length: SAMPLE_COUNT,
+      },
+      'processCPU',
+      'CPU'
+    );
+    counter.display = {
+      ...counter.display,
+      graphType: 'line-rate',
+      unit: 'percent',
+      sortWeight: 70,
+      label: 'Process CPU',
+    };
+    profile.counters = [counter];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackProcessCPU counterIndex={0} />
+        <TrackCounter counterIndex={0} />
       </Provider>
     );
     const { container } = renderResult;
@@ -84,13 +90,13 @@ describe('TrackProcessCPU', function () {
     flushRafCalls();
 
     const canvas = ensureExists(
-      container.querySelector('.timelineTrackProcessCPUCanvas'),
-      `Couldn't find the process CPU canvas, with selector .timelineTrackProcessCPUCanvas`
+      container.querySelector('.timelineTrackCounterCanvas'),
+      `Couldn't find the process CPU canvas, with selector .timelineTrackCounterCanvas`
     );
     const getTooltipContents = () =>
-      document.querySelector('.timelineTrackProcessCPUTooltip');
+      document.querySelector('.timelineTrackCounterTooltip');
     const getProcessCPUDot = () =>
-      container.querySelector('.timelineTrackProcessCPUGraphDot');
+      container.querySelector('.timelineTrackCounterGraphDot');
     const moveMouseAtCounter = (index: number, pos: number) =>
       fireEvent(
         canvas,

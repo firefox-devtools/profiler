@@ -9,7 +9,7 @@ import { fireEvent } from '@testing-library/react';
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
-import { TrackPower } from '../../components/timeline/TrackPower';
+import { TrackCounter } from '../../components/timeline/TrackCounter';
 import { ensureExists } from '../../utils/types';
 
 import {
@@ -62,30 +62,36 @@ describe('TrackPower', function () {
     for (let i = 7; i < sampleTimes.length - 1; ++i) {
       sampleTimes[i] = 7 + i / 100;
     }
-    profile.counters = [
-      getCounterForThreadWithSamples(
-        thread,
-        threadIndex,
-        {
-          time: sampleTimes.slice(),
-          // Power usage numbers. They are pWh so they are pretty big.
-          count: [
-            10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000,
-            20000, 1, 12000, 100000,
-          ],
-          length: SAMPLE_COUNT,
-        },
-        'SystemPower',
-        'power'
-      ),
-    ];
+    const counter = getCounterForThreadWithSamples(
+      thread,
+      threadIndex,
+      {
+        time: sampleTimes.slice(),
+        // Power usage numbers. They are pWh so they are pretty big.
+        count: [
+          10000, 40000, 50000, 100000, 2000000, 5000000, 30000, 1000000, 20000,
+          1, 12000, 100000,
+        ],
+        length: SAMPLE_COUNT,
+      },
+      'SystemPower',
+      'power'
+    );
+    counter.display = {
+      ...counter.display,
+      graphType: 'line-rate',
+      unit: 'pWh',
+      sortWeight: 30,
+      label: 'SystemPower',
+    };
+    profile.counters = [counter];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackPower counterIndex={0} />
+        <TrackCounter counterIndex={0} />
       </Provider>
     );
     const { container } = renderResult;
@@ -94,13 +100,13 @@ describe('TrackPower', function () {
     flushRafCalls();
 
     const canvas = ensureExists(
-      container.querySelector('.timelineTrackPowerCanvas'),
-      `Couldn't find the power canvas, with selector .timelineTrackPowerCanvas`
+      container.querySelector('.timelineTrackCounterCanvas'),
+      `Couldn't find the power canvas, with selector .timelineTrackCounterCanvas`
     );
     const getTooltipContents = () =>
       document.querySelector('.timelineTrackPowerTooltip');
     const getPowerDot = () =>
-      container.querySelector('.timelineTrackPowerGraphDot');
+      container.querySelector('.timelineTrackCounterGraphDot');
     const moveMouseAtCounter = (index: number, pos: number) =>
       fireEvent(
         canvas,

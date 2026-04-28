@@ -1149,6 +1149,12 @@ BottomBox--assembly-code-not-available-title = Samenstellingscode niet beschikba
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Zie <a>issue #4520</a> voor ondersteunde scenario’s en geplande verbeteringen.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Volledig scherm verlaten
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Volledig scherm
 SourceView--close-button =
     .title = Bronweergave sluiten
 

@@ -1,3 +1,6 @@
+# Normalize line endings to LF on all platforms.
+* text=auto eol=lf
+
 # The following are not technically binary, but this makes it so that git does not try
 # and treat them like normal text.
 *.min.js binary

@@ -20,6 +20,7 @@ import {
   closeBottomBox,
   changeShowUserTimings,
   changeStackChartSameWidths,
+  changeIncludeIdleSamples,
   changeSelectedMarker,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
@@ -51,6 +52,7 @@ import {
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  getCounterForThread,
 } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import {
@@ -1234,14 +1236,19 @@ describe('url upgrading', function () {
       expect(query.timelineType).toBeFalsy();
     });
 
-    it('add an explicit category from the url', function () {
+    it('maps the implicit category type to cpu-category', function () {
+      // In v6, the default timeline type was 'category'. The v7 upgrader adds
+      // an explicit 'category' to the URL, which is then parsed as 'cpu-category'
+      // since the two are now equivalent.
       const { getState } = _getStoreWithURL({
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/calltree/',
         search: '',
         v: 6,
       });
 
-      expect(urlStateSelectors.getTimelineType(getState())).toBe('category');
+      expect(urlStateSelectors.getTimelineType(getState())).toBe(
+        'cpu-category'
+      );
 
       const newUrl = new URL(
         urlFromState(urlStateSelectors.getUrlState(getState())),
@@ -1250,7 +1257,7 @@ describe('url upgrading', function () {
       const query = queryString.parse(newUrl.search.substr(1), {
         arrayFormat: 'bracket',
       });
-      expect(query.timelineType).toBe('category');
+      expect(query.timelineType).toBeFalsy();
     });
 
     it('keeps stack category the same', function () {
@@ -1270,6 +1277,142 @@ describe('url upgrading', function () {
         arrayFormat: 'bracket',
       });
       expect(query.timelineType).toBe('stack');
+    });
+  });
+
+  describe('version 16: collapse counter track types into a single counter type', function () {
+    // Build a profile whose pid '222' has one main thread with an IPC marker and
+    // three counters (Memory, power, Bandwidth). This exercises the v16 upgrader:
+    // under the pre-v16 LOCAL_TRACK_INDEX_ORDER the ipc track sat between
+    // 'memory' (slot 2) and 'power' (slot 6), which no longer holds now that all
+    // counters share slot 2.
+    function buildCounterProfile() {
+      const { profile } = getProfileFromTextSamples('A  B  C  D  E');
+      const mainThread = profile.threads[0];
+      mainThread.pid = '222';
+      mainThread.name = 'GeckoMain';
+      mainThread.isMainThread = true;
+      mainThread.processType = 'tab';
+
+      // Push a single IPC marker onto the main thread. The upgrader only
+      // checks markers.data[i].type === 'IPC', so a minimal payload is enough.
+      const stringTable = StringTable.withBackingArray(
+        profile.shared.stringArray
+      );
+      mainThread.markers.name.push(stringTable.indexForString('IPC'));
+      mainThread.markers.phase.push(0);
+      mainThread.markers.startTime.push(0);
+      mainThread.markers.endTime.push(null);
+      mainThread.markers.category.push(0);
+      mainThread.markers.data.push({
+        type: 'IPC',
+        startTime: 0,
+        endTime: 1,
+        otherPid: '333',
+        messageSeqno: 1,
+        messageType: 'Foo',
+        side: 'parent',
+        direction: 'sending',
+        phase: 'endpoint',
+        sync: false,
+      } as any);
+      mainThread.markers.length++;
+
+      const memoryCounter = getCounterForThread(mainThread, 0);
+      memoryCounter.category = 'Memory';
+      memoryCounter.name = 'Memory';
+      const powerCounter = getCounterForThread(mainThread, 0);
+      powerCounter.category = 'power';
+      powerCounter.name = 'Power';
+      const bandwidthCounter = getCounterForThread(mainThread, 0);
+      bandwidthCounter.category = 'Bandwidth';
+      bandwidthCounter.name = 'Bandwidth';
+      profile.counters = [memoryCounter, powerCounter, bandwidthCounter];
+
+      return profile;
+    }
+
+    it('remaps localTrackOrderByPid when counter tracks change position', function () {
+      const profile = buildCounterProfile();
+
+      // Pre-v16 layout for pid '222' (sorted by old LOCAL_TRACK_INDEX_ORDER):
+      //   [0] memory    (slot 2)
+      //   [1] ipc       (slot 3)
+      //   [2] power     (slot 6)
+      //   [3] bandwidth (slot 8)
+      const oldOrder = [3, 2, 1, 0];
+
+      // Post-v16 layout: counters grouped at slot 2, ipc at slot 3.
+      //   [0] memory    (counter, insertion order)
+      //   [1] power     (counter)
+      //   [2] bandwidth (counter)
+      //   [3] ipc
+      const expectedNewOrder = [2, 1, 3, 0];
+
+      const { query } = upgradeLocationToCurrentVersion(
+        {
+          pathname: '',
+          hash: '',
+          query: {
+            v: '15',
+            localTrackOrderByPid:
+              '222-' + encodeUintArrayForUrlComponent(oldOrder),
+          },
+        },
+        profile
+      );
+
+      expect(query.localTrackOrderByPid).toBe(
+        '222-' + encodeUintArrayForUrlComponent(expectedNewOrder)
+      );
+    });
+
+    it('remaps hiddenLocalTracksByPid when counter tracks change position', function () {
+      const profile = buildCounterProfile();
+
+      // Hide the old 'ipc' (index 1) and old 'bandwidth' (index 3).
+      const oldHidden = new Set([1, 3]);
+      // In the new layout those tracks live at indexes 3 (ipc) and 2 (bandwidth).
+      const expectedNewHidden = new Set([3, 2]);
+
+      const { query } = upgradeLocationToCurrentVersion(
+        {
+          pathname: '',
+          hash: '',
+          query: {
+            v: '15',
+            hiddenLocalTracksByPid:
+              '222-' + encodeUintSetForUrlComponent(oldHidden),
+          },
+        },
+        profile
+      );
+
+      expect(query.hiddenLocalTracksByPid).toBe(
+        '222-' + encodeUintSetForUrlComponent(expectedNewHidden)
+      );
+    });
+
+    it('leaves unrelated PIDs untouched', function () {
+      const profile = buildCounterProfile();
+
+      // pid '999' isn't in the profile, so the upgrader has nothing to remap
+      // for it and should leave the segment as-is.
+      const untouched = '999-' + encodeUintArrayForUrlComponent([1, 0]);
+
+      const { query } = upgradeLocationToCurrentVersion(
+        {
+          pathname: '',
+          hash: '',
+          query: {
+            v: '15',
+            localTrackOrderByPid: untouched,
+          },
+        },
+        profile
+      );
+
+      expect(query.localTrackOrderByPid).toBe(untouched);
     });
   });
 
@@ -1656,6 +1799,28 @@ describe('stack chart specific queries', function () {
     expect(
       urlStateSelectors.getStackChartSameWidths(storeAfterReload.getState())
     ).toBe(true);
+  });
+});
+
+describe('"include idle samples" query', function () {
+  it('defaults to true and is absent from the URL', function () {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateSelectors.getIncludeIdleSamples(getState())).toBe(true);
+    expect(getQueryStringFromState(getState())).not.toContain(
+      'hideIdleSamples'
+    );
+  });
+
+  it('persists hideIdleSamples through a URL roundtrip when toggled off', function () {
+    const { getState, dispatch } = _getStoreWithURL();
+
+    dispatch(changeIncludeIdleSamples(false));
+    expect(getQueryStringFromState(getState())).toContain('hideIdleSamples');
+
+    const storeAfterReload = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getIncludeIdleSamples(storeAfterReload.getState())
+    ).toBe(false);
   });
 });
 

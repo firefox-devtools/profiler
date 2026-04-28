@@ -27,12 +27,12 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackMemory"
-        style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
+        class="timelineTrackCounter"
+        style="--graph-height: 25px; --markers-height: 15px;"
       >
         <div
-          class="timelineMarkers timelineMarkersMemory"
-          data-testid="TimelineMarkersMemory"
+          class="timelineMarkers timelineMarkersCounter"
+          data-testid="TimelineMarkersCounter"
         >
           <div
             class="react-contextmenu-wrapper"
@@ -47,11 +47,11 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
           </div>
         </div>
         <div
-          class="timelineTrackMemoryGraph"
+          class="timelineTrackCounterGraph"
         >
           <div>
             <canvas
-              class="timelineTrackMemoryCanvas"
+              class="timelineTrackCounterCanvas"
               height="25"
               width="400"
             />

@@ -5,6 +5,7 @@ import { PureComponent } from 'react';
 
 import { EmptyReasons } from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getIncludeIdleSamples } from 'firefox-profiler/selectors/url-state';
 import { oneLine } from 'common-tags';
 import explicitConnect, {
   type ConnectedProps,
@@ -16,6 +17,7 @@ type StateProps = {
   threadName: string;
   rangeFilteredThread: Thread;
   thread: Thread;
+  includeIdleSamples: boolean;
 };
 
 type Props = ConnectedProps<{}, StateProps, {}>;
@@ -26,7 +28,9 @@ type Props = ConnectedProps<{}, StateProps, {}>;
  */
 class CallTreeEmptyReasonsImpl extends PureComponent<Props> {
   override render() {
-    const { thread, rangeFilteredThread, threadName } = this.props;
+    const { thread, rangeFilteredThread, threadName, includeIdleSamples } =
+      this.props;
+    // FIXME: These strings should be localized.
     let reason;
 
     if (thread.samples.length === 0) {
@@ -34,9 +38,12 @@ class CallTreeEmptyReasonsImpl extends PureComponent<Props> {
     } else if (rangeFilteredThread.samples.length === 0) {
       reason = 'Broaden the selected range to view samples.';
     } else {
+      const idleHint = includeIdleSamples
+        ? ''
+        : ', checking "Include idle samples"';
       reason = oneLine`
-        Try broadening the selected range, removing search terms, or call tree transforms
-        to view samples.
+        Try broadening the selected range, removing search terms${idleHint},
+        or call tree transforms to view samples.
       `;
     }
 
@@ -55,6 +62,7 @@ export const CallTreeEmptyReasons = explicitConnect<{}, StateProps, {}>({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),
     rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
+    includeIdleSamples: getIncludeIdleSamples(state),
   }),
   component: CallTreeEmptyReasonsImpl,
 });

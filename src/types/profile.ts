@@ -3,7 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { Milliseconds, Address, Microseconds, Bytes } from './units';
-import type { MarkerPayload, MarkerSchema, MarkerFormatType } from './markers';
+import type {
+  MarkerPayload,
+  MarkerSchema,
+  MarkerFormatType,
+  MarkerDisplayLocation,
+} from './markers';
 import type { MarkerPhase, ProfilingLog } from './gecko-profile';
 
 export type IndexIntoStackTable = number;
@@ -529,14 +534,35 @@ export type GraphColor =
   | 'teal'
   | 'yellow';
 
+export type CounterGraphType = 'line-accumulated' | 'line-rate';
+
+/**
+ * Specifies how a counter should be displayed in the UI.
+ */
+export type CounterDisplayConfig = {
+  graphType: CounterGraphType;
+  unit: string;
+  color: GraphColor;
+  // The marker schema display location to filter markers for this track,
+  // e.g., "timeline-memory". If null, no markers are shown.
+  markerSchemaLocation: MarkerDisplayLocation | null;
+  // Controls the default display position of this counter track relative to
+  // other tracks. Tracks with lower values appear closer to the top.
+  sortWeight: number;
+  // The human-readable label shown in the track sidebar. For known counter
+  // types this is a friendly name (eg, "Memory"); for generic counters
+  // it falls back to counter.name.
+  label: string;
+};
+
 export type RawCounter = {
   name: string;
   category: string;
   description: string;
-  color?: GraphColor;
   pid: Pid;
   mainThreadIndex: ThreadIndex;
   samples: RawCounterSamplesTable;
+  display: CounterDisplayConfig;
 };
 
 /**
