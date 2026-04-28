@@ -66,6 +66,7 @@ export async function startDevServer(buildConfig, options = {}) {
   // Create build context for watching
   const buildContext = await esbuild.context(buildConfig);
   const { hosts, port: esbuildServerPort } = await buildContext.serve({
+    port: 0,
     host: '127.0.0.1',
     servedir: distDir,
     fallback: fallback ? path.join(distDir, fallback) : undefined,
