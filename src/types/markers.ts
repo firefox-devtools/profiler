@@ -717,7 +717,6 @@ export type BHRMarkerPayload = {
 
 export type LongTaskMarkerPayload = {
   type: 'MainThreadLongTask';
-  category: 'LongTask';
 };
 
 export type JsAllocationPayload_Gecko = {
