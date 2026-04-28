@@ -19,21 +19,27 @@ export function isLocalURL(url: string | URL): boolean {
     if (localhostHostnames.includes(hostname)) {
       return true;
     }
-    // LAN addresses: 10.x.x.x, 172.16.x.x-172.31.x.x, 192.168.x.x
+    // IPv4 ranges:
     if (
-      /^10\./.test(hostname) ||
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
-      /^192\.168\./.test(hostname)
+      /^127\./.test(hostname) || // Loopback 127.0.0.0/8
+      /^10\./.test(hostname) || // Private 10.0.0.0/8
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) || // Private 172.16.0.0/12
+      /^192\.168\./.test(hostname) || // Private 192.168.0.0/16
+      /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(hostname) || // CGNAT 100.64.0.0/10
+      /^169\.254\./.test(hostname) || // Link-local 169.254.0.0/16
+      /^198\.(1[8-9])\./.test(hostname) // Benchmark 198.18.0.0/15
     ) {
       return true;
     }
     // IPv6 local addresses:
     // [fe80::...] (Link-local)
     // [fc00::...] or [fd00::...] (Unique Local Address)
+    // [ff00::...] (Multicast)
     if (
       hostname.startsWith('[fe80:') ||
       hostname.startsWith('[fc00:') ||
-      hostname.startsWith('[fd00:')
+      hostname.startsWith('[fd00:') ||
+      hostname.startsWith('[ff')
     ) {
       return true;
     }

@@ -27,6 +27,10 @@ describe('isLocalURL', () => {
     expect(isLocalURL('http://172.16.0.1')).toBe(true);
     expect(isLocalURL('http://172.31.255.255')).toBe(true);
     expect(isLocalURL('http://192.168.1.1')).toBe(true);
+    expect(isLocalURL('http://100.100.100.100')).toBe(true);
+    expect(isLocalURL('http://169.254.1.1')).toBe(true);
+    expect(isLocalURL('http://198.18.0.1')).toBe(true);
+    expect(isLocalURL('http://127.0.0.2')).toBe(true);
   });
 
   it('should return false for other public IP addresses', () => {
