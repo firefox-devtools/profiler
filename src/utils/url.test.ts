@@ -15,6 +15,12 @@ describe('isLocalURL', () => {
     expect(isLocalURL('http://[::1]')).toBe(true);
   });
 
+  it('should return true for IPv6 local addresses', () => {
+    expect(isLocalURL('http://[fe80::1]')).toBe(true);
+    expect(isLocalURL('http://[fd00::1]')).toBe(true);
+    expect(isLocalURL('http://[fc00::1]')).toBe(true);
+  });
+
   it('should return true for LAN addresses', () => {
     expect(isLocalURL('http://10.0.0.1')).toBe(true);
     expect(isLocalURL('http://10.255.255.255')).toBe(true);

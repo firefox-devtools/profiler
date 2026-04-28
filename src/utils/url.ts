@@ -27,6 +27,16 @@ export function isLocalURL(url: string | URL): boolean {
     ) {
       return true;
     }
+    // IPv6 local addresses:
+    // [fe80::...] (Link-local)
+    // [fc00::...] or [fd00::...] (Unique Local Address)
+    if (
+      hostname.startsWith('[fe80:') ||
+      hostname.startsWith('[fc00:') ||
+      hostname.startsWith('[fd00:')
+    ) {
+      return true;
+    }
     // .local domains or hostnames without dots
     if (hostname.endsWith('.local') || !hostname.includes('.')) {
       return true;
