@@ -15,7 +15,23 @@ export const localhostHostnames: readonly string[] = [
 export function isLocalURL(url: string | URL): boolean {
   try {
     const parsedUrl = url instanceof URL ? url : new URL(url);
-    return localhostHostnames.includes(parsedUrl.hostname);
+    const hostname = parsedUrl.hostname;
+    if (localhostHostnames.includes(hostname)) {
+      return true;
+    }
+    // LAN addresses: 10.x.x.x, 172.16.x.x-172.31.x.x, 192.168.x.x
+    if (
+      /^10\./.test(hostname) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
+      /^192\.168\./.test(hostname)
+    ) {
+      return true;
+    }
+    // .local domains or hostnames without dots
+    if (hostname.endsWith('.local') || !hostname.includes('.')) {
+      return true;
+    }
+    return false;
   } catch (_e) {
     return false;
   }
