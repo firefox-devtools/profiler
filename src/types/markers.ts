@@ -53,6 +53,7 @@ export type MarkerFormatType =
   // Numeric types
 
   // Note: All time and durations are stored as milliseconds.
+  // Except for microseconds and nanoseconds, which are stored in μs and ns.
 
   // For time data that represents a duration of time.
   // e.g. "Label: 5s, 5ms, 5μs"
