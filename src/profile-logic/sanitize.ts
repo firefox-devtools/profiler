@@ -126,6 +126,14 @@ export function sanitizePII(
     stringArray,
   };
 
+  // FIXME: Currently we always sanitize the source contents while publishing.
+  // But we should have a sharing option in the publish panel to be able to
+  // include sources.
+  newShared.sources = {
+    ...newShared.sources,
+    content: Array(newShared.sources.content.length).fill(null),
+  };
+
   let stackFlags: Uint8Array | null = null;
 
   if (windowIdFromPrivateBrowsing.size > 0) {
