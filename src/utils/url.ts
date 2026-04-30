@@ -5,8 +5,11 @@
 export const localhostHostnames: readonly string[] = [
   'localhost',
   '127.0.0.1',
-  '::1',
+  '[::1]',
 ];
+
+// https://regex101.com/r/ChFXjy/2
+const ipv4Regex = /^(?:(?:25[0-5]|2[0-4]\d|1?\d{1,2})(?:\.(?!$)|$)){4}$/;
 
 // Used to determine if a URL (usually one that's provided a profile)
 // is local, and therefore likely to have gone away, meaning we should
@@ -20,37 +23,64 @@ export function isLocalURL(url: string | URL): boolean {
       return true;
     }
     // IPv4 ranges:
-    if (
-      /^127\./.test(hostname) || // Loopback 127.0.0.0/8
-      /^10\./.test(hostname) || // Private 10.0.0.0/8
-      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) || // Private 172.16.0.0/12
-      /^192\.168\./.test(hostname) || // Private 192.168.0.0/16
-      /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(hostname) || // CGNAT 100.64.0.0/10
-      /^169\.254\./.test(hostname) || // Link-local 169.254.0.0/16
-      /^198\.(1[8-9])\./.test(hostname) // Benchmark 198.18.0.0/15
-    ) {
-      return true;
+    if (ipv4Regex.test(hostname)) {
+      if (
+        /^127\./.test(hostname) || // Loopback 127.0.0.0/8
+        /^10\./.test(hostname) || // Private 10.0.0.0/8
+        /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) || // Private 172.16.0.0/12
+        /^192\.168\./.test(hostname) || // Private 192.168.0.0/16
+        /^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(hostname) || // CGNAT 100.64.0.0/10
+        /^169\.254\./.test(hostname) || // Link-local 169.254.0.0/16
+        /^198\.(1[8-9])\./.test(hostname) // Benchmark 198.18.0.0/15
+      ) {
+        return true;
+      }
     }
     // IPv6 local addresses:
     // [fe80::...] (Link-local)
     // [fc00::...] or [fd00::...] (Unique Local Address)
-    // [ff00::...] (Multicast)
     if (
       hostname.startsWith('[fe80:') ||
       hostname.startsWith('[fc00:') ||
-      hostname.startsWith('[fd00:') ||
-      hostname.startsWith('[ff')
+      hostname.startsWith('[fd00:')
     ) {
       return true;
     }
-    // .local domains or hostnames without dots
-    if (hostname.endsWith('.local') || !hostname.includes('.')) {
+    if (isLocalHostName(hostname)) {
       return true;
     }
     return false;
   } catch (_e) {
     return false;
   }
+}
+
+/**
+ * hostname => true
+ * hostname => true
+ * hostname:8080 => true
+ * hostname.local => true
+ * hostname.local:8080 => true
+ * xxx.com=> false
+ * xxx.com:8080 => false
+ * 1.1.1.1=> false
+ * 1.1.1.1:8080 => false
+ * [::1]=> false
+ * [::1]:8080 => false
+ */
+function isLocalHostName(hostname: string): boolean {
+  if (!hostname) {
+    return false;
+  }
+
+  // IPv6 literals are bracketed when parsed from a URL, and IPv4 literals are
+  // dot-delimited numeric segments. Neither should be treated as local
+  // hostnames here; those cases are handled separately in isLocalURL.
+  if (hostname.startsWith('[') || ipv4Regex.test(hostname)) {
+    return false;
+  }
+
+  return hostname.endsWith('.local') || !hostname.includes('.');
 }
 
 /**

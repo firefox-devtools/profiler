@@ -1,5 +1,8 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { isLocalURL } from './url';
+import { isLocalURL } from 'firefox-profiler/utils/url';
 
 describe('isLocalURL', () => {
   it('should return true for localhost', () => {
@@ -19,6 +22,8 @@ describe('isLocalURL', () => {
     expect(isLocalURL('http://[fe80::1]')).toBe(true);
     expect(isLocalURL('http://[fd00::1]')).toBe(true);
     expect(isLocalURL('http://[fc00::1]')).toBe(true);
+    expect(isLocalURL('http://[ff00::1]')).toBe(false);
+    expect(isLocalURL('http://[::ffff:1.1.1.1]')).toBe(false);
   });
 
   it('should return true for LAN addresses', () => {
@@ -52,6 +57,11 @@ describe('isLocalURL', () => {
   it('should return false for public domains', () => {
     expect(isLocalURL('https://firefox.com')).toBe(false);
     expect(isLocalURL('https://profiler.firefox.com')).toBe(false);
+  });
+
+  it('should return false for hostnames that look like IPv4 but have more labels', () => {
+    expect(isLocalURL('http://192.168.1.1.foo.com')).toBe(false);
+    expect(isLocalURL('http://10.0.0.1.example.org')).toBe(false);
   });
 
   it('should return false for invalid URLs', () => {
