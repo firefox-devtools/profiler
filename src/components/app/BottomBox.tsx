@@ -3,12 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import React from 'react';
-import SplitterLayout from 'react-splitter-layout';
 import classNames from 'classnames';
 
 import { SourceView } from '../shared/SourceView';
 import { AssemblyView } from '../shared/AssemblyView';
 import { FullscreenToggleButton } from './FullscreenToggleButton';
+import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
 import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
@@ -249,43 +249,47 @@ class BottomBoxImpl extends React.PureComponent<Props> {
           isFullscreen ? 'bottom-box-fullscreen' : null
         )}
       >
-        <SplitterLayout percentage>
-          <div className="bottom-box-pane">
-            <div className="bottom-box-bar">
-              <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
-              {assemblyViewIsOpen ? null : trailingHeaderButtons}
-            </div>
-            <div className="bottom-sourceview-wrapper">
-              {displayIonGraph ? (
-                <IonGraphView
-                  timings={globalLineTimings}
-                  sourceCode={sourceCode}
-                />
-              ) : null}
-              {displaySourceView ? (
-                <SourceView
-                  timings={globalLineTimings}
-                  sourceCode={sourceCode}
-                  filePath={path}
-                  scrollGeneration={sourceViewScrollGeneration}
-                  scrollToLineNumber={sourceViewScrollToLineNumber}
-                  highlightedLine={sourceViewHighlightedLine}
-                  startLine={sourceViewStartLine}
-                  ref={this._sourceView}
-                />
-              ) : null}
-              {sourceViewCode !== undefined &&
-              sourceViewCode.type === 'LOADING' ? (
-                <CodeLoadingOverlay source={sourceViewCode.source} />
-              ) : null}
-              {sourceViewCode !== undefined &&
-              sourceViewCode.type === 'ERROR' ? (
-                <SourceCodeErrorOverlay errors={sourceViewCode.errors} />
-              ) : null}
-            </div>
+        <div className="bottom-box-pane">
+          <div className="bottom-box-bar">
+            <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
+            {assemblyViewIsOpen ? null : trailingHeaderButtons}
           </div>
+          <div className="bottom-sourceview-wrapper">
+            {displayIonGraph ? (
+              <IonGraphView
+                timings={globalLineTimings}
+                sourceCode={sourceCode}
+              />
+            ) : null}
+            {displaySourceView ? (
+              <SourceView
+                timings={globalLineTimings}
+                sourceCode={sourceCode}
+                filePath={path}
+                scrollGeneration={sourceViewScrollGeneration}
+                scrollToLineNumber={sourceViewScrollToLineNumber}
+                highlightedLine={sourceViewHighlightedLine}
+                startLine={sourceViewStartLine}
+                ref={this._sourceView}
+              />
+            ) : null}
+            {sourceViewCode !== undefined &&
+            sourceViewCode.type === 'LOADING' ? (
+              <CodeLoadingOverlay source={sourceViewCode.source} />
+            ) : null}
+            {sourceViewCode !== undefined && sourceViewCode.type === 'ERROR' ? (
+              <SourceCodeErrorOverlay errors={sourceViewCode.errors} />
+            ) : null}
+          </div>
+        </div>
 
-          {assemblyViewIsOpen ? (
+        {assemblyViewIsOpen ? (
+          <ResizableWithSplitter
+            splitterPosition="start"
+            controlledProperty="width"
+            percent={true}
+            initialSize="50%"
+          >
             <div className="bottom-box-pane">
               <div className="bottom-box-bar">
                 <h3 className="bottom-box-title">
@@ -321,8 +325,8 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                 ) : null}
               </div>
             </div>
-          ) : null}
-        </SplitterLayout>
+          </ResizableWithSplitter>
+        ) : null}
       </div>
     );
   }
