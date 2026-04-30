@@ -1,5 +1,4 @@
-
-import { isLocalURL } from './url';
+import { isLocalURL } from 'firefox-profiler/utils/url';
 
 describe('isLocalURL', () => {
   it('should return true for localhost', () => {
@@ -19,6 +18,8 @@ describe('isLocalURL', () => {
     expect(isLocalURL('http://[fe80::1]')).toBe(true);
     expect(isLocalURL('http://[fd00::1]')).toBe(true);
     expect(isLocalURL('http://[fc00::1]')).toBe(true);
+    expect(isLocalURL('http://[ff00::1]')).toBe(false);
+    expect(isLocalURL('http://[::ffff:1.1.1.1]')).toBe(false);
   });
 
   it('should return true for LAN addresses', () => {

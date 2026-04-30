@@ -5,7 +5,7 @@
 export const localhostHostnames: readonly string[] = [
   'localhost',
   '127.0.0.1',
-  '::1',
+  '[::1]',
 ];
 
 // Used to determine if a URL (usually one that's provided a profile)
@@ -34,23 +34,48 @@ export function isLocalURL(url: string | URL): boolean {
     // IPv6 local addresses:
     // [fe80::...] (Link-local)
     // [fc00::...] or [fd00::...] (Unique Local Address)
-    // [ff00::...] (Multicast)
     if (
       hostname.startsWith('[fe80:') ||
       hostname.startsWith('[fc00:') ||
-      hostname.startsWith('[fd00:') ||
-      hostname.startsWith('[ff')
+      hostname.startsWith('[fd00:')
     ) {
       return true;
     }
-    // .local domains or hostnames without dots
-    if (hostname.endsWith('.local') || !hostname.includes('.')) {
+    if (isLocalHostName(hostname)) {
       return true;
     }
     return false;
   } catch (_e) {
     return false;
   }
+}
+
+/**
+ * http://hostname => true
+ * https://hostname => true
+ * http://hostname:8080 => true
+ * https://hostname.local => true
+ * http://hostname.local:8080 => true
+ * http://xxx.com=> false
+ * http://xxx.com:8080 => false
+ * http://1.1.1.1=> false
+ * http://1.1.1.1:8080 => false
+ * http://[::1]=> false
+ * http://[::1]:8080 => false
+ */
+function isLocalHostName(hostname: string): boolean {
+  if (!hostname) {
+    return false;
+  }
+
+  // IPv6 literals are bracketed when parsed from a URL, and IPv4 literals are
+  // dot-delimited numeric segments. Neither should be treated as local
+  // hostnames here; those cases are handled separately in isLocalURL.
+  if (hostname.startsWith('[') || /^\d+(?:\.\d+){3}$/.test(hostname)) {
+    return false;
+  }
+
+  return hostname.endsWith('.local') || !hostname.includes('.');
 }
 
 /**
