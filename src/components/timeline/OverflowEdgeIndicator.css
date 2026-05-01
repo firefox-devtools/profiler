@@ -6,6 +6,7 @@
   position: relative;
   display: flex;
   width: calc(100% + var(--vertical-scrollbar-reserved-width));
+  min-height: 0;
   flex: 1;
   flex-direction: column;
 }
