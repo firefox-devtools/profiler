@@ -76,7 +76,7 @@
     "clamp": "^1.0.1",
     "classnames": "^2.5.1",
     "common-tags": "^1.8.2",
-    "copy-to-clipboard": "^3.3.3",
+    "copy-to-clipboard": "^4.0.2",
     "core-js": "^3.49.0",
     "devtools-reps": "^0.27.6",
     "escape-string-regexp": "^4.0.0",
