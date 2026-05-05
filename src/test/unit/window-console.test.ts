@@ -120,7 +120,7 @@ describe('console-accessible values on the window object', function () {
         null,
         {
           type: 'Log',
-          level: 1,
+          level: 'Error',
           message:
             'ParentChannelListener::ParentChannelListener [this=7fb5e19b98d0]',
         },
@@ -131,22 +131,27 @@ describe('console-accessible values on the window object', function () {
         null,
         {
           type: 'Log',
-          level: 2,
+          level: 'Warning',
           message: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
         },
       ],
-      ['cubeb', 200, null, { type: 'Log', level: 3, message: 'cubeb_init' }],
+      [
+        'cubeb',
+        200,
+        null,
+        { type: 'Log', level: 'Info', message: 'cubeb_init' },
+      ],
       [
         'AudioStream',
         210,
         null,
-        { type: 'Log', level: 4, message: 'AudioStream init\n' },
+        { type: 'Log', level: 'Debug', message: 'AudioStream init\n' },
       ],
       [
         'VideoSink',
         220,
         null,
-        { type: 'Log', level: 5, message: 'VideoSink::VideoSink' },
+        { type: 'Log', level: 'Verbose', message: 'VideoSink::VideoSink' },
       ],
     ]);
     const store = storeWithProfile(profile);

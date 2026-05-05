@@ -41,6 +41,7 @@ import type {
   MarkerSchemaByName,
   MarkerDisplayLocation,
   Tid,
+  LogMarkerPayload,
 } from 'firefox-profiler/types';
 
 /**
@@ -1583,3 +1584,81 @@ export const stringsToMarkerRegExps = (
     fieldMap,
   };
 };
+
+// In the new Log marker format, the `level` field is a string table index
+// pointing to one of these strings. Map them to the single-letter abbreviations
+// used in MOZ_LOG output (E/W/I/D/V).
+export const LOG_LEVEL_STRING_TO_LETTER: Record<string, string> = {
+  Error: 'E',
+  Warning: 'W',
+  Info: 'I',
+  Debug: 'D',
+  Verbose: 'V',
+};
+
+// Maps MOZ_LOG single-letter level abbreviations to a numeric priority
+// (lower number = higher severity) for filtering comparisons.
+export const LOG_LETTER_TO_LEVEL: Record<string, number> = {
+  E: 1,
+  W: 2,
+  I: 3,
+  D: 4,
+  V: 5,
+};
+
+/**
+ * Format an absolute timestamp (ms since epoch) as a MOZ_LOG date string.
+ * Matches the output format of mozlog: "YYYY-MM-DD HH:MM:SS.mssμs UTC"
+ */
+export function formatLogTimestamp(absoluteMs: number): string {
+  function pad(p: string | number, c: number) {
+    return String(p).padStart(c, '0');
+  }
+  const d = new Date(absoluteMs);
+  // new Date rounds down milliseconds; recover sub-millisecond precision separately.
+  // This will be imperfect because of float rounding errors but still better
+  // than not having them.
+  const ns = Math.trunc((absoluteMs - Math.trunc(absoluteMs)) * 10 ** 6);
+  return (
+    `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)} ` +
+    `${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}.` +
+    `${pad(d.getUTCMilliseconds(), 3)}${pad(ns, 6)} UTC`
+  );
+}
+
+/**
+ * Format a Log marker payload into a MOZ_LOG canonical line.
+ *
+ * Returns null if the entry has no message content and should be skipped.
+ *
+ * Two payload formats are supported:
+ *  - New format: { message, level } where `level` is a string table index
+ *    resolving to "Error" / "Warning" / "Info" / "Debug" / "Verbose", and the
+ *    module name is taken from the marker's `name` field (also a string table
+ *    index, passed here as `moduleName`).
+ *  - Legacy format: { name, module } where `module` may include a level prefix
+ *    ("D/nsHttp") or just a bare module name ("nsHttp").
+ */
+export function formatLogStatement(
+  timestampStr: string,
+  processName: string,
+  pid: number | string,
+  threadName: string,
+  data: LogMarkerPayload,
+  moduleName: string,
+  stringArray: string[]
+): string | null {
+  if ('message' in data) {
+    if (!data.message) {
+      return null;
+    }
+    const levelStr = stringArray[data.level] ?? '';
+    const levelLetter = LOG_LEVEL_STRING_TO_LETTER[levelStr] ?? 'D';
+    return `${timestampStr} - [${processName} ${pid}: ${threadName}]: ${levelLetter}/${moduleName} ${data.message.trim()}`;
+  }
+  if (!data.name) {
+    return null;
+  }
+  const prefix = data.module.includes('/') ? '' : 'D/';
+  return `${timestampStr} - [${processName} ${pid}: ${threadName}]: ${prefix}${data.module} ${data.name.trim()}`;
+}

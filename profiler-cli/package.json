@@ -1,0 +1,44 @@
+{
+  "name": "@firefox-devtools/profiler-cli",
+  "version": "0.1.0",
+  "description": "Command-line interface for querying Firefox Profiler profiles with persistent daemon sessions",
+  "scripts": {
+    "prepublishOnly": "node ../scripts/verify-profiler-cli-build.mjs"
+  },
+  "main": "./dist/profiler-cli.js",
+  "bin": {
+    "profiler-cli": "dist/profiler-cli.js",
+    "pq": "dist/profiler-cli.js"
+  },
+  "files": [
+    "dist/profiler-cli.js"
+  ],
+  "engines": {
+    "node": ">= 24"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": ">= 24"
+    }
+  },
+  "keywords": [
+    "profiler",
+    "firefox",
+    "performance",
+    "profiling",
+    "cli",
+    "performance-analysis"
+  ],
+  "author": "Mozilla DevTools",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firefox-devtools/profiler.git",
+    "directory": "profiler-cli"
+  },
+  "homepage": "https://profiler.firefox.com",
+  "bugs": {
+    "url": "https://github.com/firefox-devtools/profiler/issues"
+  }
+}

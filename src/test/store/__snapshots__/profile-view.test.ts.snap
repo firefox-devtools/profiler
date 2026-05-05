@@ -278,6 +278,11 @@ Object {
             "key": "name",
             "label": "Name",
           },
+          Object {
+            "format": "unique-string",
+            "key": "level",
+            "label": "Level",
+          },
         ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",

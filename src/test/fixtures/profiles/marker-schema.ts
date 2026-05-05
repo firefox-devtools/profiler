@@ -114,6 +114,8 @@ export const markerSchemaForTests: MarkerSchema[] = [
     fields: [
       { key: 'module', label: 'Module', format: 'string' },
       { key: 'name', label: 'Name', format: 'string' },
+      // New format: level is a string table index ("Error"/"Warning"/"Info"/"Debug"/"Verbose").
+      { key: 'level', label: 'Level', format: 'unique-string' },
     ],
   },
   {

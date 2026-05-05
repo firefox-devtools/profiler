@@ -633,6 +633,14 @@ export type ChromeEventPayload = {
 /**
  * Gecko includes rich log information. This marker payload is used to mirror that
  * log information in the profile.
+ *
+ * Two formats are in use:
+ *  - Legacy: { name, module } where module may be "D/nsHttp" (level prefix
+ *    included) or just "nsHttp" (bare module name, implicitly Debug level).
+ *  - New:    { level, message } where `level` is a string table index resolving
+ *    to "Error" / "Warning" / "Info" / "Debug" / "Verbose", the module name is
+ *    taken from the marker's own name field, and an optional `color` hint may
+ *    be present.
  */
 export type LogMarkerPayload =
   | {
@@ -642,8 +650,10 @@ export type LogMarkerPayload =
     }
   | {
       type: 'Log';
+      // String table index resolving to "Error", "Warning", "Info", "Debug", or "Verbose".
       level: number;
       message: string;
+      color?: string;
     };
 
 export type DOMEventMarkerPayload = {

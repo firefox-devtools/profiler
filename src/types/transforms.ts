@@ -24,10 +24,25 @@ import type { ImplementationFilter } from './actions';
 
 /**
  * This type represents the filter types for the 'filter-samples' transform.
- * Currently the only filter type is 'marker-search', but in the future we may
- * add more types of filters.
+ *
+ * - 'marker-search': keep only samples whose timestamp falls within a matching marker range.
+ * - 'outside-marker': keep only samples whose timestamp falls OUTSIDE any matching marker range.
+ * - 'function-include': keep only samples whose stack contains any of the given functions
+ *   (encoded as comma-separated funcIndexes in the `filter` string).
+ * - 'stack-prefix': keep only samples whose stack starts with the given sequence of functions
+ *   (encoded as comma-separated funcIndexes, root-first).
+ * - 'stack-suffix': keep only samples whose leaf frame is the given function
+ *   (encoded as a single funcIndex).
+ *
+ * Note: 'outside-marker', 'function-include', 'stack-prefix', and 'stack-suffix' are used
+ * by the profiler-cli tool only and are not serialized to profile URLs.
  */
-export type FilterSamplesType = 'marker-search';
+export type FilterSamplesType =
+  | 'marker-search'
+  | 'outside-marker'
+  | 'function-include'
+  | 'stack-prefix'
+  | 'stack-suffix';
 
 /*
  * Define all of the transforms on an object to conveniently access mapped types and do
@@ -369,13 +384,11 @@ export type TransformDefinitions = {
   };
 
   /**
-   * Filter the samples in the thread by the filter.
-   * Currently it only supports filtering by the marker name but can be extended
-   * to support more filters in the future.
+   * Filter the samples in the thread by the filter. See FilterSamplesType for
+   * the supported filter types.
    */
   'filter-samples': {
     readonly type: 'filter-samples';
-    // Expand this type when you need to support more than just the marker.
     readonly filterType: FilterSamplesType;
     readonly filter: string;
   };
