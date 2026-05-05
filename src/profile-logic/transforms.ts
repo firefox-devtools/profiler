@@ -317,6 +317,15 @@ export function parseTransforms(transformString: string): TransformStack {
         const filterString = filter.join('-');
         const filterType = convertToFullFilterType(shortFilterType);
 
+        if (filterType !== 'marker-search') {
+          // profiler-cli-only filter types are not supported in the frontend.
+          console.error(
+            'A profiler-cli-only filter-samples type was found in the URL and will be ignored.',
+            filterType
+          );
+          break;
+        }
+
         transforms.push({
           type: 'filter-samples',
           filterType,
@@ -338,6 +347,15 @@ function convertToFullFilterType(shortFilterType: string): FilterSamplesType {
   switch (shortFilterType) {
     case 'm':
       return 'marker-search';
+    // profiler-cli-only types:
+    case 'om':
+      return 'outside-marker';
+    case 'fi':
+      return 'function-include';
+    case 'sp':
+      return 'stack-prefix';
+    case 'ss':
+      return 'stack-suffix';
     default:
       throw new Error('Unknown filter type.');
   }
@@ -350,6 +368,15 @@ function convertToShortFilterType(filterType: FilterSamplesType): string {
   switch (filterType) {
     case 'marker-search':
       return 'm';
+    // profiler-cli-only types:
+    case 'outside-marker':
+      return 'om';
+    case 'function-include':
+      return 'fi';
+    case 'stack-prefix':
+      return 'sp';
+    case 'stack-suffix':
+      return 'ss';
     default:
       throw assertExhaustiveCheck(filterType);
   }
@@ -457,6 +484,14 @@ export function getTransformLabelL10nIds(
               'TransformNavigator--drop-samples-outside-of-markers-matching',
             item: transform.filter,
           };
+        // profiler-cli-only filter types:
+        case 'outside-marker':
+        case 'function-include':
+        case 'stack-prefix':
+        case 'stack-suffix':
+          throw new Error(
+            `getTransformLabelL10nIds: profiler-cli-only filter type "${transform.filterType}" is not supported in the frontend transform navigator.`
+          );
         default:
           throw assertExhaustiveCheck(transform.filterType);
       }
@@ -1730,70 +1765,169 @@ export function filterSamples(
   filter: string
 ): Thread {
   return timeCode('filterSamples', () => {
-    // Find the ranges to filter.
-    function getFilterRanges(): StartEndRange[] {
-      switch (filterType) {
-        case 'marker-search':
-          return _findRangesByMarkerFilter(
+    const { stackTable, frameTable } = thread;
+
+    switch (filterType) {
+      case 'function-include': {
+        // Keep only samples whose stack contains at least one of the given functions.
+        // The filter string is comma-separated funcIndexes.
+        if (!filter) {
+          throw new Error(
+            'function-include filter requires a non-empty filter string.'
+          );
+        }
+        const funcIndexes = new Set(filter.split(',').map(Number));
+        // stackHasFunc[i] = 1 if stack i or any of its prefixes contains one of the functions.
+        const stackHasFunc = new Uint8Array(stackTable.length);
+        for (let i = 0; i < stackTable.length; i++) {
+          const prefix = stackTable.prefix[i];
+          const f = frameTable.func[stackTable.frame[i]];
+          if (funcIndexes.has(f) || (prefix !== null && stackHasFunc[prefix])) {
+            stackHasFunc[i] = 1;
+          }
+        }
+        return updateThreadStacks(thread, stackTable, (stack) =>
+          stack !== null && !stackHasFunc[stack] ? null : stack
+        );
+      }
+
+      case 'stack-suffix': {
+        // Keep only samples whose leaf frame (the sample's direct stack) is the given function.
+        // The filter string is a single funcIndex.
+        if (!filter) {
+          throw new Error(
+            'stack-suffix filter requires a non-empty filter string.'
+          );
+        }
+        const targetFunc = Number(filter);
+        return updateThreadStacks(thread, stackTable, (stack) => {
+          if (stack === null) {
+            return null;
+          }
+          return frameTable.func[stackTable.frame[stack]] === targetFunc
+            ? stack
+            : null;
+        });
+      }
+
+      case 'stack-prefix': {
+        // Keep only samples whose stack starts with the given root-first sequence of functions.
+        // The filter string is comma-separated funcIndexes (root frame first).
+        if (!filter) {
+          throw new Error(
+            'stack-prefix filter requires a non-empty filter string.'
+          );
+        }
+        const prefixFuncs = filter.split(',').map(Number);
+        // matchDepth[i]: -1 = no match started; 1..N = number of prefix levels matched so far.
+        // When matchDepth[i] >= prefixFuncs.length the full prefix is matched and all
+        // descendants are valid.
+        const matchDepth = new Int32Array(stackTable.length).fill(-1);
+        for (let i = 0; i < stackTable.length; i++) {
+          const prefix = stackTable.prefix[i];
+          const f = frameTable.func[stackTable.frame[i]];
+          if (prefix === null) {
+            // Root frame: must match the first element of the prefix.
+            if (f === prefixFuncs[0]) {
+              matchDepth[i] = 1;
+            }
+          } else {
+            const pd = matchDepth[prefix];
+            if (pd < 0) {
+              // Parent did not start matching — skip.
+            } else if (pd >= prefixFuncs.length) {
+              // Parent already fully matched the prefix — all descendants are valid.
+              matchDepth[i] = pd;
+            } else if (f === prefixFuncs[pd]) {
+              matchDepth[i] = pd + 1;
+            }
+          }
+        }
+        return updateThreadStacks(thread, stackTable, (stack) =>
+          stack !== null && matchDepth[stack] < prefixFuncs.length
+            ? null
+            : stack
+        );
+      }
+
+      case 'marker-search':
+      case 'outside-marker': {
+        // Range-based filters: keep samples within (marker-search) or outside
+        // (outside-marker) the time ranges of matching markers.
+        const markerRanges = canonicalizeRangeSet(
+          _findRangesByMarkerFilter(
             getMarker,
             markerIndexes,
             markerSchemaByName,
             thread.stringTable,
             categoryList,
             filter
-          );
-        default:
-          throw assertExhaustiveCheck(filterType);
-      }
-    }
+          )
+        );
+        const keepInsideRanges = filterType === 'marker-search';
 
-    const ranges = canonicalizeRangeSet(getFilterRanges());
+        function computeFilteredStackColumn(
+          originalStackColumn: Array<IndexIntoStackTable | null>,
+          timeColumn: Milliseconds[]
+        ): Array<IndexIntoStackTable | null> {
+          const newStackColumn = originalStackColumn.slice();
+          let sampleIndex = 0;
+          const sampleCount = timeColumn.length;
 
-    function computeFilteredStackColumn(
-      originalStackColumn: Array<IndexIntoStackTable | null>,
-      timeColumn: Milliseconds[]
-    ): Array<IndexIntoStackTable | null> {
-      const newStackColumn = originalStackColumn.slice();
-
-      // Walk the ranges and samples in order. Both are sorted by time.
-      // For each range, drop the samples before the range and skip the samples
-      // inside the range.
-      let sampleIndex = 0;
-      const sampleCount = timeColumn.length;
-      for (const range of ranges) {
-        const { start: rangeStart, end: rangeEnd } = range;
-        // Drop samples before the range.
-        for (; sampleIndex < sampleCount; sampleIndex++) {
-          if (timeColumn[sampleIndex] >= rangeStart) {
-            break;
+          if (keepInsideRanges) {
+            // Keep samples INSIDE ranges; drop everything else.
+            for (const range of markerRanges) {
+              const { start: rangeStart, end: rangeEnd } = range;
+              for (; sampleIndex < sampleCount; sampleIndex++) {
+                if (timeColumn[sampleIndex] >= rangeStart) {
+                  break;
+                }
+                newStackColumn[sampleIndex] = null;
+              }
+              for (; sampleIndex < sampleCount; sampleIndex++) {
+                if (timeColumn[sampleIndex] >= rangeEnd) {
+                  break;
+                }
+              }
+            }
+            while (sampleIndex < sampleCount) {
+              newStackColumn[sampleIndex] = null;
+              sampleIndex++;
+            }
+          } else {
+            // Keep samples OUTSIDE ranges; drop samples inside each range.
+            for (const range of markerRanges) {
+              const { start: rangeStart, end: rangeEnd } = range;
+              for (; sampleIndex < sampleCount; sampleIndex++) {
+                if (timeColumn[sampleIndex] >= rangeStart) {
+                  break;
+                }
+              }
+              for (; sampleIndex < sampleCount; sampleIndex++) {
+                if (timeColumn[sampleIndex] >= rangeEnd) {
+                  break;
+                }
+                newStackColumn[sampleIndex] = null;
+              }
+            }
+            // Remaining samples after the last range are kept (they are outside all ranges).
           }
-          newStackColumn[sampleIndex] = null;
+
+          return newStackColumn;
         }
 
-        // Skip over samples inside the range.
-        for (; sampleIndex < sampleCount; sampleIndex++) {
-          if (timeColumn[sampleIndex] >= rangeEnd) {
-            break;
-          }
-        }
+        return updateThreadStacksByGeneratingNewStackColumns(
+          thread,
+          thread.stackTable,
+          computeFilteredStackColumn,
+          computeFilteredStackColumn,
+          (markerData) => markerData
+        );
       }
 
-      // Drop the remaining samples, i.e. the samples after the last range.
-      while (sampleIndex < sampleCount) {
-        newStackColumn[sampleIndex] = null;
-        sampleIndex++;
-      }
-
-      return newStackColumn;
+      default:
+        throw assertExhaustiveCheck(filterType);
     }
-
-    return updateThreadStacksByGeneratingNewStackColumns(
-      thread,
-      thread.stackTable,
-      computeFilteredStackColumn,
-      computeFilteredStackColumn,
-      (markerData) => markerData
-    );
   });
 }
 
@@ -2066,9 +2200,54 @@ export function translateTransform(
     }
     case 'filter-samples': {
       switch (transform.filterType) {
-        case 'marker-search': {
-          // This transform doesn't contain any data which needs to be translated.
+        case 'marker-search':
+        case 'outside-marker':
+          // These filter by marker name string — no indices to remap.
           return transform;
+        case 'stack-suffix': {
+          // Single funcIndex encoded as a decimal string.
+          const newFuncIndex = translateFuncIndex(
+            Number(transform.filter),
+            translationMaps
+          );
+          if (newFuncIndex === null) {
+            return null;
+          }
+          return { ...transform, filter: String(newFuncIndex) };
+        }
+        case 'stack-prefix': {
+          // Comma-separated funcIndexes (root-first). The entire prefix is
+          // invalid if any element is missing after translation.
+          const translated = [];
+          for (const raw of transform.filter.split(',')) {
+            const newFuncIndex = translateFuncIndex(
+              Number(raw),
+              translationMaps
+            );
+            if (newFuncIndex === null) {
+              return null;
+            }
+            translated.push(newFuncIndex);
+          }
+          return { ...transform, filter: translated.join(',') };
+        }
+        case 'function-include': {
+          // Comma-separated funcIndexes. Drop missing ones; if all are gone,
+          // drop the transform.
+          const translated = [];
+          for (const raw of transform.filter.split(',')) {
+            const newFuncIndex = translateFuncIndex(
+              Number(raw),
+              translationMaps
+            );
+            if (newFuncIndex !== null) {
+              translated.push(newFuncIndex);
+            }
+          }
+          if (translated.length === 0) {
+            return null;
+          }
+          return { ...transform, filter: translated.join(',') };
         }
         default:
           throw assertExhaustiveCheck(transform.filterType);

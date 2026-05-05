@@ -97,3 +97,61 @@ To deploy on nginx (without support for direct upload from the Firefox UI), run 
 and point nginx at the `dist` directory, which needs to be at the root of the webserver. Additionally,
 a `error_page 404 =200 /index.html;` directive needs to be added so that unknown URLs respond with index.html.
 For a more production-ready configuration, have a look at the netlify [`_headers`](/res/_headers) file.
+
+# Publishing profiler-cli to npm
+
+The [`@firefox-devtools/profiler-cli`](https://www.npmjs.com/package/@firefox-devtools/profiler-cli)
+package is published to npm from this repository. It provides a command-line
+interface for querying Firefox Profiler profiles — see
+[`profiler-cli/README.md`](../profiler-cli/README.md) for usage.
+
+## Prerequisites
+
+- Be logged in to npm (`npm login`) with publish access to the `@firefox-devtools` scope.
+- Make sure the working tree is clean and you are on the commit you want to publish.
+- Run `yarn test-all` (or at least `yarn test-cli`) to confirm the CLI still builds and passes tests.
+
+## Bump the version
+
+Edit the `version` field in [`profiler-cli/package.json`](../profiler-cli/package.json),
+then land the version bump on `main` before publishing.
+
+## Publish
+
+From the repository root:
+
+```
+yarn publish-profiler-cli
+```
+
+[`scripts/publish-profiler-cli.mjs`](../scripts/publish-profiler-cli.mjs) will:
+
+1. Run `yarn build-profiler-cli` to produce `profiler-cli/dist/profiler-cli.js` (a
+   single self-contained bundle with no runtime dependencies).
+2. Run `npm publish profiler-cli/`, picking `--tag next` when the version
+   contains `-` (e.g. `0.1.0-next.1`) and `--tag latest` otherwise.
+3. Trigger the `prepublishOnly` hook in `profiler-cli/package.json`, which runs
+   [`scripts/verify-profiler-cli-build.mjs`](../scripts/verify-profiler-cli-build.mjs)
+   to confirm the bundle exists and embeds the current `package.json` version —
+   this guards against publishing a stale build.
+
+Extra arguments are forwarded to `npm publish`. For example:
+
+```
+# Build and verify, but do not actually publish.
+yarn publish-profiler-cli --dry-run
+
+# Override the automatic dist-tag.
+yarn publish-profiler-cli --tag alpha
+```
+
+## Verify the release
+
+After publishing, confirm the new version is listed on
+[npm](https://www.npmjs.com/package/@firefox-devtools/profiler-cli) and installs
+cleanly:
+
+```
+npm install -g @firefox-devtools/profiler-cli@latest
+profiler-cli --version
+```

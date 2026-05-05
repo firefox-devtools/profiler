@@ -18,6 +18,7 @@ export default defineConfig(
     ignores: [
       'src/profile-logic/import/proto/**',
       'src/types/libdef/npm/**',
+      'profiler-cli/dist/**',
       'res/**',
       'dist/**',
       'node-tools-dist/**',
@@ -253,7 +254,7 @@ export default defineConfig(
 
   // Test files override
   {
-    files: ['src/test/**/*'],
+    files: ['src/test/**/*', 'profiler-cli/src/test/**/*'],
     languageOptions: {
       globals: {
         ...globals.jest,

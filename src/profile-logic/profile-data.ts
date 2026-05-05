@@ -4360,6 +4360,32 @@ export function getNativeSymbolsForCallNode(
 }
 
 /**
+ * Return all native symbols whose frames are associated with the given function,
+ * across all call paths and all occurrences of the function in the call tree.
+ *
+ * This is the function-level counterpart to getNativeSymbolsForCallNode, which
+ * operates on a single call node (one specific path through the call tree).
+ * Use this when you need assembly coverage for an entire function regardless of
+ * how it was called, and getNativeSymbolsForCallNode when you need it for a
+ * specific call site.
+ */
+export function getNativeSymbolsForFunc(
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable
+): Set<IndexIntoNativeSymbolTable> {
+  const set = new Set<IndexIntoNativeSymbolTable>();
+  for (let frameIndex = 0; frameIndex < frameTable.func.length; frameIndex++) {
+    if (frameTable.func[frameIndex] === funcIndex) {
+      const nativeSymbol = frameTable.nativeSymbol[frameIndex];
+      if (nativeSymbol !== null) {
+        set.add(nativeSymbol);
+      }
+    }
+  }
+  return set;
+}
+
+/**
  * Return the total of the sample weights per native symbol, by
  * accumulating the weight from samples which contribute to the
  * call node of interest's total time.

@@ -508,6 +508,7 @@ export function getStackAndSampleSelectorsPerThread(
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getFunctionListTree,
+    getFunctionListTimings,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,

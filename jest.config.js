@@ -2,21 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-module.exports = {
-  testMatch: ['<rootDir>/src/**/*.test.{js,jsx,ts,tsx}'],
-  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
-
-  // Use custom resolver that respects the "browser" field in package.json
-  resolver: './jest-resolver.js',
-
+// Shared config for projects that need a browser-like (jsdom) environment.
+// CLI unit tests use the same environment because they import browser-side
+// fixtures to construct profile data.
+const browserEnvConfig = {
   testEnvironment: './src/test/custom-environment',
   setupFilesAfterEnv: ['jest-extended/all', './src/test/setup.ts'],
-
-  collectCoverageFrom: [
-    'src/**/*.{js,jsx,ts,tsx}',
-    '!**/node_modules/**',
-    '!src/types/libdef/**',
-  ],
+  moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  resolver: './jest-resolver.js',
 
   transform: {
     '\\.([jt]sx?|mjs)$': 'babel-jest',
@@ -43,5 +36,61 @@ module.exports = {
     escapeString: true,
     printBasicPrototype: true,
   },
-  verbose: false,
+};
+
+const allProjects = [
+  // ========================================================================
+  // Browser Tests (React/browser environment)
+  // ========================================================================
+  {
+    ...browserEnvConfig,
+    displayName: 'browser',
+    testMatch: ['<rootDir>/src/**/*.test.{js,jsx,ts,tsx}'],
+
+    collectCoverageFrom: [
+      'src/**/*.{js,jsx,ts,tsx}',
+      '!**/node_modules/**',
+      '!src/types/libdef/**',
+    ],
+  },
+
+  // ========================================================================
+  // CLI Unit Tests (browser/jsdom environment - imports browser-side fixtures)
+  // ========================================================================
+  {
+    ...browserEnvConfig,
+    displayName: 'cli',
+    testMatch: ['<rootDir>/profiler-cli/src/test/unit/**/*.test.ts'],
+  },
+
+  // ========================================================================
+  // CLI Integration Tests (Node.js environment - spawns real processes)
+  // ========================================================================
+  {
+    displayName: 'cli-integration',
+    testMatch: ['<rootDir>/profiler-cli/src/test/integration/**/*.test.ts'],
+
+    testEnvironment: 'node',
+
+    setupFilesAfterEnv: ['./profiler-cli/src/test/integration/setup.ts'],
+
+    // Integration tests can be slow (loading profiles, spawning processes)
+    testTimeout: 30000,
+
+    moduleFileExtensions: ['ts', 'js'],
+
+    transform: {
+      '\\.([jt]sx?|mjs)$': 'babel-jest',
+    },
+  },
+];
+
+// Filter projects by JEST_PROJECTS env var (comma-separated displayNames).
+// Preferred over --selectProjects because that CLI flag is variadic and
+// swallows positional args like `yarn test process-profile.ts`.
+const filter = process.env.JEST_PROJECTS;
+module.exports = {
+  projects: filter
+    ? allProjects.filter((p) => filter.split(',').includes(p.displayName))
+    : allProjects,
 };

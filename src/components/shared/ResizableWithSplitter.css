@@ -1,0 +1,43 @@
+.resizableWithSplitterOuter,
+.resizableWithSplitterInner {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: inherit;
+}
+
+.resizableWithSplitterOuter.resizesWidth {
+  min-width: 10px;
+}
+
+.resizableWithSplitterOuter.resizesHeight {
+  min-height: 10px;
+}
+
+.resizableWithSplitterInner {
+  overflow: hidden;
+  flex: 1;
+}
+
+.resizableWithSplitterSplitter {
+  flex-shrink: 0;
+  background-color: var(--wide-splitter-color);
+}
+
+.resizableWithSplitterSplitter:hover {
+  background-color: var(--wide-splitter-hover-color);
+}
+
+.resizableWithSplitterSplitter.dragging {
+  background-color: var(--wide-splitter-pressed-color);
+}
+
+.resizableWithSplitterSplitter.resizesWidth {
+  width: 5px;
+  cursor: col-resize;
+}
+
+.resizableWithSplitterSplitter.resizesHeight {
+  height: 5px;
+  cursor: row-resize;
+}
