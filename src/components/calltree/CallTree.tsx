@@ -110,7 +110,7 @@ class CallTreeImpl extends PureComponent<Props> {
             {
               propName: 'totalPercent',
               titleL10nId: '',
-              initialWidth: 50,
+              initialWidth: 55,
               hideDividerAfter: true,
             },
             {
@@ -119,20 +119,20 @@ class CallTreeImpl extends PureComponent<Props> {
               minWidth: 30,
               initialWidth: 70,
               resizable: true,
-              headerWidthAdjustment: 50,
+              headerWidthAdjustment: 55,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--tracing-ms-self',
-              minWidth: 30,
-              initialWidth: 70,
+              minWidth: 40,
+              initialWidth: 80,
               resizable: true,
             },
             {
               propName: 'icon',
               titleL10nId: '',
               component: Icon as any,
-              initialWidth: 10,
+              initialWidth: 20,
             },
           ];
         case 'samples':
@@ -140,7 +140,7 @@ class CallTreeImpl extends PureComponent<Props> {
             {
               propName: 'totalPercent',
               titleL10nId: '',
-              initialWidth: 50,
+              initialWidth: 55,
               hideDividerAfter: true,
             },
             {
@@ -149,20 +149,20 @@ class CallTreeImpl extends PureComponent<Props> {
               minWidth: 30,
               initialWidth: 70,
               resizable: true,
-              headerWidthAdjustment: 50,
+              headerWidthAdjustment: 55 /* totalPercent initialWidth */,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--samples-self',
-              minWidth: 30,
-              initialWidth: 70,
+              minWidth: 40,
+              initialWidth: 80,
               resizable: true,
             },
             {
               propName: 'icon',
               titleL10nId: '',
               component: Icon as any,
-              initialWidth: 10,
+              initialWidth: 20,
             },
           ];
         case 'bytes':
@@ -170,7 +170,7 @@ class CallTreeImpl extends PureComponent<Props> {
             {
               propName: 'totalPercent',
               titleL10nId: '',
-              initialWidth: 50,
+              initialWidth: 55,
               hideDividerAfter: true,
             },
             {
@@ -179,20 +179,20 @@ class CallTreeImpl extends PureComponent<Props> {
               minWidth: 30,
               initialWidth: 140,
               resizable: true,
-              headerWidthAdjustment: 50,
+              headerWidthAdjustment: 55,
             },
             {
               propName: 'self',
               titleL10nId: 'CallTree--bytes-self',
-              minWidth: 30,
-              initialWidth: 90,
+              minWidth: 40,
+              initialWidth: 100,
               resizable: true,
             },
             {
               propName: 'icon',
               titleL10nId: '',
               component: Icon as any,
-              initialWidth: 10,
+              initialWidth: 20,
             },
           ];
         default:

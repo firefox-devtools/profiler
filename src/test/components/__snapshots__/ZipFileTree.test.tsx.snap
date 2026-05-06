@@ -139,7 +139,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     foo
                   </span>
@@ -161,7 +161,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     bar
                   </span>
@@ -182,7 +182,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json"
@@ -207,7 +207,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=foo%2Fprofile2.json"
@@ -233,7 +233,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     baz
                   </span>
@@ -254,7 +254,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json"
@@ -280,7 +280,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     boat
                   </span>
@@ -302,7 +302,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     ship
                   </span>
@@ -324,7 +324,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     new
                   </span>
@@ -346,7 +346,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     anything
                   </span>
@@ -368,7 +368,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     explore
                   </span>
@@ -390,7 +390,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     yes
                   </span>
@@ -411,7 +411,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=boat%2Fship%2Fnew%2Fanything%2Fexplore%2Fyes%2Fprofile4.json"
@@ -437,7 +437,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     not
                   </span>
@@ -459,7 +459,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     a
                   </span>
@@ -480,7 +480,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                     class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    class="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=not%2Fa%2Fprofile.pdf"
