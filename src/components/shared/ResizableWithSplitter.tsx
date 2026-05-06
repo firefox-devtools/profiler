@@ -16,10 +16,10 @@ type Props = {
   controlledProperty:
     | 'width'
     | 'height'
-    | 'min-width'
-    | 'min-height'
-    | 'max-width'
-    | 'max-height';
+    | 'minWidth'
+    | 'minHeight'
+    | 'maxWidth'
+    | 'maxHeight';
   // The initial size, as a valid CSS length. For example "200px" or "30%".
   // This prop is read only once, during the initial render.
   initialSize: string;
@@ -55,7 +55,10 @@ export function ResizableWithSplitter({
   const [size, setSize] = React.useState(initialSize);
   const [dragging, setDragging] = React.useState(false);
   const dragState = React.useRef<DragState | null>(null);
-  const isWidth = controlledProperty.endsWith('width');
+  const isWidth =
+    controlledProperty === 'width' ||
+    controlledProperty === 'maxWidth' ||
+    controlledProperty === 'minWidth';
   const orientClassName = isWidth ? 'resizesWidth' : 'resizesHeight';
 
   const onPointerDown = React.useCallback(
