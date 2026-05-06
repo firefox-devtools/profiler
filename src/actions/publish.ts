@@ -17,17 +17,32 @@ import {
   getDataSource,
   getProfileNameForStorage,
   getUrlPredictor,
+  getGlobalTrackOrder,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getLocalTrackOrderByPid,
+  getTabFilter,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getZeroAt,
   getCommittedRange,
+  getGlobalTracks,
+  getLocalTracksByPid,
+  getTabToThreadIndexesMap,
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import {
+  computeGlobalTracks,
+  computeLocalTracksByPid,
+  computeOldTrackIndexToNewTrackIndexMap,
+  computeHiddenTracksAfterSanitization,
+  computeTrackOrderAfterSanitization,
+} from 'firefox-profiler/profile-logic/tracks';
 
 import type {
   Action,
@@ -36,6 +51,11 @@ import type {
   StartEndRange,
   State,
   Profile,
+  Pid,
+  RawCounter,
+  CounterIndex,
+  ThreadIndex,
+  TrackIndex,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
@@ -232,6 +252,47 @@ async function persistJustUploadedProfileInformationToDb(
   }
 }
 
+/**
+ * Map each old CounterIndex to its new CounterIndex across a sanitization
+ * step. Sanitization removes counters whose parent thread is removed; the
+ * survivors keep their relative order. Each counter is identified by
+ * (pid, category, name, mainThreadIndex), with the old-side mainThreadIndex
+ * normalized through `oldThreadIndexToNew`.
+ */
+function _computeOldCounterIndexToNew(
+  oldCounters: RawCounter[] | null | undefined,
+  newCounters: RawCounter[] | null | undefined,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): Map<CounterIndex, CounterIndex> {
+  const result = new Map<CounterIndex, CounterIndex>();
+  if (!oldCounters || !newCounters) {
+    return result;
+  }
+  const newKeyToIndex = new Map<string, CounterIndex>();
+  for (let i = 0; i < newCounters.length; i++) {
+    const c = newCounters[i];
+    newKeyToIndex.set(
+      `${c.pid}|${c.category}|${c.name}|${c.mainThreadIndex}`,
+      i
+    );
+  }
+  for (let i = 0; i < oldCounters.length; i++) {
+    const c = oldCounters[i];
+    const newMainThreadIndex = oldThreadIndexToNew.get(c.mainThreadIndex);
+    if (newMainThreadIndex === undefined) {
+      // The counter's parent thread is gone in the new profile, so the
+      // counter is gone too.
+      continue;
+    }
+    const key = `${c.pid}|${c.category}|${c.name}|${newMainThreadIndex}`;
+    const newIndex = newKeyToIndex.get(key);
+    if (newIndex !== undefined) {
+      result.set(i, newIndex);
+    }
+  }
+  return result;
+}
+
 export type ProfileEncodingResult =
   | {
       type: 'SUCCESS';
@@ -413,6 +474,95 @@ export function attemptToPublish(
       if (removeProfileInformation) {
         const { committedRanges, translationMaps, profile } =
           sanitizedInformation;
+
+        // When sanitization re-indexed tracks, translate the URL state's
+        // track-index references through old → new track-index space so the
+        // user's choices for tracks that survived sanitization stay attached
+        // to the right tracks.
+        let remappedHiddenGlobalTracks: Set<TrackIndex> | null = null;
+        let remappedGlobalTrackOrder: TrackIndex[] | null = null;
+        let remappedHiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null =
+          null;
+        let remappedLocalTrackOrderByPid: Map<Pid, TrackIndex[]> | null = null;
+
+        const oldThreadIndexToNew = translationMaps?.oldThreadIndexToNew;
+        if (oldThreadIndexToNew) {
+          const oldProfile = getProfile(prePublishedState);
+          const oldCounterIndexToNew = _computeOldCounterIndexToNew(
+            oldProfile.counters,
+            profile.counters,
+            oldThreadIndexToNew
+          );
+
+          const tabToThreadIndexesMap =
+            getTabToThreadIndexesMap(prePublishedState);
+          const tabFilter = getTabFilter(prePublishedState);
+          const newGlobalTracks = computeGlobalTracks(
+            profile,
+            tabFilter,
+            tabToThreadIndexesMap
+          );
+          const newLocalTracksByPid = computeLocalTracksByPid(
+            profile,
+            newGlobalTracks
+          );
+
+          const oldGlobalTracks = getGlobalTracks(prePublishedState);
+          const oldLocalTracksByPid = getLocalTracksByPid(prePublishedState);
+
+          const globalOldToNew = computeOldTrackIndexToNewTrackIndexMap({
+            oldTracks: oldGlobalTracks,
+            newTracks: newGlobalTracks,
+            oldThreadIndexToNew,
+            oldCounterIndexToNew,
+          });
+
+          remappedHiddenGlobalTracks = computeHiddenTracksAfterSanitization({
+            oldHiddenTracks: getHiddenGlobalTracks(prePublishedState),
+            oldTrackIndexToNewTrackIndex: globalOldToNew,
+          });
+          remappedGlobalTrackOrder = computeTrackOrderAfterSanitization({
+            oldTrackOrder: getGlobalTrackOrder(prePublishedState),
+            oldTrackIndexToNewTrackIndex: globalOldToNew,
+          });
+
+          remappedHiddenLocalTracksByPid = new Map();
+          remappedLocalTrackOrderByPid = new Map();
+          const oldHiddenLocalByPid =
+            getHiddenLocalTracksByPid(prePublishedState);
+          const oldLocalOrderByPid = getLocalTrackOrderByPid(prePublishedState);
+
+          for (const [pid, newLocalTracks] of newLocalTracksByPid) {
+            const oldLocalTracks = oldLocalTracksByPid.get(pid) ?? [];
+            const localOldToNew = computeOldTrackIndexToNewTrackIndexMap({
+              oldTracks: oldLocalTracks,
+              newTracks: newLocalTracks,
+              oldThreadIndexToNew,
+              oldCounterIndexToNew,
+            });
+            const oldHiddenForPid = oldHiddenLocalByPid.get(pid);
+            if (oldHiddenForPid !== undefined) {
+              remappedHiddenLocalTracksByPid.set(
+                pid,
+                computeHiddenTracksAfterSanitization({
+                  oldHiddenTracks: oldHiddenForPid,
+                  oldTrackIndexToNewTrackIndex: localOldToNew,
+                })
+              );
+            }
+            const oldOrderForPid = oldLocalOrderByPid.get(pid);
+            if (oldOrderForPid !== undefined) {
+              remappedLocalTrackOrderByPid.set(
+                pid,
+                computeTrackOrderAfterSanitization({
+                  oldTrackOrder: oldOrderForPid,
+                  oldTrackIndexToNewTrackIndex: localOldToNew,
+                })
+              );
+            }
+          }
+        }
+
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
@@ -423,7 +573,11 @@ export function attemptToPublish(
             committedRanges,
             translationMaps,
             profileName,
-            prePublishedState
+            prePublishedState,
+            remappedHiddenGlobalTracks,
+            remappedGlobalTrackOrder,
+            remappedHiddenLocalTracksByPid,
+            remappedLocalTrackOrderByPid
           )
         );
 
@@ -504,13 +658,22 @@ export function resetUploadState(): Action {
 /**
  * Report to the UrlState that the profile was sanitized. This will re-map any stored
  * indexes or information that has been sanitized away.
+ *
+ * The four track-index payload fields carry URL state translated into the
+ * post-sanitization track-index space when sanitization re-indexed tracks
+ * (translationMaps.oldThreadIndexToNew is non-null). They are null when no
+ * remap is needed; in that case the existing reducer state is left untouched.
  */
 export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
   translationMaps: ProfileIndexTranslationMaps | null,
   profileName: string,
-  prePublishedState: State | null
+  prePublishedState: State | null,
+  hiddenGlobalTracks: Set<TrackIndex> | null = null,
+  globalTrackOrder: TrackIndex[] | null = null,
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null = null,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]> | null = null
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_PUBLISHED',
@@ -519,6 +682,10 @@ export function profileSanitized(
     translationMaps,
     profileName,
     prePublishedState,
+    hiddenGlobalTracks,
+    globalTrackOrder,
+    hiddenLocalTracksByPid,
+    localTrackOrderByPid,
   };
 }
 

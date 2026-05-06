@@ -558,6 +558,14 @@ type UrlStateAction =
       readonly translationMaps: ProfileIndexTranslationMaps | null;
       readonly profileName: string;
       readonly prePublishedState: State | null;
+      // URL-state track-index references in the post-sanitization track-index
+      // space, populated when sanitization re-indexed tracks
+      // (translationMaps.oldThreadIndexToNew is non-null). When null, the
+      // existing reducer state is left untouched.
+      readonly hiddenGlobalTracks: Set<TrackIndex> | null;
+      readonly globalTrackOrder: TrackIndex[] | null;
+      readonly hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null;
+      readonly localTrackOrderByPid: Map<Pid, TrackIndex[]> | null;
     }
   | {
       readonly type: 'SET_DATA_SOURCE';

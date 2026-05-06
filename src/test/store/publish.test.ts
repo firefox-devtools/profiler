@@ -32,11 +32,19 @@ import {
   getPathInZipFileFromUrl,
   getHash,
   getTransformStack,
+  getHiddenGlobalTracks,
 } from '../../selectors/url-state';
-import { getHasPreferenceMarkers } from '../../selectors/profile';
+import {
+  getHasPreferenceMarkers,
+  getGlobalTracks,
+} from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addRawMarkersToThread,
+  makeCompositorScreenshot,
+} from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithFakeGlobalTrack,
   getHumanReadableTracks,
@@ -551,6 +559,74 @@ describe('attemptToPublish', function () {
     // Verify that the call tree structure is preserved after sanitization.
     const callTreeAfter = selectedThreadSelectors.getCallTree(getState());
     expect(formatTree(callTreeAfter)).toEqual(['- C (total: 1, self: 1)']);
+  });
+
+  it('keeps a hidden screenshot track hidden after sanitization', async function () {
+    const { profile } = getProfileFromTextSamples('A', 'B');
+
+    // Cause sanitization on publish.
+    profile.meta.updateChannel = 'release';
+
+    // Two main threads in different processes.
+    profile.threads[0].name = 'GeckoMain';
+    profile.threads[0].isMainThread = true;
+    profile.threads[0].pid = '111';
+    profile.threads[1].name = 'GeckoMain';
+    profile.threads[1].isMainThread = true;
+    profile.threads[1].pid = '222';
+
+    // Add a CompositorScreenshot marker to thread 0 (pid 111) so a screenshot
+    // global track is created.
+    addRawMarkersToThread(profile.threads[0], profile.shared, [
+      makeCompositorScreenshot(0.5),
+    ]);
+
+    const store = storeWithProfile(profile);
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+      setupFakeUploadsWithStore(store);
+
+    // Keep screenshots in the sanitized profile so the screenshot track
+    // survives sanitization (only the hidden thread will be removed).
+    dispatch(updateSharingOption('includeScreenshots', true));
+
+    // Locate the global track indexes.
+    const globalTracksBefore = getGlobalTracks(getState());
+    const screenshotTrackIndex = globalTracksBefore.findIndex(
+      (t) => t.type === 'screenshots'
+    );
+    const secondProcessTrackIndex = globalTracksBefore.findIndex(
+      (t) => t.type === 'process' && t.pid === '222'
+    );
+    expect(screenshotTrackIndex).toBeGreaterThanOrEqual(0);
+    expect(secondProcessTrackIndex).toBeGreaterThanOrEqual(0);
+
+    // Hide both: the screenshot track stays in the profile (because
+    // includeScreenshots is true), but pid 222 is sanitized away (because
+    // includeHiddenThreads is false by default for release-channel profiles).
+    dispatch(hideGlobalTrack(screenshotTrackIndex));
+    dispatch(hideGlobalTrack(secondProcessTrackIndex));
+
+    expect(getHiddenGlobalTracks(getState())).toEqual(
+      new Set([screenshotTrackIndex, secondProcessTrackIndex])
+    );
+
+    // Publish with sanitization.
+    const publishAttempt = dispatch(attemptToPublish());
+    resolveUpload(JWT_TOKEN);
+    await assertUploadSuccess(publishAttempt);
+
+    // After publish, the screenshot track should still exist and still be
+    // hidden in the URL state, with its TrackIndex remapped to the post-
+    // sanitization position.
+    const globalTracksAfter = getGlobalTracks(getState());
+    const newScreenshotTrackIndex = globalTracksAfter.findIndex(
+      (t) => t.type === 'screenshots'
+    );
+    expect(newScreenshotTrackIndex).toBeGreaterThanOrEqual(0);
+
+    expect(getHiddenGlobalTracks(getState())).toEqual(
+      new Set([newScreenshotTrackIndex])
+    );
   });
 
   describe('with zip files', function () {
