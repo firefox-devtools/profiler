@@ -266,6 +266,9 @@ export async function startNewDaemon(
   const scriptPath = process.argv[1];
 
   const daemonArgs = [
+    // Make fetch respect HTTP_PROXY/HTTPS_PROXY/NO_PROXY. This is the default
+    // in a lot of tools like, curl, python, go etc.
+    '--use-env-proxy',
     scriptPath,
     '--daemon',
     absolutePath,
