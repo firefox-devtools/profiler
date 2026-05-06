@@ -12,6 +12,7 @@
  */
 
 import * as fs from 'fs';
+import * as net from 'net';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import type { SessionMetadata } from './protocol';
@@ -141,36 +142,45 @@ export function getCurrentSocketPath(sessionDir: string): string | null {
 }
 
 /**
- * Check if a process is running.
+ * Check if a daemon is reachable by attempting a socket connection.
+ * Works for both Unix domain sockets and Windows named pipes.
  */
-export function isProcessRunning(pid: number): boolean {
-  try {
-    // Sending signal 0 checks if process exists without killing it
-    process.kill(pid, 0);
-    return true;
-  } catch (_error) {
-    return false;
-  }
+export async function isDaemonReachable(socketPath: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = net.connect(socketPath);
+    socket.setTimeout(1000);
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.on('error', () => {
+      resolve(false);
+    });
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
+  });
 }
 
 /**
- * Wait for a process to exit.
+ * Wait for a daemon's socket to become unreachable (i.e. for the daemon to stop).
  */
-export async function waitForProcessExit(
-  pid: number,
+export async function waitForSocketClose(
+  socketPath: string,
   timeoutMs: number = 5000,
   pollIntervalMs: number = 50
 ): Promise<boolean> {
   const deadline = Date.now() + timeoutMs;
 
   while (Date.now() < deadline) {
-    if (!isProcessRunning(pid)) {
+    if (!(await isDaemonReachable(socketPath))) {
       return true;
     }
     await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
   }
 
-  return !isProcessRunning(pid);
+  return !(await isDaemonReachable(socketPath));
 }
 
 /**
@@ -202,25 +212,19 @@ export function cleanupSession(sessionDir: string, sessionId: string): void {
 }
 
 /**
- * Validate that a session is healthy (process running, socket exists).
+ * Validate that a session is healthy (daemon reachable via socket).
  * If not, clean up stale files.
  */
-export function validateSession(
+export async function validateSession(
   sessionDir: string,
   sessionId: string
-): SessionMetadata | null {
+): Promise<SessionMetadata | null> {
   const metadata = loadSessionMetadata(sessionDir, sessionId);
   if (!metadata) {
     return null;
   }
 
-  // Check if process is still running
-  if (!isProcessRunning(metadata.pid)) {
-    return null;
-  }
-
-  // Check if socket exists (Unix only — named pipes on Windows are not filesystem files)
-  if (process.platform !== 'win32' && !fs.existsSync(metadata.socketPath)) {
+  if (!(await isDaemonReachable(metadata.socketPath))) {
     return null;
   }
 

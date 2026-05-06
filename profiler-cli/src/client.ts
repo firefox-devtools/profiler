@@ -22,10 +22,10 @@ import {
   getCurrentSessionId,
   getCurrentSocketPath,
   getSocketPath,
-  isProcessRunning,
+  isDaemonReachable,
   loadSessionMetadata,
   validateSession,
-  waitForProcessExit,
+  waitForSocketClose,
 } from './session';
 import { BUILD_HASH } from './constants';
 
@@ -77,17 +77,8 @@ async function sendMessageToSocket(
 async function attemptShutdownOnBuildMismatch(
   sessionDir: string,
   sessionId: string,
-  socketPath: string,
-  pid: number
+  socketPath: string
 ): Promise<BuildMismatchShutdownResult> {
-  if (process.platform !== 'win32' && !fs.existsSync(socketPath)) {
-    if (!isProcessRunning(pid)) {
-      cleanupSession(sessionDir, sessionId);
-      return 'already-dead';
-    }
-    return 'still-running';
-  }
-
   try {
     const response = await sendMessageToSocket(
       socketPath,
@@ -99,10 +90,12 @@ async function attemptShutdownOnBuildMismatch(
       console.error(
         `Failed to stop mismatched daemon for session ${sessionId}: unexpected response ${response.type}`
       );
-      return isProcessRunning(pid) ? 'still-running' : 'already-dead';
+      return (await isDaemonReachable(socketPath))
+        ? 'still-running'
+        : 'already-dead';
     }
 
-    const exited = await waitForProcessExit(pid);
+    const exited = await waitForSocketClose(socketPath);
     if (!exited) {
       console.error(
         `Mismatched daemon for session ${sessionId} acknowledged shutdown but did not exit within timeout`
@@ -113,7 +106,7 @@ async function attemptShutdownOnBuildMismatch(
     cleanupSession(sessionDir, sessionId);
     return 'stopped';
   } catch (error) {
-    if (!isProcessRunning(pid)) {
+    if (!(await isDaemonReachable(socketPath))) {
       cleanupSession(sessionDir, sessionId);
       return 'already-dead';
     }
@@ -140,7 +133,7 @@ async function sendRawMessage(
   }
 
   // Validate the session
-  if (!validateSession(sessionDir, resolvedSessionId)) {
+  if (!(await validateSession(sessionDir, resolvedSessionId))) {
     cleanupSession(sessionDir, resolvedSessionId);
     throw new Error(
       `Session ${resolvedSessionId} is not running or is invalid.`
@@ -153,8 +146,7 @@ async function sendRawMessage(
     const shutdownResult = await attemptShutdownOnBuildMismatch(
       sessionDir,
       resolvedSessionId,
-      metadata.socketPath,
-      metadata.pid
+      metadata.socketPath
     );
 
     const shutdownMessage =
@@ -250,7 +242,7 @@ export async function startNewDaemon(
   const targetSessionId = sessionId || generateSessionId();
 
   if (sessionId) {
-    const existingSession = validateSession(sessionDir, targetSessionId);
+    const existingSession = await validateSession(sessionDir, targetSessionId);
     if (existingSession) {
       throw new Error(
         `Session ${targetSessionId} is already running. Stop it first or choose a different session id.`
@@ -302,14 +294,14 @@ export async function startNewDaemon(
     attempts++;
 
     // Validate the session (checks metadata exists, process running, socket exists)
-    if (validateSession(sessionDir, targetSessionId)) {
+    if (await validateSession(sessionDir, targetSessionId)) {
       // Daemon is validated and running
       break;
     }
   }
 
   // Check if daemon started successfully after polling
-  if (!validateSession(sessionDir, targetSessionId)) {
+  if (!(await validateSession(sessionDir, targetSessionId))) {
     throw new Error(
       `Failed to start daemon: session not validated after ${daemonStartMaxAttempts * 50}ms`
     );
