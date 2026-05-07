@@ -1775,6 +1775,17 @@ export function changeFunctionListSort(sort: SingleColumnSortState[]): Action {
   };
 }
 
+export function changeFunctionListSectionOpen(
+  section: 'descendants' | 'ancestors' | 'self',
+  isOpen: boolean
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
+    section,
+    isOpen,
+  };
+}
+
 export function changeNetworkSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_NETWORK_SEARCH_STRING',

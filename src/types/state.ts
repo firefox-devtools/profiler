@@ -406,6 +406,13 @@ export type ProfileSpecificUrlState = {
   selectedMarkers: SelectedMarkersPerThread;
   markerTableSort: SingleColumnSortState[];
   functionListSort: SingleColumnSortState[];
+  functionListSectionsOpen: FunctionListSectionsOpenState;
+};
+
+export type FunctionListSectionsOpenState = {
+  descendants: boolean;
+  ancestors: boolean;
+  self: boolean;
 };
 
 export type UrlState = {
