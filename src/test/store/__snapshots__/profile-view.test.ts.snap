@@ -4435,7 +4435,6 @@ Object {
     "_table": Map {},
   },
   "lastSeenTransformCount": 1,
-  "selectedFunctionIndex": null,
   "selectedInvertedCallNodePath": Array [],
   "selectedLowerWingCallNodePath": Array [],
   "selectedNetworkMarker": null,

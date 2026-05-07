@@ -42,6 +42,7 @@ import type {
   IndexIntoFrameTable,
   MarkerIndex,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
   FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 import {
@@ -189,6 +190,7 @@ type CallTreeQuery = BaseQuery & {
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
   funcListSections?: string; // "descendants,self" — comma-separated open sections
+  selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
 type MarkersQuery = BaseQuery & {
@@ -238,6 +240,7 @@ type Query = BaseQuery & {
   // Function list specific
   functionListSort?: string;
   funcListSections?: string;
+  selectedFunc?: number;
 
   // Network specific
   networkSearch?: string;
@@ -400,6 +403,14 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         query.funcListSections = convertFunctionListSectionsOpenToString(
           urlState.profileSpecific.functionListSectionsOpen
         );
+        query.selectedFunc =
+          selectedThreadsKey !== null &&
+          urlState.profileSpecific.selectedFunctions[selectedThreadsKey] !==
+            null &&
+          urlState.profileSpecific.selectedFunctions[selectedThreadsKey] !==
+            undefined
+            ? urlState.profileSpecific.selectedFunctions[selectedThreadsKey]
+            : undefined;
       }
       break;
     }
@@ -563,6 +574,19 @@ export function stateFromLocation(
     }
   }
 
+  // Parse the selected function for the current thread
+  const selectedFunctions: SelectedFunctionsPerThread = {};
+  if (
+    selectedThreadsKey !== null &&
+    query.selectedFunc !== undefined &&
+    query.selectedFunc !== null
+  ) {
+    const funcIndex = Number(query.selectedFunc);
+    if (Number.isInteger(funcIndex) && funcIndex >= 0) {
+      selectedFunctions[selectedThreadsKey] = funcIndex;
+    }
+  }
+
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -654,6 +678,7 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      selectedFunctions,
       markerTableSort: convertMarkerTableSortFromString(query.markerSort),
       functionListSort: convertFunctionListSortFromString(
         query.functionListSort

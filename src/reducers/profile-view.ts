@@ -193,7 +193,6 @@ export const defaultThreadViewOptions: ThreadViewOptions = {
   expandedInvertedCallNodePaths: new PathSet(),
   expandedLowerWingCallNodePaths: new PathSet(),
   expandedUpperWingCallNodePaths: new PathSet(),
-  selectedFunctionIndex: null,
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
 };
@@ -343,17 +342,19 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
 
       const threadState = _getThreadViewOptions(state, threadsKey);
 
-      const previousSelectedFunction = threadState.selectedFunctionIndex;
+      const previousLowerWingPath = threadState.selectedLowerWingCallNodePath;
+      const isSameSelection =
+        selectedFunctionIndex === null
+          ? previousLowerWingPath.length === 0
+          : previousLowerWingPath.length === 1 &&
+            previousLowerWingPath[0] === selectedFunctionIndex;
 
-      // If the selected function doesn't actually change, let's return the previous
-      // state to avoid rerenders.
-      if (selectedFunctionIndex === previousSelectedFunction) {
+      if (isSameSelection) {
         return state;
       }
 
       if (selectedFunctionIndex !== null) {
         return _updateThreadViewOptions(state, threadsKey, {
-          selectedFunctionIndex,
           selectedLowerWingCallNodePath: [selectedFunctionIndex],
           expandedLowerWingCallNodePaths: new PathSet([
             [selectedFunctionIndex],
@@ -366,7 +367,10 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       }
 
       return _updateThreadViewOptions(state, threadsKey, {
-        selectedFunctionIndex,
+        selectedLowerWingCallNodePath: [],
+        expandedLowerWingCallNodePaths: new PathSet(),
+        selectedUpperWingCallNodePath: [],
+        expandedUpperWingCallNodePaths: new PathSet(),
       });
     }
     case 'CHANGE_INVERT_CALLSTACK': {
@@ -506,8 +510,48 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      const { transforms } = action.newUrlState.profileSpecific;
-      return objectMap(state, (viewOptions, threadsKey) => {
+      const { transforms, selectedFunctions } = action.newUrlState.profileSpecific;
+
+      // The selected function lives in URL state; mirror it into the per-thread
+      // wing paths so that initial loads and back/forward navigation restore the
+      // wings to the right function.
+      const newState: ThreadViewOptionsPerThreads = { ...state };
+      for (const threadsKey of Object.keys(selectedFunctions)) {
+        const selectedFunctionIndex = selectedFunctions[threadsKey];
+        const viewOptions = _getThreadViewOptions(newState, threadsKey);
+        const previousLowerWingPath = viewOptions.selectedLowerWingCallNodePath;
+        const matchesExisting =
+          selectedFunctionIndex === null
+            ? previousLowerWingPath.length === 0
+            : previousLowerWingPath.length === 1 &&
+              previousLowerWingPath[0] === selectedFunctionIndex;
+        if (matchesExisting) {
+          continue;
+        }
+        if (selectedFunctionIndex === null) {
+          newState[threadsKey] = {
+            ...viewOptions,
+            selectedLowerWingCallNodePath: [],
+            expandedLowerWingCallNodePaths: new PathSet(),
+            selectedUpperWingCallNodePath: [],
+            expandedUpperWingCallNodePaths: new PathSet(),
+          };
+        } else {
+          newState[threadsKey] = {
+            ...viewOptions,
+            selectedLowerWingCallNodePath: [selectedFunctionIndex],
+            expandedLowerWingCallNodePaths: new PathSet([
+              [selectedFunctionIndex],
+            ]),
+            selectedUpperWingCallNodePath: [selectedFunctionIndex],
+            expandedUpperWingCallNodePaths: new PathSet([
+              [selectedFunctionIndex],
+            ]),
+          };
+        }
+      }
+
+      return objectMap(newState, (viewOptions, threadsKey) => {
         const transformStack = transforms[threadsKey] || [];
         const newTransformCount = transformStack.length;
         const oldTransformCount = viewOptions.lastSeenTransformCount;

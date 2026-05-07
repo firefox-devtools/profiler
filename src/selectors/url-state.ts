@@ -32,6 +32,7 @@ import type {
   TabID,
   IndexIntoSourceTable,
   MarkerIndex,
+  IndexIntoFuncTable,
   FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 
@@ -253,6 +254,12 @@ export const getSelectedMarker: DangerousSelectorWithArguments<
   ThreadsKey
 > = (state, threadsKey) =>
   getProfileSpecificState(state).selectedMarkers[threadsKey] ?? null;
+
+export const getSelectedFunction: DangerousSelectorWithArguments<
+  IndexIntoFuncTable | null,
+  ThreadsKey
+> = (state, threadsKey) =>
+  getProfileSpecificState(state).selectedFunctions[threadsKey] ?? null;
 
 export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
   const tab = getSelectedTab(state);
