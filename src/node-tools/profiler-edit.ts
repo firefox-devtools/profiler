@@ -15,6 +15,10 @@ import {
 } from 'firefox-profiler/profile-logic/symbolication';
 import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
+import {
+  applyWasmSymbolication,
+  type WasmSymbolicationSpec,
+} from 'firefox-profiler/profile-logic/wasm-symbolication';
 import type { Profile } from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -30,6 +34,10 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  * Examples:
  *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json \
  *     --symbolicate-with-server http://localhost:8001/abcdef/
+ *
+ *   node node-tools-dist/profiler-edit.js -i input.json.gz -o out.json.gz \
+ *     --symbolicate-wasm http://host/a.wasm=./a-unstripped.wasm \
+ *     --symbolicate-wasm http://host/b.wasm=./b-unstripped.wasm
  */
 
 type ProfileSource =
@@ -37,10 +45,36 @@ type ProfileSource =
   | { type: 'URL'; url: string }
   | { type: 'HASH'; hash: string };
 
+// Describes one --symbolicate-wasm argument: a local unstripped wasm file that
+// supplies symbol names, plus (optionally) the URL of the stripped wasm in the
+// profile to which those names should be applied. If `strippedWasmUrl` is
+// omitted, the profile must contain exactly one .wasm source, which is used.
+interface WasmSymbolicationCliSpec {
+  // Path to the local unstripped .wasm file (with a "name" custom section).
+  unstrippedWasmPath: string;
+  // URL of the matching stripped wasm as it appears in the profile.
+  strippedWasmUrl?: string;
+}
+
 export interface CliOptions {
   input: ProfileSource;
   output: string;
   symbolicateWithServer?: string;
+  symbolicateWasm: WasmSymbolicationCliSpec[];
+}
+
+function loadWasmSymbolicationSpecs(
+  cliSpecs: WasmSymbolicationCliSpec[]
+): WasmSymbolicationSpec[] {
+  return cliSpecs.map((spec) => {
+    console.log(`Reading wasm symbols from ${spec.unstrippedWasmPath}`);
+    const buf = fs.readFileSync(spec.unstrippedWasmPath);
+    return {
+      bytes: new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength),
+      url: spec.strippedWasmUrl,
+      label: spec.unstrippedWasmPath,
+    };
+  });
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -144,6 +178,11 @@ export async function run(options: CliOptions) {
     profile.meta.symbolicated = true;
   }
 
+  applyWasmSymbolication(
+    profile,
+    loadWasmSymbolicationSpecs(options.symbolicateWasm)
+  );
+
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
   console.log(`Saving profile to ${options.output}`);
@@ -197,6 +236,35 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     throw new Error('An output path must be supplied with --output / -o');
   }
 
+  const symbolicateWasm: WasmSymbolicationCliSpec[] = [];
+  const rawWasmArg = argv['symbolicate-wasm'];
+  let wasmArgs: unknown[];
+  if (rawWasmArg === undefined) {
+    wasmArgs = [];
+  } else if (Array.isArray(rawWasmArg)) {
+    wasmArgs = rawWasmArg;
+  } else {
+    wasmArgs = [rawWasmArg];
+  }
+  for (const arg of wasmArgs) {
+    if (typeof arg !== 'string' || arg === '') {
+      throw new Error('--symbolicate-wasm requires a value');
+    }
+    // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
+    // whole string as a path and infer the URL from the profile. Split on
+    // the last `=` so URLs containing `=` (e.g. in query strings) survive
+    // intact; this assumes file paths don't contain `=`.
+    const eqIndex = arg.lastIndexOf('=');
+    if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(arg.slice(0, eqIndex))) {
+      symbolicateWasm.push({
+        strippedWasmUrl: arg.slice(0, eqIndex),
+        unstrippedWasmPath: arg.slice(eqIndex + 1),
+      });
+    } else {
+      symbolicateWasm.push({ unstrippedWasmPath: arg });
+    }
+  }
+
   return {
     input: sources[0],
     output: argv.output,
@@ -205,6 +273,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       argv['symbolicate-with-server'] !== ''
         ? argv['symbolicate-with-server']
         : undefined,
+    symbolicateWasm,
   };
 }
 
