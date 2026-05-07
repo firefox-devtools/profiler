@@ -79,6 +79,13 @@ jobs:
       - name: Build node tools
         run: yarn build-node-tools
 
+      - name: Upload node-tools-dist artifact
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: node-tools-dist
+          path: node-tools-dist/
+
   licence-check:
     runs-on: ${{ matrix.os }}
     strategy:
