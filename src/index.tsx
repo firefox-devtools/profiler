@@ -12,7 +12,6 @@ import '../res/css/style.css';
 import '../res/css/global.css';
 import '../res/css/categories.css';
 import '../res/css/network.css';
-import 'react-splitter-layout/lib/index.css';
 import 'devtools-reps/reps.css';
 
 // React imported for JSX in Root component

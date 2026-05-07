@@ -2229,6 +2229,213 @@ describe('"filter-samples" transform', function () {
       dispatch(popTransformsFromStack(0));
     });
   });
+
+  describe('outside-marker filter type', function () {
+    // Same sample layout as the marker-search tests above:
+    //   t=0: A→B→C   t=1: A→B→C→D   t=2: A→C   t=3: A→B→E   t=4: A→F
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  C  B  F
+      C  C     E
+         D
+    `);
+    const threadIndex = 0;
+    addMarkersToThreadWithCorrespondingSamples(
+      profile.threads[threadIndex],
+      profile.shared,
+      [
+        [
+          'DOMEvent',
+          0,
+          0.5,
+          { type: 'DOMEvent', latency: 7, eventType: 'click' },
+        ],
+        [
+          'UserTiming',
+          1.5,
+          2.5,
+          { type: 'UserTiming', name: 'measure-2', entryType: 'measure' },
+        ],
+        [
+          'UserTiming',
+          2.5,
+          3.5,
+          { type: 'UserTiming', name: 'measure-2', entryType: 'measure' },
+        ],
+      ]
+    );
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('keeps samples outside a single marker range', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'outside-marker',
+          filter: 'DOMEvent',
+        })
+      );
+      // t=0 is inside DOMEvent (0–0.5); t=1,2,3,4 are kept.
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 4, self: —)',
+        '  - B (total: 2, self: —)',
+        '    - C (total: 1, self: —)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '  - C (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('keeps samples outside multiple marker ranges', function () {
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'outside-marker',
+          filter: 'UserTiming',
+        })
+      );
+      // t=2 and t=3 are inside UserTiming ranges; t=0,1,4 are kept.
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 2, self: —)',
+        '    - C (total: 2, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+      dispatch(popTransformsFromStack(0));
+    });
+  });
+
+  describe('function-include filter type', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  C  B  F
+      C  C     E
+         D
+    `);
+    const threadIndex = 0;
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('keeps only samples whose stack contains the specified function', function () {
+      const B = funcNames.indexOf('B');
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'function-include',
+          filter: String(B),
+        })
+      );
+      // t=0 (A→B→C), t=1 (A→B→C→D), t=3 (A→B→E) contain B; t=2 and t=4 do not.
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+      ]);
+      dispatch(popTransformsFromStack(0));
+    });
+
+    it('keeps samples containing any of the specified functions', function () {
+      const B = funcNames.indexOf('B');
+      const F = funcNames.indexOf('F');
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'function-include',
+          filter: `${B},${F}`,
+        })
+      );
+      // t=0,1,3 contain B; t=4 contains F; t=2 is dropped.
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 4, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+        '  - F (total: 1, self: 1)',
+      ]);
+      dispatch(popTransformsFromStack(0));
+    });
+  });
+
+  describe('stack-prefix filter type', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  C  B  F
+      C  C     E
+         D
+    `);
+    const threadIndex = 0;
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('keeps only samples whose stack starts with the specified prefix', function () {
+      const A = funcNames.indexOf('A');
+      const B = funcNames.indexOf('B');
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'stack-prefix',
+          filter: `${A},${B}`,
+        })
+      );
+      // t=0 (A→B→C), t=1 (A→B→C→D), t=3 (A→B→E) start with A→B; t=2 and t=4 do not.
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 3, self: —)',
+        '  - B (total: 3, self: —)',
+        '    - C (total: 2, self: 1)',
+        '      - D (total: 1, self: 1)',
+        '    - E (total: 1, self: 1)',
+      ]);
+      dispatch(popTransformsFromStack(0));
+    });
+  });
+
+  describe('stack-suffix filter type', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  C  B  F
+      C  C     E
+         D
+    `);
+    const threadIndex = 0;
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    it('keeps only samples whose leaf frame is the specified function', function () {
+      const C = funcNames.indexOf('C');
+      dispatch(
+        addTransformToStack(threadIndex, {
+          type: 'filter-samples',
+          filterType: 'stack-suffix',
+          filter: String(C),
+        })
+      );
+      // t=0 (A→B→C) and t=2 (A→C) have C as their leaf; the rest do not.
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: 2, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: 1)',
+        '  - C (total: 1, self: 1)',
+      ]);
+      dispatch(popTransformsFromStack(0));
+    });
+  });
 });
 
 describe('expanded and selected CallNodePaths', function () {

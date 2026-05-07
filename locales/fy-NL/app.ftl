@@ -823,6 +823,8 @@ StackSettings--call-tree-strategy-native-deallocations-sites = De-allokaasje fan
     .title = Gearfetting oan de hân fan de de-allokearre bytes ûnthâldromte, per website wêrfan de ûnthâldromte de-allokearre wie.
 StackSettings--invert-call-stack = Oanropstack omkeare
     .title = Sortearje op de tiid dy’t yn in oanropnode bestege wurdt, wêrby ûnderlizzende nodes negearre wurde
+StackSettings--include-idle-samples = Ynaktive samples opnimme
+    .title = Helje it finkje fuort om samples te ferstopjen wêrfan it leaf-frame yn de kategory Ynaktyf stiet.
 StackSettings--show-user-timing = Brûkerstiming toane
 StackSettings--use-stack-chart-same-widths = Foar elke stack deselde breedte brûke
 StackSettings--panel-search =
@@ -1149,6 +1151,12 @@ BottomBox--assembly-code-not-available-title = Gearstallingskoade net beskikber
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Sjoch <a>issue #4520</a> foar stipjende senario's en plande ferbetteringen.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Folslein skerm ferlitte
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Folslein skerm
 SourceView--close-button =
     .title = Boarnewerjefte slute
 

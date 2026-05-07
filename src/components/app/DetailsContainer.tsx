@@ -1,10 +1,9 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// React imported for JSX
-import SplitterLayout from 'react-splitter-layout';
 
 import { Details } from './Details';
+import { ResizableWithSplitter } from 'firefox-profiler/components/shared/ResizableWithSplitter';
 import { selectSidebar } from 'firefox-profiler/components/sidebar';
 
 import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
@@ -27,14 +26,20 @@ function DetailsContainerImpl({ selectedTab, isSidebarOpen }: Props) {
   const Sidebar = selectSidebar(selectedTab);
 
   return (
-    <SplitterLayout
-      customClassName="DetailsContainer"
-      percentage
-      secondaryInitialSize={20}
-    >
+    <div className="DetailsContainer">
       <Details />
-      {Sidebar && isSidebarOpen ? <Sidebar /> : null}
-    </SplitterLayout>
+      {Sidebar && isSidebarOpen ? (
+        <ResizableWithSplitter
+          className="DetailsContainerResizableSidebarWrapper"
+          percent={false}
+          splitterPosition="start"
+          controlledProperty="width"
+          initialSize="300px"
+        >
+          <Sidebar />
+        </ResizableWithSplitter>
+      ) : null}
+    </div>
   );
 }
 

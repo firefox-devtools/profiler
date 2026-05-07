@@ -153,10 +153,6 @@ a:visited {
   color: var(--link-visited-foreground-color);
 }
 
-a:active {
-  color: var(--link-active-foreground-color);
-}
-
 /**
  * This class should be used to create a small colored square. It's used
  * especially for categories and network mime types.
@@ -183,16 +179,4 @@ a:active {
 
 .colored-border.ellipsis {
   opacity: 0;
-}
-
-.splitter-layout.splitter-layout > .layout-splitter {
-  background-color: var(--wide-splitter-color);
-}
-
-.splitter-layout.splitter-layout > .layout-splitter:hover {
-  background-color: var(--wide-splitter-hover-color);
-}
-
-.splitter-layout.splitter-layout.layout-changing > .layout-splitter {
-  background-color: var(--wide-splitter-pressed-color);
 }

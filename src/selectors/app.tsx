@@ -3,27 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { createSelector } from 'reselect';
 
-import {
-  getDataSource,
-  getSelectedTab,
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
-} from './url-state';
-import { getGlobalTracks, getLocalTracksByPid, getCounters } from './profile';
+import { getDataSource, getSelectedTab } from './url-state';
 import { getZipFileState } from './zipped-profiles';
-import { assertExhaustiveCheck, ensureExists } from '../utils/types';
-import {
-  FULL_TRACK_SCREENSHOT_HEIGHT,
-  TRACK_NETWORK_HEIGHT,
-  TRACK_IPC_HEIGHT,
-  TRACK_PROCESS_BLANK_HEIGHT,
-  TIMELINE_RULER_HEIGHT,
-  TRACK_VISUAL_PROGRESS_HEIGHT,
-  TRACK_EVENT_DELAY_HEIGHT,
-  TRACK_MARKER_HEIGHT,
-  TRACK_COUNTER_GRAPH_HEIGHT,
-  TRACK_COUNTER_MARKERS_HEIGHT,
-} from '../app-logic/constants';
 
 import type {
   AppState,
@@ -34,7 +15,6 @@ import type {
   ThreadsKey,
   ExperimentalFlags,
   UploadedProfileInformation,
-  Pid,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
@@ -86,133 +66,6 @@ export const getIsDragAndDropOverlayRegistered: Selector<boolean> = (state) =>
 export const getCurrentProfileUploadedInformation: Selector<
   UploadedProfileInformation | null
 > = (state) => getApp(state).currentProfileUploadedInformation;
-
-/**
- * This selector takes all of the tracks, and deduces the height in CssPixels
- * of the timeline. This is here to calculate the max-height of the timeline
- * for the splitter component.
- *
- * The height of the component is determined by the sizing of each track in the list.
- * Most sizes are pretty static, and are set through values in the component. The only
- * tricky value to determine is the thread track. These values get reported to the store
- * and get added in here.
- */
-export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
-  getGlobalTracks,
-  getLocalTracksByPid,
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
-  getTrackThreadHeights,
-  getCounters,
-  (
-    globalTracks,
-    localTracksByPid,
-    hiddenGlobalTracks,
-    hiddenLocalTracksByPid,
-    trackThreadHeights,
-    counters
-  ) => {
-    let height = TIMELINE_RULER_HEIGHT;
-    const border = 1;
-    for (const [trackIndex, globalTrack] of globalTracks.entries()) {
-      if (!hiddenGlobalTracks.has(trackIndex)) {
-        switch (globalTrack.type) {
-          case 'screenshots':
-            height += FULL_TRACK_SCREENSHOT_HEIGHT + border;
-            break;
-          case 'visual-progress':
-          case 'perceptual-visual-progress':
-          case 'contentful-visual-progress':
-            height += TRACK_VISUAL_PROGRESS_HEIGHT;
-            break;
-          case 'process': {
-            // The thread tracks have enough complexity that it warrants measuring
-            // them rather than statically using a value like the other tracks.
-            const { mainThreadIndex } = globalTrack;
-            if (mainThreadIndex === null) {
-              height += TRACK_PROCESS_BLANK_HEIGHT + border;
-            } else {
-              const trackThreadHeight = trackThreadHeights[mainThreadIndex];
-              if (trackThreadHeight === undefined) {
-                // The height isn't computed yet, return.
-                return null;
-              }
-              height += trackThreadHeight + border;
-            }
-            break;
-          }
-          default:
-            throw assertExhaustiveCheck(globalTrack);
-        }
-      }
-    }
-
-    // Figure out which PIDs are hidden.
-    const hiddenPids = new Set<Pid>();
-    for (const trackIndex of hiddenGlobalTracks) {
-      const globalTrack = globalTracks[trackIndex];
-      if (globalTrack.type === 'process') {
-        hiddenPids.add(globalTrack.pid);
-      }
-    }
-
-    for (const [pid, localTracks] of localTracksByPid) {
-      if (hiddenPids.has(pid)) {
-        // This track is hidden already.
-        continue;
-      }
-      for (const [trackIndex, localTrack] of localTracks.entries()) {
-        const hiddenLocalTracks = ensureExists(
-          hiddenLocalTracksByPid.get(pid),
-          'Could not look up the hidden local tracks from the given PID'
-        );
-        if (!hiddenLocalTracks.has(trackIndex)) {
-          switch (localTrack.type) {
-            case 'thread':
-              {
-                // The thread tracks have enough complexity that it warrants measuring
-                // them rather than statically using a value like the other tracks.
-                const trackThreadHeight =
-                  trackThreadHeights[localTrack.threadIndex];
-                if (trackThreadHeight === undefined) {
-                  // The height isn't computed yet, return.
-                  return null;
-                }
-                height += trackThreadHeight + border;
-              }
-
-              break;
-            case 'network':
-              height += TRACK_NETWORK_HEIGHT + border;
-              break;
-            case 'counter': {
-              // Counter track height depends on whether the counter asks for
-              // markers to be rendered above the graph.
-              const counter = ensureExists(counters)[localTrack.counterIndex];
-              height += counter.display.markerSchemaLocation
-                ? TRACK_COUNTER_GRAPH_HEIGHT + TRACK_COUNTER_MARKERS_HEIGHT
-                : TRACK_COUNTER_GRAPH_HEIGHT;
-              height += border;
-              break;
-            }
-            case 'event-delay':
-              height += TRACK_EVENT_DELAY_HEIGHT + border;
-              break;
-            case 'ipc':
-              height += TRACK_IPC_HEIGHT + border;
-              break;
-            case 'marker':
-              height += TRACK_MARKER_HEIGHT + border;
-              break;
-            default:
-              throw assertExhaustiveCheck(localTrack);
-          }
-        }
-      }
-    }
-    return height;
-  }
-);
 
 /**
  * This selector lets us know if it is safe to load a new profile. If

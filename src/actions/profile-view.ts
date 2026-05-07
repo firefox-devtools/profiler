@@ -1860,11 +1860,20 @@ export function popTransformsFromStack(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const threadsKey = getSelectedThreadsKey(getState());
-    dispatch({
-      type: 'POP_TRANSFORMS_FROM_STACK',
-      threadsKey,
-      firstPoppedFilterIndex,
-    });
+    dispatch(
+      popTransformsFromStackForThreads(threadsKey, firstPoppedFilterIndex)
+    );
+  };
+}
+
+export function popTransformsFromStackForThreads(
+  threadsKey: ThreadsKey,
+  firstPoppedFilterIndex: number
+): Action {
+  return {
+    type: 'POP_TRANSFORMS_FROM_STACK',
+    threadsKey,
+    firstPoppedFilterIndex,
   };
 }
 

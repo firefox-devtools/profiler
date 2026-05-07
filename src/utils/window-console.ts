@@ -22,7 +22,12 @@ import {
   getThemePreference,
   setThemePreference,
 } from 'firefox-profiler/utils/dark-mode';
+import { printSliceTree } from 'firefox-profiler/utils/slice-tree';
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import {
+  formatLogTimestamp,
+  formatLogStatement,
+} from 'firefox-profiler/profile-logic/marker-data';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -53,6 +58,7 @@ export type ExtraPropertiesOnWindowForConsole = {
   ) => Promise<void>;
   extractGeckoLogs: () => string;
   totalMarkerDuration: (markers: any) => number;
+  activity: () => void;
   shortenUrl: typeof shortenUrl;
   getState: GetState;
   selectors: typeof selectorsForConsole;
@@ -271,24 +277,8 @@ export function addDataToWindowObject(
   };
 
   // This function extracts MOZ_LOGs saved as markers in a Firefox profile,
-  // using the MOZ_LOG canonical format. All logs are saved as a debug log
-  // because the log level information isn't saved in these markers.
+  // using the MOZ_LOG canonical format.
   target.extractGeckoLogs = function () {
-    function pad(p: string | number, c: number) {
-      return String(p).padStart(c, '0');
-    }
-
-    // This transforms a timestamp to a string as output by mozlog usually.
-    function d2s(ts: number) {
-      const d = new Date(ts);
-      // new Date rounds down the timestamp (in milliseconds) to the lower integer,
-      // let's get the microseconds and nanoseconds differently.
-      // This will be imperfect because of float rounding errors but still better
-      // than not having them.
-      const ns = Math.trunc((ts - Math.trunc(ts)) * 10 ** 6);
-      return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1, 2)}-${pad(d.getUTCDate(), 2)} ${pad(d.getUTCHours(), 2)}:${pad(d.getUTCMinutes(), 2)}:${pad(d.getUTCSeconds(), 2)}.${pad(d.getUTCMilliseconds(), 3)}${pad(ns, 6)} UTC`;
-    }
-
     const logs = [];
 
     // This algorithm loops over the raw marker table instead of using the
@@ -297,14 +287,6 @@ export function addDataToWindowObject(
     const profile = selectorsForConsole.profile.getProfile(getState());
     const range =
       selectorsForConsole.profile.getPreviewSelectionRange(getState());
-
-    const LOG_LEVEL_LETTER: Record<number, string> = {
-      1: 'E',
-      2: 'W',
-      3: 'I',
-      4: 'D',
-      5: 'V',
-    };
 
     for (const thread of profile.threads) {
       const { markers } = thread;
@@ -318,25 +300,26 @@ export function addDataToWindowObject(
           startTime <= range.end
         ) {
           const data = markers.data[i] as LogMarkerPayload;
-          const strTimestamp = d2s(profile.meta.startTime + startTime);
+          const absoluteTs = profile.meta.startTime + startTime;
+          const strTimestamp = formatLogTimestamp(absoluteTs);
           const processName = thread.processName ?? 'Unknown Process';
-
-          let statement;
-          if ('message' in data) {
-            if (!data.message) {
-              continue;
-            }
-            const moduleName = profile.shared.stringArray[markers.name[i]];
-            const levelLetter = LOG_LEVEL_LETTER[data.level] ?? 'D';
-            statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${levelLetter}/${moduleName} ${data.message.trim()}`;
-          } else {
-            if (!data.name) {
-              continue;
-            }
-            const prefix = data.module.includes('/') ? '' : 'D/';
-            statement = `${strTimestamp} - [${processName} ${thread.pid}: ${thread.name}]: ${prefix}${data.module} ${data.name.trim()}`;
+          const stringArray = profile.shared.stringArray;
+          // For the new format the module name lives in the marker's name field.
+          // For the legacy format it is embedded in data.module; formatLogStatement
+          // handles that internally, so this value is not used in that case.
+          const moduleName = stringArray[markers.name[i]];
+          const statement = formatLogStatement(
+            strTimestamp,
+            processName,
+            thread.pid,
+            thread.name,
+            data,
+            moduleName,
+            stringArray
+          );
+          if (statement !== null) {
+            logs.push(statement);
           }
-          logs.push(statement);
         }
       }
     }
@@ -364,6 +347,14 @@ export function addDataToWindowObject(
 
     console.log(`Total marker duration: ${formatTimestamp(totalDuration)}`);
     return totalDuration;
+  };
+
+  target.activity = function () {
+    const slices =
+      selectorsForConsole.selectedThread.getActivitySlices(getState());
+    if (slices) {
+      console.log(printSliceTree(slices).join('\n'));
+    }
   };
 
   target.shortenUrl = shortenUrl;

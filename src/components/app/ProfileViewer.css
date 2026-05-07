@@ -47,6 +47,10 @@
 }
 
 .profileViewer {
+  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
+     viewer. */
+  position: relative;
+  z-index: 0;
   display: flex;
   min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
   flex: 1;
@@ -107,21 +111,6 @@
     --internal-icon: url(../../../res/img/svg/back-arrow-light.svg);
     --internal-hover-border-color: var(--grey-20);
   }
-}
-
-.profileViewerSplitter {
-  /* Position relative for layout. Don't set z-index here to avoid creating a
-     stacking context that would trap the context menu below the screenshot hover.
-     This allows both the screenshot hover and context menu to be compared
-     at the .profileViewer level, ensuring the context menu appears on top. */
-  position: relative;
-}
-
-.profileViewerSplitter > .layout-pane:not(.layout-pane-primary) {
-  display: flex;
-  overflow: hidden;
-  max-height: var(--profile-viewer-splitter-max-height);
-  flex-direction: column;
 }
 
 .profileViewerTopBar {
