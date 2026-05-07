@@ -24,6 +24,7 @@ import type {
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
+  FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -213,6 +214,24 @@ const functionListSort: Reducer<SingleColumnSortState[]> = (
   switch (action.type) {
     case 'CHANGE_FUNCTION_LIST_SORT':
       return action.sort;
+    default:
+      return state;
+  }
+};
+
+const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState = {
+  descendants: true,
+  ancestors: false,
+  self: false,
+};
+
+const functionListSectionsOpen: Reducer<FunctionListSectionsOpenState> = (
+  state = FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNCTION_LIST_SECTION_OPEN':
+      return { ...state, [action.section]: action.isOpen };
     default:
       return state;
   }
@@ -807,6 +826,7 @@ const profileSpecific = combineReducers({
   selectedMarkers,
   markerTableSort,
   functionListSort,
+  functionListSectionsOpen,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

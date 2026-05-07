@@ -9,6 +9,8 @@ import './DisclosureBox.css';
 type Props = {
   readonly label: string;
   readonly initialOpen?: boolean;
+  readonly isOpen?: boolean;
+  readonly onToggle?: (isOpen: boolean) => void;
   readonly children: React.ReactNode;
 };
 
@@ -22,12 +24,20 @@ export class DisclosureBox extends React.PureComponent<Props, State> {
   };
 
   _onToggle = () => {
+    const { isOpen, onToggle } = this.props;
+    if (isOpen !== undefined) {
+      if (onToggle) {
+        onToggle(!isOpen);
+      }
+      return;
+    }
     this.setState((state) => ({ isOpen: !state.isOpen }));
   };
 
   override render() {
-    const { label, children } = this.props;
-    const { isOpen } = this.state;
+    const { label, children, isOpen: controlledOpen } = this.props;
+    const isOpen =
+      controlledOpen !== undefined ? controlledOpen : this.state.isOpen;
 
     return (
       <div className={`disclosureBox ${isOpen ? 'open' : 'closed'}`}>
