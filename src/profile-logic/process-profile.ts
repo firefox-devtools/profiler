@@ -2005,10 +2005,12 @@ export async function unserializeProfileOfArbitraryFormat(
   upgradeInfo: ProfileUpgradeInfo = {}
 ): Promise<Profile> {
   try {
-    // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
-    // object is constructed from an ArrayBuffer in a different context... which
-    // happens in our tests.
-    if (String(arbitraryFormat) === '[object ArrayBuffer]') {
+    // We use Object.prototype.toString instead of `instanceof ArrayBuffer`
+    // because instanceof doesn't work cross-realm (e.g. in tests), and we
+    // can't use String() since that serializes the full contents of a Uint8Array.
+    if (
+      Object.prototype.toString.call(arbitraryFormat) === '[object ArrayBuffer]'
+    ) {
       const arrayBuffer = arbitraryFormat as ArrayBuffer;
       arbitraryFormat = new Uint8Array(arrayBuffer);
     }
