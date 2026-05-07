@@ -42,6 +42,7 @@ import type {
   IndexIntoFrameTable,
   MarkerIndex,
   SelectedMarkersPerThread,
+  FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -187,6 +188,7 @@ type CallTreeQuery = BaseQuery & {
   hideIdleSamples: null | undefined;
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
+  funcListSections?: string; // "descendants,self" — comma-separated open sections
 };
 
 type MarkersQuery = BaseQuery & {
@@ -235,6 +237,7 @@ type Query = BaseQuery & {
 
   // Function list specific
   functionListSort?: string;
+  funcListSections?: string;
 
   // Network specific
   networkSearch?: string;
@@ -393,6 +396,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       if (selectedTab === 'function-list') {
         query.functionListSort = convertFunctionListSortToString(
           urlState.profileSpecific.functionListSort
+        );
+        query.funcListSections = convertFunctionListSectionsOpenToString(
+          urlState.profileSpecific.functionListSectionsOpen
         );
       }
       break;
@@ -652,6 +658,9 @@ export function stateFromLocation(
       functionListSort: convertFunctionListSortFromString(
         query.functionListSort
       ),
+      functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
+        query.funcListSections
+      ),
     },
   };
 }
@@ -749,6 +758,58 @@ function convertFunctionListSortFromString(
   }
   // URL is primary-first; internal storage is primary-last.
   return parsed.reverse();
+}
+
+// FunctionList section disclosure-box open/closed state. The URL stores a
+// comma-separated list of the open sections; the param is omitted when the
+// state matches the default (only "descendants" open). The value "none" is
+// used as a sentinel for the all-closed case so the param is non-empty.
+const FUNCTION_LIST_SECTION_NAMES: ReadonlyArray<
+  keyof FunctionListSectionsOpenState
+> = ['descendants', 'ancestors', 'self'];
+const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState = {
+  descendants: true,
+  ancestors: false,
+  self: false,
+};
+
+function convertFunctionListSectionsOpenToString(
+  state: FunctionListSectionsOpenState
+): string | undefined {
+  const matchesDefault = FUNCTION_LIST_SECTION_NAMES.every(
+    (name) => state[name] === FUNCTION_LIST_SECTIONS_OPEN_DEFAULT[name]
+  );
+  if (matchesDefault) {
+    return undefined;
+  }
+  const open = FUNCTION_LIST_SECTION_NAMES.filter((name) => state[name]);
+  return open.length === 0 ? 'none' : open.join(',');
+}
+
+function convertFunctionListSectionsOpenFromString(
+  raw: string | null | void
+): FunctionListSectionsOpenState {
+  if (raw === undefined || raw === null) {
+    return { ...FUNCTION_LIST_SECTIONS_OPEN_DEFAULT };
+  }
+  const result: FunctionListSectionsOpenState = {
+    descendants: false,
+    ancestors: false,
+    self: false,
+  };
+  if (raw === 'none' || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    if (
+      part === 'descendants' ||
+      part === 'ancestors' ||
+      part === 'self'
+    ) {
+      result[part] = true;
+    }
+  }
+  return result;
 }
 
 function convertGlobalTrackOrderFromString(

@@ -32,6 +32,7 @@ import type {
   TabID,
   IndexIntoSourceTable,
   MarkerIndex,
+  FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -122,6 +123,9 @@ export const getMarkerTableSort: Selector<SingleColumnSortState[]> = (state) =>
   getProfileSpecificState(state).markerTableSort;
 export const getFunctionListSort: Selector<SingleColumnSortState[]> = (state) =>
   getProfileSpecificState(state).functionListSort;
+export const getFunctionListSectionsOpen: Selector<
+  FunctionListSectionsOpenState
+> = (state) => getProfileSpecificState(state).functionListSectionsOpen;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>

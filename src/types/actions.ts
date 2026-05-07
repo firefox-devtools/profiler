@@ -566,6 +566,11 @@ type UrlStateAction =
       readonly sort: SingleColumnSortState[];
     }
   | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN';
+      readonly section: 'descendants' | 'ancestors' | 'self';
+      readonly isOpen: boolean;
+    }
+  | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
       readonly searchString: string;
     }
