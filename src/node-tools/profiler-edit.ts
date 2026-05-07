@@ -25,6 +25,7 @@ import {
   applyWasmSymbolication,
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
+import { getThreadsWithMarkersMatchingSearchFilter } from 'firefox-profiler/profile-logic/marker-data';
 import type { Profile } from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
@@ -52,6 +53,9 @@ import {
  *
  *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
  *     --insert-label-frames known-functions.toml
+ *
+ *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
+ *     --only-keep-threads-with-markers-matching '-async,-sync'
  */
 
 type ProfileSource =
@@ -76,6 +80,7 @@ export interface CliOptions {
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
   insertLabelFrames?: string;
+  onlyKeepThreadsWithMarkersMatching?: string;
 }
 
 function loadWasmSymbolicationSpecs(
@@ -265,6 +270,24 @@ export async function run(options: CliOptions) {
     profile = insertStackLabels(profile, labels);
   }
 
+  if (
+    options.onlyKeepThreadsWithMarkersMatching !== undefined &&
+    options.onlyKeepThreadsWithMarkersMatching !== ''
+  ) {
+    const before = profile.threads.length;
+    const matchingThreadIndexes = getThreadsWithMarkersMatchingSearchFilter(
+      profile,
+      options.onlyKeepThreadsWithMarkersMatching
+    );
+    const matchingThreads = profile.threads.filter((_thread, threadIndex) =>
+      matchingThreadIndexes.has(threadIndex)
+    );
+    profile = { ...profile, threads: matchingThreads };
+    console.log(
+      `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
+    );
+  }
+
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
   const outputFilename = options.output;
@@ -324,7 +347,11 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         .argParser(collectWasm)
         .default([] as WasmSymbolicationCliSpec[])
     )
-    .option('--insert-label-frames <path>', 'TOML file with label definitions');
+    .option('--insert-label-frames <path>', 'TOML file with label definitions')
+    .option(
+      '--only-keep-threads-with-markers-matching <search>',
+      'Keep only threads with markers matching the given search string'
+    );
 
   program.parse(processArgv);
   const opts = program.opts();
@@ -375,6 +402,11 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       typeof opts.insertLabelFrames === 'string' &&
       opts.insertLabelFrames !== ''
         ? opts.insertLabelFrames
+        : undefined,
+    onlyKeepThreadsWithMarkersMatching:
+      typeof opts.onlyKeepThreadsWithMarkersMatching === 'string' &&
+      opts.onlyKeepThreadsWithMarkersMatching !== ''
+        ? opts.onlyKeepThreadsWithMarkersMatching
         : undefined,
   };
 }
