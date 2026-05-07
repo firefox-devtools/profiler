@@ -2,7 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
-import { Command, CommanderError, Option } from 'commander';
+import {
+  Command,
+  CommanderError,
+  InvalidArgumentError,
+  Option,
+} from 'commander';
 import { parse as parseToml } from 'smol-toml';
 
 import {
@@ -84,6 +89,7 @@ export interface CliOptions {
   insertLabelFrames?: string;
   onlyKeepThreadsWithMarkersMatching?: string;
   mergeNonOverlappingThreadsByName?: boolean;
+  setName?: string;
 }
 
 export function loadWasmSymbolicationSpecs(
@@ -295,6 +301,10 @@ export async function run(options: CliOptions) {
     profile = mergeNonOverlappingThreadsByName(profile);
   }
 
+  if (options.setName !== undefined) {
+    profile.meta.product = options.setName;
+  }
+
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
   const outputFilename = options.output;
@@ -326,6 +336,15 @@ function collectWasm(
     ];
   }
   return [...previous, { unstrippedWasmPath: value }];
+}
+
+function requireNonEmpty(flagName: string): (value: string) => string {
+  return (value: string) => {
+    if (value === '') {
+      throw new InvalidArgumentError(`${flagName} requires a non-empty value`);
+    }
+    return value;
+  };
 }
 
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
@@ -362,6 +381,11 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     .option(
       '--merge-non-overlapping-threads-by-name',
       'Merge same-named threads across non-overlapping process runs'
+    )
+    .option(
+      '--set-name <name>',
+      'Override the profile product name',
+      requireNonEmpty('--set-name')
     );
 
   program.parse(processArgv);
@@ -421,6 +445,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         : undefined,
     mergeNonOverlappingThreadsByName:
       opts.mergeNonOverlappingThreadsByName === true,
+    setName: typeof opts.setName === 'string' ? opts.setName : undefined,
   };
 }
 
