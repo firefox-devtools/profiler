@@ -97,10 +97,6 @@ function extractFaviconFromLibname(libname: string): string | null {
     }
     return url.href;
   } catch (_e) {
-    console.error(
-      'Error while extracing the favicon from the libname',
-      libname
-    );
     return null;
   }
 }
