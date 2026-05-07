@@ -59,7 +59,6 @@ export type ThreadViewOptions = {
   readonly selectedInvertedCallNodePath: CallNodePath;
   readonly expandedNonInvertedCallNodePaths: PathSet;
   readonly expandedInvertedCallNodePaths: PathSet;
-  readonly selectedFunctionIndex: IndexIntoFuncTable | null;
   readonly selectedLowerWingCallNodePath: CallNodePath;
   readonly expandedLowerWingCallNodePaths: PathSet;
   readonly selectedUpperWingCallNodePath: CallNodePath;
@@ -105,6 +104,10 @@ export type MarkerReference = {
 
 export type SelectedMarkersPerThread = {
   [key: ThreadsKey]: MarkerIndex | null;
+};
+
+export type SelectedFunctionsPerThread = {
+  [key: ThreadsKey]: IndexIntoFuncTable | null;
 };
 
 /**
@@ -399,6 +402,7 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  selectedFunctions: SelectedFunctionsPerThread;
   markerTableSort: SingleColumnSortState[];
   functionListSort: SingleColumnSortState[];
   functionListSectionsOpen: FunctionListSectionsOpenState;

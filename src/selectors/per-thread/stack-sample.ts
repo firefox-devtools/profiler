@@ -209,13 +209,9 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
-  const getSelectedFunctionIndex: Selector<IndexIntoFuncTable | null> =
-    createSelector(
-      threadSelectors.getViewOptions,
-      (threadViewOptions): IndexIntoFuncTable | null => {
-        return threadViewOptions.selectedFunctionIndex;
-      }
-    );
+  const getSelectedFunctionIndex: Selector<IndexIntoFuncTable | null> = (
+    state
+  ) => UrlState.getSelectedFunction(state, threadsKey);
 
   const getUpperWingCallNodeInfo: Selector<CallNodeInfo> = createSelector(
     _getNonInvertedCallNodeInfo,

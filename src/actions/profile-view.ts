@@ -81,6 +81,7 @@ import {
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
@@ -163,17 +164,25 @@ export function changeUpperWingSelectedCallNode(
 
 /**
  * Select a function for a given thread in the function list.
+ *
+ * Uses replaceState rather than pushState so that holding e.g. the down arrow
+ * key in the function list doesn't get rate-limited by the browser and doesn't
+ * flood the back/forward history.
  */
 export function changeSelectedFunctionIndex(
   threadsKey: ThreadsKey,
   selectedFunctionIndex: IndexIntoFuncTable | null,
   context: SelectionContext = { source: 'auto' }
-): Action {
-  return {
-    type: 'CHANGE_SELECTED_FUNCTION',
-    selectedFunctionIndex,
-    threadsKey,
-    context,
+): ThunkAction<void> {
+  return (dispatch) => {
+    withHistoryReplaceStateSync(() => {
+      dispatch({
+        type: 'CHANGE_SELECTED_FUNCTION',
+        selectedFunctionIndex,
+        threadsKey,
+        context,
+      });
+    });
   };
 }
 
