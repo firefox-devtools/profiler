@@ -1275,6 +1275,16 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
     threadId: newThreadId,
   };
 
+  // If every source thread has threadCPUDelta, carry the per-sample values
+  // through unchanged. For non-overlapping inputs the resulting deltas remain
+  // meaningful; for overlapping inputs the values are nonsensical but harmless
+  // (still numerically valid).
+  const allHaveThreadCPUDelta = samplesPerThread.every(
+    (s) => s.threadCPUDelta !== undefined
+  );
+  const newThreadCPUDelta: Array<number | null> | undefined =
+    allHaveThreadCPUDelta ? [] : undefined;
+
   while (true) {
     let earliestNextSampleThreadIndex: number | null = null;
     let earliestNextSampleTime = Infinity;
@@ -1324,11 +1334,21 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
         ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
         : threads[sourceThreadIndex].tid
     );
+    if (newThreadCPUDelta !== undefined) {
+      newThreadCPUDelta.push(
+        ensureExists(sourceThreadSamples.threadCPUDelta)[
+          sourceThreadSampleIndex
+        ]
+      );
+    }
 
     newSamples.length++;
     nextSampleIndexPerThread[sourceThreadIndex]++;
   }
 
+  if (newThreadCPUDelta !== undefined) {
+    return { ...newSamples, threadCPUDelta: newThreadCPUDelta };
+  }
   return newSamples;
 }
 
