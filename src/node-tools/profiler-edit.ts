@@ -83,6 +83,7 @@ export interface CliOptions {
   insertLabelFrames?: string;
   onlyKeepThreadsWithMarkersMatching?: string;
   mergeNonOverlappingThreadsByName?: boolean;
+  setName?: string;
 }
 
 function loadWasmSymbolicationSpecs(
@@ -511,6 +512,10 @@ export async function run(options: CliOptions) {
     profile = mergeNonOverlappingThreadsByName(profile);
   }
 
+  if (options.setName !== undefined) {
+    profile.meta.product = options.setName;
+  }
+
   console.log(`Saving profile to ${options.output}`);
   if (options.output.endsWith('.gz')) {
     fs.writeFileSync(options.output, await compress(JSON.stringify(profile)));
@@ -600,6 +605,15 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     onlyKeepThreadsWithMarkersMatching = rawMarkerArg;
   }
 
+  const rawSetName = argv['set-name'];
+  let setName: string | undefined;
+  if (rawSetName !== undefined) {
+    if (typeof rawSetName !== 'string' || rawSetName === '') {
+      throw new Error('--set-name requires a non-empty value');
+    }
+    setName = rawSetName;
+  }
+
   return {
     input: sources[0],
     output: argv.output,
@@ -617,6 +631,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     onlyKeepThreadsWithMarkersMatching,
     mergeNonOverlappingThreadsByName:
       argv['merge-non-overlapping-threads-by-name'] === true,
+    setName,
   };
 }
 
