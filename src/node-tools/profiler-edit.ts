@@ -19,7 +19,21 @@ import {
   applyWasmSymbolication,
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
-import type { Profile } from 'firefox-profiler/types/profile';
+import { mergeThreads } from 'firefox-profiler/profile-logic/merge-compare';
+import { getTimeRangeForThread } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  correlateIPCMarkers,
+  deriveMarkersFromRawMarkerTable,
+  getSearchFilteredMarkerIndexes,
+  stringsToMarkerRegExps,
+} from 'firefox-profiler/profile-logic/marker-data';
+import { markerSchemaFrontEndOnly } from 'firefox-profiler/profile-logic/marker-schema';
+import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
+import { StringTable } from 'firefox-profiler/utils/string-table';
+import { splitSearchString } from 'firefox-profiler/utils/string';
+import type { MarkerSchemaByName } from 'firefox-profiler/types/markers';
+import type { Profile, RawThread } from 'firefox-profiler/types/profile';
+import type { StartEndRange } from 'firefox-profiler/types/units';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
   parseLabelToml,
@@ -45,6 +59,10 @@ import {
  *
  *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
  *     --insert-label-frames known-functions.toml
+ *
+ *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
+ *     --only-keep-threads-with-markers-matching '-async,-sync' \
+ *     --merge-non-overlapping-threads-by-name
  */
 
 type ProfileSource =
@@ -63,6 +81,8 @@ export interface CliOptions {
   symbolicateWithServer?: string;
   symbolicateWasm?: WasmSymbolicationCliSpec[];
   insertLabelFrames?: string;
+  onlyKeepThreadsWithMarkersMatching?: string;
+  mergeNonOverlappingThreadsByName?: boolean;
 }
 
 function loadWasmSymbolicationSpecs(
@@ -105,6 +125,255 @@ function collectFuncNames(profile: Profile): string[] {
     result.push(name);
   }
   return result;
+}
+
+/**
+ * Keep only the threads that have at least one marker matching the given
+ * marker search string (using the same syntax as the front-end: comma-
+ * separated terms, optional `field:value` and `-field:value` qualifiers).
+ * We derive markers and run the standard search filter so that string-table
+ * indexed payload fields (UserTiming.name, IPC fields, ...) are resolved
+ * correctly.
+ */
+function filterThreadsByMarkerSearch(
+  profile: Profile,
+  search: string
+): Profile {
+  const searchRegExps = stringsToMarkerRegExps(splitSearchString(search));
+  if (searchRegExps === null) {
+    return profile;
+  }
+
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const categoryList = profile.meta.categories ?? getDefaultCategories();
+
+  const frontEndSchemaNames = new Set(
+    markerSchemaFrontEndOnly.map((schema) => schema.name)
+  );
+  const schemaList = [
+    ...(profile.meta.markerSchema ?? []).filter(
+      (schema) => !frontEndSchemaNames.has(schema.name)
+    ),
+    ...markerSchemaFrontEndOnly,
+  ];
+  const markerSchemaByName: MarkerSchemaByName = Object.create(null);
+  for (const schema of schemaList) {
+    markerSchemaByName[schema.name] = schema;
+  }
+
+  const ipcCorrelations = correlateIPCMarkers(profile.threads, profile.shared);
+
+  const threads = profile.threads.filter((thread) => {
+    const { markers } = deriveMarkersFromRawMarkerTable(
+      thread.markers,
+      profile.shared.stringArray,
+      thread.tid,
+      getTimeRangeForThread(thread, profile.meta.interval),
+      ipcCorrelations
+    );
+    if (markers.length === 0) {
+      return false;
+    }
+    const markerIndexes = markers.map((_, i) => i);
+    const filtered = getSearchFilteredMarkerIndexes(
+      (i) => markers[i],
+      markerIndexes,
+      markerSchemaByName,
+      searchRegExps,
+      stringTable,
+      categoryList
+    );
+    return filtered.length > 0;
+  });
+
+  return { ...profile, threads };
+}
+
+/**
+ * First-fit interval coloring: partition `items` (sorted by start time) into
+ * subgroups such that within each subgroup no two items overlap.
+ */
+function partitionNonOverlapping<T>(
+  itemsSortedByStart: T[],
+  rangeOf: (item: T) => StartEndRange
+): T[][] {
+  const subgroups: { items: T[]; lastEnd: number }[] = [];
+  for (const item of itemsSortedByStart) {
+    const range = rangeOf(item);
+    let placed = false;
+    for (const sg of subgroups) {
+      if (sg.lastEnd <= range.start) {
+        sg.items.push(item);
+        sg.lastEnd = range.end;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      subgroups.push({ items: [item], lastEnd: range.end });
+    }
+  }
+  return subgroups.map((sg) => sg.items);
+}
+
+/**
+ * Merges threads from sequential runs of the same logical workload.
+ *
+ * Two-stage approach:
+ *
+ *   1. Group processes (i.e. all threads sharing a pid) by (processName,
+ *      processType, mainThreadName) and partition each group into matched
+ *      bundles of non-overlapping processes via first-fit interval coloring.
+ *      Each non-singleton bundle represents one logical process whose
+ *      lifetime spans multiple runs.
+ *
+ *   2. Within each matched bundle, merge same-named threads across the
+ *      bundled processes. Same-named threads inside a single process are
+ *      not merged (they may overlap), so we again partition by non-overlap
+ *      before merging.
+ *
+ * Threads belonging to a singleton process bundle are passed through
+ * unchanged.
+ */
+function mergeNonOverlappingThreadsByName(profile: Profile): Profile {
+  const interval = profile.meta.interval;
+  const threads = profile.threads;
+
+  const threadRanges = threads.map((t) => getTimeRangeForThread(t, interval));
+
+  type ProcessInfo = {
+    pid: RawThread['pid'];
+    threadIndices: number[];
+    range: StartEndRange;
+    processName: string | undefined;
+    processType: string;
+    mainThreadName: string;
+  };
+
+  const processesByPid = new Map<RawThread['pid'], ProcessInfo>();
+  for (let i = 0; i < threads.length; i++) {
+    const t = threads[i];
+    let proc = processesByPid.get(t.pid);
+    if (proc === undefined) {
+      proc = {
+        pid: t.pid,
+        threadIndices: [],
+        range: { start: Infinity, end: -Infinity },
+        processName: t.processName,
+        processType: t.processType,
+        mainThreadName: t.name,
+      };
+      processesByPid.set(t.pid, proc);
+    }
+    proc.threadIndices.push(i);
+    if (t.isMainThread) {
+      proc.mainThreadName = t.name;
+      if (t.processName !== undefined) {
+        proc.processName = t.processName;
+      }
+    }
+    const r = threadRanges[i];
+    if (r.start < proc.range.start) {
+      proc.range.start = r.start;
+    }
+    if (r.end > proc.range.end) {
+      proc.range.end = r.end;
+    }
+  }
+
+  const processGroups = new Map<string, ProcessInfo[]>();
+  for (const proc of processesByPid.values()) {
+    const key = `${proc.processName ?? ''}\u0000${proc.processType}\u0000${proc.mainThreadName}`;
+    let g = processGroups.get(key);
+    if (g === undefined) {
+      g = [];
+      processGroups.set(key, g);
+    }
+    g.push(proc);
+  }
+
+  const mergedIndexes = new Set<number>();
+  const mergeReplacements = new Map<number, RawThread>();
+  let mergedProcessBundles = 0;
+
+  for (const procs of processGroups.values()) {
+    if (procs.length <= 1) {
+      continue;
+    }
+    procs.sort((a, b) => a.range.start - b.range.start);
+    const bundles = partitionNonOverlapping(procs, (p) => p.range);
+
+    for (const bundle of bundles) {
+      if (bundle.length <= 1) {
+        continue;
+      }
+      mergedProcessBundles++;
+
+      // Group threads in this bundle by name, partition each by non-overlap,
+      // and merge subgroups of size > 1.
+      const threadsByName = new Map<string, number[]>();
+      for (const proc of bundle) {
+        for (const tIdx of proc.threadIndices) {
+          const name = threads[tIdx].name;
+          let arr = threadsByName.get(name);
+          if (arr === undefined) {
+            arr = [];
+            threadsByName.set(name, arr);
+          }
+          arr.push(tIdx);
+        }
+      }
+
+      for (const tIndices of threadsByName.values()) {
+        if (tIndices.length <= 1) {
+          continue;
+        }
+        tIndices.sort((a, b) => threadRanges[a].start - threadRanges[b].start);
+        const tBundles = partitionNonOverlapping(
+          tIndices,
+          (i) => threadRanges[i]
+        );
+        for (const tb of tBundles) {
+          if (tb.length <= 1) {
+            continue;
+          }
+          const sourceThreads = tb.map((i) => threads[i]);
+          const original = sourceThreads[0];
+          const merged = mergeThreads(sourceThreads);
+          merged.name = original.name;
+          merged.pid = original.pid;
+          merged.tid = original.tid;
+          merged.processType = original.processType;
+          merged.processName = original.processName;
+          merged.isMainThread = original.isMainThread;
+
+          mergeReplacements.set(tb[0], merged);
+          for (let k = 1; k < tb.length; k++) {
+            mergedIndexes.add(tb[k]);
+          }
+        }
+      }
+    }
+  }
+
+  if (mergeReplacements.size === 0) {
+    return profile;
+  }
+
+  const newThreads: RawThread[] = [];
+  for (let i = 0; i < threads.length; i++) {
+    if (mergedIndexes.has(i)) {
+      continue;
+    }
+    const replacement = mergeReplacements.get(i);
+    newThreads.push(replacement ?? threads[i]);
+  }
+
+  console.log(
+    `Matched ${mergedProcessBundles} non-overlapping process bundles. Merged ${mergedIndexes.size + mergeReplacements.size} threads into ${mergeReplacements.size}, going from ${threads.length} to ${newThreads.length} threads.`
+  );
+
+  return { ...profile, threads: newThreads };
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -224,6 +493,24 @@ export async function run(options: CliOptions) {
     profile = insertStackLabels(profile, labels);
   }
 
+  if (
+    options.onlyKeepThreadsWithMarkersMatching !== undefined &&
+    options.onlyKeepThreadsWithMarkersMatching !== ''
+  ) {
+    const before = profile.threads.length;
+    profile = filterThreadsByMarkerSearch(
+      profile,
+      options.onlyKeepThreadsWithMarkersMatching
+    );
+    console.log(
+      `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
+    );
+  }
+
+  if (options.mergeNonOverlappingThreadsByName) {
+    profile = mergeNonOverlappingThreadsByName(profile);
+  }
+
   console.log(`Saving profile to ${options.output}`);
   if (options.output.endsWith('.gz')) {
     fs.writeFileSync(options.output, await compress(JSON.stringify(profile)));
@@ -236,6 +523,7 @@ export async function run(options: CliOptions) {
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
   const argv = minimist(processArgv.slice(2), {
     alias: { i: 'input', o: 'output' },
+    boolean: ['merge-non-overlapping-threads-by-name'],
   });
 
   const sources: ProfileSource[] = [];
@@ -301,6 +589,17 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     }
   }
 
+  const rawMarkerArg = argv['only-keep-threads-with-markers-matching'];
+  let onlyKeepThreadsWithMarkersMatching: string | undefined;
+  if (rawMarkerArg !== undefined) {
+    if (typeof rawMarkerArg !== 'string' || rawMarkerArg === '') {
+      throw new Error(
+        '--only-keep-threads-with-markers-matching requires a value (use `=` syntax for values starting with `-`, e.g. --only-keep-threads-with-markers-matching=-async,-sync)'
+      );
+    }
+    onlyKeepThreadsWithMarkersMatching = rawMarkerArg;
+  }
+
   return {
     input: sources[0],
     output: argv.output,
@@ -315,6 +614,9 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       argv['insert-label-frames'] !== ''
         ? argv['insert-label-frames']
         : undefined,
+    onlyKeepThreadsWithMarkersMatching,
+    mergeNonOverlappingThreadsByName:
+      argv['merge-non-overlapping-threads-by-name'] === true,
   };
 }
 
