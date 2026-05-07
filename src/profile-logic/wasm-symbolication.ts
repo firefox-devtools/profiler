@@ -1,0 +1,206 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+// Applies wasm symbols to a profile after the fact. This is useful for
+// profiles captured against a stripped wasm bundle: when the loaded wasm
+// has no "name" custom section, Firefox synthesizes function names of the
+// shape `wasm-function[123]`. Given an unstripped copy of the same wasm,
+// we can recover real names from its name section and replace those
+// placeholders in the profile's funcTable.
+
+import type { Profile } from 'firefox-profiler/types/profile';
+import { StringTable } from 'firefox-profiler/utils/string-table';
+
+export interface WasmSymbolicationSpec {
+  // Raw bytes of an unstripped .wasm file containing a "name" custom section.
+  bytes: Uint8Array;
+  // The wasm URL in the profile to apply names to. If undefined, the profile
+  // must contain exactly one .wasm source and that source is used.
+  url?: string;
+  // Human-readable label (e.g. file path) used only for diagnostic messages.
+  label?: string;
+}
+
+// Parses the function-name subsection of a wasm "name" custom section and
+// returns a map from function index to name. Returns an empty map if the
+// module has no name section. The function index space includes imports
+// (imports come first) — same numbering used in `wasm-function[N]` strings.
+export function parseWasmFunctionNames(bytes: Uint8Array): Map<number, string> {
+  if (
+    bytes.length < 8 ||
+    bytes[0] !== 0x00 ||
+    bytes[1] !== 0x61 ||
+    bytes[2] !== 0x73 ||
+    bytes[3] !== 0x6d
+  ) {
+    throw new Error('Not a wasm file (bad magic)');
+  }
+
+  let pos = 8;
+  const decoder = new TextDecoder('utf-8');
+
+  const readVarUint = (): number => {
+    let result = 0;
+    let shift = 0;
+    while (true) {
+      if (pos >= bytes.length) {
+        throw new Error('Unexpected end of wasm');
+      }
+      const byte = bytes[pos++];
+      result |= (byte & 0x7f) << shift;
+      if ((byte & 0x80) === 0) {
+        return result >>> 0;
+      }
+      shift += 7;
+      if (shift >= 32) {
+        throw new Error('varuint too large');
+      }
+    }
+  };
+
+  const readBytes = (n: number): Uint8Array => {
+    const out = bytes.subarray(pos, pos + n);
+    pos += n;
+    return out;
+  };
+
+  const readName = (): string => {
+    const len = readVarUint();
+    return decoder.decode(readBytes(len));
+  };
+
+  while (pos < bytes.length) {
+    const sectionId = bytes[pos++];
+    const sectionSize = readVarUint();
+    const sectionEnd = pos + sectionSize;
+    if (sectionId !== 0) {
+      pos = sectionEnd;
+      continue;
+    }
+    const sectionName = readName();
+    if (sectionName !== 'name') {
+      pos = sectionEnd;
+      continue;
+    }
+
+    const result = new Map<number, string>();
+    while (pos < sectionEnd) {
+      const subId = bytes[pos++];
+      const subSize = readVarUint();
+      const subEnd = pos + subSize;
+      if (subId === 1) {
+        const count = readVarUint();
+        for (let i = 0; i < count; i++) {
+          const funcIdx = readVarUint();
+          const name = readName();
+          result.set(funcIdx, name);
+        }
+      }
+      pos = subEnd;
+    }
+    return result;
+  }
+
+  return new Map();
+}
+
+const WASM_FUNCTION_NAME_RE = /^wasm-function\[(\d+)\]$/;
+
+// Renames `wasm-function[N]` entries in the profile's funcTable to the
+// symbolicated names found in each spec's `bytes`. Mutates `profile.shared`
+// in place. Throws if a spec's URL cannot be resolved or if a wasm has no
+// name section.
+export function applyWasmSymbolication(
+  profile: Profile,
+  specs: WasmSymbolicationSpec[]
+): void {
+  if (specs.length === 0) {
+    return;
+  }
+
+  const { sources, funcTable, stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+
+  // Build url -> source-index map from the profile.
+  const sourceIndicesByUrl = new Map<string, number[]>();
+  const wasmUrlsInProfile: string[] = [];
+  for (let s = 0; s < sources.length; s++) {
+    const filenameIdx = sources.filename[s];
+    if (filenameIdx === null) {
+      continue;
+    }
+    const url = stringArray[filenameIdx];
+    if (!url.endsWith('.wasm')) {
+      continue;
+    }
+    wasmUrlsInProfile.push(url);
+    let arr = sourceIndicesByUrl.get(url);
+    if (arr === undefined) {
+      arr = [];
+      sourceIndicesByUrl.set(url, arr);
+    }
+    arr.push(s);
+  }
+
+  for (const spec of specs) {
+    const tag = spec.label ?? spec.url ?? '<wasm>';
+    let url = spec.url;
+    if (url === undefined) {
+      if (wasmUrlsInProfile.length === 0) {
+        throw new Error(
+          `${tag}: profile contains no .wasm sources to apply symbols to`
+        );
+      }
+      const unique = new Set(wasmUrlsInProfile);
+      if (unique.size !== 1) {
+        throw new Error(
+          `${tag}: profile contains multiple wasm URLs ` +
+            `(${[...unique].join(', ')}). Specify which one explicitly.`
+        );
+      }
+      url = [...unique][0];
+    }
+
+    const sourceIndices = sourceIndicesByUrl.get(url);
+    if (sourceIndices === undefined) {
+      throw new Error(`${tag}: no source with URL "${url}" in profile`);
+    }
+
+    const namesByIndex = parseWasmFunctionNames(spec.bytes);
+    if (namesByIndex.size === 0) {
+      throw new Error(
+        `${tag} has no function names — is this an unstripped wasm file?`
+      );
+    }
+
+    const sourceIndexSet = new Set(sourceIndices);
+    let updated = 0;
+    let missingNames = 0;
+    for (let f = 0; f < funcTable.length; f++) {
+      const sourceIdx = funcTable.source[f];
+      if (sourceIdx === null || !sourceIndexSet.has(sourceIdx)) {
+        continue;
+      }
+      const oldName = stringArray[funcTable.name[f]];
+      const m = WASM_FUNCTION_NAME_RE.exec(oldName);
+      if (m === null) {
+        continue;
+      }
+      const wasmFuncIndex = Number(m[1]);
+      const newName = namesByIndex.get(wasmFuncIndex);
+      if (newName === undefined) {
+        missingNames++;
+        continue;
+      }
+      funcTable.name[f] = stringTable.indexForString(newName);
+      updated++;
+    }
+    console.log(
+      `Renamed ${updated} wasm function(s) for ${url}` +
+        (missingNames > 0
+          ? ` (${missingNames} index(es) had no name in the wasm file)`
+          : '')
+    );
+  }
+}

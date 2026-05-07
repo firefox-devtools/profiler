@@ -14,6 +14,10 @@ import {
 } from 'firefox-profiler/profile-logic/symbolication';
 import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
+import {
+  applyWasmSymbolication,
+  type WasmSymbolicationSpec,
+} from 'firefox-profiler/profile-logic/wasm-symbolication';
 import type { Profile } from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -29,6 +33,10 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  * Examples:
  *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json \
  *     --symbolicate-with-server http://localhost:8001/abcdef/
+ *
+ *   node node-tools-dist/profiler-edit.js -i input.json.gz -o out.json.gz \
+ *     --symbolicate-wasm http://host/a.wasm=./a-unstripped.wasm \
+ *     --symbolicate-wasm http://host/b.wasm=./b-unstripped.wasm
  */
 
 type ProfileSource =
@@ -36,10 +44,30 @@ type ProfileSource =
   | { type: 'URL'; url: string }
   | { type: 'HASH'; hash: string };
 
+interface WasmSymbolicationCliSpec {
+  path: string;
+  url?: string;
+}
+
 export interface CliOptions {
   input: ProfileSource;
   output: string;
   symbolicateWithServer?: string;
+  symbolicateWasm?: WasmSymbolicationCliSpec[];
+}
+
+function loadWasmSymbolicationSpecs(
+  cliSpecs: WasmSymbolicationCliSpec[]
+): WasmSymbolicationSpec[] {
+  return cliSpecs.map((spec) => {
+    console.log(`Reading wasm symbols from ${spec.path}`);
+    const buf = fs.readFileSync(spec.path);
+    return {
+      bytes: new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength),
+      url: spec.url,
+      label: spec.path,
+    };
+  });
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -143,6 +171,13 @@ export async function run(options: CliOptions) {
     profile.meta.symbolicated = true;
   }
 
+  if (options.symbolicateWasm !== undefined) {
+    applyWasmSymbolication(
+      profile,
+      loadWasmSymbolicationSpecs(options.symbolicateWasm)
+    );
+  }
+
   console.log(`Saving profile to ${options.output}`);
   if (options.output.endsWith('.gz')) {
     fs.writeFileSync(options.output, await compress(JSON.stringify(profile)));
@@ -191,6 +226,35 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     throw new Error('An output path must be supplied with --output / -o');
   }
 
+  const symbolicateWasm: WasmSymbolicationCliSpec[] = [];
+  const rawWasmArg = argv['symbolicate-wasm'];
+  let wasmArgs: unknown[];
+  if (rawWasmArg === undefined) {
+    wasmArgs = [];
+  } else if (Array.isArray(rawWasmArg)) {
+    wasmArgs = rawWasmArg;
+  } else {
+    wasmArgs = [rawWasmArg];
+  }
+  for (const arg of wasmArgs) {
+    if (typeof arg !== 'string' || arg === '') {
+      throw new Error('--symbolicate-wasm requires a value');
+    }
+    // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
+    // whole string as a path and infer the URL from the profile. Split on
+    // the last `=` so URLs containing `=` (e.g. in query strings) survive
+    // intact; this assumes file paths don't contain `=`.
+    const eqIndex = arg.lastIndexOf('=');
+    if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(arg.slice(0, eqIndex))) {
+      symbolicateWasm.push({
+        url: arg.slice(0, eqIndex),
+        path: arg.slice(eqIndex + 1),
+      });
+    } else {
+      symbolicateWasm.push({ path: arg });
+    }
+  }
+
   return {
     input: sources[0],
     output: argv.output,
@@ -199,6 +263,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       argv['symbolicate-with-server'] !== ''
         ? argv['symbolicate-with-server']
         : undefined,
+    symbolicateWasm,
   };
 }
 
