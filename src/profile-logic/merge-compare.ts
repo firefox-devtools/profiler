@@ -1361,6 +1361,26 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
     threadId: newThreadId,
   };
 
+  // If every source thread has threadCPUDelta, and if the threads are
+  // non-overlapping in time, create a combined threadCPUDelta for the
+  // merged thread.
+  // For overlapping threads we drop threadCPUDelta entirely because the
+  // deltas are non-sensical if samples are interleaved.
+  const allHaveThreadCPUDelta = samplesPerThread.every(
+    (s) => s.threadCPUDelta !== undefined
+  );
+  const sortedThreadTimeRanges = sampleTimesPerThread
+    .filter((times) => times.length > 0)
+    .map((times) => ({ start: times[0], end: times[times.length - 1] }))
+    .sort((a, b) => a.start - b.start);
+  const threadsAreNonOverlapping = sortedThreadTimeRanges.every(
+    (range, i) => i === 0 || range.start >= sortedThreadTimeRanges[i - 1].end
+  );
+  const shouldCombineThreadCPUDelta =
+    allHaveThreadCPUDelta && threadsAreNonOverlapping;
+  const newThreadCPUDelta: Array<number | null> | undefined =
+    shouldCombineThreadCPUDelta ? [] : undefined;
+
   while (true) {
     let earliestNextSampleThreadIndex: number | null = null;
     let earliestNextSampleTime = Infinity;
@@ -1410,11 +1430,21 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
         ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
         : threads[sourceThreadIndex].tid
     );
+    if (newThreadCPUDelta !== undefined) {
+      newThreadCPUDelta.push(
+        ensureExists(sourceThreadSamples.threadCPUDelta)[
+          sourceThreadSampleIndex
+        ]
+      );
+    }
 
     newSamples.length++;
     nextSampleIndexPerThread[sourceThreadIndex]++;
   }
 
+  if (newThreadCPUDelta !== undefined) {
+    return { ...newSamples, threadCPUDelta: newThreadCPUDelta };
+  }
   return newSamples;
 }
 
