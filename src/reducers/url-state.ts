@@ -24,6 +24,7 @@ import type {
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
   FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 
@@ -795,6 +796,26 @@ const selectedMarkers: Reducer<SelectedMarkersPerThread> = (
   }
 };
 
+const selectedFunctions: Reducer<SelectedFunctionsPerThread> = (
+  state = {},
+  action
+): SelectedFunctionsPerThread => {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_FUNCTION': {
+      const { threadsKey, selectedFunctionIndex } = action;
+      if (state[threadsKey] === selectedFunctionIndex) {
+        return state;
+      }
+      return {
+        ...state,
+        [threadsKey]: selectedFunctionIndex,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * These values are specific to an individual profile.
  */
@@ -824,6 +845,7 @@ const profileSpecific = combineReducers({
   showJsTracerSummary,
   tabFilter,
   selectedMarkers,
+  selectedFunctions,
   markerTableSort,
   functionListSort,
   functionListSectionsOpen,
