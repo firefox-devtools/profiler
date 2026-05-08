@@ -62,6 +62,13 @@ export type ProfileBenchmarkStats = {
   /** Name of each bucket (JS function name or similar). Length = total bucket count. */
   bucketNames: string[];
   /**
+   * Func index (in profile.shared.funcTable) for each bucket. Same length as
+   * bucketNames. -1 for the synthetic "no JS frame" bucket. Useful when callers
+   * want to reach back into the source profile for a given bucket, e.g. to feed
+   * a focusSelf() flame graph.
+   */
+  bucketFuncs: Array<IndexIntoFuncTable>;
+  /**
    * Per-bucket weight summed across all suites, with suite geomean factors applied,
    * per iteration. Sparse: only buckets with nonzero global total.
    * This is the "geomean-normalised" global view.
@@ -255,5 +262,5 @@ export function extractBenchmarkStatsFromProfile(
     globalBuckets.push({ bucketIndex: b, iterationTotals });
   }
 
-  return { bucketNames, globalBuckets, suites };
+  return { bucketNames, bucketFuncs, globalBuckets, suites };
 }

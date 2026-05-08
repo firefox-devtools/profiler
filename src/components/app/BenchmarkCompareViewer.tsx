@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AppHeader } from './AppHeader';
@@ -25,11 +25,24 @@ import type {
   ConfidenceRating,
   EffectSize,
 } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
+import type { Profile } from 'firefox-profiler/types';
+import { BucketFlameGraphPair } from './BucketFlameGraphPair';
+import type { BucketProfileBundle } from './BucketFlameGraphPair';
+import {
+  buildDerivedThread,
+  getCategoriesForProfile,
+  getDefaultCategoryIndex,
+} from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
+import { getBenchmarkInfo } from 'firefox-profiler/profile-logic/benchmark/benchmark-stuff';
 import './BenchmarkCompareViewer.css';
 
 type ComparisonData = {
   baseUrl: string;
   newUrl: string;
+  /** The loaded source profiles, retained so we can render flame graphs of
+   * individual buckets on demand (focusSelf on a bucket's representative func). */
+  baseProfile: Profile;
+  newProfile: Profile;
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
   suiteComparisons: Array<{
@@ -121,6 +134,8 @@ async function computeComparison(
       newSuite.buckets,
       baseStats.bucketNames,
       newStats.bucketNames,
+      baseStats.bucketFuncs,
+      newStats.bucketFuncs,
       baseSuite.iterationCount
     );
     return [{ suiteName: baseSuite.suiteName, comparisons }];
@@ -130,6 +145,8 @@ async function computeComparison(
   return {
     baseUrl,
     newUrl,
+    baseProfile,
+    newProfile,
     overallScore,
     suiteScores,
     suiteComparisons,
@@ -224,10 +241,14 @@ function ScoreTable({
   overallScore,
   suiteScores,
   suiteComparisonsByName,
+  baseBundle,
+  newBundle,
 }: {
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
   suiteComparisonsByName: Map<string, BucketComparison[]>;
+  baseBundle: BucketProfileBundle;
+  newBundle: BucketProfileBundle;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const numSuites = suiteScores.length;
@@ -313,6 +334,8 @@ function ScoreTable({
                       label={row.label}
                       baseSubtestMean={row.baseMean}
                       numSuites={numSuites}
+                      baseBundle={baseBundle}
+                      newBundle={newBundle}
                     />
                   </td>
                 </tr>
@@ -330,6 +353,8 @@ function BucketTable({
   label,
   baseSubtestMean,
   numSuites,
+  baseBundle,
+  newBundle,
 }: {
   comparisons: BucketComparison[];
   label: string;
@@ -337,9 +362,22 @@ function BucketTable({
    * (Δ% overall and Δ% subtest) instead of the bucket-relative Δ%. */
   baseSubtestMean?: number;
   numSuites?: number;
+  baseBundle: BucketProfileBundle;
+  newBundle: BucketProfileBundle;
 }) {
   const showSubtestColumns =
     baseSubtestMean !== undefined && numSuites !== undefined;
+  const columnCount = showSubtestColumns ? 6 : 5;
+
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const toggle = (bucketName: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(bucketName)) next.delete(bucketName);
+      else next.add(bucketName);
+      return next;
+    });
+  };
 
   const significant = comparisons
     .filter((c) => c.confidence !== 'LOW' && c.effectSize !== 'Negligible')
@@ -403,21 +441,68 @@ function BucketTable({
               </td>
             );
           }
+          // A bucket can be expanded if at least one side has a func index.
+          // (If both are null it's a degenerate "appeared/disappeared with no
+          // attributable func" case.)
+          const expandable = c.baseFunc !== null || c.newFunc !== null;
+          const isExpanded = expanded.has(c.bucketName);
           return (
-            <tr key={i}>
-              <td className="benchmarkCell--bucketName" title={c.bucketName}>
-                {c.bucketName}
-              </td>
-              <td className="benchmarkCell--number">{c.baseMean.toFixed(2)}</td>
-              <td className="benchmarkCell--number">{c.newMean.toFixed(2)}</td>
-              <td className="benchmarkCell--number">{absDiffStr}</td>
-              {pctCells}
-            </tr>
+            <Fragment key={i}>
+              <tr
+                className={
+                  expandable ? 'benchmarkRow--bucket-expandable' : undefined
+                }
+                onClick={expandable ? () => toggle(c.bucketName) : undefined}
+              >
+                <td className="benchmarkCell--bucketName" title={c.bucketName}>
+                  {expandable && (
+                    <span className="benchmarkDisclosure" aria-hidden="true">
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
+                  )}
+                  {c.bucketName}
+                </td>
+                <td className="benchmarkCell--number">
+                  {c.baseMean.toFixed(2)}
+                </td>
+                <td className="benchmarkCell--number">{c.newMean.toFixed(2)}</td>
+                <td className="benchmarkCell--number">{absDiffStr}</td>
+                {pctCells}
+              </tr>
+              {expandable && isExpanded && (
+                <tr className="benchmarkRow--bucket-expansion">
+                  <td colSpan={columnCount}>
+                    <BucketFlameGraphPair
+                      baseBundle={baseBundle}
+                      newBundle={newBundle}
+                      baseFunc={c.baseFunc}
+                      newFunc={c.newFunc}
+                    />
+                  </td>
+                </tr>
+              )}
+            </Fragment>
           );
         })}
       </tbody>
     </table>
   );
+}
+
+/** Build the (profile, derivedThread, categories) bundle once per profile.
+ * Computing the derived thread is expensive, so we memoize on profile identity
+ * and reuse the same bundle across every bucket the user expands. */
+function makeBucketProfileBundle(profile: Profile): BucketProfileBundle {
+  const categories = getCategoriesForProfile(profile);
+  const defaultCategory = getDefaultCategoryIndex(categories);
+  const benchmarkInfo = getBenchmarkInfo(profile, 'speedometer');
+  const thread = buildDerivedThread(
+    profile,
+    benchmarkInfo.threadIndex,
+    categories,
+    defaultCategory
+  );
+  return { profile, thread, categories, defaultCategory };
 }
 
 function ComparisonResults({ data }: { data: ComparisonData }) {
@@ -426,6 +511,15 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
       suiteName,
       comparisons,
     ])
+  );
+
+  const baseBundle = useMemo(
+    () => makeBucketProfileBundle(data.baseProfile),
+    [data.baseProfile]
+  );
+  const newBundle = useMemo(
+    () => makeBucketProfileBundle(data.newProfile),
+    [data.newProfile]
   );
 
   return (
@@ -450,6 +544,8 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
         overallScore={data.overallScore}
         suiteScores={data.suiteScores}
         suiteComparisonsByName={suiteComparisonsByName}
+        baseBundle={baseBundle}
+        newBundle={newBundle}
       />
     </div>
   );

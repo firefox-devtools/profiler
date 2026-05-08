@@ -122,6 +122,15 @@ async function main() {
     fs.readFileSync(argv.new, 'utf8')
   );
 
+  // bucketFuncs was added later; older stats files don't include it. The CLI
+  // doesn't need real func indices (no flame graph here), so fill with -1.
+  if (!base.bucketFuncs) {
+    base.bucketFuncs = new Array(base.bucketNames.length).fill(-1);
+  }
+  if (!newStats.bucketFuncs) {
+    newStats.bucketFuncs = new Array(newStats.bucketNames.length).fill(-1);
+  }
+
   const iterationCount = base.suites[0]?.iterationCount ?? 1;
 
   if (showGlobal) {
@@ -164,6 +173,8 @@ async function main() {
       newStats.globalBuckets,
       base.bucketNames,
       newStats.bucketNames,
+      base.bucketFuncs,
+      newStats.bucketFuncs,
       iterationCount,
       excludeAppearedDisappeared
     );
@@ -196,6 +207,8 @@ async function main() {
         newSuite.buckets,
         base.bucketNames,
         newStats.bucketNames,
+        base.bucketFuncs,
+        newStats.bucketFuncs,
         baseSuite.iterationCount,
         excludeAppearedDisappeared
       );
