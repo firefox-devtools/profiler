@@ -108,6 +108,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^3.1.0",
     "reselect": "^4.1.8",
+    "smol-toml": "^1.6.1",
     "url": "^0.11.4",
     "valibot": "^1.3.1",
     "weaktuplemap": "^1.0.0",
