@@ -27,6 +27,7 @@ import {
   pValueToConfidence,
 } from './perf-compare-stats';
 import type { EffectSize, ConfidenceRating } from './perf-compare-stats';
+import type { IndexIntoFuncTable } from '../../types/profile';
 
 // ---------------------------------------------------------------------------
 // Comparison logic
@@ -34,6 +35,12 @@ import type { EffectSize, ConfidenceRating } from './perf-compare-stats';
 
 export type BucketComparison = {
   bucketName: string;
+  /** Func index of the bucket in the base profile, or null if absent there.
+   * If multiple funcs share this name within the profile, the one with the
+   * largest sum of iterationTotals is chosen (representative func). */
+  baseFunc: IndexIntoFuncTable | null;
+  /** Func index of the bucket in the new profile, or null if absent there. */
+  newFunc: IndexIntoFuncTable | null;
   baseMean: number;
   newMean: number;
   /** Relative change: (newMean - baseMean) / baseMean */
@@ -43,24 +50,45 @@ export type BucketComparison = {
   confidence: ConfidenceRating;
 };
 
-/** Build a name → iterationTotals map for a set of sparse bucket entries. */
+type NameMapEntry = {
+  iterationTotals: number[];
+  /** Func index of the highest-weight bucket with this name (representative). */
+  representativeFunc: IndexIntoFuncTable;
+  /** Sum of iterationTotals for that representative bucket alone. */
+  representativeWeight: number;
+};
+
+/** Build a name → iterationTotals + representative-func map for a set of sparse bucket entries. */
 function buildNameMap(
   buckets: SparseBucketEntry[],
-  bucketNames: string[]
-): Map<string, number[]> {
-  const map = new Map<string, number[]>();
+  bucketNames: string[],
+  bucketFuncs: IndexIntoFuncTable[]
+): Map<string, NameMapEntry> {
+  const map = new Map<string, NameMapEntry>();
   for (const entry of buckets) {
     const name =
       bucketNames[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
-    // If the same name appears twice (two different functions with identical names),
-    // sum their iteration totals together.
+    const func = bucketFuncs[entry.bucketIndex];
+    let weight = 0;
+    for (const v of entry.iterationTotals) weight += v;
     const existing = map.get(name);
     if (existing !== undefined) {
-      for (let i = 0; i < existing.length; i++) {
-        existing[i] += entry.iterationTotals[i];
+      // If the same name appears twice (two different functions with identical names),
+      // sum their iteration totals together. Pick the heaviest as the representative
+      // func, since the flame graph can only focusSelf on one func.
+      for (let i = 0; i < existing.iterationTotals.length; i++) {
+        existing.iterationTotals[i] += entry.iterationTotals[i];
+      }
+      if (weight > existing.representativeWeight) {
+        existing.representativeFunc = func;
+        existing.representativeWeight = weight;
       }
     } else {
-      map.set(name, entry.iterationTotals.slice());
+      map.set(name, {
+        iterationTotals: entry.iterationTotals.slice(),
+        representativeFunc: func,
+        representativeWeight: weight,
+      });
     }
   }
   return map;
@@ -76,11 +104,13 @@ export function compareBuckets(
   newBuckets: SparseBucketEntry[],
   baseBucketNames: string[],
   newBucketNames: string[],
+  baseBucketFuncs: IndexIntoFuncTable[],
+  newBucketFuncs: IndexIntoFuncTable[],
   iterationCount: number,
   excludeAppearedDisappeared: boolean = false
 ): BucketComparison[] {
-  const baseMap = buildNameMap(baseBuckets, baseBucketNames);
-  const newMap = buildNameMap(newBuckets, newBucketNames);
+  const baseMap = buildNameMap(baseBuckets, baseBucketNames, baseBucketFuncs);
+  const newMap = buildNameMap(newBuckets, newBucketNames, newBucketFuncs);
 
   const allNames = excludeAppearedDisappeared
     ? new Set([...baseMap.keys()].filter((k) => newMap.has(k)))
@@ -90,8 +120,10 @@ export function compareBuckets(
 
   const results: BucketComparison[] = [];
   for (const name of allNames) {
-    const baseIter = baseMap.get(name) ?? zeros;
-    const newIter = newMap.get(name) ?? zeros;
+    const baseEntry = baseMap.get(name);
+    const newEntry = newMap.get(name);
+    const baseIter = baseEntry?.iterationTotals ?? zeros;
+    const newIter = newEntry?.iterationTotals ?? zeros;
 
     const baseMean = mean(baseIter);
     const newMean = mean(newIter);
@@ -114,6 +146,8 @@ export function compareBuckets(
 
     results.push({
       bucketName: name,
+      baseFunc: baseEntry?.representativeFunc ?? null,
+      newFunc: newEntry?.representativeFunc ?? null,
       baseMean,
       newMean,
       relChange,

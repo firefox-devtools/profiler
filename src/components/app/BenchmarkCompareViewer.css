@@ -1,5 +1,6 @@
 .benchmarkCompareViewer {
-  flex: 1;
+  /* this element is a child in a horizontal flex parent */
+  align-self: flex-start; /* allow extending beyond the parent's height */
   box-sizing: border-box;
   width: 100%;
   min-height: 100%;
@@ -215,4 +216,76 @@
 
 .benchmarkCell--effect-moderate {
   font-weight: 600;
+}
+
+/* Expandable bucket rows (inner table). Mirror the suite-row styling. */
+
+.benchmarkRow--bucket-expandable {
+  cursor: pointer;
+}
+
+.benchmarkRow--bucket-expandable:hover {
+  background: var(--grey-10);
+}
+
+.benchmarkRow--bucket-expansion > td {
+  padding: 0.5em 0;
+  background: var(--grey-10);
+  white-space: normal;
+}
+
+/* Stacked base / new flame graphs for one expanded bucket. The base flame
+ * graph is on top, the new one below, so they can be visually compared by
+ * scanning vertically. Each side's width is set inline (as a percentage)
+ * proportional to its total sample count, so 1 sample takes up the same
+ * pixel width on both sides. */
+
+.bucketFlameGraphPair {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.5em 1em;
+}
+
+.bucketFlameGraphSide {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  height: 280px;
+  flex-direction: column;
+  border: 1px solid var(--grey-30);
+  border-radius: 4px;
+  background: var(--base-background-color);
+}
+
+.bucketFlameGraphSide__label {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--grey-30);
+  background: var(--grey-20);
+  color: var(--grey-70);
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.bucketFlameGraphSide__sampleCount {
+  color: var(--grey-60);
+  font-weight: normal;
+  text-transform: none;
+}
+
+.bucketFlameGraphSide__chart {
+  display: flex;
+  overflow: hidden;
+  flex: 1;
+  flex-direction: column;
+}
+
+.bucketFlameGraphSide__empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--grey-60);
+  font-style: italic;
 }
