@@ -43,13 +43,16 @@ type Props<Item> = {
   } | null;
 };
 
-// The naming of the X and Y coordinates here correspond to the ones
-// found on the MouseEvent interface.
+// Mouse coordinates passed to the Tooltip component. The Tooltip uses
+// `position: fixed`, so these must be VIEWPORT-relative (i.e. clientX/clientY,
+// not pageX/pageY). Otherwise the tooltip is mispositioned whenever the page
+// is scrolled (the chart's container can be in a scrollable region — e.g. the
+// benchmark-comparison page — even though the chart itself doesn't scroll).
 type State<Item> = {
   hoveredItem: Item | null;
   selectedItem: Item | null;
-  pageX: CssPixels;
-  pageY: CssPixels;
+  clientX: CssPixels;
+  clientY: CssPixels;
 };
 
 export type ChartCanvasScale = {
@@ -103,8 +106,8 @@ export class ChartCanvas<Item> extends React.Component<
   override state: State<Item> = {
     hoveredItem: null,
     selectedItem: null,
-    pageX: 0,
-    pageY: 0,
+    clientX: 0,
+    clientY: 0,
   };
 
   _scheduleDraw(
@@ -238,8 +241,8 @@ export class ChartCanvas<Item> extends React.Component<
       if (this.props.stickyTooltips) {
         this.setState((state) => ({
           selectedItem: state.hoveredItem,
-          pageX: e.pageX,
-          pageY: e.pageY,
+          clientX: e.clientX,
+          clientY: e.clientY,
         }));
       }
 
@@ -292,20 +295,18 @@ export class ChartCanvas<Item> extends React.Component<
     const maybeHoveredItem = this.props.hitTest(offsetX, offsetY);
     if (maybeHoveredItem !== null) {
       if (this.state.selectedItem === null) {
-        // Update both the hovered item and the pageX and pageY values. The
-        // pageX and pageY values are used to change the position of the tooltip
-        // and if there is no selected item, it means that we can update this
-        // position freely.
+        // Update both the hovered item and the cursor position. The cursor
+        // position is used to position the tooltip; if there is no selected
+        // item we can update it freely.
         this.setState({
           hoveredItem: maybeHoveredItem,
-          pageX: event.pageX,
-          pageY: event.pageY,
+          clientX: event.clientX,
+          clientY: event.clientY,
         });
       } else {
         // If there is a selected item, only update the hoveredItem and not the
-        // pageX and pageY values which is used for the position of the tooltip.
-        // By keeping the x and y values the same, we make sure that the tooltip
-        // stays in its initial position where it's clicked.
+        // cursor position used to position the tooltip. By keeping the x and y
+        // values the same, the tooltip stays at the position where it was clicked.
         this.setState({
           hoveredItem: maybeHoveredItem,
         });
@@ -385,9 +386,11 @@ export class ChartCanvas<Item> extends React.Component<
 
     const { offsetX, offsetY } = selectedItemTooltipOffset;
     const canvasRect = this._canvas.getBoundingClientRect();
-    const pageX = canvasRect.left + window.scrollX + offsetX;
-    const pageY = canvasRect.top + window.scrollY + offsetY;
-    this.setState({ selectedItem, pageX, pageY });
+    // Viewport-relative coordinates (no scroll offsets), since the Tooltip is
+    // positioned with `position: fixed`. See the State type comment above.
+    const clientX = canvasRect.left + offsetX;
+    const clientY = canvasRect.top + offsetY;
+    this.setState({ selectedItem, clientX, clientY });
   };
 
   override UNSAFE_componentWillReceiveProps() {
@@ -495,7 +498,7 @@ export class ChartCanvas<Item> extends React.Component<
 
   override render() {
     const { isDragging } = this.props;
-    const { hoveredItem, pageX, pageY } = this.state;
+    const { hoveredItem, clientX, clientY } = this.state;
 
     const className = classNames({
       chartCanvas: true,
@@ -519,8 +522,8 @@ export class ChartCanvas<Item> extends React.Component<
         />
         {!isDragging && tooltipContents ? (
           <Tooltip
-            mouseX={pageX}
-            mouseY={pageY}
+            mouseX={clientX}
+            mouseY={clientY}
             className={classNames({
               clickable: this.state.selectedItem !== null,
             })}
