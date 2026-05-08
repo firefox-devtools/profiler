@@ -476,9 +476,11 @@ describe('MarkerTable', function () {
       );
 
       let dividerForFirstColumn = ensureExists(
-        document.querySelector('.treeViewColumnDivider')
+        document.querySelector('.treeViewHeaderColumnDivider')
       );
-      let firstColumn = screen.getByText('Start');
+      let firstColumn = ensureExists(
+        document.querySelector('.treeViewHeaderColumn.start')
+      );
       expect(firstColumn).toHaveStyle({ width: '90px' });
       fireEvent.mouseDown(dividerForFirstColumn, { clientX: 90 });
 
@@ -505,12 +507,14 @@ describe('MarkerTable', function () {
       );
 
       // Make sure the first column kept its width
-      firstColumn = screen.getByText('Start');
+      firstColumn = ensureExists(
+        document.querySelector('.treeViewHeaderColumn.start')
+      );
       expect(firstColumn).toHaveStyle({ width: '80px' });
 
       // Now double click to reset the style.
       dividerForFirstColumn = ensureExists(
-        document.querySelector('.treeViewColumnDivider')
+        document.querySelector('.treeViewHeaderColumnDivider')
       );
       fireEvent.dblClick(dividerForFirstColumn, { detail: 2 });
       expect(firstColumn).toHaveStyle({ width: '90px' });
