@@ -34,6 +34,7 @@ import {
   getHiddenLocalTracks,
   getInvertCallstack,
   getHash,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
 import {
   assertExhaustiveCheck,
@@ -81,7 +82,7 @@ import {
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
-import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
+import { replaceHistoryWithUrlState } from 'firefox-profiler/app-logic/url-handling';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
@@ -165,24 +166,26 @@ export function changeUpperWingSelectedCallNode(
 /**
  * Select a function for a given thread in the function list.
  *
- * Uses replaceState rather than pushState so that holding e.g. the down arrow
- * key in the function list doesn't get rate-limited by the browser and doesn't
- * flood the back/forward history.
+ * Replaces the current history entry rather than pushing a new one, so that
+ * holding e.g. the down arrow key in the function list doesn't get rate-limited
+ * by the browser and doesn't flood the back/forward history.
  */
 export function changeSelectedFunctionIndex(
   threadsKey: ThreadsKey,
   selectedFunctionIndex: IndexIntoFuncTable | null,
   context: SelectionContext = { source: 'auto' }
 ): ThunkAction<void> {
-  return (dispatch) => {
-    withHistoryReplaceStateSync(() => {
-      dispatch({
-        type: 'CHANGE_SELECTED_FUNCTION',
-        selectedFunctionIndex,
-        threadsKey,
-        context,
-      });
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'CHANGE_SELECTED_FUNCTION',
+      selectedFunctionIndex,
+      threadsKey,
+      context,
     });
+    // Update window.history synchronously instead of waiting for the
+    // UrlManager's componentDidUpdate, which is deferred by React's render
+    // scheduling and would otherwise pushState a new entry.
+    replaceHistoryWithUrlState(getUrlState(getState()));
   };
 }
 

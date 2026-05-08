@@ -122,6 +122,23 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
+/**
+ * Synchronously replace the current history entry to match the given UrlState.
+ *
+ * Use this from action thunks for high-frequency actions (e.g. arrow-key
+ * navigation) where deferring the URL update to UrlManager.componentDidUpdate
+ * would result in unwanted pushState calls and history-flooding. By updating
+ * window.history synchronously here, the URL already matches the new state by
+ * the time UrlManager's componentDidUpdate runs, so it becomes a no-op.
+ */
+export function replaceHistoryWithUrlState(urlState: UrlState): void {
+  window.history.replaceState(
+    urlState,
+    document.title,
+    urlFromState(urlState)
+  );
+}
+
 function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
