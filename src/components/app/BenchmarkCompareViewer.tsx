@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AppHeader } from './AppHeader';
@@ -21,7 +21,10 @@ import type {
   BucketComparison,
   ScoreComparison,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
-import type { ConfidenceRating } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
+import type {
+  ConfidenceRating,
+  EffectSize,
+} from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
 import './BenchmarkCompareViewer.css';
 
 type ComparisonData = {
@@ -29,7 +32,6 @@ type ComparisonData = {
   newUrl: string;
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
-  globalComparisons: BucketComparison[];
   suiteComparisons: Array<{
     suiteName: string;
     comparisons: BucketComparison[];
@@ -109,14 +111,6 @@ async function computeComparison(
   }
   suiteScores.sort((a, b) => a.label.localeCompare(b.label));
 
-  const globalComparisons = compareBuckets(
-    baseStats.globalBuckets,
-    newStats.globalBuckets,
-    baseStats.bucketNames,
-    newStats.bucketNames,
-    iterationCount
-  );
-
   const suiteComparisons = baseStats.suites.flatMap((baseSuite) => {
     const newSuite = newStats.suites.find(
       (s) => s.suiteName === baseSuite.suiteName
@@ -138,9 +132,19 @@ async function computeComparison(
     newUrl,
     overallScore,
     suiteScores,
-    globalComparisons,
     suiteComparisons,
   };
+}
+
+/**
+ * Given a relative change of a single subtest's mean, compute the resulting
+ * relative change in the overall geomean across `numSuites` subtests, assuming
+ * the other subtests are unchanged. Exact (not a linearization):
+ *   newGeomean / baseGeomean = (newSuiteMean / baseSuiteMean)^(1/N)
+ */
+function impactOnGeomean(suiteRel: number, numSuites: number): number {
+  if (!isFinite(suiteRel)) return suiteRel;
+  return Math.pow(1 + suiteRel, 1 / numSuites) - 1;
 }
 
 function formatChange(rel: number): string {
@@ -149,58 +153,171 @@ function formatChange(rel: number): string {
   return rel >= 0 ? `+${pct}%` : `${pct}%`;
 }
 
-function changeClass(relChange: number, confidence: ConfidenceRating): string {
+function changeClass(
+  relChange: number,
+  confidence: ConfidenceRating,
+  effectSize: EffectSize
+): string {
   if (!isFinite(relChange) || relChange === 0) return '';
   const direction = relChange > 0 ? 'regressed' : 'improved';
-  if (confidence === 'LOW') return '';
-  if (confidence === 'MEDIUM') return `benchmarkCell--${direction}-medium`;
-  return `benchmarkCell--${direction}`;
+  const classes = [];
+  // Only color the text (and add background shading) when we have at least
+  // medium confidence. Below that, leave the text in the default color.
+  if (confidence === 'HIGH') {
+    classes.push(`benchmarkCell--${direction}`, 'benchmarkCell--conf-high');
+  } else if (confidence === 'MEDIUM') {
+    classes.push(`benchmarkCell--${direction}`, 'benchmarkCell--conf-medium');
+  }
+  if (effectSize === 'Large') classes.push('benchmarkCell--effect-large');
+  else if (effectSize === 'Moderate')
+    classes.push('benchmarkCell--effect-moderate');
+  // Small / Negligible: normal weight.
+  return classes.join(' ');
+}
+
+const SCORE_TABLE_COLUMN_COUNT = 6;
+
+function ScoreRow({
+  row,
+  isOverall,
+  numSuites,
+}: {
+  row: ScoreComparison;
+  isOverall: boolean;
+  numSuites: number;
+}) {
+  const absDiff = row.newMean - row.baseMean;
+  const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
+  // For the overall row, the score IS the geomean — there's no enclosing
+  // subtest, so leave the subtest column blank, and the overall column shows
+  // the actual measured geomean relChange. For a subtest row, the subtest's
+  // relChange is its own, and we compute its impact on the overall geomean
+  // assuming only this subtest changed.
+  const subtestRel = isOverall ? null : row.relChange;
+  const overallRel = isOverall
+    ? row.relChange
+    : impactOnGeomean(row.relChange, numSuites);
+  return (
+    <>
+      <td className="benchmarkCell--number">{row.baseMean.toFixed(2)}</td>
+      <td className="benchmarkCell--number">{row.newMean.toFixed(2)}</td>
+      <td className="benchmarkCell--number">{absDiffStr}</td>
+      <td
+        className={
+          subtestRel === null
+            ? 'benchmarkCell--number'
+            : `benchmarkCell--number ${changeClass(subtestRel, row.confidence, row.effectSize)}`
+        }
+      >
+        {subtestRel === null ? '—' : formatChange(subtestRel)}
+      </td>
+      <td
+        className={`benchmarkCell--number ${changeClass(overallRel, row.confidence, row.effectSize)}`}
+      >
+        {formatChange(overallRel)}
+      </td>
+    </>
+  );
 }
 
 function ScoreTable({
   overallScore,
   suiteScores,
+  suiteComparisonsByName,
 }: {
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
+  suiteComparisonsByName: Map<string, BucketComparison[]>;
 }) {
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const numSuites = suiteScores.length;
+
+  const toggle = (label: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  };
+
   return (
     <table className="benchmarkTable">
       <thead>
         <tr>
           <th>Score</th>
-          <th className="benchmarkCell--number">Base mean</th>
-          <th className="benchmarkCell--number">New mean</th>
-          <th className="benchmarkCell--number">Δ abs</th>
-          <th className="benchmarkCell--number">Δ%</th>
-          <th className="benchmarkCell--number">Effect</th>
-          <th className="benchmarkCell--number">Confidence</th>
+          <th className="benchmarkCell--number benchmarkCell--colFixed">
+            Base mean
+          </th>
+          <th className="benchmarkCell--number benchmarkCell--colFixed">
+            New mean
+          </th>
+          <th className="benchmarkCell--number benchmarkCell--colFixed">
+            Δ abs
+          </th>
+          <th className="benchmarkCell--number benchmarkCell--colFixed">
+            Δ% subtest
+          </th>
+          <th className="benchmarkCell--number benchmarkCell--colFixed">
+            Δ% overall
+          </th>
         </tr>
       </thead>
       <tbody>
-        {[overallScore, ...suiteScores].map((row, i) => {
-          const absDiff = row.newMean - row.baseMean;
-          const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
+        <tr className="benchmarkRow--overall">
+          <td
+            className="benchmarkCell--scoreLabel"
+            title={overallScore.label}
+          >
+            {overallScore.label}
+          </td>
+          <ScoreRow
+            row={overallScore}
+            isOverall={true}
+            numSuites={numSuites}
+          />
+        </tr>
+        {suiteScores.map((row) => {
+          const isExpanded = expanded.has(row.label);
+          const comparisons = suiteComparisonsByName.get(row.label);
+          const expandable = comparisons !== undefined;
           return (
-            <tr key={i} className={i === 0 ? 'benchmarkRow--overall' : ''}>
-              <td className={i > 0 ? 'benchmarkCell--indented' : ''}>
-                {row.label}
-              </td>
-              <td className="benchmarkCell--number">
-                {row.baseMean.toFixed(2)}
-              </td>
-              <td className="benchmarkCell--number">
-                {row.newMean.toFixed(2)}
-              </td>
-              <td className="benchmarkCell--number">{absDiffStr}</td>
-              <td
-                className={`benchmarkCell--number ${changeClass(row.relChange, row.confidence)}`}
+            <Fragment key={row.label}>
+              <tr
+                className={
+                  expandable ? 'benchmarkRow--suite-expandable' : undefined
+                }
+                onClick={expandable ? () => toggle(row.label) : undefined}
               >
-                {formatChange(row.relChange)}
-              </td>
-              <td className="benchmarkCell--number">{row.effectSize}</td>
-              <td className="benchmarkCell--number">{row.confidence}</td>
-            </tr>
+                <td
+                  className="benchmarkCell--indented benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
+                  title={row.label}
+                >
+                  {expandable && (
+                    <span
+                      className="benchmarkDisclosure"
+                      aria-hidden="true"
+                    >
+                      {isExpanded ? '▼' : '▶'}
+                    </span>
+                  )}
+                  {row.label}
+                </td>
+                <ScoreRow row={row} isOverall={false} numSuites={numSuites} />
+              </tr>
+              {isExpanded && comparisons && (
+                <tr className="benchmarkRow--expansion">
+                  <td colSpan={SCORE_TABLE_COLUMN_COUNT}>
+                    <BucketTable
+                      comparisons={comparisons}
+                      label={row.label}
+                      baseSubtestMean={row.baseMean}
+                      numSuites={numSuites}
+                    />
+                  </td>
+                </tr>
+              )}
+            </Fragment>
           );
         })}
       </tbody>
@@ -211,12 +328,21 @@ function ScoreTable({
 function BucketTable({
   comparisons,
   label,
+  baseSubtestMean,
+  numSuites,
 }: {
   comparisons: BucketComparison[];
   label: string;
+  /** When provided together with numSuites, two percent columns are shown
+   * (Δ% overall and Δ% subtest) instead of the bucket-relative Δ%. */
+  baseSubtestMean?: number;
+  numSuites?: number;
 }) {
+  const showSubtestColumns =
+    baseSubtestMean !== undefined && numSuites !== undefined;
+
   const significant = comparisons
-    .filter((c) => c.confidence !== 'LOW')
+    .filter((c) => c.confidence !== 'LOW' && c.effectSize !== 'Negligible')
     .sort(
       (a, b) =>
         Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
@@ -226,28 +352,57 @@ function BucketTable({
   if (significant.length === 0) {
     return (
       <p className="benchmarkNoChanges">
-        No significant bucket changes in {label}.
+        No bucket changes in {label} with at least medium confidence and a
+        non-negligible effect size.
       </p>
     );
   }
 
   return (
     <table className="benchmarkTable benchmarkTable--buckets">
-      <thead>
-        <tr>
-          <th>Bucket name</th>
-          <th className="benchmarkCell--number">Base mean</th>
-          <th className="benchmarkCell--number">New mean</th>
-          <th className="benchmarkCell--number">Δ abs</th>
-          <th className="benchmarkCell--number">Δ%</th>
-          <th className="benchmarkCell--number">Effect</th>
-          <th className="benchmarkCell--number">Confidence</th>
-        </tr>
-      </thead>
+      {/* Column widths come from the colgroup so we don't need a thead. The
+       * headers in the outer score table double as labels for these aligned
+       * columns. */}
+      <colgroup>
+        <col />
+        <col className="benchmarkCell--colFixed" />
+        <col className="benchmarkCell--colFixed" />
+        <col className="benchmarkCell--colFixed" />
+        <col className="benchmarkCell--colFixed" />
+        {showSubtestColumns && <col className="benchmarkCell--colFixed" />}
+      </colgroup>
       <tbody>
         {significant.map((c, i) => {
           const absDiff = c.newMean - c.baseMean;
           const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
+          let pctCells;
+          if (showSubtestColumns) {
+            const subtestRel =
+              baseSubtestMean === 0 ? Infinity : absDiff / baseSubtestMean!;
+            const overallRel = impactOnGeomean(subtestRel, numSuites!);
+            pctCells = (
+              <>
+                <td
+                  className={`benchmarkCell--number ${changeClass(subtestRel, c.confidence, c.effectSize)}`}
+                >
+                  {formatChange(subtestRel)}
+                </td>
+                <td
+                  className={`benchmarkCell--number ${changeClass(overallRel, c.confidence, c.effectSize)}`}
+                >
+                  {formatChange(overallRel)}
+                </td>
+              </>
+            );
+          } else {
+            pctCells = (
+              <td
+                className={`benchmarkCell--number ${changeClass(c.relChange, c.confidence, c.effectSize)}`}
+              >
+                {formatChange(c.relChange)}
+              </td>
+            );
+          }
           return (
             <tr key={i}>
               <td className="benchmarkCell--bucketName" title={c.bucketName}>
@@ -256,13 +411,7 @@ function BucketTable({
               <td className="benchmarkCell--number">{c.baseMean.toFixed(2)}</td>
               <td className="benchmarkCell--number">{c.newMean.toFixed(2)}</td>
               <td className="benchmarkCell--number">{absDiffStr}</td>
-              <td
-                className={`benchmarkCell--number ${changeClass(c.relChange, c.confidence)}`}
-              >
-                {formatChange(c.relChange)}
-              </td>
-              <td className="benchmarkCell--number">{c.effectSize}</td>
-              <td className="benchmarkCell--number">{c.confidence}</td>
+              {pctCells}
             </tr>
           );
         })}
@@ -272,6 +421,13 @@ function BucketTable({
 }
 
 function ComparisonResults({ data }: { data: ComparisonData }) {
+  const suiteComparisonsByName = new Map(
+    data.suiteComparisons.map(({ suiteName, comparisons }) => [
+      suiteName,
+      comparisons,
+    ])
+  );
+
   return (
     <div className="benchmarkResults">
       <div className="benchmarkProfileUrls">
@@ -293,21 +449,8 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
       <ScoreTable
         overallScore={data.overallScore}
         suiteScores={data.suiteScores}
+        suiteComparisonsByName={suiteComparisonsByName}
       />
-
-      <h3 className="benchmarkSectionTitle">
-        Global buckets (top {TOP_N} by |Δ abs|, medium or high confidence)
-      </h3>
-      <BucketTable comparisons={data.globalComparisons} label="global" />
-
-      {data.suiteComparisons.map(({ suiteName, comparisons }) => (
-        <details key={suiteName} className="benchmarkSuiteDetails">
-          <summary className="benchmarkSectionTitle">
-            Suite: {suiteName}
-          </summary>
-          <BucketTable comparisons={comparisons} label={suiteName} />
-        </details>
-      ))}
     </div>
   );
 }
