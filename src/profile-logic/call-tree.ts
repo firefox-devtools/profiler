@@ -38,7 +38,14 @@ import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
-import { getBottomBoxInfoForCallNode } from './bottom-box';
+import type {
+  ColumnSortState,
+  SortableColumn,
+} from '../components/shared/TreeView';
+import {
+  getBottomBoxInfoForCallNode,
+  getBottomBoxInfoForFunction,
+} from './bottom-box';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
@@ -47,6 +54,7 @@ export type CallTreeTimingsNonInverted = {
   self: Float64Array;
   total: Float64Array;
   rootTotalSummary: number; // sum of absolute values, this is used for computing percentages
+  flameGraphTotalForScaling: number; // used as 100% reference for flame graph box widths
 };
 
 type TotalAndHasChildren = { total: number; hasChildren: boolean };
@@ -105,7 +113,8 @@ interface CallTreeInternal {
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean;
   createChildren(nodeIndex: IndexIntoCallNodeTable): CallNodeChildren;
   createRoots(): CallNodeChildren;
-  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal;
+  getSelf(nodeIndex: IndexIntoCallNodeTable): number;
+  getTotal(nodeIndex: IndexIntoCallNodeTable): number;
   findHeaviestPathInSubtree(
     callNodeIndex: IndexIntoCallNodeTable
   ): CallNodePath;
@@ -171,10 +180,12 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
     return this._callNodeHasChildren[callNodeIndex] !== 0;
   }
 
-  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
-    const self = this._callTreeTimings.self[callNodeIndex];
-    const total = this._callTreeTimings.total[callNodeIndex];
-    return { self, total };
+  getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callTreeTimings.self[callNodeIndex];
+  }
+
+  getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callTreeTimings.total[callNodeIndex];
   }
 
   findHeaviestPathInSubtree(
@@ -216,11 +227,12 @@ export class CallTreeInternalFunctionList implements CallTreeInternal {
     return this._timings.sortedFuncs;
   }
 
-  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
-    return {
-      self: this._timings.funcSelf[nodeIndex],
-      total: this._timings.funcTotal[nodeIndex],
-    };
+  getSelf(nodeIndex: IndexIntoCallNodeTable): number {
+    return this._timings.funcSelf[nodeIndex];
+  }
+
+  getTotal(nodeIndex: IndexIntoCallNodeTable): number {
+    return this._timings.funcTotal[nodeIndex];
   }
 
   findHeaviestPathInSubtree(
@@ -288,13 +300,19 @@ class CallTreeInternalInverted implements CallTreeInternal {
     return children;
   }
 
-  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
+  getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      const total = this._totalPerRootFunc[callNodeIndex];
-      return { self: total, total };
+      return this._totalPerRootFunc[callNodeIndex];
+    }
+    return 0;
+  }
+
+  getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
+    if (this._callNodeInfo.isRoot(callNodeIndex)) {
+      return this._totalPerRootFunc[callNodeIndex];
     }
     const { total } = this._getTotalAndHasChildren(callNodeIndex);
-    return { self: 0, total };
+    return total;
   }
 
   _getTotalAndHasChildren(
@@ -390,11 +408,42 @@ export class CallTree {
     this._weightType = weightType;
   }
 
+  getSortableColumns(): SortableColumn[] {
+    if (this._internal instanceof CallTreeInternalFunctionList) {
+      return [
+        { name: 'total', prefersDescending: true },
+        { name: 'self', prefersDescending: true },
+      ];
+    }
+    return [];
+  }
+
   getTotal(): number {
     return this._rootTotalSummary;
   }
 
-  getRoots() {
+  getRoots(sort: ColumnSortState | null = null): IndexIntoCallNodeTable[] {
+    if (
+      sort !== null &&
+      sort.sortedColumns.length > 0 &&
+      this._internal instanceof CallTreeInternalFunctionList
+    ) {
+      const internal = this._internal;
+      return sort.sortItemsHelper(
+        this._roots,
+        (
+          a: IndexIntoCallNodeTable,
+          b: IndexIntoCallNodeTable,
+          column: string
+        ) => {
+          const aValue =
+            column === 'self' ? internal.getSelf(a) : internal.getTotal(a);
+          const bValue =
+            column === 'self' ? internal.getSelf(b) : internal.getTotal(b);
+          return aValue - bValue;
+        }
+      );
+    }
     return this._roots;
   }
 
@@ -445,7 +494,8 @@ export class CallTree {
       this._thread.funcTable.name[funcIndex]
     );
 
-    const { self, total } = this._internal.getSelfAndTotal(callNodeIndex);
+    const total = this._internal.getTotal(callNodeIndex);
+    const self = this._internal.getSelf(callNodeIndex);
     const totalRelative = total / this._rootTotalSummary;
     const selfRelative = self / this._rootTotalSummary;
 
@@ -497,7 +547,7 @@ export class CallTree {
     let displayData: CallNodeDisplayData | void =
       this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, total, totalRelative, self } =
+      const { funcName, total, totalRelative, self, selfRelative } =
         this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeInfo.funcForNode(callNodeIndex);
       const categoryIndex = this._callNodeInfo.categoryForNode(callNodeIndex);
@@ -535,6 +585,7 @@ export class CallTree {
         self
       );
       const totalPercent = `${formatPercent(totalRelative)}`;
+      const selfPercent = `${formatPercent(selfRelative)}`;
 
       let ariaLabel;
       let totalWithUnit;
@@ -585,6 +636,7 @@ export class CallTree {
         self: self === 0 ? '—' : formattedSelf,
         selfWithUnit: self === 0 ? '—' : selfWithUnit,
         totalPercent,
+        selfPercent,
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
@@ -624,6 +676,14 @@ export class CallTree {
     return getBottomBoxInfoForCallNode(
       callNodeIndex,
       this._callNodeInfo,
+      this._thread,
+      this._previewFilteredCtssSamples
+    );
+  }
+
+  getBottomBoxInfoForFunction(funcIndex: IndexIntoFuncTable): BottomBoxInfo {
+    return getBottomBoxInfoForFunction(
+      funcIndex,
       this._thread,
       this._previewFilteredCtssSamples
     );
@@ -689,7 +749,7 @@ export function computeCallNodeSelfAndSummary(
     rootTotalSummary += abs(callNodeSelf[callNodeIndex]);
   }
 
-  return { callNodeSelf, rootTotalSummary };
+  return { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling: rootTotalSummary };
 }
 
 export function getSelfAndTotalForCallNode(
@@ -828,6 +888,60 @@ export function computeCallTreeTimingsInverted(
   };
 }
 
+function _computeLowerWingCallNodeSelf(
+  callNodeSelf: Float64Array,
+  callNodeTable: CallNodeTable,
+  selectedFuncIndex: IndexIntoFuncTable
+): Float64Array {
+  // There is an implicit mapping so that every call node in the non-inverted table is mapped to:
+  //  - either the root-most ancestor whose func is selectedFuncIndex, or
+  //  - -1 if no such ancestor exists
+  const callNodeCount = callNodeTable.length;
+  const funcCol = callNodeTable.func;
+  const subtreeEndCol = callNodeTable.subtreeRangeEnd;
+  const mappedSelf = new Float64Array(callNodeCount);
+  for (let i = 0; i < callNodeCount; i++) {
+    if (funcCol[i] !== selectedFuncIndex) {
+      continue;
+    }
+
+    // Call node i is the root of a subtree for the selected function.
+    const subtreeEnd = subtreeEndCol[i];
+    let subtreeTotal = 0;
+    for (let j = i; j < subtreeEnd; j++) {
+      subtreeTotal += callNodeSelf[j];
+    }
+    mappedSelf[i] = subtreeTotal;
+    i = subtreeEnd - 1;
+  }
+  return mappedSelf;
+}
+
+export function computeLowerWingTimings(
+  callNodeInfo: CallNodeInfoInverted,
+  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallTreeTimings {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const mappedSelf =
+    selectedFuncIndex !== null
+      ? _computeLowerWingCallNodeSelf(
+          callNodeSelf,
+          callNodeTable,
+          selectedFuncIndex
+        )
+      : new Float64Array(callNodeSelf.length);
+
+  return {
+    type: 'INVERTED',
+    timings: computeCallTreeTimingsInverted(callNodeInfo, {
+      callNodeSelf: mappedSelf,
+      rootTotalSummary,
+      flameGraphTotalForScaling: rootTotalSummary,
+    }),
+  };
+}
+
 export function computeCallTreeTimings(
   callNodeInfo: CallNodeInfo,
   callNodeSelfAndSummary: CallNodeSelfAndSummary
@@ -860,7 +974,7 @@ export function computeCallTreeTimingsNonInverted(
   callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimingsNonInverted {
   const callNodeTable = callNodeInfo.getCallNodeTable();
-  const { callNodeSelf, rootTotalSummary } = callNodeSelfAndSummary;
+  const { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling } = callNodeSelfAndSummary;
 
   // Compute the following variables:
   const callNodeTotal = new Float64Array(callNodeTable.length);
@@ -898,6 +1012,7 @@ export function computeCallTreeTimingsNonInverted(
     total: callNodeTotal,
     callNodeHasChildren,
     rootTotalSummary,
+    flameGraphTotalForScaling,
   };
 }
 
@@ -1300,5 +1415,5 @@ export function computeCallNodeTracedSelfAndSummary(
     }
   }
 
-  return { callNodeSelf, rootTotalSummary };
+  return { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling: rootTotalSummary };
 }

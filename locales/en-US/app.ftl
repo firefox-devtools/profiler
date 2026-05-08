@@ -900,6 +900,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Call Tree
+TabBar--function-list-tab = Function List
 TabBar--flame-graph-tab = Flame Graph
 TabBar--stack-chart-tab = Stack Chart
 TabBar--marker-chart-tab = Marker Chart
