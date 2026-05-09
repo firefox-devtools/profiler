@@ -34,6 +34,14 @@ const view: Reducer<AppViewState> = (
       };
     case 'FATAL_ERROR':
       return { phase: 'FATAL_ERROR', error: action.error };
+    case 'PROFILE_DOWNLOAD_PROGRESS':
+      return {
+        phase: 'INITIALIZING',
+        downloadProgress: {
+          receivedBytes: action.receivedBytes,
+          totalBytes: action.totalBytes,
+        },
+      };
     case 'WAITING_FOR_PROFILE_FROM_BROWSER':
     case 'WAITING_FOR_PROFILE_FROM_URL':
     case 'WAITING_FOR_PROFILE_FROM_FILE':

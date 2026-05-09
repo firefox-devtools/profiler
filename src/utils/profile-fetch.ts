@@ -155,18 +155,16 @@ export async function extractJsonFromArrayBuffer(
 }
 
 /**
- * Don't trust third party responses, try and handle a variety of responses gracefully.
+ * Don't trust third party data, try and handle a variety of inputs gracefully.
  */
-async function _extractJsonFromResponse(
+async function _extractJsonFromBuffer(
+  buffer: ArrayBuffer,
   response: Response,
   reportError: (...data: Array<any>) => void,
   fileType: 'application/json' | null
 ): Promise<unknown> {
-  let arrayBuffer: ArrayBuffer | null = null;
   try {
-    // await before returning so that we can catch JSON parse errors.
-    arrayBuffer = await response.arrayBuffer();
-    return await extractJsonFromArrayBuffer(arrayBuffer);
+    return await extractJsonFromArrayBuffer(buffer);
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
@@ -174,10 +172,10 @@ async function _extractJsonFromResponse(
       message = 'The network request to load the profile was aborted.';
     } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
-    } else if (fileType === null && arrayBuffer !== null) {
+    } else if (fileType === null) {
       // If the content type is not specified, use a raw array buffer
       // to fallback to other supported profile formats.
-      return arrayBuffer;
+      return buffer;
     } else {
       message = oneLine`
         The profile could not be downloaded and decoded. This does not look like a supported file
@@ -197,14 +195,14 @@ async function _extractJsonFromResponse(
 }
 
 /**
- * Attempt to load a zip file from a third party. This process can fail, so make sure
- * to handle and report the error if it does.
+ * Attempt to load a zip file from a pre-read buffer. This process can fail, so make
+ * sure to handle and report the error if it does.
  */
-async function _extractZipFromResponse(
+async function _extractZipFromBuffer(
+  buffer: ArrayBuffer,
   response: Response,
   reportError: (...data: Array<any>) => void
 ): Promise<JSZip> {
-  const buffer = await response.arrayBuffer();
   // Workaround for https://github.com/Stuk/jszip/issues/941
   // When running this code in tests, `buffer` doesn't inherits from _this_
   // realm's ArrayBuffer object, and this breaks JSZip which doesn't account for
@@ -233,10 +231,11 @@ export type ProfileOrZip =
 
 /**
  * This function guesses the correct content-type (even if one isn't sent) and then
- * attempts to use the proper method to extract the response.
+ * attempts to use the proper method to extract the profile or zip from a pre-read buffer.
  */
-async function _extractProfileOrZipFromResponse(
+async function _extractProfileOrZipFromBuffer(
   url: string,
+  buffer: ArrayBuffer,
   response: Response,
   reportError: (...data: Array<any>) => void
 ): Promise<ProfileOrZip> {
@@ -248,7 +247,7 @@ async function _extractProfileOrZipFromResponse(
     case 'application/zip':
       return {
         responseType: 'ZIP',
-        zip: await _extractZipFromResponse(response, reportError),
+        zip: await _extractZipFromBuffer(buffer, response, reportError),
       };
     case 'application/json':
     case null:
@@ -256,7 +255,8 @@ async function _extractProfileOrZipFromResponse(
       // and try to process it as a profile.
       return {
         responseType: 'PROFILE',
-        profile: await _extractJsonFromResponse(
+        profile: await _extractJsonFromBuffer(
+          buffer,
           response,
           reportError,
           contentType
@@ -267,9 +267,94 @@ async function _extractProfileOrZipFromResponse(
   }
 }
 
+export type DownloadProgress = {
+  receivedBytes: number;
+  totalBytes: number | null;
+};
+
+/**
+ * Read the full response body as an ArrayBuffer, reporting download progress
+ * via the onProgress callback. If the response body is not streamable (e.g. in
+ * older browsers or test environments), falls back to response.arrayBuffer().
+ */
+async function _readResponseWithProgress(
+  response: Response,
+  onProgress?: (progress: DownloadProgress) => void
+): Promise<ArrayBuffer> {
+  if (!onProgress || !response.body) {
+    return response.arrayBuffer();
+  }
+
+  const PROGRESS_THROTTLE_MS = 100;
+  const contentLength = response.headers.get('Content-Length');
+  const totalBytes = contentLength ? parseInt(contentLength, 10) : null;
+  const reader = response.body.getReader();
+
+  const chunks: Uint8Array[] = [];
+  let lastProgressTime = 0;
+  let lastReportedBytes = -1;
+  let receivedBytes = 0;
+
+  // When Content-Length is known and trustworthy, pre-allocate a single buffer
+  // and write directly into it to avoid a 2x memory spike. If the server sends
+  // more data than declared, fall back to chunk accumulation.
+  let preAllocated: Uint8Array | null =
+    totalBytes && totalBytes > 0 ? new Uint8Array(totalBytes) : null;
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) {
+      break;
+    }
+
+    if (preAllocated) {
+      if (receivedBytes + value.length <= totalBytes!) {
+        preAllocated.set(value, receivedBytes);
+      } else {
+        // Content-Length was wrong; abandon pre-allocated buffer and switch
+        // to chunk accumulation for the rest of the download.
+        chunks.push(preAllocated.slice(0, receivedBytes));
+        chunks.push(value);
+        preAllocated = null;
+      }
+    } else {
+      chunks.push(value);
+    }
+
+    receivedBytes += value.length;
+
+    // Throttle progress callbacks to avoid excessive Redux dispatches.
+    const now = performance.now();
+    if (now - lastProgressTime >= PROGRESS_THROTTLE_MS) {
+      onProgress({ receivedBytes, totalBytes });
+      lastProgressTime = now;
+      lastReportedBytes = receivedBytes;
+    }
+  }
+
+  // Report final progress so the bar reaches 100%, unless we just reported it.
+  if (lastReportedBytes !== receivedBytes) {
+    onProgress({ receivedBytes, totalBytes });
+  }
+
+  if (preAllocated) {
+    return preAllocated.buffer as ArrayBuffer;
+  }
+
+  // Concatenate accumulated chunks.
+  const result = new Uint8Array(receivedBytes);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return result.buffer as ArrayBuffer;
+}
+
 export type FetchProfileArgs = {
   url: string;
   onTemporaryError: (param: TemporaryError) => void;
+  onDownloadProgress?: (progress: DownloadProgress) => void;
   // Allow tests to capture the reported error, but normally use console.error.
   reportError?: (...data: Array<any>) => void;
 };
@@ -290,7 +375,7 @@ export async function fetchProfile(
 ): Promise<ProfileOrZip> {
   const MAX_WAIT_SECONDS = 10;
   let i = 0;
-  const { url, onTemporaryError } = args;
+  const { url, onTemporaryError, onDownloadProgress } = args;
   // Allow tests to capture the reported error, but normally use console.error.
   const reportError = args.reportError || console.error;
 
@@ -310,7 +395,11 @@ export async function fetchProfile(
 
     // Case 2: successful answer.
     if (response.ok) {
-      return _extractProfileOrZipFromResponse(url, response, reportError);
+      const buffer = await _readResponseWithProgress(
+        response,
+        onDownloadProgress
+      );
+      return _extractProfileOrZipFromBuffer(url, buffer, response, reportError);
     }
 
     // case 3: unrecoverable error.

@@ -6,6 +6,7 @@ import {
   fetchProfile,
   getProfileUrlForHash,
   type ProfileOrZip,
+  type DownloadProgress,
   deduceContentType,
   extractJsonFromArrayBuffer,
 } from 'firefox-profiler/utils/profile-fetch';
@@ -995,6 +996,30 @@ export function retrieveProfileFromStore(
 }
 
 /**
+ * Create a callback that aggregates download progress across multiple parallel
+ * fetches and dispatches the combined totals. Used for compare-mode downloads.
+ */
+function _makeAggregatedProgressDispatcher(
+  dispatch: (receivedBytes: number, totalBytes: number | null) => void
+): (key: string, progress: DownloadProgress) => void {
+  const progressByKey = new Map<string, DownloadProgress>();
+  return (key: string, progress: DownloadProgress) => {
+    progressByKey.set(key, progress);
+    let receivedBytes = 0;
+    let totalBytes: number | null = 0;
+    for (const p of progressByKey.values()) {
+      receivedBytes += p.receivedBytes;
+      if (totalBytes !== null && p.totalBytes !== null) {
+        totalBytes += p.totalBytes;
+      } else {
+        totalBytes = null;
+      }
+    }
+    dispatch(receivedBytes, totalBytes);
+  };
+}
+
+/**
  * Runs a fetch on a URL, and downloads the file. If it's JSON, then it attempts
  * to process the profile. If it's a zip file, it tries to unzip it, and save it
  * into the store so that the user can then choose which file to load.
@@ -1011,6 +1036,13 @@ export function retrieveProfileOrZipFromUrl(
         url: profileUrl,
         onTemporaryError: (e: TemporaryError) => {
           dispatch(temporaryError(e));
+        },
+        onDownloadProgress: ({ receivedBytes, totalBytes }) => {
+          dispatch({
+            type: 'PROFILE_DOWNLOAD_PROGRESS',
+            receivedBytes,
+            totalBytes,
+          });
         },
       });
 
@@ -1178,6 +1210,16 @@ export function retrieveProfilesToCompare(
   return async (dispatch) => {
     dispatch(waitingForProfileFromUrl());
 
+    const reportAggregatedProgress = _makeAggregatedProgressDispatcher(
+      (receivedBytes, totalBytes) => {
+        dispatch({
+          type: 'PROFILE_DOWNLOAD_PROGRESS',
+          receivedBytes,
+          totalBytes,
+        });
+      }
+    );
+
     try {
       const profilesAndStates = await Promise.all(
         profileViewUrls.map(async (url) => {
@@ -1195,6 +1237,9 @@ export function retrieveProfilesToCompare(
             url: profileUrl,
             onTemporaryError: (e: TemporaryError) => {
               dispatch(temporaryError(e));
+            },
+            onDownloadProgress: (progress: DownloadProgress) => {
+              reportAggregatedProgress(profileUrl, progress);
             },
           });
           if (response.responseType !== 'PROFILE') {
