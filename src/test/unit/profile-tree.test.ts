@@ -20,6 +20,7 @@ import {
   getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
 import { ResourceType } from 'firefox-profiler/types';
+import { makeBitSet, setBit } from '../../utils/bitset';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
@@ -79,11 +80,16 @@ describe('unfiltered call tree', function () {
           callNodeInfo.getCallNodeTable().length
         )
       );
+      const expectedHasChildren = makeBitSet(9);
+      // Nodes 0, 1, 2, 3, 5, 7 have children.
+      for (const i of [0, 1, 2, 3, 5, 7]) {
+        setBit(expectedHasChildren, i);
+      }
       expect(callTreeTimings).toEqual({
         type: 'NON_INVERTED',
         timings: {
           rootTotalSummary: 3,
-          callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
+          callNodeHasChildren: expectedHasChildren,
           self: new Float64Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           total: new Float64Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
         },

@@ -34,7 +34,7 @@ import { ResourceType } from 'firefox-profiler/types';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 import { assertExhaustiveCheck, ensureExists } from '../utils/types';
-import { checkBit } from '../utils/bitset';
+import { type BitSet, checkBit, makeBitSet, setBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
@@ -43,7 +43,7 @@ import { getBottomBoxInfoForCallNode } from './bottom-box';
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
 export type CallTreeTimingsNonInverted = {
-  callNodeHasChildren: Uint8Array;
+  callNodeHasChildren: BitSet;
   self: Float64Array;
   total: Float64Array;
   rootTotalSummary: number; // sum of absolute values, this is used for computing percentages
@@ -61,7 +61,7 @@ export type CallTreeTimingsInverted = {
   rootTotalSummary: number;
   sortedRoots: IndexIntoFuncTable[];
   totalPerRootFunc: Float64Array;
-  hasChildrenPerRootFunc: Uint8Array;
+  hasChildrenPerRootFunc: BitSet;
 };
 
 export type CallTreeTimingsFunctionList = {
@@ -115,7 +115,7 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
   _callNodeInfo: CallNodeInfo;
   _callNodeTable: CallNodeTable;
   _callTreeTimings: CallTreeTimingsNonInverted;
-  _callNodeHasChildren: Uint8Array; // A table column matching the callNodeTable
+  _callNodeHasChildren: BitSet; // A table column matching the callNodeTable
 
   constructor(
     callNodeInfo: CallNodeInfo,
@@ -153,9 +153,12 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
       childCallNodeIndex = this._callNodeTable.nextSibling[childCallNodeIndex]
     ) {
       const childTotalSummary = this._callTreeTimings.total[childCallNodeIndex];
-      const childHasChildren = this._callNodeHasChildren[childCallNodeIndex];
+      const childHasChildren = checkBit(
+        this._callNodeHasChildren,
+        childCallNodeIndex
+      );
 
-      if (childTotalSummary !== 0 || childHasChildren !== 0) {
+      if (childTotalSummary !== 0 || childHasChildren) {
         children.push(childCallNodeIndex);
       }
     }
@@ -168,7 +171,7 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
   }
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
-    return this._callNodeHasChildren[callNodeIndex] !== 0;
+    return checkBit(this._callNodeHasChildren, callNodeIndex);
   }
 
   getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
@@ -238,7 +241,7 @@ class CallTreeInternalInverted implements CallTreeInternal {
   _callNodeSelf: Float64Array;
   _rootNodes: IndexIntoCallNodeTable[];
   _totalPerRootFunc: Float64Array;
-  _hasChildrenPerRootFunc: Uint8Array;
+  _hasChildrenPerRootFunc: BitSet;
   _totalAndHasChildrenPerNonRootNode: Map<
     IndexIntoCallNodeTable,
     TotalAndHasChildren
@@ -264,7 +267,7 @@ class CallTreeInternalInverted implements CallTreeInternal {
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      return this._hasChildrenPerRootFunc[callNodeIndex] !== 0;
+      return checkBit(this._hasChildrenPerRootFunc, callNodeIndex);
     }
     return this._getTotalAndHasChildren(callNodeIndex).hasChildren;
   }
@@ -790,8 +793,8 @@ export function computeCallTreeTimingsInverted(
   const callNodeTableFuncCol = callNodeTable.func;
   const callNodeTableDepthCol = callNodeTable.depth;
   const totalPerRootFunc = new Float64Array(funcCount);
-  const hasChildrenPerRootFunc = new Uint8Array(funcCount);
-  const seenPerRootFunc = new Uint8Array(funcCount);
+  const hasChildrenPerRootFunc = makeBitSet(funcCount);
+  const seenPerRootFunc = makeBitSet(funcCount);
   const sortedRoots = [];
   for (let i = 0; i < callNodeSelf.length; i++) {
     const self = callNodeSelf[i];
@@ -805,12 +808,12 @@ export function computeCallTreeTimingsInverted(
     const func = callNodeTableFuncCol[i];
 
     totalPerRootFunc[func] += self;
-    if (seenPerRootFunc[func] === 0) {
-      seenPerRootFunc[func] = 1;
+    if (!checkBit(seenPerRootFunc, func)) {
+      setBit(seenPerRootFunc, func);
       sortedRoots.push(func);
     }
     if (callNodeTableDepthCol[i] !== 0) {
-      hasChildrenPerRootFunc[func] = 1;
+      setBit(hasChildrenPerRootFunc, func);
     }
   }
   sortedRoots.sort(
@@ -861,7 +864,7 @@ export function computeCallTreeTimingsNonInverted(
 
   // Compute the following variables:
   const callNodeTotal = new Float64Array(callNodeTable.length);
-  const callNodeHasChildren = new Uint8Array(callNodeTable.length);
+  const callNodeHasChildren = makeBitSet(callNodeTable.length);
 
   // We loop the call node table in reverse, so that we find the children
   // before their parents, and the total is known at the time we reach a
@@ -874,7 +877,7 @@ export function computeCallTreeTimingsNonInverted(
     // callNodeTotal[callNodeIndex] is the sum of our children's totals.
     // Compute this node's total by adding this node's self.
     const total = callNodeTotal[callNodeIndex] + callNodeSelf[callNodeIndex];
-    const hasChildren = callNodeHasChildren[callNodeIndex] !== 0;
+    const hasChildren = checkBit(callNodeHasChildren, callNodeIndex);
     const hasTotalValue = total !== 0;
 
     callNodeTotal[callNodeIndex] = total;
@@ -886,7 +889,7 @@ export function computeCallTreeTimingsNonInverted(
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
     if (prefixCallNode !== -1) {
       callNodeTotal[prefixCallNode] += total;
-      callNodeHasChildren[prefixCallNode] = 1;
+      setBit(callNodeHasChildren, prefixCallNode);
     }
   }
 
@@ -940,7 +943,7 @@ function _computeFuncTotal(
   // The set of "functions with potentially non-zero totals", stored as an array.
   const seenFuncs = [];
   // seenPerFunc[func] stores whether seenFuncs.includes(func).
-  const seenPerFunc = new Uint8Array(funcCount);
+  const seenPerFunc = makeBitSet(funcCount);
 
   // We loop the call node table in reverse, so that we find the children
   // before their parents, and the total is known at the time we reach a
@@ -979,8 +982,8 @@ function _computeFuncTotal(
       funcTotal[func] += total;
 
       // Add this func to the set of funcs with potentially non-zero totals.
-      if (seenPerFunc[func] === 0) {
-        seenPerFunc[func] = 1;
+      if (!checkBit(seenPerFunc, func)) {
+        setBit(seenPerFunc, func);
         seenFuncs.push(func);
       }
     }

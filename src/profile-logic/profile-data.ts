@@ -578,7 +578,7 @@ function _computeCallNodeTableExtraColumns(
   const innerWindowIDCol = new Float64Array(callNodeCount);
   const inlinedIntoCol = new Int32Array(callNodeCount);
 
-  const haveFilled = new Uint8Array(callNodeCount);
+  const haveFilled = makeBitSet(callNodeCount);
 
   for (let stackIndex = 0; stackIndex < stackCount; stackIndex++) {
     const category = stackTableCategoryCol[stackIndex];
@@ -588,7 +588,7 @@ function _computeCallNodeTableExtraColumns(
 
     const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
 
-    if (haveFilled[callNodeIndex] === 0) {
+    if (!checkBit(haveFilled, callNodeIndex)) {
       funcCol[callNodeIndex] = frameTableFuncCol[frameIndex];
 
       categoryCol[callNodeIndex] = category;
@@ -602,7 +602,7 @@ function _computeCallNodeTableExtraColumns(
         innerWindowIDCol[callNodeIndex] = innerWindowID;
       }
 
-      haveFilled[callNodeIndex] = 1;
+      setBit(haveFilled, callNodeIndex);
     } else {
       // Resolve category conflicts, by resetting a conflicting subcategory or
       // category to the default category.

@@ -32,6 +32,7 @@ import type {
 import { PathSet } from '../utils/path';
 import { StringTable } from '../utils/string-table';
 import { updateRawThreadStacks } from './profile-data';
+import { type BitSet, makeBitSet, setBit, checkBit } from '../utils/bitset';
 
 // Contains functions to symbolicate a profile.
 
@@ -411,7 +412,7 @@ function finishSymbolicationForLib(
 //      - stack F with frame 5
 function _computeStackTableWithAddedExpansionStacks(
   stackTable: RawStackTable,
-  shouldStacksWithThisOldFrameBeRemoved: Uint8Array,
+  shouldStacksWithThisOldFrameBeRemoved: BitSet,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[]
@@ -427,7 +428,7 @@ function _computeStackTableWithAddedExpansionStacks(
     const oldPrefix = stackTable.prefix[stack];
     const newPrefixOrMinusOne =
       oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
-    if (shouldStacksWithThisOldFrameBeRemoved[oldFrame] !== 0) {
+    if (checkBit(shouldStacksWithThisOldFrameBeRemoved, oldFrame)) {
       // Don't add this stack node to the new stack table. Instead, make it
       // so that this node's children use our prefix as their prefix.
       oldStackToNewStack[stack] = newPrefixOrMinusOne;
@@ -470,7 +471,7 @@ export function applySymbolicationSteps(
 } {
   const oldFuncToNewFuncsMap: FuncToFuncsMap = new Map();
   const frameCount = oldShared.frameTable.length;
-  const shouldStacksWithThisFrameBeRemoved = new Uint8Array(frameCount);
+  const shouldStacksWithThisFrameBeRemoved = makeBitSet(frameCount);
   const frameIndexToInlineExpansionFrames = new Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[]
@@ -541,7 +542,7 @@ function _partiallyApplySymbolicationStep(
   shared: RawProfileSharedData,
   symbolicationStepInfo: SymbolicationStepInfo,
   oldFuncToNewFuncsMap: FuncToFuncsMap,
-  shouldStacksWithThisFrameBeRemoved: Uint8Array,
+  shouldStacksWithThisFrameBeRemoved: BitSet,
   frameIndexToInlineExpansionFrames: Map<
     IndexIntoFrameTable,
     IndexIntoFrameTable[]
@@ -585,7 +586,7 @@ function _partiallyApplySymbolicationStep(
   for (const frameIndex of allFramesForThisLib) {
     if (oldFrameTable.inlineDepth[frameIndex] > 0) {
       inlinedFrames.push(frameIndex);
-      shouldStacksWithThisFrameBeRemoved[frameIndex] = 1;
+      setBit(shouldStacksWithThisFrameBeRemoved, frameIndex);
     } else {
       nonInlinedFrames.push(frameIndex);
     }

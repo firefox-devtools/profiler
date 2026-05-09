@@ -939,9 +939,7 @@ export function dropFunction(
   const { stackTable, frameTable } = thread;
 
   // Go through each stack, and label it as containing the function or not.
-  // stackContainsFunc is a stackIndex => bool map, implemented as a U8 typed
-  // array for better performance. 0 means false, 1 means true.
-  const stackContainsFunc = new Uint8Array(stackTable.length);
+  const stackContainsFunc = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
@@ -950,15 +948,15 @@ export function dropFunction(
       // This is the function we want to remove.
       funcIndex === funcIndexToDrop ||
       // The parent of this stack contained the function.
-      (prefix !== null && stackContainsFunc[prefix] === 1)
+      (prefix !== null && checkBit(stackContainsFunc, prefix))
     ) {
-      stackContainsFunc[stackIndex] = 1;
+      setBit(stackContainsFunc, stackIndex);
     }
   }
 
   return updateThreadStacks(thread, stackTable, (stack) =>
     // Drop the stacks that contain that function.
-    stack !== null && stackContainsFunc[stack] === 1 ? null : stack
+    stack !== null && checkBit(stackContainsFunc, stack) ? null : stack
   );
 }
 
@@ -1227,19 +1225,19 @@ export function collapseFunctionSubtree(
 ): Thread {
   const { stackTable, frameTable } = thread;
   const oldStackToNewStack = new Int32Array(stackTable.length);
-  const isInCollapsedSubtree = new Uint8Array(stackTable.length);
+  const isInCollapsedSubtree = makeBitSet(stackTable.length);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
-    if (prefix !== null && isInCollapsedSubtree[prefix] !== 0) {
+    if (prefix !== null && checkBit(isInCollapsedSubtree, prefix)) {
       oldStackToNewStack[stackIndex] = oldStackToNewStack[prefix];
-      isInCollapsedSubtree[stackIndex] = 1;
+      setBit(isInCollapsedSubtree, stackIndex);
     } else {
       oldStackToNewStack[stackIndex] = stackIndex;
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       if (funcToCollapse === funcIndex) {
-        isInCollapsedSubtree[stackIndex] = 1;
+        setBit(isInCollapsedSubtree, stackIndex);
       }
     }
   }
@@ -1695,7 +1693,7 @@ export function funcHasRecursiveCall(
   funcToCheck: IndexIntoFuncTable
 ) {
   // Set of stack indices that are funcToCheck or have a funcToCheck ancestor.
-  const ancestorOfCallNodeContainsFuncToCheck = new Uint8Array(
+  const ancestorOfCallNodeContainsFuncToCheck = makeBitSet(
     callNodeTable.length
   );
 
@@ -1703,16 +1701,16 @@ export function funcHasRecursiveCall(
     const prefix = callNodeTable.prefix[i];
     const funcIndex = callNodeTable.func[i];
     const recursivePrefix =
-      prefix !== -1 && ancestorOfCallNodeContainsFuncToCheck[prefix] !== 0;
+      prefix !== -1 && checkBit(ancestorOfCallNodeContainsFuncToCheck, prefix);
 
     if (funcToCheck === funcIndex) {
       if (recursivePrefix) {
         // This function matches and so did one of its ancestors.
         return true;
       }
-      ancestorOfCallNodeContainsFuncToCheck[i] = 1;
+      setBit(ancestorOfCallNodeContainsFuncToCheck, i);
     } else if (recursivePrefix) {
-      ancestorOfCallNodeContainsFuncToCheck[i] = 1;
+      setBit(ancestorOfCallNodeContainsFuncToCheck, i);
     }
   }
   return false;
