@@ -87,6 +87,7 @@ type StateProps = {
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
+  readonly ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
 };
@@ -341,6 +342,7 @@ class FlameGraphImpl
       weightType,
       ctssSamples,
       ctssSampleCategoriesAndSubcategories,
+      ctssSampleCallNodes,
       tracedTiming,
       displayStackType,
     } = this.props;
@@ -406,6 +408,7 @@ class FlameGraphImpl
               isInverted,
               ctssSamples,
               ctssSampleCategoriesAndSubcategories,
+              ctssSampleCallNodes,
               tracedTiming: tracedTimingNonInverted,
               displayStackType,
             }}
@@ -459,6 +462,8 @@ export const FlameGraph = explicitConnectWithForwardRef<
       selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories(
         state
       ),
+    ctssSampleCallNodes:
+      selectedThreadSelectors.getPreviewFilteredCtssSampleCallNodes(state),
     tracedTiming: selectedThreadSelectors.getTracedTiming(state),
     displayStackType: getProfileUsesMultipleStackTypes(state),
   }),

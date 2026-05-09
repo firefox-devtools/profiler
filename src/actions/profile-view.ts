@@ -156,9 +156,7 @@ export function selectSelfCallNode(
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const sampleCallNodes =
-      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-        getState()
-      );
+      threadSelectors.getSampleCallNodesForFilteredThread(getState());
 
     if (
       sampleIndex === null ||
