@@ -1,28 +1,35 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+// @flow
+
+import * as React from 'react';
 import { PureComponent } from 'react';
 import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
+import { UpperWingFlameGraph } from './UpperWingFlameGraph';
 import {
-  getInvertCallstack,
+  treeColumnsForTracingMs,
+  treeColumnsForSamples,
+  treeColumnsForBytes,
+} from './columns';
+import {
   getSearchStringsAsRegExp,
   getSelectedThreadsKey,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getScrollToSelectionGeneration,
-  getFocusCallTreeGeneration,
-  getPreviewSelectionIsBeingModified,
-  getIdleCategoryIndex,
+  getCategories,
   getCurrentTableViewOptions,
+  getPreviewSelectionIsBeingModified,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
-  changeSelectedCallNode,
-  changeRightClickedCallNode,
-  changeExpandedCallNodes,
+  changeUpperWingSelectedCallNode,
+  changeUpperWingRightClickedCallNode,
+  changeUpperWingExpandedCallNodes,
   addTransformToStack,
   handleCallNodeTransformShortcut,
   changeTableViewOptions,
@@ -33,7 +40,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
   State,
   ThreadsKey,
-  IndexIntoCategoryList,
+  CategoryList,
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
   WeightType,
@@ -50,43 +57,36 @@ import type {
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
-import {
-  treeColumnsForBytes,
-  treeColumnsForSamples,
-  treeColumnsForTracingMs,
-} from './columns';
 
 type StateProps = {
   readonly threadsKey: ThreadsKey;
   readonly scrollToSelectionGeneration: number;
-  readonly focusCallTreeGeneration: number;
   readonly tree: CallTreeType;
   readonly callNodeInfo: CallNodeInfo;
-  readonly idleCategoryIndex: IndexIntoCategoryList | null;
+  readonly categories: CategoryList;
   readonly selectedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly rightClickedCallNodeIndex: IndexIntoCallNodeTable | null;
   readonly expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>;
   readonly searchStringsRegExp: RegExp | null;
   readonly disableOverscan: boolean;
-  readonly invertCallstack: boolean;
   readonly callNodeMaxDepthPlusOne: number;
   readonly weightType: WeightType;
   readonly tableViewOptions: TableViewOptions;
 };
 
 type DispatchProps = {
-  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
-  readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
-  readonly changeExpandedCallNodes: typeof changeExpandedCallNodes;
+  readonly changeUpperWingSelectedCallNode: typeof changeUpperWingSelectedCallNode;
+  readonly changeUpperWingRightClickedCallNode: typeof changeUpperWingRightClickedCallNode;
+  readonly changeUpperWingExpandedCallNodes: typeof changeUpperWingExpandedCallNodes;
   readonly addTransformToStack: typeof addTransformToStack;
   readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
-  readonly onTableViewOptionsChange: (param: TableViewOptions) => any;
+  readonly onTableViewOptionsChange: (options: TableViewOptions) => any;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-class CallTreeImpl extends PureComponent<Props> {
+class UpperWingImpl extends PureComponent<Props> {
   _mainColumn: Column<CallNodeDisplayData> = {
     propName: 'name',
     titleL10nId: '',
@@ -96,7 +96,7 @@ class CallTreeImpl extends PureComponent<Props> {
     titleL10nId: '',
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
-  _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) =>
+  _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData>) =>
     (this._treeView = treeView);
 
   /**
@@ -130,12 +130,6 @@ class CallTreeImpl extends PureComponent<Props> {
   }
 
   override componentDidUpdate(prevProps: Props) {
-    if (
-      this.props.focusCallTreeGeneration > prevProps.focusCallTreeGeneration
-    ) {
-      this.focus();
-    }
-
     this.maybeProcureInterestingInitialSelection();
 
     if (
@@ -158,8 +152,9 @@ class CallTreeImpl extends PureComponent<Props> {
     newSelectedCallNode: IndexIntoCallNodeTable,
     context: SelectionContext
   ) => {
-    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
-    changeSelectedCallNode(
+    const { callNodeInfo, threadsKey, changeUpperWingSelectedCallNode } =
+      this.props;
+    changeUpperWingSelectedCallNode(
       threadsKey,
       callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode),
       context
@@ -167,8 +162,9 @@ class CallTreeImpl extends PureComponent<Props> {
   };
 
   _onRightClickSelection = (newSelectedCallNode: IndexIntoCallNodeTable) => {
-    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
-    changeRightClickedCallNode(
+    const { callNodeInfo, threadsKey, changeUpperWingRightClickedCallNode } =
+      this.props;
+    changeUpperWingRightClickedCallNode(
       threadsKey,
       callNodeInfo.getCallNodePathFromIndex(newSelectedCallNode)
     );
@@ -177,8 +173,9 @@ class CallTreeImpl extends PureComponent<Props> {
   _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
   ) => {
-    const { callNodeInfo, threadsKey, changeExpandedCallNodes } = this.props;
-    changeExpandedCallNodes(
+    const { callNodeInfo, threadsKey, changeUpperWingExpandedCallNodes } =
+      this.props;
+    changeUpperWingExpandedCallNodes(
       threadsKey,
       newExpandedCallNodeIndexes.map((callNodeIndex) =>
         callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
@@ -190,9 +187,9 @@ class CallTreeImpl extends PureComponent<Props> {
     const {
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
+      callNodeInfo,
       handleCallNodeTransformShortcut,
       threadsKey,
-      callNodeInfo,
     } = this.props;
     const nodeIndex =
       rightClickedCallNodeIndex !== null
@@ -207,7 +204,7 @@ class CallTreeImpl extends PureComponent<Props> {
   _onEnterOrDoubleClick = (nodeId: IndexIntoCallNodeTable) => {
     const { tree, updateBottomBoxContentsAndMaybeOpen } = this.props;
     const bottomBoxInfo = tree.getBottomBoxInfoForCallNode(nodeId);
-    updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo);
+    updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo);
   };
 
   maybeProcureInterestingInitialSelection() {
@@ -218,13 +215,17 @@ class CallTreeImpl extends PureComponent<Props> {
       expandedCallNodeIndexes,
       selectedCallNodeIndex,
       callNodeInfo,
-      idleCategoryIndex,
+      categories,
     } = this.props;
 
     if (selectedCallNodeIndex !== null || expandedCallNodeIndexes.length > 0) {
       // Let's not change some existing state.
       return;
     }
+
+    const idleCategoryIndex = categories.findIndex(
+      (category) => category.name === 'Idle'
+    );
 
     const newExpandedCallNodeIndexes = expandedCallNodeIndexes.slice();
     const maxInterestingDepth = 17; // scientifically determined
@@ -264,7 +265,7 @@ class CallTreeImpl extends PureComponent<Props> {
     }
   }
 
-  override render() {
+  _renderCallTree() {
     const {
       tree,
       selectedCallNodeIndex,
@@ -307,25 +308,27 @@ class CallTreeImpl extends PureComponent<Props> {
       />
     );
   }
+
+  override render() {
+    return <UpperWingFlameGraph />;
+  }
 }
 
-export const CallTree = explicitConnect<{}, StateProps, DispatchProps>({
+export const UpperWing = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    focusCallTreeGeneration: getFocusCallTreeGeneration(state),
-    tree: selectedThreadSelectors.getCallTree(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    idleCategoryIndex: getIdleCategoryIndex(state),
+    tree: selectedThreadSelectors.getUpperWingCallTree(state),
+    callNodeInfo: selectedThreadSelectors.getUpperWingCallNodeInfo(state),
+    categories: getCategories(state),
     selectedCallNodeIndex:
-      selectedThreadSelectors.getSelectedCallNodeIndex(state),
+      selectedThreadSelectors.getUpperWingSelectedCallNodeIndex(state),
     rightClickedCallNodeIndex:
-      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
+      selectedThreadSelectors.getUpperWingRightClickedCallNodeIndex(state),
     expandedCallNodeIndexes:
-      selectedThreadSelectors.getExpandedCallNodeIndexes(state),
+      selectedThreadSelectors.getUpperWingExpandedCallNodeIndexes(state),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
     disableOverscan: getPreviewSelectionIsBeingModified(state),
-    invertCallstack: getInvertCallstack(state),
     // Use the filtered call node max depth, rather than the preview filtered call node
     // max depth so that the width of the TreeView component is stable across preview
     // selections.
@@ -335,14 +338,14 @@ export const CallTree = explicitConnect<{}, StateProps, DispatchProps>({
     tableViewOptions: getCurrentTableViewOptions(state),
   }),
   mapDispatchToProps: {
-    changeSelectedCallNode,
-    changeRightClickedCallNode,
-    changeExpandedCallNodes,
+    changeUpperWingSelectedCallNode,
+    changeUpperWingRightClickedCallNode,
+    changeUpperWingExpandedCallNodes,
     addTransformToStack,
     handleCallNodeTransformShortcut,
     updateBottomBoxContentsAndMaybeOpen,
     onTableViewOptionsChange: (options: TableViewOptions) =>
       changeTableViewOptions('calltree', options),
   },
-  component: CallTreeImpl,
+  component: UpperWingImpl,
 });

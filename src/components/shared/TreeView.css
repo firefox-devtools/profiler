@@ -58,8 +58,7 @@
 }
 
 .treeViewHeader {
-  height: 15px;
-  padding: 4px 0;
+  height: 23px;
   border-bottom: 1px solid var(--base-border-color);
   background: var(--raised-background-color);
   color: var(--raised-foreground-color);
@@ -113,9 +112,17 @@
 }
 
 .treeViewHeaderColumn {
-  position: relative;
   line-height: 15px;
   white-space: nowrap;
+}
+
+.treeViewHeaderColumn,
+.treeViewSortButton,
+.treeViewRowColumn,
+.treeViewRowScrolledColumns {
+  box-sizing: border-box;
+  padding-right: 5px;
+  padding-left: 5px;
 }
 
 .treeViewFixedColumn {
@@ -123,28 +130,69 @@
   text-overflow: ellipsis;
 }
 
-.treeViewColumnDivider {
+.treeViewSortButton {
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: inherit;
+}
+
+.treeViewSortButton:active:hover {
+  background-color: var(--clickable-ghost-active-background-color);
+}
+
+.treeViewSortButton.sortInactive::after {
+  content: ' ▲';
+  opacity: 0;
+}
+
+.treeViewSortButton.sortAscending::after {
+  content: ' ▲';
+}
+
+.treeViewSortButton.sortDescending::after {
+  content: ' ▼';
+}
+
+.treeViewHeaderColumnDivider,
+.treeViewRowColumnDivider {
   display: flex;
-  width: 20px;
+  width: 1px;
   flex: none;
   align-items: stretch;
   justify-content: center;
+  padding-right: 5px;
+  padding-left: 5px;
   margin-right: -5px;
   margin-left: -5px;
 }
 
-.treeViewColumnDivider.isResizable,
+.treeViewHeaderColumn,
+.treeViewHeaderColumnDivider {
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+.treeViewHeaderColumnDivider.isResizable {
+  position: relative;
+  z-index: 2;
+}
+
+.treeViewHeaderColumnDivider.isResizable,
 .treeView.isResizingColumns {
   cursor: col-resize;
 }
 
-.treeViewColumnDivider::before {
+.treeViewRowColumnDivider::before,
+.treeViewHeaderColumnDivider::before {
   border-right: 1px solid var(--base-border-color);
   content: '';
 }
 
-.treeViewColumnDivider.isResizable::before {
+.treeViewHeaderColumnDivider.isResizable::before {
   width: 1px;
+  flex-shrink: 0;
   border-left: 1px solid var(--base-border-color);
 }
 

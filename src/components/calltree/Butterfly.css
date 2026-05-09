@@ -1,0 +1,55 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.butterflyWrapper {
+  display: flex;
+  position: relative;
+  min-height: 0;
+  flex: 1;
+}
+
+.butterflyWings > .resizableWithSplitterInner {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+/* Provide 3px extra grabbable surface on each side of the splitter */
+.butterflyWrapper .resizableWithSplitterSplitter {
+  position: relative; /* containing block for absolute ::before */
+  border: none;
+  background-color: var(--base-border-color) !important;
+}
+
+.butterflyWrapper .resizableWithSplitterSplitter::before {
+  position: absolute;
+  z-index: var(--z-bottom-box);
+  display: block;
+  content: '';
+}
+
+.butterflyWrapper .resizableWithSplitterSplitter.resizesWidth {
+  width: 1px;
+}
+
+.butterflyWrapper .resizableWithSplitterSplitter.resizesWidth::before {
+  inset: 0 -3px;
+}
+
+.butterflyWrapper .resizableWithSplitterSplitter.resizesHeight {
+  height: 1px;
+  margin-bottom: -1px;
+}
+
+.butterflyWrapper .resizableWithSplitterSplitter.resizesHeight::before {
+  inset: -3px 0;
+}
+
+.functionListTreeWrapper {
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.functionListTreeWrapper .treeRowToggleButton {
+  display: none;
+}

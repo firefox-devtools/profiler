@@ -8,7 +8,10 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ProfileSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { emptyAddressTimings } from '../../profile-logic/address-timings';
-import { getBottomBoxInfoForCallNode } from '../../profile-logic/bottom-box';
+import {
+  getBottomBoxInfoForCallNode,
+  getBottomBoxInfoForFunction,
+} from '../../profile-logic/bottom-box';
 import {
   changeSelectedCallNode,
   updateBottomBoxContentsAndMaybeOpen,
@@ -372,4 +375,68 @@ describe('bottom box', function () {
   //
   // - A test with multiple threads: Open the assembly view for a symbol, switch
   //   to a different thread, check timings
+});
+
+describe('getBottomBoxInfoForFunction', function () {
+  it('uses the innermost frame when a function appears multiple times due to recursion (A->B->A->B)', function () {
+    // Stack: A[line:20] -> B[line:30] -> A[line:21] -> B[line:31]
+    // B appears at line 30 (outer) and line 31 (inner/leaf).
+    // Double-clicking B in the function list should use line 31 (innermost).
+    const { derivedThreads, funcNamesDictPerThread } =
+      getProfileFromTextSamples(`
+        A[file:a.js][line:20]
+        B[file:b.js][line:30]
+        A[file:a.js][line:21]
+        B[file:b.js][line:31]
+      `);
+    const [thread] = derivedThreads;
+    const [{ B }] = funcNamesDictPerThread;
+
+    const bottomBoxInfo = getBottomBoxInfoForFunction(B, thread, thread.samples);
+
+    // scrollToLineNumber should be 31 (the innermost B), not 30 (the outer B).
+    expect(bottomBoxInfo.scrollToLineNumber).toBe(31);
+  });
+
+  it('uses the innermost frame when a function appears multiple times due to recursion via another function (A->B->C->B->D)', function () {
+    // Stack: A[line:20] -> B[line:30] -> C[line:40] -> B[line:31] -> D[line:50]
+    // B appears at line 30 (outer) and line 31 (inner), with C and D in between.
+    // Double-clicking B in the function list should use line 31 (innermost B).
+    const { derivedThreads, funcNamesDictPerThread } =
+      getProfileFromTextSamples(`
+        A[file:a.js][line:20]
+        B[file:b.js][line:30]
+        C[file:c.js][line:40]
+        B[file:b.js][line:31]
+        D[file:d.js][line:50]
+      `);
+    const [thread] = derivedThreads;
+    const [{ B }] = funcNamesDictPerThread;
+
+    const bottomBoxInfo = getBottomBoxInfoForFunction(B, thread, thread.samples);
+
+    // scrollToLineNumber should be 31 (the innermost B), not 30 (the outer B).
+    expect(bottomBoxInfo.scrollToLineNumber).toBe(31);
+  });
+
+  it('opens the source view when double-clicking a function in the function list', function () {
+    const { profile, derivedThreads, funcNamesDictPerThread } =
+      getProfileFromTextSamples(`
+        A[file:a.js][line:20]
+        B[file:b.js][line:30]
+      `);
+    const { dispatch, getState } = storeWithProfile(profile);
+    const [thread] = derivedThreads;
+    const [{ B }] = funcNamesDictPerThread;
+
+    dispatch(changeSelectedTab('function-list'));
+
+    const bottomBoxInfo = getBottomBoxInfoForFunction(B, thread, thread.samples);
+    dispatch(updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo));
+
+    expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
+    expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(
+      30
+    );
+  });
 });

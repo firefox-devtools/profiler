@@ -14,6 +14,7 @@ import type {
   IndexIntoLibs,
   PageList,
   IndexIntoSourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 import type {
   Thread,
@@ -31,6 +32,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   UrlState,
@@ -41,6 +43,7 @@ import type {
   ApiQueryError,
   TableViewOptions,
   DecodedInstruction,
+  CallNodeArea,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -181,10 +184,16 @@ type ProfileAction =
     }
   | {
       readonly type: 'CHANGE_SELECTED_CALL_NODE';
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly threadsKey: ThreadsKey;
       readonly selectedCallNodePath: CallNodePath;
       readonly optionalExpandedToCallNodePath: CallNodePath | undefined;
+      readonly context: SelectionContext;
+    }
+  | {
+      readonly type: 'CHANGE_SELECTED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly selectedFunctionIndex: IndexIntoFuncTable | null;
       readonly context: SelectionContext;
     }
   | {
@@ -195,7 +204,13 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE';
       readonly threadsKey: ThreadsKey;
+      readonly area: CallNodeArea;
       readonly callNodePath: CallNodePath | null;
+    }
+  | {
+      readonly type: 'CHANGE_RIGHT_CLICKED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly functionIndex: IndexIntoFuncTable | null;
     }
   | {
       readonly type: 'FOCUS_CALL_TREE';
@@ -203,7 +218,7 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_EXPANDED_CALL_NODES';
       readonly threadsKey: ThreadsKey;
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly expandedCallNodePaths: Array<CallNodePath>;
     }
   | {
@@ -541,6 +556,19 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_MARKER_SEARCH_STRING';
       readonly searchString: string;
+    }
+  | {
+      readonly type: 'CHANGE_MARKER_TABLE_SORT';
+      readonly sort: SingleColumnSortState[];
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SORT';
+      readonly sort: SingleColumnSortState[];
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN';
+      readonly section: 'descendants' | 'ancestors' | 'self';
+      readonly isOpen: boolean;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
