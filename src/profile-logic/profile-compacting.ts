@@ -274,6 +274,11 @@ export function computeCompactedProfile(
   tcs.funcTable.computeIndexTranslation();
   _dedupFrameTable(shared.frameTable, tcs.frameTable);
   tcs.frameTable.computeIndexTranslation();
+  _dedupStackTable(
+    shared.stackTable,
+    tcs.stackTable,
+    tcs.frameTable.oldIndexToNewIndexPlusOne
+  );
   tcs.stackTable.computeIndexTranslation();
 
   // Step 2: Create new tables for everything, skipping unreferenced entries.
@@ -552,6 +557,141 @@ function _compareNullableNumber(a: number | null, b: number | null): number {
     return 1;
   }
   return a - b;
+}
+
+// Collapse stack tree nodes that have the same (prefix, frame) into a single
+// canonical node. Walks the table in topological order (prefix < i is
+// guaranteed) so the canonical version of each stack's prefix is already
+// known by the time we process the stack.
+//
+// To find an existing canonical child of a given parent with a given frame
+// without hashing, we maintain a per-parent intrusive linked list of
+// canonical children, kept sorted by canonical frame index, plus a
+// `lastUsed` pointer per parent. This is the same trick as in
+// _computeCallNodeTableHierarchy (introduced in #5964) and tames the
+// degenerate fan-out case:
+//   - Repeated lookups for the same (parent, frame) hit the lastUsed cache
+//     in O(1).
+//   - When the new frame is greater than lastUsed's frame, the sorted-list
+//     invariant lets us start the scan at lastUsed's successor rather than
+//     the head; ascending-order inserts therefore append in amortized O(1).
+//   - Mismatched scans early-exit as soon as they pass the target frame, so
+//     even arbitrary insertion orders pay ~K/2 per lookup instead of K.
+function _dedupStackTable(
+  stackTable: RawStackTable,
+  state: TableCompactionState,
+  frameMap: Int32Array
+): void {
+  const { markBuffer, oldIndexToCanonicalOldIndexPlusOne } = state;
+  const N = stackTable.length;
+
+  // Per-canonical-parent intrusive linked list of canonical children, sorted
+  // by canonical frame. Both arrays store value+1 so 0 acts as null.
+  // firstChildPlusOne is indexed by canonical parent, nextSiblingPlusOne by
+  // canonical child. The null-prefix root has its own scalar.
+  const firstChildPlusOne = new Int32Array(N);
+  const nextSiblingPlusOne = new Int32Array(N);
+  let rootFirstChild = -1;
+
+  // The most recently matched-or-inserted canonical child per parent.
+  const lastUsedChildPlusOne = new Int32Array(N);
+  let rootLastUsed = -1;
+
+  for (let i = 0; i < N; i++) {
+    if (!checkBit(markBuffer, i)) {
+      continue;
+    }
+
+    // Resolve canonical prefix in old-index space. The marking pass
+    // guarantees that any non-root prefix of a marked stack is itself
+    // marked, so it has already been processed in a previous iteration.
+    const offset = stackTable.prefixOffset[i];
+    let canonicalPrefix;
+    if (offset === 0) {
+      canonicalPrefix = -1;
+    } else {
+      const oldPrefix = i - offset;
+      if (oldIndexToCanonicalOldIndexPlusOne[oldPrefix] !== 0) {
+        canonicalPrefix = oldIndexToCanonicalOldIndexPlusOne[oldPrefix] - 1;
+      } else {
+        canonicalPrefix = oldPrefix;
+      }
+    }
+    // Frame index in canonical (post-frame-dedup) frame-table space.
+    const canonicalFrame = frameMap[stackTable.frame[i]] - 1;
+
+    const firstChildOfParent =
+      canonicalPrefix === -1
+        ? rootFirstChild
+        : firstChildPlusOne[canonicalPrefix] - 1;
+    const lastUsed =
+      canonicalPrefix === -1
+        ? rootLastUsed
+        : lastUsedChildPlusOne[canonicalPrefix] - 1;
+
+    // Locate (canonicalPrefix, canonicalFrame) in the sorted sibling list.
+    // foundCanonical is the existing canonical child if a match exists;
+    // otherwise prevSibling is where the new node should be linked after
+    // (-1 means "at the head").
+    let foundCanonical = -1;
+    let prevSibling = -1;
+    let scanStart = firstChildOfParent;
+
+    if (lastUsed !== -1) {
+      const lastUsedFrame = frameMap[stackTable.frame[lastUsed]] - 1;
+      if (lastUsedFrame === canonicalFrame) {
+        foundCanonical = lastUsed;
+      } else if (lastUsedFrame < canonicalFrame) {
+        // Sorted-list invariant: everything up to and including lastUsed has
+        // a smaller frame and can be skipped.
+        prevSibling = lastUsed;
+        scanStart = nextSiblingPlusOne[lastUsed] - 1;
+      }
+    }
+
+    if (foundCanonical === -1) {
+      let child = scanStart;
+      while (child !== -1) {
+        const childFrame = frameMap[stackTable.frame[child]] - 1;
+        if (childFrame === canonicalFrame) {
+          foundCanonical = child;
+          break;
+        }
+        if (childFrame > canonicalFrame) {
+          // Sorted-by-frame: nothing further can match.
+          break;
+        }
+        prevSibling = child;
+        child = nextSiblingPlusOne[child] - 1;
+      }
+    }
+
+    let lastUsedAfter;
+    if (foundCanonical !== -1) {
+      state.redirectOldIndexToCanonicalOldIndex(i, foundCanonical);
+      lastUsedAfter = foundCanonical;
+    } else {
+      // Splice i (canonical) into the sorted sibling list.
+      if (prevSibling === -1) {
+        nextSiblingPlusOne[i] = firstChildOfParent + 1;
+        if (canonicalPrefix === -1) {
+          rootFirstChild = i;
+        } else {
+          firstChildPlusOne[canonicalPrefix] = i + 1;
+        }
+      } else {
+        nextSiblingPlusOne[i] = nextSiblingPlusOne[prevSibling];
+        nextSiblingPlusOne[prevSibling] = i + 1;
+      }
+      lastUsedAfter = i;
+    }
+
+    if (canonicalPrefix === -1) {
+      rootLastUsed = lastUsedAfter;
+    } else {
+      lastUsedChildPlusOne[canonicalPrefix] = lastUsedAfter + 1;
+    }
+  }
 }
 
 function _gatherReferencesInThread(
