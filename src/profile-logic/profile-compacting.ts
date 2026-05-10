@@ -214,44 +214,32 @@ export function computeCompactedProfile(
     _gatherReferencesInThread(thread, tcs, stringIndexMarkerFieldsByDataType);
   }
 
-  // The order of the _markTableAndComputeTranslation calls is important!
+  // The order of the _markTable calls is important!
   // We only want to mark data that is (transitively) used by thread data.
   // So, for example, we have to mark the funcTable before we mark the
   // sources, so that, by the time we look at the sources, we already know
   // which sources are (transitively) referenced.
-  _markTableAndComputeTranslation(
-    shared.stackTable,
-    tcs.stackTable,
-    stackTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.frameTable,
-    tcs.frameTable,
-    frameTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.funcTable,
-    tcs.funcTable,
-    funcTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.resourceTable,
-    tcs.resourceTable,
-    resourceTableDesc
-  );
-  _markTableAndComputeTranslation(
+  _markTable(shared.stackTable, tcs.stackTable, stackTableDesc);
+  _markTable(shared.frameTable, tcs.frameTable, frameTableDesc);
+  _markTable(shared.funcTable, tcs.funcTable, funcTableDesc);
+  _markTable(shared.resourceTable, tcs.resourceTable, resourceTableDesc);
+  _markTable(
     shared.sourceLocationTable,
     tcs.sourceLocationTable,
     sourceLocationTableDesc
   );
-  _markTableAndComputeTranslation(
-    shared.nativeSymbols,
-    tcs.nativeSymbols,
-    nativeSymbolsDesc
-  );
-  _markTableAndComputeTranslation(shared.sources, tcs.sources, sourcesDesc);
-  tcs.stringArray.computeIndexTranslation();
+  _markTable(shared.nativeSymbols, tcs.nativeSymbols, nativeSymbolsDesc);
+  _markTable(shared.sources, tcs.sources, sourcesDesc);
+
   tcs.libs.computeIndexTranslation();
+  tcs.stringArray.computeIndexTranslation();
+  tcs.sources.computeIndexTranslation();
+  tcs.nativeSymbols.computeIndexTranslation();
+  tcs.sourceLocationTable.computeIndexTranslation();
+  tcs.resourceTable.computeIndexTranslation();
+  tcs.funcTable.computeIndexTranslation();
+  tcs.frameTable.computeIndexTranslation();
+  tcs.stackTable.computeIndexTranslation();
 
   // Step 2: Create new tables for everything, skipping unreferenced entries.
   // The order of calls to _compactTable doesn't matter - we've already computed
@@ -313,7 +301,7 @@ export function computeCompactedProfile(
 
 // --- Step 1: Marking ---
 
-function _markTableAndComputeTranslation<T>(
+function _markTable<T>(
   table: T,
   thisTableCompactionState: TableCompactionState,
   tableDesc: TableDescription<T>
@@ -362,8 +350,6 @@ function _markTableAndComputeTranslation<T>(
         throw assertExhaustiveCheck(desc);
     }
   }
-
-  thisTableCompactionState.computeIndexTranslation();
 }
 
 function markColumn(
