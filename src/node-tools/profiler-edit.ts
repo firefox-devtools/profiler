@@ -5,6 +5,7 @@ import fs from 'fs';
 import minimist from 'minimist';
 
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
@@ -143,11 +144,16 @@ export async function run(options: CliOptions) {
     profile.meta.symbolicated = true;
   }
 
+  const { profile: compactedProfile } = computeCompactedProfile(profile);
+
   console.log(`Saving profile to ${options.output}`);
   if (options.output.endsWith('.gz')) {
-    fs.writeFileSync(options.output, await compress(JSON.stringify(profile)));
+    fs.writeFileSync(
+      options.output,
+      await compress(JSON.stringify(compactedProfile))
+    );
   } else {
-    fs.writeFileSync(options.output, JSON.stringify(profile));
+    fs.writeFileSync(options.output, JSON.stringify(compactedProfile));
   }
   console.log('Finished.');
 }
