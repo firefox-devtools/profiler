@@ -14,6 +14,10 @@ import type {
   IndexIntoLibs,
   PageList,
   IndexIntoSourceTable,
+  FuncTable,
+  FrameTable,
+  SourceLocationTable,
+  SourceTable,
 } from './profile';
 import type {
   Thread,
@@ -442,6 +446,14 @@ type ReceiveProfileAction =
   | {
       readonly type: 'UPDATE_PAGES';
       readonly newPages: PageList;
+    }
+  | {
+      readonly type: 'BULK_SOURCE_MAP_SYMBOLICATION';
+      readonly newFuncTable: FuncTable;
+      readonly newFrameTable: FrameTable;
+      readonly newSourceLocationTable: SourceLocationTable;
+      readonly newSources: SourceTable;
+      readonly newStringArray: string[];
     };
 
 type UrlEnhancerAction =
