@@ -91,6 +91,7 @@ async function fetchSourceAnnotation(
     frameTable,
     funcTable: threadFuncTable,
     samples,
+    sourceMapInfo,
   } = thread;
   const filename = thread.stringTable.getString(
     thread.sources.filename[sourceIndex]
@@ -101,7 +102,8 @@ async function fetchSourceAnnotation(
     stackTable,
     frameTable,
     threadFuncTable,
-    sourceIndex
+    sourceIndex,
+    sourceMapInfo
   );
   const { totalLineHits, selfLineHits } = getLineTimings(
     stackLineInfo,

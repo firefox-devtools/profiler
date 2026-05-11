@@ -608,10 +608,13 @@ export class CallTree {
   _getOriginAnnotation(funcIndex: IndexIntoFuncTable): string {
     return getOriginAnnotationForFunc(
       funcIndex,
+      null,
+      this._thread.frameTable,
       this._thread.funcTable,
       this._thread.resourceTable,
       this._thread.stringTable,
-      this._thread.sources
+      this._thread.sources,
+      this._thread.sourceMapInfo
     );
   }
 

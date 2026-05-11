@@ -1614,7 +1614,8 @@ export function getBacktraceItemsForStack(
   implementationFilter: ImplementationFilter,
   thread: Thread
 ): BacktraceItem[] {
-  const { funcTable, stringTable, resourceTable, sources } = thread;
+  const { funcTable, stringTable, resourceTable, sources, sourceMapInfo } =
+    thread;
 
   const { stackTable, frameTable } = thread;
   const unfilteredPath = [];
@@ -1627,8 +1628,7 @@ export function getBacktraceItemsForStack(
     unfilteredPath.push({
       category: stackTable.category[stackIndex],
       funcIndex: frameTable.func[frameIndex],
-      frameLine: frameTable.line[frameIndex],
-      frameColumn: frameTable.column[frameIndex],
+      frameIndex,
       inlineDepth: frameTable.inlineDepth[frameIndex],
       stackIndex,
     });
@@ -1639,26 +1639,20 @@ export function getBacktraceItemsForStack(
     funcMatchesImplementation(thread, funcIndex)
   );
   return path.map(
-    ({
-      category,
-      funcIndex,
-      frameLine,
-      frameColumn,
-      inlineDepth,
-      stackIndex,
-    }) => {
+    ({ category, funcIndex, frameIndex, inlineDepth, stackIndex }) => {
       return {
         funcName: stringTable.getString(funcTable.name[funcIndex]),
         category,
         isFrameLabel: funcTable.resource[funcIndex] === -1,
         origin: getOriginAnnotationForFunc(
           funcIndex,
+          frameIndex,
+          frameTable,
           funcTable,
           resourceTable,
           stringTable,
           sources,
-          frameLine,
-          frameColumn
+          sourceMapInfo
         ),
         inlineDepth,
         stackIndex,

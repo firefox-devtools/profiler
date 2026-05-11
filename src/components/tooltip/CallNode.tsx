@@ -8,7 +8,10 @@ import { getStackType } from 'firefox-profiler/profile-logic/transforms';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import { formatCallNodeNumberWithUnit } from 'firefox-profiler/utils/format-numbers';
 import { Icon } from 'firefox-profiler/components/shared/Icon';
-import { getCategoryPairLabel } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getCategoryPairLabel,
+  getOriginalPositionForFrame,
+} from 'firefox-profiler/profile-logic/profile-data';
 import { countPositiveValues } from 'firefox-profiler/utils';
 
 import type {
@@ -379,9 +382,19 @@ export class TooltipCallNode extends React.PureComponent<Props> {
 
     let fileName = null;
 
-    const sourceIndex = thread.funcTable.source[funcIndex];
-
     const { sources } = thread;
+    const {
+      source: sourceIndex,
+      line: lineNumber,
+      column: columnNumber,
+    } = getOriginalPositionForFrame(
+      null,
+      funcIndex,
+      thread.frameTable,
+      thread.funcTable,
+      thread.sourceMapInfo
+    );
+
     if (sourceIndex !== null) {
       const fileNameIndex = sources.filename[sourceIndex];
       let fileNameURL = thread.stringTable.getString(fileNameIndex);
@@ -390,12 +403,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       // If it's a path from symbolication, strip it down to just the actual path.
       fileNameURL = parseFileNameFromSymbolication(fileNameURL).path;
 
-      // JS functions have information about where the function starts.
-      // Add :<line>:<col> to the URL, if known.
-      const lineNumber = thread.funcTable.lineNumber[funcIndex];
       if (lineNumber !== null) {
         fileNameURL += ':' + lineNumber;
-        const columnNumber = thread.funcTable.columnNumber[funcIndex];
         if (columnNumber !== null) {
           fileNameURL += ':' + columnNumber;
         }

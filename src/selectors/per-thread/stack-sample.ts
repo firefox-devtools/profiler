@@ -155,13 +155,19 @@ export function getStackAndSampleSelectorsPerThread(
       threadSelectors.getFilteredThread,
       UrlState.getSourceViewSourceIndex,
       (
-        { stackTable, frameTable, funcTable }: Thread,
+        { stackTable, frameTable, funcTable, sourceMapInfo }: Thread,
         sourceIndex
       ): StackLineInfo | null => {
         if (sourceIndex === null) {
           return null;
         }
-        return getStackLineInfo(stackTable, frameTable, funcTable, sourceIndex);
+        return getStackLineInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          sourceIndex,
+          sourceMapInfo
+        );
       }
     );
 

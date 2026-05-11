@@ -253,7 +253,14 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const {
       callNodeIndex,
-      thread: { funcTable, resourceTable, stringTable, sources },
+      thread: {
+        frameTable,
+        funcTable,
+        resourceTable,
+        stringTable,
+        sources,
+        sourceMapInfo,
+      },
       callNodeInfo,
     } = rightClickedCallNodeInfo;
 
@@ -271,10 +278,13 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
         const funcName = stringTable.getString(funcNameIndex);
         const originAnnotation = getOriginAnnotationForFunc(
           funcIndex,
+          null,
+          frameTable,
           funcTable,
           resourceTable,
           stringTable,
-          sources
+          sources,
+          sourceMapInfo
         );
         return funcName + (originAnnotation ? ` [${originAnnotation}]` : '');
       })

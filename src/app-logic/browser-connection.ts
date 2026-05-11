@@ -15,13 +15,13 @@ import {
   getJSSourcesViaWebChannel,
   getSourceMapViaWebChannel,
 } from './web-channel';
+import type { RawSourceMap } from 'source-map';
 import type {
   Milliseconds,
   FaviconData,
   MixedObject,
   SymbolTableAsTuple,
 } from 'firefox-profiler/types';
-import type { RawSourceMap } from 'source-map';
 
 /**
  * This file manages the communication between the profiler and the browser.
