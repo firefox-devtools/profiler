@@ -1801,10 +1801,10 @@
   dependencies:
     vary "^1.1.2"
 
-"@lezer/common@^1.0.0", "@lezer/common@^1.3.0", "@lezer/common@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@lezer/common/-/common-1.5.0.tgz#db227b596260189b67ba286387d9dc81fb07c70b"
-  integrity sha512-PNGcolp9hr4PJdXR4ix7XtixDrClScvtSCYW3rQG106oVMOOI+jFb+0+J3mbeL/53g1Zd6s0kJzaw6Ri68GmAA==
+"@lezer/common@^1.0.0", "@lezer/common@^1.2.0", "@lezer/common@^1.3.0", "@lezer/common@^1.5.0":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@lezer/common/-/common-1.5.2.tgz#d6840db13779e3f1b42e70c9a97c4086d12fae22"
+  integrity sha512-sxQE460fPZyU3sdc8lafxiPwJHBzZRy/udNFynGQky1SePYBdhkBl1kOagA9uT3pxR8K09bOrmTUqA9wb/PjSQ==
 
 "@lezer/cpp@^1.0.0":
   version "1.0.0"
@@ -1814,25 +1814,26 @@
     "@lezer/highlight" "^1.0.0"
     "@lezer/lr" "^1.0.0"
 
-"@lezer/highlight@^1.0.0", "@lezer/highlight@^1.2.3":
+"@lezer/highlight@^1.0.0", "@lezer/highlight@^1.1.3", "@lezer/highlight@^1.2.3":
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/@lezer/highlight/-/highlight-1.2.3.tgz#a20f324b71148a2ea9ba6ff42e58bbfaec702857"
   integrity sha512-qXdH7UqTvGfdVBINrgKhDsVTJTxactNNxLk7+UMwZhU13lMHaOBlJe9Vqp907ya56Y3+ed2tlqzys7jDkTmW0g==
   dependencies:
     "@lezer/common" "^1.3.0"
 
-"@lezer/javascript@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@lezer/javascript/-/javascript-1.0.0.tgz#60f0b6c295ef526a51fb33603403daad452d9470"
-  integrity sha512-RawBSrMD9yrVdrXWKn7hqo5BqgBaFelUx80i6p2/V0f+0THjncSSrRC6v3QWVv++RpqWT59L8ujKZjlExJq9xw==
+"@lezer/javascript@^1.0.0", "@lezer/javascript@^1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@lezer/javascript/-/javascript-1.5.4.tgz#11746955f957d33c0933f17d7594db54a8b4beea"
+  integrity sha512-vvYx3MhWqeZtGPwDStM2dwgljd5smolYD2lR2UyFcHfxbBQebqx8yjmFmxtJ/E6nN6u1D9srOiVWm3Rb4tmcUA==
   dependencies:
-    "@lezer/highlight" "^1.0.0"
-    "@lezer/lr" "^1.0.0"
+    "@lezer/common" "^1.2.0"
+    "@lezer/highlight" "^1.1.3"
+    "@lezer/lr" "^1.3.0"
 
-"@lezer/lr@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@lezer/lr/-/lr-1.0.0.tgz#89e30c1e710b8715ac5c847ad063418c51d6e750"
-  integrity sha512-k6DEqBh4HxqO/cVGedb6Ern6LS7K6IOzfydJ5WaqCR26v6UR9sIFyb6PS+5rPUs/mXgnBR/QQCW7RkyjSCMoQA==
+"@lezer/lr@^1.0.0", "@lezer/lr@^1.3.0":
+  version "1.4.10"
+  resolved "https://registry.yarnpkg.com/@lezer/lr/-/lr-1.4.10.tgz#b3acc36e5ad049b74ddb7719594e7e74d9161ff5"
+  integrity sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A==
   dependencies:
     "@lezer/common" "^1.0.0"
 
