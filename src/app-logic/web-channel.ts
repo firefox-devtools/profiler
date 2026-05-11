@@ -65,10 +65,11 @@ type OpenScriptInTabDebuggerRequest = {
   line: number | null;
   column: number | null;
 };
-type GetJSSourcesRequest = {
-  type: 'GET_JS_SOURCES';
-  sourceUuids: Array<string>;
-};
+type GetJSSourcesRequest =
+  // Version 7+ uses sourceIds
+  | { type: 'GET_JS_SOURCES'; sourceIds: Array<string> }
+  // Version 6 uses sourceUuids
+  | { type: 'GET_JS_SOURCES'; sourceUuids: Array<string> };
 
 export type MessageFromBrowser<R extends ResponseFromBrowser> =
   | OutOfBandErrorMessageFromBrowser
@@ -138,6 +139,8 @@ type StatusQueryResponse = {
   //  Shipped in Firefox 145.
   //  Adds support for fetching JS sources.
   //    - GET_JS_SOURCES
+  // Version 7:
+  //  Renames the GET_JS_SOURCES request field from `sourceUuids` to `sourceIds`.
   version?: number;
 };
 type EnableMenuButtonResponse = void;
@@ -388,12 +391,14 @@ export async function showFunctionInDevtoolsViaWebChannel(
 }
 
 export async function getJSSourcesViaWebChannel(
-  sourceUuids: Array<string>
+  sourceIds: Array<string>,
+  webChannelVersion: number
 ): Promise<Array<GetJSSourceReponseItem>> {
-  return _sendMessageWithResponse({
-    type: 'GET_JS_SOURCES',
-    sourceUuids,
-  });
+  return _sendMessageWithResponse(
+    webChannelVersion >= 7
+      ? { type: 'GET_JS_SOURCES', sourceIds }
+      : { type: 'GET_JS_SOURCES', sourceUuids: sourceIds }
+  );
 }
 
 /**
