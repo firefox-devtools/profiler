@@ -33,6 +33,7 @@ import type {
   SourceTable,
   IndexIntoSourceTable,
   CounterDisplayConfig,
+  SourceLocationTable,
 } from './profile';
 import type { IndexedArray } from './utils';
 import type { BitSet } from '../utils/bitset';
@@ -109,6 +110,8 @@ export type Thread = {
   // Sources for profiles are collected into a single table, containing file sources
   // with their UUIDs and filenames.
   sources: SourceTable;
+  // Source map symbolication results, copied from profile.shared.sourceLocationTable.
+  sourceLocationTable: SourceLocationTable;
   // The stack samples collected for this thread. This field is different from
   // RawThread in that the `time` column is always present.
   samples: SamplesTable;

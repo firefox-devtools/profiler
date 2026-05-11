@@ -29,6 +29,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
   getEmptySourceTable,
+  getEmptySourceLocationTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -134,6 +135,7 @@ class FirefoxFuncTable {
       this.funcTable.source.push(null);
       this.funcTable.lineNumber.push(null);
       this.funcTable.columnNumber.push(null);
+      this.funcTable.originalLocation.push(null);
 
       funcIndex = this.funcTable.length++;
       this.funcMap.set(mapKey, funcIndex);
@@ -174,6 +176,7 @@ class FirefoxFrameTable {
       this.frameTable.innerWindowID.push(null);
       this.frameTable.line.push(null);
       this.frameTable.column.push(null);
+      this.frameTable.originalLocation.push(null);
 
       frameIndex = this.frameTable.length++;
       this.frameMap.set(mapKey, frameIndex);
@@ -233,6 +236,7 @@ class FirefoxSharedData {
       nativeSymbols: getEmptyNativeSymbolTable(),
       sources: getEmptySourceTable(),
       stringArray: this.stringArray,
+      sourceLocationTable: getEmptySourceLocationTable(),
     };
   }
 }

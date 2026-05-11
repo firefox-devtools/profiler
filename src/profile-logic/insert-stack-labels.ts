@@ -128,6 +128,7 @@ export function insertStackLabels(
     funcTable.source[funcIndex] = null;
     funcTable.lineNumber[funcIndex] = null;
     funcTable.columnNumber[funcIndex] = null;
+    funcTable.originalLocation[funcIndex] = null;
     funcTable.isJS[funcIndex] = false;
     funcTable.relevantForJS[funcIndex] = true;
 
@@ -140,6 +141,7 @@ export function insertStackLabels(
     frameTable.inlineDepth[frameIndex] = 0;
     frameTable.line[frameIndex] = null;
     frameTable.column[frameIndex] = null;
+    frameTable.originalLocation[frameIndex] = null;
     frameTable.innerWindowID[frameIndex] = null;
   }
 

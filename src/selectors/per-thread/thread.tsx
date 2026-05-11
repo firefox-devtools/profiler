@@ -193,6 +193,8 @@ export function getBasicThreadSelectorsPerThread(
     ProfileSelectors.getStringTable,
     ProfileSelectors.getSourceTable,
     getTracedValuesBuffer,
+    (state: State) =>
+      ProfileSelectors.getRawProfileSharedData(state).sourceLocationTable,
     ProfileData.createThreadFromDerivedTables
   );
 

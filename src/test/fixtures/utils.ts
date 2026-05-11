@@ -172,7 +172,8 @@ export function computeThreadFromRawThread(
     shared.resourceTable,
     stringTable,
     shared.sources,
-    tracedValuesBuffer
+    tracedValuesBuffer,
+    shared.sourceLocationTable
   );
 }
 
@@ -688,6 +689,7 @@ export function addSourceToTable(
   sources.startLine.push(startLine);
   sources.startColumn.push(startColumn);
   sources.sourceMapURL.push(sourceMapURLStringIndex);
+  sources.content.push(null);
   sources.length = sources.filename.length;
 
   return sourceIndex;

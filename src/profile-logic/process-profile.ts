@@ -536,6 +536,7 @@ function _processFrameTable(
       geckoFrameStruct.innerWindowID[i];
     sharedFrameTable.line[newIndex] = geckoFrameStruct.line[i];
     sharedFrameTable.column[newIndex] = geckoFrameStruct.column[i];
+    sharedFrameTable.originalLocation[newIndex] = null;
   }
   sharedFrameTable.length += geckoFrameStruct.length;
   return frameIndexOffset;

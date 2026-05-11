@@ -101,6 +101,7 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
   SampleCategoriesAndSubcategories,
+  SourceLocationTable,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -2784,7 +2785,8 @@ export function createThreadFromDerivedTables(
   resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
-  tracedValuesBuffer: ArrayBuffer | undefined
+  tracedValuesBuffer: ArrayBuffer | undefined,
+  sourceLocationTable: SourceLocationTable
 ): Thread {
   const {
     processType,
@@ -2844,6 +2846,7 @@ export function createThreadFromDerivedTables(
     stringTable,
     sources,
     tracedValuesBuffer,
+    sourceLocationTable,
   };
   return thread;
 }
@@ -3440,6 +3443,7 @@ export function reserveFunctionsForCollapsedResources(
     funcTable.source.push(null);
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
+    funcTable.originalLocation.push(null);
     funcTable.length++;
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
@@ -4186,6 +4190,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
       newFrameTable.line.push(frameTable.line[frame]);
       newFrameTable.column.push(frameTable.column[frame]);
+      newFrameTable.originalLocation.push(frameTable.originalLocation[frame]);
       newFrameTable.length++;
       oldIpFrameToNewIpFrame[frame] = newIpFrame;
       // Note: The duplicated frame uses the same func as the original frame.

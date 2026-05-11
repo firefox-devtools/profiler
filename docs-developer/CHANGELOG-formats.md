@@ -6,6 +6,21 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 64
+
+A new `SourceLocationTable` has been added to `profile.shared.sourceLocationTable`. It holds the original (pre-compilation) source positions produced by source map symbolication, paired with the generated `line`/`column` already on `FrameTable`.
+
+- `source: IndexIntoSourceTable[]`: source file index. Set independently for func entries (the function's definition file) and frame entries (the execution point's file).
+- `line: number[]`: 1-based line number
+- `column: number[]`: 1-based column number
+
+Two new columns were added that index into this table:
+
+- `FrameTable.originalLocation: Array<IndexIntoSourceLocationTable | null>`: the original execution point for the frame
+- `FuncTable.originalLocation: Array<IndexIntoSourceLocationTable | null>`: the original definition site for the function
+
+A new `content: Array<string | null>` column was added to `SourceTable`.
+
 ### Version 63
 
 A new `tooltipRows` field was added to `CounterDisplayConfig`.

@@ -122,6 +122,7 @@ export function convertFlameGraphProfile(profileText: string): Profile {
     frameTable.innerWindowID.push(null);
     frameTable.line.push(null);
     frameTable.column.push(null);
+    frameTable.originalLocation.push(null);
     frameTable.length++;
     frameMap.set(frameString, frameIndex);
 
