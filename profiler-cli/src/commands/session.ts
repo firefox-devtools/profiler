@@ -27,13 +27,13 @@ export function registerSessionCommand(
   session
     .command('list', { isDefault: true })
     .description('List all running daemon sessions')
-    .action(() => {
+    .action(async () => {
       const sessionIds = listSessions(sessionDir);
       let numCleaned = 0;
       const runningSessionMetadata = [];
 
       for (const sessionId of sessionIds) {
-        const metadata = validateSession(sessionDir, sessionId);
+        const metadata = await validateSession(sessionDir, sessionId);
         if (metadata === null) {
           cleanupSession(sessionDir, sessionId);
           numCleaned++;
@@ -70,8 +70,8 @@ export function registerSessionCommand(
   session
     .command('use <id>')
     .description('Switch the current session')
-    .action((sessionId: string) => {
-      const metadata = validateSession(sessionDir, sessionId);
+    .action(async (sessionId: string) => {
+      const metadata = await validateSession(sessionDir, sessionId);
       if (metadata === null) {
         console.error(`Error: session "${sessionId}" not found or not running`);
         process.exit(1);
