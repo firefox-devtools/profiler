@@ -56,6 +56,7 @@ export async function startDevServer(buildConfig, options = {}) {
     fallback = 'index.html',
     onServerStart,
     cleanDist = true,
+    extraWatchConfigs = [],
   } = options;
 
   // Clean dist directory first
@@ -76,6 +77,12 @@ export async function startDevServer(buildConfig, options = {}) {
 
   // Start watching for changes
   await buildContext.watch();
+
+  // Watch extra configs (no serving needed, just watch for rebuilds)
+  const extraContexts = await Promise.all(
+    extraWatchConfigs.map((config) => esbuild.context(config))
+  );
+  await Promise.all(extraContexts.map((ctx) => ctx.watch()));
 
   // Create HTTP server
   const server = http.createServer((req, res) => {
@@ -135,7 +142,9 @@ export async function startDevServer(buildConfig, options = {}) {
     isShuttingDown = true;
 
     console.log('\nShutting down...');
-    await buildContext.dispose();
+    await Promise.all(
+      [buildContext, ...extraContexts].map((ctx) => ctx.dispose())
+    );
     server.close();
     process.exit(0);
   });
