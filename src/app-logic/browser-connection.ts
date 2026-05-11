@@ -12,7 +12,8 @@ import {
   querySymbolicationApiViaWebChannel,
   getPageFaviconsViaWebChannel,
   showFunctionInDevtoolsViaWebChannel,
-  getJSSourcesViaWebChannel,
+  getJSSourcesViaWebChannelV6,
+  getJSSourcesViaWebChannelV7,
 } from './web-channel';
 import type {
   Milliseconds,
@@ -96,6 +97,7 @@ export interface BrowserConnection {
  * the profile or symbols. So this class also supports the frame script.
  */
 class BrowserConnectionImpl implements BrowserConnection {
+  _webChannelVersion: number;
   _webChannelSupportsGetProfileAndSymbolication: boolean;
   _webChannelSupportsGetExternalPowerTracks: boolean;
   _webChannelSupportsGetExternalMarkers: boolean;
@@ -105,6 +107,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _geckoProfiler: $GeckoProfiler | undefined;
 
   constructor(webChannelVersion: number) {
+    this._webChannelVersion = webChannelVersion;
     this._webChannelSupportsGetProfileAndSymbolication = webChannelVersion >= 1;
     this._webChannelSupportsGetExternalPowerTracks = webChannelVersion >= 2;
     this._webChannelSupportsGetExternalMarkers = webChannelVersion >= 3;
@@ -247,7 +250,11 @@ class BrowserConnectionImpl implements BrowserConnection {
     // fetching multiple sources, we only fetch one at a time currently.
     // TODO: Change this to fetch multiple JS sources at the load time or while
     // we share the profile.
-    return getJSSourcesViaWebChannel([sourceUuid]).then((sources) => {
+    const sourcesPromise =
+      this._webChannelVersion >= 7
+        ? getJSSourcesViaWebChannelV7([sourceUuid])
+        : getJSSourcesViaWebChannelV6([sourceUuid]);
+    return sourcesPromise.then((sources) => {
       const source = sources[0];
       if ('error' in source) {
         throw new Error(source.error);
