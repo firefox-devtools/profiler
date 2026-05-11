@@ -135,8 +135,8 @@ describe('BottomBox', () => {
     const sourceViewContent =
       await within(sourceViewElement).findByRole('textbox');
 
-    // Because numbers and strings are split in several element, we're matching
-    // on the string "line" only.
+    // Verify source content is rendered. Syntax highlighting splits tokens
+    // across spans, so we match against each cm-line's full textContent.
     await within(sourceViewContent).findAllByText('line');
 
     expect(sourceViewContent).toMatchSnapshot();

@@ -6,7 +6,8 @@
 // pipeline. Drives `loadProfile` with a mocked BrowserConnection that serves
 // a real source map and minified bundle, then asserts on:
 //   - what was fetched (filtering by id / sourceMapURL / WebChannel version),
-//   - the post-symbolication profile state.
+//   - the post-symbolication profile state,
+//   - the source view selector reading the original-source content.
 //
 // Worker plumbing: the production worker is bundled by esbuild and replaced
 // in jest.config.js with a no-op stub. For these tests we override
@@ -20,6 +21,9 @@ import { SourceMapGenerator } from 'source-map';
 import { runSourceMapSymbolicationCore } from '../../profile-logic/source-map-symbolication';
 import { loadProfile } from '../../actions/receive-profile';
 import { getRawProfileSharedData } from '../../selectors/profile';
+import { getSourceViewCode } from '../../selectors/code';
+import { stateFromLocation } from '../../app-logic/url-handling';
+import { updateUrlState } from '../../actions/app';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
@@ -387,6 +391,34 @@ describe('receive-profile -> JS source map symbolication', function () {
       // bundle 1:15 ('return') maps to hello.js 2:3 (1-based).
       expect(sourceLocationTable.line[frameOriginalLocationIdx!]).toBe(2);
       expect(sourceLocationTable.column[frameOriginalLocationIdx!]).toBe(3);
+    });
+
+    it('returns the original source content via the source view selector', async function () {
+      const { dispatch, getState } = await loadAndSymbolicate();
+
+      // The original source was appended to the sources table during
+      // symbolication. Find its index by filename.
+      const { sources, stringArray } = getRawProfileSharedData(getState());
+      const originalSourceIndex = sources.filename.findIndex(
+        (idx) => stringArray[idx] === ORIGINAL_FILENAME
+      );
+      expect(originalSourceIndex).toBeGreaterThanOrEqual(0);
+
+      // Point the source view URL state at the original source.
+      dispatch(
+        updateUrlState(
+          stateFromLocation({
+            pathname: '/public/fakehash/',
+            search: `?sourceViewIndex=${originalSourceIndex}`,
+            hash: '',
+          })
+        )
+      );
+
+      expect(getSourceViewCode(getState())).toEqual({
+        type: 'AVAILABLE',
+        code: ORIGINAL_SOURCE,
+      });
     });
   });
 });

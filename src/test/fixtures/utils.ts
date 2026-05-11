@@ -350,17 +350,15 @@ export function formatStack(
   ) {
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const frameLine = frameTable.line[frameIndex];
-    const frameColumn = frameTable.column[frameIndex];
     const funcName = stringTable.getString(funcTable.name[funcIndex]);
     const origin = getOriginAnnotationForFunc(
       funcIndex,
+      frameIndex,
+      frameTable,
       funcTable,
       resourceTable,
       stringTable,
-      sources,
-      frameLine,
-      frameColumn
+      sources
     );
     lines.push(`${funcName} (${origin})`);
   }

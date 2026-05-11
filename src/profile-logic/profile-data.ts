@@ -3333,18 +3333,83 @@ function _shouldShowBothOriginAndFileName(
 }
 
 /**
+ * Resolves the original (source-mapped) position for a frame's execution point,
+ * with a 3-tier fallback that always produces a self-consistent
+ * (source, line, column) triple where all three come from the same file.
+ *
+ * Tier 1: frame's own source-map entry (when present). Handles inlined code
+ *   where the frame's original file may differ from the func's.
+ * Tier 2: func's source-map entry (same condition).
+ * Tier 3: compiled position: funcTable.source[funcIndex] plus line/column
+ *   from the frame (if frameIndex !== null) else from the func declaration.
+ *
+ * Pass frameIndex = null for call sites that only have a funcIndex (e.g.,
+ * tooltip / call-node-level lookups, where the call node represents the func
+ * rather than a specific frame).
+ */
+export function getOriginalPositionForFrame(
+  frameIndex: IndexIntoFrameTable | null,
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  sourceLocationTable: SourceLocationTable | null
+): {
+  source: IndexIntoSourceTable | null;
+  line: number | null;
+  column: number | null;
+} {
+  if (sourceLocationTable !== null && frameIndex !== null) {
+    const frameOriginalLocationIdx = frameTable.originalLocation[frameIndex];
+    if (frameOriginalLocationIdx !== null) {
+      return {
+        source: sourceLocationTable.source[frameOriginalLocationIdx],
+        line: sourceLocationTable.line[frameOriginalLocationIdx],
+        column: sourceLocationTable.column[frameOriginalLocationIdx],
+      };
+    }
+  }
+
+  if (sourceLocationTable !== null) {
+    const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
+    if (funcOriginalLocationIdx !== null) {
+      return {
+        source: sourceLocationTable.source[funcOriginalLocationIdx],
+        line: sourceLocationTable.line[funcOriginalLocationIdx],
+        column: sourceLocationTable.column[funcOriginalLocationIdx],
+      };
+    }
+  }
+
+  if (frameIndex !== null) {
+    return {
+      source: funcTable.source[funcIndex],
+      line: frameTable.line[frameIndex] ?? funcTable.lineNumber[funcIndex],
+      column:
+        frameTable.column[frameIndex] ?? funcTable.columnNumber[funcIndex],
+    };
+  }
+
+  return {
+    source: funcTable.source[funcIndex],
+    line: funcTable.lineNumber[funcIndex],
+    column: funcTable.columnNumber[funcIndex],
+  };
+}
+
+/**
  * This function returns the source origin for a function. This can be:
  * - a filename (javascript or object file or c++ source file)
  * - a URL (if the source is a website)
  */
 export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
+  frameIndex: IndexIntoFrameTable | null,
+  frameTable: FrameTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
-  frameLineNumber: number | null = null,
-  frameColumnNumber: number | null = null
+  sourceLocationTable: SourceLocationTable | null = null
 ): string {
   let resourceType = null;
   let origin = null;
@@ -3355,7 +3420,18 @@ export function getOriginAnnotationForFunc(
     origin = stringTable.getString(resourceNameIndex);
   }
 
-  const sourceIndex = funcTable.source[funcIndex];
+  const {
+    source: sourceIndex,
+    line: lineNumber,
+    column: columnNumber,
+  } = getOriginalPositionForFrame(
+    frameIndex,
+    funcIndex,
+    frameTable,
+    funcTable,
+    sourceLocationTable
+  );
+
   let fileName;
   if (sourceIndex !== null) {
     const urlIndex = sources.filename[sourceIndex];
@@ -3369,19 +3445,10 @@ export function getOriginAnnotationForFunc(
     // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
-    if (frameLineNumber !== null) {
-      fileName += ':' + frameLineNumber;
-      if (frameColumnNumber !== null) {
-        fileName += ':' + frameColumnNumber;
-      }
-    } else {
-      const lineNumber = funcTable.lineNumber[funcIndex];
-      if (lineNumber !== null) {
-        fileName += ':' + lineNumber;
-        const columnNumber = funcTable.columnNumber[funcIndex];
-        if (columnNumber !== null) {
-          fileName += ':' + columnNumber;
-        }
+    if (lineNumber !== null) {
+      fileName += ':' + lineNumber;
+      if (columnNumber !== null) {
+        fileName += ':' + columnNumber;
       }
     }
   }
