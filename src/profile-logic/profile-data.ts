@@ -3993,6 +3993,70 @@ export function _gatherSingleThreadStackReferences(
 }
 
 /**
+ * Collect all source table indices referenced by the given threads.
+ * Walks samples, jsAllocations, and nativeAllocations, following stack prefix
+ * chains. Includes both compiled sources (funcTable.source) and
+ * post-symbolication original sources (via sourceMapInfo).
+ */
+export function collectSourceIndicesFromThreads(
+  threadIndexes: Iterable<ThreadIndex>,
+  threads: RawThread[],
+  shared: RawProfileSharedData
+): Set<IndexIntoSourceTable> {
+  const { stackTable, frameTable, funcTable, sourceMapInfo } = shared;
+  const sourceIndices = new Set<IndexIntoSourceTable>();
+  const visitedStacks = makeBitSet(stackTable.length);
+
+  const addStackChain = (stackIndex: IndexIntoStackTable | null) => {
+    let current = stackIndex;
+    while (current !== null && !checkBit(visitedStacks, current)) {
+      setBit(visitedStacks, current);
+      const frameIndex = stackTable.frame[current];
+      const funcIndex = frameTable.func[frameIndex];
+
+      const compiledSource = funcTable.source[funcIndex];
+      if (compiledSource !== null) {
+        sourceIndices.add(compiledSource);
+      }
+
+      const frameSmInfoIndex = frameTable.sourceMapInfo[frameIndex];
+      if (frameSmInfoIndex !== null) {
+        sourceIndices.add(sourceMapInfo.originalSource[frameSmInfoIndex]);
+      }
+
+      const funcSmInfoIndex = funcTable.sourceMapInfo[funcIndex];
+      if (funcSmInfoIndex !== null) {
+        sourceIndices.add(sourceMapInfo.originalSource[funcSmInfoIndex]);
+      }
+
+      current = stackTable.prefix[current];
+    }
+  };
+
+  for (const threadIndex of threadIndexes) {
+    if (threadIndex >= threads.length) {
+      continue;
+    }
+    const thread = threads[threadIndex];
+    for (const s of thread.samples.stack) {
+      addStackChain(s);
+    }
+    if (thread.jsAllocations !== undefined) {
+      for (const s of thread.jsAllocations.stack) {
+        addStackChain(s);
+      }
+    }
+    if (thread.nativeAllocations !== undefined) {
+      for (const s of thread.nativeAllocations.stack) {
+        addStackChain(s);
+      }
+    }
+  }
+
+  return sourceIndices;
+}
+
+/**
  * Creates a new thread with modified frame and stack tables for "nudged" return addresses:
  * All return addresses are moved backwards by one byte, to point into the "call"
  * instruction. This allows symbolication to obtain accurate line numbers and inline frames
