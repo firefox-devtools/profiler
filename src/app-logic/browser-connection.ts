@@ -14,6 +14,7 @@ import {
   showFunctionInDevtoolsViaWebChannel,
   getJSSourcesViaWebChannelV6,
   getJSSourcesViaWebChannelV7,
+  getSourceMapViaWebChannel,
 } from './web-channel';
 import type {
   Milliseconds,
@@ -21,6 +22,7 @@ import type {
   MixedObject,
   SymbolTableAsTuple,
 } from 'firefox-profiler/types';
+import type { RawSourceMap } from 'source-map';
 
 /**
  * This file manages the communication between the profiler and the browser.
@@ -87,6 +89,14 @@ export interface BrowserConnection {
   ): Promise<void>;
 
   getJSSource(sourceUuid: string): Promise<string>;
+
+  // Get source map of the given source directly from the browser.
+  // Requires WebChannel version 7+.
+  getSourceMap(sourceId: string): Promise<RawSourceMap>;
+
+  // True when the browser exposes GET_SOURCE_MAP (WebChannel version 7+).
+  // Callers use this to gate source-map-based features.
+  readonly supportsGetSourceMap: boolean;
 }
 
 /**
@@ -104,6 +114,7 @@ class BrowserConnectionImpl implements BrowserConnection {
   _webChannelSupportsGetPageFavicons: boolean;
   _webChannelSupportsOpenDebuggerInTab: boolean;
   _webChannelSupportsGetJSSource: boolean;
+  readonly supportsGetSourceMap: boolean;
   _geckoProfiler: $GeckoProfiler | undefined;
 
   constructor(webChannelVersion: number) {
@@ -114,6 +125,7 @@ class BrowserConnectionImpl implements BrowserConnection {
     this._webChannelSupportsGetPageFavicons = webChannelVersion >= 4;
     this._webChannelSupportsOpenDebuggerInTab = webChannelVersion >= 5;
     this._webChannelSupportsGetJSSource = webChannelVersion >= 6;
+    this.supportsGetSourceMap = webChannelVersion >= 7;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -233,6 +245,15 @@ class BrowserConnectionImpl implements BrowserConnection {
     }
 
     return [];
+  }
+
+  async getSourceMap(sourceId: string): Promise<RawSourceMap> {
+    if (!this.supportsGetSourceMap) {
+      throw new Error(
+        "Can't use getSourceMap in Firefox versions with the old WebChannel."
+      );
+    }
+    return getSourceMapViaWebChannel(sourceId);
   }
 
   /**

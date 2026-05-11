@@ -143,7 +143,7 @@ export function simulateWebChannel(
           requestId: message.requestId,
           response: {
             menuButtonIsEnabled: true,
-            version: 5,
+            version: 7,
           },
         });
         break;
@@ -207,6 +207,24 @@ export function simulateWebChannel(
           type: 'SUCCESS_RESPONSE',
           requestId: message.requestId,
           response: undefined,
+        });
+        break;
+      }
+      case 'GET_JS_SOURCES': {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error:
+            'GET_JS_SOURCES is a valid message but not covered by this test.',
+        });
+        break;
+      }
+      case 'GET_SOURCE_MAP': {
+        triggerResponse({
+          type: 'ERROR_RESPONSE',
+          requestId: message.requestId,
+          error:
+            'GET_SOURCE_MAP is a valid message but not covered by this test.',
         });
         break;
       }
