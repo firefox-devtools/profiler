@@ -6,6 +6,21 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 63
+
+A new `SourceMapInfoTable` has been added to `profile.shared.sourceMapInfo`. Each entry maps a generated (compiled) position to its original source position as determined by source map symbolication.
+
+- `originalSource: Array<IndexIntoSourceTable | null>`: original source file index, or `null` if the source map does not provide one. Set independently for both func entries (the function's definition file) and frame entries (the execution point's file, which can differ from the func's file for inlined code).
+- `originalLine: number[]`: 1-based original line number
+- `originalColumn: number[]`: 1-based original column number
+
+Two new columns were added that index into this table:
+
+- `FrameTable.sourceMapInfo: Array<IndexIntoSourceMapInfoTable | null>`: points to the original execution point for the frame
+- `FuncTable.sourceMapInfo: Array<IndexIntoSourceMapInfoTable | null>`: points to the original definition site for the function
+
+A new `content: Array<string | null>` column was added to `SourceTable`. It stores the original source file text from the source map's `sourcesContent` field, allowing offline source viewing when profiles are shared.
+
 ### Version 62
 
 A new `display` field of type `CounterDisplayConfig` was added to `RawCounter`.

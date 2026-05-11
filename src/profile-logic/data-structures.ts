@@ -26,6 +26,7 @@ import type {
   JsTracerTable,
   CallNodeTable,
   SourceTable,
+  SourceMapInfoTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -93,6 +94,7 @@ export function getEmptyFrameTable(): FrameTable {
     innerWindowID: [],
     line: [],
     column: [],
+    sourceMapInfo: [],
     length: 0,
   };
 }
@@ -112,6 +114,7 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     innerWindowID: frameTable.innerWindowID.slice(),
     line: frameTable.line.slice(),
     column: frameTable.column.slice(),
+    sourceMapInfo: frameTable.sourceMapInfo.slice(),
     length: frameTable.length,
   };
 }
@@ -129,6 +132,7 @@ export function getEmptyFuncTable(): FuncTable {
     source: [],
     lineNumber: [],
     columnNumber: [],
+    sourceMapInfo: [],
     length: 0,
   };
 }
@@ -146,7 +150,17 @@ export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
     source: funcTable.source.slice(),
     lineNumber: funcTable.lineNumber.slice(),
     columnNumber: funcTable.columnNumber.slice(),
+    sourceMapInfo: funcTable.sourceMapInfo.slice(),
     length: funcTable.length,
+  };
+}
+
+export function getEmptySourceMapInfoTable(): SourceMapInfoTable {
+  return {
+    originalSource: [],
+    originalLine: [],
+    originalColumn: [],
+    length: 0,
   };
 }
 
@@ -338,6 +352,7 @@ export function getEmptySourceTable(): SourceTable {
     startLine: [],
     startColumn: [],
     sourceMapURL: [],
+    content: [],
     length: 0,
   };
 }
@@ -374,6 +389,7 @@ export function getEmptySharedData(): RawProfileSharedData {
     nativeSymbols: getEmptyNativeSymbolTable(),
     sources: getEmptySourceTable(),
     stringArray: [],
+    sourceMapInfo: getEmptySourceMapInfoTable(),
   };
 }
 

@@ -100,6 +100,7 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
   SampleCategoriesAndSubcategories,
+  SourceMapInfoTable,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -2783,7 +2784,8 @@ export function createThreadFromDerivedTables(
   resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
-  tracedValuesBuffer: ArrayBuffer | undefined
+  tracedValuesBuffer: ArrayBuffer | undefined,
+  sourceMapInfo: SourceMapInfoTable
 ): Thread {
   const {
     processType,
@@ -2843,6 +2845,7 @@ export function createThreadFromDerivedTables(
     stringTable,
     sources,
     tracedValuesBuffer,
+    sourceMapInfo,
   };
   return thread;
 }
@@ -3439,6 +3442,7 @@ export function reserveFunctionsForCollapsedResources(
     funcTable.source.push(null);
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
+    funcTable.sourceMapInfo.push(null);
     funcTable.length++;
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }

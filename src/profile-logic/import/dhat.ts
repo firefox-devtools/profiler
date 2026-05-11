@@ -204,6 +204,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   funcTable.source.push(null);
   funcTable.lineNumber.push(null);
   funcTable.columnNumber.push(null);
+  funcTable.sourceMapInfo.push(null);
   const rootFuncIndex = funcTable.length++;
 
   frameTable.address.push(-1);
@@ -215,6 +216,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   frameTable.nativeSymbol.push(null);
   frameTable.inlineDepth.push(0);
   frameTable.func.push(rootFuncIndex);
+  frameTable.sourceMapInfo.push(null);
   const rootFrameIndex = frameTable.length++;
 
   stackTable.frame.push(rootFrameIndex);
@@ -273,6 +275,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
       funcTable.source.push(globalDataCollector.indexForSource(null, fileName));
       funcTable.lineNumber.push(line);
       funcTable.columnNumber.push(column);
+      funcTable.sourceMapInfo.push(null);
       funcIndex = funcTable.length++;
       funcKeyToFuncIndex.set(funcKey, funcIndex);
     }
@@ -286,6 +289,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     frameTable.nativeSymbol.push(null);
     frameTable.inlineDepth.push(0);
     frameTable.func.push(funcIndex);
+    frameTable.sourceMapInfo.push(null);
     frameTable.length++;
   }
 

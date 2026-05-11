@@ -18,6 +18,7 @@ import type {
   NativeSymbolTable,
   Lib,
   SourceTable,
+  SourceMapInfoTable,
 } from 'firefox-profiler/types';
 import {
   assertExhaustiveCheck,
@@ -104,6 +105,7 @@ type TableCompactionStates = {
   resourceTable: TableCompactionState;
   nativeSymbols: TableCompactionState;
   sources: TableCompactionState;
+  sourceMapInfo: TableCompactionState;
   stringArray: TableCompactionState;
   libs: TableCompactionState;
 };
@@ -135,6 +137,7 @@ export function computeCompactedProfile(
     resourceTable: new TableCompactionState(shared.resourceTable.length),
     nativeSymbols: new TableCompactionState(shared.nativeSymbols.length),
     sources: new TableCompactionState(shared.sources.length),
+    sourceMapInfo: new TableCompactionState(shared.sourceMapInfo.length),
     libs: new TableCompactionState(profile.libs.length),
     stringArray: new TableCompactionState(shared.stringArray.length),
   };
@@ -153,6 +156,7 @@ export function computeCompactedProfile(
     innerWindowID: ColDesc.noRef(),
     line: ColDesc.noRef(),
     column: ColDesc.noRef(),
+    sourceMapInfo: ColDesc.indexRefOrNull(tcs.sourceMapInfo),
   };
   const funcTableDesc: TableDescription<FuncTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
@@ -162,6 +166,12 @@ export function computeCompactedProfile(
     source: ColDesc.indexRefOrNull(tcs.sources),
     lineNumber: ColDesc.noRef(),
     columnNumber: ColDesc.noRef(),
+    sourceMapInfo: ColDesc.indexRefOrNull(tcs.sourceMapInfo),
+  };
+  const sourceMapInfoDesc: TableDescription<SourceMapInfoTable> = {
+    originalSource: ColDesc.indexRef(tcs.sources),
+    originalLine: ColDesc.noRef(),
+    originalColumn: ColDesc.noRef(),
   };
   const resourceTableDesc: TableDescription<ResourceTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
@@ -181,6 +191,7 @@ export function computeCompactedProfile(
     startLine: ColDesc.noRef(),
     startColumn: ColDesc.noRef(),
     sourceMapURL: ColDesc.indexRefOrNull(tcs.stringArray),
+    content: ColDesc.noRef(),
   };
 
   // Step 1: Gather all references.
@@ -214,6 +225,13 @@ export function computeCompactedProfile(
     shared.resourceTable,
     tcs.resourceTable,
     resourceTableDesc
+  );
+  // sourceMapInfo must be marked after frameTable and funcTable (which reference
+  // sourceMapInfo entries), and before sources (since sourceMapInfo references sources).
+  _markTableAndComputeTranslation(
+    shared.sourceMapInfo,
+    tcs.sourceMapInfo,
+    sourceMapInfoDesc
   );
   _markTableAndComputeTranslation(
     shared.nativeSymbols,
@@ -250,6 +268,11 @@ export function computeCompactedProfile(
       nativeSymbolsDesc
     ),
     sources: _compactTable(shared.sources, tcs.sources, sourcesDesc),
+    sourceMapInfo: _compactTable(
+      shared.sourceMapInfo,
+      tcs.sourceMapInfo,
+      sourceMapInfoDesc
+    ),
     stringArray: _createCompactedStringArray(shared.stringArray, tcs),
   };
 

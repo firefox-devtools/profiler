@@ -23,6 +23,7 @@ export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type IndexIntoSourceTable = number;
+export type IndexIntoSourceMapInfoTable = number;
 export type ThreadIndex = number;
 // The Tid is most often a number. However in some cases such as merged profiles
 // we could generate a string.
@@ -296,6 +297,12 @@ export type FrameTable = {
 
   line: (number | null)[];
   column: (number | null)[];
+
+  // Index into the sourceMapInfo table, or null if not source-mapped.
+  // Points to the original source file (if known), line, and column for this
+  // frame's execution point.
+  sourceMapInfo: Array<IndexIntoSourceMapInfoTable | null>;
+
   length: number;
 };
 
@@ -341,6 +348,10 @@ export type FuncTable = {
   source: Array<IndexIntoSourceTable | null>;
   lineNumber: Array<number | null>;
   columnNumber: Array<number | null>;
+
+  // Index into the thread's sourceMapInfo table, or null if not source-mapped.
+  // Points to the original source file + line/column for this function's definition.
+  sourceMapInfo: Array<IndexIntoSourceMapInfoTable | null>;
 
   length: number;
 };
@@ -980,6 +991,28 @@ export type SourceTable = {
   startLine: Array<number>;
   startColumn: Array<number>;
   sourceMapURL: Array<IndexIntoStringTable | null>;
+  // Original source file contents from source map sourcesContent, or null if
+  // not available. Stored for offline source view when a profile is shared.
+  content: Array<string | null>;
+};
+
+/**
+ * Table holding source map symbolication results for a thread. Each entry maps
+ * a generated (compiled) position to the corresponding original source position.
+ * Funcs reference this table to find their original source file and definition
+ * location. Frames reference this table to find their original execution point.
+ */
+export type SourceMapInfoTable = {
+  // Original source file index (from the shared SourceTable).
+  // For funcs: the original file where the function is defined.
+  // For frames: the original source file for the execution point. Usually
+  // matches the func's original source, but can differ for inlined code.
+  originalSource: IndexIntoSourceTable[];
+  // 1-based original line number.
+  originalLine: number[];
+  // 1-based original column number.
+  originalColumn: number[];
+  length: number;
 };
 
 export type RawProfileSharedData = {
@@ -994,6 +1027,9 @@ export type RawProfileSharedData = {
   // Optional sources table for JS source UUID to URL mapping.
   // Added for UUID-based source fetching.
   sources: SourceTable;
+  // Source map symbolication results, shared across all threads.
+  // frameTable.sourceMapInfo and funcTable.sourceMapInfo index into this table.
+  sourceMapInfo: SourceMapInfoTable;
 };
 
 /**

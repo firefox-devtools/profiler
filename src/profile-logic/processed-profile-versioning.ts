@@ -3110,6 +3110,32 @@ const _upgraders: {
     }
   },
 
+  [63]: (profile: any) => {
+    // Add sourceMapInfo table to profile.shared, sourceMapInfo column to
+    // funcTable and frameTable, and content column to sources table.
+    if (profile.shared) {
+      const { funcTable, frameTable } = profile.shared;
+      if (funcTable && !funcTable.sourceMapInfo) {
+        funcTable.sourceMapInfo = new Array(funcTable.length).fill(null);
+      }
+      if (frameTable && !frameTable.sourceMapInfo) {
+        frameTable.sourceMapInfo = new Array(frameTable.length).fill(null);
+      }
+      if (!profile.shared.sourceMapInfo) {
+        profile.shared.sourceMapInfo = {
+          originalSource: [],
+          originalLine: [],
+          originalColumn: [],
+          length: 0,
+        };
+      }
+      if (profile.shared.sources && !profile.shared.sources.content) {
+        profile.shared.sources.content = new Array(
+          profile.shared.sources.length
+        ).fill(null);
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

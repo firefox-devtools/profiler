@@ -40,7 +40,6 @@ import {
   getMouseEvent,
   fireFullClick,
   fireFullContextMenu,
-  findFillTextPositionFromDrawLog,
   addSourceToTable,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -427,8 +426,24 @@ function setupFlameGraph() {
     fireFullClick(getByText(strOrRegexp));
   }
 
+  // Flame graph labels now include origin annotations (e.g., "A — path/to/file:10:100"),
+  // so we match by prefix (function name) rather than exact string.
   function findFillTextPosition(fillText: string) {
-    return findFillTextPositionFromDrawLog(flushDrawLog(), fillText);
+    const drawLog = flushDrawLog();
+    const positions: Array<{ x: number; y: number }> = drawLog
+      .filter(([cmd, text]) => cmd === 'fillText' && text.startsWith(fillText))
+      .map(([, , x, y]) => ({ x: x as number, y: y as number }));
+    if (positions.length === 0) {
+      throw new Error(
+        'Could not find a fillText command starting with ' + fillText
+      );
+    }
+    if (positions.length > 1) {
+      throw new Error(
+        'More than one fillText() call was found starting with ' + fillText
+      );
+    }
+    return positions[0];
   }
 
   return {
