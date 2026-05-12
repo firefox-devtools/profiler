@@ -37,7 +37,7 @@ import {
 //     code is exercised. Do that, run the tests and inspect the snapshot
 //     changes, add a comment to the relevant subtest, and update the snapshots
 //     using `yarn test -u`.
-//     Also run `yarn prettier-json` to format the modified input file.
+//     Also run `yarn fmt` to format the modified input file.
 //  4. If you can't modify any of the existing input files, for example because
 //     the format version of the inputs is too old to even have a place to add
 //     the data that your upgrader operates on, you'll need to add a new input

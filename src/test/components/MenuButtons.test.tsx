@@ -441,11 +441,11 @@ describe('app/MenuButtons', function () {
 
   describe('<MetaInfoPanel>', function () {
     async function setupForMetaInfoPanel(profile: Profile) {
-      jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function (
-        this: Date
-      ) {
-        return 'toLocaleString ' + this.toUTCString();
-      });
+      jest
+        .spyOn(Date.prototype, 'toLocaleString')
+        .mockImplementation(function (this: Date) {
+          return 'toLocaleString ' + this.toUTCString();
+        });
 
       const store = blankStore();
 
