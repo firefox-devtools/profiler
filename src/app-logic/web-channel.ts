@@ -8,6 +8,7 @@ import type {
   ExternalMarkersData,
   FaviconData,
 } from 'firefox-profiler/types';
+import type { RawSourceMap } from 'source-map';
 
 /**
  * This file is in charge of handling the message managing between profiler.firefox.com
@@ -29,7 +30,8 @@ export type Request =
   | QuerySymbolicationApiRequest
   | GetPageFaviconsRequest
   | OpenScriptInTabDebuggerRequest
-  | GetJSSourcesRequest;
+  | GetJSSourcesRequest
+  | GetSourceMapRequest;
 
 type StatusQueryRequest = { type: 'STATUS_QUERY' };
 type EnableMenuButtonRequest = { type: 'ENABLE_MENU_BUTTON' };
@@ -65,9 +67,14 @@ type OpenScriptInTabDebuggerRequest = {
   line: number | null;
   column: number | null;
 };
-type GetJSSourcesRequest = {
-  type: 'GET_JS_SOURCES';
-  sourceUuids: Array<string>;
+type GetJSSourcesRequest =
+  // Version 7+ uses sourceIds
+  | { type: 'GET_JS_SOURCES'; sourceIds: Array<string> }
+  // Version 6 uses sourceUuids
+  | { type: 'GET_JS_SOURCES'; sourceUuids: Array<string> };
+type GetSourceMapRequest = {
+  type: 'GET_SOURCE_MAP';
+  sourceId: string;
 };
 
 export type MessageFromBrowser<R extends ResponseFromBrowser> =
@@ -138,6 +145,11 @@ type StatusQueryResponse = {
   //  Shipped in Firefox 145.
   //  Adds support for fetching JS sources.
   //    - GET_JS_SOURCES
+  // Version 7:
+  //  Adds support for fetching source maps via the browser, which can access
+  //  URLs that the frontend cannot (file://, chrome://, localhost, etc.).
+  //    - GET_SOURCE_MAP
+  //  Also renames the GET_JS_SOURCES request field from `sourceUuids` to `sourceIds`.
   version?: number;
 };
 type EnableMenuButtonResponse = void;
@@ -150,6 +162,7 @@ type GetPageFaviconsResponse = Array<FaviconData | null>;
 type OpenScriptInTabDebuggerResponse = void;
 type GetJSSourceReponseItem = { sourceText: string } | { error: string };
 type GetJSSourcesResponse = Array<GetJSSourceReponseItem>;
+type GetSourceMapResponse = RawSourceMap;
 
 // TypeScript function overloads for request/response pairs.
 function _sendMessageWithResponse(
@@ -182,6 +195,9 @@ function _sendMessageWithResponse(
 function _sendMessageWithResponse(
   request: GetJSSourcesRequest
 ): Promise<GetJSSourcesResponse>;
+function _sendMessageWithResponse(
+  request: GetSourceMapRequest
+): Promise<GetSourceMapResponse>;
 
 function _sendMessageWithResponse(request: Request): Promise<any> {
   const requestId = _requestId++;
@@ -388,11 +404,22 @@ export async function showFunctionInDevtoolsViaWebChannel(
 }
 
 export async function getJSSourcesViaWebChannel(
-  sourceUuids: Array<string>
+  sourceIds: Array<string>,
+  webChannelVersion: number
 ): Promise<Array<GetJSSourceReponseItem>> {
+  return _sendMessageWithResponse(
+    webChannelVersion >= 7
+      ? { type: 'GET_JS_SOURCES', sourceIds }
+      : { type: 'GET_JS_SOURCES', sourceUuids: sourceIds }
+  );
+}
+
+export async function getSourceMapViaWebChannel(
+  sourceId: string
+): Promise<GetSourceMapResponse> {
   return _sendMessageWithResponse({
-    type: 'GET_JS_SOURCES',
-    sourceUuids,
+    type: 'GET_SOURCE_MAP',
+    sourceId,
   });
 }
 

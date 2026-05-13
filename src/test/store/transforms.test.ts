@@ -1436,7 +1436,8 @@ describe('"collapse-direct-recursion" transform', function () {
         stackTable,
         frameTable,
         funcTable,
-        fileSourceIndex
+        fileSourceIndex,
+        filteredThread.sourceMapInfo
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1620,7 +1621,8 @@ describe('"collapse-recursion" transform', function () {
         stackTable,
         frameTable,
         funcTable,
-        fileSourceIndex
+        fileSourceIndex,
+        filteredThread.sourceMapInfo
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1733,7 +1735,8 @@ describe('"collapse-recursion" transform', function () {
         stackTable,
         frameTable,
         funcTable,
-        fileSourceIndex
+        fileSourceIndex,
+        filteredThread.sourceMapInfo
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -1869,7 +1872,8 @@ describe('"collapse-recursion" transform', function () {
         stackTable,
         frameTable,
         funcTable,
-        fileSourceIndex
+        fileSourceIndex,
+        filteredThread.sourceMapInfo
       );
       const lineTimings = getLineTimings(stackLineInfo, samples);
 

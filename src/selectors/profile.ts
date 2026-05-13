@@ -1109,7 +1109,7 @@ export const getSourceViewFile: Selector<string | null> = createSelector(
     }
 
     const fileNameStrIndex = sources.filename[sourceIndex];
-    return fileNameStrIndex !== null
+    return fileNameStrIndex !== null && fileNameStrIndex !== undefined
       ? stringTable.getString(fileNameStrIndex)
       : null;
   }

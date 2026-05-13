@@ -48,6 +48,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoStringTable,
   IndexIntoSourceTable,
+  IndexIntoSourceMapInfoTable,
   FuncTable,
   FrameTable,
   Lib,
@@ -56,6 +57,7 @@ import type {
   RawSamplesTable,
   RawStackTable,
   SourceTable,
+  SourceMapInfoTable,
   UrlState,
   ImplementationFilter,
   TransformStacksPerThread,
@@ -374,6 +376,7 @@ type TranslationMapForStacks = Int32Array;
 type TranslationMapForLibs = Int32Array;
 type TranslationMapForStrings = Int32Array;
 type TranslationMapForSources = Int32Array;
+type TranslationMapForSourceMapInfo = Int32Array;
 
 /**
  * Merges several categories lists into one, resolving duplicates if necessary.
@@ -443,6 +446,10 @@ export function mergeSharedData(profiles: Profile[]): {
       translationMapsForStrings
     );
   const {
+    sourceMapInfo: newSourceMapInfo,
+    translationMaps: translationMapsForSourceMapInfo,
+  } = mergeSourceMapInfoTables(profiles, translationMapsForSources);
+  const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
   } = mergeResourceTables(
@@ -463,6 +470,7 @@ export function mergeSharedData(profiles: Profile[]): {
       profiles,
       translationMapsForResources,
       translationMapsForSources,
+      translationMapsForSourceMapInfo,
       translationMapsForStrings
     );
   const {
@@ -472,6 +480,7 @@ export function mergeSharedData(profiles: Profile[]): {
     profiles,
     translationMapsForFuncs,
     translationMapsForNativeSymbols,
+    translationMapsForSourceMapInfo,
     translationMapsForCategories
   );
   const {
@@ -487,6 +496,7 @@ export function mergeSharedData(profiles: Profile[]): {
     resourceTable: newResourceTable,
     stringArray: newStringArray,
     sources: newSources,
+    sourceMapInfo: newSourceMapInfo,
   };
 
   const translationMapsPerProfile = profiles.map((profile, i) => {
@@ -581,6 +591,7 @@ function mergeSources(
         newSources.startLine[insertedSourceIndex] = sources.startLine[i];
         newSources.startColumn[insertedSourceIndex] = sources.startColumn[i];
         newSources.sourceMapURL[insertedSourceIndex] = newSourceMapURLIndex;
+        newSources.content[insertedSourceIndex] = sources.content[i];
         newSources.length++;
         mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
       }
@@ -595,6 +606,50 @@ function mergeSources(
     sources: newSources,
     translationMaps,
   };
+}
+
+/**
+ * Combines the sourceMapInfo tables from multiple profiles. Each row is copied
+ * verbatim except `originalSource`, which is translated through the source
+ * translation map. Rows are not deduplicated across profiles — this is leaf
+ * data with no downstream constraint that would benefit from a stable key.
+ */
+function mergeSourceMapInfoTables(
+  profiles: ReadonlyArray<Profile>,
+  translationMapsForSources: TranslationMapForSources[]
+): {
+  sourceMapInfo: SourceMapInfoTable;
+  translationMaps: TranslationMapForSourceMapInfo[];
+} {
+  const newSourceMapInfo: SourceMapInfoTable = {
+    originalSource: [],
+    originalLine: [],
+    originalColumn: [],
+    length: 0,
+  };
+
+  const translationMaps = profiles.map((profile, profileIndex) => {
+    const sourceMapInfo = profile.shared.sourceMapInfo;
+    const sourceTranslation = translationMapsForSources[profileIndex];
+    const oldSourceMapInfoToNewPlusOne = new Int32Array(sourceMapInfo.length);
+
+    for (let i = 0; i < sourceMapInfo.length; i++) {
+      const originalSource = sourceMapInfo.originalSource[i];
+      const newOriginalSource = sourceTranslation[originalSource] - 1;
+
+      const newIndex = newSourceMapInfo.length;
+      newSourceMapInfo.originalSource.push(newOriginalSource);
+      newSourceMapInfo.originalLine.push(sourceMapInfo.originalLine[i]);
+      newSourceMapInfo.originalColumn.push(sourceMapInfo.originalColumn[i]);
+      newSourceMapInfo.length++;
+
+      oldSourceMapInfoToNewPlusOne[i] = newIndex + 1;
+    }
+
+    return oldSourceMapInfoToNewPlusOne;
+  });
+
+  return { sourceMapInfo: newSourceMapInfo, translationMaps };
 }
 
 function adjustStringIndexes(
@@ -710,6 +765,15 @@ function _mapNullableSource(
 ): IndexIntoStringTable | null {
   return sourceIndex !== null
     ? oldSourceToNewSourcePlusOne[sourceIndex] - 1
+    : null;
+}
+
+function _mapNullableSourceMapInfo(
+  sourceMapInfoIndex: IndexIntoSourceMapInfoTable | null,
+  oldSourceMapInfoToNewPlusOne: TranslationMapForSourceMapInfo
+): IndexIntoSourceMapInfoTable | null {
+  return sourceMapInfoIndex !== null
+    ? oldSourceMapInfoToNewPlusOne[sourceMapInfoIndex] - 1
     : null;
 }
 
@@ -900,6 +964,7 @@ function mergeFuncTables(
   profiles: ReadonlyArray<Profile>,
   translationMapsForResources: TranslationMapForResources[],
   translationMapsForSources: TranslationMapForSources[],
+  translationMapsForSourceMapInfo: TranslationMapForSourceMapInfo[],
   translationMapsForStrings: TranslationMapForStrings[]
 ): { funcTable: FuncTable; translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs = new Map<string, IndexIntoFuncTable>();
@@ -912,6 +977,8 @@ function mergeFuncTables(
       translationMapsForResources[profileIndex];
     const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
     const oldSourceToNewSourcePlusOne = translationMapsForSources[profileIndex];
+    const oldSourceMapInfoToNewPlusOne =
+      translationMapsForSourceMapInfo[profileIndex];
     const oldFuncToNewFuncPlusOne = new Int32Array(funcTable.length);
 
     for (let i = 0; i < funcTable.length; i++) {
@@ -953,6 +1020,12 @@ function mergeFuncTables(
       newFuncTable.source.push(sourceIndex);
       newFuncTable.lineNumber.push(lineNumber);
       newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
+      newFuncTable.sourceMapInfo.push(
+        _mapNullableSourceMapInfo(
+          funcTable.sourceMapInfo[i],
+          oldSourceMapInfoToNewPlusOne
+        )
+      );
 
       newFuncTable.length++;
     }
@@ -974,6 +1047,7 @@ function mergeFrameTables(
   profiles: ReadonlyArray<Profile>,
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
+  translationMapsForSourceMapInfo: TranslationMapForSourceMapInfo[],
   translationMapsForCategories: TranslationMapForCategories[]
 ): { frameTable: FrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
@@ -984,6 +1058,8 @@ function mergeFrameTables(
     const oldFuncToNewFuncPlusOne = translationMapsForFuncs[profileIndex];
     const oldNativeSymbolToNewNativeSymbolPlusOne =
       translationMapsForNativeSymbols[profileIndex];
+    const oldSourceMapInfoToNewPlusOne =
+      translationMapsForSourceMapInfo[profileIndex];
     const oldCategoryToNewCategoryPlusOne =
       translationMapsForCategories[profileIndex];
     const oldFrameToNewFramePlusOne = new Int32Array(frameTable.length);
@@ -1010,6 +1086,12 @@ function mergeFrameTables(
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
+      newFrameTable.sourceMapInfo.push(
+        _mapNullableSourceMapInfo(
+          frameTable.sourceMapInfo[i],
+          oldSourceMapInfoToNewPlusOne
+        )
+      );
 
       oldFrameToNewFramePlusOne[i] = newFrameTable.length + 1;
       newFrameTable.length++;

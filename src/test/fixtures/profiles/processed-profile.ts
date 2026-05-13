@@ -978,6 +978,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.nativeSymbol.push(nativeSymbol);
         frameTable.line.push(lineNumber);
         frameTable.column.push(null);
+        frameTable.sourceMapInfo.push(null);
         frameIndex = frameTable.length++;
       }
 
@@ -2061,6 +2062,7 @@ export function addInnerWindowIdToStacks(
       frameTable.nativeSymbol.push(frameTable.nativeSymbol[foundFrameIndex]);
       frameTable.line.push(frameTable.line[foundFrameIndex]);
       frameTable.column.push(frameTable.column[foundFrameIndex]);
+      frameTable.sourceMapInfo.push(frameTable.sourceMapInfo[foundFrameIndex]);
 
       // And that one comes from the second tab.
       frameTable.innerWindowID.push(listOfOperations[1].innerWindowID);

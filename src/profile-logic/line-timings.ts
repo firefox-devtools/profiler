@@ -12,8 +12,10 @@ import type {
   LineNumber,
   IndexIntoSourceTable,
   IndexIntoLineSetTable,
+  SourceMapInfoTable,
 } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
+import { getOriginalPositionForFrame } from './profile-data';
 
 /**
  * For each stack in `stackTable`, and one specific source file, compute the
@@ -47,7 +49,8 @@ export function getStackLineInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
-  sourceViewSourceIndex: IndexIntoSourceTable
+  sourceViewSourceIndex: IndexIntoSourceTable,
+  sourceMapInfo: SourceMapInfoTable
 ): StackLineInfo {
   const builder = new SetCollectionBuilder<number>();
   const stackIndexToLineSetIndex = new Int32Array(stackTable.length);
@@ -59,14 +62,20 @@ export function getStackLineInfo(
 
     const frame = stackTable.frame[stackIndex];
     const func = frameTable.func[frame];
-    const sourceIndexOfThisStack = funcTable.source[func];
+    const { source: sourceIndexOfThisStack, line: selfLineFromMapping } =
+      getOriginalPositionForFrame(
+        frame,
+        func,
+        frameTable,
+        funcTable,
+        sourceMapInfo
+      );
+
     const matchesSource = sourceIndexOfThisStack === sourceViewSourceIndex;
     if (prefixLineSet === -1 && !matchesSource) {
       stackIndexToLineSetIndex[stackIndex] = -1;
     } else {
-      const selfLineOrNull = matchesSource
-        ? (frameTable.line[frame] ?? funcTable.lineNumber[func])
-        : null;
+      const selfLineOrNull = matchesSource ? selfLineFromMapping : null;
 
       stackIndexToLineSetIndex[stackIndex] = builder.extend(
         prefixLineSet !== -1 ? prefixLineSet : null,
@@ -169,7 +178,9 @@ export function getTotalLineTimingsForCallNode(
   samples: SamplesLikeTable,
   callNodeFramePerStack: Int32Array,
   frameTable: FrameTable,
-  funcLine: LineNumber | null
+  funcTable: FuncTable,
+  funcLine: LineNumber | null,
+  sourceMapInfo: SourceMapInfoTable
 ): Map<LineNumber, number> {
   const totalPerLine = new Map<LineNumber, number>();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
@@ -179,11 +190,20 @@ export function getTotalLineTimingsForCallNode(
     }
     const callNodeFrame = callNodeFramePerStack[stack];
     if (callNodeFrame === -1) {
-      // This sample does not contribute to the call node's total. Ignore.
       continue;
     }
 
-    const frameLine = frameTable.line[callNodeFrame];
+    // Resolve in the same coordinate space as the source view: helper returns
+    // a source-mapped line when available, otherwise the frame's compiled
+    // line, otherwise the func's compiled line.
+    const funcIndex = frameTable.func[callNodeFrame];
+    const { line: frameLine } = getOriginalPositionForFrame(
+      callNodeFrame,
+      funcIndex,
+      frameTable,
+      funcTable,
+      sourceMapInfo
+    );
     const line = frameLine !== null ? frameLine : funcLine;
     if (line === null) {
       continue;

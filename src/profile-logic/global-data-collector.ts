@@ -10,6 +10,7 @@ import {
   getEmptyRawStackTable,
   getEmptyResourceTable,
   getEmptySourceTable,
+  getEmptySourceMapInfoTable,
 } from './data-structures';
 
 import type {
@@ -108,6 +109,7 @@ export class GlobalDataCollector {
       this._funcTable.source[funcIndex] = source;
       this._funcTable.lineNumber[funcIndex] = lineNumber;
       this._funcTable.columnNumber[funcIndex] = columnNumber;
+      this._funcTable.sourceMapInfo[funcIndex] = null;
       this._funcKeyToFuncIndex.set(funcKey, funcIndex);
     }
     return funcIndex;
@@ -144,6 +146,7 @@ export class GlobalDataCollector {
       this._sources.startLine[index] = startLine;
       this._sources.startColumn[index] = startColumn;
       this._sources.sourceMapURL[index] = sourceMapURLIndex;
+      this._sources.content[index] = null;
       this._sources.length++;
 
       if (id !== null) {
@@ -314,6 +317,7 @@ export class GlobalDataCollector {
       nativeSymbols: this._nativeSymbols,
       stringArray: this._stringArray,
       sources: this._sources,
+      sourceMapInfo: getEmptySourceMapInfoTable(),
     };
 
     return { libs: this._libs, shared };

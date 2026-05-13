@@ -985,4 +985,117 @@ describe('mergeProfilesForDiffing with source tables', function () {
       singleProfile.profile.shared.sources
     );
   });
+
+  it('should merge sourceMapInfo tables and remap funcTable / frameTable references', function () {
+    const profileA = getProfileFromTextSamples(`
+      A[file:bundle-a.js]
+    `);
+    const profileB = getProfileFromTextSamples(`
+      B[file:bundle-b.js]
+    `);
+
+    // Pre-populate sourceMapInfo and the func/frame columns that reference it.
+    // bundle-a.js source is index 0 in each per-profile table (sources from
+    // getProfileFromTextSamples have null id but a filename string).
+    const sharedA = profileA.profile.shared;
+    sharedA.sourceMapInfo.originalSource.push(0);
+    sharedA.sourceMapInfo.originalLine.push(11);
+    sharedA.sourceMapInfo.originalColumn.push(22);
+    sharedA.sourceMapInfo.length = 1;
+    sharedA.funcTable.sourceMapInfo[0] = 0;
+    sharedA.frameTable.sourceMapInfo[0] = 0;
+
+    const sharedB = profileB.profile.shared;
+    sharedB.sourceMapInfo.originalSource.push(0);
+    sharedB.sourceMapInfo.originalLine.push(33);
+    sharedB.sourceMapInfo.originalColumn.push(44);
+    sharedB.sourceMapInfo.length = 1;
+    sharedB.funcTable.sourceMapInfo[0] = 0;
+    sharedB.frameTable.sourceMapInfo[0] = 0;
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    const { funcTable, frameTable, sourceMapInfo, sources } =
+      mergedProfile.shared;
+    const stringTable = StringTable.withBackingArray(
+      mergedProfile.shared.stringArray
+    );
+
+    // Both inputs' sourceMapInfo rows survive the merge (no dedup).
+    expect(sourceMapInfo.length).toBe(2);
+
+    // originalSource indices are remapped through the merged sources table.
+    for (let i = 0; i < sourceMapInfo.length; i++) {
+      const src = sourceMapInfo.originalSource[i];
+      expect(src).not.toBeNull();
+      expect(src).toBeGreaterThanOrEqual(0);
+      expect(src).toBeLessThan(sources.length);
+    }
+
+    // Each input's funcTable.sourceMapInfo[0] now points at the corresponding
+    // remapped row, and the remapped row carries the correct original line.
+    const funcAName = stringTable.indexForString('A');
+    const funcBName = stringTable.indexForString('B');
+    const funcAIndex = funcTable.name.indexOf(funcAName);
+    const funcBIndex = funcTable.name.indexOf(funcBName);
+    expect(funcAIndex).toBeGreaterThanOrEqual(0);
+    expect(funcBIndex).toBeGreaterThanOrEqual(0);
+
+    const funcASmInfo = funcTable.sourceMapInfo[funcAIndex];
+    const funcBSmInfo = funcTable.sourceMapInfo[funcBIndex];
+    expect(funcASmInfo).not.toBeNull();
+    expect(funcBSmInfo).not.toBeNull();
+    expect(sourceMapInfo.originalLine[ensureExists(funcASmInfo)]).toBe(11);
+    expect(sourceMapInfo.originalLine[ensureExists(funcBSmInfo)]).toBe(33);
+
+    // The frame columns are populated for every row (catches the original bug
+    // where the column was left empty and any index access returned undefined).
+    for (let i = 0; i < frameTable.length; i++) {
+      const v = frameTable.sourceMapInfo[i];
+      expect(v === null || v >= 0).toBe(true);
+    }
+    for (let i = 0; i < funcTable.length; i++) {
+      const v = funcTable.sourceMapInfo[i];
+      expect(v === null || v >= 0).toBe(true);
+    }
+  });
+
+  it('should populate empty sourceMapInfo columns on funcTable and frameTable when no symbolication ran', function () {
+    const profileA = getProfileFromTextSamples(`A[file:a.js]`);
+    const profileB = getProfileFromTextSamples(`B[file:b.js]`);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    const { funcTable, frameTable, sourceMapInfo } = mergedProfile.shared;
+
+    // Even without any symbolicated entries on the inputs, the columns must
+    // be filled (not undefined) so downstream `x !== null` checks work.
+    expect(sourceMapInfo.length).toBe(0);
+    expect(funcTable.sourceMapInfo).toHaveLength(funcTable.length);
+    expect(frameTable.sourceMapInfo).toHaveLength(frameTable.length);
+    for (const v of funcTable.sourceMapInfo) {
+      expect(v).toBeNull();
+    }
+    for (const v of frameTable.sourceMapInfo) {
+      expect(v).toBeNull();
+    }
+  });
 });

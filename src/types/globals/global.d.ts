@@ -4,6 +4,7 @@
 
 // Added by esbuild's define option
 declare const AVAILABLE_STAGING_LOCALES: string[] | null;
+declare const SOURCE_MAP_WORKER_PATH: string;
 
 declare module '*.worker.js' {
   const content: string;

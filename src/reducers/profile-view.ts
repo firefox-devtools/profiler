@@ -58,6 +58,31 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
         threads: symbolicatedThreads,
       };
     }
+    case 'SOURCE_MAP_SYMBOLICATION_APPLIED': {
+      if (state === null) {
+        throw new Error(
+          'Assumed that a profile would be loaded for JS source map symbolication.'
+        );
+      }
+      const {
+        newFuncTable,
+        newFrameTable,
+        newSourceMapInfo,
+        newSources,
+        newStringArray,
+      } = action;
+      return {
+        ...state,
+        shared: {
+          ...state.shared,
+          funcTable: newFuncTable,
+          frameTable: newFrameTable,
+          sourceMapInfo: newSourceMapInfo,
+          sources: newSources,
+          stringArray: newStringArray,
+        },
+      };
+    }
     case 'DONE_SYMBOLICATING': {
       if (state === null) {
         throw new Error(

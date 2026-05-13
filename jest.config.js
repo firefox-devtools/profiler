@@ -30,6 +30,7 @@ const browserEnvConfig = {
 
   globals: {
     AVAILABLE_STAGING_LOCALES: null,
+    SOURCE_MAP_WORKER_PATH: '/source-map.worker.js',
   },
 
   snapshotFormat: {

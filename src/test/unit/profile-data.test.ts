@@ -27,6 +27,7 @@ import {
   computeTimeColumnForRawSamplesTable,
   getCallNodeFramePerStack,
   getTotalNativeSymbolTimingsForCallNode,
+  collectSourceIndicesFromThreads,
 } from '../../profile-logic/profile-data';
 import {
   createGeckoProfile,
@@ -1842,5 +1843,247 @@ describe('getBacktraceItemsForStack', function () {
      B one.js:31
      A one.js:20"
     `);
+  });
+});
+
+describe('collectSourceIndicesFromThreads', function () {
+  // Helper to find a source index by filename string.
+  function sourceIndexForFile(
+    profile: Profile,
+    fileName: string
+  ): IndexIntoSourceTable {
+    const { sources, stringArray } = profile.shared;
+    for (let i = 0; i < sources.length; i++) {
+      if (stringArray[sources.filename[i]] === fileName) {
+        return i;
+      }
+    }
+    throw new Error(`No source for ${fileName}`);
+  }
+
+  // Helper to append a new entry to sourceMapInfo and return its index.
+  function addSourceMapInfo(
+    profile: Profile,
+    originalSource: IndexIntoSourceTable,
+    line: number,
+    column: number
+  ): number {
+    const { sourceMapInfo } = profile.shared;
+    const idx = sourceMapInfo.length;
+    sourceMapInfo.originalSource.push(originalSource);
+    sourceMapInfo.originalLine.push(line);
+    sourceMapInfo.originalColumn.push(column);
+    sourceMapInfo.length++;
+    return idx;
+  }
+
+  // Helper to add an "original" source that has no compiled-side references.
+  function addOriginalSource(profile: Profile, fileName: string): number {
+    const { sources, stringArray } = profile.shared;
+    const filenameIdx = stringArray.length;
+    stringArray.push(fileName);
+    const idx = sources.length;
+    sources.id.push(null);
+    sources.filename.push(filenameIdx);
+    sources.startLine.push(1);
+    sources.startColumn.push(1);
+    sources.sourceMapURL.push(null);
+    sources.content.push(null);
+    sources.length++;
+    return idx;
+  }
+
+  it('collects compiled sources only from the requested threads', function () {
+    const { profile } = getProfileFromTextSamples(
+      `
+        A[file:a.js]
+        B[file:b.js]
+      `,
+      `
+        C[file:c.js]
+        D[file:d.js]
+      `,
+      `
+        E[file:e.js]
+      `
+    );
+
+    const aJs = sourceIndexForFile(profile, 'a.js');
+    const bJs = sourceIndexForFile(profile, 'b.js');
+    const cJs = sourceIndexForFile(profile, 'c.js');
+    const dJs = sourceIndexForFile(profile, 'd.js');
+    const eJs = sourceIndexForFile(profile, 'e.js');
+
+    expect(
+      collectSourceIndicesFromThreads([0], profile.threads, profile.shared)
+    ).toEqual(new Set([aJs, bJs]));
+    expect(
+      collectSourceIndicesFromThreads([1], profile.threads, profile.shared)
+    ).toEqual(new Set([cJs, dJs]));
+    expect(
+      collectSourceIndicesFromThreads([0, 2], profile.threads, profile.shared)
+    ).toEqual(new Set([aJs, bJs, eJs]));
+  });
+
+  it('walks the full stack chain via the prefix pointer', function () {
+    // Top-of-stack is "C", but A and B are in the prefix chain — all three
+    // must be collected even though only the top frame is referenced from
+    // samples.stack.
+    const { profile } = getProfileFromTextSamples(`
+      A[file:a.js]
+      B[file:b.js]
+      C[file:c.js]
+    `);
+
+    const result = collectSourceIndicesFromThreads(
+      [0],
+      profile.threads,
+      profile.shared
+    );
+
+    expect(result).toEqual(
+      new Set([
+        sourceIndexForFile(profile, 'a.js'),
+        sourceIndexForFile(profile, 'b.js'),
+        sourceIndexForFile(profile, 'c.js'),
+      ])
+    );
+  });
+
+  it('includes both frame sourceMapInfo and func sourceMapInfo entries', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[file:bundle.js]
+      B[file:bundle.js]
+    `);
+
+    const bundle = sourceIndexForFile(profile, 'bundle.js');
+    const originalA = addOriginalSource(profile, 'original-a.ts');
+    const originalB = addOriginalSource(profile, 'original-b.ts');
+    const originalBInline = addOriginalSource(profile, 'inlined.ts');
+
+    // Func A is mapped to original-a.ts.
+    const funcA = profile.shared.funcTable.name.findIndex(
+      (n) => profile.shared.stringArray[n] === 'A'
+    );
+    profile.shared.funcTable.sourceMapInfo[funcA] = addSourceMapInfo(
+      profile,
+      originalA,
+      10,
+      1
+    );
+
+    // Func B is mapped to original-b.ts, but one of its frames is inlined
+    // from inlined.ts (frame sourceMapInfo differs from func sourceMapInfo).
+    const funcB = profile.shared.funcTable.name.findIndex(
+      (n) => profile.shared.stringArray[n] === 'B'
+    );
+    profile.shared.funcTable.sourceMapInfo[funcB] = addSourceMapInfo(
+      profile,
+      originalB,
+      20,
+      1
+    );
+    const frameB = profile.shared.frameTable.func.findIndex((f) => f === funcB);
+    profile.shared.frameTable.sourceMapInfo[frameB] = addSourceMapInfo(
+      profile,
+      originalBInline,
+      5,
+      2
+    );
+
+    const result = collectSourceIndicesFromThreads(
+      [0],
+      profile.threads,
+      profile.shared
+    );
+
+    expect(result).toEqual(
+      new Set([bundle, originalA, originalB, originalBInline])
+    );
+  });
+
+  it('skips threadIndex values that are out of range', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[file:a.js]
+    `);
+    const aJs = sourceIndexForFile(profile, 'a.js');
+
+    expect(
+      collectSourceIndicesFromThreads(
+        [0, 5, 99],
+        profile.threads,
+        profile.shared
+      )
+    ).toEqual(new Set([aJs]));
+  });
+
+  it('includes sources reached via jsAllocations and nativeAllocations stacks', function () {
+    const { profile } = getProfileFromTextSamples(
+      // Samples have one source...
+      `
+        A[file:samples.js]
+      `,
+      // ...and the other thread has two unrelated stacks we'll re-attach as
+      // allocation stacks below.
+      `
+        B[file:alloc-js.js]
+        C[file:alloc-native.js]
+      `
+    );
+
+    const samplesJs = sourceIndexForFile(profile, 'samples.js');
+    const allocJs = sourceIndexForFile(profile, 'alloc-js.js');
+    const allocNative = sourceIndexForFile(profile, 'alloc-native.js');
+
+    // Grab two distinct stack indices from thread 1 to use as the allocation
+    // sample stacks for thread 0.
+    const thread1 = profile.threads[1];
+    const allocJsStack = thread1.samples.stack[0]; // top frame = B (alloc-js.js)
+    // For the native one, walk to a stack whose top is C.
+    const { stackTable, frameTable, funcTable, stringArray } = profile.shared;
+    const cFunc = funcTable.name.findIndex((n) => stringArray[n] === 'C');
+    let allocNativeStack: number | null = null;
+    for (let i = 0; i < stackTable.length; i++) {
+      if (funcTable.source[frameTable.func[stackTable.frame[i]]] !== null) {
+        if (frameTable.func[stackTable.frame[i]] === cFunc) {
+          allocNativeStack = i;
+          break;
+        }
+      }
+    }
+    if (allocNativeStack === null) {
+      throw new Error('Could not find a stack for func C');
+    }
+
+    profile.threads[0].jsAllocations = {
+      time: [0],
+      className: [0],
+      typeName: [0],
+      coarseType: [0],
+      weight: [1],
+      weightType: 'bytes',
+      inNursery: [false],
+      stack: [allocJsStack],
+      length: 1,
+    } as any;
+    profile.threads[0].nativeAllocations = {
+      time: [0],
+      weight: [1],
+      weightType: 'bytes',
+      stack: [allocNativeStack],
+      length: 1,
+    } as any;
+
+    // Only collecting from thread 0 — but allocations point into thread 1's
+    // stacks, which live in the shared stack table.
+    const result = collectSourceIndicesFromThreads(
+      [0],
+      profile.threads,
+      profile.shared
+    );
+
+    expect(result.has(samplesJs)).toBe(true);
+    expect(result.has(allocJs)).toBe(true);
+    expect(result.has(allocNative)).toBe(true);
   });
 });

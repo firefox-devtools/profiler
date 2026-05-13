@@ -100,6 +100,7 @@ import type {
   IndexIntoSourceTable,
   TransformOutput,
   SampleCategoriesAndSubcategories,
+  SourceMapInfoTable,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
@@ -2783,7 +2784,8 @@ export function createThreadFromDerivedTables(
   resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
-  tracedValuesBuffer: ArrayBuffer | undefined
+  tracedValuesBuffer: ArrayBuffer | undefined,
+  sourceMapInfo: SourceMapInfoTable
 ): Thread {
   const {
     processType,
@@ -2843,6 +2845,7 @@ export function createThreadFromDerivedTables(
     stringTable,
     sources,
     tracedValuesBuffer,
+    sourceMapInfo,
   };
   return thread;
 }
@@ -3329,18 +3332,83 @@ function _shouldShowBothOriginAndFileName(
 }
 
 /**
+ * Resolves the original (source-mapped) position for a frame's execution point,
+ * with a 3-tier fallback that always produces a self-consistent
+ * (source, line, column) triple — all three come from the same file.
+ *
+ * Tier 1: frame's own source-map entry (when present) — handles inlined code
+ *   where the frame's original file may differ from the func's.
+ * Tier 2: func's source-map entry (same condition).
+ * Tier 3: compiled position — funcTable.source[funcIndex] plus line/column
+ *   from the frame (if frameIndex !== null) else from the func declaration.
+ *
+ * Pass frameIndex = null for call sites that only have a funcIndex (e.g.,
+ * tooltip / call-node-level lookups, where the call node represents the func
+ * rather than a specific frame).
+ */
+export function getOriginalPositionForFrame(
+  frameIndex: IndexIntoFrameTable | null,
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  sourceMapInfo: SourceMapInfoTable | null
+): {
+  source: IndexIntoSourceTable | null;
+  line: number | null;
+  column: number | null;
+} {
+  if (sourceMapInfo !== null && frameIndex !== null) {
+    const frameSmi = frameTable.sourceMapInfo[frameIndex];
+    if (frameSmi !== null) {
+      return {
+        source: sourceMapInfo.originalSource[frameSmi],
+        line: sourceMapInfo.originalLine[frameSmi],
+        column: sourceMapInfo.originalColumn[frameSmi],
+      };
+    }
+  }
+
+  if (sourceMapInfo !== null) {
+    const funcSmi = funcTable.sourceMapInfo[funcIndex];
+    if (funcSmi !== null) {
+      return {
+        source: sourceMapInfo.originalSource[funcSmi],
+        line: sourceMapInfo.originalLine[funcSmi],
+        column: sourceMapInfo.originalColumn[funcSmi],
+      };
+    }
+  }
+
+  if (frameIndex !== null) {
+    return {
+      source: funcTable.source[funcIndex],
+      line: frameTable.line[frameIndex] ?? funcTable.lineNumber[funcIndex],
+      column:
+        frameTable.column[frameIndex] ?? funcTable.columnNumber[funcIndex],
+    };
+  }
+
+  return {
+    source: funcTable.source[funcIndex],
+    line: funcTable.lineNumber[funcIndex],
+    column: funcTable.columnNumber[funcIndex],
+  };
+}
+
+/**
  * This function returns the source origin for a function. This can be:
  * - a filename (javascript or object file or c++ source file)
  * - a URL (if the source is a website)
  */
 export function getOriginAnnotationForFunc(
   funcIndex: IndexIntoFuncTable,
+  frameIndex: IndexIntoFrameTable | null,
+  frameTable: FrameTable,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   stringTable: StringTable,
   sources: SourceTable,
-  frameLineNumber: number | null = null,
-  frameColumnNumber: number | null = null
+  sourceMapInfo: SourceMapInfoTable | null = null
 ): string {
   let resourceType = null;
   let origin = null;
@@ -3351,7 +3419,18 @@ export function getOriginAnnotationForFunc(
     origin = stringTable.getString(resourceNameIndex);
   }
 
-  const sourceIndex = funcTable.source[funcIndex];
+  const {
+    source: sourceIndex,
+    line: lineNumber,
+    column: columnNumber,
+  } = getOriginalPositionForFrame(
+    frameIndex,
+    funcIndex,
+    frameTable,
+    funcTable,
+    sourceMapInfo
+  );
+
   let fileName;
   if (sourceIndex !== null) {
     const urlIndex = sources.filename[sourceIndex];
@@ -3365,19 +3444,10 @@ export function getOriginAnnotationForFunc(
     // strip it down to just the actual path.
     fileName = parseFileNameFromSymbolication(fileName).path;
 
-    if (frameLineNumber !== null) {
-      fileName += ':' + frameLineNumber;
-      if (frameColumnNumber !== null) {
-        fileName += ':' + frameColumnNumber;
-      }
-    } else {
-      const lineNumber = funcTable.lineNumber[funcIndex];
-      if (lineNumber !== null) {
-        fileName += ':' + lineNumber;
-        const columnNumber = funcTable.columnNumber[funcIndex];
-        if (columnNumber !== null) {
-          fileName += ':' + columnNumber;
-        }
+    if (lineNumber !== null) {
+      fileName += ':' + lineNumber;
+      if (columnNumber !== null) {
+        fileName += ':' + columnNumber;
       }
     }
   }
@@ -3439,6 +3509,7 @@ export function reserveFunctionsForCollapsedResources(
     funcTable.source.push(null);
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
+    funcTable.sourceMapInfo.push(null);
     funcTable.length++;
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
@@ -3986,6 +4057,70 @@ export function _gatherSingleThreadStackReferences(
       }
     }
   }
+}
+
+/**
+ * Collect all source table indices referenced by the given threads.
+ * Walks samples, jsAllocations, and nativeAllocations, following stack prefix
+ * chains. Includes both compiled sources (funcTable.source) and
+ * post-symbolication original sources (via sourceMapInfo).
+ */
+export function collectSourceIndicesFromThreads(
+  threadIndexes: Iterable<ThreadIndex>,
+  threads: RawThread[],
+  shared: RawProfileSharedData
+): Set<IndexIntoSourceTable> {
+  const { stackTable, frameTable, funcTable, sourceMapInfo } = shared;
+  const sourceIndices = new Set<IndexIntoSourceTable>();
+  const visitedStacks = makeBitSet(stackTable.length);
+
+  const addStackChain = (stackIndex: IndexIntoStackTable | null) => {
+    let current = stackIndex;
+    while (current !== null && !checkBit(visitedStacks, current)) {
+      setBit(visitedStacks, current);
+      const frameIndex = stackTable.frame[current];
+      const funcIndex = frameTable.func[frameIndex];
+
+      const compiledSource = funcTable.source[funcIndex];
+      if (compiledSource !== null) {
+        sourceIndices.add(compiledSource);
+      }
+
+      const frameSmInfoIndex = frameTable.sourceMapInfo[frameIndex];
+      if (frameSmInfoIndex !== null) {
+        sourceIndices.add(sourceMapInfo.originalSource[frameSmInfoIndex]);
+      }
+
+      const funcSmInfoIndex = funcTable.sourceMapInfo[funcIndex];
+      if (funcSmInfoIndex !== null) {
+        sourceIndices.add(sourceMapInfo.originalSource[funcSmInfoIndex]);
+      }
+
+      current = stackTable.prefix[current];
+    }
+  };
+
+  for (const threadIndex of threadIndexes) {
+    if (threadIndex >= threads.length) {
+      continue;
+    }
+    const thread = threads[threadIndex];
+    for (const s of thread.samples.stack) {
+      addStackChain(s);
+    }
+    if (thread.jsAllocations !== undefined) {
+      for (const s of thread.jsAllocations.stack) {
+        addStackChain(s);
+      }
+    }
+    if (thread.nativeAllocations !== undefined) {
+      for (const s of thread.nativeAllocations.stack) {
+        addStackChain(s);
+      }
+    }
+  }
+
+  return sourceIndices;
 }
 
 /**
