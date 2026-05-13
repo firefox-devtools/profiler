@@ -15,7 +15,7 @@ import { ensureExists } from 'firefox-profiler/utils/types';
 
 export type BenchmarkHarness = 'speedometer' | 'jetstream';
 
-type BenchmarkInfo = {
+export type BenchmarkInfo = {
   suiteNameIfSingleSuite: string | null;
   threadIndex: number;
   getMeasuredTimeRanges: (
@@ -307,6 +307,33 @@ export type IterationMarkersAndMeasuredSamples = {
   measuredSamples: SamplesTableForThisStuff;
 };
 
+/**
+ * Compute per-suite sample weights, filtered to (already-applied measured time
+ * ranges) ∩ (this suite's iteration marker ranges). The input weights are
+ * `measuredSamples.weight` (i.e. weights with -async/-sync filtering and
+ * ignored-bucket zeroing already applied). The output zeroes out any weight
+ * outside this suite's iteration markers, so the flame graph for this suite
+ * reflects exactly the same samples that the suite's score counts.
+ *
+ * Iteration markers are assumed to be sorted by start time and non-overlapping
+ * (matching the assumption in `computeSuiteScores`).
+ */
+export function computeSuiteFilteredSampleWeights(
+  measuredSampleWeights: Float64Array,
+  sampleTimes: Float64Array,
+  iterationMarkers: Marker[]
+): Float64Array {
+  const filtered = measuredSampleWeights.slice();
+  const ranges: StartEndRange[] = [];
+  for (const m of iterationMarkers) {
+    if (m.end !== null) {
+      ranges.push({ start: m.start, end: m.end });
+    }
+  }
+  zeroWeightsOutsideRanges(filtered, sampleTimes, ranges);
+  return filtered;
+}
+
 export function computeIterationMarkersAndMeasuredSamples(
   benchmarkInfo: BenchmarkInfo,
   filteredMarkers: Marker[],
@@ -356,7 +383,7 @@ function computeGeomean(values: number[]): number {
   return Math.pow(product, 1 / values.length);
 }
 
-function zeroWeightsOutsideRanges(
+export function zeroWeightsOutsideRanges(
   sampleWeights: Float64Array,
   sampleTimes: Float64Array,
   nonZeroRanges: StartEndRange[]

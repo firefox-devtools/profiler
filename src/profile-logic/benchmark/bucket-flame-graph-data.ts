@@ -21,6 +21,7 @@ import {
   createThreadFromDerivedTables,
   getCallNodeInfo,
   getSampleIndexToCallNodeIndex,
+  getTimeRangeForThread,
 } from '../profile-data';
 import * as Transforms from '../transforms';
 import * as CallTree from '../call-tree';
@@ -29,8 +30,19 @@ import { computeReferenceCPUDeltaPerMs } from '../cpu';
 import { getDefaultCategories } from '../data-structures';
 import { StringTable } from '../../utils/string-table';
 import { base64StringToBytes } from '../../utils/base64';
+import {
+  correlateIPCMarkers,
+  deriveMarkersFromRawMarkerTable,
+} from '../marker-data';
+import {
+  computeSuiteFilteredSampleWeights,
+  getBenchmarkInfo,
+  zeroWeightsOutsideRanges,
+} from './benchmark-stuff';
+import type { BenchmarkHarness, BenchmarkInfo } from './benchmark-stuff';
 
 import type {
+  Marker,
   Thread,
   Profile,
   IndexIntoFuncTable,
@@ -70,7 +82,9 @@ export function getCategoriesForProfile(profile: Profile): CategoryList {
 }
 
 /** Default category index — the "Other" / grey category. */
-export function getDefaultCategoryIndex(categories: CategoryList): IndexIntoCategoryList {
+export function getDefaultCategoryIndex(
+  categories: CategoryList
+): IndexIntoCategoryList {
   return categories.findIndex((c) => c.color === 'grey');
 }
 
@@ -151,7 +165,10 @@ export function computeBucketFlameGraphData(
   );
 
   // 3. CTSS samples (timing strategy → just thread.samples).
-  const ctssSamples = CallTree.extractSamplesLikeTable(selfWingThread, 'timing');
+  const ctssSamples = CallTree.extractSamplesLikeTable(
+    selfWingThread,
+    'timing'
+  );
 
   // 4. Map samples → call nodes.
   const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
@@ -231,5 +248,111 @@ export function computeBucketFlameGraphData(
     timeRange,
     interval,
     rootTotalSummary: callNodeSelfAndSummary.rootTotalSummary,
+  };
+}
+
+/** Per-profile prep data passed in from the viewer. The derived `thread` is
+ * expensive to build, so it's computed once at the viewer level and reused
+ * across every bucket the user expands. Also carries the benchmark marker
+ * info needed to lazily build per-suite filtered threads. */
+export type BucketProfileBundle = {
+  profile: Profile;
+  thread: Thread;
+  categories: CategoryList;
+  defaultCategory: IndexIntoCategoryList;
+  benchmarkInfo: BenchmarkInfo;
+  /** `thread.samples.time` as a Float64Array, for fast range filtering. */
+  sampleTimes: Float64Array;
+  /** Sample weights with the global -async/-sync measured-time filter applied,
+   * matching the `measuredSamples.weight` used by score computation. */
+  measuredSampleWeights: Float64Array;
+  /** Iteration markers per suite name. Sorted by start time, non-overlapping. */
+  markersPerSuite: Map<string, Marker[]>;
+};
+
+export function makeBucketProfileBundle(
+  profile: Profile,
+  benchmarkHarness: BenchmarkHarness
+): BucketProfileBundle {
+  const categories = getCategoriesForProfile(profile);
+  const defaultCategory = getDefaultCategoryIndex(categories);
+  const benchmarkInfo = getBenchmarkInfo(profile, benchmarkHarness);
+  const thread = buildDerivedThread(
+    profile,
+    benchmarkInfo.threadIndex,
+    categories,
+    defaultCategory
+  );
+
+  const { shared } = profile;
+  const rawThread = profile.threads[benchmarkInfo.threadIndex];
+  const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const { markers: derivedMarkers } = deriveMarkersFromRawMarkerTable(
+    rawThread.markers,
+    shared.stringArray,
+    rawThread.tid,
+    getTimeRangeForThread(rawThread, profile.meta.interval),
+    correlateIPCMarkers(profile.threads, shared)
+  );
+
+  const sampleCount = thread.samples.length;
+  const sampleTimes = new Float64Array(thread.samples.time);
+  const measuredSampleWeights = thread.samples.weight
+    ? new Float64Array(thread.samples.weight)
+    : new Float64Array(sampleCount).fill(1);
+  const measuredTimeRanges = benchmarkInfo.getMeasuredTimeRanges(
+    derivedMarkers,
+    stringTable
+  );
+  if (measuredTimeRanges !== null) {
+    zeroWeightsOutsideRanges(
+      measuredSampleWeights,
+      sampleTimes,
+      measuredTimeRanges
+    );
+  }
+
+  const markersPerSuite = benchmarkInfo.getMarkersPerSuite(
+    derivedMarkers,
+    stringTable
+  );
+
+  return {
+    profile,
+    thread,
+    categories,
+    defaultCategory,
+    benchmarkInfo,
+    sampleTimes,
+    measuredSampleWeights,
+    markersPerSuite,
+  };
+}
+
+/**
+ * Return a Thread that shares all tables with `bundle.thread` but has sample
+ * weights zeroed outside this suite's iteration marker ranges. The flame graph
+ * built from this thread then reflects only the samples that contribute to
+ * this suite's score (matching `computeSuiteScores`).
+ */
+export function makeSuiteFilteredThread(
+  bundle: BucketProfileBundle,
+  suiteName: string
+): Thread {
+  const { thread, sampleTimes, measuredSampleWeights, markersPerSuite } =
+    bundle;
+  const iterationMarkers = markersPerSuite.get(suiteName) ?? [];
+  const filteredWeights = computeSuiteFilteredSampleWeights(
+    measuredSampleWeights,
+    sampleTimes,
+    iterationMarkers
+  );
+  return {
+    ...thread,
+    samples: {
+      ...thread.samples,
+      weight: Array.from(filteredWeights),
+      weightType: thread.samples.weightType ?? 'samples',
+    },
   };
 }
