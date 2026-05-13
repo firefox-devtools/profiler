@@ -7,25 +7,16 @@ import { useMemo, useState } from 'react';
 import { FlameGraph } from 'firefox-profiler/components/flame-graph/FlameGraph';
 import { computeBucketFlameGraphData } from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
 
-import type { BucketFlameGraphData } from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
 import type {
-  Profile,
-  Thread,
-  CategoryList,
-  IndexIntoCategoryList,
+  BucketFlameGraphData,
+  BucketProfileBundle,
+} from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
+import type {
   IndexIntoFuncTable,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
 
-/** Per-profile prep data passed in from the viewer. The derived `thread` is
- * expensive to build, so it's computed once at the viewer level and reused
- * across every bucket the user expands. */
-export type BucketProfileBundle = {
-  profile: Profile;
-  thread: Thread;
-  categories: CategoryList;
-  defaultCategory: IndexIntoCategoryList;
-};
+export type { BucketProfileBundle };
 
 type SideProps = {
   label: string;
