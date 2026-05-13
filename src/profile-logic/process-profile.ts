@@ -976,7 +976,7 @@ function _processSamples(
 /**
  * Derive a CounterDisplayConfig from a counter's category and name.
  */
-function _deriveCounterDisplay(
+export function deriveCounterDisplay(
   category: string,
   name: string
 ): CounterDisplayConfig {
@@ -988,6 +988,40 @@ function _deriveCounterDisplay(
       markerSchemaLocation: null,
       sortWeight: 10,
       label: 'Bandwidth',
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'rate',
+          format: { unit: 'bytes-per-second', co2: 'per-byte' },
+          label: 'Transfer speed for this sample',
+        },
+        {
+          type: 'value',
+          source: 'sample-number',
+          format: { unit: 'number' },
+          label: 'read/write operations since the previous sample',
+        },
+        { type: 'separator' },
+        {
+          type: 'value',
+          source: 'accumulated',
+          format: { unit: 'bytes', co2: 'per-byte' },
+          label: 'Data transferred up to this time',
+        },
+        {
+          type: 'value',
+          source: 'count-range',
+          format: { unit: 'bytes', co2: 'per-byte' },
+          label: 'Data transferred in the visible range',
+        },
+        {
+          type: 'value',
+          source: 'selection-total',
+          format: { unit: 'bytes', co2: 'per-byte' },
+          label: 'Data transferred in the current selection',
+          requiresPreviewSelection: true,
+        },
+      ],
     };
   } else if (category === 'Memory') {
     return {
@@ -997,6 +1031,26 @@ function _deriveCounterDisplay(
       markerSchemaLocation: 'timeline-memory',
       sortWeight: 20,
       label: 'Memory',
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'accumulated',
+          format: { unit: 'bytes' },
+          label: 'relative memory at this time',
+        },
+        {
+          type: 'value',
+          source: 'count-range',
+          format: { unit: 'bytes' },
+          label: 'memory range in graph',
+        },
+        {
+          type: 'value',
+          source: 'sample-number',
+          format: { unit: 'number' },
+          label: 'allocations and deallocations since the previous sample',
+        },
+      ],
     };
   } else if (category === 'power') {
     return {
@@ -1006,6 +1060,34 @@ function _deriveCounterDisplay(
       markerSchemaLocation: null,
       sortWeight: 30,
       label: name,
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'count',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'power' },
+          label: 'Power',
+        },
+        {
+          type: 'value',
+          source: 'selection-total',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'energy' },
+          label: 'Energy used in the current selection',
+          requiresPreviewSelection: true,
+        },
+        {
+          type: 'value',
+          source: 'selection-rate',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'power' },
+          label: 'Average power in the current selection',
+          requiresPreviewSelection: true,
+        },
+        {
+          type: 'value',
+          source: 'committed-range-total',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'energy' },
+          label: 'Energy used in the visible range',
+        },
+      ],
     };
   } else if (category === 'CPU' && name === 'processCPU') {
     return {
@@ -1015,6 +1097,14 @@ function _deriveCounterDisplay(
       markerSchemaLocation: null,
       sortWeight: 40,
       label: 'Process CPU',
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'cpu-ratio',
+          format: { unit: 'percent' },
+          label: 'CPU',
+        },
+      ],
     };
   }
 
@@ -1025,6 +1115,14 @@ function _deriveCounterDisplay(
     markerSchemaLocation: null,
     sortWeight: 50,
     label: name,
+    tooltipRows: [
+      {
+        type: 'value',
+        source: 'count',
+        format: { unit: 'number' },
+        label: name,
+      },
+    ],
   };
 }
 
@@ -1087,7 +1185,7 @@ function _processCounters(
         pid: mainThreadPid,
         mainThreadIndex,
         samples: adjustTableTimeDeltas(processedCounterSamples, delta),
-        display: _deriveCounterDisplay(category, name),
+        display: deriveCounterDisplay(category, name),
       });
       return result;
     },

@@ -3109,6 +3109,124 @@ const _upgraders: {
       }
     }
   },
+  [63]: (profile: any) => {
+    // Added tooltipRows to CounterDisplayConfig. This metadata describes the
+    // rows of the counter's hover tooltip (data source, value format, label).
+    // Derive defaults from the counter's category and name.
+    if (!profile.counters) {
+      return;
+    }
+    for (const counter of profile.counters) {
+      if (!counter.display || counter.display.tooltipRows !== undefined) {
+        continue;
+      }
+      const { category, name } = counter;
+      if (category === 'Bandwidth') {
+        counter.display.tooltipRows = [
+          {
+            type: 'value',
+            source: 'rate',
+            format: { unit: 'bytes-per-second', co2: 'per-byte' },
+            label: 'Transfer speed for this sample',
+          },
+          {
+            type: 'value',
+            source: 'sample-number',
+            format: { unit: 'number' },
+            label: 'read/write operations since the previous sample',
+          },
+          { type: 'separator' },
+          {
+            type: 'value',
+            source: 'accumulated',
+            format: { unit: 'bytes', co2: 'per-byte' },
+            label: 'Data transferred up to this time',
+          },
+          {
+            type: 'value',
+            source: 'count-range',
+            format: { unit: 'bytes', co2: 'per-byte' },
+            label: 'Data transferred in the visible range',
+          },
+          {
+            type: 'value',
+            source: 'selection-total',
+            format: { unit: 'bytes', co2: 'per-byte' },
+            label: 'Data transferred in the current selection',
+            requiresPreviewSelection: true,
+          },
+        ];
+      } else if (category === 'Memory') {
+        counter.display.tooltipRows = [
+          {
+            type: 'value',
+            source: 'accumulated',
+            format: { unit: 'bytes' },
+            label: 'relative memory at this time',
+          },
+          {
+            type: 'value',
+            source: 'count-range',
+            format: { unit: 'bytes' },
+            label: 'memory range in graph',
+          },
+          {
+            type: 'value',
+            source: 'sample-number',
+            format: { unit: 'number' },
+            label: 'allocations and deallocations since the previous sample',
+          },
+        ];
+      } else if (category === 'power') {
+        counter.display.tooltipRows = [
+          {
+            type: 'value',
+            source: 'count',
+            format: { unit: 'number', co2: 'per-watthour', scale: 'power' },
+            label: 'Power',
+          },
+          {
+            type: 'value',
+            source: 'selection-total',
+            format: { unit: 'number', co2: 'per-watthour', scale: 'energy' },
+            label: 'Energy used in the current selection',
+            requiresPreviewSelection: true,
+          },
+          {
+            type: 'value',
+            source: 'selection-rate',
+            format: { unit: 'number', co2: 'per-watthour', scale: 'power' },
+            label: 'Average power in the current selection',
+            requiresPreviewSelection: true,
+          },
+          {
+            type: 'value',
+            source: 'committed-range-total',
+            format: { unit: 'number', co2: 'per-watthour', scale: 'energy' },
+            label: 'Energy used in the visible range',
+          },
+        ];
+      } else if (category === 'CPU' && name === 'processCPU') {
+        counter.display.tooltipRows = [
+          {
+            type: 'value',
+            source: 'cpu-ratio',
+            format: { unit: 'percent' },
+            label: 'CPU',
+          },
+        ];
+      } else {
+        counter.display.tooltipRows = [
+          {
+            type: 'value',
+            source: 'count',
+            format: { unit: 'number' },
+            label: name,
+          },
+        ];
+      }
+    }
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

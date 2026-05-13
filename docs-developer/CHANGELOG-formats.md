@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 63
+
+A new `tooltipRows` field was added to `CounterDisplayConfig`.
+This metadata describes the rows of the counter's hover tooltip (data source, value format, label).
+For existing profiles, the rows are derived from the counter's `category` and `name`.
+
 ### Version 62
 
 A new `display` field of type `CounterDisplayConfig` was added to `RawCounter`.

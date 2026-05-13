@@ -537,6 +537,60 @@ export type GraphColor =
 export type CounterGraphType = 'line-accumulated' | 'line-rate';
 
 /**
+ * Per-sample data sources that a tooltip row can read from.
+ */
+export type CounterTooltipDataSource =
+  // samples.count[i]
+  | 'count'
+  // samples.count[i] / sampleTimeDelta[i]   (per ms)
+  | 'rate'
+  // rate / maxCounterSampleCountPerMs       (e.g., process CPU)
+  | 'cpu-ratio'
+  // accumulatedCounts[i] - minCount         (cumulative sum minus baseline)
+  | 'accumulated'
+  // countRange across the visible (committed) graph
+  | 'count-range'
+  // Σ samples.count[i] over the preview selection
+  | 'selection-total'
+  // selection-total / selection-duration    (per ms)
+  | 'selection-rate'
+  // Σ samples.count[i] over the committed range
+  | 'committed-range-total'
+  // samples.number[i] - the row is omitted when the column is absent.
+  | 'sample-number';
+
+/**
+ * How a counter tooltip row's value should be formatted.
+ * - `unit`: the base formatter for the value.
+ * - `co2`: when set, an additional CO₂e estimate is shown next to the value.
+ * - `scale`: when set, the value is rendered using the named auto-scaling
+ *   unit ladder (e.g., kW/W/mW/µW for `'power'`).
+ */
+export type CounterTooltipFormat = {
+  unit: 'bytes' | 'bytes-per-second' | 'percent' | 'number';
+  co2?: 'per-byte' | 'per-watthour';
+  scale?: 'power' | 'energy';
+};
+
+/**
+ * One row inside a counter tooltip.
+ *
+ * `label` is a potentially user-facing English label
+ *  (if it is not overriden by a locale-specific translation).
+ * `requiresPreviewSelection`, when true, hides the row unless there is a
+ * non-empty preview selection.
+ */
+export type CounterTooltipRow =
+  | {
+      type: 'value';
+      source: CounterTooltipDataSource;
+      format: CounterTooltipFormat;
+      label: string;
+      requiresPreviewSelection?: boolean;
+    }
+  | { type: 'separator' };
+
+/**
  * Specifies how a counter should be displayed in the UI.
  */
 export type CounterDisplayConfig = {
@@ -553,6 +607,8 @@ export type CounterDisplayConfig = {
   // types this is a friendly name (eg, "Memory"); for generic counters
   // it falls back to counter.name.
   label: string;
+  // Describes the rows shown in the hover tooltip.
+  tooltipRows: CounterTooltipRow[];
 };
 
 export type RawCounter = {
