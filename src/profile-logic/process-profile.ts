@@ -976,7 +976,7 @@ function _processSamples(
 /**
  * Derive a CounterDisplayConfig from a counter's category and name.
  */
-function _deriveCounterDisplay(
+export function deriveCounterDisplay(
   category: string,
   name: string
 ): CounterDisplayConfig {
@@ -988,6 +988,45 @@ function _deriveCounterDisplay(
       markerSchemaLocation: null,
       sortWeight: 10,
       label: 'Bandwidth',
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'rate',
+          format: { unit: 'bytes-per-second', co2: 'per-byte' },
+          label: 'Transfer speed for this sample',
+          labelKey: 'bandwidth-speed',
+        },
+        {
+          type: 'value',
+          source: 'sample-number',
+          format: { unit: 'number' },
+          label: 'read/write operations since the previous sample',
+          labelKey: 'bandwidth-operations',
+        },
+        { type: 'separator' },
+        {
+          type: 'value',
+          source: 'accumulated',
+          format: { unit: 'bytes', co2: 'per-byte' },
+          label: 'Data transferred up to this time',
+          labelKey: 'bandwidth-cumulative',
+        },
+        {
+          type: 'value',
+          source: 'count-range',
+          format: { unit: 'bytes', co2: 'per-byte' },
+          label: 'Data transferred in the visible range',
+          labelKey: 'bandwidth-total-graph',
+        },
+        {
+          type: 'value',
+          source: 'selection-total',
+          format: { unit: 'bytes', co2: 'per-byte' },
+          label: 'Data transferred in the current selection',
+          labelKey: 'bandwidth-total-selection',
+          requiresPreviewSelection: true,
+        },
+      ],
     };
   } else if (category === 'Memory') {
     return {
@@ -997,6 +1036,29 @@ function _deriveCounterDisplay(
       markerSchemaLocation: 'timeline-memory',
       sortWeight: 20,
       label: 'Memory',
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'accumulated',
+          format: { unit: 'bytes' },
+          label: 'relative memory at this time',
+          labelKey: 'memory-relative',
+        },
+        {
+          type: 'value',
+          source: 'count-range',
+          format: { unit: 'bytes' },
+          label: 'memory range in graph',
+          labelKey: 'memory-range',
+        },
+        {
+          type: 'value',
+          source: 'sample-number',
+          format: { unit: 'number' },
+          label: 'allocations and deallocations since the previous sample',
+          labelKey: 'memory-operations',
+        },
+      ],
     };
   } else if (category === 'power') {
     return {
@@ -1006,6 +1068,38 @@ function _deriveCounterDisplay(
       markerSchemaLocation: null,
       sortWeight: 30,
       label: name,
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'count',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'power' },
+          label: 'Power',
+          labelKey: 'power',
+        },
+        {
+          type: 'value',
+          source: 'selection-total',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'energy' },
+          label: 'Energy used in the current selection',
+          labelKey: 'power-energy-preview',
+          requiresPreviewSelection: true,
+        },
+        {
+          type: 'value',
+          source: 'selection-rate',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'power' },
+          label: 'Average power in the current selection',
+          labelKey: 'power-average-preview',
+          requiresPreviewSelection: true,
+        },
+        {
+          type: 'value',
+          source: 'committed-range-total',
+          format: { unit: 'number', co2: 'per-watthour', scale: 'energy' },
+          label: 'Energy used in the visible range',
+          labelKey: 'power-energy-range',
+        },
+      ],
     };
   } else if (category === 'CPU' && name === 'processCPU') {
     return {
@@ -1015,6 +1109,15 @@ function _deriveCounterDisplay(
       markerSchemaLocation: null,
       sortWeight: 40,
       label: 'Process CPU',
+      tooltipRows: [
+        {
+          type: 'value',
+          source: 'cpu-ratio',
+          format: { unit: 'percent' },
+          label: 'CPU',
+          labelKey: 'cpu',
+        },
+      ],
     };
   }
 
@@ -1025,6 +1128,14 @@ function _deriveCounterDisplay(
     markerSchemaLocation: null,
     sortWeight: 50,
     label: name,
+    tooltipRows: [
+      {
+        type: 'value',
+        source: 'count',
+        format: { unit: 'number' },
+        label: name,
+      },
+    ],
   };
 }
 
@@ -1087,7 +1198,7 @@ function _processCounters(
         pid: mainThreadPid,
         mainThreadIndex,
         samples: adjustTableTimeDeltas(processedCounterSamples, delta),
-        display: _deriveCounterDisplay(category, name),
+        display: deriveCounterDisplay(category, name),
       });
       return result;
     },

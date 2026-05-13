@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
-import { Localized } from '@fluent/react';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import {
   getStrokeColor,
@@ -12,30 +11,16 @@ import {
   getDotColor,
 } from 'firefox-profiler/profile-logic/graph-color';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import {
-  formatBytes,
-  formatNumber,
-  formatPercent,
-} from 'firefox-profiler/utils/format-numbers';
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
 import {
   getCommittedRange,
   getCounterSelectors,
-  getPreviewSelection,
   getProfileInterval,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
-import { TooltipTrackPower } from 'firefox-profiler/components/tooltip/TrackPower';
-import {
-  TooltipDetails,
-  TooltipDetail,
-  TooltipDetailSeparator,
-} from 'firefox-profiler/components/tooltip/TooltipDetails';
+import { TrackCounterTooltip } from './TrackCounterTooltip';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
-import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { co2 } from '@tgwf/co2';
 
 import type {
   CounterIndex,
@@ -44,7 +29,6 @@ import type {
   ThreadIndex,
   AccumulatedCounterSamples,
   Milliseconds,
-  PreviewSelection,
   CssPixels,
   StartEndRange,
   IndexIntoSamplesTable,
@@ -379,7 +363,6 @@ type StateProps = {
   readonly interval: Milliseconds;
   readonly filteredThread: Thread;
   readonly unfilteredSamplesRange: StartEndRange | null;
-  readonly previewSelection: PreviewSelection | null;
 };
 
 type DispatchProps = {};
@@ -393,10 +376,8 @@ type State = {
 };
 
 /**
- * The generic counter track graph component. It renders information from any counters
- * (eg, Memory, Power, etc.) as a graph in the timeline. It branches on
- * `display.graphType` for drawing, and on `counter.category`/`counter.name`
- * for tooltip rendering of known counter types.
+ * The generic counter track graph component. It renders any counter
+ * (Memory, Power, etc.) as a graph in the timeline.
  */
 class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
   override state = {
@@ -404,8 +385,6 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     mouseX: 0,
     mouseY: 0,
   };
-
-  _co2: InstanceType<typeof co2> | null = null;
 
   _onMouseLeave = () => {
     // This persistTooltips property is part of the web console API. It helps
@@ -509,44 +488,14 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     }
   };
 
-  _formatDataTransferValue(bytes: number, l10nId: string) {
-    if (!this._co2) {
-      this._co2 = new co2({ model: 'swd' });
-    }
-    // By default, when estimating emissions per byte, co2.js takes into account
-    // emissions for the user device, the data center and the network.
-    // Because we already have power tracks showing the power use and estimated
-    // emissions of the device, set the 'device' grid intensity to 0 to avoid
-    // double counting.
-    const co2eq = this._co2.perByteTrace(bytes, false, {
-      gridIntensity: { device: 0 },
-    });
-    const carbonValue = formatNumber(
-      typeof co2eq.co2 === 'number' ? co2eq.co2 : co2eq.co2.total
-    );
-    const value = formatBytes(bytes);
-    return (
-      <Localized
-        id={l10nId}
-        vars={{ value, carbonValue }}
-        attrs={{ label: true }}
-      >
-        <TooltipDetail label="">{value}</TooltipDetail>
-      </Localized>
-    );
-  }
-
   _renderTooltip(counterIndex: number): React.ReactNode {
     const {
-      accumulatedSamples,
       counter,
       rangeStart,
       rangeEnd,
-      interval,
+      accumulatedSamples,
       maxCounterSampleCountPerMs,
-      previewSelection,
     } = this.props;
-    const { display } = counter;
     const { mouseX, mouseY } = this.state;
     const { samples } = counter;
 
@@ -563,182 +512,15 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
       return null;
     }
 
-    const { category, name } = counter;
-
-    // Power tooltip — delegate to the dedicated component.
-    if (category === 'power') {
-      return (
-        <Tooltip mouseX={mouseX} mouseY={mouseY}>
-          <TooltipTrackPower
-            counter={counter}
-            counterSampleIndex={counterIndex}
-          />
-        </Tooltip>
-      );
-    }
-
-    // Process CPU tooltip.
-    if (category === 'CPU' && name === 'processCPU') {
-      const cpuUsage = samples.count[counterIndex];
-      const sampleTimeDeltaInMs =
-        counterIndex === 0
-          ? interval
-          : samples.time[counterIndex] - samples.time[counterIndex - 1];
-      const cpuRatio =
-        cpuUsage / sampleTimeDeltaInMs / maxCounterSampleCountPerMs;
-      return (
-        <Tooltip mouseX={mouseX} mouseY={mouseY}>
-          <div className="timelineTrackCounterTooltip">
-            <div className="timelineTrackCounterTooltipLine">
-              CPU:{' '}
-              <span className="timelineTrackCounterTooltipNumber">
-                {formatPercent(cpuRatio)}
-              </span>
-            </div>
-          </div>
-        </Tooltip>
-      );
-    }
-
-    // Bandwidth tooltip — bytes with rate, CO2, and accumulated total.
-    if (category === 'Bandwidth') {
-      const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
-      const bytes = accumulatedCounts[counterIndex] - minCount;
-      const operations =
-        samples.number !== undefined ? samples.number[counterIndex] : null;
-
-      const sampleTimeDeltaInMs =
-        counterIndex === 0
-          ? interval
-          : samples.time[counterIndex] - samples.time[counterIndex - 1];
-      const unitGraphCount = samples.count[counterIndex] / sampleTimeDeltaInMs;
-
-      let rangeTotal = 0;
-      if (previewSelection) {
-        const [beginIndex, endIndex] = getSampleIndexRangeForSelection(
-          samples,
-          previewSelection.selectionStart,
-          previewSelection.selectionEnd
-        );
-
-        for (
-          let counterSampleIndex = beginIndex;
-          counterSampleIndex < endIndex;
-          counterSampleIndex++
-        ) {
-          rangeTotal += samples.count[counterSampleIndex];
-        }
-      }
-
-      let ops;
-      if (operations !== null) {
-        ops = formatNumber(operations, 2, 0);
-      }
-
-      return (
-        <Tooltip mouseX={mouseX} mouseY={mouseY}>
-          <div className="timelineTrackCounterTooltip">
-            <TooltipDetails>
-              {this._formatDataTransferValue(
-                unitGraphCount * 1000 /* ms -> s */,
-                'TrackBandwidthGraph--speed'
-              )}
-              {operations !== null ? (
-                <Localized
-                  id="TrackBandwidthGraph--read-write-operations-since-the-previous-sample"
-                  vars={{ value: ops || '' }}
-                  attrs={{ label: true }}
-                >
-                  <TooltipDetail label="">{ops}</TooltipDetail>
-                </Localized>
-              ) : null}
-              <TooltipDetailSeparator />
-              {this._formatDataTransferValue(
-                bytes,
-                'TrackBandwidthGraph--cumulative-bandwidth-at-this-time'
-              )}
-              {this._formatDataTransferValue(
-                countRange,
-                'TrackBandwidthGraph--total-bandwidth-in-graph'
-              )}
-              {previewSelection
-                ? this._formatDataTransferValue(
-                    rangeTotal,
-                    'TrackBandwidthGraph--total-bandwidth-in-range'
-                  )
-                : null}
-            </TooltipDetails>
-          </div>
-        </Tooltip>
-      );
-    }
-
-    // Memory tooltip — accumulated bytes with operations count.
-    if (category === 'Memory') {
-      const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
-      const bytes = accumulatedCounts[counterIndex] - minCount;
-      const operations =
-        samples.number !== undefined ? samples.number[counterIndex] : null;
-      return (
-        <Tooltip mouseX={mouseX} mouseY={mouseY}>
-          <div className="timelineTrackCounterTooltip">
-            <div className="timelineTrackCounterTooltipLine">
-              <span className="timelineTrackCounterTooltipNumber">
-                {formatBytes(bytes)}
-              </span>
-              <Localized id="TrackMemoryGraph--relative-memory-at-this-time">
-                relative memory at this time
-              </Localized>
-            </div>
-
-            <div className="timelineTrackCounterTooltipLine">
-              <span className="timelineTrackCounterTooltipNumber">
-                {formatBytes(countRange)}
-              </span>
-              <Localized id="TrackMemoryGraph--memory-range-in-graph">
-                memory range in graph
-              </Localized>
-            </div>
-            {operations !== null ? (
-              <div className="timelineTrackCounterTooltipLine">
-                <span className="timelineTrackCounterTooltipNumber">
-                  {formatNumber(operations, 2, 0)}
-                </span>
-                <Localized id="TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample">
-                  allocations and deallocations since the previous sample
-                </Localized>
-              </div>
-            ) : null}
-          </div>
-        </Tooltip>
-      );
-    }
-
-    // Generic tooltip for unknown counter types - format the value based on
-    // the counter's unit.
-    const value = samples.count[counterIndex];
-    let formattedValue;
-    if (display.unit === 'bytes') {
-      formattedValue = formatBytes(value);
-    } else if (display.unit === 'percent') {
-      formattedValue = formatPercent(value);
-    } else if (display.unit) {
-      // Bypasses i18n but this is hit only for unknown counters.
-      formattedValue = `${formatNumber(value)} ${display.unit}`;
-    } else {
-      formattedValue = formatNumber(value);
-    }
     return (
-      <Tooltip mouseX={mouseX} mouseY={mouseY}>
-        <div className="timelineTrackCounterTooltip">
-          <div className="timelineTrackCounterTooltipLine">
-            <span className="timelineTrackCounterTooltipNumber">
-              {formattedValue}
-            </span>
-            {display.label || name}
-          </div>
-        </div>
-      </Tooltip>
+      <TrackCounterTooltip
+        counter={counter}
+        counterIndex={counterIndex}
+        accumulatedSamples={accumulatedSamples}
+        maxCounterSampleCountPerMs={maxCounterSampleCountPerMs}
+        mouseX={mouseX}
+        mouseY={mouseY}
+      />
     );
   }
 
@@ -894,7 +676,6 @@ export const TrackCounterGraph = explicitConnect<
       interval: getProfileInterval(state),
       filteredThread: selectors.getFilteredThread(state),
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
-      previewSelection: getPreviewSelection(state),
     };
   },
   component: withSize(TrackCounterGraphImpl),
