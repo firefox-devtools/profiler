@@ -44,6 +44,7 @@ class NetworkSettingsImpl extends PureComponent<Props> {
             title="Only display network requests that match a certain name"
             currentSearchString={searchString}
             onSearch={this._onSearch}
+            alsoFocusOnF={true}
           />
         </Localized>
       </div>
