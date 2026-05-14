@@ -43,7 +43,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display network requests that match a certain name"
             type="search"

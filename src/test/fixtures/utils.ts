@@ -576,6 +576,7 @@ export function fireFullKeyPress(
     escape: 27,
     ' ': 32,
     '?': 191,
+    '/': 191,
     a: 65,
     b: 66,
     c: 67,
