@@ -109,6 +109,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^3.1.0",
     "reselect": "^4.1.8",
+    "smol-toml": "^1.6.1",
     "valibot": "^1.3.1",
     "workbox-window": "^7.4.0"
   },

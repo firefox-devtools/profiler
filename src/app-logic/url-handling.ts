@@ -42,6 +42,8 @@ import type {
   IndexIntoFrameTable,
   MarkerIndex,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -52,8 +54,9 @@ import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 
-export const CURRENT_URL_VERSION = 16;
+export const CURRENT_URL_VERSION = 17;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -119,6 +122,23 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
+/**
+ * Synchronously replace the current history entry to match the given UrlState.
+ *
+ * Use this from action thunks for high-frequency actions (e.g. arrow-key
+ * navigation) where deferring the URL update to UrlManager.componentDidUpdate
+ * would result in unwanted pushState calls and history-flooding. By updating
+ * window.history synchronously here, the URL already matches the new state by
+ * the time UrlManager's componentDidUpdate runs, so it becomes a no-op.
+ */
+export function replaceHistoryWithUrlState(urlState: UrlState): void {
+  window.history.replaceState(
+    urlState,
+    document.title,
+    urlFromState(urlState)
+  );
+}
+
 function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
@@ -131,6 +151,8 @@ function getPathParts(urlState: UrlState): string[] {
         return ['compare'];
       }
       return ['compare', urlState.selectedTab];
+    case 'compare-benchmark':
+      return ['compare-benchmark'];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':
@@ -185,11 +207,15 @@ type CallTreeQuery = BaseQuery & {
   invertCallstack: null | undefined;
   hideIdleSamples: null | undefined;
   ctSummary: string;
+  functionListSort?: string; // "total-desc~self-asc" — primary first
+  funcListSections?: string; // "descendants,self" — comma-separated open sections
+  selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
 type MarkersQuery = BaseQuery & {
   markerSearch: string; // "DOMEvent"
   marker?: MarkerIndex; // Selected marker index for the current thread, e.g. 42
+  markerSort?: string; // "duration:desc,start:asc" — primary first
 };
 
 type NetworkQuery = BaseQuery & {
@@ -228,6 +254,12 @@ type Query = BaseQuery & {
   // Markers specific
   markerSearch?: string;
   marker?: MarkerIndex;
+  markerSort?: string;
+
+  // Function list specific
+  functionListSort?: string;
+  funcListSections?: string;
+  selectedFunc?: number;
 
   // Network specific
   networkSearch?: string;
@@ -264,6 +296,14 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         return '';
       }
       break;
+    case 'compare-benchmark':
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      return queryString.stringify(
+        { profiles: urlState.profilesToCompare },
+        { arrayFormat: 'bracket' }
+      );
     case 'public':
     case 'local':
     case 'from-browser':
@@ -335,6 +375,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : undefined;
     /* fallsthrough */
     case 'flame-graph':
+    case 'function-list':
     case 'calltree': {
       query = baseQuery as CallTreeQueryShape;
 
@@ -382,6 +423,22 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           query.bottomFullscreen = true;
         }
       }
+      if (selectedTab === 'function-list') {
+        query.functionListSort = convertFunctionListSortToString(
+          urlState.profileSpecific.functionListSort
+        );
+        query.funcListSections = convertFunctionListSectionsOpenToString(
+          urlState.profileSpecific.functionListSectionsOpen
+        );
+        query.selectedFunc =
+          selectedThreadsKey !== null &&
+          urlState.profileSpecific.selectedFunctions[selectedThreadsKey] !==
+            null &&
+          urlState.profileSpecific.selectedFunctions[selectedThreadsKey] !==
+            undefined
+            ? urlState.profileSpecific.selectedFunctions[selectedThreadsKey]
+            : undefined;
+      }
       break;
     }
     case 'marker-table':
@@ -394,6 +451,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
           ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
           : undefined;
+      query.markerSort = convertMarkerTableSortToString(
+        urlState.profileSpecific.markerTableSort
+      );
       break;
     case 'network-chart':
       query = baseQuery as NetworkQueryShape;
@@ -449,6 +509,7 @@ export function ensureIsValidDataSource(
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'compare-benchmark':
     case 'uploaded-recordings':
       return coercedDataSource;
     default:
@@ -538,6 +599,19 @@ export function stateFromLocation(
     const markerIndex = Number(query.marker);
     if (Number.isInteger(markerIndex) && markerIndex >= 0) {
       selectedMarkers[selectedThreadsKey] = markerIndex;
+    }
+  }
+
+  // Parse the selected function for the current thread
+  const selectedFunctions: SelectedFunctionsPerThread = {};
+  if (
+    selectedThreadsKey !== null &&
+    query.selectedFunc !== undefined &&
+    query.selectedFunc !== null
+  ) {
+    const funcIndex = Number(query.selectedFunc);
+    if (Number.isInteger(funcIndex) && funcIndex >= 0) {
+      selectedFunctions[selectedThreadsKey] = funcIndex;
     }
   }
 
@@ -632,8 +706,163 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      selectedFunctions,
+      markerTableSort: convertMarkerTableSortFromString(query.markerSort),
+      functionListSort: convertFunctionListSortFromString(
+        query.functionListSort
+      ),
+      functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
+        query.funcListSections
+      ),
     },
   };
+}
+
+// MarkerTable sort URL encoding. The internal ColumnSortState stores the
+// primary-sorted column last (newest click wins as primary); the URL puts the
+// primary first for human readability.
+const VALID_MARKER_SORT_COLUMNS = new Set(['start', 'duration', 'name']);
+
+function convertMarkerTableSortToString(
+  sort: SingleColumnSortState[]
+): string | undefined {
+  if (sort.length === 0) {
+    return undefined;
+  }
+  // Omit when it matches the marker table's own default.
+  if (sort.length === 1 && sort[0].column === 'start' && sort[0].ascending) {
+    return undefined;
+  }
+  return sort
+    .slice()
+    .reverse()
+    .map((s) => `${s.column}-${s.ascending ? 'asc' : 'desc'}`)
+    .join('~');
+}
+
+function convertMarkerTableSortFromString(
+  raw: string | null | void
+): SingleColumnSortState[] {
+  if (!raw) {
+    return [];
+  }
+  const parsed: SingleColumnSortState[] = [];
+  for (const part of raw.split('~')) {
+    const dashIndex = part.lastIndexOf('-');
+    if (dashIndex === -1) {
+      return [];
+    }
+    const column = part.slice(0, dashIndex);
+    const dir = part.slice(dashIndex + 1);
+    if (
+      !VALID_MARKER_SORT_COLUMNS.has(column) ||
+      (dir !== 'asc' && dir !== 'desc')
+    ) {
+      return [];
+    }
+    parsed.push({ column, ascending: dir === 'asc' });
+  }
+  // URL is primary-first; internal storage is primary-last.
+  return parsed.reverse();
+}
+
+// FunctionList sort URL encoding. Same convention as the marker table:
+// internal storage is primary-last, URL is primary-first.
+const VALID_FUNCTION_LIST_SORT_COLUMNS = new Set(['total', 'self']);
+
+function convertFunctionListSortToString(
+  sort: SingleColumnSortState[]
+): string | undefined {
+  if (sort.length === 0) {
+    return undefined;
+  }
+  // Omit when it matches the function list's own default (total descending).
+  if (sort.length === 1 && sort[0].column === 'total' && !sort[0].ascending) {
+    return undefined;
+  }
+  return sort
+    .slice()
+    .reverse()
+    .map((s) => `${s.column}-${s.ascending ? 'asc' : 'desc'}`)
+    .join('~');
+}
+
+function convertFunctionListSortFromString(
+  raw: string | null | void
+): SingleColumnSortState[] {
+  if (!raw) {
+    return [];
+  }
+  const parsed: SingleColumnSortState[] = [];
+  for (const part of raw.split('~')) {
+    const dashIndex = part.lastIndexOf('-');
+    if (dashIndex === -1) {
+      return [];
+    }
+    const column = part.slice(0, dashIndex);
+    const dir = part.slice(dashIndex + 1);
+    if (
+      !VALID_FUNCTION_LIST_SORT_COLUMNS.has(column) ||
+      (dir !== 'asc' && dir !== 'desc')
+    ) {
+      return [];
+    }
+    parsed.push({ column, ascending: dir === 'asc' });
+  }
+  // URL is primary-first; internal storage is primary-last.
+  return parsed.reverse();
+}
+
+// FunctionList section disclosure-box open/closed state. The URL stores a
+// comma-separated list of the open sections; the param is omitted when the
+// state matches the default (only "descendants" open). The value "none" is
+// used as a sentinel for the all-closed case so the param is non-empty.
+const FUNCTION_LIST_SECTION_NAMES: ReadonlyArray<
+  keyof FunctionListSectionsOpenState
+> = ['descendants', 'ancestors', 'self'];
+const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState = {
+  descendants: true,
+  ancestors: false,
+  self: false,
+};
+
+function convertFunctionListSectionsOpenToString(
+  state: FunctionListSectionsOpenState
+): string | undefined {
+  const matchesDefault = FUNCTION_LIST_SECTION_NAMES.every(
+    (name) => state[name] === FUNCTION_LIST_SECTIONS_OPEN_DEFAULT[name]
+  );
+  if (matchesDefault) {
+    return undefined;
+  }
+  const open = FUNCTION_LIST_SECTION_NAMES.filter((name) => state[name]);
+  return open.length === 0 ? 'none' : open.join(',');
+}
+
+function convertFunctionListSectionsOpenFromString(
+  raw: string | null | void
+): FunctionListSectionsOpenState {
+  if (raw === undefined || raw === null) {
+    return { ...FUNCTION_LIST_SECTIONS_OPEN_DEFAULT };
+  }
+  const result: FunctionListSectionsOpenState = {
+    descendants: false,
+    ancestors: false,
+    self: false,
+  };
+  if (raw === 'none' || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    if (
+      part === 'descendants' ||
+      part === 'ancestors' ||
+      part === 'self'
+    ) {
+      result[part] = true;
+    }
+  }
+  return result;
 }
 
 function convertGlobalTrackOrderFromString(
@@ -1442,6 +1671,11 @@ const _upgraders: {
         })
         .join('~');
     }
+  },
+  [17]: (_processedLocation: ProcessedLocationBeforeUpgrade) => {
+    // Adds the optional `markerSort` query parameter for the marker table.
+    // No migration is necessary: older URLs simply omit it and the default
+    // (sort by start ascending) is used.
   },
 };
 

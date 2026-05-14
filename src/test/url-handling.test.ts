@@ -22,6 +22,8 @@ import {
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
   changeSelectedMarker,
+  changeMarkerTableSort,
+  changeFunctionListSort,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -490,6 +492,106 @@ describe('search strings', function () {
     dispatch(changeSelectedTab('network-chart'));
     const queryString = getQueryStringFromState(getState());
     expect(queryString).toContain(`networkSearch=${networkSearchString}`);
+  });
+});
+
+describe('marker table sort', function () {
+  function _getStoreOnMarkerTable() {
+    const store = _getStoreWithURL();
+    store.dispatch(changeSelectedTab('marker-table'));
+    return store;
+  }
+
+  it('omits the default sort from the URL', function () {
+    const { getState } = _getStoreOnMarkerTable();
+    expect(getQueryStringFromState(getState())).not.toContain('markerSort');
+  });
+
+  it('serializes a non-default sort with primary first', function () {
+    const { getState, dispatch } = _getStoreOnMarkerTable();
+    // duration desc primary, name asc tiebreaker (internal: primary last)
+    dispatch(
+      changeMarkerTableSort([
+        { column: 'name', ascending: true },
+        { column: 'duration', ascending: false },
+      ])
+    );
+    expect(getQueryStringFromState(getState())).toContain(
+      'markerSort=duration-desc~name-asc'
+    );
+  });
+
+  it('round-trips a non-default sort through the URL', function () {
+    const { getState, dispatch } = _getStoreOnMarkerTable();
+    dispatch(changeMarkerTableSort([{ column: 'duration', ascending: false }]));
+    const url = urlFromState(getState().urlState);
+    const restored = stateFromLocation({
+      pathname: new URL(url, 'http://localhost').pathname,
+      search: new URL(url, 'http://localhost').search,
+      hash: '',
+    });
+    expect(restored.profileSpecific.markerTableSort).toEqual([
+      { column: 'duration', ascending: false },
+    ]);
+  });
+
+  it('falls back to the default when the URL has an invalid column', function () {
+    const { getState } = _getStoreWithURL({
+      pathname: '/public/abc/marker-table/',
+      search: '?markerSort=bogus-desc',
+    });
+    expect(getState().urlState.profileSpecific.markerTableSort).toEqual([]);
+  });
+});
+
+describe('function list sort', function () {
+  function _getStoreOnFunctionList() {
+    const store = _getStoreWithURL();
+    store.dispatch(changeSelectedTab('function-list'));
+    return store;
+  }
+
+  it('omits the default sort from the URL', function () {
+    const { getState } = _getStoreOnFunctionList();
+    expect(getQueryStringFromState(getState())).not.toContain(
+      'functionListSort'
+    );
+  });
+
+  it('serializes a non-default sort with primary first', function () {
+    const { getState, dispatch } = _getStoreOnFunctionList();
+    // self desc primary, total asc tiebreaker (internal: primary last)
+    dispatch(
+      changeFunctionListSort([
+        { column: 'total', ascending: true },
+        { column: 'self', ascending: false },
+      ])
+    );
+    expect(getQueryStringFromState(getState())).toContain(
+      'functionListSort=self-desc~total-asc'
+    );
+  });
+
+  it('round-trips a non-default sort through the URL', function () {
+    const { getState, dispatch } = _getStoreOnFunctionList();
+    dispatch(changeFunctionListSort([{ column: 'self', ascending: false }]));
+    const url = urlFromState(getState().urlState);
+    const restored = stateFromLocation({
+      pathname: new URL(url, 'http://localhost').pathname,
+      search: new URL(url, 'http://localhost').search,
+      hash: '',
+    });
+    expect(restored.profileSpecific.functionListSort).toEqual([
+      { column: 'self', ascending: false },
+    ]);
+  });
+
+  it('falls back to the default when the URL has an invalid column', function () {
+    const { getState } = _getStoreWithURL({
+      pathname: '/public/abc/function-list/',
+      search: '?functionListSort=bogus-desc',
+    });
+    expect(getState().urlState.profileSpecific.functionListSort).toEqual([]);
   });
 });
 

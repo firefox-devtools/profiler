@@ -23,6 +23,8 @@ import { ResourceType } from 'firefox-profiler/types';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
+  upperWingTreeFromProfile,
+  lowerWingTreeFromProfile,
   formatTree,
   formatTreeIncludeCategories,
   addSourceToTable,
@@ -329,6 +331,7 @@ describe('unfiltered call tree', function () {
           name: 'A',
           self: '—',
           selfWithUnit: '—',
+          selfPercent: '0%',
           total: '3',
           totalWithUnit: '3 samples',
           totalPercent: '100%',
@@ -345,6 +348,7 @@ describe('unfiltered call tree', function () {
           name: 'I',
           self: '1',
           selfWithUnit: '1 sample',
+          selfPercent: '33%',
           total: '1',
           totalWithUnit: '1 sample',
           totalPercent: '33%',
@@ -573,6 +577,82 @@ describe('function list', function () {
       '- F (total: 1, self: —)',
       '- G (total: 1, self: 1)',
     ]);
+  });
+});
+
+describe('upper wing', function () {
+  // Samples:  A->B->C, A->B->D, A->E->C, A->E->F
+  const textSamples = `
+    A  A  A  A
+    B  B  E  E
+    C  D  C  F
+  `;
+
+  it('shows all callee subtrees of the selected function', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // Select B: show subtrees rooted at B (i.e. B->C and B->D)
+    const callTree = upperWingTreeFromProfile(profile, 'B');
+    expect(formatTree(callTree)).toEqual([
+      '- B (total: 2, self: —)',
+      '  - C (total: 1, self: 1)',
+      '  - D (total: 1, self: 1)',
+    ]);
+  });
+
+  it('merges call nodes with the same function across different callers', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // C appears under both B and E; the upper wing for C should show both
+    // subtrees merged into one root C node
+    const callTree = upperWingTreeFromProfile(profile, 'C');
+    expect(formatTree(callTree)).toEqual(['- C (total: 2, self: 2)']);
+  });
+
+  it('returns an empty tree when no function is selected', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // null selection: no subtrees to show
+    const callTree = upperWingTreeFromProfile(profile, 'NONEXISTENT');
+    expect(formatTree(callTree)).toEqual([]);
+  });
+});
+
+describe('lower wing', function () {
+  // Samples:  A->B->C, A->B->D, A->E->C, A->E->F
+  const textSamples = `
+    A  A  A  A
+    B  B  E  E
+    C  D  C  F
+  `;
+
+  it('shows callers of the selected function as inverted roots', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // Select C: C has self-time in both A->B->C and A->E->C, so C becomes the
+    // inverted root with total 2. Its callers B and E appear as children.
+    const callTree = lowerWingTreeFromProfile(profile, 'C');
+    expect(formatTree(callTree)).toEqual([
+      '- C (total: 2, self: 2)',
+      '  - B (total: 1, self: —)',
+      '    - A (total: 1, self: —)',
+      '  - E (total: 1, self: —)',
+      '    - A (total: 1, self: —)',
+    ]);
+  });
+
+  it('only counts samples where the selected function is present', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    // Select B: the self-time of B's subtree (C and D) gets attributed to B in
+    // the non-inverted table, so the inverted tree shows B as the root with
+    // total 2, and its caller A as a child.
+    const callTree = lowerWingTreeFromProfile(profile, 'B');
+    expect(formatTree(callTree)).toEqual([
+      '- B (total: 2, self: 2)',
+      '  - A (total: 2, self: —)',
+    ]);
+  });
+
+  it('returns an empty tree when no function is selected', function () {
+    const { profile } = getProfileFromTextSamples(textSamples);
+    const callTree = lowerWingTreeFromProfile(profile, 'NONEXISTENT');
+    expect(formatTree(callTree)).toEqual([]);
   });
 });
 

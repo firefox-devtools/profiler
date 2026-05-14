@@ -206,7 +206,7 @@ describe('selectors/getFlameGraphTiming', function () {
       store.getState()
     );
 
-    return flameGraphTiming.map(({ callNode, end, length, start }) => {
+    return flameGraphTiming.rows.map(({ callNode, end, length, start }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
@@ -240,7 +240,7 @@ describe('selectors/getFlameGraphTiming', function () {
       store.getState()
     );
 
-    return flameGraphTiming.map(({ selfRelative, callNode, length }) => {
+    return flameGraphTiming.rows.map(({ selfRelative, callNode, length }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];

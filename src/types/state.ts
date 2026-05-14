@@ -23,6 +23,7 @@ import type {
   TabID,
   IndexIntoLibs,
   IndexIntoSourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 
 import type {
@@ -36,6 +37,7 @@ import type {
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
@@ -51,11 +53,16 @@ export type Reducer<T> = (state: T | undefined, action: Action) => T;
 export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
+
 export type ThreadViewOptions = {
   readonly selectedNonInvertedCallNodePath: CallNodePath;
   readonly selectedInvertedCallNodePath: CallNodePath;
   readonly expandedNonInvertedCallNodePaths: PathSet;
   readonly expandedInvertedCallNodePaths: PathSet;
+  readonly selectedLowerWingCallNodePath: CallNodePath;
+  readonly expandedLowerWingCallNodePaths: PathSet;
+  readonly selectedUpperWingCallNodePath: CallNodePath;
+  readonly expandedUpperWingCallNodePaths: PathSet;
   readonly selectedNetworkMarker: MarkerIndex | null;
   // Track the number of transforms to detect when they change via browser
   // navigation. This helps us know when to reset paths that may be invalid
@@ -73,9 +80,21 @@ export type TableViewOptions = {
 
 export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 
+export type CallNodeArea =
+  | 'NON_INVERTED_TREE'
+  | 'INVERTED_TREE'
+  | 'LOWER_WING'
+  | 'UPPER_WING';
+
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
+  readonly area: CallNodeArea;
   readonly callNodePath: CallNodePath;
+};
+
+export type RightClickedFunction = {
+  readonly threadsKey: ThreadsKey;
+  readonly functionIndex: IndexIntoFuncTable;
 };
 
 export type MarkerReference = {
@@ -85,6 +104,10 @@ export type MarkerReference = {
 
 export type SelectedMarkersPerThread = {
   [key: ThreadsKey]: MarkerIndex | null;
+};
+
+export type SelectedFunctionsPerThread = {
+  [key: ThreadsKey]: IndexIntoFuncTable | null;
 };
 
 /**
@@ -102,6 +125,7 @@ export type ProfileViewState = {
     lastNonShiftClick: LastNonShiftClickInformation | null;
     rightClickedTrack: TrackReference | null;
     rightClickedCallNode: RightClickedCallNode | null;
+    rightClickedFunction: RightClickedFunction | null;
     rightClickedMarker: MarkerReference | null;
     hoveredMarker: MarkerReference | null;
     mouseTimePosition: Milliseconds | null;
@@ -378,6 +402,16 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  selectedFunctions: SelectedFunctionsPerThread;
+  markerTableSort: SingleColumnSortState[];
+  functionListSort: SingleColumnSortState[];
+  functionListSectionsOpen: FunctionListSectionsOpenState;
+};
+
+export type FunctionListSectionsOpenState = {
+  descendants: boolean;
+  ancestors: boolean;
+  self: boolean;
 };
 
 export type UrlState = {
