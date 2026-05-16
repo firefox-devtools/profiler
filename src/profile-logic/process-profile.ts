@@ -107,6 +107,7 @@ import type {
   CounterDisplayConfig,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
+import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
 
 type RegExpResult = null | string[];
 /**
@@ -2056,7 +2057,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
  * Take a processed profile and convert it to a string.
  */
 export function serializeProfileToJsonString(profile: Profile): string {
-  return JSON.stringify(profile);
+  return jsonEncodeObjectWithTypedArraysAsRegularArrays(profile);
 }
 
 /**
