@@ -1688,7 +1688,7 @@ export function createStackTableBySkippingDiscarded(
   keepStack: BitSet
 ): StackTable {
   const newStackCount = newPrefixCol.length;
-  const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
+  const newFrameCol = new Int32Array(newStackCount);
   const newCategoryCol = new Uint8Array(newStackCount);
   const newSubcategoryCol =
     stackTable.subcategory instanceof Uint16Array
@@ -4764,8 +4764,11 @@ export function computeStackTableFromRawStackTable(
     subcategoryColumn[stackIndex] = stackSubcategory;
   }
 
+  // The frame column is a typed array in the derived stack table.
+  const frame = new Int32Array(rawStackTable.frame);
+
   return {
-    frame: rawStackTable.frame,
+    frame,
     category: categoryColumn,
     subcategory: subcategoryColumn,
     prefix: rawStackTable.prefix,

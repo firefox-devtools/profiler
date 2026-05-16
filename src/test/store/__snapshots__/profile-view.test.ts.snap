@@ -2721,7 +2721,7 @@ CallTree {
         0,
         0,
       ],
-      "frame": Array [
+      "frame": Int32Array [
         0,
         1,
         2,
@@ -3109,7 +3109,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
@@ -3563,7 +3563,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
@@ -3949,7 +3949,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
@@ -4335,7 +4335,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
