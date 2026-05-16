@@ -82,7 +82,7 @@ export function finishRawStackTableBuilder(
 ): RawStackTable {
   const { frame, prefix, length } = builder;
   return {
-    frame,
+    frame: new Int32Array(frame),
     prefix,
     length,
   };

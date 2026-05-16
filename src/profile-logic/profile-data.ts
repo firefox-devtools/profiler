@@ -4766,7 +4766,10 @@ export function computeStackTableFromRawStackTable(
   }
 
   // The frame column is a typed array in the derived stack table.
-  const frame = new Int32Array(rawStackTable.frame);
+  const frame =
+    rawStackTable.frame instanceof Int32Array
+      ? rawStackTable.frame
+      : new Int32Array(rawStackTable.frame);
 
   return {
     frame,
