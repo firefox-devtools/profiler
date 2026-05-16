@@ -2733,8 +2733,8 @@ CallTree {
         8,
       ],
       "length": 9,
-      "prefix": Array [
-        null,
+      "prefix": Int32Array [
+        -1,
         0,
         1,
         1,
@@ -3121,8 +3121,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       1,
@@ -3577,8 +3577,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       1,
@@ -3963,8 +3963,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       1,
@@ -4349,8 +4349,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       2,
