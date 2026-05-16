@@ -1993,7 +1993,7 @@ export function hasUsefulSamples(
     // All samples were null.
     return false;
   }
-  if (stackTable.prefix[stackIndex] === -1) {
+  if (stackTable.prefixOffset[stackIndex] === 0) {
     // There's only a single stack frame, check if it's '(root)'.
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
@@ -4081,11 +4081,7 @@ export function collectSourceIndicesFromThreads(
 
   const addStackChain = (stackIndex: IndexIntoStackTable | null) => {
     let current = stackIndex;
-    while (
-      current !== null &&
-      current !== -1 &&
-      !checkBit(visitedStacks, current)
-    ) {
+    while (current !== null && !checkBit(visitedStacks, current)) {
       setBit(visitedStacks, current);
       const frameIndex = stackTable.frame[current];
       const funcIndex = frameTable.func[frameIndex];
@@ -4105,7 +4101,8 @@ export function collectSourceIndicesFromThreads(
         sourceIndices.add(sourceLocationTable.source[funcOriginalLocationIdx]);
       }
 
-      current = stackTable.prefix[current];
+      const prefixOffset = stackTable.prefixOffset[current];
+      current = prefixOffset !== 0 ? current - prefixOffset : null;
     }
   };
 
@@ -4289,8 +4286,12 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
     }
   }
   for (let stack = 0; stack < stackTable.length; stack++) {
-    const prefix = stackTable.prefix[stack];
-    if (prefix === -1 || prefixStacks.has(prefix)) {
+    const offset = stackTable.prefixOffset[stack];
+    if (offset === 0) {
+      continue;
+    }
+    const prefix = stack - offset;
+    if (prefixStacks.has(prefix)) {
       continue;
     }
     prefixStacks.add(prefix);
@@ -4363,7 +4364,8 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
-    const prefix = stackTable.prefix[stack];
+    const offset = stackTable.prefixOffset[stack];
+    const prefix = offset === 0 ? -1 : stack - offset;
 
     const newPrefix = prefix === -1 ? null : prefixMap[prefix];
 
@@ -4747,7 +4749,12 @@ export function computeStackTableFromRawStackTable(
     maxSubcategoryCount < 256
       ? new Uint8Array(rawStackTable.length)
       : new Uint16Array(rawStackTable.length);
+  const prefix = new Int32Array(rawStackTable.length);
   for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
+    const offset = rawStackTable.prefixOffset[stackIndex];
+    const prefixStack = offset === 0 ? -1 : stackIndex - offset;
+    prefix[stackIndex] = prefixStack;
+
     const frameIndex = rawStackTable.frame[stackIndex];
     const frameCategory = frameTable.category[frameIndex];
     const frameSubcategory = frameTable.subcategory[frameIndex];
@@ -4756,17 +4763,14 @@ export function computeStackTableFromRawStackTable(
     if (frameCategory !== null) {
       stackCategory = frameCategory;
       stackSubcategory = frameSubcategory || 0;
+    } else if (prefixStack !== -1) {
+      // Because of the structure of the stack table, prefix < stackIndex.
+      // So we've already computed the category for the prefix.
+      stackCategory = categoryColumn[prefixStack];
+      stackSubcategory = subcategoryColumn[prefixStack];
     } else {
-      const prefix = rawStackTable.prefix[stackIndex];
-      if (prefix !== -1) {
-        // Because of the structure of the stack table, prefix < stackIndex.
-        // So we've already computed the category for the prefix.
-        stackCategory = categoryColumn[prefix];
-        stackSubcategory = subcategoryColumn[prefix];
-      } else {
-        stackCategory = defaultCategory;
-        stackSubcategory = 0;
-      }
+      stackCategory = defaultCategory;
+      stackSubcategory = 0;
     }
     categoryColumn[stackIndex] = stackCategory;
     subcategoryColumn[stackIndex] = stackSubcategory;
@@ -4782,7 +4786,7 @@ export function computeStackTableFromRawStackTable(
     frame,
     category: categoryColumn,
     subcategory: subcategoryColumn,
-    prefix: rawStackTable.prefix,
+    prefix,
     length: rawStackTable.length,
   };
 }

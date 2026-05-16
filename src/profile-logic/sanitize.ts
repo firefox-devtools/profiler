@@ -274,10 +274,10 @@ export function sanitizePII(
     stackFlags = new Uint8Array(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-      const prefix = stackTable.prefix[stackIndex];
-      if (prefix !== -1) {
+      const offset = stackTable.prefixOffset[stackIndex];
+      if (offset !== 0) {
         // Inherit the prefix value
-        stackFlags[stackIndex] = stackFlags[prefix];
+        stackFlags[stackIndex] = stackFlags[stackIndex - offset];
         if (stackFlags[stackIndex] === PRIVATE_BROWSING_STACK) {
           // Because private browsing is the strongest value, we can skip
           // the rest of the processing.

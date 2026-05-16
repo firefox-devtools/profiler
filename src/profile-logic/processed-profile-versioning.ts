@@ -113,8 +113,8 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
 // arrays. Idempotent; safe to run on an already-normalized profile.
 function _normalizeAfterUpgrade(profile: any): void {
   const stackTable = profile.shared?.stackTable ?? null;
-  if (stackTable && !(stackTable.prefix instanceof Int32Array)) {
-    stackTable.prefix = new Int32Array(stackTable.prefix);
+  if (stackTable && !(stackTable.prefixOffset instanceof Int32Array)) {
+    stackTable.prefixOffset = new Int32Array(stackTable.prefixOffset);
   }
 }
 
@@ -3283,6 +3283,23 @@ const _upgraders: {
         newPrefix[i] = p === null ? -1 : p;
       }
       stackTable.prefix = newPrefix;
+    }
+  },
+  [67]: (profile: any) => {
+    // The stackTable.prefix column was replaced with a stackTable.prefixOffset
+    // column. For each stack i, prefixOffset[i] is 0 if i is a root, otherwise
+    // it is i's offset from its parent (parent index = i - prefixOffset[i]).
+    const stackTable = profile.shared?.stackTable ?? null;
+    if (stackTable && stackTable.prefix !== undefined) {
+      const oldPrefix = stackTable.prefix;
+      const length = oldPrefix.length;
+      const prefixOffset = new Int32Array(length);
+      for (let i = 0; i < length; i++) {
+        const p = oldPrefix[i];
+        prefixOffset[i] = p === -1 || p === null ? 0 : i - p;
+      }
+      stackTable.prefixOffset = prefixOffset;
+      delete stackTable.prefix;
     }
   },
   // If you add a new upgrader here, please document the change in

@@ -1833,8 +1833,8 @@ describe('actions/receive-profile', function () {
       // Mirror the normalization that unserializeProfileOfArbitraryFormat
       // applies when the store loads the JSON profile, so `toEqual` matches
       // the in-memory profile shape after loading.
-      profile.shared.stackTable.prefix = new Int32Array(
-        profile.shared.stackTable.prefix
+      profile.shared.stackTable.prefixOffset = new Int32Array(
+        profile.shared.stackTable.prefixOffset
       );
       const geckoProfile = createGeckoProfile();
 

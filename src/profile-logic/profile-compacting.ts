@@ -52,6 +52,7 @@ type ColumnDescription<TCol> = null extends (
     ?
         | { type: 'INDEX_REF_INT32'; referencedTable: TableCompactionState }
         | { type: 'SELF_INDEX_REF_OR_NEG_ONE_INT32' }
+        | { type: 'SELF_RELATIVE_PARENT' }
         | { type: 'NO_REF' }
     :
         | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
@@ -88,6 +89,7 @@ const ColDesc = {
   selfIndexRefOrNegOneInt32: () => ({
     type: 'SELF_INDEX_REF_OR_NEG_ONE_INT32' as const,
   }),
+  selfPrefixOffset: () => ({ type: 'SELF_RELATIVE_PARENT' as const }),
   noRef: () => ({ type: 'NO_REF' as const }),
 };
 
@@ -161,7 +163,7 @@ export function computeCompactedProfile(
 
   const stackTableDesc: TableDescription<RawStackTable> = {
     frame: ColDesc.indexRefInt32(tcs.frameTable),
-    prefix: ColDesc.selfIndexRefOrNegOneInt32(),
+    prefixOffset: ColDesc.selfPrefixOffset(),
   };
   const frameTableDesc: TableDescription<FrameTable> = {
     address: ColDesc.noRef(),
@@ -334,6 +336,8 @@ function _markTableAndComputeTranslation<T>(
       markSelfColumnWithNullableFields((table as any)[key], markBuffer);
     } else if (desc.type === 'SELF_INDEX_REF_OR_NEG_ONE_INT32') {
       markSelfColumnWithNegOneFieldsInt32((table as any)[key], markBuffer);
+    } else if (desc.type === 'SELF_RELATIVE_PARENT') {
+      markSelfColumnPrefixOffset((table as any)[key], markBuffer);
     }
   }
 
@@ -355,6 +359,7 @@ function _markTableAndComputeTranslation<T>(
         break;
       case 'SELF_INDEX_REF_OR_NULL':
       case 'SELF_INDEX_REF_OR_NEG_ONE_INT32':
+      case 'SELF_RELATIVE_PARENT':
         break; // already handled in the first pass
       case 'INDEX_REF_OR_NEG_ONE':
         markColumnWithNegOneableFields(
@@ -426,6 +431,20 @@ function markSelfColumnWithNegOneFieldsInt32(col: Int32Array, markBuf: BitSet) {
       const val = col[i];
       if (val !== -1) {
         setBit(markBuf, val);
+      }
+    }
+  }
+}
+
+function markSelfColumnPrefixOffset(
+  col: Int32Array<ArrayBuffer>,
+  markBuf: BitSet
+) {
+  for (let i = col.length - 1; i >= 0; i--) {
+    if (checkBit(markBuf, i)) {
+      const offset = col[i];
+      if (offset !== 0) {
+        setBit(markBuf, i - offset);
       }
     }
   }
@@ -567,6 +586,14 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
+      case 'SELF_RELATIVE_PARENT':
+        result[key] = _compactColSelfPrefixOffset(
+          oldCol,
+          markBuffer,
+          thisTableCompactionState.oldIndexToNewIndexPlusOne,
+          newLength
+        );
+        break;
       case 'INDEX_REF_OR_NEG_ONE':
         result[key] = _compactColIndexOrNegOne(
           oldCol,
@@ -679,6 +706,29 @@ function _compactColIndexOrNegOneInt32(
     if (checkBit(markBuffer, i)) {
       const val = oldCol[i];
       newCol[newIndex++] = val !== -1 ? oldIndexToNewIndexPlusOne[val] - 1 : -1;
+    }
+  }
+  return newCol;
+}
+
+function _compactColSelfPrefixOffset(
+  oldCol: Int32Array<ArrayBuffer>,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      const offset = oldCol[i];
+      if (offset === 0) {
+        newCol[newIndex] = 0;
+      } else {
+        const newParent = oldIndexToNewIndexPlusOne[i - offset] - 1;
+        newCol[newIndex] = newIndex - newParent;
+      }
+      newIndex++;
     }
   }
   return newCol;

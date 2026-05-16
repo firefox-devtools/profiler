@@ -1135,7 +1135,8 @@ function mergeStackTables(
         stackTable.frame[i],
         oldFrameToNewFramePlusOne
       );
-      const prefix = stackTable.prefix[i];
+      const offset = stackTable.prefixOffset[i];
+      const prefix = offset === 0 ? -1 : i - offset;
       const newPrefix =
         prefix === -1 ? null : oldStackToNewStackPlusOne[prefix] - 1;
 

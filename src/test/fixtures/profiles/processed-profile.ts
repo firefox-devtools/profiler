@@ -2070,10 +2070,8 @@ export function addInnerWindowIdToStacks(
 
       // Clone the stack
       const newStackIndex = stackTableBuilder.length++;
-      const prefixForStack = stackTable.prefix[stackIndex];
-      stackTableBuilder.prefix.push(
-        prefixForStack === -1 ? null : prefixForStack
-      );
+      const offset = stackTable.prefixOffset[stackIndex];
+      stackTableBuilder.prefix.push(offset === 0 ? null : stackIndex - offset);
       // Using the cloned frame index.
       stackTableBuilder.frame.push(newFrameIndex);
 

@@ -425,7 +425,8 @@ function _computeStackTableWithAddedExpansionStacks(
   const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
-    const oldPrefix = stackTable.prefix[stack];
+    const offset = stackTable.prefixOffset[stack];
+    const oldPrefix = offset === 0 ? -1 : stack - offset;
     const newPrefixOrMinusOne =
       oldPrefix === -1 ? -1 : oldStackToNewStack[oldPrefix];
     if (shouldStacksWithThisOldFrameBeRemoved[oldFrame] !== 0) {

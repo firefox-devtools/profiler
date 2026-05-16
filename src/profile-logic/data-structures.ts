@@ -72,8 +72,8 @@ export function getRawStackTableBuilderWithExistingContents(
 ): RawStackTableBuilder {
   const prefix = new Array<IndexIntoStackTable | null>(existing.length);
   for (let i = 0; i < existing.length; i++) {
-    const p = existing.prefix[i];
-    prefix[i] = p === -1 ? null : p;
+    const offset = existing.prefixOffset[i];
+    prefix[i] = offset === 0 ? null : i - offset;
   }
   return {
     frame: [...existing.frame],
@@ -86,14 +86,14 @@ export function finishRawStackTableBuilder(
   builder: RawStackTableBuilder
 ): RawStackTable {
   const { frame, prefix, length } = builder;
-  const prefixCol = new Int32Array(length);
+  const prefixOffset = new Int32Array(length);
   for (let i = 0; i < length; i++) {
     const p = prefix[i];
-    prefixCol[i] = p === null ? -1 : p;
+    prefixOffset[i] = p === null ? 0 : i - p;
   }
   return {
     frame: new Int32Array(frame),
-    prefix: prefixCol,
+    prefixOffset,
     length,
   };
 }

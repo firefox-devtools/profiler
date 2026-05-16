@@ -1654,7 +1654,8 @@ function getStackIndexFromVersion3JSCallNodePath(
   stackIndexDepth.set(-1, -1);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const prefix = stackTable.prefix[stackIndex];
+    const offset = stackTable.prefixOffset[stackIndex];
+    const prefix = offset === 0 ? -1 : stackIndex - offset;
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const isJS = funcTable.isJS[funcIndex];
@@ -1703,7 +1704,8 @@ function getVersion4JSCallNodePathFromStackIndex(
     if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
       callNodePath.unshift(funcIndex);
     }
-    nextStackIndex = stackTable.prefix[nextStackIndex];
+    const offset = stackTable.prefixOffset[nextStackIndex];
+    nextStackIndex = offset === 0 ? -1 : nextStackIndex - offset;
   }
   return callNodePath;
 }
