@@ -1649,8 +1649,9 @@ function getStackIndexFromVersion3JSCallNodePath(
   oldCallNodePath: CallNodePath
 ): IndexIntoStackTable | null {
   const { stackTable, funcTable, frameTable } = shared;
-  const stackIndexDepth: Map<IndexIntoStackTable | null, number> = new Map();
-  stackIndexDepth.set(null, -1);
+  const stackIndexDepth: Map<IndexIntoStackTable, number> = new Map();
+  // Map key -1 represents the virtual root above all stack indexes.
+  stackIndexDepth.set(-1, -1);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
@@ -1659,9 +1660,8 @@ function getStackIndexFromVersion3JSCallNodePath(
     const isJS = funcTable.isJS[funcIndex];
     // We know that at this point stack table is sorted and the following
     // condition holds:
-    // assert(prefixStack === null || prefixStack < stackIndex);
-    const doesPrefixMatchCallNodePath =
-      prefix === null || stackIndexDepth.has(prefix);
+    // assert(prefixStack === -1 || prefixStack < stackIndex);
+    const doesPrefixMatchCallNodePath = stackIndexDepth.has(prefix);
 
     if (!doesPrefixMatchCallNodePath) {
       continue;
@@ -1696,8 +1696,8 @@ function getVersion4JSCallNodePathFromStackIndex(
 ): CallNodePath {
   const { funcTable, stackTable, frameTable } = shared;
   const callNodePath = [];
-  let nextStackIndex: IndexIntoStackTable | null = stackIndex;
-  while (nextStackIndex !== null) {
+  let nextStackIndex: IndexIntoStackTable = stackIndex;
+  while (nextStackIndex !== -1) {
     const frameIndex: IndexIntoFrameTable = stackTable.frame[nextStackIndex];
     const funcIndex = frameTable.func[frameIndex];
     if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {

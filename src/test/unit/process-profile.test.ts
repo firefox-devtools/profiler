@@ -464,8 +464,8 @@ describe('js allocation processing', function () {
     stackIndex: IndexIntoStackTable | null
   ) {
     const addresses = [];
-    let stack = stackIndex;
-    while (stack !== null) {
+    let stack = stackIndex ?? -1;
+    while (stack !== -1) {
       addresses.push(shared.frameTable.address[shared.stackTable.frame[stack]]);
       stack = shared.stackTable.prefix[stack];
     }

@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 66
+
+The `prefix` column of `profile.shared.stackTable` now uses `-1` instead of `null` to indicate "this stack node is a root".
+Furthermore, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz),
+`profile.shared.stackTable.prefix` can now optionally be stored as an `Int32Array`. Regular JS / JSON arrays are still accepted.
+
 ### Version 65
 
 The stack table's `frame` column (stored at `profile.shared.stackTable.frame`) can now optionally be stored as an `Int32Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.

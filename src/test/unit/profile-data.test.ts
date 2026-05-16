@@ -314,8 +314,8 @@ describe('process-profile', function () {
       const shared = profile.shared;
       function getFrameAddressesForSampleIndex(sample: IndexIntoSamplesTable) {
         const addresses = [];
-        let stack = thread.samples.stack[sample];
-        while (stack !== null) {
+        let stack = thread.samples.stack[sample] ?? -1;
+        while (stack !== -1) {
           addresses.push(
             shared.frameTable.address[shared.stackTable.frame[stack]]
           );
@@ -525,12 +525,8 @@ describe('profile-data', function () {
     }
     const { prefix } = thread.stackTable;
     const stackList = [];
-    let nextStack: IndexIntoStackTable | null = stackIndex;
-    while (nextStack !== null) {
-      if (typeof nextStack !== 'number') {
-        throw new Error('nextStack must be a number');
-      }
-
+    let nextStack: IndexIntoStackTable = stackIndex;
+    while (nextStack !== -1) {
       stackList.unshift(nextStack);
       nextStack = prefix[nextStack];
     }

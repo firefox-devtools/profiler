@@ -43,7 +43,7 @@ export type Pid = string;
 /**
  * The stack table stores the tree of stack nodes of a thread.
  * The shape of the tree is encoded in the prefix column: Root stack nodes have
- * null as their prefix, and every non-root stack has the stack index of its
+ * -1 as their prefix, and every non-root stack has the stack index of its
  * "caller" / "parent" as its prefix.
  * Every stack node also has a frame and a category.
  * A "call stack" is a list of frames. Every stack index in the stack table
@@ -61,7 +61,9 @@ export type Pid = string;
  */
 export type RawStackTable = {
   frame: IndexIntoFrameTable[] | Int32Array<ArrayBuffer>;
-  prefix: Array<IndexIntoStackTable | null>;
+  // Maps each stack to its parent stack, or -1 if it is a root.
+  prefix: Array<IndexIntoStackTable | -1> | Int32Array<ArrayBuffer>;
+
   length: number;
 };
 

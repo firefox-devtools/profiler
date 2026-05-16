@@ -1137,7 +1137,7 @@ function mergeStackTables(
       );
       const prefix = stackTable.prefix[i];
       const newPrefix =
-        prefix === null ? null : oldStackToNewStackPlusOne[prefix] - 1;
+        prefix === -1 ? null : oldStackToNewStackPlusOne[prefix] - 1;
 
       newStackTable.frame.push(frameIndex);
       newStackTable.prefix.push(newPrefix);

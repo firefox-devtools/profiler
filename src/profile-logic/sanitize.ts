@@ -275,7 +275,7 @@ export function sanitizePII(
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
-      if (prefix !== null) {
+      if (prefix !== -1) {
         // Inherit the prefix value
         stackFlags[stackIndex] = stackFlags[prefix];
         if (stackFlags[stackIndex] === PRIVATE_BROWSING_STACK) {

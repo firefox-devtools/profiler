@@ -321,9 +321,9 @@ function _computeCallNodeTableHierarchy(
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefixStack = stackTable.prefix[stackIndex];
     // We know that at this point the following condition holds:
-    // assert(prefixStack === null || prefixStack < stackIndex);
+    // assert(prefixStack === -1 || prefixStack < stackIndex);
     const prefixCallNode =
-      prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
+      prefixStack === -1 ? -1 : stackIndexToCallNodeIndex[prefixStack];
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
@@ -745,7 +745,7 @@ export function getMatchingAncestorStackForInvertedCallNode(
   suffixOrderIndexes: Uint32Array,
   invertedTreeCallNodeDepth: number,
   stackIndexToCallNodeIndex: Int32Array,
-  stackTablePrefixCol: Array<IndexIntoStackTable | null>
+  stackTablePrefixCol: Int32Array
 ): IndexIntoStackTable | null {
   // Get the non-inverted call tree node for the (non-inverted) stack.
   // For example, if the stack has the call path A -> B -> C,
@@ -785,11 +785,12 @@ export function getMatchingAncestorStackForInvertedCallNode(
 export function getNthPrefixStack(
   stackIndex: IndexIntoStackTable | null,
   n: number,
-  stackTablePrefixCol: Array<IndexIntoStackTable | null>
+  stackTablePrefixCol: Int32Array
 ): IndexIntoStackTable | null {
   let s = stackIndex;
   for (let i = 0; i < n && s !== null; i++) {
-    s = stackTablePrefixCol[s];
+    const next = stackTablePrefixCol[s];
+    s = next === -1 ? null : next;
   }
   return s;
 }
@@ -891,7 +892,7 @@ export function getCallNodeFramePerStackNonInverted(
       // outside the subtree. Either way, we can just inherit the frame
       // that our prefix stack hits in this call node.
       const prefix = prefixCol[stackIndex];
-      if (prefix !== null) {
+      if (prefix !== -1) {
         frame = callNodeFramePerStack[prefix];
       }
     }
@@ -1685,7 +1686,7 @@ export function computeTransformOutputForImplementationFilter(
  */
 export function createStackTableBySkippingDiscarded(
   stackTable: StackTable,
-  newPrefixCol: Array<IndexIntoStackTable | null>,
+  newPrefixCol: Int32Array,
   keepStack: BitSet
 ): StackTable {
   const newStackCount = newPrefixCol.length;
@@ -1723,7 +1724,8 @@ function _computeTransformOutputForMergingFuncs(
   shouldIncludeFuncInFilteredThread: (funcIndex: IndexIntoFuncTable) => boolean
 ): TransformOutput {
   return timeCode('_computeTransformOutputForMergingFuncs', () => {
-    const newPrefixCol = new Array<IndexIntoStackTable | null>();
+    const newPrefixBuf = new Int32Array(stackTable.length);
+    let newPrefixLen = 0;
     const oldStackToNewStack = new Int32Array(stackTable.length);
     const keepStack = makeBitSet(stackTable.length);
 
@@ -1731,10 +1733,10 @@ function _computeTransformOutputForMergingFuncs(
       const oldPrefix = stackTable.prefix[stackIndex];
       const frame = stackTable.frame[stackIndex];
       const func = frameTable.func[frame];
-      const newPrefix = oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
+      const newPrefix = oldPrefix === -1 ? -1 : oldStackToNewStack[oldPrefix];
       if (shouldIncludeFuncInFilteredThread(func)) {
-        const newStackIndex = newPrefixCol.length;
-        newPrefixCol[newStackIndex] = newPrefix !== -1 ? newPrefix : null;
+        const newStackIndex = newPrefixLen++;
+        newPrefixBuf[newStackIndex] = newPrefix;
         oldStackToNewStack[stackIndex] = newStackIndex;
         setBit(keepStack, stackIndex);
       } else {
@@ -1742,6 +1744,7 @@ function _computeTransformOutputForMergingFuncs(
       }
     }
 
+    const newPrefixCol = newPrefixBuf.slice(0, newPrefixLen);
     const newStackTable = createStackTableBySkippingDiscarded(
       stackTable,
       newPrefixCol,
@@ -1918,7 +1921,7 @@ function _computeStackMatchesFromFuncMatches(
   const stackMatchesSearch = makeBitSet(stackTable.length);
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
-    if (prefix !== null && checkBit(stackMatchesSearch, prefix)) {
+    if (prefix !== -1 && checkBit(stackMatchesSearch, prefix)) {
       setBit(stackMatchesSearch, stackIndex);
     } else {
       const funcIndex = frameTable.func[stackTable.frame[stackIndex]];
@@ -1990,7 +1993,7 @@ export function hasUsefulSamples(
     // All samples were null.
     return false;
   }
-  if (stackTable.prefix[stackIndex] === null) {
+  if (stackTable.prefix[stackIndex] === -1) {
     // There's only a single stack frame, check if it's '(root)'.
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
@@ -3536,7 +3539,7 @@ export function isSampleWithNonEmptyStack(
     return false;
   }
 
-  if (stackTable.prefix[stackIndex] !== null) {
+  if (stackTable.prefix[stackIndex] !== -1) {
     // Stack contains at least two frames.
     return true;
   }
@@ -4078,7 +4081,11 @@ export function collectSourceIndicesFromThreads(
 
   const addStackChain = (stackIndex: IndexIntoStackTable | null) => {
     let current = stackIndex;
-    while (current !== null && !checkBit(visitedStacks, current)) {
+    while (
+      current !== null &&
+      current !== -1 &&
+      !checkBit(visitedStacks, current)
+    ) {
       setBit(visitedStacks, current);
       const frameIndex = stackTable.frame[current];
       const funcIndex = frameTable.func[frameIndex];
@@ -4283,7 +4290,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   }
   for (let stack = 0; stack < stackTable.length; stack++) {
     const prefix = stackTable.prefix[stack];
-    if (prefix === null || prefixStacks.has(prefix)) {
+    if (prefix === -1 || prefixStacks.has(prefix)) {
       continue;
     }
     prefixStacks.add(prefix);
@@ -4358,7 +4365,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
     const frame = stackTable.frame[stack];
     const prefix = stackTable.prefix[stack];
 
-    const newPrefix = prefix === null ? null : prefixMap[prefix];
+    const newPrefix = prefix === -1 ? null : prefixMap[prefix];
 
     if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
       // Copy this stack to the new stack table, and use the original frame
@@ -4751,7 +4758,7 @@ export function computeStackTableFromRawStackTable(
       stackSubcategory = frameSubcategory || 0;
     } else {
       const prefix = rawStackTable.prefix[stackIndex];
-      if (prefix !== null) {
+      if (prefix !== -1) {
         // Because of the structure of the stack table, prefix < stackIndex.
         // So we've already computed the category for the prefix.
         stackCategory = categoryColumn[prefix];

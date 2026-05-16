@@ -427,7 +427,7 @@ function _computeStackTableWithAddedExpansionStacks(
     const oldFrame = stackTable.frame[stack];
     const oldPrefix = stackTable.prefix[stack];
     const newPrefixOrMinusOne =
-      oldPrefix === null ? -1 : oldStackToNewStack[oldPrefix];
+      oldPrefix === -1 ? -1 : oldStackToNewStack[oldPrefix];
     if (shouldStacksWithThisOldFrameBeRemoved[oldFrame] !== 0) {
       // Don't add this stack node to the new stack table. Instead, make it
       // so that this node's children use our prefix as their prefix.
