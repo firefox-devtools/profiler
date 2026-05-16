@@ -6,7 +6,8 @@ import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
   shallowCloneFuncTable,
@@ -4343,7 +4344,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   // Now the frame table contains adjusted / "nudged" addresses.
 
   // Make a new stack table which refers to the adjusted frames.
-  const newStackTable = getEmptyRawStackTable();
+  const newStackTable = getRawStackTableBuilder();
   const mapForSamplingSelfStacks = new Map<
     null | IndexIntoStackTable,
     null | IndexIntoStackTable
@@ -4385,7 +4386,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   const newShared: RawProfileSharedData = {
     ...profile.shared,
     frameTable: newFrameTable,
-    stackTable: newStackTable,
+    stackTable: finishRawStackTableBuilder(newStackTable),
   };
 
   const newThreads = updateRawThreadStacksSeparate(

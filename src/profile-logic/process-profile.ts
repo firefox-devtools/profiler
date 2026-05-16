@@ -16,6 +16,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
+  type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
 import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
@@ -53,7 +54,6 @@ import type {
   FrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
-  RawStackTable,
   RawMarkerTable,
   LibMapping,
   IndexIntoStackTable,
@@ -549,7 +549,7 @@ function _processFrameTable(
  */
 function _processStackTable(
   geckoStackTable: GeckoStackStruct,
-  sharedStackTable: RawStackTable,
+  sharedStackTable: RawStackTableBuilder,
   frameIndexOffset: IndexIntoFrameTable
 ): IndexIntoStackTable {
   const stackIndexOffset = sharedStackTable.length;
@@ -1337,7 +1337,7 @@ function _processThread(
   );
   const stackIndexOffset = _processStackTable(
     geckoStackTable,
-    globalDataCollector.getStackTable(),
+    globalDataCollector.getStackTableBuilder(),
     frameIndexOffset
   );
 

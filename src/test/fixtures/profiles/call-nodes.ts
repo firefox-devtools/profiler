@@ -6,7 +6,8 @@ import type { FuncTable, FrameTable, Profile } from 'firefox-profiler/types';
 import {
   getEmptyThread,
   getEmptyProfile,
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
 } from '../../../profile-logic/data-structures';
 import { StringTable } from '../../../utils/string-table';
 
@@ -87,7 +88,7 @@ export default function getProfile(): Profile {
     length: frameFuncs.length,
   };
 
-  const stackTable = getEmptyRawStackTable();
+  const stackTable = getRawStackTableBuilder();
 
   // Provide a utility function for readability.
   function addToStackTable(frame: any, prefix: any) {
@@ -119,7 +120,12 @@ export default function getProfile(): Profile {
     length: 2,
   };
 
-  profile.shared = { ...profile.shared, stackTable, funcTable, frameTable };
+  profile.shared = {
+    ...profile.shared,
+    stackTable: finishRawStackTableBuilder(stackTable),
+    funcTable,
+    frameTable,
+  };
 
   profile.threads.push(thread, { ...thread }, { ...thread });
 

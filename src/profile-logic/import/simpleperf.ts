@@ -24,7 +24,9 @@ import {
   getEmptyFuncTable,
   getEmptyResourceTable,
   getEmptyFrameTable,
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
+  type RawStackTableBuilder,
   getEmptySamplesTable,
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
@@ -189,7 +191,7 @@ class FirefoxFrameTable {
 class FirefoxSampleTable {
   strings: StringTable;
 
-  stackTable: RawStackTable = getEmptyRawStackTable();
+  stackTable: RawStackTableBuilder = getRawStackTableBuilder();
   stackMap: Map<string, IndexIntoStackTable> = new Map();
 
   constructor(strings: StringTable) {
@@ -197,7 +199,7 @@ class FirefoxSampleTable {
   }
 
   toJson(): RawStackTable {
-    return this.stackTable;
+    return finishRawStackTableBuilder(this.stackTable);
   }
 
   findOrAddStack(

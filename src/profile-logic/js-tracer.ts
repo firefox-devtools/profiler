@@ -4,6 +4,8 @@
 import {
   getEmptySamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
+  finishRawStackTableBuilder,
+  getRawStackTableBuilderWithExistingContents,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/types';
@@ -512,7 +514,10 @@ export function convertJsTracerToThreadWithoutSamples(
     samples,
   };
 
-  const { funcTable, frameTable, stackTable } = shared;
+  const { funcTable, frameTable } = shared;
+  const stackTable = getRawStackTableBuilderWithExistingContents(
+    shared.stackTable
+  );
 
   // Keep a stack of js tracer events, and end timings, that will be used to find
   // the stack prefixes. Once a JS tracer event starts past another event end, the
@@ -619,6 +624,9 @@ export function convertJsTracerToThreadWithoutSamples(
     (unmatchedEventIndexes as any)[unmatchedIndex] = tracerEventIndex;
     unmatchedEventEnds[unmatchedIndex] = end;
   }
+
+  // Write the augmented stackTable back to the shared data.
+  shared.stackTable = finishRawStackTableBuilder(stackTable);
 
   return { thread, stackMap };
 }
