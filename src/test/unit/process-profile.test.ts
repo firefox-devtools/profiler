@@ -1,9 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import { isJsonSlabsFile } from 'json-slabs';
+
 import {
   extractFuncsAndResourcesFromFrameLocations,
   processGeckoProfile,
+  serializeProfileToJsonSlabsFile,
   serializeProfileToJsonString,
   unserializeProfileOfArbitraryFormat,
 } from '../../profile-logic/process-profile';
@@ -398,6 +401,28 @@ describe('serializeProfile', function () {
     const secondRountrip =
       await unserializeProfileOfArbitraryFormat(secondSerialized);
     expect(roundtrip).toEqual(secondRountrip);
+  });
+});
+
+describe('serializeProfileToJsonSlabsFile', function () {
+  it('should produce bytes recognized as a JsonSlabs file', function () {
+    const profile = processGeckoProfile(createGeckoProfile());
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    expect(isJsonSlabsFile(bytes)).toBe(true);
+  });
+
+  it('should produce the same profile in a roundtrip', async function () {
+    const profile = processGeckoProfile(createGeckoProfile());
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    const roundtrip = await unserializeProfileOfArbitraryFormat(bytes);
+
+    // Two roundtrips should be stable, mirroring the JSON serializer test
+    // above (see issue #1599 for why we can't compare against the original
+    // profile directly).
+    const secondBytes = serializeProfileToJsonSlabsFile(roundtrip);
+    const secondRoundtrip =
+      await unserializeProfileOfArbitraryFormat(secondBytes);
+    expect(roundtrip).toEqual(secondRoundtrip);
   });
 });
 

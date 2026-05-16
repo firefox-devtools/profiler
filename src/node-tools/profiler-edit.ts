@@ -4,7 +4,11 @@
 import fs from 'fs';
 import minimist from 'minimist';
 
-import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  serializeProfileToJsonSlabsFile,
+  serializeProfileToJsonString,
+  unserializeProfileOfArbitraryFormat,
+} from 'firefox-profiler/profile-logic/process-profile';
 import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
@@ -128,6 +132,24 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
   }
 }
 
+async function encodeProfileWithFilename(
+  profile: Profile,
+  filename: string
+): Promise<Uint8Array> {
+  if (filename.endsWith('.jslb') || filename.endsWith('.jslb.gz')) {
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    if (filename.endsWith('.jslb.gz')) {
+      return compress(bytes);
+    }
+    return bytes;
+  }
+  const s = serializeProfileToJsonString(profile);
+  if (filename.endsWith('.gz')) {
+    return compress(s);
+  }
+  return new TextEncoder().encode(s);
+}
+
 export async function run(options: CliOptions) {
   const profile = await loadProfile(options.input);
 
@@ -185,15 +207,13 @@ export async function run(options: CliOptions) {
 
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
-  console.log(`Saving profile to ${options.output}`);
-  if (options.output.endsWith('.gz')) {
-    fs.writeFileSync(
-      options.output,
-      await compress(JSON.stringify(compactedProfile))
-    );
-  } else {
-    fs.writeFileSync(options.output, JSON.stringify(compactedProfile));
-  }
+  const outputFilename = options.output;
+  console.log(`Saving profile to ${outputFilename}`);
+  const bytes = await encodeProfileWithFilename(
+    compactedProfile,
+    outputFilename
+  );
+  fs.writeFileSync(outputFilename, bytes);
   console.log('Finished.');
 }
 
