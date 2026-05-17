@@ -3,7 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
-import { type BitSet, makeBitSet, setBit, checkBit } from '../utils/bitset';
+import {
+  type BitSet,
+  makeBitSet,
+  setBit,
+  clearBit,
+  checkBit,
+} from '../utils/bitset';
 
 import type {
   Profile,
@@ -18,6 +24,7 @@ import type {
   NativeSymbolTable,
   Lib,
   SourceTable,
+  IndexIntoFrameTable,
 } from 'firefox-profiler/types';
 import {
   assertExhaustiveCheck,
@@ -78,11 +85,23 @@ const ColDesc = {
 class TableCompactionState {
   markBuffer: BitSet;
   oldIndexToNewIndexPlusOne: Int32Array;
+  oldIndexToCanonicalOldIndexPlusOne: Int32Array;
+  hasCanonicalRedirects: boolean = false; // whether oldIndexToCanonicalOldIndexPlusOne has any non-zero values
   newLength: number | null = null;
 
   constructor(itemCount: number) {
     this.markBuffer = makeBitSet(itemCount);
+    this.oldIndexToCanonicalOldIndexPlusOne = new Int32Array(itemCount);
     this.oldIndexToNewIndexPlusOne = new Int32Array(itemCount);
+  }
+
+  redirectOldIndexToCanonicalOldIndex(
+    redirected: number,
+    canonical: number
+  ): void {
+    clearBit(this.markBuffer, redirected);
+    this.oldIndexToCanonicalOldIndexPlusOne[redirected] = canonical + 1;
+    this.hasCanonicalRedirects = true;
   }
 
   computeIndexTranslation(): void {
@@ -94,6 +113,20 @@ class TableCompactionState {
       }
     }
     this.newLength = newLength;
+
+    if (this.hasCanonicalRedirects) {
+      // Patch redirected (deduped-away) rows so any reference to them
+      // resolves to their canonical row's new index. For tables that didn't
+      // dedup, oldIndexToCanonicalOldIndexPlusOne is all zeros and this loop is a no-op.
+      for (let i = 0; i < this.oldIndexToCanonicalOldIndexPlusOne.length; i++) {
+        const canonicalOldIndex =
+          this.oldIndexToCanonicalOldIndexPlusOne[i] - 1;
+        if (canonicalOldIndex !== -1) {
+          this.oldIndexToNewIndexPlusOne[i] =
+            this.oldIndexToNewIndexPlusOne[canonicalOldIndex];
+        }
+      }
+    }
   }
 }
 
@@ -190,39 +223,27 @@ export function computeCompactedProfile(
     _gatherReferencesInThread(thread, tcs, stringIndexMarkerFieldsByDataType);
   }
 
-  // The order of the _markTableAndComputeTranslation calls is important!
+  // The order of the _markTable calls is important!
   // We only want to mark data that is (transitively) used by thread data.
   // So, for example, we have to mark the funcTable before we mark the
   // sources, so that, by the time we look at the sources, we already know
   // which sources are (transitively) referenced.
-  _markTableAndComputeTranslation(
-    shared.stackTable,
-    tcs.stackTable,
-    stackTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.frameTable,
-    tcs.frameTable,
-    frameTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.funcTable,
-    tcs.funcTable,
-    funcTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.resourceTable,
-    tcs.resourceTable,
-    resourceTableDesc
-  );
-  _markTableAndComputeTranslation(
-    shared.nativeSymbols,
-    tcs.nativeSymbols,
-    nativeSymbolsDesc
-  );
-  _markTableAndComputeTranslation(shared.sources, tcs.sources, sourcesDesc);
-  tcs.stringArray.computeIndexTranslation();
+  _markTable(shared.stackTable, tcs.stackTable, stackTableDesc);
+  _markTable(shared.frameTable, tcs.frameTable, frameTableDesc);
+  _markTable(shared.funcTable, tcs.funcTable, funcTableDesc);
+  _markTable(shared.resourceTable, tcs.resourceTable, resourceTableDesc);
+  _markTable(shared.nativeSymbols, tcs.nativeSymbols, nativeSymbolsDesc);
+  _markTable(shared.sources, tcs.sources, sourcesDesc);
+
   tcs.libs.computeIndexTranslation();
+  tcs.stringArray.computeIndexTranslation();
+  tcs.sources.computeIndexTranslation();
+  tcs.nativeSymbols.computeIndexTranslation();
+  tcs.resourceTable.computeIndexTranslation();
+  tcs.funcTable.computeIndexTranslation();
+  _dedupFrameTable(shared.frameTable, tcs.frameTable);
+  tcs.frameTable.computeIndexTranslation();
+  tcs.stackTable.computeIndexTranslation();
 
   // Step 2: Create new tables for everything, skipping unreferenced entries.
   // The order of calls to _compactTable doesn't matter - we've already computed
@@ -279,7 +300,7 @@ export function computeCompactedProfile(
 
 // --- Step 1: Marking ---
 
-function _markTableAndComputeTranslation<T>(
+function _markTable<T>(
   table: T,
   thisTableCompactionState: TableCompactionState,
   tableDesc: TableDescription<T>
@@ -327,8 +348,6 @@ function _markTableAndComputeTranslation<T>(
         throw assertExhaustiveCheck(desc);
     }
   }
-
-  thisTableCompactionState.computeIndexTranslation();
 }
 
 function markColumn(col: Array<number>, shouldMark: BitSet, markBuf: BitSet) {
@@ -385,6 +404,111 @@ function markColumnWithNegOneableFields(
       }
     }
   }
+}
+
+// Collapse identical rows in the frame table. Two rows are identical if every
+// column has the same value. Duplicates often arise during profile processing
+// because Firefox's gecko profile has a per-thread frame table, and
+// process-profile.ts merges those into a single frame table without
+// deduplicating (so that profile loading stays fast). Compacting runs in
+// contexts where small profile size matters more than latency, so we dedupe
+// here.
+//
+// We sort an array of marked frame indices using a comparator that walks the
+// frame columns directly (no per-frame object is constructed). After sorting,
+// duplicates are adjacent and a single linear pass picks one canonical frame
+// per group, redirects the others to it, and clears their bits in markBuffer
+// so they get skipped during the compact phase.
+function _dedupFrameTable(
+  frameTable: FrameTable,
+  state: TableCompactionState
+): void {
+  const markedFrames = new Array<IndexIntoFrameTable>();
+  const { markBuffer } = state;
+  for (let i = 0; i < frameTable.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      markedFrames.push(i);
+    }
+  }
+
+  if (markedFrames.length === 0) {
+    return;
+  }
+
+  // Sort, so that we can deduplicate without creating hash strings.
+  markedFrames.sort((a, b) => _compareFrames(frameTable, a, b));
+
+  // Walk the sorted list. If we find matching subsequent frames,
+  // redirect the later frames to the first matching frame.
+  let prevFrame = markedFrames[0];
+  for (let i = 1; i < markedFrames.length; i++) {
+    const frameIndex = markedFrames[i];
+    if (_compareFrames(frameTable, frameIndex, prevFrame) === 0) {
+      state.redirectOldIndexToCanonicalOldIndex(frameIndex, prevFrame);
+      continue;
+    }
+    prevFrame = frameIndex;
+  }
+}
+
+function _compareFrames(frameTable: FrameTable, a: number, b: number): number {
+  let d;
+  const funcCol = frameTable.func;
+  d = funcCol[a] - funcCol[b];
+  if (d !== 0) {
+    return d;
+  }
+  const addressCol = frameTable.address;
+  d = addressCol[a] - addressCol[b];
+  if (d !== 0) {
+    return d;
+  }
+  const inlineDepthCol = frameTable.inlineDepth;
+  d = inlineDepthCol[a] - inlineDepthCol[b];
+  if (d !== 0) {
+    return d;
+  }
+  const categoryCol = frameTable.category;
+  d = _compareNullableNumber(categoryCol[a], categoryCol[b]);
+  if (d !== 0) {
+    return d;
+  }
+  const subcategoryCol = frameTable.subcategory;
+  d = _compareNullableNumber(subcategoryCol[a], subcategoryCol[b]);
+  if (d !== 0) {
+    return d;
+  }
+  const nativeSymbolCol = frameTable.nativeSymbol;
+  d = _compareNullableNumber(nativeSymbolCol[a], nativeSymbolCol[b]);
+  if (d !== 0) {
+    return d;
+  }
+  const innerWindowIDCol = frameTable.innerWindowID;
+  d = _compareNullableNumber(innerWindowIDCol[a], innerWindowIDCol[b]);
+  if (d !== 0) {
+    return d;
+  }
+  const lineCol = frameTable.line;
+  d = _compareNullableNumber(lineCol[a], lineCol[b]);
+  if (d !== 0) {
+    return d;
+  }
+  const columnCol = frameTable.column;
+  d = _compareNullableNumber(columnCol[a], columnCol[b]);
+  if (d !== 0) {
+    return d;
+  }
+  return 0;
+}
+
+function _compareNullableNumber(a: number | null, b: number | null): number {
+  if (a === null) {
+    return b === null ? 0 : -1;
+  }
+  if (b === null) {
+    return 1;
+  }
+  return a - b;
 }
 
 function _gatherReferencesInThread(
