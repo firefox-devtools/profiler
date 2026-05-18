@@ -4470,6 +4470,23 @@ export function determineTimelineType(profile: Profile): TimelineType {
 }
 
 /**
+ * Compute an innerWindowID → tabID lookup from a profile's pages list.
+ * Returns null when the profile has no pages.
+ */
+export function computeInnerWindowIDToTabMap(
+  pages: PageList | null | undefined
+): Map<InnerWindowID, TabID> | null {
+  if (!pages) {
+    return null;
+  }
+  const innerWindowIDToTabMap = new Map<InnerWindowID, TabID>();
+  for (const page of pages) {
+    innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
+  }
+  return innerWindowIDToTabMap;
+}
+
+/**
  * Compute a map of tab to thread indexes map. This is useful for learning which
  * threads are involved for tabs. This is mainly used for the tab selector on
  * the top left corner.

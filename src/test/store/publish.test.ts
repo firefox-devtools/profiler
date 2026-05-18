@@ -59,6 +59,7 @@ import {
   hideGlobalTrack,
   commitRange,
 } from '../../actions/profile-view';
+import { changeTabFilter } from '../../actions/receive-profile';
 
 import {
   retrieveUploadedProfileInformationFromDb,
@@ -626,6 +627,102 @@ describe('attemptToPublish', function () {
 
     expect(getHiddenGlobalTracks(getState())).toEqual(
       new Set([newScreenshotTrackIndex])
+    );
+  });
+
+  it('keeps a hidden screenshot track hidden after sanitization when a tab filter is active', async function () {
+    const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D', 'E');
+    profile.meta.updateChannel = 'release';
+
+    profile.threads[0].name = 'GeckoMain';
+    profile.threads[0].isMainThread = true;
+    profile.threads[0].processType = 'default';
+    profile.threads[0].pid = '100';
+    profile.threads[1].name = 'GeckoMain';
+    profile.threads[1].isMainThread = true;
+    profile.threads[1].processType = 'tab';
+    profile.threads[1].pid = '200';
+    profile.threads[2].name = 'GeckoMain';
+    profile.threads[2].isMainThread = true;
+    profile.threads[2].processType = 'tab';
+    profile.threads[2].pid = '300';
+    profile.threads[3].name = 'GeckoMain';
+    profile.threads[3].isMainThread = true;
+    profile.threads[3].processType = 'tab';
+    profile.threads[3].pid = '400';
+    profile.threads[4].name = 'GeckoMain';
+    profile.threads[4].isMainThread = true;
+    profile.threads[4].processType = 'tab';
+    profile.threads[4].pid = '500';
+
+    const tab1ID = 1;
+    const tab2ID = 2;
+    const tab1InnerWindowID = 1001;
+    const tab2InnerWindowID = 1002;
+    profile.pages = [
+      {
+        tabID: tab1ID,
+        innerWindowID: tab1InnerWindowID,
+        url: 'https://tab1.example.com/',
+        embedderInnerWindowID: 0,
+      },
+      {
+        tabID: tab2ID,
+        innerWindowID: tab2InnerWindowID,
+        url: 'https://tab2.example.com/',
+        embedderInnerWindowID: 0,
+      },
+    ];
+    profile.threads[0].usedInnerWindowIDs = [tab1InnerWindowID];
+    profile.threads[1].usedInnerWindowIDs = [tab1InnerWindowID];
+    profile.threads[2].usedInnerWindowIDs = [tab1InnerWindowID];
+    profile.threads[3].usedInnerWindowIDs = [tab2InnerWindowID];
+    profile.threads[4].usedInnerWindowIDs = [tab2InnerWindowID];
+
+    addRawMarkersToThread(profile.threads[2], profile.shared, [
+      makeCompositorScreenshot(0.5),
+    ]);
+
+    const store = storeWithProfile(profile);
+    const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+      setupFakeUploadsWithStore(store);
+
+    dispatch(updateSharingOption('includeScreenshots', true));
+    dispatch(changeTabFilter(tab1ID));
+
+    const globalTracksBefore = getGlobalTracks(getState());
+    const pid200TrackIndex = globalTracksBefore.findIndex(
+      (t) => t.type === 'process' && t.pid === '200'
+    );
+    const screenshotTrackIndex = globalTracksBefore.findIndex(
+      (t) => t.type === 'screenshots'
+    );
+    expect(pid200TrackIndex).toBeGreaterThanOrEqual(0);
+    expect(screenshotTrackIndex).toBeGreaterThanOrEqual(0);
+
+    dispatch(hideGlobalTrack(pid200TrackIndex));
+    dispatch(hideGlobalTrack(screenshotTrackIndex));
+
+    expect(getHiddenGlobalTracks(getState())).toContain(screenshotTrackIndex);
+
+    const publishAttempt = dispatch(attemptToPublish());
+    resolveUpload(JWT_TOKEN);
+    await assertUploadSuccess(publishAttempt);
+
+    const globalTracksAfter = getGlobalTracks(getState());
+    expect(
+      globalTracksAfter.some((t) => t.type === 'process' && t.pid === '200')
+    ).toBe(false);
+    expect(
+      globalTracksAfter.some((t) => t.type === 'process' && t.pid === '300')
+    ).toBe(true);
+    const newScreenshotTrackIndex = globalTracksAfter.findIndex(
+      (t) => t.type === 'screenshots'
+    );
+    expect(newScreenshotTrackIndex).toBeGreaterThanOrEqual(0);
+
+    expect(getHiddenGlobalTracks(getState())).toContain(
+      newScreenshotTrackIndex
     );
   });
 

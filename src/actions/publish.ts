@@ -29,7 +29,6 @@ import {
   getCommittedRange,
   getGlobalTracks,
   getLocalTracksByPid,
-  getTabToThreadIndexesMap,
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -43,6 +42,10 @@ import {
   computeHiddenTracksAfterSanitization,
   computeTrackOrderAfterSanitization,
 } from 'firefox-profiler/profile-logic/tracks';
+import {
+  computeInnerWindowIDToTabMap,
+  computeTabToThreadIndexesMap,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Action,
@@ -494,13 +497,17 @@ export function attemptToPublish(
             oldThreadIndexToNew
           );
 
-          const tabToThreadIndexesMap =
-            getTabToThreadIndexesMap(prePublishedState);
+          // The selector-derived map keys ThreadIndex values from the
+          // prePublishedState; rebuild it against the sanitized profile.
+          const newTabToThreadIndexesMap = computeTabToThreadIndexesMap(
+            profile.threads,
+            computeInnerWindowIDToTabMap(profile.pages)
+          );
           const tabFilter = getTabFilter(prePublishedState);
           const newGlobalTracks = computeGlobalTracks(
             profile,
             tabFilter,
-            tabToThreadIndexesMap
+            newTabToThreadIndexesMap
           );
           const newLocalTracksByPid = computeLocalTracksByPid(
             profile,
