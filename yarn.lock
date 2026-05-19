@@ -4132,10 +4132,10 @@ devtools-license-check@^0.9.0:
   dependencies:
     license-checker "^9.0.3"
 
-devtools-reps@^0.27.6:
-  version "0.27.6"
-  resolved "https://registry.yarnpkg.com/devtools-reps/-/devtools-reps-0.27.6.tgz#26aa682cfd058e171064bc86da6590e80785933f"
-  integrity sha512-ukQco/6e3nmTOk/qDnW7VuMga6XAlshJ/aBsCfq6ZTmaqJG2YybK7STV6oEiy2vi1U/YGQpg46mhPNx4fKytzw==
+devtools-reps@^0.27.7:
+  version "0.27.7"
+  resolved "https://registry.yarnpkg.com/devtools-reps/-/devtools-reps-0.27.7.tgz#39292c8daea8afb38320ecb0c490f0191ed30f1a"
+  integrity sha512-64bMesSloBN1flY9S1Ni4BxcmJkhQSSrUMYYXTeM+dfV65A+BwJTgBFmC1etA2JPoRpY9lW26WkYq5GSm5hxOw==
   dependencies:
     prop-types "^15.7.2"
     react "^16.8.6"
