@@ -16,6 +16,8 @@ import {
   type CliTestContext,
 } from './utils';
 
+import type { FilterStackResult } from '../../protocol';
+
 describe('profiler-cli basic functionality', () => {
   let ctx: CliTestContext;
 
@@ -254,6 +256,24 @@ describe('profiler-cli basic functionality', () => {
       filters: unknown[];
     };
     expect(afterPop.filters).toHaveLength(0);
+  });
+
+  it('filter push supports --during-marker with --search', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['thread', 'select', 't-0']);
+
+    await cli(ctx, ['filter', 'push', '--during-marker', '--search', 'Reflow']);
+
+    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
+    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
+
+    expect(filterList.filters).toHaveLength(1);
+    expect(filterList.filters[0].transforms).toEqual([
+      { type: 'filter-samples', filterType: 'marker-search', filter: 'Reflow' },
+    ]);
+    expect(filterList.filters[0].description).toBe(
+      'during marker matching: "Reflow"'
+    );
   });
 
   it('ephemeral sample filters do not persist into session state', async () => {
