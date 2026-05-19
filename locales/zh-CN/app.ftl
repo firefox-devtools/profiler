@@ -1045,6 +1045,12 @@ BottomBox--assembly-code-not-available-title = 汇编代码不可用
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = 关于支持的使用场景和改进计划，请参阅 <a>issue #4520</a>。
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = 退出全屏
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = 全屏
 SourceView--close-button =
     .title = 关闭源代码视图
 
