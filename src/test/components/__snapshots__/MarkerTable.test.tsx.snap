@@ -127,7 +127,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display markers that match a certain name"
             type="search"

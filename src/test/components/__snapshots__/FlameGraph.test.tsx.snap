@@ -500,7 +500,7 @@ exports[`FlameGraph matches the snapshot 1`] = `
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
