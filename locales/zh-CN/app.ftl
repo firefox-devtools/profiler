@@ -304,7 +304,7 @@ IdleSearchField--search-input =
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
-JsTracerSettings--show-only-self-time = 只显示自身时间
+JsTracerSettings--show-only-self-time = 只显示自身耗时
     .title = 只显示调用节点所用的时间，而忽略其子节点。
 
 ## ListOfPublishedProfiles
