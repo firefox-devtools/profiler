@@ -10,8 +10,10 @@ import type {
   Pid,
   GlobalTrack,
   LocalTrack,
+  Track,
   TrackIndex,
   RawCounter,
+  CounterIndex,
   Tid,
   TrackReference,
   TabID,
@@ -494,6 +496,148 @@ export function addProcessCPUTracksForProcess(
   }
 
   return newLocalTracksByPid;
+}
+
+/**
+ * Build an identity key for a track based on properties that survive
+ * sanitization. When a translation map is provided for the dimension a track
+ * keys on, the source-side index is normalized through it; a missing entry
+ * means the track was removed and the key is null. Marker tracks key on a
+ * string-table index that sanitization reshuffles, so they're not matched
+ * here.
+ */
+function _trackIdentityKey(
+  track: Track,
+  threadIndexTranslation: Map<ThreadIndex, ThreadIndex> | null,
+  counterIndexTranslation: Map<CounterIndex, CounterIndex> | null
+): string | null {
+  switch (track.type) {
+    case 'process':
+      return `process:${track.pid}`;
+    case 'screenshots':
+      return `screenshots:${track.id}`;
+    case 'visual-progress':
+    case 'perceptual-visual-progress':
+    case 'contentful-visual-progress':
+      return track.type;
+    case 'thread':
+    case 'network':
+    case 'ipc':
+    case 'event-delay': {
+      let ti: ThreadIndex | undefined = track.threadIndex;
+      if (threadIndexTranslation !== null) {
+        ti = threadIndexTranslation.get(track.threadIndex);
+        if (ti === undefined) {
+          return null;
+        }
+      }
+      return `${track.type}:${ti}`;
+    }
+    case 'counter': {
+      let ci: CounterIndex | undefined = track.counterIndex;
+      if (counterIndexTranslation !== null) {
+        ci = counterIndexTranslation.get(track.counterIndex);
+        if (ci === undefined) {
+          return null;
+        }
+      }
+      return `counter:${ci}`;
+    }
+    case 'marker':
+      return null;
+    default:
+      throw assertExhaustiveCheck(track, 'Unhandled Track type.');
+  }
+}
+
+/**
+ * Map each old TrackIndex to its new TrackIndex when both old and new track
+ * lists describe the same profile across a sanitization step. Tracks are
+ * matched by stable identity (pid, screenshot id, threadIndex, counterIndex,
+ * or visual-progress singleton); old-side thread- and counter-index values
+ * are normalized through the supplied translation maps before comparison.
+ * Tracks with no match in `newTracks` are absent from the result.
+ */
+export function computeOldTrackIndexToNewTrackIndexMap({
+  oldTracks,
+  newTracks,
+  oldThreadIndexToNew,
+  oldCounterIndexToNew,
+}: {
+  readonly oldTracks: ReadonlyArray<Track>;
+  readonly newTracks: ReadonlyArray<Track>;
+  readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
+  readonly oldCounterIndexToNew: Map<CounterIndex, CounterIndex> | null;
+}): Map<TrackIndex, TrackIndex> {
+  const newKeyToTrackIndex = new Map<string, TrackIndex>();
+  for (let i = 0; i < newTracks.length; i++) {
+    const key = _trackIdentityKey(newTracks[i], null, null);
+    if (key !== null) {
+      newKeyToTrackIndex.set(key, i);
+    }
+  }
+
+  const oldTrackIndexToNewTrackIndex = new Map<TrackIndex, TrackIndex>();
+  for (let i = 0; i < oldTracks.length; i++) {
+    const key = _trackIdentityKey(
+      oldTracks[i],
+      oldThreadIndexToNew,
+      oldCounterIndexToNew
+    );
+    if (key === null) {
+      continue;
+    }
+    const newIndex = newKeyToTrackIndex.get(key);
+    if (newIndex !== undefined) {
+      oldTrackIndexToNewTrackIndex.set(i, newIndex);
+    }
+  }
+
+  return oldTrackIndexToNewTrackIndex;
+}
+
+/**
+ * Translate a Set of hidden track indexes from old to new track-index space.
+ * Hidden tracks whose old index has no match in the new track list are dropped.
+ */
+export function computeHiddenTracksAfterSanitization({
+  oldHiddenTracks,
+  oldTrackIndexToNewTrackIndex,
+}: {
+  readonly oldHiddenTracks: ReadonlySet<TrackIndex>;
+  readonly oldTrackIndexToNewTrackIndex: Map<TrackIndex, TrackIndex>;
+}): Set<TrackIndex> {
+  const newHiddenTracks = new Set<TrackIndex>();
+  for (const oldIndex of oldHiddenTracks) {
+    const newIndex = oldTrackIndexToNewTrackIndex.get(oldIndex);
+    if (newIndex !== undefined) {
+      newHiddenTracks.add(newIndex);
+    }
+  }
+  return newHiddenTracks;
+}
+
+/**
+ * Translate a track-order array from old to new track-index space, preserving
+ * relative order. Indexes with no match in the new track list are dropped;
+ * `initializeGlobalTrackOrder` / `initializeLocalTrackOrderByPid` append any
+ * new tracks not represented in the input order.
+ */
+export function computeTrackOrderAfterSanitization({
+  oldTrackOrder,
+  oldTrackIndexToNewTrackIndex,
+}: {
+  readonly oldTrackOrder: ReadonlyArray<TrackIndex>;
+  readonly oldTrackIndexToNewTrackIndex: Map<TrackIndex, TrackIndex>;
+}): TrackIndex[] {
+  const newTrackOrder: TrackIndex[] = [];
+  for (const oldIndex of oldTrackOrder) {
+    const newIndex = oldTrackIndexToNewTrackIndex.get(oldIndex);
+    if (newIndex !== undefined) {
+      newTrackOrder.push(newIndex);
+    }
+  }
+  return newTrackOrder;
 }
 
 /**
