@@ -842,16 +842,24 @@ exports[`TrackEventDelay matches the component snapshot when event delay tracks 
   style="height: 40px; --graph-height: 40px; --markers-height: 0px;"
 >
   <div
-    class="timelineTrackEventDelayGraph"
+    style="display: contents;"
   >
-    <canvas
-      class="timelineTrackEventDelayCanvas"
-      height="40"
-      width="80"
-    />
     <div
-      class="timelineEmptyThreadIndicator"
-    />
+      class="timelineTrackEventDelayGraph"
+    >
+      <canvas
+        class="timelineTrackEventDelayCanvas"
+        height="40"
+        width="80"
+      />
+      <div
+        style="display: contents;"
+      >
+        <div
+          class="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
   </div>
 </div>
 `;

@@ -234,14 +234,18 @@ exports[`TrackCustomMarker matches the component snapshot 1`] = `
   style="height: 25px; --graph-height: 25px;"
 >
   <div
-    class="timelineTrackCustomMarkerGraph"
+    style="display: contents;"
   >
-    <div>
-      <canvas
-        class="timelineTrackCustomMarkerCanvas"
-        height="25"
-        width="80"
-      />
+    <div
+      class="timelineTrackCustomMarkerGraph"
+    >
+      <div>
+        <canvas
+          class="timelineTrackCustomMarkerCanvas"
+          height="25"
+          width="80"
+        />
+      </div>
     </div>
   </div>
 </div>
