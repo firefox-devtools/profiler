@@ -702,7 +702,7 @@ StackSettings--implementation-all-frames = 所有帧
 StackSettings--implementation-script = 脚本
     .title = 只显示与执行脚本相关的栈帧
 StackSettings--implementation-native2 = 原生
-    .title = 仅显示栈上的原生代码帧
+    .title = 只显示原生代码栈帧
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = 过滤栈：
 StackSettings--use-data-source-label = 数据源：
