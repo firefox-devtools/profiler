@@ -184,6 +184,6 @@ describe('TrackProcessCPU', function () {
     // should be 50% CPU ratio since the highest value is 1000. But if we look
     // at the intervals, we can see that the interval of this sample is 0.5ms
     // therefore, the CPU usage should be 100% instead.
-    expect(screen.getByText(/CPU:/)).toHaveTextContent('100%');
+    expect(screen.getByText(/CPU:/).nextSibling).toHaveTextContent('100%');
   });
 });

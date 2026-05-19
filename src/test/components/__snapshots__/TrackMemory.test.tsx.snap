@@ -12,34 +12,29 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
   class="timelineTrackCounterTooltip"
 >
   <div
-    class="timelineTrackCounterTooltipLine"
+    class="tooltipDetails"
   >
-    <span
-      class="timelineTrackCounterTooltipNumber"
+    <div
+      class="tooltipLabel"
     >
-      0B
-    </span>
-    relative memory at this time
-  </div>
-  <div
-    class="timelineTrackCounterTooltipLine"
-  >
-    <span
-      class="timelineTrackCounterTooltipNumber"
+      relative memory at this time
+      :
+    </div>
+    0B
+    <div
+      class="tooltipLabel"
     >
-      2B
-    </span>
-    memory range in graph
-  </div>
-  <div
-    class="timelineTrackCounterTooltipLine"
-  >
-    <span
-      class="timelineTrackCounterTooltipNumber"
+      memory range in graph
+      :
+    </div>
+    2B
+    <div
+      class="tooltipLabel"
     >
-      36
-    </span>
-    allocations and deallocations since the previous sample
+      allocations and deallocations since the previous sample
+      :
+    </div>
+    36
   </div>
 </div>
 `;
@@ -49,24 +44,22 @@ exports[`TrackMemory has a tooltip that matches the snapshot for counts equallin
   class="timelineTrackCounterTooltip"
 >
   <div
-    class="timelineTrackCounterTooltipLine"
+    class="tooltipDetails"
   >
-    <span
-      class="timelineTrackCounterTooltipNumber"
+    <div
+      class="tooltipLabel"
     >
-      0B
-    </span>
-    relative memory at this time
-  </div>
-  <div
-    class="timelineTrackCounterTooltipLine"
-  >
-    <span
-      class="timelineTrackCounterTooltipNumber"
+      relative memory at this time
+      :
+    </div>
+    0B
+    <div
+      class="tooltipLabel"
     >
-      2B
-    </span>
-    memory range in graph
+      memory range in graph
+      :
+    </div>
+    2B
   </div>
 </div>
 `;
