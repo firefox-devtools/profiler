@@ -9090,10 +9090,10 @@ proto-list@~1.2.1:
   resolved "https://registry.yarnpkg.com/proto-list/-/proto-list-1.2.4.tgz#212d5bfe1318306a420f6402b8e26ff39647a849"
   integrity sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==
 
-protobufjs@^8.0.3:
-  version "8.0.3"
-  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-8.0.3.tgz#f14b215443856b5069d3ddf9c7459aa1d607f9b8"
-  integrity sha512-LBYnMWkKLB8fE/ljROPDbCl7mgLSlI+oBe1fAAr5MTqFg4TIi0tYrVVurJvQggOjnUYMQtEZBjrej59ojMNTHQ==
+protobufjs@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/protobufjs/-/protobufjs-8.2.0.tgz#b062ced7379d1363180473093aeac9a8048e30e7"
+  integrity sha512-oI+GC9iPxrQEr6wragljFKH46/r3rNsm6eg7F2fp6kBUMnf6/mesDRdBuF4gK+OyaKJ8N4C1B9s9cCeYdqFikg==
   dependencies:
     "@types/node" ">=13.7.0"
     long "^5.0.0"
