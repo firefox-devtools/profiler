@@ -4,7 +4,7 @@
 import {
   extractFuncsAndResourcesFromFrameLocations,
   processGeckoProfile,
-  serializeProfile,
+  serializeProfileToJsonString,
   unserializeProfileOfArbitraryFormat,
 } from '../../profile-logic/process-profile';
 import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
@@ -382,19 +382,19 @@ describe('gecko profilerOverhead processing', function () {
 describe('serializeProfile', function () {
   it('should produce a parsable profile string', async function () {
     const profile = processGeckoProfile(createGeckoProfile());
-    const serialized = serializeProfile(profile);
+    const serialized = serializeProfileToJsonString(profile);
     expect(JSON.parse.bind(null, serialized)).not.toThrow();
   });
 
   it('should produce the same profile in a roundtrip', async function () {
     const profile = processGeckoProfile(createGeckoProfile());
-    const serialized = serializeProfile(profile);
+    const serialized = serializeProfileToJsonString(profile);
     const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
     // FIXME: Uncomment this line after resolving `undefined` serialization issue
     // See: https://github.com/firefox-devtools/profiler/issues/1599
     // expect(profile).toEqual(roundtrip);
 
-    const secondSerialized = serializeProfile(roundtrip);
+    const secondSerialized = serializeProfileToJsonString(roundtrip);
     const secondRountrip =
       await unserializeProfileOfArbitraryFormat(secondSerialized);
     expect(roundtrip).toEqual(secondRountrip);

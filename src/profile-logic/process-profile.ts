@@ -1922,7 +1922,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 /**
  * Take a processed profile and convert it to a string.
  */
-export function serializeProfile(profile: Profile): string {
+export function serializeProfileToJsonString(profile: Profile): string {
   return JSON.stringify(profile);
 }
 

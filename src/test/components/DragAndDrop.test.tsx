@@ -12,7 +12,7 @@ import {
   DragAndDropOverlay,
 } from '../../components/app/DragAndDrop';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { serializeProfileToJsonString } from '../../profile-logic/process-profile';
 import { getView } from 'firefox-profiler/selectors';
 import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
 import { mockWebChannel } from '../fixtures/mocks/web-channel';
@@ -100,9 +100,13 @@ describe('app/DragAndDrop', () => {
     const [dragAndDrop, overlay] = container.children;
 
     const { profile } = getProfileFromTextSamples('A');
-    const file = new File([serializeProfile(profile)], 'profile.json', {
-      type: 'application/json',
-    });
+    const file = new File(
+      [serializeProfileToJsonString(profile)],
+      'profile.json',
+      {
+        type: 'application/json',
+      }
+    );
     const files = [file];
 
     fireEvent.dragEnter(dragAndDrop);
