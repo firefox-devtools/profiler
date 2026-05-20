@@ -16,6 +16,7 @@ import {
   getFriendlyThreadName,
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
+  computeInnerWindowIDToTabMap,
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
   reserveFunctionsForCollapsedResources,
@@ -428,19 +429,7 @@ export const getInnerWindowIDToPageMap: Selector<Map<
 export const getInnerWindowIDToTabMap: Selector<Map<
   InnerWindowID,
   TabID
-> | null> = createSelector(getPageList, (pages) => {
-  if (!pages) {
-    // Return null if there are no pages.
-    return null;
-  }
-
-  const innerWindowIDToTabMap: Map<InnerWindowID, TabID> = new Map();
-  for (const page of pages) {
-    innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
-  }
-
-  return innerWindowIDToTabMap;
-});
+> | null> = createSelector(getPageList, computeInnerWindowIDToTabMap);
 
 /**
  * Return a map of tab to thread indexes map. This is useful for learning which
