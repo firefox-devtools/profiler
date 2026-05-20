@@ -155,48 +155,6 @@ export async function extractJsonFromArrayBuffer(
 }
 
 /**
- * Don't trust third party responses, try and handle a variety of responses gracefully.
- */
-async function _extractJsonFromResponse(
-  response: Response,
-  reportError: (...data: Array<any>) => void,
-  fileType: 'application/json' | null
-): Promise<unknown> {
-  let arrayBuffer: ArrayBuffer | null = null;
-  try {
-    // await before returning so that we can catch JSON parse errors.
-    arrayBuffer = await response.arrayBuffer();
-    return await extractJsonFromArrayBuffer(arrayBuffer);
-  } catch (error) {
-    // Change the error message depending on the circumstance:
-    let message;
-    if (error && typeof error === 'object' && error.name === 'AbortError') {
-      message = 'The network request to load the profile was aborted.';
-    } else if (fileType === 'application/json') {
-      message = 'The profile’s JSON could not be decoded.';
-    } else if (fileType === null && arrayBuffer !== null) {
-      // If the content type is not specified, use a raw array buffer
-      // to fallback to other supported profile formats.
-      return arrayBuffer;
-    } else {
-      message = oneLine`
-        The profile could not be downloaded and decoded. This does not look like a supported file
-        type.
-      `;
-    }
-
-    // Provide helpful debugging information to the console.
-    reportError(message);
-    reportError('JSON parsing error:', error);
-    reportError('Fetch response:', response);
-
-    throw new Error(
-      `${message} The full error information has been printed out to the DevTool’s console.`
-    );
-  }
-}
-
-/**
  * Attempt to load a zip file from a third party. This process can fail, so make sure
  * to handle and report the error if it does.
  */
@@ -228,12 +186,13 @@ async function _extractZipFromResponse(
 }
 
 export type ProfileOrZip =
-  | { responseType: 'PROFILE'; profile: unknown }
+  | { responseType: 'BYTES'; bytes: Uint8Array<ArrayBuffer> }
   | { responseType: 'ZIP'; zip: JSZip };
 
 /**
- * This function guesses the correct content-type (even if one isn't sent) and then
- * attempts to use the proper method to extract the response.
+ * Use the content-type (or URL extension) to pick between zip and "bytes".
+ * Bytes are returned as-is; gzip decompression and format detection happen
+ * downstream in `unserializeProfileOfArbitraryFormat`.
  */
 async function _extractProfileOrZipFromResponse(
   url: string,
@@ -251,17 +210,10 @@ async function _extractProfileOrZipFromResponse(
         zip: await _extractZipFromResponse(response, reportError),
       };
     case 'application/json':
-    case null:
-      // The content type is null if it is unknown, or an unsupported type. Go ahead
-      // and try to process it as a profile.
-      return {
-        responseType: 'PROFILE',
-        profile: await _extractJsonFromResponse(
-          response,
-          reportError,
-          contentType
-        ),
-      };
+    case null: {
+      const buffer = await response.arrayBuffer();
+      return { responseType: 'BYTES', bytes: new Uint8Array(buffer) };
+    }
     default:
       throw assertExhaustiveCheck(contentType);
   }

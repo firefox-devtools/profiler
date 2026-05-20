@@ -163,7 +163,7 @@ async function fetchAndParseProfile(
 
   const upgradeInfo: ProfileUpgradeInfo = {};
   const profile = await unserializeProfileOfArbitraryFormat(
-    response.profile,
+    response.bytes,
     fetchUrl,
     upgradeInfo
   );
