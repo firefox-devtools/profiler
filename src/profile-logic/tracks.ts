@@ -499,17 +499,31 @@ export function addProcessCPUTracksForProcess(
 }
 
 /**
+ * Decode an `oldXToNewXPlusOne` entry. The 0 sentinel means the source
+ * index was removed during sanitization.
+ */
+function _translatePlusOne(
+  plusOne: Int32Array | null,
+  oldIndex: number
+): number | undefined {
+  if (plusOne === null) {
+    return oldIndex;
+  }
+  const stored = plusOne[oldIndex];
+  return stored === 0 ? undefined : stored - 1;
+}
+
+/**
  * Build an identity key for a track based on properties that survive
  * sanitization. When a translation map is provided for the dimension a track
  * keys on, the source-side index is normalized through it; a missing entry
- * means the track was removed and the key is null. Marker tracks key on a
- * string-table index that sanitization reshuffles, so they're not matched
- * here.
+ * means the track was removed and the key is null.
  */
 function _trackIdentityKey(
   track: Track,
   threadIndexTranslation: Map<ThreadIndex, ThreadIndex> | null,
-  counterIndexTranslation: Map<CounterIndex, CounterIndex> | null
+  counterIndexTranslation: Map<CounterIndex, CounterIndex> | null,
+  stringIndexTranslation: Int32Array | null
 ): string | null {
   switch (track.type) {
     case 'process':
@@ -524,27 +538,42 @@ function _trackIdentityKey(
     case 'network':
     case 'ipc':
     case 'event-delay': {
-      let ti: ThreadIndex | undefined = track.threadIndex;
-      if (threadIndexTranslation !== null) {
-        ti = threadIndexTranslation.get(track.threadIndex);
-        if (ti === undefined) {
-          return null;
-        }
+      const threadIndex =
+        threadIndexTranslation === null
+          ? track.threadIndex
+          : threadIndexTranslation.get(track.threadIndex);
+      if (threadIndex === undefined) {
+        return null;
       }
-      return `${track.type}:${ti}`;
+      return `${track.type}:${threadIndex}`;
     }
     case 'counter': {
-      let ci: CounterIndex | undefined = track.counterIndex;
-      if (counterIndexTranslation !== null) {
-        ci = counterIndexTranslation.get(track.counterIndex);
-        if (ci === undefined) {
-          return null;
-        }
+      const counterIndex =
+        counterIndexTranslation === null
+          ? track.counterIndex
+          : counterIndexTranslation.get(track.counterIndex);
+      if (counterIndex === undefined) {
+        return null;
       }
-      return `counter:${ci}`;
+      return `counter:${counterIndex}`;
     }
-    case 'marker':
-      return null;
+    case 'marker': {
+      const threadIndex =
+        threadIndexTranslation === null
+          ? track.threadIndex
+          : threadIndexTranslation.get(track.threadIndex);
+      if (threadIndex === undefined) {
+        return null;
+      }
+      const markerName = _translatePlusOne(
+        stringIndexTranslation,
+        track.markerName
+      );
+      if (markerName === undefined) {
+        return null;
+      }
+      return `marker:${threadIndex}:${track.markerSchema.name}:${markerName}`;
+    }
     default:
       throw assertExhaustiveCheck(track, 'Unhandled Track type.');
   }
@@ -554,24 +583,27 @@ function _trackIdentityKey(
  * Map each old TrackIndex to its new TrackIndex when both old and new track
  * lists describe the same profile across a sanitization step. Tracks are
  * matched by stable identity (pid, screenshot id, threadIndex, counterIndex,
- * or visual-progress singleton); old-side thread- and counter-index values
- * are normalized through the supplied translation maps before comparison.
- * Tracks with no match in `newTracks` are absent from the result.
+ * visual-progress singleton, or marker schema name plus marker name string);
+ * old-side thread, counter, and string-table indexes are normalized through
+ * the supplied translation maps before comparison. Tracks with no match in
+ * `newTracks` are absent from the result.
  */
 export function computeOldTrackIndexToNewTrackIndexMap({
   oldTracks,
   newTracks,
   oldThreadIndexToNew,
   oldCounterIndexToNew,
+  oldStringToNewStringPlusOne,
 }: {
   readonly oldTracks: ReadonlyArray<Track>;
   readonly newTracks: ReadonlyArray<Track>;
   readonly oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null;
   readonly oldCounterIndexToNew: Map<CounterIndex, CounterIndex> | null;
+  readonly oldStringToNewStringPlusOne: Int32Array | null;
 }): Map<TrackIndex, TrackIndex> {
   const newKeyToTrackIndex = new Map<string, TrackIndex>();
   for (let i = 0; i < newTracks.length; i++) {
-    const key = _trackIdentityKey(newTracks[i], null, null);
+    const key = _trackIdentityKey(newTracks[i], null, null, null);
     if (key !== null) {
       newKeyToTrackIndex.set(key, i);
     }
@@ -582,7 +614,8 @@ export function computeOldTrackIndexToNewTrackIndexMap({
     const key = _trackIdentityKey(
       oldTracks[i],
       oldThreadIndexToNew,
-      oldCounterIndexToNew
+      oldCounterIndexToNew,
+      oldStringToNewStringPlusOne
     );
     if (key === null) {
       continue;

@@ -69,6 +69,7 @@ import type {
   Category,
   RawCounter,
   Counter,
+  CounterIndex,
   RawCounterSamplesTable,
   CounterSamplesTable,
   NativeAllocationsTable,
@@ -4484,6 +4485,47 @@ export function computeInnerWindowIDToTabMap(
     innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
   }
   return innerWindowIDToTabMap;
+}
+
+/**
+ * Map each old CounterIndex to its new CounterIndex across a sanitization
+ * step. Sanitization removes counters whose parent thread is removed; the
+ * survivors keep their relative order. Each counter is identified by
+ * (pid, category, name, mainThreadIndex), with the old-side mainThreadIndex
+ * normalized through `oldThreadIndexToNew`.
+ */
+export function computeOldCounterIndexToNew(
+  oldCounters: RawCounter[] | null | undefined,
+  newCounters: RawCounter[] | null | undefined,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): Map<CounterIndex, CounterIndex> {
+  const result = new Map<CounterIndex, CounterIndex>();
+  if (!oldCounters || !newCounters) {
+    return result;
+  }
+  const newKeyToIndex = new Map<string, CounterIndex>();
+  for (let i = 0; i < newCounters.length; i++) {
+    const c = newCounters[i];
+    newKeyToIndex.set(
+      `${c.pid}|${c.category}|${c.name}|${c.mainThreadIndex}`,
+      i
+    );
+  }
+  for (let i = 0; i < oldCounters.length; i++) {
+    const c = oldCounters[i];
+    const newMainThreadIndex = oldThreadIndexToNew.get(c.mainThreadIndex);
+    if (newMainThreadIndex === undefined) {
+      // The counter's parent thread is gone in the new profile, so the
+      // counter is gone too.
+      continue;
+    }
+    const key = `${c.pid}|${c.category}|${c.name}|${newMainThreadIndex}`;
+    const newIndex = newKeyToIndex.get(key);
+    if (newIndex !== undefined) {
+      result.set(i, newIndex);
+    }
+  }
+  return result;
 }
 
 /**

@@ -44,6 +44,7 @@ import {
 } from 'firefox-profiler/profile-logic/tracks';
 import {
   computeInnerWindowIDToTabMap,
+  computeOldCounterIndexToNew,
   computeTabToThreadIndexesMap,
 } from 'firefox-profiler/profile-logic/profile-data';
 
@@ -55,9 +56,6 @@ import type {
   State,
   Profile,
   Pid,
-  RawCounter,
-  CounterIndex,
-  ThreadIndex,
   TrackIndex,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
@@ -255,47 +253,6 @@ async function persistJustUploadedProfileInformationToDb(
   }
 }
 
-/**
- * Map each old CounterIndex to its new CounterIndex across a sanitization
- * step. Sanitization removes counters whose parent thread is removed; the
- * survivors keep their relative order. Each counter is identified by
- * (pid, category, name, mainThreadIndex), with the old-side mainThreadIndex
- * normalized through `oldThreadIndexToNew`.
- */
-function _computeOldCounterIndexToNew(
-  oldCounters: RawCounter[] | null | undefined,
-  newCounters: RawCounter[] | null | undefined,
-  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
-): Map<CounterIndex, CounterIndex> {
-  const result = new Map<CounterIndex, CounterIndex>();
-  if (!oldCounters || !newCounters) {
-    return result;
-  }
-  const newKeyToIndex = new Map<string, CounterIndex>();
-  for (let i = 0; i < newCounters.length; i++) {
-    const c = newCounters[i];
-    newKeyToIndex.set(
-      `${c.pid}|${c.category}|${c.name}|${c.mainThreadIndex}`,
-      i
-    );
-  }
-  for (let i = 0; i < oldCounters.length; i++) {
-    const c = oldCounters[i];
-    const newMainThreadIndex = oldThreadIndexToNew.get(c.mainThreadIndex);
-    if (newMainThreadIndex === undefined) {
-      // The counter's parent thread is gone in the new profile, so the
-      // counter is gone too.
-      continue;
-    }
-    const key = `${c.pid}|${c.category}|${c.name}|${newMainThreadIndex}`;
-    const newIndex = newKeyToIndex.get(key);
-    if (newIndex !== undefined) {
-      result.set(i, newIndex);
-    }
-  }
-  return result;
-}
-
 export type ProfileEncodingResult =
   | {
       type: 'SUCCESS';
@@ -491,7 +448,7 @@ export function attemptToPublish(
         const oldThreadIndexToNew = translationMaps?.oldThreadIndexToNew;
         if (oldThreadIndexToNew) {
           const oldProfile = getProfile(prePublishedState);
-          const oldCounterIndexToNew = _computeOldCounterIndexToNew(
+          const oldCounterIndexToNew = computeOldCounterIndexToNew(
             oldProfile.counters,
             profile.counters,
             oldThreadIndexToNew
@@ -517,11 +474,15 @@ export function attemptToPublish(
           const oldGlobalTracks = getGlobalTracks(prePublishedState);
           const oldLocalTracksByPid = getLocalTracksByPid(prePublishedState);
 
+          const oldStringToNewStringPlusOne =
+            translationMaps?.oldStringToNewStringPlusOne ?? null;
+
           const globalOldToNew = computeOldTrackIndexToNewTrackIndexMap({
             oldTracks: oldGlobalTracks,
             newTracks: newGlobalTracks,
             oldThreadIndexToNew,
             oldCounterIndexToNew,
+            oldStringToNewStringPlusOne,
           });
 
           remappedHiddenGlobalTracks = computeHiddenTracksAfterSanitization({
@@ -546,6 +507,7 @@ export function attemptToPublish(
               newTracks: newLocalTracks,
               oldThreadIndexToNew,
               oldCounterIndexToNew,
+              oldStringToNewStringPlusOne,
             });
             const oldHiddenForPid = oldHiddenLocalByPid.get(pid);
             if (oldHiddenForPid !== undefined) {

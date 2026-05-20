@@ -26,6 +26,7 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
       newTracks,
       oldThreadIndexToNew: null,
       oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.get(0)).toBe(0);
     expect(map.has(1)).toBe(false);
@@ -45,6 +46,7 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
       newTracks,
       oldThreadIndexToNew: null,
       oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.has(0)).toBe(false);
     expect(map.get(1)).toBe(0);
@@ -65,6 +67,7 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
       newTracks,
       oldThreadIndexToNew: null,
       oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.get(0)).toBe(1); // visual-progress
     expect(map.has(1)).toBe(false); // perceptual was removed
@@ -94,6 +97,7 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
       newTracks,
       oldThreadIndexToNew,
       oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.get(0)).toBe(0); // thread:0 → new threadIndex 0
     expect(map.has(1)).toBe(false); // network:1 has no surviving thread
@@ -121,26 +125,108 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
       newTracks,
       oldThreadIndexToNew: null,
       oldCounterIndexToNew,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.get(0)).toBe(0);
     expect(map.has(1)).toBe(false);
     expect(map.get(2)).toBe(1);
   });
 
-  it('does not match marker tracks', function () {
-    // Marker tracks key on a string-table index that sanitization reshuffles,
-    // so the helper deliberately skips them.
-    const markerTrack = {
-      type: 'marker' as const,
-      threadIndex: 0,
-      markerSchema: { name: 'CustomA' } as any,
-      markerName: 42,
-    };
+  it('matches marker tracks by (translated threadIndex, schema name, translated markerName)', function () {
+    const schemaA = { name: 'CustomA' } as any;
+    const schemaB = { name: 'CustomB' } as any;
+    const oldTracks: Track[] = [
+      // Survives: thread translated 0→0, markerName 10→3.
+      {
+        type: 'marker',
+        threadIndex: 0,
+        markerSchema: schemaA,
+        markerName: 10,
+      } as any,
+      // Sanitized away because its thread is gone.
+      {
+        type: 'marker',
+        threadIndex: 1,
+        markerSchema: schemaA,
+        markerName: 11,
+      } as any,
+      // Sanitized away because its marker name string was removed.
+      {
+        type: 'marker',
+        threadIndex: 0,
+        markerSchema: schemaB,
+        markerName: 12,
+      } as any,
+      // Survives: thread 2→1, markerName 13→4.
+      {
+        type: 'marker',
+        threadIndex: 2,
+        markerSchema: schemaB,
+        markerName: 13,
+      } as any,
+    ];
+    const newTracks: Track[] = [
+      {
+        type: 'marker',
+        threadIndex: 0,
+        markerSchema: schemaA,
+        markerName: 3,
+      } as any,
+      {
+        type: 'marker',
+        threadIndex: 1,
+        markerSchema: schemaB,
+        markerName: 4,
+      } as any,
+    ];
+    const oldThreadIndexToNew = new Map<number, number>([
+      [0, 0],
+      [2, 1],
+    ]);
+    // Old string indexes 10, 11, 13 survive (mapping to 3, 5, 4); index 12 was
+    // removed (encoded as 0 in the plusOne array).
+    const oldStringToNewStringPlusOne = new Int32Array(14);
+    oldStringToNewStringPlusOne[10] = 4;
+    oldStringToNewStringPlusOne[11] = 6;
+    oldStringToNewStringPlusOne[12] = 0;
+    oldStringToNewStringPlusOne[13] = 5;
+
     const map = computeOldTrackIndexToNewTrackIndexMap({
-      oldTracks: [markerTrack as Track],
-      newTracks: [markerTrack as Track],
+      oldTracks,
+      newTracks,
+      oldThreadIndexToNew,
+      oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne,
+    });
+    expect(map.get(0)).toBe(0);
+    expect(map.has(1)).toBe(false);
+    expect(map.has(2)).toBe(false);
+    expect(map.get(3)).toBe(1);
+  });
+
+  it('does not match marker tracks whose schema name differs', function () {
+    const oldTracks: Track[] = [
+      {
+        type: 'marker',
+        threadIndex: 0,
+        markerSchema: { name: 'CustomA' } as any,
+        markerName: 5,
+      } as any,
+    ];
+    const newTracks: Track[] = [
+      {
+        type: 'marker',
+        threadIndex: 0,
+        markerSchema: { name: 'CustomB' } as any,
+        markerName: 5,
+      } as any,
+    ];
+    const map = computeOldTrackIndexToNewTrackIndexMap({
+      oldTracks,
+      newTracks,
       oldThreadIndexToNew: null,
       oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.has(0)).toBe(false);
   });
@@ -161,6 +247,7 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
       newTracks,
       oldThreadIndexToNew: null,
       oldCounterIndexToNew: null,
+      oldStringToNewStringPlusOne: null,
     });
     expect(map.get(0)).toBe(0); // process pid 1
     expect(map.has(1)).toBe(false); // screenshot win-A removed
