@@ -1850,17 +1850,16 @@ exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
         </div>
       </div>
     </div>
-    <a
-      class="menuButtonsButton menuButtonsButton-hasLeftBorder"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
+    <div
+      class="buttonWithPanel settingsMenu"
     >
-      Docs
-      <i
-        class="open-in-new"
+      <button
+        aria-expanded="false"
+        class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsButton-hasLeftBorder menuButtonsSettingsButton"
+        title="Settings"
+        type="button"
       />
-    </a>
+    </div>
   </div>
 </body>
 `;
@@ -2029,17 +2028,16 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       Upload Local Profile
     </button>
   </div>
-  <a
-    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
-    href="/docs/"
-    target="_blank"
-    title="Open the documentation in a new window"
+  <div
+    class="buttonWithPanel settingsMenu"
   >
-    Docs
-    <i
-      class="open-in-new"
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsButton-hasLeftBorder menuButtonsSettingsButton"
+      title="Settings"
+      type="button"
     />
-  </a>
+  </div>
 </div>
 `;
 
@@ -2078,17 +2076,16 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
       Permalink
     </button>
   </div>
-  <a
-    class="menuButtonsButton menuButtonsButton-hasLeftBorder"
-    href="/docs/"
-    target="_blank"
-    title="Open the documentation in a new window"
+  <div
+    class="buttonWithPanel settingsMenu"
   >
-    Docs
-    <i
-      class="open-in-new"
+    <button
+      aria-expanded="false"
+      class="buttonWithPanelButton menuButtonsButton menuButtonsButton-hasIcon menuButtonsButton-hasLeftBorder menuButtonsSettingsButton"
+      title="Settings"
+      type="button"
     />
-  </a>
+  </div>
 </div>
 `;
 

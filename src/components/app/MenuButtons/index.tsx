@@ -24,6 +24,7 @@ import {
 /* Note: the order of import is important, from most general to most specific,
  * so that the CSS rules are in the correct order. */
 import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { SettingsMenu } from 'firefox-profiler/components/app/SettingsMenu';
 import { MetaInfoPanel } from './MetaInfo';
 import { PublishPanel } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
@@ -334,15 +335,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
         {this._renderPermalink()}
-        <a
-          href="/docs/"
-          target="_blank"
-          className="menuButtonsButton menuButtonsButton-hasLeftBorder"
-          title="Open the documentation in a new window"
-        >
-          <Localized id="MenuButtons--index--docs">Docs</Localized>
-          <i className="open-in-new" />
-        </a>
+        <SettingsMenu buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsButton-hasLeftBorder menuButtonsSettingsButton" />
       </>
     );
   }

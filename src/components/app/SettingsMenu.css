@@ -1,0 +1,114 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.settingsMenu {
+  --internal-cog-icon: url(../../../res/img/svg/cog-12.svg);
+}
+
+:root.dark-mode {
+  .settingsMenu {
+    --internal-cog-icon: url(../../../res/img/svg/cog-light-12.svg);
+  }
+}
+
+.menuButtonsSettingsButton::before {
+  padding-right: 0;
+  background-image: var(--internal-cog-icon);
+}
+
+.appHeaderSettingsButton {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity 250ms var(--animation-curve);
+}
+
+.appHeaderSettingsButton::before {
+  display: block;
+  width: 22px;
+  height: 22px;
+  background: var(--internal-cog-icon) no-repeat center / 22px;
+  content: '';
+}
+
+.appHeaderSettingsButton:hover {
+  opacity: 0.5;
+}
+
+/* Override the ArrowPanel's default 60px right-offset - the cog sits at the
+ * far right of the top bar, so any larger offset overflows the viewport. */
+.settingsMenuArrowPanel {
+  --offset-from-right: 12px;
+
+  min-width: 200px;
+}
+
+.settingsMenuArrowPanel .arrowPanelContent {
+  padding: 0;
+}
+
+.settingsMenuPanel {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  font-weight: normal;
+  line-height: 1.3;
+}
+
+.settingsMenuRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+}
+
+.settingsMenuLinks {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 4px 0;
+  border-top: 1px solid var(--base-border-color);
+  border-bottom: 1px solid var(--base-border-color);
+}
+
+.settingsMenuLink {
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-weight: 600;
+}
+
+.settingsMenuLink,
+.settingsMenuLink:visited {
+  color: var(--base-foreground-color);
+  text-decoration: none;
+}
+
+.settingsMenuLink:hover {
+  background-color: rgb(0 0 0 / 0.06);
+  text-decoration: none;
+}
+
+:root.dark-mode .settingsMenuLink:hover {
+  background-color: rgb(255 255 255 / 0.08);
+}
+
+.settingsMenuLanguageSwitcher {
+  flex: 1;
+  color: inherit;
+  font: inherit;
+}
+
+:root.dark-mode .settingsMenuLanguageSwitcher {
+  border: 1px solid var(--grey-40);
+  border-radius: 4px;
+  background: var(--grey-60);
+}
