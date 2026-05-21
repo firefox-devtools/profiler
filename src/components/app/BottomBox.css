@@ -132,6 +132,11 @@
   background-image: var(--internal-fullscreen-exit-icon);
 }
 
+.bottom-fullscreen-show-button,
+.bottom-fullscreen-hide-button {
+  background-size: 11px 11px;
+}
+
 .codeLoadingOverlay,
 .sourceCodeErrorOverlay,
 .assemblyCodeErrorOverlay {

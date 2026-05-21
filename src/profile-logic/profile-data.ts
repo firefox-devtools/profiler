@@ -69,6 +69,7 @@ import type {
   Category,
   RawCounter,
   Counter,
+  CounterIndex,
   RawCounterSamplesTable,
   CounterSamplesTable,
   NativeAllocationsTable,
@@ -4360,6 +4361,32 @@ export function getNativeSymbolsForCallNode(
 }
 
 /**
+ * Return all native symbols whose frames are associated with the given function,
+ * across all call paths and all occurrences of the function in the call tree.
+ *
+ * This is the function-level counterpart to getNativeSymbolsForCallNode, which
+ * operates on a single call node (one specific path through the call tree).
+ * Use this when you need assembly coverage for an entire function regardless of
+ * how it was called, and getNativeSymbolsForCallNode when you need it for a
+ * specific call site.
+ */
+export function getNativeSymbolsForFunc(
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable
+): Set<IndexIntoNativeSymbolTable> {
+  const set = new Set<IndexIntoNativeSymbolTable>();
+  for (let frameIndex = 0; frameIndex < frameTable.func.length; frameIndex++) {
+    if (frameTable.func[frameIndex] === funcIndex) {
+      const nativeSymbol = frameTable.nativeSymbol[frameIndex];
+      if (nativeSymbol !== null) {
+        set.add(nativeSymbol);
+      }
+    }
+  }
+  return set;
+}
+
+/**
  * Return the total of the sample weights per native symbol, by
  * accumulating the weight from samples which contribute to the
  * call node of interest's total time.
@@ -4441,6 +4468,64 @@ export function determineTimelineType(profile: Profile): TimelineType {
   }
 
   return 'cpu-category';
+}
+
+/**
+ * Compute an innerWindowID → tabID lookup from a profile's pages list.
+ * Returns null when the profile has no pages.
+ */
+export function computeInnerWindowIDToTabMap(
+  pages: PageList | null | undefined
+): Map<InnerWindowID, TabID> | null {
+  if (!pages) {
+    return null;
+  }
+  const innerWindowIDToTabMap = new Map<InnerWindowID, TabID>();
+  for (const page of pages) {
+    innerWindowIDToTabMap.set(page.innerWindowID, page.tabID);
+  }
+  return innerWindowIDToTabMap;
+}
+
+/**
+ * Map each old CounterIndex to its new CounterIndex across a sanitization
+ * step. Sanitization removes counters whose parent thread is removed; the
+ * survivors keep their relative order. Each counter is identified by
+ * (pid, category, name, mainThreadIndex), with the old-side mainThreadIndex
+ * normalized through `oldThreadIndexToNew`.
+ */
+export function computeOldCounterIndexToNew(
+  oldCounters: RawCounter[] | null | undefined,
+  newCounters: RawCounter[] | null | undefined,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): Map<CounterIndex, CounterIndex> {
+  const result = new Map<CounterIndex, CounterIndex>();
+  if (!oldCounters || !newCounters) {
+    return result;
+  }
+  const newKeyToIndex = new Map<string, CounterIndex>();
+  for (let i = 0; i < newCounters.length; i++) {
+    const c = newCounters[i];
+    newKeyToIndex.set(
+      `${c.pid}|${c.category}|${c.name}|${c.mainThreadIndex}`,
+      i
+    );
+  }
+  for (let i = 0; i < oldCounters.length; i++) {
+    const c = oldCounters[i];
+    const newMainThreadIndex = oldThreadIndexToNew.get(c.mainThreadIndex);
+    if (newMainThreadIndex === undefined) {
+      // The counter's parent thread is gone in the new profile, so the
+      // counter is gone too.
+      continue;
+    }
+    const key = `${c.pid}|${c.category}|${c.name}|${newMainThreadIndex}`;
+    const newIndex = newKeyToIndex.get(key);
+    if (newIndex !== undefined) {
+      result.set(i, newIndex);
+    }
+  }
+  return result;
 }
 
 /**

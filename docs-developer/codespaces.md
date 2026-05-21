@@ -60,5 +60,5 @@ The Codespace is configured using the `.devcontainer/devcontainer.json` file in 
 
 - Node.js environment
 - Automatic port forwarding for port 4242
-- Pre-installed VS Code extensions (ESLint, Prettier, Stylelint)
+- Pre-installed VS Code extensions (ESLint, Oxc, Stylelint)
 - Automatic dependency installation and server startup

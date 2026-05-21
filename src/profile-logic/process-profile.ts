@@ -1984,6 +1984,41 @@ function attemptToFixProcessedProfileThroughMutation(
   return profile;
 }
 
+function decodeUtf8WithNiceError(bytes: Uint8Array): string {
+  try {
+    const textDecoder = new TextDecoder(undefined, { fatal: true });
+    return textDecoder.decode(bytes);
+  } catch (e) {
+    console.error('Source exception:', e);
+    throw new Error(
+      'The profile array buffer could not be parsed as a UTF-8 string.'
+    );
+  }
+}
+
+async function parseJSONFromBytes(bytes: Uint8Array): Promise<any> {
+  const V8_STRING_MAX_SIZE = 512 * 1024 * 1024 - 24; // 512 MiB - 24
+  if (bytes.byteLength < V8_STRING_MAX_SIZE) {
+    const jsonString = decodeUtf8WithNiceError(bytes);
+    return JSON.parse(jsonString);
+  }
+
+  // The payload is too large to fit in a single string (in V8), so we can't decode
+  // it and call JSON.parse on it. Use a streaming JSON parser instead. This is
+  // much slower than native JSON.parse, so we only do it when necessary.
+  const { JSONParser } = await import('@streamparser/json');
+  const parser = new JSONParser({ paths: ['$'] });
+  let result: any;
+  parser.onValue = ({ value }) => {
+    result = value;
+  };
+  parser.write(bytes);
+  if (!parser.isEnded) {
+    throw new Error('Input terminated before end of JSON');
+  }
+  return result;
+}
+
 /**
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
@@ -2005,10 +2040,12 @@ export async function unserializeProfileOfArbitraryFormat(
   upgradeInfo: ProfileUpgradeInfo = {}
 ): Promise<Profile> {
   try {
-    // We used to use `instanceof ArrayBuffer`, but this doesn't work when the
-    // object is constructed from an ArrayBuffer in a different context... which
-    // happens in our tests.
-    if (String(arbitraryFormat) === '[object ArrayBuffer]') {
+    // We use Object.prototype.toString instead of `instanceof ArrayBuffer`
+    // because instanceof doesn't work cross-realm (e.g. in tests), and we
+    // can't use String() since that serializes the full contents of a Uint8Array.
+    if (
+      Object.prototype.toString.call(arbitraryFormat) === '[object ArrayBuffer]'
+    ) {
       const arrayBuffer = arbitraryFormat as ArrayBuffer;
       arbitraryFormat = new Uint8Array(arrayBuffer);
     }
@@ -2032,20 +2069,42 @@ export async function unserializeProfileOfArbitraryFormat(
           await import('./import/simpleperf');
         arbitraryFormat = convertSimpleperfTraceProfile(profileBytes);
       } else {
-        try {
-          const textDecoder = new TextDecoder(undefined, { fatal: true });
-          arbitraryFormat = await textDecoder.decode(profileBytes);
-        } catch (e) {
-          console.error('Source exception:', e);
-          throw new Error(
-            'The profile array buffer could not be parsed as a UTF-8 string.'
+        // Probably a string-based format.
+        // We don't want to materialize a string for the entire profileBytes
+        // here, in case we want to use the streaming JSON parser later. But
+        // to detect perf script + flamegraph, we need to look at some text,
+        // so let's decode the first 4096 bytes and detect the format based
+        // on the first one or two lines.
+        const CHARCODE_LINE_BREAK = 10; // '\n'.charCodeAt(0)
+        const firstPage = profileBytes.subarray(0, 4096);
+        const firstLineBreakPos = firstPage.indexOf(CHARCODE_LINE_BREAK);
+        const secondLineBreakPos =
+          firstLineBreakPos !== -1
+            ? firstPage.indexOf(CHARCODE_LINE_BREAK, firstLineBreakPos + 1)
+            : -1;
+        const sniffEnd =
+          secondLineBreakPos !== -1 ? secondLineBreakPos : firstPage.byteLength;
+        // Non-fatal: the cut may fall inside a multi-byte UTF-8 sequence;
+        // we only need enough text to recognize the format.
+        const firstTwoLinesAsText = new TextDecoder().decode(
+          firstPage.subarray(0, sniffEnd)
+        );
+        if (isPerfScriptFormat(firstTwoLinesAsText)) {
+          arbitraryFormat = convertPerfScriptProfile(
+            decodeUtf8WithNiceError(profileBytes)
           );
+        } else if (isFlameGraphFormat(firstTwoLinesAsText)) {
+          arbitraryFormat = convertFlameGraphProfile(
+            decodeUtf8WithNiceError(profileBytes)
+          );
+        } else {
+          // Try parsing as JSON.
+          arbitraryFormat = await parseJSONFromBytes(profileBytes);
         }
       }
     }
 
     if (typeof arbitraryFormat === 'string') {
-      // The profile could be JSON or the output from `perf script`. Try `perf script` first.
       if (isPerfScriptFormat(arbitraryFormat)) {
         arbitraryFormat = convertPerfScriptProfile(arbitraryFormat);
       } else if (isFlameGraphFormat(arbitraryFormat)) {

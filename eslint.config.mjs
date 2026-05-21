@@ -9,7 +9,6 @@ import jestPlugin from 'eslint-plugin-jest';
 import testingLibraryPlugin from 'eslint-plugin-testing-library';
 import jestFormattingPlugin from 'eslint-plugin-jest-formatting';
 import jestDomPlugin from 'eslint-plugin-jest-dom';
-import prettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
 
 export default defineConfig(
@@ -18,6 +17,7 @@ export default defineConfig(
     ignores: [
       'src/profile-logic/import/proto/**',
       'src/types/libdef/npm/**',
+      'profiler-cli/dist/**',
       'res/**',
       'dist/**',
       'node-tools-dist/**',
@@ -34,11 +34,6 @@ export default defineConfig(
 
   // React config
   reactPlugin.configs.flat.recommended,
-
-  // Prettier config must be placed here to disable formatting rules from the
-  // base configs above, while allowing our custom rules below to take
-  // precedence.
-  prettierConfig,
 
   // Custom configuration for all files
   {
@@ -253,7 +248,7 @@ export default defineConfig(
 
   // Test files override
   {
-    files: ['src/test/**/*'],
+    files: ['src/test/**/*', 'profiler-cli/src/test/**/*'],
     languageOptions: {
       globals: {
         ...globals.jest,
