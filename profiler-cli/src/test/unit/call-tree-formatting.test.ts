@@ -597,4 +597,71 @@ describe('call tree formatting', function () {
       });
     });
   });
+
+  describe('inlined frames', function () {
+    it('shows (inl) suffix and legend for inlined frames in top-down view', function () {
+      // funC is inlined into funB's native symbol (symB).
+      const result = buildTopDownResult(
+        `
+          funA[lib:XUL][address:1005][sym:symA:1000:]
+          funB[lib:XUL][address:2007][sym:symB:2000:]
+          funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]
+        `,
+        { maxNodes: 10 }
+      );
+
+      const formatted = formatThreadSamplesTopDownResult(result);
+
+      expect(formatted).toContain('(inl)');
+      expect(formatted).toContain(
+        'Note: (inl) = inlined by the compiler into the nearest non-inlined ancestor above.'
+      );
+
+      // Only funC should be marked inlined.
+      const lines = formatted.split('\n');
+      const funcCLine = lines.find((l) => l.includes('funC'));
+      const funcBLine = lines.find(
+        (l) => l.includes('funB') && !l.includes('symB')
+      );
+      expect(funcCLine).toBeDefined();
+      expect(funcCLine).toContain('(inl)');
+      expect(funcBLine).toBeDefined();
+      expect(funcBLine).not.toContain('(inl)');
+    });
+
+    it('does not show legend when no frames are inlined', function () {
+      const result = buildTopDownResult(
+        `
+          A
+          B
+          C
+        `,
+        { maxNodes: 10 }
+      );
+
+      const formatted = formatThreadSamplesTopDownResult(result);
+
+      expect(formatted).not.toContain('(inl)');
+      expect(formatted).not.toContain('Note: (inl)');
+    });
+
+    it('shows (inl?) for inverted call nodes with conflicting inlining', function () {
+      // funC is inlined into two different native symbols (symB and symD) at
+      // different sites. In the inverted tree, the root funC call node merges
+      // both, resulting in divergent inlining.
+      const result = buildBottomUpResult(
+        `
+          funA[lib:XUL][address:1005][sym:symA:1000:]         funA[lib:XUL][address:1005][sym:symA:1000:]
+          funB[lib:XUL][address:2007][sym:symB:2000:]         funD[lib:XUL][address:4007][sym:symD:4000:]
+          funC[lib:XUL][address:2007][sym:symB:2000:][inl:1]  funC[lib:XUL][address:4007][sym:symD:4000:][inl:1]
+        `,
+        { maxNodes: 10 }
+      );
+
+      const formatted = formatThreadSamplesBottomUpResult(result);
+
+      expect(formatted).toContain('(inl?)');
+      expect(formatted).toContain('Note: (inl) =');
+    });
+  });
 });

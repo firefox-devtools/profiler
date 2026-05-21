@@ -329,16 +329,26 @@ export type ThreadSamplesResult = {
   heaviestStack: {
     selfSamples: number;
     frameCount: number;
+    hasInlinedFrames: boolean;
     frames: Array<
       FunctionDisplayInfo & {
         totalSamples: number;
         totalPercentage: number;
         selfSamples: number;
         selfPercentage: number;
+        inlineStatus?: InlineStatus;
       }
     >;
   };
 };
+
+/**
+ * Inline status of a frame / call node.
+ * - 'inlined': all calls to this function at this call site were inlined by the
+ *   compiler into the nearest non-inlined ancestor's native function.
+ * - 'divergent': some calls were inlined, some were not.
+ */
+export type InlineStatus = 'inlined' | 'divergent';
 
 export type ThreadSamplesTopDownResult = {
   type: 'thread-samples-top-down';
@@ -385,6 +395,13 @@ export type CallTreeNode = FunctionDisplayInfo & {
   selfPercentage: number;
   /** Original depth in tree before collapsing single-child chains */
   originalDepth: number;
+  /** Whether this call node represents an inlined frame. Unset on the virtual root. */
+  inlineStatus?: InlineStatus;
+  /**
+   * Only set on the synthetic root. True if any node in the tree has an
+   * inlineStatus. Lets consumers skip a full tree walk to detect inlining.
+   */
+  hasInlinedFrames?: boolean;
   children: CallTreeNode[];
   /** Information about truncated children, if any were omitted */
   childrenTruncated?: {
