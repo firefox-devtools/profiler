@@ -14,14 +14,14 @@
  */
 class TextMeasurement {
   _ctx: CanvasRenderingContext2D;
-  _cache: { [id: string]: number };
+  _cache: Map<string, number>;
   _averageCharWidth: number;
   overflowChar: string;
   minWidth: number;
 
   constructor(ctx: CanvasRenderingContext2D) {
     this._ctx = ctx;
-    this._cache = {};
+    this._cache = new Map();
     this._averageCharWidth = this._calcAverageCharWidth();
 
     // TODO - L10N
@@ -50,12 +50,12 @@ class TextMeasurement {
    * @return {number} The text width.
    */
   getTextWidth(text: string): number {
-    const cachedWidth = this._cache[text];
+    const cachedWidth = this._cache.get(text);
     if (cachedWidth !== undefined) {
       return cachedWidth;
     }
     const metrics = this._ctx.measureText(text);
-    this._cache[text] = metrics.width;
+    this._cache.set(text, metrics.width);
     return metrics.width;
   }
 
