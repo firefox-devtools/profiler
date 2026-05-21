@@ -31,34 +31,46 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
         style="--graph-height: 25px; --markers-height: 15px;"
       >
         <div
-          class="timelineMarkers timelineMarkersCounter"
-          data-testid="TimelineMarkersCounter"
+          style="display: contents;"
         >
           <div
-            class="react-contextmenu-wrapper"
+            class="timelineMarkers timelineMarkersCounter"
+            data-testid="TimelineMarkersCounter"
           >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
+            <div
+              class="react-contextmenu-wrapper"
+            >
+              <div>
+                <canvas
+                  class="timelineMarkersCanvas"
+                  height="400"
+                  width="400"
+                />
+              </div>
             </div>
           </div>
         </div>
         <div
-          class="timelineTrackCounterGraph"
+          style="display: contents;"
         >
-          <div>
-            <canvas
-              class="timelineTrackCounterCanvas"
-              height="25"
-              width="400"
-            />
-          </div>
           <div
-            class="timelineEmptyThreadIndicator"
-          />
+            class="timelineTrackCounterGraph"
+          >
+            <div>
+              <canvas
+                class="timelineTrackCounterCanvas"
+                height="25"
+                width="400"
+              />
+            </div>
+            <div
+              style="display: contents;"
+            >
+              <div
+                class="timelineEmptyThreadIndicator"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -92,47 +104,51 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackNetwork"
-        style="height: 35px;"
+        style="display: contents;"
       >
         <div
-          class="react-contextmenu-wrapper treeViewContextMenu"
+          class="timelineTrackNetwork"
+          style="height: 35px;"
         >
-          <canvas
-            class="timelineTrackNetworkCanvas"
-            height="35"
-            width="400"
-          />
           <div
-            class="timelineVerticalIndicatorsLine"
-            data-marker-index="10"
-            data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: var(--red-60); left: 200px;"
-          />
-          <div
-            class="timelineVerticalIndicatorsLine"
-            data-marker-index="11"
-            data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: #000; left: 200px;"
-          />
-          <div
-            class="timelineVerticalIndicatorsLine"
-            data-marker-index="12"
-            data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: var(--blue-50); left: 266.6666666666667px;"
-          />
-          <div
-            class="timelineVerticalIndicatorsLine"
-            data-marker-index="13"
-            data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
-          />
-          <div
-            class="timelineVerticalIndicatorsLine"
-            data-marker-index="14"
-            data-testid="vertical-indicator-line"
-            style="--vertical-indicator-color: var(--magenta-60); left: 333.33333333333337px;"
-          />
+            class="react-contextmenu-wrapper treeViewContextMenu"
+          >
+            <canvas
+              class="timelineTrackNetworkCanvas"
+              height="35"
+              width="400"
+            />
+            <div
+              class="timelineVerticalIndicatorsLine"
+              data-marker-index="10"
+              data-testid="vertical-indicator-line"
+              style="--vertical-indicator-color: var(--red-60); left: 200px;"
+            />
+            <div
+              class="timelineVerticalIndicatorsLine"
+              data-marker-index="11"
+              data-testid="vertical-indicator-line"
+              style="--vertical-indicator-color: #000; left: 200px;"
+            />
+            <div
+              class="timelineVerticalIndicatorsLine"
+              data-marker-index="12"
+              data-testid="vertical-indicator-line"
+              style="--vertical-indicator-color: var(--blue-50); left: 266.6666666666667px;"
+            />
+            <div
+              class="timelineVerticalIndicatorsLine"
+              data-marker-index="13"
+              data-testid="vertical-indicator-line"
+              style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
+            />
+            <div
+              class="timelineVerticalIndicatorsLine"
+              data-marker-index="14"
+              data-testid="vertical-indicator-line"
+              style="--vertical-indicator-color: var(--magenta-60); left: 333.33333333333337px;"
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -169,65 +185,85 @@ Process: \\"tab\\" (222)"
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread expanded"
+        style="display: contents;"
       >
         <div
-          class="timelineMarkers"
-          data-testid="TimelineMarkersJank"
+          class="timelineTrackThread expanded"
         >
           <div
-            class="react-contextmenu-wrapper"
+            style="display: contents;"
           >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
+            <div
+              class="timelineMarkers"
+              data-testid="TimelineMarkersJank"
+            >
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div
-          class="threadActivityGraph"
-        >
-          <div>
-            <canvas
-              class="threadActivityGraphCanvas threadActivityGraphCanvas"
-              height="400"
-              width="400"
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="threadActivityGraph"
             >
-              <h2>
-                Activity Graph for 
-                DOM Worker
-              </h2>
-              <p>
-                This graph shows a visual chart of thread activity.
-              </p>
-            </canvas>
+              <div>
+                <canvas
+                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Activity Graph for 
+                    DOM Worker
+                  </h2>
+                  <p>
+                    This graph shows a visual chart of thread activity.
+                  </p>
+                </canvas>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="threadSampleGraph"
+            >
+              <div>
+                <canvas
+                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Stack Graph for 
+                    DOM Worker
+                  </h2>
+                  <p>
+                    This graph charts the stack height of each sample.
+                  </p>
+                </canvas>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineEmptyThreadIndicator"
+            />
           </div>
         </div>
-        <div
-          class="threadSampleGraph"
-        >
-          <div>
-            <canvas
-              class="threadSampleGraphCanvas threadSampleGraphCanvas"
-              height="400"
-              width="400"
-            >
-              <h2>
-                Stack Graph for 
-                DOM Worker
-              </h2>
-              <p>
-                This graph charts the stack height of each sample.
-              </p>
-            </canvas>
-          </div>
-        </div>
-        <div
-          class="timelineEmptyThreadIndicator"
-        />
       </div>
     </div>
   </div>
@@ -263,18 +299,22 @@ exports[`timeline/LocalTrack with an IPC track matches the snapshot of the IPC t
         style="height: 25px; --markers-height: 25px;"
       >
         <div
-          class="timelineMarkers timelineMarkersIPC"
-          data-testid="TimelineMarkersIPC"
+          style="display: contents;"
         >
           <div
-            class="react-contextmenu-wrapper"
+            class="timelineMarkers timelineMarkersIPC"
+            data-testid="TimelineMarkersIPC"
           >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
+            <div
+              class="react-contextmenu-wrapper"
+            >
+              <div>
+                <canvas
+                  class="timelineMarkersCanvas"
+                  height="400"
+                  width="400"
+                />
+              </div>
             </div>
           </div>
         </div>
