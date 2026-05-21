@@ -447,6 +447,10 @@ type ReceiveProfileAction =
       readonly type: 'UPDATE_PAGES';
       readonly newPages: PageList;
     }
+  | { readonly type: 'START_SOURCE_MAP_FETCHING' }
+  | { readonly type: 'DONE_SOURCE_MAP_FETCHING' }
+  | { readonly type: 'START_SOURCE_MAP_SYMBOLICATION' }
+  | { readonly type: 'SOURCE_MAP_SYMBOLICATION_FAILED' }
   | {
       readonly type: 'BULK_SOURCE_MAP_SYMBOLICATION';
       readonly newFuncTable: FuncTable;

@@ -6,6 +6,7 @@
 // pipeline. Drives `loadProfile` with a mocked BrowserConnection that serves
 // a real source map and minified bundle, then asserts on:
 //   - what was fetched (filtering by id / sourceMapURL / WebChannel version),
+//   - the status reducer transitions,
 //   - the post-symbolication profile state,
 //   - the source view selector reading the original-source content.
 //
@@ -13,14 +14,18 @@
 // in jest.config.js with a no-op stub. For these tests we override
 // global.Worker with an in-process variant that calls
 // runSourceMapSymbolicationCore directly, so the real
-// doSourceMapSymbolication action runs its full Redux flow and the worker
-// internals are exercised.
+// doSourceMapSymbolication action runs its full Redux flow
+// (START_SOURCE_MAP_SYMBOLICATION -> BULK_SOURCE_MAP_SYMBOLICATION /
+// SOURCE_MAP_SYMBOLICATION_FAILED) and the worker internals are exercised.
 
 import { SourceMapGenerator } from 'source-map';
 
 import { runSourceMapSymbolicationCore } from '../../profile-logic/source-map-symbolication';
 import { loadProfile } from '../../actions/receive-profile';
-import { getRawProfileSharedData } from '../../selectors/profile';
+import {
+  getSourceMapSymbolicationStatus,
+  getRawProfileSharedData,
+} from '../../selectors/profile';
 import { getSourceViewCode } from '../../selectors/code';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { updateUrlState } from '../../actions/app';
@@ -346,6 +351,50 @@ describe('receive-profile -> JS source map symbolication', function () {
       // unchanged.
       const { funcTable, stringArray } = getRawProfileSharedData(getState());
       expect(stringArray[funcTable.name[0]]).toBe('Ajs');
+      expect(getSourceMapSymbolicationStatus(getState())).toBe('INACTIVE');
+    });
+  });
+
+  describe('status transitions', function () {
+    it('moves through FETCHING and SYMBOLICATING before settling back to INACTIVE', async function () {
+      const profile = makeProfileWithJsSources([
+        {
+          filename: 'bundle.js',
+          id: 'uuid-x',
+          sourceMapURL: 'https://example.com/bundle.js.map',
+        },
+      ]);
+      const browserConnection = makeMockBrowserConnection({
+        supportsSourceMapFetching: true,
+        sourceMapsById: new Map([['uuid-x', buildSourceMap('bundle.js')]]),
+        jsSourcesById: new Map([['uuid-x', BUNDLE_SOURCE]]),
+      });
+
+      const store = blankStore();
+      // Record every distinct sourceMapSymbolicationStatus value the store
+      // passes through.
+      const statuses: string[] = [
+        getSourceMapSymbolicationStatus(store.getState()),
+      ];
+      store.subscribe(() => {
+        const current = getSourceMapSymbolicationStatus(store.getState());
+        if (statuses[statuses.length - 1] !== current) {
+          statuses.push(current);
+        }
+      });
+
+      await store.dispatch(loadProfile(profile, { browserConnection }));
+
+      // FETCHING is set when fetching starts and reverted to INACTIVE on
+      // DONE_SOURCE_MAP_FETCHING; SYMBOLICATING is set when the worker starts
+      // and cleared by BULK_SOURCE_MAP_SYMBOLICATION on success.
+      expect(statuses).toEqual([
+        'INACTIVE',
+        'FETCHING',
+        'INACTIVE',
+        'SYMBOLICATING',
+        'INACTIVE',
+      ]);
     });
   });
 

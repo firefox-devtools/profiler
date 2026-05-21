@@ -258,7 +258,7 @@ export function finalizeProfileView(
       // Fetch source maps concurrently with native symbolication. Once both
       // have completed, apply JS symbolication on top of the final state.
       sourceMapSymbolicationPromise = Promise.all([
-        doResolveSourceMaps(profile, browserConnection),
+        doResolveSourceMaps(profile, browserConnection, dispatch),
         symbolicationPromise,
       ]).then(([{ resolvedSourceMaps, compiledSources }]) =>
         dispatch(doSourceMapSymbolication(resolvedSourceMaps, compiledSources))
@@ -844,7 +844,8 @@ export async function doSymbolicateProfile(
  */
 async function doResolveSourceMaps(
   profile: Profile,
-  browserConnection: BrowserConnection
+  browserConnection: BrowserConnection,
+  dispatch: Dispatch
 ): Promise<{
   resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>;
   compiledSources: Map<IndexIntoSourceTable, string>;
@@ -872,38 +873,43 @@ async function doResolveSourceMaps(
   const resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap> = new Map();
   const compiledSources: Map<IndexIntoSourceTable, string> = new Map();
 
-  await Promise.all(
-    Array.from(sourceIndexesWithSourceMaps).map(async (sourceIndex) => {
-      const filename = stringArray[sources.filename[sourceIndex]];
-      // sourceId is guaranteed non-null by the filter above.
-      const sourceId = sources.id[sourceIndex] as string;
+  dispatch({ type: 'START_SOURCE_MAP_FETCHING' });
+  try {
+    await Promise.all(
+      Array.from(sourceIndexesWithSourceMaps).map(async (sourceIndex) => {
+        const filename = stringArray[sources.filename[sourceIndex]];
+        // sourceId is guaranteed non-null by the filter above.
+        const sourceId = sources.id[sourceIndex] as string;
 
-      await Promise.all([
-        browserConnection
-          .getSourceMap(sourceId)
-          .then((result) => {
-            resolvedSourceMaps.set(sourceIndex, result);
-          })
-          .catch((e) => {
-            console.warn(
-              `Failed to fetch source map for "${filename}" (id=${sourceId}):`,
-              e
-            );
-          }),
-        browserConnection
-          .getJSSource(sourceId)
-          .then((text) => {
-            compiledSources.set(sourceIndex, text);
-          })
-          .catch((e) => {
-            console.warn(
-              `Failed to fetch compiled source for "${filename}" (id=${sourceId}):`,
-              e
-            );
-          }),
-      ]);
-    })
-  );
+        await Promise.all([
+          browserConnection
+            .getSourceMap(sourceId)
+            .then((result) => {
+              resolvedSourceMaps.set(sourceIndex, result);
+            })
+            .catch((e) => {
+              console.warn(
+                `Failed to fetch source map for "${filename}" (id=${sourceId}):`,
+                e
+              );
+            }),
+          browserConnection
+            .getJSSource(sourceId)
+            .then((text) => {
+              compiledSources.set(sourceIndex, text);
+            })
+            .catch((e) => {
+              console.warn(
+                `Failed to fetch compiled source for "${filename}" (id=${sourceId}):`,
+                e
+              );
+            }),
+        ]);
+      })
+    );
+  } finally {
+    dispatch({ type: 'DONE_SOURCE_MAP_FETCHING' });
+  }
 
   return { resolvedSourceMaps, compiledSources };
 }

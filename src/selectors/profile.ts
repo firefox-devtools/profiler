@@ -70,6 +70,7 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
+  SourceMapSymbolicationStatus,
   MarkerSchema,
   MarkerSchemaByName,
   SampleUnits,
@@ -105,6 +106,9 @@ export const getProfileRootRange: Selector<StartEndRange> = (state) =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = (state) =>
   getProfileViewOptions(state).symbolicationStatus;
+export const getSourceMapSymbolicationStatus: Selector<
+  SourceMapSymbolicationStatus
+> = (state) => getProfileViewOptions(state).sourceMapSymbolicationStatus;
 export const getScrollToSelectionGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = (state) =>

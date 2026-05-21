@@ -51,6 +51,10 @@ export type Reducer<T> = (state: T | undefined, action: Action) => T;
 export type UploadedProfileInformation = ImportedUploadedProfileInformation;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
+export type SourceMapSymbolicationStatus =
+  | 'INACTIVE'
+  | 'FETCHING'
+  | 'SYMBOLICATING';
 export type ThreadViewOptions = {
   readonly selectedNonInvertedCallNodePath: CallNodePath;
   readonly selectedInvertedCallNodePath: CallNodePath;
@@ -94,6 +98,7 @@ export type ProfileViewState = {
   readonly viewOptions: {
     perThread: ThreadViewOptionsPerThreads;
     symbolicationStatus: SymbolicationStatus;
+    sourceMapSymbolicationStatus: SourceMapSymbolicationStatus;
     waitingForLibs: Set<RequestedLib>;
     previewSelection: PreviewSelection | null;
     scrollToSelectionGeneration: number;

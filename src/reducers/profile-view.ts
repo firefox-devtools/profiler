@@ -20,6 +20,7 @@ import type {
   Reducer,
   ProfileViewState,
   SymbolicationStatus,
+  SourceMapSymbolicationStatus,
   ThreadViewOptions,
   ThreadViewOptionsPerThreads,
   TableViewOptionsPerTab,
@@ -156,6 +157,27 @@ const symbolicationStatus: Reducer<SymbolicationStatus> = (
       return 'SYMBOLICATING';
     case 'DONE_SYMBOLICATING':
       return 'DONE';
+    default:
+      return state;
+  }
+};
+
+const sourceMapSymbolicationStatus: Reducer<SourceMapSymbolicationStatus> = (
+  state = 'INACTIVE',
+  action
+) => {
+  switch (action.type) {
+    case 'START_SOURCE_MAP_FETCHING':
+      return 'FETCHING';
+    case 'START_SOURCE_MAP_SYMBOLICATION':
+      return 'SYMBOLICATING';
+    // Fetching done but worker not yet started. Go back to INACTIVE.
+    // The next START_SOURCE_MAP_SYMBOLICATION will set it to SYMBOLICATING.
+    case 'DONE_SOURCE_MAP_FETCHING':
+      return state === 'FETCHING' ? 'INACTIVE' : state;
+    case 'BULK_SOURCE_MAP_SYMBOLICATION':
+    case 'SOURCE_MAP_SYMBOLICATION_FAILED':
+      return 'INACTIVE';
     default:
       return state;
   }
@@ -851,6 +873,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
     viewOptions: combineReducers({
       perThread: viewOptionsPerThread,
       symbolicationStatus,
+      sourceMapSymbolicationStatus,
       waitingForLibs,
       previewSelection,
       scrollToSelectionGeneration,

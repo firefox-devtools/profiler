@@ -46,6 +46,7 @@ export function doSourceMapSymbolication(
       stringArray: shared.stringArray,
     };
 
+    dispatch({ type: 'START_SOURCE_MAP_SYMBOLICATION' });
     const result = await _runSourceMapWorker(input);
     switch (result.type) {
       case 'success':
@@ -60,8 +61,10 @@ export function doSourceMapSymbolication(
         break;
       case 'error':
         console.warn('Source map worker error:', result.message);
+        dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
         break;
       case 'no-op':
+        dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
         break;
       default:
         throw assertExhaustiveCheck(result);
