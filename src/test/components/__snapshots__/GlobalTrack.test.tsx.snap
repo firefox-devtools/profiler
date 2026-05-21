@@ -35,97 +35,125 @@ Process: \\"tab\\" (222)"
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread expanded"
+        style="display: contents;"
       >
         <div
-          class="timelineMarkers timelineMarkersMemory"
-          data-testid="TimelineMarkersMemory"
+          class="timelineTrackThread expanded"
         >
           <div
-            class="react-contextmenu-wrapper"
+            style="display: contents;"
           >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="timelineMarkers"
-          data-testid="TimelineMarkersJank"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="timelineMarkers timelineMarkersGeckoMain"
-          data-testid="TimelineMarkersOverview"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="threadActivityGraph"
-        >
-          <div>
-            <canvas
-              class="threadActivityGraphCanvas threadActivityGraphCanvas"
-              height="400"
-              width="400"
+            <div
+              class="timelineMarkers timelineMarkersMemory"
+              data-testid="TimelineMarkersMemory"
             >
-              <h2>
-                Activity Graph for 
-                Content Process
-              </h2>
-              <p>
-                This graph shows a visual chart of thread activity.
-              </p>
-            </canvas>
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div
-          class="threadSampleGraph"
-        >
-          <div>
-            <canvas
-              class="threadSampleGraphCanvas threadSampleGraphCanvas"
-              height="400"
-              width="400"
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineMarkers"
+              data-testid="TimelineMarkersJank"
             >
-              <h2>
-                Stack Graph for 
-                Content Process
-              </h2>
-              <p>
-                This graph charts the stack height of each sample.
-              </p>
-            </canvas>
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineMarkers timelineMarkersGeckoMain"
+              data-testid="TimelineMarkersOverview"
+            >
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="threadActivityGraph"
+            >
+              <div>
+                <canvas
+                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Activity Graph for 
+                    Content Process
+                  </h2>
+                  <p>
+                    This graph shows a visual chart of thread activity.
+                  </p>
+                </canvas>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="threadSampleGraph"
+            >
+              <div>
+                <canvas
+                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Stack Graph for 
+                    Content Process
+                  </h2>
+                  <p>
+                    This graph charts the stack height of each sample.
+                  </p>
+                </canvas>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineEmptyThreadIndicator"
+            />
           </div>
         </div>
-        <div
-          class="timelineEmptyThreadIndicator"
-        />
       </div>
     </div>
   </div>
@@ -160,65 +188,85 @@ Process: \\"tab\\" (222)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread expanded"
+            style="display: contents;"
           >
             <div
-              class="timelineMarkers selected"
-              data-testid="TimelineMarkersJank"
+              class="timelineTrackThread expanded"
             >
               <div
-                class="react-contextmenu-wrapper"
+                style="display: contents;"
               >
-                <div>
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="400"
-                    width="400"
-                  />
+                <div
+                  class="timelineMarkers selected"
+                  data-testid="TimelineMarkersJank"
+                >
+                  <div
+                    class="react-contextmenu-wrapper"
+                  >
+                    <div>
+                      <canvas
+                        class="timelineMarkersCanvas"
+                        height="400"
+                        width="400"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="threadActivityGraph"
-            >
-              <div>
-                <canvas
-                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                  height="400"
-                  width="400"
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadActivityGraph"
                 >
-                  <h2>
-                    Activity Graph for 
-                    DOM Worker
-                  </h2>
-                  <p>
-                    This graph shows a visual chart of thread activity.
-                  </p>
-                </canvas>
+                  <div>
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Activity Graph for 
+                        DOM Worker
+                      </h2>
+                      <p>
+                        This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadSampleGraph"
+                >
+                  <div>
+                    <canvas
+                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Stack Graph for 
+                        DOM Worker
+                      </h2>
+                      <p>
+                        This graph charts the stack height of each sample.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="timelineEmptyThreadIndicator"
+                />
               </div>
             </div>
-            <div
-              class="threadSampleGraph"
-            >
-              <div>
-                <canvas
-                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                  height="400"
-                  width="400"
-                >
-                  <h2>
-                    Stack Graph for 
-                    DOM Worker
-                  </h2>
-                  <p>
-                    This graph charts the stack height of each sample.
-                  </p>
-                </canvas>
-              </div>
-            </div>
-            <div
-              class="timelineEmptyThreadIndicator"
-            />
           </div>
         </div>
       </div>
@@ -251,65 +299,85 @@ Process: \\"tab\\" (222)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread expanded"
+            style="display: contents;"
           >
             <div
-              class="timelineMarkers"
-              data-testid="TimelineMarkersJank"
+              class="timelineTrackThread expanded"
             >
               <div
-                class="react-contextmenu-wrapper"
+                style="display: contents;"
               >
-                <div>
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="400"
-                    width="400"
-                  />
+                <div
+                  class="timelineMarkers"
+                  data-testid="TimelineMarkersJank"
+                >
+                  <div
+                    class="react-contextmenu-wrapper"
+                  >
+                    <div>
+                      <canvas
+                        class="timelineMarkersCanvas"
+                        height="400"
+                        width="400"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="threadActivityGraph"
-            >
-              <div>
-                <canvas
-                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                  height="400"
-                  width="400"
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadActivityGraph"
                 >
-                  <h2>
-                    Activity Graph for 
-                    Style
-                  </h2>
-                  <p>
-                    This graph shows a visual chart of thread activity.
-                  </p>
-                </canvas>
+                  <div>
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Activity Graph for 
+                        Style
+                      </h2>
+                      <p>
+                        This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadSampleGraph"
+                >
+                  <div>
+                    <canvas
+                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Stack Graph for 
+                        Style
+                      </h2>
+                      <p>
+                        This graph charts the stack height of each sample.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="timelineEmptyThreadIndicator"
+                />
               </div>
             </div>
-            <div
-              class="threadSampleGraph"
-            >
-              <div>
-                <canvas
-                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                  height="400"
-                  width="400"
-                >
-                  <h2>
-                    Stack Graph for 
-                    Style
-                  </h2>
-                  <p>
-                    This graph charts the stack height of each sample.
-                  </p>
-                </canvas>
-              </div>
-            </div>
-            <div
-              class="timelineEmptyThreadIndicator"
-            />
           </div>
         </div>
       </div>
@@ -347,97 +415,125 @@ Process: \\"tab\\" (0)"
       class="timelineTrackTrack"
     >
       <div
-        class="timelineTrackThread expanded"
+        style="display: contents;"
       >
         <div
-          class="timelineMarkers timelineMarkersMemory"
-          data-testid="TimelineMarkersMemory"
+          class="timelineTrackThread expanded"
         >
           <div
-            class="react-contextmenu-wrapper"
+            style="display: contents;"
           >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="timelineMarkers"
-          data-testid="TimelineMarkersJank"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="timelineMarkers timelineMarkersGeckoMain"
-          data-testid="TimelineMarkersOverview"
-        >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <div>
-              <canvas
-                class="timelineMarkersCanvas"
-                height="400"
-                width="400"
-              />
-            </div>
-          </div>
-        </div>
-        <div
-          class="threadActivityGraph"
-        >
-          <div>
-            <canvas
-              class="threadActivityGraphCanvas threadActivityGraphCanvas"
-              height="400"
-              width="400"
+            <div
+              class="timelineMarkers timelineMarkersMemory"
+              data-testid="TimelineMarkersMemory"
             >
-              <h2>
-                Activity Graph for 
-                Content Process
-              </h2>
-              <p>
-                This graph shows a visual chart of thread activity.
-              </p>
-            </canvas>
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div
-          class="threadSampleGraph"
-        >
-          <div>
-            <canvas
-              class="threadSampleGraphCanvas threadSampleGraphCanvas"
-              height="400"
-              width="400"
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineMarkers"
+              data-testid="TimelineMarkersJank"
             >
-              <h2>
-                Stack Graph for 
-                Content Process
-              </h2>
-              <p>
-                This graph charts the stack height of each sample.
-              </p>
-            </canvas>
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineMarkers timelineMarkersGeckoMain"
+              data-testid="TimelineMarkersOverview"
+            >
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <div>
+                  <canvas
+                    class="timelineMarkersCanvas"
+                    height="400"
+                    width="400"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="threadActivityGraph"
+            >
+              <div>
+                <canvas
+                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Activity Graph for 
+                    Content Process
+                  </h2>
+                  <p>
+                    This graph shows a visual chart of thread activity.
+                  </p>
+                </canvas>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="threadSampleGraph"
+            >
+              <div>
+                <canvas
+                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                  height="400"
+                  width="400"
+                >
+                  <h2>
+                    Stack Graph for 
+                    Content Process
+                  </h2>
+                  <p>
+                    This graph charts the stack height of each sample.
+                  </p>
+                </canvas>
+              </div>
+            </div>
+          </div>
+          <div
+            style="display: contents;"
+          >
+            <div
+              class="timelineEmptyThreadIndicator"
+            />
           </div>
         </div>
-        <div
-          class="timelineEmptyThreadIndicator"
-        />
       </div>
     </div>
   </div>
@@ -506,65 +602,85 @@ Process: \\"default\\" (5555)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread expanded"
+            style="display: contents;"
           >
             <div
-              class="timelineMarkers"
-              data-testid="TimelineMarkersJank"
+              class="timelineTrackThread expanded"
             >
               <div
-                class="react-contextmenu-wrapper"
+                style="display: contents;"
               >
-                <div>
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="400"
-                    width="400"
-                  />
+                <div
+                  class="timelineMarkers"
+                  data-testid="TimelineMarkersJank"
+                >
+                  <div
+                    class="react-contextmenu-wrapper"
+                  >
+                    <div>
+                      <canvas
+                        class="timelineMarkersCanvas"
+                        height="400"
+                        width="400"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="threadActivityGraph"
-            >
-              <div>
-                <canvas
-                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                  height="400"
-                  width="400"
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadActivityGraph"
                 >
-                  <h2>
-                    Activity Graph for 
-                    NoMain
-                  </h2>
-                  <p>
-                    This graph shows a visual chart of thread activity.
-                  </p>
-                </canvas>
+                  <div>
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Activity Graph for 
+                        NoMain
+                      </h2>
+                      <p>
+                        This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadSampleGraph"
+                >
+                  <div>
+                    <canvas
+                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Stack Graph for 
+                        NoMain
+                      </h2>
+                      <p>
+                        This graph charts the stack height of each sample.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="timelineEmptyThreadIndicator"
+                />
               </div>
             </div>
-            <div
-              class="threadSampleGraph"
-            >
-              <div>
-                <canvas
-                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                  height="400"
-                  width="400"
-                >
-                  <h2>
-                    Stack Graph for 
-                    NoMain
-                  </h2>
-                  <p>
-                    This graph charts the stack height of each sample.
-                  </p>
-                </canvas>
-              </div>
-            </div>
-            <div
-              class="timelineEmptyThreadIndicator"
-            />
           </div>
         </div>
       </div>
@@ -630,65 +746,85 @@ Process: \\"default\\" (0)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread expanded"
+            style="display: contents;"
           >
             <div
-              class="timelineMarkers selected"
-              data-testid="TimelineMarkersJank"
+              class="timelineTrackThread expanded"
             >
               <div
-                class="react-contextmenu-wrapper"
+                style="display: contents;"
               >
-                <div>
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="400"
-                    width="400"
-                  />
+                <div
+                  class="timelineMarkers selected"
+                  data-testid="TimelineMarkersJank"
+                >
+                  <div
+                    class="react-contextmenu-wrapper"
+                  >
+                    <div>
+                      <canvas
+                        class="timelineMarkersCanvas"
+                        height="400"
+                        width="400"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="threadActivityGraph"
-            >
-              <div>
-                <canvas
-                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                  height="400"
-                  width="400"
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadActivityGraph"
                 >
-                  <h2>
-                    Activity Graph for 
-                    Task Thread
-                  </h2>
-                  <p>
-                    This graph shows a visual chart of thread activity.
-                  </p>
-                </canvas>
+                  <div>
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Activity Graph for 
+                        Task Thread
+                      </h2>
+                      <p>
+                        This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadSampleGraph"
+                >
+                  <div>
+                    <canvas
+                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Stack Graph for 
+                        Task Thread
+                      </h2>
+                      <p>
+                        This graph charts the stack height of each sample.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="timelineEmptyThreadIndicator"
+                />
               </div>
             </div>
-            <div
-              class="threadSampleGraph"
-            >
-              <div>
-                <canvas
-                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                  height="400"
-                  width="400"
-                >
-                  <h2>
-                    Stack Graph for 
-                    Task Thread
-                  </h2>
-                  <p>
-                    This graph charts the stack height of each sample.
-                  </p>
-                </canvas>
-              </div>
-            </div>
-            <div
-              class="timelineEmptyThreadIndicator"
-            />
           </div>
         </div>
       </div>
@@ -2002,81 +2138,105 @@ Process: \\"default\\" (0)"
           class="timelineTrackTrack"
         >
           <div
-            class="timelineTrackThread expanded"
+            style="display: contents;"
           >
             <div
-              class="timelineMarkers selected"
-              data-testid="TimelineMarkersJank"
+              class="timelineTrackThread expanded"
             >
               <div
-                class="react-contextmenu-wrapper"
+                style="display: contents;"
               >
-                <div>
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="400"
-                    width="400"
-                  />
+                <div
+                  class="timelineMarkers selected"
+                  data-testid="TimelineMarkersJank"
+                >
+                  <div
+                    class="react-contextmenu-wrapper"
+                  >
+                    <div>
+                      <canvas
+                        class="timelineMarkersCanvas"
+                        height="400"
+                        width="400"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="timelineMarkers selected"
-              data-testid="TimelineMarkersOverview"
-            >
               <div
-                class="react-contextmenu-wrapper"
+                style="display: contents;"
               >
-                <div>
-                  <canvas
-                    class="timelineMarkersCanvas"
-                    height="400"
-                    width="400"
-                  />
+                <div
+                  class="timelineMarkers selected"
+                  data-testid="TimelineMarkersOverview"
+                >
+                  <div
+                    class="react-contextmenu-wrapper"
+                  >
+                    <div>
+                      <canvas
+                        class="timelineMarkersCanvas"
+                        height="400"
+                        width="400"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div
-              class="threadActivityGraph"
-            >
-              <div>
-                <canvas
-                  class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                  height="400"
-                  width="400"
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadActivityGraph"
                 >
-                  <h2>
-                    Activity Graph for 
-                    Task Thread
-                  </h2>
-                  <p>
-                    This graph shows a visual chart of thread activity.
-                  </p>
-                </canvas>
+                  <div>
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Activity Graph for 
+                        Task Thread
+                      </h2>
+                      <p>
+                        This graph shows a visual chart of thread activity.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="threadSampleGraph"
+                >
+                  <div>
+                    <canvas
+                      class="threadSampleGraphCanvas threadSampleGraphCanvas"
+                      height="400"
+                      width="400"
+                    >
+                      <h2>
+                        Stack Graph for 
+                        Task Thread
+                      </h2>
+                      <p>
+                        This graph charts the stack height of each sample.
+                      </p>
+                    </canvas>
+                  </div>
+                </div>
+              </div>
+              <div
+                style="display: contents;"
+              >
+                <div
+                  class="timelineEmptyThreadIndicator"
+                />
               </div>
             </div>
-            <div
-              class="threadSampleGraph"
-            >
-              <div>
-                <canvas
-                  class="threadSampleGraphCanvas threadSampleGraphCanvas"
-                  height="400"
-                  width="400"
-                >
-                  <h2>
-                    Stack Graph for 
-                    Task Thread
-                  </h2>
-                  <p>
-                    This graph charts the stack height of each sample.
-                  </p>
-                </canvas>
-              </div>
-            </div>
-            <div
-              class="timelineEmptyThreadIndicator"
-            />
           </div>
         </div>
       </div>
@@ -3326,6 +3486,23 @@ Array [
     1,
   ],
   Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    400,
+    400,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
     "set fillStyle",
     "black",
   ],
@@ -3423,23 +3600,6 @@ Array [
     339,
     5,
     54.33802816901409,
-    1,
-  ],
-  Array [
-    "scale",
-    1,
-    1,
-  ],
-  Array [
-    "clearRect",
-    0,
-    0,
-    400,
-    400,
-  ],
-  Array [
-    "scale",
-    1,
     1,
   ],
   Array [
