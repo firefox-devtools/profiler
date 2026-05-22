@@ -26,7 +26,7 @@ import {
   extractFunctionData,
   formatFunctionNameWithLibrary,
 } from '../function-list';
-import { collectCallTree } from './call-tree';
+import { collectCallTree, inlineStatusForNode } from './call-tree';
 import type { CallTreeCollectionOptions } from './call-tree';
 import {
   computeCallTreeTimings,
@@ -157,6 +157,7 @@ export function collectThreadSamples(
   let heaviestStack: ThreadSamplesResult['heaviestStack'] = {
     selfSamples: 0,
     frameCount: 0,
+    hasInlinedFrames: false,
     frames: [],
   };
 
@@ -187,26 +188,41 @@ export function collectThreadSamples(
       if (leafNodeIndex !== null) {
         const leafNodeData = callTree.getNodeData(leafNodeIndex);
 
+        let hasInlinedFrames = false;
+        const frames = heaviestPath.map((funcIndex, depth) => {
+          const funcName = formatFunctionNameWithLibrary(
+            funcIndex,
+            thread,
+            libs
+          );
+          const funcData = funcMap.get(funcIndex);
+          const prefixPath = heaviestPath.slice(0, depth + 1);
+          const frameCallNodeIndex =
+            callNodeInfo.getCallNodeIndexFromPath(prefixPath);
+          const inlineStatus =
+            frameCallNodeIndex !== null
+              ? inlineStatusForNode(callTree, frameCallNodeIndex)
+              : undefined;
+          if (inlineStatus !== undefined) {
+            hasInlinedFrames = true;
+          }
+          return {
+            funcIndex,
+            name: funcName,
+            nameWithLibrary: funcName,
+            totalSamples: funcData?.total ?? 0,
+            totalPercentage: (funcData?.totalRelative ?? 0) * 100,
+            selfSamples: funcData?.self ?? 0,
+            selfPercentage: (funcData?.selfRelative ?? 0) * 100,
+            inlineStatus,
+          };
+        });
+
         heaviestStack = {
           selfSamples: leafNodeData.self,
           frameCount: heaviestPath.length,
-          frames: heaviestPath.map((funcIndex) => {
-            const funcName = formatFunctionNameWithLibrary(
-              funcIndex,
-              thread,
-              libs
-            );
-            const funcData = funcMap.get(funcIndex);
-            return {
-              funcIndex,
-              name: funcName,
-              nameWithLibrary: funcName,
-              totalSamples: funcData?.total ?? 0,
-              totalPercentage: (funcData?.totalRelative ?? 0) * 100,
-              selfSamples: funcData?.self ?? 0,
-              selfPercentage: (funcData?.selfRelative ?? 0) * 100,
-            };
-          }),
+          hasInlinedFrames,
+          frames,
         };
       }
     }

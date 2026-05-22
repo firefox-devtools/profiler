@@ -143,13 +143,17 @@ exports[`TrackVisualProgress matches the component snapshot 1`] = `
   style="height: 40px; --graph-height: 40px;"
 >
   <div
-    class="timelineTrackVisualProgressGraph"
+    style="display: contents;"
   >
-    <canvas
-      class="timelineTrackVisualProgressCanvas"
-      height="40"
-      width="70"
-    />
+    <div
+      class="timelineTrackVisualProgressGraph"
+    >
+      <canvas
+        class="timelineTrackVisualProgressCanvas"
+        height="40"
+        width="70"
+      />
+    </div>
   </div>
 </div>
 `;
