@@ -52,6 +52,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (satır içi)
+    .title = { $function } derleyici tarafından çağıran işlevin içine yerleştirildi.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -77,6 +85,18 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    “Self” odaklaması, bir fonksiyona odaklanmaya benzer;
+    ancak yalnızca fonksiyonun kendi zamanına katkıda bulunan örnekleri tutar.
+    Çağrılan fonksiyonlardaki örnekler atılır ve çağrı ağacı odaklanan fonksiyona yeniden bağlanır.
+CallNodeContextMenu--transform-focus-self = Yalnızca self'e odaklan
+    .title = { CallNodeContextMenu--transform-focus-self-title }
 
 ##
 
