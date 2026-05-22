@@ -29,6 +29,7 @@ import {
   getTransformStack,
   getCurrentSearchString,
   getProfileSpecificState,
+  getSymbolServerUrl,
 } from 'firefox-profiler/selectors/url-state';
 import {
   commitRange,
@@ -1140,20 +1141,26 @@ export class ProfileQuerier {
 
   /**
    * Annotate a function with per-line source or per-instruction assembly timing data.
+   *
+   * If `symbolServerUrl` is omitted, falls back to the symbol server resolved
+   * from the loaded profile's URL state (the ?symbolServer= query parameter,
+   * or the default Mozilla server when none was set).
    */
   async functionAnnotate(
     functionHandle: string,
     mode: AnnotateMode,
-    symbolServerUrl: string,
+    symbolServerUrl: string | undefined,
     contextOption: string = '2'
   ): Promise<WithContext<FunctionAnnotateResult>> {
+    const resolvedSymbolServerUrl =
+      symbolServerUrl ?? getSymbolServerUrl(this._store.getState());
     const result = await computeFunctionAnnotate(
       this._store,
       this._threadMap,
       this._archiveCache,
       functionHandle,
       mode,
-      symbolServerUrl,
+      resolvedSymbolServerUrl,
       contextOption
     );
     return { ...result, context: this._getContext() };
