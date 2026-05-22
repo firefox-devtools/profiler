@@ -78,6 +78,23 @@ Array [
     0,
     0,
     80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
     25,
   ],
   Array [
@@ -160,23 +177,6 @@ Array [
   Array [
     "fill",
   ],
-  Array [
-    "clearRect",
-    0,
-    0,
-    80,
-    10,
-  ],
-  Array [
-    "scale",
-    1,
-    1,
-  ],
-  Array [
-    "scale",
-    1,
-    1,
-  ],
 ]
 `;
 
@@ -186,34 +186,46 @@ exports[`TrackMemory matches the component snapshot 1`] = `
   style="--graph-height: 25px; --markers-height: 15px;"
 >
   <div
-    class="timelineMarkers timelineMarkersCounter selected"
-    data-testid="TimelineMarkersCounter"
+    style="display: contents;"
   >
     <div
-      class="react-contextmenu-wrapper"
+      class="timelineMarkers timelineMarkersCounter selected"
+      data-testid="TimelineMarkersCounter"
     >
-      <div>
-        <canvas
-          class="timelineMarkersCanvas"
-          height="10"
-          width="80"
-        />
+      <div
+        class="react-contextmenu-wrapper"
+      >
+        <div>
+          <canvas
+            class="timelineMarkersCanvas"
+            height="10"
+            width="80"
+          />
+        </div>
       </div>
     </div>
   </div>
   <div
-    class="timelineTrackCounterGraph"
+    style="display: contents;"
   >
-    <div>
-      <canvas
-        class="timelineTrackCounterCanvas"
-        height="25"
-        width="80"
-      />
-    </div>
     <div
-      class="timelineEmptyThreadIndicator"
-    />
+      class="timelineTrackCounterGraph"
+    >
+      <div>
+        <canvas
+          class="timelineTrackCounterCanvas"
+          height="25"
+          width="80"
+        />
+      </div>
+      <div
+        style="display: contents;"
+      >
+        <div
+          class="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
   </div>
 </div>
 `;

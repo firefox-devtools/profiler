@@ -30,6 +30,7 @@ import type {
   NetworkPhaseTimings,
   MarkerGroupData,
   CallTreeNode,
+  InlineStatus,
   FilterEntry,
   SampleFilterSpec,
   ProfileLogsResult,
@@ -41,6 +42,24 @@ import { formatTimestamp as formatDuration } from 'firefox-profiler/utils/format
 
 // Maximum display width for function names in call-tree and sample views.
 const FUNC_NAME_WIDTH = 120;
+
+/**
+ * Suffix appended to a function name to indicate inline status.
+ * Empty string if the frame is not inlined.
+ */
+function inlineSuffix(status: InlineStatus | undefined): string {
+  if (status === 'inlined') {
+    return ' (inl)';
+  }
+  if (status === 'divergent') {
+    return ' (inl?)';
+  }
+  return '';
+}
+
+const INLINE_LEGEND =
+  'Note: (inl) = inlined by the compiler into the nearest non-inlined ancestor above. ' +
+  '(inl?) = some calls were inlined by the compiler.';
 
 /**
  * Format a SessionContext as a compact header line.
@@ -466,9 +485,10 @@ function formatCallTreeNode(
 
   // Add function handle prefix if available
   const handlePrefix = node.functionHandle ? `${node.functionHandle}. ` : '';
+  const inlineMark = inlineSuffix(node.inlineStatus);
 
   lines.push(
-    `${linePrefix}${handlePrefix}${displayName} [total: ${totalPct}%, self: ${selfPct}%]`
+    `${linePrefix}${handlePrefix}${displayName}${inlineMark} [total: ${totalPct}%, self: ${selfPct}%]`
   );
 
   // Handle children and truncation
@@ -534,6 +554,11 @@ function formatCallTree(
   emptyMessage?: string
 ): string {
   const lines: string[] = [`${title} Call Tree:`];
+
+  if (tree.hasInlinedFrames) {
+    lines.push(INLINE_LEGEND);
+    lines.push('');
+  }
 
   // The root node is virtual, so format its children
   if (tree.children && tree.children.length > 0) {
@@ -630,35 +655,21 @@ export function formatThreadSamplesResult(
   const stack = result.heaviestStack;
   output += `Heaviest stack (${stack.selfSamples.toFixed(1)} samples, ${stack.frameCount} frames):\n`;
 
+  if (stack.hasInlinedFrames) {
+    output += `  ${INLINE_LEGEND}\n\n`;
+  }
+
   if (stack.frames.length === 0) {
     output += '  (empty)\n';
   } else if (stack.frameCount <= 200) {
     // Show all frames
     for (let i = 0; i < stack.frames.length; i++) {
-      const frame = stack.frames[i];
-      const displayName = truncateFunctionName(
-        frame.nameWithLibrary,
-        FUNC_NAME_WIDTH
-      );
-      const totalCount = Math.round(frame.totalSamples);
-      const totalPct = frame.totalPercentage.toFixed(1);
-      const selfCount = Math.round(frame.selfSamples);
-      const selfPct = frame.selfPercentage.toFixed(1);
-      output += `  ${i + 1}. ${displayName} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
+      output += formatHeaviestStackFrame(stack.frames[i], i);
     }
   } else {
     // Show first 100
     for (let i = 0; i < 100; i++) {
-      const frame = stack.frames[i];
-      const displayName = truncateFunctionName(
-        frame.nameWithLibrary,
-        FUNC_NAME_WIDTH
-      );
-      const totalCount = Math.round(frame.totalSamples);
-      const totalPct = frame.totalPercentage.toFixed(1);
-      const selfCount = Math.round(frame.selfSamples);
-      const selfPct = frame.selfPercentage.toFixed(1);
-      output += `  ${i + 1}. ${displayName} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
+      output += formatHeaviestStackFrame(stack.frames[i], i);
     }
 
     // Show placeholder for skipped frames
@@ -667,20 +678,27 @@ export function formatThreadSamplesResult(
 
     // Show last 100
     for (let i = stack.frameCount - 100; i < stack.frameCount; i++) {
-      const frame = stack.frames[i];
-      const displayName = truncateFunctionName(
-        frame.nameWithLibrary,
-        FUNC_NAME_WIDTH
-      );
-      const totalCount = Math.round(frame.totalSamples);
-      const totalPct = frame.totalPercentage.toFixed(1);
-      const selfCount = Math.round(frame.selfSamples);
-      const selfPct = frame.selfPercentage.toFixed(1);
-      output += `  ${i + 1}. ${displayName} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
+      output += formatHeaviestStackFrame(stack.frames[i], i);
     }
   }
 
   return output;
+}
+
+function formatHeaviestStackFrame(
+  frame: ThreadSamplesResult['heaviestStack']['frames'][number],
+  i: number
+): string {
+  const displayName = truncateFunctionName(
+    frame.nameWithLibrary,
+    FUNC_NAME_WIDTH
+  );
+  const inlineMark = inlineSuffix(frame.inlineStatus);
+  const totalCount = Math.round(frame.totalSamples);
+  const totalPct = frame.totalPercentage.toFixed(1);
+  const selfCount = Math.round(frame.selfSamples);
+  const selfPct = frame.selfPercentage.toFixed(1);
+  return `  ${i + 1}. ${displayName}${inlineMark} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
 }
 
 /**

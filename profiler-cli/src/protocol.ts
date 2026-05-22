@@ -29,6 +29,7 @@ export type {
   ThreadSamplesBottomUpResult,
   CallTreeNode,
   CallTreeScoringStrategy,
+  InlineStatus,
   ThreadMarkersResult,
   ThreadNetworkResult,
   NetworkRequestEntry,
