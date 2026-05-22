@@ -5,9 +5,32 @@
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
 import type { IndexIntoCallNodeTable, Lib } from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import type { CallTreeNode, CallTreeScoringStrategy } from '../types';
+import type {
+  CallTreeNode,
+  CallTreeScoringStrategy,
+  InlineStatus,
+} from '../types';
 import { getFunctionHandle } from '../function-map';
 import { formatFunctionNameWithLibrary } from '../function-list';
+
+/**
+ * Map a call node's sourceFramesInlinedIntoSymbol value to our InlineStatus.
+ * -2 → undefined (not inlined), -1 → 'divergent', otherwise → 'inlined'.
+ */
+export function inlineStatusForNode(
+  tree: CallTree,
+  callNodeIndex: IndexIntoCallNodeTable
+): InlineStatus | undefined {
+  const inlinedInto =
+    tree._callNodeInfo.sourceFramesInlinedIntoSymbolForNode(callNodeIndex);
+  if (inlinedInto === -2) {
+    return undefined;
+  }
+  if (inlinedInto === -1) {
+    return 'divergent';
+  }
+  return 'inlined';
+}
 
 /**
  * Compute inclusion score for a call tree node.
@@ -244,6 +267,7 @@ function buildTreeStructure(
     selfSamples: 0,
     selfPercentage: 0,
     originalDepth: -1,
+    hasInlinedFrames: false,
     children: [],
   };
 
@@ -279,6 +303,11 @@ function buildTreeStructure(
         libs
       );
 
+      const inlineStatus = inlineStatusForNode(tree, callNodeIndex);
+      if (inlineStatus !== undefined) {
+        rootNode.hasInlinedFrames = true;
+      }
+
       const childNode: CallTreeNode = {
         callNodeIndex,
         functionHandle: getFunctionHandle(funcIndex),
@@ -290,6 +319,7 @@ function buildTreeStructure(
         selfSamples: childNodeData.self,
         selfPercentage: childNodeData.selfRelative * 100,
         originalDepth: childrenDepth,
+        inlineStatus,
         children: [],
       };
 
