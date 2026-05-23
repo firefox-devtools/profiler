@@ -76,6 +76,29 @@ export function doSourceMapSymbolication(
  * Spawn a one-shot source map worker, send it the input, and return the
  * output. The worker is terminated once a response is received or an error
  * occurs. Uses the same on-demand spawn pattern as gz.browser.ts.
+ *
+ * Debugging tip: to step through symbolication from the page DevTools, paste
+ * the snippet below over this function body. It runs the same core on the
+ * main thread (blocking, debug only).
+ *
+ *   const { runSourceMapSymbolicationCore } = await import(
+ *     'firefox-profiler/profile-logic/source-map-symbolication'
+ *   );
+ *   const sources = {
+ *     length: input.sources.length,
+ *     id: input.sources.id.slice(),
+ *     filename: input.sources.filename.slice(),
+ *     startLine: input.sources.startLine.slice(),
+ *     startColumn: input.sources.startColumn.slice(),
+ *     sourceMapURL: input.sources.sourceMapURL.slice(),
+ *     content: input.sources.content.slice(),
+ *   };
+ *   const stringArray = input.stringArray.slice();
+ *   const wasmUrl = new URL('/mappings.wasm', window.location.href).href;
+ *   return runSourceMapSymbolicationCore(
+ *     { ...input, sources, stringArray },
+ *     wasmUrl
+ *   );
  */
 function _runSourceMapWorker(input: WorkerInput): Promise<WorkerOutput> {
   return new Promise((resolve) => {
