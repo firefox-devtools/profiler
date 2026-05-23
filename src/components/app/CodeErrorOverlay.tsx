@@ -50,6 +50,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { apiErrorMessage } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--browser-api-error-when-obtaining-source"
                 vars={{ apiErrorMessage }}
               >
@@ -61,6 +62,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { apiErrorMessage } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--local-symbol-server-api-error-when-obtaining-source"
                 vars={{ apiErrorMessage }}
               >
@@ -72,6 +74,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { errorMessage } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--browser-api-malformed-response-when-obtaining-source"
                 vars={{ errorMessage }}
               >
@@ -83,6 +86,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { errorMessage } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--local-symbol-server-api-malformed-response-when-obtaining-source"
                 vars={{ errorMessage }}
               >
@@ -94,6 +98,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { url, pathInArchive } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--not-in-archive-error-when-obtaining-source"
                 vars={{ url, pathInArchive }}
               >
@@ -105,6 +110,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { url, parsingErrorMessage } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--archive-parsing-error-when-obtaining-source"
                 vars={{ url, parsingErrorMessage }}
               >
@@ -116,6 +122,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
             const { sourceUuid, url, errorMessage } = error;
             return (
               <Localized
+                key={key}
                 id="SourceView--not-in-browser-error-when-obtaining-js-source"
                 vars={{ url, sourceUuid, errorMessage }}
               >
