@@ -16,6 +16,14 @@ import {
   type CliTestContext,
 } from './utils';
 
+import type {
+  FilterStackResult,
+  SessionMetadata,
+  StatusResult,
+  ThreadSamplesResult,
+  WithContext,
+} from '../../protocol';
+
 describe('profiler-cli basic functionality', () => {
   let ctx: CliTestContext;
 
@@ -154,15 +162,7 @@ describe('profiler-cli basic functionality', () => {
     await cli(ctx, ['filter', 'push', '--merge', 'f-1,f-2']);
 
     const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
-    const filterList = JSON.parse(filterListResult.stdout) as {
-      type: string;
-      threadHandle: string;
-      filters: Array<{
-        index: number;
-        transforms: Array<{ type: string; funcIndex?: number }>;
-        description: string;
-      }>;
-    };
+    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
 
     expect(filterList.type).toBe('filter-stack');
     expect(filterList.threadHandle).toBe('t-0');
@@ -175,15 +175,7 @@ describe('profiler-cli basic functionality', () => {
     expect(filterList.filters[0].description).toBe('merge: f-1, f-2');
 
     const statusResult = await cli(ctx, ['status', '--json']);
-    const status = JSON.parse(statusResult.stdout) as {
-      type: string;
-      filterStacks: Array<{
-        threadHandle: string;
-        filters: Array<{
-          transforms: Array<{ type: string; funcIndex?: number }>;
-        }>;
-      }>;
-    };
+    const status = JSON.parse(statusResult.stdout) as StatusResult;
 
     expect(status.type).toBe('status');
     expect(status.filterStacks).toHaveLength(1);
@@ -210,10 +202,7 @@ describe('profiler-cli basic functionality', () => {
     ]);
     const otherThreadFilterList = JSON.parse(
       otherThreadFilterListResult.stdout
-    ) as {
-      threadHandle: string;
-      filters: unknown[];
-    };
+    ) as FilterStackResult;
 
     expect(otherThreadFilterList.threadHandle).toBe('t-1');
     expect(otherThreadFilterList.filters).toHaveLength(0);
@@ -227,12 +216,7 @@ describe('profiler-cli basic functionality', () => {
     ]);
     const explicitThreadFilterList = JSON.parse(
       explicitThreadFilterListResult.stdout
-    ) as {
-      threadHandle: string;
-      filters: Array<{
-        transforms: Array<{ type: string; funcIndex?: number }>;
-      }>;
-    };
+    ) as FilterStackResult;
 
     expect(explicitThreadFilterList.threadHandle).toBe('t-0');
     expect(explicitThreadFilterList.filters).toHaveLength(1);
@@ -250,10 +234,26 @@ describe('profiler-cli basic functionality', () => {
       't-0',
       '--json',
     ]);
-    const afterPop = JSON.parse(afterPopResult.stdout) as {
-      filters: unknown[];
-    };
+    const afterPop = JSON.parse(afterPopResult.stdout) as FilterStackResult;
     expect(afterPop.filters).toHaveLength(0);
+  });
+
+  it('filter push supports --during-marker with --search', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['thread', 'select', 't-0']);
+
+    await cli(ctx, ['filter', 'push', '--during-marker', '--search', 'Reflow']);
+
+    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
+    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
+
+    expect(filterList.filters).toHaveLength(1);
+    expect(filterList.filters[0].transforms).toEqual([
+      { type: 'filter-samples', filterType: 'marker-search', filter: 'Reflow' },
+    ]);
+    expect(filterList.filters[0].description).toBe(
+      'during marker matching: "Reflow"'
+    );
   });
 
   it('ephemeral sample filters do not persist into session state', async () => {
@@ -266,11 +266,9 @@ describe('profiler-cli basic functionality', () => {
       '--merge',
       'f-1',
     ]);
-    const samples = JSON.parse(samplesResult.stdout) as {
-      type: string;
-      ephemeralFilters?: Array<{ type: string; funcIndexes?: number[] }>;
-      activeFilters?: unknown[];
-    };
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
 
     expect(samples.type).toBe('thread-samples');
     expect(samples.ephemeralFilters).toEqual([
@@ -279,15 +277,11 @@ describe('profiler-cli basic functionality', () => {
     expect(samples.activeFilters).toBeUndefined();
 
     const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
-    const filterList = JSON.parse(filterListResult.stdout) as {
-      filters: unknown[];
-    };
+    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
     expect(filterList.filters).toHaveLength(0);
 
     const statusResult = await cli(ctx, ['status', '--json']);
-    const status = JSON.parse(statusResult.stdout) as {
-      filterStacks: unknown[];
-    };
+    const status = JSON.parse(statusResult.stdout) as StatusResult;
     expect(status.filterStacks).toHaveLength(0);
   });
 
@@ -318,10 +312,9 @@ describe('profiler-cli basic functionality', () => {
     const sessionId = match![1];
 
     const metadataPath = join(ctx.sessionDir, `${sessionId}.json`);
-    const metadata = JSON.parse(await readFile(metadataPath, 'utf-8')) as {
-      buildHash: string;
-      pid: number;
-    };
+    const metadata = JSON.parse(
+      await readFile(metadataPath, 'utf-8')
+    ) as SessionMetadata;
 
     await writeFile(
       metadataPath,

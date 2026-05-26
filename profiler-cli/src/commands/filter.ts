@@ -31,6 +31,10 @@ export function registerFilterCommand(
         .command('push')
         .description('Push a sticky sample filter')
         .option('--thread <handle>', 'Thread handle')
+        .option(
+          '--search <term>',
+          'Marker search text (used with --during-marker / --outside-marker)'
+        )
     )
   ).action(async (opts) => {
     const spec = parseFilterSpec({

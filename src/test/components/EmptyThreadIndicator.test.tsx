@@ -2,8 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import ReactDOM from 'react-dom';
-
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import {
   EmptyThreadIndicator,
@@ -11,7 +9,7 @@ import {
 } from '../../components/timeline/EmptyThreadIndicator';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
-import { getElementWithFixedSize } from '../fixtures/mocks/element-size';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { StartEndRange } from 'firefox-profiler/types';
 
@@ -20,11 +18,7 @@ describe('EmptyThreadIndicator', function () {
   const width = 100;
   const height = 10;
 
-  beforeEach(() => {
-    jest
-      .spyOn(ReactDOM, 'findDOMNode')
-      .mockImplementation(() => getElementWithFixedSize({ width, height }));
-  });
+  autoMockElementSize({ width, height });
 
   const { derivedThreads } = getProfileFromTextSamples(`
     A  A  A

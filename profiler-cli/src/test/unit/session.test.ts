@@ -12,9 +12,9 @@
  */
 
 import * as fs from 'fs';
+import * as net from 'net';
 import * as path from 'path';
 import * as os from 'os';
-import { spawn } from 'child_process';
 import {
   ensureSessionDir,
   generateSessionId,
@@ -27,8 +27,8 @@ import {
   setCurrentSession,
   getCurrentSessionId,
   getCurrentSocketPath,
-  isProcessRunning,
-  waitForProcessExit,
+  isDaemonReachable,
+  waitForSocketClose,
   cleanupSession,
   validateSession,
   listSessions,
@@ -235,38 +235,47 @@ describe('profiler-cli session management', function () {
     });
   });
 
-  describe('isProcessRunning', function () {
-    it('returns true for current process', function () {
-      expect(isProcessRunning(process.pid)).toBe(true);
+  describe('isDaemonReachable', function () {
+    it('returns false when nothing is listening', async function () {
+      const socketPath = getSocketPath(testSessionDir, 'test-socket');
+      expect(await isDaemonReachable(socketPath)).toBe(false);
     });
 
-    it('returns false for non-existent PID', function () {
-      expect(isProcessRunning(999999)).toBe(false);
-    });
-
-    it('waits for a process to exit', async function () {
-      const child = spawn(process.execPath, [
-        '-e',
-        'setTimeout(() => process.exit(0), 100)',
-      ]);
-
-      const exited = await waitForProcessExit(child.pid!, 2000, 10);
-
-      expect(exited).toBe(true);
-    });
-
-    it('times out if a process does not exit', async function () {
-      const child = spawn(process.execPath, [
-        '-e',
-        'setTimeout(() => process.exit(0), 5000)',
-      ]);
+    it('returns true when a server is listening', async function () {
+      const socketPath = getSocketPath(testSessionDir, 'test-socket');
+      const server = net.createServer();
+      await new Promise<void>((resolve) => server.listen(socketPath, resolve));
 
       try {
-        const exited = await waitForProcessExit(child.pid!, 50, 10);
-        expect(exited).toBe(false);
+        expect(await isDaemonReachable(socketPath)).toBe(true);
       } finally {
-        child.kill('SIGTERM');
-        await waitForProcessExit(child.pid!, 2000, 10);
+        await new Promise<void>((resolve) => server.close(() => resolve()));
+      }
+    });
+  });
+
+  describe('waitForSocketClose', function () {
+    it('returns true when the server closes', async function () {
+      const socketPath = getSocketPath(testSessionDir, 'test-socket');
+      const server = net.createServer();
+      await new Promise<void>((resolve) => server.listen(socketPath, resolve));
+
+      setTimeout(() => server.close(), 100);
+
+      const closed = await waitForSocketClose(socketPath, 2000, 10);
+      expect(closed).toBe(true);
+    });
+
+    it('times out if the server does not close', async function () {
+      const socketPath = getSocketPath(testSessionDir, 'test-socket');
+      const server = net.createServer();
+      await new Promise<void>((resolve) => server.listen(socketPath, resolve));
+
+      try {
+        const closed = await waitForSocketClose(socketPath, 50, 10);
+        expect(closed).toBe(false);
+      } finally {
+        await new Promise<void>((resolve) => server.close(() => resolve()));
       }
     });
   });
@@ -320,17 +329,36 @@ describe('profiler-cli session management', function () {
   });
 
   describe('validateSession', function () {
-    it('returns false for non-existent session', function () {
-      expect(validateSession(testSessionDir, 'nonexistent')).toBe(null);
+    it('returns null for non-existent session', async function () {
+      expect(await validateSession(testSessionDir, 'nonexistent')).toBe(null);
     });
 
-    it('returns false for session with dead PID', function () {
+    it('returns null when nothing is listening on the socket', async function () {
       const sessionId = 'test123';
       const metadata: SessionMetadata = {
         id: sessionId,
         socketPath: getSocketPath(testSessionDir, sessionId),
         logPath: getLogPath(testSessionDir, sessionId),
-        pid: 999999, // Non-existent PID
+        pid: process.pid,
+        profilePath: '/path/to/profile.json',
+        createdAt: new Date().toISOString(),
+        buildHash: TEST_BUILD_HASH,
+      };
+
+      saveSessionMetadata(testSessionDir, metadata);
+      // Intentionally don't start a server
+
+      expect(await validateSession(testSessionDir, sessionId)).toBe(null);
+    });
+
+    it('returns metadata for a valid session with an active socket', async function () {
+      const sessionId = 'test123';
+      const socketPath = getSocketPath(testSessionDir, sessionId);
+      const metadata: SessionMetadata = {
+        id: sessionId,
+        socketPath,
+        logPath: getLogPath(testSessionDir, sessionId),
+        pid: process.pid,
         profilePath: '/path/to/profile.json',
         createdAt: new Date().toISOString(),
         buildHash: TEST_BUILD_HASH,
@@ -338,52 +366,14 @@ describe('profiler-cli session management', function () {
 
       saveSessionMetadata(testSessionDir, metadata);
 
-      expect(validateSession(testSessionDir, sessionId)).toBe(null);
-    });
+      const server = net.createServer();
+      await new Promise<void>((resolve) => server.listen(socketPath, resolve));
 
-    it('returns false for session with missing socket', function () {
-      if (process.platform === 'win32') {
-        // Not applicable on Windows: named pipes are self-cleaning and disappear
-        // automatically when the server stops, so a session can't have a live PID
-        // but a missing socket. validateSession skips the socket check on Windows
-        // for this reason.
-        return;
+      try {
+        expect(await validateSession(testSessionDir, sessionId)).not.toBe(null);
+      } finally {
+        await new Promise<void>((resolve) => server.close(() => resolve()));
       }
-      const sessionId = 'test123';
-      const metadata: SessionMetadata = {
-        id: sessionId,
-        socketPath: getSocketPath(testSessionDir, sessionId),
-        logPath: getLogPath(testSessionDir, sessionId),
-        pid: process.pid, // Use current process PID (guaranteed to exist)
-        profilePath: '/path/to/profile.json',
-        createdAt: new Date().toISOString(),
-        buildHash: TEST_BUILD_HASH,
-      };
-
-      saveSessionMetadata(testSessionDir, metadata);
-      // Intentionally don't create socket file
-
-      expect(validateSession(testSessionDir, sessionId)).toBe(null);
-    });
-
-    it('returns true for valid session', function () {
-      const sessionId = 'test123';
-      const metadata: SessionMetadata = {
-        id: sessionId,
-        socketPath: getSocketPath(testSessionDir, sessionId),
-        logPath: getLogPath(testSessionDir, sessionId),
-        pid: process.pid, // Use current process PID
-        profilePath: '/path/to/profile.json',
-        createdAt: new Date().toISOString(),
-        buildHash: TEST_BUILD_HASH,
-      };
-
-      saveSessionMetadata(testSessionDir, metadata);
-      if (process.platform !== 'win32') {
-        fs.writeFileSync(metadata.socketPath, '');
-      }
-
-      expect(validateSession(testSessionDir, sessionId)).not.toBe(null);
     });
   });
 

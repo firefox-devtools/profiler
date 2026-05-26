@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "endOfLine": "lf",
+  "printWidth": 80,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "src/profile-logic/import/proto",
+    "src/types/libdef/npm",
+    "docs-user/js",
+    "docs-user/css",
+    "src/test/fixtures/upgrades",
+    "dist",
+    "node-tools-dist",
+    "profiler-cli/dist",
+    "coverage",
+    "taskcluster/",
+    ".taskcluster.yml"
+  ]
+}

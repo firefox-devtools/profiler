@@ -141,17 +141,15 @@ export type GeckoSamples = {
         // milliseconds since the last event was processed in this
         // thread's event loop at the time that the sample was taken
         Milliseconds,
-        (
-          // Index into the values buffer containing a binary representation of the argumentValues
-          // It's present only when the JS Execution Tracing feature is enabled in Firefox
-          //   OR
-          // CPU usage value of the current thread.
-          // It's present only when the CPU Utilization feature is enabled in Firefox.
-          //
-          // NOTE: these two options are mutually exclusive since CPU Utilization is
-          // mutually exclusive with JS Execution Tracing
-          number | null
-        ),
+        // Index into the values buffer containing a binary representation of the argumentValues
+        // It's present only when the JS Execution Tracing feature is enabled in Firefox
+        //   OR
+        // CPU usage value of the current thread.
+        // It's present only when the CPU Utilization feature is enabled in Firefox.
+        //
+        // NOTE: these two options are mutually exclusive since CPU Utilization is
+        // mutually exclusive with JS Execution Tracing
+        number | null,
       ]
   >;
 };
@@ -217,29 +215,19 @@ export type GeckoFrameTable = {
       IndexIntoStringTable,
       // for label frames, whether this frame should be shown in "JS only" stacks
       boolean,
-      (
-        // innerWindowID of JS frames. See the comment inside FrameTable in src/types/profile.js
-        // for more information.
-        null | number
-      ),
+      // innerWindowID of JS frames. See the comment inside FrameTable in src/types/profile.js
+      // for more information.
+      null | number,
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"
       null | IndexIntoStringTable,
-      (
-        // The line of code
-        null | number
-      ),
-      (
-        // The column of code
-        null | number
-      ),
-      (
-        // index into profile.meta.categories
-        null | number
-      ),
-      (
-        // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
-        null | number
-      ),
+      // The line of code
+      null | number,
+      // The column of code
+      null | number,
+      // index into profile.meta.categories
+      null | number,
+      // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
+      null | number,
     ]
   >;
 };

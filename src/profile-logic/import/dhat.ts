@@ -6,7 +6,6 @@ import type {
   Profile,
   Pid,
   Bytes,
-  IndexIntoFuncTable,
   IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
@@ -184,12 +183,11 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
   const globalDataCollector = new GlobalDataCollector();
+  const stackTable = globalDataCollector.getStackTable();
+  const frameTable = globalDataCollector.getFrameTable();
   const stringTable = globalDataCollector.getStringTable();
 
   const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
-  const { funcTable, stackTable, frameTable } = profile.shared;
-
-  const funcKeyToFuncIndex = new Map<string, IndexIntoFuncTable>();
 
   // dhat profiles do no support categories. Fill the category and subcategory information
   // with 0s.
@@ -197,14 +195,15 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   const otherSubCategory = 0;
 
   // Insert a root function that is the command that was run.
-  funcTable.name.push(stringTable.indexForString(dhat.cmd));
-  funcTable.isJS.push(false);
-  funcTable.relevantForJS.push(false);
-  funcTable.resource.push(-1);
-  funcTable.source.push(null);
-  funcTable.lineNumber.push(null);
-  funcTable.columnNumber.push(null);
-  const rootFuncIndex = funcTable.length++;
+  const rootFuncIndex = globalDataCollector.indexForFunc(
+    stringTable.indexForString(dhat.cmd),
+    false,
+    false,
+    -1,
+    null,
+    null,
+    null
+  );
 
   frameTable.address.push(-1);
   frameTable.line.push(null);
@@ -262,20 +261,15 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     // If the above regex doesn't match, just use the raw funcName, without additional
     // information.
 
-    const funcKey = `${funcName} ${fileName}`;
-
-    let funcIndex = funcKeyToFuncIndex.get(funcKey);
-    if (funcIndex === undefined) {
-      funcTable.name.push(stringTable.indexForString(funcName));
-      funcTable.isJS.push(false);
-      funcTable.relevantForJS.push(false);
-      funcTable.resource.push(-1);
-      funcTable.source.push(globalDataCollector.indexForSource(null, fileName));
-      funcTable.lineNumber.push(line);
-      funcTable.columnNumber.push(column);
-      funcIndex = funcTable.length++;
-      funcKeyToFuncIndex.set(funcKey, funcIndex);
-    }
+    const funcIndex = globalDataCollector.indexForFunc(
+      stringTable.indexForString(funcName),
+      false,
+      false,
+      -1,
+      globalDataCollector.indexForSource(null, fileName),
+      line,
+      column
+    );
 
     frameTable.address.push(address);
     frameTable.line.push(line);
