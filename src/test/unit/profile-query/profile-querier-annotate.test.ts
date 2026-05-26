@@ -17,6 +17,8 @@ import { ProfileQuerier } from 'firefox-profiler/profile-query';
 import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
+import { updateUrlState } from 'firefox-profiler/actions/app';
+import { getUrlState } from 'firefox-profiler/selectors/url-state';
 
 jest.mock('firefox-profiler/utils/fetch-source');
 jest.mock('firefox-profiler/utils/fetch-assembly');
@@ -43,6 +45,64 @@ describe('ProfileQuerier.functionAnnotate', function () {
       'firefox-profiler/utils/fetch-source'
     ).fetchSource;
     fetchSource.mockResolvedValue({ type: 'ERROR', errors: [] });
+  });
+
+  describe('symbol server URL resolution', function () {
+    it('falls back to URL-state symbolServerUrl when not explicitly provided', async function () {
+      const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+        A[file:f.c][line:10]
+      `);
+
+      const store = storeWithProfile(profile);
+      const customSymbolServer = 'http://127.0.0.1:3000/some-samply-prefix';
+      store.dispatch(
+        updateUrlState({
+          ...getUrlState(store.getState()),
+          symbolServerUrl: customSymbolServer,
+        })
+      );
+
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      await querier.functionAnnotate(
+        funcHandle(funcNamesDictPerThread, 'A'),
+        'src',
+        undefined
+      );
+
+      expect(fetchSource).toHaveBeenCalledTimes(1);
+      expect(fetchSource.mock.calls[0][2]).toBe(customSymbolServer);
+    });
+
+    it('explicit symbolServerUrl argument overrides URL-state value', async function () {
+      const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+        A[file:f.c][line:10]
+      `);
+
+      const store = storeWithProfile(profile);
+      store.dispatch(
+        updateUrlState({
+          ...getUrlState(store.getState()),
+          symbolServerUrl: 'http://127.0.0.1:3000/from-url-state',
+        })
+      );
+
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      const explicitUrl = 'http://127.0.0.1:9999/explicit-override';
+      await querier.functionAnnotate(
+        funcHandle(funcNamesDictPerThread, 'A'),
+        'src',
+        explicitUrl
+      );
+
+      expect(fetchSource).toHaveBeenCalledTimes(1);
+      expect(fetchSource.mock.calls[0][2]).toBe(explicitUrl);
+    });
   });
 
   describe('aggregate self/total sample counts', function () {
