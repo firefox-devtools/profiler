@@ -15,7 +15,6 @@ import type {
   SourceLocationTable,
 } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
-import { getOriginalPositionForFrame } from './profile-data';
 
 /**
  * For each stack in `stackTable`, and one specific source file, compute the
@@ -62,20 +61,38 @@ export function getStackLineInfo(
 
     const frame = stackTable.frame[stackIndex];
     const func = frameTable.func[frame];
-    const { source: sourceIndexOfThisStack, line: selfLineFromMapping } =
-      getOriginalPositionForFrame(
-        frame,
-        func,
-        frameTable,
-        funcTable,
-        sourceLocationTable
-      );
+
+    // Inlined source resolution from getOriginalPositionForFrame. We avoid
+    // its per-stack {source, line, column} allocation, skip resolving the
+    // column entirely, and defer the line lookup until we know the source
+    // matches.
+    const frameOriginalLocationIdx = frameTable.originalLocation[frame];
+    const funcOriginalLocationIdx = funcTable.originalLocation[func];
+    let sourceIndexOfThisStack;
+    if (frameOriginalLocationIdx !== null) {
+      sourceIndexOfThisStack =
+        sourceLocationTable.source[frameOriginalLocationIdx];
+    } else if (funcOriginalLocationIdx !== null) {
+      sourceIndexOfThisStack =
+        sourceLocationTable.source[funcOriginalLocationIdx];
+    } else {
+      sourceIndexOfThisStack = funcTable.source[func];
+    }
 
     const matchesSource = sourceIndexOfThisStack === sourceViewSourceIndex;
     if (prefixLineSet === -1 && !matchesSource) {
       stackIndexToLineSetIndex[stackIndex] = -1;
     } else {
-      const selfLineOrNull = matchesSource ? selfLineFromMapping : null;
+      let selfLineOrNull: number | null = null;
+      if (matchesSource) {
+        if (frameOriginalLocationIdx !== null) {
+          selfLineOrNull = sourceLocationTable.line[frameOriginalLocationIdx];
+        } else if (funcOriginalLocationIdx !== null) {
+          selfLineOrNull = sourceLocationTable.line[funcOriginalLocationIdx];
+        } else {
+          selfLineOrNull = frameTable.line[frame] ?? funcTable.lineNumber[func];
+        }
+      }
 
       stackIndexToLineSetIndex[stackIndex] = builder.extend(
         prefixLineSet !== -1 ? prefixLineSet : null,
@@ -193,17 +210,24 @@ export function getTotalLineTimingsForCallNode(
       continue;
     }
 
-    // Resolve in the same coordinate space as the source view: helper returns
-    // a source-mapped line when available, otherwise the frame's compiled
-    // line, otherwise the func's compiled line.
+    // Resolve in the same coordinate space as the source view: prefer the
+    // source-mapped line, otherwise the frame's compiled line, otherwise the
+    // func's compiled line. Inlined from getOriginalPositionForFrame to avoid
+    // the per-sample object allocation.
     const funcIndex = frameTable.func[callNodeFrame];
-    const { line: frameLine } = getOriginalPositionForFrame(
-      callNodeFrame,
-      funcIndex,
-      frameTable,
-      funcTable,
-      sourceLocationTable
-    );
+    const frameOriginalLocationIdx = frameTable.originalLocation[callNodeFrame];
+    let frameLine: number | null;
+    if (frameOriginalLocationIdx !== null) {
+      frameLine = sourceLocationTable.line[frameOriginalLocationIdx];
+    } else {
+      const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
+      if (funcOriginalLocationIdx !== null) {
+        frameLine = sourceLocationTable.line[funcOriginalLocationIdx];
+      } else {
+        frameLine =
+          frameTable.line[callNodeFrame] ?? funcTable.lineNumber[funcIndex];
+      }
+    }
     const line = frameLine !== null ? frameLine : funcLine;
     if (line === null) {
       continue;
