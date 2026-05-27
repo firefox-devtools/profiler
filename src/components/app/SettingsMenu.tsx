@@ -13,6 +13,10 @@ import './SettingsMenu.css';
 
 type Props = {
   readonly buttonClassName?: string;
+  // When true, the panel is positioned tight against the viewport's right edge.
+  // Used in the profile-viewer top bar where the cog sits at the screen edge
+  // and the default centered placement would overflow.
+  readonly rightAligned?: boolean;
 };
 
 function SettingsMenuPanel() {
@@ -28,7 +32,8 @@ function SettingsMenuPanel() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Localized id="SettingsMenu--docs">Docs</Localized>
+          <Localized id="SettingsMenu--docs">Documentation</Localized>
+          <i className="open-in-new" />
         </a>
         <a
           className="settingsMenuLink"
@@ -37,6 +42,7 @@ function SettingsMenuPanel() {
           rel="noopener noreferrer"
         >
           <Localized id="SettingsMenu--legal">Legal</Localized>
+          <i className="open-in-new" />
         </a>
         <a
           className="settingsMenuLink"
@@ -45,6 +51,7 @@ function SettingsMenuPanel() {
           rel="noopener noreferrer"
         >
           <Localized id="SettingsMenu--privacy">Privacy</Localized>
+          <i className="open-in-new" />
         </a>
         <a
           className="settingsMenuLink"
@@ -53,6 +60,7 @@ function SettingsMenuPanel() {
           rel="noopener noreferrer"
         >
           <Localized id="SettingsMenu--cookies">Cookies</Localized>
+          <i className="open-in-new" />
         </a>
       </div>
       <div className="settingsMenuRow settingsMenuRow--language">
@@ -64,13 +72,16 @@ function SettingsMenuPanel() {
 
 export class SettingsMenu extends React.PureComponent<Props> {
   override render() {
-    const { buttonClassName } = this.props;
+    const { buttonClassName, rightAligned } = this.props;
+    const panelClassName = rightAligned
+      ? 'settingsMenuArrowPanel settingsMenuArrowPanel--rightAligned'
+      : 'settingsMenuArrowPanel';
     return (
       <Localized id="SettingsMenu--button" attrs={{ title: true }}>
         <ButtonWithPanel
           className="settingsMenu"
           buttonClassName={buttonClassName}
-          panelClassName="settingsMenuArrowPanel"
+          panelClassName={panelClassName}
           title="Settings"
           label=""
           panelContent={<SettingsMenuPanel />}

@@ -335,7 +335,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
         {this._renderPermalink()}
-        <SettingsMenu buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsButton-hasLeftBorder menuButtonsSettingsButton" />
+        <SettingsMenu
+          buttonClassName="menuButtonsButton menuButtonsButton-hasIcon menuButtonsButton-hasLeftBorder menuButtonsSettingsButton"
+          rightAligned
+        />
       </>
     );
   }

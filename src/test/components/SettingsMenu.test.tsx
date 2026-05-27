@@ -61,7 +61,7 @@ it('renders the cog button in its closed state', async () => {
 it('opens the panel when the cog button is clicked', async () => {
   setup();
   await openMenu();
-  expect(screen.getByText('Docs')).toBeInTheDocument();
+  expect(screen.getByText('Documentation')).toBeInTheDocument();
   expect(screen.getByText('Legal')).toBeInTheDocument();
   expect(screen.getByText('Privacy')).toBeInTheDocument();
   expect(screen.getByText('Cookies')).toBeInTheDocument();

@@ -320,7 +320,7 @@ ErrorBoundary--report-error-on-github = Report the error on GitHub
 
 SettingsMenu--button =
     .title = Settings
-SettingsMenu--docs = Docs
+SettingsMenu--docs = Documentation
 SettingsMenu--legal = Legal
 SettingsMenu--privacy = Privacy
 SettingsMenu--cookies = Cookies

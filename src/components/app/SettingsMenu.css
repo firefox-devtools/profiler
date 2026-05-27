@@ -4,11 +4,13 @@
 
 .settingsMenu {
   --internal-cog-icon: url(../../../res/img/svg/cog-12.svg);
+  --internal-open-in-new-icon: url(../../../res/img/svg/open-in-new-12.svg);
 }
 
 :root.dark-mode {
   .settingsMenu {
     --internal-cog-icon: url(../../../res/img/svg/cog-light-12.svg);
+    --internal-open-in-new-icon: url(../../../res/img/svg/open-in-new-light-12.svg);
   }
 }
 
@@ -43,22 +45,25 @@
   opacity: 0.5;
 }
 
-/* Override the ArrowPanel's default 60px right-offset - the cog sits at the
- * far right of the top bar, so any larger offset overflows the viewport. */
 .settingsMenuArrowPanel {
-  --offset-from-right: 12px;
-
   min-width: 200px;
+}
+
+.settingsMenuArrowPanel--rightAligned {
+  --offset-from-right: 14px;
 }
 
 .settingsMenuArrowPanel .arrowPanelContent {
   padding: 0;
+
+  --internal-approx-distance-from-top: 20px;
+  --internal-approx-distance-to-bottom: 5px;
 }
 
 .settingsMenuPanel {
   display: flex;
   flex-direction: column;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: normal;
   line-height: 1.3;
 }
@@ -82,8 +87,12 @@
 .settingsMenuLink {
   display: flex;
   align-items: center;
-  padding: 6px 14px;
+  padding: 4px 14px;
   font-weight: 600;
+}
+
+.settingsMenuLink .open-in-new {
+  margin-left: auto;
 }
 
 .settingsMenuLink,
