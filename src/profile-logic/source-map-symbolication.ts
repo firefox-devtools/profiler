@@ -93,12 +93,19 @@ import type {
   IndexIntoFrameTable,
   FuncTable,
   FrameTable,
+  RawProfileSharedData,
   SourceLocationTable,
   SourceTable,
 } from '../types';
 import type { NullableMappedPosition } from 'source-map';
 import type { SourceMapConsumer } from './source-map-store';
-import type { WorkerInput, WorkerOutput } from './source-map-worker-types';
+import type {
+  FrameResolution,
+  FuncResolution,
+  SourceMapSymbolicationResponse,
+  WorkerInput,
+  WorkerOutput,
+} from './source-map-worker-types';
 
 const INT32_MAX = 0x7fffffff;
 
@@ -117,15 +124,13 @@ type ParsedSource = {
   lineOffsets: number[];
 };
 
-export type SourceMapSymbolicationResult = {
-  newFuncTable: FuncTable;
-  newFrameTable: FrameTable;
-  newOriginalLocation: SourceLocationTable;
-};
-
 // The subset of RawProfileSharedData that symbolicateWithSourceMaps reads.
 // Other shared fields (stackTable, resourceTable, nativeSymbols) are not
 // touched, so callers (e.g. the worker) can supply just this subset.
+//
+// The worker only *reads* these fields. All table mutations happen on the
+// main thread in applySourceMapSymbolicationResponse, which builds new
+// tables from the current shared state at apply time.
 export type SourceMapSymbolicationInput = {
   frameTable: FrameTable;
   funcTable: FuncTable;
@@ -146,13 +151,15 @@ export type SourceMapSymbolicationInput = {
  * name resolution falls back to original-source-only lookup via
  * `sourcesContent`.
  *
- * Returns null if no mappings were applied.
+ * Returns a position-keyed response that the main thread translates into
+ * new tables via applySourceMapSymbolicationResponse. Returns null if no
+ * funcs or frames produced a resolution.
  */
 export function symbolicateWithSourceMaps(
   shared: SourceMapSymbolicationInput,
   sourceMapStore: SourceMapStore,
   compiledSources: Map<IndexIntoSourceTable, string> = new Map()
-): SourceMapSymbolicationResult | null {
+): SourceMapSymbolicationResponse | null {
   const { funcsToSymbolicate, framesToSymbolicate } = _identifyToSymbolicate(
     shared.frameTable,
     shared.funcTable,
@@ -163,7 +170,7 @@ export function symbolicateWithSourceMaps(
     return null;
   }
 
-  return _applySourceMapSymbolication(
+  return _buildSourceMapSymbolicationResponse(
     shared,
     funcsToSymbolicate,
     framesToSymbolicate,
@@ -290,57 +297,39 @@ function _isExactSourceMapEntry(
 }
 
 /**
- * Apply source map lookups to produce new funcTable, frameTable, and
- * originalLocation table. Positions with no mapping in the source map are skipped.
- * Returns null if no mappings were actually applied (e.g. no consumers available).
+ * Walk the funcs/frames to symbolicate, run source-map lookups, and collect
+ * the results into a position-keyed response. The worker doesn't allocate
+ * source-table or originalLocation indices and doesn't intern strings; that
+ * bookkeeping happens main-side in applySourceMapSymbolicationResponse.
+ *
+ * Returns null if no funcs or frames were resolved (e.g. no consumers were
+ * available, or every position fell outside its source map's coverage).
  */
-function _applySourceMapSymbolication(
+function _buildSourceMapSymbolicationResponse(
   shared: SourceMapSymbolicationInput,
   funcsToSymbolicate: IndexIntoFuncTable[],
   framesToSymbolicate: IndexIntoFrameTable[],
   sourceMapStore: SourceMapStore,
   compiledSources: Map<IndexIntoSourceTable, string>
-): SourceMapSymbolicationResult | null {
-  const { frameTable, funcTable, sourceLocationTable, sources, stringArray } =
-    shared;
+): SourceMapSymbolicationResponse | null {
+  const { frameTable, funcTable } = shared;
 
-  // funcTable, frameTable, and sourceLocationTable are cloned because we overwrite
-  // values at existing indices (e.g. funcTable.name[i], frameTable.originalLocation[i]).
-  //
-  // sources and stringArray are *not* cloned: they're append-only here
-  // (_findOrCreateSource pushes new entries, StringTable.withBackingArray pushes
-  // newly interned strings). This function only runs inside the source map worker,
-  // which received its own structured-cloned copies, so mutating them in place
-  // is safe for the main thread, and the worker hands the mutated arrays back
-  // through WorkerOutput.
-  const newFuncTable = shallowCloneFuncTable(funcTable);
-  const newFrameTable = shallowCloneFrameTable(frameTable);
-  const newOriginalLocation =
-    shallowCloneSourceLocationTable(sourceLocationTable);
+  const funcResults = new Map<IndexIntoFuncTable, FuncResolution>();
+  const frameResults = new Map<IndexIntoFrameTable, FrameResolution>();
 
-  const stringTable = StringTable.withBackingArray(stringArray);
-
-  // filename string index to source index, covering all existing null-id
-  // (original source) entries. Updated in place as new entries are appended.
-  const sourceByFilename = new Map<number, IndexIntoSourceTable>();
-  for (let i = 0; i < sources.length; i++) {
-    if (sources.id[i] === null) {
-      sourceByFilename.set(sources.filename[i], i);
-    }
-  }
+  // Per-URL source content fetched from source maps' sourcesContent. Used
+  // both by original-source name resolution and (post-walk) to populate the
+  // response's originalSources map. Value null means we probed and the
+  // source map had no content for this URL.
+  const originalSourceContents = new Map<string, string | null>();
 
   const compiledSourceCache = new Map<IndexIntoSourceTable, ParsedSource>();
 
-  // Parsed scope tree + line offsets of original sources we've seen. Used to
-  // recover function names stripped during minification (esbuild drops
-  // named-function-expression identifiers when the inner name isn't referenced
-  // from inside the function body, so `function mapToPropsProxy()` becomes
-  // `function()`. Only the original source still knows the name). Map value
-  // `null` is cached when no content was available so we don't keep retrying.
-  const originalSourceCache = new Map<
-    IndexIntoSourceTable,
-    ParsedSource | null
-  >();
+  // Parsed scope tree + line offsets of original sources we've seen, keyed
+  // by URL. Used to recover function names stripped during minification.
+  // Value `null` is cached when no content was available so we don't keep
+  // retrying.
+  const originalSourceCache = new Map<string, ParsedSource | null>();
 
   // Function definitions. These get an original source file.
   for (const funcIndex of funcsToSymbolicate) {
@@ -361,15 +350,11 @@ function _applySourceMapSymbolication(
       consumer,
       line,
       column,
-      sources,
-      stringTable,
-      sourceByFilename,
-      newOriginalLocation
+      originalSourceContents
     );
     if (remap === null) {
       continue;
     }
-    newFuncTable.originalLocation[funcIndex] = remap.originalLocationIndex;
 
     // Full resolution (compiled + original, with ancestor chain) when the
     // compiled bundle is available. Otherwise (e.g. the profile was captured
@@ -394,21 +379,23 @@ function _applySourceMapSymbolication(
         column,
         compiled.lineOffsets,
         compiled.tree,
-        sources,
-        remap.originalSourceIndex,
+        originalSourceContents,
         originalSourceCache
       );
     } else {
       resolvedName = _resolveOriginalName(
-        sources,
-        remap.originalSourceIndex,
         remap.original,
+        originalSourceContents,
         originalSourceCache
       );
     }
-    if (resolvedName) {
-      newFuncTable.name[funcIndex] = stringTable.indexForString(resolvedName);
-    }
+
+    funcResults.set(funcIndex, {
+      originalSource: remap.originalSource,
+      originalLine: remap.originalLine,
+      originalColumn: remap.originalColumn,
+      name: resolvedName,
+    });
   }
 
   // Frame execution points. Remap line/column and capture the original source
@@ -433,28 +420,37 @@ function _applySourceMapSymbolication(
       consumer,
       line,
       column,
-      sources,
-      stringTable,
-      sourceByFilename,
-      newOriginalLocation
+      originalSourceContents
     );
     if (remap === null) {
       continue;
     }
-    newFrameTable.originalLocation[frameIndex] = remap.originalLocationIndex;
+    frameResults.set(frameIndex, {
+      originalSource: remap.originalSource,
+      originalLine: remap.originalLine,
+      originalColumn: remap.originalColumn,
+    });
   }
 
-  if (newOriginalLocation.length === sourceLocationTable.length) {
+  if (funcResults.size === 0 && frameResults.size === 0) {
     return null;
   }
 
-  return { newFuncTable, newFrameTable, newOriginalLocation };
+  const originalSources = new Map<string, { content: string | null }>();
+  for (const [url, content] of originalSourceContents) {
+    originalSources.set(url, { content });
+  }
+
+  return { funcResults, frameResults, originalSources };
 }
 
 /**
- * Remap a single (line, column) through the source map and append a new row
- * to newOriginalLocation. Returns the new row index plus the resolved original
- * position. Returns null when the source map has no mapping at that position.
+ * Remap a single (line, column) through the source map. Returns the original
+ * source URL plus 1-based line/column (Gecko convention), or null when the
+ * source map has no mapping at that position. Also populates
+ * `originalSourceContents` with the source map's sourcesContent for the URL
+ * the first time it's seen, used by original-source name resolution and
+ * later shipped to the main thread in the response's originalSources map.
  *
  * Gecko line/column are 1-based. source-map expects 0-based columns and
  * returns 0-based columns; we convert in both directions here so callers
@@ -464,44 +460,35 @@ function _remapPosition(
   consumer: SourceMapConsumer,
   line: number,
   column: number,
-  sources: SourceTable,
-  stringTable: StringTable,
-  sourceByFilename: Map<number, IndexIntoSourceTable>,
-  newOriginalLocation: SourceLocationTable
+  originalSourceContents: Map<string, string | null>
 ): {
-  originalLocationIndex: number;
-  originalSourceIndex: IndexIntoSourceTable;
+  originalSource: string;
+  originalLine: number;
+  originalColumn: number;
   original: OriginalPosition;
 } | null {
   const original = consumer.originalPositionFor({ line, column: column - 1 });
   if (original.source === null || original.line === null) {
     return null;
   }
-  const originalSourceIndex = _findOrCreateSource(
-    sources,
-    stringTable,
-    original.source,
-    sourceByFilename
-  );
 
-  // Extract original source content from sourcesContent if not yet seen.
+  // Extract original source content from sourcesContent if not yet seen, or
+  // re-probe when a prior consumer recorded null but this one might have it.
   // nullOnMissing=true so we get null instead of a throw when not embedded.
-  if (sources.content[originalSourceIndex] === null) {
+  const existingContent = originalSourceContents.get(original.source);
+  if (existingContent === undefined || existingContent === null) {
     const content = consumer.sourceContentFor(original.source, true);
     if (content !== null) {
-      sources.content[originalSourceIndex] = content;
+      originalSourceContents.set(original.source, content);
+    } else if (existingContent === undefined) {
+      originalSourceContents.set(original.source, null);
     }
   }
 
-  const originalLocationIndex = newOriginalLocation.length;
-  newOriginalLocation.source.push(originalSourceIndex);
-  newOriginalLocation.line.push(original.line);
-  newOriginalLocation.column.push((original.column ?? 0) + 1);
-  newOriginalLocation.length++;
-
   return {
-    originalLocationIndex,
-    originalSourceIndex,
+    originalSource: original.source,
+    originalLine: original.line,
+    originalColumn: (original.column ?? 0) + 1,
     original: original as OriginalPosition,
   };
 }
@@ -541,9 +528,8 @@ function _resolveFunctionName(
   column: number,
   lineOffsets: number[],
   scopeTree: FunctionScope[],
-  sources: SourceTable,
-  originalSourceIndex: IndexIntoSourceTable,
-  originalSourceCache: Map<IndexIntoSourceTable, ParsedSource | null>
+  originalSourceContents: Map<string, string | null>,
+  originalSourceCache: Map<string, ParsedSource | null>
 ): string | null {
   // 1. Original-source name lookup. Prefers the function's own declared
   //    identifier, falling back to the verbatim LHS text of the surrounding
@@ -553,9 +539,8 @@ function _resolveFunctionName(
   //    the enclosing function, matching SpiderMonkey's output shape (e.g.
   //    `outer/Foo.prototype.bar`).
   const originalName = _resolveOriginalName(
-    sources,
-    originalSourceIndex,
     original,
+    originalSourceContents,
     originalSourceCache
   );
   if (originalName !== null && !_isMemberStyleName(originalName)) {
@@ -791,20 +776,19 @@ function _resolveCompiledName(
  * an `astName` nor an `lhsText`.
  */
 function _resolveOriginalName(
-  sources: SourceTable,
-  originalSourceIndex: IndexIntoSourceTable,
   original: OriginalPosition,
-  cache: Map<IndexIntoSourceTable, ParsedSource | null>
+  originalSourceContents: Map<string, string | null>,
+  cache: Map<string, ParsedSource | null>
 ): string | null {
   // A cached `null` means we saw no content the last time we looked, but a
-  // later _remapPosition from a different consumer may have populated it
-  // since. Re-check `sources.content` on every cached miss so the upgrade
-  // doesn't depend on iteration order across consumers.
-  let entry = cache.get(originalSourceIndex);
+  // later _remapPosition from a different consumer may have populated
+  // `originalSourceContents` since. Re-check on every cached miss so the
+  // upgrade doesn't depend on iteration order across consumers.
+  let entry = cache.get(original.source);
   if (entry === undefined || entry === null) {
-    const sourceContent = sources.content[originalSourceIndex];
+    const sourceContent = originalSourceContents.get(original.source) ?? null;
     if (sourceContent === null) {
-      cache.set(originalSourceIndex, null);
+      cache.set(original.source, null);
       return null;
     }
     entry = {
@@ -814,7 +798,7 @@ function _resolveOriginalName(
       ),
       lineOffsets: buildLineOffsets(sourceContent),
     };
-    cache.set(originalSourceIndex, entry);
+    cache.set(original.source, entry);
   }
   // source-map's original.line is 1-based, column is 0-based.
   const offset = lineColToOffset(
@@ -892,13 +876,11 @@ function _findOrCreateSource(
 
 /**
  * End-to-end source map symbolication runner: build the SourceMapStore, run
- * symbolication, and return a WorkerOutput.
+ * symbolication, and return a WorkerOutput carrying a position-keyed response.
  *
- * Mutates `input.sources` and `input.stringArray` in place
- * (`_findOrCreateSource` appends new sources, `StringTable.withBackingArray`
- * appends interned strings). Callers must pass copies if the originals must
- * stay untouched. The worker is safe because structured clone already copies
- * them at the thread boundary.
+ * The worker only reads from `input` — no tables or string arrays are mutated.
+ * The main thread translates the response into new tables via
+ * applySourceMapSymbolicationResponse, against the latest shared state.
  */
 export async function runSourceMapSymbolicationCore(
   input: WorkerInput,
@@ -917,24 +899,17 @@ export async function runSourceMapSymbolicationCore(
     } = input;
 
     sourceMapStore = await SourceMapStore.create(resolvedSourceMaps, wasmUrl);
-    const result = symbolicateWithSourceMaps(
+    const response = symbolicateWithSourceMaps(
       { frameTable, funcTable, sourceLocationTable, sources, stringArray },
       sourceMapStore,
       compiledSources
     );
 
-    if (result === null) {
+    if (response === null) {
       return { type: 'no-op' };
     }
 
-    return {
-      type: 'success',
-      newFuncTable: result.newFuncTable,
-      newFrameTable: result.newFrameTable,
-      newSourceLocationTable: result.newOriginalLocation,
-      newSources: sources,
-      newStringArray: stringArray,
-    };
+    return { type: 'success', response };
   } catch (err) {
     return {
       type: 'error',
@@ -945,4 +920,143 @@ export async function runSourceMapSymbolicationCore(
       sourceMapStore.destroy();
     }
   }
+}
+
+/**
+ * Apply a worker-produced SourceMapSymbolicationResponse against the current
+ * shared tables and return new ones. This is the main-thread complement to
+ * the worker: it allocates the source-table and sourceLocationTable indices,
+ * interns names into the string table, and dedupes original-source URLs
+ * against current state.
+ *
+ * Reading current state at apply time (rather than reusing the snapshot the
+ * worker started from) makes concurrent worker runs compose correctly: a
+ * second result landing after a first never undoes the first's writes,
+ * because each apply step skips funcs/frames that already have a
+ * sourceLocationTable row.
+ *
+ * Idempotency relies on funcIndex/frameIndex being stable across concurrent
+ * runs. JS source-map symbolication only appends to sourceLocationTable,
+ * sources, and stringArray — it never adds funcs or frames. If a future
+ * change adds funcs/frames during symbolication, this contract needs
+ * revisiting.
+ *
+ * Returns null when nothing applied (every response entry collided with
+ * a row that's already populated).
+ */
+export function applySourceMapSymbolicationResponse(
+  shared: RawProfileSharedData,
+  response: SourceMapSymbolicationResponse
+): {
+  newFuncTable: FuncTable;
+  newFrameTable: FrameTable;
+  newSourceLocationTable: SourceLocationTable;
+  newSources: SourceTable;
+  newStringArray: string[];
+} | null {
+  const { funcTable, frameTable, sourceLocationTable, sources, stringArray } =
+    shared;
+
+  const newFuncTable = shallowCloneFuncTable(funcTable);
+  const newFrameTable = shallowCloneFrameTable(frameTable);
+  const newSourceLocationTable =
+    shallowCloneSourceLocationTable(sourceLocationTable);
+  const newSources = _shallowCloneSourceTable(sources);
+  const newStringArray = stringArray.slice();
+  const stringTable = StringTable.withBackingArray(newStringArray);
+
+  // filename string index to source index, covering all existing null-id
+  // (original source) entries. Updated in place as new entries are appended
+  // by _findOrCreateSource.
+  const sourceByFilename = new Map<number, IndexIntoSourceTable>();
+  for (let i = 0; i < newSources.length; i++) {
+    if (newSources.id[i] === null) {
+      sourceByFilename.set(newSources.filename[i], i);
+    }
+  }
+
+  // Resolve each original-source URL to a source-table index, creating new
+  // entries as needed and upgrading content where the existing entry has
+  // none.
+  const urlToSourceIndex = new Map<string, IndexIntoSourceTable>();
+  for (const [url, { content }] of response.originalSources) {
+    const sourceIndex = _findOrCreateSource(
+      newSources,
+      stringTable,
+      url,
+      sourceByFilename
+    );
+    if (content !== null && newSources.content[sourceIndex] === null) {
+      newSources.content[sourceIndex] = content;
+    }
+    urlToSourceIndex.set(url, sourceIndex);
+  }
+
+  let applied = 0;
+
+  for (const [funcIndex, resolution] of response.funcResults) {
+    // A concurrent run got here first. Skip the whole entry: the row and
+    // the name go together; writing a name without a sourceLocationTable row
+    // would be inconsistent.
+    if (newFuncTable.originalLocation[funcIndex] !== null) {
+      continue;
+    }
+    const sourceIndex = urlToSourceIndex.get(resolution.originalSource);
+    if (sourceIndex === undefined) {
+      continue;
+    }
+    const rowIndex = newSourceLocationTable.length;
+    newSourceLocationTable.source.push(sourceIndex);
+    newSourceLocationTable.line.push(resolution.originalLine);
+    newSourceLocationTable.column.push(resolution.originalColumn);
+    newSourceLocationTable.length++;
+    newFuncTable.originalLocation[funcIndex] = rowIndex;
+    if (resolution.name !== null) {
+      newFuncTable.name[funcIndex] = stringTable.indexForString(
+        resolution.name
+      );
+    }
+    applied++;
+  }
+
+  for (const [frameIndex, resolution] of response.frameResults) {
+    if (newFrameTable.originalLocation[frameIndex] !== null) {
+      continue;
+    }
+    const sourceIndex = urlToSourceIndex.get(resolution.originalSource);
+    if (sourceIndex === undefined) {
+      continue;
+    }
+    const rowIndex = newSourceLocationTable.length;
+    newSourceLocationTable.source.push(sourceIndex);
+    newSourceLocationTable.line.push(resolution.originalLine);
+    newSourceLocationTable.column.push(resolution.originalColumn);
+    newSourceLocationTable.length++;
+    newFrameTable.originalLocation[frameIndex] = rowIndex;
+    applied++;
+  }
+
+  if (applied === 0) {
+    return null;
+  }
+
+  return {
+    newFuncTable,
+    newFrameTable,
+    newSourceLocationTable,
+    newSources,
+    newStringArray,
+  };
+}
+
+function _shallowCloneSourceTable(sources: SourceTable): SourceTable {
+  return {
+    id: sources.id.slice(),
+    filename: sources.filename.slice(),
+    startLine: sources.startLine.slice(),
+    startColumn: sources.startColumn.slice(),
+    sourceMapURL: sources.sourceMapURL.slice(),
+    content: sources.content.slice(),
+    length: sources.length,
+  };
 }

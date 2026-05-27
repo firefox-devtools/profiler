@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { getRawProfileSharedData } from 'firefox-profiler/selectors';
+import { applySourceMapSymbolicationResponse } from 'firefox-profiler/profile-logic/source-map-symbolication';
 
 import type {
   WorkerInput,
@@ -49,16 +50,29 @@ export function doSourceMapSymbolication(
     dispatch({ type: 'START_SOURCE_MAP_SYMBOLICATION' });
     const result = await _runSourceMapWorker(input);
     switch (result.type) {
-      case 'success':
+      case 'success': {
+        // Apply against the current shared state (not the snapshot the worker
+        // received), so concurrent worker runs compose instead of stomping
+        // each other's results.
+        const currentShared = getRawProfileSharedData(getState());
+        const applied = applySourceMapSymbolicationResponse(
+          currentShared,
+          result.response
+        );
+        if (applied === null) {
+          dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
+          break;
+        }
         dispatch({
           type: 'BULK_SOURCE_MAP_SYMBOLICATION',
-          newFuncTable: result.newFuncTable,
-          newFrameTable: result.newFrameTable,
-          newSourceLocationTable: result.newSourceLocationTable,
-          newSources: result.newSources,
-          newStringArray: result.newStringArray,
+          newFuncTable: applied.newFuncTable,
+          newFrameTable: applied.newFrameTable,
+          newSourceLocationTable: applied.newSourceLocationTable,
+          newSources: applied.newSources,
+          newStringArray: applied.newStringArray,
         });
         break;
+      }
       case 'error':
         console.warn('Source map worker error:', result.message);
         dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
@@ -79,26 +93,14 @@ export function doSourceMapSymbolication(
  *
  * Debugging tip: to step through symbolication from the page DevTools, paste
  * the snippet below over this function body. It runs the same core on the
- * main thread (blocking, debug only).
+ * main thread (blocking, debug only). The worker no longer mutates its
+ * input, so no defensive cloning is needed here.
  *
  *   const { runSourceMapSymbolicationCore } = await import(
  *     'firefox-profiler/profile-logic/source-map-symbolication'
  *   );
- *   const sources = {
- *     length: input.sources.length,
- *     id: input.sources.id.slice(),
- *     filename: input.sources.filename.slice(),
- *     startLine: input.sources.startLine.slice(),
- *     startColumn: input.sources.startColumn.slice(),
- *     sourceMapURL: input.sources.sourceMapURL.slice(),
- *     content: input.sources.content.slice(),
- *   };
- *   const stringArray = input.stringArray.slice();
  *   const wasmUrl = new URL('/mappings.wasm', window.location.href).href;
- *   return runSourceMapSymbolicationCore(
- *     { ...input, sources, stringArray },
- *     wasmUrl
- *   );
+ *   return runSourceMapSymbolicationCore(input, wasmUrl);
  */
 function _runSourceMapWorker(input: WorkerInput): Promise<WorkerOutput> {
   return new Promise((resolve) => {

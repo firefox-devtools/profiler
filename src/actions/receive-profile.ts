@@ -248,19 +248,19 @@ export function finalizeProfileView(
       }
     }
 
-    // Fetch source maps for all JS sources with a sourceMapURL, then apply JS
-    // symbolication. Fetching runs in parallel with native symbolication, but
-    // the worker is only dispatched after native symbolication has committed
-    // its Redux changes, so neither clobbers the other's funcTable updates.
-    // Requires WebChannel version 7+.
+    // Fetch source maps for all JS sources with a sourceMapURL, then run the
+    // source-map worker. Runs fully in parallel with native symbolication:
+    // native only touches funcs/frames belonging to library resources (JS
+    // funcs aren't in those sets), and the JS apply step reads current
+    // shared state at dispatch time so it composes with whatever native
+    // has committed by then. Requires WebChannel version 7+.
     let sourceMapSymbolicationPromise: Promise<void> | null = null;
     if (browserConnection !== null && browserConnection.supportsGetSourceMap) {
-      // Fetch source maps concurrently with native symbolication. Once both
-      // have completed, apply JS symbolication on top of the final state.
-      sourceMapSymbolicationPromise = Promise.all([
-        doResolveSourceMaps(profile, browserConnection, dispatch),
-        symbolicationPromise,
-      ]).then(([{ resolvedSourceMaps, compiledSources }]) =>
+      sourceMapSymbolicationPromise = doResolveSourceMaps(
+        profile,
+        browserConnection,
+        dispatch
+      ).then(({ resolvedSourceMaps, compiledSources }) =>
         dispatch(doSourceMapSymbolication(resolvedSourceMaps, compiledSources))
       );
     }
