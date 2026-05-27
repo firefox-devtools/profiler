@@ -390,7 +390,7 @@ export class Daemon {
             return this.querier!.functionAnnotate(
               command.function,
               command.annotateMode ?? 'src',
-              command.symbolServerUrl ?? 'http://localhost:3000',
+              command.symbolServerUrl,
               command.annotateContext ?? '2'
             );
           default:

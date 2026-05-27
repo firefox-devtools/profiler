@@ -61,8 +61,7 @@ export function registerFunctionCommand(
       )
       .option(
         '--symbol-server <url>',
-        'Symbol server URL for asm mode (default: http://localhost:3000)',
-        'http://localhost:3000'
+        'Symbol server URL for asm mode. Defaults to the ?symbolServer= value from the loaded URL, or the Mozilla symbol server.'
       )
       .option(
         '--context <context>',
