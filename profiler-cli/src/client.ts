@@ -213,6 +213,15 @@ export async function sendCommand(
   return sendMessage(sessionDir, { type: 'command', command }, sessionId);
 }
 
+function hasProxyEnvVar(): boolean {
+  return Boolean(
+    process.env.HTTP_PROXY ||
+    process.env.HTTPS_PROXY ||
+    process.env.http_proxy ||
+    process.env.https_proxy
+  );
+}
+
 /**
  * Start a new daemon for the given profile.
  * Uses a two-phase approach:
@@ -257,10 +266,21 @@ export async function startNewDaemon(
   // Get the path to the current script (profiler-cli.js)
   const scriptPath = process.argv[1];
 
+  // --use-env-proxy was added in Node.js 24. On older runtimes node would
+  // exit immediately with "bad option", taking the daemon down with it.
+  const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+  const supportsUseEnvProxy = nodeMajor >= 24;
+
+  if (!supportsUseEnvProxy && hasProxyEnvVar()) {
+    console.warn(
+      `Warning: Node.js ${process.versions.node} detected. HTTP_PROXY/HTTPS_PROXY env vars will not be honored when fetching profiles or symbols. Upgrade to Node.js >= 24 for proxy support.`
+    );
+  }
+
   const daemonArgs = [
     // Make fetch respect HTTP_PROXY/HTTPS_PROXY/NO_PROXY. This is the default
-    // in a lot of tools like, curl, python, go etc.
-    '--use-env-proxy',
+    // in a lot of tools like curl, python, go etc.
+    ...(supportsUseEnvProxy ? ['--use-env-proxy'] : []),
     scriptPath,
     '--daemon',
     absolutePath,
