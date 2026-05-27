@@ -138,6 +138,11 @@ CallTree--tracing-ms-total = Çalışma süresi (ms)
     .title = “Toplam” çalışma süresi, bu fonksiyonun yığında gözlemlendiği tüm sürenin özetini içerir. Bu süre, fonksiyonun kendisinin çalıştığı süreyi ve bu fonksiyondan çağırılanların sürelerini içerir.
 CallTree--tracing-ms-self = Öz (ms)
     .title = “Öz” süre yalnızca fonksiyonun yığının sonunda olduğu süreyi içerir. Eğer fonksiyon başka fonksiyonları çağırmışsa diğer fonksiyonların süresi dahil değildir. Öz süre, programda asıl nerede zaman harcandığını anlamak için faydalıdır.
+CallTree--samples-total = Toplam (örnekler)
+    .title =
+        “Toplam” örnek sayısı, bu fonksiyonun yığın üzerinde görüldüğü her örneğin
+        bir özetini içerir. Fonksiyonun gerçekten çalıştığı süre ile bu fonksiyondan
+        çağrılan fonksiyonlarda geçirilen süre de buna dahildir.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -288,6 +293,9 @@ Home--record-instructions =
 Home--instructions-content2 =
     Performans profilleri yalnızca <a>{ -firefox-brand-name }’un masaüstü sürümü</a> ile kaydedilebilir.
     Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } bu cihazda doğrudan profillenebilir.
+    Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını cihazda doğrudan profilleme</a> sayfasını okuyabilirsiniz.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
