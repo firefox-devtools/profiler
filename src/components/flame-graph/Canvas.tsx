@@ -17,8 +17,11 @@ import {
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
-import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
+import {
+  getCallNodeTimings,
+  getSampleSelectedStates,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Thread,
@@ -74,6 +77,7 @@ export type OwnProps = {
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
+  readonly ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly tracedTiming: CallTreeTimingsNonInverted | null;
   readonly displayStackType: boolean;
 };
@@ -344,7 +348,10 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   };
 
   // Properly memoize this derived information for the Tooltip component.
-  _getTimingsForCallNodeIndex = memoize(getTimingsForCallNodeIndex, {
+  _getSampleSelectedStates = memoize(getSampleSelectedStates, {
+    cache: new MixedTupleMap(),
+  });
+  _getCallNodeTimings = memoize(getCallNodeTimings, {
     cache: new MixedTupleMap(),
   });
 
@@ -365,6 +372,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       weightType,
       ctssSamples,
       ctssSampleCategoriesAndSubcategories,
+      ctssSampleCallNodes,
       tracedTiming,
       displayStackType,
     } = this.props;
@@ -404,6 +412,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       // strategies, but it may not be worth implementing it.
       callTreeSummaryStrategy === 'timing';
 
+    const callNodeInfoInverted = callNodeInfo.asInverted();
+    const isInvertedRoot =
+      callNodeInfoInverted !== null &&
+      callNodeInfoInverted.isRoot(callNodeIndex);
+
     return (
       // Important! Only pass in props that have been properly memoized so this component
       // doesn't over-render.
@@ -420,12 +433,16 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
           shouldComputeTimings
-            ? this._getTimingsForCallNodeIndex(
-                callNodeIndex,
-                callNodeInfo,
+            ? this._getCallNodeTimings(
                 categories,
                 ctssSamples,
-                ctssSampleCategoriesAndSubcategories
+                ctssSampleCategoriesAndSubcategories,
+                this._getSampleSelectedStates(
+                  callNodeInfo,
+                  ctssSampleCallNodes,
+                  callNodeIndex
+                ),
+                isInvertedRoot
               )
             : undefined
         }
