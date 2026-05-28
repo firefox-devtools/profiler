@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
-import minimist from 'minimist';
+import { Command, CommanderError, Option } from 'commander';
 
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
@@ -197,28 +197,73 @@ export async function run(options: CliOptions) {
   console.log('Finished.');
 }
 
+function collectWasm(
+  value: string,
+  previous: WasmSymbolicationCliSpec[]
+): WasmSymbolicationCliSpec[] {
+  // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
+  // whole string as a path and infer the URL from the profile. Split on
+  // the last `=` so URLs containing `=` (e.g. in query strings) survive
+  // intact; this assumes file paths don't contain `=`.
+  const eqIndex = value.lastIndexOf('=');
+  if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(value.slice(0, eqIndex))) {
+    return [
+      ...previous,
+      {
+        strippedWasmUrl: value.slice(0, eqIndex),
+        unstrippedWasmPath: value.slice(eqIndex + 1),
+      },
+    ];
+  }
+  return [...previous, { unstrippedWasmPath: value }];
+}
+
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
-  const argv = minimist(processArgv.slice(2), {
-    alias: { i: 'input', o: 'output' },
-  });
+  const program = new Command();
+  program
+    .name('profiler-edit')
+    .description('Edit and transform Firefox performance profiles')
+    .exitOverride()
+    .option(
+      '-i, --input <fileOrUrl>',
+      'Input profile (file path or http(s) URL)'
+    )
+    .option('-o, --output <path>', 'Output path (.json or .json.gz)')
+    .option('--from-file <path>', 'Load input from a file')
+    .option('--from-url <url>', 'Load input from a URL')
+    .option('--from-hash <hash>', 'Load input from a profile hash')
+    .option(
+      '--symbolicate-with-server <url>',
+      'Symbolicate frames using this symbol server URL'
+    )
+    .addOption(
+      new Option(
+        '--symbolicate-wasm <spec>',
+        'Apply wasm symbol info, as <url>=<path> or just <path>'
+      )
+        .argParser(collectWasm)
+        .default([] as WasmSymbolicationCliSpec[])
+    );
+
+  program.parse(processArgv);
+  const opts = program.opts();
 
   const sources: ProfileSource[] = [];
-
-  if (typeof argv.input === 'string' && argv.input !== '') {
-    if (/^https?:\/\//i.test(argv.input)) {
-      sources.push({ type: 'URL', url: argv.input });
+  if (typeof opts.input === 'string' && opts.input !== '') {
+    if (/^https?:\/\//i.test(opts.input)) {
+      sources.push({ type: 'URL', url: opts.input });
     } else {
-      sources.push({ type: 'FILE', path: argv.input });
+      sources.push({ type: 'FILE', path: opts.input });
     }
   }
-  if (typeof argv['from-file'] === 'string' && argv['from-file'] !== '') {
-    sources.push({ type: 'FILE', path: argv['from-file'] });
+  if (typeof opts.fromFile === 'string' && opts.fromFile !== '') {
+    sources.push({ type: 'FILE', path: opts.fromFile });
   }
-  if (typeof argv['from-url'] === 'string' && argv['from-url'] !== '') {
-    sources.push({ type: 'URL', url: argv['from-url'] });
+  if (typeof opts.fromUrl === 'string' && opts.fromUrl !== '') {
+    sources.push({ type: 'URL', url: opts.fromUrl });
   }
-  if (typeof argv['from-hash'] === 'string' && argv['from-hash'] !== '') {
-    sources.push({ type: 'HASH', hash: argv['from-hash'] });
+  if (typeof opts.fromHash === 'string' && opts.fromHash !== '') {
+    sources.push({ type: 'HASH', hash: opts.fromHash });
   }
 
   if (sources.length === 0) {
@@ -232,55 +277,36 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     );
   }
 
-  if (!(typeof argv.output === 'string' && argv.output !== '')) {
+  if (!(typeof opts.output === 'string' && opts.output !== '')) {
     throw new Error('An output path must be supplied with --output / -o');
-  }
-
-  const symbolicateWasm: WasmSymbolicationCliSpec[] = [];
-  const rawWasmArg = argv['symbolicate-wasm'];
-  let wasmArgs: unknown[];
-  if (rawWasmArg === undefined) {
-    wasmArgs = [];
-  } else if (Array.isArray(rawWasmArg)) {
-    wasmArgs = rawWasmArg;
-  } else {
-    wasmArgs = [rawWasmArg];
-  }
-  for (const arg of wasmArgs) {
-    if (typeof arg !== 'string' || arg === '') {
-      throw new Error('--symbolicate-wasm requires a value');
-    }
-    // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
-    // whole string as a path and infer the URL from the profile. Split on
-    // the last `=` so URLs containing `=` (e.g. in query strings) survive
-    // intact; this assumes file paths don't contain `=`.
-    const eqIndex = arg.lastIndexOf('=');
-    if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(arg.slice(0, eqIndex))) {
-      symbolicateWasm.push({
-        strippedWasmUrl: arg.slice(0, eqIndex),
-        unstrippedWasmPath: arg.slice(eqIndex + 1),
-      });
-    } else {
-      symbolicateWasm.push({ unstrippedWasmPath: arg });
-    }
   }
 
   return {
     input: sources[0],
-    output: argv.output,
+    output: opts.output,
     symbolicateWithServer:
-      typeof argv['symbolicate-with-server'] === 'string' &&
-      argv['symbolicate-with-server'] !== ''
-        ? argv['symbolicate-with-server']
+      typeof opts.symbolicateWithServer === 'string' &&
+      opts.symbolicateWithServer !== ''
+        ? opts.symbolicateWithServer
         : undefined,
-    symbolicateWasm,
+    symbolicateWasm: opts.symbolicateWasm,
   };
 }
 
 if (require.main === module) {
-  const options = makeOptionsFromArgv(process.argv);
-  run(options).catch((err) => {
-    console.error(err);
+  try {
+    const options = makeOptionsFromArgv(process.argv);
+    run(options).catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+  } catch (err) {
+    if (err instanceof CommanderError) {
+      // Commander already wrote its own output and chose the
+      // appropriate exit code.
+      process.exit(err.exitCode);
+    }
+    console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }
