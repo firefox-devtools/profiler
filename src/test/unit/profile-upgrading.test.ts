@@ -4,7 +4,7 @@
 
 import {
   unserializeProfileOfArbitraryFormat,
-  serializeProfile,
+  serializeProfileToJsonString,
 } from '../../profile-logic/process-profile';
 import { upgradeGeckoProfileToCurrentVersion } from '../../profile-logic/gecko-profile-versioning';
 import {
@@ -79,7 +79,9 @@ describe('upgrading processed profiles', function () {
     expect(upgradedProfile.meta.preprocessedProfileVersion).toEqual(
       PROCESSED_PROFILE_VERSION
     );
-    expect(JSON.parse(serializeProfile(upgradedProfile))).toMatchSnapshot();
+    expect(
+      JSON.parse(serializeProfileToJsonString(upgradedProfile))
+    ).toMatchSnapshot();
   }
 
   it('should upgrade processed-1.json all the way to the current version', async function () {
