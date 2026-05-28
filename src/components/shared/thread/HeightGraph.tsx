@@ -38,8 +38,9 @@ type Props = {
 
 export class ThreadHeightGraph extends PureComponent<Props> {
   _canvas: null | HTMLCanvasElement = null;
-  _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
-    (this._canvas = canvas);
+  _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
+    this._canvas = canvas;
+  };
   _resizeListener = () => this.forceUpdate();
 
   _renderCanvas() {
