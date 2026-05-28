@@ -2,16 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
-import { findDOMNode } from 'react-dom';
 import type { CssPixels } from 'firefox-profiler/types';
 import { getResizeObserverWrapper } from 'firefox-profiler/utils/resize-observer-wrapper';
 
-type State = {
+type SizeState = {
   width: CssPixels;
   height: CssPixels;
 };
 
-export type SizeProps = Readonly<State>;
+export type SizeProps = Readonly<SizeState>;
 
 export type PropsWithSize<Props> = Props & SizeProps;
 
@@ -19,59 +18,40 @@ export type PropsWithSize<Props> = Props & SizeProps;
  * Wraps a React component and makes 'width' and 'height' available in the
  * wrapped component's props. These props start out at zero and are updated to
  * the component's DOM node's getBoundingClientRect().width/.height after the
- * component has been mounted. They also get updated when the window is
- * resized.
- *
- * Note that the props are *not* updated if the size of the element changes
- * for reasons other than a window resize.
+ * component has been mounted. They also get updated whenever the element's
+ * size changes.
  */
 export function withSize<Props>(
   Wrapped: React.ComponentType<PropsWithSize<Props>>
 ): React.ComponentType<Props> {
-  return class WithSizeWrapper extends React.PureComponent<Props, State> {
-    override state = { width: 0, height: 0 };
-    _container: HTMLElement | null = null;
+  return function WithSizeWrapper(props: Props) {
+    const [size, setSize] = React.useState<SizeState>({ width: 0, height: 0 });
+    const wrapperRef = React.useRef<HTMLDivElement>(null);
 
-    override componentDidMount() {
-      const container = findDOMNode(this) as HTMLElement; // eslint-disable-line react/no-find-dom-node
-      if (!container) {
-        throw new Error('Unable to find the DOMNode');
+    React.useEffect(() => {
+      const wrapper = wrapperRef.current;
+      if (!wrapper) {
+        return undefined;
       }
-      this._container = container;
-      getResizeObserverWrapper().subscribe(container, this._resizeListener);
-    }
-
-    // The listener is only called when the document is visible.
-    _resizeListener = (contentRect: DOMRectReadOnly) => {
-      const container = this._container;
-      if (!container) {
-        return;
+      const child = wrapper.firstElementChild as HTMLElement | null;
+      if (!child) {
+        throw new Error(
+          'WithSize: the wrapped component must render a DOM element as its root.'
+        );
       }
-      this._updateSize(container, contentRect);
-    };
-
-    override componentWillUnmount() {
-      const container = this._container;
-      if (container) {
-        getResizeObserverWrapper().unsubscribe(container, this._resizeListener);
-      }
-
-      this._container = null;
-    }
-
-    _updateSize(_container: HTMLElement, contentRect: DOMRectReadOnly) {
-      this.setState({
-        width: contentRect.width,
-        height: contentRect.height,
-      });
-    }
-
-    override render() {
-      const combinedProps: Props & SizeProps = {
-        ...this.props,
-        ...this.state,
+      const listener = (contentRect: DOMRectReadOnly) => {
+        setSize({ width: contentRect.width, height: contentRect.height });
       };
-      return <Wrapped {...combinedProps} />;
-    }
+      getResizeObserverWrapper().subscribe(child, listener);
+      return () => {
+        getResizeObserverWrapper().unsubscribe(child, listener);
+      };
+    }, []);
+
+    return (
+      <div ref={wrapperRef} style={{ display: 'contents' }}>
+        <Wrapped {...props} {...size} />
+      </div>
+    );
   };
 }

@@ -33,10 +33,7 @@ import {
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
-import {
-  autoMockElementSize,
-  getElementWithFixedSize,
-} from '../fixtures/mocks/element-size';
+import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import {
   getMouseEvent,
   fireFullClick,
@@ -44,7 +41,6 @@ import {
   fireFullContextMenu,
   type FakeMouseEventInit,
 } from '../fixtures/utils';
-import ReactDOM from 'react-dom';
 import {
   getProfileWithNiceTracks,
   getProfileWithMoreNiceTracks,
@@ -1234,14 +1230,6 @@ function _getProfileWithDroppedSamples(): Profile {
 }
 
 describe('Timeline', function () {
-  beforeEach(() => {
-    jest
-      .spyOn(ReactDOM, 'findDOMNode')
-      .mockImplementation(() =>
-        getElementWithFixedSize({ width: 200, height: 300 })
-      );
-  });
-
   it('displays a context menu when right clicking global and local tracks', () => {
     const profile = getProfileWithNiceTracks();
 

@@ -56,43 +56,55 @@ Array [
 
 exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
 <div
-  class="timelineTrackThread expanded"
+  style="display: contents;"
 >
   <div
-    class="timelineMarkers selected"
-    data-testid="TimelineMarkersJank"
+    class="timelineTrackThread expanded"
   >
     <div
-      class="react-contextmenu-wrapper"
+      style="display: contents;"
     >
-      <div>
-        <canvas
-          class="timelineMarkersCanvas"
-          height="50"
-          width="400"
-        />
+      <div
+        class="timelineMarkers selected"
+        data-testid="TimelineMarkersJank"
+      >
+        <div
+          class="react-contextmenu-wrapper"
+        >
+          <div>
+            <canvas
+              class="timelineMarkersCanvas"
+              height="50"
+              width="400"
+            />
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-  <div
-    class="threadStackGraph"
-  >
-    <canvas
-      class="threadStackGraphCanvas threadHeightGraphCanvas"
-      height="50"
-      width="400"
+    <div
+      class="threadStackGraph"
     >
-      <h2>
-        Stack Graph for 
-        Test Track
-      </h2>
-      <p>
-        This graph charts the stack height of each sample.
-      </p>
-    </canvas>
+      <canvas
+        class="threadStackGraphCanvas threadHeightGraphCanvas"
+        height="50"
+        width="400"
+      >
+        <h2>
+          Stack Graph for 
+          Test Track
+        </h2>
+        <p>
+          This graph charts the stack height of each sample.
+        </p>
+      </canvas>
+    </div>
+    <div
+      style="display: contents;"
+    >
+      <div
+        class="timelineEmptyThreadIndicator"
+      />
+    </div>
   </div>
-  <div
-    class="timelineEmptyThreadIndicator"
-  />
 </div>
 `;
