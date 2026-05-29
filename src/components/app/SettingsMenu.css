@@ -75,6 +75,16 @@
   padding: 10px 14px;
 }
 
+.settingsMenuRow--theme .themeToggle {
+  width: 100%;
+  margin: 0;
+}
+
+.settingsMenuRow--theme .themeToggleButton {
+  width: auto;
+  flex: 1;
+}
+
 .settingsMenuLinks {
   display: flex;
   flex-direction: column;
@@ -88,7 +98,6 @@
   display: flex;
   align-items: center;
   padding: 4px 14px;
-  font-weight: 600;
 }
 
 .settingsMenuLink .open-in-new {
