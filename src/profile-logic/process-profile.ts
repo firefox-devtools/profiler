@@ -73,6 +73,7 @@ import type {
   GeckoMetaMarkerSchema,
   GeckoStaticFieldSchemaData,
   GeckoMarkers,
+  GeckoMarkerStack,
   GeckoMarkerStruct,
   GeckoMarkerTuple,
   GeckoFrameStruct,
@@ -563,6 +564,20 @@ function _processStackTable(
 }
 
 /**
+ * We expect a captured backtrace here, with a samples table. But the "stack" key
+ * isn't reserved for that: some markers store an unrelated value (e.g. Log markers
+ * from the test harness put a textual stack trace string there). Such a value has
+ * no `samples`, so checking for it both selects real backtraces and keeps one bad
+ * marker from failing the whole profile. A non-backtrace stack is left in place to
+ * be handled by the marker schema like any other field.
+ */
+function _payloadHasStack(
+  data: MarkerPayload_Gecko
+): data is MarkerPayload_Gecko & { stack: GeckoMarkerStack } {
+  return 'stack' in data && !!data.stack?.samples?.data.length;
+}
+
+/**
  * Convert stack field to cause field for the given payload. A cause field includes
  * the thread ID (tid), an IndexIntoStackTable, and the time the stack was captured.
  * If the stack was captured within the start and end time of the marker, this was a
@@ -573,7 +588,7 @@ function _convertStackToCause(
   data: MarkerPayload_Gecko,
   stackIndexOffset: IndexIntoStackTable
 ) {
-  if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
+  if (_payloadHasStack(data)) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
@@ -599,7 +614,7 @@ function _convertPayloadStackToIndex(
   if (!data) {
     return null;
   }
-  if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
+  if (_payloadHasStack(data)) {
     const { samples } = data.stack;
     const geckoStackIndex = samples.data[0][samples.schema.stack];
     if (geckoStackIndex !== null) {
