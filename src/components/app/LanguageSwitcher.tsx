@@ -30,12 +30,9 @@ export function LanguageSwitcher(): React.ReactNode {
   }
 
   return (
-    <Localized
-      id="FooterLinks--languageSwitcher--select"
-      attrs={{ title: true }}
-    >
+    <Localized id="SettingsMenu--language-switcher" attrs={{ title: true }}>
       <select
-        className="appFooterLinksLanguageSwitcher"
+        className="settingsMenuLanguageSwitcher"
         onChange={onLocaleChange}
         value={primaryLocale}
       >
