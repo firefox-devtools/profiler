@@ -36,7 +36,7 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import {
   processGeckoProfile,
-  serializeProfile,
+  serializeProfileToJsonString,
 } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
@@ -1044,7 +1044,7 @@ describe('actions/receive-profile', function () {
       const expectedUrl = 'https://profiles.club/shared.json';
       window.fetchMock.get(
         expectedUrl,
-        compress(serializeProfile(_getSimpleProfile()))
+        compress(serializeProfileToJsonString(_getSimpleProfile()))
       );
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1174,7 +1174,7 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/json',
-        payload: serializeProfile(profile),
+        payload: serializeProfileToJsonString(profile),
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1194,7 +1194,7 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/json',
-        payload: JSON.stringify(profile), // Note: No serializeProfile call!
+        payload: JSON.stringify(profile), // Note: No serializeProfileToJsonString call!
       });
 
       expect(view.phase).toBe('DATA_LOADED');
@@ -1243,7 +1243,7 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: '',
-        payload: serializeProfile(profile),
+        payload: serializeProfileToJsonString(profile),
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1257,7 +1257,9 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: '',
-        payload: extractArrayBuffer(await compress(serializeProfile(profile))),
+        payload: extractArrayBuffer(
+          await compress(serializeProfileToJsonString(profile))
+        ),
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1289,7 +1291,9 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/gzip',
-        payload: extractArrayBuffer(await compress(serializeProfile(profile))),
+        payload: extractArrayBuffer(
+          await compress(serializeProfileToJsonString(profile))
+        ),
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1303,7 +1307,9 @@ describe('actions/receive-profile', function () {
 
       const { getState, view } = await setupTestWithFile({
         type: 'application/json',
-        payload: extractArrayBuffer(await compress(serializeProfile(profile))),
+        payload: extractArrayBuffer(
+          await compress(serializeProfileToJsonString(profile))
+        ),
       });
       expect(view.phase).toBe('DATA_LOADED');
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
@@ -1345,7 +1351,7 @@ describe('actions/receive-profile', function () {
     it('can load a zipped profile', async function () {
       const { getState, view } = await setupZipTestWithProfile(
         'profile.json',
-        serializeProfile(_getSimpleProfile())
+        serializeProfileToJsonString(_getSimpleProfile())
       );
       expect(view.phase).toBe('DATA_LOADED');
       const zipInStore = ZippedProfilesSelectors.getZipFile(getState());
@@ -1358,7 +1364,7 @@ describe('actions/receive-profile', function () {
     it('will load and view a simple profile with no errors', async function () {
       const { getState, dispatch } = await setupZipTestWithProfile(
         'profile.json',
-        serializeProfile(_getSimpleProfile())
+        serializeProfileToJsonString(_getSimpleProfile())
       );
 
       expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
@@ -1376,7 +1382,7 @@ describe('actions/receive-profile', function () {
     it('will be an error to view a profile with no threads', async function () {
       const { getState, dispatch } = await setupZipTestWithProfile(
         'profile.json',
-        serializeProfile(getEmptyProfile())
+        serializeProfileToJsonString(getEmptyProfile())
       );
 
       expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(

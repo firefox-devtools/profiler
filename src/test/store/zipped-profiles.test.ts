@@ -16,7 +16,7 @@ import * as ZippedProfilesActions from '../../actions/zipped-profiles';
 import * as ReceiveProfileActions from '../../actions/receive-profile';
 import * as ProfileViewActions from '../../actions/profile-view';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { serializeProfileToJsonString } from '../../profile-logic/process-profile';
 import { compress } from '../../utils/gz';
 import type { PreviewSelection } from 'firefox-profiler/types';
 
@@ -112,7 +112,7 @@ describe('reducer zipFileState', function () {
     // returns a typed array whose `instanceof Uint8Array` check fails against
     // the main realm's global, so JSZip wouldn't recognize it directly.
     const gzippedProfile = new Uint8Array(
-      await compress(serializeProfile(profile))
+      await compress(serializeProfileToJsonString(profile))
     );
 
     const zip = new JSZip();

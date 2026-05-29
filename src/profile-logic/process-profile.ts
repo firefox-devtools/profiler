@@ -1,6 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import {
+  isJsonSlabsFile,
+  decode as decodeJsonSlabs,
+  encode as encodeJsonSlabs,
+} from 'json-slabs';
+
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
 import { GlobalDataCollector } from './global-data-collector';
@@ -1922,8 +1928,40 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 /**
  * Take a processed profile and convert it to a string.
  */
-export function serializeProfile(profile: Profile): string {
+export function serializeProfileToJsonString(profile: Profile): string {
   return JSON.stringify(profile);
+}
+
+/**
+ * Take a profile and convert it to a Uint8Array in the JsonSlabs format.
+ *
+ * This is more efficient than JSON if the profile contains large typed arrays.
+ */
+export function serializeProfileToJsonSlabsFile(
+  profile: Profile
+): Uint8Array<ArrayBuffer> {
+  // Encode the profile object with the binary JsonSlabs container format.
+  return encodeJsonSlabs(profile, [
+    // "Split-out" slabs:
+    //
+    // This second argument to the encode function is an array of objects which
+    // should be pulled out into their own dedicated slabs. This is totally
+    // optional and doesn't change what the decoded object will look like.
+    // We use it to "split out" some large tables as long as we haven't converted
+    // them to use typed arrays. This already gives us a benefit: It means that
+    // decoding will use several JSON.parse calls rather than just one single
+    // JSON.parse call, and each individual JSON.parse will act on a smaller
+    // string, which means it's less likely to hit any string size limits.
+    //
+    // As we convert more and more tables / columns to typed arrays, the "skeleton
+    // JSON" for these tables will become much smaller and we won't need to split
+    // out those tables anymore.
+    profile.threads,
+    profile.shared.stackTable,
+    profile.shared.frameTable,
+    profile.shared.funcTable,
+    profile.shared.stringArray,
+  ]);
 }
 
 // If applicable, this function will try to "fix" a processed profile that was
@@ -2062,7 +2100,9 @@ export async function unserializeProfileOfArbitraryFormat(
         profileBytes = await decompress(profileBytes);
       }
 
-      if (isArtTraceFormat(profileBytes)) {
+      if (isJsonSlabsFile(profileBytes)) {
+        arbitraryFormat = decodeJsonSlabs(profileBytes);
+      } else if (isArtTraceFormat(profileBytes)) {
         arbitraryFormat = convertArtTraceProfile(profileBytes);
       } else if (verifyMagic(SIMPLEPERF_MAGIC, profileBytes)) {
         const { convertSimpleperfTraceProfile } =
