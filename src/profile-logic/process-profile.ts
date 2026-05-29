@@ -1,6 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import {
+  isJsonSlabsFile,
+  decode as decodeJsonSlabs,
+  encode as encodeJsonSlabs,
+} from 'json-slabs';
+
 import { attemptToConvertChromeProfile } from './import/chrome';
 import { attemptToConvertDhat } from './import/dhat';
 import { GlobalDataCollector } from './global-data-collector';
@@ -67,6 +73,7 @@ import type {
   GeckoMetaMarkerSchema,
   GeckoStaticFieldSchemaData,
   GeckoMarkers,
+  GeckoMarkerStack,
   GeckoMarkerStruct,
   GeckoMarkerTuple,
   GeckoFrameStruct,
@@ -557,6 +564,20 @@ function _processStackTable(
 }
 
 /**
+ * We expect a captured backtrace here, with a samples table. But the "stack" key
+ * isn't reserved for that: some markers store an unrelated value (e.g. Log markers
+ * from the test harness put a textual stack trace string there). Such a value has
+ * no `samples`, so checking for it both selects real backtraces and keeps one bad
+ * marker from failing the whole profile. A non-backtrace stack is left in place to
+ * be handled by the marker schema like any other field.
+ */
+function _payloadHasStack(
+  data: MarkerPayload_Gecko
+): data is MarkerPayload_Gecko & { stack: GeckoMarkerStack } {
+  return 'stack' in data && !!data.stack?.samples?.data.length;
+}
+
+/**
  * Convert stack field to cause field for the given payload. A cause field includes
  * the thread ID (tid), an IndexIntoStackTable, and the time the stack was captured.
  * If the stack was captured within the start and end time of the marker, this was a
@@ -567,7 +588,7 @@ function _convertStackToCause(
   data: MarkerPayload_Gecko,
   stackIndexOffset: IndexIntoStackTable
 ) {
-  if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
+  if (_payloadHasStack(data)) {
     const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
@@ -593,7 +614,7 @@ function _convertPayloadStackToIndex(
   if (!data) {
     return null;
   }
-  if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
+  if (_payloadHasStack(data)) {
     const { samples } = data.stack;
     const geckoStackIndex = samples.data[0][samples.schema.stack];
     if (geckoStackIndex !== null) {
@@ -1922,8 +1943,40 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 /**
  * Take a processed profile and convert it to a string.
  */
-export function serializeProfile(profile: Profile): string {
+export function serializeProfileToJsonString(profile: Profile): string {
   return JSON.stringify(profile);
+}
+
+/**
+ * Take a profile and convert it to a Uint8Array in the JsonSlabs format.
+ *
+ * This is more efficient than JSON if the profile contains large typed arrays.
+ */
+export function serializeProfileToJsonSlabsFile(
+  profile: Profile
+): Uint8Array<ArrayBuffer> {
+  // Encode the profile object with the binary JsonSlabs container format.
+  return encodeJsonSlabs(profile, [
+    // "Split-out" slabs:
+    //
+    // This second argument to the encode function is an array of objects which
+    // should be pulled out into their own dedicated slabs. This is totally
+    // optional and doesn't change what the decoded object will look like.
+    // We use it to "split out" some large tables as long as we haven't converted
+    // them to use typed arrays. This already gives us a benefit: It means that
+    // decoding will use several JSON.parse calls rather than just one single
+    // JSON.parse call, and each individual JSON.parse will act on a smaller
+    // string, which means it's less likely to hit any string size limits.
+    //
+    // As we convert more and more tables / columns to typed arrays, the "skeleton
+    // JSON" for these tables will become much smaller and we won't need to split
+    // out those tables anymore.
+    profile.threads,
+    profile.shared.stackTable,
+    profile.shared.frameTable,
+    profile.shared.funcTable,
+    profile.shared.stringArray,
+  ]);
 }
 
 // If applicable, this function will try to "fix" a processed profile that was
@@ -2062,7 +2115,9 @@ export async function unserializeProfileOfArbitraryFormat(
         profileBytes = await decompress(profileBytes);
       }
 
-      if (isArtTraceFormat(profileBytes)) {
+      if (isJsonSlabsFile(profileBytes)) {
+        arbitraryFormat = decodeJsonSlabs(profileBytes);
+      } else if (isArtTraceFormat(profileBytes)) {
         arbitraryFormat = convertArtTraceProfile(profileBytes);
       } else if (verifyMagic(SIMPLEPERF_MAGIC, profileBytes)) {
         const { convertSimpleperfTraceProfile } =

@@ -1,10 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import { isJsonSlabsFile } from 'json-slabs';
+
 import {
   extractFuncsAndResourcesFromFrameLocations,
   processGeckoProfile,
-  serializeProfile,
+  serializeProfileToJsonSlabsFile,
+  serializeProfileToJsonString,
   unserializeProfileOfArbitraryFormat,
 } from '../../profile-logic/process-profile';
 import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
@@ -382,22 +385,44 @@ describe('gecko profilerOverhead processing', function () {
 describe('serializeProfile', function () {
   it('should produce a parsable profile string', async function () {
     const profile = processGeckoProfile(createGeckoProfile());
-    const serialized = serializeProfile(profile);
+    const serialized = serializeProfileToJsonString(profile);
     expect(JSON.parse.bind(null, serialized)).not.toThrow();
   });
 
   it('should produce the same profile in a roundtrip', async function () {
     const profile = processGeckoProfile(createGeckoProfile());
-    const serialized = serializeProfile(profile);
+    const serialized = serializeProfileToJsonString(profile);
     const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
     // FIXME: Uncomment this line after resolving `undefined` serialization issue
     // See: https://github.com/firefox-devtools/profiler/issues/1599
     // expect(profile).toEqual(roundtrip);
 
-    const secondSerialized = serializeProfile(roundtrip);
+    const secondSerialized = serializeProfileToJsonString(roundtrip);
     const secondRountrip =
       await unserializeProfileOfArbitraryFormat(secondSerialized);
     expect(roundtrip).toEqual(secondRountrip);
+  });
+});
+
+describe('serializeProfileToJsonSlabsFile', function () {
+  it('should produce bytes recognized as a JsonSlabs file', function () {
+    const profile = processGeckoProfile(createGeckoProfile());
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    expect(isJsonSlabsFile(bytes)).toBe(true);
+  });
+
+  it('should produce the same profile in a roundtrip', async function () {
+    const profile = processGeckoProfile(createGeckoProfile());
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    const roundtrip = await unserializeProfileOfArbitraryFormat(bytes);
+
+    // Two roundtrips should be stable, mirroring the JSON serializer test
+    // above (see issue #1599 for why we can't compare against the original
+    // profile directly).
+    const secondBytes = serializeProfileToJsonSlabsFile(roundtrip);
+    const secondRoundtrip =
+      await unserializeProfileOfArbitraryFormat(secondBytes);
+    expect(roundtrip).toEqual(secondRoundtrip);
   });
 });
 

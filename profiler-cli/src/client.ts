@@ -213,6 +213,26 @@ export async function sendCommand(
   return sendMessage(sessionDir, { type: 'command', command }, sessionId);
 }
 
+function hasProxyEnvVar(): boolean {
+  return Boolean(
+    process.env.HTTP_PROXY ||
+    process.env.HTTPS_PROXY ||
+    process.env.http_proxy ||
+    process.env.https_proxy
+  );
+}
+
+function formatEarlyExitError(earlyExit: {
+  code: number | null;
+  signal: NodeJS.Signals | null;
+}): string {
+  const reason =
+    earlyExit.signal !== null
+      ? `signal ${earlyExit.signal}`
+      : `exit code ${earlyExit.code}`;
+  return `Daemon process exited unexpectedly during startup (${reason}). Run with PROFILER_CLI_SESSION_DIR set and check the session directory for a log file, or re-run after upgrading Node.js.`;
+}
+
 /**
  * Start a new daemon for the given profile.
  * Uses a two-phase approach:
@@ -257,10 +277,21 @@ export async function startNewDaemon(
   // Get the path to the current script (profiler-cli.js)
   const scriptPath = process.argv[1];
 
+  // --use-env-proxy was added in Node.js 24. On older runtimes node would
+  // exit immediately with "bad option", taking the daemon down with it.
+  const nodeMajor = parseInt(process.versions.node.split('.')[0], 10);
+  const supportsUseEnvProxy = nodeMajor >= 24;
+
+  if (!supportsUseEnvProxy && hasProxyEnvVar()) {
+    console.warn(
+      `Warning: Node.js ${process.versions.node} detected. HTTP_PROXY/HTTPS_PROXY env vars will not be honored when fetching profiles or symbols. Upgrade to Node.js >= 24 for proxy support.`
+    );
+  }
+
   const daemonArgs = [
     // Make fetch respect HTTP_PROXY/HTTPS_PROXY/NO_PROXY. This is the default
-    // in a lot of tools like, curl, python, go etc.
-    '--use-env-proxy',
+    // in a lot of tools like curl, python, go etc.
+    ...(supportsUseEnvProxy ? ['--use-env-proxy'] : []),
     scriptPath,
     '--daemon',
     absolutePath,
@@ -285,6 +316,19 @@ export async function startNewDaemon(
   // Unref so parent can exit
   child.unref();
 
+  // Observe early daemon death so spawn-time failures surface immediately
+  // instead of as a generic 500ms validation timeout.
+  const daemonStartupState: {
+    earlyExit: { code: number | null; signal: NodeJS.Signals | null } | null;
+    spawnError: Error | null;
+  } = { earlyExit: null, spawnError: null };
+  child.once('exit', (code, signal) => {
+    daemonStartupState.earlyExit = { code, signal };
+  });
+  child.once('error', (err) => {
+    daemonStartupState.spawnError = err;
+  });
+
   // Phase 1: Wait for daemon to be validated (short timeout)
   const daemonStartMaxAttempts = 10; // 10 * 50ms = 500ms
   let attempts = 0;
@@ -292,6 +336,15 @@ export async function startNewDaemon(
   while (attempts < daemonStartMaxAttempts) {
     await new Promise((resolve) => setTimeout(resolve, 50));
     attempts++;
+
+    if (daemonStartupState.spawnError) {
+      throw new Error(
+        `Failed to spawn daemon: ${daemonStartupState.spawnError.message}`
+      );
+    }
+    if (daemonStartupState.earlyExit) {
+      throw new Error(formatEarlyExitError(daemonStartupState.earlyExit));
+    }
 
     // Validate the session (checks metadata exists, process running, socket exists)
     if (await validateSession(sessionDir, targetSessionId)) {
@@ -302,6 +355,9 @@ export async function startNewDaemon(
 
   // Check if daemon started successfully after polling
   if (!(await validateSession(sessionDir, targetSessionId))) {
+    if (daemonStartupState.earlyExit) {
+      throw new Error(formatEarlyExitError(daemonStartupState.earlyExit));
+    }
     throw new Error(
       `Failed to start daemon: session not validated after ${daemonStartMaxAttempts * 50}ms`
     );

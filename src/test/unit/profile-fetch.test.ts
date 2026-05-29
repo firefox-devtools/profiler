@@ -4,7 +4,7 @@
 import JSZip from 'jszip';
 
 import { fetchProfile } from '../../utils/profile-fetch';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { serializeProfileToJsonString } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { extractArrayBuffer } from '../fixtures/utils';
 
@@ -37,7 +37,7 @@ describe('fetchProfile', function () {
     content: 'generated-zip' | 'generated-json' | Uint8Array;
   }) {
     const { url, contentType, content } = obj;
-    const stringProfile = serializeProfile(_getSimpleProfile());
+    const stringProfile = serializeProfileToJsonString(_getSimpleProfile());
     const profile = JSON.parse(stringProfile);
     let arrayBuffer;
 
