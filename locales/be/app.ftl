@@ -253,6 +253,18 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Паведаміце пра памылку на GitHub
 
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
+
+SettingsMenu--button =
+    .title = Налады
+SettingsMenu--docs = Дакументацыя
+SettingsMenu--legal = Прававыя звесткі
+SettingsMenu--privacy = Прыватнасць
+SettingsMenu--cookies = Кукі
+SettingsMenu--language-switcher =
+    .title = Змяніць мову
+
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -1097,6 +1109,12 @@ BottomBox--assembly-code-not-available-title = Код асэмблера нед�
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Глядзіце <a>абмеркаванне #4520</a> каб даведацца аб сцэнарыях, якія падтрымліваюцца, і запланаваных паляпшэннях.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Выйсці з поўнага экрана
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Увесь экран
 SourceView--close-button =
     .title = Закрыць акно з кодам
 
