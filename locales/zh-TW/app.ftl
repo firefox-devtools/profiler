@@ -231,17 +231,6 @@ ErrorBoundary--report-error-to-developers-description = 請將此問題報告給
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = 到 GitHub 回報錯誤
 
-## Footer Links
-
-FooterLinks--legal = 法律資訊
-FooterLinks--Privacy = 隱私權
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
-    .title = 變更語言
-FooterLinks--hide-button =
-    .title = 隱藏頁尾鏈結
-    .aria-label = 隱藏頁尾鏈結
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -427,7 +416,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = 上傳時發生錯誤
 MenuButtons--index--revert = 回復到原始檢測檔
-MenuButtons--index--docs = 文件
 MenuButtons--permalink--button =
     .label = 永久鏈結
 

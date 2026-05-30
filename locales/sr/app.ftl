@@ -22,14 +22,6 @@ ThemeToggle--light =
 ThemeToggle--dark =
     .title = Користите тамну тему
 
-## Footer Links
-
-FooterLinks--legal = Правно
-FooterLinks--Privacy = Приватност
-FooterLinks--Cookies = Колачићи
-FooterLinks--languageSwitcher--select =
-    .title = Промени језик
-
 ## Home page
 
 Home--load-from-url-submit-button =
@@ -48,7 +40,6 @@ MarkerTable--details = Детаљи
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
-MenuButtons--index--docs = Документи
 MenuButtons--permalink--button =
     .label = Трајна веза
 

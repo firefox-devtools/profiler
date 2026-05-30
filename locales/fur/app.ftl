@@ -257,17 +257,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Segnale l’erôr su GitHub
 
-## Footer Links
-
-FooterLinks--legal = Notis legâls
-FooterLinks--Privacy = Riservatece
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
-    .title = Cambie lenghe
-FooterLinks--hide-button =
-    .title = Plate colegaments da pît de pagjine
-    .aria-label = Plate colegaments da pît de pagjine
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -441,7 +430,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Erôr tal cjariâ in rêt
 MenuButtons--index--revert = Ripristine al profîl origjinâl
-MenuButtons--index--docs = Documentazion
 MenuButtons--permalink--button =
     .label = Colegament permanent
 

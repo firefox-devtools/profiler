@@ -293,17 +293,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
-## Footer Links
-
-FooterLinks--legal = Νομικά
-FooterLinks--Privacy = Απόρρητο
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
-    .title = Αλλαγή γλώσσας
-FooterLinks--hide-button =
-    .title = Απόκρυψη συνδέσμων υποσέλιδου
-    .aria-label = Απόκρυψη συνδέσμων υποσέλιδου
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -518,7 +507,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Σφάλμα μεταφόρτωσης
 MenuButtons--index--revert = Επιστροφή στο αρχικό προφίλ
-MenuButtons--index--docs = Έγγραφα
 MenuButtons--permalink--button =
     .label = Μόνιμος σύνδεσμος
 

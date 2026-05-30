@@ -263,17 +263,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Повідомити про помилку на GitHub
 
-## Footer Links
-
-FooterLinks--legal = Правові положення
-FooterLinks--Privacy = Приватність
-FooterLinks--Cookies = Файли cookie
-FooterLinks--languageSwitcher--select =
-    .title = Змінити мову
-FooterLinks--hide-button =
-    .title = Сховати посилання нижнього колонтитула
-    .aria-label = Сховати посилання нижнього колонтитула
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -453,7 +442,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Помилка вивантаження
 MenuButtons--index--revert = Повернутися до початкового профілю
-MenuButtons--index--docs = Документи
 MenuButtons--permalink--button =
     .label = Стороннє посилання
 

@@ -292,17 +292,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Rapportera felet på GitHub
 
-## Footer Links
-
-FooterLinks--legal = Juridisk information
-FooterLinks--Privacy = Sekretesspolicy
-FooterLinks--Cookies = Kakor
-FooterLinks--languageSwitcher--select =
-    .title = Ändra språk
-FooterLinks--hide-button =
-    .title = Dölj sidfotslänkar
-    .aria-label = Dölj sidfotslänkar
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -518,7 +507,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Fel vid uppladdning
 MenuButtons--index--revert = Återgå till originalprofil
-MenuButtons--index--docs = Dokument
 MenuButtons--permalink--button =
     .label = Permalänk
 

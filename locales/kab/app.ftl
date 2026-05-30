@@ -105,17 +105,6 @@ Details--open-sidebar-button =
 Details--close-sidebar-button =
     .title = Mdel agalis adisan
 
-## Footer Links
-
-FooterLinks--legal = Usḍif
-FooterLinks--Privacy = Tabaḍnit
-FooterLinks--Cookies = Inagan n tuqqna
-FooterLinks--languageSwitcher--select =
-    .title = Snifel tutlayt
-FooterLinks--hide-button =
-    .title = Ffer iseɣwan n uḍar n usebter
-    .aria-label = Ffer iseɣwan n uḍar n usebter
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -210,7 +199,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Tuccḍa deg usali
 MenuButtons--index--revert = Uɣal ɣer umaɣnu aɣbalu
-MenuButtons--index--docs = Tasemlit
 MenuButtons--permalink--button =
     .label = Permalink
 

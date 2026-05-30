@@ -243,17 +243,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Hatayı GitHub’da rapor et
 
-## Footer Links
-
-FooterLinks--legal = Hukuki bilgiler
-FooterLinks--Privacy = Gizlilik
-FooterLinks--Cookies = Çerezler
-FooterLinks--languageSwitcher--select =
-    .title = Dili değiştir
-FooterLinks--hide-button =
-    .title = Alt bilgi bağlantılarını gizle
-    .aria-label = Alt bilgi bağlantılarını gizle
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -447,7 +436,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Yükleme başarısız
 MenuButtons--index--revert = Orijinal profile geri dön
-MenuButtons--index--docs = Dokümanlar
 MenuButtons--permalink--button =
     .label = Kalıcı bağlantı
 

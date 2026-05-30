@@ -297,17 +297,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = De flater op GitHub melde
 
-## Footer Links
-
-FooterLinks--legal = Juridysk
-FooterLinks--Privacy = Privacy
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
-    .title = Taal wizigje
-FooterLinks--hide-button =
-    .title = Fuottekstkeppelingen ferstopje
-    .aria-label = Fuottekstkeppelingen ferstopje
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -523,7 +512,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Flater by it opladen
 MenuButtons--index--revert = Tebek nei orizjineel profyl
-MenuButtons--index--docs = Dokuminten
 MenuButtons--permalink--button =
     .label = Permalink
 

@@ -231,17 +231,6 @@ ErrorBoundary--report-error-to-developers-description = Segnalare questo problem
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Segnala l’errore su GitHub
 
-## Footer Links
-
-FooterLinks--legal = Note legali
-FooterLinks--Privacy = Informativa sulla privacy
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
-    .title = Cambia lingua
-FooterLinks--hide-button =
-    .title = Nascondi collegamenti a piè di pagina
-    .aria-label = Nascondi collegamenti a piè di pagina
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -433,7 +422,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Errore durante il caricamento
 MenuButtons--index--revert = Ripristina profilo originale
-MenuButtons--index--docs = Documentazione
 MenuButtons--permalink--button =
     .label = Link permanente
 
