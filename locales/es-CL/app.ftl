@@ -239,6 +239,18 @@ ErrorBoundary--report-error-to-developers-description = Por favor, reporta este 
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Reportar el error en GitHub
 
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
+
+SettingsMenu--button =
+    .title = Ajustes
+SettingsMenu--docs = Documentación
+SettingsMenu--legal = Legal
+SettingsMenu--privacy = Privacidad
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
+    .title = Cambiar idioma
+
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
