@@ -249,6 +249,7 @@ ErrorBoundary--report-error-on-github = Hatayı GitHub’da rapor et
 SettingsMenu--button =
     .title = Ayarlar
 SettingsMenu--docs = Belgelendirme
+SettingsMenu--legal = Hukuki Bilgiler
 SettingsMenu--privacy = Gizlilik
 SettingsMenu--cookies = Çerezler
 SettingsMenu--language-switcher =
