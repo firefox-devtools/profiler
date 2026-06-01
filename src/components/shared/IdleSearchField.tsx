@@ -1,7 +1,14 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { PureComponent } from 'react';
+
+import React, {
+  forwardRef,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+
 import classNames from 'classnames';
 import { Localized } from '@fluent/react';
 
@@ -17,133 +24,151 @@ type Props = {
   readonly title: string | null;
 };
 
-type State = {
-  value: string;
-  previousDefaultValue: string;
-};
+export const IdleSearchField = forwardRef<HTMLInputElement, Props>(
+  (
+    {
+      onIdleAfterChange,
+      onFocus,
+      onBlur,
+      idlePeriod,
+      defaultValue,
+      className,
+      title,
+    },
+    forwardedRef
+  ) => {
+    const [value, setValue] = useState(defaultValue || '');
 
-export class IdleSearchField extends PureComponent<Props, State> {
-  _timeout: NodeJS.Timeout | null = null;
-  _previouslyNotifiedValue: string;
-  _input: HTMLInputElement | null = null;
-  _takeInputRef = (input: HTMLInputElement | null) => (this._input = input);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      value: props.defaultValue || '',
-      previousDefaultValue: props.defaultValue || '',
+    const previouslyNotifiedValue = useRef(value);
+
+    const internalInputRef = useRef<HTMLInputElement | null>(null);
+
+    // Sync forwarded ref with internal input ref
+    const setRefs = (input: HTMLInputElement | null) => {
+      internalInputRef.current = input;
+
+      if (typeof forwardedRef === 'function') {
+        forwardedRef(input);
+      } else if (forwardedRef) {
+        forwardedRef.current = input;
+      }
     };
-    this._previouslyNotifiedValue = this.state.value;
-  }
 
-  _onSearchFieldFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.select();
+    // Sync state when defaultValue changes externally
+    useEffect(() => {
+      setValue(defaultValue || '');
+      previouslyNotifiedValue.current = defaultValue || '';
+    }, [defaultValue]);
 
-    if (this.props.onFocus) {
-      this.props.onFocus();
-    }
-  };
-
-  _onSearchFieldBlur = (e: { relatedTarget: Element | null }) => {
-    if (this.props.onBlur) {
-      this.props.onBlur(e.relatedTarget);
-    }
-  };
-
-  _onSearchFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      value: e.currentTarget.value,
-    });
-
-    if (this._timeout) {
-      clearTimeout(this._timeout);
-    }
-    this._timeout = setTimeout(this._onTimeout, this.props.idlePeriod);
-  };
-
-  _onTimeout = () => {
-    this._timeout = null;
-    this._notifyIfChanged(this.state.value);
-  };
-
-  _notifyIfChanged(value: string) {
-    if (value !== this._previouslyNotifiedValue) {
-      this._previouslyNotifiedValue = value;
-      this.props.onIdleAfterChange(value);
-    }
-  }
-
-  _onClearButtonClick = () => {
-    if (this._input) {
-      this._input.focus();
-    }
-
-    if (this._timeout !== null) {
-      clearTimeout(this._timeout);
-      this._timeout = null;
-    }
-
-    this.setState({ value: '' });
-    this._notifyIfChanged('');
-  };
-
-  _onFormSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-  }
-
-  override componentDidUpdate(prevProps: Props) {
-    // When the defaultValue prop changes externally (e.g., from Redux),
-    // getDerivedStateFromProps will update the state value. We need to sync
-    // _previouslyNotifiedValue to match so that subsequent changes are detected
-    // correctly by _notifyIfChanged.
-    if (prevProps.defaultValue !== this.props.defaultValue) {
-      this._previouslyNotifiedValue = this.state.value;
-    }
-  }
-
-  static getDerivedStateFromProps(props: Props, state: State) {
-    if (props.defaultValue !== state.previousDefaultValue) {
-      return {
-        previousDefaultValue: props.defaultValue || '',
-        value: props.defaultValue || '',
+    // Cleanup timeout on unmount
+    useEffect(() => {
+      return () => {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
       };
-    }
-    return null;
-  }
+    }, []);
 
-  override render() {
-    const { className, title } = this.props;
+    const notifyIfChanged = (newValue: string) => {
+      if (newValue !== previouslyNotifiedValue.current) {
+        previouslyNotifiedValue.current = newValue;
+        onIdleAfterChange(newValue);
+      }
+    };
+
+    const onTimeout = () => {
+      timeoutRef.current = null;
+      notifyIfChanged(value);
+    };
+
+    const onSearchFieldFocus = (
+      e: React.FocusEvent<HTMLInputElement>
+    ) => {
+      e.currentTarget.select();
+
+      if (onFocus) {
+        onFocus();
+      }
+    };
+
+    const onSearchFieldBlur = (
+      e: React.FocusEvent<HTMLInputElement>
+    ) => {
+      if (onBlur) {
+        onBlur(e.relatedTarget);
+      }
+    };
+
+    const onSearchFieldChange = (
+      e: React.ChangeEvent<HTMLInputElement>
+    ) => {
+      const newValue = e.currentTarget.value;
+
+      setValue(newValue);
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
+      timeoutRef.current = setTimeout(onTimeout, idlePeriod);
+    };
+
+    const onClearButtonClick = () => {
+      if (internalInputRef.current) {
+        internalInputRef.current.focus();
+      }
+
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+
+      setValue('');
+      notifyIfChanged('');
+    };
+
+    const onFormSubmit = (
+      e: React.FormEvent<HTMLFormElement>
+    ) => {
+      e.preventDefault();
+    };
+
     return (
       <form
         className={classNames('idleSearchField', className)}
-        onSubmit={this._onFormSubmit}
+        onSubmit={onFormSubmit}
       >
         <Localized
           id="IdleSearchField--search-input"
           attrs={{ placeholder: true }}
         >
           <input
+            ref={setRefs}
             type="search"
             name="search"
             placeholder="Enter filter terms"
             className="idleSearchFieldInput photon-input"
             required={true}
             title={title ?? undefined}
-            value={this.state.value}
-            onChange={this._onSearchFieldChange}
-            onFocus={this._onSearchFieldFocus}
-            onBlur={this._onSearchFieldBlur}
-            ref={this._takeInputRef}
+            value={value}
+            onChange={onSearchFieldChange}
+            onFocus={onSearchFieldFocus}
+            onBlur={onSearchFieldBlur}
           />
         </Localized>
+
         <input
           type="reset"
           className="idleSearchFieldButton"
-          onClick={this._onClearButtonClick}
+          onClick={onClearButtonClick}
           tabIndex={-1}
         />
       </form>
     );
   }
-}
+);
+
+IdleSearchField.displayName = 'IdleSearchField';
+```
