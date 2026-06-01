@@ -1,0 +1,121 @@
+profiler-cli: JSON Output Schemas
+
+Add --json to any command to get structured JSON output. The schemas below
+document the exact fields returned by each command.
+
+SessionContext (present on all command results):
+  {
+    selectedThreadHandle,
+    selectedThreads: [{ threadIndex, name }],
+    currentViewRange: { start, startName, end, endName } | null,
+    rootRange: { start, end }
+  }
+
+
+profiler-cli profile info --json
+  {
+    type: "profile-info",
+    name, platform, threadCount, processCount,
+    processes: [{
+      pid, name, cpuMs,
+      threads: [{ threadHandle, threadIndex, name, tid, cpuMs }],
+      remainingThreads?: { count, combinedCpuMs, maxCpuMs }
+    }],
+    remainingProcesses?: { count, combinedCpuMs, maxCpuMs },
+    context: SessionContext
+  }
+
+profiler-cli thread samples --json
+  {
+    type: "thread-samples",
+    threadHandle, friendlyThreadName, activeOnly?,
+    topFunctionsBySelf:  [{ functionHandle, functionIndex, name, nameWithLibrary,
+                             library?, selfSamples, selfPercentage,
+                             totalSamples, totalPercentage }],
+    topFunctionsByTotal: [ ...same shape... ],
+    heaviestStack: {
+      selfSamples, frameCount,
+      frames: [{ name, nameWithLibrary, library?,
+                 selfSamples, selfPercentage, totalSamples, totalPercentage }]
+    },
+    activeFilters?, ephemeralFilters?,
+    context: SessionContext
+  }
+
+profiler-cli thread samples-top-down --json
+  {
+    type: "thread-samples-top-down",
+    threadHandle, friendlyThreadName, activeOnly?,
+    regularCallTree: CallTreeNode,
+    activeFilters?, ephemeralFilters?,
+    context: SessionContext
+  }
+
+profiler-cli thread samples-bottom-up --json
+  {
+    type: "thread-samples-bottom-up",
+    threadHandle, friendlyThreadName, activeOnly?,
+    invertedCallTree: CallTreeNode | null,
+    activeFilters?, ephemeralFilters?,
+    context: SessionContext
+  }
+
+CallTreeNode (recursive):
+  {
+    name, nameWithLibrary, library?,
+    functionHandle?, functionIndex?,
+    totalSamples, totalPercentage, selfSamples, selfPercentage,
+    originalDepth,
+    children: [CallTreeNode],
+    childrenTruncated?: { count, combinedSamples, combinedPercentage,
+                          maxSamples, maxPercentage, depth }
+  }
+
+profiler-cli thread markers --json
+  {
+    type: "thread-markers",
+    threadHandle, friendlyThreadName,
+    totalMarkerCount, filteredMarkerCount,
+    byType: [{
+      markerName, count, isInterval,
+      durationStats?: { min, max, avg, median, p95, p99 },
+      rateStats?: { markersPerSecond, minGap, avgGap, maxGap },
+      topMarkers: [{ handle, label, start, duration?, hasStack? }],
+      subGroups?: [ ...MarkerGroupData... ]
+    }],
+    byCategory: [{ categoryName, categoryIndex, count, percentage }],
+    customGroups?: [ ...MarkerGroupData... ],
+    context: SessionContext
+  }
+
+profiler-cli thread functions --json
+  {
+    type: "thread-functions",
+    threadHandle, friendlyThreadName, activeOnly?,
+    totalFunctionCount, filteredFunctionCount,
+    functions: [{ functionHandle, name, nameWithLibrary, library?,
+                  selfSamples, selfPercentage, totalSamples, totalPercentage,
+                  fullSelfPercentage?, fullTotalPercentage? }],
+    activeFilters?, ephemeralFilters?,
+    context: SessionContext
+  }
+
+profiler-cli marker info --json
+  {
+    type: "marker-info",
+    threadHandle, friendlyThreadName, markerHandle, markerIndex, name,
+    category: { index, name },
+    start, end, duration?,
+    fields?: [{ key, label, value, formattedValue }],
+    stack?: { frames: [{ name, nameWithLibrary }], truncated }
+  }
+
+profiler-cli status --json
+  {
+    type: "status",
+    selectedThreadHandle,
+    selectedThreads: [{ threadIndex, name }],
+    viewRanges: [{ start, startName, end, endName }],
+    rootRange: { start, end },
+    filterStacks: [{ threadHandle, filters: FilterEntry[] }]
+  }

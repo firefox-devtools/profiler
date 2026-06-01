@@ -1,9 +1,0 @@
-src/profile-logic/import/proto
-src/types/libdef/npm
-docs-user/js
-docs-user/css
-src/test/fixtures/upgrades
-dist
-coverage
-taskcluster/
-.taskcluster.yml

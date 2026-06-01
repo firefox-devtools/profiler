@@ -6,7 +6,6 @@ import { PureComponent } from 'react';
 import { Localized } from '@fluent/react';
 import { Provider } from 'react-redux';
 import { UrlManager } from './UrlManager';
-import { FooterLinks } from './FooterLinks';
 import {
   NonLocalizedErrorBoundary,
   LocalizedErrorBoundary,
@@ -44,7 +43,6 @@ export class Root extends PureComponent<RootProps> {
                     <ServiceWorkerManager />
                     <ProfileLoader />
                     <AppViewRouter />
-                    <FooterLinks />
                     <WindowTitle />
                   </UrlManager>
                 </DragAndDrop>

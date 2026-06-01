@@ -11,8 +11,9 @@ const fixingCommands = {
   lint: 'lint-fix',
   'lint-js': 'lint-fix-js',
   'lint-css': 'lint-fix-css',
-  'prettier-run': 'prettier-fix',
+  'fmt-check': 'fmt',
   test: 'test -u',
+  'test-cli': 'test-cli -u',
 };
 
 const command = process.argv.slice(2);

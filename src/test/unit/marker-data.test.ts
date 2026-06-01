@@ -100,6 +100,44 @@ describe('Derive markers from Gecko phase markers', function () {
     ]);
   });
 
+  it('keeps a non-backtrace string stack instead of crashing', function () {
+    // The Gecko "stack" key isn't reserved for captured backtraces. Log markers
+    // emitted by the test harness store a textual JS stack trace string there.
+    // Such a value has no samples table, so it must be left untouched (not turned
+    // into a cause) rather than crashing the whole profile during processing.
+    const stackString =
+      '_abort_failed_test@head.js:938:20\ndo_report_result@head.js:1053:5\n';
+    const { markers } = setupWithTestDefinedMarkers([
+      {
+        startTime: 5,
+        endTime: null,
+        phase: INSTANT,
+        data: {
+          type: 'Log',
+          level: 1,
+          message: 'Unexpected exception NS_ERROR_ABORT',
+          stack: stackString,
+        } as any,
+      },
+    ]);
+
+    expect(markers).toEqual([
+      {
+        category: 0,
+        data: {
+          type: 'Log',
+          level: 1,
+          message: 'Unexpected exception NS_ERROR_ABORT',
+          stack: stackString,
+        },
+        end: null,
+        name: 'TestDefinedMarker',
+        start: 5,
+        threadId: null,
+      },
+    ]);
+  });
+
   it('matches an IntervalStart and IntervalEnd marker', function () {
     const { markers } = setupWithTestDefinedMarkers([
       {

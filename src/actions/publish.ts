@@ -17,17 +17,36 @@ import {
   getDataSource,
   getProfileNameForStorage,
   getUrlPredictor,
+  getGlobalTrackOrder,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getLocalTrackOrderByPid,
+  getTabFilter,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getZeroAt,
   getCommittedRange,
+  getGlobalTracks,
+  getLocalTracksByPid,
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import {
+  computeGlobalTracks,
+  computeLocalTracksByPid,
+  computeOldTrackIndexToNewTrackIndexMap,
+  computeHiddenTracksAfterSanitization,
+  computeTrackOrderAfterSanitization,
+} from 'firefox-profiler/profile-logic/tracks';
+import {
+  computeInnerWindowIDToTabMap,
+  computeOldCounterIndexToNew,
+  computeTabToThreadIndexesMap,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Action,
@@ -36,10 +55,12 @@ import type {
   StartEndRange,
   State,
   Profile,
+  Pid,
+  TrackIndex,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
-import { serializeProfile } from 'firefox-profiler/profile-logic/process-profile';
+import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
 
 export function updateSharingOption(
   slug: keyof CheckedSharingOptions,
@@ -301,7 +322,9 @@ export function encodeSanitizedProfile(
     const encodingPromise: Promise<ProfileEncodingResult> = (async function () {
       try {
         dispatch(sanitizedProfileEncodingStarted(sanitizedProfile));
-        const gzipData = await compress(serializeProfile(sanitizedProfile));
+        const gzipData = await compress(
+          serializeProfileToJsonString(sanitizedProfile)
+        );
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
         dispatch(sanitizedProfileEncodingCompleted(sanitizedProfile, blob));
         return { type: 'SUCCESS', profileData: blob };
@@ -413,6 +436,104 @@ export function attemptToPublish(
       if (removeProfileInformation) {
         const { committedRanges, translationMaps, profile } =
           sanitizedInformation;
+
+        // When sanitization re-indexed tracks, translate the URL state's
+        // track-index references through old → new track-index space so the
+        // user's choices for tracks that survived sanitization stay attached
+        // to the right tracks.
+        let remappedHiddenGlobalTracks: Set<TrackIndex> | null = null;
+        let remappedGlobalTrackOrder: TrackIndex[] | null = null;
+        let remappedHiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null =
+          null;
+        let remappedLocalTrackOrderByPid: Map<Pid, TrackIndex[]> | null = null;
+
+        const oldThreadIndexToNew = translationMaps?.oldThreadIndexToNew;
+        if (oldThreadIndexToNew) {
+          const oldProfile = getProfile(prePublishedState);
+          const oldCounterIndexToNew = computeOldCounterIndexToNew(
+            oldProfile.counters,
+            profile.counters,
+            oldThreadIndexToNew
+          );
+
+          // The selector-derived map keys ThreadIndex values from the
+          // prePublishedState; rebuild it against the sanitized profile.
+          const newTabToThreadIndexesMap = computeTabToThreadIndexesMap(
+            profile.threads,
+            computeInnerWindowIDToTabMap(profile.pages)
+          );
+          const tabFilter = getTabFilter(prePublishedState);
+          const newGlobalTracks = computeGlobalTracks(
+            profile,
+            tabFilter,
+            newTabToThreadIndexesMap
+          );
+          const newLocalTracksByPid = computeLocalTracksByPid(
+            profile,
+            newGlobalTracks
+          );
+
+          const oldGlobalTracks = getGlobalTracks(prePublishedState);
+          const oldLocalTracksByPid = getLocalTracksByPid(prePublishedState);
+
+          const oldStringToNewStringPlusOne =
+            translationMaps?.oldStringToNewStringPlusOne ?? null;
+
+          const globalOldToNew = computeOldTrackIndexToNewTrackIndexMap({
+            oldTracks: oldGlobalTracks,
+            newTracks: newGlobalTracks,
+            oldThreadIndexToNew,
+            oldCounterIndexToNew,
+            oldStringToNewStringPlusOne,
+          });
+
+          remappedHiddenGlobalTracks = computeHiddenTracksAfterSanitization({
+            oldHiddenTracks: getHiddenGlobalTracks(prePublishedState),
+            oldTrackIndexToNewTrackIndex: globalOldToNew,
+          });
+          remappedGlobalTrackOrder = computeTrackOrderAfterSanitization({
+            oldTrackOrder: getGlobalTrackOrder(prePublishedState),
+            oldTrackIndexToNewTrackIndex: globalOldToNew,
+          });
+
+          remappedHiddenLocalTracksByPid = new Map();
+          remappedLocalTrackOrderByPid = new Map();
+          const oldHiddenLocalByPid =
+            getHiddenLocalTracksByPid(prePublishedState);
+          const oldLocalOrderByPid = getLocalTrackOrderByPid(prePublishedState);
+
+          for (const [pid, newLocalTracks] of newLocalTracksByPid) {
+            const oldLocalTracks = oldLocalTracksByPid.get(pid) ?? [];
+            const localOldToNew = computeOldTrackIndexToNewTrackIndexMap({
+              oldTracks: oldLocalTracks,
+              newTracks: newLocalTracks,
+              oldThreadIndexToNew,
+              oldCounterIndexToNew,
+              oldStringToNewStringPlusOne,
+            });
+            const oldHiddenForPid = oldHiddenLocalByPid.get(pid);
+            if (oldHiddenForPid !== undefined) {
+              remappedHiddenLocalTracksByPid.set(
+                pid,
+                computeHiddenTracksAfterSanitization({
+                  oldHiddenTracks: oldHiddenForPid,
+                  oldTrackIndexToNewTrackIndex: localOldToNew,
+                })
+              );
+            }
+            const oldOrderForPid = oldLocalOrderByPid.get(pid);
+            if (oldOrderForPid !== undefined) {
+              remappedLocalTrackOrderByPid.set(
+                pid,
+                computeTrackOrderAfterSanitization({
+                  oldTrackOrder: oldOrderForPid,
+                  oldTrackIndexToNewTrackIndex: localOldToNew,
+                })
+              );
+            }
+          }
+        }
+
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
@@ -423,7 +544,11 @@ export function attemptToPublish(
             committedRanges,
             translationMaps,
             profileName,
-            prePublishedState
+            prePublishedState,
+            remappedHiddenGlobalTracks,
+            remappedGlobalTrackOrder,
+            remappedHiddenLocalTracksByPid,
+            remappedLocalTrackOrderByPid
           )
         );
 
@@ -504,13 +629,22 @@ export function resetUploadState(): Action {
 /**
  * Report to the UrlState that the profile was sanitized. This will re-map any stored
  * indexes or information that has been sanitized away.
+ *
+ * The four track-index payload fields carry URL state translated into the
+ * post-sanitization track-index space when sanitization re-indexed tracks
+ * (translationMaps.oldThreadIndexToNew is non-null). They are null when no
+ * remap is needed; in that case the existing reducer state is left untouched.
  */
 export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
   translationMaps: ProfileIndexTranslationMaps | null,
   profileName: string,
-  prePublishedState: State | null
+  prePublishedState: State | null,
+  hiddenGlobalTracks: Set<TrackIndex> | null = null,
+  globalTrackOrder: TrackIndex[] | null = null,
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>> | null = null,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]> | null = null
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_PUBLISHED',
@@ -519,6 +653,10 @@ export function profileSanitized(
     translationMaps,
     profileName,
     prePublishedState,
+    hiddenGlobalTracks,
+    globalTrackOrder,
+    hiddenLocalTracksByPid,
+    localTrackOrderByPid,
   };
 }
 

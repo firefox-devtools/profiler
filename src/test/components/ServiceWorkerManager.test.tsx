@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Provider } from 'react-redux';
-import * as WorkboxModule from 'workbox-window';
+import { Workbox } from 'workbox-window';
 
 import {
   render,
@@ -25,6 +25,10 @@ import { ensureExists } from '../../utils/types';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { fireFullClick } from '../fixtures/utils';
+
+jest.mock('workbox-window', () => ({
+  Workbox: jest.fn(),
+}));
 
 function _getSimpleProfile() {
   return getProfileFromTextSamples('A').profile;
@@ -68,13 +72,7 @@ describe('app/ServiceWorkerManager', () => {
     // Comment out this spy when you want to debug this test file.
     jest.spyOn(console, 'log').mockImplementation(() => {});
 
-    // Due to the following jest issues, we can't put this implementation in a
-    // jest.mock() call and also spying on the Workbox constructor:
-    // https://github.com/facebook/jest/issues/7573
-    // https://github.com/facebook/jest/issues/10419
-    // But we need the constructor spy to access the instance.
-    // @ts-expect-error - Types don't fully conform
-    jest.spyOn(WorkboxModule, 'Workbox').mockImplementation(() => {
+    (Workbox as unknown as jest.Mock).mockImplementation(() => {
       // Constructor
 
       // We reimplement the event system so that we can dispatchEvent in tests
@@ -87,7 +85,7 @@ describe('app/ServiceWorkerManager', () => {
           listeners.add(callback);
           listenersMap.set(eventName, listeners);
         }),
-        dispatchEvent: (eventName) => {
+        dispatchEvent: (eventName: string) => {
           const listeners = listenersMap.get(eventName) ?? new Set();
           for (const listener of listeners) {
             act(() => {
@@ -143,8 +141,7 @@ describe('app/ServiceWorkerManager', () => {
     }
 
     function getWorkboxInstance() {
-      // WorkboxModule.Workbox is a mock but Flow doesn't know about that.
-      const instance = (WorkboxModule.Workbox as any).mock.results[0].value;
+      const instance = (Workbox as unknown as jest.Mock).mock.results[0].value;
       return instance;
     }
 
@@ -171,7 +168,7 @@ describe('app/ServiceWorkerManager', () => {
 
   it('does not register a service worker in the development environment', () => {
     setup();
-    expect(WorkboxModule.Workbox).not.toHaveBeenCalled();
+    expect(Workbox).not.toHaveBeenCalled();
   });
 
   describe('in the home, with the `none` datasource', () => {
@@ -180,7 +177,7 @@ describe('app/ServiceWorkerManager', () => {
 
       const { container, getCloseButton, getReloadButton, getWorkboxInstance } =
         setup();
-      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+      expect(Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
       });
 
@@ -239,7 +236,7 @@ describe('app/ServiceWorkerManager', () => {
       navigateToStoreLoadingPage();
       await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
-      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+      expect(Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
       });
 
@@ -448,7 +445,7 @@ describe('app/ServiceWorkerManager', () => {
       );
       await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
-      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+      expect(Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
       });
 
@@ -486,7 +483,7 @@ describe('app/ServiceWorkerManager', () => {
       navigateToFromUrlLoadingPage('http://localhost:5656/profile_amazon.zip');
       await act(() => dispatch(viewProfile(_getSimpleProfile())));
 
-      expect(WorkboxModule.Workbox).toHaveBeenCalledWith('/sw.js', {
+      expect(Workbox).toHaveBeenCalledWith('/sw.js', {
         updateViaCache: 'none',
       });
 

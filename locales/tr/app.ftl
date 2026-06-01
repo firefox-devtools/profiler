@@ -52,6 +52,14 @@ AppViewRouter--error-from-localhost-url-safari =
 AppViewRouter--route-not-found--home =
     .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (satır içi)
+    .title = { $function } derleyici tarafından çağıran işlevin içine yerleştirildi.
+
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
 ## panels.
@@ -77,6 +85,18 @@ CallNodeContextMenu--transform-focus-function = Fonksiyona odaklan
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Fonksiyona odaklan (tersine)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    “Self” odaklaması, bir fonksiyona odaklanmaya benzer;
+    ancak yalnızca fonksiyonun kendi zamanına katkıda bulunan örnekleri tutar.
+    Çağrılan fonksiyonlardaki örnekler atılır ve çağrı ağacı odaklanan fonksiyona yeniden bağlanır.
+CallNodeContextMenu--transform-focus-self = Yalnızca self'e odaklan
+    .title = { CallNodeContextMenu--transform-focus-self-title }
 
 ##
 
@@ -349,6 +369,15 @@ MarkerContextMenu--select-the-receiver-thread = “<strong>{ $threadName }</stro
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = “<strong>{ $threadName }</strong>” gönderen iş parçacığını seç
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = “<strong>{ $filter }</strong>” ifadesine uyan işaretçilerin dışındaki örnekleri at
+
 ## MarkerCopyTableContextMenu
 ## This is the menu when the copy icon is clicked in Marker Chart and Marker
 ## Table panels.
@@ -366,6 +395,12 @@ MarkerSettings--marker-filters =
     .title = İşaretçi filtreleri
 MarkerSettings--copy-table =
     .title = Tabloyu metin olarak kopyala
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Satır sayısı sınırı aşıyor: { $rows } > { $maxRows }. Yalnızca ilk { $maxRows } satır kopyalanacak.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.

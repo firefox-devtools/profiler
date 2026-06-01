@@ -2,18 +2,22 @@
 
 exports[`TimelineMarkers renders correctly memory markers 1`] = `
 <div
-  class="timelineMarkers timelineMarkersMemory selected"
-  data-testid="TimelineMarkersMemory"
+  style="display: contents;"
 >
   <div
-    class="react-contextmenu-wrapper"
+    class="timelineMarkers timelineMarkersMemory selected"
+    data-testid="TimelineMarkersMemory"
   >
-    <div>
-      <canvas
-        class="timelineMarkersCanvas"
-        height="300"
-        width="200"
-      />
+    <div
+      class="react-contextmenu-wrapper"
+    >
+      <div>
+        <canvas
+          class="timelineMarkersCanvas"
+          height="300"
+          width="200"
+        />
+      </div>
     </div>
   </div>
 </div>
@@ -65,18 +69,22 @@ Array [
 
 exports[`TimelineMarkers renders correctly overview markers 1`] = `
 <div
-  class="timelineMarkers selected"
-  data-testid="TimelineMarkersOverview"
+  style="display: contents;"
 >
   <div
-    class="react-contextmenu-wrapper"
+    class="timelineMarkers selected"
+    data-testid="TimelineMarkersOverview"
   >
-    <div>
-      <canvas
-        class="timelineMarkersCanvas"
-        height="300"
-        width="200"
-      />
+    <div
+      class="react-contextmenu-wrapper"
+    >
+      <div>
+        <canvas
+          class="timelineMarkersCanvas"
+          height="300"
+          width="200"
+        />
+      </div>
     </div>
   </div>
 </div>

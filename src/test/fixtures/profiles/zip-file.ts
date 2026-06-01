@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
-import { serializeProfile } from '../../../profile-logic/process-profile';
+import { serializeProfileToJsonString } from '../../../profile-logic/process-profile';
 import { receiveZipFile } from '../../../actions/receive-profile';
 import { setDataSource } from '../../../actions/profile-view';
 import type {
@@ -17,7 +17,7 @@ import JSZip from 'jszip';
  */
 export function getZippedProfiles(files: string[] = []): JSZip {
   const { profile } = getProfileFromTextSamples('A');
-  const profileText = serializeProfile(profile);
+  const profileText = serializeProfileToJsonString(profile);
 
   const zip = new JSZip();
   files.forEach((fileName) => {

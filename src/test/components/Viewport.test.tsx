@@ -681,11 +681,9 @@ function setup(profileOverrides: MixedObject = {}) {
           maximumZoom: MAXIMUM_ZOOM,
           ...profileOverrides,
         }}
-        chartProps={
-          {
-            // None used in dummy component.
-          }
-        }
+        chartProps={{
+          // None used in dummy component.
+        }}
       />
     ),
   });

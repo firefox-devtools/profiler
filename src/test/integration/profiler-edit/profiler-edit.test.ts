@@ -57,6 +57,7 @@ describe('profiler-edit tool', function () {
       },
       output: '',
       symbolicateWithServer: 'http://symbol.server',
+      symbolicateWasm: [],
     };
 
     const result = await runToTempFileAndReturnOutput(options);
@@ -85,6 +86,7 @@ describe('profiler-edit tool', function () {
       },
       output: '',
       symbolicateWithServer: 'http://symbol.server',
+      symbolicateWasm: [],
     };
 
     const result = await runToTempFileAndReturnOutput(options);
@@ -109,6 +111,7 @@ describe('profiler-edit tool', function () {
           path: 'src/test/integration/profiler-edit/unsymbolicated.json',
         },
         output: tempFile,
+        symbolicateWasm: [],
       };
 
       await run(options);
@@ -148,6 +151,7 @@ describe('profiler-edit tool', function () {
       },
       output: '',
       symbolicateWithServer: 'http://symbol.server',
+      symbolicateWasm: [],
     };
 
     const result = await runToTempFileAndReturnOutput(options);
@@ -184,6 +188,7 @@ describe('profiler-edit tool', function () {
       },
       output: '',
       symbolicateWithServer: 'http://symbol.server',
+      symbolicateWasm: [],
     };
 
     const result = await runToTempFileAndReturnOutput(options);

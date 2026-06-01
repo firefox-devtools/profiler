@@ -1,0 +1,415 @@
+profiler-cli: Usage Guide
+
+profiler-cli (Profiler CLI) queries Firefox performance profiles loaded into a persistent
+daemon. Load a profile once, then query it interactively without reloading.
+
+
+QUICK START
+
+  profiler-cli load profile.json.gz
+  profiler-cli profile info                  Find threads; note handles (e.g. t-0, t-1)
+  profiler-cli thread select t-0
+  profiler-cli thread samples                Hot functions by self time
+  profiler-cli thread samples-top-down       Full top-down call tree
+
+  profiler-cli uses a daemon model: "profiler-cli load" starts a background daemon that
+  persists your selected thread, zoom ranges, and filter stacks. Stop it with "profiler-cli stop".
+
+  The rest of this guide covers filtering, zooming, markers, and advanced analysis.
+
+
+CORE WORKFLOW
+
+  Step 1: Load a profile
+    profiler-cli load profile.json.gz
+    profiler-cli load https://share.firefox.dev/XXXXXX   From a profiler.firefox.com / share URL
+    profiler-cli load profile.json.gz --session run-a    Recommended for scripting or concurrent work
+
+  Step 2: Explore the profile
+    profiler-cli profile info          Overview: processes, threads, time range, CPU activity
+    profiler-cli profile info --all    Show all processes and threads (not just top 5)
+    profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
+    profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
+
+  Step 3: Select a thread to analyze
+    profiler-cli thread select t-0     Select a specific thread (persists for future commands)
+
+  Step 4: Analyze CPU usage
+    profiler-cli thread samples                             Hot functions list (self time, sorted by impact)
+    profiler-cli thread samples-top-down                    Top-down call tree (where does CPU time originate)
+    profiler-cli thread samples-bottom-up                   Bottom-up call tree (what calls the hot functions)
+    profiler-cli thread functions                           All functions with self/total CPU percentages
+
+    All samples commands exclude idle by default so percentages reflect active CPU time.
+    Use --include-idle to include idle samples (e.g. to see what fraction of wall time is idle).
+
+    Use --search to focus the call tree on paths containing a specific function:
+    profiler-cli thread samples-top-down --search GC
+    profiler-cli thread samples-bottom-up --search "JS::Compile"
+    profiler-cli thread samples --search malloc
+
+    Search syntax for samples commands:
+    - Matches any frame in the call stack (case-insensitive substring)
+    - Comma joins multiple terms with AND: both must appear somewhere in the stack
+      profiler-cli thread samples-top-down --search "GC,malloc"   paths through both GC and malloc
+    - "|" IS A LITERAL CHARACTER, NOT OR. There is no OR operator in --search.
+      ✗ WRONG: --search "foo|bar"     matches nothing (no function is named "foo|bar")
+      ✗ WRONG: --search "foo\|bar"    same — the backslash doesn't help
+      ✓ RIGHT:  run two separate commands, one per term:
+                profiler-cli thread functions --search "foo"
+                profiler-cli thread functions --search "bar"
+
+  Step 5: Analyze markers (browser events, timers, etc.)
+    profiler-cli thread markers                          All markers with aggregated stats
+    profiler-cli thread markers --category Layout        Filter by category
+    profiler-cli thread markers --search DOMEvent        Filter by name substring
+    profiler-cli thread markers --min-duration 10        Only markers >= 10ms
+    profiler-cli thread markers --has-stack              Only markers with stack traces
+    profiler-cli thread markers --list                   Flat chronological list (one row per marker)
+    profiler-cli thread markers --search X --list        List all individual X markers with handles
+
+    profiler-cli thread network                          First 20 requests with timing phases (default)
+    profiler-cli thread network --limit 0                All requests (no limit)
+    profiler-cli thread network --search "api.example"  Filter by URL substring
+    profiler-cli thread network --min-duration 200       Only requests >= 200ms
+    profiler-cli thread network --max-duration 50        Only requests <= 50ms
+    profiler-cli thread network --limit 50               Show up to 50 requests
+
+    profiler-cli profile logs                            All Log markers in MOZ_LOG format (all threads)
+    profiler-cli profile logs --module nsHttp            Filter by module name (substring match)
+    profiler-cli profile logs --level info               Minimum level: error, warn, info, debug, verbose
+    profiler-cli profile logs --search "connect"         Filter by substring in message
+    profiler-cli profile logs --thread t-0               Restrict to a specific thread
+    profiler-cli profile logs --limit 200                Show only the first 200 entries
+
+  Step 6: Drill into specifics
+    profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
+    profiler-cli marker stack m-1234         Full stack trace at the time of a marker
+    profiler-cli function info f-12          Function details (source location, library)
+    profiler-cli function expand f-12        Show full untruncated function name
+    profiler-cli function annotate f-12      Annotated source with per-line self/total timing
+    profiler-cli function annotate f-12 --mode asm   Annotated assembly (requires local symbol server)
+    profiler-cli function annotate f-12 --mode all   Both source and assembly
+    profiler-cli function annotate f-12 --context file   Show entire source file instead of snippets
+
+  Step 7: Filter to focus the analysis (see FILTERS section below)
+
+    profiler-cli thread samples --excludes-function f-184     Ephemeral: one command only
+    profiler-cli filter push --includes-function f-500        Sticky: persists until popped
+    profiler-cli filter pop                                   Remove last filter
+    profiler-cli filter clear                                 Remove all filters
+
+
+SESSION STATE
+
+  Three pieces of mutable state persist across commands:
+
+    selected_thread   set by "thread select"; required by all thread/* commands
+    zoom_stack        set by zoom push/pop/clear; restricts all queries to a time window
+    filter_stack[t]   set by filter push/pop/clear; per-thread, independent stacks
+
+  Use "profiler-cli status" to inspect all session state at any time.
+
+
+HANDLE SYSTEM
+
+  Handles are short IDs shown in command output that reference specific items:
+    t-0, t-1   Thread handles (from "profile info")
+    m-1234     Marker handles (from "thread markers")
+    f-12       Function handles (from "thread samples", "thread functions")
+    ts-6       Timestamp handles (named points in time, usable with "zoom push")
+
+  Handle lifetime and stability:
+
+    Handle   Populated by      Stable across sessions?
+    ──────────────────────────────────────────────────────────────────────────
+    t-N      profile info      Yes, if the same profile is loaded
+    m-N      thread markers    No -- rebuilt each time the daemon starts
+    f-N      thread samples,   Yes -- direct index into the profile's function
+             thread functions  table; same profile always yields the same f-N
+    ts-N     thread markers    No -- position-based, session-scoped
+    ──────────────────────────────────────────────────────────────────────────
+
+  Function handles (f-N) can be saved and reused across sessions for the same profile.
+  For all other handles, re-run the command that generates them after each daemon restart.
+
+
+ZOOM: FOCUS ON A TIME RANGE
+
+  Zoom restricts all subsequent queries to a specific time window. Useful for
+  drilling into a specific jank period, page load phase, or marker duration.
+
+    profiler-cli zoom push 2.7,3.1       Zoom to 2.7s-3.1s (relative to profile start)
+    profiler-cli zoom push m-158         Zoom to the time range of marker m-158
+    profiler-cli zoom push ts-6,ts-12    Zoom to the range between two named timestamps
+    profiler-cli zoom pop                Undo the last zoom
+    profiler-cli zoom clear              Return to full profile view
+
+  After zooming, all thread/marker/sample commands automatically apply the filter.
+  Use "profiler-cli status" to confirm the active zoom stack (along with thread and filters).
+
+
+FILTERS
+
+  Filters narrow which samples appear in analysis results. They work in two modes:
+
+  EPHEMERAL (one command only)
+    Add filter flags directly to thread samples/functions commands. They apply
+    only to that invocation; the sticky filter stack is unchanged. Multiple flags
+    may be combined on one command and are applied left to right.
+
+      profiler-cli thread samples --excludes-function f-184
+      profiler-cli thread samples --merge f-142,f-143 --root-at f-500 --limit 30
+      profiler-cli thread functions --includes-function f-500
+
+  STICKY (persists across commands, per-thread)
+    Use "filter push" to add a filter to the current thread's stack. Every
+    subsequent analysis command sees all pushed filters automatically. Exactly
+    one filter flag per "filter push" command.
+
+      profiler-cli filter push --merge f-142,f-143         # add filter 1
+      profiler-cli filter push --includes-function f-500   # add filter 2
+      profiler-cli filter list                             # one row per entry, in push order
+      profiler-cli filter pop                              # undo the last push
+      profiler-cli filter pop 2                            # undo the last 2 pushes
+      profiler-cli filter clear                            # remove all
+
+    Each "filter push" is one entry, even when the flag takes a comma-separated
+    list (e.g. "--merge f-1,f-2" is a single entry and a single pop).
+
+    Loading a profiler.firefox.com URL that encodes transforms adds them as
+    entries too; each URL transform is its own entry, so "filter pop" removes
+    them one at a time. "filter clear" removes everything.
+
+  Use "profiler-cli status" to inspect the full session state (selected thread,
+  zoom stack, per-thread filters).
+
+  Sticky + ephemeral compose: sticky filters apply first, then ephemeral flags
+  layer on top for that one invocation only.
+
+  AVAILABLE FILTER FLAGS
+
+    Inclusion -- keep only samples whose stack matches:
+      --includes-function f-N,...       stack contains any of these funcs (OR)
+      --includes-prefix f-N,...         stack starts with this root-first sequence
+      --includes-suffix f-N             leaf (innermost) frame is f-N
+      --during-marker --search <text>   sample timestamp inside a matching marker
+      --outside-marker --search <text>  sample timestamp outside all matching markers
+
+    Exclusion -- drop matching samples:
+      --excludes-function f-N,...       stack contains any of these funcs
+
+    Stack transforms -- modify stack structure:
+      --merge f-N,...                   remove funcs from stacks (A→f-N→B becomes A→B)
+      --root-at f-N                     re-root all stacks at f-N (subtree within f-N)
+
+  COMBINING FILTERS
+
+    OR within one push: --includes-function f-1,f-2 keeps samples with f-1 OR f-2.
+    AND across pushes: two separate "filter push" calls both must pass.
+    Push order matters: each filter sees the stack as left by the prior filter.
+
+    Example -- only samples containing f-500, during Paint markers, after merging noise:
+      profiler-cli filter push --merge f-142,f-143
+      profiler-cli filter push --includes-function f-500
+      profiler-cli filter push --during-marker --search Paint
+
+
+JSON OUTPUT
+
+  Add --json to any command to get structured JSON output, suitable for piping to jq
+  or processing programmatically.
+
+    profiler-cli thread samples --json | jq '.topFunctionsBySelf[0]'
+    profiler-cli thread markers --json | jq '[.byType[] | select(.durationStats.max > 50)]'
+    profiler-cli profile info --json | jq '.processes[].threads[] | {handle: .threadHandle, name}'
+
+  Run "profiler-cli schemas" for the full JSON schema reference.
+
+
+COMMON ANALYSIS PATTERNS
+
+  Investigate a jank/slow period:
+    profiler-cli thread markers --min-duration 50    Find long-running markers (>50ms = jank)
+    profiler-cli zoom push m-158                     Zoom into that marker's time range
+    profiler-cli thread samples                      What was executing during that period?
+    profiler-cli zoom pop                            Back to full profile
+
+  Eliminate allocator noise from a call tree:
+    profiler-cli thread functions --search malloc    Find allocator function handles (e.g. f-142)
+    profiler-cli thread samples --merge f-142        Try ephemerally first
+    profiler-cli filter push --merge f-142,f-143     Make it sticky for all subsequent commands
+    profiler-cli thread samples                      Clean call tree, filters persist
+    profiler-cli filter clear
+
+  Focus on work inside a specific function:
+    profiler-cli thread functions --search PresentImpl   Note the handle (e.g. f-500)
+    profiler-cli thread samples --root-at f-500          Ephemeral: subtree rooted at f-500
+    profiler-cli filter push --includes-function f-500   Sticky: only samples containing f-500
+    profiler-cli filter push --root-at f-500             Sticky: re-root at f-500
+    profiler-cli thread samples-top-down                 Call tree within f-500 only
+
+  Correlate CPU with a specific event type:
+    profiler-cli thread markers --search Paint           Check Paint marker frequency/duration
+    profiler-cli filter push --during-marker --search Paint
+    profiler-cli thread samples                          What runs during Paint?
+    profiler-cli thread functions                        Which functions are active during Paint?
+    profiler-cli filter clear
+
+  Find slow layout or script execution:
+    profiler-cli thread markers --category Layout --min-duration 5
+    profiler-cli thread markers --category JavaScript --min-duration 10
+    profiler-cli thread markers --search Reflow --min-duration 5
+
+  Deep dive on a specific function:
+    profiler-cli thread samples                        Find hot function, note its handle (f-12)
+    profiler-cli function info f-12                    See callers, callees, source location
+    profiler-cli function expand f-12                  See full name if truncated
+    profiler-cli function annotate f-12                Annotated source: per-line self/total timing
+    profiler-cli function annotate f-12 --context file Full source file with all timings inline
+    profiler-cli function annotate f-12 --mode asm     Annotated assembly (needs local symbol server)
+    profiler-cli function annotate f-12 --mode all     Source + assembly together
+
+  Group markers by event type:
+    profiler-cli thread markers --search DOMEvent --group-by field:eventType
+    profiler-cli thread markers --auto-group
+    profiler-cli thread markers --group-by type,name
+
+  List all occurrences of a specific marker type:
+    profiler-cli thread markers --search "Histogram::Add" --list
+    profiler-cli thread markers --search "Paint" --list | head -50
+    profiler-cli thread markers --search "GC" --min-duration 5 --list
+    profiler-cli thread markers --list --limit 100         First 100 markers in chronological order
+
+  Investigate a page load:
+    profiler-cli thread page-load                    Overview: milestones, top resources, CPU categories, jank
+    profiler-cli thread page-load --navigation 2     If multiple navigations, inspect each one separately (1-based)
+    profiler-cli thread page-load --jank-limit 0     Show all jank periods (default: first 10)
+    profiler-cli zoom push m-<jank-handle>           Zoom into a specific jank period (handle from page-load output)
+    profiler-cli thread samples                      What was executing during the jank?
+    profiler-cli zoom pop
+    Requires page load markers in the selected thread (typically GeckoMain or a content process thread).
+    Marker handles shown in page-load output can be passed to "marker info" or "zoom push".
+
+  Analyze network activity:
+    profiler-cli thread network                      All requests with timing phases
+    profiler-cli thread network --min-duration 200   Slow requests only (>= 200ms)
+    profiler-cli thread network --search "api"       Filter by URL substring
+    profiler-cli thread markers --category Network   Cross-reference with marker view
+
+
+UNDERSTANDING THE OUTPUT
+
+  Self time vs total time:
+    Self time   Samples where this function was the innermost frame (actually executing)
+    Total time  All samples where this function appeared anywhere in the stack
+
+    Self time is more actionable -- it pinpoints where CPU time is actually spent.
+
+  Samples:
+    Profiles are sampled at regular intervals (typically 1ms). Each sample is a snapshot
+    of the call stack. Higher sample counts = more time spent. Counts are relative
+    within a profile.
+
+    By default, samples commands drop idle samples before computing percentages, so
+    percentages reflect how the thread spent its active CPU time. Pass --include-idle
+    to include idle samples and see percentages relative to wall time instead.
+
+  Call tree views:
+    samples-top-down    Root frames at top, drilling down to leaves.
+                        Use to understand the calling structure and where time originates.
+    samples-bottom-up   Hot leaf functions at top with their callers.
+                        Use to understand what calls a frequently-seen function.
+
+TIPS
+
+  - Start with "profile info"; GeckoMain is usually the main thread -- use
+    "--search GeckoMain" to find it quickly
+  - Idle time alone is not a finding: only investigate idle during a period when the
+    thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
+    lock contention or blocking on another thread
+  - --search has no OR operator. "|" and "\|" are literal characters that will match
+    nothing. "--search foo,bar" is AND (both must appear). To get OR behavior, run two
+    separate commands: once with "--search foo", once with "--search bar".
+  - Try filters ephemerally first (as flags on thread commands) before committing
+    with "filter push"
+  - "filter push --during-marker --search X" is powerful for correlating CPU work
+    with specific event types
+  - Check "profiler-cli status" after any state changes to confirm selected thread, active
+    zoom, and active filters before running analysis
+
+
+SCRIPTING
+
+  When using profiler-cli in scripts or pipelines:
+
+  Always use a named session for isolation:
+    profiler-cli load profile.json.gz --session my-analysis
+    profiler-cli profile info --session my-analysis
+    profiler-cli thread select t-0 --session my-analysis
+
+  Always use --json for reliable output parsing. Plain text output is for human
+  reading and may change; the JSON schema is stable.
+
+  Prerequisite chain -- commands depend on prior state:
+    load  →  thread select  →  analysis commands
+    (run "profile info" to discover thread handles before selecting)
+
+  Extracting handles with jq:
+    # Find the GeckoMain thread handle
+    profiler-cli profile info --json | \
+      jq -r '.processes[].threads[] | select(.name | test("GeckoMain")) | .threadHandle'
+
+    # Get the top self-time function handle
+    profiler-cli thread samples --json | jq -r '.topFunctionsBySelf[0].functionHandle'
+
+    # List marker handles for markers longer than 50ms
+    profiler-cli thread markers --json | \
+      jq -r '[.byType[].topMarkers[] | select(.duration > 50) | .handle][]'
+
+    # List all handles for a specific marker type (flat list mode)
+    profiler-cli thread markers --search "Histogram::Add" --list --json | \
+      jq -r '.flatMarkers[].handle'
+
+SESSION MANAGEMENT
+
+    profiler-cli session list                               List all running daemon sessions (* marks current)
+    profiler-cli session use <id>                           Switch the current session
+    profiler-cli stop                                       Stop the current session
+    profiler-cli stop <id>                                  Stop a specific session
+    profiler-cli stop --all                                 Stop all sessions
+    profiler-cli load profile.json.gz --session my-session   Named session
+    profiler-cli load profile.json.gz --symbol-server <url>  Override symbol server (else ?symbolServer= URL param or Mozilla default)
+    profiler-cli thread info --session my-session            Query a specific session
+
+
+ERROR HANDLING
+
+  "No running session"
+    Run "profiler-cli load <profile>" first. If using a named session, ensure --session matches.
+    Run "profiler-cli session list" to see what sessions are currently active.
+
+  "Thread not found"
+    The handle does not exist in this profile. Run "profiler-cli profile info" to see valid
+    thread handles, then re-run "profiler-cli thread select" with a handle from that list.
+
+  "No thread selected"
+    Run "profiler-cli thread select <handle>" before querying thread data. Use "profiler-cli profile info"
+    first to get valid handles.
+
+  "Marker not found"
+    Marker handles (m-N) are session-scoped. If the daemon was restarted, re-run
+    "profiler-cli thread markers" to get fresh handles for the new session.
+
+  "Function not found"
+    Function handles (f-N) are stable across sessions for the same profile, but only
+    valid after the profile is loaded. Verify the correct profile is loaded with
+    "profiler-cli status" (check the profile path).
+
+  "Session not found" / "No such session"
+    The session has exited or was stopped. Run "profiler-cli session list" to see active sessions.
+    Run "profiler-cli load <profile> --session <id>" to start a new session with that ID.
+
+  "Profile load failed"
+    Check that the path is correct and the file is a valid supported profile format.
+    The daemon log at ~/.profiler-cli/<session-id>.log contains the full error detail.

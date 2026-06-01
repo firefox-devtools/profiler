@@ -2,9 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
-import minimist from 'minimist';
+import { Command, CommanderError, Option } from 'commander';
 
-import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  serializeProfileToJsonSlabsFile,
+  serializeProfileToJsonString,
+  unserializeProfileOfArbitraryFormat,
+} from 'firefox-profiler/profile-logic/process-profile';
+import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
@@ -14,6 +19,10 @@ import {
 } from 'firefox-profiler/profile-logic/symbolication';
 import type { SymbolicationStepInfo } from 'firefox-profiler/profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from 'firefox-profiler/profile-logic/mozilla-symbolication-api';
+import {
+  applyWasmSymbolication,
+  type WasmSymbolicationSpec,
+} from 'firefox-profiler/profile-logic/wasm-symbolication';
 import type { Profile } from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -29,6 +38,10 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  * Examples:
  *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json \
  *     --symbolicate-with-server http://localhost:8001/abcdef/
+ *
+ *   node node-tools-dist/profiler-edit.js -i input.json.gz -o out.json.gz \
+ *     --symbolicate-wasm http://host/a.wasm=./a-unstripped.wasm \
+ *     --symbolicate-wasm http://host/b.wasm=./b-unstripped.wasm
  */
 
 type ProfileSource =
@@ -36,10 +49,36 @@ type ProfileSource =
   | { type: 'URL'; url: string }
   | { type: 'HASH'; hash: string };
 
+// Describes one --symbolicate-wasm argument: a local unstripped wasm file that
+// supplies symbol names, plus (optionally) the URL of the stripped wasm in the
+// profile to which those names should be applied. If `strippedWasmUrl` is
+// omitted, the profile must contain exactly one .wasm source, which is used.
+interface WasmSymbolicationCliSpec {
+  // Path to the local unstripped .wasm file (with a "name" custom section).
+  unstrippedWasmPath: string;
+  // URL of the matching stripped wasm as it appears in the profile.
+  strippedWasmUrl?: string;
+}
+
 export interface CliOptions {
   input: ProfileSource;
   output: string;
   symbolicateWithServer?: string;
+  symbolicateWasm: WasmSymbolicationCliSpec[];
+}
+
+function loadWasmSymbolicationSpecs(
+  cliSpecs: WasmSymbolicationCliSpec[]
+): WasmSymbolicationSpec[] {
+  return cliSpecs.map((spec) => {
+    console.log(`Reading wasm symbols from ${spec.unstrippedWasmPath}`);
+    const buf = fs.readFileSync(spec.unstrippedWasmPath);
+    return {
+      bytes: new Uint8Array(buf.buffer, buf.byteOffset, buf.byteLength),
+      url: spec.strippedWasmUrl,
+      label: spec.unstrippedWasmPath,
+    };
+  });
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -93,6 +132,24 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
   }
 }
 
+async function encodeProfileWithFilename(
+  profile: Profile,
+  filename: string
+): Promise<Uint8Array> {
+  if (filename.endsWith('.jslb') || filename.endsWith('.jslb.gz')) {
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    if (filename.endsWith('.jslb.gz')) {
+      return compress(bytes);
+    }
+    return bytes;
+  }
+  const s = serializeProfileToJsonString(profile);
+  if (filename.endsWith('.gz')) {
+    return compress(s);
+  }
+  return new TextEncoder().encode(s);
+}
+
 export async function run(options: CliOptions) {
   const profile = await loadProfile(options.input);
 
@@ -143,37 +200,90 @@ export async function run(options: CliOptions) {
     profile.meta.symbolicated = true;
   }
 
-  console.log(`Saving profile to ${options.output}`);
-  if (options.output.endsWith('.gz')) {
-    fs.writeFileSync(options.output, await compress(JSON.stringify(profile)));
-  } else {
-    fs.writeFileSync(options.output, JSON.stringify(profile));
-  }
+  applyWasmSymbolication(
+    profile,
+    loadWasmSymbolicationSpecs(options.symbolicateWasm)
+  );
+
+  const { profile: compactedProfile } = computeCompactedProfile(profile);
+
+  const outputFilename = options.output;
+  console.log(`Saving profile to ${outputFilename}`);
+  const bytes = await encodeProfileWithFilename(
+    compactedProfile,
+    outputFilename
+  );
+  fs.writeFileSync(outputFilename, bytes);
   console.log('Finished.');
 }
 
+function collectWasm(
+  value: string,
+  previous: WasmSymbolicationCliSpec[]
+): WasmSymbolicationCliSpec[] {
+  // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
+  // whole string as a path and infer the URL from the profile. Split on
+  // the last `=` so URLs containing `=` (e.g. in query strings) survive
+  // intact; this assumes file paths don't contain `=`.
+  const eqIndex = value.lastIndexOf('=');
+  if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(value.slice(0, eqIndex))) {
+    return [
+      ...previous,
+      {
+        strippedWasmUrl: value.slice(0, eqIndex),
+        unstrippedWasmPath: value.slice(eqIndex + 1),
+      },
+    ];
+  }
+  return [...previous, { unstrippedWasmPath: value }];
+}
+
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
-  const argv = minimist(processArgv.slice(2), {
-    alias: { i: 'input', o: 'output' },
-  });
+  const program = new Command();
+  program
+    .name('profiler-edit')
+    .description('Edit and transform Firefox performance profiles')
+    .exitOverride()
+    .option(
+      '-i, --input <fileOrUrl>',
+      'Input profile (file path or http(s) URL)'
+    )
+    .option('-o, --output <path>', 'Output path (.json or .json.gz)')
+    .option('--from-file <path>', 'Load input from a file')
+    .option('--from-url <url>', 'Load input from a URL')
+    .option('--from-hash <hash>', 'Load input from a profile hash')
+    .option(
+      '--symbolicate-with-server <url>',
+      'Symbolicate frames using this symbol server URL'
+    )
+    .addOption(
+      new Option(
+        '--symbolicate-wasm <spec>',
+        'Apply wasm symbol info, as <url>=<path> or just <path>'
+      )
+        .argParser(collectWasm)
+        .default([] as WasmSymbolicationCliSpec[])
+    );
+
+  program.parse(processArgv);
+  const opts = program.opts();
 
   const sources: ProfileSource[] = [];
-
-  if (typeof argv.input === 'string' && argv.input !== '') {
-    if (/^https?:\/\//i.test(argv.input)) {
-      sources.push({ type: 'URL', url: argv.input });
+  if (typeof opts.input === 'string' && opts.input !== '') {
+    if (/^https?:\/\//i.test(opts.input)) {
+      sources.push({ type: 'URL', url: opts.input });
     } else {
-      sources.push({ type: 'FILE', path: argv.input });
+      sources.push({ type: 'FILE', path: opts.input });
     }
   }
-  if (typeof argv['from-file'] === 'string' && argv['from-file'] !== '') {
-    sources.push({ type: 'FILE', path: argv['from-file'] });
+  if (typeof opts.fromFile === 'string' && opts.fromFile !== '') {
+    sources.push({ type: 'FILE', path: opts.fromFile });
   }
-  if (typeof argv['from-url'] === 'string' && argv['from-url'] !== '') {
-    sources.push({ type: 'URL', url: argv['from-url'] });
+  if (typeof opts.fromUrl === 'string' && opts.fromUrl !== '') {
+    sources.push({ type: 'URL', url: opts.fromUrl });
   }
-  if (typeof argv['from-hash'] === 'string' && argv['from-hash'] !== '') {
-    sources.push({ type: 'HASH', hash: argv['from-hash'] });
+  if (typeof opts.fromHash === 'string' && opts.fromHash !== '') {
+    sources.push({ type: 'HASH', hash: opts.fromHash });
   }
 
   if (sources.length === 0) {
@@ -187,25 +297,36 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     );
   }
 
-  if (!(typeof argv.output === 'string' && argv.output !== '')) {
+  if (!(typeof opts.output === 'string' && opts.output !== '')) {
     throw new Error('An output path must be supplied with --output / -o');
   }
 
   return {
     input: sources[0],
-    output: argv.output,
+    output: opts.output,
     symbolicateWithServer:
-      typeof argv['symbolicate-with-server'] === 'string' &&
-      argv['symbolicate-with-server'] !== ''
-        ? argv['symbolicate-with-server']
+      typeof opts.symbolicateWithServer === 'string' &&
+      opts.symbolicateWithServer !== ''
+        ? opts.symbolicateWithServer
         : undefined,
+    symbolicateWasm: opts.symbolicateWasm,
   };
 }
 
 if (require.main === module) {
-  const options = makeOptionsFromArgv(process.argv);
-  run(options).catch((err) => {
-    console.error(err);
+  try {
+    const options = makeOptionsFromArgv(process.argv);
+    run(options).catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+  } catch (err) {
+    if (err instanceof CommanderError) {
+      // Commander already wrote its own output and chose the
+      // appropriate exit code.
+      process.exit(err.exitCode);
+    }
+    console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

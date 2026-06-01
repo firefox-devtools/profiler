@@ -117,7 +117,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           </div>
           <ResizableWithSplitter
             splitterPosition="end"
-            controlledProperty="max-height"
+            controlledProperty="maxHeight"
             percent={false}
             initialSize="270px"
           >
