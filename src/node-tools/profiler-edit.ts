@@ -47,6 +47,7 @@ import {
   mergeNonOverlappingThreadsByName,
   remapCountersAndProfilerOverhead,
 } from 'firefox-profiler/profile-logic/merge-compare';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 
 /**
  * A CLI tool for editing profiles.
@@ -71,6 +72,9 @@ import {
  *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
  *     --only-keep-threads-with-markers-matching '-async,-sync' \
  *     --merge-non-overlapping-threads-by-name
+ *
+ *   node node-tools-dist/profiler-edit.js -i in.json -o out.json \
+ *     --canonicalize-js-location
  */
 
 export type ProfileSource =
@@ -98,6 +102,7 @@ export interface CliOptions {
   onlyKeepThreadsWithMarkersMatching?: string;
   mergeNonOverlappingThreadsByName?: boolean;
   setName?: string;
+  canonicalizeJsLocation?: boolean;
 }
 
 export function loadWasmSymbolicationSpecs(
@@ -132,6 +137,72 @@ export function collectFuncNames(profile: Profile): string[] {
     result.push(name);
   }
   return result;
+}
+
+/**
+ * Strip ` (file:line:col)` or ` file:line:col` location suffixes from JS func
+ * names and move the location into the funcTable + sources columns instead.
+ * Idempotent: re-running on an already-canonicalized profile is a no-op
+ * because the trailing suffix is gone.
+ */
+function canonicalizeJsLocations(profile: Profile): Profile {
+  const { funcTable, sources, stringArray } = profile.shared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+
+  // Reuse existing source entries that already cover a whole file at the
+  // standard (1, 1) origin, keyed by the filename's string index.
+  const filenameToSourceIndex = new Map<number, number>();
+  for (let i = 0; i < sources.length; i++) {
+    if (sources.startLine[i] === 1 && sources.startColumn[i] === 1) {
+      const filenameIndex = sources.filename[i];
+      if (!filenameToSourceIndex.has(filenameIndex)) {
+        filenameToSourceIndex.set(filenameIndex, i);
+      }
+    }
+  }
+
+  // The filename may contain colons (URLs), so we rely on greedy matching
+  // to anchor `:line:col` at the very end of the string.
+  const parenRegex = /^(.+) \((.+):(\d+):(\d+)\)$/;
+  const plainRegex = /^(.+) (.+):(\d+):(\d+)$/;
+
+  let canonicalized = 0;
+  for (let i = 0; i < funcTable.length; i++) {
+    if (!funcTable.isJS[i]) {
+      continue;
+    }
+    const name = stringArray[funcTable.name[i]];
+    const match = parenRegex.exec(name) ?? plainRegex.exec(name);
+    if (match === null) {
+      continue;
+    }
+    const cleanName = match[1];
+    const filename = match[2];
+    const line = parseInt(match[3], 10);
+    const col = parseInt(match[4], 10);
+
+    const filenameIndex = stringTable.indexForString(filename);
+    let sourceIndex = filenameToSourceIndex.get(filenameIndex);
+    if (sourceIndex === undefined) {
+      sourceIndex = sources.length;
+      sources.id[sourceIndex] = null;
+      sources.filename[sourceIndex] = filenameIndex;
+      sources.startLine[sourceIndex] = 1;
+      sources.startColumn[sourceIndex] = 1;
+      sources.sourceMapURL[sourceIndex] = null;
+      sources.length++;
+      filenameToSourceIndex.set(filenameIndex, sourceIndex);
+    }
+
+    funcTable.name[i] = stringTable.indexForString(cleanName);
+    funcTable.source[i] = sourceIndex;
+    funcTable.lineNumber[i] = line;
+    funcTable.columnNumber[i] = col;
+    canonicalized++;
+  }
+
+  console.log(`Canonicalized location of ${canonicalized} JS function(s).`);
+  return profile;
 }
 
 export type ParsedLabelToml = {
@@ -320,6 +391,10 @@ export async function run(options: CliOptions) {
     profile = mergeNonOverlappingThreadsByName(profile);
   }
 
+  if (options.canonicalizeJsLocation) {
+    profile = canonicalizeJsLocations(profile);
+  }
+
   if (options.setName !== undefined) {
     profile.meta.product = options.setName;
   }
@@ -405,6 +480,10 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       '--set-name <name>',
       'Override the profile product name',
       requireNonEmpty('--set-name')
+    )
+    .option(
+      '--canonicalize-js-location',
+      'Move "name (file:line:col)" suffixes on JS functions into the funcTable + sources columns'
     );
 
   program.parse(processArgv);
@@ -465,6 +544,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     mergeNonOverlappingThreadsByName:
       opts.mergeNonOverlappingThreadsByName === true,
     setName: typeof opts.setName === 'string' ? opts.setName : undefined,
+    canonicalizeJsLocation: opts.canonicalizeJsLocation === true,
   };
 }
 
