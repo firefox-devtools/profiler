@@ -127,6 +127,29 @@ describe('makeOptionsFromArgv', function () {
     expect(options.insertLabelFrames).toEqual('/path/to/labels.toml');
   });
 
+  it('recognizes optional --canonicalize-js-location', function () {
+    const options = makeOptionsFromArgv([
+      ...commonArgs,
+      '-i',
+      '/path/to/profile.json',
+      '-o',
+      '/path/to/output.json',
+      '--canonicalize-js-location',
+    ]);
+    expect(options.canonicalizeJsLocation).toBe(true);
+  });
+
+  it('defaults --canonicalize-js-location to false', function () {
+    const options = makeOptionsFromArgv([
+      ...commonArgs,
+      '-i',
+      '/path/to/profile.json',
+      '-o',
+      '/path/to/output.json',
+    ]);
+    expect(options.canonicalizeJsLocation).toBe(false);
+  });
+
   it('throws when no input is provided', function () {
     expect(() =>
       makeOptionsFromArgv([...commonArgs, '-o', '/path/to/output.json'])
