@@ -35,6 +35,17 @@ export const L10N_ID_BY_LABEL_KEY: { [labelKey: string]: string } = {
   'power-energy-range': 'TrackPower--tooltip-energy-carbon-used-in-range',
 };
 
+const PWH_TO_WH = 1e-12;
+const MS_PER_HOUR = 1000 * 3600;
+
+export function pwhToWh(pwh: number): number {
+  return pwh * PWH_TO_WH;
+}
+
+export function pwhPerMsToWatts(pwhPerMs: number): number {
+  return pwhPerMs * PWH_TO_WH * MS_PER_HOUR;
+}
+
 let _co2: InstanceType<typeof co2> | null = null;
 function getCo2(): InstanceType<typeof co2> {
   if (_co2 === null) {
@@ -52,7 +63,6 @@ export function carbonForBytes(bytes: number): number {
   return typeof co2eq.co2 === 'number' ? co2eq.co2 : co2eq.co2.total;
 }
 
-// Watt-hours → CO₂e in grams.
 export function carbonForWattHours(
   wattHours: number,
   meta: ProfileMeta

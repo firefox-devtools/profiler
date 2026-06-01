@@ -4,6 +4,7 @@
 
 import * as React from 'react';
 import { Localized } from '@fluent/react';
+import memoize from 'memoize-one';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
@@ -32,11 +33,14 @@ import {
   carbonForBytes,
   carbonForWattHours,
   pickTier,
+  pwhPerMsToWatts,
+  pwhToWh,
 } from './TrackCounterTooltipFormat';
 
 import type {
   AccumulatedCounterSamples,
   Counter,
+  CounterSamplesTable,
   CounterTooltipDataSource,
   CounterTooltipFormat,
   CounterTooltipRow,
@@ -48,232 +52,6 @@ import type {
   State,
 } from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-
-type ResolverContext = {
-  counter: Counter;
-  counterIndex: number;
-  interval: Milliseconds;
-  accumulatedSamples: AccumulatedCounterSamples;
-  maxCounterSampleCountPerMs: number;
-  committedRange: StartEndRange;
-  previewSelection: PreviewSelection | null;
-  meta: ProfileMeta;
-};
-
-function resolveSource(
-  source: CounterTooltipDataSource,
-  ctx: ResolverContext
-): number | null {
-  const { counter, counterIndex, interval } = ctx;
-  const { samples } = counter;
-
-  switch (source) {
-    case 'count':
-      return samples.count[counterIndex];
-    case 'rate': {
-      const dt =
-        counterIndex === 0
-          ? interval
-          : samples.time[counterIndex] - samples.time[counterIndex - 1];
-      return samples.count[counterIndex] / dt;
-    }
-    case 'cpu-ratio': {
-      const dt =
-        counterIndex === 0
-          ? interval
-          : samples.time[counterIndex] - samples.time[counterIndex - 1];
-      return samples.count[counterIndex] / dt / ctx.maxCounterSampleCountPerMs;
-    }
-    case 'accumulated': {
-      const { minCount, accumulatedCounts } = ctx.accumulatedSamples;
-      return accumulatedCounts[counterIndex] - minCount;
-    }
-    case 'count-range':
-      return ctx.accumulatedSamples.countRange;
-    case 'sample-number':
-      return samples.number !== undefined ? samples.number[counterIndex] : null;
-    case 'selection-total': {
-      if (!ctx.previewSelection) {
-        return null;
-      }
-      const [begin, end] = getSampleIndexRangeForSelection(
-        samples,
-        ctx.previewSelection.selectionStart,
-        ctx.previewSelection.selectionEnd
-      );
-      let sum = 0;
-      for (let i = begin; i < end; i++) {
-        sum += samples.count[i];
-      }
-      return sum;
-    }
-    case 'selection-rate': {
-      if (!ctx.previewSelection) {
-        return null;
-      }
-      const span =
-        ctx.previewSelection.selectionEnd - ctx.previewSelection.selectionStart;
-      if (span <= 0) {
-        return null;
-      }
-      const [begin, end] = getSampleIndexRangeForSelection(
-        samples,
-        ctx.previewSelection.selectionStart,
-        ctx.previewSelection.selectionEnd
-      );
-      let sum = 0;
-      for (let i = begin; i < end; i++) {
-        sum += samples.count[i];
-      }
-      return sum / span;
-    }
-    case 'committed-range-total': {
-      const [begin, end] = getSampleIndexRangeForSelection(
-        samples,
-        ctx.committedRange.start,
-        ctx.committedRange.end
-      );
-      let sum = 0;
-      for (let i = begin; i < end; i++) {
-        sum += samples.count[i];
-      }
-      return sum;
-    }
-    default:
-      throw assertExhaustiveCheck(source);
-  }
-}
-
-function formatValueRow(
-  value: number,
-  format: CounterTooltipFormat,
-  source: CounterTooltipDataSource,
-  label: string,
-  labelKey: string | undefined,
-  key: number,
-  ctx: ResolverContext
-): React.ReactElement {
-  // Normalize the value into the ladder's input unit (watts for power,
-  // watt-hours for energy). samples.count[i] is energy in pWh accumulated
-  // over the sample's dt; selection-rate is pWh per ms; the range totals
-  // are sums of pWh.
-  let valueForLadder = value;
-  if (format.scale === 'power') {
-    if (source === 'count') {
-      const dt =
-        ctx.counterIndex === 0
-          ? ctx.interval
-          : ctx.counter.samples.time[ctx.counterIndex] -
-            ctx.counter.samples.time[ctx.counterIndex - 1];
-      valueForLadder = ((value * 1e-12) / dt) * 1000 * 3600;
-    } else if (source === 'selection-rate') {
-      valueForLadder = value * 1e-12 * 1000 * 3600;
-    }
-  } else if (format.scale === 'energy') {
-    valueForLadder = value * 1e-12;
-  }
-
-  const knownL10nId = labelKey ? L10N_ID_BY_LABEL_KEY[labelKey] : undefined;
-
-  if (format.scale) {
-    const ladder = format.scale === 'power' ? POWER_LADDER : ENERGY_LADDER;
-    const tier = pickTier(valueForLadder, ladder);
-    let carbonGrams = 0;
-    if (format.co2 === 'per-watthour' && format.scale === 'energy') {
-      carbonGrams = carbonForWattHours(valueForLadder, ctx.meta);
-    }
-
-    const formattedValue = formatNumber(
-      valueForLadder * tier.multiplier,
-      tier.valueSignificantDigits
-    );
-    const formattedCarbon = formatNumber(
-      carbonGrams * tier.carbonMultiplier,
-      tier.carbonSignificantDigits
-    );
-
-    if (knownL10nId) {
-      const vars: { value: string; carbonValue?: string } = {
-        value: formattedValue,
-      };
-      if (format.co2) {
-        vars.carbonValue = formattedCarbon;
-      }
-      return (
-        <Localized
-          key={key}
-          id={knownL10nId + tier.suffix}
-          vars={vars}
-          attrs={{ label: true }}
-        >
-          <TooltipDetail label={label}>{formattedValue}</TooltipDetail>
-        </Localized>
-      );
-    }
-
-    const valueWithUnit = `${formattedValue} ${tier.unitText}`;
-    return (
-      <TooltipDetail key={key} label={label}>
-        {format.scale === 'energy' && format.co2 === 'per-watthour'
-          ? `${valueWithUnit} (${formattedCarbon} ${tier.carbonUnitText})`
-          : valueWithUnit}
-      </TooltipDetail>
-    );
-  }
-
-  let formattedValue: string;
-  switch (format.unit) {
-    case 'bytes':
-      formattedValue = formatBytes(value);
-      break;
-    case 'bytes-per-second':
-      // Input arrives in bytes/ms.
-      formattedValue = formatBytes(value * 1000);
-      break;
-    case 'percent':
-      formattedValue = formatPercent(value);
-      break;
-    case 'number':
-      formattedValue = formatNumber(value, 2, 0);
-      break;
-    default:
-      throw assertExhaustiveCheck(format.unit);
-  }
-
-  let formattedCarbon: string | undefined;
-  if (format.co2 === 'per-byte') {
-    const bytesForCarbon =
-      format.unit === 'bytes-per-second' ? value * 1000 : value;
-    formattedCarbon = formatNumber(carbonForBytes(bytesForCarbon));
-  }
-
-  if (knownL10nId) {
-    const vars: { value: string; carbonValue?: string } = {
-      value: formattedValue,
-    };
-    if (formattedCarbon !== undefined) {
-      vars.carbonValue = formattedCarbon;
-    }
-    return (
-      <Localized key={key} id={knownL10nId} vars={vars} attrs={{ label: true }}>
-        <TooltipDetail label={label}>{formattedValue}</TooltipDetail>
-      </Localized>
-    );
-  }
-
-  let displayValue = formattedValue;
-  if (format.unit === 'bytes-per-second') {
-    displayValue += ' per second';
-  }
-  if (formattedCarbon !== undefined) {
-    displayValue += ` (${formattedCarbon} g CO₂e)`;
-  }
-  return (
-    <TooltipDetail key={key} label={label}>
-      {displayValue}
-    </TooltipDetail>
-  );
-}
 
 type OwnProps = {
   readonly counter: Counter;
@@ -293,31 +71,243 @@ type StateProps = {
 
 type Props = ConnectedProps<OwnProps, StateProps, {}>;
 
+function sumCountOverRange(
+  samples: CounterSamplesTable,
+  start: Milliseconds,
+  end: Milliseconds
+): number {
+  const [begin, finish] = getSampleIndexRangeForSelection(samples, start, end);
+  let sum = 0;
+  for (let i = begin; i < finish; i++) {
+    sum += samples.count[i];
+  }
+  return sum;
+}
+
 class TrackCounterTooltipImpl extends React.PureComponent<Props> {
-  override render() {
+  // `memoize-one` only caches the most recent call, but because the args
+  // here (`counter.samples`, `previewSelection`, `committedRange`) are
+  // reference-stable across renders, the cache survives between them.
+  _selectionSum = memoize(
+    (samples: CounterSamplesTable, selection: PreviewSelection): number =>
+      sumCountOverRange(
+        samples,
+        selection.selectionStart,
+        selection.selectionEnd
+      )
+  );
+
+  _committedRangeSum = memoize(
+    (samples: CounterSamplesTable, range: StartEndRange): number =>
+      sumCountOverRange(samples, range.start, range.end)
+  );
+
+  _sampleDtMs(): Milliseconds {
+    const { counter, counterIndex, interval } = this.props;
+    return counterIndex === 0
+      ? interval
+      : counter.samples.time[counterIndex] -
+          counter.samples.time[counterIndex - 1];
+  }
+
+  _resolveSource(source: CounterTooltipDataSource): number | null {
     const {
       counter,
       counterIndex,
       accumulatedSamples,
       maxCounterSampleCountPerMs,
-      mouseX,
-      mouseY,
-      interval,
       committedRange,
       previewSelection,
-      meta,
     } = this.props;
+    const { samples } = counter;
 
-    const ctx: ResolverContext = {
-      counter,
-      counterIndex,
-      interval,
-      accumulatedSamples,
-      maxCounterSampleCountPerMs,
-      committedRange,
-      previewSelection,
-      meta,
-    };
+    switch (source) {
+      case 'count':
+        return samples.count[counterIndex];
+      case 'rate':
+        return samples.count[counterIndex] / this._sampleDtMs();
+      case 'cpu-ratio':
+        return (
+          samples.count[counterIndex] /
+          this._sampleDtMs() /
+          maxCounterSampleCountPerMs
+        );
+      case 'accumulated': {
+        const { minCount, accumulatedCounts } = accumulatedSamples;
+        return accumulatedCounts[counterIndex] - minCount;
+      }
+      case 'count-range':
+        return accumulatedSamples.countRange;
+      case 'sample-number':
+        return samples.number !== undefined
+          ? samples.number[counterIndex]
+          : null;
+      case 'selection-total':
+        if (!previewSelection) {
+          return null;
+        }
+        return this._selectionSum(samples, previewSelection);
+      case 'selection-rate': {
+        if (!previewSelection) {
+          return null;
+        }
+        const span =
+          previewSelection.selectionEnd - previewSelection.selectionStart;
+        if (span <= 0) {
+          return null;
+        }
+        return this._selectionSum(samples, previewSelection) / span;
+      }
+      case 'committed-range-total':
+        return this._committedRangeSum(samples, committedRange);
+      default:
+        throw assertExhaustiveCheck(source);
+    }
+  }
+
+  // Normalize a power- or energy-scale row's value into the ladder's input
+  // unit (watts for `'power'`, watt-hours for `'energy'`). samples.count[i]
+  // is energy in pWh accumulated over the sample's dt; selection-rate is
+  // pWh per ms; the range totals are sums of pWh.
+  _normalizeForLadder(
+    value: number,
+    format: CounterTooltipFormat,
+    source: CounterTooltipDataSource
+  ): number {
+    if (format.scale === 'power') {
+      if (source === 'count') {
+        return pwhPerMsToWatts(value / this._sampleDtMs());
+      }
+      if (source === 'selection-rate') {
+        return pwhPerMsToWatts(value);
+      }
+      return value;
+    }
+    if (format.scale === 'energy') {
+      return pwhToWh(value);
+    }
+    return value;
+  }
+
+  _formatValueRow(
+    value: number,
+    format: CounterTooltipFormat,
+    source: CounterTooltipDataSource,
+    label: string,
+    labelKey: string | undefined,
+    key: number
+  ): React.ReactElement {
+    const { meta } = this.props;
+    const valueForLadder = this._normalizeForLadder(value, format, source);
+    const knownL10nId = labelKey ? L10N_ID_BY_LABEL_KEY[labelKey] : undefined;
+
+    if (format.scale) {
+      const ladder = format.scale === 'power' ? POWER_LADDER : ENERGY_LADDER;
+      const tier = pickTier(valueForLadder, ladder);
+      let carbonGrams = 0;
+      if (format.co2 === 'per-watthour' && format.scale === 'energy') {
+        carbonGrams = carbonForWattHours(valueForLadder, meta);
+      }
+
+      const formattedValue = formatNumber(
+        valueForLadder * tier.multiplier,
+        tier.valueSignificantDigits
+      );
+      const formattedCarbon = formatNumber(
+        carbonGrams * tier.carbonMultiplier,
+        tier.carbonSignificantDigits
+      );
+
+      if (knownL10nId) {
+        const vars: { value: string; carbonValue?: string } = {
+          value: formattedValue,
+        };
+        if (format.co2) {
+          vars.carbonValue = formattedCarbon;
+        }
+        return (
+          <Localized
+            key={key}
+            id={knownL10nId + tier.suffix}
+            vars={vars}
+            attrs={{ label: true }}
+          >
+            <TooltipDetail label={label}>{formattedValue}</TooltipDetail>
+          </Localized>
+        );
+      }
+
+      const valueWithUnit = `${formattedValue} ${tier.unitText}`;
+      return (
+        <TooltipDetail key={key} label={label}>
+          {format.scale === 'energy' && format.co2 === 'per-watthour'
+            ? `${valueWithUnit} (${formattedCarbon} ${tier.carbonUnitText})`
+            : valueWithUnit}
+        </TooltipDetail>
+      );
+    }
+
+    let formattedValue: string;
+    switch (format.unit) {
+      case 'bytes':
+        formattedValue = formatBytes(value);
+        break;
+      case 'bytes-per-second':
+        // Input arrives in bytes/ms.
+        formattedValue = formatBytes(value * 1000);
+        break;
+      case 'percent':
+        formattedValue = formatPercent(value);
+        break;
+      case 'number':
+        formattedValue = formatNumber(value, 2, 0);
+        break;
+      default:
+        throw assertExhaustiveCheck(format.unit);
+    }
+
+    let formattedCarbon: string | undefined;
+    if (format.co2 === 'per-byte') {
+      const bytesForCarbon =
+        format.unit === 'bytes-per-second' ? value * 1000 : value;
+      formattedCarbon = formatNumber(carbonForBytes(bytesForCarbon));
+    }
+
+    if (knownL10nId) {
+      const vars: { value: string; carbonValue?: string } = {
+        value: formattedValue,
+      };
+      if (formattedCarbon !== undefined) {
+        vars.carbonValue = formattedCarbon;
+      }
+      return (
+        <Localized
+          key={key}
+          id={knownL10nId}
+          vars={vars}
+          attrs={{ label: true }}
+        >
+          <TooltipDetail label={label}>{formattedValue}</TooltipDetail>
+        </Localized>
+      );
+    }
+
+    let displayValue = formattedValue;
+    if (format.unit === 'bytes-per-second') {
+      displayValue += ' per second';
+    }
+    if (formattedCarbon !== undefined) {
+      displayValue += ` (${formattedCarbon} g CO₂e)`;
+    }
+    return (
+      <TooltipDetail key={key} label={label}>
+        {displayValue}
+      </TooltipDetail>
+    );
+  }
+
+  override render() {
+    const { counter, mouseX, mouseY, previewSelection } = this.props;
 
     const hasNonEmptySelection =
       previewSelection !== null &&
@@ -332,19 +322,18 @@ class TrackCounterTooltipImpl extends React.PureComponent<Props> {
       if (row.requiresPreviewSelection && !hasNonEmptySelection) {
         return;
       }
-      const value = resolveSource(row.source, ctx);
+      const value = this._resolveSource(row.source);
       if (value === null) {
         return;
       }
       rendered.push(
-        formatValueRow(
+        this._formatValueRow(
           value,
           row.format,
           row.source,
           row.label,
           row.labelKey,
-          i,
-          ctx
+          i
         )
       );
     });
