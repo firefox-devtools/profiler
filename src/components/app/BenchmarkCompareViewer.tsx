@@ -385,14 +385,18 @@ function BucketTable({
     [newBundle, label]
   );
 
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const toggle = (bucketName: string) => {
+  // Keyed by row index in `significant`, not bucketName: multiple buckets in
+  // the same suite can share a display name (e.g. several `get` accessors on
+  // different classes — distinguished by their source-location key but
+  // collapsed to the same name for display).
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const toggle = (rowIndex: number) => {
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(bucketName)) {
-        next.delete(bucketName);
+      if (next.has(rowIndex)) {
+        next.delete(rowIndex);
       } else {
-        next.add(bucketName);
+        next.add(rowIndex);
       }
       return next;
     });
@@ -466,14 +470,14 @@ function BucketTable({
           // (If both are null it's a degenerate "appeared/disappeared with no
           // attributable func" case.)
           const expandable = c.baseFunc !== null || c.newFunc !== null;
-          const isExpanded = expanded.has(c.bucketName);
+          const isExpanded = expanded.has(i);
           return (
             <Fragment key={i}>
               <tr
                 className={
                   expandable ? 'benchmarkRow--bucket-expandable' : undefined
                 }
-                onClick={expandable ? () => toggle(c.bucketName) : undefined}
+                onClick={expandable ? () => toggle(i) : undefined}
               >
                 <td className="benchmarkCell--bucketName" title={c.bucketName}>
                   {expandable ? (
