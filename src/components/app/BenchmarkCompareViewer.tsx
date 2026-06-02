@@ -126,7 +126,9 @@ async function computeComparison(
     const newSuite = newStats.suites.find(
       (s) => s.suiteName === baseSuite.suiteName
     );
-    if (!newSuite) return [];
+    if (!newSuite) {
+      return [];
+    }
     const comparisons = compareBuckets(
       baseSuite.buckets,
       newSuite.buckets,
@@ -161,12 +163,16 @@ async function computeComparison(
  *   newGeomean / baseGeomean = (newSuiteMean / baseSuiteMean)^(1/N)
  */
 function impactOnGeomean(suiteRel: number, numSuites: number): number {
-  if (!isFinite(suiteRel)) return suiteRel;
+  if (!isFinite(suiteRel)) {
+    return suiteRel;
+  }
   return Math.pow(1 + suiteRel, 1 / numSuites) - 1;
 }
 
 function formatChange(rel: number): string {
-  if (!isFinite(rel)) return rel > 0 ? 'appeared' : 'disappeared';
+  if (!isFinite(rel)) {
+    return rel > 0 ? 'appeared' : 'disappeared';
+  }
   const pct = (rel * 100).toFixed(2);
   return rel >= 0 ? `+${pct}%` : `${pct}%`;
 }
@@ -176,7 +182,9 @@ function changeClass(
   confidence: ConfidenceRating,
   effectSize: EffectSize
 ): string {
-  if (!isFinite(relChange) || relChange === 0) return '';
+  if (!isFinite(relChange) || relChange === 0) {
+    return '';
+  }
   const direction = relChange > 0 ? 'regressed' : 'improved';
   const classes = [];
   // Only color the text (and add background shading) when we have at least
@@ -186,9 +194,11 @@ function changeClass(
   } else if (confidence === 'MEDIUM') {
     classes.push(`benchmarkCell--${direction}`, 'benchmarkCell--conf-medium');
   }
-  if (effectSize === 'Large') classes.push('benchmarkCell--effect-large');
-  else if (effectSize === 'Moderate')
+  if (effectSize === 'Large') {
+    classes.push('benchmarkCell--effect-large');
+  } else if (effectSize === 'Moderate') {
     classes.push('benchmarkCell--effect-moderate');
+  }
   // Small / Negligible: normal weight.
   return classes.join(' ');
 }
@@ -257,8 +267,11 @@ function ScoreTable({
   const toggle = (label: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
+      if (next.has(label)) {
+        next.delete(label);
+      } else {
+        next.add(label);
+      }
       return next;
     });
   };
@@ -308,16 +321,16 @@ function ScoreTable({
                   className="benchmarkCell--indented benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
                   title={row.label}
                 >
-                  {expandable && (
+                  {expandable ? (
                     <span className="benchmarkDisclosure" aria-hidden="true">
                       {isExpanded ? '▼' : '▶'}
                     </span>
-                  )}
+                  ) : null}
                   {row.label}
                 </td>
                 <ScoreRow row={row} isOverall={false} numSuites={numSuites} />
               </tr>
-              {isExpanded && comparisons && (
+              {isExpanded && comparisons ? (
                 <tr className="benchmarkRow--expansion">
                   <td colSpan={SCORE_TABLE_COLUMN_COUNT}>
                     <BucketTable
@@ -330,7 +343,7 @@ function ScoreTable({
                     />
                   </td>
                 </tr>
-              )}
+              ) : null}
             </Fragment>
           );
         })}
@@ -376,8 +389,11 @@ function BucketTable({
   const toggle = (bucketName: string) => {
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(bucketName)) next.delete(bucketName);
-      else next.add(bucketName);
+      if (next.has(bucketName)) {
+        next.delete(bucketName);
+      } else {
+        next.add(bucketName);
+      }
       return next;
     });
   };
@@ -410,7 +426,9 @@ function BucketTable({
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
-        {showSubtestColumns && <col className="benchmarkCell--colFixed" />}
+        {showSubtestColumns ? (
+          <col className="benchmarkCell--colFixed" />
+        ) : null}
       </colgroup>
       <tbody>
         {significant.map((c, i) => {
@@ -458,11 +476,11 @@ function BucketTable({
                 onClick={expandable ? () => toggle(c.bucketName) : undefined}
               >
                 <td className="benchmarkCell--bucketName" title={c.bucketName}>
-                  {expandable && (
+                  {expandable ? (
                     <span className="benchmarkDisclosure" aria-hidden="true">
                       {isExpanded ? '▼' : '▶'}
                     </span>
-                  )}
+                  ) : null}
                   {c.bucketName}
                 </td>
                 <td className="benchmarkCell--number">
@@ -474,7 +492,7 @@ function BucketTable({
                 <td className="benchmarkCell--number">{absDiffStr}</td>
                 {pctCells}
               </tr>
-              {expandable && isExpanded && (
+              {expandable && isExpanded ? (
                 <tr className="benchmarkRow--bucket-expansion">
                   <td colSpan={columnCount}>
                     <BucketFlameGraphPair
@@ -485,7 +503,7 @@ function BucketTable({
                     />
                   </td>
                 </tr>
-              )}
+              ) : null}
             </Fragment>
           );
         })}

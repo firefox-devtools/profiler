@@ -70,13 +70,14 @@ function buildKeyMap(
 ): Map<string, KeyMapEntry> {
   const map = new Map<string, KeyMapEntry>();
   for (const entry of buckets) {
-    const key =
-      bucketKeys[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
+    const key = bucketKeys[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
     const name =
       bucketNames[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
     const func = bucketFuncs[entry.bucketIndex];
     let weight = 0;
-    for (const v of entry.iterationTotals) weight += v;
+    for (const v of entry.iterationTotals) {
+      weight += v;
+    }
     const existing = map.get(key);
     if (existing !== undefined) {
       // If the same key appears twice (two different funcs that collapsed to
@@ -158,7 +159,9 @@ export function compareBuckets(
     const baseMean = mean(baseIter);
     const newMean = mean(newIter);
 
-    if (baseMean === 0 && newMean === 0) continue;
+    if (baseMean === 0 && newMean === 0) {
+      continue;
+    }
 
     const allValues = [...baseIter, ...newIter];
     const u = mannWhitneyU(baseIter, newIter);
@@ -194,9 +197,13 @@ export function compareBuckets(
 }
 
 export function mean(arr: number[]): number {
-  if (arr.length === 0) return 0;
+  if (arr.length === 0) {
+    return 0;
+  }
   let sum = 0;
-  for (const v of arr) sum += v;
+  for (const v of arr) {
+    sum += v;
+  }
   return sum / arr.length;
 }
 

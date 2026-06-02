@@ -749,7 +749,11 @@ export function computeCallNodeSelfAndSummary(
     rootTotalSummary += abs(callNodeSelf[callNodeIndex]);
   }
 
-  return { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling: rootTotalSummary };
+  return {
+    callNodeSelf,
+    rootTotalSummary,
+    flameGraphTotalForScaling: rootTotalSummary,
+  };
 }
 
 export function getSelfAndTotalForCallNode(
@@ -974,7 +978,8 @@ export function computeCallTreeTimingsNonInverted(
   callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimingsNonInverted {
   const callNodeTable = callNodeInfo.getCallNodeTable();
-  const { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling } = callNodeSelfAndSummary;
+  const { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling } =
+    callNodeSelfAndSummary;
 
   // Compute the following variables:
   const callNodeTotal = new Float64Array(callNodeTable.length);
@@ -1415,5 +1420,9 @@ export function computeCallNodeTracedSelfAndSummary(
     }
   }
 
-  return { callNodeSelf, rootTotalSummary, flameGraphTotalForScaling: rootTotalSummary };
+  return {
+    callNodeSelf,
+    rootTotalSummary,
+    flameGraphTotalForScaling: rootTotalSummary,
+  };
 }

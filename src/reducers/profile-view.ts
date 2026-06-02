@@ -510,7 +510,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      const { transforms, selectedFunctions } = action.newUrlState.profileSpecific;
+      const { transforms, selectedFunctions } =
+        action.newUrlState.profileSpecific;
 
       // The selected function lives in URL state; mirror it into the per-thread
       // wing paths so that initial loads and back/forward navigation restore the

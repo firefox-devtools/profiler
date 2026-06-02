@@ -451,13 +451,7 @@ function _computeCallNodeTableDFSOrder(
   hierarchy: CallNodeTableHierarchy,
   stackIndexToCallNodeIndex: Int32Array
 ): CallNodeTableDFSOrder {
-  const {
-    prefix,
-    firstChild,
-    firstRoot,
-    nextSibling,
-    length,
-  } = hierarchy;
+  const { prefix, firstChild, firstRoot, nextSibling, length } = hierarchy;
 
   const prefixSorted = new Int32Array(length);
   const nextSiblingSorted = new Int32Array(length);
@@ -1165,7 +1159,8 @@ export function getFunctionFramePerStack(
     } else {
       // Inherit from parent (or -1 if there is no parent).
       const prefix = prefixCol[stackIndex];
-      funcFramePerStack[stackIndex] = prefix !== null ? funcFramePerStack[prefix] : -1;
+      funcFramePerStack[stackIndex] =
+        prefix !== null ? funcFramePerStack[prefix] : -1;
     }
   }
   return funcFramePerStack;

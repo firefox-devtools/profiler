@@ -17,7 +17,8 @@
   background: var(--panel-background-color); /* Same background as sidebars */
 }
 
-.DetailsContainerResizableSidebarWrapper > .resizableWithSplitterSplitter:hover {
+.DetailsContainerResizableSidebarWrapper
+  > .resizableWithSplitterSplitter:hover {
   background: var(--panel-background-color); /* same as the border above */
 }
 

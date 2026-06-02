@@ -73,7 +73,9 @@ export function normalCDF(x: number): number {
 // ---------------------------------------------------------------------------
 
 export function median(arr: number[]): number {
-  if (!arr.length) return NaN;
+  if (!arr.length) {
+    return NaN;
+  }
   const s = arr.slice().sort((a, b) => a - b);
   const m = s.length >> 1;
   return s.length & 1 ? s[m] : (s[m - 1] + s[m]) / 2;
@@ -87,8 +89,11 @@ export function mannWhitneyU(a: number[], b: number[]): number {
   let u = 0;
   for (const ai of a) {
     for (const bj of b) {
-      if (ai < bj) u += 1;
-      else if (ai === bj) u += 0.5;
+      if (ai < bj) {
+        u += 1;
+      } else if (ai === bj) {
+        u += 0.5;
+      }
     }
   }
   return u;
@@ -102,14 +107,20 @@ export function mannWhitneyPValue(
 ): number {
   const mu = (n1 * n2) / 2;
   const counts = new Map<number, number>();
-  for (const v of allValues) counts.set(v, (counts.get(v) ?? 0) + 1);
+  for (const v of allValues) {
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
   let tieCorrection = 0;
   for (const t of counts.values()) {
-    if (t > 1) tieCorrection += t * t * t - t;
+    if (t > 1) {
+      tieCorrection += t * t * t - t;
+    }
   }
   const n = n1 + n2;
   const variance = ((n1 * n2) / 12) * (n + 1 - tieCorrection / (n * (n - 1)));
-  if (variance <= 0) return 1;
+  if (variance <= 0) {
+    return 1;
+  }
   const z = (u - mu) / Math.sqrt(variance);
   return 2 * (1 - normalCDF(Math.abs(z)));
 }
@@ -130,9 +141,15 @@ export function cles(u: number, n1: number, n2: number): number {
 
 export function interpretEffectSize(delta: number): EffectSize {
   const magnitude = Math.abs(delta);
-  if (magnitude < 0.15) return 'Negligible';
-  if (magnitude < 0.33) return 'Small';
-  if (magnitude < 0.47) return 'Moderate';
+  if (magnitude < 0.15) {
+    return 'Negligible';
+  }
+  if (magnitude < 0.33) {
+    return 'Small';
+  }
+  if (magnitude < 0.47) {
+    return 'Moderate';
+  }
   return 'Large';
 }
 
@@ -154,8 +171,12 @@ export function effectSizeLessThan(e1: EffectSize, e2: EffectSize): boolean {
 export type ConfidenceRating = 'HIGH' | 'MEDIUM' | 'LOW' | 'UNKNOWN';
 
 export function pValueToConfidence(pValue: number): ConfidenceRating {
-  if (pValue <= 0.05) return 'HIGH';
-  if (pValue <= 0.15) return 'MEDIUM';
+  if (pValue <= 0.05) {
+    return 'HIGH';
+  }
+  if (pValue <= 0.15) {
+    return 'MEDIUM';
+  }
   return 'LOW';
 }
 
@@ -183,7 +204,9 @@ function poly5(coeffs: number[], u: number): number {
 }
 
 function iqrFilter(data: number[]): number[] {
-  if (data.length < 4) return data;
+  if (data.length < 4) {
+    return data;
+  }
   const s = [...data].sort((a, b) => a - b);
   const n = s.length;
   const q1 = s[Math.floor(n * 0.25)];
@@ -197,7 +220,9 @@ export function shapiroWilkTest(
 ): { w: number; pvalue: number } | null {
   const x = iqrFilter(data).sort((a, b) => a - b);
   const n = x.length;
-  if (n < 3 || n > 5000) return null;
+  if (n < 3 || n > 5000) {
+    return null;
+  }
 
   const m = Array.from({ length: n }, (_, i) =>
     normalQuantile((i + 1 - 0.375) / (n + 0.25))
@@ -226,7 +251,9 @@ export function shapiroWilkTest(
 
   const a: number[] = Array.from<number>({ length: half });
   a[0] = an;
-  if (n > 5 && half > 1) a[1] = ann;
+  if (n > 5 && half > 1) {
+    a[1] = ann;
+  }
   const startJ = n > 5 ? 2 : 1;
   for (let j = startJ; j < half; j++) {
     a[j] = m[n - 1 - j] / sqrtPhi;
@@ -234,10 +261,14 @@ export function shapiroWilkTest(
 
   const xbar = x.reduce((s, v) => s + v, 0) / n;
   const ss = x.reduce((s, v) => s + (v - xbar) ** 2, 0);
-  if (ss === 0) return null;
+  if (ss === 0) {
+    return null;
+  }
 
   let num = 0;
-  for (let j = 0; j < half; j++) num += a[j] * (x[n - 1 - j] - x[j]);
+  for (let j = 0; j < half; j++) {
+    num += a[j] * (x[n - 1 - j] - x[j]);
+  }
   const w = Math.min(num ** 2 / ss, 1);
 
   const logn = Math.log(n);
@@ -275,7 +306,9 @@ export function bootstrapMedianCI(
   comp: number[],
   nIter: number = 500
 ): BootstrapCIResult | null {
-  if (base.length < 2 || comp.length < 2) return null;
+  if (base.length < 2 || comp.length < 2) {
+    return null;
+  }
   const shifts = new Array<number>(nIter);
   for (let i = 0; i < nIter; i++) {
     shifts[i] = median(bootSample(comp)) - median(bootSample(base));
@@ -290,8 +323,9 @@ export function bootstrapMedianCI(
 
 function bootSample(arr: number[]): number[] {
   const out = new Array<number>(arr.length);
-  for (let i = 0; i < arr.length; i++)
+  for (let i = 0; i < arr.length; i++) {
     out[i] = arr[Math.floor(Math.random() * arr.length)];
+  }
   return out;
 }
 
@@ -315,8 +349,9 @@ export function matchModes(
 ): MatchResult {
   const n = baseLocs.length;
   const m = newLocs.length;
-  if (!n || !m)
+  if (!n || !m) {
     return { pairs: [], unmatchedBase: range(n), unmatchedNew: range(m) };
+  }
 
   if (n > m) {
     const sw = matchModes(newLocs, newFracs, baseLocs, baseFracs);
@@ -332,8 +367,12 @@ export function matchModes(
   let lo = all[0],
     hi = all[0];
   for (let i = 1; i < all.length; i++) {
-    if (all[i] < lo) lo = all[i];
-    if (all[i] > hi) hi = all[i];
+    if (all[i] < lo) {
+      lo = all[i];
+    }
+    if (all[i] > hi) {
+      hi = all[i];
+    }
   }
   const span = hi - lo || 1;
 
@@ -351,11 +390,17 @@ export function matchModes(
   const prev = new Int16Array(states).fill(-1);
   dp[0] = 0;
   for (let mask = 0; mask < states; mask++) {
-    if (dp[mask] === INF) continue;
+    if (dp[mask] === INF) {
+      continue;
+    }
     const i = popcount(mask);
-    if (i >= n) continue;
+    if (i >= n) {
+      continue;
+    }
     for (let j = 0; j < m; j++) {
-      if ((mask >> j) & 1) continue;
+      if ((mask >> j) & 1) {
+        continue;
+      }
       const nm = mask | (1 << j);
       const c = dp[mask] + cost[i][j];
       if (c < dp[nm]) {
@@ -414,7 +459,9 @@ export function splitByMode(data: number[], boundaries: number[]): number[][] {
   );
   for (const v of data) {
     let m = 0;
-    while (m < boundaries.length && v > boundaries[m]) m++;
+    while (m < boundaries.length && v > boundaries[m]) {
+      m++;
+    }
     buckets[m].push(v);
   }
   return buckets;
@@ -432,7 +479,9 @@ export function areaFractions(
     const area = 0.5 * (y[i] + y[i - 1]) * (x[i] - x[i - 1]);
     total += area;
     let m = 0;
-    while (m < boundaries.length && x[i] > boundaries[m]) m++;
+    while (m < boundaries.length && x[i] > boundaries[m]) {
+      m++;
+    }
     buckets[m] += area;
   }
   return total > 0

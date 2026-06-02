@@ -91,7 +91,10 @@ interface BucketConfig {
   apply?: Array<{ template: string; [key: string]: string }>;
 }
 
-export function applyModifier(value: string, modifier: string | undefined): string {
+export function applyModifier(
+  value: string,
+  modifier: string | undefined
+): string {
   switch (modifier) {
     case 'pascal':
       return value.charAt(0).toUpperCase() + value.slice(1);
@@ -107,7 +110,10 @@ export function applyModifier(value: string, modifier: string | undefined): stri
   }
 }
 
-export function expandPattern(pattern: string, vars: Record<string, string>): string {
+export function expandPattern(
+  pattern: string,
+  vars: Record<string, string>
+): string {
   return pattern.replace(
     /\{(\w+)(?::(\w+))?\}/g,
     (_match, name: string, modifier: string | undefined) => {
@@ -141,7 +147,9 @@ export function resolveTemplates(
 
 export async function run(options: CliOptions) {
   const tomlText = fs.readFileSync(options.labelsFile, 'utf8');
-  const { buckets: bucketConfigs, templates = [] } = parseToml(tomlText) as unknown as {
+  const { buckets: bucketConfigs, templates = [] } = parseToml(
+    tomlText
+  ) as unknown as {
     buckets: BucketConfig[];
     templates?: Template[];
   };

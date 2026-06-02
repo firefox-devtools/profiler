@@ -247,7 +247,8 @@ export function getFlameGraphTiming(
   callNodeTable: CallNodeTable,
   callTreeTimings: CallTreeTimingsNonInverted
 ): FlameGraphTiming {
-  const { total, self, rootTotalSummary, flameGraphTotalForScaling } = callTreeTimings;
+  const { total, self, rootTotalSummary, flameGraphTotalForScaling } =
+    callTreeTimings;
   const { prefix } = callNodeTable;
 
   // This is where we build up the return value, one row at a time.

@@ -21,7 +21,9 @@ import type {
 // ---------------------------------------------------------------------------
 
 function formatChange(rel: number): string {
-  if (!isFinite(rel)) return rel > 0 ? 'appeared' : 'disappeared';
+  if (!isFinite(rel)) {
+    return rel > 0 ? 'appeared' : 'disappeared';
+  }
   const pct = (rel * 100).toFixed(2);
   return rel >= 0 ? `+${pct}%` : `${pct}%`;
 }
@@ -198,7 +200,9 @@ async function main() {
 
     if (matchingSuites.length === 0) {
       console.error(`No suites matching "${suiteFilter}". Available suites:`);
-      for (const s of base.suites) console.error(`  ${s.suiteName}`);
+      for (const s of base.suites) {
+        console.error(`  ${s.suiteName}`);
+      }
       process.exit(1);
     }
 

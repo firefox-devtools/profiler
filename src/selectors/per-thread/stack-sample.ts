@@ -479,7 +479,8 @@ export function getStackAndSampleSelectorsPerThread(
         // percentage display, so tooltips show percentages relative to all
         // filtered samples (e.g. "80%" if 800 of 1000 samples contain the
         // selected function).
-        const flameGraphTotalForScaling = upperWingSelfAndSummary.rootTotalSummary;
+        const flameGraphTotalForScaling =
+          upperWingSelfAndSummary.rootTotalSummary;
         return { rootTotalSummary, callNodeSelf, flameGraphTotalForScaling };
       }
     );
@@ -734,7 +735,12 @@ export function getStackAndSampleSelectorsPerThread(
       (state: State) =>
         _getSelfWingCallNodeInfo(state).getCallNodeTable().length,
       getCallNodeSelfAndSummary,
-      (samples, sampleIndexToCallNodeIndex, callNodeCount, regularTreeSelfAndSummary) => {
+      (
+        samples,
+        sampleIndexToCallNodeIndex,
+        callNodeCount,
+        regularTreeSelfAndSummary
+      ) => {
         const selfWingSelfAndSummary = CallTree.computeCallNodeSelfAndSummary(
           samples,
           sampleIndexToCallNodeIndex,

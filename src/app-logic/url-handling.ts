@@ -132,11 +132,7 @@ export function getIsHistoryReplaceState(): boolean {
  * the time UrlManager's componentDidUpdate runs, so it becomes a no-op.
  */
 export function replaceHistoryWithUrlState(urlState: UrlState): void {
-  window.history.replaceState(
-    urlState,
-    document.title,
-    urlFromState(urlState)
-  );
+  window.history.replaceState(urlState, document.title, urlFromState(urlState));
 }
 
 function getPathParts(urlState: UrlState): string[] {
@@ -854,11 +850,7 @@ function convertFunctionListSectionsOpenFromString(
     return result;
   }
   for (const part of raw.split(',')) {
-    if (
-      part === 'descendants' ||
-      part === 'ancestors' ||
-      part === 'self'
-    ) {
+    if (part === 'descendants' || part === 'ancestors' || part === 'self') {
       result[part] = true;
     }
   }

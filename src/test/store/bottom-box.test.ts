@@ -392,7 +392,11 @@ describe('getBottomBoxInfoForFunction', function () {
     const [thread] = derivedThreads;
     const [{ B }] = funcNamesDictPerThread;
 
-    const bottomBoxInfo = getBottomBoxInfoForFunction(B, thread, thread.samples);
+    const bottomBoxInfo = getBottomBoxInfoForFunction(
+      B,
+      thread,
+      thread.samples
+    );
 
     // scrollToLineNumber should be 31 (the innermost B), not 30 (the outer B).
     expect(bottomBoxInfo.scrollToLineNumber).toBe(31);
@@ -413,7 +417,11 @@ describe('getBottomBoxInfoForFunction', function () {
     const [thread] = derivedThreads;
     const [{ B }] = funcNamesDictPerThread;
 
-    const bottomBoxInfo = getBottomBoxInfoForFunction(B, thread, thread.samples);
+    const bottomBoxInfo = getBottomBoxInfoForFunction(
+      B,
+      thread,
+      thread.samples
+    );
 
     // scrollToLineNumber should be 31 (the innermost B), not 30 (the outer B).
     expect(bottomBoxInfo.scrollToLineNumber).toBe(31);
@@ -431,8 +439,14 @@ describe('getBottomBoxInfoForFunction', function () {
 
     dispatch(changeSelectedTab('function-list'));
 
-    const bottomBoxInfo = getBottomBoxInfoForFunction(B, thread, thread.samples);
-    dispatch(updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo));
+    const bottomBoxInfo = getBottomBoxInfoForFunction(
+      B,
+      thread,
+      thread.samples
+    );
+    dispatch(
+      updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo)
+    );
 
     expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
     expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(

@@ -1,9 +1,10 @@
 .benchmarkCompareViewer {
-  /* this element is a child in a horizontal flex parent */
-  align-self: flex-start; /* allow extending beyond the parent's height */
-  box-sizing: border-box;
   width: 100%;
   min-height: 100%;
+  box-sizing: border-box;
+
+  /* this element is a child in a horizontal flex parent */
+  align-self: flex-start; /* allow extending beyond the parent's height */
   padding: 2em 3em;
   background: var(--base-background-color);
 }
@@ -243,8 +244,8 @@
 .bucketFlameGraphPair {
   display: flex;
   flex-direction: column;
-  gap: 0.5em;
   padding: 0.5em 1em;
+  gap: 0.5em;
 }
 
 .bucketFlameGraphSide {

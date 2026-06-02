@@ -40,9 +40,7 @@ describe('LowerWingContextMenu', function () {
 
     // The inverted call node path for B-as-caller-of-C is [C, B].
     const threadsKey = 0;
-    store.dispatch(
-      changeLowerWingRightClickedCallNode(threadsKey, [C, B])
-    );
+    store.dispatch(changeLowerWingRightClickedCallNode(threadsKey, [C, B]));
     return store;
   }
 
@@ -93,7 +91,8 @@ describe('LowerWingContextMenu', function () {
     it('applies transforms to function B, not to the selected function C', function () {
       const { getState } = setup();
       fireFullClick(screen.getByText(/Merge function/));
-      const transform = selectedThreadSelectors.getTransformStack(getState())[0];
+      const transform =
+        selectedThreadSelectors.getTransformStack(getState())[0];
       expect(transform.type).toBe('merge-function');
       // The transform should target B (the right-clicked caller), not C (the root).
       if (transform.type === 'merge-function') {
