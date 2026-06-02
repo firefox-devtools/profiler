@@ -225,12 +225,12 @@
 }
 
 .benchmarkRow--bucket-expandable:hover {
-  background: var(--grey-10);
+  background: var(--grey-20);
 }
 
 .benchmarkRow--bucket-expansion > td {
   padding: 0.5em 0;
-  background: var(--grey-10);
+  background: var(--grey-20);
   white-space: normal;
 }
 
