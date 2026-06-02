@@ -28,38 +28,14 @@ exports[`UploadedRecordingsHome matches a snapshot when rendering published prof
         class="appHeaderRightControls"
       >
         <div
-          class="themeToggle"
+          class="buttonWithPanel settingsMenu"
         >
           <button
-            aria-label="light"
-            class="themeToggleButton "
-            title="Use light theme"
+            aria-expanded="false"
+            class="buttonWithPanelButton appHeaderSettingsButton"
+            title="Settings"
             type="button"
-          >
-            <span
-              class="themeToggleIcon themeToggleIcon--light"
-            />
-          </button>
-          <button
-            aria-label="system"
-            class="themeToggleButton themeToggleButton-active"
-            title="Follow system theme preference"
-            type="button"
-          >
-            <span
-              class="themeToggleIcon themeToggleIcon--system"
-            />
-          </button>
-          <button
-            aria-label="dark"
-            class="themeToggleButton "
-            title="Use dark theme"
-            type="button"
-          >
-            <span
-              class="themeToggleIcon themeToggleIcon--dark"
-            />
-          </button>
+          />
         </div>
         <a
           class="appHeaderGithubIcon"
@@ -412,38 +388,14 @@ exports[`UploadedRecordingsHome matches a snapshot when there is no published pr
         class="appHeaderRightControls"
       >
         <div
-          class="themeToggle"
+          class="buttonWithPanel settingsMenu"
         >
           <button
-            aria-label="light"
-            class="themeToggleButton "
-            title="Use light theme"
+            aria-expanded="false"
+            class="buttonWithPanelButton appHeaderSettingsButton"
+            title="Settings"
             type="button"
-          >
-            <span
-              class="themeToggleIcon themeToggleIcon--light"
-            />
-          </button>
-          <button
-            aria-label="system"
-            class="themeToggleButton themeToggleButton-active"
-            title="Follow system theme preference"
-            type="button"
-          >
-            <span
-              class="themeToggleIcon themeToggleIcon--system"
-            />
-          </button>
-          <button
-            aria-label="dark"
-            class="themeToggleButton "
-            title="Use dark theme"
-            type="button"
-          >
-            <span
-              class="themeToggleIcon themeToggleIcon--dark"
-            />
-          </button>
+          />
         </div>
         <a
           class="appHeaderGithubIcon"

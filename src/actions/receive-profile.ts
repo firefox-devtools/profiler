@@ -1015,11 +1015,10 @@ export function retrieveProfileOrZipFromUrl(
       });
 
       switch (response.responseType) {
-        case 'PROFILE': {
-          const serializedProfile = response.profile;
+        case 'BYTES': {
           const profileUpgradeInfo = {};
           const profile = await unserializeProfileOfArbitraryFormat(
-            serializedProfile,
+            response.bytes,
             profileUrl,
             profileUpgradeInfo
           );
@@ -1197,13 +1196,15 @@ export function retrieveProfilesToCompare(
               dispatch(temporaryError(e));
             },
           });
-          if (response.responseType !== 'PROFILE') {
-            throw new Error('Expected to receive a profile from fetchProfile');
+          if (response.responseType !== 'BYTES') {
+            throw new Error(
+              'Expected to receive a single profile (not a zip) from fetchProfile'
+            );
           }
 
           const upgradeInfo: ProfileUpgradeInfo = {};
           const profile = await unserializeProfileOfArbitraryFormat(
-            response.profile,
+            response.bytes,
             profileUrl,
             upgradeInfo
           );
