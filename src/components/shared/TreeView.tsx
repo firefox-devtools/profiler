@@ -476,7 +476,9 @@ export class TreeView<
   DisplayData extends Record<string, any>,
 > extends React.PureComponent<TreeViewProps<DisplayData>, TreeViewState> {
   _list: VirtualList<NodeIndex> | null = null;
-  _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
+  _takeListRef = (list: VirtualList<NodeIndex> | null) => {
+    this._list = list;
+  };
 
   // This contains the information about the current column resizing happening currently.
   _currentMovedColumnState: {
