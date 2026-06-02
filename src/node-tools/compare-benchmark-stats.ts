@@ -130,6 +130,14 @@ async function main() {
   if (!newStats.bucketFuncs) {
     newStats.bucketFuncs = new Array(newStats.bucketNames.length).fill(-1);
   }
+  // bucketKeys was added later too; fall back to bucketNames so older stats
+  // files still match using the prior name-based behaviour.
+  if (!base.bucketKeys) {
+    base.bucketKeys = base.bucketNames;
+  }
+  if (!newStats.bucketKeys) {
+    newStats.bucketKeys = newStats.bucketNames;
+  }
 
   const iterationCount = base.suites[0]?.iterationCount ?? 1;
 
@@ -176,7 +184,9 @@ async function main() {
       base.bucketFuncs,
       newStats.bucketFuncs,
       iterationCount,
-      excludeAppearedDisappeared
+      excludeAppearedDisappeared,
+      base.bucketKeys,
+      newStats.bucketKeys
     );
     printBucketResults('Global (geomean-normalised)', globalComparisons, topN);
   }
@@ -210,7 +220,9 @@ async function main() {
         base.bucketFuncs,
         newStats.bucketFuncs,
         baseSuite.iterationCount,
-        excludeAppearedDisappeared
+        excludeAppearedDisappeared,
+        base.bucketKeys,
+        newStats.bucketKeys
       );
       printBucketResults(baseSuite.suiteName, comparisons, topN);
     }

@@ -134,7 +134,10 @@ async function computeComparison(
       newStats.bucketNames,
       baseStats.bucketFuncs,
       newStats.bucketFuncs,
-      baseSuite.iterationCount
+      baseSuite.iterationCount,
+      false,
+      baseStats.bucketKeys ?? baseStats.bucketNames,
+      newStats.bucketKeys ?? newStats.bucketNames
     );
     return [{ suiteName: baseSuite.suiteName, comparisons }];
   });

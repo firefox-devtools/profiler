@@ -62,6 +62,25 @@ export type ProfileBenchmarkStats = {
   /** Name of each bucket (JS function name or similar). Length = total bucket count. */
   bucketNames: string[];
   /**
+   * Cross-engine matching key for each bucket. Same length as bucketNames.
+   *
+   * For JS funcs, this is `<filename>:<startLine>:<startColumn>` (using the
+   * source/lineNumber/columnNumber columns of the funcTable). Function names
+   * differ across engines for the same logical function — V8 reports
+   * `Template.show` where SpiderMonkey reports `Template.prototype.show`, and
+   * anonymous-arrow naming heuristics diverge entirely — but the source
+   * location is stable, so matching on it lets `compareBuckets` align the
+   * two engines' samples for the same function.
+   *
+   * For non-JS funcs (DOM-binding `relevantForJS` shims, inserted `Label`
+   * funcs, etc.), the key is the name itself: those are already engine-
+   * neutral by design.
+   *
+   * Falls back to the name if a JS func has no source/line/col (e.g. the
+   * profile wasn't run through `--canonicalize-js-location`).
+   */
+  bucketKeys: string[];
+  /**
    * Func index (in profile.shared.funcTable) for each bucket. Same length as
    * bucketNames. -1 for the synthetic "no JS frame" bucket. Useful when callers
    * want to reach back into the source profile for a given bucket, e.g. to feed
@@ -194,9 +213,27 @@ export function extractBenchmarkStatsFromProfile(
     iterationMarkersAndMeasuredSamples
   );
 
+  const { funcTable: sharedFuncTable, sources: sharedSources } = shared;
   const bucketNames = bucketFuncs.map(
-    (funcIndex) => shared.stringArray[shared.funcTable.name[funcIndex]]
+    (funcIndex) => shared.stringArray[sharedFuncTable.name[funcIndex]]
   );
+  // Build cross-engine matching keys: filename:line:col for JS funcs with a
+  // source, name otherwise. See ProfileBenchmarkStats.bucketKeys for the
+  // motivation (function names diverge across engines for the same source
+  // location).
+  const bucketKeys = bucketFuncs.map((funcIndex, b) => {
+    if (sharedFuncTable.isJS[funcIndex]) {
+      const sourceIndex = sharedFuncTable.source[funcIndex];
+      const line = sharedFuncTable.lineNumber[funcIndex];
+      const col = sharedFuncTable.columnNumber[funcIndex];
+      if (sourceIndex !== null && line !== null && col !== null) {
+        const filename =
+          shared.stringArray[sharedSources.filename[sourceIndex]];
+        return `${filename}:${line}:${col}`;
+      }
+    }
+    return bucketNames[b];
+  });
 
   const bucketCount = bucketFuncs.length;
   const { allSuiteScores, factorPerSuite } = benchmarkScores;
@@ -262,5 +299,5 @@ export function extractBenchmarkStatsFromProfile(
     globalBuckets.push({ bucketIndex: b, iterationTotals });
   }
 
-  return { bucketNames, bucketFuncs, globalBuckets, suites };
+  return { bucketNames, bucketKeys, bucketFuncs, globalBuckets, suites };
 }

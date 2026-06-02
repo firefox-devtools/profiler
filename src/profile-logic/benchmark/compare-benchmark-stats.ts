@@ -50,41 +50,51 @@ export type BucketComparison = {
   confidence: ConfidenceRating;
 };
 
-type NameMapEntry = {
+type KeyMapEntry = {
+  /** Human-readable display name for this key (taken from the first bucket
+   * seen with this key — usually a function name). */
+  displayName: string;
   iterationTotals: number[];
-  /** Func index of the highest-weight bucket with this name (representative). */
+  /** Func index of the highest-weight bucket with this key (representative). */
   representativeFunc: IndexIntoFuncTable;
   /** Sum of iterationTotals for that representative bucket alone. */
   representativeWeight: number;
 };
 
-/** Build a name → iterationTotals + representative-func map for a set of sparse bucket entries. */
-function buildNameMap(
+/** Build a key → iterationTotals + representative-func map for a set of sparse bucket entries. */
+function buildKeyMap(
   buckets: SparseBucketEntry[],
+  bucketKeys: string[],
   bucketNames: string[],
   bucketFuncs: IndexIntoFuncTable[]
-): Map<string, NameMapEntry> {
-  const map = new Map<string, NameMapEntry>();
+): Map<string, KeyMapEntry> {
+  const map = new Map<string, KeyMapEntry>();
   for (const entry of buckets) {
+    const key =
+      bucketKeys[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
     const name =
       bucketNames[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
     const func = bucketFuncs[entry.bucketIndex];
     let weight = 0;
     for (const v of entry.iterationTotals) weight += v;
-    const existing = map.get(name);
+    const existing = map.get(key);
     if (existing !== undefined) {
-      // If the same name appears twice (two different functions with identical names),
-      // sum their iteration totals together. Pick the heaviest as the representative
-      // func, since the flame graph can only focusSelf on one func.
+      // If the same key appears twice (two different funcs that collapsed to
+      // the same matching key — e.g. an inlined and non-inlined copy of the
+      // same JS function), sum their iteration totals together. Pick the
+      // heaviest as the representative func, since the flame graph can only
+      // focusSelf on one func.
       for (let i = 0; i < existing.iterationTotals.length; i++) {
         existing.iterationTotals[i] += entry.iterationTotals[i];
       }
       if (weight > existing.representativeWeight) {
         existing.representativeFunc = func;
         existing.representativeWeight = weight;
+        existing.displayName = name;
       }
     } else {
-      map.set(name, {
+      map.set(key, {
+        displayName: name,
         iterationTotals: entry.iterationTotals.slice(),
         representativeFunc: func,
         representativeWeight: weight,
@@ -95,9 +105,17 @@ function buildNameMap(
 }
 
 /**
- * Compare two sparse bucket lists, matching by bucket name across profiles.
- * Buckets that appear in only one profile are treated as "appeared"/"disappeared"
- * unless excludeAppearedDisappeared is set.
+ * Compare two sparse bucket lists, matching by bucket key across profiles.
+ * For JS funcs, the key is the source location (filename:line:col) so that
+ * naming differences across engines don't prevent the same function from
+ * matching. For everything else, the key is the bucket name.
+ *
+ * Buckets that appear in only one profile are treated as
+ * "appeared"/"disappeared" unless excludeAppearedDisappeared is set.
+ *
+ * `baseBucketKeys` / `newBucketKeys` may be missing (older stats files
+ * predate the cross-engine matching key); in that case we fall back to
+ * matching by name, which preserves prior behaviour.
  */
 export function compareBuckets(
   baseBuckets: SparseBucketEntry[],
@@ -107,21 +125,33 @@ export function compareBuckets(
   baseBucketFuncs: IndexIntoFuncTable[],
   newBucketFuncs: IndexIntoFuncTable[],
   iterationCount: number,
-  excludeAppearedDisappeared: boolean = false
+  excludeAppearedDisappeared: boolean = false,
+  baseBucketKeys: string[] = baseBucketNames,
+  newBucketKeys: string[] = newBucketNames
 ): BucketComparison[] {
-  const baseMap = buildNameMap(baseBuckets, baseBucketNames, baseBucketFuncs);
-  const newMap = buildNameMap(newBuckets, newBucketNames, newBucketFuncs);
+  const baseMap = buildKeyMap(
+    baseBuckets,
+    baseBucketKeys,
+    baseBucketNames,
+    baseBucketFuncs
+  );
+  const newMap = buildKeyMap(
+    newBuckets,
+    newBucketKeys,
+    newBucketNames,
+    newBucketFuncs
+  );
 
-  const allNames = excludeAppearedDisappeared
+  const allKeys = excludeAppearedDisappeared
     ? new Set([...baseMap.keys()].filter((k) => newMap.has(k)))
     : new Set([...baseMap.keys(), ...newMap.keys()]);
 
   const zeros = new Array<number>(iterationCount).fill(0);
 
   const results: BucketComparison[] = [];
-  for (const name of allNames) {
-    const baseEntry = baseMap.get(name);
-    const newEntry = newMap.get(name);
+  for (const key of allKeys) {
+    const baseEntry = baseMap.get(key);
+    const newEntry = newMap.get(key);
     const baseIter = baseEntry?.iterationTotals ?? zeros;
     const newIter = newEntry?.iterationTotals ?? zeros;
 
@@ -144,8 +174,11 @@ export function compareBuckets(
     const effectSize = interpretEffectSize(delta);
     const confidence = pValueToConfidence(pValue);
 
+    // Prefer the base profile's display name; fall back to the new one.
+    const displayName = baseEntry?.displayName ?? newEntry?.displayName ?? key;
+
     results.push({
-      bucketName: name,
+      bucketName: displayName,
       baseFunc: baseEntry?.representativeFunc ?? null,
       newFunc: newEntry?.representativeFunc ?? null,
       baseMean,
