@@ -28,7 +28,7 @@ type DispatchProps = {
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class MaybeFlameGraphImpl extends React.PureComponent<Props> {
-  _flameGraph: React.RefObject<FlameGraphHandle> = React.createRef();
+  _flameGraph: React.RefObject<FlameGraphHandle | null> = React.createRef();
 
   _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
