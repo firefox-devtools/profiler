@@ -77,8 +77,9 @@ type CanvasProps = {
  */
 class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
   _canvas: null | HTMLCanvasElement = null;
-  _takeCanvasRef = (canvas: HTMLCanvasElement | null) =>
-    (this._canvas = canvas);
+  _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
+    this._canvas = canvas;
+  };
   _canvasState: { renderScheduled: boolean; inView: boolean } = {
     renderScheduled: false,
     inView: false,

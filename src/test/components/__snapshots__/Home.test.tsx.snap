@@ -227,7 +227,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
@@ -526,7 +525,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
@@ -765,7 +763,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
@@ -1004,7 +1001,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
