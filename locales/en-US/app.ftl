@@ -315,16 +315,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Report the error on GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Legal
-FooterLinks--Privacy = Privacy
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Settings
+SettingsMenu--docs = Documentation
+SettingsMenu--legal = Legal
+SettingsMenu--privacy = Privacy
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Change language
-FooterLinks--hide-button =
-    .title = Hide footer links
-    .aria-label = Hide footer links
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -576,7 +577,6 @@ MenuButtons--index--share-error-uploading =
     .label = Error uploading
 
 MenuButtons--index--revert = Revert to Original Profile
-MenuButtons--index--docs = Docs
 
 MenuButtons--permalink--button =
     .label = Permalink

@@ -31,38 +31,14 @@ exports[`app/Home renders a button to enable the popup in Firefox 1`] = `
           class="appHeaderRightControls"
         >
           <div
-            class="themeToggle"
+            class="buttonWithPanel settingsMenu"
           >
             <button
-              aria-label="light"
-              class="themeToggleButton "
-              title="Use light theme"
+              aria-expanded="false"
+              class="buttonWithPanelButton appHeaderSettingsButton"
+              title="Settings"
               type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--light"
-              />
-            </button>
-            <button
-              aria-label="system"
-              class="themeToggleButton themeToggleButton-active"
-              title="Follow system theme preference"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--system"
-              />
-            </button>
-            <button
-              aria-label="dark"
-              class="themeToggleButton "
-              title="Use dark theme"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--dark"
-              />
-            </button>
+            />
           </div>
           <a
             class="appHeaderGithubIcon"
@@ -251,7 +227,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
@@ -317,38 +292,14 @@ exports[`app/Home renders the Chrome extension instructions for Chromium based b
           class="appHeaderRightControls"
         >
           <div
-            class="themeToggle"
+            class="buttonWithPanel settingsMenu"
           >
             <button
-              aria-label="light"
-              class="themeToggleButton "
-              title="Use light theme"
+              aria-expanded="false"
+              class="buttonWithPanelButton appHeaderSettingsButton"
+              title="Settings"
               type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--light"
-              />
-            </button>
-            <button
-              aria-label="system"
-              class="themeToggleButton themeToggleButton-active"
-              title="Follow system theme preference"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--system"
-              />
-            </button>
-            <button
-              aria-label="dark"
-              class="themeToggleButton "
-              title="Use dark theme"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--dark"
-              />
-            </button>
+            />
           </div>
           <a
             class="appHeaderGithubIcon"
@@ -574,7 +525,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
@@ -622,38 +572,14 @@ exports[`app/Home renders the information screen for fenix 1`] = `
           class="appHeaderRightControls"
         >
           <div
-            class="themeToggle"
+            class="buttonWithPanel settingsMenu"
           >
             <button
-              aria-label="light"
-              class="themeToggleButton "
-              title="Use light theme"
+              aria-expanded="false"
+              class="buttonWithPanelButton appHeaderSettingsButton"
+              title="Settings"
               type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--light"
-              />
-            </button>
-            <button
-              aria-label="system"
-              class="themeToggleButton themeToggleButton-active"
-              title="Follow system theme preference"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--system"
-              />
-            </button>
-            <button
-              aria-label="dark"
-              class="themeToggleButton "
-              title="Use dark theme"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--dark"
-              />
-            </button>
+            />
           </div>
           <a
             class="appHeaderGithubIcon"
@@ -837,7 +763,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>
@@ -885,38 +810,14 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           class="appHeaderRightControls"
         >
           <div
-            class="themeToggle"
+            class="buttonWithPanel settingsMenu"
           >
             <button
-              aria-label="light"
-              class="themeToggleButton "
-              title="Use light theme"
+              aria-expanded="false"
+              class="buttonWithPanelButton appHeaderSettingsButton"
+              title="Settings"
               type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--light"
-              />
-            </button>
-            <button
-              aria-label="system"
-              class="themeToggleButton themeToggleButton-active"
-              title="Follow system theme preference"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--system"
-              />
-            </button>
-            <button
-              aria-label="dark"
-              class="themeToggleButton "
-              title="Use dark theme"
-              type="button"
-            >
-              <span
-                class="themeToggleIcon themeToggleIcon--dark"
-              />
-            </button>
+            />
           </div>
           <a
             class="appHeaderGithubIcon"
@@ -1100,7 +1001,6 @@ own importer
         </h2>
         <list-of-published-profiles
           limit="3"
-          withactionbuttons="false"
         />
       </section>
     </section>

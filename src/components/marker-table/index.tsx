@@ -276,8 +276,9 @@ class MarkerTableImpl extends PureComponent<Props> {
   _expandedNodeIds: Array<MarkerIndex | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: TreeView<MarkerDisplayData> | null = null;
-  _takeTreeViewRef = (treeView: TreeView<MarkerDisplayData> | null) =>
-    (this._treeView = treeView);
+  _takeTreeViewRef = (treeView: TreeView<MarkerDisplayData> | null) => {
+    this._treeView = treeView;
+  };
 
   getMarkerTree = memoize(
     (

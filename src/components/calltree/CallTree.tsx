@@ -95,8 +95,9 @@ class CallTreeImpl extends PureComponent<Props> {
     titleL10nId: '',
   };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
-  _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) =>
-    (this._treeView = treeView);
+  _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) => {
+    this._treeView = treeView;
+  };
 
   /**
    * Call Trees can have different types of "weights" for the data. Choose the
