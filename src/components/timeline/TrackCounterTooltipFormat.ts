@@ -14,10 +14,10 @@ import type { ProfileMeta } from 'firefox-profiler/types';
  */
 export const L10N_ID_BY_LABEL_KEY: { [labelKey: string]: string } = {
   // Memory
-  'memory-relative': 'TrackMemoryGraph--relative-memory-at-this-time',
-  'memory-range': 'TrackMemoryGraph--memory-range-in-graph',
+  'memory-relative': 'TrackMemoryGraph--relative-memory-at-this-time2',
+  'memory-range': 'TrackMemoryGraph--memory-range-in-graph2',
   'memory-operations':
-    'TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample',
+    'TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2',
   // Process CPU
   cpu: 'TrackProcessCPUGraph--cpu',
   // Bandwidth
