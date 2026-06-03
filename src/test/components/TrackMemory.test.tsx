@@ -63,17 +63,10 @@ describe('TrackMemory', function () {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const counter = getCounterForThread(thread, threadIndex, counterConfig);
-    counter.category = 'Memory';
-    counter.display = {
-      ...counter.display,
-      graphType: 'line-accumulated',
-      unit: 'bytes',
-      color: 'orange',
-      markerSchemaLocation: 'timeline-memory',
-      sortWeight: 20,
-      label: 'Memory',
-    };
+    const counter = getCounterForThread(thread, threadIndex, {
+      ...counterConfig,
+      category: 'Memory',
+    });
     profile.counters = [counter];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
