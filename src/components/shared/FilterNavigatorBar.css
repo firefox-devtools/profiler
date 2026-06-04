@@ -12,6 +12,7 @@
   --internal-separator-img: url(../../../res/img/svg/scope-bar-separator.svg);
 
   display: flex;
+  overflow: hidden;
   height: 24px;
   flex-flow: row nowrap;
   flex-shrink: 0;
@@ -20,9 +21,10 @@
   cursor: default;
   user-select: none;
 
-  /* Note: no overflow: hidden for historical reasons - we wanted to see
-     an animation for items at the end while they were fading out, but
-     we have removed this animation in the meantime */
+  /* Without overflow: hidden, the bar's intrinsic min-content width (sum of
+     all nowrap children) propagates up and forces the parent flame-graph tab
+     to expand horizontally past the viewport when there are many breadcrumbs
+     (issue #6028). Items already truncate text via .filterNavigatorBarItemContent. */
 }
 
 :root.dark-mode {
