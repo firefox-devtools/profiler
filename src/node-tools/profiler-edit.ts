@@ -33,6 +33,7 @@ import {
   type LabelDescription,
   resolveAllLabels,
 } from 'firefox-profiler/utils/label-templates';
+import { mergeNonOverlappingThreadsByName } from 'firefox-profiler/profile-logic/merge-compare';
 
 /**
  * A CLI tool for editing profiles.
@@ -55,10 +56,11 @@ import {
  *     --insert-label-frames known-functions.toml
  *
  *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
- *     --only-keep-threads-with-markers-matching '-async,-sync'
+ *     --only-keep-threads-with-markers-matching '-async,-sync' \
+ *     --merge-non-overlapping-threads-by-name
  */
 
-type ProfileSource =
+export type ProfileSource =
   | { type: 'FILE'; path: string }
   | { type: 'URL'; url: string }
   | { type: 'HASH'; hash: string };
@@ -67,7 +69,7 @@ type ProfileSource =
 // supplies symbol names, plus (optionally) the URL of the stripped wasm in the
 // profile to which those names should be applied. If `strippedWasmUrl` is
 // omitted, the profile must contain exactly one .wasm source, which is used.
-interface WasmSymbolicationCliSpec {
+export interface WasmSymbolicationCliSpec {
   // Path to the local unstripped .wasm file (with a "name" custom section).
   unstrippedWasmPath: string;
   // URL of the matching stripped wasm as it appears in the profile.
@@ -81,9 +83,10 @@ export interface CliOptions {
   symbolicateWasm: WasmSymbolicationCliSpec[];
   insertLabelFrames?: string;
   onlyKeepThreadsWithMarkersMatching?: string;
+  mergeNonOverlappingThreadsByName?: boolean;
 }
 
-function loadWasmSymbolicationSpecs(
+export function loadWasmSymbolicationSpecs(
   cliSpecs: WasmSymbolicationCliSpec[]
 ): WasmSymbolicationSpec[] {
   return cliSpecs.map((spec) => {
@@ -102,7 +105,7 @@ function loadWasmSymbolicationSpecs(
  * (mirrors getLabelIndexForFunc in insert-stack-labels.ts), so auto-discovery
  * sees the same strings the labeler will compare against.
  */
-function collectFuncNames(profile: Profile): string[] {
+export function collectFuncNames(profile: Profile): string[] {
   const { funcTable, sources, stringArray } = profile.shared;
   const result: string[] = [];
   for (let i = 0; i < funcTable.length; i++) {
@@ -288,6 +291,10 @@ export async function run(options: CliOptions) {
     );
   }
 
+  if (options.mergeNonOverlappingThreadsByName) {
+    profile = mergeNonOverlappingThreadsByName(profile);
+  }
+
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
   const outputFilename = options.output;
@@ -351,6 +358,10 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     .option(
       '--only-keep-threads-with-markers-matching <search>',
       'Keep only threads with markers matching the given search string'
+    )
+    .option(
+      '--merge-non-overlapping-threads-by-name',
+      'Merge same-named threads across non-overlapping process runs'
     );
 
   program.parse(processArgv);
@@ -408,6 +419,8 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       opts.onlyKeepThreadsWithMarkersMatching !== ''
         ? opts.onlyKeepThreadsWithMarkersMatching
         : undefined,
+    mergeNonOverlappingThreadsByName:
+      opts.mergeNonOverlappingThreadsByName === true,
   };
 }
 
