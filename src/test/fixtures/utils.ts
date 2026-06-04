@@ -172,7 +172,8 @@ export function computeThreadFromRawThread(
     shared.resourceTable,
     stringTable,
     shared.sources,
-    tracedValuesBuffer
+    tracedValuesBuffer,
+    shared.sourceLocationTable
   );
 }
 
@@ -349,17 +350,15 @@ export function formatStack(
   ) {
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const frameLine = frameTable.line[frameIndex];
-    const frameColumn = frameTable.column[frameIndex];
     const funcName = stringTable.getString(funcTable.name[funcIndex]);
     const origin = getOriginAnnotationForFunc(
       funcIndex,
+      frameIndex,
+      frameTable,
       funcTable,
       resourceTable,
       stringTable,
-      sources,
-      frameLine,
-      frameColumn
+      sources
     );
     lines.push(`${funcName} (${origin})`);
   }
@@ -688,6 +687,7 @@ export function addSourceToTable(
   sources.startLine.push(startLine);
   sources.startColumn.push(startColumn);
   sources.sourceMapURL.push(sourceMapURLStringIndex);
+  sources.content.push(null);
   sources.length = sources.filename.length;
 
   return sourceIndex;

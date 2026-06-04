@@ -6,10 +6,15 @@ import { PureComponent } from 'react';
 import {
   getProfileViewOptions,
   getSymbolicationStatus,
+  getSourceMapSymbolicationStatus,
 } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
-import type { RequestedLib, State } from 'firefox-profiler/types';
+import type {
+  RequestedLib,
+  SourceMapSymbolicationStatus,
+  State,
+} from 'firefox-profiler/types';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './SymbolicationStatusOverlay.css';
@@ -33,6 +38,7 @@ function englishListJoin(list: string[]) {
 
 type StateProps = {
   readonly symbolicationStatus: string;
+  readonly sourceMapSymbolicationStatus: SourceMapSymbolicationStatus;
   readonly waitingForLibs: Set<RequestedLib>;
 };
 
@@ -40,7 +46,11 @@ type Props = ConnectedProps<{}, StateProps, {}>;
 
 class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
   override render() {
-    const { symbolicationStatus, waitingForLibs } = this.props;
+    const {
+      symbolicationStatus,
+      sourceMapSymbolicationStatus,
+      waitingForLibs,
+    } = this.props;
     if (symbolicationStatus === 'SYMBOLICATING') {
       if (waitingForLibs.size > 0) {
         const libNames = Array.from(waitingForLibs.values()).map(
@@ -62,6 +72,23 @@ class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
         </div>
       );
     }
+    // Native takes priority: only show source-map status when native isn't active.
+    if (sourceMapSymbolicationStatus === 'FETCHING') {
+      return (
+        <div className="symbolicationStatusOverlay">
+          <span className="symbolicationStatusOverlayThrobber" />
+          Fetching source maps...
+        </div>
+      );
+    }
+    if (sourceMapSymbolicationStatus === 'SYMBOLICATING') {
+      return (
+        <div className="symbolicationStatusOverlay">
+          <span className="symbolicationStatusOverlayThrobber" />
+          Symbolicating JS source maps...
+        </div>
+      );
+    }
     return <div className="symbolicationStatusOverlay hidden" />;
   }
 }
@@ -69,6 +96,7 @@ class SymbolicationStatusOverlayImpl extends PureComponent<Props> {
 export const SymbolicationStatusOverlay = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state: State) => ({
     symbolicationStatus: getSymbolicationStatus(state),
+    sourceMapSymbolicationStatus: getSourceMapSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),
   component: SymbolicationStatusOverlayImpl,

@@ -31,6 +31,9 @@ describe('fetchSource', function () {
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -75,6 +78,9 @@ describe('fetchSource', function () {
     const fetchJSSourceFromBrowser = async (_sourceUuid: string) => {
       throw new Error('No browser connection');
     };
+    const fetchSourceMapFromBrowser = async (_sourceId: string) => {
+      throw new Error('No browser connection');
+    };
 
     const archiveCache = new Map<string, Promise<Uint8Array>>();
 
@@ -89,6 +95,7 @@ describe('fetchSource', function () {
           fetchUrlResponse,
           queryBrowserSymbolicationApi,
           fetchJSSourceFromBrowser,
+          fetchSourceMapFromBrowser,
         }
       )
     ).toEqual({
@@ -112,6 +119,7 @@ describe('fetchSource', function () {
           fetchUrlResponse,
           queryBrowserSymbolicationApi,
           fetchJSSourceFromBrowser,
+          fetchSourceMapFromBrowser,
         }
       )
     ).toEqual({
@@ -133,6 +141,7 @@ describe('fetchSource', function () {
           fetchUrlResponse,
           queryBrowserSymbolicationApi,
           fetchJSSourceFromBrowser,
+          fetchSourceMapFromBrowser,
         }
       )
     ).toEqual({
@@ -169,6 +178,9 @@ describe('fetchSource', function () {
             throw new Error('No browser connection');
           },
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -216,6 +228,9 @@ describe('fetchSource', function () {
             });
           },
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -272,6 +287,9 @@ describe('fetchSource', function () {
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -326,6 +344,9 @@ describe('fetchSource', function () {
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -378,6 +399,9 @@ describe('fetchSource', function () {
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -410,6 +434,9 @@ describe('fetchSource', function () {
             throw new Error('No browser connection');
           },
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -456,6 +483,9 @@ describe('fetchSource', function () {
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -490,6 +520,9 @@ describe('fetchSource', function () {
             return '[Invalid \\ JSON}';
           },
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
+            throw new Error('No browser connection');
+          },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
             throw new Error('No browser connection');
           },
         }
@@ -541,6 +574,9 @@ describe('fetchSource', function () {
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('No browser connection');
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -581,6 +617,9 @@ describe('fetchSource', function () {
             }
             throw new Error(`Unexpected source: ${sourceUuid}`);
           },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
+          },
         }
       )
     ).toEqual({
@@ -611,6 +650,9 @@ describe('fetchSource', function () {
             throw new Error(
               `Source not found for source with ID: ${sourceUuid}`
             );
+          },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
           },
         }
       )
@@ -654,6 +696,9 @@ describe('fetchSource', function () {
           },
           fetchJSSourceFromBrowser: async (_sourceUuid: string) => {
             throw new Error('Source not found in browser');
+          },
+          fetchSourceMapFromBrowser: async (_sourceId: string) => {
+            throw new Error('No browser connection');
           },
         }
       )

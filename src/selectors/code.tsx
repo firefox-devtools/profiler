@@ -4,10 +4,10 @@
 import { createSelector } from 'reselect';
 import type {
   AssemblyCodeStatus,
+  IndexIntoSourceTable,
   Lib,
   SourceCodeStatus,
   Selector,
-  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 import {
   getSourceViewSourceIndex,
@@ -23,8 +23,19 @@ export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(
     getSourceCodeCache,
     getSourceViewSourceIndex,
-    (sourceCodeCache, sourceIndex) =>
-      sourceIndex !== null ? sourceCodeCache.get(sourceIndex) : undefined
+    getProfileOrNull,
+    (sourceCodeCache, sourceIndex, profile) => {
+      if (sourceIndex === null) {
+        return undefined;
+      }
+      // Prefer source content stored in the profile (from source map sourcesContent),
+      // so the source view works offline and when sharing profiles.
+      const inlineCode = profile?.shared.sources.content[sourceIndex];
+      if (inlineCode !== null && inlineCode !== undefined) {
+        return { type: 'AVAILABLE', code: inlineCode };
+      }
+      return sourceCodeCache.get(sourceIndex);
+    }
   );
 
 export const getAssemblyCodeCache: Selector<Map<string, AssemblyCodeStatus>> = (

@@ -20,10 +20,12 @@ import {
   getNativeSymbolInfo,
   getNativeSymbolsForFunc,
   findAddressProofForFile,
+  getOriginalPositionForFrame,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import type { ExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
+import type { RawSourceMap } from 'source-map';
 import type {
   Profile,
   IndexIntoFuncTable,
@@ -56,6 +58,10 @@ class NodeExternalCommunicationDelegate implements ExternalCommunicationDelegate
   async fetchJSSourceFromBrowser(_source: string): Promise<string> {
     throw new Error('No browser connection available in profiler-cli');
   }
+
+  async fetchSourceMapFromBrowser(_sourceId: string): Promise<RawSourceMap> {
+    throw new Error('No browser connection available in profiler-cli');
+  }
 }
 
 const nodeDelegate = new NodeExternalCommunicationDelegate();
@@ -71,8 +77,8 @@ async function fetchSourceAnnotation(
   contextOption: string
 ): Promise<SourceAnnotationResult> {
   const warnings: string[] = [];
-  const sourceIndex = profile.shared.funcTable.source[funcIndex];
-  if (sourceIndex === null) {
+  const compiledSourceIndex = profile.shared.funcTable.source[funcIndex];
+  if (compiledSourceIndex === null) {
     if (mode === 'src') {
       warnings.push(
         `Function ${functionHandle} has no source index. Use --mode asm for assembly view.`
@@ -86,17 +92,34 @@ async function fetchSourceAnnotation(
     frameTable,
     funcTable: threadFuncTable,
     samples,
+    sourceLocationTable,
   } = thread;
+
+  // For JS-symbolicated funcs, prefer the original source from
+  // sourceLocationTable so the source view shows the original file (filename,
+  // content, line/column hits) rather than the compiled bundle. Falls back to
+  // the compiled source when no source map info is present.
+  const { source: resolvedSourceIndex } = getOriginalPositionForFrame(
+    null,
+    funcIndex,
+    frameTable,
+    threadFuncTable,
+    sourceLocationTable
+  );
+  const sourceIndex = resolvedSourceIndex ?? compiledSourceIndex;
+
   const filename = thread.stringTable.getString(
     thread.sources.filename[sourceIndex]
   );
   const sourceUuid = thread.sources.id[sourceIndex];
+  const inlineContent = thread.sources.content[sourceIndex];
 
   const stackLineInfo = getStackLineInfo(
     stackTable,
     frameTable,
     threadFuncTable,
-    sourceIndex
+    sourceIndex,
+    sourceLocationTable
   );
   const { totalLineHits, selfLineHits } = getLineTimings(
     stackLineInfo,
@@ -125,22 +148,30 @@ async function fetchSourceAnnotation(
 
   let fileLines: string[] | null = null;
   let totalFileLines: number | null = null;
-  const fetchResult = await fetchSource(
-    filename,
-    sourceUuid,
-    symbolServerUrl,
-    addressProof,
-    archiveCache,
-    nodeDelegate
-  );
-  if (fetchResult.type === 'SUCCESS') {
-    fileLines = fetchResult.source.split('\n');
+  if (inlineContent !== null) {
+    // Source content was embedded in the profile (e.g. captured from a source
+    // map's sourcesContent during JS symbolication). Use it directly so the
+    // source view works offline.
+    fileLines = inlineContent.split('\n');
     totalFileLines = fileLines.length;
   } else {
-    const errorMessages = fetchResult.errors
-      .map((e) => JSON.stringify(e))
-      .join('; ');
-    warnings.push(`Could not fetch source for ${filename}: ${errorMessages}`);
+    const fetchResult = await fetchSource(
+      filename,
+      sourceUuid,
+      symbolServerUrl,
+      addressProof,
+      archiveCache,
+      nodeDelegate
+    );
+    if (fetchResult.type === 'SUCCESS') {
+      fileLines = fetchResult.source.split('\n');
+      totalFileLines = fileLines.length;
+    } else {
+      const errorMessages = fetchResult.errors
+        .map((e) => JSON.stringify(e))
+        .join('; ');
+      warnings.push(`Could not fetch source for ${filename}: ${errorMessages}`);
+    }
   }
 
   const annotatedLineNums = new Set([

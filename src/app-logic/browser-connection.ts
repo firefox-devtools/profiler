@@ -12,8 +12,11 @@ import {
   querySymbolicationApiViaWebChannel,
   getPageFaviconsViaWebChannel,
   showFunctionInDevtoolsViaWebChannel,
-  getJSSourcesViaWebChannel,
+  getJSSourcesViaWebChannelV6,
+  getJSSourcesViaWebChannelV7,
+  getSourceMapViaWebChannel,
 } from './web-channel';
+import type { RawSourceMap } from 'source-map';
 import type {
   Milliseconds,
   FaviconData,
@@ -86,6 +89,14 @@ export interface BrowserConnection {
   ): Promise<void>;
 
   getJSSource(sourceUuid: string): Promise<string>;
+
+  // Get source map of the given source directly from the browser.
+  // Requires WebChannel version 7+.
+  getSourceMap(sourceId: string): Promise<RawSourceMap>;
+
+  // True when the browser exposes GET_SOURCE_MAP (WebChannel version 7+).
+  // Callers use this to gate source-map-based features.
+  readonly supportsGetSourceMap: boolean;
 }
 
 /**
@@ -96,21 +107,25 @@ export interface BrowserConnection {
  * the profile or symbols. So this class also supports the frame script.
  */
 class BrowserConnectionImpl implements BrowserConnection {
+  _webChannelVersion: number;
   _webChannelSupportsGetProfileAndSymbolication: boolean;
   _webChannelSupportsGetExternalPowerTracks: boolean;
   _webChannelSupportsGetExternalMarkers: boolean;
   _webChannelSupportsGetPageFavicons: boolean;
   _webChannelSupportsOpenDebuggerInTab: boolean;
   _webChannelSupportsGetJSSource: boolean;
+  readonly supportsGetSourceMap: boolean;
   _geckoProfiler: $GeckoProfiler | undefined;
 
   constructor(webChannelVersion: number) {
+    this._webChannelVersion = webChannelVersion;
     this._webChannelSupportsGetProfileAndSymbolication = webChannelVersion >= 1;
     this._webChannelSupportsGetExternalPowerTracks = webChannelVersion >= 2;
     this._webChannelSupportsGetExternalMarkers = webChannelVersion >= 3;
     this._webChannelSupportsGetPageFavicons = webChannelVersion >= 4;
     this._webChannelSupportsOpenDebuggerInTab = webChannelVersion >= 5;
     this._webChannelSupportsGetJSSource = webChannelVersion >= 6;
+    this.supportsGetSourceMap = webChannelVersion >= 7;
   }
 
   // Only called when we must obtain the profile from the browser, i.e. if we
@@ -232,6 +247,15 @@ class BrowserConnectionImpl implements BrowserConnection {
     return [];
   }
 
+  async getSourceMap(sourceId: string): Promise<RawSourceMap> {
+    if (!this.supportsGetSourceMap) {
+      throw new Error(
+        "Can't use getSourceMap in Firefox versions with the old WebChannel."
+      );
+    }
+    return getSourceMapViaWebChannel(sourceId);
+  }
+
   /**
    * Fetches JavaScript source code from the browser using the source UUID.
    * This method requires WebChannel version 6 or higher (Firefox 145+).
@@ -247,7 +271,11 @@ class BrowserConnectionImpl implements BrowserConnection {
     // fetching multiple sources, we only fetch one at a time currently.
     // TODO: Change this to fetch multiple JS sources at the load time or while
     // we share the profile.
-    return getJSSourcesViaWebChannel([sourceUuid]).then((sources) => {
+    const sourcesPromise =
+      this._webChannelVersion >= 7
+        ? getJSSourcesViaWebChannelV7([sourceUuid])
+        : getJSSourcesViaWebChannelV6([sourceUuid]);
+    return sourcesPromise.then((sources) => {
       const source = sources[0];
       if ('error' in source) {
         throw new Error(source.error);

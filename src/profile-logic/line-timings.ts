@@ -12,6 +12,7 @@ import type {
   LineNumber,
   IndexIntoSourceTable,
   IndexIntoLineSetTable,
+  SourceLocationTable,
 } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
 
@@ -47,7 +48,8 @@ export function getStackLineInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
-  sourceViewSourceIndex: IndexIntoSourceTable
+  sourceViewSourceIndex: IndexIntoSourceTable,
+  sourceLocationTable: SourceLocationTable
 ): StackLineInfo {
   const builder = new SetCollectionBuilder<number>();
   const stackIndexToLineSetIndex = new Int32Array(stackTable.length);
@@ -59,14 +61,38 @@ export function getStackLineInfo(
 
     const frame = stackTable.frame[stackIndex];
     const func = frameTable.func[frame];
-    const sourceIndexOfThisStack = funcTable.source[func];
+
+    // Inlined source resolution from getOriginalPositionForFrame. We avoid
+    // its per-stack {source, line, column} allocation, skip resolving the
+    // column entirely, and defer the line lookup until we know the source
+    // matches.
+    const frameOriginalLocationIdx = frameTable.originalLocation[frame];
+    const funcOriginalLocationIdx = funcTable.originalLocation[func];
+    let sourceIndexOfThisStack;
+    if (frameOriginalLocationIdx !== null) {
+      sourceIndexOfThisStack =
+        sourceLocationTable.source[frameOriginalLocationIdx];
+    } else if (funcOriginalLocationIdx !== null) {
+      sourceIndexOfThisStack =
+        sourceLocationTable.source[funcOriginalLocationIdx];
+    } else {
+      sourceIndexOfThisStack = funcTable.source[func];
+    }
+
     const matchesSource = sourceIndexOfThisStack === sourceViewSourceIndex;
     if (prefixLineSet === -1 && !matchesSource) {
       stackIndexToLineSetIndex[stackIndex] = -1;
     } else {
-      const selfLineOrNull = matchesSource
-        ? (frameTable.line[frame] ?? funcTable.lineNumber[func])
-        : null;
+      let selfLineOrNull: number | null = null;
+      if (matchesSource) {
+        if (frameOriginalLocationIdx !== null) {
+          selfLineOrNull = sourceLocationTable.line[frameOriginalLocationIdx];
+        } else if (funcOriginalLocationIdx !== null) {
+          selfLineOrNull = sourceLocationTable.line[funcOriginalLocationIdx];
+        } else {
+          selfLineOrNull = frameTable.line[frame] ?? funcTable.lineNumber[func];
+        }
+      }
 
       stackIndexToLineSetIndex[stackIndex] = builder.extend(
         prefixLineSet !== -1 ? prefixLineSet : null,
@@ -169,7 +195,9 @@ export function getTotalLineTimingsForCallNode(
   samples: SamplesLikeTable,
   callNodeFramePerStack: Int32Array,
   frameTable: FrameTable,
-  funcLine: LineNumber | null
+  funcTable: FuncTable,
+  funcLine: LineNumber | null,
+  sourceLocationTable: SourceLocationTable
 ): Map<LineNumber, number> {
   const totalPerLine = new Map<LineNumber, number>();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
@@ -179,11 +207,27 @@ export function getTotalLineTimingsForCallNode(
     }
     const callNodeFrame = callNodeFramePerStack[stack];
     if (callNodeFrame === -1) {
-      // This sample does not contribute to the call node's total. Ignore.
       continue;
     }
 
-    const frameLine = frameTable.line[callNodeFrame];
+    // Resolve in the same coordinate space as the source view: prefer the
+    // source-mapped line, otherwise the frame's compiled line, otherwise the
+    // func's compiled line. Inlined from getOriginalPositionForFrame to avoid
+    // the per-sample object allocation.
+    const funcIndex = frameTable.func[callNodeFrame];
+    const frameOriginalLocationIdx = frameTable.originalLocation[callNodeFrame];
+    let frameLine: number | null;
+    if (frameOriginalLocationIdx !== null) {
+      frameLine = sourceLocationTable.line[frameOriginalLocationIdx];
+    } else {
+      const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
+      if (funcOriginalLocationIdx !== null) {
+        frameLine = sourceLocationTable.line[funcOriginalLocationIdx];
+      } else {
+        frameLine =
+          frameTable.line[callNodeFrame] ?? funcTable.lineNumber[funcIndex];
+      }
+    }
     const line = frameLine !== null ? frameLine : funcLine;
     if (line === null) {
       continue;
