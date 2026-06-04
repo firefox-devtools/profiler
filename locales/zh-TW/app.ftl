@@ -780,15 +780,6 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = 隱藏處理程序
 
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
-TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 上次取樣以來的分配與取消分配
-
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.

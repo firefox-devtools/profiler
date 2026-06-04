@@ -881,15 +881,6 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = Dölj process
 
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = relativa minnet vid denna tidpunkt
-TrackMemoryGraph--memory-range-in-graph = minnesintervall i grafen
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allokeringar och deallokeringar sedan föregående prov
-
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
