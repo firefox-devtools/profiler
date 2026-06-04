@@ -253,22 +253,22 @@ class MarkerTableImpl extends PureComponent<Props> {
     {
       propName: 'start',
       titleL10nId: 'MarkerTable--start',
-      minWidth: 30,
-      initialWidth: 90,
+      minWidth: 35,
+      initialWidth: 95,
       resizable: true,
     },
     {
       propName: 'duration',
       titleL10nId: 'MarkerTable--duration',
-      minWidth: 30,
-      initialWidth: 80,
+      minWidth: 40,
+      initialWidth: 90,
       resizable: true,
     },
     {
       propName: 'name',
       titleL10nId: 'MarkerTable--name',
-      minWidth: 30,
-      initialWidth: 150,
+      minWidth: 40,
+      initialWidth: 160,
       resizable: true,
     },
   ];
