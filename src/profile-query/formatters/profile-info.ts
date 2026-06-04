@@ -6,15 +6,17 @@ import {
   getProfile,
   getThreadCPUTimeMs,
   getRangeFilteredCombinedThreadActivitySlices,
+  getCounters,
 } from 'firefox-profiler/selectors/profile';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state';
 import { buildProcessThreadList } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
+import { collectCounterSummary } from './counter-info';
 import type { Store } from '../../types/store';
 import type { ThreadInfo, ProcessListItem } from '../process-thread-list';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
-import type { ProfileInfoResult } from '../types';
+import type { ProfileInfoResult, CounterSummary } from '../types';
 
 /**
  * Filter a list of processes by a search string.
@@ -108,6 +110,15 @@ export function collectProfileInfo(
       ? applySearchFilter(result.processes, search)
       : result.processes;
 
+  const countersByPid = new Map<string, CounterSummary[]>();
+  (getCounters(state) ?? []).forEach((_, index) => {
+    const counter = collectCounterSummary(store, threadMap, index);
+    const pid = String(profile.threads[counter.mainThreadIndex].pid);
+    const list = countersByPid.get(pid) ?? [];
+    list.push(counter);
+    countersByPid.set(pid, list);
+  });
+
   const processesData: ProfileInfoResult['processes'] = processesToShow.map(
     (processItem) => {
       let startTimeName: string | undefined;
@@ -141,6 +152,7 @@ export function collectProfileInfo(
           cpuMs: thread.cpuMs,
         })),
         remainingThreads: processItem.remainingThreads,
+        counters: countersByPid.get(String(processItem.pid)),
       };
     }
   );

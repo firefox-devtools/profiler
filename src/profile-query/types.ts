@@ -7,7 +7,11 @@
  * These types are used by both profile-query (the library) and profiler-cli.
  */
 
-import type { Transform } from 'firefox-profiler/types';
+import type {
+  Transform,
+  CounterGraphType,
+  CounterTooltipDataSource,
+} from 'firefox-profiler/types';
 
 // ===== Utility types =====
 
@@ -662,6 +666,60 @@ export type ThreadPageLoadResult = {
   jankPeriods: JankPeriod[]; // limited by jankLimit
 };
 
+// ===== Counter Commands =====
+
+/**
+ * A single range-aggregate stat for a counter, derived from one of the
+ * counter's own `display.tooltipRows`. Only the rows whose data source is a
+ * whole-range aggregate (`count-range`, `committed-range-total`) are surfaced;
+ * per-sample and preview-selection rows have no CLI equivalent and are skipped.
+ * `label`, `value`, and `formattedValue` come straight from the tooltip schema,
+ * so the CLI and the timeline tooltips stay in lockstep.
+ */
+export type CounterStat = {
+  source: CounterTooltipDataSource;
+  label: string;
+  labelKey?: string;
+  value: number;
+  formattedValue: string;
+  carbon?: string;
+};
+
+/**
+ * One-line summary of a counter, shared by `counter list`, `counter info`, and
+ * the `profile info --counters` section. The `stats` cover the current
+ * committed (zoom) range, or the whole profile when not zoomed.
+ */
+export type CounterSummary = {
+  counterHandle: string; // e.g. "c-0"
+  counterIndex: number;
+  name: string; // raw counter name, e.g. "malloc"
+  label: string; // display.label || name, e.g. "Memory"
+  category: string; // e.g. "Memory"
+  unit: string; // display.unit, e.g. "bytes"
+  graphType: CounterGraphType;
+  color: string;
+  pid: string;
+  mainThreadIndex: number;
+  mainThreadHandle: string; // e.g. "t-0"
+  mainThreadName: string;
+  rangeSampleCount: number; // samples within the current range
+  stats: CounterStat[]; // range-aggregate stats from the tooltip schema
+};
+
+export type CounterListResult = {
+  type: 'counter-list';
+  counters: CounterSummary[];
+};
+
+export type CounterInfoResult = CounterSummary & {
+  type: 'counter-info';
+  description: string;
+  sampleCount: number; // total samples in the counter (whole profile)
+  rangeStart: number | null; // absolute time of first in-range sample
+  rangeEnd: number | null; // absolute time of last in-range sample
+};
+
 // ===== Profile Commands =====
 
 export type ProfileInfoResult = {
@@ -694,6 +752,7 @@ export type ProfileInfoResult = {
       combinedCpuMs: number;
       maxCpuMs: number;
     };
+    counters?: CounterSummary[];
   }>;
   remainingProcesses?: {
     count: number;

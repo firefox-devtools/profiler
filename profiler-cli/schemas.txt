@@ -19,9 +19,36 @@ profiler-cli profile info --json
     processes: [{
       pid, name, cpuMs,
       threads: [{ threadHandle, threadIndex, name, tid, cpuMs }],
-      remainingThreads?: { count, combinedCpuMs, maxCpuMs }
+      remainingThreads?: { count, combinedCpuMs, maxCpuMs },
+      counters?: [CounterSummary]
     }],
     remainingProcesses?: { count, combinedCpuMs, maxCpuMs },
+    context: SessionContext
+  }
+
+CounterSummary:
+  {
+    counterHandle, counterIndex, name, label, category,
+    unit, graphType,
+    color, pid, mainThreadIndex, mainThreadHandle, mainThreadName,
+    rangeSampleCount,
+    stats: [{ source, label, labelKey?, value, formattedValue, carbon? }]
+  }
+
+profiler-cli counter list --json
+  {
+    type: "counter-list",
+    counters: [CounterSummary],
+    context: SessionContext
+  }
+
+profiler-cli counter info --json
+  {
+    type: "counter-info",
+    ...CounterSummary,
+    description,
+    sampleCount,
+    rangeStart, rangeEnd,
     context: SessionContext
   }
 

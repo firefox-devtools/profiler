@@ -62,6 +62,10 @@ import {
   collectProfileLogs,
 } from './formatters/marker-info';
 import { collectThreadPageLoad } from './formatters/page-load';
+import {
+  collectCounterList,
+  collectCounterInfo,
+} from './formatters/counter-info';
 import { parseTimeValue } from './time-range-parser';
 import { describeTransformGroup, pushSpecTransforms } from './filter-stack';
 import { functionAnnotate as computeFunctionAnnotate } from './function-annotate';
@@ -92,6 +96,8 @@ import type {
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   ProfileLogsResult,
+  CounterListResult,
+  CounterInfoResult,
   MarkerFilterOptions,
   FunctionFilterOptions,
   SampleFilterSpec,
@@ -202,13 +208,29 @@ export class ProfileQuerier {
     showAll: boolean = false,
     search?: string
   ): Promise<WithContext<ProfileInfoResult>> {
-    const result = await collectProfileInfo(
+    const result = collectProfileInfo(
       this._store,
       this._timestampManager,
       this._threadMap,
       this._processIndexMap,
       showAll,
       search
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  async counterList(): Promise<WithContext<CounterListResult>> {
+    const result = collectCounterList(this._store, this._threadMap);
+    return { ...result, context: this._getContext() };
+  }
+
+  async counterInfo(
+    counterHandle: string
+  ): Promise<WithContext<CounterInfoResult>> {
+    const result = collectCounterInfo(
+      this._store,
+      this._threadMap,
+      counterHandle
     );
     return { ...result, context: this._getContext() };
   }
