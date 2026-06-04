@@ -104,7 +104,7 @@ describe('TrackPower', function () {
       `Couldn't find the power canvas, with selector .timelineTrackCounterCanvas`
     );
     const getTooltipContents = () =>
-      document.querySelector('.timelineTrackPowerTooltip');
+      document.querySelector('.timelineTrackCounterTooltip');
     const getPowerDot = () =>
       container.querySelector('.timelineTrackCounterGraphDot');
     const moveMouseAtCounter = (index: number, pos: number) =>

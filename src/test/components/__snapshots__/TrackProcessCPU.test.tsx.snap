@@ -12,15 +12,15 @@ exports[`TrackProcessCPU has a tooltip that matches the snapshot 1`] = `
   class="timelineTrackCounterTooltip"
 >
   <div
-    class="timelineTrackCounterTooltipLine"
+    class="tooltipDetails"
   >
-    CPU:
-     
-    <span
-      class="timelineTrackCounterTooltipNumber"
+    <div
+      class="tooltipLabel"
     >
-      50%
-    </span>
+      CPU
+      :
+    </div>
+    50%
   </div>
 </div>
 `;

@@ -11,6 +11,7 @@ import {
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
+import { deriveCounterDisplay } from '../../../profile-logic/process-profile';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { StringTable } from '../../../utils/string-table';
 import { computeThreadFromRawThread } from '../utils';
@@ -33,7 +34,6 @@ import type {
   CategoryList,
   JsTracerTable,
   RawCounter,
-  CounterDisplayConfig,
   TabID,
   MarkerPayload,
   NetworkPayload,
@@ -1481,29 +1481,19 @@ export function getProfileWithJsTracerEvents(
 }
 
 /**
- * Default display configuration for test counters.
- */
-const DEFAULT_TEST_COUNTER_DISPLAY: CounterDisplayConfig = {
-  graphType: 'line-rate',
-  unit: '',
-  color: 'grey',
-  markerSchemaLocation: null,
-  sortWeight: 50,
-  label: 'My Counter',
-};
-
-/**
  * Creates a Counter fixture for a given thread.
  */
 export function getCounterForThread(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
-  config: { hasCountNumber?: boolean } = {}
+  config: { hasCountNumber?: boolean; name?: string; category?: string } = {}
 ): RawCounter {
   const sampleTimes = computeTimeColumnForRawSamplesTable(thread.samples);
+  const name = config.name ?? 'My Counter';
+  const category = config.category ?? 'My Category';
   const counter: RawCounter = {
-    name: 'My Counter',
-    category: 'My Category',
+    name,
+    category,
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
@@ -1517,7 +1507,7 @@ export function getCounterForThread(
       count: sampleTimes.map((_, i) => Math.sin(i)),
       length: thread.samples.length,
     },
-    display: DEFAULT_TEST_COUNTER_DISPLAY,
+    display: deriveCounterDisplay(category, name),
   };
   return counter;
 }
@@ -1548,14 +1538,16 @@ export function getCounterForThreadWithSamples(
     length: samples.length,
   };
 
+  const finalName = name ?? 'My Counter';
+  const finalCategory = category ?? 'My Category';
   const counter: RawCounter = {
-    name: name ?? 'My Counter',
-    category: category ?? 'My Category',
+    name: finalName,
+    category: finalCategory,
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
     samples: newSamples,
-    display: DEFAULT_TEST_COUNTER_DISPLAY,
+    display: deriveCounterDisplay(finalCategory, finalName),
   };
   return counter;
 }

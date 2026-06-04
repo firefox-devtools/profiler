@@ -284,17 +284,9 @@ export function getStoreWithMemoryTrack(pid: Pid = '222') {
     thread.name = 'GeckoMain';
     thread.isMainThread = true;
     thread.pid = pid;
-    const counter = getCounterForThread(thread, threadIndex);
-    counter.category = 'Memory';
-    counter.display = {
-      ...counter.display,
-      graphType: 'line-accumulated',
-      unit: 'bytes',
-      color: 'orange',
-      markerSchemaLocation: 'timeline-memory',
-      sortWeight: 20,
-      label: 'Memory',
-    };
+    const counter = getCounterForThread(thread, threadIndex, {
+      category: 'Memory',
+    });
     profile.counters = [counter];
   }
 
