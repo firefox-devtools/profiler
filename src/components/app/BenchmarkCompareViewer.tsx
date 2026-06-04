@@ -403,7 +403,7 @@ function BucketTable({
   };
 
   const significant = comparisons
-    // .filter((c) => c.confidence !== 'LOW' && c.effectSize !== 'Negligible')
+    .filter((c) => c.confidence !== 'LOW' && c.effectSize !== 'Negligible')
     .sort(
       (a, b) =>
         Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
