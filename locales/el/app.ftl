@@ -881,6 +881,20 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = Απόκρυψη διεργασίας
 
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = σχετική μνήμη τη συγκεκριμένη στιγμή
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = εύρος μνήμης στο γράφημα
+
 ## TrackProcessCPUGraph
 ## This is used to show the CPU usage of a process over time in the timeline.
 
