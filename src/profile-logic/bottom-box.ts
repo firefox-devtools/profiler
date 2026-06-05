@@ -16,6 +16,7 @@ import {
   getCallNodeFramePerStack,
   getNativeSymbolInfo,
   getNativeSymbolsForCallNode,
+  getOriginalPositionForFrame,
   getTotalNativeSymbolTimingsForCallNode,
 } from './profile-data';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
@@ -46,7 +47,13 @@ export function getBottomBoxInfoForCallNode(
   } = thread;
 
   const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-  const sourceIndex = funcTable.source[funcIndex];
+  const { source: sourceIndex, line: funcLine } = getOriginalPositionForFrame(
+    null,
+    funcIndex,
+    frameTable,
+    funcTable,
+    thread.sourceLocationTable
+  );
   const resource = funcTable.resource[funcIndex];
   const libIndex =
     resource !== -1 && resourceTable.type[resource] === ResourceType.Library
@@ -98,13 +105,16 @@ export function getBottomBoxInfoForCallNode(
   );
 
   // Compute the hottest line and instruction address, so we can ask the
-  // source and assembly view to scroll those into view.
-  const funcLine = funcTable.lineNumber[funcIndex];
+  // source and assembly view to scroll those into view. funcLine and the per-sample
+  // frame lines come from getOriginalPositionForFrame, so the scroll target lines
+  // up with the (original) source view's line numbering when symbolicated.
   const lineTimings = getTotalLineTimingsForCallNode(
     samples,
     callNodeFramePerStack,
     frameTable,
-    funcLine
+    funcTable,
+    funcLine,
+    thread.sourceLocationTable
   );
   const hottestLine = mapGetKeyWithMaxValue(lineTimings);
   const addressTimings = getTotalAddressTimingsForCallNode(
@@ -149,7 +159,13 @@ export function getBottomBoxInfoForStackFrame(
 
   const frameIndex = stackTable.frame[stackIndex];
   const funcIndex = frameTable.func[frameIndex];
-  const sourceIndex = funcTable.source[funcIndex];
+  const { source: sourceIndex, line: lineNumber } = getOriginalPositionForFrame(
+    frameIndex,
+    funcIndex,
+    frameTable,
+    funcTable,
+    thread.sourceLocationTable
+  );
   const resource = funcTable.resource[funcIndex];
   const libIndex =
     resource !== -1 && resourceTable.type[resource] === ResourceType.Library
@@ -172,9 +188,6 @@ export function getBottomBoxInfoForStackFrame(
 
   const instructionAddress =
     nativeSymbol !== null ? frameTable.address[frameIndex] : -1;
-
-  // Extract line number from the frame
-  const lineNumber = frameTable.line[frameIndex];
 
   return {
     libIndex,

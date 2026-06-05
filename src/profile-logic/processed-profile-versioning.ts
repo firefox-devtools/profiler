@@ -3240,7 +3240,21 @@ const _upgraders: {
       }
     }
   },
-
+  [64]: (profile: any) => {
+    // Add the sourceLocationTable on profile.shared and the matching
+    // originalLocation column on funcTable and frameTable. Also add the content
+    // column on the sources table.
+    const { funcTable, frameTable, sources } = profile.shared;
+    funcTable.originalLocation = new Array(funcTable.length).fill(null);
+    frameTable.originalLocation = new Array(frameTable.length).fill(null);
+    profile.shared.sourceLocationTable = {
+      source: [],
+      line: [],
+      column: [],
+      length: 0,
+    };
+    sources.content = new Array(sources.length).fill(null);
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

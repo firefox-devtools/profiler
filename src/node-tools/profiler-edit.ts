@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
 import { Command, CommanderError, Option } from 'commander';
+import { parse as parseToml } from 'smol-toml';
 
 import {
   serializeProfileToJsonSlabsFile,
@@ -12,6 +13,7 @@ import {
 import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
+import { insertStackLabels } from 'firefox-profiler/profile-logic/insert-stack-labels';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
@@ -25,6 +27,11 @@ import {
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
 import type { Profile } from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import {
+  type AutoLabel,
+  type LabelDescription,
+  resolveAllLabels,
+} from 'firefox-profiler/utils/label-templates';
 
 /**
  * A CLI tool for editing profiles.
@@ -42,6 +49,9 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  *   node node-tools-dist/profiler-edit.js -i input.json.gz -o out.json.gz \
  *     --symbolicate-wasm http://host/a.wasm=./a-unstripped.wasm \
  *     --symbolicate-wasm http://host/b.wasm=./b-unstripped.wasm
+ *
+ *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
+ *     --insert-label-frames known-functions.toml
  */
 
 type ProfileSource =
@@ -65,6 +75,7 @@ export interface CliOptions {
   output: string;
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
+  insertLabelFrames?: string;
 }
 
 function loadWasmSymbolicationSpecs(
@@ -79,6 +90,42 @@ function loadWasmSymbolicationSpecs(
       label: spec.unstrippedWasmPath,
     };
   });
+}
+
+/**
+ * Reconstruct the func-name strings used by insertStackLabels' prefix matcher
+ * (mirrors getLabelIndexForFunc in insert-stack-labels.ts), so auto-discovery
+ * sees the same strings the labeler will compare against.
+ */
+function collectFuncNames(profile: Profile): string[] {
+  const { funcTable, sources, stringArray } = profile.shared;
+  const result: string[] = [];
+  for (let i = 0; i < funcTable.length; i++) {
+    let name = stringArray[funcTable.name[i]];
+    const sourceIndex = funcTable.source[i];
+    if (sourceIndex !== null) {
+      const filename = stringArray[sources.filename[sourceIndex]];
+      name += ` (${filename})`;
+    }
+    result.push(name);
+  }
+  return result;
+}
+
+export type ParsedLabelToml = {
+  labels: LabelDescription[];
+  autoLabels: AutoLabel[];
+};
+
+export function parseLabelToml(tomlText: string): ParsedLabelToml {
+  const data = parseToml(tomlText) as unknown as {
+    labels?: LabelDescription[];
+    auto_labels?: AutoLabel[];
+  };
+  return {
+    labels: data.labels ?? [],
+    autoLabels: data.auto_labels ?? [],
+  };
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -151,7 +198,7 @@ async function encodeProfileWithFilename(
 }
 
 export async function run(options: CliOptions) {
-  const profile = await loadProfile(options.input);
+  let profile = await loadProfile(options.input);
 
   if (options.symbolicateWithServer !== undefined) {
     const server = options.symbolicateWithServer;
@@ -204,6 +251,19 @@ export async function run(options: CliOptions) {
     profile,
     loadWasmSymbolicationSpecs(options.symbolicateWasm)
   );
+
+  if (options.insertLabelFrames !== undefined) {
+    console.log('Inserting label frames...');
+    const tomlText = fs.readFileSync(options.insertLabelFrames, 'utf8');
+    const parsed = parseLabelToml(tomlText);
+    const funcNames = collectFuncNames(profile);
+    const labels = resolveAllLabels(
+      parsed.autoLabels,
+      parsed.labels,
+      funcNames
+    );
+    profile = insertStackLabels(profile, labels);
+  }
 
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
@@ -263,7 +323,8 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       )
         .argParser(collectWasm)
         .default([] as WasmSymbolicationCliSpec[])
-    );
+    )
+    .option('--insert-label-frames <path>', 'TOML file with label definitions');
 
   program.parse(processArgv);
   const opts = program.opts();
@@ -310,6 +371,11 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         ? opts.symbolicateWithServer
         : undefined,
     symbolicateWasm: opts.symbolicateWasm,
+    insertLabelFrames:
+      typeof opts.insertLabelFrames === 'string' &&
+      opts.insertLabelFrames !== ''
+        ? opts.insertLabelFrames
+        : undefined,
   };
 }
 

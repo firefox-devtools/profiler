@@ -76,6 +76,7 @@
     "@fluent/langneg": "^0.7.0",
     "@fluent/react": "^0.15.2",
     "@lezer/highlight": "^1.2.3",
+    "@lezer/javascript": "^1.5.4",
     "@streamparser/json": "^0.0.22",
     "@tgwf/co2": "^0.18.0",
     "array-move": "^3.0.1",
@@ -109,6 +110,9 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^3.1.0",
     "reselect": "^4.1.8",
+    "smol-toml": "^1.6.1",
+    "source-map": "^0.7.6",
+    "url": "^0.11.4",
     "valibot": "^1.4.1",
     "workbox-window": "^7.4.1"
   },

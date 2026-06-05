@@ -26,6 +26,7 @@ import type {
   JsTracerTable,
   CallNodeTable,
   SourceTable,
+  SourceLocationTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -93,6 +94,7 @@ export function getEmptyFrameTable(): FrameTable {
     innerWindowID: [],
     line: [],
     column: [],
+    originalLocation: [],
     length: 0,
   };
 }
@@ -112,6 +114,7 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     innerWindowID: frameTable.innerWindowID.slice(),
     line: frameTable.line.slice(),
     column: frameTable.column.slice(),
+    originalLocation: frameTable.originalLocation.slice(),
     length: frameTable.length,
   };
 }
@@ -129,6 +132,7 @@ export function getEmptyFuncTable(): FuncTable {
     source: [],
     lineNumber: [],
     columnNumber: [],
+    originalLocation: [],
     length: 0,
   };
 }
@@ -146,7 +150,28 @@ export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
     source: funcTable.source.slice(),
     lineNumber: funcTable.lineNumber.slice(),
     columnNumber: funcTable.columnNumber.slice(),
+    originalLocation: funcTable.originalLocation.slice(),
     length: funcTable.length,
+  };
+}
+
+export function getEmptySourceLocationTable(): SourceLocationTable {
+  return {
+    source: [],
+    line: [],
+    column: [],
+    length: 0,
+  };
+}
+
+export function shallowCloneSourceLocationTable(
+  sourceLocationTable: SourceLocationTable
+): SourceLocationTable {
+  return {
+    source: sourceLocationTable.source.slice(),
+    line: sourceLocationTable.line.slice(),
+    column: sourceLocationTable.column.slice(),
+    length: sourceLocationTable.length,
   };
 }
 
@@ -338,6 +363,7 @@ export function getEmptySourceTable(): SourceTable {
     startLine: [],
     startColumn: [],
     sourceMapURL: [],
+    content: [],
     length: 0,
   };
 }
@@ -374,6 +400,7 @@ export function getEmptySharedData(): RawProfileSharedData {
     nativeSymbols: getEmptyNativeSymbolTable(),
     sources: getEmptySourceTable(),
     stringArray: [],
+    sourceLocationTable: getEmptySourceLocationTable(),
   };
 }
 

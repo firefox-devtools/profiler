@@ -23,6 +23,7 @@ export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type IndexIntoSourceTable = number;
+export type IndexIntoSourceLocationTable = number;
 export type ThreadIndex = number;
 // The Tid is most often a number. However in some cases such as merged profiles
 // we could generate a string.
@@ -296,6 +297,12 @@ export type FrameTable = {
 
   line: (number | null)[];
   column: (number | null)[];
+
+  // Index into the sourceLocationTable, or null if not source-mapped.
+  // Points to the original source file, line, and column for this frame's
+  // execution point.
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+
   length: number;
 };
 
@@ -341,6 +348,11 @@ export type FuncTable = {
   source: Array<IndexIntoSourceTable | null>;
   lineNumber: Array<number | null>;
   columnNumber: Array<number | null>;
+
+  // Index into the sourceLocationTable, or null if not source-mapped.
+  // Points to the original source file, line, and column for this function's
+  // definition.
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
 
   length: number;
 };
@@ -1037,6 +1049,28 @@ export type SourceTable = {
   startLine: Array<number>;
   startColumn: Array<number>;
   sourceMapURL: Array<IndexIntoStringTable | null>;
+  // Original source file contents from source map sourcesContent, or null if
+  // not available. Stored for offline source view when a profile is shared.
+  content: Array<string | null>;
+};
+
+/**
+ * Table holding source locations, currently populated from source map
+ * symbolication. Each row stores a (source, line, column) triple. Frames and
+ * funcs index into this table via their `originalLocation` column to record
+ * the pre-compilation counterpart to their inline (generated) line/column.
+ */
+export type SourceLocationTable = {
+  // Source file index.
+  // For funcs: the file where the function is defined.
+  // For frames: the source file for the execution point. Usually matches the
+  // func's source, but can differ for inlined code.
+  source: IndexIntoSourceTable[];
+  // 1-based line number.
+  line: number[];
+  // 1-based column number.
+  column: number[];
+  length: number;
 };
 
 export type RawProfileSharedData = {
@@ -1051,6 +1085,8 @@ export type RawProfileSharedData = {
   // Optional sources table for JS source UUID to URL mapping.
   // Added for UUID-based source fetching.
   sources: SourceTable;
+  // Source map symbolication results, shared across all threads.
+  sourceLocationTable: SourceLocationTable;
 };
 
 /**
