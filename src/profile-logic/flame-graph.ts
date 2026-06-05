@@ -8,7 +8,7 @@ import type {
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
-import type { CallTreeTimingsNonInverted } from './call-tree';
+import type { CallTreeTimingsNonInverted, CallTree } from './call-tree';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 
@@ -303,6 +303,78 @@ export function getFlameGraphTiming(
       callNode: timingCallNodes,
       length: timingCallNodes.length,
     };
+  }
+
+  return timing;
+}
+
+export function computeFlameGraphTimingFromCallTree(
+  callTree: CallTree
+): FlameGraphTiming {
+  const rootTotalSummary = callTree.getTotal();
+  if (rootTotalSummary === 0) {
+    return [];
+  }
+
+  const timing: FlameGraphTiming = [];
+
+  function traverse(
+    nodeIndex: IndexIntoCallNodeTable,
+    depth: number,
+    startX: number
+  ): number {
+    const { self, total } = callTree.getNodeData(nodeIndex);
+    if (total === 0) {
+      return startX;
+    }
+
+    const totalRelative = Math.abs(total / rootTotalSummary);
+    const endX = startX + totalRelative;
+
+    if (!timing[depth]) {
+      timing[depth] = {
+        start: [],
+        end: [],
+        selfRelative: [],
+        callNode: [],
+        length: 0,
+      };
+    }
+
+    timing[depth].start.push(startX);
+    timing[depth].end.push(endX);
+    timing[depth].selfRelative.push(Math.abs(self / rootTotalSummary));
+    timing[depth].callNode.push(nodeIndex);
+    timing[depth].length++;
+
+    const children = [...callTree.getChildren(nodeIndex)];
+    if (children.length > 0) {
+      // Sort children alphabetically by function name.
+      children.sort((a, b) => {
+        const nameA = callTree.getNodeData(a).funcName;
+        const nameB = callTree.getNodeData(b).funcName;
+        return nameA.localeCompare(nameB);
+      });
+
+      let currentChildStart = startX;
+      for (const child of children) {
+        currentChildStart = traverse(child, depth + 1, currentChildStart);
+      }
+    }
+
+    return endX;
+  }
+
+  const roots = [...callTree.getRoots()];
+  roots.sort((a, b) => {
+    const nameA = callTree.getNodeData(a).funcName;
+    const nameB = callTree.getNodeData(b).funcName;
+    return nameA.localeCompare(nameB);
+  });
+
+  let currentStart = 0;
+  for (const root of roots) {
+    currentStart = traverse(root, 0, currentStart);
   }
 
   return timing;

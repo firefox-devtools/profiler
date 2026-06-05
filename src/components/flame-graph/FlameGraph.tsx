@@ -4,7 +4,10 @@
 import * as React from 'react';
 
 import { explicitConnectWithForwardRef } from '../../utils/connect';
-import { FlameGraphCanvas } from './Canvas';
+import {
+  FlameGraphCanvas,
+  type OwnProps as FlameGraphCanvasProps,
+} from './Canvas';
 
 import {
   getCategories,
@@ -28,7 +31,6 @@ import {
   updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
 import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
-import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type {
   Thread,
@@ -352,10 +354,7 @@ class FlameGraphImpl
     // different, and the flame graph is only used with non-inverted timings.)
     const tracedTimingNonInverted =
       tracedTiming !== null
-        ? ensureExists(
-            extractNonInvertedCallTreeTimings(tracedTiming),
-            'The flame graph should only ever see non-inverted timings, see UrlState.getInvertCallstack'
-          )
+        ? extractNonInvertedCallTreeTimings(tracedTiming)
         : null;
 
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
@@ -376,7 +375,7 @@ class FlameGraphImpl
               maxViewportHeight,
               maximumZoom: 1,
               previewSelection,
-              startsAtBottom: true,
+              startsAtBottom: !isInverted,
               disableHorizontalMovement: true,
               viewportNeedsUpdate,
               marginLeft: 0,
@@ -416,12 +415,16 @@ class FlameGraphImpl
   }
 }
 
-function viewportNeedsUpdate() {
-  // By always returning false we prevent the viewport from being
+function viewportNeedsUpdate(
+  prevProps: FlameGraphCanvasProps,
+  nextProps: FlameGraphCanvasProps
+) {
+  // By returning false we prevent the viewport from being
   // reset and scrolled all the way to the bottom when doing
   // operations like changing the time selection or applying a
   // transform.
-  return false;
+  // We only reset the viewport if the invertCallstack setting changes.
+  return prevProps.isInverted !== nextProps.isInverted;
 }
 
 export const FlameGraph = explicitConnectWithForwardRef<

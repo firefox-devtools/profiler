@@ -80,13 +80,22 @@ describe('FlameGraph', function () {
     expect(drawCalls.length).toBeGreaterThan(0);
   });
 
-  it('ignores invertCallstack and always displays non-inverted', () => {
-    const { getState, dispatch } = setupFlameGraph();
+  it('respects invertCallstack and toggles icicle graph mode', () => {
+    const { getState, dispatch, flushRafCalls } = setupFlameGraph();
     expect(getInvertCallstack(getState())).toBe(false);
+
+    const initialDrawCalls = flushDrawLog();
+
     act(() => {
       dispatch(changeInvertCallstack(true));
     });
-    expect(getInvertCallstack(getState())).toBe(false);
+    expect(getInvertCallstack(getState())).toBe(true);
+    flushRafCalls();
+
+    const icicleDrawCalls = flushDrawLog();
+    expect(icicleDrawCalls.length).toBeGreaterThan(0);
+    expect(icicleDrawCalls).not.toEqual(initialDrawCalls);
+
     act(() => {
       dispatch(changeInvertCallstack(false));
     });
@@ -443,5 +452,6 @@ function setupFlameGraph() {
     getContextMenu,
     clickMenuItem,
     findFillTextPosition,
+    flushRafCalls,
   };
 }
