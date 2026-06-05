@@ -3,10 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 
-import { FlameGraphCanvas } from './Canvas';
+import {
+  FlameGraphCanvas,
+  type OwnProps as FlameGraphCanvasProps,
+} from './Canvas';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
-import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type {
   Thread,
@@ -288,17 +290,9 @@ export class FlameGraph
       onCallNodeEnterOrDoubleClick,
     } = this.props;
 
-    // Get the CallTreeTimingsNonInverted out of tracedTiming. We pass this
-    // along rather than the more generic CallTreeTimings type so that the
-    // FlameGraphCanvas component can operate on the more specialized type.
-    // (CallTreeTimingsNonInverted and CallTreeTimingsInverted are very
-    // different, and the flame graph is only used with non-inverted timings.)
     const tracedTimingNonInverted =
       tracedTiming !== null
-        ? ensureExists(
-            extractNonInvertedCallTreeTimings(tracedTiming),
-            'The flame graph should only ever see non-inverted timings, see UrlState.getInvertCallstack'
-          )
+        ? extractNonInvertedCallTreeTimings(tracedTiming)
         : null;
 
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
@@ -359,10 +353,14 @@ export class FlameGraph
   }
 }
 
-function viewportNeedsUpdate() {
-  // By always returning false we prevent the viewport from being
+function viewportNeedsUpdate(
+  prevProps: FlameGraphCanvasProps,
+  nextProps: FlameGraphCanvasProps
+) {
+  // By returning false we prevent the viewport from being
   // reset and scrolled all the way to the bottom when doing
   // operations like changing the time selection or applying a
   // transform.
-  return false;
+  // We only reset the viewport if the layout direction changes.
+  return prevProps.startsAtBottom !== nextProps.startsAtBottom;
 }

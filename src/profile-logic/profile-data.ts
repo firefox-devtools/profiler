@@ -2690,7 +2690,6 @@ export function computeCallNodeMaxDepthPlusOne(
   // computed for the filtered thread, but a samples-like table can use the preview
   // filtered thread, which involves a subset of the total call nodes.
   let maxDepth = -1;
-  const callNodeTable = callNodeInfo.getCallNodeTable();
   // TODO: Use sampleCallNodes instead
   const stackIndexToCallNodeIndex =
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
@@ -2700,7 +2699,7 @@ export function computeCallNodeMaxDepthPlusOne(
       continue;
     }
     const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-    const depth = callNodeTable.depth[callNodeIndex];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
     if (depth > maxDepth) {
       maxDepth = depth;
     }

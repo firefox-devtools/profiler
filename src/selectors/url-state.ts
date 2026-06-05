@@ -126,7 +126,8 @@ export const getNetworkSearchString: Selector<string> = (state) =>
 export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
 export const getInvertCallstack: Selector<boolean> = (state) =>
-  getSelectedTab(state) === 'calltree' &&
+  (getSelectedTab(state) === 'calltree' ||
+    getSelectedTab(state) === 'flame-graph') &&
   getProfileSpecificState(state).invertCallstack;
 export const getIncludeIdleSamples: Selector<boolean> = (state) =>
   getProfileSpecificState(state).includeIdleSamples;
