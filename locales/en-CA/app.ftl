@@ -904,6 +904,14 @@ TrackMemoryGraph--memory-range-in-graph2 = { $value }
 TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
     .label = allocations and deallocations since the previous sample
 
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
+
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
@@ -948,6 +956,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Average power in the current selection
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Average power in the current selection
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
