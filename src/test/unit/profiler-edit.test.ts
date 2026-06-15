@@ -154,6 +154,10 @@ describe('makeOptionsFromArgv', function () {
   });
 
   it('throws when -i has no value because next token is a flag', function () {
+    // Commander writes "error: too many arguments" to stderr before throwing
+    // (it takes `-o` as the value of `-i` and then sees the output path as an
+    // unexpected positional). Silence it so it doesn't clutter test output.
+    jest.spyOn(process.stderr, 'write').mockImplementation(() => true);
     expect(() =>
       makeOptionsFromArgv([...commonArgs, '-i', '-o', '/path/to/output.json'])
     ).toThrow();
