@@ -70,6 +70,9 @@ import type {
   ProfileIndexTranslationMaps,
   StartEndRange,
   Pid,
+  RawCounter,
+  ProfilerOverhead,
+  ThreadIndex,
 } from 'firefox-profiler/types';
 import { translateTransformStack } from './transforms';
 
@@ -1553,6 +1556,41 @@ function partitionNonOverlapping<T>(
 }
 
 /**
+ * Remap the `mainThreadIndex` of counters and profilerOverhead entries
+ * according to `oldThreadIndexToNew`. Entries whose main thread is not in the
+ * map (i.e. has been removed) are dropped.
+ */
+export function remapCountersAndProfilerOverhead(
+  profile: Profile,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex>
+): {
+  counters: RawCounter[] | undefined;
+  profilerOverhead: ProfilerOverhead[] | undefined;
+} {
+  return {
+    counters: profile.counters?.reduce<RawCounter[]>((acc, counter) => {
+      const newThreadIndex = oldThreadIndexToNew.get(counter.mainThreadIndex);
+      if (newThreadIndex !== undefined) {
+        acc.push({ ...counter, mainThreadIndex: newThreadIndex });
+      }
+      return acc;
+    }, []),
+    profilerOverhead: profile.profilerOverhead?.reduce<ProfilerOverhead[]>(
+      (acc, overhead) => {
+        const newThreadIndex = oldThreadIndexToNew.get(
+          overhead.mainThreadIndex
+        );
+        if (newThreadIndex !== undefined) {
+          acc.push({ ...overhead, mainThreadIndex: newThreadIndex });
+        }
+        return acc;
+      },
+      []
+    ),
+  };
+}
+
+/**
  * Merges threads from sequential runs of the same logical workload.
  *
  * Two-stage approach:
@@ -1630,6 +1668,9 @@ export function mergeNonOverlappingThreadsByName(profile: Profile): Profile {
 
   const mergedIndexes = new Set<number>();
   const mergeReplacements = new Map<number, RawThread>();
+  // For each old index that has been merged away (i.e. is in `mergedIndexes`),
+  // the old index of the surviving thread (`tb[0]`) it was merged into.
+  const mergedAwayToSurvivor = new Map<number, number>();
 
   for (const procs of processGroups.values()) {
     if (procs.length <= 1) {
@@ -1684,6 +1725,7 @@ export function mergeNonOverlappingThreadsByName(profile: Profile): Profile {
           mergeReplacements.set(tb[0], merged);
           for (let k = 1; k < tb.length; k++) {
             mergedIndexes.add(tb[k]);
+            mergedAwayToSurvivor.set(tb[k], tb[0]);
           }
         }
       }
@@ -1694,14 +1736,26 @@ export function mergeNonOverlappingThreadsByName(profile: Profile): Profile {
     return profile;
   }
 
+  const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
   const newThreads: RawThread[] = [];
   for (let i = 0; i < threads.length; i++) {
     if (mergedIndexes.has(i)) {
       continue;
     }
+    oldThreadIndexToNew.set(i, newThreads.length);
     const replacement = mergeReplacements.get(i);
     newThreads.push(replacement ?? threads[i]);
   }
+  for (const [removed, survivor] of mergedAwayToSurvivor) {
+    oldThreadIndexToNew.set(
+      removed,
+      ensureExists(oldThreadIndexToNew.get(survivor))
+    );
+  }
 
-  return { ...profile, threads: newThreads };
+  return {
+    ...profile,
+    threads: newThreads,
+    ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
+  };
 }

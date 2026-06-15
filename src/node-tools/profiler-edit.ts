@@ -31,14 +31,21 @@ import {
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
 import { getThreadsWithMarkersMatchingSearchFilter } from 'firefox-profiler/profile-logic/marker-data';
-import type { Profile } from 'firefox-profiler/types/profile';
+import type {
+  Profile,
+  RawThread,
+  ThreadIndex,
+} from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
   type AutoLabel,
   type LabelDescription,
   resolveAllLabels,
 } from 'firefox-profiler/utils/label-templates';
-import { mergeNonOverlappingThreadsByName } from 'firefox-profiler/profile-logic/merge-compare';
+import {
+  mergeNonOverlappingThreadsByName,
+  remapCountersAndProfilerOverhead,
+} from 'firefox-profiler/profile-logic/merge-compare';
 
 /**
  * A CLI tool for editing profiles.
@@ -288,10 +295,19 @@ export async function run(options: CliOptions) {
       profile,
       options.onlyKeepThreadsWithMarkersMatching
     );
-    const matchingThreads = profile.threads.filter((_thread, threadIndex) =>
-      matchingThreadIndexes.has(threadIndex)
-    );
-    profile = { ...profile, threads: matchingThreads };
+    const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
+    const matchingThreads: RawThread[] = [];
+    profile.threads.forEach((thread, oldIndex) => {
+      if (matchingThreadIndexes.has(oldIndex)) {
+        oldThreadIndexToNew.set(oldIndex, matchingThreads.length);
+        matchingThreads.push(thread);
+      }
+    });
+    profile = {
+      ...profile,
+      threads: matchingThreads,
+      ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
+    };
     console.log(
       `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
     );
