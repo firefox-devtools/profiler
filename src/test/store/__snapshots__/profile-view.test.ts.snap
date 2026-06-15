@@ -4417,6 +4417,9 @@ Object {
   "expandedInvertedCallNodePaths": PathSet {
     "_table": Map {},
   },
+  "expandedLowerWingCallNodePaths": PathSet {
+    "_table": Map {},
+  },
   "expandedNonInvertedCallNodePaths": PathSet {
     "_table": Map {
       "0" => Array [
@@ -4428,12 +4431,17 @@ Object {
       ],
     },
   },
+  "expandedUpperWingCallNodePaths": PathSet {
+    "_table": Map {},
+  },
   "lastSeenTransformCount": 1,
   "selectedInvertedCallNodePath": Array [],
+  "selectedLowerWingCallNodePath": Array [],
   "selectedNetworkMarker": null,
   "selectedNonInvertedCallNodePath": Array [
     0,
     1,
   ],
+  "selectedUpperWingCallNodePath": Array [],
 }
 `;

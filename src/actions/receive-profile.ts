@@ -1254,7 +1254,7 @@ export function viewProfileFromPostMessage(
 // Given a profile view URL, extract the raw URL needed to fetch the profile
 // data. This mirrors the manual pathname splitting done in retrieveProfileForRawUrl,
 // so we can fetch the profile before calling stateFromLocation.
-function getProfileFetchUrl(urlString: string): string {
+export function getProfileFetchUrl(urlString: string): string {
   const pathParts = new URL(urlString).pathname.split('/').filter((d) => d);
   const dataSource = ensureIsValidDataSource(pathParts[0]);
   switch (dataSource) {
@@ -1459,6 +1459,7 @@ export function retrieveProfileForRawUrl(
       case 'uploaded-recordings':
       case 'none':
       case 'local':
+      case 'compare-benchmark':
         // There is no profile to download for these datasources.
         break;
       default:

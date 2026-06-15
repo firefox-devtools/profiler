@@ -30,6 +30,7 @@ import type {
   ThreadsKey,
   Milliseconds,
   TableViewOptions,
+  RightClickedFunction,
 } from 'firefox-profiler/types';
 import {
   applyFuncSubstitutionToCallPath,
@@ -37,7 +38,7 @@ import {
 } from '../profile-logic/symbolication';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
-import { objectMap } from '../utils/types';
+import { assertExhaustiveCheck, objectMap } from '../utils/types';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
@@ -186,8 +187,12 @@ const sourceMapSymbolicationStatus: Reducer<SourceMapSymbolicationStatus> = (
 export const defaultThreadViewOptions: ThreadViewOptions = {
   selectedNonInvertedCallNodePath: [],
   selectedInvertedCallNodePath: [],
+  selectedLowerWingCallNodePath: [],
+  selectedUpperWingCallNodePath: [],
   expandedNonInvertedCallNodePaths: new PathSet(),
   expandedInvertedCallNodePaths: new PathSet(),
+  expandedLowerWingCallNodePaths: new PathSet(),
+  expandedUpperWingCallNodePaths: new PathSet(),
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
 };
@@ -254,7 +259,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
       const {
-        isInverted,
+        area,
         selectedCallNodePath,
         threadsKey,
         optionalExpandedToCallNodePath,
@@ -262,9 +267,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
 
       const threadState = _getThreadViewOptions(state, threadsKey);
 
-      const previousSelectedCallNodePath = isInverted
-        ? threadState.selectedInvertedCallNodePath
-        : threadState.selectedNonInvertedCallNodePath;
+      const previousSelectedCallNodePath = {
+        INVERTED_TREE: threadState.selectedInvertedCallNodePath,
+        NON_INVERTED_TREE: threadState.selectedNonInvertedCallNodePath,
+        LOWER_WING: threadState.selectedLowerWingCallNodePath,
+        UPPER_WING: threadState.selectedUpperWingCallNodePath,
+      }[area];
 
       // If the selected node doesn't actually change, let's return the previous
       // state to avoid rerenders.
@@ -275,9 +283,12 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      let expandedCallNodePaths = isInverted
-        ? threadState.expandedInvertedCallNodePaths
-        : threadState.expandedNonInvertedCallNodePaths;
+      let expandedCallNodePaths = {
+        INVERTED_TREE: threadState.expandedInvertedCallNodePaths,
+        NON_INVERTED_TREE: threadState.expandedNonInvertedCallNodePaths,
+        LOWER_WING: threadState.expandedLowerWingCallNodePaths,
+        UPPER_WING: threadState.expandedUpperWingCallNodePaths,
+      }[area];
       const expandToNode = optionalExpandedToCallNodePath
         ? optionalExpandedToCallNodePath
         : selectedCallNodePath;
@@ -301,19 +312,66 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         );
       }
 
-      return _updateThreadViewOptions(
-        state,
-        threadsKey,
-        isInverted
-          ? {
-              selectedInvertedCallNodePath: selectedCallNodePath,
-              expandedInvertedCallNodePaths: expandedCallNodePaths,
-            }
-          : {
-              selectedNonInvertedCallNodePath: selectedCallNodePath,
-              expandedNonInvertedCallNodePaths: expandedCallNodePaths,
-            }
-      );
+      switch (area) {
+        case 'INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedInvertedCallNodePath: selectedCallNodePath,
+            expandedInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'NON_INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedNonInvertedCallNodePath: selectedCallNodePath,
+            expandedNonInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'LOWER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedLowerWingCallNodePath: selectedCallNodePath,
+            expandedLowerWingCallNodePaths: expandedCallNodePaths,
+          });
+        case 'UPPER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            selectedUpperWingCallNodePath: selectedCallNodePath,
+            expandedUpperWingCallNodePaths: expandedCallNodePaths,
+          });
+        default:
+          throw assertExhaustiveCheck(area, 'Unhandled case');
+      }
+    }
+    case 'CHANGE_SELECTED_FUNCTION': {
+      const { selectedFunctionIndex, threadsKey } = action;
+
+      const threadState = _getThreadViewOptions(state, threadsKey);
+
+      const previousLowerWingPath = threadState.selectedLowerWingCallNodePath;
+      const isSameSelection =
+        selectedFunctionIndex === null
+          ? previousLowerWingPath.length === 0
+          : previousLowerWingPath.length === 1 &&
+            previousLowerWingPath[0] === selectedFunctionIndex;
+
+      if (isSameSelection) {
+        return state;
+      }
+
+      if (selectedFunctionIndex !== null) {
+        return _updateThreadViewOptions(state, threadsKey, {
+          selectedLowerWingCallNodePath: [selectedFunctionIndex],
+          expandedLowerWingCallNodePaths: new PathSet([
+            [selectedFunctionIndex],
+          ]),
+          selectedUpperWingCallNodePath: [selectedFunctionIndex],
+          expandedUpperWingCallNodePaths: new PathSet([
+            [selectedFunctionIndex],
+          ]),
+        });
+      }
+
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedLowerWingCallNodePath: [],
+        expandedLowerWingCallNodePaths: new PathSet(),
+        selectedUpperWingCallNodePath: [],
+        expandedUpperWingCallNodePaths: new PathSet(),
+      });
     }
     case 'CHANGE_INVERT_CALLSTACK': {
       const {
@@ -349,16 +407,29 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       });
     }
     case 'CHANGE_EXPANDED_CALL_NODES': {
-      const { threadsKey, isInverted } = action;
+      const { threadsKey, area } = action;
       const expandedCallNodePaths = new PathSet(action.expandedCallNodePaths);
 
-      return _updateThreadViewOptions(
-        state,
-        threadsKey,
-        isInverted
-          ? { expandedInvertedCallNodePaths: expandedCallNodePaths }
-          : { expandedNonInvertedCallNodePaths: expandedCallNodePaths }
-      );
+      switch (area) {
+        case 'INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'NON_INVERTED_TREE':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedNonInvertedCallNodePaths: expandedCallNodePaths,
+          });
+        case 'LOWER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedLowerWingCallNodePaths: expandedCallNodePaths,
+          });
+        case 'UPPER_WING':
+          return _updateThreadViewOptions(state, threadsKey, {
+            expandedUpperWingCallNodePaths: expandedCallNodePaths,
+          });
+        default:
+          throw assertExhaustiveCheck(area, 'Unhandled case');
+      }
     }
     case 'CHANGE_SELECTED_NETWORK_MARKER': {
       const { threadsKey, selectedNetworkMarker } = action;
@@ -439,8 +510,49 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      const { transforms } = action.newUrlState.profileSpecific;
-      return objectMap(state, (viewOptions, threadsKey) => {
+      const { transforms, selectedFunctions } =
+        action.newUrlState.profileSpecific;
+
+      // The selected function lives in URL state; mirror it into the per-thread
+      // wing paths so that initial loads and back/forward navigation restore the
+      // wings to the right function.
+      const newState: ThreadViewOptionsPerThreads = { ...state };
+      for (const threadsKey of Object.keys(selectedFunctions)) {
+        const selectedFunctionIndex = selectedFunctions[threadsKey];
+        const viewOptions = _getThreadViewOptions(newState, threadsKey);
+        const previousLowerWingPath = viewOptions.selectedLowerWingCallNodePath;
+        const matchesExisting =
+          selectedFunctionIndex === null
+            ? previousLowerWingPath.length === 0
+            : previousLowerWingPath.length === 1 &&
+              previousLowerWingPath[0] === selectedFunctionIndex;
+        if (matchesExisting) {
+          continue;
+        }
+        if (selectedFunctionIndex === null) {
+          newState[threadsKey] = {
+            ...viewOptions,
+            selectedLowerWingCallNodePath: [],
+            expandedLowerWingCallNodePaths: new PathSet(),
+            selectedUpperWingCallNodePath: [],
+            expandedUpperWingCallNodePaths: new PathSet(),
+          };
+        } else {
+          newState[threadsKey] = {
+            ...viewOptions,
+            selectedLowerWingCallNodePath: [selectedFunctionIndex],
+            expandedLowerWingCallNodePaths: new PathSet([
+              [selectedFunctionIndex],
+            ]),
+            selectedUpperWingCallNodePath: [selectedFunctionIndex],
+            expandedUpperWingCallNodePaths: new PathSet([
+              [selectedFunctionIndex],
+            ]),
+          };
+        }
+      }
+
+      return objectMap(newState, (viewOptions, threadsKey) => {
         const transformStack = transforms[threadsKey] || [];
         const newTransformCount = transformStack.length;
         const oldTransformCount = viewOptions.lastSeenTransformCount;
@@ -634,8 +746,11 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
     case 'CHANGE_MARKER_SEARCH_STRING':
     case 'CHANGE_NETWORK_SEARCH_STRING':
+    case 'ADD_TRANSFORM_TO_STACK':
+    case 'POP_TRANSFORMS_FROM_STACK':
       return state + 1;
     case 'CHANGE_SELECTED_CALL_NODE':
+    case 'CHANGE_SELECTED_FUNCTION':
     case 'CHANGE_SELECTED_MARKER':
     case 'CHANGE_SELECTED_NETWORK_MARKER':
       if (action.context.source === 'pointer') {
@@ -758,7 +873,56 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
       if (action.callNodePath !== null) {
         return {
           threadsKey: action.threadsKey,
+          area: action.area,
           callNodePath: action.callNodePath,
+        };
+      }
+
+      return null;
+    case 'SET_CONTEXT_MENU_VISIBILITY':
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+    case 'CHANGE_INVERT_CALLSTACK':
+    case 'ADD_TRANSFORM_TO_STACK':
+    case 'POP_TRANSFORMS_FROM_STACK':
+    case 'CHANGE_IMPLEMENTATION_FILTER':
+      return null;
+    default:
+      return state;
+  }
+};
+
+const rightClickedFunction: Reducer<RightClickedFunction | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'BULK_SYMBOLICATION': {
+      if (state === null) {
+        return null;
+      }
+
+      const { oldFuncToNewFuncsMap } = action;
+      const functionIndexes = oldFuncToNewFuncsMap.get(state.functionIndex);
+      if (functionIndexes === undefined || functionIndexes.length === 0) {
+        return null;
+      }
+
+      return {
+        ...state,
+        functionIndex: functionIndexes[0],
+      };
+    }
+    case 'CHANGE_RIGHT_CLICKED_FUNCTION':
+      if (action.functionIndex !== null) {
+        return {
+          threadsKey: action.threadsKey,
+          functionIndex: action.functionIndex,
         };
       }
 
@@ -882,6 +1046,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       lastNonShiftClick,
       rightClickedTrack,
       rightClickedCallNode,
+      rightClickedFunction,
       rightClickedMarker,
       hoveredMarker,
       mouseTimePosition,

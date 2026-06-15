@@ -68,6 +68,8 @@ import type {
   Tid,
   RawProfileSharedData,
   ProfileIndexTranslationMaps,
+  StartEndRange,
+  Pid,
 } from 'firefox-profiler/types';
 import { translateTransformStack } from './transforms';
 
@@ -1359,6 +1361,16 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
     threadId: newThreadId,
   };
 
+  // If every source thread has threadCPUDelta, carry the per-sample values
+  // through unchanged. For non-overlapping inputs the resulting deltas remain
+  // meaningful; for overlapping inputs the values are nonsensical but harmless
+  // (still numerically valid).
+  const allHaveThreadCPUDelta = samplesPerThread.every(
+    (s) => s.threadCPUDelta !== undefined
+  );
+  const newThreadCPUDelta: Array<number | null> | undefined =
+    allHaveThreadCPUDelta ? [] : undefined;
+
   while (true) {
     let earliestNextSampleThreadIndex: number | null = null;
     let earliestNextSampleTime = Infinity;
@@ -1408,11 +1420,21 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
         ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
         : threads[sourceThreadIndex].tid
     );
+    if (newThreadCPUDelta !== undefined) {
+      newThreadCPUDelta.push(
+        ensureExists(sourceThreadSamples.threadCPUDelta)[
+          sourceThreadSampleIndex
+        ]
+      );
+    }
 
     newSamples.length++;
     nextSampleIndexPerThread[sourceThreadIndex]++;
   }
 
+  if (newThreadCPUDelta !== undefined) {
+    return { ...newSamples, threadCPUDelta: newThreadCPUDelta };
+  }
   return newSamples;
 }
 
@@ -1491,4 +1513,191 @@ function getThreadMarkersAndScreenshotMarkers(
   }
 
   return targetMarkerTable;
+}
+
+/**
+ * First-fit interval coloring: partition `items` (sorted by start time) into
+ * subgroups such that within each subgroup no two items overlap.
+ */
+function partitionNonOverlapping<T>(
+  itemsSortedByStart: T[],
+  rangeOf: (item: T) => StartEndRange
+): T[][] {
+  const subgroups: { items: T[]; lastEnd: number }[] = [];
+  for (const item of itemsSortedByStart) {
+    const range = rangeOf(item);
+    let placed = false;
+    for (const sg of subgroups) {
+      if (sg.lastEnd <= range.start) {
+        sg.items.push(item);
+        sg.lastEnd = range.end;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      subgroups.push({ items: [item], lastEnd: range.end });
+    }
+  }
+  return subgroups.map((sg) => sg.items);
+}
+
+/**
+ * Merges threads from sequential runs of the same logical workload.
+ *
+ * Two-stage approach:
+ *
+ *   1. Group processes (i.e. all threads sharing a pid) by (processName,
+ *      processType, mainThreadName) and partition each group into matched
+ *      bundles of non-overlapping processes via first-fit interval coloring.
+ *      Each non-singleton bundle represents one logical process whose
+ *      lifetime spans multiple runs.
+ *
+ *   2. Within each matched bundle, merge same-named threads across the
+ *      bundled processes. Same-named threads inside a single process are
+ *      not merged (they may overlap), so we again partition by non-overlap
+ *      before merging.
+ *
+ * Threads belonging to a singleton process bundle are passed through
+ * unchanged.
+ */
+export function mergeNonOverlappingThreadsByName(profile: Profile): Profile {
+  const interval = profile.meta.interval;
+  const threads = profile.threads;
+
+  const threadRanges = threads.map((t) => getTimeRangeForThread(t, interval));
+
+  type ProcessInfo = {
+    pid: Pid;
+    threadIndices: number[];
+    range: StartEndRange;
+    processName: string | undefined;
+    processType: string;
+    mainThreadName: string;
+  };
+
+  const processesByPid = new Map<Pid, ProcessInfo>();
+  for (let i = 0; i < threads.length; i++) {
+    const t = threads[i];
+    let proc = processesByPid.get(t.pid);
+    if (proc === undefined) {
+      proc = {
+        pid: t.pid,
+        threadIndices: [],
+        range: { start: Infinity, end: -Infinity },
+        processName: t.processName,
+        processType: t.processType,
+        mainThreadName: t.name,
+      };
+      processesByPid.set(t.pid, proc);
+    }
+    proc.threadIndices.push(i);
+    if (t.isMainThread) {
+      proc.mainThreadName = t.name;
+      if (t.processName !== undefined) {
+        proc.processName = t.processName;
+      }
+    }
+    const r = threadRanges[i];
+    if (r.start < proc.range.start) {
+      proc.range.start = r.start;
+    }
+    if (r.end > proc.range.end) {
+      proc.range.end = r.end;
+    }
+  }
+
+  const processGroups = new Map<string, ProcessInfo[]>();
+  for (const proc of processesByPid.values()) {
+    const key = `${proc.processName ?? ''}\u0000${proc.processType}\u0000${proc.mainThreadName}`;
+    let g = processGroups.get(key);
+    if (g === undefined) {
+      g = [];
+      processGroups.set(key, g);
+    }
+    g.push(proc);
+  }
+
+  const mergedIndexes = new Set<number>();
+  const mergeReplacements = new Map<number, RawThread>();
+  let mergedProcessBundles = 0;
+
+  for (const procs of processGroups.values()) {
+    if (procs.length <= 1) {
+      continue;
+    }
+    procs.sort((a, b) => a.range.start - b.range.start);
+    const bundles = partitionNonOverlapping(procs, (p) => p.range);
+
+    for (const bundle of bundles) {
+      if (bundle.length <= 1) {
+        continue;
+      }
+      mergedProcessBundles++;
+
+      // Group threads in this bundle by name, partition each by non-overlap,
+      // and merge subgroups of size > 1.
+      const threadsByName = new Map<string, number[]>();
+      for (const proc of bundle) {
+        for (const tIdx of proc.threadIndices) {
+          const name = threads[tIdx].name;
+          let arr = threadsByName.get(name);
+          if (arr === undefined) {
+            arr = [];
+            threadsByName.set(name, arr);
+          }
+          arr.push(tIdx);
+        }
+      }
+
+      for (const tIndices of threadsByName.values()) {
+        if (tIndices.length <= 1) {
+          continue;
+        }
+        tIndices.sort((a, b) => threadRanges[a].start - threadRanges[b].start);
+        const tBundles = partitionNonOverlapping(
+          tIndices,
+          (i) => threadRanges[i]
+        );
+        for (const tb of tBundles) {
+          if (tb.length <= 1) {
+            continue;
+          }
+          const sourceThreads = tb.map((i) => threads[i]);
+          const original = sourceThreads[0];
+          const merged = mergeThreads(sourceThreads);
+          merged.name = original.name;
+          merged.pid = original.pid;
+          merged.tid = original.tid;
+          merged.processType = original.processType;
+          merged.processName = original.processName;
+          merged.isMainThread = original.isMainThread;
+
+          mergeReplacements.set(tb[0], merged);
+          for (let k = 1; k < tb.length; k++) {
+            mergedIndexes.add(tb[k]);
+          }
+        }
+      }
+    }
+  }
+
+  if (mergeReplacements.size === 0) {
+    return profile;
+  }
+
+  const newThreads: RawThread[] = [];
+  for (let i = 0; i < threads.length; i++) {
+    if (mergedIndexes.has(i)) {
+      continue;
+    }
+    const replacement = mergeReplacements.get(i);
+    newThreads.push(replacement ?? threads[i]);
+  }
+
+  console.log(
+    `Matched ${mergedProcessBundles} non-overlapping process bundles. Merged ${mergedIndexes.size + mergeReplacements.size} threads into ${mergeReplacements.size}, going from ${threads.length} to ${newThreads.length} threads.`
+  );
+
+  return { ...profile, threads: newThreads };
 }
