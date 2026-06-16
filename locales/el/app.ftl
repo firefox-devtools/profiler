@@ -293,16 +293,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Νομικά
-FooterLinks--Privacy = Απόρρητο
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Ρυθμίσεις
+SettingsMenu--docs = Τεκμηρίωση
+SettingsMenu--legal = Νομικά
+SettingsMenu--privacy = Απόρρητο
+SettingsMenu--cookies = Cookie
+SettingsMenu--language-switcher =
     .title = Αλλαγή γλώσσας
-FooterLinks--hide-button =
-    .title = Απόκρυψη συνδέσμων υποσέλιδου
-    .aria-label = Απόκρυψη συνδέσμων υποσέλιδου
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -518,7 +519,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Σφάλμα μεταφόρτωσης
 MenuButtons--index--revert = Επιστροφή στο αρχικό προφίλ
-MenuButtons--index--docs = Έγγραφα
 MenuButtons--permalink--button =
     .label = Μόνιμος σύνδεσμος
 
@@ -886,9 +886,22 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = σχετική μνήμη αυτήν τη στιγμή
-TrackMemoryGraph--memory-range-in-graph = εύρος μνήμης στο γράφημα
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = κατανομές και αποδεσμεύσεις από το προηγούμενο δείγμα
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = σχετική μνήμη τη συγκεκριμένη στιγμή
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = εύρος μνήμης στο γράφημα
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

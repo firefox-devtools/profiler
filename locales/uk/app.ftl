@@ -263,17 +263,6 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Повідомити про помилку на GitHub
 
-## Footer Links
-
-FooterLinks--legal = Правові положення
-FooterLinks--Privacy = Приватність
-FooterLinks--Cookies = Файли cookie
-FooterLinks--languageSwitcher--select =
-    .title = Змінити мову
-FooterLinks--hide-button =
-    .title = Сховати посилання нижнього колонтитула
-    .aria-label = Сховати посилання нижнього колонтитула
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -453,7 +442,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Помилка вивантаження
 MenuButtons--index--revert = Повернутися до початкового профілю
-MenuButtons--index--docs = Документи
 MenuButtons--permalink--button =
     .label = Стороннє посилання
 
@@ -820,15 +808,6 @@ TrackNameButton--hide-track =
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = Сховати процес
-
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = відносна пам'ять на цю мить
-TrackMemoryGraph--memory-range-in-graph = діапазон пам'яті в графіку
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = розподіл і вивільнення після попереднього зразка
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
