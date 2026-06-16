@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`renders the open panel correctly 1`] = `
+<body>
+  <div>
+    <div
+      class="buttonWithPanel settingsMenu open"
+    >
+      <button
+        aria-expanded="true"
+        class="buttonWithPanelButton"
+        type="button"
+      />
+      <div
+        class="arrowPanelAnchor"
+      >
+        <div
+          class="arrowPanel open settingsMenuArrowPanel"
+        >
+          <div
+            class="arrowPanelArrow"
+          />
+          <div
+            class="arrowPanelContent"
+          >
+            <div
+              class="settingsMenuPanel"
+            >
+              <div
+                class="settingsMenuRow settingsMenuRow--theme"
+              >
+                <div
+                  class="themeToggle"
+                >
+                  <button
+                    aria-label="light"
+                    class="themeToggleButton "
+                    title="Use light theme"
+                    type="button"
+                  >
+                    <span
+                      class="themeToggleIcon themeToggleIcon--light"
+                    />
+                  </button>
+                  <button
+                    aria-label="system"
+                    class="themeToggleButton themeToggleButton-active"
+                    title="Follow system theme preference"
+                    type="button"
+                  >
+                    <span
+                      class="themeToggleIcon themeToggleIcon--system"
+                    />
+                  </button>
+                  <button
+                    aria-label="dark"
+                    class="themeToggleButton "
+                    title="Use dark theme"
+                    type="button"
+                  >
+                    <span
+                      class="themeToggleIcon themeToggleIcon--dark"
+                    />
+                  </button>
+                </div>
+              </div>
+              <div
+                class="settingsMenuLinks"
+              >
+                <a
+                  class="settingsMenuLink"
+                  href="/docs/"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Documentation
+                  <i
+                    class="open-in-new"
+                  />
+                </a>
+                <a
+                  class="settingsMenuLink"
+                  href="https://www.mozilla.org/about/legal/terms/mozilla"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Legal
+                  <i
+                    class="open-in-new"
+                  />
+                </a>
+                <a
+                  class="settingsMenuLink"
+                  href="https://www.mozilla.org/privacy/websites"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Privacy
+                  <i
+                    class="open-in-new"
+                  />
+                </a>
+                <a
+                  class="settingsMenuLink"
+                  href="https://www.mozilla.org/privacy/websites/#cookies"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Cookies
+                  <i
+                    class="open-in-new"
+                  />
+                </a>
+              </div>
+              <div
+                class="settingsMenuRow settingsMenuRow--language"
+              >
+                <select
+                  class="settingsMenuLanguageSwitcher"
+                  title="Change language"
+                >
+                  <option
+                    value="be"
+                  >
+                    Беларуская
+                  </option>
+                  <option
+                    value="de"
+                  >
+                    Deutsch
+                  </option>
+                  <option
+                    value="el"
+                  >
+                    Ελληνικά
+                  </option>
+                  <option
+                    value="en-GB"
+                  >
+                    English (GB)
+                  </option>
+                  <option
+                    value="en-CA"
+                  >
+                    English (CA)
+                  </option>
+                  <option
+                    value="en-US"
+                  >
+                    English (US)
+                  </option>
+                  <option
+                    value="es-CL"
+                  >
+                    Español
+                  </option>
+                  <option
+                    value="fr"
+                  >
+                    Français
+                  </option>
+                  <option
+                    value="fy-NL"
+                  >
+                    Frysk
+                  </option>
+                  <option
+                    value="fur"
+                  >
+                    Furlan
+                  </option>
+                  <option
+                    value="ia"
+                  >
+                    Interlingua
+                  </option>
+                  <option
+                    value="it"
+                  >
+                    Italiano
+                  </option>
+                  <option
+                    value="nl"
+                  >
+                    Nederlands
+                  </option>
+                  <option
+                    value="pt-BR"
+                  >
+                    Português (BR)
+                  </option>
+                  <option
+                    value="ru"
+                  >
+                    Русский
+                  </option>
+                  <option
+                    value="sv-SE"
+                  >
+                    Svenska
+                  </option>
+                  <option
+                    value="tr"
+                  >
+                    Türkçe
+                  </option>
+                  <option
+                    value="uk"
+                  >
+                    Українська
+                  </option>
+                  <option
+                    value="zh-CN"
+                  >
+                    简体中文
+                  </option>
+                  <option
+                    value="zh-TW"
+                  >
+                    正體中文
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;

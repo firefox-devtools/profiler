@@ -60,7 +60,7 @@ import type {
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
-import { serializeProfile } from 'firefox-profiler/profile-logic/process-profile';
+import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
 
 export function updateSharingOption(
   slug: keyof CheckedSharingOptions,
@@ -322,7 +322,9 @@ export function encodeSanitizedProfile(
     const encodingPromise: Promise<ProfileEncodingResult> = (async function () {
       try {
         dispatch(sanitizedProfileEncodingStarted(sanitizedProfile));
-        const gzipData = await compress(serializeProfile(sanitizedProfile));
+        const gzipData = await compress(
+          serializeProfileToJsonString(sanitizedProfile)
+        );
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
         dispatch(sanitizedProfileEncodingCompleted(sanitizedProfile, blob));
         return { type: 'SUCCESS', profileData: blob };

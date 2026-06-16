@@ -795,6 +795,7 @@ function _partiallyApplySymbolicationStep(
           funcTable.source[funcIndex] = null;
           funcTable.lineNumber[funcIndex] = null;
           funcTable.columnNumber[funcIndex] = null;
+          funcTable.originalLocation[funcIndex] = null;
           // The name field will be filled below.
           funcTable.length++;
         }
@@ -819,6 +820,7 @@ function _partiallyApplySymbolicationStep(
             sources.startLine.push(1);
             sources.startColumn.push(1);
             sources.sourceMapURL.push(null);
+            sources.content.push(null);
             sources.length++;
           }
           funcTable.source[funcIndex] = sourceIndex;
@@ -851,6 +853,7 @@ function _partiallyApplySymbolicationStep(
         frameTable.innerWindowID[expansionFrameIndex] = innerWindowID;
         frameTable.address[expansionFrameIndex] = address;
         frameTable.nativeSymbol[expansionFrameIndex] = nativeSymbolIndex;
+        frameTable.originalLocation[expansionFrameIndex] = null;
 
         // These remaining fields are filled below.
       }

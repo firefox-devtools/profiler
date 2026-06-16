@@ -23,8 +23,11 @@ import {
   computeSamplesTableFromRawSamplesTable,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
-import { correlateIPCMarkers } from '../profile-logic/marker-data';
-import { markerSchemaFrontEndOnly } from '../profile-logic/marker-schema';
+import {
+  computeCombinedMarkerSchemaList,
+  computeMarkerSchemaByName,
+  correlateIPCMarkers,
+} from '../profile-logic/marker-data';
 import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-structures';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
@@ -70,6 +73,7 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
+  SourceMapSymbolicationStatus,
   MarkerSchema,
   MarkerSchemaByName,
   SampleUnits,
@@ -105,6 +109,9 @@ export const getProfileRootRange: Selector<StartEndRange> = (state) =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = (state) =>
   getProfileViewOptions(state).symbolicationStatus;
+export const getSourceMapSymbolicationStatus: Selector<
+  SourceMapSymbolicationStatus
+> = (state) => getProfileViewOptions(state).sourceMapSymbolicationStatus;
 export const getScrollToSelectionGeneration: Selector<number> = (state) =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = (state) =>
@@ -297,26 +304,11 @@ export const getSourceTable: Selector<SourceTable> = (state: State) =>
 // to generate markers such as the Jank markers, and display them.
 export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
   getMarkerSchemaGecko,
-  (geckoSchema) => {
-    const frontEndSchemaNames = new Set([
-      ...markerSchemaFrontEndOnly.map((schema) => schema.name),
-    ]);
-    return [
-      // Don't duplicate schema definitions that the front-end already has.
-      ...geckoSchema.filter((schema) => !frontEndSchemaNames.has(schema.name)),
-      ...markerSchemaFrontEndOnly,
-    ];
-  }
+  computeCombinedMarkerSchemaList
 );
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
-  createSelector(getMarkerSchema, (schemaList) => {
-    const result = Object.create(null);
-    for (const schema of schemaList) {
-      result[schema.name] = schema;
-    }
-    return result;
-  });
+  createSelector(getMarkerSchema, computeMarkerSchemaByName);
 
 type CounterSelectors = ReturnType<typeof _createCounterSelectors>;
 
@@ -1098,7 +1090,7 @@ export const getSourceViewFile: Selector<string | null> = createSelector(
     }
 
     const fileNameStrIndex = sources.filename[sourceIndex];
-    return fileNameStrIndex !== null
+    return fileNameStrIndex !== null && fileNameStrIndex !== undefined
       ? stringTable.getString(fileNameStrIndex)
       : null;
   }

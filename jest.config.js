@@ -18,7 +18,7 @@ const browserEnvConfig = {
   // Transform ESM modules to CommonJS for Jest
   // These packages ship as pure ESM and need to be transformed by Babel
   transformIgnorePatterns: [
-    '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps)/)',
+    '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander)/)',
   ],
 
   // Mock static assets (images, CSS, etc.)
@@ -30,6 +30,7 @@ const browserEnvConfig = {
 
   globals: {
     AVAILABLE_STAGING_LOCALES: null,
+    SOURCE_MAP_WORKER_PATH: 'src/test/fixtures/source-map.worker.stub.js',
   },
 
   snapshotFormat: {

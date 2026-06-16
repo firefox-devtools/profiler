@@ -23,6 +23,7 @@ export type IndexIntoNativeSymbolTable = number;
 export type IndexIntoCategoryList = number;
 export type IndexIntoSubcategoryListForCategory = number;
 export type IndexIntoSourceTable = number;
+export type IndexIntoSourceLocationTable = number;
 export type ThreadIndex = number;
 // The Tid is most often a number. However in some cases such as merged profiles
 // we could generate a string.
@@ -296,6 +297,12 @@ export type FrameTable = {
 
   line: (number | null)[];
   column: (number | null)[];
+
+  // Index into the sourceLocationTable, or null if not source-mapped.
+  // Points to the original source file, line, and column for this frame's
+  // execution point.
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+
   length: number;
 };
 
@@ -341,6 +348,11 @@ export type FuncTable = {
   source: Array<IndexIntoSourceTable | null>;
   lineNumber: Array<number | null>;
   columnNumber: Array<number | null>;
+
+  // Index into the sourceLocationTable, or null if not source-mapped.
+  // Points to the original source file, line, and column for this function's
+  // definition.
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
 
   length: number;
 };
@@ -537,6 +549,61 @@ export type GraphColor =
 export type CounterGraphType = 'line-accumulated' | 'line-rate';
 
 /**
+ * Per-sample data sources that a tooltip row can read from.
+ */
+export type CounterTooltipDataSource =
+  // samples.count[i]
+  | 'count'
+  // samples.count[i] / sampleTimeDelta[i]   (per ms)
+  | 'rate'
+  // rate / maxCounterSampleCountPerMs       (e.g., process CPU)
+  | 'cpu-ratio'
+  // accumulatedCounts[i] - minCount         (cumulative sum minus baseline)
+  | 'accumulated'
+  // countRange across the visible (committed) graph
+  | 'count-range'
+  // Σ samples.count[i] over the preview selection
+  | 'selection-total'
+  // selection-total / selection-duration    (per ms)
+  | 'selection-rate'
+  // Σ samples.count[i] over the committed range
+  | 'committed-range-total'
+  // samples.number[i] - the row is omitted when the column is absent.
+  | 'sample-number';
+
+/**
+ * How a counter tooltip row's value should be formatted.
+ * - `unit`: the base formatter for the value.
+ * - `co2`: when set, an additional CO₂e estimate is shown next to the value.
+ * - `scale`: when set, the value is rendered using the named auto-scaling
+ *   unit ladder (e.g., kW/W/mW/µW for `'power'`).
+ */
+export type CounterTooltipFormat = {
+  unit: 'bytes' | 'bytes-per-second' | 'percent' | 'number';
+  co2?: 'per-byte' | 'per-watthour';
+  scale?: 'power' | 'energy';
+};
+
+/**
+ * One row inside a counter tooltip.
+ *
+ * - `label`: English text, used as the fallback when no translation applies.
+ * - `labelKey`: optional stable identifier the renderer maps to a translation.
+ * - `requiresPreviewSelection`: when true, hides the row unless there is a
+ *   non-empty preview selection.
+ */
+export type CounterTooltipRow =
+  | {
+      type: 'value';
+      source: CounterTooltipDataSource;
+      format: CounterTooltipFormat;
+      label: string;
+      labelKey?: string;
+      requiresPreviewSelection?: boolean;
+    }
+  | { type: 'separator' };
+
+/**
  * Specifies how a counter should be displayed in the UI.
  */
 export type CounterDisplayConfig = {
@@ -553,6 +620,8 @@ export type CounterDisplayConfig = {
   // types this is a friendly name (eg, "Memory"); for generic counters
   // it falls back to counter.name.
   label: string;
+  // Describes the rows shown in the hover tooltip.
+  tooltipRows: CounterTooltipRow[];
 };
 
 export type RawCounter = {
@@ -980,6 +1049,28 @@ export type SourceTable = {
   startLine: Array<number>;
   startColumn: Array<number>;
   sourceMapURL: Array<IndexIntoStringTable | null>;
+  // Original source file contents from source map sourcesContent, or null if
+  // not available. Stored for offline source view when a profile is shared.
+  content: Array<string | null>;
+};
+
+/**
+ * Table holding source locations, currently populated from source map
+ * symbolication. Each row stores a (source, line, column) triple. Frames and
+ * funcs index into this table via their `originalLocation` column to record
+ * the pre-compilation counterpart to their inline (generated) line/column.
+ */
+export type SourceLocationTable = {
+  // Source file index.
+  // For funcs: the file where the function is defined.
+  // For frames: the source file for the execution point. Usually matches the
+  // func's source, but can differ for inlined code.
+  source: IndexIntoSourceTable[];
+  // 1-based line number.
+  line: number[];
+  // 1-based column number.
+  column: number[];
+  length: number;
 };
 
 export type RawProfileSharedData = {
@@ -994,6 +1085,8 @@ export type RawProfileSharedData = {
   // Optional sources table for JS source UUID to URL mapping.
   // Added for UUID-based source fetching.
   sources: SourceTable;
+  // Source map symbolication results, shared across all threads.
+  sourceLocationTable: SourceLocationTable;
 };
 
 /**

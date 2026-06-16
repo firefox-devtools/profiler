@@ -214,6 +214,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   frameTable.nativeSymbol.push(null);
   frameTable.inlineDepth.push(0);
   frameTable.func.push(rootFuncIndex);
+  frameTable.originalLocation.push(null);
   const rootFrameIndex = frameTable.length++;
 
   stackTable.frame.push(rootFrameIndex);
@@ -280,6 +281,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     frameTable.nativeSymbol.push(null);
     frameTable.inlineDepth.push(0);
     frameTable.func.push(funcIndex);
+    frameTable.originalLocation.push(null);
     frameTable.length++;
   }
 

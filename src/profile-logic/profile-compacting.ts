@@ -18,6 +18,7 @@ import type {
   NativeSymbolTable,
   Lib,
   SourceTable,
+  SourceLocationTable,
 } from 'firefox-profiler/types';
 import {
   assertExhaustiveCheck,
@@ -104,6 +105,7 @@ type TableCompactionStates = {
   resourceTable: TableCompactionState;
   nativeSymbols: TableCompactionState;
   sources: TableCompactionState;
+  sourceLocationTable: TableCompactionState;
   stringArray: TableCompactionState;
   libs: TableCompactionState;
 };
@@ -135,6 +137,9 @@ export function computeCompactedProfile(
     resourceTable: new TableCompactionState(shared.resourceTable.length),
     nativeSymbols: new TableCompactionState(shared.nativeSymbols.length),
     sources: new TableCompactionState(shared.sources.length),
+    sourceLocationTable: new TableCompactionState(
+      shared.sourceLocationTable.length
+    ),
     libs: new TableCompactionState(profile.libs.length),
     stringArray: new TableCompactionState(shared.stringArray.length),
   };
@@ -153,6 +158,7 @@ export function computeCompactedProfile(
     innerWindowID: ColDesc.noRef(),
     line: ColDesc.noRef(),
     column: ColDesc.noRef(),
+    originalLocation: ColDesc.indexRefOrNull(tcs.sourceLocationTable),
   };
   const funcTableDesc: TableDescription<FuncTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
@@ -162,6 +168,12 @@ export function computeCompactedProfile(
     source: ColDesc.indexRefOrNull(tcs.sources),
     lineNumber: ColDesc.noRef(),
     columnNumber: ColDesc.noRef(),
+    originalLocation: ColDesc.indexRefOrNull(tcs.sourceLocationTable),
+  };
+  const sourceLocationTableDesc: TableDescription<SourceLocationTable> = {
+    source: ColDesc.indexRef(tcs.sources),
+    line: ColDesc.noRef(),
+    column: ColDesc.noRef(),
   };
   const resourceTableDesc: TableDescription<ResourceTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
@@ -181,6 +193,7 @@ export function computeCompactedProfile(
     startLine: ColDesc.noRef(),
     startColumn: ColDesc.noRef(),
     sourceMapURL: ColDesc.indexRefOrNull(tcs.stringArray),
+    content: ColDesc.noRef(),
   };
 
   // Step 1: Gather all references.
@@ -214,6 +227,11 @@ export function computeCompactedProfile(
     shared.resourceTable,
     tcs.resourceTable,
     resourceTableDesc
+  );
+  _markTableAndComputeTranslation(
+    shared.sourceLocationTable,
+    tcs.sourceLocationTable,
+    sourceLocationTableDesc
   );
   _markTableAndComputeTranslation(
     shared.nativeSymbols,
@@ -250,6 +268,11 @@ export function computeCompactedProfile(
       nativeSymbolsDesc
     ),
     sources: _compactTable(shared.sources, tcs.sources, sourcesDesc),
+    sourceLocationTable: _compactTable(
+      shared.sourceLocationTable,
+      tcs.sourceLocationTable,
+      sourceLocationTableDesc
+    ),
     stringArray: _createCompactedStringArray(shared.stringArray, tcs),
   };
 

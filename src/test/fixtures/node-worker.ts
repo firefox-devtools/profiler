@@ -25,6 +25,7 @@ function getWorkerScript(file: string): string {
       CompressionStream,
       Response,
     };
+    sandbox.self = sandbox;
 
     vm.runInNewContext(scriptContent, sandbox, { filename: "${file}" });
 

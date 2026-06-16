@@ -28,6 +28,13 @@ fetchMock.mockGlobal();
 // for files ending in .worker.js: The "default export" is the path to the file.
 jest.mock('../utils/gz.worker.js', () => 'src/utils/gz.worker.js');
 
+// The source-map worker is normally bundled as an IIFE by esbuild because its
+// dependencies (lezer, source-map) can't run as ES modules in a Web Worker
+// context. In tests there is no bundle: SOURCE_MAP_WORKER_PATH is defined as
+// a global in jest.config.js to point at a stub that immediately responds with
+// { type: 'no-op' }. Tests that actually need to exercise the worker logic must
+// mock the 'actions/source-map-symbolication' module directly.
+
 // Install a Worker class which is similar to the DOM Worker class.
 (global as any).Worker = NodeWorker;
 

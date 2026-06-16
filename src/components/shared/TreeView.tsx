@@ -113,7 +113,7 @@ class TreeViewHeader<
               {col.hideDividerAfter !== true ? (
                 <span
                   key={col.propName + 'Divider'}
-                  className={classNames('treeViewColumnDivider', {
+                  className={classNames('treeViewHeaderColumnDivider', {
                     isResizable: col.resizable,
                   })}
                   onMouseDown={
@@ -241,7 +241,7 @@ class TreeViewRowFixedColumns<
                 )}
               </span>
               {col.hideDividerAfter !== true ? (
-                <span className="treeViewColumnDivider"></span>
+                <span className="treeViewRowColumnDivider"></span>
               ) : null}
             </React.Fragment>
           );
@@ -380,14 +380,9 @@ class TreeViewRowScrolledColumns<
           ) : null
         }
         <span
-          className={classNames(
-            'treeViewRowColumn',
-            'treeViewMainColumn',
-            mainColumn.propName,
-            {
-              dim: displayData.isFrameLabel,
-            }
-          )}
+          className={classNames('treeViewMainColumn', mainColumn.propName, {
+            dim: displayData.isFrameLabel,
+          })}
         >
           {displayData.badge ? (
             <Localized
@@ -415,7 +410,7 @@ class TreeViewRowScrolledColumns<
         </span>
         {appendageColumn ? (
           <span
-            className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}
+            className={`treeViewAppendageColumn ${appendageColumn.propName}`}
           >
             {reactStringWithHighlightedSubstrings(
               displayData[appendageColumn.propName],
@@ -476,7 +471,9 @@ export class TreeView<
   DisplayData extends Record<string, any>,
 > extends React.PureComponent<TreeViewProps<DisplayData>, TreeViewState> {
   _list: VirtualList<NodeIndex> | null = null;
-  _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
+  _takeListRef = (list: VirtualList<NodeIndex> | null) => {
+    this._list = list;
+  };
 
   // This contains the information about the current column resizing happening currently.
   _currentMovedColumnState: {

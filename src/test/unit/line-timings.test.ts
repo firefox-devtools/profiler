@@ -39,7 +39,8 @@ describe('getStackLineInfo', function () {
       stackTable,
       frameTable,
       funcTable,
-      fileOneSourceIndex
+      fileOneSourceIndex,
+      thread.sourceLocationTable
     );
 
     // Expect the returned stackIndexToLineSetIndex array to have the same length as the stackTable.
@@ -52,14 +53,22 @@ describe('getStackLineInfo', function () {
 
 describe('getLineTimings for getStackLineInfo', function () {
   function getTimings(thread: Thread, file: string) {
-    const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
+    const {
+      stackTable,
+      frameTable,
+      funcTable,
+      samples,
+      stringTable,
+      sourceLocationTable,
+    } = thread;
     const fileStringIndex = stringTable.indexForString(file);
     const fileSourceIndex = thread.sources.filename.indexOf(fileStringIndex);
     const stackLineInfo = getStackLineInfo(
       stackTable,
       frameTable,
       funcTable,
-      fileSourceIndex
+      fileSourceIndex,
+      sourceLocationTable
     );
     return getLineTimings(stackLineInfo, samples);
   }
@@ -140,7 +149,8 @@ describe('getLineTimings for getStackLineInfo', function () {
       stackTable,
       frameTable,
       funcTable,
-      fileSourceIndex
+      fileSourceIndex,
+      thread.sourceLocationTable
     );
     const lineTimings = getLineTimings(stackLineInfo, samples);
 
@@ -148,6 +158,68 @@ describe('getLineTimings for getStackLineInfo', function () {
     expect(lineTimings.selfLineHits.get(35)).toBe(1);
     expect(lineTimings.totalLineHits.get(20)).toBe(1);
     expect(lineTimings.totalLineHits.get(35)).toBe(1);
+  });
+
+  it("attributes the func's original line when the frame is not source-mapped but the func is", function () {
+    // Case from the source-map symbolication design: the func definition was
+    // mapped to an original source, but the frame's execution point was not
+    // (e.g. it lacked line/column info, so it was never submitted for
+    // symbolication). Source determination falls back to the func's original
+    // source, so line attribution must also come from the func's originalLocation
+    // entry. Otherwise we'd attribute the compiled line value in
+    // frameTable.line[frame] onto an original-source view.
+    const { derivedThreads } = getProfileFromTextSamples(`
+      A[file:compiled.js][line:5]
+      B[file:compiled.js][line:7]
+    `);
+    const [thread] = derivedThreads;
+    const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
+
+    // Register an additional source representing the original .ts file.
+    const originalFilenameIndex = stringTable.indexForString('original.ts');
+    const originalSourceIndex = thread.sources.length;
+    thread.sources.id.push(null);
+    thread.sources.filename.push(originalFilenameIndex);
+    thread.sources.sourceMapURL.push(null);
+    thread.sources.content.push(null);
+    thread.sources.length++;
+
+    // For both funcs, add a sourceLocationTable entry pointing at the original
+    // source at a known line. Leave frameTable.originalLocation as null on
+    // every frame. That is the case under test.
+    const funcAIndex = frameTable.func[stackTable.frame[0]];
+    const funcBIndex = frameTable.func[stackTable.frame[stackTable.length - 1]];
+    const funcALine = 100;
+    const funcBLine = 200;
+    const sourceLocationTable = thread.sourceLocationTable;
+    sourceLocationTable.source.push(originalSourceIndex, originalSourceIndex);
+    sourceLocationTable.line.push(funcALine, funcBLine);
+    sourceLocationTable.column.push(1, 1);
+    const funcAOriginalLocationIdx = sourceLocationTable.length;
+    const funcBOriginalLocationIdx = sourceLocationTable.length + 1;
+    sourceLocationTable.length += 2;
+    funcTable.originalLocation[funcAIndex] = funcAOriginalLocationIdx;
+    funcTable.originalLocation[funcBIndex] = funcBOriginalLocationIdx;
+
+    const stackLineInfo = getStackLineInfo(
+      stackTable,
+      frameTable,
+      funcTable,
+      originalSourceIndex,
+      sourceLocationTable
+    );
+    const lineTimings = getLineTimings(stackLineInfo, samples);
+
+    // Without the fix, the compiled line numbers (5 and 7) would have been
+    // attributed to the original-source view. With the fix, the func's
+    // original lines are used.
+    expect(lineTimings.selfLineHits.get(funcBLine)).toBe(1);
+    expect(lineTimings.selfLineHits.size).toBe(1);
+    expect(lineTimings.totalLineHits.get(funcALine)).toBe(1);
+    expect(lineTimings.totalLineHits.get(funcBLine)).toBe(1);
+    expect(lineTimings.totalLineHits.size).toBe(2);
+    expect(lineTimings.selfLineHits.get(5)).toBe(undefined);
+    expect(lineTimings.selfLineHits.get(7)).toBe(undefined);
   });
 });
 
@@ -158,7 +230,8 @@ describe('getTotalLineTimingsForCallNode', function () {
     defaultCategory: IndexIntoCategoryList,
     isInverted: boolean
   ): Map<LineNumber, number> {
-    const { stackTable, frameTable, funcTable, samples } = thread;
+    const { stackTable, frameTable, funcTable, samples, sourceLocationTable } =
+      thread;
     const nonInvertedCallNodeInfo = getCallNodeInfo(
       stackTable,
       frameTable,
@@ -186,7 +259,9 @@ describe('getTotalLineTimingsForCallNode', function () {
       samples,
       callNodeFramePerStack,
       frameTable,
-      funcLine
+      funcTable,
+      funcLine,
+      sourceLocationTable
     );
   }
 

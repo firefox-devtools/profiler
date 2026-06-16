@@ -2,11 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import JSZip from 'jszip';
+import zlib from 'zlib';
 
 import { fetchProfile } from '../../utils/profile-fetch';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import { serializeProfileToJsonString } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { extractArrayBuffer } from '../fixtures/utils';
 
 import type { Profile } from 'firefox-profiler/types';
 
@@ -22,42 +22,38 @@ function _getSimpleProfile(): Profile {
 }
 
 /**
- * fetchProfile has a decent amount of complexity around different issues with loading
- * in different support URL formats. It's mainly testing what happens when JSON
- * and zip file is sent, and what happens when things fail.
+ * fetchProfile is responsible for downloading bytes and distinguishing ZIPs
+ * (via content-type or URL extension) from everything else. Format detection
+ * and gzip decompression happen downstream in unserializeProfileOfArbitraryFormat,
+ * so the non-ZIP path here just returns raw bytes.
  */
 describe('fetchProfile', function () {
-  /**
-   * This helper function encapsulates various configurations for the type of content
-   * as well and response headers.
-   */
   async function configureFetch(obj: {
     url: string;
     contentType?: string;
     content: 'generated-zip' | 'generated-json' | Uint8Array;
   }) {
     const { url, contentType, content } = obj;
-    const stringProfile = serializeProfile(_getSimpleProfile());
-    const profile = JSON.parse(stringProfile);
-    let arrayBuffer;
+    const stringProfile = serializeProfileToJsonString(_getSimpleProfile());
+    let bytes: Uint8Array;
 
     switch (content) {
       case 'generated-zip': {
         const zip = new JSZip();
         zip.file('profile.json', stringProfile);
-        arrayBuffer = await zip.generateAsync({ type: 'uint8array' });
+        bytes = await zip.generateAsync({ type: 'uint8array' });
         break;
       }
       case 'generated-json':
-        arrayBuffer = encode(stringProfile);
+        bytes = encode(stringProfile);
         break;
       default:
-        arrayBuffer = content;
+        bytes = content;
         break;
     }
 
     window.fetchMock.catch(403).get(url, {
-      body: arrayBuffer,
+      body: bytes,
       headers: {
         'content-type': contentType,
       },
@@ -70,19 +66,27 @@ describe('fetchProfile', function () {
       reportError,
     };
 
-    // Return fetch's args, based on the inputs.
-    return { profile, args, reportError };
+    return { bytes, args, reportError };
   }
 
-  it('fetches a normal profile with the correct content-type headers', async function () {
-    const { profile, args } = await configureFetch({
+  function expectBytesEqual(received: unknown, expected: Uint8Array) {
+    // Uint8Arrays from workers / other realms aren't instanceof Uint8Array here.
+    expect(Object.prototype.toString.call(received)).toBe(
+      '[object Uint8Array]'
+    );
+    expect(Array.from(received as Uint8Array)).toEqual(Array.from(expected));
+  }
+
+  it('returns the raw bytes when the content-type is application/json', async function () {
+    const { bytes, args } = await configureFetch({
       url: 'https://example.com/profile.json',
       contentType: 'application/json',
       content: 'generated-json',
     });
 
     const profileOrZip = await fetchProfile(args);
-    expect(profileOrZip).toEqual({ responseType: 'PROFILE', profile });
+    expect(profileOrZip.responseType).toBe('BYTES');
+    expectBytesEqual((profileOrZip as any).bytes, bytes);
   });
 
   it('fetches a zipped profile with correct content-type headers', async function () {
@@ -108,26 +112,44 @@ describe('fetchProfile', function () {
     expect(reportError.mock.calls.length).toBe(0);
   });
 
-  it('fetches a profile with incorrect content-type headers, but .json extension', async function () {
-    const { profile, args, reportError } = await configureFetch({
+  it('returns the raw bytes when the URL has a .json extension but no content type', async function () {
+    const { bytes, args, reportError } = await configureFetch({
       url: 'https://example.com/profile.json',
       content: 'generated-json',
     });
 
     const profileOrZip = await fetchProfile(args);
-    expect(profileOrZip).toEqual({ responseType: 'PROFILE', profile });
+    expect(profileOrZip.responseType).toBe('BYTES');
+    expectBytesEqual((profileOrZip as any).bytes, bytes);
     expect(reportError.mock.calls.length).toBe(0);
   });
 
-  it('fetches a profile with incorrect content-type headers, no known extension, and attempts to JSON parse it', async function () {
-    const { profile, args, reportError } = await configureFetch({
+  it('returns the raw bytes when the URL extension and content type are both unknown', async function () {
+    const { bytes, args, reportError } = await configureFetch({
       url: 'https://example.com/profile.file',
       content: 'generated-json',
     });
 
     const profileOrZip = await fetchProfile(args);
-    expect(profileOrZip).toEqual({ responseType: 'PROFILE', profile });
+    expect(profileOrZip.responseType).toBe('BYTES');
+    expectBytesEqual((profileOrZip as any).bytes, bytes);
     expect(reportError.mock.calls.length).toBe(0);
+  });
+
+  it('passes gzipped bytes through unchanged (decompression is downstream)', async function () {
+    // Previously fetchProfile decompressed in-place, which detached the
+    // original ArrayBuffer and broke the fallback path for binary formats
+    // like JSLB. Now the bytes pass through as-is.
+    const payload = new Uint8Array([0x89, 0x4a, 0x53, 0x4c, 0x42, 0, 1, 2, 3]);
+    const gzipped = new Uint8Array(zlib.gzipSync(payload));
+    const { args } = await configureFetch({
+      url: 'https://example.com/profile.bin',
+      content: gzipped,
+    });
+
+    const profileOrZip = await fetchProfile(args);
+    expect(profileOrZip.responseType).toBe('BYTES');
+    expectBytesEqual((profileOrZip as any).bytes, gzipped);
   });
 
   it('fails if a bad zip file is passed in', async function () {
@@ -146,63 +168,5 @@ describe('fetchProfile', function () {
     expect(userFacingError).toMatchSnapshot();
     expect(reportError.mock.calls.length).toBeGreaterThan(0);
     expect(reportError.mock.calls).toMatchSnapshot();
-  });
-
-  it('fails if a bad profile JSON is passed in', async function () {
-    const invalidJSON = 'invalid';
-    const { args, reportError } = await configureFetch({
-      url: 'https://example.com/profile.json',
-      contentType: 'application/json',
-      content: encode(invalidJSON),
-    });
-
-    let userFacingError;
-    try {
-      await fetchProfile(args);
-    } catch (error) {
-      userFacingError = error;
-    }
-    expect(userFacingError).toMatchSnapshot();
-    expect(reportError.mock.calls.length).toBeGreaterThan(0);
-    expect(reportError.mock.calls).toMatchSnapshot();
-  });
-
-  it('fails if a bad profile JSON is passed in, with no content type', async function () {
-    const invalidJSON = 'invalid';
-    const { args, reportError } = await configureFetch({
-      url: 'https://example.com/profile.json',
-      content: encode(invalidJSON),
-    });
-
-    let userFacingError;
-    try {
-      await fetchProfile(args);
-    } catch (error) {
-      userFacingError = error;
-    }
-    expect(userFacingError).toMatchSnapshot();
-    expect(reportError.mock.calls.length).toBeGreaterThan(0);
-    expect(reportError.mock.calls).toMatchSnapshot();
-  });
-
-  it('fallback behavior if a completely unknown file is passed in', async function () {
-    const invalidJSON = 'invalid';
-    const profile = encode(invalidJSON);
-    const { args } = await configureFetch({
-      url: 'https://example.com/profile.unknown',
-      content: profile,
-    });
-
-    let userFacingError = null;
-    try {
-      const profileOrZip = await fetchProfile(args);
-      expect(profileOrZip).toEqual({
-        responseType: 'PROFILE',
-        profile: extractArrayBuffer(profile),
-      });
-    } catch (error) {
-      userFacingError = error;
-    }
-    expect(userFacingError).toBeNull();
   });
 });

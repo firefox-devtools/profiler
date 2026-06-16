@@ -231,16 +231,17 @@ ErrorBoundary--report-error-to-developers-description = 請將此問題報告給
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = 到 GitHub 回報錯誤
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = 法律資訊
-FooterLinks--Privacy = 隱私權
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = 設定
+SettingsMenu--docs = 文件
+SettingsMenu--legal = 法律資訊
+SettingsMenu--privacy = 隱私權
+SettingsMenu--cookies = Cookie
+SettingsMenu--language-switcher =
     .title = 變更語言
-FooterLinks--hide-button =
-    .title = 隱藏頁尾鏈結
-    .aria-label = 隱藏頁尾鏈結
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -427,7 +428,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = 上傳時發生錯誤
 MenuButtons--index--revert = 回復到原始檢測檔
-MenuButtons--index--docs = 文件
 MenuButtons--permalink--button =
     .label = 永久鏈結
 
@@ -785,9 +785,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
-TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 上次取樣以來的分配與取消分配
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = 此時間點的相對記憶體
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = 圖表中的記憶體範圍
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = 自上一次取樣的分配與取消分配
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -834,6 +851,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
     .label = 目前選擇範圍的平均功率
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
+    .label = 目前選擇範圍中的平均電力
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:

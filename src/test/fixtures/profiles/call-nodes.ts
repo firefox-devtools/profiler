@@ -49,6 +49,7 @@ export default function getProfile(): Profile {
     source: Array(funcNames.length).fill(null),
     lineNumber: Array(funcNames.length).fill(null),
     columnNumber: Array(funcNames.length).fill(null),
+    originalLocation: Array(funcNames.length).fill(null),
     length: funcNames.length,
   };
 
@@ -82,6 +83,7 @@ export default function getProfile(): Profile {
     innerWindowID: Array(frameFuncs.length).fill(null),
     line: Array(frameFuncs.length).fill(null),
     column: Array(frameFuncs.length).fill(null),
+    originalLocation: Array(frameFuncs.length).fill(null),
     length: frameFuncs.length,
   };
 

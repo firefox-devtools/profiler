@@ -225,17 +225,30 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getFilteredThread,
     ProfileSelectors.getSourceTable,
-    (selectedPath, { stringTable, funcTable, resourceTable }, sources) => {
+    (
+      selectedPath,
+      {
+        stringTable,
+        frameTable,
+        funcTable,
+        resourceTable,
+        sourceLocationTable,
+      },
+      sources
+    ) => {
       if (!selectedPath.length) {
         return '';
       }
 
       return ProfileData.getOriginAnnotationForFunc(
         ProfileData.getLeafFuncIndex(selectedPath),
+        null,
+        frameTable,
         funcTable,
         resourceTable,
         stringTable,
-        sources
+        sources,
+        sourceLocationTable
       );
     }
   );

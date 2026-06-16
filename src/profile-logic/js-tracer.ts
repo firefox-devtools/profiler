@@ -571,6 +571,7 @@ export function convertJsTracerToThreadWithoutSamples(
         funcTable.source.push(null);
         funcTable.lineNumber.push(null);
         funcTable.columnNumber.push(null);
+        funcTable.originalLocation.push(null);
 
         funcMap.set(eventStringIndex, funcIndex);
       } else {
@@ -601,6 +602,7 @@ export function convertJsTracerToThreadWithoutSamples(
     frameTable.innerWindowID.push(0);
     frameTable.line.push(line);
     frameTable.column.push(column);
+    frameTable.originalLocation.push(null);
 
     // Each event gets a stack table entry.
     const stackIndex = stackTable.length++;

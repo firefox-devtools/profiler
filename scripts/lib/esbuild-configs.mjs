@@ -81,6 +81,9 @@ export const mainBundleConfig = {
       : 'undefined',
     // no need to define NODE_ENV:
     // esbuild automatically defines NODE_ENV based on the value for "minify"
+    // In dev, the worker is not hashed so the path is predictable.
+    // In production, build.mjs overrides this after building the worker first.
+    SOURCE_MAP_WORKER_PATH: JSON.stringify('/source-map.worker.js'),
   },
   external: ['zlib'],
   plugins: [
@@ -98,6 +101,10 @@ export const mainBundleConfig = {
         { from: ['res/img/favicon.png'], to: ['dist/res/img'] },
         { from: ['docs-user/**/*'], to: ['dist/docs'] },
         { from: ['locales/**/*'], to: ['dist/locales'] },
+        {
+          from: ['node_modules/source-map/lib/mappings.wasm'],
+          to: ['dist'],
+        },
       ],
     }),
     generateHtmlPlugin({
@@ -107,6 +114,35 @@ export const mainBundleConfig = {
     }),
   ],
 };
+
+// Source map worker bundle configuration.
+// Built as a standalone IIFE so that npm dependencies (lezer, source-map) are
+// bundled into a single file that can be loaded as a Web Worker without needing
+// ES module support. In production the output filename includes a content hash
+// (e.g. source-map-ABCD1234.worker.js). The path is then injected into the main
+// bundle via the SOURCE_MAP_WORKER_PATH define. In dev there is no hash since the
+// dev server always serves fresh content and the define can't be updated mid-watch.
+export const sourceMapWorkerConfig = {
+  ...baseConfig,
+  entryPoints: ['src/profile-logic/source-map.worker.ts'],
+  outdir: 'dist',
+  format: 'iife',
+  platform: 'browser',
+  target: browserslistToEsbuild(),
+  sourcemap: true,
+  splitting: false,
+  entryNames: isProduction ? '[name]-[hash]' : '[name]',
+  metafile: true,
+  plugins: [wasmLoader()],
+};
+
+export function getSourceMapWorkerPath(metafile) {
+  const [entryPoint] = sourceMapWorkerConfig.entryPoints;
+  const [outputPath] = Object.entries(metafile.outputs).find(
+    ([, output]) => output.entryPoint === entryPoint
+  );
+  return '/' + path.basename(outputPath);
+}
 
 // Photon styling build configuration
 const photonTemplateHTML = fs.readFileSync(

@@ -76,7 +76,9 @@ import {
   determineTimelineType,
   hasUsefulSamples,
 } from 'firefox-profiler/profile-logic/profile-data';
+import { doSourceMapSymbolication } from './source-map-symbolication';
 
+import type { RawSourceMap } from 'source-map';
 import type {
   RequestedLib,
   ImplementationFilter,
@@ -89,6 +91,7 @@ import type {
   TabID,
   PageList,
   MixedObject,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
 import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
@@ -245,7 +248,28 @@ export function finalizeProfileView(
       }
     }
 
-    await Promise.all([faviconsPromise, symbolicationPromise]);
+    // Fetch source maps for all JS sources with a sourceMapURL, then run the
+    // source-map worker. Runs fully in parallel with native symbolication:
+    // native only touches funcs/frames belonging to library resources (JS
+    // funcs aren't in those sets), and the JS apply step reads current
+    // shared state at dispatch time so it composes with whatever native
+    // has committed by then. Requires WebChannel version 7+.
+    let sourceMapSymbolicationPromise: Promise<void> | null = null;
+    if (browserConnection !== null && browserConnection.supportsGetSourceMap) {
+      sourceMapSymbolicationPromise = doResolveSourceMaps(
+        profile,
+        browserConnection,
+        dispatch
+      ).then(({ resolvedSourceMaps, compiledSources }) =>
+        dispatch(doSourceMapSymbolication(resolvedSourceMaps, compiledSources))
+      );
+    }
+
+    await Promise.all([
+      faviconsPromise,
+      symbolicationPromise,
+      sourceMapSymbolicationPromise,
+    ]);
   };
 }
 
@@ -811,6 +835,85 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
+/**
+ * Resolve JS source maps for every source in the profile that has both a
+ * sourceMapURL and a UUID. Fetches source maps via the browser WebChannel.
+ *
+ * Also fetches the compiled source text which is required by the scope-tree
+ * name resolution in symbolicateWithSourceMaps.
+ */
+async function doResolveSourceMaps(
+  profile: Profile,
+  browserConnection: BrowserConnection,
+  dispatch: Dispatch
+): Promise<{
+  resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>;
+  compiledSources: Map<IndexIntoSourceTable, string>;
+}> {
+  const { sources, stringArray } = profile.shared;
+
+  // Collect every source with a sourceMapURL and a UUID. Only UUID-bearing
+  // sources can be fetched via the browser WebChannel.
+  const sourceIndexesWithSourceMaps = new Set<IndexIntoSourceTable>();
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    if (
+      sources.sourceMapURL[sourceIndex] !== null &&
+      sources.sourceMapURL[sourceIndex] !== undefined &&
+      typeof sources.id[sourceIndex] === 'string'
+    ) {
+      sourceIndexesWithSourceMaps.add(sourceIndex);
+    }
+  }
+
+  if (sourceIndexesWithSourceMaps.size === 0) {
+    return { resolvedSourceMaps: new Map(), compiledSources: new Map() };
+  }
+
+  // Fetch source maps and compiled sources in parallel, ignoring individual failures.
+  const resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap> = new Map();
+  const compiledSources: Map<IndexIntoSourceTable, string> = new Map();
+
+  dispatch({ type: 'START_SOURCE_MAP_FETCHING' });
+  try {
+    await Promise.all(
+      Array.from(sourceIndexesWithSourceMaps).map(async (sourceIndex) => {
+        const filename = stringArray[sources.filename[sourceIndex]];
+        // sourceId is guaranteed non-null by the filter above.
+        const sourceId = sources.id[sourceIndex] as string;
+
+        await Promise.all([
+          browserConnection
+            .getSourceMap(sourceId)
+            .then((result) => {
+              resolvedSourceMaps.set(sourceIndex, result);
+            })
+            .catch((e) => {
+              console.warn(
+                `Failed to fetch source map for "${filename}" (id=${sourceId}):`,
+                e
+              );
+            }),
+          browserConnection
+            .getJSSource(sourceId)
+            .then((text) => {
+              compiledSources.set(sourceIndex, text);
+            })
+            .catch((e) => {
+              console.warn(
+                `Failed to fetch compiled source for "${filename}" (id=${sourceId}):`,
+                e
+              );
+            }),
+        ]);
+      })
+    );
+  } finally {
+    dispatch({ type: 'DONE_SOURCE_MAP_FETCHING' });
+  }
+
+  return { resolvedSourceMaps, compiledSources };
+}
+
 export async function retrievePageFaviconsFromBrowser(
   dispatch: Dispatch,
   pages: PageList,
@@ -1015,11 +1118,10 @@ export function retrieveProfileOrZipFromUrl(
       });
 
       switch (response.responseType) {
-        case 'PROFILE': {
-          const serializedProfile = response.profile;
+        case 'BYTES': {
           const profileUpgradeInfo = {};
           const profile = await unserializeProfileOfArbitraryFormat(
-            serializedProfile,
+            response.bytes,
             profileUrl,
             profileUpgradeInfo
           );
@@ -1197,13 +1299,15 @@ export function retrieveProfilesToCompare(
               dispatch(temporaryError(e));
             },
           });
-          if (response.responseType !== 'PROFILE') {
-            throw new Error('Expected to receive a profile from fetchProfile');
+          if (response.responseType !== 'BYTES') {
+            throw new Error(
+              'Expected to receive a single profile (not a zip) from fetchProfile'
+            );
           }
 
           const upgradeInfo: ProfileUpgradeInfo = {};
           const profile = await unserializeProfileOfArbitraryFormat(
-            response.profile,
+            response.bytes,
             profileUrl,
             upgradeInfo
           );

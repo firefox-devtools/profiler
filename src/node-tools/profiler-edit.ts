@@ -2,12 +2,23 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
-import minimist from 'minimist';
+import {
+  Command,
+  CommanderError,
+  InvalidArgumentError,
+  Option,
+} from 'commander';
+import { parse as parseToml } from 'smol-toml';
 
-import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  serializeProfileToJsonSlabsFile,
+  serializeProfileToJsonString,
+  unserializeProfileOfArbitraryFormat,
+} from 'firefox-profiler/profile-logic/process-profile';
 import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
 import { compress } from 'firefox-profiler/utils/gz';
+import { insertStackLabels } from 'firefox-profiler/profile-logic/insert-stack-labels';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
   symbolicateProfile,
@@ -19,8 +30,22 @@ import {
   applyWasmSymbolication,
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
-import type { Profile } from 'firefox-profiler/types/profile';
+import { getThreadsWithMarkersMatchingSearchFilter } from 'firefox-profiler/profile-logic/marker-data';
+import type {
+  Profile,
+  RawThread,
+  ThreadIndex,
+} from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import {
+  type AutoLabel,
+  type LabelDescription,
+  resolveAllLabels,
+} from 'firefox-profiler/utils/label-templates';
+import {
+  mergeNonOverlappingThreadsByName,
+  remapCountersAndProfilerOverhead,
+} from 'firefox-profiler/profile-logic/merge-compare';
 
 /**
  * A CLI tool for editing profiles.
@@ -38,9 +63,16 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  *   node node-tools-dist/profiler-edit.js -i input.json.gz -o out.json.gz \
  *     --symbolicate-wasm http://host/a.wasm=./a-unstripped.wasm \
  *     --symbolicate-wasm http://host/b.wasm=./b-unstripped.wasm
+ *
+ *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
+ *     --insert-label-frames known-functions.toml
+ *
+ *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
+ *     --only-keep-threads-with-markers-matching '-async,-sync' \
+ *     --merge-non-overlapping-threads-by-name
  */
 
-type ProfileSource =
+export type ProfileSource =
   | { type: 'FILE'; path: string }
   | { type: 'URL'; url: string }
   | { type: 'HASH'; hash: string };
@@ -49,7 +81,7 @@ type ProfileSource =
 // supplies symbol names, plus (optionally) the URL of the stripped wasm in the
 // profile to which those names should be applied. If `strippedWasmUrl` is
 // omitted, the profile must contain exactly one .wasm source, which is used.
-interface WasmSymbolicationCliSpec {
+export interface WasmSymbolicationCliSpec {
   // Path to the local unstripped .wasm file (with a "name" custom section).
   unstrippedWasmPath: string;
   // URL of the matching stripped wasm as it appears in the profile.
@@ -61,9 +93,13 @@ export interface CliOptions {
   output: string;
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
+  insertLabelFrames?: string;
+  onlyKeepThreadsWithMarkersMatching?: string;
+  mergeNonOverlappingThreadsByName?: boolean;
+  setName?: string;
 }
 
-function loadWasmSymbolicationSpecs(
+export function loadWasmSymbolicationSpecs(
   cliSpecs: WasmSymbolicationCliSpec[]
 ): WasmSymbolicationSpec[] {
   return cliSpecs.map((spec) => {
@@ -75,6 +111,42 @@ function loadWasmSymbolicationSpecs(
       label: spec.unstrippedWasmPath,
     };
   });
+}
+
+/**
+ * Reconstruct the func-name strings used by insertStackLabels' prefix matcher
+ * (mirrors getLabelIndexForFunc in insert-stack-labels.ts), so auto-discovery
+ * sees the same strings the labeler will compare against.
+ */
+export function collectFuncNames(profile: Profile): string[] {
+  const { funcTable, sources, stringArray } = profile.shared;
+  const result: string[] = [];
+  for (let i = 0; i < funcTable.length; i++) {
+    let name = stringArray[funcTable.name[i]];
+    const sourceIndex = funcTable.source[i];
+    if (sourceIndex !== null) {
+      const filename = stringArray[sources.filename[sourceIndex]];
+      name += ` (${filename})`;
+    }
+    result.push(name);
+  }
+  return result;
+}
+
+export type ParsedLabelToml = {
+  labels: LabelDescription[];
+  autoLabels: AutoLabel[];
+};
+
+export function parseLabelToml(tomlText: string): ParsedLabelToml {
+  const data = parseToml(tomlText) as unknown as {
+    labels?: LabelDescription[];
+    auto_labels?: AutoLabel[];
+  };
+  return {
+    labels: data.labels ?? [],
+    autoLabels: data.auto_labels ?? [],
+  };
 }
 
 async function loadProfile(source: ProfileSource): Promise<Profile> {
@@ -128,8 +200,26 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
   }
 }
 
+async function encodeProfileWithFilename(
+  profile: Profile,
+  filename: string
+): Promise<Uint8Array> {
+  if (filename.endsWith('.jslb') || filename.endsWith('.jslb.gz')) {
+    const bytes = serializeProfileToJsonSlabsFile(profile);
+    if (filename.endsWith('.jslb.gz')) {
+      return compress(bytes);
+    }
+    return bytes;
+  }
+  const s = serializeProfileToJsonString(profile);
+  if (filename.endsWith('.gz')) {
+    return compress(s);
+  }
+  return new TextEncoder().encode(s);
+}
+
 export async function run(options: CliOptions) {
-  const profile = await loadProfile(options.input);
+  let profile = await loadProfile(options.input);
 
   if (options.symbolicateWithServer !== undefined) {
     const server = options.symbolicateWithServer;
@@ -183,42 +273,156 @@ export async function run(options: CliOptions) {
     loadWasmSymbolicationSpecs(options.symbolicateWasm)
   );
 
+  if (options.insertLabelFrames !== undefined) {
+    console.log('Inserting label frames...');
+    const tomlText = fs.readFileSync(options.insertLabelFrames, 'utf8');
+    const parsed = parseLabelToml(tomlText);
+    const funcNames = collectFuncNames(profile);
+    const labels = resolveAllLabels(
+      parsed.autoLabels,
+      parsed.labels,
+      funcNames
+    );
+    profile = insertStackLabels(profile, labels);
+  }
+
+  if (
+    options.onlyKeepThreadsWithMarkersMatching !== undefined &&
+    options.onlyKeepThreadsWithMarkersMatching !== ''
+  ) {
+    const before = profile.threads.length;
+    const matchingThreadIndexes = getThreadsWithMarkersMatchingSearchFilter(
+      profile,
+      options.onlyKeepThreadsWithMarkersMatching
+    );
+    const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
+    const matchingThreads: RawThread[] = [];
+    profile.threads.forEach((thread, oldIndex) => {
+      if (matchingThreadIndexes.has(oldIndex)) {
+        oldThreadIndexToNew.set(oldIndex, matchingThreads.length);
+        matchingThreads.push(thread);
+      }
+    });
+    profile = {
+      ...profile,
+      threads: matchingThreads,
+      ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
+    };
+    console.log(
+      `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
+    );
+  }
+
+  if (options.mergeNonOverlappingThreadsByName) {
+    profile = mergeNonOverlappingThreadsByName(profile);
+  }
+
+  if (options.setName !== undefined) {
+    profile.meta.product = options.setName;
+  }
+
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
-  console.log(`Saving profile to ${options.output}`);
-  if (options.output.endsWith('.gz')) {
-    fs.writeFileSync(
-      options.output,
-      await compress(JSON.stringify(compactedProfile))
-    );
-  } else {
-    fs.writeFileSync(options.output, JSON.stringify(compactedProfile));
-  }
+  const outputFilename = options.output;
+  console.log(`Saving profile to ${outputFilename}`);
+  const bytes = await encodeProfileWithFilename(
+    compactedProfile,
+    outputFilename
+  );
+  fs.writeFileSync(outputFilename, bytes);
   console.log('Finished.');
 }
 
+function collectWasm(
+  value: string,
+  previous: WasmSymbolicationCliSpec[]
+): WasmSymbolicationCliSpec[] {
+  // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
+  // whole string as a path and infer the URL from the profile. Split on
+  // the last `=` so URLs containing `=` (e.g. in query strings) survive
+  // intact; this assumes file paths don't contain `=`.
+  const eqIndex = value.lastIndexOf('=');
+  if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(value.slice(0, eqIndex))) {
+    return [
+      ...previous,
+      {
+        strippedWasmUrl: value.slice(0, eqIndex),
+        unstrippedWasmPath: value.slice(eqIndex + 1),
+      },
+    ];
+  }
+  return [...previous, { unstrippedWasmPath: value }];
+}
+
+function requireNonEmpty(flagName: string): (value: string) => string {
+  return (value: string) => {
+    if (value === '') {
+      throw new InvalidArgumentError(`${flagName} requires a non-empty value`);
+    }
+    return value;
+  };
+}
+
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
-  const argv = minimist(processArgv.slice(2), {
-    alias: { i: 'input', o: 'output' },
-  });
+  const program = new Command();
+  program
+    .name('profiler-edit')
+    .description('Edit and transform Firefox performance profiles')
+    .exitOverride()
+    .option(
+      '-i, --input <fileOrUrl>',
+      'Input profile (file path or http(s) URL)'
+    )
+    .option('-o, --output <path>', 'Output path (.json or .json.gz)')
+    .option('--from-file <path>', 'Load input from a file')
+    .option('--from-url <url>', 'Load input from a URL')
+    .option('--from-hash <hash>', 'Load input from a profile hash')
+    .option(
+      '--symbolicate-with-server <url>',
+      'Symbolicate frames using this symbol server URL'
+    )
+    .addOption(
+      new Option(
+        '--symbolicate-wasm <spec>',
+        'Apply wasm symbol info, as <url>=<path> or just <path>'
+      )
+        .argParser(collectWasm)
+        .default([] as WasmSymbolicationCliSpec[])
+    )
+    .option('--insert-label-frames <path>', 'TOML file with label definitions')
+    .option(
+      '--only-keep-threads-with-markers-matching <search>',
+      'Keep only threads with markers matching the given search string'
+    )
+    .option(
+      '--merge-non-overlapping-threads-by-name',
+      'Merge same-named threads across non-overlapping process runs'
+    )
+    .option(
+      '--set-name <name>',
+      'Override the profile product name',
+      requireNonEmpty('--set-name')
+    );
+
+  program.parse(processArgv);
+  const opts = program.opts();
 
   const sources: ProfileSource[] = [];
-
-  if (typeof argv.input === 'string' && argv.input !== '') {
-    if (/^https?:\/\//i.test(argv.input)) {
-      sources.push({ type: 'URL', url: argv.input });
+  if (typeof opts.input === 'string' && opts.input !== '') {
+    if (/^https?:\/\//i.test(opts.input)) {
+      sources.push({ type: 'URL', url: opts.input });
     } else {
-      sources.push({ type: 'FILE', path: argv.input });
+      sources.push({ type: 'FILE', path: opts.input });
     }
   }
-  if (typeof argv['from-file'] === 'string' && argv['from-file'] !== '') {
-    sources.push({ type: 'FILE', path: argv['from-file'] });
+  if (typeof opts.fromFile === 'string' && opts.fromFile !== '') {
+    sources.push({ type: 'FILE', path: opts.fromFile });
   }
-  if (typeof argv['from-url'] === 'string' && argv['from-url'] !== '') {
-    sources.push({ type: 'URL', url: argv['from-url'] });
+  if (typeof opts.fromUrl === 'string' && opts.fromUrl !== '') {
+    sources.push({ type: 'URL', url: opts.fromUrl });
   }
-  if (typeof argv['from-hash'] === 'string' && argv['from-hash'] !== '') {
-    sources.push({ type: 'HASH', hash: argv['from-hash'] });
+  if (typeof opts.fromHash === 'string' && opts.fromHash !== '') {
+    sources.push({ type: 'HASH', hash: opts.fromHash });
   }
 
   if (sources.length === 0) {
@@ -232,55 +436,49 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     );
   }
 
-  if (!(typeof argv.output === 'string' && argv.output !== '')) {
+  if (!(typeof opts.output === 'string' && opts.output !== '')) {
     throw new Error('An output path must be supplied with --output / -o');
-  }
-
-  const symbolicateWasm: WasmSymbolicationCliSpec[] = [];
-  const rawWasmArg = argv['symbolicate-wasm'];
-  let wasmArgs: unknown[];
-  if (rawWasmArg === undefined) {
-    wasmArgs = [];
-  } else if (Array.isArray(rawWasmArg)) {
-    wasmArgs = rawWasmArg;
-  } else {
-    wasmArgs = [rawWasmArg];
-  }
-  for (const arg of wasmArgs) {
-    if (typeof arg !== 'string' || arg === '') {
-      throw new Error('--symbolicate-wasm requires a value');
-    }
-    // Accept "<url>=<path>" if the LHS looks like a URL, otherwise treat the
-    // whole string as a path and infer the URL from the profile. Split on
-    // the last `=` so URLs containing `=` (e.g. in query strings) survive
-    // intact; this assumes file paths don't contain `=`.
-    const eqIndex = arg.lastIndexOf('=');
-    if (eqIndex !== -1 && /^[a-z]+:\/\//i.test(arg.slice(0, eqIndex))) {
-      symbolicateWasm.push({
-        strippedWasmUrl: arg.slice(0, eqIndex),
-        unstrippedWasmPath: arg.slice(eqIndex + 1),
-      });
-    } else {
-      symbolicateWasm.push({ unstrippedWasmPath: arg });
-    }
   }
 
   return {
     input: sources[0],
-    output: argv.output,
+    output: opts.output,
     symbolicateWithServer:
-      typeof argv['symbolicate-with-server'] === 'string' &&
-      argv['symbolicate-with-server'] !== ''
-        ? argv['symbolicate-with-server']
+      typeof opts.symbolicateWithServer === 'string' &&
+      opts.symbolicateWithServer !== ''
+        ? opts.symbolicateWithServer
         : undefined,
-    symbolicateWasm,
+    symbolicateWasm: opts.symbolicateWasm,
+    insertLabelFrames:
+      typeof opts.insertLabelFrames === 'string' &&
+      opts.insertLabelFrames !== ''
+        ? opts.insertLabelFrames
+        : undefined,
+    onlyKeepThreadsWithMarkersMatching:
+      typeof opts.onlyKeepThreadsWithMarkersMatching === 'string' &&
+      opts.onlyKeepThreadsWithMarkersMatching !== ''
+        ? opts.onlyKeepThreadsWithMarkersMatching
+        : undefined,
+    mergeNonOverlappingThreadsByName:
+      opts.mergeNonOverlappingThreadsByName === true,
+    setName: typeof opts.setName === 'string' ? opts.setName : undefined,
   };
 }
 
 if (require.main === module) {
-  const options = makeOptionsFromArgv(process.argv);
-  run(options).catch((err) => {
-    console.error(err);
+  try {
+    const options = makeOptionsFromArgv(process.argv);
+    run(options).catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+  } catch (err) {
+    if (err instanceof CommanderError) {
+      // Commander already wrote its own output and chose the
+      // appropriate exit code.
+      process.exit(err.exitCode);
+    }
+    console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
-  });
+  }
 }

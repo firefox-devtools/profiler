@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import path from 'path';
-import { mainBundleConfig } from './lib/esbuild-configs.mjs';
+import {
+  mainBundleConfig,
+  sourceMapWorkerConfig,
+} from './lib/esbuild-configs.mjs';
 import { startDevServer } from './lib/dev-server.mjs';
 import { serveAndOpenProfile } from './lib/profile-server.mjs';
 import yargs from 'yargs';
@@ -22,6 +25,7 @@ startDevServer(mainBundleConfig, {
   host,
   distDir: 'dist',
   cleanDist: true,
+  extraWatchConfigs: [sourceMapWorkerConfig],
   onServerStart: (profilerUrl) => {
     const barAscii =
       '------------------------------------------------------------------------------------------';

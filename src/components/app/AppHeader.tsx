@@ -9,7 +9,7 @@
 import * as React from 'react';
 
 import { InnerNavigationLink } from 'firefox-profiler/components/shared/InnerNavigationLink';
-import { ThemeToggle } from './ThemeToggle';
+import { SettingsMenu } from './SettingsMenu';
 
 import './AppHeader.css';
 import { Localized } from '@fluent/react';
@@ -44,7 +44,7 @@ export class AppHeader extends React.PureComponent<{}> {
             </span>
           </Localized>
           <div className="appHeaderRightControls">
-            <ThemeToggle />
+            <SettingsMenu buttonClassName="appHeaderSettingsButton" />
             <Localized id="AppHeader--github-icon" attrs={{ title: true }}>
               <a
                 className="appHeaderGithubIcon"

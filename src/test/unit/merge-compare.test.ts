@@ -985,4 +985,121 @@ describe('mergeProfilesForDiffing with source tables', function () {
       singleProfile.profile.shared.sources
     );
   });
+
+  it('should merge sourceLocationTables and remap funcTable / frameTable references', function () {
+    const profileA = getProfileFromTextSamples(`
+      A[file:bundle-a.js]
+    `);
+    const profileB = getProfileFromTextSamples(`
+      B[file:bundle-b.js]
+    `);
+
+    // Pre-populate sourceLocationTable and the func/frame columns that reference it.
+    // bundle-a.js source is index 0 in each per-profile table (sources from
+    // getProfileFromTextSamples have null id but a filename string).
+    const sharedA = profileA.profile.shared;
+    sharedA.sourceLocationTable.source.push(0);
+    sharedA.sourceLocationTable.line.push(11);
+    sharedA.sourceLocationTable.column.push(22);
+    sharedA.sourceLocationTable.length = 1;
+    sharedA.funcTable.originalLocation[0] = 0;
+    sharedA.frameTable.originalLocation[0] = 0;
+
+    const sharedB = profileB.profile.shared;
+    sharedB.sourceLocationTable.source.push(0);
+    sharedB.sourceLocationTable.line.push(33);
+    sharedB.sourceLocationTable.column.push(44);
+    sharedB.sourceLocationTable.length = 1;
+    sharedB.funcTable.originalLocation[0] = 0;
+    sharedB.frameTable.originalLocation[0] = 0;
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    const { funcTable, frameTable, sourceLocationTable, sources } =
+      mergedProfile.shared;
+    const stringTable = StringTable.withBackingArray(
+      mergedProfile.shared.stringArray
+    );
+
+    // Both inputs' sourceLocationTable rows survive the merge (no dedup).
+    expect(sourceLocationTable.length).toBe(2);
+
+    // source indices are remapped through the merged sources table.
+    for (let i = 0; i < sourceLocationTable.length; i++) {
+      const src = sourceLocationTable.source[i];
+      expect(src).not.toBeNull();
+      expect(src).toBeGreaterThanOrEqual(0);
+      expect(src).toBeLessThan(sources.length);
+    }
+
+    // Each input's funcTable.originalLocation[0] now points at the corresponding
+    // remapped row, and the remapped row carries the correct original line.
+    const funcAName = stringTable.indexForString('A');
+    const funcBName = stringTable.indexForString('B');
+    const funcAIndex = funcTable.name.indexOf(funcAName);
+    const funcBIndex = funcTable.name.indexOf(funcBName);
+    expect(funcAIndex).toBeGreaterThanOrEqual(0);
+    expect(funcBIndex).toBeGreaterThanOrEqual(0);
+
+    const funcAOriginalLocationIdx = funcTable.originalLocation[funcAIndex];
+    const funcBOriginalLocationIdx = funcTable.originalLocation[funcBIndex];
+    expect(funcAOriginalLocationIdx).not.toBeNull();
+    expect(funcBOriginalLocationIdx).not.toBeNull();
+    expect(
+      sourceLocationTable.line[ensureExists(funcAOriginalLocationIdx)]
+    ).toBe(11);
+    expect(
+      sourceLocationTable.line[ensureExists(funcBOriginalLocationIdx)]
+    ).toBe(33);
+
+    // The frame columns are populated for every row (catches the original bug
+    // where the column was left empty and any index access returned undefined).
+    for (let i = 0; i < frameTable.length; i++) {
+      const v = frameTable.originalLocation[i];
+      expect(v === null || v >= 0).toBe(true);
+    }
+    for (let i = 0; i < funcTable.length; i++) {
+      const v = funcTable.originalLocation[i];
+      expect(v === null || v >= 0).toBe(true);
+    }
+  });
+
+  it('should populate empty originalLocation columns on funcTable and frameTable when no symbolication ran', function () {
+    const profileA = getProfileFromTextSamples(`A[file:a.js]`);
+    const profileB = getProfileFromTextSamples(`B[file:b.js]`);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA.profile, profileB.profile],
+      [profileState, profileState]
+    );
+
+    const { funcTable, frameTable, sourceLocationTable } = mergedProfile.shared;
+
+    // Even without any symbolicated entries on the inputs, the columns must
+    // be filled (not undefined) so downstream `x !== null` checks work.
+    expect(sourceLocationTable.length).toBe(0);
+    expect(funcTable.originalLocation).toHaveLength(funcTable.length);
+    expect(frameTable.originalLocation).toHaveLength(frameTable.length);
+    for (const v of funcTable.originalLocation) {
+      expect(v).toBeNull();
+    }
+    for (const v of frameTable.originalLocation) {
+      expect(v).toBeNull();
+    }
+  });
 });
