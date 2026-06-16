@@ -45,9 +45,13 @@ function setup() {
 }
 
 async function openMenu() {
-  const button = await screen.findByRole('button', { name: 'Settings' });
+  // Find the cog button and wait for the panel to open in a
+  // language-agnostic way: before the menu opens there is only a single
+  // button, and the language switcher combobox only appears once the panel
+  // is shown. This avoids depending on localized label text.
+  const button = await screen.findByRole('button');
   fireFullClick(button);
-  await screen.findByText('Legal');
+  await screen.findByRole('combobox');
 }
 
 it('renders the cog button in its closed state', async () => {
