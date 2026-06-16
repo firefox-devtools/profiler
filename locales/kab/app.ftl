@@ -105,17 +105,6 @@ Details--open-sidebar-button =
 Details--close-sidebar-button =
     .title = Mdel agalis adisan
 
-## Footer Links
-
-FooterLinks--legal = Usḍif
-FooterLinks--Privacy = Tabaḍnit
-FooterLinks--Cookies = Inagan n tuqqna
-FooterLinks--languageSwitcher--select =
-    .title = Snifel tutlayt
-FooterLinks--hide-button =
-    .title = Ffer iseɣwan n uḍar n usebter
-    .aria-label = Ffer iseɣwan n uḍar n usebter
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -210,7 +199,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Tuccḍa deg usali
 MenuButtons--index--revert = Uɣal ɣer umaɣnu aɣbalu
-MenuButtons--index--docs = Tasemlit
 MenuButtons--permalink--button =
     .label = Permalink
 
@@ -410,13 +398,6 @@ TrackContextMenu--no-results-found = Ulac igmaḍ yettwafen i “<span>{ $search
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = Ffer asesfer
-
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

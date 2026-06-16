@@ -2,7 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
-import { Command, CommanderError, Option } from 'commander';
+import {
+  Command,
+  CommanderError,
+  InvalidArgumentError,
+  Option,
+} from 'commander';
 import { parse as parseToml } from 'smol-toml';
 
 import {
@@ -25,13 +30,22 @@ import {
   applyWasmSymbolication,
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
-import type { Profile } from 'firefox-profiler/types/profile';
+import { getThreadsWithMarkersMatchingSearchFilter } from 'firefox-profiler/profile-logic/marker-data';
+import type {
+  Profile,
+  RawThread,
+  ThreadIndex,
+} from 'firefox-profiler/types/profile';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
   type AutoLabel,
   type LabelDescription,
   resolveAllLabels,
 } from 'firefox-profiler/utils/label-templates';
+import {
+  mergeNonOverlappingThreadsByName,
+  remapCountersAndProfilerOverhead,
+} from 'firefox-profiler/profile-logic/merge-compare';
 
 /**
  * A CLI tool for editing profiles.
@@ -52,9 +66,13 @@ import {
  *
  *   node node-tools-dist/profiler-edit.js --from-hash w1spyw917hg... -o out.json.gz \
  *     --insert-label-frames known-functions.toml
+ *
+ *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
+ *     --only-keep-threads-with-markers-matching '-async,-sync' \
+ *     --merge-non-overlapping-threads-by-name
  */
 
-type ProfileSource =
+export type ProfileSource =
   | { type: 'FILE'; path: string }
   | { type: 'URL'; url: string }
   | { type: 'HASH'; hash: string };
@@ -63,7 +81,7 @@ type ProfileSource =
 // supplies symbol names, plus (optionally) the URL of the stripped wasm in the
 // profile to which those names should be applied. If `strippedWasmUrl` is
 // omitted, the profile must contain exactly one .wasm source, which is used.
-interface WasmSymbolicationCliSpec {
+export interface WasmSymbolicationCliSpec {
   // Path to the local unstripped .wasm file (with a "name" custom section).
   unstrippedWasmPath: string;
   // URL of the matching stripped wasm as it appears in the profile.
@@ -76,9 +94,12 @@ export interface CliOptions {
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
   insertLabelFrames?: string;
+  onlyKeepThreadsWithMarkersMatching?: string;
+  mergeNonOverlappingThreadsByName?: boolean;
+  setName?: string;
 }
 
-function loadWasmSymbolicationSpecs(
+export function loadWasmSymbolicationSpecs(
   cliSpecs: WasmSymbolicationCliSpec[]
 ): WasmSymbolicationSpec[] {
   return cliSpecs.map((spec) => {
@@ -97,7 +118,7 @@ function loadWasmSymbolicationSpecs(
  * (mirrors getLabelIndexForFunc in insert-stack-labels.ts), so auto-discovery
  * sees the same strings the labeler will compare against.
  */
-function collectFuncNames(profile: Profile): string[] {
+export function collectFuncNames(profile: Profile): string[] {
   const { funcTable, sources, stringArray } = profile.shared;
   const result: string[] = [];
   for (let i = 0; i < funcTable.length; i++) {
@@ -265,6 +286,41 @@ export async function run(options: CliOptions) {
     profile = insertStackLabels(profile, labels);
   }
 
+  if (
+    options.onlyKeepThreadsWithMarkersMatching !== undefined &&
+    options.onlyKeepThreadsWithMarkersMatching !== ''
+  ) {
+    const before = profile.threads.length;
+    const matchingThreadIndexes = getThreadsWithMarkersMatchingSearchFilter(
+      profile,
+      options.onlyKeepThreadsWithMarkersMatching
+    );
+    const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
+    const matchingThreads: RawThread[] = [];
+    profile.threads.forEach((thread, oldIndex) => {
+      if (matchingThreadIndexes.has(oldIndex)) {
+        oldThreadIndexToNew.set(oldIndex, matchingThreads.length);
+        matchingThreads.push(thread);
+      }
+    });
+    profile = {
+      ...profile,
+      threads: matchingThreads,
+      ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
+    };
+    console.log(
+      `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
+    );
+  }
+
+  if (options.mergeNonOverlappingThreadsByName) {
+    profile = mergeNonOverlappingThreadsByName(profile);
+  }
+
+  if (options.setName !== undefined) {
+    profile.meta.product = options.setName;
+  }
+
   const { profile: compactedProfile } = computeCompactedProfile(profile);
 
   const outputFilename = options.output;
@@ -298,6 +354,15 @@ function collectWasm(
   return [...previous, { unstrippedWasmPath: value }];
 }
 
+function requireNonEmpty(flagName: string): (value: string) => string {
+  return (value: string) => {
+    if (value === '') {
+      throw new InvalidArgumentError(`${flagName} requires a non-empty value`);
+    }
+    return value;
+  };
+}
+
 export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
   const program = new Command();
   program
@@ -324,7 +389,20 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         .argParser(collectWasm)
         .default([] as WasmSymbolicationCliSpec[])
     )
-    .option('--insert-label-frames <path>', 'TOML file with label definitions');
+    .option('--insert-label-frames <path>', 'TOML file with label definitions')
+    .option(
+      '--only-keep-threads-with-markers-matching <search>',
+      'Keep only threads with markers matching the given search string'
+    )
+    .option(
+      '--merge-non-overlapping-threads-by-name',
+      'Merge same-named threads across non-overlapping process runs'
+    )
+    .option(
+      '--set-name <name>',
+      'Override the profile product name',
+      requireNonEmpty('--set-name')
+    );
 
   program.parse(processArgv);
   const opts = program.opts();
@@ -376,6 +454,14 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       opts.insertLabelFrames !== ''
         ? opts.insertLabelFrames
         : undefined,
+    onlyKeepThreadsWithMarkersMatching:
+      typeof opts.onlyKeepThreadsWithMarkersMatching === 'string' &&
+      opts.onlyKeepThreadsWithMarkersMatching !== ''
+        ? opts.onlyKeepThreadsWithMarkersMatching
+        : undefined,
+    mergeNonOverlappingThreadsByName:
+      opts.mergeNonOverlappingThreadsByName === true,
+    setName: typeof opts.setName === 'string' ? opts.setName : undefined,
   };
 }
 

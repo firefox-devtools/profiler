@@ -1,9 +1,17 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { getEmptyRawMarkerTable } from './data-structures';
-import { getFriendlyThreadName } from './profile-data';
-import { removeFilePath, removeURLs, stringsToRegExp } from '../utils/string';
+import {
+  getDefaultCategories,
+  getEmptyRawMarkerTable,
+} from './data-structures';
+import { getFriendlyThreadName, getTimeRangeForThread } from './profile-data';
+import {
+  removeFilePath,
+  removeURLs,
+  stringsToRegExp,
+  splitSearchString,
+} from '../utils/string';
 import { StringTable } from '../utils/string-table';
 import { ensureExists, assertExhaustiveCheck } from '../utils/types';
 import {
@@ -15,6 +23,7 @@ import {
 import {
   getSchemaFromMarker,
   markerPayloadMatchesSearch,
+  markerSchemaFrontEndOnly,
 } from './marker-schema';
 
 import type {
@@ -42,6 +51,8 @@ import type {
   MarkerDisplayLocation,
   Tid,
   LogMarkerPayload,
+  ThreadIndex,
+  Profile,
 } from 'firefox-profiler/types';
 
 /**
@@ -996,6 +1007,99 @@ export function deriveMarkersFromRawMarkerTable(
   }
 
   return { markers, markerIndexToRawMarkerIndexes };
+}
+
+/**
+ * Return the merged list of marker schemas which contains both the schemas
+ * from the profile, and the front-end only schemas ("Jank" etc).
+ */
+export function computeCombinedMarkerSchemaList(
+  markerSchemaFromProfile: MarkerSchema[]
+): MarkerSchema[] {
+  const frontEndSchemaNames = new Set(
+    markerSchemaFrontEndOnly.map((schema) => schema.name)
+  );
+  return [
+    ...markerSchemaFromProfile.filter(
+      (schema) => !frontEndSchemaNames.has(schema.name)
+    ),
+    ...markerSchemaFrontEndOnly,
+  ];
+}
+
+/**
+ * Create a Set from the list, with the key being schema.name.
+ */
+export function computeMarkerSchemaByName(
+  schemaList: MarkerSchema[]
+): MarkerSchemaByName {
+  const markerSchemaByName: MarkerSchemaByName = Object.create(null);
+  for (const schema of schemaList) {
+    markerSchemaByName[schema.name] = schema;
+  }
+  return markerSchemaByName;
+}
+
+/**
+ * Return the set of threads that have at least one marker matching the given
+ * marker search string, using the same regular marker search syntax: comma-
+ * separated terms, optional `field:value` and `-field:value` qualifiers.
+ *
+ * This is a somewhat expensive operation because we call deriveMarkersFromRawMarkerTable
+ * for every thread.
+ */
+export function getThreadsWithMarkersMatchingSearchFilter(
+  profile: Profile,
+  markerSearch: string
+): Set<ThreadIndex> {
+  const searchRegExps = stringsToMarkerRegExps(splitSearchString(markerSearch));
+  if (searchRegExps === null) {
+    return new Set();
+  }
+
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const categoryList = profile.meta.categories ?? getDefaultCategories();
+
+  const schemaList = computeCombinedMarkerSchemaList(
+    profile.meta.markerSchema ?? []
+  );
+  const markerSchemaByName = computeMarkerSchemaByName(schemaList);
+
+  const ipcCorrelations = correlateIPCMarkers(profile.threads, profile.shared);
+
+  const matchingThreads = new Set<ThreadIndex>();
+
+  for (
+    let threadIndex = 0;
+    threadIndex < profile.threads.length;
+    threadIndex++
+  ) {
+    const thread = profile.threads[threadIndex];
+    const { markers } = deriveMarkersFromRawMarkerTable(
+      thread.markers,
+      profile.shared.stringArray,
+      thread.tid,
+      getTimeRangeForThread(thread, profile.meta.interval),
+      ipcCorrelations
+    );
+    if (markers.length === 0) {
+      continue;
+    }
+    const markerIndexes = markers.map((_, i) => i);
+    const filtered = getSearchFilteredMarkerIndexes(
+      (i) => markers[i],
+      markerIndexes,
+      markerSchemaByName,
+      searchRegExps,
+      stringTable,
+      categoryList
+    );
+    if (filtered.length > 0) {
+      matchingThreads.add(threadIndex);
+    }
+  }
+
+  return matchingThreads;
 }
 
 /**

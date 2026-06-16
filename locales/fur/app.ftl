@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Va tal nestri dipuesit Git (il colegament al vignarà viert intun gnûf barcon)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Va daûr des preferencis dal teme di sisteme
+ThemeToggle--light =
+    .title = Dopre teme clâr
+ThemeToggle--dark =
+    .title = Dopre teme scûr
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -257,16 +267,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Segnale l’erôr su GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Notis legâls
-FooterLinks--Privacy = Riservatece
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Impostazions
+SettingsMenu--docs = Documentazion
+SettingsMenu--legal = Notis legâls
+SettingsMenu--privacy = Riservatece
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Cambie lenghe
-FooterLinks--hide-button =
-    .title = Plate colegaments da pît de pagjine
-    .aria-label = Plate colegaments da pît de pagjine
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -311,6 +322,7 @@ Home--additional-content-title = Cjame profîi esistents
 Home--additional-content-content = Tu puedis <strong>strissinâ e molâ</strong> achì un profîl par cjariâlu, opûr:
 Home--compare-recordings-info = Tu puedis ancje paragonâ diviersis regjistrazions. <a>Vierç la interface pal confront</a>.
 Home--your-recent-uploaded-recordings-title = Lis tôs regjistrazions cjariadis in rêt di resint
+Home--dark-mode-title = Modalitât scure
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -403,6 +415,8 @@ MarkerSettings--panel-search =
     .title = Visualize dome marcadôrs che a corispuindin a un ciert non
 MarkerSettings--marker-filters =
     .title = Filtris pai marcadôrs
+MarkerSettings--copy-table =
+    .title = Copie tabele come test
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -441,7 +455,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Erôr tal cjariâ in rêt
 MenuButtons--index--revert = Ripristine al profîl origjinâl
-MenuButtons--index--docs = Documentazion
 MenuButtons--permalink--button =
     .label = Colegament permanent
 
@@ -520,6 +533,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Ilimitade
 MenuButtons--metaInfo--application = Aplicazion
 MenuButtons--metaInfo--name-and-version = Non e version:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Timp di ativitât:
 MenuButtons--metaInfo--update-channel = Canâl di inzornament:
 MenuButtons--metaInfo--build-id = ID compilazion:
 MenuButtons--metaInfo--build-type = Gjenar di compilazion:
@@ -796,15 +811,6 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = Plate procès
 
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = memorie relative in chest moment
-TrackMemoryGraph--memory-range-in-graph = interval di memorie tal grafic
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = assegnazions e rimozions di assegnazion dal campion precedent
-
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
@@ -829,6 +835,11 @@ TrackPower--tooltip-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Consum
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
     .label = Consum
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
@@ -1050,6 +1061,12 @@ BottomBox--assembly-code-not-available-title = Codiç in assembler no disponibil
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Viôt il <a>probleme #4520</a> pai senaris supuartâts e i mioraments planificâts.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Jes dal plen visôr
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Plen visôr
 SourceView--close-button =
     .title = Siere la viodude sorzint
 
@@ -1124,6 +1141,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Plate la viodude assembly
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Prime
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Sucessîf
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } di { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.
