@@ -48,20 +48,31 @@ type ColumnDescription<TCol> = null extends (
       | { type: 'INDEX_REF_OR_NULL'; referencedTable: TableCompactionState }
       | { type: 'SELF_INDEX_REF_OR_NULL' }
       | { type: 'NO_REF' }
-  :
-      | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
-      | { type: 'INDEX_REF_OR_NEG_ONE'; referencedTable: TableCompactionState }
-      | { type: 'NO_REF' };
+  : Int32Array<ArrayBuffer> extends TCol
+    ?
+        | { type: 'INDEX_REF_INT32'; referencedTable: TableCompactionState }
+        | { type: 'NO_REF' }
+    :
+        | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
+        | {
+            type: 'INDEX_REF_OR_NEG_ONE';
+            referencedTable: TableCompactionState;
+          }
+        | { type: 'NO_REF' };
 
 type TableDescription<T> = {
-  [K in keyof T as T[K] extends Array<any> ? K : never]: ColumnDescription<
-    T[K]
-  >;
+  [K in keyof T as T[K] extends Array<any> | Int32Array<ArrayBuffer>
+    ? K
+    : never]: ColumnDescription<T[K]>;
 };
 
 const ColDesc = {
   indexRef: (referencedTable: TableCompactionState) => ({
     type: 'INDEX_REF' as const,
+    referencedTable,
+  }),
+  indexRefInt32: (referencedTable: TableCompactionState) => ({
+    type: 'INDEX_REF_INT32' as const,
     referencedTable,
   }),
   indexRefOrNull: (referencedTable: TableCompactionState) => ({
@@ -145,7 +156,7 @@ export function computeCompactedProfile(
   };
 
   const stackTableDesc: TableDescription<RawStackTable> = {
-    frame: ColDesc.indexRef(tcs.frameTable),
+    frame: ColDesc.indexRefInt32(tcs.frameTable),
     prefix: ColDesc.selfIndexRefOrNull(),
   };
   const frameTableDesc: TableDescription<FrameTable> = {
@@ -326,6 +337,7 @@ function _markTableAndComputeTranslation<T>(
     const col = (table as any)[key];
     switch (desc.type) {
       case 'INDEX_REF':
+      case 'INDEX_REF_INT32':
         markColumn(col, markBuffer, desc.referencedTable.markBuffer);
         break;
       case 'INDEX_REF_OR_NULL':
@@ -354,7 +366,13 @@ function _markTableAndComputeTranslation<T>(
   thisTableCompactionState.computeIndexTranslation();
 }
 
-function markColumn(col: Array<number>, shouldMark: BitSet, markBuf: BitSet) {
+function markColumn(
+  col: Array<number> | Int32Array<ArrayBuffer>,
+  shouldMark: BitSet,
+  markBuf: BitSet
+) {
+  // Polymorphic: indexing works the same on Int32Array as on number[], so the
+  // INDEX_REF and INDEX_REF_INT32 cases share this function.
   for (let i = 0; i < col.length; i++) {
     if (checkBit(shouldMark, i)) {
       const val = col[i];
@@ -499,6 +517,14 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
+      case 'INDEX_REF_INT32':
+        result[key] = _compactColIndexInt32(
+          oldCol,
+          markBuffer,
+          desc.referencedTable.oldIndexToNewIndexPlusOne,
+          newLength
+        );
+        break;
       case 'INDEX_REF_OR_NULL':
         result[key] = _compactColIndexOrNull(
           oldCol,
@@ -555,6 +581,22 @@ function _compactColIndex(
   newLength: number
 ): number[] {
   const newCol: number[] = new Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      newCol[newIndex++] = oldIndexToNewIndexPlusOne[oldCol[i]] - 1;
+    }
+  }
+  return newCol;
+}
+
+function _compactColIndexInt32(
+  oldCol: Int32Array<ArrayBuffer>,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
   let newIndex = 0;
   for (let i = 0; i < oldCol.length; i++) {
     if (checkBit(markBuffer, i)) {

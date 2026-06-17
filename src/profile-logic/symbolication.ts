@@ -2,7 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
   shallowCloneFrameTable,
@@ -420,7 +421,7 @@ function _computeStackTableWithAddedExpansionStacks(
   if (frameIndexToInlineExpansionFrames.size === 0) {
     return null;
   }
-  const newStackTable = getEmptyRawStackTable();
+  const newStackTable = getRawStackTableBuilder();
   const oldStackToNewStack = new Int32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const oldFrame = stackTable.frame[stack];
@@ -452,7 +453,10 @@ function _computeStackTableWithAddedExpansionStacks(
     }
     oldStackToNewStack[stack] = prefix ?? -1;
   }
-  return { newStackTable, oldStackToNewStack };
+  return {
+    newStackTable: finishRawStackTableBuilder(newStackTable),
+    oldStackToNewStack,
+  };
 }
 
 /**

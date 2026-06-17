@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 65
+
+The stack table's `frame` column (stored at `profile.shared.stackTable.frame`) can now optionally be stored as an `Int32Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
 ### Version 64
 
 A new `SourceLocationTable` has been added to `profile.shared.sourceLocationTable`. It holds the original (pre-compilation) source positions produced by source map symbolication, paired with the generated `line`/`column` already on `FrameTable`.

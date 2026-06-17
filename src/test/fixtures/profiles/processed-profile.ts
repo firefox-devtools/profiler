@@ -8,6 +8,8 @@ import {
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
+  getRawStackTableBuilderWithExistingContents,
+  finishRawStackTableBuilder,
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
@@ -983,7 +985,7 @@ function _buildThreadFromTextOnlyStacks(
       }
 
       // Attempt to find a stack that satisfies the given frameIndex and prefix.
-      const stackTable = globalDataCollector.getStackTable();
+      const stackTable = globalDataCollector.getStackTableBuilder();
       let stackIndex;
       for (let i = 0; i < stackTable.length; i++) {
         if (
@@ -1994,8 +1996,10 @@ function getStackIndexForCallNodePath(
 /**
  * Use this function to add window id information to frames, using call node
  * paths to point to frames using stacks.
+ * This mutates `shared`.
  *
  * @param thread The thread to mutate.
+ * @param shared The shared profile data to mutate.
  * @param listOfOperations A list of pairs { innerWindowID, callNodes }
  *                         indicating which call nodes this innerWindowID will
  *                         be assigned to.
@@ -2037,6 +2041,9 @@ export function addInnerWindowIdToStacks(
       IndexIntoStackTable
     >();
 
+    const stackTableBuilder =
+      getRawStackTableBuilderWithExistingContents(stackTable);
+
     for (const callNode of callNodesToDupe) {
       const stackIndex = getStackIndexForCallNodePath(shared, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
@@ -2062,13 +2069,15 @@ export function addInnerWindowIdToStacks(
       frameTable.innerWindowID.push(listOfOperations[1].innerWindowID);
 
       // Clone the stack
-      const newStackIndex = stackTable.length++;
-      stackTable.prefix.push(stackTable.prefix[stackIndex]);
+      const newStackIndex = stackTableBuilder.length++;
+      stackTableBuilder.prefix.push(stackTable.prefix[stackIndex]);
       // Using the cloned frame index.
-      stackTable.frame.push(newFrameIndex);
+      stackTableBuilder.frame.push(newFrameIndex);
 
       mapStackIndexToDupe.set(stackIndex, newStackIndex);
     }
+
+    shared.stackTable = finishRawStackTableBuilder(stackTableBuilder);
 
     const sampleTimes = ensureExists(samples.time);
     for (let sampleIndex = samples.length; sampleIndex >= 0; sampleIndex--) {

@@ -501,7 +501,7 @@ async function processTracingEvents(
   const stringTable = globalDataCollector.getStringTable();
 
   const frameTable = globalDataCollector.getFrameTable();
-  const stackTable = globalDataCollector.getStackTable();
+  const stackTable = globalDataCollector.getStackTableBuilder();
 
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] = (eventsByName.get(
     'Profile'
