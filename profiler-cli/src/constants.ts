@@ -8,6 +8,7 @@
 
 // These globals are defined via esbuild's define option.
 declare const __BUILD_HASH__: string;
+declare const __PACKAGE_NAME__: string;
 declare const __VERSION__: string;
 
 /**
@@ -15,6 +16,11 @@ declare const __VERSION__: string;
  * between client and daemon.
  */
 export const BUILD_HASH = __BUILD_HASH__;
+
+/**
+ * Package name from profiler-cli/package.json, injected at build time.
+ */
+export const PACKAGE_NAME = __PACKAGE_NAME__;
 
 /**
  * Package version from profiler-cli/package.json, injected at build time.
