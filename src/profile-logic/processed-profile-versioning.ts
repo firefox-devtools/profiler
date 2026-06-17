@@ -18,6 +18,7 @@ import { ResourceType } from 'firefox-profiler/types';
 import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import { ProfileVersionError } from './errors';
 import type { Profile } from 'firefox-profiler/types';
 
 export type ProfileUpgradeInfo = {
@@ -85,10 +86,10 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
   }
 
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
-    throw new Error(
-      `Unable to parse a processed profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
-        `The most recent version understood by this version of profiler.firefox.com is version ${PROCESSED_PROFILE_VERSION}.\n` +
-        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
+    throw new ProfileVersionError(
+      'processed',
+      profileVersion,
+      PROCESSED_PROFILE_VERSION
     );
   }
 

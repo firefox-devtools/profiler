@@ -23,6 +23,7 @@ import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import type { ProfileUpgradeInfo } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
+import { ProfileVersionError } from './errors';
 import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
@@ -2313,6 +2314,11 @@ export async function unserializeProfileOfArbitraryFormat(
     return processGeckoOrDevToolsProfile(json);
   } catch (e) {
     console.error('UnserializationError:', e);
+    // A version mismatch is already a clear, user-facing error. Re-throw it
+    // as-is so each frontend can detect it and add its own update advice.
+    if (e instanceof ProfileVersionError) {
+      throw e;
+    }
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
 }
