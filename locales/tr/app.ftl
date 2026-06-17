@@ -138,6 +138,11 @@ CallTree--tracing-ms-total = Çalışma süresi (ms)
     .title = “Toplam” çalışma süresi, bu fonksiyonun yığında gözlemlendiği tüm sürenin özetini içerir. Bu süre, fonksiyonun kendisinin çalıştığı süreyi ve bu fonksiyondan çağırılanların sürelerini içerir.
 CallTree--tracing-ms-self = Öz (ms)
     .title = “Öz” süre yalnızca fonksiyonun yığının sonunda olduğu süreyi içerir. Eğer fonksiyon başka fonksiyonları çağırmışsa diğer fonksiyonların süresi dahil değildir. Öz süre, programda asıl nerede zaman harcandığını anlamak için faydalıdır.
+CallTree--samples-total = Toplam (örnekler)
+    .title =
+        “Toplam” örnek sayısı, bu fonksiyonun yığın üzerinde görüldüğü her örneğin
+        bir özetini içerir. Fonksiyonun gerçekten çalıştığı süre ile bu fonksiyondan
+        çağrılan fonksiyonlarda geçirilen süre de buna dahildir.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -238,16 +243,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Hatayı GitHub’da rapor et
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Hukuki bilgiler
-FooterLinks--Privacy = Gizlilik
-FooterLinks--Cookies = Çerezler
-FooterLinks--languageSwitcher--select =
-    .title = Dili değiştir
-FooterLinks--hide-button =
-    .title = Alt bilgi bağlantılarını gizle
-    .aria-label = Alt bilgi bağlantılarını gizle
+SettingsMenu--button =
+    .title = Ayarlar
+SettingsMenu--docs = Belgelendirme
+SettingsMenu--legal = Hukuki Bilgiler
+SettingsMenu--privacy = Gizlilik
+SettingsMenu--cookies = Çerezler
+SettingsMenu--language-switcher =
+    .title = Dil değiştir
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -288,6 +294,9 @@ Home--record-instructions =
 Home--instructions-content2 =
     Performans profilleri yalnızca <a>{ -firefox-brand-name }’un masaüstü sürümü</a> ile kaydedilebilir.
     Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } bu cihazda doğrudan profillenebilir.
+    Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını cihazda doğrudan profilleme</a> sayfasını okuyabilirsiniz.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
@@ -439,7 +448,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Yükleme başarısız
 MenuButtons--index--revert = Orijinal profile geri dön
-MenuButtons--index--docs = Dokümanlar
 MenuButtons--permalink--button =
     .label = Kalıcı bağlantı
 
@@ -785,15 +793,6 @@ TrackNameButton--hide-track =
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = İşlemi gizle
-
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = bu süredeki göreli bellek
-TrackMemoryGraph--memory-range-in-graph = grafikteki bellek aralığı
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = önceki örnekten beri yapılan atamalar ve serbest bırakmalar
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

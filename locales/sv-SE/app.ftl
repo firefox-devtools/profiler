@@ -292,16 +292,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Rapportera felet på GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Juridisk information
-FooterLinks--Privacy = Sekretesspolicy
-FooterLinks--Cookies = Kakor
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Inställningar
+SettingsMenu--docs = Dokumentation
+SettingsMenu--legal = Juridisk information
+SettingsMenu--privacy = Sekretess
+SettingsMenu--cookies = Kakor
+SettingsMenu--language-switcher =
     .title = Ändra språk
-FooterLinks--hide-button =
-    .title = Dölj sidfotslänkar
-    .aria-label = Dölj sidfotslänkar
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -518,7 +519,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Fel vid uppladdning
 MenuButtons--index--revert = Återgå till originalprofil
-MenuButtons--index--docs = Dokument
 MenuButtons--permalink--button =
     .label = Permalänk
 
@@ -886,9 +886,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = relativa minnet vid denna tidpunkt
-TrackMemoryGraph--memory-range-in-graph = minnesintervall i grafen
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allokeringar och deallokeringar sedan föregående prov
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = relativt minne vid denna tidpunkt
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = minnesområde i grafen
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allokeringar och avallokeringar sedan föregående urval
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -934,6 +951,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Genomsnittlig effekt i det aktuella valet
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Genomsnittlig effekt i det aktuella valet
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

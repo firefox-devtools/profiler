@@ -224,16 +224,17 @@ ErrorBoundary--report-error-to-developers-description = Merci de signaler ce pro
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Signaler l’erreur sur GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Mentions légales
-FooterLinks--Privacy = Confidentialité
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Paramètres
+SettingsMenu--docs = Documentation
+SettingsMenu--legal = Mentions légales
+SettingsMenu--privacy = Vie privée
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Changer de langue
-FooterLinks--hide-button =
-    .title = Masquer les liens de pied de page
-    .aria-label = Masquer les liens de pied de page
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -436,7 +437,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Erreur lors de l’envoi
 MenuButtons--index--revert = Revenir au profil d’origine
-MenuButtons--index--docs = Documentation
 MenuButtons--permalink--button =
     .label = Lien permanent
 
@@ -790,15 +790,6 @@ TrackNameButton--hide-track =
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = Masquer le processus
-
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = mémoire relative à ce moment
-TrackMemoryGraph--memory-range-in-graph = plage mémoire dans le graphique
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allocations et désallocations depuis l’échantillon précédent
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

@@ -287,16 +287,17 @@ ErrorBoundary--report-error-to-developers-description = Пожалуйста, с
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Сообщить об ошибке на GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Юридическая информация
-FooterLinks--Privacy = Приватность
-FooterLinks--Cookies = Куки
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Настройки
+SettingsMenu--docs = Документация
+SettingsMenu--legal = Юридическая информация
+SettingsMenu--privacy = Приватность
+SettingsMenu--cookies = Куки
+SettingsMenu--language-switcher =
     .title = Изменить язык
-FooterLinks--hide-button =
-    .title = Скрыть ссылки в нижнем колонтитуле
-    .aria-label = Скрыть ссылки в нижнем колонтитуле
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -513,7 +514,6 @@ MenuButtons--index--share-re-upload =
 MenuButtons--index--share-error-uploading =
     .label = Ошибка выгрузки
 MenuButtons--index--revert = Вернуться к исходному профилю
-MenuButtons--index--docs = Документация
 MenuButtons--permalink--button =
     .label = Постоянная ссылка
 
@@ -892,9 +892,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = относительная память в это время
-TrackMemoryGraph--memory-range-in-graph = диапазон памяти на графике
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = размещения и освобождения с момента предыдущей выборки
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = относительная память на данный момент
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = диапазон памяти на графике
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = распределения и отмены по сравнению с предыдущим семплом
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = ЦПУ
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -940,6 +957,11 @@ TrackPower--tooltip-average-power-watt = { $value } Вт
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } мВт
+    .label = Средняя мощность при текущем выборе
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } мВт
     .label = Средняя мощность при текущем выборе
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
