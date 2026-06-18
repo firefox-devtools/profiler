@@ -46,6 +46,11 @@ AppViewRouter--error-compare = 無法取得效能檢測檔。
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari = 由於 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 無法從這套瀏覽器自本機匯入效能檢測檔。請改用 { -firefox-brand-name } 或 Chrome 開啟此頁面。
     .title = 無法使用 Safari 匯入本機效能檢測檔
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    此版本的 { -profiler-brand-name } 不支援此效能檢測檔使用的格式。
+    請嘗試重新整理頁面，看看是否有 { -profiler-brand-name } 的更新可以使用。
 AppViewRouter--route-not-found--home =
     .specialMessage = 無法處理您嘗試開啟的網址。
 
