@@ -16,6 +16,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
+  type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
 import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
@@ -53,7 +54,6 @@ import type {
   FrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
-  RawStackTable,
   RawMarkerTable,
   LibMapping,
   IndexIntoStackTable,
@@ -107,6 +107,7 @@ import type {
   CounterDisplayConfig,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
+import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
 
 type RegExpResult = null | string[];
 /**
@@ -548,7 +549,7 @@ function _processFrameTable(
  */
 function _processStackTable(
   geckoStackTable: GeckoStackStruct,
-  sharedStackTable: RawStackTable,
+  sharedStackTable: RawStackTableBuilder,
   frameIndexOffset: IndexIntoFrameTable
 ): IndexIntoStackTable {
   const stackIndexOffset = sharedStackTable.length;
@@ -1336,7 +1337,7 @@ function _processThread(
   );
   const stackIndexOffset = _processStackTable(
     geckoStackTable,
-    globalDataCollector.getStackTable(),
+    globalDataCollector.getStackTableBuilder(),
     frameIndexOffset
   );
 
@@ -2056,7 +2057,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
  * Take a processed profile and convert it to a string.
  */
 export function serializeProfileToJsonString(profile: Profile): string {
-  return JSON.stringify(profile);
+  return jsonEncodeObjectWithTypedArraysAsRegularArrays(profile);
 }
 
 /**

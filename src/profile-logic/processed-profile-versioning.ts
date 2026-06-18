@@ -3255,6 +3255,11 @@ const _upgraders: {
     };
     sources.content = new Array(sources.length).fill(null);
   },
+  [65]: (_profile: any) => {
+    // The type of `profile.shared.stackTable.frame` was changed from
+    // `IndexIntoFrameTable[]` to `IndexIntoFrameTable[] | Int32Array<ArrayBuffer>`.
+    // All valid v64 profiles are valid v65 profiles, so no upgrader is needed.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

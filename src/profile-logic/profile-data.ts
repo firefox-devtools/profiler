@@ -6,7 +6,8 @@ import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
   getEmptyCallNodeTable,
   shallowCloneFrameTable,
   shallowCloneFuncTable,
@@ -1688,7 +1689,7 @@ export function createStackTableBySkippingDiscarded(
   keepStack: BitSet
 ): StackTable {
   const newStackCount = newPrefixCol.length;
-  const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
+  const newFrameCol = new Int32Array(newStackCount);
   const newCategoryCol = new Uint8Array(newStackCount);
   const newSubcategoryCol =
     stackTable.subcategory instanceof Uint16Array
@@ -4343,7 +4344,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   // Now the frame table contains adjusted / "nudged" addresses.
 
   // Make a new stack table which refers to the adjusted frames.
-  const newStackTable = getEmptyRawStackTable();
+  const newStackTable = getRawStackTableBuilder();
   const mapForSamplingSelfStacks = new Map<
     null | IndexIntoStackTable,
     null | IndexIntoStackTable
@@ -4385,7 +4386,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   const newShared: RawProfileSharedData = {
     ...profile.shared,
     frameTable: newFrameTable,
-    stackTable: newStackTable,
+    stackTable: finishRawStackTableBuilder(newStackTable),
   };
 
   const newThreads = updateRawThreadStacksSeparate(
@@ -4764,8 +4765,14 @@ export function computeStackTableFromRawStackTable(
     subcategoryColumn[stackIndex] = stackSubcategory;
   }
 
+  // The frame column is a typed array in the derived stack table.
+  const frame =
+    rawStackTable.frame instanceof Int32Array
+      ? rawStackTable.frame
+      : new Int32Array(rawStackTable.frame);
+
   return {
-    frame: rawStackTable.frame,
+    frame,
     category: categoryColumn,
     subcategory: subcategoryColumn,
     prefix: rawStackTable.prefix,

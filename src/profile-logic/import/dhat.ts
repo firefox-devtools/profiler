@@ -183,7 +183,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   profile.meta.product = dhat.cmd + ' (dhat)';
   profile.meta.importedFrom = `dhat`;
   const globalDataCollector = new GlobalDataCollector();
-  const stackTable = globalDataCollector.getStackTable();
+  const stackTable = globalDataCollector.getStackTableBuilder();
   const frameTable = globalDataCollector.getFrameTable();
   const stringTable = globalDataCollector.getStringTable();
 

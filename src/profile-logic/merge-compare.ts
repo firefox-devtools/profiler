@@ -13,7 +13,8 @@ import {
   getEmptyNativeSymbolTable,
   getEmptyFrameTable,
   getEmptyFuncTable,
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
   getEmptyRawMarkerTable,
   getEmptySamplesTableWithEventDelay,
   shallowCloneRawMarkerTable,
@@ -1122,7 +1123,7 @@ function mergeStackTables(
   translationMapsForFrames: TranslationMapForFrames[]
 ): { stackTable: RawStackTable; translationMaps: TranslationMapForStacks[] } {
   const translationMaps: TranslationMapForStacks[] = [];
-  const newStackTable = getEmptyRawStackTable();
+  const newStackTable = getRawStackTableBuilder();
 
   profiles.forEach((profile, profileIndex) => {
     const { stackTable } = profile.shared;
@@ -1148,7 +1149,10 @@ function mergeStackTables(
     translationMaps.push(oldStackToNewStackPlusOne);
   });
 
-  return { stackTable: newStackTable, translationMaps };
+  return {
+    stackTable: finishRawStackTableBuilder(newStackTable),
+    translationMaps,
+  };
 }
 
 /**
