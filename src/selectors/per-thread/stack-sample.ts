@@ -545,8 +545,41 @@ export function getStackAndSampleSelectorsPerThread(
   > = (state) =>
     _getStackTimingByDepthWithMap(state).sameWidthsIndexToTimestampMap;
 
-  const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
-    createSelector(getCallTree, FlameGraph.computeFlameGraphTimingFromCallTree);
+  const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
+    (state: State) => _getNonInvertedCallNodeInfo(state).getCallNodeTable(),
+    (state: State) => threadSelectors.getFilteredThread(state).funcTable,
+    (state: State) => threadSelectors.getFilteredThread(state).stringTable,
+    FlameGraph.computeFlameGraphRows
+  );
+
+  const getFlameGraphTimingNonInverted: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      getFlameGraphRows,
+      (state: State) => _getNonInvertedCallNodeInfo(state).getCallNodeTable(),
+      getCallTreeTimingsNonInverted,
+      FlameGraph.getFlameGraphTiming
+    );
+
+  const getCallTreeTimingsInverted: Selector<CallTree.CallTreeTimingsInverted> =
+    createSelector(
+      _getInvertedCallNodeInfo,
+      getCallNodeSelfAndSummaryNonInverted,
+      CallTree.computeCallTreeTimingsInverted
+    );
+
+  const getFlameGraphTimingInverted: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      _getInvertedCallNodeInfo,
+      getCallTreeTimingsInverted,
+      (state: State) => threadSelectors.getFilteredThread(state).funcTable,
+      (state: State) => threadSelectors.getFilteredThread(state).stringTable,
+      FlameGraph.getInvertedFlameGraphTiming
+    );
+
+  const getFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> = (state) =>
+    UrlState.getInvertCallstack(state)
+      ? getFlameGraphTimingInverted(state)
+      : getFlameGraphTimingNonInverted(state);
 
   const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
     createSelector(
