@@ -11,6 +11,7 @@ import * as net from 'net';
 import * as fs from 'fs';
 import { ProfileQuerier } from '../../src/profile-query';
 import type { LoadPhase } from '../../src/profile-query/loader';
+import { ProfileVersionError } from 'firefox-profiler/profile-logic/errors';
 import type {
   ClientCommand,
   ClientMessage,
@@ -28,7 +29,27 @@ import {
   ensureSessionDir,
 } from './session';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { BUILD_HASH } from './constants';
+import { BUILD_HASH, PACKAGE_NAME } from './constants';
+
+/**
+ * Build a user-facing message for a profile load failure. When the profile is
+ * too new for this build, append instructions on how to update the CLI.
+ */
+function formatProfileLoadError(error: unknown): string {
+  if (
+    error instanceof ProfileVersionError ||
+    (error instanceof Error && error.name === 'ProfileVersionError')
+  ) {
+    const versionError = error as ProfileVersionError;
+    return (
+      `This profile is version ${versionError.profileVersion}, but this profiler-cli only ` +
+      `supports up to version ${versionError.supportedVersion} of the ${versionError.formatName} profile format.\n` +
+      `Update to the latest version with:\n` +
+      `  npm install -g ${PACKAGE_NAME}@latest`
+    );
+  }
+  return error instanceof Error ? error.message : String(error);
+}
 
 export class Daemon {
   private querier: ProfileQuerier | null = null;
@@ -41,7 +62,7 @@ export class Daemon {
   private profilePath: string;
   private symbolServerUrl?: string;
   private loadPhase: LoadPhase = 'fetching';
-  private profileLoadError: Error | null = null;
+  private profileLoadError: string | null = null;
 
   constructor(
     sessionDir: string,
@@ -149,8 +170,7 @@ export class Daemon {
       console.log('Profile loaded successfully');
     } catch (error) {
       console.error(`Failed to load profile: ${error}`);
-      this.profileLoadError =
-        error instanceof Error ? error : new Error(String(error));
+      this.profileLoadError = formatProfileLoadError(error);
     }
   }
 
@@ -210,7 +230,7 @@ export class Daemon {
         if (this.profileLoadError) {
           return {
             type: 'error',
-            error: `Profile load failed: ${this.profileLoadError.message}`,
+            error: `Profile load failed: ${this.profileLoadError}`,
           };
         }
         switch (this.loadPhase) {
@@ -245,7 +265,7 @@ export class Daemon {
         if (this.profileLoadError) {
           return {
             type: 'error',
-            error: `Profile load failed: ${this.profileLoadError.message}`,
+            error: `Profile load failed: ${this.profileLoadError}`,
           };
         }
         if (this.loadPhase !== 'ready' || !this.querier) {

@@ -14,6 +14,7 @@
 
 import { StringTable } from '../utils/string-table';
 import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
+import { ProfileVersionError } from './errors';
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -45,10 +46,10 @@ export function upgradeGeckoProfileToCurrentVersion(json: unknown) {
   }
 
   if (profileVersion > GECKO_PROFILE_VERSION) {
-    throw new Error(
-      `Unable to parse a Gecko profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
-        `The most recent version understood by this version of profiler.firefox.com is version ${GECKO_PROFILE_VERSION}.\n` +
-        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
+    throw new ProfileVersionError(
+      'Gecko',
+      profileVersion,
+      GECKO_PROFILE_VERSION
     );
   }
 

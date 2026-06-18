@@ -87,6 +87,9 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         if (view.error) {
           if (view.error.name === 'SafariLocalhostHTTPLoadError') {
             message = 'AppViewRouter--error-from-localhost-url-safari';
+          } else if (view.error.name === 'ProfileVersionError') {
+            message = 'AppViewRouter--error-profile-version';
+            additionalMessage = <p>{view.error.toString()}</p>;
           } else {
             console.error(view.error);
             additionalMessage = (
