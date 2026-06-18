@@ -24,6 +24,7 @@ import type {
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
+  IndexIntoFlowTable,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -739,6 +740,17 @@ const isBottomBoxFullscreen: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const activeFlows: Reducer<IndexIntoFlowTable[]> = (state = [], action) => {
+  switch (action.type) {
+    case 'CHANGE_ACTIVE_FLOWS': {
+      const { activeFlows } = action;
+      return activeFlows;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * This value is only set from the URL and never changed.
  */
@@ -782,6 +794,7 @@ const profileSpecific = combineReducers({
   transforms,
   sourceView,
   assemblyView,
+  activeFlows,
   isBottomBoxOpenPerPanel,
   isBottomBoxFullscreen,
   timelineType,
