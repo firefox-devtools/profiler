@@ -5,7 +5,7 @@ import esbuild from 'esbuild';
 import { chmodSync, readFileSync } from 'fs';
 import { nodeBaseConfig } from './lib/esbuild-configs.mjs';
 
-const { version } = JSON.parse(
+const { name, version } = JSON.parse(
   readFileSync(new URL('../profiler-cli/package.json', import.meta.url), 'utf8')
 );
 
@@ -22,6 +22,7 @@ const profilerCliConfig = {
   },
   define: {
     __BUILD_HASH__: JSON.stringify(BUILD_HASH),
+    __PACKAGE_NAME__: JSON.stringify(name),
     __VERSION__: JSON.stringify(version),
     // SOURCE_MAP_WORKER_PATH is injected by the browser build. The CLI doesn't
     // use source map workers but the shared code references this constant.

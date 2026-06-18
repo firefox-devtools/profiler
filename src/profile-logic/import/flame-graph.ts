@@ -60,7 +60,7 @@ export function convertFlameGraphProfile(profileText: string): Profile {
   });
 
   const frameTable = globalDataCollector.getFrameTable();
-  const stackTable = globalDataCollector.getStackTable();
+  const stackTable = globalDataCollector.getStackTableBuilder();
   const { samples } = thread;
 
   // Maps to deduplicate stacks, frames, and functions.

@@ -879,7 +879,10 @@ describe('actions/receive-profile', function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
-      window.fetchMock.get(expectedUrl, _getSimpleProfile());
+      window.fetchMock.get(
+        expectedUrl,
+        serializeProfileToJsonString(_getSimpleProfile())
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -939,7 +942,7 @@ describe('actions/receive-profile', function () {
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetchMock
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, _getSimpleProfile());
+        .get(expectedUrl, serializeProfileToJsonString(_getSimpleProfile()));
 
       const store = blankStore();
       const views = (
@@ -1026,7 +1029,10 @@ describe('actions/receive-profile', function () {
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetchMock.get(expectedUrl, _getSimpleProfile());
+      window.fetchMock.get(
+        expectedUrl,
+        serializeProfileToJsonString(_getSimpleProfile())
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1063,7 +1069,7 @@ describe('actions/receive-profile', function () {
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetchMock
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, _getSimpleProfile());
+        .get(expectedUrl, serializeProfileToJsonString(_getSimpleProfile()));
 
       const store = blankStore();
       const views = (
@@ -1526,7 +1532,9 @@ describe('actions/receive-profile', function () {
           ])
         );
       }
-      window.fetchMock.getOnce('*', profile1).getOnce('*', profile2);
+      window.fetchMock
+        .getOnce('*', serializeProfileToJsonString(profile1))
+        .getOnce('*', serializeProfileToJsonString(profile2));
 
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([url1, url2]));
@@ -1793,7 +1801,9 @@ describe('actions/receive-profile', function () {
     it('gives a fatal error when the selected thread index is out of bounds', async function () {
       const { dispatch, getState } = blankStore();
       const { profile1, profile2 } = getSomeProfiles();
-      window.fetchMock.getOnce('*', profile1).getOnce('*', profile2);
+      window.fetchMock
+        .getOnce('*', serializeProfileToJsonString(profile1))
+        .getOnce('*', serializeProfileToJsonString(profile2));
 
       await dispatch(
         retrieveProfilesToCompare([
@@ -1813,7 +1823,10 @@ describe('actions/receive-profile', function () {
       location: Partial<Location>,
       requiredProfile: number = 1
     ) {
-      const profile = _getSimpleProfile();
+      const simpleProfile = _getSimpleProfile();
+      // Create a profile object we can use with fetchMock, which uses JSON.stringify internally.
+      // `simpleProfile` may contain typed arrays which wouldn't survive JSON.stringfy.
+      const profile = JSON.parse(serializeProfileToJsonString(simpleProfile));
       const geckoProfile = createGeckoProfile();
 
       // Add mock fetch response for the required number of times.
