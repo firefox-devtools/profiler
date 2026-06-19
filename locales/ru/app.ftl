@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     импортировать профили с локальной машины в этот браузер. Пожалуйста, откройте
     эту страницу в { -firefox-brand-name } или Chrome.
     .title = Safari не может импортировать локальные профили
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Этот профиль использует формат, который не поддерживается этой версией { -profiler-brand-name }.
+    Попробуйте обновить страницу, чтобы проверить, доступно ли обновление для { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = URL-адрес, который вы пытались открыть, не был распознан.
 
