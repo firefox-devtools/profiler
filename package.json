@@ -167,7 +167,7 @@
     "jest-extended": "^7.0.0",
     "local-web-server": "^5.4.0",
     "lockfile-lint": "^5.0.0",
-    "npm-run-all2": "^8.0.4",
+    "npm-run-all2": "^9.0.2",
     "open": "^11.0.0",
     "oxfmt": "^0.51.0",
     "patch-package": "^8.0.1",
