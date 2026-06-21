@@ -644,7 +644,7 @@ export type LowerWingFlameGraphTotals = {
   rootTotalSummary: number;
   // Equal to rootTotalSummary — the lower wing's flame graph root fills the
   // entire width.
-  flameGraphTotalForScaling: number;
+  flameGraphWidthTotal: number;
 };
 
 /**
@@ -732,7 +732,7 @@ export class LowerWingFlameGraphTiming implements FlameGraphTiming {
     this._prefixSums = null;
     this._prefixSumsForTableLength = -1;
     this._rootTotalSummary = 0;
-    // tooltipRatioMultiplier for the lower wing is flameGraphTotalForScaling /
+    // tooltipRatioMultiplier for the lower wing is flameGraphWidthTotal /
     // rootTotalSummary, both equal to total[0]. So 1 when there's a selection
     // with sample weight, 0 otherwise. We resolve this lazily inside
     // `_ensurePrefixSums` since both values come from the prefix-sums pass.
@@ -920,8 +920,8 @@ export class LowerWingFlameGraphTiming implements FlameGraphTiming {
     this._growPerTableIdxArraysTo(table.length);
 
     const rowNodes = this._rowsCallNodes[nextDepth];
-    const flameGraphTotalForScaling = this._rootTotalSummary;
-    if (flameGraphTotalForScaling === 0) {
+    const flameGraphWidthTotal = this._rootTotalSummary;
+    if (flameGraphWidthTotal === 0) {
       this._timingRows.push({
         start: [],
         end: [],
@@ -988,8 +988,8 @@ export class LowerWingFlameGraphTiming implements FlameGraphTiming {
       }
       startPerTableIdx[tableIdx] = currentStart;
 
-      const totalRelative = abs(totalVal / flameGraphTotalForScaling);
-      const selfRelativeVal = abs(selfVal / flameGraphTotalForScaling);
+      const totalRelative = abs(totalVal / flameGraphWidthTotal);
+      const selfRelativeVal = abs(selfVal / flameGraphWidthTotal);
 
       const currentEnd = currentStart + totalRelative;
       start.push(currentStart);

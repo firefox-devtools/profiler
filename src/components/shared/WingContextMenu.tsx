@@ -26,6 +26,7 @@ import {
   getProfileViewOptions,
   getShouldDisplaySearchfox,
 } from 'firefox-profiler/selectors/profile';
+import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { oneLine } from 'common-tags';
 
 import {
@@ -47,11 +48,103 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallNodeContextMenu.css';
 
+// Context provided to data-table menu items so they can compute visibility,
+// label, and l10n vars from the current right-clicked function.
+type MenuItemContext = {
+  readonly funcIndex: IndexIntoFuncTable;
+  readonly callNodeTables: ReadonlyArray<CallNodeTable>;
+  readonly nameForResource: string | null;
+};
+
+// A descriptor for a transform menu item. The data table below drives the
+// rendering of the menu, instead of repeating identical JSX three times.
+type TransformMenuItem = {
+  readonly transform: TransformType;
+  readonly shortcut: string;
+  readonly icon: string;
+  readonly l10nId: string;
+  readonly content: (ctx: MenuItemContext) => string;
+  readonly visible?: (ctx: MenuItemContext) => boolean;
+  readonly l10nVars?: (ctx: MenuItemContext) => Record<string, string>;
+  readonly l10nElems?: Record<string, React.ReactElement>;
+};
+
+const MENU_ITEMS: ReadonlyArray<TransformMenuItem> = [
+  {
+    transform: 'merge-function',
+    shortcut: 'm',
+    icon: 'Merge',
+    l10nId: 'CallNodeContextMenu--transform-merge-function',
+    content: () => 'Merge function',
+  },
+  {
+    transform: 'focus-function',
+    shortcut: 'f',
+    icon: 'Focus',
+    l10nId: 'CallNodeContextMenu--transform-focus-function',
+    content: () => 'Focus on function',
+  },
+  {
+    transform: 'focus-self',
+    shortcut: 'S',
+    icon: 'FocusSelf',
+    l10nId: 'CallNodeContextMenu--transform-focus-self',
+    content: () => 'Focus on self only',
+  },
+  {
+    transform: 'collapse-function-subtree',
+    shortcut: 'c',
+    icon: 'Collapse',
+    l10nId: 'CallNodeContextMenu--transform-collapse-function-subtree',
+    content: () => 'Collapse function',
+  },
+  {
+    transform: 'collapse-resource',
+    shortcut: 'C',
+    icon: 'Collapse',
+    l10nId: 'CallNodeContextMenu--transform-collapse-resource',
+    content: ({ nameForResource }) => `Collapse ${nameForResource}`,
+    visible: ({ nameForResource }) => nameForResource !== null,
+    l10nVars: ({ nameForResource }) => ({
+      nameForResource: nameForResource ?? '',
+    }),
+    l10nElems: { strong: <strong /> },
+  },
+  {
+    transform: 'collapse-recursion',
+    shortcut: 'r',
+    icon: 'Collapse',
+    l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
+    content: () => 'Collapse recursion',
+    visible: ({ funcIndex, callNodeTables }) =>
+      callNodeTables.some((t) => funcHasRecursiveCall(t, funcIndex)),
+  },
+  {
+    transform: 'collapse-direct-recursion',
+    shortcut: 'R',
+    icon: 'Collapse',
+    l10nId: 'CallNodeContextMenu--transform-collapse-direct-recursion-only',
+    content: () => 'Collapse direct recursion only',
+    visible: ({ funcIndex, callNodeTables }) =>
+      callNodeTables.some((t) => funcHasDirectRecursiveCall(t, funcIndex)),
+  },
+  {
+    transform: 'drop-function',
+    shortcut: 'd',
+    icon: 'Drop',
+    l10nId: 'CallNodeContextMenu--transform-drop-function',
+    content: () => 'Drop samples with this function',
+  },
+];
+
 type StateProps = {
   readonly thread: Thread | null;
   readonly threadsKey: ThreadsKey | null;
-  readonly rightClickedFunctionIndex: IndexIntoFuncTable | null;
-  readonly callNodeTable: CallNodeTable | null;
+  readonly funcIndex: IndexIntoFuncTable | null;
+  // Call node tables in which to check for recursion. Multiple tables are
+  // useful for the self wing menu, where the focusSelf-filtered table may
+  // reveal recursion that the regular table hides.
+  readonly callNodeTables: ReadonlyArray<CallNodeTable>;
   readonly implementation: ImplementationFilter;
   readonly displaySearchfox: boolean;
 };
@@ -62,9 +155,13 @@ type DispatchProps = {
   readonly setContextMenuVisibility: typeof setContextMenuVisibility;
 };
 
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
+// The DOM id is baked in by each connected variant below; the impl receives
+// it as a regular prop.
+type Props = ConnectedProps<{}, StateProps, DispatchProps> & {
+  readonly id: string;
+};
 
-class FunctionListContextMenuImpl extends PureComponent<Props> {
+class WingContextMenuImpl extends PureComponent<Props> {
   _hidingTimeout: NodeJS.Timeout | null = null;
 
   _onShow = () => {
@@ -85,22 +182,10 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
     readonly funcIndex: IndexIntoFuncTable;
-    readonly callNodeTable: CallNodeTable;
   } {
-    const { thread, threadsKey, rightClickedFunctionIndex, callNodeTable } =
-      this.props;
-    if (
-      thread !== null &&
-      threadsKey !== null &&
-      rightClickedFunctionIndex !== null &&
-      callNodeTable !== null
-    ) {
-      return {
-        thread,
-        threadsKey,
-        funcIndex: rightClickedFunctionIndex,
-        callNodeTable,
-      };
+    const { thread, threadsKey, funcIndex } = this.props;
+    if (thread !== null && threadsKey !== null && funcIndex !== null) {
+      return { thread, threadsKey, funcIndex };
     }
     return null;
   }
@@ -233,7 +318,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
       case 'focus-category':
       case 'filter-samples':
         throw new Error(
-          `The transform "${type}" is not supported in the function list context menu.`
+          `The transform "${type}" is not supported in the wing context menu.`
         );
       default:
         assertExhaustiveCheck(type);
@@ -264,45 +349,33 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
     }
   };
 
-  renderTransformMenuItem(props: {
-    readonly l10nId: string;
-    readonly content: React.ReactNode;
-    readonly onClick: (
-      event: React.ChangeEvent<HTMLElement>,
-      data: { type: string }
-    ) => void;
-    readonly transform: string;
-    readonly shortcut: string;
-    readonly icon: string;
-    readonly title: string;
-    readonly l10nVars?: Record<string, string>;
-    readonly l10nElems?: Record<string, React.ReactElement>;
-  }) {
+  renderTransformMenuItem(item: TransformMenuItem, ctx: MenuItemContext) {
     return (
-      <MenuItem onClick={props.onClick} data={{ type: props.transform }}>
+      <MenuItem
+        key={item.transform}
+        onClick={this._handleClick}
+        data={{ type: item.transform }}
+      >
         <span
-          className={`react-contextmenu-icon callNodeContextMenuIcon${props.icon}`}
+          className={`react-contextmenu-icon callNodeContextMenuIcon${item.icon}`}
         />
         <Localized
-          id={props.l10nId}
+          id={item.l10nId}
           attrs={{ title: true }}
-          vars={props.l10nVars}
-          elems={props.l10nElems}
+          vars={item.l10nVars ? item.l10nVars(ctx) : undefined}
+          elems={item.l10nElems}
         >
-          <div
-            className="react-contextmenu-item-content"
-            title={oneLine`${props.title}`}
-          >
-            {props.content}
+          <div className="react-contextmenu-item-content" title={oneLine``}>
+            {item.content(ctx)}
           </div>
         </Localized>
-        <kbd className="callNodeContextMenuShortcut">{props.shortcut}</kbd>
+        <kbd className="callNodeContextMenuShortcut">{item.shortcut}</kbd>
       </MenuItem>
     );
   }
 
   renderContextMenuContents() {
-    const { displaySearchfox } = this.props;
+    const { displaySearchfox, callNodeTables } = this.props;
     const info = this._getRightClickedInfo();
 
     if (info === null) {
@@ -312,99 +385,19 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
       return <div />;
     }
 
-    const { funcIndex, callNodeTable } = info;
-    const nameForResource = this.getNameForSelectedResource();
+    const ctx: MenuItemContext = {
+      funcIndex: info.funcIndex,
+      callNodeTables,
+      nameForResource: this.getNameForSelectedResource(),
+    };
+
+    const renderedItems = MENU_ITEMS.filter(
+      (item) => !item.visible || item.visible(ctx)
+    ).map((item) => this.renderTransformMenuItem(item, ctx));
 
     return (
       <>
-        {this.renderTransformMenuItem({
-          l10nId: 'CallNodeContextMenu--transform-merge-function',
-          shortcut: 'm',
-          icon: 'Merge',
-          onClick: this._handleClick,
-          transform: 'merge-function',
-          title: '',
-          content: 'Merge function',
-        })}
-
-        {this.renderTransformMenuItem({
-          l10nId: 'CallNodeContextMenu--transform-focus-function',
-          shortcut: 'f',
-          icon: 'Focus',
-          onClick: this._handleClick,
-          transform: 'focus-function',
-          title: '',
-          content: 'Focus on function',
-        })}
-
-        {this.renderTransformMenuItem({
-          l10nId: 'CallNodeContextMenu--transform-focus-self',
-          shortcut: 'S',
-          icon: 'FocusSelf',
-          onClick: this._handleClick,
-          transform: 'focus-self',
-          title: '',
-          content: 'Focus on self only',
-        })}
-
-        {this.renderTransformMenuItem({
-          l10nId: 'CallNodeContextMenu--transform-collapse-function-subtree',
-          shortcut: 'c',
-          icon: 'Collapse',
-          onClick: this._handleClick,
-          transform: 'collapse-function-subtree',
-          title: '',
-          content: 'Collapse function',
-        })}
-
-        {nameForResource
-          ? this.renderTransformMenuItem({
-              l10nId: 'CallNodeContextMenu--transform-collapse-resource',
-              l10nVars: { nameForResource },
-              l10nElems: { strong: <strong /> },
-              shortcut: 'C',
-              icon: 'Collapse',
-              onClick: this._handleClick,
-              transform: 'collapse-resource',
-              title: '',
-              content: `Collapse ${nameForResource}`,
-            })
-          : null}
-
-        {funcHasRecursiveCall(callNodeTable, funcIndex)
-          ? this.renderTransformMenuItem({
-              l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
-              shortcut: 'r',
-              icon: 'Collapse',
-              onClick: this._handleClick,
-              transform: 'collapse-recursion',
-              title: '',
-              content: 'Collapse recursion',
-            })
-          : null}
-
-        {funcHasDirectRecursiveCall(callNodeTable, funcIndex)
-          ? this.renderTransformMenuItem({
-              l10nId:
-                'CallNodeContextMenu--transform-collapse-direct-recursion-only',
-              shortcut: 'R',
-              icon: 'Collapse',
-              onClick: this._handleClick,
-              transform: 'collapse-direct-recursion',
-              title: '',
-              content: 'Collapse direct recursion only',
-            })
-          : null}
-
-        {this.renderTransformMenuItem({
-          l10nId: 'CallNodeContextMenu--transform-drop-function',
-          shortcut: 'd',
-          icon: 'Drop',
-          onClick: this._handleClick,
-          transform: 'drop-function',
-          title: '',
-          content: 'Drop samples with this function',
-        })}
+        {renderedItems}
 
         <div className="react-contextmenu-separator" />
 
@@ -434,7 +427,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
 
     return (
       <ContextMenu
-        id="FunctionListContextMenu"
+        id={this.props.id}
         className="callNodeContextMenu"
         onShow={this._onShow}
         onHide={this._onHide}
@@ -445,6 +438,17 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
   }
 }
 
+const dispatchToProps: DispatchProps = {
+  addTransformToStack,
+  addCollapseResourceTransformToStack,
+  setContextMenuVisibility,
+};
+
+// Connected variant used by the function list and self wing: the right-clicked
+// function comes from the rightClickedFunction profile-view state. Recursion
+// detection considers both the regular call node table and the self wing's
+// call node table (where the focusSelf filter may surface recursion that the
+// regular table hides).
 export const FunctionListContextMenu = explicitConnect<
   {},
   StateProps,
@@ -454,35 +458,83 @@ export const FunctionListContextMenu = explicitConnect<
     const rightClickedFunction =
       getProfileViewOptions(state).rightClickedFunction;
 
-    let thread = null;
-    let threadsKey = null;
-    let rightClickedFunctionIndex = null;
-    let callNodeTable = null;
-
-    if (rightClickedFunction !== null) {
-      const selectors = getThreadSelectorsFromThreadsKey(
-        rightClickedFunction.threadsKey
-      );
-      thread = selectors.getFilteredThread(state);
-      threadsKey = rightClickedFunction.threadsKey;
-      rightClickedFunctionIndex = rightClickedFunction.functionIndex;
-      // Use the non-inverted call node table for recursion detection.
-      callNodeTable = selectors.getCallNodeInfo(state).getCallNodeTable();
+    if (rightClickedFunction === null) {
+      return {
+        thread: null,
+        threadsKey: null,
+        funcIndex: null,
+        callNodeTables: [],
+        implementation: getImplementationFilter(state),
+        displaySearchfox: getShouldDisplaySearchfox(state),
+      };
     }
 
+    const selectors = getThreadSelectorsFromThreadsKey(
+      rightClickedFunction.threadsKey
+    );
+    const callNodeTables: CallNodeTable[] = [
+      selectors.getCallNodeInfo(state).getCallNodeTable(),
+      selectors.getSelfWingCallNodeInfo(state).getCallNodeTable(),
+    ];
+
     return {
-      thread,
-      threadsKey,
-      rightClickedFunctionIndex,
-      callNodeTable,
+      thread: selectors.getFilteredThread(state),
+      threadsKey: rightClickedFunction.threadsKey,
+      funcIndex: rightClickedFunction.functionIndex,
+      callNodeTables,
       implementation: getImplementationFilter(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
     };
   },
-  mapDispatchToProps: {
-    addTransformToStack,
-    addCollapseResourceTransformToStack,
-    setContextMenuVisibility,
+  mapDispatchToProps: dispatchToProps,
+  component: (props) => (
+    <WingContextMenuImpl {...props} id="FunctionListContextMenu" />
+  ),
+});
+
+// Connected variant used by the lower wing: the right-clicked function comes
+// from a right-clicked call node in the LOWER_WING area. Only the regular
+// call node table is consulted for recursion.
+export const LowerWingContextMenu = explicitConnect<
+  {},
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state: State) => {
+    const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
+
+    if (
+      rightClickedCallNodeInfo === null ||
+      rightClickedCallNodeInfo.area !== 'LOWER_WING'
+    ) {
+      return {
+        thread: null,
+        threadsKey: null,
+        funcIndex: null,
+        callNodeTables: [],
+        implementation: getImplementationFilter(state),
+        displaySearchfox: getShouldDisplaySearchfox(state),
+      };
+    }
+
+    const selectors = getThreadSelectorsFromThreadsKey(
+      rightClickedCallNodeInfo.threadsKey
+    );
+    const callNodeTables: CallNodeTable[] = [
+      selectors.getCallNodeInfo(state).getCallNodeTable(),
+    ];
+
+    return {
+      thread: selectors.getFilteredThread(state),
+      threadsKey: rightClickedCallNodeInfo.threadsKey,
+      funcIndex: selectors.getLowerWingRightClickedFuncIndex(state),
+      callNodeTables,
+      implementation: getImplementationFilter(state),
+      displaySearchfox: getShouldDisplaySearchfox(state),
+    };
   },
-  component: FunctionListContextMenuImpl,
+  mapDispatchToProps: dispatchToProps,
+  component: (props) => (
+    <WingContextMenuImpl {...props} id="LowerWingContextMenu" />
+  ),
 });
