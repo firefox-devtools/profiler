@@ -16,7 +16,10 @@ import {
   CallNodeInfoNonInverted,
   LazyInvertedCallNodeInfo,
   LowerWingCallNodeInfo,
+  computeLowerWingMaxDepthPlusOne,
 } from './call-node-info';
+
+export { computeLowerWingMaxDepthPlusOne };
 import { computeThreadCPUPercent } from './cpu';
 import {
   INSTANT,
@@ -853,7 +856,7 @@ export function getLowerWingCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number,
   selectedFuncIndex: IndexIntoFuncTable | null
-): CallNodeInfoInverted {
+): LowerWingCallNodeInfo {
   return new LowerWingCallNodeInfo(
     callNodeInfo.getCallNodeTable(),
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),

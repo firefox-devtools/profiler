@@ -908,7 +908,7 @@ export function computeCallTreeTimingsInverted(
 // *inclusive* time of that invocation (self + descendants). Feeding this
 // through computeCallTreeTimingsInverted then attributes each invocation's
 // inclusive time to the lower-wing node whose path is its caller chain.
-function _computeLowerWingCallNodeSelf(
+export function computeLowerWingCallNodeSelf(
   callNodeSelf: Float64Array,
   callNodeTable: CallNodeTable,
   selectedFuncIndex: IndexIntoFuncTable
@@ -944,7 +944,7 @@ export function computeLowerWingTimings(
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const mappedSelf =
     selectedFuncIndex !== null
-      ? _computeLowerWingCallNodeSelf(
+      ? computeLowerWingCallNodeSelf(
           callNodeSelf,
           callNodeTable,
           selectedFuncIndex
