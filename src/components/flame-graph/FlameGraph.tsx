@@ -118,8 +118,7 @@ export class FlameGraph
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
     const { flameGraphTiming, callNodeInfo } = this.props;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[callNodeIndex];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
     const row = flameGraphTiming.getRow(depth);
     const columnIndex = row.callNode.indexOf(callNodeIndex);
     return row.end[columnIndex] - row.start[columnIndex] > SELECTABLE_THRESHOLD;
@@ -143,8 +142,7 @@ export class FlameGraph
 
     let callNodeIndex = startingCallNodeIndex;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[callNodeIndex];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
     const row = flameGraphTiming.getRow(depth);
     let columnIndex = row.callNode.indexOf(callNodeIndex);
 
@@ -174,7 +172,6 @@ export class FlameGraph
       onCallNodeEnterOrDoubleClick,
       onKeyboardTransformShortcut,
     } = this.props;
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
@@ -188,7 +185,7 @@ export class FlameGraph
 
       switch (event.key) {
         case 'ArrowDown': {
-          const prefix = callNodeTable.prefix[selectedCallNodeIndex];
+          const prefix = callNodeInfo.prefixForNode(selectedCallNodeIndex);
           if (prefix !== -1) {
             onSelectedCallNodeChange(prefix);
           }
@@ -248,9 +245,8 @@ export class FlameGraph
     if (document.activeElement === this._viewport) {
       event.preventDefault();
       const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
-      const callNodeTable = callNodeInfo.getCallNodeTable();
       if (selectedCallNodeIndex !== null) {
-        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
