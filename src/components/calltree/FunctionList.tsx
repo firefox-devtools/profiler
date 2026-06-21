@@ -30,6 +30,7 @@ import {
   changeTableViewOptions,
   updateBottomBoxContentsAndMaybeOpen,
   changeFunctionListSort,
+  handleFunctionTransformShortcut,
 } from 'firefox-profiler/actions/profile-view';
 import {
   nameColumn,
@@ -47,6 +48,7 @@ import type {
   SelectionContext,
 } from 'firefox-profiler/types';
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
+import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
 import type { SingleColumnSortState } from 'firefox-profiler/components/shared/TreeView';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -62,6 +64,7 @@ const DEFAULT_FUNCTION_LIST_SORT_STATE = new ColumnSortState(
 
 type StateProps = {
   readonly threadsKey: ThreadsKey;
+  readonly callNodeInfo: CallNodeInfo;
   readonly scrollToSelectionGeneration: number;
   readonly focusCallTreeGeneration: number;
   readonly tree: CallTree;
@@ -79,6 +82,7 @@ type DispatchProps = {
   readonly changeRightClickedFunctionIndex: typeof changeRightClickedFunctionIndex;
   readonly addTransformToStack: typeof addTransformToStack;
   readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly handleFunctionTransformShortcut: typeof handleFunctionTransformShortcut;
   readonly onTableViewOptionsChange: (opts: TableViewOptions) => any;
   readonly changeFunctionListSort: typeof changeFunctionListSort;
 };
@@ -167,7 +171,23 @@ class FunctionListImpl extends PureComponent<Props> {
     _newExpandedCallNodeIndexes: Array<IndexIntoFuncTable | null>
   ) => {};
 
-  _onKeyDown = (_event: React.KeyboardEvent<HTMLElement>) => {};
+  _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const {
+      selectedFunctionIndex,
+      rightClickedFunctionIndex,
+      threadsKey,
+      callNodeInfo,
+      handleFunctionTransformShortcut,
+    } = this.props;
+    const funcIndex =
+      rightClickedFunctionIndex !== null
+        ? rightClickedFunctionIndex
+        : selectedFunctionIndex;
+    if (funcIndex === null) {
+      return;
+    }
+    handleFunctionTransformShortcut(event, threadsKey, callNodeInfo, funcIndex);
+  };
 
   _onEnterOrDoubleClick = (nodeId: IndexIntoFuncTable) => {
     const { tree, updateBottomBoxContentsAndMaybeOpen } = this.props;
@@ -224,6 +244,7 @@ class FunctionListImpl extends PureComponent<Props> {
 export const FunctionList = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadsKey: getSelectedThreadsKey(state),
+    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
     tree: selectedThreadSelectors.getFunctionListTree(state),
@@ -242,6 +263,7 @@ export const FunctionList = explicitConnect<{}, StateProps, DispatchProps>({
     changeRightClickedFunctionIndex,
     addTransformToStack,
     updateBottomBoxContentsAndMaybeOpen,
+    handleFunctionTransformShortcut,
     onTableViewOptionsChange: (options: TableViewOptions) =>
       changeTableViewOptions('calltree', options),
     changeFunctionListSort,
