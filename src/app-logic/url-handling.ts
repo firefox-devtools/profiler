@@ -186,6 +186,7 @@ type CallTreeQuery = BaseQuery & {
   invertCallstack: null | undefined;
   hideIdleSamples: null | undefined;
   ctSummary: string;
+  functionListSort?: string; // "total-desc~self-asc" — primary first
 };
 
 type MarkersQuery = BaseQuery & {
@@ -231,6 +232,9 @@ type Query = BaseQuery & {
   markerSearch?: string;
   marker?: MarkerIndex;
   markerSort?: string;
+
+  // Function list specific
+  functionListSort?: string;
 
   // Network specific
   networkSearch?: string;
@@ -338,6 +342,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : undefined;
     /* fallsthrough */
     case 'flame-graph':
+    case 'function-list':
     case 'calltree': {
       query = baseQuery as CallTreeQueryShape;
 
@@ -384,6 +389,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         if (isBottomBoxFullscreen) {
           query.bottomFullscreen = true;
         }
+      }
+      if (selectedTab === 'function-list') {
+        query.functionListSort = convertFunctionListSortToString(
+          urlState.profileSpecific.functionListSort
+        );
       }
       break;
     }
@@ -641,6 +651,9 @@ export function stateFromLocation(
         : null,
       selectedMarkers,
       markerTableSort: convertMarkerTableSortFromString(query.markerSort),
+      functionListSort: convertFunctionListSortFromString(
+        query.functionListSort
+      ),
     },
   };
 }
@@ -685,6 +698,50 @@ function convertMarkerTableSortFromString(
     parsed.push({ column, ascending: dir === 'asc' });
   }
   return parsed;
+}
+
+// FunctionList sort URL encoding. Same convention as the marker table:
+// internal storage is primary-last, URL is primary-first. `null` means "at the
+// function list's default", encoded as an absent query parameter.
+const VALID_FUNCTION_LIST_SORT_COLUMNS = new Set(['total', 'self']);
+
+function convertFunctionListSortToString(
+  sort: SingleColumnSortState[] | null
+): string | undefined {
+  if (sort === null) {
+    return undefined;
+  }
+  return sort
+    .slice()
+    .reverse()
+    .map((s) => `${s.column}-${s.ascending ? 'asc' : 'desc'}`)
+    .join('~');
+}
+
+function convertFunctionListSortFromString(
+  raw: string | null | void
+): SingleColumnSortState[] | null {
+  if (!raw) {
+    return null;
+  }
+  const parsed: SingleColumnSortState[] = [];
+  for (const part of raw.split('~')) {
+    const dashIndex = part.lastIndexOf('-');
+    if (dashIndex === -1) {
+      return null;
+    }
+    const column = part.slice(0, dashIndex);
+    const dir = part.slice(dashIndex + 1);
+    if (
+      !VALID_FUNCTION_LIST_SORT_COLUMNS.has(column) ||
+      (dir !== 'asc' && dir !== 'desc')
+    ) {
+      return null;
+    }
+    parsed.push({ column, ascending: dir === 'asc' });
+  }
+  // URL is primary-first; internal storage is primary-last.
+  return parsed.reverse();
 }
 
 function convertGlobalTrackOrderFromString(

@@ -42,6 +42,7 @@ import type {
   CallNodeSelfAndSummary,
   State,
   CallNodeTableBitSet,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 import type {
   CallNodeInfo,
@@ -208,6 +209,14 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getSelectedFunctionIndex: Selector<IndexIntoFuncTable | null> =
+    createSelector(
+      threadSelectors.getViewOptions,
+      (threadViewOptions): IndexIntoFuncTable | null => {
+        return threadViewOptions.selectedFunctionIndex;
+      }
+    );
+
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
     UrlState.getInvertCallstack,
@@ -290,6 +299,19 @@ export function getStackAndSampleSelectorsPerThread(
           selectedCallNode
         );
       }
+    );
+
+  const getSampleSelectedStatesForFunctionListTab: Selector<Uint8Array> =
+    createSelector(
+      getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      (sampleCallNodes, callNodeTable, selectedFunctionIndex) =>
+        ProfileData.getSamplesSelectedStatesForFunction(
+          sampleCallNodes,
+          selectedFunctionIndex,
+          callNodeTable
+        )
     );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
@@ -498,6 +520,23 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getRightClickedFunctionIndex: Selector<null | IndexIntoFuncTable> =
+    createSelector(
+      ProfileSelectors.getProfileViewOptions,
+      (profileViewOptions) => {
+        const rightClickedFunctionInfo =
+          profileViewOptions.rightClickedFunction;
+        if (
+          rightClickedFunctionInfo !== null &&
+          threadsKey === rightClickedFunctionInfo.threadsKey
+        ) {
+          return rightClickedFunctionInfo.functionIndex;
+        }
+
+        return null;
+      }
+    );
+
   return {
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
@@ -507,10 +546,12 @@ export function getStackAndSampleSelectorsPerThread(
     getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getSelectedFunctionIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
     getSampleSelectedStatesInFilteredThread,
+    getSampleSelectedStatesForFunctionListTab,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
     getFunctionListTree,
@@ -524,5 +565,6 @@ export function getStackAndSampleSelectorsPerThread(
     getFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
+    getRightClickedFunctionIndex,
   };
 }
