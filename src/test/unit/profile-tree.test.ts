@@ -655,6 +655,101 @@ describe('lower wing', function () {
     const callTree = lowerWingTreeFromProfile(profile, 'NONEXISTENT');
     expect(formatTree(callTree)).toEqual([]);
   });
+
+  it('returns an empty tree when null is passed', function () {
+    // Exercises the `selectedFuncIndex === null` early return in
+    // _buildLowerWingTree.
+    const { profile } = getProfileFromTextSamples(textSamples);
+    const callTree = lowerWingTreeFromProfile(profile, null);
+    expect(formatTree(callTree)).toEqual([]);
+  });
+
+  it('does not double-count nested re-entries of the selected function', function () {
+    // C calls itself: A->C->B->C. The inner C must not contribute a second
+    // entry point — the outer C's entry already covers the whole stack. This
+    // exercises the subtree skip-ahead at the `entries` collection loop.
+    const { profile } = getProfileFromTextSamples(`
+      A
+      C
+      B
+      C
+    `);
+    const callTree = lowerWingTreeFromProfile(profile, 'C');
+    expect(formatTree(callTree)).toEqual([
+      '- C (total: 1, self: 1)',
+      '  - A (total: 1, self: —)',
+    ]);
+  });
+
+  it('sorts caller children by func index', function () {
+    // Three distinct callers of X. Func indices follow column-major discovery
+    // order: Z=0, X=1, A=2, M=3. The lower wing must list the children sorted
+    // by func index (Z, then A, then M), not by stack iteration order.
+    const { profile } = getProfileFromTextSamples(`
+      Z  A  M
+      X  X  X
+    `);
+    const callTree = lowerWingTreeFromProfile(profile, 'X');
+    expect(formatTree(callTree)).toEqual([
+      '- X (total: 3, self: 3)',
+      '  - Z (total: 1, self: —)',
+      '  - A (total: 1, self: —)',
+      '  - M (total: 1, self: —)',
+    ]);
+  });
+
+  it('partitions callers across multiple depths', function () {
+    // Two stacks share a depth-4 ancestor chain through D. Exercising the
+    // partition loop past depth 1 ensures the suffix-ordered ranges and
+    // per-iteration scratch buffers behave correctly across iterations.
+    const { profile } = getProfileFromTextSamples(`
+      A  A
+      B  E
+      C  C
+      D  D
+    `);
+    const callTree = lowerWingTreeFromProfile(profile, 'D');
+    expect(formatTree(callTree)).toEqual([
+      '- D (total: 2, self: 2)',
+      '  - C (total: 2, self: —)',
+      '    - B (total: 1, self: —)',
+      '      - A (total: 1, self: —)',
+      '    - E (total: 1, self: —)',
+      '      - A (total: 1, self: —)',
+    ]);
+  });
+
+  it('attributes self time to a parent when an entry runs out of ancestors mid-walk', function () {
+    // Two entry points for X: one is at the top of its stack (no ancestor),
+    // the other has B above it. At root X the first entry is a "leaf" in the
+    // ancestor walk (newDeep === -1) and contributes to X's self only; the
+    // second contributes to child B.
+    const { profile } = getProfileFromTextSamples(`
+      X  B
+      _  X
+    `);
+    const callTree = lowerWingTreeFromProfile(profile, 'X');
+    expect(formatTree(callTree)).toEqual([
+      '- X (total: 2, self: 2)',
+      '  - B (total: 1, self: —)',
+    ]);
+  });
+
+  it('falls back to the default category when entry points disagree', function () {
+    // Two entry points for C with conflicting categories. The non-inverted
+    // call nodes have different categories (Graphics vs DOM), and the lower
+    // wing root for C must resolve to the default category ('Other').
+    const { profile } = getProfileFromTextSamples(`
+      A              B
+      C[cat:Graphics]  C[cat:DOM]
+    `);
+    const callTree = lowerWingTreeFromProfile(profile, 'C');
+    expect(formatTreeIncludeCategories(callTree)).toEqual([
+      '- C [Other] (total: 2, self: 2)',
+      '  - A [Other] (total: 1, self: —)',
+      '  - B [Other] (total: 1, self: —)',
+    ]);
+  });
 });
 
 describe('diffing trees', function () {

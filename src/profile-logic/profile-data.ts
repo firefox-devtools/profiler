@@ -14,7 +14,8 @@ import {
 } from './data-structures';
 import {
   CallNodeInfoNonInverted,
-  CallNodeInfoInverted,
+  LazyInvertedCallNodeInfo,
+  LowerWingCallNodeInfo,
 } from './call-node-info';
 import { computeThreadCPUPercent } from './cpu';
 import {
@@ -105,7 +106,11 @@ import type {
   SourceLocationTable,
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
-import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import type {
+  CallNodeInfo,
+  CallNodeInfoInverted,
+  SuffixOrderIndex,
+} from './call-node-info';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -828,11 +833,33 @@ export function getInvertedCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number
 ): CallNodeInfoInverted {
-  return new CallNodeInfoInverted(
+  return new LazyInvertedCallNodeInfo(
     callNodeInfo.getCallNodeTable(),
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     defaultCategory,
     funcCount
+  );
+}
+
+/**
+ * Generate the lower wing CallNodeInfo for a thread and a selected function.
+ *
+ * Unlike getInvertedCallNodeInfo, this builds the entire inverted subtree
+ * upfront, restricted to the selected function's entry points. It's the
+ * dedicated structure for the "lower wing" view.
+ */
+export function getLowerWingCallNodeInfo(
+  callNodeInfo: CallNodeInfo,
+  defaultCategory: IndexIntoCategoryList,
+  funcCount: number,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallNodeInfoInverted {
+  return new LowerWingCallNodeInfo(
+    callNodeInfo.getCallNodeTable(),
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+    defaultCategory,
+    funcCount,
+    selectedFuncIndex
   );
 }
 
