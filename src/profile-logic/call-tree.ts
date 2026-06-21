@@ -887,6 +887,63 @@ export function computeCallTreeTimingsInverted(
   };
 }
 
+// Returns a "self" array indexed by non-inverted call node. Only root-most
+// entries to selectedFuncIndex are non-zero, and at each one we store the
+// *inclusive* time of that invocation (self + descendants). Feeding this
+// through computeCallTreeTimingsInverted then attributes each invocation's
+// inclusive time to the lower-wing node whose path is its caller chain.
+function _computeLowerWingCallNodeSelf(
+  callNodeSelf: Float64Array,
+  callNodeTable: CallNodeTable,
+  selectedFuncIndex: IndexIntoFuncTable
+): Float64Array {
+  const callNodeCount = callNodeTable.length;
+  const funcCol = callNodeTable.func;
+  const subtreeEndCol = callNodeTable.subtreeRangeEnd;
+  const mappedSelf = new Float64Array(callNodeCount);
+  for (let i = 0; i < callNodeCount; i++) {
+    if (funcCol[i] !== selectedFuncIndex) {
+      continue;
+    }
+
+    // Call node i is the root of a subtree for the selected function.
+    const subtreeEnd = subtreeEndCol[i];
+    let subtreeTotal = 0;
+    for (let j = i; j < subtreeEnd; j++) {
+      subtreeTotal += callNodeSelf[j];
+    }
+    mappedSelf[i] = subtreeTotal;
+    // Skip nested re-entries of selectedFuncIndex; their time is already
+    // included in the outer subtree total above.
+    i = subtreeEnd - 1;
+  }
+  return mappedSelf;
+}
+
+export function computeLowerWingTimings(
+  callNodeInfo: CallNodeInfoInverted,
+  { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallTreeTimings {
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const mappedSelf =
+    selectedFuncIndex !== null
+      ? _computeLowerWingCallNodeSelf(
+          callNodeSelf,
+          callNodeTable,
+          selectedFuncIndex
+        )
+      : new Float64Array(callNodeSelf.length);
+
+  return {
+    type: 'INVERTED',
+    timings: computeCallTreeTimingsInverted(callNodeInfo, {
+      callNodeSelf: mappedSelf,
+      rootTotalSummary,
+    }),
+  };
+}
+
 export function computeCallTreeTimings(
   callNodeInfo: CallNodeInfo,
   callNodeSelfAndSummary: CallNodeSelfAndSummary
