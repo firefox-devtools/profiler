@@ -43,10 +43,13 @@ import type {
   State,
   CallNodeTableBitSet,
   IndexIntoFuncTable,
+  IndexIntoStackTable,
+  CallNodeArea,
 } from 'firefox-profiler/types';
 import type {
   CallNodeInfo,
   CallNodeInfoInverted,
+  CallersCallNodeInfo,
 } from 'firefox-profiler/profile-logic/call-node-info';
 import type { SampleRelations } from 'firefox-profiler/profile-logic/profile-data';
 
@@ -228,6 +231,60 @@ export function getStackAndSampleSelectorsPerThread(
     return funcIndex;
   };
 
+  const getCalleesCallNodeInfo: Selector<CallNodeInfo> = createSelector(
+    _getNonInvertedCallNodeInfo,
+    getSelectedFunctionIndex,
+    (state: State) => threadSelectors.getFilteredThread(state).stackTable,
+    (state: State) => threadSelectors.getFilteredThread(state).frameTable,
+    (state: State) => threadSelectors.getFilteredThread(state).funcTable.length,
+    ProfileSelectors.getDefaultCategory,
+    ProfileData.createCalleesCallNodeInfo
+  );
+
+  // The callers panel uses its own dedicated CallNodeInfo: a single inverted
+  // root for the selected function, with the entire subtree built eagerly
+  // from that function's entry points. See CallersCallNodeInfo in
+  // call-node-info.ts.
+  const getCallersCallNodeInfo: Selector<CallersCallNodeInfo> = createSelector(
+    _getNonInvertedCallNodeInfo,
+    ProfileSelectors.getDefaultCategory,
+    (state: State) => threadSelectors.getFilteredThread(state).funcTable.length,
+    getSelectedFunctionIndex,
+    ProfileData.getCallersCallNodeInfo
+  );
+
+  // Combines a CallNodeInfo selector with a CallNodePath selector to produce
+  // the corresponding call node index.
+  const makeCallNodeIndexFromPathSelector = (
+    callNodeInfoSel: Selector<CallNodeInfo>,
+    pathSel: Selector<CallNodePath>
+  ): Selector<IndexIntoCallNodeTable | null> =>
+    createSelector(callNodeInfoSel, pathSel, (callNodeInfo, callNodePath) =>
+      callNodeInfo.getCallNodeIndexFromPath(callNodePath)
+    );
+
+  // Combines a CallNodeInfo selector with an expanded-paths selector to
+  // produce the corresponding array of call node indexes.
+  const makeExpandedIndexesSelector = (
+    callNodeInfoSel: Selector<CallNodeInfo>,
+    pathsSel: Selector<PathSet>
+  ): Selector<Array<IndexIntoCallNodeTable | null>> =>
+    createSelector(callNodeInfoSel, pathsSel, (callNodeInfo, callNodePaths) =>
+      Array.from(callNodePaths).map((path) =>
+        callNodeInfo.getCallNodeIndexFromPath(path)
+      )
+    );
+
+  const getCallersSelectedCallNodePath: Selector<CallNodePath> = createSelector(
+    threadSelectors.getViewOptions,
+    (threadViewOptions) => threadViewOptions.selectedCallNodePaths.CALLERS
+  );
+
+  const getCalleesSelectedCallNodePath: Selector<CallNodePath> = createSelector(
+    threadSelectors.getViewOptions,
+    (threadViewOptions) => threadViewOptions.selectedCallNodePaths.CALLEES
+  );
+
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
     UrlState.getInvertCallstack,
@@ -237,14 +294,18 @@ export function getStackAndSampleSelectorsPerThread(
         : threadViewOptions.selectedCallNodePaths.NON_INVERTED_TREE
   );
 
-  const getSelectedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> =
-    createSelector(
-      getCallNodeInfo,
-      getSelectedCallNodePath,
-      (callNodeInfo, callNodePath) => {
-        return callNodeInfo.getCallNodeIndexFromPath(callNodePath);
-      }
-    );
+  const getSelectedCallNodeIndex = makeCallNodeIndexFromPathSelector(
+    getCallNodeInfo,
+    getSelectedCallNodePath
+  );
+  const getCallersSelectedCallNodeIndex = makeCallNodeIndexFromPathSelector(
+    getCallersCallNodeInfo,
+    getCallersSelectedCallNodePath
+  );
+  const getCalleesSelectedCallNodeIndex = makeCallNodeIndexFromPathSelector(
+    getCalleesCallNodeInfo,
+    getCalleesSelectedCallNodePath
+  );
 
   const getExpandedCallNodePaths: Selector<PathSet> = createSelector(
     threadSelectors.getViewOptions,
@@ -255,15 +316,27 @@ export function getStackAndSampleSelectorsPerThread(
         : threadViewOptions.expandedCallNodePaths.NON_INVERTED_TREE
   );
 
-  const getExpandedCallNodeIndexes: Selector<
-    Array<IndexIntoCallNodeTable | null>
-  > = createSelector(
+  const getCallersExpandedCallNodePaths: Selector<PathSet> = createSelector(
+    threadSelectors.getViewOptions,
+    (threadViewOptions) => threadViewOptions.expandedCallNodePaths.CALLERS
+  );
+
+  const getCalleesExpandedCallNodePaths: Selector<PathSet> = createSelector(
+    threadSelectors.getViewOptions,
+    (threadViewOptions) => threadViewOptions.expandedCallNodePaths.CALLEES
+  );
+
+  const getExpandedCallNodeIndexes = makeExpandedIndexesSelector(
     getCallNodeInfo,
-    getExpandedCallNodePaths,
-    (callNodeInfo, callNodePaths) =>
-      Array.from(callNodePaths).map((path) =>
-        callNodeInfo.getCallNodeIndexFromPath(path)
-      )
+    getExpandedCallNodePaths
+  );
+  const getCallersExpandedCallNodeIndexes = makeExpandedIndexesSelector(
+    getCallersCallNodeInfo,
+    getCallersExpandedCallNodePaths
+  );
+  const getCalleesExpandedCallNodeIndexes = makeExpandedIndexesSelector(
+    getCalleesCallNodeInfo,
+    getCalleesExpandedCallNodePaths
   );
 
   const _getSampleCallNodesForFilteredCtssThread: Selector<
@@ -283,6 +356,27 @@ export function getStackAndSampleSelectorsPerThread(
       threadSelectors.getPreviewFilteredCtssSampleIndexOffsets(state),
     (state: State) => threadSelectors.getFilteredCtssSampleIndexOffsets(state),
     (filteredCallNodes, [b, e], [fb]) => filteredCallNodes.slice(b - fb, e - fb)
+  );
+
+  const _getPreviewFilteredCtssSampleIndexToCalleesCallNodeIndex: Selector<
+    Array<IndexIntoCallNodeTable | null>
+  > = createSelector(
+    (state: State) =>
+      threadSelectors.getPreviewFilteredCtssSamples(state).stack,
+    (state: State) =>
+      getCalleesCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    (sampleStacks, stackIndexToCallNodeIndex) => {
+      return sampleStacks.map((stackIndex: IndexIntoStackTable | null) => {
+        if (stackIndex === null) {
+          return null;
+        }
+        const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+        if (callNodeIndex === -1) {
+          return null;
+        }
+        return callNodeIndex;
+      });
+    }
   );
 
   const getSampleCallNodesForFilteredThread: Selector<
@@ -465,11 +559,56 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getCalleesCallNodeSelfAndSummary: Selector<CallNodeSelfAndSummary> =
+    createSelector(
+      threadSelectors.getPreviewFilteredCtssSamples,
+      _getPreviewFilteredCtssSampleIndexToCalleesCallNodeIndex,
+      getCalleesCallNodeInfo,
+      getCallNodeSelfAndSummary,
+      (
+        samples,
+        sampleIndexToCallNodeIndex,
+        callNodeInfo,
+        regularTreeSelfAndSummary
+      ) => {
+        const { rootTotalSummary } = regularTreeSelfAndSummary;
+        const calleesSelfAndSummary = CallTree.computeCallNodeSelfAndSummary(
+          samples,
+          sampleIndexToCallNodeIndex,
+          callNodeInfo.getCallNodeTable().length
+        );
+        const { callNodeSelf } = calleesSelfAndSummary;
+        // Use the callees panel's own total as the flame graph scaling reference,
+        // so that the root node (the selected function) fills the full flame
+        // graph width. The rootTotalSummary from the regular tree is kept for
+        // percentage display, so tooltips show percentages relative to all
+        // filtered samples (e.g. "80%" if 800 of 1000 samples contain the
+        // selected function).
+        const flameGraphWidthTotal = calleesSelfAndSummary.rootTotalSummary;
+        return { rootTotalSummary, callNodeSelf, flameGraphWidthTotal };
+      }
+    );
+
   const getCallTreeTimings: Selector<CallTree.CallTreeTimings> = createSelector(
     getCallNodeInfo,
     getCallNodeSelfAndSummary,
     CallTree.computeCallTreeTimings
   );
+
+  const _getCallersCallTreeTimings: Selector<CallTree.CallTreeTimings> =
+    createSelector(
+      getCallersCallNodeInfo,
+      getCallNodeSelfAndSummary,
+      getSelectedFunctionIndex,
+      CallTree.computeCallersTimings
+    );
+
+  const _getCalleesCallTreeTimings: Selector<CallTree.CallTreeTimings> =
+    createSelector(
+      getCalleesCallNodeInfo,
+      getCalleesCallNodeSelfAndSummary,
+      CallTree.computeCallTreeTimings
+    );
 
   const getCallTreeTimingsNonInverted: Selector<CallTree.CallTreeTimingsNonInverted> =
     createSelector(
@@ -539,6 +678,26 @@ export function getStackAndSampleSelectorsPerThread(
         { type: 'FUNCTION_LIST', timings: functionListTimings },
         weightType
       )
+  );
+
+  const getCalleesCallTree: Selector<CallTree.CallTree> = createSelector(
+    threadSelectors.getPreviewFilteredThread,
+    getCalleesCallNodeInfo,
+    ProfileSelectors.getCategories,
+    threadSelectors.getPreviewFilteredCtssSamples,
+    _getCalleesCallTreeTimings,
+    getWeightTypeForCallTree,
+    CallTree.getCallTree
+  );
+
+  const getCallersCallTree: Selector<CallTree.CallTree> = createSelector(
+    threadSelectors.getPreviewFilteredThread,
+    getCallersCallNodeInfo,
+    ProfileSelectors.getCategories,
+    threadSelectors.getPreviewFilteredCtssSamples,
+    _getCallersCallTreeTimings,
+    getWeightTypeForCallTree,
+    CallTree.getCallTree
   );
 
   const getSourceViewLineTimings: Selector<LineTimings> = createSelector(
@@ -704,6 +863,53 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  // Returns the right-clicked call node index in `area` for this thread, or
+  // null if the right-clicked call node belongs to a different thread or area.
+  const makeAreaRightClickedCallNodeIndexSelector = (
+    area: CallNodeArea,
+    callNodeInfoSel: Selector<CallNodeInfo>
+  ): Selector<null | IndexIntoCallNodeTable> =>
+    createSelector(
+      getRightClickedCallNodeInfo,
+      callNodeInfoSel,
+      (rightClickedCallNodeInfo, callNodeInfo) => {
+        if (
+          rightClickedCallNodeInfo !== null &&
+          rightClickedCallNodeInfo.threadsKey === threadsKey &&
+          rightClickedCallNodeInfo.area === area
+        ) {
+          return callNodeInfo.getCallNodeIndexFromPath(
+            rightClickedCallNodeInfo.callNodePath
+          );
+        }
+        return null;
+      }
+    );
+
+  const getCallersRightClickedCallNodeIndex =
+    makeAreaRightClickedCallNodeIndexSelector(
+      'CALLERS',
+      getCallersCallNodeInfo
+    );
+
+  const getCalleesRightClickedCallNodeIndex =
+    makeAreaRightClickedCallNodeIndexSelector(
+      'CALLEES',
+      getCalleesCallNodeInfo
+    );
+
+  const getCallersRightClickedFuncIndex: Selector<null | IndexIntoFuncTable> =
+    createSelector(
+      getCallersRightClickedCallNodeIndex,
+      getCallersCallNodeInfo,
+      (callNodeIndex, callNodeInfo) => {
+        if (callNodeIndex === null) {
+          return null;
+        }
+        return callNodeInfo.funcForNode(callNodeIndex);
+      }
+    );
+
   const getRightClickedFunctionIndex: Selector<null | IndexIntoFuncTable> =
     createSelector(
       ProfileSelectors.getProfileViewOptions,
@@ -726,14 +932,24 @@ export function getStackAndSampleSelectorsPerThread(
     getWeightTypeForCallTree,
     getCallNodeInfo,
     getNonInvertedCallNodeInfo,
+    getCallersCallNodeInfo,
+    getCalleesCallNodeInfo,
     getSourceViewStackLineInfo,
     getAssemblyViewNativeSymbolIndex,
     getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getCallersSelectedCallNodePath,
+    getCallersSelectedCallNodeIndex,
+    getCalleesSelectedCallNodePath,
+    getCalleesSelectedCallNodeIndex,
     getSelectedFunctionIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
+    getCallersExpandedCallNodePaths,
+    getCallersExpandedCallNodeIndexes,
+    getCalleesExpandedCallNodePaths,
+    getCalleesExpandedCallNodeIndexes,
     getSampleCallNodesForFilteredThread,
     getSampleRelationsToSelectedNodeInFilteredThread,
     getSampleRelationsForFunctionListTab,
@@ -746,6 +962,8 @@ export function getStackAndSampleSelectorsPerThread(
     getNonInvertedCallTree,
     getFunctionListTree,
     getFunctionListTimings,
+    getCallersCallTree,
+    getCalleesCallTree,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
@@ -758,5 +976,8 @@ export function getStackAndSampleSelectorsPerThread(
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
     getRightClickedFunctionIndex,
+    getCallersRightClickedCallNodeIndex,
+    getCallersRightClickedFuncIndex,
+    getCalleesRightClickedCallNodeIndex,
   };
 }

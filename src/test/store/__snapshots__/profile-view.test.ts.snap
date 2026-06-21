@@ -4435,6 +4435,12 @@ Process: \\"default\\" (0)"
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `
 Object {
   "expandedCallNodePaths": Object {
+    "CALLEES": PathSet {
+      "_table": Map {},
+    },
+    "CALLERS": PathSet {
+      "_table": Map {},
+    },
     "INVERTED_TREE": PathSet {
       "_table": Map {},
     },
@@ -4452,6 +4458,8 @@ Object {
   },
   "lastSeenTransformCount": 1,
   "selectedCallNodePaths": Object {
+    "CALLEES": Array [],
+    "CALLERS": Array [],
     "INVERTED_TREE": Array [],
     "NON_INVERTED_TREE": Array [
       0,
