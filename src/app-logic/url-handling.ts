@@ -42,6 +42,9 @@ import type {
   IndexIntoFrameTable,
   MarkerIndex,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
+  WingViewsState,
 } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
@@ -120,6 +123,19 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
+/**
+ * Synchronously replace the current history entry to match the given UrlState.
+ *
+ * Use this from action thunks for high-frequency actions (e.g. arrow-key
+ * navigation) where deferring the URL update to UrlManager.componentDidUpdate
+ * would result in unwanted pushState calls and history-flooding. By updating
+ * window.history synchronously here, the URL already matches the new state by
+ * the time UrlManager's componentDidUpdate runs, so it becomes a no-op.
+ */
+export function replaceHistoryWithUrlState(urlState: UrlState): void {
+  window.history.replaceState(urlState, document.title, urlFromState(urlState));
+}
+
 function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
@@ -187,6 +203,9 @@ type CallTreeQuery = BaseQuery & {
   hideIdleSamples: null | undefined;
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
+  funcListSections?: string; // "descendants,self" — comma-separated open sections
+  wingViews?: string; // "upper:call-tree,lower:call-tree" — non-default wing views
+  selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
 type MarkersQuery = BaseQuery & {
@@ -235,6 +254,9 @@ type Query = BaseQuery & {
 
   // Function list specific
   functionListSort?: string;
+  funcListSections?: string;
+  wingViews?: string;
+  selectedFunc?: number;
 
   // Network specific
   networkSearch?: string;
@@ -394,6 +416,20 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         query.functionListSort = convertFunctionListSortToString(
           urlState.profileSpecific.functionListSort
         );
+        query.funcListSections = convertFunctionListSectionsOpenToString(
+          urlState.profileSpecific.functionListSectionsOpen
+        );
+        query.wingViews = convertWingViewsToString(
+          urlState.profileSpecific.wingViews
+        );
+        query.selectedFunc =
+          selectedThreadsKey !== null &&
+          urlState.profileSpecific.selectedFunctions[selectedThreadsKey] !==
+            null &&
+          urlState.profileSpecific.selectedFunctions[selectedThreadsKey] !==
+            undefined
+            ? urlState.profileSpecific.selectedFunctions[selectedThreadsKey]
+            : undefined;
       }
       break;
     }
@@ -557,6 +593,19 @@ export function stateFromLocation(
     }
   }
 
+  // Parse the selected function for the current thread
+  const selectedFunctions: SelectedFunctionsPerThread = {};
+  if (
+    selectedThreadsKey !== null &&
+    query.selectedFunc !== undefined &&
+    query.selectedFunc !== null
+  ) {
+    const funcIndex = Number(query.selectedFunc);
+    if (Number.isInteger(funcIndex) && funcIndex >= 0) {
+      selectedFunctions[selectedThreadsKey] = funcIndex;
+    }
+  }
+
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -648,10 +697,15 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      selectedFunctions,
       markerTableSort: convertMarkerTableSortFromString(query.markerSort),
       functionListSort: convertFunctionListSortFromString(
         query.functionListSort
       ),
+      functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
+        query.funcListSections
+      ),
+      wingViews: convertWingViewsFromString(query.wingViews),
     },
   };
 }
@@ -749,6 +803,97 @@ function convertFunctionListSortFromString(
   }
   // URL is primary-first; internal storage is primary-last.
   return parsed.reverse();
+}
+
+// FunctionList section disclosure-box open/closed state. The URL stores a
+// comma-separated list of the open sections; the param is omitted when the
+// state matches the default (only "descendants" open). The value "none" is
+// used as a sentinel for the all-closed case so the param is non-empty.
+const FUNCTION_LIST_SECTION_NAMES: ReadonlyArray<
+  keyof FunctionListSectionsOpenState
+> = ['descendants', 'ancestors', 'self'];
+const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState = {
+  descendants: true,
+  ancestors: false,
+  self: false,
+};
+
+function convertFunctionListSectionsOpenToString(
+  state: FunctionListSectionsOpenState
+): string | undefined {
+  const matchesDefault = FUNCTION_LIST_SECTION_NAMES.every(
+    (name) => state[name] === FUNCTION_LIST_SECTIONS_OPEN_DEFAULT[name]
+  );
+  if (matchesDefault) {
+    return undefined;
+  }
+  const open = FUNCTION_LIST_SECTION_NAMES.filter((name) => state[name]);
+  return open.length === 0 ? 'none' : open.join(',');
+}
+
+function convertFunctionListSectionsOpenFromString(
+  raw: string | null | void
+): FunctionListSectionsOpenState {
+  if (raw === undefined || raw === null) {
+    return { ...FUNCTION_LIST_SECTIONS_OPEN_DEFAULT };
+  }
+  const result: FunctionListSectionsOpenState = {
+    descendants: false,
+    ancestors: false,
+    self: false,
+  };
+  if (raw === 'none' || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    if (part === 'descendants' || part === 'ancestors' || part === 'self') {
+      result[part] = true;
+    }
+  }
+  return result;
+}
+
+// WingView visualization choice for the Descendants ("upper"), Ancestors
+// ("lower"), and Self wings of the FunctionList tab. The URL stores a
+// comma-separated list of "wing:view" pairs for wings whose view differs from
+// the default (flame-graph), e.g. "upper:call-tree". The param is omitted
+// when all wings use the default.
+const WING_VIEWS_DEFAULT: WingViewsState = {
+  upper: 'flame-graph',
+  lower: 'flame-graph',
+  self: 'flame-graph',
+};
+const WING_VIEW_NAMES: ReadonlyArray<keyof WingViewsState> = [
+  'upper',
+  'lower',
+  'self',
+];
+
+function convertWingViewsToString(state: WingViewsState): string | undefined {
+  const parts: string[] = [];
+  for (const wing of WING_VIEW_NAMES) {
+    if (state[wing] !== WING_VIEWS_DEFAULT[wing]) {
+      parts.push(`${wing}:${state[wing]}`);
+    }
+  }
+  return parts.length === 0 ? undefined : parts.join(',');
+}
+
+function convertWingViewsFromString(raw: string | null | void): WingViewsState {
+  const result: WingViewsState = { ...WING_VIEWS_DEFAULT };
+  if (raw === undefined || raw === null || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    const [wing, view] = part.split(':');
+    if (
+      (wing === 'upper' || wing === 'lower' || wing === 'self') &&
+      (view === 'flame-graph' || view === 'call-tree')
+    ) {
+      result[wing] = view;
+    }
+  }
+  return result;
 }
 
 function convertGlobalTrackOrderFromString(

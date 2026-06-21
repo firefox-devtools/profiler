@@ -57,12 +57,10 @@ export type SourceMapSymbolicationStatus =
   | 'INACTIVE'
   | 'FETCHING'
   | 'SYMBOLICATING';
+
 export type ThreadViewOptions = {
-  readonly selectedNonInvertedCallNodePath: CallNodePath;
-  readonly selectedInvertedCallNodePath: CallNodePath;
-  readonly expandedNonInvertedCallNodePaths: PathSet;
-  readonly expandedInvertedCallNodePaths: PathSet;
-  readonly selectedFunctionIndex: IndexIntoFuncTable | null;
+  readonly selectedCallNodePaths: Record<CallNodeArea, CallNodePath>;
+  readonly expandedCallNodePaths: Record<CallNodeArea, PathSet>;
   readonly selectedNetworkMarker: MarkerIndex | null;
   // Track the number of transforms to detect when they change via browser
   // navigation. This helps us know when to reset paths that may be invalid
@@ -80,8 +78,20 @@ export type TableViewOptions = {
 
 export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 
+export type CallNodeArea =
+  | 'NON_INVERTED_TREE'
+  | 'INVERTED_TREE'
+  | 'LOWER_WING'
+  | 'UPPER_WING';
+
+// State-bearing function-list wings: each has its own selected/expanded/
+// right-clicked call node path. The self wing has no such state of its own
+// (it shares it with the main tree).
+export type WingName = 'upper' | 'lower';
+
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
+  readonly area: CallNodeArea;
   readonly callNodePath: CallNodePath;
 };
 
@@ -97,6 +107,10 @@ export type MarkerReference = {
 
 export type SelectedMarkersPerThread = {
   [key: ThreadsKey]: MarkerIndex | null;
+};
+
+export type SelectedFunctionsPerThread = {
+  [key: ThreadsKey]: IndexIntoFuncTable | null;
 };
 
 /**
@@ -392,8 +406,25 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  selectedFunctions: SelectedFunctionsPerThread;
   markerTableSort: SingleColumnSortState[];
   functionListSort: SingleColumnSortState[];
+  functionListSectionsOpen: FunctionListSectionsOpenState;
+  wingViews: WingViewsState;
+};
+
+export type FunctionListSectionsOpenState = {
+  descendants: boolean;
+  ancestors: boolean;
+  self: boolean;
+};
+
+export type WingViewType = 'flame-graph' | 'call-tree';
+
+export type WingViewsState = {
+  upper: WingViewType;
+  lower: WingViewType;
+  self: WingViewType;
 };
 
 export type UrlState = {
