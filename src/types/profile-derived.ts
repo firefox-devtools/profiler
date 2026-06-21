@@ -588,6 +588,7 @@ export type CallNodeDisplayData = Readonly<{
   totalPercent: string;
   self: string;
   selfWithUnit: string;
+  selfPercent: string;
   name: string;
   lib: string;
   isFrameLabel: boolean;

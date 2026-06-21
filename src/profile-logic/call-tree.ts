@@ -38,7 +38,10 @@ import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
-import type { SortableColumn } from '../components/shared/TreeView';
+import type {
+  ColumnSortState,
+  SortableColumn,
+} from '../components/shared/TreeView';
 import {
   getBottomBoxInfoForCallNode,
   getBottomBoxInfoForFunction,
@@ -407,6 +410,12 @@ export class CallTree {
   // The call tree's own order (by total sample count) is the intended order,
   // so no columns are user-sortable.
   getSortableColumns(): SortableColumn[] {
+    if (this._internal instanceof CallTreeInternalFunctionList) {
+      return [
+        { column: 'total', prefersDescending: true },
+        { column: 'self', prefersDescending: true },
+      ];
+    }
     return [];
   }
 
@@ -414,7 +423,28 @@ export class CallTree {
     return this._rootTotalSummary;
   }
 
-  getRoots() {
+  getRoots(sort: ColumnSortState | null = null): IndexIntoCallNodeTable[] {
+    if (
+      sort !== null &&
+      sort.entries.length > 0 &&
+      this._internal instanceof CallTreeInternalFunctionList
+    ) {
+      const internal = this._internal;
+      return sort.sortItems(
+        this._roots,
+        (
+          a: IndexIntoCallNodeTable,
+          b: IndexIntoCallNodeTable,
+          column: string
+        ) => {
+          const aValue =
+            column === 'self' ? internal.getSelf(a) : internal.getTotal(a);
+          const bValue =
+            column === 'self' ? internal.getSelf(b) : internal.getTotal(b);
+          return aValue - bValue;
+        }
+      );
+    }
     return this._roots;
   }
 
@@ -518,7 +548,7 @@ export class CallTree {
     let displayData: CallNodeDisplayData | void =
       this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, total, totalRelative, self } =
+      const { funcName, total, totalRelative, self, selfRelative } =
         this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeInfo.funcForNode(callNodeIndex);
       const categoryIndex = this._callNodeInfo.categoryForNode(callNodeIndex);
@@ -556,6 +586,7 @@ export class CallTree {
         self
       );
       const totalPercent = `${formatPercent(totalRelative)}`;
+      const selfPercent = `${formatPercent(selfRelative)}`;
 
       let ariaLabel;
       let totalWithUnit;
@@ -606,6 +637,7 @@ export class CallTree {
         self: self === 0 ? '—' : formattedSelf,
         selfWithUnit: self === 0 ? '—' : selfWithUnit,
         totalPercent,
+        selfPercent,
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.

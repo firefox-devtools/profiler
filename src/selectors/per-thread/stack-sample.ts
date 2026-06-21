@@ -42,6 +42,7 @@ import type {
   CallNodeSelfAndSummary,
   State,
   CallNodeTableBitSet,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 import type {
   CallNodeInfo,
@@ -208,6 +209,14 @@ export function getStackAndSampleSelectorsPerThread(
           funcTable,
           nativeSymbolIndex
         );
+      }
+    );
+
+  const getSelectedFunctionIndex: Selector<IndexIntoFuncTable | null> =
+    createSelector(
+      threadSelectors.getViewOptions,
+      (threadViewOptions): IndexIntoFuncTable | null => {
+        return threadViewOptions.selectedFunctionIndex;
       }
     );
 
@@ -596,6 +605,23 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getRightClickedFunctionIndex: Selector<null | IndexIntoFuncTable> =
+    createSelector(
+      ProfileSelectors.getProfileViewOptions,
+      (profileViewOptions) => {
+        const rightClickedFunctionInfo =
+          profileViewOptions.rightClickedFunction;
+        if (
+          rightClickedFunctionInfo !== null &&
+          threadsKey === rightClickedFunctionInfo.threadsKey
+        ) {
+          return rightClickedFunctionInfo.functionIndex;
+        }
+
+        return null;
+      }
+    );
+
   return {
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
@@ -606,6 +632,7 @@ export function getStackAndSampleSelectorsPerThread(
     getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getSelectedFunctionIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleIndexToNonInvertedCallNodeIndexForFilteredThread,
@@ -626,5 +653,6 @@ export function getStackAndSampleSelectorsPerThread(
     getNonInvertedFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
+    getRightClickedFunctionIndex,
   };
 }

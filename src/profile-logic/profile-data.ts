@@ -1492,6 +1492,41 @@ export function computeCallNodeFuncIsDuplicate(
   return nodeFuncIsDuplicateBitSet;
 }
 
+/**
+ * This function returns the timings for a specific function.
+ *
+ * Note that the unfilteredThread should be the original thread before any filtering
+ * (by range or other) happens. Also sampleIndexOffset needs to be properly
+ * specified and is the offset to be applied on thread's indexes to access
+ * the same samples in unfilteredThread.
+ */
+export function getTimingsForFunction(
+  _funcIndex: IndexIntoFuncTable | null,
+  _interval: Milliseconds,
+  _thread: Thread,
+  _unfilteredThread: Thread,
+  _sampleIndexOffset: number,
+  _categories: CategoryList,
+  _samples: SamplesLikeTable,
+  _unfilteredSamples: SamplesLikeTable,
+  _displayImplementation: boolean
+): TimingsForPath {
+  // TODO
+  return {
+    forPath: {
+      selfTime: {
+        value: 0,
+        breakdownByCategory: null,
+      },
+      totalTime: {
+        value: 0,
+        breakdownByCategory: null,
+      },
+    },
+    rootTime: 1,
+  };
+}
+
 // This function computes the time range for a thread, using both its samples
 // and markers data. It's memoized and exported below, because it's called both
 // here in getTimeRangeIncludingAllThreads, and in selectors when dealing with
