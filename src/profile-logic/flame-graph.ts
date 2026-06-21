@@ -16,9 +16,8 @@ export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
 
 /**
- * FlameGraphTiming is an array containing data used for rendering the
- * flame graph. Each element in the array describes one row in the
- * graph. Each such element in turn contains one or more functions,
+ * FlameGraphTimingRow contains the data used for rendering a single
+ * row of the flame graph. Each row contains one or more functions,
  * drawn as boxes with start and end positions, represented as unit
  * intervals of the profile range. It should be noted that start and
  * end does not represent units of time, but only positions on the
@@ -30,13 +29,47 @@ export type IndexIntoFlameGraphTiming = number;
  * selfRelative contains the self time relative to the total time,
  * which is used to color the drawn functions.
  */
-export type FlameGraphTiming = Array<{
+export type FlameGraphTimingRow = {
   start: UnitIntervalOfProfileRange[];
   end: UnitIntervalOfProfileRange[];
   selfRelative: Array<number>;
   callNode: IndexIntoCallNodeTable[];
   length: number;
-}>;
+};
+
+/**
+ * Used by the flame graph canvas to know which boxes to render where.
+ *
+ * The flame graph only calls getRow(depth) for on-screen rows; this allows
+ * the implementation to generate rows lazily as the user scrolls towards
+ * deeper calls.
+ */
+export class FlameGraphTiming {
+  _rows: FlameGraphTimingRow[];
+
+  constructor(rows: FlameGraphTimingRow[]) {
+    this._rows = rows;
+  }
+
+  get rowCount(): number {
+    return this._rows.length;
+  }
+
+  getRow(depth: number): FlameGraphTimingRow {
+    if (depth < 0 || depth >= this.rowCount) {
+      throw new Error(
+        `Out-of-bounds call to getRow: ${depth} is outside 0..${this.rowCount}`
+      );
+    }
+
+    return this._rows[depth];
+  }
+
+  // Convenience method for tests, don't call in production
+  getAllRowsForTesting(): FlameGraphTimingRow[] {
+    return this._rows;
+  }
+}
 
 /**
  * FlameGraphRows is an array of rows, where each row is an array of call node
@@ -305,5 +338,5 @@ export function getFlameGraphTiming(
     };
   }
 
-  return timing;
+  return new FlameGraphTiming(timing);
 }
