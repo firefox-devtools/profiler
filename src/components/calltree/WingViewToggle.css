@@ -1,0 +1,44 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.wingViewToggle {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.wingViewToggleButton {
+  display: flex;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--panel-foreground-color);
+  cursor: pointer;
+}
+
+.wingViewToggleButton:hover {
+  background: var(--clickable-ghost-hover-background-color);
+}
+
+.wingViewToggleButton:active {
+  background: var(--clickable-ghost-active-background-color);
+}
+
+.wingViewToggleButton.selected {
+  background: var(--clickable-ghost-active-background-color);
+}
+
+.wingViewToggleButton svg {
+  fill: currentcolor;
+  opacity: 0.55;
+}
+
+.wingViewToggleButton.selected svg {
+  opacity: 1;
+}

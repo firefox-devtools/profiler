@@ -24,6 +24,9 @@ import type {
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
+  WingViewsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -213,6 +216,42 @@ const functionListSort: Reducer<SingleColumnSortState[] | null> = (
   switch (action.type) {
     case 'CHANGE_FUNCTION_LIST_SORT':
       return action.sort;
+    default:
+      return state;
+  }
+};
+
+const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState = {
+  descendants: true,
+  ancestors: false,
+  self: false,
+};
+
+const functionListSectionsOpen: Reducer<FunctionListSectionsOpenState> = (
+  state = FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNCTION_LIST_SECTION_OPEN':
+      return { ...state, [action.section]: action.isOpen };
+    default:
+      return state;
+  }
+};
+
+const WING_VIEWS_DEFAULT: WingViewsState = {
+  upper: 'flame-graph',
+  lower: 'flame-graph',
+  self: 'flame-graph',
+};
+
+const wingViews: Reducer<WingViewsState> = (
+  state = WING_VIEWS_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_WING_VIEW':
+      return { ...state, [action.wing]: action.view };
     default:
       return state;
   }
@@ -789,6 +828,26 @@ const selectedMarkers: Reducer<SelectedMarkersPerThread> = (
   }
 };
 
+const selectedFunctions: Reducer<SelectedFunctionsPerThread> = (
+  state = {},
+  action
+): SelectedFunctionsPerThread => {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_FUNCTION': {
+      const { threadsKey, selectedFunctionIndex } = action;
+      if (state[threadsKey] === selectedFunctionIndex) {
+        return state;
+      }
+      return {
+        ...state,
+        [threadsKey]: selectedFunctionIndex,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * These values are specific to an individual profile.
  */
@@ -818,8 +877,11 @@ const profileSpecific = combineReducers({
   showJsTracerSummary,
   tabFilter,
   selectedMarkers,
+  selectedFunctions,
   markerTableSort,
   functionListSort,
+  functionListSectionsOpen,
+  wingViews,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading
