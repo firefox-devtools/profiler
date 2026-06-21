@@ -66,9 +66,15 @@ export type InvertedCallTreeRoot = {
 export type CallTreeTimingsInverted = {
   callNodeSelf: Float64Array;
   rootTotalSummary: number;
-  sortedRoots: IndexIntoFuncTable[];
-  totalPerRootFunc: Float64Array;
-  hasChildrenPerRootFunc: Uint8Array;
+  // Inverted-tree root call node indices, sorted by their total descending.
+  // For LazyInvertedCallNodeInfo these happen to equal func indices; for other
+  // CNIs (e.g. lower-wing) they're whatever index the CNI uses for its root.
+  sortedRoots: IndexIntoCallNodeTable[];
+  // Indexed by inverted-tree root call node index (i.e. 0..rootCount-1, where
+  // rootCount = callNodeInfo.getRootCount()). For the standard inverted tree,
+  // root index === func index; for a lower-wing CNI, the array has length 1.
+  totalPerRootNode: Float64Array;
+  hasChildrenPerRootNode: Uint8Array;
 };
 
 export type CallTreeTimingsFunctionList = {
@@ -248,8 +254,8 @@ class CallTreeInternalInverted implements CallTreeInternal {
   _callNodeTable: CallNodeTable;
   _callNodeSelf: Float64Array;
   _rootNodes: IndexIntoCallNodeTable[];
-  _totalPerRootFunc: Float64Array;
-  _hasChildrenPerRootFunc: Uint8Array;
+  _totalPerRootNode: Float64Array;
+  _hasChildrenPerRootNode: Uint8Array;
   _totalAndHasChildrenPerNonRootNode: Map<
     IndexIntoCallNodeTable,
     TotalAndHasChildren
@@ -262,10 +268,10 @@ class CallTreeInternalInverted implements CallTreeInternal {
     this._callNodeInfo = callNodeInfo;
     this._callNodeTable = callNodeInfo.getCallNodeTable();
     this._callNodeSelf = callTreeTimingsInverted.callNodeSelf;
-    const { sortedRoots, totalPerRootFunc, hasChildrenPerRootFunc } =
+    const { sortedRoots, totalPerRootNode, hasChildrenPerRootNode } =
       callTreeTimingsInverted;
-    this._totalPerRootFunc = totalPerRootFunc;
-    this._hasChildrenPerRootFunc = hasChildrenPerRootFunc;
+    this._totalPerRootNode = totalPerRootNode;
+    this._hasChildrenPerRootNode = hasChildrenPerRootNode;
     this._rootNodes = sortedRoots;
   }
 
@@ -275,7 +281,7 @@ class CallTreeInternalInverted implements CallTreeInternal {
 
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      return this._hasChildrenPerRootFunc[callNodeIndex] !== 0;
+      return this._hasChildrenPerRootNode[callNodeIndex] !== 0;
     }
     return this._getTotalAndHasChildren(callNodeIndex).hasChildren;
   }
@@ -301,14 +307,14 @@ class CallTreeInternalInverted implements CallTreeInternal {
 
   getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      return this._totalPerRootFunc[callNodeIndex];
+      return this._totalPerRootNode[callNodeIndex];
     }
     return 0;
   }
 
   getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      return this._totalPerRootFunc[callNodeIndex];
+      return this._totalPerRootNode[callNodeIndex];
     }
     const { total } = this._getTotalAndHasChildren(callNodeIndex);
     return total;
@@ -779,9 +785,9 @@ export function getSelfAndTotalForCallNode(
     case 'INVERTED': {
       const callNodeInfoInverted = ensureExists(callNodeInfo.asInverted());
       const { timings } = callTreeTimings;
-      const { callNodeSelf, totalPerRootFunc } = timings;
+      const { callNodeSelf, totalPerRootNode } = timings;
       if (callNodeInfoInverted.isRoot(callNodeIndex)) {
-        const total = totalPerRootFunc[callNodeIndex];
+        const total = totalPerRootNode[callNodeIndex];
         return { self: total, total };
       }
       const { total } = _getInvertedTreeNodeTotalAndHasChildren(
@@ -849,14 +855,14 @@ export function computeCallTreeTimingsInverted(
   callNodeInfo: CallNodeInfoInverted,
   { callNodeSelf, rootTotalSummary }: CallNodeSelfAndSummary
 ): CallTreeTimingsInverted {
-  const funcCount = callNodeInfo.getFuncCount();
+  const rootCount = callNodeInfo.getRootCount();
   const callNodeTable = callNodeInfo.getCallNodeTable();
   const callNodeTableFuncCol = callNodeTable.func;
   const callNodeTableDepthCol = callNodeTable.depth;
-  const totalPerRootFunc = new Float64Array(funcCount);
-  const hasChildrenPerRootFunc = new Uint8Array(funcCount);
-  const seenPerRootFunc = new Uint8Array(funcCount);
-  const sortedRoots = [];
+  const totalPerRootNode = new Float64Array(rootCount);
+  const hasChildrenPerRootNode = new Uint8Array(rootCount);
+  const seenPerRootNode = new Uint8Array(rootCount);
+  const sortedRoots: IndexIntoCallNodeTable[] = [];
   for (let i = 0; i < callNodeSelf.length; i++) {
     const self = callNodeSelf[i];
     if (self === 0) {
@@ -864,28 +870,33 @@ export function computeCallTreeTimingsInverted(
     }
 
     // Map the non-inverted call node to its corresponding root in the inverted
-    // call tree. This is done by finding the inverted root which corresponds to
-    // the self function of the non-inverted call node.
+    // call tree, via the CNI. For the full inverted tree this is the identity
+    // on func index; for a lower-wing CNI only one func has a root, so other
+    // funcs return -1 and are skipped here.
     const func = callNodeTableFuncCol[i];
+    const rootNode = callNodeInfo.getRootNodeForFunc(func);
+    if (rootNode === -1) {
+      continue;
+    }
 
-    totalPerRootFunc[func] += self;
-    if (seenPerRootFunc[func] === 0) {
-      seenPerRootFunc[func] = 1;
-      sortedRoots.push(func);
+    totalPerRootNode[rootNode] += self;
+    if (seenPerRootNode[rootNode] === 0) {
+      seenPerRootNode[rootNode] = 1;
+      sortedRoots.push(rootNode);
     }
     if (callNodeTableDepthCol[i] !== 0) {
-      hasChildrenPerRootFunc[func] = 1;
+      hasChildrenPerRootNode[rootNode] = 1;
     }
   }
   sortedRoots.sort(
-    (a, b) => Math.abs(totalPerRootFunc[b]) - Math.abs(totalPerRootFunc[a])
+    (a, b) => Math.abs(totalPerRootNode[b]) - Math.abs(totalPerRootNode[a])
   );
   return {
     callNodeSelf,
     rootTotalSummary,
     sortedRoots,
-    totalPerRootFunc,
-    hasChildrenPerRootFunc,
+    totalPerRootNode,
+    hasChildrenPerRootNode,
   };
 }
 
