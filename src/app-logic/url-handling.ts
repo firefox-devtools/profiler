@@ -42,6 +42,7 @@ import type {
   IndexIntoFrameTable,
   MarkerIndex,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
 } from 'firefox-profiler/types';
 import { FuncFlag } from 'firefox-profiler/types';
 import {
@@ -121,6 +122,19 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
+/**
+ * Synchronously replace the current history entry to match the given UrlState.
+ *
+ * Use this from action thunks for high-frequency actions (e.g. arrow-key
+ * navigation) where deferring the URL update to UrlManager.componentDidUpdate
+ * would result in unwanted pushState calls and history-flooding. By updating
+ * window.history synchronously here, the URL already matches the new state by
+ * the time UrlManager's componentDidUpdate runs, so it becomes a no-op.
+ */
+export function replaceHistoryWithUrlState(urlState: UrlState): void {
+  window.history.replaceState(urlState, document.title, urlFromState(urlState));
+}
+
 function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
@@ -188,6 +202,8 @@ type CallTreeQuery = BaseQuery & {
   invertFlameGraph: null | undefined;
   hideIdleSamples: null | undefined;
   ctSummary: string;
+  functionListSort?: string; // "total-desc~self-asc" — primary first
+  selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
 type MarkersQuery = BaseQuery & {
@@ -235,6 +251,10 @@ type Query = BaseQuery & {
   markerSearch?: string;
   marker?: MarkerIndex;
   markerSort?: string;
+
+  // Function list specific
+  functionListSort?: string;
+  selectedFunc?: number;
 
   // Network specific
   networkSearch?: string;
@@ -342,6 +362,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         : undefined;
     /* falls through */
     case 'flame-graph':
+    case 'function-list':
     case 'calltree': {
       query = baseQuery as CallTreeQueryShape;
 
@@ -391,6 +412,16 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         if (isBottomBoxFullscreen) {
           query.bottomFullscreen = true;
         }
+      }
+      if (selectedTab === 'function-list') {
+        query.functionListSort = convertFunctionListSortToString(
+          urlState.profileSpecific.functionListSort
+        );
+        const selectedFunc =
+          selectedThreadsKey !== null
+            ? urlState.profileSpecific.selectedFunctions[selectedThreadsKey]
+            : undefined;
+        query.selectedFunc = selectedFunc ?? undefined;
       }
       break;
     }
@@ -556,6 +587,19 @@ export function stateFromLocation(
     }
   }
 
+  // Parse the selected function for the current thread
+  const selectedFunctions: SelectedFunctionsPerThread = {};
+  if (
+    selectedThreadsKey !== null &&
+    query.selectedFunc !== undefined &&
+    query.selectedFunc !== null
+  ) {
+    const funcIndex = Number(query.selectedFunc);
+    if (Number.isInteger(funcIndex) && funcIndex >= 0) {
+      selectedFunctions[selectedThreadsKey] = funcIndex;
+    }
+  }
+
   // tabID is used for the tab selector that we have in our full view.
   let tabID = null;
   if (query.tabID && Number.isInteger(Number(query.tabID))) {
@@ -647,7 +691,11 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      selectedFunctions,
       markerTableSort: convertMarkerTableSortFromString(query.markerSort),
+      functionListSort: convertFunctionListSortFromString(
+        query.functionListSort
+      ),
     },
   };
 }
@@ -692,6 +740,50 @@ function convertMarkerTableSortFromString(
     parsed.push({ column, ascending: dir === 'asc' });
   }
   return parsed;
+}
+
+// FunctionList sort URL encoding. Same convention as the marker table:
+// internal storage is primary-last, URL is primary-first. `null` means "at the
+// function list's default", encoded as an absent query parameter.
+const VALID_FUNCTION_LIST_SORT_COLUMNS = new Set(['total', 'self']);
+
+function convertFunctionListSortToString(
+  sort: SingleColumnSortState[] | null
+): string | undefined {
+  if (sort === null) {
+    return undefined;
+  }
+  return sort
+    .slice()
+    .reverse()
+    .map((s) => `${s.column}-${s.ascending ? 'asc' : 'desc'}`)
+    .join('~');
+}
+
+function convertFunctionListSortFromString(
+  raw: string | null | void
+): SingleColumnSortState[] | null {
+  if (!raw) {
+    return null;
+  }
+  const parsed: SingleColumnSortState[] = [];
+  for (const part of raw.split('~')) {
+    const dashIndex = part.lastIndexOf('-');
+    if (dashIndex === -1) {
+      return null;
+    }
+    const column = part.slice(0, dashIndex);
+    const dir = part.slice(dashIndex + 1);
+    if (
+      !VALID_FUNCTION_LIST_SORT_COLUMNS.has(column) ||
+      (dir !== 'asc' && dir !== 'desc')
+    ) {
+      return null;
+    }
+    parsed.push({ column, ascending: dir === 'asc' });
+  }
+  // URL is primary-first; internal storage is primary-last.
+  return parsed.reverse();
 }
 
 function convertGlobalTrackOrderFromString(
