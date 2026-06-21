@@ -6,22 +6,23 @@
   contain: size;
 }
 
-.DetailsContainer .resizableWithSplitterInner > * {
-  min-width: 0;
-  flex: 1;
-}
-
 .DetailsContainerResizableSidebarWrapper {
   max-width: 600px;
 }
 
 /* overriding defaults from ResizableWithSplitter.css */
-.DetailsContainer .resizableWithSplitterSplitter {
+.DetailsContainerResizableSidebarWrapper > .resizableWithSplitterSplitter {
   border-top: 1px solid var(--panel-border-color);
   border-left: 1px solid var(--panel-border-color);
   background: var(--panel-background-color); /* Same background as sidebars */
 }
 
-.DetailsContainer .resizableWithSplitterSplitter:hover {
+.DetailsContainerResizableSidebarWrapper
+  > .resizableWithSplitterSplitter:hover {
   background: var(--panel-background-color); /* same as the border above */
+}
+
+.DetailsContainerResizableSidebarWrapper > .resizableWithSplitterInner > * {
+  min-width: 0;
+  flex: 1;
 }
