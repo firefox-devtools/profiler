@@ -15,6 +15,7 @@ import {
 import {
   CallNodeInfoNonInverted,
   LazyInvertedCallNodeInfo,
+  CallersCallNodeInfo,
 } from './call-node-info';
 import { computeThreadCPUPercent } from './cpu';
 import {
@@ -677,6 +678,28 @@ export function getInvertedCallNodeInfo(
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     defaultCategory,
     funcCount
+  );
+}
+
+/**
+ * Generate the callers CallNodeInfo for a thread and a selected function.
+ *
+ * Unlike getInvertedCallNodeInfo, this builds the entire inverted subtree
+ * upfront, restricted to the selected function's entry points. It's the
+ * dedicated structure for the "callers panel" view.
+ */
+export function getCallersCallNodeInfo(
+  callNodeInfo: CallNodeInfo,
+  defaultCategory: IndexIntoCategoryList,
+  funcCount: number,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallNodeInfoInverted {
+  return new CallersCallNodeInfo(
+    callNodeInfo.getCallNodeTable(),
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+    defaultCategory,
+    funcCount,
+    selectedFuncIndex
   );
 }
 
