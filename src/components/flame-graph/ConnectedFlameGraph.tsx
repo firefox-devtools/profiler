@@ -179,6 +179,7 @@ class ConnectedFlameGraphImpl
         scrollToSelectionGeneration={scrollToSelectionGeneration}
         categories={categories}
         interval={interval}
+        startsAtBottom={true}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         ctssSamples={ctssSamples}
         ctssSampleCategoriesAndSubcategories={
