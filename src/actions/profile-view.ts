@@ -237,6 +237,40 @@ export function selectSelfCallNode(
 }
 
 /**
+ * Like selectSelfCallNode, but selects the function of the self call node
+ * instead. Used when the function list tab is active.
+ */
+export function selectSelfFunction(
+  threadsKey: ThreadsKey,
+  sampleIndex: IndexIntoSamplesTable | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (sampleIndex === null || sampleIndex < 0) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const sampleCallNodes =
+      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+        getState()
+      );
+    if (sampleIndex >= sampleCallNodes.length) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const funcIndex =
+      callNodeInfo.getCallNodeTable().func[nonInvertedSelfCallNode];
+    dispatch(changeSelectedFunctionIndex(threadsKey, funcIndex));
+  };
+}
+
+/**
  * This selects a set of thread from thread indexes.
  * Please use it in tests only.
  */
