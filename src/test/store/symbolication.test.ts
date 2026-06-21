@@ -36,6 +36,8 @@ import {
   changeExpandedCallNodes,
   changeImplementationFilter,
   changeSelectedFunctionIndex,
+  changeWingSelectedCallNode,
+  changeWingExpandedCallNodes,
 } from '../../actions/profile-view';
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -471,6 +473,42 @@ describe('doSymbolicateProfile', function () {
       expect(selectedThreadSelectors.getSelectedFunctionIndex(getState())).toBe(
         symbolicatedFunc
       );
+    });
+
+    it('symbolicates the function list wing paths', async function () {
+      const {
+        store: { dispatch, getState },
+        profile,
+        symbolStore,
+        funcNamesToFuncIndexes,
+      } = init();
+
+      const threadsKey = 0;
+      const [rootFunc, calleeFunc] = funcNamesToFuncIndexes([
+        '0x0000',
+        '0x2000',
+      ]);
+      dispatch(changeSelectedFunctionIndex(threadsKey, rootFunc));
+      dispatch(
+        changeWingSelectedCallNode('upper', threadsKey, [rootFunc, calleeFunc])
+      );
+      dispatch(changeWingExpandedCallNodes('upper', threadsKey, [[rootFunc]]));
+
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      const [firstSymbol, lastSymbol] = funcNamesToFuncIndexes([
+        'first symbol',
+        'last symbol',
+      ]);
+      expect(
+        selectedThreadSelectors.getUpperWingSelectedCallNodePath(getState())
+      ).toEqual([firstSymbol, lastSymbol]);
+      assertSetContainsOnly(
+        selectedThreadSelectors.getUpperWingExpandedCallNodePaths(getState()),
+        [[firstSymbol]]
+      );
+      expect(
+        selectedThreadSelectors.getLowerWingSelectedCallNodePath(getState())
+      ).toEqual([firstSymbol]);
     });
   });
 

@@ -32,12 +32,14 @@ import type {
   TableViewOptions,
   RightClickedFunction,
   CallNodeArea,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 import {
   applyFuncSubstitutionToFunc,
   applyFuncSubstitutionToCallPath,
   applyFuncSubstitutionToPathSetAndIncludeNewAncestors,
 } from '../profile-logic/symbolication';
+import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import { objectMap } from '../utils/types';
@@ -189,12 +191,16 @@ const sourceMapSymbolicationStatus: Reducer<SourceMapSymbolicationStatus> = (
 const _emptySelectedCallNodePaths: Record<CallNodeArea, CallNodePath> = {
   NON_INVERTED_TREE: [],
   INVERTED_TREE: [],
+  LOWER_WING: [],
+  UPPER_WING: [],
 };
 
 function _emptyExpandedCallNodePaths(): Record<CallNodeArea, PathSet> {
   return {
     NON_INVERTED_TREE: new PathSet(),
     INVERTED_TREE: new PathSet(),
+    LOWER_WING: new PathSet(),
+    UPPER_WING: new PathSet(),
   };
 }
 
@@ -229,6 +235,83 @@ function _updateThreadViewOptions(
   return newState;
 }
 
+// The function list wings are rooted at the selected function: all of their
+// call node paths start with it. When the selected function changes, reset the
+// wing paths so that only the new root is selected and expanded. Returns the
+// unchanged view options if the wings are already rooted at this function.
+function _rootWingsAtFunction(
+  viewOptions: ThreadViewOptions,
+  selectedFunctionIndex: IndexIntoFuncTable | null
+): ThreadViewOptions {
+  const previousWingPath = viewOptions.selectedCallNodePaths.LOWER_WING;
+  const isAlreadyRooted =
+    selectedFunctionIndex === null
+      ? previousWingPath.length === 0
+      : previousWingPath[0] === selectedFunctionIndex;
+  if (isAlreadyRooted) {
+    return viewOptions;
+  }
+
+  const wingPath: CallNodePath =
+    selectedFunctionIndex !== null ? [selectedFunctionIndex] : [];
+  const wingExpanded =
+    selectedFunctionIndex !== null
+      ? new PathSet([[selectedFunctionIndex]])
+      : new PathSet();
+  return {
+    ...viewOptions,
+    selectedCallNodePaths: {
+      ...viewOptions.selectedCallNodePaths,
+      LOWER_WING: wingPath,
+      UPPER_WING: wingPath,
+    },
+    expandedCallNodePaths: {
+      ...viewOptions.expandedCallNodePaths,
+      LOWER_WING: wingExpanded,
+      UPPER_WING: wingExpanded,
+    },
+  };
+}
+
+// The root of a wing path is the selected function, which symbolication maps
+// to a single func, like the selectedFunctions URL state. The rest of the path
+// is substituted like a regular call node path.
+function _applyFuncSubstitutionToWingPath(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  path: CallNodePath
+): CallNodePath {
+  if (path.length === 0) {
+    return path;
+  }
+  const [root, ...rest] = path;
+  return [
+    applyFuncSubstitutionToFunc(oldFuncToNewFuncsMap, root),
+    ...applyFuncSubstitutionToCallPath(oldFuncToNewFuncsMap, rest),
+  ];
+}
+
+function _applyFuncSubstitutionToWingPathSet(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  pathSet: PathSet
+): PathSet {
+  const newPathSet = new PathSet();
+  for (const [root, ...rest] of pathSet) {
+    const newRoot = applyFuncSubstitutionToFunc(oldFuncToNewFuncsMap, root);
+    newPathSet.add([newRoot]);
+    if (rest.length === 0) {
+      continue;
+    }
+    const newRests = applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+      oldFuncToNewFuncsMap,
+      new PathSet([rest])
+    );
+    for (const newRest of newRests) {
+      newPathSet.add([newRoot, ...newRest]);
+    }
+  }
+  return newPathSet;
+}
+
 const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
   state = {} as ThreadViewOptionsPerThreads,
   action
@@ -252,6 +335,14 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
               oldFuncToNewFuncsMap,
               threadViewOptions.selectedCallNodePaths.INVERTED_TREE
             ),
+            LOWER_WING: _applyFuncSubstitutionToWingPath(
+              oldFuncToNewFuncsMap,
+              threadViewOptions.selectedCallNodePaths.LOWER_WING
+            ),
+            UPPER_WING: _applyFuncSubstitutionToWingPath(
+              oldFuncToNewFuncsMap,
+              threadViewOptions.selectedCallNodePaths.UPPER_WING
+            ),
           },
           expandedCallNodePaths: {
             ...threadViewOptions.expandedCallNodePaths,
@@ -263,6 +354,14 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
             INVERTED_TREE: applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
               oldFuncToNewFuncsMap,
               threadViewOptions.expandedCallNodePaths.INVERTED_TREE
+            ),
+            LOWER_WING: _applyFuncSubstitutionToWingPathSet(
+              oldFuncToNewFuncsMap,
+              threadViewOptions.expandedCallNodePaths.LOWER_WING
+            ),
+            UPPER_WING: _applyFuncSubstitutionToWingPathSet(
+              oldFuncToNewFuncsMap,
+              threadViewOptions.expandedCallNodePaths.UPPER_WING
             ),
           },
         };
@@ -325,6 +424,19 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
           [area]: expandedCallNodePaths,
         },
       });
+    }
+    case 'CHANGE_SELECTED_FUNCTION': {
+      const { selectedFunctionIndex, threadsKey } = action;
+
+      const threadState = _getThreadViewOptions(state, threadsKey);
+      const newThreadState = _rootWingsAtFunction(
+        threadState,
+        selectedFunctionIndex
+      );
+      if (newThreadState === threadState) {
+        return state;
+      }
+      return { ...state, [threadsKey]: newThreadState };
     }
     case 'CHANGE_INVERT_CALLSTACK': {
       const {
@@ -460,8 +572,25 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      const { transforms } = action.newUrlState.profileSpecific;
-      return objectMap(state, (viewOptions, threadsKey) => {
+      const { transforms, selectedFunctions } =
+        action.newUrlState.profileSpecific;
+
+      // The selected function lives in URL state; mirror it into the per-thread
+      // wing paths so that initial loads and back/forward navigation restore the
+      // wings to the right function.
+      const newState: ThreadViewOptionsPerThreads = { ...state };
+      for (const threadsKey of Object.keys(selectedFunctions)) {
+        const viewOptions = _getThreadViewOptions(newState, threadsKey);
+        const newViewOptions = _rootWingsAtFunction(
+          viewOptions,
+          selectedFunctions[threadsKey]
+        );
+        if (newViewOptions !== viewOptions) {
+          newState[threadsKey] = newViewOptions;
+        }
+      }
+
+      return objectMap(newState, (viewOptions, threadsKey) => {
         const transformStack = transforms[threadsKey] || [];
         const newTransformCount = transformStack.length;
         const oldTransformCount = viewOptions.lastSeenTransformCount;

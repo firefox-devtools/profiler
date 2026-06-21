@@ -78,7 +78,15 @@ export type TableViewOptions = {
 
 export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 
-export type CallNodeArea = 'NON_INVERTED_TREE' | 'INVERTED_TREE';
+export type CallNodeArea =
+  | 'NON_INVERTED_TREE'
+  | 'INVERTED_TREE'
+  | 'LOWER_WING'
+  | 'UPPER_WING';
+
+// Function-list wings with their own selected/expanded/right-clicked call
+// node path.
+export type WingName = 'upper' | 'lower';
 
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;

@@ -77,6 +77,8 @@ import type {
   SelectionContext,
   BottomBoxInfo,
   IndexIntoFuncTable,
+  CallNodeArea,
+  WingName,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -134,6 +136,27 @@ export function changeSelectedCallNode(
   };
 }
 
+const WING_AREAS: Record<WingName, CallNodeArea> = {
+  upper: 'UPPER_WING',
+  lower: 'LOWER_WING',
+};
+
+export function changeWingSelectedCallNode(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: WING_AREAS[wing],
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
+  };
+}
+
 /**
  * Select a function for a given thread in the function list.
  *
@@ -188,6 +211,19 @@ export function changeRightClickedFunctionIndex(
     type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
     threadsKey,
     functionIndex,
+  };
+}
+
+export function changeWingRightClickedCallNode(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadsKey,
+    area: WING_AREAS[wing],
+    callNodePath,
   };
 }
 
@@ -1627,6 +1663,20 @@ export function changeExpandedCallNodes(
     });
   };
 }
+
+export function changeWingExpandedCallNodes(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: WING_AREAS[wing],
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,
