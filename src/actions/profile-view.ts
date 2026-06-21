@@ -166,7 +166,7 @@ export function changeRightClickedCallNode(
 export function changeRightClickedFunctionIndex(
   threadsKey: ThreadsKey,
   functionIndex: IndexIntoFuncTable | null
-) {
+): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
     threadsKey,
