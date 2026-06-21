@@ -124,11 +124,13 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
   }
 
   getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
-    return _getBoxWidth(this, depth, indexInRow);
+    const ratioOfFullWidth = _getBoxWidth(this, depth, indexInRow);
+    const total = ratioOfFullWidth * this._callTreeTimings.flameGraphWidthTotal;
+    return total / this._callTreeTimings.rootTotalSummary;
   }
 
   _buildNextTimingRow(): void {
-    const { total, self, rootTotalSummary } = this._callTreeTimings;
+    const { total, self, flameGraphWidthTotal } = this._callTreeTimings;
     const { prefix } = this._callNodeTable;
 
     const depth = this._timingRows.length;
@@ -165,8 +167,8 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
       }
       startPerCallNode[nodeIndex] = currentStart;
 
-      const totalRelative = abs(totalVal / rootTotalSummary);
-      const selfRelativeVal = abs(self[nodeIndex] / rootTotalSummary);
+      const totalRelative = abs(totalVal / flameGraphWidthTotal);
+      const selfRelativeVal = abs(self[nodeIndex] / flameGraphWidthTotal);
 
       const currentEnd = currentStart + totalRelative;
       start.push(currentStart);

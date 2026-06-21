@@ -86,6 +86,7 @@ describe('unfiltered call tree', function () {
         type: 'NON_INVERTED',
         timings: {
           rootTotalSummary: 3,
+          flameGraphWidthTotal: 3,
           callNodeHasChildren: new Uint8Array([1, 1, 1, 1, 0, 1, 0, 1, 0]),
           self: new Float64Array([0, 0, 0, 0, 1, 0, 1, 0, 1]),
           total: new Float64Array([3, 3, 2, 1, 1, 1, 1, 1, 1]),
