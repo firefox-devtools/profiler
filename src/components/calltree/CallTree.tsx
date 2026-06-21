@@ -2,11 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { PureComponent } from 'react';
-import memoize from 'memoize-immutable';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
-import { Icon } from 'firefox-profiler/components/shared/Icon';
 import {
   getInvertCallstack,
   getImplementationFilter,
@@ -30,7 +28,6 @@ import {
   changeTableViewOptions,
   updateBottomBoxContentsAndMaybeOpen,
 } from 'firefox-profiler/actions/profile-view';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type {
   State,
@@ -46,13 +43,10 @@ import type {
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 
-import type {
-  Column,
-  MaybeResizableColumn,
-} from 'firefox-profiler/components/shared/TreeView';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './CallTree.css';
+import { nameColumn, libColumn, treeColumnsForWeightType } from './columns';
 
 type StateProps = {
   readonly threadsKey: ThreadsKey;
@@ -86,123 +80,10 @@ type DispatchProps = {
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 class CallTreeImpl extends PureComponent<Props> {
-  _mainColumn: Column<CallNodeDisplayData> = {
-    propName: 'name',
-    titleL10nId: '',
-  };
-  _appendageColumn: Column<CallNodeDisplayData> = {
-    propName: 'lib',
-    titleL10nId: '',
-  };
   _treeView: TreeView<CallNodeDisplayData> | null = null;
   _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) => {
     this._treeView = treeView;
   };
-
-  /**
-   * Call Trees can have different types of "weights" for the data. Choose the
-   * appropriate labels for the call tree based on this weight.
-   */
-  _weightTypeToColumns = memoize(
-    (weightType: WeightType): MaybeResizableColumn<CallNodeDisplayData>[] => {
-      switch (weightType) {
-        case 'tracing-ms':
-          return [
-            {
-              propName: 'totalPercent',
-              titleL10nId: '',
-              initialWidth: 55,
-              hideDividerAfter: true,
-            },
-            {
-              propName: 'total',
-              titleL10nId: 'CallTree--tracing-ms-total',
-              minWidth: 30,
-              initialWidth: 70,
-              resizable: true,
-              headerWidthAdjustment: 55 /* totalPercent initialWidth */,
-            },
-            {
-              propName: 'self',
-              titleL10nId: 'CallTree--tracing-ms-self',
-              minWidth: 40,
-              initialWidth: 80,
-              resizable: true,
-            },
-            {
-              propName: 'icon',
-              titleL10nId: '',
-              component: Icon as any,
-              initialWidth: 20,
-            },
-          ];
-        case 'samples':
-          return [
-            {
-              propName: 'totalPercent',
-              titleL10nId: '',
-              initialWidth: 55,
-              hideDividerAfter: true,
-            },
-            {
-              propName: 'total',
-              titleL10nId: 'CallTree--samples-total',
-              minWidth: 30,
-              initialWidth: 70,
-              resizable: true,
-              headerWidthAdjustment: 55 /* totalPercent initialWidth */,
-            },
-            {
-              propName: 'self',
-              titleL10nId: 'CallTree--samples-self',
-              minWidth: 40,
-              initialWidth: 80,
-              resizable: true,
-            },
-            {
-              propName: 'icon',
-              titleL10nId: '',
-              component: Icon as any,
-              initialWidth: 20,
-            },
-          ];
-        case 'bytes':
-          return [
-            {
-              propName: 'totalPercent',
-              titleL10nId: '',
-              initialWidth: 55,
-              hideDividerAfter: true,
-            },
-            {
-              propName: 'total',
-              titleL10nId: 'CallTree--bytes-total',
-              minWidth: 30,
-              initialWidth: 140,
-              resizable: true,
-              headerWidthAdjustment: 55 /* totalPercent initialWidth */,
-            },
-            {
-              propName: 'self',
-              titleL10nId: 'CallTree--bytes-self',
-              minWidth: 40,
-              initialWidth: 100,
-              resizable: true,
-            },
-            {
-              propName: 'icon',
-              titleL10nId: '',
-              component: Icon as any,
-              initialWidth: 20,
-            },
-          ];
-        default:
-          throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
-      }
-    },
-    // Use a Map cache, as the function only takes one argument, which is a simple string.
-    { cache: new Map() }
-  );
 
   override componentDidMount() {
     this.focus();
@@ -367,9 +248,9 @@ class CallTreeImpl extends PureComponent<Props> {
     return (
       <TreeView
         tree={tree}
-        fixedColumns={this._weightTypeToColumns(weightType)}
-        mainColumn={this._mainColumn}
-        appendageColumn={this._appendageColumn}
+        fixedColumns={treeColumnsForWeightType(weightType)}
+        mainColumn={nameColumn}
+        appendageColumn={libColumn}
         onSelectionChange={this._onSelectedCallNodeChange}
         onRightClickSelection={this._onRightClickSelection}
         onExpandedNodesChange={this._onExpandedCallNodesChange}
