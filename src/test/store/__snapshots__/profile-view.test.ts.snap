@@ -2365,6 +2365,7 @@ CallTree {
         0,
         0,
       ],
+      "flameGraphWidthTotal": 2,
       "rootTotalSummary": 2,
       "self": Float64Array [
         0,
