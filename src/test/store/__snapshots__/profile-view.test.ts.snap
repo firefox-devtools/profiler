@@ -4432,6 +4432,9 @@ Object {
     "INVERTED_TREE": PathSet {
       "_table": Map {},
     },
+    "LOWER_WING": PathSet {
+      "_table": Map {},
+    },
     "NON_INVERTED_TREE": PathSet {
       "_table": Map {
         "0" => Array [
@@ -4443,14 +4446,19 @@ Object {
         ],
       },
     },
+    "UPPER_WING": PathSet {
+      "_table": Map {},
+    },
   },
   "lastSeenTransformCount": 1,
   "selectedCallNodePaths": Object {
     "INVERTED_TREE": Array [],
+    "LOWER_WING": Array [],
     "NON_INVERTED_TREE": Array [
       0,
       1,
     ],
+    "UPPER_WING": Array [],
   },
   "selectedNetworkMarker": null,
 }
