@@ -2069,27 +2069,76 @@ export function handleCallNodeTransformShortcut(
     if (event.metaKey || event.ctrlKey || event.altKey) {
       return;
     }
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const unfilteredThread = threadSelectors.getThread(getState());
-    const implementation = getImplementationFilter(getState());
-    const inverted = getInvertCallstack(getState());
-    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const category = callNodeInfo.categoryForNode(callNodeIndex);
-
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     switch (event.key) {
-      case 'F':
+      case 'F': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        const inverted = getInvertCallstack(getState());
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'focus-subtree',
-            callNodePath: callNodePath,
+            callNodePath,
             implementation,
             inverted,
           })
         );
         break;
+      }
+      case 'M': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-call-node',
+            callNodePath,
+            implementation,
+          })
+        );
+        break;
+      }
+      case 'g': {
+        const category = callNodeInfo.categoryForNode(callNodeIndex);
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-category',
+            category,
+          })
+        );
+        break;
+      }
+      default:
+        dispatch(
+          handleFunctionTransformShortcut(
+            event,
+            threadsKey,
+            callNodeInfo,
+            funcIndex
+          )
+        );
+    }
+  };
+}
+
+export function handleFunctionTransformShortcut(
+  event: React.KeyboardEvent<HTMLElement>,
+  threadsKey: ThreadsKey,
+  callNodeInfo: CallNodeInfo,
+  funcIndex: IndexIntoFuncTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const implementation = getImplementationFilter(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const unfilteredThread = threadSelectors.getThread(getState());
+
+    switch (event.key) {
       case 'f':
         dispatch(
           addTransformToStack(threadsKey, {
@@ -2103,15 +2152,6 @@ export function handleCallNodeTransformShortcut(
           addTransformToStack(threadsKey, {
             type: 'focus-self',
             funcIndex,
-            implementation,
-          })
-        );
-        break;
-      case 'M':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'merge-call-node',
-            callNodePath: callNodePath,
             implementation,
           })
         );
@@ -2133,8 +2173,7 @@ export function handleCallNodeTransformShortcut(
         );
         break;
       case 'C': {
-        const { funcTable } = unfilteredThread;
-        const resourceIndex = funcTable.resource[funcIndex];
+        const resourceIndex = unfilteredThread.funcTable.resource[funcIndex];
         dispatch(
           addCollapseResourceTransformToStack(
             threadsKey,
@@ -2167,7 +2206,7 @@ export function handleCallNodeTransformShortcut(
         }
         break;
       }
-      case 'c': {
+      case 'c':
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'collapse-function-subtree',
@@ -2175,17 +2214,8 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
-      }
-      case 'g':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'focus-category',
-            category,
-          })
-        );
-        break;
       default:
-      // This did not match a call tree transform.
+      // This did not match a function transform.
     }
   };
 }
