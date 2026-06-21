@@ -179,7 +179,7 @@ class StackChartImpl extends React.PureComponent<Props> {
       return;
     }
 
-    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+    handleCallNodeTransformShortcut(event, threadsKey, callNodeInfo, nodeIndex);
   };
 
   _onDoubleClick = (callNodeIndex: IndexIntoCallNodeTable | null) => {
