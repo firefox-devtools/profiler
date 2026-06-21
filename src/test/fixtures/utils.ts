@@ -15,6 +15,7 @@ import {
   computeCallNodeFuncIsDuplicate,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
+  getLowerWingCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
@@ -336,10 +337,13 @@ export function upperWingTreeFromProfile(
  * This function creates the "lower wing" CallTree for a profile and a selected
  * function. The lower wing is an inverted call tree where each root's total
  * counts only samples where the selected function appears in the call stack.
+ *
+ * Pass `null` (or a name that does not exist in the thread) to exercise the
+ * "no function selected" path.
  */
 export function lowerWingTreeFromProfile(
   profile: Profile,
-  selectedFuncName: string,
+  selectedFuncName: string | null,
   threadIndex: number = 0
 ): CallTree {
   const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
@@ -349,15 +353,19 @@ export function lowerWingTreeFromProfile(
     thread.frameTable,
     defaultCategory
   );
-  const invertedCallNodeInfo = getInvertedCallNodeInfo(
+  const selectedFunc =
+    selectedFuncName === null
+      ? -1
+      : (thread.funcTable.name.findIndex(
+          (i) => thread.stringTable.getString(i) === selectedFuncName
+        ) ?? -1);
+  const selectedFuncIndex = selectedFunc === -1 ? null : selectedFunc;
+  const lowerWingCallNodeInfo = getLowerWingCallNodeInfo(
     callNodeInfo,
     defaultCategory,
-    thread.funcTable.length
+    thread.funcTable.length,
+    selectedFuncIndex
   );
-  const selectedFunc =
-    thread.funcTable.name.findIndex(
-      (i) => thread.stringTable.getString(i) === selectedFuncName
-    ) ?? null;
   const selfAndSummary = computeCallNodeSelfAndSummary(
     thread.samples,
     getSampleIndexToCallNodeIndex(
@@ -367,13 +375,13 @@ export function lowerWingTreeFromProfile(
     callNodeInfo.getCallNodeTable().length
   );
   const timings = computeLowerWingTimings(
-    invertedCallNodeInfo,
+    lowerWingCallNodeInfo,
     selfAndSummary,
-    selectedFunc === -1 ? null : selectedFunc
+    selectedFuncIndex
   );
   return getCallTree(
     thread,
-    invertedCallNodeInfo,
+    lowerWingCallNodeInfo,
     ensureExists(profile.meta.categories),
     thread.samples,
     timings,
