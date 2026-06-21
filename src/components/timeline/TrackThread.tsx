@@ -38,6 +38,7 @@ import {
   changeSelectedCallNode,
   focusCallTree,
   selectSelfCallNode,
+  selectSelfFunction,
 } from 'firefox-profiler/actions/profile-view';
 import { reportTrackThreadHeight } from 'firefox-profiler/actions/app';
 import { EmptyThreadIndicator } from './EmptyThreadIndicator';
@@ -100,6 +101,7 @@ type DispatchProps = {
   readonly changeSelectedCallNode: typeof changeSelectedCallNode;
   readonly focusCallTree: typeof focusCallTree;
   readonly selectSelfCallNode: typeof selectSelfCallNode;
+  readonly selectSelfFunction: typeof selectSelfFunction;
   readonly reportTrackThreadHeight: typeof reportTrackThreadHeight;
 };
 
@@ -123,6 +125,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
     const {
       threadsKey,
       selectSelfCallNode,
+      selectSelfFunction,
       focusCallTree,
       selectedThreadIndexes,
       callTreeVisible,
@@ -130,6 +133,7 @@ class TimelineTrackThreadImpl extends PureComponent<Props> {
 
     // Sample clicking only works for one thread. See issue #2709
     if (selectedThreadIndexes.size === 1) {
+      selectSelfFunction(threadsKey, sampleIndex);
       selectSelfCallNode(threadsKey, sampleIndex);
 
       if (sampleIndex !== null && callTreeVisible) {
@@ -368,6 +372,7 @@ export const TimelineTrackThread = explicitConnect<
     changeSelectedCallNode,
     focusCallTree,
     selectSelfCallNode,
+    selectSelfFunction,
     reportTrackThreadHeight,
   },
   component: withSize(TimelineTrackThreadImpl),
