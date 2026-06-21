@@ -16,7 +16,10 @@ import {
   CallNodeInfoNonInverted,
   LazyInvertedCallNodeInfo,
   CallersCallNodeInfo,
+  computeCallersMaxDepthPlusOne,
 } from './call-node-info';
+
+export { computeCallersMaxDepthPlusOne };
 import { computeThreadCPUPercent } from './cpu';
 import {
   INSTANT,
@@ -874,7 +877,7 @@ export function getCallersCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number,
   selectedFuncIndex: IndexIntoFuncTable | null
-): CallNodeInfoInverted {
+): CallersCallNodeInfo {
   return new CallersCallNodeInfo(
     callNodeInfo.getCallNodeTable(),
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),

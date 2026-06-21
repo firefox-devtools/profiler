@@ -13,13 +13,20 @@ import {
 } from '../../profile-logic/call-tree';
 import {
   computeFlameGraphRows,
+  createCallersFlameGraphTiming,
   makeFlameGraphFuncComparator,
+} from '../../profile-logic/flame-graph';
+import type {
+  FlameGraphTiming,
+  FlameGraphTimingRow,
 } from '../../profile-logic/flame-graph';
 import {
   computeFrameTableFromRawFrameTable,
   computeFuncTableFromRawFuncTable,
+  computeCallersMaxDepthPlusOne,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
+  getCallersCallNodeInfo,
   getOriginAnnotationForFunc,
   getOriginalPositionForFrame,
   filterRawThreadSamplesToRange,
@@ -288,6 +295,242 @@ describe('unfiltered call tree', function () {
           cnForView(view1),
         ],
       ]);
+    });
+  });
+
+  describe('callers flame graph', function () {
+    // The shared fixture profile (see `getProfile` above) has every sample
+    // rooted at A, so A has no callers in the inverted (callers panel) view.
+    // This used to render an empty flame graph; the regression test below
+    // exercises the fix that emits a single root cell with the full total.
+    function setup(selectedFuncIndex: number | null) {
+      const { derivedThreads, defaultCategory } = getProfile();
+      const [thread] = derivedThreads;
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        defaultCategory
+      );
+      const callers = getCallersCallNodeInfo(
+        callNodeInfo,
+        defaultCategory,
+        thread.funcTable.length,
+        selectedFuncIndex
+      );
+      const selfAndSummary = computeCallNodeSelfAndSummary(
+        thread.samples,
+        getSampleIndexToCallNodeIndex(
+          thread.samples.stack,
+          callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+        ),
+        callNodeInfo.getCallNodeTable().length
+      );
+      const timing = createCallersFlameGraphTiming(
+        callers,
+        selfAndSummary,
+        callNodeInfo.getCallNodeTable(),
+        selectedFuncIndex,
+        makeFuncComparator(thread)
+      );
+      return { thread, callNodeInfo, callers, selfAndSummary, timing };
+    }
+
+    // Materialize every row of a lazy timing into a flat array for compact
+    // assertions. Equivalent to the old `flameGraphTiming.rows` field.
+    function materializeRows(timing: FlameGraphTiming): FlameGraphTimingRow[] {
+      const rows: FlameGraphTimingRow[] = [];
+      for (let depth = 0; depth < timing.rowCount; depth++) {
+        rows.push(timing.getRow(depth));
+      }
+      return rows;
+    }
+
+    it('renders a single full-width root cell when the selected function has no callers', function () {
+      const { timing } = setup(A);
+
+      // Every one of the 3 samples passes through A at the bottom of the
+      // stack, so A's callers row is a single full-width cell with full
+      // self time.
+      expect(timing.rowCount).toBe(1);
+      expect(timing.getRow(0)).toEqual({
+        start: [0],
+        end: [1],
+        selfRelative: [1],
+        callNode: [A],
+        length: 1,
+      });
+    });
+
+    it('builds a multi-row flame graph for a function with callers', function () {
+      // C appears in two samples and is called by B in both, so the callers
+      // tree has C as root with one caller chain (B -> A).
+      const { callers, timing } = setup(C);
+
+      // Three rows: [C], [B], [A]. Each cell occupies the full width since
+      // it's the only sibling at its depth.
+      expect(timing.rowCount).toBe(3);
+      const rows = materializeRows(timing);
+      // Cell values are InvertedCallNodeHandle values (root === funcIndex,
+      // non-roots come from the callers handle scheme); translate via
+      // funcForNode for a clear func-based assertion.
+      expect(
+        rows.map((r) => r.callNode.map((h) => callers.funcForNode(h)))
+      ).toEqual([[C], [B], [A]]);
+      expect(rows.map((r) => ({ start: r.start, end: r.end }))).toEqual([
+        { start: [0], end: [1] },
+        { start: [0], end: [1] },
+        { start: [0], end: [1] },
+      ]);
+      // Only the deepest inverted node (A, the topmost expanded caller)
+      // accumulates self; intermediate nodes' self is zero.
+      expect(rows.map((r) => r.selfRelative)).toEqual([[0], [0], [1]]);
+    });
+
+    it('extends the callers tree lazily as rows are requested', function () {
+      // E sits at the deepest leaf of the fixture (A -> B -> C -> D -> E),
+      // so its callers tree has rows E, D, C, B, A (max depth 4).
+      const { callers, timing } = setup(E);
+
+      // The cheap max-depth selector knows the row count up front, without
+      // building any of the tree.
+      expect(timing.rowCount).toBe(5);
+
+      // Before any rows are fetched: only the root row of the callers
+      // tree exists; no BFS work has happened.
+      expect(callers.getCallersTableUpToDepth(-1).length).toBe(1);
+
+      // Fetching row 0 extends the BFS just enough to process the root and
+      // emit its depth-1 child. The internal table is now length 2.
+      timing.getRow(0);
+      expect(callers.getCallersTableUpToDepth(-1).length).toBe(2);
+
+      // Fetching row 2 extends through depth 2, growing the table further.
+      timing.getRow(2);
+      expect(callers.getCallersTableUpToDepth(-1).length).toBe(4);
+
+      // Materializing every row matches an independently-built eager
+      // baseline (one row per depth, each cell full-width).
+      const rows = materializeRows(timing);
+      expect(
+        rows.map((r) => r.callNode.map((h) => callers.funcForNode(h)))
+      ).toEqual([[E], [D], [C], [B], [A]]);
+      expect(rows.map((r) => ({ start: r.start, end: r.end }))).toEqual([
+        { start: [0], end: [1] },
+        { start: [0], end: [1] },
+        { start: [0], end: [1] },
+        { start: [0], end: [1] },
+        { start: [0], end: [1] },
+      ]);
+      // Only the deepest caller (A, the topmost expanded ancestor) carries
+      // self time. Self values stay correct as the tree is grown one row at
+      // a time because each `getRow(D)` extends the CNI to depth D, which
+      // emits depth D+1 children needed to compute self = total − Σchildren.
+      expect(rows.map((r) => r.selfRelative)).toEqual([
+        [0],
+        [0],
+        [0],
+        [0],
+        [1],
+      ]);
+    });
+
+    it('builds the callers tree incrementally via getCallersTableUpToDepth', function () {
+      // E sits at the deepest leaf of the fixture (A -> B -> C -> D -> E),
+      // so its callers tree has rows E, D, C, B, A (max depth 4).
+      const { derivedThreads, defaultCategory } = getProfile();
+      const [thread] = derivedThreads;
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        defaultCategory
+      );
+
+      const callers = getCallersCallNodeInfo(
+        callNodeInfo,
+        defaultCategory,
+        thread.funcTable.length,
+        E
+      );
+
+      // Before any extension: only the root row (placeholder children) exists.
+      // The cached snapshot is invalidated as the BFS grows the table, so each
+      // partial call returns a snapshot whose `length` reflects how far the
+      // tree has been expanded.
+      const tableAtRoot = callers.getCallersTableUpToDepth(0);
+      // Processing depth 0 emits the single depth-1 child (D), so the table
+      // length is 2.
+      expect(tableAtRoot.length).toBe(2);
+      expect(tableAtRoot.depth).toEqual([0, 1]);
+
+      // Extending by one more level reveals depth-2 children of D (only C).
+      const tableAtDepth1 = callers.getCallersTableUpToDepth(1);
+      expect(tableAtDepth1.length).toBe(3);
+      expect(tableAtDepth1.depth).toEqual([0, 1, 2]);
+
+      // Going past the tree's real depth caps at the actual max (4 + 1 = 5).
+      const tableFull = callers.getCallersTableUpToDepth(99);
+      expect(tableFull.length).toBe(5);
+      expect(tableFull.depth).toEqual([0, 1, 2, 3, 4]);
+
+      // The lazy build must match the eager build that getCallersTable
+      // returns (which is just getCallersTableUpToDepth(Infinity)).
+      const eager = getCallersCallNodeInfo(
+        callNodeInfo,
+        defaultCategory,
+        thread.funcTable.length,
+        E
+      ).getCallersTable();
+      expect(tableFull.length).toBe(eager.length);
+      expect(tableFull.prefix).toEqual(eager.prefix);
+      expect(tableFull.func).toEqual(eager.func);
+      expect(tableFull.depth).toEqual(eager.depth);
+      expect(tableFull.suffixOrderIndexRangeStart).toEqual(
+        eager.suffixOrderIndexRangeStart
+      );
+      expect(tableFull.suffixOrderIndexRangeEnd).toEqual(
+        eager.suffixOrderIndexRangeEnd
+      );
+    });
+
+    it('computes max depth without building the callers tree, matching the eager build', function () {
+      const { derivedThreads, defaultCategory } = getProfile();
+      const [thread] = derivedThreads;
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        defaultCategory
+      );
+      const callNodeTable = callNodeInfo.getCallNodeTable();
+
+      // No selection → single empty root row.
+      expect(computeCallersMaxDepthPlusOne(callNodeTable, null)).toBe(1);
+
+      // For every func in the fixture, the cheap helper should agree with the
+      // depth read off the fully-built callers table.
+      const funcCount = thread.funcTable.length;
+      for (let f = 0; f < funcCount; f++) {
+        const callers = getCallersCallNodeInfo(
+          callNodeInfo,
+          defaultCategory,
+          funcCount,
+          f
+        );
+        const table = callers.getCallersTable();
+        const eagerMaxDepthPlusOne = table.depth[table.length - 1] + 1;
+        expect(computeCallersMaxDepthPlusOne(callNodeTable, f)).toBe(
+          eagerMaxDepthPlusOne
+        );
+      }
+
+      // Spot-check the absolute values for a few funcs in the fixture:
+      //   A (root, no callers)   -> 1
+      //   B (called by A)        -> 2
+      //   C (called by B, A)     -> 3
+      //   E (deepest leaf chain) -> 5
+      expect(computeCallersMaxDepthPlusOne(callNodeTable, A)).toBe(1);
+      expect(computeCallersMaxDepthPlusOne(callNodeTable, B)).toBe(2);
+      expect(computeCallersMaxDepthPlusOne(callNodeTable, C)).toBe(3);
+      expect(computeCallersMaxDepthPlusOne(callNodeTable, E)).toBe(5);
     });
   });
 

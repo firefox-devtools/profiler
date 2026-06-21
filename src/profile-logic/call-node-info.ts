@@ -2167,6 +2167,13 @@ export class CallersCallNodeInfo implements CallNodeInfoInverted {
       | -2;
   }
 
+  // Returns a snapshot of the callers inverted call node table, fully
+  // expanded. Kept for callers (and tests) that want the whole tree at once;
+  // new code should prefer `getCallersTableUpToDepth(k)`.
+  getCallersTable(): CallersTable {
+    return this.getCallersTableUpToDepth(Infinity);
+  }
+
   // Returns a snapshot of the callers inverted call node table containing
   // at least every node with inverted depth <= `targetDepth`. The snapshot may
   // also include nodes at `targetDepth + 1` (children emitted when the deepest
@@ -2180,6 +2187,10 @@ export class CallersCallNodeInfo implements CallNodeInfoInverted {
   getCallersTableUpToDepth(targetDepth: number): CallersTable {
     this._extendToDepth(targetDepth);
     return this._getSnapshotTable();
+  }
+
+  getSelectedFuncIndex(): IndexIntoFuncTable | null {
+    return this._selectedFuncIndex;
   }
 
   // Run the BFS while the next queued node sits at depth <= `targetDepth`.
@@ -2396,6 +2407,48 @@ export class CallersCallNodeInfo implements CallNodeInfoInverted {
     this._cachedTableLength = length;
     return table;
   }
+}
+
+/**
+ * Compute the number of rows in the callers flame graph for `selectedFuncIndex`
+ * without building the callers tree.
+ *
+ * The callers max inverted depth equals the maximum non-inverted depth across
+ * all entry points (root-most non-inverted call nodes whose func is the selected
+ * one): an entry at non-inverted depth D contributes D ancestor steps above the
+ * inverted root, giving a final inverted depth of D. We add 1 to match the
+ * "depth-plus-one" row-count convention.
+ *
+ * Entry-point collection mirrors the skip-ahead in `_buildCallersTree` (Pass 1)
+ * so nested re-entries aren't double-counted. Returns 1 when there is no
+ * selection or no entry points — matching the empty-tree fallback in
+ * `_emptyCallersTree`, which has a length-1 root row at depth 0.
+ */
+export function computeCallersMaxDepthPlusOne(
+  callNodeTable: CallNodeTable,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): number {
+  if (selectedFuncIndex === null) {
+    return 1;
+  }
+  const funcCol = callNodeTable.func;
+  const subtreeEndCol = callNodeTable.subtreeRangeEnd;
+  const depthCol = callNodeTable.depth;
+  const callNodeCount = callNodeTable.length;
+  let maxDepth = 0;
+  let found = false;
+  for (let i = 0; i < callNodeCount; i++) {
+    if (funcCol[i] !== selectedFuncIndex) {
+      continue;
+    }
+    found = true;
+    const d = depthCol[i];
+    if (d > maxDepth) {
+      maxDepth = d;
+    }
+    i = subtreeEndCol[i] - 1;
+  }
+  return found ? maxDepth + 1 : 1;
 }
 
 // Shared empty children array for unused roots. Returned by reference; callers
