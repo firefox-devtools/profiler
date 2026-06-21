@@ -38,7 +38,10 @@ import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
-import type { SortableColumn } from '../components/shared/TreeView';
+import type {
+  ColumnSortState,
+  SortableColumn,
+} from '../components/shared/TreeView';
 import {
   getBottomBoxInfoForCallNode,
   getBottomBoxInfoForFunction,
@@ -115,6 +118,8 @@ interface CallTreeInternal {
   findHeaviestPathInSubtree(
     callNodeIndex: IndexIntoCallNodeTable
   ): CallNodePath;
+  getSortableColumns(): SortableColumn[];
+  sortRoots(roots: CallNodeChildren, sort: ColumnSortState): CallNodeChildren;
 }
 
 export class CallTreeInternalNonInverted implements CallTreeInternal {
@@ -203,6 +208,16 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
 
     return this._callNodeInfo.getCallNodePathFromIndex(maxNode);
   }
+
+  // The call tree's own order (by total sample count) is the intended order,
+  // so no columns are user-sortable.
+  getSortableColumns(): SortableColumn[] {
+    return [];
+  }
+
+  sortRoots(roots: CallNodeChildren, _sort: ColumnSortState): CallNodeChildren {
+    return roots;
+  }
 }
 
 export class CallTreeInternalFunctionList implements CallTreeInternal {
@@ -238,6 +253,21 @@ export class CallTreeInternalFunctionList implements CallTreeInternal {
     throw new Error(
       'unexpected call to findHeaviestPathInSubtree in CallTreeInternalFunctionList'
     );
+  }
+
+  getSortableColumns(): SortableColumn[] {
+    return [
+      { column: 'total', prefersDescending: true },
+      { column: 'self', prefersDescending: true },
+    ];
+  }
+
+  sortRoots(roots: CallNodeChildren, sort: ColumnSortState): CallNodeChildren {
+    const { funcSelf, funcTotal } = this._timings;
+    return sort.sortItems(roots, (a, b, column) => {
+      const values = column === 'self' ? funcSelf : funcTotal;
+      return values[a] - values[b];
+    });
   }
 }
 
@@ -365,6 +395,16 @@ class CallTreeInternalInverted implements CallTreeInternal {
     }
     return callPath;
   }
+
+  // The call tree's own order (by total sample count) is the intended order,
+  // so no columns are user-sortable.
+  getSortableColumns(): SortableColumn[] {
+    return [];
+  }
+
+  sortRoots(roots: CallNodeChildren, _sort: ColumnSortState): CallNodeChildren {
+    return roots;
+  }
 }
 
 export class CallTree {
@@ -405,18 +445,19 @@ export class CallTree {
     this._weightType = weightType;
   }
 
-  // The call tree's own order (by total sample count) is the intended order,
-  // so no columns are user-sortable.
   getSortableColumns(): SortableColumn[] {
-    return [];
+    return this._internal.getSortableColumns();
   }
 
   getTotal(): number {
     return this._rootTotalSummary;
   }
 
-  getRoots() {
-    return this._roots;
+  getRoots(sort: ColumnSortState | null = null): IndexIntoCallNodeTable[] {
+    if (sort === null || sort.entries.length === 0) {
+      return this._roots;
+    }
+    return this._internal.sortRoots(this._roots, sort);
   }
 
   getChildren(callNodeIndex: IndexIntoCallNodeTable): CallNodeChildren {
@@ -519,7 +560,7 @@ export class CallTree {
     let displayData: CallNodeDisplayData | void =
       this._displayDataByIndex.get(callNodeIndex);
     if (displayData === undefined) {
-      const { funcName, total, totalRelative, self } =
+      const { funcName, total, totalRelative, self, selfRelative } =
         this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeInfo.funcForNode(callNodeIndex);
       const categoryIndex = this._callNodeInfo.categoryForNode(callNodeIndex);
@@ -562,6 +603,7 @@ export class CallTree {
         self
       );
       const totalPercent = `${formatPercent(totalRelative)}`;
+      const selfPercent = `${formatPercent(selfRelative)}`;
 
       let ariaLabel;
       let totalWithUnit;
@@ -612,6 +654,7 @@ export class CallTree {
         self: self === 0 ? '—' : formattedSelf,
         selfWithUnit: self === 0 ? '—' : selfWithUnit,
         totalPercent,
+        selfPercent,
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.

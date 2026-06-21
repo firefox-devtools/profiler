@@ -20,6 +20,9 @@ import type { TabSlug } from '../../app-logic/tabs-handling';
 jest.mock('../../components/calltree/ProfileCallTreeView', () => ({
   ProfileCallTreeView: 'call-tree',
 }));
+jest.mock('../../components/calltree/ProfileFunctionListView', () => ({
+  ProfileFunctionListView: 'function-list',
+}));
 jest.mock('../../components/flame-graph', () => ({
   FlameGraph: 'flame-graph',
 }));
