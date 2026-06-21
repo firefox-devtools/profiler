@@ -1094,6 +1094,21 @@ export async function symbolicateProfile(
   );
 }
 
+// Returns the func that replaces the given func after symbolication. If the
+// func expanded into a path of new funcs (from inlined functions), this returns
+// the innermost one. This matches applyFuncSubstitutionToCallPath, where the
+// leaf of the new call path is the innermost func.
+// A func that is not present as a key in the map stays unchanged.
+export function applyFuncSubstitutionToFunc(
+  oldFuncToNewFuncsMap: FuncToFuncsMap,
+  func: IndexIntoFuncTable
+): IndexIntoFuncTable {
+  const newFuncs = oldFuncToNewFuncsMap.get(func);
+  return newFuncs === undefined || newFuncs.length === 0
+    ? func
+    : newFuncs[newFuncs.length - 1];
+}
+
 // Create a new call path, where each func in the old call path is
 // replaced with one or more funcs from the FuncToFuncsMap.
 // This is used during symbolication, where some previously separate
