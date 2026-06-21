@@ -34,6 +34,7 @@ import {
   getHiddenLocalTracks,
   getInvertCallstack,
   getHash,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
 import {
   assertExhaustiveCheck,
@@ -76,12 +77,15 @@ import type {
   SelectionContext,
   BottomBoxInfo,
   IndexIntoFuncTable,
+  CallNodeArea,
+  WingName,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import { replaceHistoryWithUrlState } from 'firefox-profiler/app-logic/url-handling';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
@@ -123,7 +127,7 @@ export function changeSelectedCallNode(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_SELECTED_CALL_NODE',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       selectedCallNodePath,
       optionalExpandedToCallNodePath,
       threadsKey,
@@ -132,19 +136,50 @@ export function changeSelectedCallNode(
   };
 }
 
+const WING_AREAS: Record<WingName, CallNodeArea> = {
+  upper: 'UPPER_WING',
+  lower: 'LOWER_WING',
+};
+
+export function changeWingSelectedCallNode(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: WING_AREAS[wing],
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
+  };
+}
+
 /**
  * Select a function for a given thread in the function list.
+ *
+ * Replaces the current history entry rather than pushing a new one, so that
+ * holding e.g. the down arrow key in the function list doesn't get rate-limited
+ * by the browser and doesn't flood the back/forward history.
  */
 export function changeSelectedFunctionIndex(
   threadsKey: ThreadsKey,
   selectedFunctionIndex: IndexIntoFuncTable | null,
   context: SelectionContext = { source: 'auto' }
-): Action {
-  return {
-    type: 'CHANGE_SELECTED_FUNCTION',
-    selectedFunctionIndex,
-    threadsKey,
-    context,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'CHANGE_SELECTED_FUNCTION',
+      selectedFunctionIndex,
+      threadsKey,
+      context,
+    });
+    // Update window.history synchronously instead of waiting for the
+    // UrlManager's componentDidUpdate, which is deferred by React's render
+    // scheduling and would otherwise pushState a new entry.
+    replaceHistoryWithUrlState(getUrlState(getState()));
   };
 }
 
@@ -156,11 +191,15 @@ export function changeSelectedFunctionIndex(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
-): Action {
-  return {
-    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
-    threadsKey,
-    callNodePath,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      threadsKey,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
+      callNodePath,
+    });
   };
 }
 
@@ -172,6 +211,19 @@ export function changeRightClickedFunctionIndex(
     type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
     threadsKey,
     functionIndex,
+  };
+}
+
+export function changeWingRightClickedCallNode(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadsKey,
+    area: WING_AREAS[wing],
+    callNodePath,
   };
 }
 
@@ -1605,12 +1657,26 @@ export function changeExpandedCallNodes(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_EXPANDED_CALL_NODES',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       threadsKey,
       expandedCallNodePaths,
     });
   };
 }
+
+export function changeWingExpandedCallNodes(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: WING_AREAS[wing],
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,
@@ -1690,6 +1756,28 @@ export function changeFunctionListSort(
   return {
     type: 'CHANGE_FUNCTION_LIST_SORT',
     sort,
+  };
+}
+
+export function changeFunctionListSectionOpen(
+  section: 'descendants' | 'ancestors' | 'self',
+  isOpen: boolean
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
+    section,
+    isOpen,
+  };
+}
+
+export function changeWingView(
+  wing: 'upper' | 'lower' | 'self',
+  view: 'flame-graph' | 'call-tree'
+): Action {
+  return {
+    type: 'CHANGE_WING_VIEW',
+    wing,
+    view,
   };
 }
 

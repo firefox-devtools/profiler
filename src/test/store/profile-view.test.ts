@@ -3629,6 +3629,7 @@ describe('right clicked call node info', () => {
 
     expect(getRightClickedCallNodeInfo(getState())).toEqual({
       threadsKey: 0,
+      area: 'NON_INVERTED_TREE',
       callNodePath: [0, 1],
     });
   });
@@ -3640,6 +3641,7 @@ describe('right clicked call node info', () => {
 
     expect(getRightClickedCallNodeInfo(getState())).toEqual({
       threadsKey: 0,
+      area: 'NON_INVERTED_TREE',
       callNodePath: [0, 1],
     });
 

@@ -9,10 +9,12 @@ import type {
   ThreadsKey,
   CallNodePath,
   Selector,
+  CallNodeArea,
 } from 'firefox-profiler/types';
 
 export type RightClickedCallNodeInfo = {
   readonly threadsKey: ThreadsKey;
+  readonly area: CallNodeArea;
   readonly callNodePath: CallNodePath;
 };
 
