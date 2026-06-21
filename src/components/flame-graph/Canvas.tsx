@@ -157,8 +157,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return;
     }
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[selectedCallNodeIndex];
+    const depth = callNodeInfo.depthForNode(selectedCallNodeIndex);
     const y = (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
@@ -231,8 +230,6 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     fastFillStyle.set(getBackgroundColor());
     ctx.fillRect(0, 0, deviceContainerWidth, deviceContainerHeight);
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-
     const startDepth = Math.floor(
       maxStackDepthPlusOne - viewportBottom / stackFrameHeight
     );
@@ -299,7 +296,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
           i === hoveredItem.flameGraphTimingIndex;
         const isHighlighted = isSelected || isRightClicked || isHovered;
 
-        const categoryIndex = callNodeTable.category[callNodeIndex];
+        const categoryIndex = callNodeInfo.categoryForNode(callNodeIndex);
         const category = categories[categoryIndex];
         const colorStyles = mapCategoryColorNameToStackChartStyles(
           category.color
@@ -321,7 +318,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
           deviceBoxLeft + deviceHorizontalPadding;
         const deviceTextWidth: DevicePixels = deviceBoxRight - deviceTextLeft;
         if (deviceTextWidth > textMeasurement.minWidth) {
-          const funcIndex = callNodeTable.func[callNodeIndex];
+          const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
           const funcName = thread.stringTable.getString(
             thread.funcTable.name[funcIndex]
           );
