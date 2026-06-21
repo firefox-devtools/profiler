@@ -39,7 +39,10 @@ import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
 import type { SortableColumn } from '../components/shared/TreeView';
-import { getBottomBoxInfoForCallNode } from './bottom-box';
+import {
+  getBottomBoxInfoForCallNode,
+  getBottomBoxInfoForFunction,
+} from './bottom-box';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
@@ -642,6 +645,14 @@ export class CallTree {
     return getBottomBoxInfoForCallNode(
       callNodeIndex,
       this._callNodeInfo,
+      this._thread,
+      this._previewFilteredCtssSamples
+    );
+  }
+
+  getBottomBoxInfoForFunction(funcIndex: IndexIntoFuncTable): BottomBoxInfo {
+    return getBottomBoxInfoForFunction(
+      funcIndex,
       this._thread,
       this._previewFilteredCtssSamples
     );
