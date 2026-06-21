@@ -7,7 +7,6 @@ import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
 import {
   getInvertCallstack,
-  getImplementationFilter,
   getSearchStringsAsRegExp,
   getSelectedThreadsKey,
 } from 'firefox-profiler/selectors/url-state';
@@ -31,7 +30,6 @@ import {
 
 import type {
   State,
-  ImplementationFilter,
   ThreadsKey,
   IndexIntoCategoryList,
   IndexIntoCallNodeTable,
@@ -61,7 +59,6 @@ type StateProps = {
   readonly searchStringsRegExp: RegExp | null;
   readonly disableOverscan: boolean;
   readonly invertCallstack: boolean;
-  readonly implementationFilter: ImplementationFilter;
   readonly callNodeMaxDepthPlusOne: number;
   readonly weightType: WeightType;
   readonly tableViewOptions: TableViewOptions;
@@ -291,7 +288,6 @@ export const CallTree = explicitConnect<{}, StateProps, DispatchProps>({
     searchStringsRegExp: getSearchStringsAsRegExp(state),
     disableOverscan: getPreviewSelectionIsBeingModified(state),
     invertCallstack: getInvertCallstack(state),
-    implementationFilter: getImplementationFilter(state),
     // Use the filtered call node max depth, rather than the preview filtered call node
     // max depth so that the width of the TreeView component is stable across preview
     // selections.
