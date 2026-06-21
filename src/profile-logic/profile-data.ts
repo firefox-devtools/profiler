@@ -949,6 +949,47 @@ export function getCallNodeFramePerStackInverted(
 }
 
 /**
+ * For each stack, returns the innermost (leaf-most) frame whose function matches
+ * funcIndex, or -1 if funcIndex doesn't appear in that stack at all.
+ *
+ * This is used when double-clicking a function in the function list, to find
+ * which frame to show in the source and assembly views. When a function appears
+ * multiple times in a stack (due to recursion), we use the innermost occurrence,
+ * because that is the one doing the most specific work.
+ *
+ * Example: for stack A -> B -> C -> B -> D, asking for func B gives:
+ *   - frame of the B in "C -> B" (the innermost B), not the B in "A -> B"
+ *
+ * The algorithm takes advantage of the stack table's ordering (parents before
+ * children): for each stack, we start with the parent's result and overwrite
+ * whenever we encounter funcIndex again, so the last write wins (innermost).
+ */
+export function getFunctionFramePerStack(
+  funcIndex: IndexIntoFuncTable,
+  stackTable: StackTable,
+  frameTable: FrameTable
+): Int32Array {
+  const { frame: frameCol, prefix: prefixCol, length: stackCount } = stackTable;
+  const funcCol = frameTable.func;
+
+  const funcFramePerStack = new Int32Array(stackCount);
+
+  for (let stackIndex = 0; stackIndex < stackCount; stackIndex++) {
+    const frame = frameCol[stackIndex];
+    if (funcCol[frame] === funcIndex) {
+      // This stack's own frame matches: it is the innermost so far, overwrite.
+      funcFramePerStack[stackIndex] = frame;
+    } else {
+      // Inherit from parent (or -1 if there is no parent).
+      const prefix = prefixCol[stackIndex];
+      funcFramePerStack[stackIndex] =
+        prefix !== null ? funcFramePerStack[prefix] : -1;
+    }
+  }
+  return funcFramePerStack;
+}
+
+/**
  * Take a samples table, and return an array that contain indexes that point to the
  * leaf most call node, or null.
  */
