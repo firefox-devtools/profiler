@@ -425,4 +425,31 @@ describe('getBottomBoxInfoForFunction', function () {
     // scrollToLineNumber should be 31 (the innermost B), not 30 (the outer B).
     expect(bottomBoxInfo.scrollToLineNumber).toBe(31);
   });
+
+  it('opens the source view when double-clicking a function in the function list', function () {
+    const { profile, derivedThreads, funcNamesDictPerThread } =
+      getProfileFromTextSamples(`
+        A[file:a.js][line:20]
+        B[file:b.js][line:30]
+      `);
+    const { dispatch, getState } = storeWithProfile(profile);
+    const [thread] = derivedThreads;
+    const [{ B }] = funcNamesDictPerThread;
+
+    dispatch(changeSelectedTab('function-list'));
+
+    const bottomBoxInfo = getBottomBoxInfoForFunction(
+      B,
+      thread,
+      thread.samples
+    );
+    dispatch(
+      updateBottomBoxContentsAndMaybeOpen('function-list', bottomBoxInfo)
+    );
+
+    expect(UrlStateSelectors.getIsBottomBoxOpen(getState())).toBeTrue();
+    expect(UrlStateSelectors.getSourceViewScrollToLineNumber(getState())).toBe(
+      30
+    );
+  });
 });
