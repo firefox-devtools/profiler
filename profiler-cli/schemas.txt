@@ -32,7 +32,7 @@ CounterSummary:
     unit, graphType,
     color, pid, mainThreadIndex, mainThreadHandle, mainThreadName,
     rangeSampleCount,
-    stats: [{ source, label, labelKey?, value, formattedValue, carbon? }]
+    stats: [{ source, label, value, formattedValue, carbon? }]
   }
 
 profiler-cli counter list --json

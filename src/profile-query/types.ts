@@ -679,7 +679,6 @@ export type ThreadPageLoadResult = {
 export type CounterStat = {
   source: CounterTooltipDataSource;
   label: string;
-  labelKey?: string;
   value: number;
   formattedValue: string;
   carbon?: string;

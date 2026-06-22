@@ -32,8 +32,7 @@ function applySearchFilter(
 
   for (const process of processes) {
     const processMatches =
-      process.name.toLowerCase().includes(query) ||
-      String(process.pid).includes(query);
+      process.name.toLowerCase().includes(query) || process.pid.includes(query);
 
     const matchingThreads = processMatches
       ? process.threads
@@ -113,10 +112,9 @@ export function collectProfileInfo(
   const countersByPid = new Map<string, CounterSummary[]>();
   (getCounters(state) ?? []).forEach((_, index) => {
     const counter = collectCounterSummary(store, threadMap, index);
-    const pid = String(profile.threads[counter.mainThreadIndex].pid);
-    const list = countersByPid.get(pid) ?? [];
+    const list = countersByPid.get(counter.pid) ?? [];
     list.push(counter);
-    countersByPid.set(pid, list);
+    countersByPid.set(counter.pid, list);
   });
 
   const processesData: ProfileInfoResult['processes'] = processesToShow.map(
@@ -152,7 +150,7 @@ export function collectProfileInfo(
           cpuMs: thread.cpuMs,
         })),
         remainingThreads: processItem.remainingThreads,
-        counters: countersByPid.get(String(processItem.pid)),
+        counters: countersByPid.get(processItem.pid),
       };
     }
   );

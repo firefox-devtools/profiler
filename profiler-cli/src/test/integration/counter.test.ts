@@ -17,7 +17,6 @@ import {
 import type {
   CounterListResult,
   CounterInfoResult,
-  ProfileInfoResult,
   WithContext,
 } from '../../protocol';
 
@@ -95,27 +94,6 @@ describe('profiler-cli counter commands', () => {
     expect(parsed.description).toBe('Amount of allocated memory');
     expect(parsed.sampleCount).toBeGreaterThan(0);
     expect(parsed.stats.some((s) => s.source === 'count-range')).toBe(true);
-  });
-
-  it('profile info lists counters under their process', async () => {
-    await cli(ctx, ['load', PROFILE_WITH_COUNTER]);
-
-    const result = await cli(ctx, ['profile', 'info']);
-
-    expect(result.exitCode).toBe(0);
-    expect(result.stdout).toContain('c-0');
-    expect(result.stdout).toContain('Memory');
-  });
-
-  it('profile info --json nests counters in their owning process', async () => {
-    await cli(ctx, ['load', PROFILE_WITH_COUNTER]);
-
-    const result = await cli(ctx, ['profile', 'info', '--json']);
-    const parsed = JSON.parse(result.stdout) as WithContext<ProfileInfoResult>;
-
-    const counters = parsed.processes.flatMap((p) => p.counters ?? []);
-    expect(counters).toHaveLength(1);
-    expect(counters[0].counterHandle).toBe('c-0');
   });
 
   it('counter list reports when a profile has no counters', async () => {

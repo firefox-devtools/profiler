@@ -7,10 +7,8 @@ import {
   getProfileRootRange,
   getCounters,
   getCounterSelectors,
-  getCommittedRange,
   getMeta,
 } from 'firefox-profiler/selectors/profile';
-import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import {
   formatBytes,
   formatNumber,
@@ -29,7 +27,6 @@ import type {
   CounterIndex,
   CounterTooltipDataSource,
   CounterTooltipFormat,
-  CounterSamplesTable,
   ProfileMeta,
 } from 'firefox-profiler/types';
 import type { Store } from '../../types/store';
@@ -49,19 +46,6 @@ const RANGE_AGGREGATE_SOURCES: Set<CounterTooltipDataSource> = new Set([
   'count-range',
   'committed-range-total',
 ]);
-
-function sumCountOverRange(
-  samples: CounterSamplesTable,
-  start: number,
-  end: number
-): number {
-  const [begin, finish] = getSampleIndexRangeForSelection(samples, start, end);
-  let sum = 0;
-  for (let i = begin; i < finish; i++) {
-    sum += samples.count[i];
-  }
-  return sum;
-}
 
 /**
  * Format a resolved counter value exactly as the timeline tooltip does, minus
@@ -126,7 +110,6 @@ function collectCounterStats(
   const selectors = getCounterSelectors(counterIndex);
   const counter = selectors.getCounter(state);
   const accumulated = selectors.getAccumulateCounterSamples(state);
-  const committedRange = getCommittedRange(state);
   const meta = getMeta(state);
 
   const stats: CounterStat[] = [];
@@ -144,11 +127,7 @@ function collectCounterStats(
     const value =
       row.source === 'count-range'
         ? accumulated.countRange
-        : sumCountOverRange(
-            counter.samples,
-            committedRange.start,
-            committedRange.end
-          );
+        : selectors.getCommittedRangeCounterSampleSum(state);
 
     const { formattedValue, carbon } = formatCounterRowValue(
       value,
@@ -158,7 +137,6 @@ function collectCounterStats(
     stats.push({
       source: row.source,
       label: row.label,
-      labelKey: row.labelKey,
       value,
       formattedValue,
       carbon,

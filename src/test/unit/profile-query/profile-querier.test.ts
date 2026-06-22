@@ -17,7 +17,10 @@
  */
 
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
-import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getCounterForThread,
+} from '../../fixtures/profiles/processed-profile';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
 
@@ -341,6 +344,67 @@ describe('ProfileQuerier', function () {
       expect(names).toContain('A');
       expect(names).toContain('X');
       expect(result.search).toBeUndefined();
+    });
+  });
+
+  describe('counters', function () {
+    function profileWithMemoryCounter() {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+        B  B  B
+      `);
+      const counter = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+        hasCountNumber: true,
+      });
+      profile.counters = [counter];
+      return { profile, counter };
+    }
+
+    function querierFor(profile: Parameters<typeof storeWithProfile>[0]) {
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('counterList returns a schema-driven summary per counter', async function () {
+      const { profile } = profileWithMemoryCounter();
+      const result = await querierFor(profile).counterList();
+
+      expect(result.counters).toHaveLength(1);
+      expect(result.counters[0].counterHandle).toBe('c-0');
+      expect(result.counters[0].label).toBe('Memory');
+      expect(
+        result.counters[0].stats.some((s) => s.source === 'count-range')
+      ).toBe(true);
+    });
+
+    it('profileInfo nests each counter under its owning process', async function () {
+      const { profile, counter } = profileWithMemoryCounter();
+      const info = await querierFor(profile).profileInfo();
+
+      const owningProcess = info.processes.find((p) => p.pid === counter.pid);
+      expect(owningProcess).toBeDefined();
+      expect(owningProcess!.counters?.map((c) => c.counterHandle)).toEqual([
+        'c-0',
+      ]);
+    });
+
+    it('counterInfo resolves a counter by handle', async function () {
+      const { profile } = profileWithMemoryCounter();
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.counterHandle).toBe('c-0');
+      expect(info.description).toBe('My Description');
+      expect(info.sampleCount).toBeGreaterThan(0);
+    });
+
+    it('counterInfo throws for an unknown handle', async function () {
+      const { profile } = profileWithMemoryCounter();
+      await expect(querierFor(profile).counterInfo('c-9')).rejects.toThrow(
+        'Unknown counter c-9'
+      );
     });
   });
 
