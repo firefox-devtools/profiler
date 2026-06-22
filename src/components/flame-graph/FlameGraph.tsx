@@ -16,10 +16,7 @@ import {
   getProfileUsesMultipleStackTypes,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import {
-  getSelectedThreadsKey,
-  getInvertCallstack,
-} from '../../selectors/url-state';
+import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
 import {
   changeSelectedCallNode,
@@ -83,7 +80,6 @@ type StateProps = {
   readonly scrollToSelectionGeneration: number;
   readonly categories: CategoryList;
   readonly interval: Milliseconds;
-  readonly isInverted: boolean;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
@@ -336,7 +332,6 @@ class FlameGraphImpl
       callTreeSummaryStrategy,
       categories,
       interval,
-      isInverted,
       innerWindowIDToPageMap,
       weightType,
       ctssSamples,
@@ -403,7 +398,6 @@ class FlameGraphImpl
               onDoubleClick: this._onCallNodeEnterOrDoubleClick,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
-              isInverted,
               ctssSamples,
               ctssSampleCategoriesAndSubcategories,
               tracedTiming: tracedTimingNonInverted,
@@ -450,7 +444,6 @@ export const FlameGraph = explicitConnectWithForwardRef<
       selectedThreadSelectors.getRightClickedCallNodeIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     interval: getProfileInterval(state),
-    isInverted: getInvertCallstack(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
     innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
