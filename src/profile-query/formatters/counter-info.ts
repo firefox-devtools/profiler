@@ -47,6 +47,25 @@ const RANGE_AGGREGATE_SOURCES: Set<CounterTooltipDataSource> = new Set([
   'committed-range-total',
 ]);
 
+const naturalSort = new Intl.Collator('en-US', { numeric: true });
+
+export function getSortedCounterIndexes(store: Store): CounterIndex[] {
+  const state = store.getState();
+  const counters = getCounters(state) ?? [];
+  const order = counters.map((_, index) => index);
+  if (getMeta(state).keepProfileThreadOrder) {
+    return order;
+  }
+  return order.sort((a, b) => {
+    const sortWeightDiff =
+      counters[a].display.sortWeight - counters[b].display.sortWeight;
+    if (sortWeightDiff !== 0) {
+      return sortWeightDiff;
+    }
+    return naturalSort.compare(counters[a].name, counters[b].name);
+  });
+}
+
 /**
  * Format a resolved counter value exactly as the timeline tooltip does, minus
  * the React/localization wrapping. Only the range-aggregate sources reach this,
@@ -192,10 +211,9 @@ export function collectCounterList(
   store: Store,
   threadMap: ThreadMap
 ): CounterListResult {
-  const counters = getCounters(store.getState()) ?? [];
   return {
     type: 'counter-list',
-    counters: counters.map((_, index) =>
+    counters: getSortedCounterIndexes(store).map((index) =>
       collectCounterSummary(store, threadMap, index)
     ),
   };

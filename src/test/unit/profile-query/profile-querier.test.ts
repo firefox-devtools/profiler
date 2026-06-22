@@ -380,6 +380,35 @@ describe('ProfileQuerier', function () {
       ).toBe(true);
     });
 
+    it('orders counters by display.sortWeight, not profile order', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+      `);
+      // Listed Memory-first, but Bandwidth (sortWeight 10) should sort before
+      // Memory (sortWeight 20), matching the timeline track order.
+      const memory = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+      });
+      const bandwidth = getCounterForThread(profile.threads[0], 0, {
+        name: 'eth0',
+        category: 'Bandwidth',
+      });
+      profile.counters = [memory, bandwidth];
+
+      const result = await querierFor(profile).counterList();
+
+      expect(result.counters.map((c) => c.label)).toEqual([
+        'Bandwidth',
+        'Memory',
+      ]);
+      expect(result.counters.map((c) => c.counterHandle)).toEqual([
+        'c-1',
+        'c-0',
+      ]);
+    });
+
     it('profileInfo nests each counter under its owning process', async function () {
       const { profile, counter } = profileWithMemoryCounter();
       const info = await querierFor(profile).profileInfo();
