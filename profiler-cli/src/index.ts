@@ -37,6 +37,7 @@ import { registerProfileCommand } from './commands/profile';
 import { registerThreadCommand } from './commands/thread';
 import { registerMarkerCommand } from './commands/marker';
 import { registerFunctionCommand } from './commands/function';
+import { registerCounterCommand } from './commands/counter';
 import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
 import { registerSessionCommand } from './commands/session';
@@ -85,6 +86,8 @@ Examples:
   profiler-cli thread samples
   profiler-cli thread functions --search GC --min-self 1
   profiler-cli thread markers --search DOMEvent --category Graphics
+  profiler-cli counter list
+  profiler-cli counter info c-0
   profiler-cli zoom push 2.7,3.1
   profiler-cli filter push --excludes-function f-184
   profiler-cli status
@@ -180,6 +183,7 @@ Examples:
   registerThreadCommand(program, SESSION_DIR);
   registerMarkerCommand(program, SESSION_DIR);
   registerFunctionCommand(program, SESSION_DIR);
+  registerCounterCommand(program, SESSION_DIR);
   registerZoomCommand(program, SESSION_DIR);
   registerFilterCommand(program, SESSION_DIR);
   registerSessionCommand(program, SESSION_DIR);
