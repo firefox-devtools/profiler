@@ -435,6 +435,21 @@ describe('ProfileQuerier', function () {
         'Unknown counter c-9'
       );
     });
+
+    it('returns no counters for a profile without any', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+      `);
+
+      const querier = querierFor(profile);
+      const list = await querier.counterList();
+
+      expect(list.counters).toEqual([]);
+      await expect(querier.counterInfo('c-0')).rejects.toThrow(
+        'Unknown counter c-0'
+      );
+    });
   });
 
   describe('threadSamples', function () {
