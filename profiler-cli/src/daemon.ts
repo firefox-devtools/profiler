@@ -380,6 +380,18 @@ export class Daemon {
           default:
             throw assertExhaustiveCheck(command);
         }
+      case 'counter':
+        switch (command.subcommand) {
+          case 'list':
+            return this.querier!.counterList();
+          case 'info':
+            if (!command.counter) {
+              throw new Error('counter handle required for counter info');
+            }
+            return this.querier!.counterInfo(command.counter);
+          default:
+            throw assertExhaustiveCheck(command);
+        }
       case 'sample':
         switch (command.subcommand) {
           case 'info':

@@ -2051,6 +2051,15 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
+      case 'S':
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-self',
+            funcIndex,
+            implementation,
+          })
+        );
+        break;
       case 'M':
         dispatch(
           addTransformToStack(threadsKey, {
