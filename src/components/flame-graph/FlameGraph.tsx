@@ -298,7 +298,7 @@ class FlameGraphImpl
       return;
     }
 
-    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+    handleCallNodeTransformShortcut(event, threadsKey, callNodeInfo, nodeIndex);
   };
 
   _onCopy = (event: ClipboardEvent) => {
