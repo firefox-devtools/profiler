@@ -10,11 +10,12 @@ import {
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state';
 import { buildProcessThreadList } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
+import { collectCounterSummary, getSortedCounterIndexes } from './counter-info';
 import type { Store } from '../../types/store';
 import type { ThreadInfo, ProcessListItem } from '../process-thread-list';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
-import type { ProfileInfoResult } from '../types';
+import type { ProfileInfoResult, CounterSummary } from '../types';
 
 /**
  * Filter a list of processes by a search string.
@@ -30,8 +31,7 @@ function applySearchFilter(
 
   for (const process of processes) {
     const processMatches =
-      process.name.toLowerCase().includes(query) ||
-      String(process.pid).includes(query);
+      process.name.toLowerCase().includes(query) || process.pid.includes(query);
 
     const matchingThreads = processMatches
       ? process.threads
@@ -108,6 +108,14 @@ export function collectProfileInfo(
       ? applySearchFilter(result.processes, search)
       : result.processes;
 
+  const countersByPid = new Map<string, CounterSummary[]>();
+  for (const index of getSortedCounterIndexes(store)) {
+    const counter = collectCounterSummary(store, threadMap, index);
+    const list = countersByPid.get(counter.pid) ?? [];
+    list.push(counter);
+    countersByPid.set(counter.pid, list);
+  }
+
   const processesData: ProfileInfoResult['processes'] = processesToShow.map(
     (processItem) => {
       let startTimeName: string | undefined;
@@ -141,6 +149,7 @@ export function collectProfileInfo(
           cpuMs: thread.cpuMs,
         })),
         remainingThreads: processItem.remainingThreads,
+        counters: countersByPid.get(processItem.pid),
       };
     }
   );
