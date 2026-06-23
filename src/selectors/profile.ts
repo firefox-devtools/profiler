@@ -16,6 +16,7 @@ import {
   getFriendlyThreadName,
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
+  getSampleIndexRangeForSelection,
   computeInnerWindowIDToTabMap,
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
@@ -379,6 +380,23 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
       )
   );
 
+  const getCommittedRangeCounterSampleSum: Selector<number> = createSelector(
+    getCounter,
+    getCommittedRange,
+    (counter, range) => {
+      const [begin, end] = getSampleIndexRangeForSelection(
+        counter.samples,
+        range.start,
+        range.end
+      );
+      let sum = 0;
+      for (let i = begin; i < end; i++) {
+        sum += counter.samples.count[i];
+      }
+      return sum;
+    }
+  );
+
   return {
     getCounter,
     getDescription,
@@ -387,6 +405,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getMaxCounterSampleCountPerMs,
     getMaxRangeCounterSampleCountPerMs,
     getCommittedRangeCounterSampleRange,
+    getCommittedRangeCounterSampleSum,
   };
 }
 

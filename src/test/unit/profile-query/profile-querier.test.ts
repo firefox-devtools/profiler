@@ -17,7 +17,10 @@
  */
 
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
-import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getCounterForThread,
+} from '../../fixtures/profiles/processed-profile';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
 
@@ -341,6 +344,111 @@ describe('ProfileQuerier', function () {
       expect(names).toContain('A');
       expect(names).toContain('X');
       expect(result.search).toBeUndefined();
+    });
+  });
+
+  describe('counters', function () {
+    function profileWithMemoryCounter() {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+        B  B  B
+      `);
+      const counter = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+        hasCountNumber: true,
+      });
+      profile.counters = [counter];
+      return { profile, counter };
+    }
+
+    function querierFor(profile: Parameters<typeof storeWithProfile>[0]) {
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('counterList returns a schema-driven summary per counter', async function () {
+      const { profile } = profileWithMemoryCounter();
+      const result = await querierFor(profile).counterList();
+
+      expect(result.counters).toHaveLength(1);
+      expect(result.counters[0].counterHandle).toBe('c-0');
+      expect(result.counters[0].label).toBe('Memory');
+      expect(
+        result.counters[0].stats.some((s) => s.source === 'count-range')
+      ).toBe(true);
+    });
+
+    it('orders counters by display.sortWeight, not profile order', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+      `);
+      // Listed Memory-first, but Bandwidth (sortWeight 10) should sort before
+      // Memory (sortWeight 20), matching the timeline track order.
+      const memory = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+      });
+      const bandwidth = getCounterForThread(profile.threads[0], 0, {
+        name: 'eth0',
+        category: 'Bandwidth',
+      });
+      profile.counters = [memory, bandwidth];
+
+      const result = await querierFor(profile).counterList();
+
+      expect(result.counters.map((c) => c.label)).toEqual([
+        'Bandwidth',
+        'Memory',
+      ]);
+      expect(result.counters.map((c) => c.counterHandle)).toEqual([
+        'c-1',
+        'c-0',
+      ]);
+    });
+
+    it('profileInfo nests each counter under its owning process', async function () {
+      const { profile, counter } = profileWithMemoryCounter();
+      const info = await querierFor(profile).profileInfo();
+
+      const owningProcess = info.processes.find((p) => p.pid === counter.pid);
+      expect(owningProcess).toBeDefined();
+      expect(owningProcess!.counters?.map((c) => c.counterHandle)).toEqual([
+        'c-0',
+      ]);
+    });
+
+    it('counterInfo resolves a counter by handle', async function () {
+      const { profile } = profileWithMemoryCounter();
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.counterHandle).toBe('c-0');
+      expect(info.description).toBe('My Description');
+      expect(info.sampleCount).toBeGreaterThan(0);
+    });
+
+    it('counterInfo throws for an unknown handle', async function () {
+      const { profile } = profileWithMemoryCounter();
+      await expect(querierFor(profile).counterInfo('c-9')).rejects.toThrow(
+        'Unknown counter c-9'
+      );
+    });
+
+    it('returns no counters for a profile without any', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+      `);
+
+      const querier = querierFor(profile);
+      const list = await querier.counterList();
+
+      expect(list.counters).toEqual([]);
+      await expect(querier.counterInfo('c-0')).rejects.toThrow(
+        'Unknown counter c-0'
+      );
     });
   });
 
