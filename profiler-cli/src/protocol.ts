@@ -50,6 +50,9 @@ export type {
   ProfileInfoResult,
   ProfileLogsResult,
   ThreadSelectResult,
+  CounterSummary,
+  CounterListResult,
+  CounterInfoResult,
 } from '../../src/profile-query/types';
 export type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -79,6 +82,8 @@ import type {
   FilterStackResult,
   ProfileLogsResult,
   ThreadSelectResult,
+  CounterListResult,
+  CounterInfoResult,
 } from '../../src/profile-query/types';
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -141,6 +146,11 @@ export type ClientCommand =
       subcommand: 'info' | 'select' | 'stack';
       marker?: string;
     }
+  | {
+      command: 'counter';
+      subcommand: 'list' | 'info';
+      counter?: string;
+    }
   | { command: 'sample'; subcommand: 'info' | 'select'; sample?: string }
   | {
       command: 'function';
@@ -195,7 +205,9 @@ export type CommandResult =
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
   | WithContext<ThreadPageLoadResult>
-  | WithContext<ThreadSelectResult>;
+  | WithContext<ThreadSelectResult>
+  | WithContext<CounterListResult>
+  | WithContext<CounterInfoResult>;
 
 export interface SessionMetadata {
   id: string;
