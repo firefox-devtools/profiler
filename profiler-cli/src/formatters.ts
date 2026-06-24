@@ -35,6 +35,9 @@ import type {
   SampleFilterSpec,
   ProfileLogsResult,
   ThreadSelectResult,
+  CounterSummary,
+  CounterListResult,
+  CounterInfoResult,
 } from './protocol';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
@@ -428,6 +431,10 @@ Name: ${result.name}\n`;
     if (process.remainingThreads) {
       output += `    + ${process.remainingThreads.count} more threads with combined CPU time ${process.remainingThreads.combinedCpuMs.toFixed(3)}ms and max CPU time ${process.remainingThreads.maxCpuMs.toFixed(3)}ms (use --all to see all)\n`;
     }
+
+    for (const counter of process.counters ?? []) {
+      output += `    ${counter.counterHandle}: ${counter.label}${formatCounterStats(counter)}\n`;
+    }
   }
 
   if (result.remainingProcesses) {
@@ -449,6 +456,85 @@ Name: ${result.name}\n`;
   }
 
   return output;
+}
+
+function formatCounterStatInline(
+  stat: CounterSummary['stats'][number]
+): string {
+  const value = stat.carbon
+    ? `${stat.formattedValue} (${stat.carbon})`
+    : stat.formattedValue;
+  return `${stat.label}: ${value}`;
+}
+
+/** The ` - stat; stat [N samples]` trailer shared by counter list and profile info. */
+function formatCounterStats(counter: CounterSummary): string {
+  const stats =
+    counter.stats.length > 0
+      ? ` - ${counter.stats.map(formatCounterStatInline).join('; ')}`
+      : '';
+  return `${stats} [${counter.rangeSampleCount} samples]`;
+}
+
+function formatCounterSummaryLine(counter: CounterSummary): string {
+  return `  ${counter.counterHandle}: ${counter.label} (${counter.category})${formatCounterStats(counter)}`;
+}
+
+/**
+ * Format a CounterListResult as plain text.
+ */
+export function formatCounterListResult(
+  result: WithContext<CounterListResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  if (result.counters.length === 0) {
+    return `${contextHeader}\n\nNo counters in this profile.`;
+  }
+  const lines = result.counters.map(formatCounterSummaryLine);
+  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${lines.join('\n')}`;
+}
+
+/**
+ * Format a CounterInfoResult as plain text.
+ */
+export function formatCounterInfoResult(
+  result: WithContext<CounterInfoResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const lines = [
+    contextHeader,
+    '',
+    `Counter ${result.counterHandle}: ${result.label}`,
+    `  Name: ${result.name}`,
+    `  Category: ${result.category}`,
+  ];
+  if (result.description) {
+    lines.push(`  Description: ${result.description}`);
+  }
+  lines.push(`  Unit: ${result.unit || '(none)'}`);
+  lines.push(`  Graph type: ${result.graphType}`);
+  lines.push(
+    `  Main thread: ${result.mainThreadHandle} (${result.mainThreadName})`
+  );
+  lines.push(
+    `  Samples: ${result.sampleCount} total, ${result.rangeSampleCount} in current range`
+  );
+  if (result.rangeStart !== null && result.rangeEnd !== null) {
+    const zeroAt = result.context.rootRange.start;
+    lines.push(
+      `  Time span: ${formatDuration(result.rangeStart - zeroAt)} → ${formatDuration(result.rangeEnd - zeroAt)}`
+    );
+  }
+  if (result.stats.length > 0) {
+    lines.push('  Stats (current range):');
+    for (const stat of result.stats) {
+      const value = stat.carbon
+        ? `${stat.formattedValue} (${stat.carbon})`
+        : stat.formattedValue;
+      lines.push(`    ${stat.label}: ${value}`);
+    }
+  }
+  return lines.join('\n');
 }
 
 /**
