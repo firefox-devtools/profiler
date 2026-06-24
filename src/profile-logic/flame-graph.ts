@@ -5,10 +5,16 @@ import type {
   UnitIntervalOfProfileRange,
   CallNodeTable,
   FuncTable,
+  IndexIntoFuncTable,
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
-import type { CallTreeTimingsNonInverted } from './call-tree';
+import type {
+  CallTree,
+  CallTreeTimingsInverted,
+  CallTreeTimingsNonInverted,
+} from './call-tree';
+import type { CallNodeInfoInverted } from './call-node-info';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 
@@ -303,6 +309,274 @@ export function getFlameGraphTiming(
       callNode: timingCallNodes,
       length: timingCallNodes.length,
     };
+  }
+
+  return timing;
+}
+
+type InvertedNodeTiming = {
+  total: number;
+  hasChildren: boolean;
+};
+
+type InvertedFlameGraphStackItem = {
+  nodeIndex: IndexIntoCallNodeTable;
+  depth: FlameGraphDepth;
+  start: UnitIntervalOfProfileRange;
+  end: UnitIntervalOfProfileRange;
+};
+
+// The flame graph does not support horizontal zooming, so boxes that are smaller
+// than a fraction of a 16k-wide display cannot be hovered or read. Pruning these
+// boxes is especially important for inverted flame graphs, where eagerly
+// materializing the full inverted tree for large profiles can exhaust memory.
+const MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH = 1 / 16384;
+
+export function getInvertedFlameGraphTiming(
+  callNodeInfo: CallNodeInfoInverted,
+  callTreeTimings: CallTreeTimingsInverted,
+  funcTable: FuncTable,
+  stringTable: StringTable
+): FlameGraphTiming {
+  const {
+    callNodeSelf,
+    rootTotalSummary,
+    sortedRoots,
+    totalPerRootFunc,
+    hasChildrenPerRootFunc,
+  } = callTreeTimings;
+
+  if (rootTotalSummary === 0) {
+    return [];
+  }
+
+  const callNodeTableDepthCol = callNodeInfo.getCallNodeTable().depth;
+  const funcTableNameColumn = funcTable.name;
+  const funcNameCache: Array<string | void> = [];
+  const nonRootTimingCache = new Map<
+    IndexIntoCallNodeTable,
+    InvertedNodeTiming
+  >();
+  const abs = Math.abs;
+
+  function getFuncName(func: IndexIntoFuncTable): string {
+    let funcName = funcNameCache[func];
+    if (funcName === undefined) {
+      funcName = stringTable.getString(funcTableNameColumn[func]);
+      funcNameCache[func] = funcName;
+    }
+    return funcName;
+  }
+
+  function compareCallNodesByFuncName(
+    a: IndexIntoCallNodeTable,
+    b: IndexIntoCallNodeTable
+  ): number {
+    const funcA = callNodeInfo.funcForNode(a);
+    const funcB = callNodeInfo.funcForNode(b);
+    const result = getFuncName(funcA).localeCompare(getFuncName(funcB));
+    return result || funcA - funcB;
+  }
+
+  function getNodeTiming(
+    nodeIndex: IndexIntoCallNodeTable
+  ): InvertedNodeTiming {
+    if (callNodeInfo.isRoot(nodeIndex)) {
+      return {
+        total: totalPerRootFunc[nodeIndex],
+        hasChildren: hasChildrenPerRootFunc[nodeIndex] !== 0,
+      };
+    }
+
+    const cached = nonRootTimingCache.get(nodeIndex);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const nodeDepth = callNodeInfo.depthForNode(nodeIndex);
+    const [rangeStart, rangeEnd] =
+      callNodeInfo.getSuffixOrderIndexRangeForCallNode(nodeIndex);
+    const suffixOrderedCallNodes = callNodeInfo.getSuffixOrderedCallNodes();
+
+    let total = 0;
+    let hasChildren = false;
+    for (let i = rangeStart; i < rangeEnd; i++) {
+      const selfNode = suffixOrderedCallNodes[i];
+      const self = callNodeSelf[selfNode];
+      total += self;
+      hasChildren =
+        hasChildren ||
+        (self !== 0 && callNodeTableDepthCol[selfNode] > nodeDepth);
+    }
+
+    const timing = { total, hasChildren };
+    nonRootTimingCache.set(nodeIndex, timing);
+    return timing;
+  }
+
+  function getDisplayedChildren(
+    nodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable[] {
+    const children = callNodeInfo.getChildren(nodeIndex);
+    const displayedChildren = [];
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const { total, hasChildren } = getNodeTiming(child);
+      if (
+        (total !== 0 || hasChildren) &&
+        abs(total / rootTotalSummary) >= MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH
+      ) {
+        displayedChildren.push(child);
+      }
+    }
+    displayedChildren.sort(compareCallNodesByFuncName);
+    return displayedChildren;
+  }
+
+  const roots = [];
+  for (let i = 0; i < sortedRoots.length; i++) {
+    const root = sortedRoots[i];
+    if (
+      abs(totalPerRootFunc[root] / rootTotalSummary) >=
+      MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH
+    ) {
+      roots.push(root);
+    }
+  }
+  roots.sort(compareCallNodesByFuncName);
+
+  const timing: FlameGraphTiming = [];
+  const stack: InvertedFlameGraphStackItem[] = [];
+  const rootStackItems: InvertedFlameGraphStackItem[] = [];
+  let currentRootStart = 0;
+  for (let i = 0; i < roots.length; i++) {
+    const root = roots[i];
+    const { total } = getNodeTiming(root);
+    const totalRelative = abs(total / rootTotalSummary);
+    const start = currentRootStart;
+    const end = start + totalRelative;
+    rootStackItems.push({ nodeIndex: root, depth: 0, start, end });
+    currentRootStart = end;
+  }
+  for (let i = rootStackItems.length - 1; i >= 0; i--) {
+    stack.push(rootStackItems[i]);
+  }
+
+  while (stack.length !== 0) {
+    const { nodeIndex, depth, start, end } = stack.pop()!;
+    const { total } = getNodeTiming(nodeIndex);
+
+    let row = timing[depth];
+    if (row === undefined) {
+      row = {
+        start: [],
+        end: [],
+        selfRelative: [],
+        callNode: [],
+        length: 0,
+      };
+      timing[depth] = row;
+    }
+
+    row.start.push(start);
+    row.end.push(end);
+    row.selfRelative.push(
+      callNodeInfo.isRoot(nodeIndex) ? abs(total / rootTotalSummary) : 0
+    );
+    row.callNode.push(nodeIndex);
+    row.length++;
+
+    const children = getDisplayedChildren(nodeIndex);
+    const childStackItems: InvertedFlameGraphStackItem[] = [];
+    let currentChildStart = start;
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const childTotal = getNodeTiming(child).total;
+      const childTotalRelative = abs(childTotal / rootTotalSummary);
+      const childEnd = currentChildStart + childTotalRelative;
+      childStackItems.push({
+        nodeIndex: child,
+        depth: depth + 1,
+        start: currentChildStart,
+        end: childEnd,
+      });
+      currentChildStart = childEnd;
+    }
+    for (let i = childStackItems.length - 1; i >= 0; i--) {
+      stack.push(childStackItems[i]);
+    }
+  }
+
+  return timing;
+}
+
+export function computeFlameGraphTimingFromCallTree(
+  callTree: CallTree
+): FlameGraphTiming {
+  const rootTotalSummary = callTree.getTotal();
+  if (rootTotalSummary === 0) {
+    return [];
+  }
+
+  const timing: FlameGraphTiming = [];
+
+  function traverse(
+    nodeIndex: IndexIntoCallNodeTable,
+    depth: number,
+    startX: number
+  ): number {
+    const { self, total } = callTree.getNodeData(nodeIndex);
+    if (total === 0) {
+      return startX;
+    }
+
+    const totalRelative = Math.abs(total / rootTotalSummary);
+    const endX = startX + totalRelative;
+
+    if (!timing[depth]) {
+      timing[depth] = {
+        start: [],
+        end: [],
+        selfRelative: [],
+        callNode: [],
+        length: 0,
+      };
+    }
+
+    timing[depth].start.push(startX);
+    timing[depth].end.push(endX);
+    timing[depth].selfRelative.push(Math.abs(self / rootTotalSummary));
+    timing[depth].callNode.push(nodeIndex);
+    timing[depth].length++;
+
+    const children = [...callTree.getChildren(nodeIndex)];
+    if (children.length > 0) {
+      // Sort children alphabetically by function name.
+      children.sort((a, b) => {
+        const nameA = callTree.getNodeData(a).funcName;
+        const nameB = callTree.getNodeData(b).funcName;
+        return nameA.localeCompare(nameB);
+      });
+
+      let currentChildStart = startX;
+      for (const child of children) {
+        currentChildStart = traverse(child, depth + 1, currentChildStart);
+      }
+    }
+
+    return endX;
+  }
+
+  const roots = [...callTree.getRoots()];
+  roots.sort((a, b) => {
+    const nameA = callTree.getNodeData(a).funcName;
+    const nameB = callTree.getNodeData(b).funcName;
+    return nameA.localeCompare(nameB);
+  });
+
+  let currentStart = 0;
+  for (const root of roots) {
+    currentStart = traverse(root, 0, currentStart);
   }
 
   return timing;

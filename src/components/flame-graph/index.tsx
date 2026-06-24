@@ -13,7 +13,7 @@ const FlameGraphView = () => (
     role="tabpanel"
     aria-labelledby="flame-graph-tab-button"
   >
-    <StackSettings hideInvertCallstack={true} />
+    <StackSettings />
     <TransformNavigator />
     <MaybeFlameGraph />
   </div>
