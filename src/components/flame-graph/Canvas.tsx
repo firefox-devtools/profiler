@@ -392,10 +392,10 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const ratio =
-      stackTiming.end[flameGraphTimingIndex] -
-      stackTiming.start[flameGraphTimingIndex];
-
+    const ratio = flameGraphTiming.getRatioOfRootTotalSummary(
+      depth,
+      flameGraphTimingIndex
+    );
     let percentage = formatPercent(ratio);
     if (tracedTiming) {
       const { total } = getSelfAndTotalForCallNode(
