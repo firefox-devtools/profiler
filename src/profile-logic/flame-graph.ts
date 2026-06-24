@@ -94,6 +94,20 @@ export class FlameGraphTiming {
     return rows;
   }
 
+  // For a given node / "box", get the sample percentage (as a fraction of 1) that
+  // should be displayed in the tooltip for this node.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    const row = this.getRow(depth);
+    if (indexInRow < 0 || indexInRow >= row.length) {
+      throw new Error(
+        `Out-of-bounds call to getRatioOfRootTotalSummary: For depth ${depth}, ${indexInRow} is outside 0..${row.length}`
+      );
+    }
+
+    const ratioOfFullWidth = row.end[indexInRow] - row.start[indexInRow];
+    return ratioOfFullWidth;
+  }
+
   _buildNextTimingRow(): void {
     const { total, self, rootTotalSummary } = this._callTreeTimings;
     const { prefix } = this._callNodeTable;
