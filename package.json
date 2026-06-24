@@ -169,7 +169,7 @@
     "lockfile-lint": "^5.0.0",
     "npm-run-all2": "^8.0.4",
     "open": "^11.0.0",
-    "oxfmt": "^0.51.0",
+    "oxfmt": "^0.56.0",
     "patch-package": "^8.0.1",
     "postcss": "^8.5.15",
     "postinstall-postinstall": "^2.1.0",
