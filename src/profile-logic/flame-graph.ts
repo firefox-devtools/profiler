@@ -52,6 +52,10 @@ export interface FlameGraphTiming {
   readonly rowCount: number;
   getRow(depth: number): FlameGraphTimingRow;
   getAllRowsForTesting(): FlameGraphTimingRow[];
+
+  // For a given node / "box", get the sample percentage (as a fraction of 1)
+  // that should be displayed in the tooltip for this node.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number;
 }
 
 class FlameGraphTimingNonInverted implements FlameGraphTiming {
@@ -102,6 +106,20 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
       rows.push(this.getRow(depth));
     }
     return rows;
+  }
+
+  // For a given node / "box", get the sample percentage (as a fraction of 1) that
+  // should be displayed in the tooltip for this node.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    const row = this.getRow(depth);
+    if (indexInRow < 0 || indexInRow >= row.length) {
+      throw new Error(
+        `Out-of-bounds call to getRatioOfRootTotalSummary: For depth ${depth}, ${indexInRow} is outside 0..${row.length}`
+      );
+    }
+
+    const ratioOfFullWidth = row.end[indexInRow] - row.start[indexInRow];
+    return ratioOfFullWidth;
   }
 
   _buildNextTimingRow(): void {
@@ -433,6 +451,21 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
       rows.push(this.getRow(depth));
     }
     return rows;
+  }
+
+  // For a given node / "box", get the sample percentage (as a fraction of 1) that
+  // should be displayed in the tooltip for this node. In the inverted flame
+  // graph, box widths are computed relative to rootTotalSummary, so the box
+  // width is already the ratio we want.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    const row = this.getRow(depth);
+    if (indexInRow < 0 || indexInRow >= row.length) {
+      throw new Error(
+        `Out-of-bounds call to getRatioOfRootTotalSummary: For depth ${depth}, ${indexInRow} is outside 0..${row.length}`
+      );
+    }
+
+    return row.end[indexInRow] - row.start[indexInRow];
   }
 
   _compareCallNodesByFuncName = (
