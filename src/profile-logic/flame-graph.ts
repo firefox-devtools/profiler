@@ -52,6 +52,25 @@ export interface FlameGraphTiming {
   readonly rowCount: number;
   getRow(depth: number): FlameGraphTimingRow;
   getAllRowsForTesting(): FlameGraphTimingRow[];
+
+  // For a given node / "box", get the sample percentage (as a fraction of 1)
+  // that should be displayed in the tooltip for this node.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number;
+}
+
+// Returns the width of a box as a fraction of the full flame graph width.
+function _getBoxWidth(
+  flameGraphTiming: FlameGraphTiming,
+  depth: number,
+  indexInRow: number
+): number {
+  const row = flameGraphTiming.getRow(depth);
+  if (indexInRow < 0 || indexInRow >= row.length) {
+    throw new Error(
+      `Out-of-bounds call to _getBoxWidth: For depth ${depth}, ${indexInRow} is outside 0..${row.length}`
+    );
+  }
+  return row.end[indexInRow] - row.start[indexInRow];
 }
 
 class FlameGraphTimingNonInverted implements FlameGraphTiming {
@@ -102,6 +121,10 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
       rows.push(this.getRow(depth));
     }
     return rows;
+  }
+
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    return _getBoxWidth(this, depth, indexInRow);
   }
 
   _buildNextTimingRow(): void {
@@ -433,6 +456,12 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
       rows.push(this.getRow(depth));
     }
     return rows;
+  }
+
+  // In the inverted flame graph, box widths are computed relative to
+  // rootTotalSummary, so the box width is already the ratio we want.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    return _getBoxWidth(this, depth, indexInRow);
   }
 
   _compareCallNodesByFuncName = (
