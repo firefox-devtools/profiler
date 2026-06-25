@@ -81,10 +81,6 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
       ? meta.preprocessedProfileVersion
       : UNANNOTATED_VERSION;
 
-  if (profileVersion === PROCESSED_PROFILE_VERSION) {
-    return profile;
-  }
-
   if (profileVersion > PROCESSED_PROFILE_VERSION) {
     throw new ProfileVersionError(
       'processed',
@@ -104,10 +100,22 @@ export function attemptToUpgradeProcessedProfileThroughMutation(
     }
   }
 
+  _normalizeAfterUpgrade(profile);
+
   const upgradedProfile = profile as Profile;
   upgradedProfile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 
   return upgradedProfile;
+}
+
+// Fixups for things that don't survive JSON roundtripping at the current
+// profile version, such as typed array columns being parsed as regular
+// arrays. Idempotent; safe to run on an already-normalized profile.
+function _normalizeAfterUpgrade(profile: any): void {
+  const stackTable = profile.shared?.stackTable ?? null;
+  if (stackTable && !(stackTable.prefixOffset instanceof Int32Array)) {
+    stackTable.prefixOffset = new Int32Array(stackTable.prefixOffset);
+  }
 }
 
 function _archFromAbi(abi: string): string {
@@ -3260,6 +3268,39 @@ const _upgraders: {
     // The type of `profile.shared.stackTable.frame` was changed from
     // `IndexIntoFrameTable[]` to `IndexIntoFrameTable[] | Int32Array<ArrayBuffer>`.
     // All valid v64 profiles are valid v65 profiles, so no upgrader is needed.
+  },
+  [66]: (profile: any) => {
+    // The stackTable.prefix column is now stored as an Int32Array with -1
+    // meaning "root", instead of an Array<number | null> with null meaning
+    // "root". Convert any null entries to -1 and turn the column into an
+    // Int32Array.
+    const stackTable = profile.shared?.stackTable ?? null;
+    if (stackTable && Array.isArray(stackTable.prefix)) {
+      const oldPrefix = stackTable.prefix;
+      const newPrefix = new Int32Array(oldPrefix.length);
+      for (let i = 0; i < oldPrefix.length; i++) {
+        const p = oldPrefix[i];
+        newPrefix[i] = p === null ? -1 : p;
+      }
+      stackTable.prefix = newPrefix;
+    }
+  },
+  [67]: (profile: any) => {
+    // The stackTable.prefix column was replaced with a stackTable.prefixOffset
+    // column. For each stack i, prefixOffset[i] is 0 if i is a root, otherwise
+    // it is i's offset from its parent (parent index = i - prefixOffset[i]).
+    const stackTable = profile.shared?.stackTable ?? null;
+    if (stackTable && stackTable.prefix !== undefined) {
+      const oldPrefix = stackTable.prefix;
+      const length = oldPrefix.length;
+      const prefixOffset = new Int32Array(length);
+      for (let i = 0; i < length; i++) {
+        const p = oldPrefix[i];
+        prefixOffset[i] = p === -1 || p === null ? 0 : i - p;
+      }
+      stackTable.prefixOffset = prefixOffset;
+      delete stackTable.prefix;
+    }
   },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

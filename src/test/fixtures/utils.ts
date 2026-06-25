@@ -344,8 +344,8 @@ export function formatStack(
     sources,
   } = thread;
   for (
-    let stackIndex: IndexIntoStackTable | null = stack;
-    stackIndex !== null;
+    let stackIndex: IndexIntoStackTable = stack;
+    stackIndex !== -1;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
     const frameIndex = stackTable.frame[stackIndex];

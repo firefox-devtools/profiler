@@ -4,7 +4,6 @@
 
 import type {
   IndexIntoFrameTable,
-  IndexIntoStackTable,
   RawStackTable,
   IndexIntoFuncTable,
   Profile,
@@ -197,10 +196,10 @@ export function insertStackLabels(
   );
   let stacksToInsertCount = 0;
   for (let stackIndex = 0; stackIndex < oldStackTable.length; stackIndex++) {
-    const parentStackIndex = oldStackTable.prefix[stackIndex];
+    const prefixOffset = oldStackTable.prefixOffset[stackIndex];
     const inheritedLabelFrameIndex =
-      parentStackIndex !== null
-        ? inheritedLabelFrameIndexAtStack[parentStackIndex]
+      prefixOffset !== 0
+        ? inheritedLabelFrameIndexAtStack[stackIndex - prefixOffset]
         : null;
     const frameIndex = oldStackTable.frame[stackIndex];
     const funcIndex = oldFrameTable.func[frameIndex];
@@ -218,7 +217,7 @@ export function insertStackLabels(
     ) {
       labelFrameIndexToInsertAtStack[stackIndex] = null;
       inheritedLabelFrameIndexAtStack[stackIndex] = null;
-    } else if (parentStackIndex === null) {
+    } else if (prefixOffset === 0) {
       labelFrameIndexToInsertAtStack[stackIndex] = rootLabelFrameIndex;
       inheritedLabelFrameIndexAtStack[stackIndex] = rootLabelFrameIndex;
       stacksToInsertCount++;
@@ -230,7 +229,7 @@ export function insertStackLabels(
 
   // Now compute the new stack table.
   const newStackCount = oldStackTable.length + stacksToInsertCount;
-  const newPrefixCol = new Array<IndexIntoStackTable | null>(newStackCount);
+  const newPrefixOffsetCol = new Int32Array(newStackCount);
   const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
   const oldStackToNewStackPlusOne = new Int32Array(oldStackTable.length);
   let nextNewStackIndex = 0;
@@ -241,18 +240,22 @@ export function insertStackLabels(
   ) {
     const labelFrameIndexToInsert =
       labelFrameIndexToInsertAtStack[oldStackIndex];
-    const oldPrefix = oldStackTable.prefix[oldStackIndex];
+    const oldPrefixOffset = oldStackTable.prefixOffset[oldStackIndex];
+    const oldPrefix =
+      oldPrefixOffset !== 0 ? oldStackIndex - oldPrefixOffset : -1;
     let newPrefix =
-      oldPrefix !== null ? oldStackToNewStackPlusOne[oldPrefix] - 1 : null;
+      oldPrefix !== -1 ? oldStackToNewStackPlusOne[oldPrefix] - 1 : -1;
     const frameIndex = oldStackTable.frame[oldStackIndex];
     if (labelFrameIndexToInsert !== null) {
       const insertedStackIndex = nextNewStackIndex++;
-      newPrefixCol[insertedStackIndex] = newPrefix;
+      newPrefixOffsetCol[insertedStackIndex] =
+        newPrefix === -1 ? 0 : insertedStackIndex - newPrefix;
       newFrameCol[insertedStackIndex] = labelFrameIndexToInsert;
       newPrefix = insertedStackIndex;
     }
     const newStackIndex = nextNewStackIndex++;
-    newPrefixCol[newStackIndex] = newPrefix;
+    newPrefixOffsetCol[newStackIndex] =
+      newPrefix === -1 ? 0 : newStackIndex - newPrefix;
     newFrameCol[newStackIndex] = frameIndex;
     oldStackToNewStackPlusOne[oldStackIndex] = newStackIndex + 1;
   }
@@ -266,7 +269,7 @@ export function insertStackLabels(
   }
 
   const stackTable: RawStackTable = {
-    prefix: newPrefixCol,
+    prefixOffset: newPrefixOffsetCol,
     frame: newFrameCol,
     length: newStackCount,
   };

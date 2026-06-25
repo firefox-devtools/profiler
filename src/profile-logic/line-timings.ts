@@ -57,7 +57,7 @@ export function getStackLineInfo(
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefixStack = stackTable.prefix[stackIndex];
     const prefixLineSet: IndexIntoLineSetTable | -1 =
-      prefixStack !== null ? stackIndexToLineSetIndex[prefixStack] : -1;
+      prefixStack !== -1 ? stackIndexToLineSetIndex[prefixStack] : -1;
 
     const frame = stackTable.frame[stackIndex];
     const func = frameTable.func[frame];
