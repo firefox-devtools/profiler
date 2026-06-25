@@ -13,6 +13,7 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   formatFromMarkerSchema,
   getLabelGetter,
+  getMarkerFieldValue,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import type { Store } from '../../types/store';
@@ -307,23 +308,15 @@ function getGroupingValue(
     return categories[marker.category]?.name ?? 'Unknown';
   }
   // Field-based grouping
-  const fieldValue = (marker.data as any)?.[key.field];
-  if (fieldValue === undefined || fieldValue === null) {
+  const schema = marker.data ? markerSchemaByName[marker.data.type] : null;
+  const fieldValue = getMarkerFieldValue(
+    marker.data,
+    key.field,
+    schema,
+    stringTable
+  );
+  if (fieldValue === undefined) {
     return '(no value)';
-  }
-  // For fields whose format stores a string-table index (unique-string /
-  // flow-id / terminating-flow-id), resolve to the interned string so groups
-  // show "Error" / "click" / ... instead of integer indices.
-  const schema = marker.data ? markerSchemaByName[marker.data.type] : undefined;
-  const field = schema?.fields.find((f) => f.key === key.field);
-  if (
-    field &&
-    (field.format === 'unique-string' ||
-      field.format === 'flow-id' ||
-      field.format === 'terminating-flow-id') &&
-    typeof fieldValue === 'number'
-  ) {
-    return stringTable.getString(fieldValue, '(empty)');
   }
   return String(fieldValue);
 }
