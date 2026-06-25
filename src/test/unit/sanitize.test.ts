@@ -1275,4 +1275,21 @@ describe('sanitizePII', function () {
       'file2.js'
     );
   });
+
+  it('always removes source contents even when no PII removal is requested', function () {
+    const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
+    // There should be only one source.
+    expect(profile.shared.sources.content.length).toEqual(1);
+    // Pretend the source content have been loaded.
+    profile.shared.sources.content[0] = 'source code';
+
+    // A null `RemoveProfileInformation` means the user kept all sharing options
+    // checked, so no other sanitization happens.
+    const { profile: sanitizedProfile } = sanitizePII(profile, [], null, {});
+
+    expect(sanitizedProfile.shared.sources.content.length).toEqual(
+      profile.shared.sources.content.length
+    );
+    expect(sanitizedProfile.shared.sources.content[0]).toBe(null);
+  });
 });
