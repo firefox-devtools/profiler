@@ -2385,9 +2385,13 @@ describe('snapshots of selectors/profile', function () {
 
   it('matches the last stored run of selectedThreadSelector.getFlameGraphTiming', function () {
     const { getState } = setupStore();
-    expect(
-      selectedThreadSelectors.getFlameGraphTiming(getState())
-    ).toMatchSnapshot();
+    const timing = selectedThreadSelectors.getFlameGraphTiming(getState());
+    // Build a plain shape with the flame graph timing contents, so that the
+    // snapshot doesn't contain the class name / class fields.
+    const plainTiming = {
+      rows: timing.getAllRowsForTesting(),
+    };
+    expect(plainTiming).toMatchSnapshot();
   });
 
   it('matches the last stored run of selectedThreadSelector.getFriendlyThreadName', function () {
@@ -3597,6 +3601,7 @@ describe('right clicked call node info', () => {
 
     expect(getRightClickedCallNodeInfo(getState())).toEqual({
       threadsKey: 0,
+      area: 'NON_INVERTED_TREE',
       callNodePath: [0, 1],
     });
   });
@@ -3608,6 +3613,7 @@ describe('right clicked call node info', () => {
 
     expect(getRightClickedCallNodeInfo(getState())).toEqual({
       threadsKey: 0,
+      area: 'NON_INVERTED_TREE',
       callNodePath: [0, 1],
     });
 

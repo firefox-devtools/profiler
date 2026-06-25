@@ -34,6 +34,7 @@ import {
   getHiddenLocalTracks,
   getInvertCallstack,
   getHash,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
 import {
   assertExhaustiveCheck,
@@ -74,14 +75,19 @@ import type {
   TableViewOptions,
   SelectionContext,
   BottomBoxInfo,
+  IndexIntoFuncTable,
+  CallNodeArea,
+  WingName,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import { replaceHistoryWithUrlState } from 'firefox-profiler/app-logic/url-handling';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -120,12 +126,59 @@ export function changeSelectedCallNode(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_SELECTED_CALL_NODE',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       selectedCallNodePath,
       optionalExpandedToCallNodePath,
       threadsKey,
       context,
     });
+  };
+}
+
+const WING_AREAS: Record<WingName, CallNodeArea> = {
+  upper: 'UPPER_WING',
+  lower: 'LOWER_WING',
+};
+
+export function changeWingSelectedCallNode(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: WING_AREAS[wing],
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
+  };
+}
+
+/**
+ * Select a function for a given thread in the function list.
+ *
+ * Replaces the current history entry rather than pushing a new one, so that
+ * holding e.g. the down arrow key in the function list doesn't get rate-limited
+ * by the browser and doesn't flood the back/forward history.
+ */
+export function changeSelectedFunctionIndex(
+  threadsKey: ThreadsKey,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  context: SelectionContext = { source: 'auto' }
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'CHANGE_SELECTED_FUNCTION',
+      selectedFunctionIndex,
+      threadsKey,
+      context,
+    });
+    // Update window.history synchronously instead of waiting for the
+    // UrlManager's componentDidUpdate, which is deferred by React's render
+    // scheduling and would otherwise pushState a new entry.
+    replaceHistoryWithUrlState(getUrlState(getState()));
   };
 }
 
@@ -137,10 +190,38 @@ export function changeSelectedCallNode(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      threadsKey,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
+      callNodePath,
+    });
+  };
+}
+
+export function changeRightClickedFunctionIndex(
+  threadsKey: ThreadsKey,
+  functionIndex: IndexIntoFuncTable | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
+    threadsKey,
+    functionIndex,
+  };
+}
+
+export function changeWingRightClickedCallNode(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
 ): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
+    area: WING_AREAS[wing],
     callNodePath,
   };
 }
@@ -204,6 +285,40 @@ export function selectSelfCallNode(
       // In the non-inverted tree, we want to select the self node.
       dispatch(changeSelectedCallNode(threadsKey, callNodePath.reverse()));
     }
+  };
+}
+
+/**
+ * Like selectSelfCallNode, but selects the function of the self call node
+ * instead. Used when the function list tab is active.
+ */
+export function selectSelfFunction(
+  threadsKey: ThreadsKey,
+  sampleIndex: IndexIntoSamplesTable | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (sampleIndex === null || sampleIndex < 0) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const sampleCallNodes =
+      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
+        getState()
+      );
+    if (sampleIndex >= sampleCallNodes.length) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const funcIndex =
+      callNodeInfo.getCallNodeTable().func[nonInvertedSelfCallNode];
+    dispatch(changeSelectedFunctionIndex(threadsKey, funcIndex));
   };
 }
 
@@ -1545,12 +1660,26 @@ export function changeExpandedCallNodes(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_EXPANDED_CALL_NODES',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       threadsKey,
       expandedCallNodePaths,
     });
   };
 }
+
+export function changeWingExpandedCallNodes(
+  wing: WingName,
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: WING_AREAS[wing],
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,
@@ -1612,6 +1741,42 @@ export function changeMarkersSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_MARKER_SEARCH_STRING',
     searchString,
+  };
+}
+
+export function changeMarkerTableSort(sort: SingleColumnSortState[]): Action {
+  return {
+    type: 'CHANGE_MARKER_TABLE_SORT',
+    sort,
+  };
+}
+
+export function changeFunctionListSort(sort: SingleColumnSortState[]): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SORT',
+    sort,
+  };
+}
+
+export function changeFunctionListSectionOpen(
+  section: 'descendants' | 'ancestors' | 'self',
+  isOpen: boolean
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
+    section,
+    isOpen,
+  };
+}
+
+export function changeWingView(
+  wing: 'upper' | 'lower' | 'self',
+  view: 'flame-graph' | 'call-tree'
+): Action {
+  return {
+    type: 'CHANGE_WING_VIEW',
+    wing,
+    view,
   };
 }
 
@@ -2022,27 +2187,76 @@ export function handleCallNodeTransformShortcut(
     if (event.metaKey || event.ctrlKey || event.altKey) {
       return;
     }
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const unfilteredThread = threadSelectors.getThread(getState());
-    const implementation = getImplementationFilter(getState());
-    const inverted = getInvertCallstack(getState());
-    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const category = callNodeInfo.categoryForNode(callNodeIndex);
-
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     switch (event.key) {
-      case 'F':
+      case 'F': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        const inverted = getInvertCallstack(getState());
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'focus-subtree',
-            callNodePath: callNodePath,
+            callNodePath,
             implementation,
             inverted,
           })
         );
         break;
+      }
+      case 'M': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-call-node',
+            callNodePath,
+            implementation,
+          })
+        );
+        break;
+      }
+      case 'g': {
+        const category = callNodeInfo.categoryForNode(callNodeIndex);
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-category',
+            category,
+          })
+        );
+        break;
+      }
+      default:
+        dispatch(
+          handleFunctionTransformShortcut(
+            event,
+            threadsKey,
+            callNodeInfo,
+            funcIndex
+          )
+        );
+    }
+  };
+}
+
+export function handleFunctionTransformShortcut(
+  event: React.KeyboardEvent<HTMLElement>,
+  threadsKey: ThreadsKey,
+  callNodeInfo: CallNodeInfo,
+  funcIndex: IndexIntoFuncTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const implementation = getImplementationFilter(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const unfilteredThread = threadSelectors.getThread(getState());
+
+    switch (event.key) {
       case 'f':
         dispatch(
           addTransformToStack(threadsKey, {
@@ -2056,15 +2270,6 @@ export function handleCallNodeTransformShortcut(
           addTransformToStack(threadsKey, {
             type: 'focus-self',
             funcIndex,
-            implementation,
-          })
-        );
-        break;
-      case 'M':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'merge-call-node',
-            callNodePath: callNodePath,
             implementation,
           })
         );
@@ -2086,8 +2291,7 @@ export function handleCallNodeTransformShortcut(
         );
         break;
       case 'C': {
-        const { funcTable } = unfilteredThread;
-        const resourceIndex = funcTable.resource[funcIndex];
+        const resourceIndex = unfilteredThread.funcTable.resource[funcIndex];
         dispatch(
           addCollapseResourceTransformToStack(
             threadsKey,
@@ -2120,7 +2324,7 @@ export function handleCallNodeTransformShortcut(
         }
         break;
       }
-      case 'c': {
+      case 'c':
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'collapse-function-subtree',
@@ -2128,17 +2332,8 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
-      }
-      case 'g':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'focus-category',
-            category,
-          })
-        );
-        break;
       default:
-      // This did not match a call tree transform.
+      // This did not match a function transform.
     }
   };
 }
