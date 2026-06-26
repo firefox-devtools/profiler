@@ -47,10 +47,7 @@
 }
 
 .profileViewer {
-  /* Create a stacking context, so that the KeyboardShortcut can overlay the profile
-     viewer. */
   position: relative;
-  z-index: 0;
   display: flex;
   min-width: 0; /* This allows Flexible Layout to shrink this further than its min-content */
   flex: 1;
