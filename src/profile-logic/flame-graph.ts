@@ -16,9 +16,8 @@ export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
 
 /**
- * FlameGraphTiming is an array containing data used for rendering the
- * flame graph. Each element in the array describes one row in the
- * graph. Each such element in turn contains one or more functions,
+ * FlameGraphTimingRow contains the data used for rendering a single
+ * row of the flame graph. Each row contains one or more functions,
  * drawn as boxes with start and end positions, represented as unit
  * intervals of the profile range. It should be noted that start and
  * end does not represent units of time, but only positions on the
@@ -30,13 +29,130 @@ export type IndexIntoFlameGraphTiming = number;
  * selfRelative contains the self time relative to the total time,
  * which is used to color the drawn functions.
  */
-export type FlameGraphTiming = Array<{
+export type FlameGraphTimingRow = {
   start: UnitIntervalOfProfileRange[];
   end: UnitIntervalOfProfileRange[];
   selfRelative: Array<number>;
   callNode: IndexIntoCallNodeTable[];
   length: number;
-}>;
+};
+
+/**
+ * Used by the flame graph canvas to know which boxes to render where.
+ *
+ * The flame graph only calls getRow(depth) for on-screen rows; this allows
+ * the implementation to generate rows lazily as the user scrolls towards
+ * deeper calls.
+ */
+export class FlameGraphTiming {
+  _flameGraphRows: FlameGraphRows;
+  _callNodeTable: CallNodeTable;
+  _callTreeTimings: CallTreeTimingsNonInverted;
+
+  // Populated lazily by _buildNextTimingRow().
+  _timingRows: FlameGraphTimingRow[];
+
+  // Used to position the children call node boxes: For a given parent box, its
+  // first (left-most) child box starts at the same x position as the parent.
+  _startPerCallNode: Float32Array;
+
+  constructor(
+    flameGraphRows: FlameGraphRows,
+    callNodeTable: CallNodeTable,
+    callTreeTimings: CallTreeTimingsNonInverted
+  ) {
+    this._flameGraphRows = flameGraphRows;
+    this._callNodeTable = callNodeTable;
+    this._callTreeTimings = callTreeTimings;
+
+    this._timingRows = [];
+    this._startPerCallNode = new Float32Array(callNodeTable.length);
+  }
+
+  get rowCount(): number {
+    return this._flameGraphRows.length;
+  }
+
+  getRow(depth: number): FlameGraphTimingRow {
+    if (depth < 0 || depth >= this.rowCount) {
+      throw new Error(
+        `Out-of-bounds call to getRow: ${depth} is outside 0..${this.rowCount}`
+      );
+    }
+    while (this._timingRows.length <= depth) {
+      this._buildNextTimingRow();
+    }
+    return this._timingRows[depth];
+  }
+
+  // Convenience method for tests, don't call in production
+  getAllRowsForTesting(): FlameGraphTimingRow[] {
+    const rows = [];
+    for (let depth = 0; depth < this.rowCount; depth++) {
+      rows.push(this.getRow(depth));
+    }
+    return rows;
+  }
+
+  _buildNextTimingRow(): void {
+    const { total, self, rootTotalSummary } = this._callTreeTimings;
+    const { prefix } = this._callNodeTable;
+
+    const depth = this._timingRows.length;
+    const rowNodes = this._flameGraphRows[depth];
+    const startPerCallNode = this._startPerCallNode;
+
+    // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
+    const abs = Math.abs;
+
+    const start: UnitIntervalOfProfileRange[] = [];
+    const end: UnitIntervalOfProfileRange[] = [];
+    const selfRelative: number[] = [];
+    const timingCallNodes: IndexIntoCallNodeTable[] = [];
+
+    // Sibling boxes are adjacent. Whenever the prefix changes, jump ahead to
+    // the new parent's start so children stay aligned under their parent.
+    //
+    // Previous row: [B          ][D      ]       [G        ]
+    // Current row:  [C][E][F]    [I    ]
+    // (Note: upside down from how the flame graph is usually displayed.)
+    let currentStart = 0;
+    let previousPrefixCallNode = -1;
+    for (let i = 0; i < rowNodes.length; i++) {
+      const nodeIndex = rowNodes[i];
+      const totalVal = total[nodeIndex];
+      if (totalVal === 0) {
+        continue;
+      }
+
+      const nodePrefix = prefix[nodeIndex];
+      if (nodePrefix !== previousPrefixCallNode) {
+        currentStart = nodePrefix === -1 ? 0 : startPerCallNode[nodePrefix];
+        previousPrefixCallNode = nodePrefix;
+      }
+      startPerCallNode[nodeIndex] = currentStart;
+
+      const totalRelative = abs(totalVal / rootTotalSummary);
+      const selfRelativeVal = abs(self[nodeIndex] / rootTotalSummary);
+
+      const currentEnd = currentStart + totalRelative;
+      start.push(currentStart);
+      end.push(currentEnd);
+      selfRelative.push(selfRelativeVal);
+      timingCallNodes.push(nodeIndex);
+
+      currentStart = currentEnd;
+    }
+
+    this._timingRows.push({
+      start,
+      end,
+      selfRelative,
+      callNode: timingCallNodes,
+      length: timingCallNodes.length,
+    });
+  }
+}
 
 /**
  * FlameGraphRows is an array of rows, where each row is an array of call node
@@ -225,85 +341,12 @@ export function computeFlameGraphRows(
 }
 
 /**
- * Build a FlameGraphTiming table from a call tree.
+ * Build a FlameGraphTiming from a call tree.
  */
 export function getFlameGraphTiming(
   flameGraphRows: FlameGraphRows,
   callNodeTable: CallNodeTable,
   callTreeTimings: CallTreeTimingsNonInverted
 ): FlameGraphTiming {
-  const { total, self, rootTotalSummary } = callTreeTimings;
-  const { prefix } = callNodeTable;
-
-  // This is where we build up the return value, one row at a time.
-  const timing = [];
-
-  // This is used to adjust the start position of a call node's box based on the
-  // start position of its prefix node's box.
-  const startPerCallNode = new Float32Array(callNodeTable.length);
-
-  // Workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=1858310
-  const abs = Math.abs;
-
-  // Go row by row.
-  for (let depth = 0; depth < flameGraphRows.length; depth++) {
-    const rowNodes = flameGraphRows[depth];
-
-    const start = [];
-    const end = [];
-    const selfRelative = [];
-    const timingCallNodes = [];
-
-    // Process the call nodes in this row. Sibling boxes are adjacent to each other.
-    // Whenever the prefix changes, we need to add a gap so that the child boxes
-    // start at the same position as the parent box.
-    //
-    // Previous row: [B          ][D      ]       [G        ]
-    // Current row:  [C][E][F]    [I    ]
-    // (Note that this is upside down from how the flame graph is usually displayed)
-    let currentStart = 0;
-    let previousPrefixCallNode = -1;
-    for (let indexInRow = 0; indexInRow < rowNodes.length; indexInRow++) {
-      const nodeIndex = rowNodes[indexInRow];
-      const totalVal = total[nodeIndex];
-      if (totalVal === 0) {
-        // Skip boxes with zero width.
-        continue;
-      }
-
-      const nodePrefix = prefix[nodeIndex];
-      if (nodePrefix !== previousPrefixCallNode) {
-        // We have advanced to a node with a different parent, so we need to
-        // jump ahead to the parent box's start position.
-        currentStart = startPerCallNode[nodePrefix];
-        previousPrefixCallNode = nodePrefix;
-      }
-
-      // Write down the start position of this call node so that it can be
-      // checked later by this node's children.
-      startPerCallNode[nodeIndex] = currentStart;
-
-      // Take the absolute value, as native deallocations can be negative.
-      const totalRelativeVal = abs(totalVal / rootTotalSummary);
-      const selfRelativeVal = abs(self[nodeIndex] / rootTotalSummary);
-
-      const currentEnd = currentStart + totalRelativeVal;
-      start.push(currentStart);
-      end.push(currentEnd);
-      selfRelative.push(selfRelativeVal);
-      timingCallNodes.push(nodeIndex);
-
-      // The start position of the next box is the end position of the current box.
-      currentStart = currentEnd;
-    }
-    timing[depth] = {
-      start,
-      end,
-      selfRelative,
-      callNode: timingCallNodes,
-      length: timingCallNodes.length,
-    };
-  }
-
-  return timing;
+  return new FlameGraphTiming(flameGraphRows, callNodeTable, callTreeTimings);
 }
