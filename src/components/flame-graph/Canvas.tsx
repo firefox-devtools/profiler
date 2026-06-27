@@ -243,12 +243,12 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     // Only draw the stack frames that are vertically within view.
     // The graph is drawn from bottom to top, in order of increasing depth.
     for (let depth = startDepth; depth < endDepth; depth++) {
-      // Get the timing information for a row of stack frames.
-      const stackTiming = flameGraphTiming[depth];
-
-      if (!stackTiming) {
+      if (depth < 0 || depth >= flameGraphTiming.rowCount) {
         continue;
       }
+
+      // Get the timing information for a row of stack frames.
+      const stackTiming = flameGraphTiming.getRow(depth);
 
       const cssRowTop: CssPixels =
         (maxStackDepthPlusOne - depth - 1) * ROW_HEIGHT - viewportTop;
@@ -372,10 +372,11 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       return null;
     }
 
-    const stackTiming = flameGraphTiming[depth];
-    if (!stackTiming) {
+    if (depth < 0 || depth >= flameGraphTiming.rowCount) {
       return null;
     }
+
+    const stackTiming = flameGraphTiming.getRow(depth);
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
     if (callNodeIndex === undefined) {
       return null;
@@ -442,7 +443,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
     const { depth, flameGraphTimingIndex } = hoveredItem;
     const { flameGraphTiming } = this.props;
-    const stackTiming = flameGraphTiming[depth];
+    const stackTiming = flameGraphTiming.getRow(depth);
     const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
     return callNodeIndex;
   }
@@ -476,12 +477,10 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     const depth = Math.floor(
       maxStackDepthPlusOne - (y + viewportTop) / ROW_HEIGHT
     );
-    const stackTiming = flameGraphTiming[depth];
-
-    if (!stackTiming) {
+    if (depth < 0 || depth >= flameGraphTiming.rowCount) {
       return null;
     }
-
+    const stackTiming = flameGraphTiming.getRow(depth);
     for (let i = 0; i < stackTiming.length; i++) {
       const start = stackTiming.start[i];
       const end = stackTiming.end[i];

@@ -3,27 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 
-import { explicitConnectWithForwardRef } from '../../utils/connect';
 import { FlameGraphCanvas } from './Canvas';
-
-import {
-  getCategories,
-  getCommittedRange,
-  getPreviewSelection,
-  getScrollToSelectionGeneration,
-  getProfileInterval,
-  getInnerWindowIDToPageMap,
-  getProfileUsesMultipleStackTypes,
-} from 'firefox-profiler/selectors/profile';
-import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
-import {
-  changeSelectedCallNode,
-  changeRightClickedCallNode,
-  handleCallNodeTransformShortcut,
-  updateBottomBoxContentsAndMaybeOpen,
-} from 'firefox-profiler/actions/profile-view';
 import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
 import { ensureExists } from 'firefox-profiler/utils/types';
 
@@ -51,8 +32,6 @@ import type {
   CallTreeTimings,
 } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-
 import './FlameGraph.css';
 
 const STACK_FRAME_HEIGHT = 16;
@@ -64,7 +43,7 @@ const STACK_FRAME_HEIGHT = 16;
  */
 const SELECTABLE_THRESHOLD = 0.001;
 
-type StateProps = {
+export type Props = {
   readonly thread: Thread;
   readonly weightType: WeightType;
   readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
@@ -85,20 +64,27 @@ type StateProps = {
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
+  readonly contextMenuId?: string;
+  readonly onSelectedCallNodeChange: (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => void;
+  readonly onRightClickedCallNodeChange: (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => void;
+  readonly onCallNodeEnterOrDoubleClick: (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => void;
+  readonly onKeyboardTransformShortcut: (
+    event: React.KeyboardEvent<HTMLElement>,
+    nodeIndex: IndexIntoCallNodeTable
+  ) => void;
 };
-type DispatchProps = {
-  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
-  readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
-  readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
-  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
-};
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 export interface FlameGraphHandle {
   focus(): void;
 }
 
-class FlameGraphImpl
+export class FlameGraph
   extends React.PureComponent<Props>
   implements FlameGraphHandle
 {
@@ -112,44 +98,13 @@ class FlameGraphImpl
     document.removeEventListener('copy', this._onCopy, false);
   }
 
-  _onSelectedCallNodeChange = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
-    changeSelectedCallNode(
-      threadsKey,
-      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-    );
-  };
-
-  _onRightClickedCallNodeChange = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
-    changeRightClickedCallNode(
-      threadsKey,
-      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-    );
-  };
-
-  _onCallNodeEnterOrDoubleClick = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    if (callNodeIndex === null) {
-      return;
-    }
-    const { callTree, updateBottomBoxContentsAndMaybeOpen } = this.props;
-    const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(callNodeIndex);
-    updateBottomBoxContentsAndMaybeOpen('flame-graph', bottomBoxInfo);
-  };
-
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
   };
 
-  /* This method is called from MaybeFlameGraph. */
+  /* This method is called from ConnectedFlameGraph. */
   /* eslint-disable-next-line react/no-unused-class-component-methods */
   focus = () => {
     if (this._viewport) {
@@ -165,7 +120,7 @@ class FlameGraphImpl
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
-    const row = flameGraphTiming[depth];
+    const row = flameGraphTiming.getRow(depth);
     const columnIndex = row.callNode.indexOf(callNodeIndex);
     return row.end[columnIndex] - row.start[columnIndex] > SELECTABLE_THRESHOLD;
   };
@@ -190,7 +145,7 @@ class FlameGraphImpl
 
     const callNodeTable = callNodeInfo.getCallNodeTable();
     const depth = callNodeTable.depth[callNodeIndex];
-    const row = flameGraphTiming[depth];
+    const row = flameGraphTiming.getRow(depth);
     let columnIndex = row.callNode.indexOf(callNodeIndex);
 
     do {
@@ -211,13 +166,13 @@ class FlameGraphImpl
 
   _handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const {
-      threadsKey,
       callTree,
       callNodeInfo,
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
-      changeSelectedCallNode,
-      handleCallNodeTransformShortcut,
+      onSelectedCallNodeChange,
+      onCallNodeEnterOrDoubleClick,
+      onKeyboardTransformShortcut,
     } = this.props;
     const callNodeTable = callNodeInfo.getCallNodeTable();
 
@@ -227,10 +182,7 @@ class FlameGraphImpl
     ) {
       if (selectedCallNodeIndex === null) {
         // Just select the "root" node if we've got no prior selection.
-        changeSelectedCallNode(
-          threadsKey,
-          callNodeInfo.getCallNodePathFromIndex(0)
-        );
+        onSelectedCallNodeChange(0);
         return;
       }
 
@@ -238,10 +190,7 @@ class FlameGraphImpl
         case 'ArrowDown': {
           const prefix = callNodeTable.prefix[selectedCallNodeIndex];
           if (prefix !== -1) {
-            changeSelectedCallNode(
-              threadsKey,
-              callNodeInfo.getCallNodePathFromIndex(prefix)
-            );
+            onSelectedCallNodeChange(prefix);
           }
           break;
         }
@@ -253,10 +202,7 @@ class FlameGraphImpl
           // thus the widest box.
 
           if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
-            changeSelectedCallNode(
-              threadsKey,
-              callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-            );
+            onSelectedCallNodeChange(callNodeIndex);
           }
           break;
         }
@@ -268,10 +214,7 @@ class FlameGraphImpl
           );
 
           if (callNodeIndex !== undefined) {
-            changeSelectedCallNode(
-              threadsKey,
-              callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-            );
+            onSelectedCallNodeChange(callNodeIndex);
           }
           break;
         }
@@ -294,11 +237,11 @@ class FlameGraphImpl
     }
 
     if (event.key === 'Enter') {
-      this._onCallNodeEnterOrDoubleClick(nodeIndex);
+      onCallNodeEnterOrDoubleClick(nodeIndex);
       return;
     }
 
-    handleCallNodeTransformShortcut(event, threadsKey, callNodeInfo, nodeIndex);
+    onKeyboardTransformShortcut(event, nodeIndex);
   };
 
   _onCopy = (event: ClipboardEvent) => {
@@ -338,6 +281,10 @@ class FlameGraphImpl
       ctssSampleCategoriesAndSubcategories,
       tracedTiming,
       displayStackType,
+      contextMenuId = 'CallNodeContextMenu',
+      onSelectedCallNodeChange,
+      onRightClickedCallNodeChange,
+      onCallNodeEnterOrDoubleClick,
     } = this.props;
 
     // Get the CallTreeTimingsNonInverted out of tracedTiming. We pass this
@@ -358,7 +305,7 @@ class FlameGraphImpl
     return (
       <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
         <ContextMenuTrigger
-          id="CallNodeContextMenu"
+          id={contextMenuId}
           attributes={{
             className: 'treeViewContextMenu',
           }}
@@ -393,9 +340,9 @@ class FlameGraphImpl
               scrollToSelectionGeneration,
               callTreeSummaryStrategy,
               stackFrameHeight: STACK_FRAME_HEIGHT,
-              onSelectionChange: this._onSelectedCallNodeChange,
-              onRightClick: this._onRightClickedCallNodeChange,
-              onDoubleClick: this._onCallNodeEnterOrDoubleClick,
+              onSelectionChange: onSelectedCallNodeChange,
+              onRightClick: onRightClickedCallNodeChange,
+              onDoubleClick: onCallNodeEnterOrDoubleClick,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               ctssSamples,
@@ -417,50 +364,3 @@ function viewportNeedsUpdate() {
   // transform.
   return false;
 }
-
-export const FlameGraph = explicitConnectWithForwardRef<
-  {},
-  StateProps,
-  DispatchProps,
-  FlameGraphHandle
->({
-  mapStateToProps: (state) => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
-    // Use the filtered call node max depth, rather than the preview filtered one, so
-    // that the viewport height is stable across preview selections.
-    maxStackDepthPlusOne:
-      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
-    flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
-    callTree: selectedThreadSelectors.getCallTree(state),
-    timeRange: getCommittedRange(state),
-    previewSelection: getPreviewSelection(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    categories: getCategories(state),
-    threadsKey: getSelectedThreadsKey(state),
-    selectedCallNodeIndex:
-      selectedThreadSelectors.getSelectedCallNodeIndex(state),
-    rightClickedCallNodeIndex:
-      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
-    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    interval: getProfileInterval(state),
-    callTreeSummaryStrategy:
-      selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-    innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
-    ctssSamples: selectedThreadSelectors.getPreviewFilteredCtssSamples(state),
-    ctssSampleCategoriesAndSubcategories:
-      selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories(
-        state
-      ),
-    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
-    displayStackType: getProfileUsesMultipleStackTypes(state),
-  }),
-  mapDispatchToProps: {
-    changeSelectedCallNode,
-    changeRightClickedCallNode,
-    handleCallNodeTransformShortcut,
-    updateBottomBoxContentsAndMaybeOpen,
-  },
-  options: { forwardRef: true },
-  component: FlameGraphImpl,
-});
