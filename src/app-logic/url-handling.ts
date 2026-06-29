@@ -52,8 +52,9 @@ import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 
-export const CURRENT_URL_VERSION = 16;
+export const CURRENT_URL_VERSION = 17;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -190,6 +191,7 @@ type CallTreeQuery = BaseQuery & {
 type MarkersQuery = BaseQuery & {
   markerSearch: string; // "DOMEvent"
   marker?: MarkerIndex; // Selected marker index for the current thread, e.g. 42
+  markerSort?: string; // "duration:desc,start:asc" — primary first
 };
 
 type NetworkQuery = BaseQuery & {
@@ -228,6 +230,7 @@ type Query = BaseQuery & {
   // Markers specific
   markerSearch?: string;
   marker?: MarkerIndex;
+  markerSort?: string;
 
   // Network specific
   networkSearch?: string;
@@ -394,6 +397,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
           ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
           : undefined;
+      query.markerSort = convertMarkerTableSortToString(
+        urlState.profileSpecific.markerTableSort
+      );
       break;
     case 'network-chart':
       query = baseQuery as NetworkQueryShape;
@@ -632,8 +638,57 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      markerTableSort: convertMarkerTableSortFromString(query.markerSort),
     },
   };
+}
+
+// MarkerTable sort URL encoding. The internal ColumnSortState stores the
+// primary-sorted column last (newest click wins as primary); the URL puts the
+// primary first for human readability.
+const VALID_MARKER_SORT_COLUMNS = new Set(['start', 'duration', 'name']);
+
+function convertMarkerTableSortToString(
+  sort: SingleColumnSortState[]
+): string | undefined {
+  if (sort.length === 0) {
+    return undefined;
+  }
+  // Omit when it matches the marker table's own default.
+  if (sort.length === 1 && sort[0].column === 'start' && sort[0].ascending) {
+    return undefined;
+  }
+  return sort
+    .slice()
+    .reverse()
+    .map((s) => `${s.column}-${s.ascending ? 'asc' : 'desc'}`)
+    .join('~');
+}
+
+function convertMarkerTableSortFromString(
+  raw: string | null | void
+): SingleColumnSortState[] {
+  if (!raw) {
+    return [];
+  }
+  const parsed: SingleColumnSortState[] = [];
+  for (const part of raw.split('~')) {
+    const dashIndex = part.lastIndexOf('-');
+    if (dashIndex === -1) {
+      return [];
+    }
+    const column = part.slice(0, dashIndex);
+    const dir = part.slice(dashIndex + 1);
+    if (
+      !VALID_MARKER_SORT_COLUMNS.has(column) ||
+      (dir !== 'asc' && dir !== 'desc')
+    ) {
+      return [];
+    }
+    parsed.push({ column, ascending: dir === 'asc' });
+  }
+  // URL is primary-first; internal storage is primary-last.
+  return parsed.reverse();
 }
 
 function convertGlobalTrackOrderFromString(
@@ -1442,6 +1497,11 @@ const _upgraders: {
         })
         .join('~');
     }
+  },
+  [17]: (_processedLocation: ProcessedLocationBeforeUpgrade) => {
+    // Adds the optional `markerSort` query parameter for the marker table.
+    // No migration is necessary: older URLs simply omit it and the default
+    // (sort by start ascending) is used.
   },
 };
 
