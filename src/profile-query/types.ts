@@ -704,11 +704,38 @@ export type CounterSummary = {
   mainThreadName: string;
   rangeSampleCount: number; // samples within the current range
   stats: CounterStat[]; // range-aggregate stats from the tooltip schema
+  // Raw values for a sparkline of the counter's trajectory over the current
+  // view. Empty when the counter has no in-range samples.
+  graph: number[];
 };
 
 export type CounterListResult = {
   type: 'counter-list';
   counters: CounterSummary[];
+};
+
+/**
+ * One time bucket of a counter's "over time" breakdown. The current view is
+ * split into equal-width buckets; each carries the bucket's value formatted via
+ * the tooltip schema. `delta` is present only for accumulated counters.
+ */
+export type CounterTimeBucket = {
+  startTime: number; // absolute time of the bucket start
+  startTimeName: string; // e.g. "ts-0"
+  startTimeStr: string; // human-readable, relative to profile start, e.g. "1.4s"
+  endTime: number;
+  endTimeName: string;
+  endTimeStr: string;
+  value: number;
+  formattedValue: string;
+  delta?: number;
+  formattedDelta?: string; // signed, e.g. "+6.3 MB"
+  // Ratio (0..1) of the bucket's value: share of the range total for rate
+  // counters, share of the range peak for accumulated counters. Omitted for
+  // process CPU, whose value is already a percentage.
+  percentage?: number;
+  formattedPercentage?: string; // e.g. "60%"
+  carbon?: string; // when the row's format requests a CO2e estimate
 };
 
 export type CounterInfoResult = CounterSummary & {
@@ -717,6 +744,7 @@ export type CounterInfoResult = CounterSummary & {
   sampleCount: number; // total samples in the counter (whole profile)
   rangeStart: number | null; // absolute time of first in-range sample
   rangeEnd: number | null; // absolute time of last in-range sample
+  overTime: CounterTimeBucket[]; // per-bucket values across the current view
 };
 
 // ===== Profile Commands =====
