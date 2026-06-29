@@ -2086,7 +2086,6 @@ export function serializeProfileToJsonSlabsFile(
     // JSON" for these tables will become much smaller and we won't need to split
     // out those tables anymore.
     profile.threads,
-    profile.shared.stackTable,
     profile.shared.frameTable,
     profile.shared.funcTable,
     profile.shared.stringArray,
