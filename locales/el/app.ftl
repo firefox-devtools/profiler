@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης.
     Ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
     .title = Το Safari δεν μπορεί να εισαγάγει τοπικά προφίλ
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Αυτό το προφίλ χρησιμοποιεί μια μορφή που δεν υποστηρίζεται από αυτήν την έκδοση του { -profiler-brand-name }.
+    Δοκιμάστε να ανανεώσετε τη σελίδα για να ελέγξετε αν διατίθεται ενημέρωση για το { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
@@ -894,6 +899,10 @@ TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
 #   $value (String) - the memory range across the graph (e.g. "5MB")
 TrackMemoryGraph--memory-range-in-graph2 = { $value }
     .label = εύρος μνήμης στο γράφημα
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = εκχωρήσεις και αποδεσμεύσεις από το προηγούμενο δείγμα
 
 ## TrackProcessCPUGraph
 ## This is used to show the CPU usage of a process over time in the timeline.
@@ -947,6 +956,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Μέση ισχύς στην τρέχουσα επιλογή
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Μέση ισχύς στην τρέχουσα επιλογή
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

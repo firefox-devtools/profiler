@@ -46,6 +46,11 @@ AppViewRouter--error-compare = Impossible de récupérer les profils.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari = En raison d’une <a>limitation spécifique à Safari</a>, { -profiler-brand-name } ne peut pas importer de profils depuis la machine locale dans ce navigateur. Veuillez ouvrir cette page dans { -firefox-brand-name } ou Chrome à la place.
     .title = Safari ne peut pas importer de profils locaux
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Ce profil utilise un format qui n’est pas pris en charge par cette version de { -profiler-brand-name }.
+    Essayez d’actualiser la page pour vérifier si une mise à jour est disponible pour { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL que vous avez tenté d’atteindre n’a pas été trouvée
 
