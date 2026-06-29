@@ -27,6 +27,8 @@ import type {
   CallNodeTable,
   SourceTable,
   SourceLocationTable,
+  IndexIntoFrameTable,
+  IndexIntoStackTable,
 } from 'firefox-profiler/types';
 
 /**
@@ -47,7 +49,13 @@ export function getEmptySamplesTable(): RawSamplesTable {
   };
 }
 
-export function getEmptyRawStackTable(): RawStackTable {
+export type RawStackTableBuilder = {
+  frame: IndexIntoFrameTable[];
+  prefix: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+export function getRawStackTableBuilder(): RawStackTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -56,6 +64,27 @@ export function getEmptyRawStackTable(): RawStackTable {
     frame: [],
     prefix: [],
     length: 0,
+  };
+}
+
+export function getRawStackTableBuilderWithExistingContents(
+  existing: RawStackTable
+): RawStackTableBuilder {
+  return {
+    frame: [...existing.frame],
+    prefix: [...existing.prefix],
+    length: existing.length,
+  };
+}
+
+export function finishRawStackTableBuilder(
+  builder: RawStackTableBuilder
+): RawStackTable {
+  const { frame, prefix, length } = builder;
+  return {
+    frame: new Int32Array(frame),
+    prefix,
+    length,
   };
 }
 
@@ -393,7 +422,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
 
 export function getEmptySharedData(): RawProfileSharedData {
   return {
-    stackTable: getEmptyRawStackTable(),
+    stackTable: finishRawStackTableBuilder(getRawStackTableBuilder()),
     frameTable: getEmptyFrameTable(),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),

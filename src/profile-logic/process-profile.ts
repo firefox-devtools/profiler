@@ -16,12 +16,14 @@ import {
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
+  type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
 import { verifyMagic, SIMPLEPERF as SIMPLEPERF_MAGIC } from '../utils/magic';
 import { attemptToUpgradeProcessedProfileThroughMutation } from './processed-profile-versioning';
 import type { ProfileUpgradeInfo } from './processed-profile-versioning';
 import { upgradeGeckoProfileToCurrentVersion } from './gecko-profile-versioning';
+import { ProfileVersionError } from './errors';
 import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
@@ -53,7 +55,6 @@ import type {
   FrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
-  RawStackTable,
   RawMarkerTable,
   LibMapping,
   IndexIntoStackTable,
@@ -107,6 +108,7 @@ import type {
   CounterDisplayConfig,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
+import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
 
 type RegExpResult = null | string[];
 /**
@@ -548,7 +550,7 @@ function _processFrameTable(
  */
 function _processStackTable(
   geckoStackTable: GeckoStackStruct,
-  sharedStackTable: RawStackTable,
+  sharedStackTable: RawStackTableBuilder,
   frameIndexOffset: IndexIntoFrameTable
 ): IndexIntoStackTable {
   const stackIndexOffset = sharedStackTable.length;
@@ -1336,7 +1338,7 @@ function _processThread(
   );
   const stackIndexOffset = _processStackTable(
     geckoStackTable,
-    globalDataCollector.getStackTable(),
+    globalDataCollector.getStackTableBuilder(),
     frameIndexOffset
   );
 
@@ -2056,7 +2058,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
  * Take a processed profile and convert it to a string.
  */
 export function serializeProfileToJsonString(profile: Profile): string {
-  return JSON.stringify(profile);
+  return jsonEncodeObjectWithTypedArraysAsRegularArrays(profile);
 }
 
 /**
@@ -2312,6 +2314,11 @@ export async function unserializeProfileOfArbitraryFormat(
     return processGeckoOrDevToolsProfile(json);
   } catch (e) {
     console.error('UnserializationError:', e);
+    // A version mismatch is already a clear, user-facing error. Re-throw it
+    // as-is so each frontend can detect it and add its own update advice.
+    if (e instanceof ProfileVersionError) {
+      throw e;
+    }
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
 }

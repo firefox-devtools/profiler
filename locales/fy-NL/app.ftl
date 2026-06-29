@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     profilen fan de lokale kompjûter yn dizze browser ymportearje. Iepenje yn stee dêrfan
     dizze side yn { -firefox-brand-name } of Chrome.
     .title = Safari kan geen lokale profielen importeren
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Dit profyl brûkt in yndieling dy’t net troch dizze ferzje fan { -profiler-brand-name } stipe wurdt.
+    Probearje de side te ferfarskjen om te kontrolearjen oft der in fernijing beskikber is foar { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = De URL dy’t jo probearre te berikken, waard net werkend.
 

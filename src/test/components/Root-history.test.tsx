@@ -13,6 +13,7 @@ import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { fireFullClick } from '../fixtures/utils';
 import { getProfileUrlForHash } from '../../utils/profile-fetch';
 import { blankStore } from '../fixtures/stores';
+import { serializeProfileToJsonString } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   autoMockFullNavigation,
@@ -198,5 +199,5 @@ describe('Root with history', function () {
 function mockFetchProfileAtUrl(url: string, profile: Profile): void {
   window.fetchMock
     .catch(404) // catchall
-    .get(url, profile);
+    .get(url, serializeProfileToJsonString(profile));
 }

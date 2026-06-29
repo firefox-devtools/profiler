@@ -423,7 +423,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 64,
+    "preprocessedProfileVersion": 65,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -676,7 +676,7 @@ Object {
       "startLine": Array [],
     },
     "stackTable": Object {
-      "frame": Array [
+      "frame": Int32Array [
         0,
         1,
         2,
@@ -2721,7 +2721,7 @@ CallTree {
         0,
         0,
       ],
-      "frame": Array [
+      "frame": Int32Array [
         0,
         1,
         2,
@@ -3109,7 +3109,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
@@ -3181,68 +3181,70 @@ Object {
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getFlameGraphTiming 1`] = `
-Array [
-  Object {
-    "callNode": Array [
-      0,
-    ],
-    "end": Array [
-      1,
-    ],
-    "length": 1,
-    "selfRelative": Array [
-      0,
-    ],
-    "start": Array [
-      0,
-    ],
-  },
-  Object {
-    "callNode": Array [
-      1,
-    ],
-    "end": Array [
-      1,
-    ],
-    "length": 1,
-    "selfRelative": Array [
-      0,
-    ],
-    "start": Array [
-      0,
-    ],
-  },
-  Object {
-    "callNode": Array [
-      5,
-    ],
-    "end": Array [
-      1,
-    ],
-    "length": 1,
-    "selfRelative": Array [
-      0,
-    ],
-    "start": Array [
-      0,
-    ],
-  },
-  Object {
-    "callNode": Array [
-      6,
-    ],
-    "end": Array [
-      1,
-    ],
-    "length": 1,
-    "selfRelative": Array [
-      1,
-    ],
-    "start": Array [
-      0,
-    ],
-  },
-]
+Object {
+  "rows": Array [
+    Object {
+      "callNode": Array [
+        0,
+      ],
+      "end": Array [
+        1,
+      ],
+      "length": 1,
+      "selfRelative": Array [
+        0,
+      ],
+      "start": Array [
+        0,
+      ],
+    },
+    Object {
+      "callNode": Array [
+        1,
+      ],
+      "end": Array [
+        1,
+      ],
+      "length": 1,
+      "selfRelative": Array [
+        0,
+      ],
+      "start": Array [
+        0,
+      ],
+    },
+    Object {
+      "callNode": Array [
+        5,
+      ],
+      "end": Array [
+        1,
+      ],
+      "length": 1,
+      "selfRelative": Array [
+        0,
+      ],
+      "start": Array [
+        0,
+      ],
+    },
+    Object {
+      "callNode": Array [
+        6,
+      ],
+      "end": Array [
+        1,
+      ],
+      "length": 1,
+      "selfRelative": Array [
+        1,
+      ],
+      "start": Array [
+        0,
+      ],
+    },
+  ],
+}
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkersForHeader 1`] = `
@@ -3563,7 +3565,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
@@ -3949,7 +3951,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,
@@ -4335,7 +4337,7 @@ Object {
       0,
       0,
     ],
-    "frame": Array [
+    "frame": Int32Array [
       0,
       1,
       2,

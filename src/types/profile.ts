@@ -60,7 +60,7 @@ export type Pid = string;
  * to storing them as actual lists of frames.
  */
 export type RawStackTable = {
-  frame: IndexIntoFrameTable[];
+  frame: IndexIntoFrameTable[] | Int32Array<ArrayBuffer>;
   prefix: Array<IndexIntoStackTable | null>;
   length: number;
 };

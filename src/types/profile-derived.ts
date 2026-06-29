@@ -29,7 +29,6 @@ import type {
   JsTracerTable,
   IndexIntoStackTable,
   WeightType,
-  IndexIntoFrameTable,
   SourceTable,
   IndexIntoSourceTable,
   CounterDisplayConfig,
@@ -200,7 +199,8 @@ export type Counter = {
  * The `StackTable` type of the derived thread.
  *
  * The only difference from the `RawStackTable` is that the `StackTable` has a
- * `category` and a `subcategory` column.
+ * `category` and a `subcategory` column, and that the `StackTable` always uses
+ * a typed array for the `frame` column.
  *
  * The category of a stack node is always non-null and is derived from a stack's
  * frame and its prefix. Frames can have null categories, stacks cannot. If a
@@ -225,8 +225,7 @@ export type Counter = {
  * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
 export type StackTable = {
-  // Same as in RawStackTable
-  frame: IndexIntoFrameTable[];
+  frame: Int32Array;
   prefix: Array<IndexIntoStackTable | null>;
   length: number;
 

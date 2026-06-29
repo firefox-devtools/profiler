@@ -117,6 +117,7 @@ HANDLE SYSTEM
     t-0, t-1   Thread handles (from "profile info")
     m-1234     Marker handles (from "thread markers")
     f-12       Function handles (from "thread samples", "thread functions")
+    c-0, c-1   Counter handles (from "counter list" or "profile info")
     ts-6       Timestamp handles (named points in time, usable with "zoom push")
 
   Handle lifetime and stability:
@@ -127,6 +128,8 @@ HANDLE SYSTEM
     m-N      thread markers    No -- rebuilt each time the daemon starts
     f-N      thread samples,   Yes -- direct index into the profile's function
              thread functions  table; same profile always yields the same f-N
+    c-N      counter list      Yes -- direct index into the profile's counter
+                               array; same profile always yields the same c-N
     ts-N     thread markers    No -- position-based, session-scoped
     ──────────────────────────────────────────────────────────────────────────
 
@@ -213,6 +216,31 @@ FILTERS
       profiler-cli filter push --merge f-142,f-143
       profiler-cli filter push --includes-function f-500
       profiler-cli filter push --during-marker --search Paint
+
+
+COUNTERS
+
+  Counters are time series the profiler records alongside samples: memory usage,
+  network bandwidth, process CPU, power, and similar. Each counter has a handle
+  (c-0, c-1, ...) and carries its own display metadata (label, unit, graph type).
+
+    profiler-cli counter list            List all counters with one-line summaries
+    profiler-cli counter info c-0        Detailed info and stats for one counter
+
+  Counters also appear in "profile info", listed under their owning process
+  next to that process's threads (much like the timeline track list).
+
+  The stats shown come from the counter's own tooltip schema, so they match the
+  timeline tooltips. Each counter reports its whole-range aggregates, e.g. the
+  memory range for Memory, data transferred for Bandwidth, or energy used (with a
+  CO2e estimate) for Power.
+
+  All counter stats respect the current zoom: with no zoom they cover the whole
+  profile; after "zoom push" they cover the committed range. Combine with zoom to
+  see, for example, how much memory a specific time window allocated:
+
+      profiler-cli zoom push 2.7,3.1
+      profiler-cli counter info c-0
 
 
 JSON OUTPUT
