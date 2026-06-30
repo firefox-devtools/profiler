@@ -13,6 +13,10 @@ permissions:
   issues: read
   pull-requests: write
 
+concurrency:
+  group: add-preview-links-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   add-preview-links:
     runs-on: ubuntu-latest

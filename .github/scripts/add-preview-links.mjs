@@ -5,6 +5,7 @@ export const START_MARKER = '<!-- profiler-preview-links:start -->';
 export const END_MARKER = '<!-- profiler-preview-links:end -->';
 
 const GITHUB_API_URL = 'https://api.github.com';
+const GITHUB_API_VERSION = '2026-03-10';
 const MAIN_BASE_URL = 'https://main--perf-html.netlify.app';
 const PROFILE_HOST = 'profiler.firefox.com';
 const SHARE_HOST = 'share.firefox.dev';
@@ -39,6 +40,8 @@ export function extractProfileUrls(text) {
     /https:\/\/(?:share\.firefox\.dev|profiler\.firefox\.com)\/[^\s<>)\]]+/g;
 
   for (const match of text.matchAll(profileUrlRegExp)) {
+    // Profile links are often followed by punctuation in prose, for example
+    // "Profile: https://share.firefox.dev/466MJwC.".
     urls.push(match[0].replace(/[.,;:]+$/, ''));
   }
 
@@ -67,6 +70,7 @@ export async function resolveProfileUrlToPath(profileUrl, fetchImpl = fetch) {
     return null;
   }
 
+  // Follow share.firefox.dev redirects to get the full profiler.firefox.com URL.
   const response = await fetchImpl(profileUrl, { redirect: 'follow' });
   return profileUrlToPath(response.url);
 }
@@ -105,7 +109,7 @@ async function githubRequest(path, token, options = {}) {
       authorization: `Bearer ${token}`,
       'content-type': 'application/json',
       'user-agent': 'firefox-profiler-preview-links',
-      'x-github-api-version': '2022-11-28',
+      'x-github-api-version': GITHUB_API_VERSION,
       ...options.headers,
     },
   });
@@ -135,6 +139,10 @@ async function getIssueTexts({ owner, repo, issueNumber, token }) {
   );
 
   return [issue.body ?? '', ...comments.map((comment) => comment.body ?? '')];
+}
+
+async function getPullRequest({ owner, repo, pullNumber, token }) {
+  return githubRequest(`/repos/${owner}/${repo}/pulls/${pullNumber}`, token);
 }
 
 async function findProfilePath({ owner, repo, pullRequest, token }) {
@@ -169,6 +177,7 @@ async function findProfilePath({ owner, repo, pullRequest, token }) {
     }
   }
 
+  // No profile link was found, so the generated links should point to homepage.
   return '/';
 }
 
@@ -206,7 +215,24 @@ export async function main() {
     token,
   });
   const previewLinks = buildPreviewLinks(pullRequest.number, profilePath);
-  const updatedBody = addPreviewLinksToBody(body, previewLinks);
+
+  // Re-read the PR body just before patching it. GitHub's API does not support
+  // conditional PATCH requests here, so this is a best-effort guard against
+  // overwriting edits that happened while this script looked up the profile URL.
+  const latestPullRequest = await getPullRequest({
+    owner,
+    repo,
+    pullNumber: pullRequest.number,
+    token,
+  });
+  const latestBody = latestPullRequest.body ?? '';
+
+  if (hasDeployPreviewLink(latestBody)) {
+    console.log('The pull request already has deploy preview links.');
+    return;
+  }
+
+  const updatedBody = addPreviewLinksToBody(latestBody, previewLinks);
 
   await githubRequest(
     `/repos/${owner}/${repo}/pulls/${pullRequest.number}`,
