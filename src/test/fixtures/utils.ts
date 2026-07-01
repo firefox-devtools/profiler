@@ -574,6 +574,9 @@ export function fireFullKeyPress(
     enter: 13,
     escape: 27,
     ' ': 32,
+    // On a QWERTY layout '/' and '?' are the same physical key (191), '?'
+    // being Shift+'/', so they share the same keyCode.
+    '/': 191,
     '?': 191,
     a: 65,
     b: 66,
