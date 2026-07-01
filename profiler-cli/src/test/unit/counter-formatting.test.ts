@@ -46,6 +46,7 @@ function makeCounter(overrides: Partial<CounterSummary> = {}): CounterSummary {
         formattedValue: '27B',
       },
     ],
+    graph: [],
     ...overrides,
   };
 }
@@ -95,6 +96,19 @@ describe('formatCounterListResult', function () {
       'No counters in this profile.'
     );
   });
+
+  it('renders a sparkline next to each counter', function () {
+    const result: WithContext<CounterListResult> = {
+      context: createContext(),
+      type: 'counter-list',
+      counters: [makeCounter({ graph: [1, 5, 9] })],
+    };
+
+    const output = formatCounterListResult(result);
+    expect(output).toContain('c-0: Memory (Memory)');
+    expect(output).toContain('▁'); // lowest graph value
+    expect(output).toContain('█'); // highest graph value
+  });
 });
 
 describe('formatCounterInfoResult', function () {
@@ -109,6 +123,7 @@ describe('formatCounterInfoResult', function () {
       sampleCount: 7,
       rangeStart: 0,
       rangeEnd: 10,
+      overTime: [],
       ...overrides,
     };
   }
@@ -146,5 +161,82 @@ describe('formatCounterInfoResult', function () {
     expect(output).toContain(
       'Energy used in the visible range: 5 Wh (2 g CO₂e)'
     );
+  });
+
+  it('renders the over-time section with level and delta', function () {
+    const output = formatCounterInfoResult(
+      makeInfo({
+        overTime: [
+          {
+            startTime: 0,
+            startTimeName: 'ts-0',
+            startTimeStr: '0s',
+            endTime: 5,
+            endTimeName: 'ts-K',
+            endTimeStr: '5ms',
+            value: 2_100_000,
+            formattedValue: '2.1 MB',
+            delta: 2_100_000,
+            formattedDelta: '+2.1 MB',
+            percentage: 0.25,
+            formattedPercentage: '25%',
+          },
+          {
+            startTime: 5,
+            startTimeName: 'ts-K',
+            startTimeStr: '5ms',
+            endTime: 10,
+            endTimeName: 'ts-Z',
+            endTimeStr: '10ms',
+            value: 8_400_000,
+            formattedValue: '8.4 MB',
+            delta: 6_300_000,
+            formattedDelta: '+6.3 MB',
+            percentage: 1,
+            formattedPercentage: '100%',
+          },
+        ],
+      })
+    );
+    expect(output).toContain('Memory over time:');
+    // Columns are padded for alignment, so allow variable whitespace between them.
+    expect(output).toMatch(
+      /\[ts-0 → ts-K\]\s+\(0s - 5ms\)\s+2\.1 MB\s+\(\+2\.1 MB, 25%\)/
+    );
+    expect(output).toMatch(
+      /\[ts-K → ts-Z\]\s+\(5ms - 10ms\)\s+8\.4 MB\s+\(\+6\.3 MB, 100%\)/
+    );
+  });
+
+  function makeBucket(
+    value: number,
+    index: number
+  ): CounterInfoResult['overTime'][number] {
+    return {
+      startTime: index,
+      startTimeName: `ts-${index}`,
+      startTimeStr: `${index}ms`,
+      endTime: index + 1,
+      endTimeName: `ts-${index + 1}`,
+      endTimeStr: `${index + 1}ms`,
+      value,
+      formattedValue: `${value}B`,
+    };
+  }
+
+  it('renders a sparkline from the graph values', function () {
+    const output = formatCounterInfoResult(
+      makeInfo({ overTime: [makeBucket(1, 0)], graph: [1, 5, 9] })
+    );
+    expect(output).toContain('Memory over time:');
+    expect(output).toContain('▁'); // lowest graph value
+    expect(output).toContain('█'); // highest graph value
+  });
+
+  it('omits the sparkline when the graph is empty', function () {
+    const output = formatCounterInfoResult(
+      makeInfo({ overTime: [makeBucket(1, 0)], graph: [] })
+    );
+    expect(output).not.toMatch(/[▁▂▃▄▅▆▇█]/);
   });
 });

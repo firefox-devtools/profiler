@@ -490,8 +490,42 @@ export function formatCounterListResult(
   if (result.counters.length === 0) {
     return `${contextHeader}\n\nNo counters in this profile.`;
   }
-  const lines = result.counters.map(formatCounterSummaryLine);
-  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${lines.join('\n')}`;
+  const blocks = result.counters.map((counter) => {
+    const block = [formatCounterSummaryLine(counter)];
+    if (counter.graph.length > 0) {
+      block.push(`      ${renderSparkline(counter.graph)}`);
+    }
+    return block.join('\n');
+  });
+  // Trailing blank line so the last counter's sparkline is separated from the
+  // prompt, matching the blank lines between counters.
+  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${blocks.join('\n\n')}\n`;
+}
+
+const SPARKLINE_CHARS = '▁▂▃▄▅▆▇█';
+
+/**
+ * Render a compact sparkline of the given values using block characters.
+ * Heights are normalized across the series (min..max); a flat series renders
+ * at a mid-height rather than the floor so it doesn't read as zero.
+ */
+function renderSparkline(values: number[]): string {
+  if (values.length === 0) {
+    return '';
+  }
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min;
+  const lastIndex = SPARKLINE_CHARS.length - 1;
+  if (range === 0) {
+    return SPARKLINE_CHARS[Math.floor(lastIndex / 2)].repeat(values.length);
+  }
+  return values
+    .map((value) => {
+      const index = Math.round(((value - min) / range) * lastIndex);
+      return SPARKLINE_CHARS[index];
+    })
+    .join('');
 }
 
 /**
@@ -532,6 +566,36 @@ export function formatCounterInfoResult(
         ? `${stat.formattedValue} (${stat.carbon})`
         : stat.formattedValue;
       lines.push(`    ${stat.label}: ${value}`);
+    }
+  }
+  if (result.overTime.length > 0) {
+    lines.push(`  ${result.label} over time:`);
+    if (result.graph.length > 0) {
+      lines.push(`    ${renderSparkline(result.graph)}`);
+      lines.push('');
+    }
+    // Build the columns first, then pad each to its widest cell so the values
+    // line up in a column.
+    const rows = result.overTime.map((bucket) => {
+      const extras = [
+        bucket.formattedDelta,
+        bucket.formattedPercentage,
+        bucket.carbon,
+      ].filter((part) => part !== undefined);
+      return {
+        handles: `[${bucket.startTimeName} → ${bucket.endTimeName}]`,
+        times: `(${bucket.startTimeStr} - ${bucket.endTimeStr})`,
+        value: bucket.formattedValue,
+        extras: extras.length > 0 ? `(${extras.join(', ')})` : '',
+      };
+    });
+    const handlesWidth = Math.max(...rows.map((row) => row.handles.length));
+    const timesWidth = Math.max(...rows.map((row) => row.times.length));
+    const valueWidth = Math.max(...rows.map((row) => row.value.length));
+    for (const row of rows) {
+      lines.push(
+        `    ${row.handles.padEnd(handlesWidth)}  ${row.times.padEnd(timesWidth)}  ${row.value.padEnd(valueWidth)}  ${row.extras}`.trimEnd()
+      );
     }
   }
   return lines.join('\n');

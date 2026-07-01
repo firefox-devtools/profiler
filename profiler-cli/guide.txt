@@ -224,7 +224,7 @@ COUNTERS
   network bandwidth, process CPU, power, and similar. Each counter has a handle
   (c-0, c-1, ...) and carries its own display metadata (label, unit, graph type).
 
-    profiler-cli counter list            List all counters with one-line summaries
+    profiler-cli counter list            List all counters, each with a sparkline
     profiler-cli counter info c-0        Detailed info and stats for one counter
 
   Counters also appear in "profile info", listed under their owning process
@@ -234,6 +234,14 @@ COUNTERS
   timeline tooltips. Each counter reports its whole-range aggregates, e.g. the
   memory range for Memory, data transferred for Bandwidth, or energy used (with a
   CO2e estimate) for Power.
+
+  "counter info" also prints an "over time" section that splits the current view
+  into time buckets, so you can see when a counter's value changed - for any
+  counter, in its own unit. What each slice shows follows the counter's graph
+  type: accumulated counters (e.g. Memory) show the level and its change, rate
+  counters (e.g. Bandwidth, Power) show the amount in the slice. Each slice also
+  shows its share of the range, and a sparkline draws the trajectory above them.
+  "counter list" shows a sparkline next to each counter as well.
 
   All counter stats respect the current zoom: with no zoom they cover the whole
   profile; after "zoom push" they cover the committed range. Combine with zoom to
