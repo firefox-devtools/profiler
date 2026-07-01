@@ -59,6 +59,7 @@ export type Props = {
   readonly scrollToSelectionGeneration: number;
   readonly categories: CategoryList;
   readonly interval: Milliseconds;
+  readonly startsAtBottom: boolean;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
@@ -118,8 +119,7 @@ export class FlameGraph
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
     const { flameGraphTiming, callNodeInfo } = this.props;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[callNodeIndex];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
     const row = flameGraphTiming.getRow(depth);
     const columnIndex = row.callNode.indexOf(callNodeIndex);
     return row.end[columnIndex] - row.start[columnIndex] > SELECTABLE_THRESHOLD;
@@ -143,8 +143,7 @@ export class FlameGraph
 
     let callNodeIndex = startingCallNodeIndex;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[callNodeIndex];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
     const row = flameGraphTiming.getRow(depth);
     let columnIndex = row.callNode.indexOf(callNodeIndex);
 
@@ -173,8 +172,8 @@ export class FlameGraph
       onSelectedCallNodeChange,
       onCallNodeEnterOrDoubleClick,
       onKeyboardTransformShortcut,
+      startsAtBottom,
     } = this.props;
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
@@ -186,43 +185,45 @@ export class FlameGraph
         return;
       }
 
-      switch (event.key) {
-        case 'ArrowDown': {
-          const prefix = callNodeTable.prefix[selectedCallNodeIndex];
-          if (prefix !== -1) {
-            onSelectedCallNodeChange(prefix);
-          }
-          break;
-        }
-        case 'ArrowUp': {
-          const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
-          // The call nodes returned from getChildren are sorted by
-          // total time in descending order.  The first one in the
-          // array, which is the one we pick, has the longest time and
-          // thus the widest box.
+      // In top-down layout the parent is visually above the selected box, so
+      // ArrowUp navigates to the parent and ArrowDown to the first child.
+      // In bottom-up layout it's the other way around.
+      const isGoToParent = startsAtBottom
+        ? event.key === 'ArrowDown'
+        : event.key === 'ArrowUp';
+      const isGoToChild = startsAtBottom
+        ? event.key === 'ArrowUp'
+        : event.key === 'ArrowDown';
 
-          if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
-            onSelectedCallNodeChange(callNodeIndex);
-          }
-          break;
+      if (isGoToParent) {
+        const prefix = callNodeInfo.prefixForNode(selectedCallNodeIndex);
+        if (prefix !== -1) {
+          onSelectedCallNodeChange(prefix);
         }
-        case 'ArrowLeft':
-        case 'ArrowRight': {
-          const callNodeIndex = this._nextSelectableInRow(
-            selectedCallNodeIndex,
-            event.key === 'ArrowLeft' ? -1 : 1
-          );
+      } else if (isGoToChild) {
+        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        // The call nodes returned from getChildren are sorted by
+        // total time in descending order.  The first one in the
+        // array, which is the one we pick, has the longest time and
+        // thus the widest box.
 
-          if (callNodeIndex !== undefined) {
-            onSelectedCallNodeChange(callNodeIndex);
-          }
-          break;
+        if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
+          onSelectedCallNodeChange(callNodeIndex);
         }
-        default:
-          // We shouldn't arrive here, thanks to the if block at the top.
-          console.error(
-            `An unknown key "${event.key}" was pressed, this shouldn't happen.`
-          );
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const callNodeIndex = this._nextSelectableInRow(
+          selectedCallNodeIndex,
+          event.key === 'ArrowLeft' ? -1 : 1
+        );
+
+        if (callNodeIndex !== undefined) {
+          onSelectedCallNodeChange(callNodeIndex);
+        }
+      } else {
+        // We shouldn't arrive here, thanks to the if block at the top.
+        console.error(
+          `An unknown key "${event.key}" was pressed, this shouldn't happen.`
+        );
       }
       return;
     }
@@ -248,9 +249,8 @@ export class FlameGraph
     if (document.activeElement === this._viewport) {
       event.preventDefault();
       const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
-      const callNodeTable = callNodeInfo.getCallNodeTable();
       if (selectedCallNodeIndex !== null) {
-        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
@@ -275,6 +275,7 @@ export class FlameGraph
       callTreeSummaryStrategy,
       categories,
       interval,
+      startsAtBottom,
       innerWindowIDToPageMap,
       weightType,
       ctssSamples,
@@ -318,7 +319,7 @@ export class FlameGraph
               maxViewportHeight,
               maximumZoom: 1,
               previewSelection,
-              startsAtBottom: true,
+              startsAtBottom,
               disableHorizontalMovement: true,
               viewportNeedsUpdate,
               marginLeft: 0,
@@ -345,6 +346,7 @@ export class FlameGraph
               onDoubleClick: onCallNodeEnterOrDoubleClick,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
+              startsAtBottom,
               ctssSamples,
               ctssSampleCategoriesAndSubcategories,
               tracedTiming: tracedTimingNonInverted,
