@@ -1993,7 +1993,7 @@ export function hasUsefulSamples(
     // All samples were null.
     return false;
   }
-  if (stackTable.prefix[stackIndex] === null) {
+  if (stackTable.prefixOffset[stackIndex] === 0) {
     // There's only a single stack frame, check if it's '(root)'.
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
@@ -4101,7 +4101,8 @@ export function collectSourceIndicesFromThreads(
         sourceIndices.add(sourceLocationTable.source[funcOriginalLocationIdx]);
       }
 
-      current = stackTable.prefix[current];
+      const prefixOffset = stackTable.prefixOffset[current];
+      current = prefixOffset !== 0 ? current - prefixOffset : null;
     }
   };
 
@@ -4285,8 +4286,12 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
     }
   }
   for (let stack = 0; stack < stackTable.length; stack++) {
-    const prefix = stackTable.prefix[stack];
-    if (prefix === null || prefixStacks.has(prefix)) {
+    const offset = stackTable.prefixOffset[stack];
+    if (offset === 0) {
+      continue;
+    }
+    const prefix = stack - offset;
+    if (prefixStacks.has(prefix)) {
       continue;
     }
     prefixStacks.add(prefix);
@@ -4359,9 +4364,9 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   const prefixMap = new Uint32Array(stackTable.length);
   for (let stack = 0; stack < stackTable.length; stack++) {
     const frame = stackTable.frame[stack];
-    const prefix = stackTable.prefix[stack];
-
-    const newPrefix = prefix === null ? null : prefixMap[prefix];
+    const prefixOffset = stackTable.prefixOffset[stack];
+    const newPrefix =
+      prefixOffset === 0 ? null : prefixMap[stack - prefixOffset];
 
     if (prefixStacks.has(stack) || syncBacktraceSelfStacks.has(stack)) {
       // Copy this stack to the new stack table, and use the original frame
@@ -4745,8 +4750,9 @@ export function computeStackTableFromRawStackTable(
       : new Uint16Array(rawStackTable.length);
   const prefix = new Int32Array(rawStackTable.length);
   for (let stackIndex = 0; stackIndex < rawStackTable.length; stackIndex++) {
-    const prefixStack = rawStackTable.prefix[stackIndex];
-    prefix[stackIndex] = prefixStack === null ? -1 : prefixStack;
+    const offset = rawStackTable.prefixOffset[stackIndex];
+    const prefixStack = offset === 0 ? -1 : stackIndex - offset;
+    prefix[stackIndex] = prefixStack;
 
     const frameIndex = rawStackTable.frame[stackIndex];
     const frameCategory = frameTable.category[frameIndex];
@@ -4756,7 +4762,7 @@ export function computeStackTableFromRawStackTable(
     if (frameCategory !== null) {
       stackCategory = frameCategory;
       stackSubcategory = frameSubcategory || 0;
-    } else if (prefixStack !== null) {
+    } else if (prefixStack !== -1) {
       // Because of the structure of the stack table, prefixStack < stackIndex.
       // So we've already computed the category for the prefixStack.
       stackCategory = categoryColumn[prefixStack];

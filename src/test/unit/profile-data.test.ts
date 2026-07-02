@@ -319,7 +319,8 @@ describe('process-profile', function () {
           addresses.push(
             shared.frameTable.address[shared.stackTable.frame[stack]]
           );
-          stack = shared.stackTable.prefix[stack];
+          const offset = shared.stackTable.prefixOffset[stack];
+          stack = offset === 0 ? null : stack - offset;
         }
         addresses.reverse();
         return addresses;
