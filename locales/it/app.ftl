@@ -301,6 +301,15 @@ Home--install-chrome-extension = Installa l’estensione per Chrome
 Home--chrome-extension-instructions = Utilizza l’estensione <a>{ -profiler-brand-name } per Chrome</a> per acquisire i profili delle prestazioni in Chrome e analizzarli in { -profiler-brand-name }. Installa l’estensione dal Chrome Web Store.
 Home--chrome-extension-recording-instructions = Una volta installata, utilizza l’icona dell’estensione nella barra degli strumenti o le scorciatoie per avviare e interrompere la profilazione. Puoi anche esportare i profili e caricarli qui per un’analisi dettagliata.
 
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Inserisci i termini da filtrare (/)
+
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
