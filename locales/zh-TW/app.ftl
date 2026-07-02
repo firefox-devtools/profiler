@@ -299,12 +299,6 @@ Home--install-chrome-extension = 安裝 Chrome 擴充套件
 Home--chrome-extension-instructions = 可使用 <a>Chrome 的 { -profiler-brand-name } 擴充套件</a>，在 Chrome 當中捕捉效能紀錄檔，再使用 { -profiler-brand-name } 進行分析。請到 Chrome 線上應用程式商店安裝此套件。
 Home--chrome-extension-recording-instructions = 安裝完成後，即可使用擴充套件在工具列新增的圖示或快速鍵開始或停止捕捉效能紀錄。您也可以匯出檢測檔，匯入此處，進行更詳細的分析。
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = 輸入過濾條件
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

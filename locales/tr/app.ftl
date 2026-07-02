@@ -315,12 +315,6 @@ Home--chrome-extension-recording-instructions =
     araç çubuğu simgesini veya kısayolları kullanabilirsiniz. İsterseniz
     profilleri dışa aktarabilir ve ayrıntılı analiz için buraya yükleyebilirsiniz.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Filtre terimlerini girin
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

@@ -308,12 +308,6 @@ Home--chrome-extension-instructions =
     { -profiler-brand-name }. Installez l’extension depuis le Chrome Web Store.
 Home--chrome-extension-recording-instructions = Une fois l’extension installée, utilisez l’icône de la barre d’outils ou les raccourcis pour démarrer et arrêter le profilage. Vous pouvez également exporter des profils et les charger ici pour une analyse détaillée.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Saisissez le filtre
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

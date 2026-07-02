@@ -395,12 +395,6 @@ Home--chrome-extension-recording-instructions =
     útwreiding of de fluchkeppelingen om it profilearjen te starten en te stopjen. Jo kinne ek
     profilen eksportearje en dizze hjir lade foar detaillearre analyze.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Fier filtertermen yn
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

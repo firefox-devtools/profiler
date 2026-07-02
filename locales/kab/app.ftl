@@ -134,12 +134,6 @@ Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>L
 Home--your-recent-uploaded-recordings-title = Iseklasen-ik·im i d-yulin melmi kan
 Home--install-chrome-extension = Sbedd aseɣẓan  n Chrome
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Sekcem awalen n yimsizdeg
-
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.

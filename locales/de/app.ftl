@@ -371,12 +371,6 @@ Home--chrome-extension-recording-instructions =
     oder die Tastenkombinationen zum Starten und Stoppen der Profilerstellung. Sie können auch
     Profile exportieren und hier zur detaillierten Analyse laden.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Filterbegriffe eingeben
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

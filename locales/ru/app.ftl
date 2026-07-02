@@ -384,12 +384,6 @@ Home--chrome-extension-recording-instructions =
     расширения на панели инструментов или сочетания клавиш для запуска и остановки профилирования. Вы также можете
     экспортировать профили и загрузить их здесь для подробного анализа.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Введите условия фильтра
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
