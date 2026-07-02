@@ -122,13 +122,13 @@ export class IdleSearchField extends PureComponent<Props, State> {
         onSubmit={this._onFormSubmit}
       >
         <Localized
-          id="IdleSearchField--search-input"
+          id="IdleSearchField--search-input2"
           attrs={{ placeholder: true }}
         >
           <input
             type="search"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             className="idleSearchFieldInput photon-input"
             required={true}
             title={title ?? undefined}
