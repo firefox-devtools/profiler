@@ -2103,16 +2103,8 @@ CallTree {
   "_children": Array [],
   "_displayDataByIndex": Map {},
   "_internal": CallTreeInternalNonInverted {
-    "_callNodeHasChildren": Uint8Array [
-      1,
-      1,
-      0,
-      0,
-      0,
-      1,
-      0,
-      0,
-      0,
+    "_callNodeHasChildren": Int32Array [
+      35,
     ],
     "_callNodeInfo": CallNodeInfoNonInverted {
       "_cache": Map {},
@@ -2335,16 +2327,8 @@ CallTree {
       ],
     },
     "_callTreeTimings": Object {
-      "callNodeHasChildren": Uint8Array [
-        1,
-        1,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
+      "callNodeHasChildren": Int32Array [
+        35,
       ],
       "rootTotalSummary": 2,
       "self": Float64Array [
