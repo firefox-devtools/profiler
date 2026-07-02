@@ -59,6 +59,8 @@ export function profileUrlToPath(profileUrl) {
   return path === '/' ? null : path;
 }
 
+// Returns the path for a profiler.firefox.com URL, and follows share.firefox.dev
+// redirects to resolve short links to their full profiler.firefox.com URL.
 export async function resolveProfileUrlToPath(profileUrl, fetchImpl = fetch) {
   const url = new URL(profileUrl);
 
@@ -70,7 +72,6 @@ export async function resolveProfileUrlToPath(profileUrl, fetchImpl = fetch) {
     return null;
   }
 
-  // Follow share.firefox.dev redirects to get the full profiler.firefox.com URL.
   const response = await fetchImpl(profileUrl, { redirect: 'follow' });
   return profileUrlToPath(response.url);
 }
@@ -145,6 +146,8 @@ async function getPullRequest({ owner, repo, pullNumber, token }) {
   return githubRequest(`/repos/${owner}/${repo}/pulls/${pullNumber}`, token);
 }
 
+// Finds the first profile path mentioned in the PR or its linked issues.
+// Returns '/' if no profile link is found, so generated links use the homepage.
 async function findProfilePath({ owner, repo, pullRequest, token }) {
   const pullRequestText = `${pullRequest.title ?? ''}\n${pullRequest.body ?? ''}`;
 
@@ -177,7 +180,6 @@ async function findProfilePath({ owner, repo, pullRequest, token }) {
     }
   }
 
-  // No profile link was found, so the generated links should point to homepage.
   return '/';
 }
 
