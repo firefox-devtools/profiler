@@ -163,14 +163,8 @@ export function compareBuckets(
       continue;
     }
 
-    const allValues = [...baseIter, ...newIter];
     const u = mannWhitneyU(baseIter, newIter);
-    const pValue = mannWhitneyPValue(
-      u,
-      baseIter.length,
-      newIter.length,
-      allValues
-    );
+    const pValue = mannWhitneyPValue(u, baseIter, newIter);
     const relChange =
       baseMean === 0 ? Infinity : (newMean - baseMean) / baseMean;
     const delta = cliffsDelta(u, baseIter.length, newIter.length);
@@ -238,14 +232,8 @@ export function compareIterationTotals(
 ): ScoreComparison {
   const baseMean = mean(baseIter);
   const newMean = mean(newIter);
-  const allValues = [...baseIter, ...newIter];
   const u = mannWhitneyU(baseIter, newIter);
-  const pValue = mannWhitneyPValue(
-    u,
-    baseIter.length,
-    newIter.length,
-    allValues
-  );
+  const pValue = mannWhitneyPValue(u, baseIter, newIter);
   const relChange = baseMean === 0 ? Infinity : (newMean - baseMean) / baseMean;
   const delta = cliffsDelta(u, baseIter.length, newIter.length);
   const effectSize = interpretEffectSize(delta);
