@@ -47,8 +47,11 @@ import type {
 export type SparseBucketEntry = {
   /** Index into the profile's global bucket list. */
   bucketIndex: number;
-  /** Weight sum per iteration, length = iterationCount. */
-  iterationTotals: number[];
+  /** Weight sum per iteration, length = iterationCount. Held as a typed
+   * subarray of the underlying `bucketIterationTotals` buffer in the browser
+   * path (no copy). CLI-loaded stats parse back to `number[]` — both types
+   * support indexed access/assignment and `.slice()`. */
+  iterationTotals: Float64Array | number[];
 };
 
 export type SuiteStats = {
@@ -248,11 +251,11 @@ export function extractBenchmarkStatsFromProfile(
       if (suiteScores.bucketTotals[b] === 0) {
         continue;
       }
-      const iterationTotals: number[] = new Array(iterationCount);
       const base = b * iterationCount;
-      for (let i = 0; i < iterationCount; i++) {
-        iterationTotals[i] = suiteScores.bucketIterationTotals[base + i];
-      }
+      const iterationTotals = suiteScores.bucketIterationTotals.subarray(
+        base,
+        base + iterationCount
+      );
       buckets.push({ bucketIndex: b, iterationTotals });
     }
 
@@ -293,10 +296,10 @@ export function extractBenchmarkStatsFromProfile(
     if (total === 0) {
       continue;
     }
-    const iterationTotals: number[] = new Array(iterationCount);
-    for (let i = 0; i < iterationCount; i++) {
-      iterationTotals[i] = globalIterTotals[base + i];
-    }
+    const iterationTotals = globalIterTotals.subarray(
+      base,
+      base + iterationCount
+    );
     globalBuckets.push({ bucketIndex: b, iterationTotals });
   }
 

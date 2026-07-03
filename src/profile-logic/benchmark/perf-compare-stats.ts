@@ -85,10 +85,17 @@ export function median(arr: number[]): number {
 // Mann-Whitney U
 // ---------------------------------------------------------------------------
 
-export function mannWhitneyU(a: number[], b: number[]): number {
+export function mannWhitneyU(
+  a: ArrayLike<number>,
+  b: ArrayLike<number>
+): number {
   let u = 0;
-  for (const ai of a) {
-    for (const bj of b) {
+  const aLen = a.length;
+  const bLen = b.length;
+  for (let i = 0; i < aLen; i++) {
+    const ai = a[i];
+    for (let j = 0; j < bLen; j++) {
+      const bj = b[j];
       if (ai < bj) {
         u += 1;
       } else if (ai === bj) {
@@ -101,17 +108,19 @@ export function mannWhitneyU(a: number[], b: number[]): number {
 
 export function mannWhitneyPValue(
   u: number,
-  a: number[],
-  b: number[]
+  a: ArrayLike<number>,
+  b: ArrayLike<number>
 ): number {
   const n1 = a.length;
   const n2 = b.length;
   const mu = (n1 * n2) / 2;
   const counts = new Map<number, number>();
-  for (const v of a) {
+  for (let i = 0; i < n1; i++) {
+    const v = a[i];
     counts.set(v, (counts.get(v) ?? 0) + 1);
   }
-  for (const v of b) {
+  for (let i = 0; i < n2; i++) {
+    const v = b[i];
     counts.set(v, (counts.get(v) ?? 0) + 1);
   }
   let tieCorrection = 0;
