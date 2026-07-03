@@ -54,14 +54,22 @@ type KeyMapEntry = {
   /** Human-readable display name for this key (taken from the first bucket
    * seen with this key — usually a function name). */
   displayName: string;
-  iterationTotals: number[];
+  /** Borrowed from `entry.iterationTotals` on first insert, then replaced by a
+   * fresh Float64Array on collision (see buildKeyMap). Callers must not mutate
+   * this unless `owned` is true. */
+  iterationTotals: ArrayLike<number>;
+  /** True iff `iterationTotals` is a fresh Float64Array owned by this entry. */
+  owned: boolean;
   /** Func index of the highest-weight bucket with this key (representative). */
   representativeFunc: IndexIntoFuncTable;
   /** Sum of iterationTotals for that representative bucket alone. */
   representativeWeight: number;
 };
 
-/** Build a key → iterationTotals + representative-func map for a set of sparse bucket entries. */
+/** Build a key → iterationTotals + representative-func map for a set of sparse
+ * bucket entries. Iteration-total arrays are borrowed by reference until a
+ * collision forces a copy — the extraction step returns subarrays of a shared
+ * Float64Array, so avoiding copies here saves ~200k small allocations per side. */
 function buildKeyMap(
   buckets: SparseBucketEntry[],
   bucketKeys: string[],
@@ -74,19 +82,28 @@ function buildKeyMap(
     const name =
       bucketNames[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
     const func = bucketFuncs[entry.bucketIndex];
+    const iterTotals = entry.iterationTotals;
+    const iterLen = iterTotals.length;
     let weight = 0;
-    for (const v of entry.iterationTotals) {
-      weight += v;
+    for (let i = 0; i < iterLen; i++) {
+      weight += iterTotals[i];
     }
     const existing = map.get(key);
     if (existing !== undefined) {
-      // If the same key appears twice (two different funcs that collapsed to
-      // the same matching key — e.g. an inlined and non-inlined copy of the
-      // same JS function), sum their iteration totals together. Pick the
-      // heaviest as the representative func, since the flame graph can only
-      // focusSelf on one func.
-      for (let i = 0; i < existing.iterationTotals.length; i++) {
-        existing.iterationTotals[i] += entry.iterationTotals[i];
+      // Two funcs collapsed to the same matching key (e.g. an inlined and
+      // non-inlined copy of the same JS function). Sum their iteration totals
+      // together; on the first collision materialise into a fresh Float64Array
+      // since the borrowed entry may be a subarray of the source buffer.
+      let dest: Float64Array;
+      if (existing.owned) {
+        dest = existing.iterationTotals as Float64Array;
+      } else {
+        dest = new Float64Array(existing.iterationTotals);
+        existing.iterationTotals = dest;
+        existing.owned = true;
+      }
+      for (let i = 0; i < iterLen; i++) {
+        dest[i] += iterTotals[i];
       }
       if (weight > existing.representativeWeight) {
         existing.representativeFunc = func;
@@ -96,7 +113,8 @@ function buildKeyMap(
     } else {
       map.set(key, {
         displayName: name,
-        iterationTotals: entry.iterationTotals.slice(),
+        iterationTotals: iterTotals,
+        owned: false,
         representativeFunc: func,
         representativeWeight: weight,
       });
@@ -190,15 +208,16 @@ export function compareBuckets(
   return results;
 }
 
-export function mean(arr: number[]): number {
-  if (arr.length === 0) {
+export function mean(arr: ArrayLike<number>): number {
+  const n = arr.length;
+  if (n === 0) {
     return 0;
   }
   let sum = 0;
-  for (const v of arr) {
-    sum += v;
+  for (let i = 0; i < n; i++) {
+    sum += arr[i];
   }
-  return sum / arr.length;
+  return sum / n;
 }
 
 /** Sum all bucket iterationTotals element-wise to get a per-iteration total for a suite. */
