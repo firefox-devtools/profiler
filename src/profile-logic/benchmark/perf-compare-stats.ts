@@ -85,23 +85,37 @@ export function median(arr: number[]): number {
 // Mann-Whitney U
 // ---------------------------------------------------------------------------
 
+// Sort a and b once, then walk both in a single pass to count pairs where
+// ai < bj and ai === bj. Both pointers move monotonically because a and b
+// are sorted, giving O((n1 + n2) log(n1 + n2)) time overall — a large win
+// over the naive O(n1 * n2) at n ≈ 200, which the compare-benchmark path
+// runs ~200k times per profile pair.
 export function mannWhitneyU(
   a: ArrayLike<number>,
   b: ArrayLike<number>
 ): number {
-  let u = 0;
   const aLen = a.length;
   const bLen = b.length;
+  const aSorted =
+    a instanceof Float64Array ? new Float64Array(a) : Float64Array.from(a);
+  const bSorted =
+    b instanceof Float64Array ? new Float64Array(b) : Float64Array.from(b);
+  aSorted.sort();
+  bSorted.sort();
+  let u = 0;
+  // jLo = count of bSorted[j] < ai (first j with bSorted[j] >= ai).
+  // jHi = count of bSorted[j] <= ai (first j with bSorted[j] > ai).
+  let jLo = 0;
+  let jHi = 0;
   for (let i = 0; i < aLen; i++) {
-    const ai = a[i];
-    for (let j = 0; j < bLen; j++) {
-      const bj = b[j];
-      if (ai < bj) {
-        u += 1;
-      } else if (ai === bj) {
-        u += 0.5;
-      }
+    const ai = aSorted[i];
+    while (jLo < bLen && bSorted[jLo] < ai) {
+      jLo++;
     }
+    while (jHi < bLen && bSorted[jHi] <= ai) {
+      jHi++;
+    }
+    u += bLen - jHi + 0.5 * (jHi - jLo);
   }
   return u;
 }
