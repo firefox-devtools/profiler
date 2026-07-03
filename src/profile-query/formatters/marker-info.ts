@@ -909,8 +909,8 @@ function collectStackTrace(
     thread;
   const frames: StackTraceData['frames'] = [];
 
-  let currentStackIndex: IndexIntoStackTable | null = stackIndex;
-  while (currentStackIndex !== null) {
+  let currentStackIndex: IndexIntoStackTable = stackIndex;
+  while (currentStackIndex !== -1) {
     const frameIndex = stackTable.frame[currentStackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const funcName = stringTable.getString(funcTable.name[funcIndex]);

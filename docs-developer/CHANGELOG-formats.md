@@ -6,6 +6,19 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 66
+
+The `prefix` column of `profile.shared.stackTable` was replaced with a `prefixOffset` column, to improve compressibility.
+For profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz),
+`profile.shared.stackTable.prefixOffset` can now optionally be stored as an `Int32Array`. Regular JS / JSON arrays are still accepted.
+
+The `prefixOffset` values have the following meanings:
+
+- `prefixOffset[i] === 0` means: stack `i` is a root.
+- Otherwise, `prefixOffset[i] === k` (k > 0) means: `i`'s parent has index `i - k`.
+
+Parents always come before their children in the stack table (the stack table is stored in topological order), so these offsets are always positive and always point backwards.
+
 ### Version 65
 
 The stack table's `frame` column (stored at `profile.shared.stackTable.frame`) can now optionally be stored as an `Int32Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
