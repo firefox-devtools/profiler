@@ -2396,7 +2396,7 @@ CallTree {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       4,
       5,
     ],
@@ -2684,7 +2684,7 @@ CallTree {
         100,
         100,
       ],
-      "time": Array [
+      "time": Float64Array [
         3,
         4,
         5,
@@ -3072,7 +3072,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       3,
       4,
       5,
@@ -3530,7 +3530,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       4,
       5,
     ],
@@ -3914,7 +3914,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       3,
       4,
       5,
@@ -4300,7 +4300,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       3,
       4,
       5,

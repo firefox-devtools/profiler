@@ -284,12 +284,16 @@ describe('gecko counters processing', function () {
     expect(extractTime(childCounter)).toEqual(originalTime);
 
     expect(
-      computeTimeColumnForRawSamplesTable(processedCounters[0].samples)
+      Array.from(
+        computeTimeColumnForRawSamplesTable(processedCounters[0].samples)
+      )
     ).toEqual(originalTime);
 
     // The subprocess times are offset when processed:
     expect(
-      computeTimeColumnForRawSamplesTable(processedCounters[1].samples)
+      Array.from(
+        computeTimeColumnForRawSamplesTable(processedCounters[1].samples)
+      )
     ).toEqual(offsetTime);
   });
 });
@@ -645,7 +649,7 @@ describe('gecko samples table processing', function () {
       hardcodedStackAfterProcessing
     );
     const sampleTimes = computeTimeColumnForRawSamplesTable(processedSamples);
-    expect(sampleTimes.slice(0, 2)).toEqual(hardcodedTime);
+    expect(Array.from(sampleTimes.slice(0, 2))).toEqual(hardcodedTime);
     expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
       hardcodedEventDelay
     );

@@ -1352,9 +1352,8 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const samplesPerThread: RawSamplesTable[] = threads.map(
     (thread) => thread.samples
   );
-  const sampleTimesPerThread: Milliseconds[][] = samplesPerThread.map(
-    computeTimeColumnForRawSamplesTable
-  );
+  const sampleTimesPerThread: Float64Array<ArrayBuffer>[] =
+    samplesPerThread.map(computeTimeColumnForRawSamplesTable);
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
   const nextSampleIndexPerThread: number[] = Array(
