@@ -101,13 +101,17 @@ export function mannWhitneyU(a: number[], b: number[]): number {
 
 export function mannWhitneyPValue(
   u: number,
-  n1: number,
-  n2: number,
-  allValues: number[]
+  a: number[],
+  b: number[]
 ): number {
+  const n1 = a.length;
+  const n2 = b.length;
   const mu = (n1 * n2) / 2;
   const counts = new Map<number, number>();
-  for (const v of allValues) {
+  for (const v of a) {
+    counts.set(v, (counts.get(v) ?? 0) + 1);
+  }
+  for (const v of b) {
     counts.set(v, (counts.get(v) ?? 0) + 1);
   }
   let tieCorrection = 0;
