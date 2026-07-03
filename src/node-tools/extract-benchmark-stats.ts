@@ -24,7 +24,15 @@ async function main() {
   const profile = await unserializeProfileOfArbitraryFormat(uint8Array.buffer);
   const stats = extractBenchmarkStatsFromProfile(profile, harness);
 
-  fs.writeFileSync(argv.output, JSON.stringify(stats));
+  // Float64Array serializes as an object with numeric keys under the default
+  // JSON.stringify behaviour; the extractor returns typed subarrays for the
+  // browser hot path, so convert them here for the CLI's JSON output.
+  fs.writeFileSync(
+    argv.output,
+    JSON.stringify(stats, (_key, value) =>
+      value instanceof Float64Array ? Array.from(value) : value
+    )
+  );
   console.log(
     `Wrote ${stats.suites.length} suites, ` +
       `${stats.globalBuckets.length} global buckets, ` +
