@@ -1824,15 +1824,18 @@ describe('actions/receive-profile', function () {
       requiredProfile: number = 1
     ) {
       const simpleProfile = _getSimpleProfile();
-      // Create a profile object we can use with fetchMock, which uses JSON.stringify internally.
-      // `simpleProfile` may contain typed arrays which wouldn't survive JSON.stringfy.
-      const profile = JSON.parse(serializeProfileToJsonString(simpleProfile));
+      // Create a profile object we can use with fetchMock, which uses
+      // JSON.stringify internally. `simpleProfile` contains typed arrays which
+      // wouldn't survive JSON.stringfy, so we feed the pre-serialized JSON
+      // string to the fetch mock directly.
+      const profileJson = serializeProfileToJsonString(simpleProfile);
+      const profile = JSON.parse(profileJson);
       const geckoProfile = createGeckoProfile();
 
       // Add mock fetch response for the required number of times.
       // Usually it's 1 but it can be also 2 for `compare` dataSource.
       for (let i = 0; i < requiredProfile; i++) {
-        window.fetchMock.getOnce('*', profile);
+        window.fetchMock.getOnce('*', profileJson);
       }
 
       const geckoProfiler = {

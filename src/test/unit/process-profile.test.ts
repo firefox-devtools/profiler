@@ -467,7 +467,8 @@ describe('js allocation processing', function () {
     let stack = stackIndex;
     while (stack !== null) {
       addresses.push(shared.frameTable.address[shared.stackTable.frame[stack]]);
-      stack = shared.stackTable.prefix[stack];
+      const offset = shared.stackTable.prefixOffset[stack];
+      stack = offset === 0 ? null : stack - offset;
     }
     addresses.reverse();
     return addresses;

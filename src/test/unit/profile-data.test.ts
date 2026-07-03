@@ -319,7 +319,8 @@ describe('process-profile', function () {
           addresses.push(
             shared.frameTable.address[shared.stackTable.frame[stack]]
           );
-          stack = shared.stackTable.prefix[stack];
+          const offset = shared.stackTable.prefixOffset[stack];
+          stack = offset === 0 ? null : stack - offset;
         }
         addresses.reverse();
         return addresses;
@@ -516,17 +517,14 @@ describe('profile-data', function () {
     });
   });
 
-  function _getStackList(
-    thread: Thread,
-    stackIndex: IndexIntoStackTable | null
-  ) {
-    if (typeof stackIndex !== 'number') {
+  function _getStackList(thread: Thread, stackIndex: IndexIntoStackTable) {
+    if (typeof stackIndex !== 'number' || stackIndex === -1) {
       throw new Error('stackIndex must be a number');
     }
     const { prefix } = thread.stackTable;
     const stackList = [];
-    let nextStack: IndexIntoStackTable | null = stackIndex;
-    while (nextStack !== null) {
+    let nextStack: IndexIntoStackTable = stackIndex;
+    while (nextStack !== -1) {
       if (typeof nextStack !== 'number') {
         throw new Error('nextStack must be a number');
       }

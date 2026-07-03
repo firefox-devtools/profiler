@@ -226,7 +226,8 @@ export type Counter = {
  */
 export type StackTable = {
   frame: Int32Array;
-  prefix: Array<IndexIntoStackTable | null>;
+  // Maps each stack to its parent stack, or -1 if it is a root.
+  prefix: Int32Array;
   length: number;
 
   // Derived from RawStackTable + FrameTable

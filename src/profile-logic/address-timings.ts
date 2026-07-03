@@ -127,7 +127,7 @@ export function getStackAddressInfo(
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefixStack = stackTable.prefix[stackIndex];
     const prefixAddressSet: IndexIntoAddressSetTable | -1 =
-      prefixStack !== null ? stackIndexToAddressSetIndex[prefixStack] : -1;
+      prefixStack !== -1 ? stackIndexToAddressSetIndex[prefixStack] : -1;
 
     const frame = stackTable.frame[stackIndex];
     const nativeSymbolOfThisStack = frameTable.nativeSymbol[frame];

@@ -1709,15 +1709,15 @@ function getStackIndexFromVersion3JSCallNodePath(
   stackIndexDepth.set(null, -1);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const prefix = stackTable.prefix[stackIndex];
+    const offset = stackTable.prefixOffset[stackIndex];
+    const prefix = offset === 0 ? null : stackIndex - offset;
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const isJS = funcTable.isJS[funcIndex];
     // We know that at this point stack table is sorted and the following
     // condition holds:
-    // assert(prefixStack === null || prefixStack < stackIndex);
-    const doesPrefixMatchCallNodePath =
-      prefix === null || stackIndexDepth.has(prefix);
+    // assert(prefix === null || prefix < stackIndex);
+    const doesPrefixMatchCallNodePath = stackIndexDepth.has(prefix);
 
     if (!doesPrefixMatchCallNodePath) {
       continue;
@@ -1759,7 +1759,8 @@ function getVersion4JSCallNodePathFromStackIndex(
     if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
       callNodePath.unshift(funcIndex);
     }
-    nextStackIndex = stackTable.prefix[nextStackIndex];
+    const offset: number = stackTable.prefixOffset[nextStackIndex];
+    nextStackIndex = offset === 0 ? null : nextStackIndex - offset;
   }
   return callNodePath;
 }
