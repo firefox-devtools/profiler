@@ -46,11 +46,11 @@ type ColumnDescription<TCol> = null extends (
 )
   ?
       | { type: 'INDEX_REF_OR_NULL'; referencedTable: TableCompactionState }
-      | { type: 'SELF_INDEX_REF_OR_NULL' }
       | { type: 'NO_REF' }
   : Int32Array<ArrayBuffer> extends TCol
     ?
         | { type: 'INDEX_REF_INT32'; referencedTable: TableCompactionState }
+        | { type: 'SELF_RELATIVE_PARENT' }
         | { type: 'NO_REF' }
     :
         | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
@@ -83,7 +83,7 @@ const ColDesc = {
     type: 'INDEX_REF_OR_NEG_ONE' as const,
     referencedTable,
   }),
-  selfIndexRefOrNull: () => ({ type: 'SELF_INDEX_REF_OR_NULL' as const }),
+  selfPrefixOffset: () => ({ type: 'SELF_RELATIVE_PARENT' as const }),
   noRef: () => ({ type: 'NO_REF' as const }),
 };
 
@@ -157,7 +157,7 @@ export function computeCompactedProfile(
 
   const stackTableDesc: TableDescription<RawStackTable> = {
     frame: ColDesc.indexRefInt32(tcs.frameTable),
-    prefix: ColDesc.selfIndexRefOrNull(),
+    prefixOffset: ColDesc.selfPrefixOffset(),
   };
   const frameTableDesc: TableDescription<FrameTable> = {
     address: ColDesc.noRef(),
@@ -326,8 +326,8 @@ function _markTableAndComputeTranslation<T>(
   // we look up which rows of other tables they reference.
   for (const key of keys) {
     const desc = tableDesc[key];
-    if (desc.type === 'SELF_INDEX_REF_OR_NULL') {
-      markSelfColumnWithNullableFields((table as any)[key], markBuffer);
+    if (desc.type === 'SELF_RELATIVE_PARENT') {
+      markSelfColumnPrefixOffset((table as any)[key], markBuffer);
     }
   }
 
@@ -347,7 +347,7 @@ function _markTableAndComputeTranslation<T>(
           desc.referencedTable.markBuffer
         );
         break;
-      case 'SELF_INDEX_REF_OR_NULL':
+      case 'SELF_RELATIVE_PARENT':
         break; // already handled in the first pass
       case 'INDEX_REF_OR_NEG_ONE':
         markColumnWithNegOneableFields(
@@ -399,15 +399,15 @@ function markColumnWithNullableFields(
 // Self-referential columns must be iterated in reverse so that marking a
 // prefix propagates transitively: since prefix[i] < i is guaranteed, iterating
 // high-to-low means a newly marked row will still be visited.
-function markSelfColumnWithNullableFields(
-  col: Array<number | null>,
+function markSelfColumnPrefixOffset(
+  col: Int32Array<ArrayBuffer>,
   markBuf: BitSet
 ) {
   for (let i = col.length - 1; i >= 0; i--) {
     if (checkBit(markBuf, i)) {
-      const val = col[i];
-      if (val !== null) {
-        setBit(markBuf, val);
+      const offset = col[i];
+      if (offset !== 0) {
+        setBit(markBuf, i - offset);
       }
     }
   }
@@ -533,8 +533,8 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
-      case 'SELF_INDEX_REF_OR_NULL':
-        result[key] = _compactColIndexOrNull(
+      case 'SELF_RELATIVE_PARENT':
+        result[key] = _compactColSelfPrefixOffset(
           oldCol,
           markBuffer,
           thisTableCompactionState.oldIndexToNewIndexPlusOne,
@@ -636,6 +636,29 @@ function _compactColIndexOrNegOne(
     if (checkBit(markBuffer, i)) {
       const val = oldCol[i];
       newCol[newIndex++] = val !== -1 ? oldIndexToNewIndexPlusOne[val] - 1 : -1;
+    }
+  }
+  return newCol;
+}
+
+function _compactColSelfPrefixOffset(
+  oldCol: Int32Array<ArrayBuffer>,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      const offset = oldCol[i];
+      if (offset === 0) {
+        newCol[newIndex] = 0;
+      } else {
+        const newParent = oldIndexToNewIndexPlusOne[i - offset] - 1;
+        newCol[newIndex] = newIndex - newParent;
+      }
+      newIndex++;
     }
   }
   return newCol;

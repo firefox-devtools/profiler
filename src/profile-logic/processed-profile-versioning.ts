@@ -3261,6 +3261,21 @@ const _upgraders: {
     // `IndexIntoFrameTable[]` to `IndexIntoFrameTable[] | Int32Array<ArrayBuffer>`.
     // All valid v64 profiles are valid v65 profiles, so no upgrader is needed.
   },
+  [66]: (profile: any) => {
+    // The profile.shared.stackTable.prefix column was replaced with a prefixOffset
+    // column. For each stack i, prefixOffset[i] is 0 if i is a root, otherwise
+    // it is i's offset from its parent (parent index = i - prefixOffset[i]).
+    const { stackTable } = profile.shared;
+    const { prefix } = stackTable;
+    const len = prefix.length;
+    const prefixOffset = new Array<number>(len);
+    for (let i = 0; i < len; i++) {
+      const p = prefix[i];
+      prefixOffset[i] = p === null ? 0 : i - p;
+    }
+    stackTable.prefixOffset = prefixOffset;
+    delete stackTable.prefix;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
