@@ -7,6 +7,7 @@ import {
   computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
   computeFunctionListTimings,
+  computeLowerWingTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
@@ -14,11 +15,13 @@ import {
   computeCallNodeFuncIsDuplicate,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
+  getLowerWingCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
   computeSamplesTableFromRawSamplesTable,
+  createUpperWingCallNodeInfo,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
 import { StringTable } from '../../utils/string-table';
@@ -261,6 +264,111 @@ export function functionListTreeFromProfile(
     ensureExists(profile.meta.categories),
     thread.samples,
     { type: 'FUNCTION_LIST', timings: functionListTimings },
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "upper wing" CallTree for a profile and a selected
+ * function. The upper wing shows the call subtrees that are rooted at the
+ * selected function, i.e. it answers "where is this function called from / what
+ * does it call".
+ */
+export function upperWingTreeFromProfile(
+  profile: Profile,
+  selectedFuncName: string,
+  threadIndex: number = 0
+): CallTree {
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const selectedFunc =
+    thread.funcTable.name.findIndex(
+      (i) => thread.stringTable.getString(i) === selectedFuncName
+    ) ?? null;
+  const upperWingCallNodeInfo = createUpperWingCallNodeInfo(
+    callNodeInfo,
+    selectedFunc === -1 ? null : selectedFunc,
+    thread.stackTable,
+    thread.frameTable,
+    thread.funcTable.length,
+    defaultCategory
+  );
+  const selfAndSummary = computeCallNodeSelfAndSummary(
+    thread.samples,
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      upperWingCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    ),
+    upperWingCallNodeInfo.getCallNodeTable().length
+  );
+  const timings = computeCallTreeTimings(upperWingCallNodeInfo, selfAndSummary);
+  return getCallTree(
+    thread,
+    upperWingCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    thread.samples,
+    timings,
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "lower wing" CallTree for a profile and a selected
+ * function. The lower wing is an inverted call tree where each root's total
+ * counts only samples where the selected function appears in the call stack.
+ *
+ * Pass `null` (or a name that does not exist in the thread) to exercise the
+ * "no function selected" path.
+ */
+export function lowerWingTreeFromProfile(
+  profile: Profile,
+  selectedFuncName: string | null,
+  threadIndex: number = 0
+): CallTree {
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const selectedFunc =
+    selectedFuncName === null
+      ? -1
+      : (thread.funcTable.name.findIndex(
+          (i) => thread.stringTable.getString(i) === selectedFuncName
+        ) ?? -1);
+  const selectedFuncIndex = selectedFunc === -1 ? null : selectedFunc;
+  const lowerWingCallNodeInfo = getLowerWingCallNodeInfo(
+    callNodeInfo,
+    defaultCategory,
+    thread.funcTable.length,
+    selectedFuncIndex
+  );
+  const selfAndSummary = computeCallNodeSelfAndSummary(
+    thread.samples,
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    ),
+    callNodeInfo.getCallNodeTable().length
+  );
+  const timings = computeLowerWingTimings(
+    lowerWingCallNodeInfo,
+    selfAndSummary,
+    selectedFuncIndex
+  );
+  return getCallTree(
+    thread,
+    lowerWingCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    thread.samples,
+    timings,
     'samples'
   );
 }

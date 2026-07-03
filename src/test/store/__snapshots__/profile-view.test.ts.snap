@@ -2346,6 +2346,7 @@ CallTree {
         0,
         0,
       ],
+      "flameGraphWidthTotal": 2,
       "rootTotalSummary": 2,
       "self": Float64Array [
         0,
@@ -4416,26 +4417,38 @@ Process: \\"default\\" (0)"
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `
 Object {
-  "expandedInvertedCallNodePaths": PathSet {
-    "_table": Map {},
-  },
-  "expandedNonInvertedCallNodePaths": PathSet {
-    "_table": Map {
-      "0" => Array [
-        0,
-      ],
-      "0-1" => Array [
-        0,
-        1,
-      ],
+  "expandedCallNodePaths": Object {
+    "INVERTED_TREE": PathSet {
+      "_table": Map {},
+    },
+    "LOWER_WING": PathSet {
+      "_table": Map {},
+    },
+    "NON_INVERTED_TREE": PathSet {
+      "_table": Map {
+        "0" => Array [
+          0,
+        ],
+        "0-1" => Array [
+          0,
+          1,
+        ],
+      },
+    },
+    "UPPER_WING": PathSet {
+      "_table": Map {},
     },
   },
   "lastSeenTransformCount": 1,
-  "selectedInvertedCallNodePath": Array [],
+  "selectedCallNodePaths": Object {
+    "INVERTED_TREE": Array [],
+    "LOWER_WING": Array [],
+    "NON_INVERTED_TREE": Array [
+      0,
+      1,
+    ],
+    "UPPER_WING": Array [],
+  },
   "selectedNetworkMarker": null,
-  "selectedNonInvertedCallNodePath": Array [
-    0,
-    1,
-  ],
 }
 `;

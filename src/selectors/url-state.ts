@@ -32,6 +32,10 @@ import type {
   TabID,
   IndexIntoSourceTable,
   MarkerIndex,
+  IndexIntoFuncTable,
+  FunctionListSectionsOpenState,
+  WingViewsState,
+  WingViewType,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -121,6 +125,20 @@ export const getMarkersSearchString: Selector<string> = (state) =>
 export const getMarkerTableSort: Selector<SingleColumnSortState[] | null> = (
   state
 ) => getProfileSpecificState(state).markerTableSort;
+export const getFunctionListSort: Selector<SingleColumnSortState[] | null> = (
+  state
+) => getProfileSpecificState(state).functionListSort;
+export const getFunctionListSectionsOpen: Selector<
+  FunctionListSectionsOpenState
+> = (state) => getProfileSpecificState(state).functionListSectionsOpen;
+export const getWingViews: Selector<WingViewsState> = (state) =>
+  getProfileSpecificState(state).wingViews;
+export const getUpperWingView: Selector<WingViewType> = (state) =>
+  getWingViews(state).upper;
+export const getLowerWingView: Selector<WingViewType> = (state) =>
+  getWingViews(state).lower;
+export const getSelfWingView: Selector<WingViewType> = (state) =>
+  getWingViews(state).self;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>
@@ -248,6 +266,12 @@ export const getSelectedMarker: DangerousSelectorWithArguments<
   ThreadsKey
 > = (state, threadsKey) =>
   getProfileSpecificState(state).selectedMarkers[threadsKey] ?? null;
+
+export const getSelectedFunction: DangerousSelectorWithArguments<
+  IndexIntoFuncTable | null,
+  ThreadsKey
+> = (state, threadsKey) =>
+  getProfileSpecificState(state).selectedFunctions[threadsKey] ?? null;
 
 export const getIsBottomBoxOpen: Selector<boolean> = (state) => {
   const tab = getSelectedTab(state);
