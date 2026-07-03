@@ -2,14 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { SamplesTable } from 'firefox-profiler/types';
+import type { Milliseconds, SamplesTable } from 'firefox-profiler/types';
 import { bisectionLeft } from '../utils/bisect';
 
 /**
  * Represents CPU usage over time for a single thread.
  */
 export type CpuRatioTimeSeries = {
-  time: number[];
+  time: Float64Array<ArrayBuffer>;
   cpuRatio: Float64Array;
   maxCpuRatio: number;
   length: number;
@@ -87,7 +87,7 @@ export function combineCPUDataFromThreads(
   }
 
   const cursors = new Array(threadsWithCPU.length).fill(0);
-  const combinedTime: number[] = [];
+  const combinedTime: Milliseconds[] = [];
   const combinedCPURatio: number[] = [];
   let combinedMaxCpuRatio = 0;
 
@@ -126,7 +126,7 @@ export function combineCPUDataFromThreads(
   }
 
   return {
-    time: combinedTime,
+    time: Float64Array.from(combinedTime),
     cpuRatio: Float64Array.from(combinedCPURatio),
     maxCpuRatio: combinedMaxCpuRatio,
     length: combinedTime.length,

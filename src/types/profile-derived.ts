@@ -128,7 +128,7 @@ export type SamplesTable = {
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<Milliseconds | null>;
   stack: Array<IndexIntoStackTable | null>;
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[];
@@ -163,7 +163,7 @@ export type SampleCategoriesAndSubcategories = {
 
 export type SamplesLikeTable = {
   stack: Array<IndexIntoStackTable | null>;
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[];
@@ -173,7 +173,7 @@ export type SamplesLikeTable = {
 };
 
 export type CounterSamplesTable = {
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[];
@@ -186,12 +186,11 @@ export type CounterSamplesTable = {
 /**
  * The `JsAllocationsTable` type of the derived thread.
  *
- * Currently identical in shape to the `RawJsAllocationsTable`. Splitting the
- * derived type off lets us widen columns (e.g. store `time` as a typed array)
- * without affecting the raw type.
+ * Differs from `RawJsAllocationsTable` in that the `time` column is always a
+ * `Float64Array`.
  */
 export type JsAllocationsTable = {
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   className: string[];
   typeName: string[];
   coarseType: string[];
@@ -205,10 +204,11 @@ export type JsAllocationsTable = {
 /**
  * The `UnbalancedNativeAllocationsTable` type of the derived thread.
  *
- * Currently identical in shape to the `RawUnbalancedNativeAllocationsTable`.
+ * Differs from `RawUnbalancedNativeAllocationsTable` in that the `time` column
+ * is always a `Float64Array`.
  */
 export type UnbalancedNativeAllocationsTable = {
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   weight: Bytes[];
   weightType: 'bytes';
   stack: Array<IndexIntoStackTable | null>;
@@ -218,8 +218,6 @@ export type UnbalancedNativeAllocationsTable = {
 
 /**
  * The `BalancedNativeAllocationsTable` type of the derived thread.
- *
- * Currently identical in shape to the `RawBalancedNativeAllocationsTable`.
  */
 export type BalancedNativeAllocationsTable =
   UnbalancedNativeAllocationsTable & {

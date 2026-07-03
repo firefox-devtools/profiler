@@ -1939,9 +1939,12 @@ function _computeStackMatchesFromFuncMatches(
 
 export function computeTimeColumnForRawSamplesTable(
   samples: RawSamplesTable | RawCounterSamplesTable
-): number[] {
+): Float64Array<ArrayBuffer> {
   const { time, timeDeltas } = samples;
-  return time ?? numberSeriesFromDeltas(ensureExists(timeDeltas));
+  if (time !== undefined) {
+    return Float64Array.from(time);
+  }
+  return numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
 
 export function computeSampleCategoriesAndSubcategories(
@@ -2014,7 +2017,10 @@ export function hasUsefulSamples(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  times: { time: Milliseconds[]; length: number },
+  times: {
+    time: Milliseconds[] | Float64Array<ArrayBuffer>;
+    length: number;
+  },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2022,7 +2028,7 @@ export function getSampleIndexRangeForSelection(
 }
 
 export function getIndexRangeForSelection(
-  times: Milliseconds[],
+  times: Milliseconds[] | Float64Array<ArrayBuffer>,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2037,7 +2043,10 @@ export function getIndexRangeForSelection(
  * sure that some charts will not be cut off at the edges when zoomed in to a range.
  */
 export function getInclusiveSampleIndexRangeForSelection(
-  table: { time: Milliseconds[]; length: number },
+  table: {
+    time: Milliseconds[] | Float64Array<ArrayBuffer>;
+    length: number;
+  },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2045,7 +2054,7 @@ export function getInclusiveSampleIndexRangeForSelection(
 }
 
 export function getInclusiveIndexRangeForSelection(
-  times: Milliseconds[],
+  times: Milliseconds[] | Float64Array<ArrayBuffer>,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2257,7 +2266,7 @@ export function filterRawThreadSamplesToRange(
   );
   const newSamples: RawSamplesTable = {
     length: endSampleIndex - beginSampleIndex,
-    time: sampleTimes.slice(beginSampleIndex, endSampleIndex),
+    time: Array.from(sampleTimes.slice(beginSampleIndex, endSampleIndex)),
     weight: samples.weight
       ? samples.weight.slice(beginSampleIndex, endSampleIndex)
       : null,
@@ -2392,7 +2401,7 @@ export function filterCounterSamplesToRange(
 
   newCounter.samples = {
     length: endSampleIndex - beginSampleIndex,
-    time: timeColumn.slice(beginSampleIndex, endSampleIndex),
+    time: Array.from(timeColumn.slice(beginSampleIndex, endSampleIndex)),
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
@@ -2782,7 +2791,8 @@ export function computeJsAllocationsTableFromRawJsAllocationsTable(
   raw: RawJsAllocationsTable
 ): JsAllocationsTable {
   return {
-    time: raw.time,
+    time:
+      raw.time instanceof Float64Array ? raw.time : new Float64Array(raw.time),
     className: raw.className,
     typeName: raw.typeName,
     coarseType: raw.coarseType,
@@ -2797,9 +2807,11 @@ export function computeJsAllocationsTableFromRawJsAllocationsTable(
 export function computeNativeAllocationsTableFromRawNativeAllocationsTable(
   raw: RawNativeAllocationsTable
 ): NativeAllocationsTable {
+  const time =
+    raw.time instanceof Float64Array ? raw.time : new Float64Array(raw.time);
   if ('memoryAddress' in raw) {
     return {
-      time: raw.time,
+      time,
       weight: raw.weight,
       weightType: raw.weightType,
       stack: raw.stack,
@@ -2810,7 +2822,7 @@ export function computeNativeAllocationsTableFromRawNativeAllocationsTable(
     };
   }
   return {
-    time: raw.time,
+    time,
     weight: raw.weight,
     weightType: raw.weightType,
     stack: raw.stack,
@@ -2940,11 +2952,11 @@ export function updateThreadStacksByGeneratingNewStackColumns(
   newStackTable: StackTable,
   computeMappedStackColumn: (
     oldStack: Array<IndexIntoStackTable | null>,
-    sampleTime: Array<Milliseconds>
+    sampleTime: Float64Array<ArrayBuffer>
   ) => Array<IndexIntoStackTable | null>,
   computeMappedSyncBacktraceStackColumn: (
     oldStack: Array<IndexIntoStackTable | null>,
-    sampleTime: Array<Milliseconds>
+    sampleTime: Float64Array<ArrayBuffer>
   ) => Array<IndexIntoStackTable | null>,
   computeMappedMarkerDataColumn: (
     markerData: Array<MarkerPayload | null>

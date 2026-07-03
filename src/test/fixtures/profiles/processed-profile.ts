@@ -1501,13 +1501,13 @@ export function getCounterForThread(
     pid: thread.pid,
     mainThreadIndex,
     samples: {
-      time: sampleTimes.slice(),
+      time: Array.from(sampleTimes),
       // Create some arbitrary (positive integer) values for the number.
       number: config.hasCountNumber
-        ? sampleTimes.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+        ? Array.from(sampleTimes, (_, i) => Math.floor(50 * Math.sin(i) + 50))
         : undefined,
       // Create some arbitrary values for the count.
-      count: sampleTimes.map((_, i) => Math.sin(i)),
+      count: Array.from(sampleTimes, (_, i) => Math.sin(i)),
       length: thread.samples.length,
     },
     display: deriveCounterDisplay(category, name),
