@@ -1284,6 +1284,13 @@ BottomBox--source-code-not-available-title = Source code not available
 SourceView--source-not-available-text =
     See <a>issue #3741</a> for supported scenarios and planned improvements.
 
+# Displayed in the source view when the source code for a JavaScript file could
+# not be obtained. It hints that the "JavaScript Sources" feature needs to be
+# enabled in the recording settings before capturing a profile.
+# "JavaScript Sources" and "about:profiling" should not be translated.
+SourceView--enable-js-sources-feature-hint =
+    To view the source of this JavaScript file, before recording the profile enable the “JavaScript Sources” feature in the recording settings in about:profiling.
+
 # Displayed whenever the assembly view was not able to get the assembly code for
 # a file.
 # Assembly refers to the low-level programming language.
