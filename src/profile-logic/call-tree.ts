@@ -38,6 +38,7 @@ import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
+import type { SortableColumn } from '../components/shared/TreeView';
 import { getBottomBoxInfoForCallNode } from './bottom-box';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
@@ -398,6 +399,12 @@ export class CallTree {
     this._roots = internal.createRoots();
     this._isHighPrecision = isHighPrecision;
     this._weightType = weightType;
+  }
+
+  // The call tree's own order (by total sample count) is the intended order,
+  // so no columns are user-sortable.
+  getSortableColumns(): SortableColumn[] {
+    return [];
   }
 
   getTotal(): number {
