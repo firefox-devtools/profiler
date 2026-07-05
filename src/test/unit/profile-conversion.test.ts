@@ -8,29 +8,16 @@ import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
+import {
+  assertProfileIntegrity,
+  profileImportSnapshot,
+} from '../fixtures/profile-summary';
 
 import type {
   TracingEventUnion,
   CpuProfileEvent,
 } from '../../profile-logic/import/chrome';
 import type { Profile } from 'firefox-profiler/types';
-
-function checkProfileContainsUniqueTid(profile: Profile) {
-  const foundTids = new Set<unknown>();
-
-  for (const thread of profile.threads) {
-    const { tid } = thread;
-    if (tid === undefined) {
-      throw new Error('Found an undefined tid!');
-    }
-
-    if (foundTids.has(tid)) {
-      console.error(`Found a duplicate tid ${tid}!`);
-    }
-
-    foundTids.add(tid);
-  }
-}
 
 describe('converting Linux perf profile', function () {
   async function loadProfile(filename: string): Promise<Profile> {
@@ -57,8 +44,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/test.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a simple perf profile', async function () {
@@ -66,8 +53,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/simple-perf.txt.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a perf profile of gzip', async function () {
@@ -75,8 +62,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/gzip.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a perf profile of graphviz with a header', async function () {
@@ -84,8 +71,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/graphviz.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -100,8 +87,8 @@ describe('converting dhat profiles', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -127,8 +114,8 @@ describe('converting Google Chrome profile', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a chrome profile with an invalid "endTime" entry', async () => {
@@ -168,8 +155,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function () {
@@ -182,8 +169,8 @@ describe('converting Google Chrome profile', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a single CpuProfile, e.g. from node', async function () {
@@ -218,8 +205,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a profile with DevTools timestamp in filename', async function () {
@@ -235,8 +222,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a profile using the chrome tracing format', async function () {
@@ -252,8 +239,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a profile with the chrome array format', async function () {
@@ -269,8 +256,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a chrome profile using markers of different types', async function () {
@@ -396,7 +383,7 @@ describe('converting Google Chrome profile', function () {
       .getFullMarkerListIndexes(state)
       .map(mainGetMarker);
 
-    checkProfileContainsUniqueTid(profile);
+    assertProfileIntegrity(profile);
     expect(markers.map(({ name }) => name)).toEqual([
       'RunTask',
       'RunTask Complete',
@@ -430,8 +417,8 @@ describe('converting ART trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a streaming ART trace', async function () {
@@ -446,8 +433,8 @@ describe('converting ART trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -464,8 +451,8 @@ describe('converting Simpleperf trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a simpleperf trace with cpu-clock', async function () {
@@ -480,8 +467,8 @@ describe('converting Simpleperf trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -518,8 +505,8 @@ describe('converting flamegraph profile', function () {
     expect(thread.name).toBe('Program');
     expect(thread.samples.length).toBe(18); // 10 + 5 + 3 samples
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a flamegraph profile with Java frames', async function () {
@@ -541,7 +528,7 @@ describe('converting flamegraph profile', function () {
     expect(
       profile.shared.stringArray.find((s) => s.includes('[j]'))
     ).toBeUndefined();
-    checkProfileContainsUniqueTid(profile);
+    assertProfileIntegrity(profile);
   });
 
   it('should handle empty lines in flamegraph', async function () {
@@ -555,7 +542,7 @@ describe('converting flamegraph profile', function () {
     const thread = profile.threads[0];
     // 2 + 1 stacks
     expect(thread.samples.length).toBe(3);
-    checkProfileContainsUniqueTid(profile);
+    assertProfileIntegrity(profile);
   });
 
   it('should import a real-world flamegraph file', async function () {
@@ -577,7 +564,7 @@ describe('converting flamegraph profile', function () {
     expect(thread.name).toBe('Program');
     expect(thread.samples.length).toBeGreaterThan(0);
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
