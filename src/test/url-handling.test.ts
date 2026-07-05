@@ -61,6 +61,7 @@ import {
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { getProfile } from '../selectors/profile';
+import { getRawMarkerTableBuilderFromExisting } from '../profile-logic/data-structures';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -1356,12 +1357,16 @@ describe('url upgrading', function () {
       const stringTable = StringTable.withBackingArray(
         profile.shared.stringArray
       );
-      mainThread.markers.name.push(stringTable.indexForString('IPC'));
-      mainThread.markers.phase.push(0);
-      mainThread.markers.startTime.push(0);
-      mainThread.markers.endTime.push(null);
-      mainThread.markers.category.push(0);
-      mainThread.markers.data.push({
+      const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
+        mainThread.markers
+      );
+      mainThread.markers = mainThreadMarkers;
+      mainThreadMarkers.name.push(stringTable.indexForString('IPC'));
+      mainThreadMarkers.phase.push(0);
+      mainThreadMarkers.startTime.push(0);
+      mainThreadMarkers.endTime.push(null);
+      mainThreadMarkers.category.push(0);
+      mainThreadMarkers.data.push({
         type: 'IPC',
         startTime: 0,
         endTime: 1,
@@ -1373,7 +1378,7 @@ describe('url upgrading', function () {
         phase: 'endpoint',
         sync: false,
       } as any);
-      mainThread.markers.length++;
+      mainThreadMarkers.length++;
 
       const memoryCounter = getCounterForThread(mainThread, 0);
       memoryCounter.category = 'Memory';

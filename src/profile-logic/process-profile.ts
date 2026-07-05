@@ -19,7 +19,9 @@ import {
   getEmptyRawMarkerTable,
   getEmptyRawJsAllocationsTable,
   getEmptyRawUnbalancedNativeAllocationsTable,
+  getRawMarkerTableBuilderFromExisting,
   type RawFrameTableBuilder,
+  type RawMarkerTableBuilder,
   type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
@@ -51,6 +53,7 @@ import {
   toInt32Array,
   toUint8Array,
   toFloat64Array,
+  toFloat64ArraySetNullToZero,
 } from '../utils/typed-arrays';
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
@@ -1548,13 +1551,23 @@ export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
-  function adjustTimeIfNotNull(time: number | null) {
-    return time === null ? time : time + delta;
+  function adjustTimes(
+    times: Array<number | null> | Float64Array<ArrayBuffer>
+  ): Array<number | null> | Float64Array<ArrayBuffer> {
+    if (Array.isArray(times)) {
+      return times.map((time) => (time === null ? time : time + delta));
+    }
+    // JSLB Float64Array: no nulls; shift every value.
+    const out = new Float64Array(times.length);
+    for (let i = 0; i < times.length; i++) {
+      out[i] = times[i] + delta;
+    }
+    return out;
   }
   return {
     ...markers,
-    startTime: markers.startTime.map(adjustTimeIfNotNull),
-    endTime: markers.endTime.map(adjustTimeIfNotNull),
+    startTime: adjustTimes(markers.startTime),
+    endTime: adjustTimes(markers.endTime),
     data: markers.data.map((data) => {
       if (!data) {
         return data;
@@ -2108,6 +2121,7 @@ function convertThreadEligibleColumns(thread: RawThread): RawThread {
   const newThread: RawThread = {
     ...thread,
     samples: convertSamplesTimesToTypedArrays(thread.samples),
+    markers: convertMarkersEligibleColumnsToTypedArrays(thread.markers),
   };
   if (thread.jsAllocations !== undefined) {
     newThread.jsAllocations = {
@@ -2135,6 +2149,16 @@ function convertSamplesTimesToTypedArrays(
     result.timeDeltas = toFloat64Array(samples.timeDeltas);
   }
   return result;
+}
+
+function convertMarkersEligibleColumnsToTypedArrays(
+  markers: RawMarkerTable
+): RawMarkerTable {
+  return {
+    ...markers,
+    startTime: toFloat64ArraySetNullToZero(markers.startTime),
+    endTime: toFloat64ArraySetNullToZero(markers.endTime),
+  };
 }
 
 function convertCounterEligibleColumns(counter: RawCounter): RawCounter {
@@ -2456,8 +2480,17 @@ export function processVisualMetrics(
     (cat) => cat.name === 'Test'
   );
 
+  const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
+    mainThread.markers
+  );
+  mainThread.markers = mainThreadMarkers;
+  const tabThreadMarkers = getRawMarkerTableBuilderFromExisting(
+    tabThread.markers
+  );
+  tabThread.markers = tabThreadMarkers;
+
   function maybeAddMetricMarker(
-    thread: RawThread,
+    markers: RawMarkerTableBuilder,
     name: string,
     phase: MarkerPhase,
     startTime: number | null,
@@ -2475,14 +2508,13 @@ export function processVisualMetrics(
       // browsertime bug here: https://github.com/sitespeedio/browsertime/issues/1746.
       return;
     }
-    // Add the marker to the given thread.
-    thread.markers.name.push(stringTable.indexForString(name));
-    thread.markers.startTime.push(startTime);
-    thread.markers.endTime.push(endTime);
-    thread.markers.phase.push(phase);
-    thread.markers.category.push(testingCategoryIdx);
-    thread.markers.data.push(payload ?? null);
-    thread.markers.length++;
+    markers.name.push(stringTable.indexForString(name));
+    markers.startTime.push(startTime);
+    markers.endTime.push(endTime);
+    markers.phase.push(phase);
+    markers.category.push(testingCategoryIdx);
+    markers.data.push(payload ?? null);
+    markers.length++;
   }
 
   // Find the navigation start time in the tab thread for specifying the marker
@@ -2513,9 +2545,21 @@ export function processVisualMetrics(
 
     // Add the progress marker to the parent process main thread.
     const markerName = `${metricName} Progress`;
-    maybeAddMetricMarker(mainThread, markerName, INTERVAL, startTime, endTime);
+    maybeAddMetricMarker(
+      mainThreadMarkers,
+      markerName,
+      INTERVAL,
+      startTime,
+      endTime
+    );
     // Add the progress marker to the tab process main thread.
-    maybeAddMetricMarker(tabThread, markerName, INTERVAL, startTime, endTime);
+    maybeAddMetricMarker(
+      tabThreadMarkers,
+      markerName,
+      INTERVAL,
+      startTime,
+      endTime
+    );
 
     // Add progress markers for every visual progress change for more fine grained information.
     const progressMarkerSchema: MarkerSchema = {
@@ -2538,7 +2582,7 @@ export function processVisualMetrics(
 
       // Add it to the parent process main thread.
       maybeAddMetricMarker(
-        mainThread,
+        mainThreadMarkers,
         changeMarkerName,
         INSTANT,
         timestamp,
@@ -2547,7 +2591,7 @@ export function processVisualMetrics(
       );
       // Add it to the tab process main thread.
       maybeAddMetricMarker(
-        tabThread,
+        tabThreadMarkers,
         changeMarkerName,
         INSTANT,
         timestamp,

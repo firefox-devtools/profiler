@@ -19,8 +19,9 @@ import {
   finishRawStackTableBuilder,
   getEmptyRawMarkerTable,
   getRawSamplesTableBuilderWithEventDelay,
-  shallowCloneRawMarkerTable,
+  getRawMarkerTableBuilderFromExisting,
   getEmptySourceTable,
+  type RawMarkerTableBuilder,
 } from './data-structures';
 import {
   filterRawThreadSamplesToRange,
@@ -1455,7 +1456,7 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
  */
 function mergeMarkers(threads: RawThread[]): RawMarkerTable {
   const newThreadId: Array<Tid | null> = [];
-  const newMarkerTable: RawMarkerTable = {
+  const newMarkerTable: RawMarkerTableBuilder = {
     ...getEmptyRawMarkerTable(),
     threadId: newThreadId,
   };
@@ -1490,7 +1491,9 @@ function getThreadMarkersAndScreenshotMarkers(
   threads: RawThread[],
   targetThread: RawThread
 ): RawMarkerTable {
-  const targetMarkerTable = shallowCloneRawMarkerTable(targetThread.markers);
+  const targetMarkerTable = getRawMarkerTableBuilderFromExisting(
+    targetThread.markers
+  );
 
   // Find screenshot markers in the other threads and add them to the target thread.
   for (const thread of threads) {
