@@ -5,9 +5,9 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getEmptyJsTracerTable,
-  getEmptyJsAllocationsTable,
-  getEmptyUnbalancedNativeAllocationsTable,
-  getEmptyBalancedNativeAllocationsTable,
+  getEmptyRawJsAllocationsTable,
+  getEmptyRawUnbalancedNativeAllocationsTable,
+  getEmptyRawBalancedNativeAllocationsTable,
   getRawStackTableBuilderWithExistingContents,
   finishRawStackTableBuilder,
 } from '../../../profile-logic/data-structures';
@@ -1628,8 +1628,8 @@ export function getProfileWithJsAllocations() {
              I[lib:libI.so]
   `);
 
-  // Now add a JsAllocationsTable.
-  const jsAllocations = getEmptyJsAllocationsTable();
+  // Now add a RawJsAllocationsTable.
+  const jsAllocations = getEmptyRawJsAllocationsTable();
   profile.threads[0].jsAllocations = jsAllocations;
 
   // The stack table is built sequentially, so we can assume that the stack indexes
@@ -1708,8 +1708,8 @@ export function getProfileWithUnbalancedNativeAllocations() {
     `
   );
 
-  // Now add a NativeAllocationsTable.
-  const nativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+  // Now add a RawNativeAllocationsTable.
+  const nativeAllocations = getEmptyRawUnbalancedNativeAllocationsTable();
   profile.threads[0].nativeAllocations = nativeAllocations;
 
   // The stack table is built sequentially, so we can assume that the stack indexes
@@ -1776,8 +1776,8 @@ export function getProfileWithBalancedNativeAllocations() {
     `
   );
 
-  // Now add a NativeAllocationsTable.
-  const nativeAllocations = getEmptyBalancedNativeAllocationsTable();
+  // Now add a RawNativeAllocationsTable.
+  const nativeAllocations = getEmptyRawBalancedNativeAllocationsTable();
   const [thread] = profile.threads;
   thread.nativeAllocations = nativeAllocations;
   const threadId = thread.tid;

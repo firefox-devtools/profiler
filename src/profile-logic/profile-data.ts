@@ -73,6 +73,9 @@ import type {
   CounterIndex,
   RawCounterSamplesTable,
   CounterSamplesTable,
+  RawJsAllocationsTable,
+  JsAllocationsTable,
+  RawNativeAllocationsTable,
   NativeAllocationsTable,
   InnerWindowID,
   BalancedNativeAllocationsTable,
@@ -2775,6 +2778,47 @@ export function computeSamplesTableFromRawSamplesTable(
   };
 }
 
+export function computeJsAllocationsTableFromRawJsAllocationsTable(
+  raw: RawJsAllocationsTable
+): JsAllocationsTable {
+  return {
+    time: raw.time,
+    className: raw.className,
+    typeName: raw.typeName,
+    coarseType: raw.coarseType,
+    weight: raw.weight,
+    weightType: raw.weightType,
+    inNursery: raw.inNursery,
+    stack: raw.stack,
+    length: raw.length,
+  };
+}
+
+export function computeNativeAllocationsTableFromRawNativeAllocationsTable(
+  raw: RawNativeAllocationsTable
+): NativeAllocationsTable {
+  if ('memoryAddress' in raw) {
+    return {
+      time: raw.time,
+      weight: raw.weight,
+      weightType: raw.weightType,
+      stack: raw.stack,
+      argumentValues: raw.argumentValues,
+      memoryAddress: raw.memoryAddress,
+      threadId: raw.threadId,
+      length: raw.length,
+    };
+  }
+  return {
+    time: raw.time,
+    weight: raw.weight,
+    weightType: raw.weightType,
+    stack: raw.stack,
+    argumentValues: raw.argumentValues,
+    length: raw.length,
+  };
+}
+
 /**
  * Create the derived Thread.
  */
@@ -2789,7 +2833,9 @@ export function createThreadFromDerivedTables(
   stringTable: StringTable,
   sources: SourceTable,
   tracedValuesBuffer: ArrayBuffer | undefined,
-  sourceLocationTable: SourceLocationTable
+  sourceLocationTable: SourceLocationTable,
+  jsAllocations: JsAllocationsTable | undefined,
+  nativeAllocations: NativeAllocationsTable | undefined
 ): Thread {
   const {
     processType,
@@ -2806,8 +2852,6 @@ export function createThreadFromDerivedTables(
     isJsTracer,
     pid,
     tid,
-    jsAllocations,
-    nativeAllocations,
     markers,
     jsTracer,
     isPrivateBrowsing,

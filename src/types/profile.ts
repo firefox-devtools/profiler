@@ -151,8 +151,10 @@ export type RawSamplesTable = {
 /**
  * JS allocations are recorded as a marker payload, but in profile processing they
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ *
+ * There is also a derived `JsAllocationsTable` type, see profile-derived.js.
  */
-export type JsAllocationsTable = {
+export type RawJsAllocationsTable = {
   time: Milliseconds[];
   className: string[];
   typeName: string[]; // Currently only 'JSObject'
@@ -170,7 +172,7 @@ export type JsAllocationsTable = {
  * This variant is the original version of the table, before the memory address
  * and threadId were added.
  */
-export type UnbalancedNativeAllocationsTable = {
+export type RawUnbalancedNativeAllocationsTable = {
   time: Milliseconds[];
   // "weight" is used here rather than "bytes", so that this type can be
   // used as a SamplesLikeTable.
@@ -184,8 +186,8 @@ export type UnbalancedNativeAllocationsTable = {
 /**
  * The memory address and thread ID were added later.
  */
-export type BalancedNativeAllocationsTable =
-  UnbalancedNativeAllocationsTable & {
+export type RawBalancedNativeAllocationsTable =
+  RawUnbalancedNativeAllocationsTable & {
     memoryAddress: number[];
     threadId: number[];
   };
@@ -195,10 +197,12 @@ export type BalancedNativeAllocationsTable =
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
  * Currently they include native allocations and deallocations. However, both
  * of them are sampled independently, so they will be unbalanced if summed togther.
+ *
+ * There is also a derived `NativeAllocationsTable` type, see profile-derived.js.
  */
-export type NativeAllocationsTable =
-  | UnbalancedNativeAllocationsTable
-  | BalancedNativeAllocationsTable;
+export type RawNativeAllocationsTable =
+  | RawUnbalancedNativeAllocationsTable
+  | RawBalancedNativeAllocationsTable;
 
 /**
  * Markers represent arbitrary events that happen within the browser. They have a
@@ -764,8 +768,8 @@ export type RawThread = {
   pid: Pid;
   tid: Tid;
   samples: RawSamplesTable;
-  jsAllocations?: JsAllocationsTable;
-  nativeAllocations?: NativeAllocationsTable;
+  jsAllocations?: RawJsAllocationsTable;
+  nativeAllocations?: RawNativeAllocationsTable;
   markers: RawMarkerTable;
   jsTracer?: JsTracerTable;
   // If present and true, this thread was launched for a private browsing session only.

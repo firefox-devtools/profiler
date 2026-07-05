@@ -19,6 +19,8 @@ import {
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
   computeSamplesTableFromRawSamplesTable,
+  computeJsAllocationsTableFromRawJsAllocationsTable,
+  computeNativeAllocationsTableFromRawNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
 import { StringTable } from '../../utils/string-table';
@@ -162,6 +164,16 @@ export function computeThreadFromRawThread(
   const tracedValuesBuffer = rawThread.tracedValuesBuffer
     ? base64StringToBytes(rawThread.tracedValuesBuffer)
     : undefined;
+  const jsAllocations = rawThread.jsAllocations
+    ? computeJsAllocationsTableFromRawJsAllocationsTable(
+        rawThread.jsAllocations
+      )
+    : undefined;
+  const nativeAllocations = rawThread.nativeAllocations
+    ? computeNativeAllocationsTableFromRawNativeAllocationsTable(
+        rawThread.nativeAllocations
+      )
+    : undefined;
   return createThreadFromDerivedTables(
     rawThread,
     samples,
@@ -173,7 +185,9 @@ export function computeThreadFromRawThread(
     stringTable,
     shared.sources,
     tracedValuesBuffer,
-    shared.sourceLocationTable
+    shared.sourceLocationTable,
+    jsAllocations,
+    nativeAllocations
   );
 }
 
