@@ -15,9 +15,9 @@ import type {
   RawStackTable,
   FuncTable,
   RawMarkerTable,
-  JsAllocationsTable,
-  UnbalancedNativeAllocationsTable,
-  BalancedNativeAllocationsTable,
+  RawJsAllocationsTable,
+  RawUnbalancedNativeAllocationsTable,
+  RawBalancedNativeAllocationsTable,
   ResourceTable,
   NativeSymbolTable,
   Profile,
@@ -274,7 +274,7 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
   };
 }
 
-export function getEmptyJsAllocationsTable(): JsAllocationsTable {
+export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTable {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -296,7 +296,7 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllocationsTable {
+export function getEmptyRawUnbalancedNativeAllocationsTable(): RawUnbalancedNativeAllocationsTable {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -314,7 +314,7 @@ export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllo
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocationsTable {
+export function getEmptyRawBalancedNativeAllocationsTable(): RawBalancedNativeAllocationsTable {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not

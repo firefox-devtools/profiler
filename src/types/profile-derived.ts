@@ -19,8 +19,6 @@ import type {
   Tid,
   ProcessType,
   PausedRange,
-  JsAllocationsTable,
-  NativeAllocationsTable,
   RawMarkerTable,
   FrameTable,
   FuncTable,
@@ -184,6 +182,57 @@ export type CounterSamplesTable = {
   argumentValues?: Array<number | null>;
   length: number;
 };
+
+/**
+ * The `JsAllocationsTable` type of the derived thread.
+ *
+ * Currently identical in shape to the `RawJsAllocationsTable`. Splitting the
+ * derived type off lets us widen columns (e.g. store `time` as a typed array)
+ * without affecting the raw type.
+ */
+export type JsAllocationsTable = {
+  time: Milliseconds[];
+  className: string[];
+  typeName: string[];
+  coarseType: string[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+/**
+ * The `UnbalancedNativeAllocationsTable` type of the derived thread.
+ *
+ * Currently identical in shape to the `RawUnbalancedNativeAllocationsTable`.
+ */
+export type UnbalancedNativeAllocationsTable = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  length: number;
+};
+
+/**
+ * The `BalancedNativeAllocationsTable` type of the derived thread.
+ *
+ * Currently identical in shape to the `RawBalancedNativeAllocationsTable`.
+ */
+export type BalancedNativeAllocationsTable =
+  UnbalancedNativeAllocationsTable & {
+    memoryAddress: number[];
+    threadId: number[];
+  };
+
+/**
+ * The `NativeAllocationsTable` type of the derived thread.
+ */
+export type NativeAllocationsTable =
+  | UnbalancedNativeAllocationsTable
+  | BalancedNativeAllocationsTable;
 
 export type Counter = {
   name: string;

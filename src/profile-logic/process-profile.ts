@@ -14,8 +14,8 @@ import { AddressLocator } from './address-locator';
 import {
   getEmptyExtensions,
   getEmptyRawMarkerTable,
-  getEmptyJsAllocationsTable,
-  getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyRawJsAllocationsTable,
+  getEmptyRawUnbalancedNativeAllocationsTable,
   type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
@@ -61,9 +61,9 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStringTable,
   JsTracerTable,
-  JsAllocationsTable,
+  RawJsAllocationsTable,
   ProfilerOverhead,
-  NativeAllocationsTable,
+  RawNativeAllocationsTable,
   Milliseconds,
   Microseconds,
   Address,
@@ -631,8 +631,8 @@ function _convertPayloadStackToIndex(
  * Process the markers.
  *  Convert stacks to causes.
  *  Process GC markers.
- *  Extract JS allocations into the JsAllocationsTable.
- *  Extract Native allocations into the NativeAllocationsTable.
+ *  Extract JS allocations into the RawJsAllocationsTable.
+ *  Extract Native allocations into the RawNativeAllocationsTable.
  */
 function _processMarkers(
   geckoMarkers: GeckoMarkerStruct,
@@ -642,13 +642,13 @@ function _processMarkers(
   stackIndexOffset: IndexIntoStackTable
 ): {
   markers: RawMarkerTable;
-  jsAllocations: JsAllocationsTable | null;
-  nativeAllocations: NativeAllocationsTable | null;
+  jsAllocations: RawJsAllocationsTable | null;
+  nativeAllocations: RawNativeAllocationsTable | null;
 } {
   const markers = getEmptyRawMarkerTable();
-  const jsAllocations = getEmptyJsAllocationsTable();
+  const jsAllocations = getEmptyRawJsAllocationsTable();
   const inProgressNativeAllocations =
-    getEmptyUnbalancedNativeAllocationsTable();
+    getEmptyRawUnbalancedNativeAllocationsTable();
   const memoryAddress: number[] = [];
   const threadId: number[] = [];
 
