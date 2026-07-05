@@ -7,9 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
-import { addGlobalOptions, parseIntArg } from './shared';
+import { addGlobalOptions, parseIntArg, runCommand } from './shared';
 
 export function registerProfileCommand(
   program: Command,
@@ -29,7 +27,7 @@ export function registerProfileCommand(
       )
       .option('--search <term>', 'Filter by substring')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'profile',
@@ -37,9 +35,8 @@ export function registerProfileCommand(
         all: opts.all,
         search: opts.search,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   const VALID_LOG_LEVELS = ['error', 'warn', 'info', 'debug', 'verbose'];
@@ -76,7 +73,7 @@ export function registerProfileCommand(
       opts.search !== undefined ||
       limit !== undefined;
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'profile',
@@ -91,8 +88,7 @@ export function registerProfileCommand(
             }
           : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }

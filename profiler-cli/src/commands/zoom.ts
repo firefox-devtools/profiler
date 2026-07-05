@@ -7,9 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
-import { addGlobalOptions } from './shared';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerZoomCommand(
   program: Command,
@@ -24,23 +22,17 @@ export function registerZoomCommand(
         'Push a zoom range (e.g. 2.7,3.1 in seconds, 2700ms,3100ms in milliseconds, 10%,20% as percentage, or m-158 for a marker)'
       )
   ).action(async (range: string, opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'zoom', subcommand: 'push', range },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
     zoom.command('pop').description('Pop the most recent zoom range')
   ).action(async (opts) => {
-    const result = await sendCommand(
-      sessionDir,
-      { command: 'zoom', subcommand: 'pop' },
-      opts.session
-    );
-    console.log(formatOutput(result, opts.json ?? false));
+    await runCommand(sessionDir, { command: 'zoom', subcommand: 'pop' }, opts);
   });
 
   addGlobalOptions(
@@ -48,11 +40,10 @@ export function registerZoomCommand(
       .command('clear')
       .description('Clear all zoom ranges (return to full profile)')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'zoom', subcommand: 'clear' },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }
