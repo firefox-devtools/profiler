@@ -175,7 +175,7 @@ Add a case to `processMessage()`:
 case 'allocation':
   switch (command.subcommand) {
     case 'info':
-      return this.querier!.allocationInfo(command.thread);
+      return this.querier.allocationInfo(command.thread);
     default:
       throw assertExhaustiveCheck(command);
   }
