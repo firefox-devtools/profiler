@@ -319,6 +319,15 @@ Home--chrome-extension-instructions =
     { -profiler-brand-name }. Instala la extensión desde la Chrome Web Store.
 Home--chrome-extension-recording-instructions = Una vez instalada, utiliza el icono de la barra de herramientas de la extensión o los accesos directos para iniciar y detener la creación de perfiles. También puedes exportar perfiles y cargarlos aquí para realizar un análisis detallado.
 
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Ingresa los términos de filtro (/)
+
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
