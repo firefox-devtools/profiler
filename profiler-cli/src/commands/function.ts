@@ -7,9 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
-import { addGlobalOptions } from './shared';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerFunctionCommand(
   program: Command,
@@ -24,12 +22,11 @@ export function registerFunctionCommand(
       .option('--function <handle>', 'Function handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'function', subcommand: 'expand', function: funcHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
@@ -39,12 +36,11 @@ export function registerFunctionCommand(
       .option('--function <handle>', 'Function handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'function', subcommand: 'info', function: funcHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
@@ -70,7 +66,7 @@ export function registerFunctionCommand(
       )
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'function',
@@ -80,8 +76,7 @@ export function registerFunctionCommand(
         symbolServerUrl: opts.symbolServer,
         annotateContext: opts.context,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }

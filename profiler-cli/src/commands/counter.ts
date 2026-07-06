@@ -7,9 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
-import { addGlobalOptions } from './shared';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerCounterCommand(
   program: Command,
@@ -24,12 +22,11 @@ export function registerCounterCommand(
       .command('list')
       .description('List all counters with one-line summaries')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'counter', subcommand: 'list' },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
@@ -39,11 +36,10 @@ export function registerCounterCommand(
       .option('--counter <handle>', 'Counter handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const counterHandle = handleArg ?? opts.counter;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'counter', subcommand: 'info', counter: counterHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }
