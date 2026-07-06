@@ -2174,13 +2174,6 @@ export function filterThreadSamplesToRange(
     );
   }
 
-  if (samples.threadId) {
-    newSamples.threadId = samples.threadId.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
   const newThread: Thread = {
     ...thread,
     samples: newSamples,
@@ -2302,13 +2295,6 @@ export function filterRawThreadSamplesToRange(
 
   if (samples.argumentValues) {
     newSamples.argumentValues = samples.argumentValues.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadId) {
-    newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2745,7 +2731,6 @@ export function computeSamplesTableFromRawSamplesTable(
     threadCPUDelta,
     weight,
     weightType,
-    threadId,
     length,
   } = rawSamples;
 
@@ -2782,7 +2767,6 @@ export function computeSamplesTableFromRawSamplesTable(
     stack,
     weight,
     weightType,
-    threadId,
     length,
 
     // These fields are derived:
