@@ -78,7 +78,7 @@
     "@lezer/highlight": "^1.2.3",
     "@lezer/javascript": "^1.5.4",
     "@streamparser/json": "^0.0.22",
-    "@tgwf/co2": "^0.18.0",
+    "@tgwf/co2": "^0.19.0",
     "array-move": "^3.0.1",
     "array-range": "^1.0.1",
     "clamp": "^1.0.1",
