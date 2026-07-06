@@ -154,15 +154,20 @@
   min-width: 200px;
   max-width: min(500px, 100%);
   height: min-content;
+  max-height: 90%;
   flex-flow: row;
-  align-items: center;
+  align-items: safe center;
   padding: 15px;
   border-radius: 10px;
   margin: auto;
   background-color: var(--internal-background-color);
   gap: 15px;
   inset: 0;
-  overflow-wrap: break-word;
+
+  /* `anywhere`, shrinks min-content width so the flex child can shrink and
+   * long unbreakable URLs don't overflow. */
+  overflow-wrap: anywhere;
+  overflow-y: auto;
 }
 
 /* Use ::before to add a loading spinner image */
@@ -190,6 +195,7 @@
 }
 
 .codeErrorOverlay {
+  min-width: 0;
   padding-left: 20px;
 }
 
