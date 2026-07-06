@@ -11,7 +11,7 @@ import {
   getEmptyProfile,
   getEmptyResourceTable,
   getEmptyNativeSymbolTable,
-  getEmptyFrameTable,
+  getEmptyRawFrameTable,
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
@@ -51,7 +51,7 @@ import type {
   IndexIntoSourceTable,
   IndexIntoSourceLocationTable,
   FuncTable,
-  FrameTable,
+  RawFrameTable,
   Lib,
   NativeSymbolTable,
   ResourceTable,
@@ -1057,9 +1057,9 @@ function mergeFrameTables(
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   translationMapsForOriginalLocation: TranslationMapForOriginalLocation[],
   translationMapsForCategories: TranslationMapForCategories[]
-): { frameTable: FrameTable; translationMaps: TranslationMapForFrames[] } {
+): { frameTable: RawFrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
-  const newFrameTable = getEmptyFrameTable();
+  const newFrameTable = getEmptyRawFrameTable();
 
   profiles.forEach((profile, profileIndex) => {
     const { frameTable } = profile.shared;

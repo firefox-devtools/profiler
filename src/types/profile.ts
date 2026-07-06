@@ -233,7 +233,7 @@ export type RawMarkerTable = {
  * Frames contain the context information about the function execution at the moment in
  * time. The caller/callee relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {
+export type RawFrameTable = {
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
   //
@@ -1086,7 +1086,7 @@ export type SourceLocationTable = {
 
 export type RawProfileSharedData = {
   stackTable: RawStackTable;
-  frameTable: FrameTable;
+  frameTable: RawFrameTable;
   funcTable: FuncTable;
   resourceTable: ResourceTable;
   nativeSymbols: NativeSymbolTable;

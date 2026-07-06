@@ -11,7 +11,7 @@ import type {
   RawProfileSharedData,
   RawThread,
   RawSamplesTable,
-  FrameTable,
+  RawFrameTable,
   RawStackTable,
   FuncTable,
   RawMarkerTable,
@@ -118,7 +118,7 @@ export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
   };
 }
 
-export function getEmptyFrameTable(): FrameTable {
+export function getEmptyRawFrameTable(): RawFrameTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -138,7 +138,9 @@ export function getEmptyFrameTable(): FrameTable {
   };
 }
 
-export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
+export function shallowCloneRawFrameTable(
+  frameTable: RawFrameTable
+): RawFrameTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -433,7 +435,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
 export function getEmptySharedData(): RawProfileSharedData {
   return {
     stackTable: finishRawStackTableBuilder(getRawStackTableBuilder()),
-    frameTable: getEmptyFrameTable(),
+    frameTable: getEmptyRawFrameTable(),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

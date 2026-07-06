@@ -18,6 +18,7 @@ import {
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
+  computeFrameTableFromRawFrameTable,
   computeSamplesTableFromRawSamplesTable,
   computeJsAllocationsTableFromRawJsAllocationsTable,
   computeNativeAllocationsTableFromRawNativeAllocationsTable,
@@ -174,11 +175,12 @@ export function computeThreadFromRawThread(
         rawThread.nativeAllocations
       )
     : undefined;
+  const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
   return createThreadFromDerivedTables(
     rawThread,
     samples,
     stackTable,
-    shared.frameTable,
+    frameTable,
     shared.funcTable,
     shared.nativeSymbols,
     shared.resourceTable,

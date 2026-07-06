@@ -7,10 +7,13 @@ import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
   ThreadIndex,
   Pid,
+  InnerWindowID,
   IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
   IndexIntoResourceTable,
+  IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
   IndexIntoRawMarkerTable,
@@ -20,7 +23,6 @@ import type {
   ProcessType,
   PausedRange,
   RawMarkerTable,
-  FrameTable,
   FuncTable,
   ResourceTable,
   NativeSymbolTable,
@@ -29,6 +31,7 @@ import type {
   WeightType,
   SourceTable,
   IndexIntoSourceTable,
+  IndexIntoSourceLocationTable,
   CounterDisplayConfig,
   SourceLocationTable,
 } from './profile';
@@ -280,6 +283,27 @@ export type StackTable = {
   // Derived from RawStackTable + FrameTable
   category: Uint8Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoCategoryList>
   subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoSubcategoryListForCategory>
+};
+
+/**
+ * The `FrameTable` type of the derived thread.
+ *
+ * Currently identical in shape to the `RawFrameTable`. Splitting the derived
+ * type off lets us widen columns (e.g. store `func` as a typed array) without
+ * affecting the raw type.
+ */
+export type FrameTable = {
+  address: Array<Address | -1>;
+  inlineDepth: number[];
+  category: (IndexIntoCategoryList | null)[];
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  func: IndexIntoFuncTable[];
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
+  innerWindowID: (InnerWindowID | null)[];
+  line: (number | null)[];
+  column: (number | null)[];
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  length: number;
 };
 
 /**

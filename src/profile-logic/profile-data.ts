@@ -9,7 +9,7 @@ import {
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
   getEmptyCallNodeTable,
-  shallowCloneFrameTable,
+  shallowCloneRawFrameTable,
   shallowCloneFuncTable,
 } from './data-structures';
 import {
@@ -54,6 +54,7 @@ import type {
   RawStackTable,
   SampleUnits,
   StackTable,
+  RawFrameTable,
   FrameTable,
   FuncTable,
   NativeSymbolTable,
@@ -4364,7 +4365,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   // Create the new frame table.
   // Frames that were observed both from the instruction pointer and from
   // stack walking have to be duplicated.
-  const newFrameTable = shallowCloneFrameTable(frameTable);
+  const newFrameTable = shallowCloneRawFrameTable(frameTable);
   // Iterate over all *return address* frames, i.e. all frames that were obtained
   // by stack walking.
   for (const [frame, address] of returnAddressFrames) {
@@ -4778,9 +4779,27 @@ export function computeTabToThreadIndexesMap(
   return tabToThreadIndexesMap;
 }
 
+export function computeFrameTableFromRawFrameTable(
+  rawFrameTable: RawFrameTable
+): FrameTable {
+  return {
+    address: rawFrameTable.address,
+    inlineDepth: rawFrameTable.inlineDepth,
+    category: rawFrameTable.category,
+    subcategory: rawFrameTable.subcategory,
+    func: rawFrameTable.func,
+    nativeSymbol: rawFrameTable.nativeSymbol,
+    innerWindowID: rawFrameTable.innerWindowID,
+    line: rawFrameTable.line,
+    column: rawFrameTable.column,
+    originalLocation: rawFrameTable.originalLocation,
+    length: rawFrameTable.length,
+  };
+}
+
 export function computeStackTableFromRawStackTable(
   rawStackTable: RawStackTable,
-  frameTable: FrameTable,
+  frameTable: RawFrameTable,
   categories: CategoryList | undefined,
   defaultCategory: IndexIntoCategoryList
 ): StackTable {

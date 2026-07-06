@@ -5,7 +5,7 @@ import type { Milliseconds } from 'firefox-profiler/types/units';
 import type {
   CategoryList,
   CategoryColor,
-  FrameTable,
+  RawFrameTable,
   FuncTable,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
@@ -23,7 +23,7 @@ import type {
 import {
   getEmptyFuncTable,
   getEmptyResourceTable,
-  getEmptyFrameTable,
+  getEmptyRawFrameTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
   type RawStackTableBuilder,
@@ -150,14 +150,14 @@ class FirefoxFuncTable {
 class FirefoxFrameTable {
   strings: StringTable;
 
-  frameTable: FrameTable = getEmptyFrameTable();
+  frameTable: RawFrameTable = getEmptyRawFrameTable();
   frameMap: Map<string, IndexIntoFrameTable> = new Map();
 
   constructor(strings: StringTable) {
     this.strings = strings;
   }
 
-  toJson(): FrameTable {
+  toJson(): RawFrameTable {
     return this.frameTable;
   }
 

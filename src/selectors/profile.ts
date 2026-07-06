@@ -20,6 +20,7 @@ import {
   computeInnerWindowIDToTabMap,
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
+  computeFrameTableFromRawFrameTable,
   reserveFunctionsForCollapsedResources,
   computeSamplesTableFromRawSamplesTable,
 } from '../profile-logic/profile-data';
@@ -39,6 +40,7 @@ import type {
   Profile,
   RawProfileSharedData,
   StackTable,
+  FrameTable,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -281,6 +283,11 @@ export const getStackTable: Selector<StackTable> = createSelector(
   getCategories,
   getDefaultCategory,
   computeStackTableFromRawStackTable
+);
+
+export const getFrameTable: Selector<FrameTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).frameTable,
+  computeFrameTableFromRawFrameTable
 );
 
 export const getFuncTableWithReservedFunctions: Selector<FuncTableWithReservedFunctions> =

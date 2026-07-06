@@ -68,7 +68,7 @@
 
 import {
   shallowCloneFuncTable,
-  shallowCloneFrameTable,
+  shallowCloneRawFrameTable,
   shallowCloneSourceLocationTable,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
@@ -92,7 +92,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoFrameTable,
   FuncTable,
-  FrameTable,
+  RawFrameTable,
   RawProfileSharedData,
   SourceLocationTable,
   SourceTable,
@@ -132,7 +132,7 @@ type ParsedSource = {
 // main thread in applySourceMapSymbolicationResponse, which builds new
 // tables from the current shared state at apply time.
 export type SourceMapSymbolicationInput = {
-  frameTable: FrameTable;
+  frameTable: RawFrameTable;
   funcTable: FuncTable;
   sourceLocationTable: SourceLocationTable;
   sources: SourceTable;
@@ -185,7 +185,7 @@ export function symbolicateWithSourceMaps(
  * candidates for line/column remapping.
  */
 function _identifyToSymbolicate(
-  frameTable: FrameTable,
+  frameTable: RawFrameTable,
   funcTable: FuncTable,
   sources: SourceTable
 ): {
@@ -949,7 +949,7 @@ export function applySourceMapSymbolicationResponse(
   response: SourceMapSymbolicationResponse
 ): {
   newFuncTable: FuncTable;
-  newFrameTable: FrameTable;
+  newFrameTable: RawFrameTable;
   newSourceLocationTable: SourceLocationTable;
   newSources: SourceTable;
   newStringArray: string[];
@@ -958,7 +958,7 @@ export function applySourceMapSymbolicationResponse(
     shared;
 
   const newFuncTable = shallowCloneFuncTable(funcTable);
-  const newFrameTable = shallowCloneFrameTable(frameTable);
+  const newFrameTable = shallowCloneRawFrameTable(frameTable);
   const newSourceLocationTable =
     shallowCloneSourceLocationTable(sourceLocationTable);
   const newSources = _shallowCloneSourceTable(sources);

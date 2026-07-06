@@ -5,7 +5,7 @@
 import { StringTable } from '../utils/string-table';
 import {
   finishRawStackTableBuilder,
-  getEmptyFrameTable,
+  getEmptyRawFrameTable,
   getEmptyFuncTable,
   getEmptyNativeSymbolTable,
   getEmptyResourceTable,
@@ -22,7 +22,7 @@ import type {
   IndexIntoSourceTable,
   RawProfileSharedData,
   SourceTable,
-  FrameTable,
+  RawFrameTable,
   FuncTable,
   ResourceTable,
   NativeSymbolTable,
@@ -50,7 +50,7 @@ export class GlobalDataCollector {
   _stringArray: string[] = [];
   _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
   _sources: SourceTable = getEmptySourceTable();
-  _frameTable: FrameTable = getEmptyFrameTable();
+  _frameTable: RawFrameTable = getEmptyRawFrameTable();
   _stackTableBuilder: RawStackTableBuilder = getRawStackTableBuilder();
   _funcTable: FuncTable = getEmptyFuncTable();
   _resourceTable: ResourceTable = getEmptyResourceTable();
@@ -299,7 +299,7 @@ export class GlobalDataCollector {
     return this._stringTable;
   }
 
-  getFrameTable(): FrameTable {
+  getFrameTable(): RawFrameTable {
     return this._frameTable;
   }
 
