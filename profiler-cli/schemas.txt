@@ -23,7 +23,25 @@ profiler-cli profile info --json
       counters?: [CounterSummary]
     }],
     remainingProcesses?: { count, combinedCpuMs, maxCpuMs },
+    networkActivity: ProfileNetworkSummary | null,
     context: SessionContext
+  }
+
+NetworkSummaryRequest:
+  {
+    markerHandle, threadHandle, url,
+    durationMs, startTime,
+    transferSizeKB?, httpStatus?, status,
+    incomplete, startedBeforeRecording
+  }
+
+ProfileNetworkSummary:
+  {
+    requestCount, incompleteCount,
+    inFlightMs, inFlightPercentage,
+    peakConcurrency, errorCount, rangeDurationMs,
+    slowest: [NetworkSummaryRequest],
+    byThread: [{ threadHandle, threadName, requestCount, inFlightMs }]
   }
 
 CounterSummary:
@@ -67,7 +85,17 @@ profiler-cli thread info --json
     sampleCount, markerCount,
     cpuActivity: [{ startTime, startTimeName, startTimeStr,
                     endTime, endTimeName, endTimeStr, cpuMs, depthLevel }] | null,
+    networkActivity: ThreadNetworkSummary | null,
     context: SessionContext
+  }
+
+ThreadNetworkSummary:
+  {
+    threadHandle, threadName,
+    requestCount, incompleteCount,
+    inFlightMs, inFlightPercentage, peakConcurrency,
+    errorCount, cacheHit, cacheMiss, cacheUnknown, rangeDurationMs,
+    slowest: [NetworkSummaryRequest]
   }
 
 profiler-cli thread samples --json

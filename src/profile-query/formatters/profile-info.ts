@@ -11,10 +11,12 @@ import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state'
 import { buildProcessThreadList, getProcessName } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
 import { collectCounterSummary, getSortedCounterIndexes } from './counter-info';
+import { computeProfileNetworkSummary } from '../network-summary';
 import type { Store } from '../../types/store';
 import type { ThreadInfo, ProcessListItem } from '../process-thread-list';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
+import type { MarkerMap } from '../marker-map';
 import type { ProfileInfoResult, CounterSummary } from '../types';
 
 /**
@@ -60,6 +62,7 @@ export function collectProfileInfo(
   store: Store,
   timestampManager: TimestampManager,
   threadMap: ThreadMap,
+  markerMap: MarkerMap,
   processIndexMap: Map<string, number>,
   showAll: boolean = false,
   search?: string
@@ -164,6 +167,12 @@ export function collectProfileInfo(
       ? collectSliceTree(combinedCpuActivity, timestampManager)
       : null;
 
+  const networkActivity = computeProfileNetworkSummary(
+    store,
+    threadMap,
+    markerMap
+  );
+
   return {
     type: 'profile-info',
     name: profileName || 'Unknown Profile',
@@ -176,5 +185,6 @@ export function collectProfileInfo(
     remainingProcesses:
       search !== undefined ? undefined : result.remainingProcesses,
     cpuActivity,
+    networkActivity,
   };
 }

@@ -28,6 +28,9 @@ import type {
   ThreadNetworkResult,
   ThreadPageLoadResult,
   NetworkPhaseTimings,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
   MarkerGroupData,
   CallTreeNode,
   InlineStatus,
@@ -280,6 +283,11 @@ CPU activity over time:`;
     output += '\nNo significant activity.';
   }
 
+  if (result.networkActivity) {
+    output +=
+      '\n\n' + formatThreadNetworkActivity(result.networkActivity).join('\n');
+  }
+
   return output;
 }
 
@@ -453,6 +461,13 @@ Name: ${result.name}\n`;
     }
   } else {
     output += 'No significant activity.\n';
+  }
+
+  if (result.networkActivity) {
+    output +=
+      '\n' +
+      formatProfileNetworkActivity(result.networkActivity).join('\n') +
+      '\n';
   }
 
   return output;
@@ -1219,6 +1234,172 @@ export function formatThreadFunctionsResult(
   );
 
   return lines.join('\n');
+}
+
+const STARTED_BEFORE_SUFFIX = ' (started before recording)';
+const IN_FLIGHT_SUFFIX = ' (in flight at end)';
+const REDIRECT_SUFFIX = ' (redirect)';
+const CANCELED_SUFFIX = ' (canceled)';
+
+/**
+ * Status-derived suffix for a summary request. STATUS_STOP is the normal
+ * completed request (no suffix); in-flight is handled separately via
+ * `incomplete`. Redirect / cancel legs are surfaced but flagged so they aren't
+ * mistaken for slow completed requests.
+ */
+function networkStatusSuffix(request: NetworkSummaryRequest): string {
+  switch (request.status) {
+    case 'STATUS_REDIRECT':
+      return REDIRECT_SUFFIX;
+    case 'STATUS_CANCEL':
+      return CANCELED_SUFFIX;
+    default:
+      return '';
+  }
+}
+
+/**
+ * Middle-truncate a URL keeping the host (which carries the signal) and the
+ * tail of the path (bare filenames like "channel" are useless on their own).
+ */
+function truncateNetworkUrl(url: string, maxLen: number = 70): string {
+  if (url.length <= maxLen) {
+    return url;
+  }
+  let host = '';
+  let rest = url;
+  try {
+    const parsed = new URL(url);
+    host = parsed.host;
+    rest = parsed.pathname + parsed.search;
+  } catch {
+    // Not a parseable URL; fall through to a raw middle-truncation.
+  }
+  if (host === '') {
+    const keep = Math.max(0, maxLen - 3);
+    const head = Math.ceil(keep / 2);
+    const tail = Math.floor(keep / 2);
+    return url.slice(0, head) + '...' + url.slice(url.length - tail);
+  }
+  const budget = maxLen - host.length;
+  if (budget <= 4) {
+    return host.length > maxLen ? host.slice(0, maxLen - 3) + '...' : host;
+  }
+  if (rest.length <= budget) {
+    return host + rest;
+  }
+  const keep = budget - 3;
+  const head = Math.ceil(keep / 2);
+  const tail = Math.floor(keep / 2);
+  return host + rest.slice(0, head) + '...' + rest.slice(rest.length - tail);
+}
+
+/**
+ * Render a thread-scoped network-activity section (used by `thread info`).
+ * Returns the lines; the caller joins and places them.
+ */
+function formatThreadNetworkActivity(summary: ThreadNetworkSummary): string[] {
+  const lines: string[] = [];
+  const incompletePart =
+    summary.incompleteCount > 0
+      ? `, ${summary.incompleteCount} still in flight at end of recording`
+      : '';
+  lines.push(
+    `Network activity: ${summary.requestCount} completed requests${incompletePart}`
+  );
+
+  const pct = Math.round(summary.inFlightPercentage);
+  const cacheParts: string[] = [];
+  if (summary.cacheHit > 0) {
+    cacheParts.push(`${summary.cacheHit} hit`);
+  }
+  if (summary.cacheMiss > 0) {
+    cacheParts.push(`${summary.cacheMiss} miss`);
+  }
+  if (summary.cacheUnknown > 0) {
+    cacheParts.push(`${summary.cacheUnknown} unknown`);
+  }
+  const cacheStr =
+    cacheParts.length > 0 ? `; cache: ${cacheParts.join(' / ')}` : '';
+  lines.push(
+    `  In flight ${pct}% of the thread's range (${formatDuration(summary.inFlightMs)} of ${formatDuration(summary.rangeDurationMs)}), peak ${summary.peakConcurrency} concurrent${cacheStr}; ${summary.errorCount} failed`
+  );
+
+  if (summary.slowest.length > 0) {
+    lines.push('  Slowest requests:');
+    for (const request of summary.slowest) {
+      const size =
+        request.transferSizeKB !== undefined
+          ? `${request.transferSizeKB.toFixed(1)}KB`
+          : '';
+      const suffix =
+        (request.incomplete ? IN_FLIGHT_SUFFIX : '') +
+        networkStatusSuffix(request) +
+        (request.startedBeforeRecording ? STARTED_BEFORE_SUFFIX : '');
+      const parts = [
+        `    ${request.markerHandle}`,
+        formatDuration(request.durationMs),
+        truncateNetworkUrl(request.url, 60),
+        size,
+      ].filter((part) => part !== '');
+      lines.push(parts.join('  ') + suffix);
+    }
+  }
+  return lines;
+}
+
+/**
+ * Render a profile-wide network-activity section (used by `profile info`).
+ * Returns the lines; the caller joins and places them.
+ */
+function formatProfileNetworkActivity(
+  summary: ProfileNetworkSummary
+): string[] {
+  const lines: string[] = [];
+  const incompletePart =
+    summary.incompleteCount > 0
+      ? `, ${summary.incompleteCount} still in flight at end of recording`
+      : '';
+  lines.push(
+    `Network activity: ${summary.requestCount} completed requests (deduped across processes)${incompletePart}`
+  );
+
+  const pct = Math.round(summary.inFlightPercentage);
+  lines.push(
+    `  In flight ${pct}% of the profile (${formatDuration(summary.inFlightMs)} of ${formatDuration(summary.rangeDurationMs)}), peak ${summary.peakConcurrency} concurrent; ${summary.errorCount} failed`
+  );
+
+  if (summary.slowest.length > 0) {
+    lines.push('  Slowest requests:');
+    for (const request of summary.slowest) {
+      const size =
+        request.transferSizeKB !== undefined
+          ? `${request.transferSizeKB.toFixed(1)}KB`
+          : '';
+      const suffix =
+        (request.incomplete ? IN_FLIGHT_SUFFIX : '') +
+        networkStatusSuffix(request) +
+        (request.startedBeforeRecording ? STARTED_BEFORE_SUFFIX : '');
+      const parts = [
+        `    ${request.markerHandle}`,
+        formatDuration(request.durationMs),
+        truncateNetworkUrl(request.url, 60),
+        `[${request.threadHandle}]`,
+        size,
+      ].filter((part) => part !== '');
+      lines.push(parts.join('  ') + suffix);
+    }
+  }
+
+  if (summary.byThread.length > 0) {
+    const parts = summary.byThread.map(
+      (thread) =>
+        `${thread.threadHandle} ${thread.threadName} (${thread.requestCount} reqs, ${formatDuration(thread.inFlightMs)} in flight)`
+    );
+    lines.push(`  By thread: ${parts.join(', ')}`);
+  }
+
+  return lines;
 }
 
 function formatNetworkPhases(phases: NetworkPhaseTimings): string {

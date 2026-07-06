@@ -213,6 +213,7 @@ export class ProfileQuerier {
       this._store,
       this._timestampManager,
       this._threadMap,
+      this._markerMap,
       this._processIndexMap,
       showAll,
       search
@@ -249,6 +250,7 @@ export class ProfileQuerier {
       this._store,
       this._timestampManager,
       this._threadMap,
+      this._markerMap,
       threadHandle
     );
     return { ...result, context: this._getContext() };

@@ -21,6 +21,8 @@ import {
   getProfileFromTextSamples,
   getCounterForThread,
   getCounterForThreadWithSamples,
+  getProfileWithMarkers,
+  getNetworkMarkers,
 } from '../../fixtures/profiles/processed-profile';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
@@ -625,6 +627,71 @@ describe('ProfileQuerier', function () {
         'X',
         'Y',
       ]);
+    });
+  });
+
+  describe('networkActivity', function () {
+    function querierWithNetwork() {
+      const markers = [
+        ...getNetworkMarkers({
+          id: 1,
+          uri: 'https://a.com/x',
+          startTime: 0,
+          fetchStart: 0,
+          endTime: 40,
+        }),
+        ...getNetworkMarkers({
+          id: 2,
+          uri: 'https://b.com/y',
+          startTime: 20,
+          fetchStart: 20,
+          endTime: 100,
+        }),
+      ];
+      const profile = getProfileWithMarkers(markers);
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('profileInfo includes networkActivity when network markers exist', async function () {
+      const info = await querierWithNetwork().profileInfo();
+      expect(info.networkActivity).not.toBeNull();
+      expect(info.networkActivity!.requestCount).toBe(2);
+      expect(info.networkActivity!.slowest.length).toBeGreaterThan(0);
+      expect(info.networkActivity!.slowest[0].markerHandle).toMatch(/^m-\d+$/);
+    });
+
+    it('threadInfo includes networkActivity for a thread with network markers', async function () {
+      const info = await querierWithNetwork().threadInfo('t-0');
+      expect(info.networkActivity).not.toBeNull();
+      expect(info.networkActivity!.requestCount).toBe(2);
+    });
+
+    it('networkActivity is null when the profile has no network markers', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        A  A  A
+      `);
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      const info = await querier.profileInfo();
+      expect(info.networkActivity).toBeNull();
+      const threadInfo = await querier.threadInfo('t-0');
+      expect(threadInfo.networkActivity).toBeNull();
+    });
+
+    it('zoom narrows the in-flight numbers', async function () {
+      const querier = querierWithNetwork();
+      const full = await querier.profileInfo();
+      const fullInFlight = full.networkActivity!.inFlightMs;
+
+      // Zoom into a sub-range that only partly overlaps the requests.
+      await querier.pushViewRange('50ms,80ms');
+      const zoomed = await querier.profileInfo();
+
+      expect(zoomed.networkActivity!.inFlightMs).toBeLessThan(fullInFlight);
     });
   });
 });

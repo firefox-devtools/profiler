@@ -12,6 +12,7 @@ import {
   getProfile,
 } from 'firefox-profiler/selectors/profile';
 import { collectSliceTree } from '../cpu-activity';
+import { computeThreadNetworkSummary } from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import type {
   ThreadInfoResult,
@@ -38,6 +39,7 @@ import type { Store } from '../../types/store';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
 import { getFunctionHandle } from '../function-map';
+import type { MarkerMap } from '../marker-map';
 import type { CallNodePath } from 'firefox-profiler/types';
 
 /**
@@ -47,6 +49,7 @@ export function collectThreadInfo(
   store: Store,
   timestampManager: TimestampManager,
   threadMap: ThreadMap,
+  markerMap: MarkerMap,
   threadHandle?: string
 ): ThreadInfoResult {
   const state = store.getState();
@@ -63,6 +66,13 @@ export function collectThreadInfo(
     cpuActivitySlices !== null
       ? collectSliceTree(cpuActivitySlices, timestampManager)
       : null;
+
+  const networkActivity = computeThreadNetworkSummary(
+    store,
+    threadIndexes,
+    markerMap,
+    threadMap
+  );
 
   const actualThreadHandle =
     threadHandle ?? threadMap.handleForThreadIndexes(threadIndexes);
@@ -83,6 +93,7 @@ export function collectThreadInfo(
     sampleCount: thread.samples.length,
     markerCount: thread.markers.length,
     cpuActivity,
+    networkActivity,
   };
 }
 

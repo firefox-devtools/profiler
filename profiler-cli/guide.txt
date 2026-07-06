@@ -31,6 +31,10 @@ CORE WORKFLOW
     profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
     profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
 
+    See the "Network activity" section in "profile info": if requests are in
+    flight for much of the profile while threads are idle, the bottleneck may be
+    the network -- follow the m-N handles (zoom push / marker info) to dig in.
+
   Step 3: Select a thread to analyze
     profiler-cli thread select t-0     Select a specific thread (persists for future commands)
 
@@ -361,6 +365,9 @@ TIPS
 
   - Start with "profile info"; GeckoMain is usually the main thread -- use
     "--search GeckoMain" to find it quickly
+  - CPU time is not the only signal. A profile where threads are mostly idle but
+    network is in flight for most of the duration is a network-bound profile --
+    report the slow requests, not the hottest function.
   - Idle time alone is not a finding: only investigate idle during a period when the
     thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
     lock contention or blocking on another thread
