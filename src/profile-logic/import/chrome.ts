@@ -12,6 +12,8 @@ import type {
 import {
   getEmptyProfile,
   getEmptyThread,
+  getRawSamplesTableBuilderWithEventDelay,
+  type RawSamplesTableBuilder,
   type RawStackTableBuilder,
 } from '../data-structures';
 import type { StringTable } from '../../utils/string-table';
@@ -270,6 +272,7 @@ export function attemptToConvertChromeProfile(
 
 type ThreadInfo = {
   thread: RawThread;
+  samples: RawSamplesTableBuilder;
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>;
   lastSeenTime: number;
   lastSampledTime: number;
@@ -316,7 +319,8 @@ function getThreadInfo(
   if (cachedThreadInfo) {
     return cachedThreadInfo;
   }
-  const thread = getEmptyThread();
+  const samples = getRawSamplesTableBuilderWithEventDelay();
+  const thread = getEmptyThread({ samples });
   thread.pid = `${chunk.pid}`;
   // It looks like the TID information in Chrome's data isn't the system's TID
   // but some internal values only unique for a pid. Therefore let's generate a
@@ -401,6 +405,7 @@ function getThreadInfo(
 
   const threadInfo: ThreadInfo = {
     thread,
+    samples,
     nodeIdToStackId,
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
@@ -531,7 +536,7 @@ async function processTracingEvents(
       profile,
       profileEvent
     );
-    const { thread, nodeIdToStackId } = threadInfo;
+    const { samples: samplesTable, nodeIdToStackId } = threadInfo;
 
     let profileChunks: any[] = [];
     if (profileEvent.name === 'Profile') {
@@ -564,8 +569,6 @@ async function processTracingEvents(
       if (!timeDeltas) {
         continue;
       }
-
-      const { samples: samplesTable } = thread;
 
       if (nodes) {
         const parentMap = new Map<number, number>();

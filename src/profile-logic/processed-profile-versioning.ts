@@ -3276,6 +3276,18 @@ const _upgraders: {
     stackTable.prefixOffset = prefixOffset;
     delete stackTable.prefix;
   },
+  [67]: (_profile: any) => {
+    // Various raw columns can now optionally be stored as typed arrays:
+    //  - `thread.samples.time` / `timeDeltas` (`Float64Array`)
+    //  - `counter.samples.time` / `timeDeltas` (`Float64Array`)
+    //  - `thread.jsAllocations.time` (`Float64Array`)
+    //  - `thread.nativeAllocations.time` (`Float64Array`)
+    //  - `profile.shared.frameTable.func` (`Int32Array`)
+    //  - `profile.shared.frameTable.address` (`Int32Array`, `-1` sentinel)
+    //  - `profile.shared.frameTable.inlineDepth` (`Uint8Array`)
+    // Regular JS / JSON arrays are still accepted. All valid v66 profiles
+    // are valid v67 profiles, so no upgrader is needed.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

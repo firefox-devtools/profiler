@@ -13,6 +13,7 @@ import type {
 import {
   getEmptyProfile,
   getEmptyThread,
+  getRawSamplesTableBuilderWithEventDelay,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
 import { ensureExists } from 'firefox-profiler/utils/types';
@@ -61,7 +62,8 @@ export function convertFlameGraphProfile(profileText: string): Profile {
 
   const frameTable = globalDataCollector.getFrameTable();
   const stackTable = globalDataCollector.getStackTableBuilder();
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderWithEventDelay();
+  thread.samples = samples;
 
   // Maps to deduplicate stacks, frames, and functions.
   const stackMap = new Map<string, IndexIntoStackTable>();

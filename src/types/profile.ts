@@ -126,9 +126,9 @@ export type RawSamplesTable = {
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<Milliseconds | null>;
   stack: Array<IndexIntoStackTable | null>;
-  time?: Milliseconds[];
+  time?: Milliseconds[] | Float64Array<ArrayBuffer>;
   // If the `time` column is not present, then the `timeDeltas` column must be present.
-  timeDeltas?: Milliseconds[];
+  timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer>;
   argumentValues?: Array<number | null>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
@@ -155,7 +155,7 @@ export type RawSamplesTable = {
  * There is also a derived `JsAllocationsTable` type, see profile-derived.js.
  */
 export type RawJsAllocationsTable = {
-  time: Milliseconds[];
+  time: Milliseconds[] | Float64Array<ArrayBuffer>;
   className: string[];
   typeName: string[]; // Currently only 'JSObject'
   coarseType: string[]; // Currently only 'Object',
@@ -173,7 +173,7 @@ export type RawJsAllocationsTable = {
  * and threadId were added.
  */
 export type RawUnbalancedNativeAllocationsTable = {
-  time: Milliseconds[];
+  time: Milliseconds[] | Float64Array<ArrayBuffer>;
   // "weight" is used here rather than "bytes", so that this type can be
   // used as a SamplesLikeTable.
   weight: Bytes[];
@@ -245,7 +245,9 @@ export type RawFrameTable = {
   //
   // The library which this address is relative to is given by the frame's nativeSymbol:
   // frame -> nativeSymbol -> lib.
-  address: Array<Address | -1>;
+  //
+  // Frames with no address use the sentinel value `-1`.
+  address: Array<Address | -1> | Int32Array<ArrayBuffer>;
 
   // The inline depth for this frame. If there is an inline stack at an address,
   // we create multiple frames with the same address, one for each depth.
@@ -273,7 +275,7 @@ export type RawFrameTable = {
   //
   // The frames of an inline stack at an address all have the same address and the same
   // nativeSymbol, but each has a different func and line.
-  inlineDepth: number[];
+  inlineDepth: number[] | Uint8Array<ArrayBuffer>;
 
   // The category of the frame. This is used to calculate the category of the stack nodes
   // which use this frame:
@@ -290,7 +292,7 @@ export type RawFrameTable = {
   subcategory: (IndexIntoSubcategoryListForCategory | null)[];
 
   // The frame's function.
-  func: IndexIntoFuncTable[];
+  func: IndexIntoFuncTable[] | Int32Array<ArrayBuffer>;
 
   // The symbol index (referring into this thread's nativeSymbols table) corresponding
   // to symbol that covers the frame address of this frame. Only non-null for native
@@ -534,8 +536,8 @@ export type JsTracerTable = {
 };
 
 export type RawCounterSamplesTable = {
-  time?: Milliseconds[];
-  timeDeltas?: Milliseconds[];
+  time?: Milliseconds[] | Float64Array<ArrayBuffer>;
+  timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer>;
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[];

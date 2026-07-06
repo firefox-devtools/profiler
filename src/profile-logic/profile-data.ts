@@ -1943,7 +1943,7 @@ export function computeTimeColumnForRawSamplesTable(
 ): Float64Array<ArrayBuffer> {
   const { time, timeDeltas } = samples;
   if (time !== undefined) {
-    return Float64Array.from(time);
+    return time instanceof Float64Array ? time : new Float64Array(time);
   }
   return numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
@@ -2267,7 +2267,7 @@ export function filterRawThreadSamplesToRange(
   );
   const newSamples: RawSamplesTable = {
     length: endSampleIndex - beginSampleIndex,
-    time: Array.from(sampleTimes.slice(beginSampleIndex, endSampleIndex)),
+    time: sampleTimes.slice(beginSampleIndex, endSampleIndex),
     weight: samples.weight
       ? samples.weight.slice(beginSampleIndex, endSampleIndex)
       : null,
@@ -2402,7 +2402,7 @@ export function filterCounterSamplesToRange(
 
   newCounter.samples = {
     length: endSampleIndex - beginSampleIndex,
-    time: Array.from(timeColumn.slice(beginSampleIndex, endSampleIndex)),
+    time: timeColumn.slice(beginSampleIndex, endSampleIndex),
     count: samples.count.slice(beginSampleIndex, endSampleIndex),
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
@@ -4782,9 +4782,18 @@ export function computeTabToThreadIndexesMap(
 export function computeFrameTableFromRawFrameTable(
   rawFrameTable: RawFrameTable
 ): FrameTable {
-  const address = new Int32Array(rawFrameTable.address);
-  const inlineDepth = new Uint8Array(rawFrameTable.inlineDepth);
-  const func = new Int32Array(rawFrameTable.func);
+  const address =
+    rawFrameTable.address instanceof Int32Array
+      ? rawFrameTable.address
+      : new Int32Array(rawFrameTable.address);
+  const inlineDepth =
+    rawFrameTable.inlineDepth instanceof Uint8Array
+      ? rawFrameTable.inlineDepth
+      : new Uint8Array(rawFrameTable.inlineDepth);
+  const func =
+    rawFrameTable.func instanceof Int32Array
+      ? rawFrameTable.func
+      : new Int32Array(rawFrameTable.func);
   return {
     address,
     inlineDepth,

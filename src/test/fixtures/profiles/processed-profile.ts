@@ -9,6 +9,7 @@ import {
   getEmptyRawUnbalancedNativeAllocationsTable,
   getEmptyRawBalancedNativeAllocationsTable,
   getRawStackTableBuilderWithExistingContents,
+  getRawSamplesTableBuilderFromExisting,
   finishRawStackTableBuilder,
   getRawFrameTableBuilderWithExistingContents,
 } from '../../../profile-logic/data-structures';
@@ -210,7 +211,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
   // control the initial range. Because of that we need to add samples so that
   // the range includes these markers. Note that when a thread has no sample,
   // then the markers are used to compute the initial range.
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderFromExisting(thread.samples);
+  thread.samples = samples;
   if (samples.length) {
     const firstMarkerTime = Math.min(...allTimes);
     const lastMarkerTime = Math.max(...allTimes);
@@ -1523,7 +1525,7 @@ export function getCounterForThreadWithSamples(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
   samples: {
-    time?: number[];
+    time?: number[] | Float64Array<ArrayBuffer>;
     number?: number[];
     count?: number[];
     length: number;
@@ -2014,7 +2016,8 @@ export function addInnerWindowIdToStacks(
   callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable } = shared;
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderFromExisting(thread.samples);
+  thread.samples = samples;
   const usedInnerWindowIDsSet = new Set<number>();
 
   for (const { innerWindowID, callNodes } of listOfOperations) {
