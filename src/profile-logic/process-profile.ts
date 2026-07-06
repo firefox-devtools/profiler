@@ -1469,10 +1469,9 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustTableTimestamps<Table extends { time: Milliseconds[] }>(
-  table: Table,
-  delta: Milliseconds
-): Table {
+export function adjustTableTimestamps<
+  Table extends { time: Milliseconds[] | Float64Array<ArrayBuffer> },
+>(table: Table, delta: Milliseconds): Table {
   return {
     ...table,
     time: table.time.map((time) => time + delta),
@@ -1480,7 +1479,7 @@ export function adjustTableTimestamps<Table extends { time: Milliseconds[] }>(
 }
 
 export function adjustTableTimeDeltas<
-  Table extends { timeDeltas?: Milliseconds[] },
+  Table extends { timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer> },
 >(table: Table, delta: Milliseconds): Table {
   const { timeDeltas } = table;
   if (timeDeltas === undefined) {

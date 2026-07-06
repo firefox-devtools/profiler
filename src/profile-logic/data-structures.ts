@@ -183,7 +183,15 @@ export function getRawSamplesTableBuilderFromExisting(
 export function finishRawSamplesTableBuilder(
   builder: RawSamplesTableBuilder
 ): RawSamplesTable {
-  return builder;
+  return {
+    ...builder,
+    time:
+      builder.time === undefined ? undefined : new Float64Array(builder.time),
+    timeDeltas:
+      builder.timeDeltas === undefined
+        ? undefined
+        : new Float64Array(builder.timeDeltas),
+  };
 }
 
 export function getRawStackTableBuilderWithExistingContents(
@@ -265,11 +273,11 @@ export function getRawFrameTableBuilderWithExistingContents(
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    address: frameTable.address.slice(),
-    inlineDepth: frameTable.inlineDepth.slice(),
+    address: Array.from(frameTable.address),
+    inlineDepth: Array.from(frameTable.inlineDepth),
     category: frameTable.category.slice(),
     subcategory: frameTable.subcategory.slice(),
-    func: frameTable.func.slice(),
+    func: Array.from(frameTable.func),
     nativeSymbol: frameTable.nativeSymbol.slice(),
     innerWindowID: frameTable.innerWindowID.slice(),
     line: frameTable.line.slice(),
@@ -282,7 +290,12 @@ export function getRawFrameTableBuilderWithExistingContents(
 export function finishRawFrameTableBuilder(
   builder: RawFrameTableBuilder
 ): RawFrameTable {
-  return builder;
+  return {
+    ...builder,
+    address: new Int32Array(builder.address),
+    inlineDepth: new Uint8Array(builder.inlineDepth),
+    func: new Int32Array(builder.func),
+  };
 }
 
 export function getEmptyFuncTable(): FuncTable {
@@ -460,19 +473,28 @@ export function getEmptyRawBalancedNativeAllocationsTable(): RawBalancedNativeAl
 export function finishRawJsAllocationsTableBuilder(
   builder: RawJsAllocationsTableBuilder
 ): RawJsAllocationsTable {
-  return builder;
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
 }
 
 export function finishRawUnbalancedNativeAllocationsTableBuilder(
   builder: RawUnbalancedNativeAllocationsTableBuilder
 ): RawUnbalancedNativeAllocationsTable {
-  return builder;
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
 }
 
 export function finishRawBalancedNativeAllocationsTableBuilder(
   builder: RawBalancedNativeAllocationsTableBuilder
 ): RawBalancedNativeAllocationsTable {
-  return builder;
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
 }
 
 export function shallowCloneRawMarkerTable(

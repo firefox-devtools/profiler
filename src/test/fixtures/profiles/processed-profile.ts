@@ -1533,7 +1533,7 @@ export function getCounterForThreadWithSamples(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
   samples: {
-    time?: number[];
+    time?: number[] | Float64Array<ArrayBuffer>;
     number?: number[];
     count?: number[];
     length: number;

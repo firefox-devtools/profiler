@@ -61,7 +61,10 @@ type ColumnDescription<TCol> = null extends (
         | { type: 'NO_REF' };
 
 type TableDescription<T> = {
-  [K in keyof T as T[K] extends Array<any> | Int32Array<ArrayBuffer>
+  [K in keyof T as T[K] extends
+    | Array<any>
+    | Int32Array<ArrayBuffer>
+    | Uint8Array<ArrayBuffer>
     ? K
     : never]: ColumnDescription<T[K]>;
 };
@@ -164,7 +167,7 @@ export function computeCompactedProfile(
     inlineDepth: ColDesc.noRef(),
     category: ColDesc.noRef(),
     subcategory: ColDesc.noRef(),
-    func: ColDesc.indexRef(tcs.funcTable),
+    func: ColDesc.indexRefInt32(tcs.funcTable),
     nativeSymbol: ColDesc.indexRefOrNull(tcs.nativeSymbols),
     innerWindowID: ColDesc.noRef(),
     line: ColDesc.noRef(),

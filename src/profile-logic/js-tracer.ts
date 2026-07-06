@@ -9,6 +9,7 @@ import {
   finishRawStackTableBuilder,
   getRawStackTableBuilderWithExistingContents,
   getRawFrameTableBuilderWithExistingContents,
+  type RawSamplesTableBuilder,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/types';
@@ -504,7 +505,7 @@ export function convertJsTracerToThreadWithoutSamples(
   thread: RawThread;
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
 } {
-  const samples: RawSamplesTable = {
+  const samples: RawSamplesTableBuilder = {
     ...getRawSamplesTableBuilderWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',

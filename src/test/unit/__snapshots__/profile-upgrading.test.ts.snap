@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 66,
+    "preprocessedProfileVersion": 67,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -62,7 +62,7 @@ Object {
   "profilingLog": Object {},
   "shared": Object {
     "frameTable": Object {
-      "address": Array [
+      "address": Int32Array [
         -1,
         -1,
         -1,
@@ -674,7 +674,7 @@ Object {
         null,
         null,
       ],
-      "func": Array [
+      "func": Int32Array [
         0,
         1,
         2,
@@ -878,7 +878,7 @@ Object {
         70,
         71,
       ],
-      "inlineDepth": Array [
+      "inlineDepth": Uint8Array [
         0,
         0,
         0,
@@ -7643,7 +7643,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 66,
+    "preprocessedProfileVersion": 67,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9019,7 +9019,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 66,
+    "preprocessedProfileVersion": 67,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10563,7 +10563,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 66,
+    "preprocessedProfileVersion": 67,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

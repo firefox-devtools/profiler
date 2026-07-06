@@ -510,7 +510,7 @@ describe('js allocation processing', function () {
     }
 
     // Assert that the transformation makes sense.
-    expect(jsAllocations.time).toEqual([0, 1, 2]);
+    expect(jsAllocations.time).toEqual(new Float64Array([0, 1, 2]));
     expect(jsAllocations.weight).toEqual([3, 5, 7]);
 
     // All addressses should be nudged by 1 byte, because js allocation stack frames
@@ -594,7 +594,7 @@ describe('native allocation processing', function () {
     }
 
     // Assert that the transformation makes sense.
-    expect(nativeAllocations.time).toEqual([0, 1, 2]);
+    expect(nativeAllocations.time).toEqual(new Float64Array([0, 1, 2]));
     expect(nativeAllocations.weight).toEqual([3, 5, 7]);
     expect(nativeAllocations.stack).toEqual([8, 9, null]);
   });
