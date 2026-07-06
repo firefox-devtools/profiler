@@ -10,7 +10,7 @@ import type {
   Category,
 } from '../types/profile';
 import {
-  shallowCloneFrameTable,
+  shallowCloneRawFrameTable,
   shallowCloneFuncTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -105,7 +105,7 @@ export function insertStackLabels(
     sources,
     stringArray,
   } = profile.shared;
-  const frameTable = shallowCloneFrameTable(oldFrameTable);
+  const frameTable = shallowCloneRawFrameTable(oldFrameTable);
   const funcTable = shallowCloneFuncTable(oldFuncTable);
   const stringTable = StringTable.withBackingArray(stringArray);
 

@@ -6,7 +6,7 @@ import {
   finishRawStackTableBuilder,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
-  shallowCloneFrameTable,
+  shallowCloneRawFrameTable,
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
@@ -716,7 +716,7 @@ function _partiallyApplySymbolicationStep(
 
   // Integrate the new native symbol column into the frame table and make a
   // copy so that we can add new frames below.
-  const frameTable = shallowCloneFrameTable({
+  const frameTable = shallowCloneRawFrameTable({
     ...oldFrameTable,
     nativeSymbol: newFrameTableNativeSymbolsColumn,
   });

@@ -52,7 +52,7 @@ import type {
   RawThread,
   RawCounter,
   ExtensionTable,
-  FrameTable,
+  RawFrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
   RawMarkerTable,
@@ -521,7 +521,7 @@ function _extractUnknownFunctionType(
  */
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
-  sharedFrameTable: FrameTable,
+  sharedFrameTable: RawFrameTable,
   frameFuncs: IndexIntoFuncTable[],
   frameAddresses: (Address | null)[]
 ): IndexIntoFrameTable {

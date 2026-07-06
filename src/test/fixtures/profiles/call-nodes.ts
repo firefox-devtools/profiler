@@ -1,7 +1,7 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import type { FuncTable, FrameTable, Profile } from 'firefox-profiler/types';
+import type { FuncTable, RawFrameTable, Profile } from 'firefox-profiler/types';
 
 import {
   getEmptyThread,
@@ -74,7 +74,7 @@ export default function getProfile(): Profile {
     funcFFrame,
   ] = frameFuncs.map((_, i) => i);
 
-  const frameTable: FrameTable = {
+  const frameTable: RawFrameTable = {
     func: frameFuncs.map((stringIndex) => funcTable.name.indexOf(stringIndex)),
     address: Array(frameFuncs.length).fill(-1),
     inlineDepth: Array(frameFuncs.length).fill(0),

@@ -12,7 +12,7 @@ import type {
   RawMarkerTable,
   IndexIntoStackTable,
   RawStackTable,
-  FrameTable,
+  RawFrameTable,
   FuncTable,
   ResourceTable,
   NativeSymbolTable,
@@ -159,7 +159,7 @@ export function computeCompactedProfile(
     frame: ColDesc.indexRefInt32(tcs.frameTable),
     prefixOffset: ColDesc.selfPrefixOffset(),
   };
-  const frameTableDesc: TableDescription<FrameTable> = {
+  const frameTableDesc: TableDescription<RawFrameTable> = {
     address: ColDesc.noRef(),
     inlineDepth: ColDesc.noRef(),
     category: ColDesc.noRef(),

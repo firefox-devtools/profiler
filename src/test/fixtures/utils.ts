@@ -18,6 +18,7 @@ import {
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
+  computeFrameTableFromRawFrameTable,
   computeSamplesTableFromRawSamplesTable,
   computeJsAllocationsTableFromRawJsAllocationsTable,
   computeNativeAllocationsTableFromRawNativeAllocationsTable,
@@ -148,9 +149,10 @@ export function computeThreadFromRawThread(
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
-    shared.frameTable,
+    frameTable,
     categories,
     defaultCategory
   );
@@ -178,7 +180,7 @@ export function computeThreadFromRawThread(
     rawThread,
     samples,
     stackTable,
-    shared.frameTable,
+    frameTable,
     shared.funcTable,
     shared.nativeSymbols,
     shared.resourceTable,
