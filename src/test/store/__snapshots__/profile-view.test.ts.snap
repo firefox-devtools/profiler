@@ -2410,7 +2410,7 @@ CallTree {
   "_thread": Object {
     "eTLD+1": undefined,
     "frameTable": Object {
-      "address": Array [
+      "address": Int32Array [
         -1,
         -1,
         -1,
@@ -2443,7 +2443,7 @@ CallTree {
         null,
         null,
       ],
-      "func": Array [
+      "func": Int32Array [
         0,
         1,
         2,
@@ -2454,7 +2454,7 @@ CallTree {
         7,
         8,
       ],
-      "inlineDepth": Array [
+      "inlineDepth": Uint8Array [
         0,
         0,
         0,
@@ -2798,7 +2798,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -2831,7 +2831,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -2842,7 +2842,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -3266,7 +3266,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -3299,7 +3299,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -3310,7 +3310,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -3640,7 +3640,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -3673,7 +3673,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -3684,7 +3684,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -4026,7 +4026,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -4059,7 +4059,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -4070,7 +4070,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
