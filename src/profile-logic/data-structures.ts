@@ -15,9 +15,6 @@ import type {
   RawStackTable,
   FuncTable,
   RawMarkerTable,
-  RawJsAllocationsTable,
-  RawUnbalancedNativeAllocationsTable,
-  RawBalancedNativeAllocationsTable,
   ResourceTable,
   NativeSymbolTable,
   Profile,
@@ -36,6 +33,10 @@ import type {
   IndexIntoSourceLocationTable,
   InnerWindowID,
   Address,
+  Bytes,
+  Milliseconds,
+  Tid,
+  WeightType,
 } from 'firefox-profiler/types';
 
 /**
@@ -47,6 +48,52 @@ import type {
  * profile files) may be using typed arrays for some of the columns,
  * and you can't push to a typed array.
  */
+export type RawSamplesTableBuilder = {
+  responsiveness?: Array<Milliseconds | null>;
+  eventDelay?: Array<Milliseconds | null>;
+  stack: Array<IndexIntoStackTable | null>;
+  time?: Milliseconds[];
+  timeDeltas?: Milliseconds[];
+  argumentValues?: Array<number | null>;
+  weight: null | number[];
+  weightType: WeightType;
+  threadCPUDelta?: Array<number | null>;
+  threadId?: Tid[];
+  length: number;
+};
+
+export type RawJsAllocationsTableBuilder = {
+  time: Milliseconds[];
+  className: string[];
+  typeName: string[];
+  coarseType: string[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+export type RawUnbalancedNativeAllocationsTableBuilder = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  length: number;
+};
+
+export type RawBalancedNativeAllocationsTableBuilder = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  memoryAddress: number[];
+  threadId: number[];
+  length: number;
+};
+
 export type RawFrameTableBuilder = {
   address: Array<Address | -1>;
   inlineDepth: number[];
@@ -71,7 +118,7 @@ export type RawStackTableBuilder = {
  * This module collects all of the creation of new empty profile data structures.
  */
 
-export function getEmptySamplesTable(): RawSamplesTable {
+export function getRawSamplesTableBuilder(): RawSamplesTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -94,6 +141,39 @@ export function getRawStackTableBuilder(): RawStackTableBuilder {
     frame: [],
     prefix: [],
     length: 0,
+  };
+}
+
+/**
+ * Return a `RawSamplesTableBuilder` view of an existing samples table. If the
+ * table's time / timeDeltas columns are already plain arrays, they are aliased
+ * through so that in-place mutations on the builder are visible via the
+ * returned reference. If they are typed arrays (only produced by the JSLB
+ * loader), they are copied into plain arrays.
+ *
+ * The returned builder shares object identity with `existing` in the common
+ * (plain-array) case, so callers do not need to reassign it back onto the
+ * thread. In the typed-array case a new object is returned; callers should
+ * reassign it (`thread.samples = builder`) to preserve mutations.
+ */
+export function getRawSamplesTableBuilderFromExisting(
+  existing: RawSamplesTable
+): RawSamplesTableBuilder {
+  const time = existing.time;
+  const timeDeltas = existing.timeDeltas;
+  if (
+    (time === undefined || Array.isArray(time)) &&
+    (timeDeltas === undefined || Array.isArray(timeDeltas))
+  ) {
+    return existing as RawSamplesTableBuilder;
+  }
+  return {
+    ...existing,
+    time: time === undefined || Array.isArray(time) ? time : Array.from(time),
+    timeDeltas:
+      timeDeltas === undefined || Array.isArray(timeDeltas)
+        ? timeDeltas
+        : Array.from(timeDeltas),
   };
 }
 
@@ -133,7 +213,7 @@ export function finishRawStackTableBuilder(
  * eventDelay is a new field and it replaced responsiveness. We should still
  * account for older profiles and use both of the flavors if needed.
  */
-export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
+export function getRawSamplesTableBuilderWithEventDelay(): RawSamplesTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -306,7 +386,7 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
   };
 }
 
-export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTable {
+export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -328,7 +408,7 @@ export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTable {
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyRawUnbalancedNativeAllocationsTable(): RawUnbalancedNativeAllocationsTable {
+export function getEmptyRawUnbalancedNativeAllocationsTable(): RawUnbalancedNativeAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -346,7 +426,7 @@ export function getEmptyRawUnbalancedNativeAllocationsTable(): RawUnbalancedNati
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyRawBalancedNativeAllocationsTable(): RawBalancedNativeAllocationsTable {
+export function getEmptyRawBalancedNativeAllocationsTable(): RawBalancedNativeAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -452,7 +532,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     pid: '0',
     tid: 0,
     // Creating samples with event delay since it's the new samples table.
-    samples: getEmptySamplesTableWithEventDelay(),
+    samples: getRawSamplesTableBuilderWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
   };
 

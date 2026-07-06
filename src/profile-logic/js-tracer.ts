@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  getEmptySamplesTableWithEventDelay,
+  getRawSamplesTableBuilderWithEventDelay,
   getEmptyRawMarkerTable,
   finishRawStackTableBuilder,
   getRawStackTableBuilderWithExistingContents,
@@ -503,7 +503,7 @@ export function convertJsTracerToThreadWithoutSamples(
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
 } {
   const samples: RawSamplesTable = {
-    ...getEmptySamplesTableWithEventDelay(),
+    ...getRawSamplesTableBuilderWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
   };
@@ -803,7 +803,7 @@ export function getSelfTimeSamplesFromJsTracer(
   const isNearlyEqual = (a: number, b: number) => Math.abs(a - b) < epsilon;
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
-  const samples = getEmptySamplesTableWithEventDelay();
+  const samples = getRawSamplesTableBuilderWithEventDelay();
   const sampleWeights: number[] = [];
   samples.weight = sampleWeights;
 
