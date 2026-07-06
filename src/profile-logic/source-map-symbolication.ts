@@ -67,8 +67,9 @@
  */
 
 import {
+  finishRawFrameTableBuilder,
   shallowCloneFuncTable,
-  shallowCloneRawFrameTable,
+  getRawFrameTableBuilderWithExistingContents,
   shallowCloneSourceLocationTable,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
@@ -958,7 +959,7 @@ export function applySourceMapSymbolicationResponse(
     shared;
 
   const newFuncTable = shallowCloneFuncTable(funcTable);
-  const newFrameTable = shallowCloneRawFrameTable(frameTable);
+  const newFrameTable = getRawFrameTableBuilderWithExistingContents(frameTable);
   const newSourceLocationTable =
     shallowCloneSourceLocationTable(sourceLocationTable);
   const newSources = _shallowCloneSourceTable(sources);
@@ -1042,7 +1043,7 @@ export function applySourceMapSymbolicationResponse(
 
   return {
     newFuncTable,
-    newFrameTable,
+    newFrameTable: finishRawFrameTableBuilder(newFrameTable),
     newSourceLocationTable,
     newSources,
     newStringArray,

@@ -23,9 +23,11 @@ import type {
 import {
   getEmptyFuncTable,
   getEmptyResourceTable,
-  getEmptyRawFrameTable,
+  getRawFrameTableBuilder,
   getRawStackTableBuilder,
+  finishRawFrameTableBuilder,
   finishRawStackTableBuilder,
+  type RawFrameTableBuilder,
   type RawStackTableBuilder,
   getEmptySamplesTable,
   getEmptyRawMarkerTable,
@@ -150,7 +152,7 @@ class FirefoxFuncTable {
 class FirefoxFrameTable {
   strings: StringTable;
 
-  frameTable: RawFrameTable = getEmptyRawFrameTable();
+  frameTable: RawFrameTableBuilder = getRawFrameTableBuilder();
   frameMap: Map<string, IndexIntoFrameTable> = new Map();
 
   constructor(strings: StringTable) {
@@ -158,7 +160,7 @@ class FirefoxFrameTable {
   }
 
   toJson(): RawFrameTable {
-    return this.frameTable;
+    return finishRawFrameTableBuilder(this.frameTable);
   }
 
   findOrAddFrame(

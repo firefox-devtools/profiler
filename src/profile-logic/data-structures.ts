@@ -28,8 +28,44 @@ import type {
   SourceTable,
   SourceLocationTable,
   IndexIntoFrameTable,
+  IndexIntoFuncTable,
   IndexIntoStackTable,
+  IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
+  IndexIntoNativeSymbolTable,
+  IndexIntoSourceLocationTable,
+  InnerWindowID,
+  Address,
 } from 'firefox-profiler/types';
+
+/**
+ * Builder-variants of various tables. The columns here use plain
+ * arrays so that elements can be added one-by-one by pushing to
+ * the column arrays.
+ *
+ * The "raw" variants of these arrays (i.e. what's stored in the
+ * profile files) may be using typed arrays for some of the columns,
+ * and you can't push to a typed array.
+ */
+export type RawFrameTableBuilder = {
+  address: Array<Address | -1>;
+  inlineDepth: number[];
+  category: (IndexIntoCategoryList | null)[];
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  func: IndexIntoFuncTable[];
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
+  innerWindowID: (InnerWindowID | null)[];
+  line: (number | null)[];
+  column: (number | null)[];
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  length: number;
+};
+
+export type RawStackTableBuilder = {
+  frame: IndexIntoFrameTable[];
+  prefix: Array<IndexIntoStackTable | null>;
+  length: number;
+};
 
 /**
  * This module collects all of the creation of new empty profile data structures.
@@ -48,12 +84,6 @@ export function getEmptySamplesTable(): RawSamplesTable {
     length: 0,
   };
 }
-
-export type RawStackTableBuilder = {
-  frame: IndexIntoFrameTable[];
-  prefix: Array<IndexIntoStackTable | null>;
-  length: number;
-};
 
 export function getRawStackTableBuilder(): RawStackTableBuilder {
   return {
@@ -118,7 +148,7 @@ export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
   };
 }
 
-export function getEmptyRawFrameTable(): RawFrameTable {
+export function getRawFrameTableBuilder(): RawFrameTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -138,9 +168,9 @@ export function getEmptyRawFrameTable(): RawFrameTable {
   };
 }
 
-export function shallowCloneRawFrameTable(
+export function getRawFrameTableBuilderWithExistingContents(
   frameTable: RawFrameTable
-): RawFrameTable {
+): RawFrameTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -158,6 +188,12 @@ export function shallowCloneRawFrameTable(
     originalLocation: frameTable.originalLocation.slice(),
     length: frameTable.length,
   };
+}
+
+export function finishRawFrameTableBuilder(
+  builder: RawFrameTableBuilder
+): RawFrameTable {
+  return builder;
 }
 
 export function getEmptyFuncTable(): FuncTable {
@@ -435,7 +471,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
 export function getEmptySharedData(): RawProfileSharedData {
   return {
     stackTable: finishRawStackTableBuilder(getRawStackTableBuilder()),
-    frameTable: getEmptyRawFrameTable(),
+    frameTable: finishRawFrameTableBuilder(getRawFrameTableBuilder()),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

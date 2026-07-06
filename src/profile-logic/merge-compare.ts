@@ -11,7 +11,8 @@ import {
   getEmptyProfile,
   getEmptyResourceTable,
   getEmptyNativeSymbolTable,
-  getEmptyRawFrameTable,
+  finishRawFrameTableBuilder,
+  getRawFrameTableBuilder,
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
@@ -1059,7 +1060,7 @@ function mergeFrameTables(
   translationMapsForCategories: TranslationMapForCategories[]
 ): { frameTable: RawFrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
-  const newFrameTable = getEmptyRawFrameTable();
+  const newFrameTable = getRawFrameTableBuilder();
 
   profiles.forEach((profile, profileIndex) => {
     const { frameTable } = profile.shared;
@@ -1108,7 +1109,10 @@ function mergeFrameTables(
     translationMaps.push(oldFrameToNewFramePlusOne);
   });
 
-  return { frameTable: newFrameTable, translationMaps };
+  return {
+    frameTable: finishRawFrameTableBuilder(newFrameTable),
+    translationMaps,
+  };
 }
 
 /**
