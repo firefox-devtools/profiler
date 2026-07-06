@@ -12,6 +12,9 @@ import { attemptToConvertDhat } from './import/dhat';
 import { GlobalDataCollector } from './global-data-collector';
 import { AddressLocator } from './address-locator';
 import {
+  finishRawBalancedNativeAllocationsTableBuilder,
+  finishRawJsAllocationsTableBuilder,
+  finishRawUnbalancedNativeAllocationsTableBuilder,
   getEmptyExtensions,
   getEmptyRawMarkerTable,
   getEmptyRawJsAllocationsTable,
@@ -756,29 +759,24 @@ function _processMarkers(
     nativeAllocations = null;
   } else if (hasMemoryAddresses) {
     // This is the newer native allocations with memory addresses.
-    nativeAllocations = {
-      time: inProgressNativeAllocations.time,
-      weight: inProgressNativeAllocations.weight,
-      weightType: inProgressNativeAllocations.weightType,
-      stack: inProgressNativeAllocations.stack,
+    nativeAllocations = finishRawBalancedNativeAllocationsTableBuilder({
+      ...inProgressNativeAllocations,
       memoryAddress,
       threadId,
-      length: inProgressNativeAllocations.length,
-    };
+    });
   } else {
     // There is the older native allocations, without memory addresses.
-    nativeAllocations = {
-      time: inProgressNativeAllocations.time,
-      weight: inProgressNativeAllocations.weight,
-      weightType: inProgressNativeAllocations.weightType,
-      stack: inProgressNativeAllocations.stack,
-      length: inProgressNativeAllocations.length,
-    };
+    nativeAllocations = finishRawUnbalancedNativeAllocationsTableBuilder(
+      inProgressNativeAllocations
+    );
   }
 
   return {
     markers: markers,
-    jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
+    jsAllocations:
+      jsAllocations.length === 0
+        ? null
+        : finishRawJsAllocationsTableBuilder(jsAllocations),
     nativeAllocations,
   };
 }

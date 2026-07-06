@@ -9,9 +9,15 @@ import {
   getEmptyRawUnbalancedNativeAllocationsTable,
   getEmptyRawBalancedNativeAllocationsTable,
   getRawStackTableBuilderWithExistingContents,
+  finishRawBalancedNativeAllocationsTableBuilder,
   finishRawFrameTableBuilder,
+  finishRawJsAllocationsTableBuilder,
+  finishRawSamplesTableBuilder,
+  finishRawUnbalancedNativeAllocationsTableBuilder,
+  getRawSamplesTableBuilderFromExisting,
   finishRawStackTableBuilder,
   getRawFrameTableBuilderWithExistingContents,
+  getRawSamplesTableBuilderWithEventDelay,
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
@@ -211,7 +217,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
   // control the initial range. Because of that we need to add samples so that
   // the range includes these markers. Note that when a thread has no sample,
   // then the markers are used to compute the initial range.
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderFromExisting(thread.samples);
   if (samples.length) {
     const firstMarkerTime = Math.min(...allTimes);
     const lastMarkerTime = Math.max(...allTimes);
@@ -257,6 +263,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
       samples.length++;
     }
   }
+  thread.samples = finishRawSamplesTableBuilder(samples);
 }
 
 export function getThreadWithMarkers(
@@ -878,7 +885,7 @@ function _buildThreadFromTextOnlyStacks(
 ): RawThread {
   const thread = getEmptyThread();
 
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderWithEventDelay();
   const stringTable = globalDataCollector.getStringTable();
 
   const frameTable = globalDataCollector.getFrameTable();
@@ -1019,6 +1026,8 @@ function _buildThreadFromTextOnlyStacks(
   if (sampleTimes) {
     samples.time = sampleTimes;
   }
+
+  thread.samples = finishRawSamplesTableBuilder(samples);
 
   return thread;
 }
@@ -1632,7 +1641,6 @@ export function getProfileWithJsAllocations() {
 
   // Now add a RawJsAllocationsTable.
   const jsAllocations = getEmptyRawJsAllocationsTable();
-  profile.threads[0].jsAllocations = jsAllocations;
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
@@ -1658,6 +1666,9 @@ export function getProfileWithJsAllocations() {
     jsAllocations.stack.push(stack);
     jsAllocations.length++;
   }
+
+  profile.threads[0].jsAllocations =
+    finishRawJsAllocationsTableBuilder(jsAllocations);
 
   return { profile, funcNamesDict, funcNames };
 }
@@ -1712,7 +1723,6 @@ export function getProfileWithUnbalancedNativeAllocations() {
 
   // Now add a RawNativeAllocationsTable.
   const nativeAllocations = getEmptyRawUnbalancedNativeAllocationsTable();
-  profile.threads[0].nativeAllocations = nativeAllocations;
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
@@ -1739,6 +1749,9 @@ export function getProfileWithUnbalancedNativeAllocations() {
     nativeAllocations.stack.push(stack);
     nativeAllocations.length++;
   }
+
+  profile.threads[0].nativeAllocations =
+    finishRawUnbalancedNativeAllocationsTableBuilder(nativeAllocations);
 
   return { profile, funcNamesDict };
 }
@@ -1781,7 +1794,6 @@ export function getProfileWithBalancedNativeAllocations() {
   // Now add a RawNativeAllocationsTable.
   const nativeAllocations = getEmptyRawBalancedNativeAllocationsTable();
   const [thread] = profile.threads;
-  thread.nativeAllocations = nativeAllocations;
   const threadId = thread.tid;
   if (typeof threadId !== 'number') {
     throw new Error(
@@ -1826,6 +1838,9 @@ export function getProfileWithBalancedNativeAllocations() {
     nativeAllocations.threadId.push(threadId);
     nativeAllocations.length++;
   }
+
+  thread.nativeAllocations =
+    finishRawBalancedNativeAllocationsTableBuilder(nativeAllocations);
 
   return { profile, funcNamesDict };
 }
@@ -2015,7 +2030,7 @@ export function addInnerWindowIdToStacks(
   callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable } = shared;
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderFromExisting(thread.samples);
   const usedInnerWindowIDsSet = new Set<number>();
 
   for (const { innerWindowID, callNodes } of listOfOperations) {
@@ -2122,6 +2137,8 @@ export function addInnerWindowIdToStacks(
       samples.length++;
     }
   }
+
+  thread.samples = finishRawSamplesTableBuilder(samples);
 
   if (usedInnerWindowIDsSet.size !== 0) {
     thread.usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);

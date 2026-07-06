@@ -14,7 +14,6 @@ import type {
   IndexIntoStackTable,
   ProfileMeta,
   ResourceTable,
-  RawSamplesTable,
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -26,10 +25,12 @@ import {
   getRawFrameTableBuilder,
   getRawStackTableBuilder,
   finishRawFrameTableBuilder,
+  finishRawSamplesTableBuilder,
   finishRawStackTableBuilder,
   type RawFrameTableBuilder,
   type RawStackTableBuilder,
-  getEmptySamplesTable,
+  getRawSamplesTableBuilder,
+  type RawSamplesTableBuilder,
   getEmptyRawMarkerTable,
   getEmptyNativeSymbolTable,
   getEmptySourceTable,
@@ -254,7 +255,7 @@ class FirefoxThread {
 
   strings: StringTable;
 
-  sampleTable: RawSamplesTable = getEmptySamplesTable();
+  sampleTable: RawSamplesTableBuilder = getRawSamplesTableBuilder();
 
   stackTable: FirefoxSampleTable;
   frameTable: FirefoxFrameTable;
@@ -289,7 +290,7 @@ class FirefoxThread {
       isMainThread: this.isMainThread,
       pid: this.pid.toString(),
       tid: this.tid,
-      samples: this.sampleTable,
+      samples: finishRawSamplesTableBuilder(this.sampleTable),
       markers: getEmptyRawMarkerTable(),
     };
   }

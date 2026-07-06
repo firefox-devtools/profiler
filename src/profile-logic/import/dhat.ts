@@ -10,6 +10,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import {
+  finishRawUnbalancedNativeAllocationsTableBuilder,
   getEmptyProfile,
   getEmptyThread,
   getEmptyRawUnbalancedNativeAllocationsTable,
@@ -372,13 +373,15 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     thread.tid = i;
     thread.name = name;
 
-    thread.nativeAllocations = {
-      time: allocationsTable.time.slice(),
-      stack: allocationsTable.stack.slice(),
-      weight,
-      weightType: 'bytes',
-      length: allocationsTable.length,
-    };
+    thread.nativeAllocations = finishRawUnbalancedNativeAllocationsTableBuilder(
+      {
+        time: allocationsTable.time.slice(),
+        stack: allocationsTable.stack.slice(),
+        weight,
+        weightType: 'bytes',
+        length: allocationsTable.length,
+      }
+    );
 
     return thread;
   });

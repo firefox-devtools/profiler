@@ -12,12 +12,13 @@ import {
   getEmptyResourceTable,
   getEmptyNativeSymbolTable,
   finishRawFrameTableBuilder,
+  finishRawSamplesTableBuilder,
   getRawFrameTableBuilder,
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
   getEmptyRawMarkerTable,
-  getEmptySamplesTableWithEventDelay,
+  getRawSamplesTableBuilderWithEventDelay,
   shallowCloneRawMarkerTable,
   getEmptySourceTable,
 } from './data-structures';
@@ -1188,7 +1189,7 @@ function combineSamplesDiffing(
   const newWeight: number[] = [];
   const newThreadId: Tid[] = [];
   const newSamples = {
-    ...getEmptySamplesTableWithEventDelay(),
+    ...getRawSamplesTableBuilderWithEventDelay(),
     weight: newWeight,
     threadId: newThreadId,
   };
@@ -1241,7 +1242,7 @@ function combineSamplesDiffing(
     }
   }
 
-  return newSamples;
+  return finishRawSamplesTableBuilder(newSamples);
 }
 
 type ThreadAndWeightMultiplier = {
@@ -1368,7 +1369,7 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const newThreadId: Tid[] = [];
   // Creating a new empty samples table to fill.
   const newSamples = {
-    ...getEmptySamplesTableWithEventDelay(),
+    ...getRawSamplesTableBuilderWithEventDelay(),
     threadId: newThreadId,
   };
 
@@ -1454,9 +1455,12 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   }
 
   if (newThreadCPUDelta !== undefined) {
-    return { ...newSamples, threadCPUDelta: newThreadCPUDelta };
+    return finishRawSamplesTableBuilder({
+      ...newSamples,
+      threadCPUDelta: newThreadCPUDelta,
+    });
   }
-  return newSamples;
+  return finishRawSamplesTableBuilder(newSamples);
 }
 
 /**
