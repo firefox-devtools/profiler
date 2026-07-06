@@ -4781,12 +4781,15 @@ export function computeTabToThreadIndexesMap(
 export function computeFrameTableFromRawFrameTable(
   rawFrameTable: RawFrameTable
 ): FrameTable {
+  const address = new Int32Array(rawFrameTable.address);
+  const inlineDepth = new Uint8Array(rawFrameTable.inlineDepth);
+  const func = new Int32Array(rawFrameTable.func);
   return {
-    address: rawFrameTable.address,
-    inlineDepth: rawFrameTable.inlineDepth,
+    address,
+    inlineDepth,
     category: rawFrameTable.category,
     subcategory: rawFrameTable.subcategory,
-    func: rawFrameTable.func,
+    func,
     nativeSymbol: rawFrameTable.nativeSymbol,
     innerWindowID: rawFrameTable.innerWindowID,
     line: rawFrameTable.line,

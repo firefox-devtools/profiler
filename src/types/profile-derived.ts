@@ -288,16 +288,22 @@ export type StackTable = {
 /**
  * The `FrameTable` type of the derived thread.
  *
- * Currently identical in shape to the `RawFrameTable`. Splitting the derived
- * type off lets us widen columns (e.g. store `func` as a typed array) without
- * affecting the raw type.
+ * Differs from `RawFrameTable` in that the following columns are always
+ * stored as typed arrays: `address` (`Int32Array`, with `-1` as the sentinel
+ * for missing addresses), `inlineDepth` (`Uint8Array`), and `func`
+ * (`Int32Array`). In `RawFrameTable`, these columns may be either regular
+ * arrays or typed arrays, since regular arrays are convenient during
+ * construction.
  */
 export type FrameTable = {
-  address: Array<Address | -1>;
-  inlineDepth: number[];
+  // Differs from RawFrameTable: always Int32Array (-1 sentinel preserved).
+  address: Int32Array<ArrayBuffer>;
+  // Differs from RawFrameTable: always Uint8Array.
+  inlineDepth: Uint8Array<ArrayBuffer>;
   category: (IndexIntoCategoryList | null)[];
   subcategory: (IndexIntoSubcategoryListForCategory | null)[];
-  func: IndexIntoFuncTable[];
+  // Differs from RawFrameTable: always Int32Array.
+  func: Int32Array<ArrayBuffer>;
   nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
   innerWindowID: (InnerWindowID | null)[];
   line: (number | null)[];
