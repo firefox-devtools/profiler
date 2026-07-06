@@ -16,6 +16,7 @@ import {
   getEmptyRawMarkerTable,
   getEmptyRawJsAllocationsTable,
   getEmptyRawUnbalancedNativeAllocationsTable,
+  type RawFrameTableBuilder,
   type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
@@ -52,7 +53,6 @@ import type {
   RawThread,
   RawCounter,
   ExtensionTable,
-  RawFrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
   RawMarkerTable,
@@ -521,7 +521,7 @@ function _extractUnknownFunctionType(
  */
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
-  sharedFrameTable: RawFrameTable,
+  sharedFrameTable: RawFrameTableBuilder,
   frameFuncs: IndexIntoFuncTable[],
   frameAddresses: (Address | null)[]
 ): IndexIntoFrameTable {

@@ -23,9 +23,10 @@ import type {
 import {
   getEmptyFuncTable,
   getEmptyResourceTable,
-  getEmptyRawFrameTable,
+  getRawFrameTableBuilder,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
+  type RawFrameTableBuilder,
   type RawStackTableBuilder,
   getEmptySamplesTable,
   getEmptyRawMarkerTable,
@@ -150,7 +151,7 @@ class FirefoxFuncTable {
 class FirefoxFrameTable {
   strings: StringTable;
 
-  frameTable: RawFrameTable = getEmptyRawFrameTable();
+  frameTable: RawFrameTableBuilder = getRawFrameTableBuilder();
   frameMap: Map<string, IndexIntoFrameTable> = new Map();
 
   constructor(strings: StringTable) {

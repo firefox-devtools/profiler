@@ -6,6 +6,7 @@ import {
   getEmptyRawMarkerTable,
   finishRawStackTableBuilder,
   getRawStackTableBuilderWithExistingContents,
+  getRawFrameTableBuilderWithExistingContents,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/types';
@@ -514,7 +515,10 @@ export function convertJsTracerToThreadWithoutSamples(
     samples,
   };
 
-  const { funcTable, frameTable } = shared;
+  const { funcTable } = shared;
+  const frameTable = getRawFrameTableBuilderWithExistingContents(
+    shared.frameTable
+  );
   const stackTable = getRawStackTableBuilderWithExistingContents(
     shared.stackTable
   );
@@ -625,8 +629,9 @@ export function convertJsTracerToThreadWithoutSamples(
     unmatchedEventEnds[unmatchedIndex] = end;
   }
 
-  // Write the augmented stackTable back to the shared data.
+  // Write the augmented stackTable and frameTable back to the shared data.
   shared.stackTable = finishRawStackTableBuilder(stackTable);
+  shared.frameTable = frameTable;
 
   return { thread, stackMap };
 }

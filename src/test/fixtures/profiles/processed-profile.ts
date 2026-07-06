@@ -10,6 +10,7 @@ import {
   getEmptyRawBalancedNativeAllocationsTable,
   getRawStackTableBuilderWithExistingContents,
   finishRawStackTableBuilder,
+  getRawFrameTableBuilderWithExistingContents,
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
@@ -2043,30 +2044,38 @@ export function addInnerWindowIdToStacks(
 
     const stackTableBuilder =
       getRawStackTableBuilderWithExistingContents(stackTable);
+    const frameTableBuilder =
+      getRawFrameTableBuilderWithExistingContents(frameTable);
 
     for (const callNode of callNodesToDupe) {
       const stackIndex = getStackIndexForCallNodePath(shared, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
       // The found one comes from the first tab.
-      frameTable.innerWindowID[foundFrameIndex] =
+      frameTableBuilder.innerWindowID[foundFrameIndex] =
         listOfOperations[0].innerWindowID;
 
       // Clone this frame
-      const newFrameIndex = frameTable.length++;
-      frameTable.address.push(frameTable.address[foundFrameIndex]);
-      frameTable.inlineDepth.push(frameTable.inlineDepth[foundFrameIndex]);
-      frameTable.category.push(frameTable.category[foundFrameIndex]);
-      frameTable.subcategory.push(frameTable.subcategory[foundFrameIndex]);
-      frameTable.func.push(frameTable.func[foundFrameIndex]);
-      frameTable.nativeSymbol.push(frameTable.nativeSymbol[foundFrameIndex]);
-      frameTable.line.push(frameTable.line[foundFrameIndex]);
-      frameTable.column.push(frameTable.column[foundFrameIndex]);
-      frameTable.originalLocation.push(
+      const newFrameIndex = frameTableBuilder.length++;
+      frameTableBuilder.address.push(frameTable.address[foundFrameIndex]);
+      frameTableBuilder.inlineDepth.push(
+        frameTable.inlineDepth[foundFrameIndex]
+      );
+      frameTableBuilder.category.push(frameTable.category[foundFrameIndex]);
+      frameTableBuilder.subcategory.push(
+        frameTable.subcategory[foundFrameIndex]
+      );
+      frameTableBuilder.func.push(frameTable.func[foundFrameIndex]);
+      frameTableBuilder.nativeSymbol.push(
+        frameTable.nativeSymbol[foundFrameIndex]
+      );
+      frameTableBuilder.line.push(frameTable.line[foundFrameIndex]);
+      frameTableBuilder.column.push(frameTable.column[foundFrameIndex]);
+      frameTableBuilder.originalLocation.push(
         frameTable.originalLocation[foundFrameIndex]
       );
 
       // And that one comes from the second tab.
-      frameTable.innerWindowID.push(listOfOperations[1].innerWindowID);
+      frameTableBuilder.innerWindowID.push(listOfOperations[1].innerWindowID);
 
       // Clone the stack
       const newStackIndex = stackTableBuilder.length++;
@@ -2079,6 +2088,7 @@ export function addInnerWindowIdToStacks(
     }
 
     shared.stackTable = finishRawStackTableBuilder(stackTableBuilder);
+    shared.frameTable = frameTableBuilder;
 
     const sampleTimes = ensureExists(samples.time);
     for (let sampleIndex = samples.length; sampleIndex >= 0; sampleIndex--) {

@@ -9,7 +9,7 @@ import {
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
   getEmptyCallNodeTable,
-  shallowCloneRawFrameTable,
+  getRawFrameTableBuilderWithExistingContents,
   shallowCloneFuncTable,
 } from './data-structures';
 import {
@@ -4365,7 +4365,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   // Create the new frame table.
   // Frames that were observed both from the instruction pointer and from
   // stack walking have to be duplicated.
-  const newFrameTable = shallowCloneRawFrameTable(frameTable);
+  const newFrameTable = getRawFrameTableBuilderWithExistingContents(frameTable);
   // Iterate over all *return address* frames, i.e. all frames that were obtained
   // by stack walking.
   for (const [frame, address] of returnAddressFrames) {
