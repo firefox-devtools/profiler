@@ -157,7 +157,7 @@ profiler-cli thread network --json
       phaseTotals: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
     },
     requests: [{
-      url, httpStatus?, httpVersion?, cacheStatus?,
+      markerHandle, url, httpStatus?, httpVersion?, cacheStatus?,
       transferSizeKB?, startTime, duration,
       phases: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
     }],
