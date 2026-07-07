@@ -1166,22 +1166,38 @@ export function collectThreadNetwork(
   const range = getCommittedRange(state);
   const rangeDurationMs = range.end - range.start;
 
-  // Filter to completed (STOP) network markers only.
-  // STOP markers are the merged markers that carry full timing data.
-  const stopIndexes = allMarkerIndexes.filter((i) => {
-    const m = fullMarkerList[i];
-    if (!isNetworkMarker(m)) {
+  // The displayable request set is completed (STATUS_STOP) markers plus
+  // requests still in flight at the end (STATUS_START only, no stop event).
+  // "In flight at end" is keyed off the status, not the derived `incomplete`
+  // flag: that flag is also set for a STOP whose START predates the recording,
+  // which did complete and must not be miscounted as in flight.
+  const requestIndexes = allMarkerIndexes.filter((i) => {
+    const marker = fullMarkerList[i];
+    if (!isNetworkMarker(marker)) {
       return false;
     }
-    const data = m.data as NetworkPayload;
-    return data.status === 'STATUS_STOP';
+    const status = (marker.data as NetworkPayload).status;
+    return status === 'STATUS_STOP' || status === 'STATUS_START';
   });
-  const totalRequestCount = stopIndexes.length;
+  const incompleteCount = requestIndexes.filter(
+    (i) => (fullMarkerList[i].data as NetworkPayload).status === 'STATUS_START'
+  ).length;
+  const totalRequestCount = requestIndexes.length - incompleteCount;
+
+  // In-range duration: a request can start before the range or end after it
+  // (requests still in flight at the recording end). Clamping keeps the
+  // reported duration from exceeding what the profile can show.
+  const durationOf = (markerIndex: MarkerIndex): number => {
+    const marker = fullMarkerList[markerIndex];
+    const start = Math.max(marker.start, range.start);
+    const end = Math.min(marker.end ?? marker.start, range.end);
+    return Math.max(0, end - start);
+  };
 
   // Wall-clock: interval union and peak concurrency over all requests
   // intersecting the range, independent of the display filters below.
   const inFlightIntervals: Array<[number, number]> = [];
-  for (const i of stopIndexes) {
+  for (const i of requestIndexes) {
     const marker = fullMarkerList[i];
     const start = marker.start;
     const end = marker.end ?? marker.start;
@@ -1196,7 +1212,7 @@ export function collectThreadNetwork(
   const inFlightMs = intervalUnionMs(inFlightIntervals);
 
   // Apply filters
-  let filteredIndexes = stopIndexes;
+  let filteredIndexes = requestIndexes;
 
   if (searchString) {
     const lowerSearch = searchString.toLowerCase();
@@ -1208,8 +1224,7 @@ export function collectThreadNetwork(
 
   if (minDuration !== undefined || maxDuration !== undefined) {
     filteredIndexes = filteredIndexes.filter((i) => {
-      const data = fullMarkerList[i].data as NetworkPayload;
-      const duration = data.endTime - data.startTime;
+      const duration = durationOf(i);
       if (minDuration !== undefined && duration < minDuration) {
         return false;
       }
@@ -1272,8 +1287,10 @@ export function collectThreadNetwork(
 
   // Build per-request entries
   const requests: NetworkRequestEntry[] = limitedIndexes.map((i) => {
-    const data = fullMarkerList[i].data as NetworkPayload;
-    const duration = data.endTime - data.startTime;
+    const marker = fullMarkerList[i];
+    const data = marker.data as NetworkPayload;
+    const duration = durationOf(i);
+    const inFlight = data.status === 'STATUS_START';
 
     return {
       markerHandle: markerMap.handleForMarker(threadIndexes, i),
@@ -1282,8 +1299,12 @@ export function collectThreadNetwork(
       httpVersion: data.httpVersion,
       cacheStatus: data.cache,
       transferSizeKB: data.count !== undefined ? data.count / 1024 : undefined,
-      startTime: data.startTime,
+      startTime: marker.start,
       duration,
+      incomplete: inFlight,
+      // Completed request whose START predates the recording: the reported
+      // duration is a lower bound (clamped to the range).
+      startedBeforeRecording: marker.incomplete === true && !inFlight,
       phases: buildNetworkPhases(data),
     };
   });
@@ -1296,6 +1317,7 @@ export function collectThreadNetwork(
     threadHandle: displayThreadHandle,
     friendlyThreadName,
     totalRequestCount,
+    incompleteCount,
     filteredRequestCount,
     filters:
       searchString !== undefined ||

@@ -18,7 +18,10 @@ import {
   getProfileFromTextSamples,
   getNetworkMarkers,
 } from '../../fixtures/profiles/processed-profile';
-import type { NetworkMarkersOptions } from '../../fixtures/profiles/processed-profile';
+import type {
+  NetworkMarkersOptions,
+  TestDefinedMarker,
+} from '../../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../../fixtures/stores';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
@@ -757,6 +760,40 @@ describe('collectThreadNetwork', function () {
 
     expect(result.totalRequestCount).toBe(2);
     expect(result.requests).toHaveLength(2);
+  });
+
+  it('counts a request that started before the recording as completed', function () {
+    // A lone STOP marker (no matching START): the request completed during the
+    // recording but started before it, so derivation flags it incomplete even
+    // though it did finish. It must count as completed, not in flight.
+    const stopOnly: TestDefinedMarker = [
+      'Load 1: https://example.com/early',
+      0,
+      10,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 0,
+        endTime: 10,
+        pri: 0,
+        status: 'STATUS_STOP',
+        URI: 'https://example.com/early',
+        responseStatus: 200,
+        contentType: 'text/html',
+      },
+    ];
+    const store = storeWithProfile(getProfileWithMarkers([stopOnly]));
+    const threadMap = new ThreadMap();
+    threadMap.handleForThreadIndex(0);
+
+    const result = collectThreadNetwork(store, threadMap, new MarkerMap());
+
+    expect(result.totalRequestCount).toBe(1);
+    expect(result.incompleteCount).toBe(0);
+    expect(result.requests).toHaveLength(1);
+    expect(result.requests[0].incomplete).toBe(false);
+    expect(result.requests[0].startedBeforeRecording).toBe(true);
+    expect(result.requests[0].httpStatus).toBe(200);
   });
 
   it('filters by searchString case-insensitively', function () {

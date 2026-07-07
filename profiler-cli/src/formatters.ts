@@ -1249,10 +1249,13 @@ export function formatThreadNetworkResult(
 ): string {
   const lines: string[] = [formatContextHeader(result.context), ''];
 
+  // totalRequestCount counts only completed requests; the candidate set the
+  // filters run against also includes the incomplete (in-flight) ones.
+  const totalCandidates = result.totalRequestCount + result.incompleteCount;
   const filterSuffix =
     result.filters !== undefined &&
-    result.filteredRequestCount !== result.totalRequestCount
-      ? ` (filtered from ${result.totalRequestCount})`
+    result.filteredRequestCount !== totalCandidates
+      ? ` (filtered from ${totalCandidates})`
       : '';
 
   const truncated = result.requests.length < result.filteredRequestCount;
@@ -1263,6 +1266,11 @@ export function formatThreadNetworkResult(
   lines.push(
     `Network requests in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${countStr}${filterSuffix}`
   );
+  if (result.incompleteCount > 0) {
+    lines.push(
+      `${result.incompleteCount} request(s) did not complete during the recording (in flight at end).`
+    );
+  }
   lines.push('');
 
   // Summary
@@ -1316,8 +1324,17 @@ export function formatThreadNetworkResult(
 
   for (const req of result.requests) {
     const url = req.url.length > 100 ? req.url.slice(0, 97) + '...' : req.url;
-    const status =
-      req.httpStatus !== undefined ? String(req.httpStatus) : '???';
+    let status: string;
+    if (req.incomplete) {
+      status = 'in flight';
+    } else if (req.httpStatus !== undefined) {
+      status = String(req.httpStatus);
+    } else {
+      status = '???';
+    }
+    if (req.startedBeforeRecording) {
+      status += ' (started before recording)';
+    }
     const version = req.httpVersion !== undefined ? `  ${req.httpVersion}` : '';
     const cache =
       req.cacheStatus !== undefined ? `  cache=${req.cacheStatus}` : '';

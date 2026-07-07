@@ -150,6 +150,7 @@ profiler-cli thread network --json
     type: "thread-network",
     threadHandle, friendlyThreadName,
     totalRequestCount,
+    incompleteCount,
     filteredRequestCount,
     filters?: { searchString?, minDuration?, maxDuration?, limit? },
     summary: {
@@ -159,7 +160,7 @@ profiler-cli thread network --json
     },
     requests: [{
       markerHandle, url, httpStatus?, httpVersion?, cacheStatus?,
-      transferSizeKB?, startTime, duration,
+      transferSizeKB?, startTime, duration, incomplete, startedBeforeRecording,
       phases: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
     }],
     context: SessionContext

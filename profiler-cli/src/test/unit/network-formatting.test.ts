@@ -28,6 +28,8 @@ function makeRequest(
     url: 'https://example.com/resource',
     startTime: 0,
     duration: 100,
+    incomplete: false,
+    startedBeforeRecording: false,
     phases: {},
     ...overrides,
   };
@@ -58,6 +60,7 @@ function makeResult(
     threadHandle: 't-0',
     friendlyThreadName: 'GeckoMain',
     totalRequestCount: 1,
+    incompleteCount: 0,
     filteredRequestCount: 1,
     summary: makeSummary(),
     requests: [makeRequest()],
@@ -296,5 +299,29 @@ describe('formatThreadNetworkResult', function () {
     const output = formatThreadNetworkResult(result);
 
     expect(output).toContain('m-42');
+  });
+
+  it('reports incomplete requests', function () {
+    const result = makeResult({ incompleteCount: 2 });
+    result.requests = [makeRequest({ incomplete: true })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('did not complete during the recording');
+    expect(output).toContain('in flight');
+  });
+
+  it('annotates requests that started before the recording', function () {
+    const result = makeResult();
+    result.requests = [
+      makeRequest({ httpStatus: 200, startedBeforeRecording: true }),
+    ];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('started before recording');
+    // Shows the real status, not "in flight".
+    expect(output).not.toContain('in flight');
+    expect(output).toContain('200');
   });
 });

@@ -436,6 +436,13 @@ export type NetworkRequestEntry = {
   transferSizeKB?: number;
   startTime: number;
   duration: number;
+  // True when the request was still in flight when the recording stopped
+  // (only a START event, no stop); its duration is measured until the end of
+  // the recording.
+  incomplete: boolean;
+  // True when the request completed during the recording but its START event
+  // predates it, so the reported duration is a lower bound.
+  startedBeforeRecording: boolean;
   phases: NetworkPhaseTimings;
 };
 
@@ -444,6 +451,8 @@ export type ThreadNetworkResult = {
   threadHandle: string;
   friendlyThreadName: string;
   totalRequestCount: number;
+  // Requests still in flight when the recording stopped.
+  incompleteCount: number;
   filteredRequestCount: number;
   filters?: {
     searchString?: string;
