@@ -316,10 +316,24 @@ const lastSelectedCallTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
   }
 };
 
-const invertCallstack: Reducer<boolean> = (state = false, action) => {
+const invertCallTree: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
-      return action.invertCallstack;
+      return action.selectedTab === 'calltree' ||
+        action.selectedTab === 'stack-chart'
+        ? action.invertCallstack
+        : state;
+    default:
+      return state;
+  }
+};
+
+const invertFlameGraph: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'CHANGE_INVERT_CALLSTACK':
+      return action.selectedTab === 'flame-graph'
+        ? action.invertCallstack
+        : state;
     default:
       return state;
   }
@@ -784,7 +798,8 @@ const profileSpecific = combineReducers({
   selectedThreads,
   implementation,
   lastSelectedCallTreeSummaryStrategy,
-  invertCallstack,
+  invertCallTree,
+  invertFlameGraph,
   includeIdleSamples,
   showUserTimings,
   stackChartSameWidths,

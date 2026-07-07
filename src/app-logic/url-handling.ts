@@ -184,6 +184,7 @@ type BaseQuery = {
 type CallTreeQuery = BaseQuery & {
   search: string; // "js::RunScript"
   invertCallstack: null | undefined;
+  invertFlameGraph: null | undefined;
   hideIdleSamples: null | undefined;
   ctSummary: string;
 };
@@ -201,6 +202,7 @@ type NetworkQuery = BaseQuery & {
 type StackChartQuery = BaseQuery & {
   search: string; // "js::RunScript"
   invertCallstack: null | undefined;
+  invertFlameGraph: null | undefined;
   hideIdleSamples: null | undefined;
   showUserTimings: null | undefined;
   sameWidths: null | undefined;
@@ -216,6 +218,7 @@ type Query = BaseQuery & {
   // CallTree/StackChart specific
   search?: string;
   invertCallstack?: null | undefined;
+  invertFlameGraph?: null | undefined;
   hideIdleSamples?: null | undefined;
   ctSummary?: string;
   transforms?: string;
@@ -342,7 +345,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query = baseQuery as CallTreeQueryShape;
 
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
-      query.invertCallstack = urlState.profileSpecific.invertCallstack
+      query.invertCallstack = urlState.profileSpecific.invertCallTree
+        ? null
+        : undefined;
+      query.invertFlameGraph = urlState.profileSpecific.invertFlameGraph
         ? null
         : undefined;
       // The URL param is inverted (`hideIdleSamples`) so the default-on state
@@ -605,7 +611,8 @@ export function stateFromLocation(
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
         query.ctSummary || undefined
       ),
-      invertCallstack: query.invertCallstack === undefined ? false : true,
+      invertCallTree: query.invertCallstack === undefined ? false : true,
+      invertFlameGraph: query.invertFlameGraph === undefined ? false : true,
       includeIdleSamples: query.hideIdleSamples === undefined,
       showUserTimings: query.showUserTimings === undefined ? false : true,
       stackChartSameWidths: query.sameWidths === undefined ? false : true,

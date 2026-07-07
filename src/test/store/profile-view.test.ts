@@ -2461,7 +2461,7 @@ describe('changeSelectedCallNode', function () {
       E  E  G
     `);
 
-    const { A, B, C, D, E, F, G } = funcNamesDict;
+    const { A, B, C, D, E, F } = funcNamesDict;
 
     const { dispatch, getState } = storeWithProfile(profile);
 
@@ -2480,25 +2480,25 @@ describe('changeSelectedCallNode', function () {
     );
 
     dispatch(App.changeSelectedTab('flame-graph'));
-    // In the flame graph, everything should now remain inverted.
-    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
-    // The inverted selected call node should remain selected.
+    // In the flame graph, the invert state is independent and defaults to false.
+    expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+    // The original non-inverted selected call node should be selected.
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [E, D, C]
+      [A, B, C]
     );
 
     // Now we select a different call node in the flame graph.
-    dispatch(ProfileView.changeSelectedCallNode(0, [G, F, C]));
+    dispatch(ProfileView.changeSelectedCallNode(0, [A, B, C, F]));
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [G, F, C]
+      [A, B, C, F]
     );
 
     // Switch back to the call tree tab. In the call tree tab, we should still
-    // be looking at the inverted tree, with the new inverted selection.
+    // be looking at the inverted tree, with the unchanged inverted selection.
     dispatch(App.changeSelectedTab('calltree'));
     expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [G, F, C]
+      [E, D, C]
     );
 
     // Switching back to non-inverted mode should pick a new non-inverted
