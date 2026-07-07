@@ -102,6 +102,27 @@ describe('FlameGraph', function () {
     expect(getInvertCallstack(getState())).toBe(false);
   });
 
+  it('shows traced timing in icicle graph tooltips', () => {
+    const {
+      dispatch,
+      flushRafCalls,
+      getTooltip,
+      moveMouse,
+      findFillTextPosition,
+    } = setupFlameGraph();
+    flushDrawLog();
+
+    act(() => {
+      dispatch(changeInvertCallstack(true));
+    });
+    flushRafCalls();
+
+    moveMouse(findFillTextPosition('E'));
+    expect(
+      within(ensureExists(getTooltip())).getByText('1.0ms (33%)')
+    ).toBeInTheDocument();
+  });
+
   it('shows a tooltip when hovering', () => {
     const { getTooltip, moveMouse, findFillTextPosition } = setupFlameGraph();
     expect(getTooltip()).toBe(null);

@@ -8,7 +8,6 @@ import {
   type OwnProps as FlameGraphCanvasProps,
 } from './Canvas';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
-import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
 
 import type {
   Thread,
@@ -290,11 +289,6 @@ export class FlameGraph
       onCallNodeEnterOrDoubleClick,
     } = this.props;
 
-    const tracedTimingNonInverted =
-      tracedTiming !== null
-        ? extractNonInvertedCallTreeTimings(tracedTiming)
-        : null;
-
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
 
     return (
@@ -343,7 +337,7 @@ export class FlameGraph
               startsAtBottom,
               ctssSamples,
               ctssSampleCategoriesAndSubcategories,
-              tracedTiming: tracedTimingNonInverted,
+              tracedTiming,
               displayStackType,
             }}
           />
