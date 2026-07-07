@@ -1713,6 +1713,30 @@ describe('actions/ProfileView', function () {
       });
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
     });
+
+    it('does not apply call tree inversion to the stack chart', function () {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+      `);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      dispatch(App.changeSelectedTab('calltree'));
+      dispatch(ProfileView.changeInvertCallstack(true));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+      expect(
+        selectedThreadSelectors.getCallNodeInfo(getState()).isInverted()
+      ).toBe(true);
+
+      dispatch(App.changeSelectedTab('stack-chart'));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+      expect(
+        selectedThreadSelectors.getCallNodeInfo(getState()).isInverted()
+      ).toBe(false);
+
+      dispatch(App.changeSelectedTab('calltree'));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+    });
   });
 
   describe('changeIncludeIdleSamples', function () {

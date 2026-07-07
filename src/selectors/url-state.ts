@@ -128,7 +128,7 @@ export const getSelectedTab: Selector<TabSlug> = (state) =>
 export const getInvertCallstack: Selector<boolean> = (state) => {
   const tab = getSelectedTab(state);
   const profileSpecific = getProfileSpecificState(state);
-  if (tab === 'calltree' || tab === 'stack-chart') {
+  if (tab === 'calltree') {
     return profileSpecific.invertCallTree;
   }
   if (tab === 'flame-graph') {

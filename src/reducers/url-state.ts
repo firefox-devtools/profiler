@@ -319,10 +319,7 @@ const lastSelectedCallTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
 const invertCallTree: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
-      return action.selectedTab === 'calltree' ||
-        action.selectedTab === 'stack-chart'
-        ? action.invertCallstack
-        : state;
+      return action.selectedTab === 'calltree' ? action.invertCallstack : state;
     default:
       return state;
   }
