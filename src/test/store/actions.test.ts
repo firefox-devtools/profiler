@@ -201,7 +201,6 @@ describe('selectors/getFlameGraphTiming', function () {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -212,7 +211,7 @@ describe('selectors/getFlameGraphTiming', function () {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
         const funcName = funcNames[funcIndex];
         lines.push(
           `${funcName} (${parseFloat(start[i].toFixed(2))}:${parseFloat(
@@ -237,7 +236,6 @@ describe('selectors/getFlameGraphTiming', function () {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
@@ -247,7 +245,7 @@ describe('selectors/getFlameGraphTiming', function () {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
         const funcName = funcNames[funcIndex];
         lines.push(`${funcName} (${selfRelative[i]})`);
       }
@@ -317,6 +315,26 @@ describe('selectors/getFlameGraphTiming', function () {
       'A (0:0.25) | D (0.25:1)',
       'B (0:0.25) | E (0.25:0.5) | F (0.5:1)',
       'C (0:0.25) | G (0.5:0.75)',
+    ]);
+  });
+
+  it('computes inverted stacks without combining unrelated same-name nodes', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A
+      B  B  C
+      C     D
+    `);
+
+    const store = storeWithProfile(profile);
+    store.dispatch(changeInvertCallstack(true));
+
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
+      'B (0:0.33) | C (0.33:0.67) | D (0.67:1)',
+      'A (0:0.33) | B (0.33:0.67) | C (0.67:1)',
+      'A (0.33:0.67) | A (0.67:1)',
     ]);
   });
 

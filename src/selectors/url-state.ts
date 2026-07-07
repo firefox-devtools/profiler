@@ -125,9 +125,17 @@ export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
-export const getInvertCallstack: Selector<boolean> = (state) =>
-  getSelectedTab(state) === 'calltree' &&
-  getProfileSpecificState(state).invertCallstack;
+export const getInvertCallstack: Selector<boolean> = (state) => {
+  const tab = getSelectedTab(state);
+  const profileSpecific = getProfileSpecificState(state);
+  if (tab === 'calltree') {
+    return profileSpecific.invertCallTree;
+  }
+  if (tab === 'flame-graph') {
+    return profileSpecific.invertFlameGraph;
+  }
+  return false;
+};
 export const getIncludeIdleSamples: Selector<boolean> = (state) =>
   getProfileSpecificState(state).includeIdleSamples;
 
