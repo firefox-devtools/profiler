@@ -360,7 +360,8 @@ export type ProfileSpecificUrlState = {
   selectedThreads: Set<ThreadIndex> | null;
   implementation: ImplementationFilter;
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy;
-  invertCallstack: boolean;
+  invertCallTree: boolean;
+  invertFlameGraph: boolean;
   includeIdleSamples: boolean;
   showUserTimings: boolean;
   stackChartSameWidths: boolean;

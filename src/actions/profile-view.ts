@@ -1696,6 +1696,7 @@ export function changeInvertCallstack(
     dispatch({
       type: 'CHANGE_INVERT_CALLSTACK',
       invertCallstack,
+      selectedTab: getSelectedTab(getState()),
       selectedThreadIndexes: getSelectedThreadIndexes(getState()),
       newSelectedCallNodePath,
     });
