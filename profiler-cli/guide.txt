@@ -68,7 +68,8 @@ CORE WORKFLOW
     profiler-cli thread markers --list                   Flat chronological list (one row per marker)
     profiler-cli thread markers --search X --list        List all individual X markers with handles
 
-    profiler-cli thread network                          First 20 requests with timing phases (default)
+    profiler-cli thread network                          Top 20 requests (slowest first) with timing phases
+    profiler-cli thread network --sort start             Chronological order instead of slowest-first
     profiler-cli thread network --limit 0                All requests (no limit)
     profiler-cli thread network --search "api.example"  Filter by URL substring
     profiler-cli thread network --min-duration 200       Only requests >= 200ms
@@ -320,7 +321,8 @@ COMMON ANALYSIS PATTERNS
     Marker handles shown in page-load output can be passed to "marker info" or "zoom push".
 
   Analyze network activity:
-    profiler-cli thread network                      All requests with timing phases
+    profiler-cli thread network                      Top requests, slowest first, with timing phases
+    profiler-cli thread network --sort start         Chronological order instead
     profiler-cli thread network --min-duration 200   Slow requests only (>= 200ms)
     profiler-cli thread network --search "api"       Filter by URL substring
     profiler-cli thread markers --category Network   Cross-reference with marker view

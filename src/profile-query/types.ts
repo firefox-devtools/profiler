@@ -427,6 +427,8 @@ export type NetworkPhaseTimings = {
   mainThread?: number;
 };
 
+export type NetworkRequestSort = 'start' | 'duration';
+
 export type NetworkRequestEntry = {
   markerHandle: string;
   url: string;
@@ -454,6 +456,8 @@ export type ThreadNetworkResult = {
   // Requests still in flight when the recording stopped.
   incompleteCount: number;
   filteredRequestCount: number;
+  // How the request list is ordered.
+  sort: NetworkRequestSort;
   filters?: {
     searchString?: string;
     minDuration?: number;

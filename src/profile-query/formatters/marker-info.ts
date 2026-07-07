@@ -41,6 +41,7 @@ import type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   NetworkRequestEntry,
+  NetworkRequestSort,
   NetworkPhaseTimings,
   MarkerGroupData,
   DurationStats,
@@ -1149,9 +1150,11 @@ export function collectThreadNetwork(
     minDuration?: number;
     maxDuration?: number;
     limit?: number;
+    sort?: NetworkRequestSort;
   } = {}
 ): ThreadNetworkResult {
   const { searchString, minDuration, maxDuration, limit } = filterOptions;
+  const sort: NetworkRequestSort = filterOptions.sort ?? 'duration';
 
   const state = store.getState();
   const threadIndexes =
@@ -1278,12 +1281,23 @@ export function collectThreadNetwork(
     }
   }
 
-  // Apply limit after accumulating summary stats.
+  // Sort before applying the limit so a limited window shows the intended
+  // requests (slowest by default; chronological with --sort start).
+  const sortedIndexes = filteredIndexes.slice();
+  if (sort === 'duration') {
+    sortedIndexes.sort((a, b) => durationOf(b) - durationOf(a));
+  } else {
+    sortedIndexes.sort(
+      (a, b) => fullMarkerList[a].start - fullMarkerList[b].start
+    );
+  }
+
+  // Apply limit after accumulating summary stats and sorting.
   // limit === 0 means "show all" (no limit).
   const limitedIndexes =
     limit !== undefined && limit > 0
-      ? filteredIndexes.slice(0, limit)
-      : filteredIndexes;
+      ? sortedIndexes.slice(0, limit)
+      : sortedIndexes;
 
   // Build per-request entries
   const requests: NetworkRequestEntry[] = limitedIndexes.map((i) => {
@@ -1319,6 +1333,7 @@ export function collectThreadNetwork(
     totalRequestCount,
     incompleteCount,
     filteredRequestCount,
+    sort,
     filters:
       searchString !== undefined ||
       minDuration !== undefined ||

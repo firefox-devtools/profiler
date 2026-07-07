@@ -33,6 +33,7 @@ export type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   NetworkRequestEntry,
+  NetworkRequestSort,
   NetworkPhaseTimings,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
@@ -77,6 +78,7 @@ import type {
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadNetworkResult,
+  NetworkRequestSort,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   FilterStackResult,
@@ -133,6 +135,7 @@ export type ClientCommand =
         minDuration?: number;
         maxDuration?: number;
         limit?: number;
+        sort?: NetworkRequestSort;
       };
       pageLoadOptions?: {
         navigationIndex?: number;

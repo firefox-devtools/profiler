@@ -152,6 +152,7 @@ profiler-cli thread network --json
     totalRequestCount,
     incompleteCount,
     filteredRequestCount,
+    sort: "duration" | "start",
     filters?: { searchString?, minDuration?, maxDuration?, limit? },
     summary: {
       cacheHit, cacheMiss, cacheUnknown,

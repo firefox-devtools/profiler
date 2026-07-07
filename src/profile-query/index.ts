@@ -93,6 +93,7 @@ import type {
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadNetworkResult,
+  NetworkRequestSort,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   ProfileLogsResult,
@@ -1048,6 +1049,7 @@ export class ProfileQuerier {
       minDuration?: number;
       maxDuration?: number;
       limit?: number;
+      sort?: NetworkRequestSort;
     }
   ): Promise<WithContext<ThreadNetworkResult>> {
     const result = collectThreadNetwork(

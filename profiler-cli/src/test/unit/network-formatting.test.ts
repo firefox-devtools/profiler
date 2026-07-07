@@ -62,6 +62,7 @@ function makeResult(
     totalRequestCount: 1,
     incompleteCount: 0,
     filteredRequestCount: 1,
+    sort: 'duration',
     summary: makeSummary(),
     requests: [makeRequest()],
     ...overrides,
@@ -323,5 +324,15 @@ describe('formatThreadNetworkResult', function () {
     // Shows the real status, not "in flight".
     expect(output).not.toContain('in flight');
     expect(output).toContain('200');
+  });
+
+  it('reflects the sort order in the header', function () {
+    const durationResult = makeResult({ sort: 'duration' });
+    expect(formatThreadNetworkResult(durationResult)).toContain(
+      'slowest first'
+    );
+
+    const startResult = makeResult({ sort: 'start' });
+    expect(formatThreadNetworkResult(startResult)).toContain('chronological');
   });
 });

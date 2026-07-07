@@ -1259,9 +1259,11 @@ export function formatThreadNetworkResult(
       : '';
 
   const truncated = result.requests.length < result.filteredRequestCount;
+  const sortLabel =
+    result.sort === 'duration' ? 'slowest first' : 'chronological';
   const countStr = truncated
-    ? `${result.requests.length} of ${result.filteredRequestCount} requests`
-    : `${result.filteredRequestCount} requests`;
+    ? `${result.requests.length} of ${result.filteredRequestCount} requests (${sortLabel})`
+    : `${result.filteredRequestCount} requests (${sortLabel})`;
 
   lines.push(
     `Network requests in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${countStr}${filterSuffix}`
@@ -1358,11 +1360,11 @@ export function formatThreadNetworkResult(
 
   if (truncated) {
     lines.push(
-      `Use --limit 0 to show all requests, or --limit <N> to set a different limit.`
+      `Use --limit 0 to show all requests, --limit <N> for a different window, or --sort start for chronological order.`
     );
   } else {
     lines.push(
-      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, or --limit <N> to filter.'
+      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, --limit <N>, or --sort start|duration to filter and order.'
     );
   }
 
