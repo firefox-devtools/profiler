@@ -8,7 +8,13 @@ import {
   getCategories,
   getMarkerSchemaByName,
   getStringTable,
+  getCommittedRange,
 } from 'firefox-profiler/selectors/profile';
+import {
+  intervalUnionMs,
+  peakConcurrency,
+  classifyCache,
+} from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   formatFromMarkerSchema,
@@ -1157,6 +1163,8 @@ export function collectThreadNetwork(
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
   const fullMarkerList = threadSelectors.getFullMarkerList(state);
   const allMarkerIndexes = threadSelectors.getFullMarkerListIndexes(state);
+  const range = getCommittedRange(state);
+  const rangeDurationMs = range.end - range.start;
 
   // Filter to completed (STOP) network markers only.
   // STOP markers are the merged markers that carry full timing data.
@@ -1169,6 +1177,23 @@ export function collectThreadNetwork(
     return data.status === 'STATUS_STOP';
   });
   const totalRequestCount = stopIndexes.length;
+
+  // Wall-clock: interval union and peak concurrency over all requests
+  // intersecting the range, independent of the display filters below.
+  const inFlightIntervals: Array<[number, number]> = [];
+  for (const i of stopIndexes) {
+    const marker = fullMarkerList[i];
+    const start = marker.start;
+    const end = marker.end ?? marker.start;
+    if (end < range.start || start > range.end) {
+      continue;
+    }
+    inFlightIntervals.push([
+      Math.max(start, range.start),
+      Math.min(end, range.end),
+    ]);
+  }
+  const inFlightMs = intervalUnionMs(inFlightIntervals);
 
   // Apply filters
   let filteredIndexes = stopIndexes;
@@ -1205,18 +1230,15 @@ export function collectThreadNetwork(
 
   for (const i of filteredIndexes) {
     const data = fullMarkerList[i].data as NetworkPayload;
-    const cache = data.cache;
-    if (cache === 'Hit' || cache === 'MemoryHit' || cache === 'Prefetched') {
-      cacheHit++;
-    } else if (
-      cache === 'Miss' ||
-      cache === 'Unresolved' ||
-      cache === 'DiskStorage' ||
-      cache === 'Push'
-    ) {
-      cacheMiss++;
-    } else {
-      cacheUnknown++;
+    switch (classifyCache(data.cache)) {
+      case 'hit':
+        cacheHit++;
+        break;
+      case 'miss':
+        cacheMiss++;
+        break;
+      default:
+        cacheUnknown++;
     }
 
     const phases = buildNetworkPhases(data);
@@ -1286,6 +1308,11 @@ export function collectThreadNetwork(
       cacheHit,
       cacheMiss,
       cacheUnknown,
+      inFlightMs,
+      inFlightPercentage:
+        rangeDurationMs > 0 ? (inFlightMs / rangeDurationMs) * 100 : 0,
+      peakConcurrency: peakConcurrency(inFlightIntervals),
+      rangeDurationMs,
       phaseTotals,
     },
     requests,

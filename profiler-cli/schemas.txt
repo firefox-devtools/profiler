@@ -154,6 +154,7 @@ profiler-cli thread network --json
     filters?: { searchString?, minDuration?, maxDuration?, limit? },
     summary: {
       cacheHit, cacheMiss, cacheUnknown,
+      inFlightMs, inFlightPercentage, peakConcurrency, rangeDurationMs,
       phaseTotals: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
     },
     requests: [{

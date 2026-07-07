@@ -349,6 +349,12 @@ UNDERSTANDING THE OUTPUT
     samples-bottom-up   Hot leaf functions at top with their callers.
                         Use to understand what calls a frequently-seen function.
 
+  Network summary ("thread network"):
+    "In flight" is the wall-clock signal: time at least one request was open
+    (overlaps counted once) plus peak concurrency. "Phase totals" are summed
+    across concurrent requests, so they can exceed the wall clock -- judge
+    network stall by "In flight", not the phase sum.
+
 TIPS
 
   - Start with "profile info"; GeckoMain is usually the main thread -- use

@@ -938,37 +938,37 @@ describe('collectThreadNetwork', function () {
         startTime: 2,
         fetchStart: 2,
         endTime: 3,
-        payload: { cache: 'MemoryHit' },
+        payload: { cache: 'HitViaReval' },
       },
       {
         id: 3,
         startTime: 4,
         fetchStart: 4,
         endTime: 5,
-        payload: { cache: 'Prefetched' },
+        payload: { cache: 'Missed' },
       },
       {
         id: 4,
         startTime: 6,
         fetchStart: 6,
         endTime: 7,
-        payload: { cache: 'Miss' },
+        payload: { cache: 'MissedViaReval' },
       },
       {
         id: 5,
         startTime: 8,
         fetchStart: 8,
         endTime: 9,
-        payload: { cache: 'DiskStorage' },
+        payload: { cache: 'Unresolved' },
       },
       { id: 6, startTime: 10, fetchStart: 10, endTime: 11 },
     ]);
 
     const result = collectThreadNetwork(store, threadMap, markerMap);
 
-    expect(result.summary.cacheHit).toBe(3);
+    expect(result.summary.cacheHit).toBe(2);
     expect(result.summary.cacheMiss).toBe(2);
-    expect(result.summary.cacheUnknown).toBe(1);
+    expect(result.summary.cacheUnknown).toBe(2);
   });
 
   it('extracts phase timings per request', function () {

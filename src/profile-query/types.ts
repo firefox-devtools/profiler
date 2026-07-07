@@ -455,6 +455,12 @@ export type ThreadNetworkResult = {
     cacheHit: number;
     cacheMiss: number;
     cacheUnknown: number;
+    // Interval union of all requests intersecting the range: wall-clock
+    // time, unlike the summed phase totals.
+    inFlightMs: number;
+    inFlightPercentage: number;
+    peakConcurrency: number;
+    rangeDurationMs: number;
     phaseTotals: NetworkPhaseTimings;
   };
   requests: NetworkRequestEntry[];

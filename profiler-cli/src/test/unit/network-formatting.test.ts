@@ -33,6 +33,22 @@ function makeRequest(
   };
 }
 
+function makeSummary(
+  overrides: Partial<ThreadNetworkResult['summary']> = {}
+): ThreadNetworkResult['summary'] {
+  return {
+    cacheHit: 0,
+    cacheMiss: 0,
+    cacheUnknown: 1,
+    inFlightMs: 100,
+    inFlightPercentage: 10,
+    peakConcurrency: 1,
+    rangeDurationMs: 1000,
+    phaseTotals: {},
+    ...overrides,
+  };
+}
+
 function makeResult(
   overrides: Partial<ThreadNetworkResult> = {}
 ): WithContext<ThreadNetworkResult> {
@@ -43,12 +59,7 @@ function makeResult(
     friendlyThreadName: 'GeckoMain',
     totalRequestCount: 1,
     filteredRequestCount: 1,
-    summary: {
-      cacheHit: 0,
-      cacheMiss: 0,
-      cacheUnknown: 1,
-      phaseTotals: {},
-    },
+    summary: makeSummary(),
     requests: [makeRequest()],
     ...overrides,
   };
@@ -137,12 +148,7 @@ describe('formatThreadNetworkResult', function () {
 
   it('shows cache summary counts', function () {
     const result = makeResult({
-      summary: {
-        cacheHit: 4,
-        cacheMiss: 2,
-        cacheUnknown: 1,
-        phaseTotals: {},
-      },
+      summary: makeSummary({ cacheHit: 4, cacheMiss: 2, cacheUnknown: 1 }),
     });
 
     const output = formatThreadNetworkResult(result);
@@ -152,10 +158,27 @@ describe('formatThreadNetworkResult', function () {
     expect(output).toContain('1 unknown');
   });
 
+  it('leads the summary with the wall-clock in-flight metric', function () {
+    const result = makeResult({
+      summary: makeSummary({
+        inFlightMs: 870,
+        inFlightPercentage: 87,
+        peakConcurrency: 14,
+        rangeDurationMs: 1000,
+      }),
+    });
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('In flight');
+    expect(output).toContain('87%');
+    expect(output).toContain('peak 14 concurrent');
+  });
+
   it('shows phase totals section when any phase total is present', function () {
     const phaseTotals: NetworkPhaseTimings = { ttfb: 50, download: 30 };
     const result = makeResult({
-      summary: { cacheHit: 0, cacheMiss: 1, cacheUnknown: 0, phaseTotals },
+      summary: makeSummary({ cacheMiss: 1, cacheUnknown: 0, phaseTotals }),
     });
 
     const output = formatThreadNetworkResult(result);
@@ -165,9 +188,19 @@ describe('formatThreadNetworkResult', function () {
     expect(output).toContain('Download');
   });
 
+  it('labels phase totals as summed across concurrent requests', function () {
+    const result = makeResult({
+      summary: makeSummary({ phaseTotals: { download: 30 } }),
+    });
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('summed across concurrent requests');
+  });
+
   it('omits phase totals section when no phases are present', function () {
     const result = makeResult({
-      summary: { cacheHit: 1, cacheMiss: 0, cacheUnknown: 0, phaseTotals: {} },
+      summary: makeSummary({ cacheHit: 1, cacheUnknown: 0 }),
     });
 
     const output = formatThreadNetworkResult(result);

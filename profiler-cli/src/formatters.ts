@@ -1268,6 +1268,10 @@ export function formatThreadNetworkResult(
   // Summary
   const s = result.summary;
   lines.push('Summary:');
+  // Lead with the wall-clock metric
+  lines.push(
+    `  In flight: ${formatDuration(s.inFlightMs)} of ${formatDuration(s.rangeDurationMs)} (${Math.round(s.inFlightPercentage)}%), peak ${s.peakConcurrency} concurrent`
+  );
   lines.push(
     `  Cache: ${s.cacheHit} hit, ${s.cacheMiss} miss, ${s.cacheUnknown} unknown`
   );
@@ -1282,7 +1286,7 @@ export function formatThreadNetworkResult(
     pt.mainThread !== undefined;
 
   if (hasPhaseTotals) {
-    lines.push('  Phase totals:');
+    lines.push('  Phase totals (summed across concurrent requests):');
     if (pt.dns !== undefined) {
       lines.push(`    DNS:              ${formatDuration(pt.dns)}`);
     }
