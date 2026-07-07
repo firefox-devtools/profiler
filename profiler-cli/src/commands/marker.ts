@@ -7,9 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
-import { addGlobalOptions } from './shared';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerMarkerCommand(
   program: Command,
@@ -24,12 +22,11 @@ export function registerMarkerCommand(
       .option('--marker <handle>', 'Marker handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const markerHandle = handleArg ?? opts.marker;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'marker', subcommand: 'info', marker: markerHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
@@ -39,11 +36,10 @@ export function registerMarkerCommand(
       .option('--marker <handle>', 'Marker handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const markerHandle = handleArg ?? opts.marker;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'marker', subcommand: 'stack', marker: markerHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }
