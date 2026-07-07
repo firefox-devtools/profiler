@@ -59,6 +59,10 @@
   font-size: 14px;
 }
 
+.benchmarkCompareViewer__spacer {
+  height: 100vh;
+}
+
 .benchmarkTitle {
   margin-bottom: 1em;
 }
