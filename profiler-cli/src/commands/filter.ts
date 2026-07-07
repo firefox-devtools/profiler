@@ -7,13 +7,12 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
 import { parseFilterSpec } from '../utils/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
   parseIntArg,
+  runCommand,
   wasExplicit,
 } from './shared';
 
@@ -48,12 +47,11 @@ export function registerFilterCommand(
       outsideMarker: opts.outsideMarker,
       search: opts.search,
     });
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'filter', subcommand: 'push', thread: opts.thread, spec },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
@@ -70,12 +68,11 @@ export function registerFilterCommand(
       1,
       'Error: count must be a positive integer'
     );
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'filter', subcommand: 'pop', thread: opts.thread, count },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   addGlobalOptions(
@@ -84,12 +81,11 @@ export function registerFilterCommand(
       .description('List active filters for current thread')
       .option('--thread <handle>', 'Thread handle')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'filter', subcommand: 'list', thread: opts.thread },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
 
     if (!wasExplicit('filter', 'list')) {
       console.log(
@@ -104,11 +100,10 @@ export function registerFilterCommand(
       .description('Remove all filters for current thread')
       .option('--thread <handle>', 'Thread handle')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'filter', subcommand: 'clear', thread: opts.thread },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }

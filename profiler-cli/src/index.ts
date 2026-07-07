@@ -31,7 +31,7 @@ import { startDaemon } from './daemon';
 import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
 import { formatOutput } from './output';
-import { addGlobalOptions } from './commands/shared';
+import { addGlobalOptions, runCommand } from './commands/shared';
 import { VERSION } from './constants';
 import { registerProfileCommand } from './commands/profile';
 import { registerThreadCommand } from './commands/thread';
@@ -135,12 +135,7 @@ Examples:
         'Show session status (selected thread, zoom ranges, filters)'
       )
   ).action(async (opts) => {
-    const result = await sendCommand(
-      SESSION_DIR,
-      { command: 'status' },
-      opts.session
-    );
-    console.log(formatOutput(result, opts.json ?? false));
+    await runCommand(SESSION_DIR, { command: 'status' }, opts);
   });
 
   // profiler-cli stop [id]

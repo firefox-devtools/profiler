@@ -9,6 +9,31 @@
 import type { Command } from 'commander';
 import { Option } from 'commander';
 import { collectStrings } from '../utils/parse';
+import { sendCommand } from '../client';
+import { formatOutput } from '../output';
+import type { ClientCommand } from '../protocol';
+
+/**
+ * Options shared by every command action via `addGlobalOptions`.
+ */
+export type GlobalOptions = {
+  session?: string;
+  json?: boolean;
+};
+
+/**
+ * Send a command to the daemon and print the formatted result. Centralizes the
+ * `sendCommand` + `formatOutput` tail that every command action shares, so no
+ * call site can forget to pass `opts.session` or honor `opts.json`.
+ */
+export async function runCommand(
+  sessionDir: string,
+  command: ClientCommand,
+  opts: GlobalOptions
+): Promise<void> {
+  const result = await sendCommand(sessionDir, command, opts.session);
+  console.log(formatOutput(result, opts.json ?? false));
+}
 
 /**
  * Parse a string as an integer and exit with an error if it is not a valid

@@ -10,6 +10,19 @@ export type CodeErrorOverlayProps = {
   errors: SourceCodeLoadingError[];
 };
 
+// Some URLs might be very long and would fill the whole overlay. Collapse the
+// middle so the beginning and end stay readable. The full URL is kept in the
+// `title` attribute for hover.
+const MAX_DISPLAYED_URL_LENGTH = 160;
+
+function shortenUrl(url: string): string {
+  if (url.length <= MAX_DISPLAYED_URL_LENGTH) {
+    return url;
+  }
+  const half = Math.floor((MAX_DISPLAYED_URL_LENGTH - 1) / 2);
+  return `${url.slice(0, half)}…${url.slice(url.length - half)}`;
+}
+
 export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
   return (
     <ul className="codeErrorOverlay">
@@ -24,13 +37,16 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
           }
           case 'NETWORK_ERROR': {
             const { url, networkErrorMessage } = error;
+            const shortUrl = shortenUrl(url);
             return (
               <Localized
                 key={key}
                 id="SourceView--network-error-when-obtaining-source"
-                vars={{ url, networkErrorMessage }}
+                vars={{ url: shortUrl, networkErrorMessage }}
               >
-                <li>{`There was a network error when fetching the URL ${url}: ${networkErrorMessage}`}</li>
+                <li
+                  title={url}
+                >{`There was a network error when fetching the URL ${shortUrl}: ${networkErrorMessage}`}</li>
               </Localized>
             );
           }
@@ -96,37 +112,46 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
           }
           case 'NOT_PRESENT_IN_ARCHIVE': {
             const { url, pathInArchive } = error;
+            const shortUrl = shortenUrl(url);
             return (
               <Localized
                 key={key}
                 id="SourceView--not-in-archive-error-when-obtaining-source"
-                vars={{ url, pathInArchive }}
+                vars={{ url: shortUrl, pathInArchive }}
               >
-                <li>{`The file ${pathInArchive} was not found in the archive from ${url}.`}</li>
+                <li
+                  title={url}
+                >{`The file ${pathInArchive} was not found in the archive from ${shortUrl}.`}</li>
               </Localized>
             );
           }
           case 'ARCHIVE_PARSING_ERROR': {
             const { url, parsingErrorMessage } = error;
+            const shortUrl = shortenUrl(url);
             return (
               <Localized
                 key={key}
                 id="SourceView--archive-parsing-error-when-obtaining-source"
-                vars={{ url, parsingErrorMessage }}
+                vars={{ url: shortUrl, parsingErrorMessage }}
               >
-                <li>{`The archive at ${url} could not be parsed: ${parsingErrorMessage}`}</li>
+                <li
+                  title={url}
+                >{`The archive at ${shortUrl} could not be parsed: ${parsingErrorMessage}`}</li>
               </Localized>
             );
           }
           case 'NOT_PRESENT_IN_BROWSER': {
             const { sourceUuid, url, errorMessage } = error;
+            const shortUrl = shortenUrl(url);
             return (
               <Localized
                 key={key}
                 id="SourceView--not-in-browser-error-when-obtaining-js-source"
-                vars={{ url, sourceUuid, errorMessage }}
+                vars={{ url: shortUrl, sourceUuid, errorMessage }}
               >
-                <li>{`The browser was unable to obtain the source file for ${url} with sourceUuid ${sourceUuid}: ${errorMessage}`}</li>
+                <li
+                  title={url}
+                >{`The browser was unable to obtain the source file for ${shortUrl} with sourceUuid ${sourceUuid}: ${errorMessage}`}</li>
               </Localized>
             );
           }
