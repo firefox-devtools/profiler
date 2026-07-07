@@ -611,6 +611,11 @@ export function BenchmarkCompareViewer() {
       )}
 
       {state.phase === 'done' && <ComparisonResults data={state.data} />}
+
+      {/* Keeps enough page height below the content that collapsing a section
+       * doesn't force the viewport to scroll up, which would visually move the
+       * clicked row. */}
+      <div className="benchmarkCompareViewer__spacer" aria-hidden="true" />
     </main>
   );
 }
