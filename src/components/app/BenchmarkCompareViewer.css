@@ -1,4 +1,25 @@
 .benchmarkCompareViewer {
+  --internal-text-muted: var(--grey-70);
+  --internal-text-hint: var(--grey-60);
+  --internal-cell-border: var(--grey-20);
+  --internal-strong-border: var(--grey-40);
+  --internal-header-background: var(--grey-10);
+  --internal-row-hover-background: var(--grey-10);
+  --internal-expansion-background: var(--grey-10);
+  --internal-inner-hover-background: var(--grey-20);
+  --internal-inner-expansion-background: var(--grey-20);
+  --internal-panel-border: var(--grey-30);
+  --internal-panel-label-background: var(--grey-20);
+  --internal-spinner-track: var(--grey-30);
+  --internal-spinner-active: var(--blue-50);
+  --internal-error-border: var(--red-50);
+  --internal-error-background: #ffe8e8;
+  --internal-error-color: var(--red-70);
+  --internal-regressed-color: var(--red-70);
+  --internal-improved-color: var(--green-80);
+  --internal-regressed-background: #ffe8e8;
+  --internal-improved-background: #d3f3d8;
+
   width: 100%;
   min-height: 100%;
   box-sizing: border-box;
@@ -7,6 +28,31 @@
   align-self: flex-start; /* allow extending beyond the parent's height */
   padding: 2em 3em;
   background: var(--base-background-color);
+}
+
+:root.dark-mode {
+  .benchmarkCompareViewer {
+    --internal-text-muted: var(--grey-30);
+    --internal-text-hint: var(--grey-40);
+    --internal-cell-border: var(--grey-70);
+    --internal-strong-border: var(--grey-50);
+    --internal-header-background: var(--grey-80);
+    --internal-row-hover-background: rgb(255 255 255 / 0.06);
+    --internal-expansion-background: rgb(255 255 255 / 0.04);
+    --internal-inner-hover-background: rgb(255 255 255 / 0.09);
+    --internal-inner-expansion-background: rgb(255 255 255 / 0.07);
+    --internal-panel-border: var(--grey-60);
+    --internal-panel-label-background: var(--grey-80);
+    --internal-spinner-track: var(--grey-70);
+    --internal-spinner-active: var(--blue-40);
+    --internal-error-border: var(--red-60);
+    --internal-error-background: rgb(255 0 57 / 0.15);
+    --internal-error-color: #ff8a8a;
+    --internal-regressed-color: #ff8a8a;
+    --internal-improved-color: #7ed77e;
+    --internal-regressed-background: rgb(255 0 57 / 0.22);
+    --internal-improved-background: rgb(48 230 11 / 0.18);
+  }
 }
 
 .benchmarkResults {
@@ -24,16 +70,16 @@
   flex-direction: column;
   align-items: center;
   padding: 4em;
-  color: var(--grey-60);
+  color: var(--internal-text-hint);
   gap: 1em;
 }
 
 .benchmarkSpinner {
   width: 2em;
   height: 2em;
-  border: 3px solid var(--grey-30);
+  border: 3px solid var(--internal-spinner-track);
   border-radius: 50%;
-  border-top-color: var(--blue-50);
+  border-top-color: var(--internal-spinner-active);
   animation: benchmarkSpin 0.8s linear infinite;
 }
 
@@ -47,10 +93,10 @@
 
 .benchmarkError {
   padding: 1em;
-  border: 1px solid var(--red-50, #ff0039);
+  border: 1px solid var(--internal-error-border);
   border-radius: 4px;
-  background: var(--red-10, #ffe8e8);
-  color: var(--red-70, #a4000f);
+  background: var(--internal-error-background);
+  color: var(--internal-error-color);
 }
 
 /* Profile URLs */
@@ -59,7 +105,7 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 1.5em;
-  color: var(--grey-70);
+  color: var(--internal-text-muted);
   font-size: 0.9em;
   gap: 0.25em;
   word-break: break-all;
@@ -86,7 +132,7 @@
 
 .benchmarkNoChanges {
   padding: 0.5em 0;
-  color: var(--grey-60);
+  color: var(--internal-text-hint);
   font-style: italic;
 }
 
@@ -110,7 +156,7 @@
 .benchmarkTable td {
   box-sizing: border-box;
   padding: 4px 8px;
-  border-bottom: 1px solid var(--grey-20);
+  border-bottom: 1px solid var(--internal-cell-border);
   text-align: left;
   white-space: nowrap;
 }
@@ -119,7 +165,7 @@
   position: sticky;
   z-index: 1;
   top: 0;
-  background: var(--grey-10);
+  background: var(--internal-header-background);
   font-weight: bold;
 }
 
@@ -139,7 +185,7 @@
 }
 
 .benchmarkRow--overall td {
-  border-bottom: 2px solid var(--grey-40);
+  border-bottom: 2px solid var(--internal-strong-border);
   font-weight: bold;
 }
 
@@ -154,7 +200,7 @@
 }
 
 .benchmarkRow--suite-expandable:hover {
-  background: var(--grey-10);
+  background: var(--internal-row-hover-background);
 }
 
 .benchmarkCell--suiteLabel {
@@ -165,7 +211,7 @@
   display: inline-block;
   width: 1em;
   margin-right: 0.25em;
-  color: var(--grey-60);
+  color: var(--internal-text-hint);
   font-size: 0.75em;
   text-align: center;
   user-select: none;
@@ -173,7 +219,7 @@
 
 .benchmarkRow--expansion > td {
   padding: 0.5em 0 0.5em 2.5em;
-  background: var(--grey-10);
+  background: var(--internal-expansion-background);
 }
 
 .benchmarkRow--expansion .benchmarkTable {
@@ -188,27 +234,35 @@
  */
 
 .benchmarkCell--regressed {
-  color: var(--red-70, #a4000f);
+  color: var(--internal-regressed-color);
 }
 
 .benchmarkCell--improved {
-  color: var(--green-80, #006504);
+  color: var(--internal-improved-color);
 }
 
 .benchmarkCell--regressed.benchmarkCell--conf-high {
-  background: var(--red-10, #ffe8e8);
+  background: var(--internal-regressed-background);
 }
 
 .benchmarkCell--regressed.benchmarkCell--conf-medium {
-  background: color-mix(in srgb, var(--red-10, #ffe8e8) 40%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--internal-regressed-background) 40%,
+    transparent
+  );
 }
 
 .benchmarkCell--improved.benchmarkCell--conf-high {
-  background: var(--green-10, #d3f3d8);
+  background: var(--internal-improved-background);
 }
 
 .benchmarkCell--improved.benchmarkCell--conf-medium {
-  background: color-mix(in srgb, var(--green-10, #d3f3d8) 40%, transparent);
+  background: color-mix(
+    in srgb,
+    var(--internal-improved-background) 40%,
+    transparent
+  );
 }
 
 .benchmarkCell--effect-large {
@@ -226,12 +280,12 @@
 }
 
 .benchmarkRow--bucket-expandable:hover {
-  background: var(--grey-20);
+  background: var(--internal-inner-hover-background);
 }
 
 .benchmarkRow--bucket-expansion > td {
   padding: 0.5em 0;
-  background: var(--grey-20);
+  background: var(--internal-inner-expansion-background);
   white-space: normal;
 }
 
@@ -254,23 +308,23 @@
   min-width: 0;
   height: 280px;
   flex-direction: column;
-  border: 1px solid var(--grey-30);
+  border: 1px solid var(--internal-panel-border);
   border-radius: 4px;
   background: var(--base-background-color);
 }
 
 .bucketFlameGraphSide__label {
   padding: 4px 8px;
-  border-bottom: 1px solid var(--grey-30);
-  background: var(--grey-20);
-  color: var(--grey-70);
+  border-bottom: 1px solid var(--internal-panel-border);
+  background: var(--internal-panel-label-background);
+  color: var(--internal-text-muted);
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
 }
 
 .bucketFlameGraphSide__sampleCount {
-  color: var(--grey-60);
+  color: var(--internal-text-hint);
   font-weight: normal;
   text-transform: none;
 }
@@ -287,6 +341,6 @@
   flex: 1;
   align-items: center;
   justify-content: center;
-  color: var(--grey-60);
+  color: var(--internal-text-hint);
   font-style: italic;
 }
