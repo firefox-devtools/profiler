@@ -106,8 +106,53 @@ describe('formatCounterListResult', function () {
 
     const output = formatCounterListResult(result);
     expect(output).toContain('c-0: Memory (Memory)');
+    // Memory is relative: it scales between its own min and max.
     expect(output).toContain('▁'); // lowest graph value
     expect(output).toContain('█'); // highest graph value
+  });
+
+  function listOf(counter: CounterSummary): WithContext<CounterListResult> {
+    return {
+      context: createContext(),
+      type: 'counter-list',
+      counters: [counter],
+    };
+  }
+
+  it('scales a percent (CPU) sparkline absolutely, 0 to 100%', function () {
+    const output = formatCounterListResult(
+      listOf(
+        makeCounter({
+          label: 'Process CPU',
+          category: 'CPU',
+          graphType: 'line-rate',
+          unit: 'percent',
+          graph: [0.5, 0.55, 0.6],
+        })
+      )
+    );
+    // ~50-60% on a 0-100% scale is mid-height: not the floor (the reviewer's
+    // "50% treated as 0" bug) and not the top (60% is not 100%).
+    expect(output).not.toContain('▁');
+    expect(output).not.toContain('█');
+    expect(output).toContain('▅');
+  });
+
+  it('anchors a rate (bytes) sparkline at zero, not the series min', function () {
+    const output = formatCounterListResult(
+      listOf(
+        makeCounter({
+          label: 'Bandwidth',
+          category: 'Bandwidth',
+          graphType: 'line-rate',
+          unit: 'bytes',
+          graph: [10, 20, 30],
+        })
+      )
+    );
+    // The smallest slice (10) sits above the zero baseline, so it isn't the floor.
+    expect(output).not.toContain('▁');
+    expect(output).toContain('█'); // the peak slice
   });
 });
 

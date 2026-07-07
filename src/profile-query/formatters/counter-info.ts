@@ -23,6 +23,7 @@ import {
   ENERGY_LADDER,
   pickTier,
 } from 'firefox-profiler/components/timeline/TrackCounterTooltipFormat';
+import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import { getCounterHandle, parseCounterHandle } from '../counter-map';
 import type {
   CounterIndex,
@@ -191,8 +192,10 @@ export function collectCounterSummary(
   const counter = selectors.getCounter(state);
   const { display } = counter;
 
-  const [rangeStartIndex, rangeEndIndex] =
-    selectors.getCommittedRangeCounterSampleRange(state);
+  const [rangeStartIndex, rangeEndIndex] = getInRangeSampleIndexes(
+    store,
+    counterIndex
+  );
 
   const mainThreadName = profile.threads[counter.mainThreadIndex]?.name ?? '';
 
@@ -269,19 +272,35 @@ function getOverTimeMode(display: CounterDisplayConfig): {
   return { kind: 'sum', format: rowFor('count')?.format ?? fallback };
 }
 
-type BinnedBucket = {
+/**
+ * The sample indexes strictly inside the committed range. The counter
+ * selectors' committed range is padded by one sample on each side (for graph
+ * continuity); those boundary samples are outside the current view, so counts,
+ * sums, and time spans should exclude them.
+ */
+function getInRangeSampleIndexes(
+  store: Store,
+  counterIndex: CounterIndex
+): [number, number] {
+  const state = store.getState();
+  const { samples } = getCounterSelectors(counterIndex).getCounter(state);
+  const range = getCommittedRange(state);
+  return getSampleIndexRangeForSelection(samples, range.start, range.end);
+}
+
+type CounterBucket = {
   startTime: number;
   endTime: number;
   value: number;
   delta?: number; // accumulated counters only
 };
 
-type BinnedCounter = {
+type CounterBuckets = {
   kind: 'level' | 'sum' | 'avg-ratio';
   format: CounterTooltipFormat;
   countRange: number; // for the accumulated (level) share
   totalSum: number; // for the rate (sum) share
-  buckets: BinnedBucket[];
+  buckets: CounterBucket[];
 };
 
 /**
@@ -293,19 +312,18 @@ type BinnedCounter = {
  * samples; the sparkline leaves it off for a consistent width, filling
  * sample-less buckets by carrying the level forward (accumulated) or with zero.
  */
-function binCounterValues(
+function getCounterBuckets(
   store: Store,
   counterIndex: CounterIndex,
   requestedBucketCount: number,
   capToSampleCount: boolean
-): BinnedCounter | null {
+): CounterBuckets | null {
   const state = store.getState();
   const selectors = getCounterSelectors(counterIndex);
   const counter = selectors.getCounter(state);
   const { samples, display } = counter;
   const range = getCommittedRange(state);
-  const [startIndex, endIndex] =
-    selectors.getCommittedRangeCounterSampleRange(state);
+  const [startIndex, endIndex] = getInRangeSampleIndexes(store, counterIndex);
   const { minCount, countRange, accumulatedCounts } =
     selectors.getAccumulateCounterSamples(state);
 
@@ -316,8 +334,12 @@ function binCounterValues(
 
   const { kind, format } = getOverTimeMode(display);
   const interval = getProfileInterval(state);
+  // Use the same range-aware max as the timeline's cpu-ratio tooltip
+  // (getMaxRangeCounterSampleCountPerMs), so the CLI and UI agree.
   const maxCountPerMs =
-    kind === 'avg-ratio' ? selectors.getMaxCounterSampleCountPerMs(state) : 0;
+    kind === 'avg-ratio'
+      ? selectors.getMaxRangeCounterSampleCountPerMs(state)
+      : 0;
 
   const bucketCount = Math.max(
     1,
@@ -362,7 +384,7 @@ function binCounterValues(
   const totalSum = accs.reduce((sum, acc) => sum + acc.sum, 0);
 
   let carriedLevel = 0;
-  const buckets: BinnedBucket[] = accs.map((acc, bucketIndex) => {
+  const buckets: CounterBucket[] = accs.map((acc, bucketIndex) => {
     const startTime = range.start + bucketIndex * width;
     const endTime =
       bucketIndex === bucketCount - 1
@@ -397,17 +419,17 @@ function collectCounterOverTime(
   counterIndex: CounterIndex,
   timestampManager: TimestampManager
 ): CounterTimeBucket[] {
-  const binned = binCounterValues(
+  const counterBuckets = getCounterBuckets(
     store,
     counterIndex,
     OVER_TIME_BUCKET_COUNT,
     true
   );
-  if (binned === null) {
+  if (counterBuckets === null) {
     return [];
   }
   const meta = getMeta(store.getState());
-  const { kind, format, countRange, totalSum, buckets } = binned;
+  const { kind, format, countRange, totalSum, buckets } = counterBuckets;
 
   return buckets.map((bucket): CounterTimeBucket => {
     const { formattedValue, carbon } = formatCounterRowValue(
@@ -460,13 +482,15 @@ function collectCounterGraph(
   store: Store,
   counterIndex: CounterIndex
 ): number[] {
-  const binned = binCounterValues(
+  const counterBuckets = getCounterBuckets(
     store,
     counterIndex,
     GRAPH_BUCKET_COUNT,
     false
   );
-  return binned === null ? [] : binned.buckets.map((bucket) => bucket.value);
+  return counterBuckets === null
+    ? []
+    : counterBuckets.buckets.map((bucket) => bucket.value);
 }
 
 /**
@@ -485,8 +509,10 @@ export function collectCounterInfo(
   const summary = collectCounterSummary(store, threadMap, counterIndex);
   const selectors = getCounterSelectors(counterIndex);
   const counter = selectors.getCounter(state);
-  const [rangeStartIndex, rangeEndIndex] =
-    selectors.getCommittedRangeCounterSampleRange(state);
+  const [rangeStartIndex, rangeEndIndex] = getInRangeSampleIndexes(
+    store,
+    counterIndex
+  );
 
   // Sample times are already in absolute profile-time space (the same space as
   // the committed range), so they need no zeroAt offset here.

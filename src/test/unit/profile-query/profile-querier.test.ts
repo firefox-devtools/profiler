@@ -546,6 +546,36 @@ describe('ProfileQuerier', function () {
       expect(info.rangeStart).not.toBeNull();
       expect(info.rangeStart! - info.context.rootRange.start).toBe(0);
     });
+
+    it('excludes the padded boundary samples when zoomed', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  10  20  30  40
+        A  A   A   A   A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        {
+          time: [0, 10, 20, 30, 40],
+          count: [0, 100, 100, 100, 100],
+          length: 5,
+        },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const querier = querierFor(profile);
+      const startName = querier._timestampManager.nameForTimestamp(15);
+      const endName = querier._timestampManager.nameForTimestamp(35);
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const info = await querier.counterInfo('c-0');
+
+      // Only the samples at 20 and 30 are inside [15, 35]; the boundary samples
+      // at 10 and 40 (which the counter selectors pad the range with) are not.
+      expect(info.rangeSampleCount).toBe(2);
+    });
   });
 
   describe('threadSamples', function () {

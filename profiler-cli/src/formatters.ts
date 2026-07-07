@@ -493,7 +493,7 @@ export function formatCounterListResult(
   const blocks = result.counters.map((counter) => {
     const block = [formatCounterSummaryLine(counter)];
     if (counter.graph.length > 0) {
-      block.push(`      ${renderSparkline(counter.graph)}`);
+      block.push(`      ${counterSparkline(counter)}`);
     }
     return block.join('\n');
   });
@@ -505,27 +505,46 @@ export function formatCounterListResult(
 const SPARKLINE_CHARS = '▁▂▃▄▅▆▇█';
 
 /**
- * Render a compact sparkline of the given values using block characters.
- * Heights are normalized across the series (min..max); a flat series renders
- * at a mid-height rather than the floor so it doesn't read as zero.
+ * Render a compact sparkline of the values using block characters, scaled
+ * between `min` (floor) and `max` (top). Values are clamped to that range; a
+ * zero-width range renders at mid-height so it doesn't read as the floor.
  */
-function renderSparkline(values: number[]): string {
+function renderSparkline(values: number[], min: number, max: number): string {
   if (values.length === 0) {
     return '';
   }
-  const min = Math.min(...values);
-  const max = Math.max(...values);
   const range = max - min;
   const lastIndex = SPARKLINE_CHARS.length - 1;
-  if (range === 0) {
+  if (range <= 0) {
     return SPARKLINE_CHARS[Math.floor(lastIndex / 2)].repeat(values.length);
   }
   return values
     .map((value) => {
-      const index = Math.round(((value - min) / range) * lastIndex);
+      const clamped = Math.min(max, Math.max(min, value));
+      const index = Math.round(((clamped - min) / range) * lastIndex);
       return SPARKLINE_CHARS[index];
     })
     .join('');
+}
+
+/**
+ * Render a counter's sparkline, choosing the baseline per graph type so the
+ * heights are meaningful: accumulated counters (e.g. Memory) are relative, so
+ * they scale between their own min and max; rate counters are absolute and
+ * anchored at zero, with percent counters (e.g. Process CPU) pinned to 0-100%.
+ */
+function counterSparkline(counter: CounterSummary): string {
+  const { graph } = counter;
+  if (graph.length === 0) {
+    return '';
+  }
+  if (counter.graphType === 'line-accumulated') {
+    return renderSparkline(graph, Math.min(...graph), Math.max(...graph));
+  }
+  if (counter.unit === 'percent') {
+    return renderSparkline(graph, 0, 1);
+  }
+  return renderSparkline(graph, 0, Math.max(...graph));
 }
 
 /**
@@ -571,7 +590,7 @@ export function formatCounterInfoResult(
   if (result.overTime.length > 0) {
     lines.push(`  ${result.label} over time:`);
     if (result.graph.length > 0) {
-      lines.push(`    ${renderSparkline(result.graph)}`);
+      lines.push(`    ${counterSparkline(result)}`);
       lines.push('');
     }
     // Build the columns first, then pad each to its widest cell so the values
