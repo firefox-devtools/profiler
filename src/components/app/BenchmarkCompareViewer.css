@@ -346,13 +346,40 @@
 }
 
 .bucketFlameGraphSide__label {
-  padding: 4px 8px;
+  display: flex;
+  align-items: stretch;
   border-bottom: 1px solid var(--internal-panel-border);
   background: var(--internal-panel-label-background);
   color: var(--internal-text-muted);
   font-size: 0.85em;
   font-weight: bold;
   text-transform: uppercase;
+}
+
+.bucketFlameGraphSide__labelText {
+  overflow: hidden;
+  flex: 1;
+  padding: 4px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Anchor stretched to the full height of the label bar and flush with the
+ * right edge, so the whole rectangle is a click target. */
+.bucketFlameGraphSide__openInNewTab {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: inherit;
+  font-weight: normal;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.bucketFlameGraphSide__openInNewTab:hover {
+  background: var(--internal-inner-hover-background);
+  text-decoration: underline;
 }
 
 .bucketFlameGraphSide__sampleCount {

@@ -45,9 +45,6 @@ export type BucketComparison = {
   newMean: number;
   /** Relative change: (newMean - baseMean) / baseMean */
   relChange: number;
-  /** Two-sided Mann-Whitney p-value. Smaller = more evidence that the two
-   * distributions differ. */
-  pValue: number;
   cliffdsDelta: number;
   effectSize: EffectSize;
   confidence: ConfidenceRating;
@@ -202,7 +199,6 @@ export function compareBuckets(
       baseMean,
       newMean,
       relChange,
-      pValue,
       cliffdsDelta: delta,
       effectSize,
       confidence,
