@@ -536,6 +536,7 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_INVERT_CALLSTACK';
       readonly invertCallstack: boolean;
+      readonly selectedTab: TabSlug;
       readonly newSelectedCallNodePath: CallNodePath;
       readonly selectedThreadIndexes: Set<ThreadIndex>;
     }

@@ -294,36 +294,40 @@ export class Daemon {
   private async processCommand(
     command: ClientCommand
   ): Promise<string | CommandResult> {
+    if (!this.querier) {
+      throw new Error('Profile not loaded');
+    }
+
     switch (command.command) {
       case 'profile':
         switch (command.subcommand) {
           case 'info':
-            return this.querier!.profileInfo(command.all, command.search);
+            return this.querier.profileInfo(command.all, command.search);
           case 'threads':
             throw new Error('unimplemented');
           case 'logs':
-            return this.querier!.profileLogs(command.logFilters);
+            return this.querier.profileLogs(command.logFilters);
           default:
             throw assertExhaustiveCheck(command);
         }
       case 'thread':
         switch (command.subcommand) {
           case 'info':
-            return this.querier!.threadInfo(command.thread);
+            return this.querier.threadInfo(command.thread);
           case 'select':
             if (!command.thread) {
               throw new Error('thread handle required for thread select');
             }
-            return this.querier!.threadSelect(command.thread);
+            return this.querier.threadSelect(command.thread);
           case 'samples':
-            return this.querier!.threadSamples(
+            return this.querier.threadSamples(
               command.thread,
               command.includeIdle,
               command.search,
               command.sampleFilters
             );
           case 'samples-top-down':
-            return this.querier!.threadSamplesTopDown(
+            return this.querier.threadSamplesTopDown(
               command.thread,
               command.callTreeOptions,
               command.includeIdle,
@@ -331,7 +335,7 @@ export class Daemon {
               command.sampleFilters
             );
           case 'samples-bottom-up':
-            return this.querier!.threadSamplesBottomUp(
+            return this.querier.threadSamplesBottomUp(
               command.thread,
               command.callTreeOptions,
               command.includeIdle,
@@ -339,24 +343,24 @@ export class Daemon {
               command.sampleFilters
             );
           case 'markers':
-            return this.querier!.threadMarkers(
+            return this.querier.threadMarkers(
               command.thread,
               command.markerFilters
             );
           case 'functions':
-            return this.querier!.threadFunctions(
+            return this.querier.threadFunctions(
               command.thread,
               command.functionFilters,
               command.includeIdle,
               command.sampleFilters
             );
           case 'network':
-            return this.querier!.threadNetwork(
+            return this.querier.threadNetwork(
               command.thread,
               command.networkFilters
             );
           case 'page-load':
-            return this.querier!.threadPageLoad(
+            return this.querier.threadPageLoad(
               command.thread,
               command.pageLoadOptions
             );
@@ -369,12 +373,12 @@ export class Daemon {
             if (!command.marker) {
               throw new Error('marker handle required for marker info');
             }
-            return this.querier!.markerInfo(command.marker);
+            return this.querier.markerInfo(command.marker);
           case 'stack':
             if (!command.marker) {
               throw new Error('marker handle required for marker stack');
             }
-            return this.querier!.markerStack(command.marker);
+            return this.querier.markerStack(command.marker);
           case 'select':
             throw new Error('unimplemented');
           default:
@@ -383,12 +387,12 @@ export class Daemon {
       case 'counter':
         switch (command.subcommand) {
           case 'list':
-            return this.querier!.counterList();
+            return this.querier.counterList();
           case 'info':
             if (!command.counter) {
               throw new Error('counter handle required for counter info');
             }
-            return this.querier!.counterInfo(command.counter);
+            return this.querier.counterInfo(command.counter);
           default:
             throw assertExhaustiveCheck(command);
         }
@@ -407,19 +411,19 @@ export class Daemon {
             if (!command.function) {
               throw new Error('function handle required for function info');
             }
-            return this.querier!.functionInfo(command.function);
+            return this.querier.functionInfo(command.function);
           case 'expand':
             if (!command.function) {
               throw new Error('function handle required for function expand');
             }
-            return this.querier!.functionExpand(command.function);
+            return this.querier.functionExpand(command.function);
           case 'select':
             throw new Error('unimplemented');
           case 'annotate':
             if (!command.function) {
               throw new Error('function handle required for function annotate');
             }
-            return this.querier!.functionAnnotate(
+            return this.querier.functionAnnotate(
               command.function,
               command.annotateMode ?? 'src',
               command.symbolServerUrl,
@@ -434,11 +438,11 @@ export class Daemon {
             if (!command.range) {
               throw new Error('range parameter is required for zoom push');
             }
-            return this.querier!.pushViewRange(command.range);
+            return this.querier.pushViewRange(command.range);
           case 'pop':
-            return this.querier!.popViewRange();
+            return this.querier.popViewRange();
           case 'clear':
-            return this.querier!.clearViewRange();
+            return this.querier.clearViewRange();
           default:
             throw assertExhaustiveCheck(command);
         }
@@ -448,18 +452,18 @@ export class Daemon {
             if (!command.spec) {
               throw new Error('spec is required for filter push');
             }
-            return this.querier!.filterPush(command.spec, command.thread);
+            return this.querier.filterPush(command.spec, command.thread);
           case 'pop':
-            return this.querier!.filterPop(command.count ?? 1, command.thread);
+            return this.querier.filterPop(command.count ?? 1, command.thread);
           case 'list':
-            return this.querier!.filterList(command.thread);
+            return this.querier.filterList(command.thread);
           case 'clear':
-            return this.querier!.filterClear(command.thread);
+            return this.querier.filterClear(command.thread);
           default:
             throw assertExhaustiveCheck(command);
         }
       case 'status':
-        return this.querier!.getStatus();
+        return this.querier.getStatus();
       default:
         throw assertExhaustiveCheck(command);
     }

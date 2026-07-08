@@ -1713,6 +1713,30 @@ describe('actions/ProfileView', function () {
       });
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
     });
+
+    it('does not apply call tree inversion to the stack chart', function () {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+      `);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      dispatch(App.changeSelectedTab('calltree'));
+      dispatch(ProfileView.changeInvertCallstack(true));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+      expect(
+        selectedThreadSelectors.getCallNodeInfo(getState()).isInverted()
+      ).toBe(true);
+
+      dispatch(App.changeSelectedTab('stack-chart'));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+      expect(
+        selectedThreadSelectors.getCallNodeInfo(getState()).isInverted()
+      ).toBe(false);
+
+      dispatch(App.changeSelectedTab('calltree'));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+    });
   });
 
   describe('changeIncludeIdleSamples', function () {
@@ -2480,7 +2504,7 @@ describe('changeSelectedCallNode', function () {
     );
 
     dispatch(App.changeSelectedTab('flame-graph'));
-    // In the flame graph, everything should still be non-inverted.
+    // In the flame graph, the invert state is independent and defaults to false.
     expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
     // The original non-inverted selected call node should be selected.
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(

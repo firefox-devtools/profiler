@@ -18,6 +18,7 @@ import {
 } from 'firefox-profiler/utils/format-numbers';
 import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
+import { getSelfAndTotalForCallNode } from 'firefox-profiler/profile-logic/call-tree';
 import MixedTupleMap from 'mixedtuplemap';
 
 import type {
@@ -49,7 +50,7 @@ import type {
 
 import type {
   CallTree,
-  CallTreeTimingsNonInverted,
+  CallTreeTimings,
 } from 'firefox-profiler/profile-logic/call-tree';
 
 export type OwnProps = {
@@ -74,7 +75,7 @@ export type OwnProps = {
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
-  readonly tracedTiming: CallTreeTimingsNonInverted | null;
+  readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
 };
 
@@ -397,11 +398,12 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
 
     let percentage = formatPercent(ratio);
     if (tracedTiming) {
-      const time = formatCallNodeNumberWithUnit(
-        'tracing-ms',
-        false,
-        tracedTiming.total[callNodeIndex]
+      const { total } = getSelfAndTotalForCallNode(
+        callNodeIndex,
+        callNodeInfo,
+        tracedTiming
       );
+      const time = formatCallNodeNumberWithUnit('tracing-ms', false, total);
       percentage = `${time} (${percentage})`;
     }
 
