@@ -140,6 +140,34 @@
   font-style: italic;
 }
 
+/* Filter controls (sliders that raise / lower the significance thresholds). */
+
+.benchmarkFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75em;
+  color: var(--internal-text-muted);
+  font-size: 0.9em;
+  gap: 1.5em;
+}
+
+.benchmarkFilter {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.benchmarkFilter__label {
+  white-space: nowrap;
+}
+
+.benchmarkFilter__value {
+  min-width: 3.5em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
 /* Tables */
 
 .benchmarkTable {
