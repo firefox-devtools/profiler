@@ -2,7 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Fragment, useState, useEffect, useMemo } from 'react';
+import { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
+import type { ChangeEvent, MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AppHeader } from './AppHeader';
@@ -47,6 +48,10 @@ type ComparisonData = {
     suiteName: string;
     comparisons: BucketComparison[];
   }>;
+  /** Per-bucket comparisons across all suites, using the geomean-normalised
+   * global bucket weights. Buckets flagged as significant here may not be
+   * significant in any single suite. */
+  globalComparisons: BucketComparison[];
 };
 
 type State =
@@ -55,6 +60,13 @@ type State =
   | { phase: 'done'; data: ComparisonData };
 
 const TOP_N = 100;
+
+/** Default p-value cutoff: matches the previous "confidence !== 'LOW'"
+ * threshold (LOW starts above 0.15 in pValueToConfidence). */
+const DEFAULT_MAX_P_VALUE = 0.15;
+/** Default |Cliff's delta| cutoff: matches the previous "effectSize !==
+ * 'Negligible'" threshold (Negligible ends at 0.15 in interpretEffectSize). */
+const DEFAULT_MIN_CLIFFS_DELTA = 0.15;
 
 async function loadOneProfile(viewerUrl: string) {
   let url = viewerUrl;
@@ -145,6 +157,19 @@ async function computeComparison(
   });
   suiteComparisons.sort((a, b) => a.suiteName.localeCompare(b.suiteName));
 
+  const globalComparisons = compareBuckets(
+    baseStats.globalBuckets,
+    newStats.globalBuckets,
+    baseStats.bucketNames,
+    newStats.bucketNames,
+    baseStats.bucketFuncs,
+    newStats.bucketFuncs,
+    iterationCount,
+    false,
+    baseStats.bucketKeys ?? baseStats.bucketNames,
+    newStats.bucketKeys ?? newStats.bucketNames
+  );
+
   return {
     baseUrl,
     newUrl,
@@ -153,6 +178,7 @@ async function computeComparison(
     overallScore,
     suiteScores,
     suiteComparisons,
+    globalComparisons,
   };
 }
 
@@ -252,19 +278,29 @@ function ScoreTable({
   overallScore,
   suiteScores,
   suiteComparisonsByName,
+  globalComparisons,
+  maxPValue,
+  minCliffsDelta,
   baseBundle,
   newBundle,
 }: {
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
   suiteComparisonsByName: Map<string, BucketComparison[]>;
+  globalComparisons: BucketComparison[];
+  maxPValue: number;
+  minCliffsDelta: number;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const numSuites = suiteScores.length;
 
-  const toggle = (label: string) => {
+  const handleToggle = useCallback((e: MouseEvent<HTMLTableRowElement>) => {
+    const label = e.currentTarget.dataset.toggleLabel;
+    if (label === undefined) {
+      return;
+    }
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(label)) {
@@ -274,7 +310,10 @@ function ScoreTable({
       }
       return next;
     });
-  };
+  }, []);
+
+  const overallExpanded = expanded.has(overallScore.label);
+  const overallExpandable = globalComparisons.length > 0;
 
   return (
     <table className="benchmarkTable">
@@ -299,12 +338,41 @@ function ScoreTable({
         </tr>
       </thead>
       <tbody>
-        <tr className="benchmarkRow--overall">
-          <td className="benchmarkCell--scoreLabel" title={overallScore.label}>
+        <tr
+          className={`benchmarkRow--overall${overallExpandable ? ' benchmarkRow--suite-expandable' : ''}`}
+          data-toggle-label={overallScore.label}
+          onClick={overallExpandable ? handleToggle : undefined}
+        >
+          <td
+            className="benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
+            title={overallScore.label}
+          >
+            {overallExpandable ? (
+              <span className="benchmarkDisclosure" aria-hidden="true">
+                {overallExpanded ? '▼' : '▶'}
+              </span>
+            ) : null}
             {overallScore.label}
           </td>
           <ScoreRow row={overallScore} isOverall={true} numSuites={numSuites} />
         </tr>
+        {overallExpanded && overallExpandable ? (
+          <tr className="benchmarkRow--expansion">
+            <td colSpan={SCORE_TABLE_COLUMN_COUNT}>
+              <BucketTable
+                comparisons={globalComparisons}
+                label={overallScore.label}
+                enclosingBaseMean={overallScore.baseMean}
+                isOverall={true}
+                numSuites={numSuites}
+                maxPValue={maxPValue}
+                minCliffsDelta={minCliffsDelta}
+                baseBundle={baseBundle}
+                newBundle={newBundle}
+              />
+            </td>
+          </tr>
+        ) : null}
         {suiteScores.map((row) => {
           const isExpanded = expanded.has(row.label);
           const comparisons = suiteComparisonsByName.get(row.label);
@@ -315,7 +383,8 @@ function ScoreTable({
                 className={
                   expandable ? 'benchmarkRow--suite-expandable' : undefined
                 }
-                onClick={expandable ? () => toggle(row.label) : undefined}
+                data-toggle-label={row.label}
+                onClick={expandable ? handleToggle : undefined}
               >
                 <td
                   className="benchmarkCell--indented benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
@@ -336,8 +405,11 @@ function ScoreTable({
                     <BucketTable
                       comparisons={comparisons}
                       label={row.label}
-                      baseSubtestMean={row.baseMean}
+                      enclosingBaseMean={row.baseMean}
+                      isOverall={false}
                       numSuites={numSuites}
+                      maxPValue={maxPValue}
+                      minCliffsDelta={minCliffsDelta}
                       baseBundle={baseBundle}
                       newBundle={newBundle}
                     />
@@ -355,34 +427,48 @@ function ScoreTable({
 function BucketTable({
   comparisons,
   label,
-  baseSubtestMean,
+  enclosingBaseMean,
+  isOverall,
   numSuites,
+  maxPValue,
+  minCliffsDelta,
   baseBundle,
   newBundle,
 }: {
   comparisons: BucketComparison[];
   label: string;
-  /** When provided together with numSuites, two percent columns are shown
-   * (Δ% overall and Δ% subtest) instead of the bucket-relative Δ%. */
-  baseSubtestMean?: number;
-  numSuites?: number;
+  /** Base mean of the enclosing score row (overall row or subtest row).
+   * Each bucket's absDiff is expressed relative to this to compute the
+   * bucket's impact on the enclosing score. */
+  enclosingBaseMean: number;
+  /** True when this table is expanded under the overall row (globalBuckets).
+   * The Δ% subtest column then shows "—" and the Δ% overall column shows
+   * absDiff / enclosingBaseMean directly (global buckets are already
+   * geomean-normalised, so their contributions sum linearly to the overall
+   * score). When false, subtest is absDiff / enclosingBaseMean and overall
+   * comes from impactOnGeomean. */
+  isOverall: boolean;
+  numSuites: number;
+  /** Include buckets whose Mann-Whitney p-value is at most this. */
+  maxPValue: number;
+  /** Include buckets whose |Cliff's delta| is at least this. */
+  minCliffsDelta: number;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
 }) {
-  const showSubtestColumns =
-    baseSubtestMean !== undefined && numSuites !== undefined;
-  const columnCount = showSubtestColumns ? 6 : 5;
+  const columnCount = 6;
 
-  // Build per-suite bundles whose `thread.samples.weight` is zeroed outside
-  // this suite's iteration markers, so flame graphs reflect only the samples
-  // that contribute to this suite's score.
-  const baseSuiteBundle = useMemo(
-    () => withSuiteFilteredThread(baseBundle, label),
-    [baseBundle, label]
+  // For a subtest expansion, filter to samples inside that suite's iteration
+  // markers so flame graphs reflect only what contributed to the subtest
+  // score. For the overall expansion, we want the full profile since global
+  // buckets aggregate across all suites.
+  const baseInnerBundle = useMemo(
+    () => (isOverall ? baseBundle : withSuiteFilteredThread(baseBundle, label)),
+    [baseBundle, label, isOverall]
   );
-  const newSuiteBundle = useMemo(
-    () => withSuiteFilteredThread(newBundle, label),
-    [newBundle, label]
+  const newInnerBundle = useMemo(
+    () => (isOverall ? newBundle : withSuiteFilteredThread(newBundle, label)),
+    [newBundle, label, isOverall]
   );
 
   // Keyed by row index in `significant`, not bucketName: multiple buckets in
@@ -390,7 +476,12 @@ function BucketTable({
   // different classes — distinguished by their source-location key but
   // collapsed to the same name for display).
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
-  const toggle = (rowIndex: number) => {
+  const handleToggle = useCallback((e: MouseEvent<HTMLTableRowElement>) => {
+    const raw = e.currentTarget.dataset.toggleIndex;
+    if (raw === undefined) {
+      return;
+    }
+    const rowIndex = Number(raw);
     setExpanded((prev) => {
       const next = new Set(prev);
       if (next.has(rowIndex)) {
@@ -400,10 +491,12 @@ function BucketTable({
       }
       return next;
     });
-  };
+  }, []);
 
   const significant = comparisons
-    .filter((c) => c.confidence !== 'LOW' && c.effectSize !== 'Negligible')
+    .filter(
+      (c) => c.pValue <= maxPValue && Math.abs(c.cliffdsDelta) >= minCliffsDelta
+    )
     .sort(
       (a, b) =>
         Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
@@ -413,8 +506,8 @@ function BucketTable({
   if (significant.length === 0) {
     return (
       <p className="benchmarkNoChanges">
-        No bucket changes in {label} with at least medium confidence and a
-        non-negligible effect size.
+        No bucket changes in {label} pass the current p-value and effect-size
+        thresholds.
       </p>
     );
   }
@@ -430,42 +523,23 @@ function BucketTable({
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
-        {showSubtestColumns ? (
-          <col className="benchmarkCell--colFixed" />
-        ) : null}
+        <col className="benchmarkCell--colFixed" />
       </colgroup>
       <tbody>
         {significant.map((c, i) => {
           const absDiff = c.newMean - c.baseMean;
           const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
-          let pctCells;
-          if (showSubtestColumns) {
-            const subtestRel =
-              baseSubtestMean === 0 ? Infinity : absDiff / baseSubtestMean!;
-            const overallRel = impactOnGeomean(subtestRel, numSuites!);
-            pctCells = (
-              <>
-                <td
-                  className={`benchmarkCell--number ${changeClass(subtestRel, c.confidence, c.effectSize)}`}
-                >
-                  {formatChange(subtestRel)}
-                </td>
-                <td
-                  className={`benchmarkCell--number ${changeClass(overallRel, c.confidence, c.effectSize)}`}
-                >
-                  {formatChange(overallRel)}
-                </td>
-              </>
-            );
-          } else {
-            pctCells = (
-              <td
-                className={`benchmarkCell--number ${changeClass(c.relChange, c.confidence, c.effectSize)}`}
-              >
-                {formatChange(c.relChange)}
-              </td>
-            );
-          }
+          const impactRel =
+            enclosingBaseMean === 0 ? Infinity : absDiff / enclosingBaseMean;
+          // Mirror ScoreRow: overall-row expansion leaves the subtest column
+          // blank (there's no enclosing subtest) and shows the bucket's direct
+          // impact on the overall geomean. Subtest expansions show the
+          // bucket's contribution to the subtest and its indirect impact on
+          // the overall geomean via impactOnGeomean.
+          const subtestRel = isOverall ? null : impactRel;
+          const overallRel = isOverall
+            ? impactRel
+            : impactOnGeomean(impactRel, numSuites);
           // A bucket can be expanded if at least one side has a func index.
           // (If both are null it's a degenerate "appeared/disappeared with no
           // attributable func" case.)
@@ -477,7 +551,8 @@ function BucketTable({
                 className={
                   expandable ? 'benchmarkRow--bucket-expandable' : undefined
                 }
-                onClick={expandable ? () => toggle(i) : undefined}
+                data-toggle-index={i}
+                onClick={expandable ? handleToggle : undefined}
               >
                 <td className="benchmarkCell--bucketName" title={c.bucketName}>
                   {expandable ? (
@@ -494,14 +569,27 @@ function BucketTable({
                   {c.newMean.toFixed(2)}
                 </td>
                 <td className="benchmarkCell--number">{absDiffStr}</td>
-                {pctCells}
+                <td
+                  className={
+                    subtestRel === null
+                      ? 'benchmarkCell--number'
+                      : `benchmarkCell--number ${changeClass(subtestRel, c.confidence, c.effectSize)}`
+                  }
+                >
+                  {subtestRel === null ? '—' : formatChange(subtestRel)}
+                </td>
+                <td
+                  className={`benchmarkCell--number ${changeClass(overallRel, c.confidence, c.effectSize)}`}
+                >
+                  {formatChange(overallRel)}
+                </td>
               </tr>
               {expandable && isExpanded ? (
                 <tr className="benchmarkRow--bucket-expansion">
                   <td colSpan={columnCount}>
                     <BucketFlameGraphPair
-                      baseBundle={baseSuiteBundle}
-                      newBundle={newSuiteBundle}
+                      baseBundle={baseInnerBundle}
+                      newBundle={newInnerBundle}
                       baseFunc={c.baseFunc}
                       newFunc={c.newFunc}
                     />
@@ -543,6 +631,24 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
     [data.newProfile]
   );
 
+  const [maxPValue, setMaxPValue] = useState(DEFAULT_MAX_P_VALUE);
+  const [minCliffsDelta, setMinCliffsDelta] = useState(
+    DEFAULT_MIN_CLIFFS_DELTA
+  );
+
+  const handleMaxPValueChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setMaxPValue(e.currentTarget.valueAsNumber);
+    },
+    []
+  );
+  const handleMinCliffsDeltaChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      setMinCliffsDelta(e.currentTarget.valueAsNumber);
+    },
+    []
+  );
+
   return (
     <div className="benchmarkResults">
       <div className="benchmarkProfileUrls">
@@ -561,10 +667,41 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
       </div>
 
       <h3 className="benchmarkSectionTitle">Score and subtest totals</h3>
+      <div className="benchmarkFilters">
+        <label className="benchmarkFilter">
+          <span className="benchmarkFilter__label">Max p-value</span>
+          <input
+            type="range"
+            min={0.001}
+            max={0.3}
+            step={0.001}
+            value={maxPValue}
+            onChange={handleMaxPValueChange}
+          />
+          <span className="benchmarkFilter__value">{maxPValue.toFixed(3)}</span>
+        </label>
+        <label className="benchmarkFilter">
+          <span className="benchmarkFilter__label">Min |Cliff&apos;s δ|</span>
+          <input
+            type="range"
+            min={0}
+            max={0.5}
+            step={0.01}
+            value={minCliffsDelta}
+            onChange={handleMinCliffsDeltaChange}
+          />
+          <span className="benchmarkFilter__value">
+            {minCliffsDelta.toFixed(2)}
+          </span>
+        </label>
+      </div>
       <ScoreTable
         overallScore={data.overallScore}
         suiteScores={data.suiteScores}
         suiteComparisonsByName={suiteComparisonsByName}
+        globalComparisons={data.globalComparisons}
+        maxPValue={maxPValue}
+        minCliffsDelta={minCliffsDelta}
         baseBundle={baseBundle}
         newBundle={newBundle}
       />
