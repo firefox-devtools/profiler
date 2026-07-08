@@ -61,9 +61,6 @@ type State =
 
 const TOP_N = 100;
 
-/** Default p-value cutoff: matches the previous "confidence !== 'LOW'"
- * threshold (LOW starts above 0.15 in pValueToConfidence). */
-const DEFAULT_MAX_P_VALUE = 0.15;
 /** Default |Cliff's delta| cutoff: matches the previous "effectSize !==
  * 'Negligible'" threshold (Negligible ends at 0.15 in interpretEffectSize). */
 const DEFAULT_MIN_CLIFFS_DELTA = 0.15;
@@ -279,19 +276,21 @@ function ScoreTable({
   suiteScores,
   suiteComparisonsByName,
   globalComparisons,
-  maxPValue,
   minCliffsDelta,
   baseBundle,
   newBundle,
+  baseViewerUrl,
+  newViewerUrl,
 }: {
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
   suiteComparisonsByName: Map<string, BucketComparison[]>;
   globalComparisons: BucketComparison[];
-  maxPValue: number;
   minCliffsDelta: number;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
+  baseViewerUrl: string;
+  newViewerUrl: string;
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const numSuites = suiteScores.length;
@@ -365,10 +364,11 @@ function ScoreTable({
                 enclosingBaseMean={overallScore.baseMean}
                 isOverall={true}
                 numSuites={numSuites}
-                maxPValue={maxPValue}
                 minCliffsDelta={minCliffsDelta}
                 baseBundle={baseBundle}
                 newBundle={newBundle}
+                baseViewerUrl={baseViewerUrl}
+                newViewerUrl={newViewerUrl}
               />
             </td>
           </tr>
@@ -408,10 +408,11 @@ function ScoreTable({
                       enclosingBaseMean={row.baseMean}
                       isOverall={false}
                       numSuites={numSuites}
-                      maxPValue={maxPValue}
                       minCliffsDelta={minCliffsDelta}
                       baseBundle={baseBundle}
                       newBundle={newBundle}
+                      baseViewerUrl={baseViewerUrl}
+                      newViewerUrl={newViewerUrl}
                     />
                   </td>
                 </tr>
@@ -430,10 +431,11 @@ function BucketTable({
   enclosingBaseMean,
   isOverall,
   numSuites,
-  maxPValue,
   minCliffsDelta,
   baseBundle,
   newBundle,
+  baseViewerUrl,
+  newViewerUrl,
 }: {
   comparisons: BucketComparison[];
   label: string;
@@ -449,12 +451,15 @@ function BucketTable({
    * comes from impactOnGeomean. */
   isOverall: boolean;
   numSuites: number;
-  /** Include buckets whose Mann-Whitney p-value is at most this. */
-  maxPValue: number;
   /** Include buckets whose |Cliff's delta| is at least this. */
   minCliffsDelta: number;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
+  /** Viewer URLs of the two source profiles, forwarded to BucketFlameGraphPair
+   * so its "open in a new profiler tab" link can point back at the original
+   * profile. */
+  baseViewerUrl: string;
+  newViewerUrl: string;
 }) {
   const columnCount = 6;
 
@@ -494,9 +499,7 @@ function BucketTable({
   }, []);
 
   const significant = comparisons
-    .filter(
-      (c) => c.pValue <= maxPValue && Math.abs(c.cliffdsDelta) >= minCliffsDelta
-    )
+    .filter((c) => Math.abs(c.cliffdsDelta) >= minCliffsDelta)
     .sort(
       (a, b) =>
         Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
@@ -506,8 +509,7 @@ function BucketTable({
   if (significant.length === 0) {
     return (
       <p className="benchmarkNoChanges">
-        No bucket changes in {label} pass the current p-value and effect-size
-        thresholds.
+        No bucket changes in {label} pass the current effect-size threshold.
       </p>
     );
   }
@@ -592,6 +594,9 @@ function BucketTable({
                       newBundle={newInnerBundle}
                       baseFunc={c.baseFunc}
                       newFunc={c.newFunc}
+                      baseViewerUrl={baseViewerUrl}
+                      newViewerUrl={newViewerUrl}
+                      suiteName={isOverall ? null : label}
                     />
                   </td>
                 </tr>
@@ -631,17 +636,10 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
     [data.newProfile]
   );
 
-  const [maxPValue, setMaxPValue] = useState(DEFAULT_MAX_P_VALUE);
   const [minCliffsDelta, setMinCliffsDelta] = useState(
     DEFAULT_MIN_CLIFFS_DELTA
   );
 
-  const handleMaxPValueChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      setMaxPValue(e.currentTarget.valueAsNumber);
-    },
-    []
-  );
   const handleMinCliffsDeltaChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       setMinCliffsDelta(e.currentTarget.valueAsNumber);
@@ -669,18 +667,6 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
       <h3 className="benchmarkSectionTitle">Score and subtest totals</h3>
       <div className="benchmarkFilters">
         <label className="benchmarkFilter">
-          <span className="benchmarkFilter__label">Max p-value</span>
-          <input
-            type="range"
-            min={0.001}
-            max={0.3}
-            step={0.001}
-            value={maxPValue}
-            onChange={handleMaxPValueChange}
-          />
-          <span className="benchmarkFilter__value">{maxPValue.toFixed(3)}</span>
-        </label>
-        <label className="benchmarkFilter">
           <span className="benchmarkFilter__label">Min |Cliff&apos;s δ|</span>
           <input
             type="range"
@@ -700,10 +686,11 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
         suiteScores={data.suiteScores}
         suiteComparisonsByName={suiteComparisonsByName}
         globalComparisons={data.globalComparisons}
-        maxPValue={maxPValue}
         minCliffsDelta={minCliffsDelta}
         baseBundle={baseBundle}
         newBundle={newBundle}
+        baseViewerUrl={data.baseUrl}
+        newViewerUrl={data.newUrl}
       />
     </div>
   );
