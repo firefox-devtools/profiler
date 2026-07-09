@@ -34,6 +34,10 @@ import type { IndexIntoFuncTable } from '../../types/profile';
 // ---------------------------------------------------------------------------
 
 export type BucketComparison = {
+  /** Cross-profile matching key (source location for JS funcs, name otherwise).
+   * Stable across the same profile pair — safe to use as a React key or to
+   * anchor UI state (like which row is expanded) across re-filterings. */
+  key: string;
   bucketName: string;
   /** Func index of the bucket in the base profile, or null if absent there.
    * If multiple funcs share this name within the profile, the one with the
@@ -193,6 +197,7 @@ export function compareBuckets(
     const displayName = baseEntry?.displayName ?? newEntry?.displayName ?? key;
 
     results.push({
+      key,
       bucketName: displayName,
       baseFunc: baseEntry?.representativeFunc ?? null,
       newFunc: newEntry?.representativeFunc ?? null,
