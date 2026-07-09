@@ -476,23 +476,22 @@ function BucketTable({
     [newBundle, label, isOverall]
   );
 
-  // Keyed by row index in `significant`, not bucketName: multiple buckets in
-  // the same suite can share a display name (e.g. several `get` accessors on
-  // different classes — distinguished by their source-location key but
-  // collapsed to the same name for display).
-  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  // Keyed by BucketComparison.key (a source-location string for JS funcs,
+  // otherwise the bucket name). The row index would drift when the effect-size
+  // slider changes the filtered/sorted list, so an expanded row would appear
+  // to "jump" to whichever different bucket now sits at that index.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const handleToggle = useCallback((e: MouseEvent<HTMLTableRowElement>) => {
-    const raw = e.currentTarget.dataset.toggleIndex;
-    if (raw === undefined) {
+    const key = e.currentTarget.dataset.toggleKey;
+    if (key === undefined) {
       return;
     }
-    const rowIndex = Number(raw);
     setExpanded((prev) => {
       const next = new Set(prev);
-      if (next.has(rowIndex)) {
-        next.delete(rowIndex);
+      if (next.has(key)) {
+        next.delete(key);
       } else {
-        next.add(rowIndex);
+        next.add(key);
       }
       return next;
     });
@@ -546,14 +545,14 @@ function BucketTable({
           // (If both are null it's a degenerate "appeared/disappeared with no
           // attributable func" case.)
           const expandable = c.baseFunc !== null || c.newFunc !== null;
-          const isExpanded = expanded.has(i);
+          const isExpanded = expanded.has(c.key);
           return (
-            <Fragment key={i}>
+            <Fragment key={c.key}>
               <tr
                 className={
                   expandable ? 'benchmarkRow--bucket-expandable' : undefined
                 }
-                data-toggle-index={i}
+                data-toggle-key={c.key}
                 onClick={expandable ? handleToggle : undefined}
               >
                 <td className="benchmarkCell--bucketName" title={c.bucketName}>
