@@ -295,12 +295,6 @@ Home--install-chrome-extension = Instale a extensão para Chrome
 Home--chrome-extension-instructions = Use a <a>extensão { -profiler-brand-name } para Chrome</a> para capturar profiles de desempenho no Chrome e analisar no { -profiler-brand-name }. Instale a extensão a partir do Chrome Web Store.
 Home--chrome-extension-recording-instructions = Após instalar, use o ícone da extensão na barra de ferramentas ou os atalhos para iniciar e encerrar a gravação de profiles. Você também pode exportar profiles e carregar aqui para análises detalhadas.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Insira termos de filtragem
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

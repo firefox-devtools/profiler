@@ -390,12 +390,6 @@ Home--chrome-extension-recording-instructions =
     eller genvägarna för att starta och stoppa profilering.
     Du kan också exportera profiler och ladda dem här för detaljerad analys.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Ange filtervillkor
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 
