@@ -334,12 +334,6 @@ Home--chrome-extension-instructions =
     par tirâ dongje i profîi des prestazions in Chrome e analizâju in { -profiler-brand-name }. Instale la estension dal Chrome Web Store.
 Home--chrome-extension-recording-instructions = Une volte instalade, dopre la icone de estension te sbare dai struments o lis scurtis par inviâe interompi la profilazion. Tu puedis ancje espuartâ i profîi e cjariâju achì par fâ une analisi detaiade.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Inserìs i tiermins di cirî
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

@@ -82,6 +82,7 @@ import {
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -1615,6 +1616,15 @@ export function changeMarkersSearchString(searchString: string): Action {
   };
 }
 
+export function changeMarkerTableSort(
+  sort: SingleColumnSortState[] | null
+): Action {
+  return {
+    type: 'CHANGE_MARKER_TABLE_SORT',
+    sort,
+  };
+}
+
 export function changeNetworkSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_NETWORK_SEARCH_STRING',
@@ -1686,6 +1696,7 @@ export function changeInvertCallstack(
     dispatch({
       type: 'CHANGE_INVERT_CALLSTACK',
       invertCallstack,
+      selectedTab: getSelectedTab(getState()),
       selectedThreadIndexes: getSelectedThreadIndexes(getState()),
       newSelectedCallNodePath,
     });

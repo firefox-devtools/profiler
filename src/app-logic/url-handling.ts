@@ -52,8 +52,9 @@ import { tabSlugs } from '../app-logic/tabs-handling';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 
-export const CURRENT_URL_VERSION = 16;
+export const CURRENT_URL_VERSION = 17;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -183,6 +184,7 @@ type BaseQuery = {
 type CallTreeQuery = BaseQuery & {
   search: string; // "js::RunScript"
   invertCallstack: null | undefined;
+  invertFlameGraph: null | undefined;
   hideIdleSamples: null | undefined;
   ctSummary: string;
 };
@@ -190,6 +192,7 @@ type CallTreeQuery = BaseQuery & {
 type MarkersQuery = BaseQuery & {
   markerSearch: string; // "DOMEvent"
   marker?: MarkerIndex; // Selected marker index for the current thread, e.g. 42
+  markerSort?: string; // "duration-desc~name-asc" — primary first
 };
 
 type NetworkQuery = BaseQuery & {
@@ -199,6 +202,7 @@ type NetworkQuery = BaseQuery & {
 type StackChartQuery = BaseQuery & {
   search: string; // "js::RunScript"
   invertCallstack: null | undefined;
+  invertFlameGraph: null | undefined;
   hideIdleSamples: null | undefined;
   showUserTimings: null | undefined;
   sameWidths: null | undefined;
@@ -214,6 +218,7 @@ type Query = BaseQuery & {
   // CallTree/StackChart specific
   search?: string;
   invertCallstack?: null | undefined;
+  invertFlameGraph?: null | undefined;
   hideIdleSamples?: null | undefined;
   ctSummary?: string;
   transforms?: string;
@@ -228,6 +233,7 @@ type Query = BaseQuery & {
   // Markers specific
   markerSearch?: string;
   marker?: MarkerIndex;
+  markerSort?: string;
 
   // Network specific
   networkSearch?: string;
@@ -339,7 +345,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query = baseQuery as CallTreeQueryShape;
 
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
-      query.invertCallstack = urlState.profileSpecific.invertCallstack
+      query.invertCallstack = urlState.profileSpecific.invertCallTree
+        ? null
+        : undefined;
+      query.invertFlameGraph = urlState.profileSpecific.invertFlameGraph
         ? null
         : undefined;
       // The URL param is inverted (`hideIdleSamples`) so the default-on state
@@ -394,6 +403,11 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         urlState.profileSpecific.selectedMarkers[selectedThreadsKey] !== null
           ? urlState.profileSpecific.selectedMarkers[selectedThreadsKey]
           : undefined;
+      if (selectedTab === 'marker-table') {
+        query.markerSort = convertMarkerTableSortToString(
+          urlState.profileSpecific.markerTableSort
+        );
+      }
       break;
     case 'network-chart':
       query = baseQuery as NetworkQueryShape;
@@ -597,7 +611,8 @@ export function stateFromLocation(
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
         query.ctSummary || undefined
       ),
-      invertCallstack: query.invertCallstack === undefined ? false : true,
+      invertCallTree: query.invertCallstack === undefined ? false : true,
+      invertFlameGraph: query.invertFlameGraph === undefined ? false : true,
       includeIdleSamples: query.hideIdleSamples === undefined,
       showUserTimings: query.showUserTimings === undefined ? false : true,
       stackChartSameWidths: query.sameWidths === undefined ? false : true,
@@ -632,8 +647,51 @@ export function stateFromLocation(
         ? query.hiddenThreads.split('-').map((index) => Number(index))
         : null,
       selectedMarkers,
+      markerTableSort: convertMarkerTableSortFromString(query.markerSort),
     },
   };
+}
+
+// MarkerTable sort URL encoding. Format: `col-asc~col-desc~…`, primary first.
+// Column names must not contain '-' (used here as the direction separator).
+// `null` means "at the table's default" and is encoded as an absent query
+// parameter.
+const VALID_MARKER_SORT_COLUMNS = new Set(['start', 'duration', 'name']);
+
+function convertMarkerTableSortToString(
+  sort: SingleColumnSortState[] | null
+): string | undefined {
+  if (sort === null) {
+    return undefined;
+  }
+  return sort
+    .map((s) => `${s.column}-${s.ascending ? 'asc' : 'desc'}`)
+    .join('~');
+}
+
+function convertMarkerTableSortFromString(
+  raw: string | null | void
+): SingleColumnSortState[] | null {
+  if (!raw) {
+    return null;
+  }
+  const parsed: SingleColumnSortState[] = [];
+  for (const part of raw.split('~')) {
+    const dashIndex = part.lastIndexOf('-');
+    if (dashIndex === -1) {
+      return null;
+    }
+    const column = part.slice(0, dashIndex);
+    const dir = part.slice(dashIndex + 1);
+    if (
+      !VALID_MARKER_SORT_COLUMNS.has(column) ||
+      (dir !== 'asc' && dir !== 'desc')
+    ) {
+      return null;
+    }
+    parsed.push({ column, ascending: dir === 'asc' });
+  }
+  return parsed;
 }
 
 function convertGlobalTrackOrderFromString(
@@ -1443,6 +1501,11 @@ const _upgraders: {
         .join('~');
     }
   },
+  [17]: (_processedLocation: ProcessedLocationBeforeUpgrade) => {
+    // Adds the optional `markerSort` query parameter for the marker table.
+    // No migration is necessary: older URLs simply omit it and the default
+    // (sort by start ascending) is used.
+  },
 };
 
 /**
@@ -1653,15 +1716,15 @@ function getStackIndexFromVersion3JSCallNodePath(
   stackIndexDepth.set(null, -1);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
-    const prefix = stackTable.prefix[stackIndex];
+    const offset = stackTable.prefixOffset[stackIndex];
+    const prefix = offset === 0 ? null : stackIndex - offset;
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const isJS = funcTable.isJS[funcIndex];
     // We know that at this point stack table is sorted and the following
     // condition holds:
-    // assert(prefixStack === null || prefixStack < stackIndex);
-    const doesPrefixMatchCallNodePath =
-      prefix === null || stackIndexDepth.has(prefix);
+    // assert(prefix === null || prefix < stackIndex);
+    const doesPrefixMatchCallNodePath = stackIndexDepth.has(prefix);
 
     if (!doesPrefixMatchCallNodePath) {
       continue;
@@ -1703,7 +1766,8 @@ function getVersion4JSCallNodePathFromStackIndex(
     if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
       callNodePath.unshift(funcIndex);
     }
-    nextStackIndex = stackTable.prefix[nextStackIndex];
+    const offset: number = stackTable.prefixOffset[nextStackIndex];
+    nextStackIndex = offset === 0 ? null : nextStackIndex - offset;
   }
   return callNodePath;
 }

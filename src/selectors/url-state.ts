@@ -36,6 +36,7 @@ import type {
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { MarkerRegExps } from '../profile-logic/marker-data';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 
 import urlStateReducer from '../reducers/url-state';
 import { formatMetaInfoString } from '../profile-logic/profile-metainfo';
@@ -117,13 +118,24 @@ export const getCurrentSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).callTreeSearchString;
 export const getMarkersSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).markersSearchString;
+export const getMarkerTableSort: Selector<SingleColumnSortState[] | null> = (
+  state
+) => getProfileSpecificState(state).markerTableSort;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>
   getUrlState(state).selectedTab;
-export const getInvertCallstack: Selector<boolean> = (state) =>
-  getSelectedTab(state) === 'calltree' &&
-  getProfileSpecificState(state).invertCallstack;
+export const getInvertCallstack: Selector<boolean> = (state) => {
+  const tab = getSelectedTab(state);
+  const profileSpecific = getProfileSpecificState(state);
+  if (tab === 'calltree') {
+    return profileSpecific.invertCallTree;
+  }
+  if (tab === 'flame-graph') {
+    return profileSpecific.invertFlameGraph;
+  }
+  return false;
+};
 export const getIncludeIdleSamples: Selector<boolean> = (state) =>
   getProfileSpecificState(state).includeIdleSamples;
 

@@ -423,7 +423,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 65,
+    "preprocessedProfileVersion": 66,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -688,16 +688,16 @@ Object {
         8,
       ],
       "length": 9,
-      "prefix": Array [
-        null,
+      "prefixOffset": Int32Array [
         0,
         1,
-        2,
-        3,
-        2,
-        5,
         1,
-        7,
+        1,
+        1,
+        3,
+        1,
+        6,
+        1,
       ],
     },
     "stringArray": Array [
@@ -2733,8 +2733,8 @@ CallTree {
         8,
       ],
       "length": 9,
-      "prefix": Array [
-        null,
+      "prefix": Int32Array [
+        -1,
         0,
         1,
         1,
@@ -3121,8 +3121,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       1,
@@ -3577,8 +3577,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       1,
@@ -3963,8 +3963,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       1,
@@ -4349,8 +4349,8 @@ Object {
       8,
     ],
     "length": 9,
-    "prefix": Array [
-      null,
+    "prefix": Int32Array [
+      -1,
       0,
       1,
       2,

@@ -5,12 +5,15 @@
 import type {
   Profile,
   RawThread,
-  RawStackTable,
   IndexIntoStackTable,
   MixedObject,
 } from 'firefox-profiler/types';
 
-import { getEmptyProfile, getEmptyThread } from '../data-structures';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+  type RawStackTableBuilder,
+} from '../data-structures';
 import type { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/types';
 import {
@@ -868,7 +871,7 @@ function getImageSize(
  * For sanity, check that stacks are ordered where the prefix stack
  * always preceeds the current stack index in the StackTable.
  */
-function assertStackOrdering(stackTable: RawStackTable) {
+function assertStackOrdering(stackTable: RawStackTableBuilder) {
   const visitedStacks = new Set<number | null>([null]);
   for (let i = 0; i < stackTable.length; i++) {
     if (!visitedStacks.has(stackTable.prefix[i])) {

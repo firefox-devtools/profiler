@@ -297,12 +297,6 @@ Home--install-chrome-extension = 安装 Chrome 扩展
 Home--chrome-extension-instructions = 使用 <a>Chrome 版 { -profiler-brand-name } 扩展</a>，在 Chrome 中捕捉性能分析记录，并通过 { -profiler-brand-name } 分析。可到 Chrome 应用商店安装扩展。
 Home--chrome-extension-recording-instructions = 安装后，即可使用扩展的工具栏图标和快捷键来开始或停止分析，也可以导出分析记录并在此处加载以进行详细分析。
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = 输入过滤条件
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

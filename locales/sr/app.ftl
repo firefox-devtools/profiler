@@ -350,12 +350,6 @@ Home--chrome-extension-instructions =
     { -profiler-brand-name }. Инсталирајте додатак са Chrome Web Store-а.
 Home--chrome-extension-recording-instructions = Када га инсталирате, употребите иконицу додатка на алатној траци или пречице да бисте покренули и зауставили профилисање. Такође можете да извезете профиле и учитате их овде за детаљну анализу.
 
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Унесите појмове за филтрирање
-
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
 

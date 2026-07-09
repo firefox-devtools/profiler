@@ -53,14 +53,16 @@ function _languageExtForPath(path: string | null): LanguageSupport | [] {
   if (path.endsWith('.rs')) {
     return rust();
   }
-  if (
-    path.endsWith('.js') ||
-    path.endsWith('.jsm') ||
-    path.endsWith('.jsx') ||
-    path.endsWith('.mjs') ||
-    path.endsWith('.ts') ||
-    path.endsWith('.tsx')
-  ) {
+  if (path.endsWith('.tsx')) {
+    return javascript({ typescript: true, jsx: true });
+  }
+  if (path.endsWith('.ts')) {
+    return javascript({ typescript: true });
+  }
+  if (path.endsWith('.jsx')) {
+    return javascript({ jsx: true });
+  }
+  if (path.endsWith('.js') || path.endsWith('.jsm') || path.endsWith('.mjs')) {
     return javascript();
   }
   if (

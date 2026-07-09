@@ -7,14 +7,13 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
 import { parseEphemeralFilters } from '../utils/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
   parseIntArg,
   parseFloatArg,
+  runCommand,
 } from './shared';
 import type {
   CallTreeScoringStrategy,
@@ -95,12 +94,11 @@ export function registerThreadCommand(
       .description('Print detailed thread information')
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'thread', subcommand: 'info', thread: opts.thread },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread select
@@ -111,12 +109,11 @@ export function registerThreadCommand(
       .option('--thread <handle>', 'Thread handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const threadHandle = handleArg ?? opts.thread;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'thread', subcommand: 'select', thread: threadHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread samples
@@ -126,7 +123,7 @@ export function registerThreadCommand(
       .description('Show hot functions list for a thread')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -136,9 +133,8 @@ export function registerThreadCommand(
         search: opts.search,
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread samples-top-down
@@ -148,7 +144,7 @@ export function registerThreadCommand(
       .description('Show top-down call tree (where CPU time is spent)')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -159,9 +155,8 @@ export function registerThreadCommand(
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread samples-bottom-up
@@ -171,7 +166,7 @@ export function registerThreadCommand(
       .description('Show bottom-up call tree (what calls hot functions)')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -182,9 +177,8 @@ export function registerThreadCommand(
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread markers
@@ -282,7 +276,7 @@ export function registerThreadCommand(
       }
     }
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -290,9 +284,8 @@ export function registerThreadCommand(
         thread: opts.thread,
         markerFilters,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread network
@@ -351,7 +344,7 @@ export function registerThreadCommand(
       networkFilters.limit = 20;
     }
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -359,9 +352,8 @@ export function registerThreadCommand(
         thread: opts.thread,
         networkFilters,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread page-load
@@ -401,7 +393,7 @@ export function registerThreadCommand(
       );
     }
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -409,9 +401,8 @@ export function registerThreadCommand(
         thread: opts.thread,
         pageLoadOptions,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread functions
@@ -457,7 +448,7 @@ export function registerThreadCommand(
 
     const sampleFilters = parseEphemeralFilters(opts);
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -467,8 +458,7 @@ export function registerThreadCommand(
         functionFilters,
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }

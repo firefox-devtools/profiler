@@ -36,6 +36,7 @@ import type {
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
@@ -359,7 +360,8 @@ export type ProfileSpecificUrlState = {
   selectedThreads: Set<ThreadIndex> | null;
   implementation: ImplementationFilter;
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy;
-  invertCallstack: boolean;
+  invertCallTree: boolean;
+  invertFlameGraph: boolean;
   includeIdleSamples: boolean;
   showUserTimings: boolean;
   stackChartSameWidths: boolean;
@@ -383,6 +385,7 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  markerTableSort: SingleColumnSortState[] | null;
 };
 
 export type UrlState = {

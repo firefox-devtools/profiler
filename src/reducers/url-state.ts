@@ -27,6 +27,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import { translateThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
 import { translateTransformStack } from 'firefox-profiler/profile-logic/transforms';
 
@@ -193,6 +194,18 @@ const markersSearchString: Reducer<string> = (state = '', action) => {
   }
 };
 
+const markerTableSort: Reducer<SingleColumnSortState[] | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_MARKER_TABLE_SORT':
+      return action.sort;
+    default:
+      return state;
+  }
+};
+
 const networkSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_NETWORK_SEARCH_STRING':
@@ -303,10 +316,21 @@ const lastSelectedCallTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
   }
 };
 
-const invertCallstack: Reducer<boolean> = (state = false, action) => {
+const invertCallTree: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
-      return action.invertCallstack;
+      return action.selectedTab === 'calltree' ? action.invertCallstack : state;
+    default:
+      return state;
+  }
+};
+
+const invertFlameGraph: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'CHANGE_INVERT_CALLSTACK':
+      return action.selectedTab === 'flame-graph'
+        ? action.invertCallstack
+        : state;
     default:
       return state;
   }
@@ -771,7 +795,8 @@ const profileSpecific = combineReducers({
   selectedThreads,
   implementation,
   lastSelectedCallTreeSummaryStrategy,
-  invertCallstack,
+  invertCallTree,
+  invertFlameGraph,
   includeIdleSamples,
   showUserTimings,
   stackChartSameWidths,
@@ -793,6 +818,7 @@ const profileSpecific = combineReducers({
   showJsTracerSummary,
   tabFilter,
   selectedMarkers,
+  markerTableSort,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

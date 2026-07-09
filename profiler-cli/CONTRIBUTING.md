@@ -139,9 +139,7 @@ export type AllocationInfoResult = {
 
 ```typescript
 import { Command } from 'commander';
-import { sendCommand } from '../client';
-import { addGlobalOptions } from './shared';
-import { formatOutput } from '../output';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerAllocationCommand(
   program: Command,
@@ -157,12 +155,11 @@ export function registerAllocationCommand(
       .description('Show allocation summary')
       .option('--thread <handle>', 'Thread to query')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'allocation', subcommand: 'info', thread: opts.thread },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }
 ```
@@ -175,7 +172,7 @@ Add a case to `processMessage()`:
 case 'allocation':
   switch (command.subcommand) {
     case 'info':
-      return this.querier!.allocationInfo(command.thread);
+      return this.querier.allocationInfo(command.thread);
     default:
       throw assertExhaustiveCheck(command);
   }

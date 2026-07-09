@@ -16,7 +16,10 @@ import {
   getProfileUsesMultipleStackTypes,
 } from 'firefox-profiler/selectors/profile';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import { getSelectedThreadsKey } from '../../selectors/url-state';
+import {
+  getInvertCallstack,
+  getSelectedThreadsKey,
+} from '../../selectors/url-state';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -56,7 +59,6 @@ type StateProps = {
   readonly thread: Thread;
   readonly weightType: WeightType;
   readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
-  readonly maxStackDepthPlusOne: number;
   readonly timeRange: StartEndRange;
   readonly previewSelection: PreviewSelection | null;
   readonly flameGraphTiming: FlameGraphTiming;
@@ -68,6 +70,7 @@ type StateProps = {
   readonly scrollToSelectionGeneration: number;
   readonly categories: CategoryList;
   readonly interval: Milliseconds;
+  readonly startsAtBottom: boolean;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
@@ -139,7 +142,6 @@ class ConnectedFlameGraphImpl
     const {
       thread,
       threadsKey,
-      maxStackDepthPlusOne,
       flameGraphTiming,
       callTree,
       callNodeInfo,
@@ -151,6 +153,7 @@ class ConnectedFlameGraphImpl
       callTreeSummaryStrategy,
       categories,
       interval,
+      startsAtBottom,
       innerWindowIDToPageMap,
       weightType,
       ctssSamples,
@@ -165,7 +168,7 @@ class ConnectedFlameGraphImpl
         thread={thread}
         weightType={weightType}
         innerWindowIDToPageMap={innerWindowIDToPageMap}
-        maxStackDepthPlusOne={maxStackDepthPlusOne}
+        maxStackDepthPlusOne={flameGraphTiming.rowCount}
         timeRange={timeRange}
         previewSelection={previewSelection}
         flameGraphTiming={flameGraphTiming}
@@ -177,6 +180,7 @@ class ConnectedFlameGraphImpl
         scrollToSelectionGeneration={scrollToSelectionGeneration}
         categories={categories}
         interval={interval}
+        startsAtBottom={startsAtBottom}
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         ctssSamples={ctssSamples}
         ctssSampleCategoriesAndSubcategories={
@@ -202,10 +206,6 @@ export const ConnectedFlameGraph = explicitConnectWithForwardRef<
   mapStateToProps: (state) => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
-    // Use the filtered call node max depth, rather than the preview filtered one, so
-    // that the viewport height is stable across preview selections.
-    maxStackDepthPlusOne:
-      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
     callTree: selectedThreadSelectors.getCallTree(state),
     timeRange: getCommittedRange(state),
@@ -219,6 +219,7 @@ export const ConnectedFlameGraph = explicitConnectWithForwardRef<
       selectedThreadSelectors.getRightClickedCallNodeIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     interval: getProfileInterval(state),
+    startsAtBottom: !getInvertCallstack(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
     innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),

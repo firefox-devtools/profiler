@@ -127,7 +127,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display markers that match a certain name"
             type="search"
@@ -205,32 +205,41 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
     <div
       class="treeViewHeader"
     >
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn start"
+      <button
+        aria-sort="ascending"
+        class="treeViewHeaderColumn treeViewFixedColumn start treeViewSortButton sortAscending"
+        data-column="start"
         style="width: 95px;"
+        type="button"
       >
         Start
-      </span>
+      </button>
       <span
         class="treeViewHeaderColumnDivider isResizable"
         data-column-index="0"
       />
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn duration"
+      <button
+        aria-sort="none"
+        class="treeViewHeaderColumn treeViewFixedColumn duration treeViewSortButton sortInactive"
+        data-column="duration"
         style="width: 90px;"
+        type="button"
       >
         Duration
-      </span>
+      </button>
       <span
         class="treeViewHeaderColumnDivider isResizable"
         data-column-index="1"
       />
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn name"
+      <button
+        aria-sort="none"
+        class="treeViewHeaderColumn treeViewFixedColumn name treeViewSortButton sortInactive"
+        data-column="name"
         style="width: 160px;"
+        type="button"
       >
         Name
-      </span>
+      </button>
       <span
         class="treeViewHeaderColumnDivider isResizable"
         data-column-index="2"

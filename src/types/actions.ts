@@ -35,6 +35,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   UrlState,
@@ -535,6 +536,7 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_INVERT_CALLSTACK';
       readonly invertCallstack: boolean;
+      readonly selectedTab: TabSlug;
       readonly newSelectedCallNodePath: CallNodePath;
       readonly selectedThreadIndexes: Set<ThreadIndex>;
     }
@@ -557,6 +559,10 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_MARKER_SEARCH_STRING';
       readonly searchString: string;
+    }
+  | {
+      readonly type: 'CHANGE_MARKER_TABLE_SORT';
+      readonly sort: SingleColumnSortState[] | null;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
