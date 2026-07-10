@@ -440,11 +440,15 @@ function collectCounterOverTime(
 
     let formattedDelta: string | undefined;
     if (bucket.delta !== undefined) {
-      const sign = bucket.delta < 0 ? '-' : '+';
-      formattedDelta =
-        sign +
-        formatCounterRowValue(Math.abs(bucket.delta), format, meta)
-          .formattedValue;
+      if (bucket.delta === 0) {
+        formattedDelta = '0';
+      } else {
+        const sign = bucket.delta < 0 ? '-' : '+';
+        formattedDelta =
+          sign +
+          formatCounterRowValue(Math.abs(bucket.delta), format, meta)
+            .formattedValue;
+      }
     }
 
     let percentage: number | undefined;

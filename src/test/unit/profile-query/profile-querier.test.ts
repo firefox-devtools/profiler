@@ -484,6 +484,30 @@ describe('ProfileQuerier', function () {
       expect(info.graph.length).toBe(50);
     });
 
+    it('renders a zero delta as a bare "0", without sign or unit', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4
+        A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: [0, 0, 0, 0, 0], length: 5 },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      // Memory never changes here, so every bucket's delta is zero.
+      expect(info.overTime.length).toBeGreaterThan(0);
+      for (const bucket of info.overTime) {
+        expect(bucket.delta).toBe(0);
+        expect(bucket.formattedDelta).toBe('0');
+      }
+    });
+
     it('gives the graph a fixed width, wider than the over-time buckets', async function () {
       const columns = Array.from({ length: 60 }, (_, i) => i);
       const { profile } = getProfileFromTextSamples(
