@@ -6,9 +6,20 @@ export const END_MARKER = '<!-- profiler-preview-links:end -->';
 
 const GITHUB_API_URL = 'https://api.github.com';
 const GITHUB_API_VERSION = '2026-03-10';
-const MAIN_BASE_URL = 'https://main--perf-html.netlify.app';
+const NETLIFY_HOST_SUFFIX = '--perf-html.netlify.app';
+const MAIN_BASE_URL = `https://main${NETLIFY_HOST_SUFFIX}`;
 const PROFILE_HOST = 'profiler.firefox.com';
 const SHARE_HOST = 'share.firefox.dev';
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+const PROFILE_URL_HOSTS_REGEXP = [
+  'share\\.firefox\\.dev',
+  'profiler\\.firefox\\.com',
+  `[a-z0-9-]+${escapeRegExp(NETLIFY_HOST_SUFFIX)}`,
+].join('|');
 
 export function hasDeployPreviewLink(body) {
   return (
@@ -17,11 +28,19 @@ export function hasDeployPreviewLink(body) {
   );
 }
 
-export function extractIssueNumbers(text) {
+export function extractIssueNumbers(
+  text,
+  owner = 'firefox-devtools',
+  repo = 'profiler'
+) {
   const issueNumbers = new Set();
   const markdownIssueRegExp = /(?:^|[^\w/-])#(\d+)\b/g;
-  const issueUrlRegExp =
-    /https:\/\/github\.com\/firefox-devtools\/profiler\/issues\/(\d+)\b/g;
+  const issueUrlRegExp = new RegExp(
+    `https://github\\.com/${escapeRegExp(owner)}/${escapeRegExp(
+      repo
+    )}/(?:issues|pull)/(\\d+)\\b`,
+    'g'
+  );
 
   for (const match of text.matchAll(markdownIssueRegExp)) {
     issueNumbers.add(Number(match[1]));
@@ -36,8 +55,10 @@ export function extractIssueNumbers(text) {
 
 export function extractProfileUrls(text) {
   const urls = [];
-  const profileUrlRegExp =
-    /https:\/\/(?:share\.firefox\.dev|profiler\.firefox\.com)\/[^\s<>)\]]+/g;
+  const profileUrlRegExp = new RegExp(
+    `https://(?:${PROFILE_URL_HOSTS_REGEXP})/[^\\s<>)\\]]+`,
+    'g'
+  );
 
   for (const match of text.matchAll(profileUrlRegExp)) {
     // Profile links are often followed by punctuation in prose, for example
@@ -51,7 +72,10 @@ export function extractProfileUrls(text) {
 export function profileUrlToPath(profileUrl) {
   const url = new URL(profileUrl);
 
-  if (url.hostname !== PROFILE_HOST) {
+  if (
+    url.hostname !== PROFILE_HOST &&
+    !url.hostname.endsWith(NETLIFY_HOST_SUFFIX)
+  ) {
     return null;
   }
 
@@ -59,21 +83,27 @@ export function profileUrlToPath(profileUrl) {
   return path === '/' ? null : path;
 }
 
-// Returns the path for a profiler.firefox.com URL, and follows share.firefox.dev
-// redirects to resolve short links to their full profiler.firefox.com URL.
+// Returns the profile path from profiler.firefox.com, main, or deploy preview
+// URLs, and follows share.firefox.dev redirects to resolve short links.
 export async function resolveProfileUrlToPath(profileUrl, fetchImpl = fetch) {
   const url = new URL(profileUrl);
+  const path = profileUrlToPath(profileUrl);
 
-  if (url.hostname === PROFILE_HOST) {
-    return profileUrlToPath(profileUrl);
+  if (path) {
+    return path;
   }
 
   if (url.hostname !== SHARE_HOST) {
     return null;
   }
 
-  const response = await fetchImpl(profileUrl, { redirect: 'follow' });
-  return profileUrlToPath(response.url);
+  try {
+    const response = await fetchImpl(profileUrl, { redirect: 'follow' });
+    return profileUrlToPath(response.url);
+  } catch (error) {
+    console.warn(`Could not resolve ${profileUrl}: ${error.message}`);
+    return null;
+  }
 }
 
 export function normalizePath(path) {
@@ -159,7 +189,7 @@ async function findProfilePath({ owner, repo, pullRequest, token }) {
     }
   }
 
-  for (const issueNumber of extractIssueNumbers(pullRequestText)) {
+  for (const issueNumber of extractIssueNumbers(pullRequestText, owner, repo)) {
     let issueTexts;
 
     try {

@@ -1463,7 +1463,13 @@ const _upgraders: {
             // upgraded counters; ignore them.
             continue;
           }
-          counter.samples = counter.sample_groups[0].samples;
+          // A counter that collected no data has an empty sample_groups array
+          // (see the version 18 upgrader), so fall back to an empty samples
+          // table when there is no group to unwrap.
+          counter.samples =
+            counter.sample_groups.length > 0
+              ? counter.sample_groups[0].samples
+              : { schema: { time: 0, count: 1, number: 2 }, data: [] };
           delete counter.sample_groups;
         }
       }

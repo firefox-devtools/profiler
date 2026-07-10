@@ -40,7 +40,7 @@ class FlameGraphViewImpl extends React.PureComponent<Props> {
         role="tabpanel"
         aria-labelledby="flame-graph-tab-button"
       >
-        <StackSettings hideInvertCallstack={true} />
+        <StackSettings />
         <TransformNavigator />
         {isPreviewSelectionEmpty ? (
           <FlameGraphEmptyReasons />

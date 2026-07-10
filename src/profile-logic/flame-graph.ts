@@ -8,7 +8,11 @@ import type {
   IndexIntoCallNodeTable,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
-import type { CallTreeTimingsNonInverted } from './call-tree';
+import type {
+  CallTreeTimingsInverted,
+  CallTreeTimingsNonInverted,
+} from './call-tree';
+import type { CallNodeInfoInverted } from './call-node-info';
 
 import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
 
@@ -44,7 +48,13 @@ export type FlameGraphTimingRow = {
  * the implementation to generate rows lazily as the user scrolls towards
  * deeper calls.
  */
-export class FlameGraphTiming {
+export interface FlameGraphTiming {
+  readonly rowCount: number;
+  getRow(depth: number): FlameGraphTimingRow;
+  getAllRowsForTesting(): FlameGraphTimingRow[];
+}
+
+class FlameGraphTimingNonInverted implements FlameGraphTiming {
   _flameGraphRows: FlameGraphRows;
   _callNodeTable: CallNodeTable;
   _callTreeTimings: CallTreeTimingsNonInverted;
@@ -348,5 +358,256 @@ export function getFlameGraphTiming(
   callNodeTable: CallNodeTable,
   callTreeTimings: CallTreeTimingsNonInverted
 ): FlameGraphTiming {
-  return new FlameGraphTiming(flameGraphRows, callNodeTable, callTreeTimings);
+  return new FlameGraphTimingNonInverted(
+    flameGraphRows,
+    callNodeTable,
+    callTreeTimings
+  );
+}
+
+type InvertedNodeTiming = {
+  total: number;
+  hasChildren: boolean;
+};
+
+type InvertedFlameGraphRowItem = {
+  nodeIndex: IndexIntoCallNodeTable;
+  start: UnitIntervalOfProfileRange;
+  end: UnitIntervalOfProfileRange;
+};
+
+// The flame graph does not support horizontal zooming, so boxes that are smaller
+// than a fraction of a 16k-wide display cannot be hovered or read. We still take
+// their width into account when positioning later boxes, but we do not expand
+// their descendants.
+const MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH = 1 / 16384;
+
+class FlameGraphTimingInverted implements FlameGraphTiming {
+  _callNodeInfo: CallNodeInfoInverted;
+  _callTreeTimings: CallTreeTimingsInverted;
+  _funcTable: FuncTable;
+  _stringTable: StringTable;
+  _nonRootTimingCache: Map<IndexIntoCallNodeTable, InvertedNodeTiming> =
+    new Map();
+  _timingRows: FlameGraphTimingRow[] = [];
+  _nextRowItems: InvertedFlameGraphRowItem[];
+  _rowCount: number;
+
+  constructor(
+    callNodeInfo: CallNodeInfoInverted,
+    callTreeTimings: CallTreeTimingsInverted,
+    funcTable: FuncTable,
+    stringTable: StringTable
+  ) {
+    this._callNodeInfo = callNodeInfo;
+    this._callTreeTimings = callTreeTimings;
+    this._funcTable = funcTable;
+    this._stringTable = stringTable;
+
+    const { rootTotalSummary } = callTreeTimings;
+    this._rowCount =
+      rootTotalSummary === 0 ? 0 : callNodeInfo.getCallNodeTable().maxDepth + 1;
+    this._nextRowItems = this._getRootRowItems();
+  }
+
+  get rowCount(): number {
+    return this._rowCount;
+  }
+
+  getRow(depth: number): FlameGraphTimingRow {
+    if (depth < 0 || depth >= this.rowCount) {
+      throw new Error(
+        `Out-of-bounds call to getRow: ${depth} is outside 0..${this.rowCount}`
+      );
+    }
+    while (this._timingRows.length <= depth) {
+      this._buildNextTimingRow();
+    }
+    return this._timingRows[depth];
+  }
+
+  // Convenience method for tests, don't call in production
+  getAllRowsForTesting(): FlameGraphTimingRow[] {
+    const rows = [];
+    for (let depth = 0; depth < this.rowCount; depth++) {
+      rows.push(this.getRow(depth));
+    }
+    return rows;
+  }
+
+  _compareCallNodesByFuncName = (
+    a: IndexIntoCallNodeTable,
+    b: IndexIntoCallNodeTable
+  ): number => {
+    const callNodeInfo = this._callNodeInfo;
+    const { name } = this._funcTable;
+    const stringTable = this._stringTable;
+    const funcA = callNodeInfo.funcForNode(a);
+    const funcB = callNodeInfo.funcForNode(b);
+    const funcNameA = stringTable.getString(name[funcA]);
+    const funcNameB = stringTable.getString(name[funcB]);
+    if (funcNameA < funcNameB) {
+      return -1;
+    }
+    if (funcNameA > funcNameB) {
+      return 1;
+    }
+    return funcA - funcB;
+  };
+
+  _getNodeTiming(nodeIndex: IndexIntoCallNodeTable): InvertedNodeTiming {
+    const callNodeInfo = this._callNodeInfo;
+    const { callNodeSelf, totalPerRootFunc, hasChildrenPerRootFunc } =
+      this._callTreeTimings;
+
+    if (callNodeInfo.isRoot(nodeIndex)) {
+      return {
+        total: totalPerRootFunc[nodeIndex],
+        hasChildren: hasChildrenPerRootFunc[nodeIndex] !== 0,
+      };
+    }
+
+    const cached = this._nonRootTimingCache.get(nodeIndex);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const nodeDepth = callNodeInfo.depthForNode(nodeIndex);
+    const [rangeStart, rangeEnd] =
+      callNodeInfo.getSuffixOrderIndexRangeForCallNode(nodeIndex);
+    const suffixOrderedCallNodes = callNodeInfo.getSuffixOrderedCallNodes();
+    const callNodeTableDepthCol = callNodeInfo.getCallNodeTable().depth;
+
+    let total = 0;
+    let hasChildren = false;
+    for (let i = rangeStart; i < rangeEnd; i++) {
+      const selfNode = suffixOrderedCallNodes[i];
+      const self = callNodeSelf[selfNode];
+      total += self;
+      hasChildren =
+        hasChildren ||
+        (self !== 0 && callNodeTableDepthCol[selfNode] > nodeDepth);
+    }
+
+    const timing = { total, hasChildren };
+    this._nonRootTimingCache.set(nodeIndex, timing);
+    return timing;
+  }
+
+  _getChildrenWithTiming(
+    nodeIndex: IndexIntoCallNodeTable
+  ): IndexIntoCallNodeTable[] {
+    const callNodeInfo = this._callNodeInfo;
+    const children = callNodeInfo.getChildren(nodeIndex);
+    const displayedChildren = [];
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const { total, hasChildren } = this._getNodeTiming(child);
+      if (total !== 0 || hasChildren) {
+        displayedChildren.push(child);
+      }
+    }
+    displayedChildren.sort(this._compareCallNodesByFuncName);
+    return displayedChildren;
+  }
+
+  _getRootRowItems(): InvertedFlameGraphRowItem[] {
+    const { rootTotalSummary, sortedRoots, totalPerRootFunc } =
+      this._callTreeTimings;
+    const abs = Math.abs;
+
+    if (rootTotalSummary === 0) {
+      return [];
+    }
+
+    const roots = [];
+    for (let i = 0; i < sortedRoots.length; i++) {
+      roots.push(sortedRoots[i]);
+    }
+    roots.sort(this._compareCallNodesByFuncName);
+
+    const rootRowItems: InvertedFlameGraphRowItem[] = [];
+    let currentRootStart = 0;
+    for (let i = 0; i < roots.length; i++) {
+      const root = roots[i];
+      const totalRelative = abs(totalPerRootFunc[root] / rootTotalSummary);
+      const start = currentRootStart;
+      const end = start + totalRelative;
+      if (totalRelative >= MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH) {
+        rootRowItems.push({ nodeIndex: root, start, end });
+      }
+      currentRootStart = end;
+    }
+
+    return rootRowItems;
+  }
+
+  _buildNextTimingRow(): void {
+    const { rootTotalSummary } = this._callTreeTimings;
+    const callNodeInfo = this._callNodeInfo;
+    const abs = Math.abs;
+
+    const rowItems = this._nextRowItems;
+    const start: UnitIntervalOfProfileRange[] = [];
+    const end: UnitIntervalOfProfileRange[] = [];
+    const selfRelative: number[] = [];
+    const timingCallNodes: IndexIntoCallNodeTable[] = [];
+    const nextRowItems: InvertedFlameGraphRowItem[] = [];
+
+    for (let i = 0; i < rowItems.length; i++) {
+      const { nodeIndex, start: itemStart, end: itemEnd } = rowItems[i];
+      const { total } = this._getNodeTiming(nodeIndex);
+
+      start.push(itemStart);
+      end.push(itemEnd);
+      selfRelative.push(
+        callNodeInfo.isRoot(nodeIndex) ? abs(total / rootTotalSummary) : 0
+      );
+      timingCallNodes.push(nodeIndex);
+
+      if (itemEnd - itemStart < MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH) {
+        continue;
+      }
+
+      const children = this._getChildrenWithTiming(nodeIndex);
+      let currentChildStart = itemStart;
+      for (let childIndex = 0; childIndex < children.length; childIndex++) {
+        const child = children[childIndex];
+        const childTotal = this._getNodeTiming(child).total;
+        const childTotalRelative = abs(childTotal / rootTotalSummary);
+        const childEnd = currentChildStart + childTotalRelative;
+        if (childTotalRelative >= MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH) {
+          nextRowItems.push({
+            nodeIndex: child,
+            start: currentChildStart,
+            end: childEnd,
+          });
+        }
+        currentChildStart = childEnd;
+      }
+    }
+
+    this._nextRowItems = nextRowItems;
+    this._timingRows.push({
+      start,
+      end,
+      selfRelative,
+      callNode: timingCallNodes,
+      length: timingCallNodes.length,
+    });
+  }
+}
+
+export function getInvertedFlameGraphTiming(
+  callNodeInfo: CallNodeInfoInverted,
+  callTreeTimings: CallTreeTimingsInverted,
+  funcTable: FuncTable,
+  stringTable: StringTable
+): FlameGraphTiming {
+  return new FlameGraphTimingInverted(
+    callNodeInfo,
+    callTreeTimings,
+    funcTable,
+    stringTable
+  );
 }
