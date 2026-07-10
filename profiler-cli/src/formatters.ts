@@ -476,8 +476,20 @@ function formatCounterStats(counter: CounterSummary): string {
   return `${stats} [${counter.rangeSampleCount} samples]`;
 }
 
+/** `p-N Process Name (etld+1)`, dropping the handle when the process is unknown. */
+function formatCounterProcessName(counter: CounterSummary): string {
+  const handle = counter.processIndex >= 0 ? `p-${counter.processIndex} ` : '';
+  const etld1 = counter.etld1 ? ` (${counter.etld1})` : '';
+  return `${handle}${counter.processName}${etld1}`;
+}
+
+/** The ` [p-N Process Name (etld+1), pid X]` segment identifying the owning process. */
+function formatCounterProcess(counter: CounterSummary): string {
+  return ` [${formatCounterProcessName(counter)}, pid ${counter.pid}]`;
+}
+
 function formatCounterSummaryLine(counter: CounterSummary): string {
-  return `  ${counter.counterHandle}: ${counter.label} (${counter.category})${formatCounterStats(counter)}`;
+  return `  ${counter.counterHandle}: ${counter.label} (${counter.category})${formatCounterProcess(counter)}${formatCounterStats(counter)}`;
 }
 
 /**
@@ -566,6 +578,9 @@ export function formatCounterInfoResult(
   }
   lines.push(`  Unit: ${result.unit || '(none)'}`);
   lines.push(`  Graph type: ${result.graphType}`);
+  lines.push(
+    `  Process: ${formatCounterProcessName(result)} [pid ${result.pid}]`
+  );
   lines.push(
     `  Main thread: ${result.mainThreadHandle} (${result.mainThreadName})`
   );
