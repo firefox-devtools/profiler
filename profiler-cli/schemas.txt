@@ -32,7 +32,8 @@ CounterSummary:
     unit, graphType,
     color, pid, mainThreadIndex, mainThreadHandle, mainThreadName,
     rangeSampleCount,
-    stats: [{ source, label, value, formattedValue, carbon? }]
+    stats: [{ source, label, value, formattedValue, carbon? }],
+    graph: [number]
   }
 
 profiler-cli counter list --json
@@ -49,6 +50,10 @@ profiler-cli counter info --json
     description,
     sampleCount,
     rangeStart, rangeEnd,
+    overTime: [{ startTime, startTimeName, startTimeStr,
+                 endTime, endTimeName, endTimeStr,
+                 value, formattedValue, delta?, formattedDelta?,
+                 percentage?, formattedPercentage?, carbon? }],
     context: SessionContext
   }
 
