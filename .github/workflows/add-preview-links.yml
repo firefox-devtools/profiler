@@ -2,6 +2,8 @@ name: Add preview links
 
 on:
   pull_request_target:
+    branches:
+      - main
     types:
       - opened
       - edited
