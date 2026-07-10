@@ -7,7 +7,7 @@ import type {
   RawThread,
   IndexIntoStackTable,
   RawStackTable,
-  FrameTable,
+  RawFrameTable,
   FuncTable,
 } from 'firefox-profiler/types';
 
@@ -458,7 +458,7 @@ export function profileImportSnapshot(
 function renderStackPath(
   stack: IndexIntoStackTable | null,
   stackTable: RawStackTable,
-  frameTable: FrameTable,
+  frameTable: RawFrameTable,
   funcTable: FuncTable,
   stringArray: string[]
 ): string {

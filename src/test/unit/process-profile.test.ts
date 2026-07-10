@@ -284,12 +284,16 @@ describe('gecko counters processing', function () {
     expect(extractTime(childCounter)).toEqual(originalTime);
 
     expect(
-      computeTimeColumnForRawSamplesTable(processedCounters[0].samples)
+      Array.from(
+        computeTimeColumnForRawSamplesTable(processedCounters[0].samples)
+      )
     ).toEqual(originalTime);
 
     // The subprocess times are offset when processed:
     expect(
-      computeTimeColumnForRawSamplesTable(processedCounters[1].samples)
+      Array.from(
+        computeTimeColumnForRawSamplesTable(processedCounters[1].samples)
+      )
     ).toEqual(offsetTime);
   });
 });
@@ -506,7 +510,7 @@ describe('js allocation processing', function () {
     }
 
     // Assert that the transformation makes sense.
-    expect(jsAllocations.time).toEqual([0, 1, 2]);
+    expect(jsAllocations.time).toEqual(new Float64Array([0, 1, 2]));
     expect(jsAllocations.weight).toEqual([3, 5, 7]);
 
     // All addressses should be nudged by 1 byte, because js allocation stack frames
@@ -590,7 +594,7 @@ describe('native allocation processing', function () {
     }
 
     // Assert that the transformation makes sense.
-    expect(nativeAllocations.time).toEqual([0, 1, 2]);
+    expect(nativeAllocations.time).toEqual(new Float64Array([0, 1, 2]));
     expect(nativeAllocations.weight).toEqual([3, 5, 7]);
     expect(nativeAllocations.stack).toEqual([8, 9, null]);
   });
@@ -645,7 +649,7 @@ describe('gecko samples table processing', function () {
       hardcodedStackAfterProcessing
     );
     const sampleTimes = computeTimeColumnForRawSamplesTable(processedSamples);
-    expect(sampleTimes.slice(0, 2)).toEqual(hardcodedTime);
+    expect(Array.from(sampleTimes.slice(0, 2))).toEqual(hardcodedTime);
     expect(ensureExists(processedSamples.eventDelay).slice(0, 2)).toEqual(
       hardcodedEventDelay
     );

@@ -45,7 +45,6 @@ import type {
   MarkerIndex,
   MarkerSchemaByName,
   CategoryList,
-  Milliseconds,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
@@ -1876,7 +1875,7 @@ export function filterSamples(
 
         function computeFilteredStackColumn(
           originalStackColumn: Array<IndexIntoStackTable | null>,
-          timeColumn: Milliseconds[]
+          timeColumn: Float64Array<ArrayBuffer>
         ): Array<IndexIntoStackTable | null> {
           const newStackColumn = originalStackColumn.slice();
           let sampleIndex = 0;

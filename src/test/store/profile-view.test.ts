@@ -19,9 +19,10 @@ import {
   getThreadWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
+  finishRawSamplesTableBuilder,
   getEmptyThread,
   getEmptyProfile,
-  getEmptySamplesTableWithEventDelay,
+  getRawSamplesTableBuilderWithEventDelay,
 } from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -53,11 +54,11 @@ import { checkBit } from '../../utils/bitset';
 import type {
   TrackReference,
   Milliseconds,
-  RawThread,
   StartEndRange,
   Marker,
   MixedObject,
   CallNodePath,
+  RawThread,
 } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
@@ -3848,7 +3849,7 @@ describe('getProcessedEventDelays', function () {
     const profile = getEmptyProfile();
 
     // Create event delay values.
-    const samples = getEmptySamplesTableWithEventDelay();
+    const samples = getRawSamplesTableBuilderWithEventDelay();
     if (eventDelay) {
       samples.eventDelay = eventDelay;
     } else {
@@ -3866,7 +3867,9 @@ describe('getProcessedEventDelays', function () {
       .fill(0)
       .map((_, i) => i);
     samples.stack = Array(samples.length).fill(null);
-    profile.threads.push(getEmptyThread({ samples }));
+    profile.threads.push(
+      getEmptyThread({ samples: finishRawSamplesTableBuilder(samples) })
+    );
 
     const { dispatch, getState } = storeWithProfile(profile);
 

@@ -15,7 +15,7 @@ import type {
   PageList,
   IndexIntoSourceTable,
   FuncTable,
-  FrameTable,
+  RawFrameTable,
   SourceLocationTable,
   SourceTable,
 } from './profile';
@@ -455,7 +455,7 @@ type ReceiveProfileAction =
   | {
       readonly type: 'BULK_SOURCE_MAP_SYMBOLICATION';
       readonly newFuncTable: FuncTable;
-      readonly newFrameTable: FrameTable;
+      readonly newFrameTable: RawFrameTable;
       readonly newSourceLocationTable: SourceLocationTable;
       readonly newSources: SourceTable;
       readonly newStringArray: string[];
