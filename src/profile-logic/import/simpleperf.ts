@@ -19,6 +19,7 @@ import type {
   RawThread,
   RawStackTable,
 } from 'firefox-profiler/types/profile';
+import { FrameFlag } from 'firefox-profiler/types/profile';
 import {
   getEmptyFuncTable,
   getEmptyResourceTable,
@@ -172,16 +173,16 @@ class FirefoxFrameTable {
 
     let frameIndex = this.frameMap.get(mapKey);
     if (!frameIndex) {
-      this.frameTable.address.push(-1);
-      this.frameTable.inlineDepth.push(0);
+      this.frameTable.flags.push(FrameFlag.HasCategory);
+      this.frameTable.address.push(0);
       this.frameTable.category.push(category);
       this.frameTable.subcategory.push(0);
       this.frameTable.func.push(funcIndex);
-      this.frameTable.nativeSymbol.push(null);
-      this.frameTable.innerWindowID.push(null);
-      this.frameTable.line.push(null);
-      this.frameTable.column.push(null);
-      this.frameTable.originalLocation.push(null);
+      this.frameTable.nativeSymbol.push(0);
+      this.frameTable.innerWindowID.push(0);
+      this.frameTable.line.push(0);
+      this.frameTable.column.push(0);
+      this.frameTable.originalLocation.push(0);
 
       frameIndex = this.frameTable.length++;
       this.frameMap.set(mapKey, frameIndex);

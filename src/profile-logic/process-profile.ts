@@ -119,6 +119,7 @@ import type {
   CounterDisplayConfig,
   RawProfileSharedData,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
 
@@ -540,17 +541,35 @@ function _processFrameTable(
   const frameIndexOffset = sharedFrameTable.length;
   for (let i = 0; i < geckoFrameStruct.length; i++) {
     const newIndex = i + frameIndexOffset;
-    sharedFrameTable.address[newIndex] = frameAddresses[i] ?? -1;
-    sharedFrameTable.inlineDepth[newIndex] = 0;
-    sharedFrameTable.category[newIndex] = geckoFrameStruct.category[i];
-    sharedFrameTable.subcategory[newIndex] = geckoFrameStruct.subcategory[i];
+    const address = frameAddresses[i];
+    const category = geckoFrameStruct.category[i];
+    const line = geckoFrameStruct.line[i];
+    const column = geckoFrameStruct.column[i];
+    let flags = 0;
+    if (address !== null) {
+      flags |= FrameFlag.HasAddress;
+    }
+    if (category !== null) {
+      flags |= FrameFlag.HasCategory;
+    }
+    if (line !== null) {
+      flags |= FrameFlag.HasLine;
+    }
+    if (column !== null) {
+      flags |= FrameFlag.HasColumn;
+    }
+    sharedFrameTable.flags[newIndex] = flags;
+    sharedFrameTable.address[newIndex] = address ?? 0;
+    sharedFrameTable.category[newIndex] = category ?? 0;
+    sharedFrameTable.subcategory[newIndex] =
+      geckoFrameStruct.subcategory[i] ?? 0;
     sharedFrameTable.func[newIndex] = frameFuncs[i];
-    sharedFrameTable.nativeSymbol[newIndex] = null;
+    sharedFrameTable.nativeSymbol[newIndex] = 0;
     sharedFrameTable.innerWindowID[newIndex] =
-      geckoFrameStruct.innerWindowID[i];
-    sharedFrameTable.line[newIndex] = geckoFrameStruct.line[i];
-    sharedFrameTable.column[newIndex] = geckoFrameStruct.column[i];
-    sharedFrameTable.originalLocation[newIndex] = null;
+      geckoFrameStruct.innerWindowID[i] ?? 0;
+    sharedFrameTable.line[newIndex] = line ?? 0;
+    sharedFrameTable.column[newIndex] = column ?? 0;
+    sharedFrameTable.originalLocation[newIndex] = 0;
   }
   sharedFrameTable.length += geckoFrameStruct.length;
   return frameIndexOffset;
@@ -2109,10 +2128,17 @@ function convertSharedTablesEligibleColumns(
       length: stackTable.length,
     },
     frameTable: {
-      ...frameTable,
+      length: frameTable.length,
+      flags: toUint8Array(frameTable.flags),
       address: toInt32Array(frameTable.address),
-      inlineDepth: toUint8Array(frameTable.inlineDepth),
       func: toInt32Array(frameTable.func),
+      category: toInt32Array(frameTable.category),
+      subcategory: toInt32Array(frameTable.subcategory),
+      nativeSymbol: toInt32Array(frameTable.nativeSymbol),
+      innerWindowID: toFloat64Array(frameTable.innerWindowID),
+      line: toInt32Array(frameTable.line),
+      column: toInt32Array(frameTable.column),
+      originalLocation: toInt32Array(frameTable.originalLocation),
     },
   };
 }

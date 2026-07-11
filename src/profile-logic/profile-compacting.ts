@@ -20,6 +20,7 @@ import type {
   SourceTable,
   SourceLocationTable,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -50,6 +51,11 @@ type ColumnDescription<TCol> = null extends (
   : Int32Array<ArrayBuffer> extends TCol
     ?
         | { type: 'INDEX_REF_INT32'; referencedTable: TableCompactionState }
+        | {
+            type: 'INDEX_REF_INT32_GATED_BY_FLAG';
+            referencedTable: TableCompactionState;
+            flagBit: number;
+          }
         | { type: 'SELF_RELATIVE_PARENT' }
         | { type: 'NO_REF' }
     :
@@ -65,6 +71,7 @@ type TableDescription<T> = {
     | Array<any>
     | Int32Array<ArrayBuffer>
     | Uint8Array<ArrayBuffer>
+    | Float64Array<ArrayBuffer>
     ? K
     : never]: ColumnDescription<T[K]>;
 };
@@ -77,6 +84,14 @@ const ColDesc = {
   indexRefInt32: (referencedTable: TableCompactionState) => ({
     type: 'INDEX_REF_INT32' as const,
     referencedTable,
+  }),
+  indexRefInt32GatedByFlag: (
+    referencedTable: TableCompactionState,
+    flagBit: number
+  ) => ({
+    type: 'INDEX_REF_INT32_GATED_BY_FLAG' as const,
+    referencedTable,
+    flagBit,
   }),
   indexRefOrNull: (referencedTable: TableCompactionState) => ({
     type: 'INDEX_REF_OR_NULL' as const,
@@ -163,16 +178,22 @@ export function computeCompactedProfile(
     prefixOffset: ColDesc.selfPrefixOffset(),
   };
   const frameTableDesc: TableDescription<RawFrameTable> = {
+    flags: ColDesc.noRef(),
     address: ColDesc.noRef(),
-    inlineDepth: ColDesc.noRef(),
     category: ColDesc.noRef(),
     subcategory: ColDesc.noRef(),
     func: ColDesc.indexRefInt32(tcs.funcTable),
-    nativeSymbol: ColDesc.indexRefOrNull(tcs.nativeSymbols),
+    nativeSymbol: ColDesc.indexRefInt32GatedByFlag(
+      tcs.nativeSymbols,
+      FrameFlag.HasNativeSymbol
+    ),
     innerWindowID: ColDesc.noRef(),
     line: ColDesc.noRef(),
     column: ColDesc.noRef(),
-    originalLocation: ColDesc.indexRefOrNull(tcs.sourceLocationTable),
+    originalLocation: ColDesc.indexRefInt32GatedByFlag(
+      tcs.sourceLocationTable,
+      FrameFlag.HasOriginalLocation
+    ),
   };
   const funcTableDesc: TableDescription<FuncTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
@@ -343,6 +364,15 @@ function _markTableAndComputeTranslation<T>(
       case 'INDEX_REF_INT32':
         markColumn(col, markBuffer, desc.referencedTable.markBuffer);
         break;
+      case 'INDEX_REF_INT32_GATED_BY_FLAG':
+        markColumnGatedByFlag(
+          col,
+          (table as any).flags,
+          desc.flagBit,
+          markBuffer,
+          desc.referencedTable.markBuffer
+        );
+        break;
       case 'INDEX_REF_OR_NULL':
         markColumnWithNullableFields(
           col,
@@ -427,6 +457,20 @@ function markColumnWithNegOneableFields(
       if (val !== -1) {
         setBit(markBuf, val);
       }
+    }
+  }
+}
+
+function markColumnGatedByFlag(
+  col: Array<number> | Int32Array<ArrayBuffer>,
+  flagCol: Array<number> | Uint8Array<ArrayBuffer>,
+  flagBit: number,
+  shouldMark: BitSet,
+  markBuf: BitSet
+) {
+  for (let i = 0; i < col.length; i++) {
+    if (checkBit(shouldMark, i) && (flagCol[i] & flagBit) !== 0) {
+      setBit(markBuf, col[i]);
     }
   }
 }
@@ -528,6 +572,16 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
+      case 'INDEX_REF_INT32_GATED_BY_FLAG':
+        result[key] = _compactColIndexInt32GatedByFlag(
+          oldCol,
+          (oldTable as any).flags,
+          desc.flagBit,
+          markBuffer,
+          desc.referencedTable.oldIndexToNewIndexPlusOne,
+          newLength
+        );
+        break;
       case 'INDEX_REF_OR_NULL':
         result[key] = _compactColIndexOrNull(
           oldCol,
@@ -604,6 +658,27 @@ function _compactColIndexInt32(
   for (let i = 0; i < oldCol.length; i++) {
     if (checkBit(markBuffer, i)) {
       newCol[newIndex++] = oldIndexToNewIndexPlusOne[oldCol[i]] - 1;
+    }
+  }
+  return newCol;
+}
+
+function _compactColIndexInt32GatedByFlag(
+  oldCol: number[] | Int32Array<ArrayBuffer>,
+  flagCol: number[] | Uint8Array<ArrayBuffer>,
+  flagBit: number,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      newCol[newIndex++] =
+        (flagCol[i] & flagBit) !== 0
+          ? oldIndexToNewIndexPlusOne[oldCol[i]] - 1
+          : 0;
     }
   }
   return newCol;

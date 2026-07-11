@@ -98,6 +98,7 @@ import type {
   SourceLocationTable,
   SourceTable,
 } from '../types';
+import { FrameFlag } from '../types';
 import type { NullableMappedPosition } from 'source-map';
 import type { SourceMapConsumer } from './source-map-store';
 import type {
@@ -219,13 +220,15 @@ function _identifyToSymbolicate(
       }
     }
 
-    if (
-      eligibility === 1 &&
-      frameTable.originalLocation[frameIndex] === null &&
-      frameTable.line[frameIndex] !== null &&
-      frameTable.column[frameIndex] !== null
-    ) {
-      framesToSymbolicate.push(frameIndex);
+    if (eligibility === 1) {
+      const flags = frameTable.flags[frameIndex];
+      if (
+        (flags & FrameFlag.HasOriginalLocation) === 0 &&
+        (flags & FrameFlag.HasLine) !== 0 &&
+        (flags & FrameFlag.HasColumn) !== 0
+      ) {
+        framesToSymbolicate.push(frameIndex);
+      }
     }
   }
 
@@ -412,11 +415,15 @@ function _buildSourceMapSymbolicationResponse(
     if (consumer === null) {
       continue;
     }
-    const line = frameTable.line[frameIndex];
-    const column = frameTable.column[frameIndex];
-    if (line === null || column === null) {
+    const flags = frameTable.flags[frameIndex];
+    if (
+      (flags & FrameFlag.HasLine) === 0 ||
+      (flags & FrameFlag.HasColumn) === 0
+    ) {
       continue;
     }
+    const line = frameTable.line[frameIndex];
+    const column = frameTable.column[frameIndex];
     const remap = _remapPosition(
       consumer,
       line,
@@ -1021,7 +1028,10 @@ export function applySourceMapSymbolicationResponse(
   }
 
   for (const [frameIndex, resolution] of response.frameResults) {
-    if (newFrameTable.originalLocation[frameIndex] !== null) {
+    if (
+      (newFrameTable.flags[frameIndex] & FrameFlag.HasOriginalLocation) !==
+      0
+    ) {
       continue;
     }
     const sourceIndex = urlToSourceIndex.get(resolution.originalSource);
@@ -1034,6 +1044,7 @@ export function applySourceMapSymbolicationResponse(
     newSourceLocationTable.column.push(resolution.originalColumn);
     newSourceLocationTable.length++;
     newFrameTable.originalLocation[frameIndex] = rowIndex;
+    newFrameTable.flags[frameIndex] |= FrameFlag.HasOriginalLocation;
     applied++;
   }
 

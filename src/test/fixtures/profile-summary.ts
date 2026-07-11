@@ -10,6 +10,7 @@ import type {
   RawFrameTable,
   FuncTable,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 /**
  * Walks a raw profile and asserts a set of structural invariants. Throws
@@ -55,23 +56,22 @@ export function assertProfileIntegrity(profile: Profile): void {
         `frameTable.func[${f}] = ${func} is not a valid integer index in [0, ${funcTable.length})`
       );
     }
-    const ns = frameTable.nativeSymbol[f];
-    if (
-      ns !== null &&
-      (!Number.isInteger(ns) || ns < 0 || ns >= nativeSymbols.length)
-    ) {
-      throw new Error(
-        `frameTable.nativeSymbol[${f}] = ${ns} is not a valid integer index in [0, ${nativeSymbols.length})`
-      );
+    const flags = frameTable.flags[f];
+    if ((flags & FrameFlag.HasNativeSymbol) !== 0) {
+      const ns = frameTable.nativeSymbol[f];
+      if (!Number.isInteger(ns) || ns < 0 || ns >= nativeSymbols.length) {
+        throw new Error(
+          `frameTable.nativeSymbol[${f}] = ${ns} is not a valid integer index in [0, ${nativeSymbols.length})`
+        );
+      }
     }
-    const cat = frameTable.category[f];
-    if (
-      cat !== null &&
-      (!Number.isInteger(cat) || cat < 0 || cat >= numCategories)
-    ) {
-      throw new Error(
-        `frameTable.category[${f}] = ${cat} is not a valid integer index in [0, ${numCategories})`
-      );
+    if ((flags & FrameFlag.HasCategory) !== 0) {
+      const cat = frameTable.category[f];
+      if (!Number.isInteger(cat) || cat < 0 || cat >= numCategories) {
+        throw new Error(
+          `frameTable.category[${f}] = ${cat} is not a valid integer index in [0, ${numCategories})`
+        );
+      }
     }
   }
 

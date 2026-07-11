@@ -7,13 +7,10 @@ import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
   ThreadIndex,
   Pid,
-  InnerWindowID,
   IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
-  IndexIntoSubcategoryListForCategory,
   IndexIntoResourceTable,
-  IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
   IndexIntoRawMarkerTable,
@@ -31,7 +28,6 @@ import type {
   WeightType,
   SourceTable,
   IndexIntoSourceTable,
-  IndexIntoSourceLocationTable,
   CounterDisplayConfig,
   SourceLocationTable,
 } from './profile';
@@ -285,27 +281,24 @@ export type StackTable = {
 /**
  * The `FrameTable` type of the derived thread.
  *
- * Differs from `RawFrameTable` in that the following columns are always
- * stored as typed arrays: `address` (`Int32Array`, with `-1` as the sentinel
- * for missing addresses), `inlineDepth` (`Uint8Array`), and `func`
- * (`Int32Array`). In `RawFrameTable`, these columns may be either regular
- * arrays or typed arrays, since regular arrays are convenient during
- * construction.
+ * Differs from `RawFrameTable` in that all columns are always stored as typed
+ * arrays. In `RawFrameTable`, these columns may be either regular arrays or
+ * typed arrays, since regular arrays are convenient during construction.
+ *
+ * See the comment on `RawFrameTable` for the semantics of the `flags` column
+ * and how it relates to the other columns.
  */
 export type FrameTable = {
-  // Differs from RawFrameTable: always Int32Array (-1 sentinel preserved).
+  flags: Uint8Array<ArrayBuffer>;
   address: Int32Array<ArrayBuffer>;
-  // Differs from RawFrameTable: always Uint8Array.
-  inlineDepth: Uint8Array<ArrayBuffer>;
-  category: (IndexIntoCategoryList | null)[];
-  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
-  // Differs from RawFrameTable: always Int32Array.
+  category: Int32Array<ArrayBuffer>;
+  subcategory: Int32Array<ArrayBuffer>;
   func: Int32Array<ArrayBuffer>;
-  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
-  innerWindowID: (InnerWindowID | null)[];
-  line: (number | null)[];
-  column: (number | null)[];
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  nativeSymbol: Int32Array<ArrayBuffer>;
+  innerWindowID: Float64Array<ArrayBuffer>;
+  line: Int32Array<ArrayBuffer>;
+  column: Int32Array<ArrayBuffer>;
+  originalLocation: Int32Array<ArrayBuffer>;
   length: number;
 };
 

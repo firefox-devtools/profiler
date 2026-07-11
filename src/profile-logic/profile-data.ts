@@ -109,7 +109,7 @@ import type {
   SampleCategoriesAndSubcategories,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType } from 'firefox-profiler/types';
+import { SelectedState, ResourceType, FrameFlag } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 import {
   toFloat64Array,
@@ -148,20 +148,19 @@ function _computeFrameTableInlinedIntoColumn(
   frameTable: FrameTable
 ): Int32Array {
   const frameCount = frameTable.length;
-  const frameTableInlineDepthCol = frameTable.inlineDepth;
+  const frameTableFlagsCol = frameTable.flags;
   const frameTableNativeSymbolCol = frameTable.nativeSymbol;
 
   const inlinedIntoCol = new Int32Array(frameCount);
+  const INLINED_WITH_SYMBOL_MASK =
+    FrameFlag.IsInlined | FrameFlag.HasNativeSymbol;
 
   for (let i = 0; i < frameCount; i++) {
-    let inlinedInto = -2;
-    if (frameTableInlineDepthCol[i] > 0) {
-      const nativeSymbol = frameTableNativeSymbolCol[i];
-      if (nativeSymbol !== null) {
-        inlinedInto = nativeSymbol;
-      }
-    }
-    inlinedIntoCol[i] = inlinedInto;
+    inlinedIntoCol[i] =
+      (frameTableFlagsCol[i] & INLINED_WITH_SYMBOL_MASK) ===
+      INLINED_WITH_SYMBOL_MASK
+        ? frameTableNativeSymbolCol[i]
+        : -2;
   }
 
   return inlinedIntoCol;
@@ -609,7 +608,7 @@ function _computeCallNodeTableExtraColumns(
       inlinedIntoCol[callNodeIndex] = inlinedIntoSymbol;
 
       const innerWindowID = frameTableInnerWindowIDCol[frameIndex];
-      if (innerWindowID !== null && innerWindowID !== 0) {
+      if (innerWindowID !== 0) {
         // Set innerWindowID when it's not zero. Otherwise the value is already
         // zero because typed arrays are initialized to zero.
         innerWindowIDCol[callNodeIndex] = innerWindowID;
@@ -3406,15 +3405,17 @@ export function getOriginalPositionForFrame(
   line: number | null;
   column: number | null;
 } {
-  if (sourceLocationTable !== null && frameIndex !== null) {
+  if (
+    sourceLocationTable !== null &&
+    frameIndex !== null &&
+    (frameTable.flags[frameIndex] & FrameFlag.HasOriginalLocation) !== 0
+  ) {
     const frameOriginalLocationIdx = frameTable.originalLocation[frameIndex];
-    if (frameOriginalLocationIdx !== null) {
-      return {
-        source: sourceLocationTable.source[frameOriginalLocationIdx],
-        line: sourceLocationTable.line[frameOriginalLocationIdx],
-        column: sourceLocationTable.column[frameOriginalLocationIdx],
-      };
-    }
+    return {
+      source: sourceLocationTable.source[frameOriginalLocationIdx],
+      line: sourceLocationTable.line[frameOriginalLocationIdx],
+      column: sourceLocationTable.column[frameOriginalLocationIdx],
+    };
   }
 
   if (sourceLocationTable !== null) {
@@ -3429,11 +3430,17 @@ export function getOriginalPositionForFrame(
   }
 
   if (frameIndex !== null) {
+    const frameFlags = frameTable.flags[frameIndex];
     return {
       source: funcTable.source[funcIndex],
-      line: frameTable.line[frameIndex] ?? funcTable.lineNumber[funcIndex],
+      line:
+        (frameFlags & FrameFlag.HasLine) !== 0
+          ? frameTable.line[frameIndex]
+          : funcTable.lineNumber[funcIndex],
       column:
-        frameTable.column[frameIndex] ?? funcTable.columnNumber[funcIndex],
+        (frameFlags & FrameFlag.HasColumn) !== 0
+          ? frameTable.column[frameIndex]
+          : funcTable.columnNumber[funcIndex],
     };
   }
 
@@ -4135,9 +4142,13 @@ export function collectSourceIndicesFromThreads(
         sourceIndices.add(compiledSource);
       }
 
-      const frameOriginalLocationIdx = frameTable.originalLocation[frameIndex];
-      if (frameOriginalLocationIdx !== null) {
-        sourceIndices.add(sourceLocationTable.source[frameOriginalLocationIdx]);
+      if (
+        (frameTable.flags[frameIndex] & FrameFlag.HasOriginalLocation) !==
+        0
+      ) {
+        sourceIndices.add(
+          sourceLocationTable.source[frameTable.originalLocation[frameIndex]]
+        );
       }
 
       const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
@@ -4311,8 +4322,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   for (const stack of samplingSelfStacks) {
     const frame = stackTable.frame[stack];
     oldIpFrameToNewIpFrame[frame] = frame;
-    const address = frameTable.address[frame];
-    if (address !== -1) {
+    if ((frameTable.flags[frame] & FrameFlag.HasAddress) !== 0) {
       ipFrames.add(frame);
     }
   }
@@ -4324,9 +4334,8 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   const prefixStacks: Set<IndexIntoStackTable> = new Set();
   for (const stack of syncBacktraceSelfStacks) {
     const frame = stackTable.frame[stack];
-    const returnAddress = frameTable.address[frame];
-    if (returnAddress !== -1) {
-      returnAddressFrames.set(frame, returnAddress);
+    if ((frameTable.flags[frame] & FrameFlag.HasAddress) !== 0) {
+      returnAddressFrames.set(frame, frameTable.address[frame]);
     }
   }
   for (let stack = 0; stack < stackTable.length; stack++) {
@@ -4340,9 +4349,8 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
     }
     prefixStacks.add(prefix);
     const prefixFrame = stackTable.frame[prefix];
-    const prefixAddress = frameTable.address[prefixFrame];
-    if (prefixAddress !== -1) {
-      returnAddressFrames.set(prefixFrame, prefixAddress);
+    if ((frameTable.flags[prefixFrame] & FrameFlag.HasAddress) !== 0) {
+      returnAddressFrames.set(prefixFrame, frameTable.address[prefixFrame]);
     }
   }
 
@@ -4365,8 +4373,8 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
       // The new frame will be used as the ipFrame, and the old frame will be used
       // as the return address frame (and have its address nudged).
       const newIpFrame = newFrameTable.length;
+      newFrameTable.flags.push(frameTable.flags[frame]);
       newFrameTable.address.push(address);
-      newFrameTable.inlineDepth.push(frameTable.inlineDepth[frame]);
       newFrameTable.category.push(frameTable.category[frame]);
       newFrameTable.subcategory.push(frameTable.subcategory[frame]);
       newFrameTable.func.push(frameTable.func[frame]);
@@ -4474,10 +4482,10 @@ export function findAddressProofForFile(
   if (frame === -1) {
     return null;
   }
-  const address = frameTable.address[frame];
-  if (address === null) {
+  if ((frameTable.flags[frame] & FrameFlag.HasAddress) === 0) {
     return null;
   }
+  const address = frameTable.address[frame];
   const resource = funcTable.resource[func];
   if (resourceTable.type[resource] !== ResourceType.Library) {
     return null;
@@ -4511,7 +4519,10 @@ export function calculateFunctionSizeLowerBound(
 ): Bytes {
   let maxFrameAddress = nativeSymbolAddress;
   for (let i = 0; i < frameTable.length; i++) {
-    if (frameTable.nativeSymbol[i] === nativeSymbolIndex) {
+    if (
+      (frameTable.flags[i] & FrameFlag.HasNativeSymbol) !== 0 &&
+      frameTable.nativeSymbol[i] === nativeSymbolIndex
+    ) {
       const frameAddress = frameTable.address[i];
       if (frameAddress > maxFrameAddress) {
         maxFrameAddress = frameAddress;
@@ -4539,11 +4550,11 @@ export function getNativeSymbolsForCallNode(
     stackIndex++
   ) {
     const callNodeFrame = callNodeFramePerStack[stackIndex];
-    if (callNodeFrame !== -1) {
-      const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
-      if (nativeSymbol !== null) {
-        set.add(nativeSymbol);
-      }
+    if (
+      callNodeFrame !== -1 &&
+      (frameTable.flags[callNodeFrame] & FrameFlag.HasNativeSymbol) !== 0
+    ) {
+      set.add(frameTable.nativeSymbol[callNodeFrame]);
     }
   }
   return set;
@@ -4565,11 +4576,11 @@ export function getNativeSymbolsForFunc(
 ): Set<IndexIntoNativeSymbolTable> {
   const set = new Set<IndexIntoNativeSymbolTable>();
   for (let frameIndex = 0; frameIndex < frameTable.func.length; frameIndex++) {
-    if (frameTable.func[frameIndex] === funcIndex) {
-      const nativeSymbol = frameTable.nativeSymbol[frameIndex];
-      if (nativeSymbol !== null) {
-        set.add(nativeSymbol);
-      }
+    if (
+      frameTable.func[frameIndex] === funcIndex &&
+      (frameTable.flags[frameIndex] & FrameFlag.HasNativeSymbol) !== 0
+    ) {
+      set.add(frameTable.nativeSymbol[frameIndex]);
     }
   }
   return set;
@@ -4599,10 +4610,10 @@ export function getTotalNativeSymbolTimingsForCallNode(
       continue;
     }
 
-    const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
-    if (nativeSymbol === null) {
+    if ((frameTable.flags[callNodeFrame] & FrameFlag.HasNativeSymbol) === 0) {
       continue;
     }
+    const nativeSymbol = frameTable.nativeSymbol[callNodeFrame];
 
     const sampleWeight =
       samples.weight !== null ? samples.weight[sampleIndex] : 1;
@@ -4771,20 +4782,17 @@ export function computeTabToThreadIndexesMap(
 export function computeFrameTableFromRawFrameTable(
   rawFrameTable: RawFrameTable
 ): FrameTable {
-  const address = toInt32Array(rawFrameTable.address);
-  const inlineDepth = toUint8Array(rawFrameTable.inlineDepth);
-  const func = toInt32Array(rawFrameTable.func);
   return {
-    address,
-    inlineDepth,
-    category: rawFrameTable.category,
-    subcategory: rawFrameTable.subcategory,
-    func,
-    nativeSymbol: rawFrameTable.nativeSymbol,
-    innerWindowID: rawFrameTable.innerWindowID,
-    line: rawFrameTable.line,
-    column: rawFrameTable.column,
-    originalLocation: rawFrameTable.originalLocation,
+    flags: toUint8Array(rawFrameTable.flags),
+    address: toInt32Array(rawFrameTable.address),
+    category: toInt32Array(rawFrameTable.category),
+    subcategory: toInt32Array(rawFrameTable.subcategory),
+    func: toInt32Array(rawFrameTable.func),
+    nativeSymbol: toInt32Array(rawFrameTable.nativeSymbol),
+    innerWindowID: toFloat64Array(rawFrameTable.innerWindowID),
+    line: toInt32Array(rawFrameTable.line),
+    column: toInt32Array(rawFrameTable.column),
+    originalLocation: toInt32Array(rawFrameTable.originalLocation),
     length: rawFrameTable.length,
   };
 }
@@ -4820,13 +4828,12 @@ export function computeStackTableFromRawStackTable(
     prefix[stackIndex] = prefixStack;
 
     const frameIndex = rawStackTable.frame[stackIndex];
-    const frameCategory = frameTable.category[frameIndex];
-    const frameSubcategory = frameTable.subcategory[frameIndex];
+    const frameFlags = frameTable.flags[frameIndex];
     let stackCategory;
     let stackSubcategory;
-    if (frameCategory !== null) {
-      stackCategory = frameCategory;
-      stackSubcategory = frameSubcategory || 0;
+    if ((frameFlags & FrameFlag.HasCategory) !== 0) {
+      stackCategory = frameTable.category[frameIndex];
+      stackSubcategory = frameTable.subcategory[frameIndex];
     } else if (prefixStack !== -1) {
       // Because of the structure of the stack table, prefixStack < stackIndex.
       // So we've already computed the category for the prefixStack.
