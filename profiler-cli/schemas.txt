@@ -58,6 +58,18 @@ profiler-cli counter info --json
     context: SessionContext
   }
 
+profiler-cli thread info --json
+  {
+    type: "thread-info",
+    threadHandle, name, friendlyName, tid,
+    createdAt, createdAtName,
+    endedAt: number | null, endedAtName: string | null,
+    sampleCount, markerCount,
+    cpuActivity: [{ startTime, startTimeName, startTimeStr,
+                    endTime, endTimeName, endTimeStr, cpuMs, depthLevel }] | null,
+    context: SessionContext
+  }
+
 profiler-cli thread samples --json
   {
     type: "thread-samples",
@@ -130,6 +142,25 @@ profiler-cli thread functions --json
                   selfSamples, selfPercentage, totalSamples, totalPercentage,
                   fullSelfPercentage?, fullTotalPercentage? }],
     activeFilters?, ephemeralFilters?,
+    context: SessionContext
+  }
+
+profiler-cli thread network --json
+  {
+    type: "thread-network",
+    threadHandle, friendlyThreadName,
+    totalRequestCount,
+    filteredRequestCount,
+    filters?: { searchString?, minDuration?, maxDuration?, limit? },
+    summary: {
+      cacheHit, cacheMiss, cacheUnknown,
+      phaseTotals: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
+    },
+    requests: [{
+      url, httpStatus?, httpVersion?, cacheStatus?,
+      transferSizeKB?, startTime, duration,
+      phases: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
+    }],
     context: SessionContext
   }
 
