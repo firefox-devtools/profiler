@@ -490,8 +490,61 @@ export function formatCounterListResult(
   if (result.counters.length === 0) {
     return `${contextHeader}\n\nNo counters in this profile.`;
   }
-  const lines = result.counters.map(formatCounterSummaryLine);
-  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${lines.join('\n')}`;
+  const blocks = result.counters.map((counter) => {
+    const block = [formatCounterSummaryLine(counter)];
+    if (counter.graph.length > 0) {
+      block.push(`      ${counterSparkline(counter)}`);
+    }
+    return block.join('\n');
+  });
+  // Trailing blank line so the last counter's sparkline is separated from the
+  // prompt, matching the blank lines between counters.
+  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${blocks.join('\n\n')}\n`;
+}
+
+const SPARKLINE_CHARS = '▁▂▃▄▅▆▇█';
+
+/**
+ * Render a compact sparkline of the values using block characters, scaled
+ * between `min` (floor) and `max` (top). Values are clamped to that range; a
+ * zero-width range renders at mid-height so it doesn't read as the floor.
+ */
+function renderSparkline(values: number[], min: number, max: number): string {
+  if (values.length === 0) {
+    return '';
+  }
+  const range = max - min;
+  const lastIndex = SPARKLINE_CHARS.length - 1;
+  if (range <= 0) {
+    return SPARKLINE_CHARS[Math.floor(lastIndex / 2)].repeat(values.length);
+  }
+  return values
+    .map((value) => {
+      const clamped = Math.min(max, Math.max(min, value));
+      const index = Math.round(((clamped - min) / range) * lastIndex);
+      return SPARKLINE_CHARS[index];
+    })
+    .join('');
+}
+
+/**
+ * Render a counter's sparkline, choosing the baseline per graph type so the
+ * heights are meaningful: accumulated counters (e.g. Memory) are relative, so
+ * they scale between their own min and max; rate counters are absolute and
+ * anchored at zero, with percent counters (e.g. Process CPU) pinned to 0-100%.
+ */
+function counterSparkline(counter: CounterSummary): string {
+  const { graph } = counter;
+  if (graph.length === 0) {
+    return '';
+  }
+  if (counter.graphType === 'line-accumulated') {
+    return renderSparkline(graph, Math.min(...graph), Math.max(...graph));
+  }
+  if (counter.unit === 'percent') {
+    return renderSparkline(graph, 0, 1);
+  }
+  return renderSparkline(graph, 0, Math.max(...graph));
 }
 
 /**
@@ -532,6 +585,36 @@ export function formatCounterInfoResult(
         ? `${stat.formattedValue} (${stat.carbon})`
         : stat.formattedValue;
       lines.push(`    ${stat.label}: ${value}`);
+    }
+  }
+  if (result.overTime.length > 0) {
+    lines.push(`  ${result.label} over time:`);
+    if (result.graph.length > 0) {
+      lines.push(`    ${counterSparkline(result)}`);
+      lines.push('');
+    }
+    // Build the columns first, then pad each to its widest cell so the values
+    // line up in a column.
+    const rows = result.overTime.map((bucket) => {
+      const extras = [
+        bucket.formattedDelta,
+        bucket.formattedPercentage,
+        bucket.carbon,
+      ].filter((part) => part !== undefined);
+      return {
+        handles: `[${bucket.startTimeName} → ${bucket.endTimeName}]`,
+        times: `(${bucket.startTimeStr} - ${bucket.endTimeStr})`,
+        value: bucket.formattedValue,
+        extras: extras.length > 0 ? `(${extras.join(', ')})` : '',
+      };
+    });
+    const handlesWidth = Math.max(...rows.map((row) => row.handles.length));
+    const timesWidth = Math.max(...rows.map((row) => row.times.length));
+    const valueWidth = Math.max(...rows.map((row) => row.value.length));
+    for (const row of rows) {
+      lines.push(
+        `    ${row.handles.padEnd(handlesWidth)}  ${row.times.padEnd(timesWidth)}  ${row.value.padEnd(valueWidth)}  ${row.extras}`.trimEnd()
+      );
     }
   }
   return lines.join('\n');

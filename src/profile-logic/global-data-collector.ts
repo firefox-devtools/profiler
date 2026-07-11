@@ -4,8 +4,9 @@
 
 import { StringTable } from '../utils/string-table';
 import {
+  finishRawFrameTableBuilder,
   finishRawStackTableBuilder,
-  getEmptyFrameTable,
+  getRawFrameTableBuilder,
   getEmptyFuncTable,
   getEmptyNativeSymbolTable,
   getEmptyResourceTable,
@@ -22,7 +23,6 @@ import type {
   IndexIntoSourceTable,
   RawProfileSharedData,
   SourceTable,
-  FrameTable,
   FuncTable,
   ResourceTable,
   NativeSymbolTable,
@@ -34,7 +34,10 @@ import type {
   Bytes,
 } from 'firefox-profiler/types';
 import { ResourceType } from 'firefox-profiler/types';
-import type { RawStackTableBuilder } from './data-structures';
+import type {
+  RawFrameTableBuilder,
+  RawStackTableBuilder,
+} from './data-structures';
 
 /**
  * GlobalDataCollector collects data which is global in the processed profile
@@ -50,7 +53,7 @@ export class GlobalDataCollector {
   _stringArray: string[] = [];
   _stringTable: StringTable = StringTable.withBackingArray(this._stringArray);
   _sources: SourceTable = getEmptySourceTable();
-  _frameTable: FrameTable = getEmptyFrameTable();
+  _frameTable: RawFrameTableBuilder = getRawFrameTableBuilder();
   _stackTableBuilder: RawStackTableBuilder = getRawStackTableBuilder();
   _funcTable: FuncTable = getEmptyFuncTable();
   _resourceTable: ResourceTable = getEmptyResourceTable();
@@ -299,7 +302,7 @@ export class GlobalDataCollector {
     return this._stringTable;
   }
 
-  getFrameTable(): FrameTable {
+  getFrameTable(): RawFrameTableBuilder {
     return this._frameTable;
   }
 
@@ -312,7 +315,7 @@ export class GlobalDataCollector {
   finish(): { libs: Lib[]; shared: RawProfileSharedData } {
     const shared: RawProfileSharedData = {
       stackTable: finishRawStackTableBuilder(this._stackTableBuilder),
-      frameTable: this._frameTable,
+      frameTable: finishRawFrameTableBuilder(this._frameTable),
       funcTable: this._funcTable,
       resourceTable: this._resourceTable,
       nativeSymbols: this._nativeSymbols,

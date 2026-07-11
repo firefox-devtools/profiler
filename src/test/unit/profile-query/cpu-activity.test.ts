@@ -12,7 +12,7 @@ describe('profile-query cpu activity', function () {
       { start: 1, end: 3, avg: 0.75, sum: 40, parent: 0 },
       { start: 2, end: 3, avg: 1, sum: 20, parent: 1 },
     ];
-    const time = [0, 10, 20, 30, 40];
+    const time = Float64Array.of(0, 10, 20, 30, 40);
     const tsManager = new TimestampManager({ start: 0, end: 40 });
 
     const result = collectSliceTree({ slices, time }, tsManager);
@@ -43,6 +43,8 @@ describe('profile-query cpu activity', function () {
   it('returns an empty list when there are no slices', function () {
     const tsManager = new TimestampManager({ start: 0, end: 10 });
 
-    expect(collectSliceTree({ slices: [], time: [] }, tsManager)).toEqual([]);
+    expect(
+      collectSliceTree({ slices: [], time: new Float64Array() }, tsManager)
+    ).toEqual([]);
   });
 });

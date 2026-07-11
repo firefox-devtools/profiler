@@ -10,9 +10,10 @@ import type {
 } from 'firefox-profiler/types';
 
 import {
+  finishRawUnbalancedNativeAllocationsTableBuilder,
   getEmptyProfile,
   getEmptyThread,
-  getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyRawUnbalancedNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 
 import { GlobalDataCollector } from 'firefox-profiler/profile-logic/global-data-collector';
@@ -154,7 +155,7 @@ type WriteCount = number;
 
 /**
  * The dhat convertor converts to the processed profile format, rather than to the Gecko
- * format, as it needs the UnbalancedNativeAllocationsTable type, which is unavailable
+ * format, as it needs the RawUnbalancedNativeAllocationsTable type, which is unavailable
  * in the Gecko format. In the Gecko format, that data comes in the form of markers, which
  * would be awkard to target.
  */
@@ -187,7 +188,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   const frameTable = globalDataCollector.getFrameTable();
   const stringTable = globalDataCollector.getStringTable();
 
-  const allocationsTable = getEmptyUnbalancedNativeAllocationsTable();
+  const allocationsTable = getEmptyRawUnbalancedNativeAllocationsTable();
 
   // dhat profiles do no support categories. Fill the category and subcategory information
   // with 0s.
@@ -372,13 +373,15 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     thread.tid = i;
     thread.name = name;
 
-    thread.nativeAllocations = {
-      time: allocationsTable.time.slice(),
-      stack: allocationsTable.stack.slice(),
-      weight,
-      weightType: 'bytes',
-      length: allocationsTable.length,
-    };
+    thread.nativeAllocations = finishRawUnbalancedNativeAllocationsTableBuilder(
+      {
+        time: allocationsTable.time.slice(),
+        stack: allocationsTable.stack.slice(),
+        weight,
+        weightType: 'bytes',
+        length: allocationsTable.length,
+      }
+    );
 
     return thread;
   });

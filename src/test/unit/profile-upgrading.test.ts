@@ -71,6 +71,30 @@ describe('upgrading gecko profiles', function () {
     //  - upgrading tracing markers without interval information
     testProfileUpgrading(require('../fixtures/upgrades/gecko-2.json'));
   });
+
+  it('handles a counter with no collected data', function () {
+    // The version 18 upgrader turns a counter whose sample_groups object has no
+    // samples into one with an empty sample_groups array. The version 29
+    // upgrader must not crash when unwrapping that empty array.
+    const profile: any = {
+      meta: { version: 17 },
+      processes: [],
+      threads: [],
+      counters: [
+        {
+          name: 'power',
+          category: 'power',
+          description: 'Power counter',
+          sample_groups: { id: 0 },
+        },
+      ],
+    };
+    upgradeGeckoProfileToCurrentVersion(profile);
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    const [counter] = profile.counters;
+    expect(counter.sample_groups).toBe(undefined);
+    expect(counter.samples.data).toEqual([]);
+  });
 });
 
 describe('upgrading processed profiles', function () {

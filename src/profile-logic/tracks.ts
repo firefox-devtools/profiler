@@ -22,6 +22,7 @@ import type {
 import {
   getFriendlyThreadName,
   computeStackTableFromRawStackTable,
+  computeFrameTableFromRawFrameTable,
 } from './profile-data';
 import { intersectSets, subtractSets } from '../utils/set';
 import { StringTable } from '../utils/string-table';
@@ -1548,7 +1549,7 @@ function _computeThreadSampleScore(
     : -1;
   const derivedStackTable = computeStackTableFromRawStackTable(
     stackTable,
-    frameTable,
+    computeFrameTableFromRawFrameTable(frameTable),
     meta.categories,
     defaultCategory
   );

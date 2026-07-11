@@ -11,13 +11,13 @@ import type {
   RawProfileSharedData,
   RawThread,
   RawSamplesTable,
-  FrameTable,
+  RawFrameTable,
   RawStackTable,
+  RawJsAllocationsTable,
+  RawUnbalancedNativeAllocationsTable,
+  RawBalancedNativeAllocationsTable,
   FuncTable,
   RawMarkerTable,
-  JsAllocationsTable,
-  UnbalancedNativeAllocationsTable,
-  BalancedNativeAllocationsTable,
   ResourceTable,
   NativeSymbolTable,
   Profile,
@@ -28,14 +28,100 @@ import type {
   SourceTable,
   SourceLocationTable,
   IndexIntoFrameTable,
+  IndexIntoFuncTable,
   IndexIntoStackTable,
+  IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
+  IndexIntoNativeSymbolTable,
+  IndexIntoSourceLocationTable,
+  InnerWindowID,
+  Address,
+  Bytes,
+  Milliseconds,
+  Tid,
+  WeightType,
 } from 'firefox-profiler/types';
+
+/**
+ * Builder-variants of various tables. The columns here use plain
+ * arrays so that elements can be added one-by-one by pushing to
+ * the column arrays.
+ *
+ * The "raw" variants of these arrays (i.e. what's stored in the
+ * profile files) may be using typed arrays for some of the columns,
+ * and you can't push to a typed array.
+ */
+export type RawSamplesTableBuilder = {
+  responsiveness?: Array<Milliseconds | null>;
+  eventDelay?: Array<Milliseconds | null>;
+  stack: Array<IndexIntoStackTable | null>;
+  time?: Milliseconds[];
+  timeDeltas?: Milliseconds[];
+  argumentValues?: Array<number | null>;
+  weight: null | number[];
+  weightType: WeightType;
+  threadCPUDelta?: Array<number | null>;
+  threadId?: Tid[];
+  length: number;
+};
+
+export type RawJsAllocationsTableBuilder = {
+  time: Milliseconds[];
+  className: string[];
+  typeName: string[];
+  coarseType: string[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+export type RawUnbalancedNativeAllocationsTableBuilder = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  length: number;
+};
+
+export type RawBalancedNativeAllocationsTableBuilder = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  memoryAddress: number[];
+  threadId: number[];
+  length: number;
+};
+
+export type RawFrameTableBuilder = {
+  address: Array<Address | -1>;
+  inlineDepth: number[];
+  category: (IndexIntoCategoryList | null)[];
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  func: IndexIntoFuncTable[];
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
+  innerWindowID: (InnerWindowID | null)[];
+  line: (number | null)[];
+  column: (number | null)[];
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  length: number;
+};
+
+export type RawStackTableBuilder = {
+  frame: IndexIntoFrameTable[];
+  prefix: Array<IndexIntoStackTable | null>;
+  length: number;
+};
 
 /**
  * This module collects all of the creation of new empty profile data structures.
  */
 
-export function getEmptySamplesTable(): RawSamplesTable {
+export function getRawSamplesTableBuilder(): RawSamplesTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -49,12 +135,6 @@ export function getEmptySamplesTable(): RawSamplesTable {
   };
 }
 
-export type RawStackTableBuilder = {
-  frame: IndexIntoFrameTable[];
-  prefix: Array<IndexIntoStackTable | null>;
-  length: number;
-};
-
 export function getRawStackTableBuilder(): RawStackTableBuilder {
   return {
     // Important!
@@ -64,6 +144,53 @@ export function getRawStackTableBuilder(): RawStackTableBuilder {
     frame: [],
     prefix: [],
     length: 0,
+  };
+}
+
+/**
+ * Return a `RawSamplesTableBuilder` view of an existing samples table. If the
+ * table's time / timeDeltas columns are already plain arrays, they are aliased
+ * through so that in-place mutations on the builder are visible via the
+ * returned reference. If they are typed arrays (only produced by the JSLB
+ * loader), they are copied into plain arrays.
+ *
+ * The returned builder shares object identity with `existing` in the common
+ * (plain-array) case, so callers do not need to reassign it back onto the
+ * thread. In the typed-array case a new object is returned; callers should
+ * reassign it (`thread.samples = builder`) to preserve mutations.
+ */
+export function getRawSamplesTableBuilderFromExisting(
+  existing: RawSamplesTable
+): RawSamplesTableBuilder {
+  const time = existing.time;
+  const timeDeltas = existing.timeDeltas;
+  if (
+    (time === undefined || Array.isArray(time)) &&
+    (timeDeltas === undefined || Array.isArray(timeDeltas))
+  ) {
+    return existing as RawSamplesTableBuilder;
+  }
+  return {
+    ...existing,
+    time: time === undefined || Array.isArray(time) ? time : Array.from(time),
+    timeDeltas:
+      timeDeltas === undefined || Array.isArray(timeDeltas)
+        ? timeDeltas
+        : Array.from(timeDeltas),
+  };
+}
+
+export function finishRawSamplesTableBuilder(
+  builder: RawSamplesTableBuilder
+): RawSamplesTable {
+  return {
+    ...builder,
+    time:
+      builder.time === undefined ? undefined : new Float64Array(builder.time),
+    timeDeltas:
+      builder.timeDeltas === undefined
+        ? undefined
+        : new Float64Array(builder.timeDeltas),
   };
 }
 
@@ -103,7 +230,7 @@ export function finishRawStackTableBuilder(
  * eventDelay is a new field and it replaced responsiveness. We should still
  * account for older profiles and use both of the flavors if needed.
  */
-export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
+export function getRawSamplesTableBuilderWithEventDelay(): RawSamplesTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -118,7 +245,7 @@ export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
   };
 }
 
-export function getEmptyFrameTable(): FrameTable {
+export function getRawFrameTableBuilder(): RawFrameTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -138,23 +265,36 @@ export function getEmptyFrameTable(): FrameTable {
   };
 }
 
-export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
+export function getRawFrameTableBuilderWithExistingContents(
+  frameTable: RawFrameTable
+): RawFrameTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    address: frameTable.address.slice(),
-    inlineDepth: frameTable.inlineDepth.slice(),
+    address: Array.from(frameTable.address),
+    inlineDepth: Array.from(frameTable.inlineDepth),
     category: frameTable.category.slice(),
     subcategory: frameTable.subcategory.slice(),
-    func: frameTable.func.slice(),
+    func: Array.from(frameTable.func),
     nativeSymbol: frameTable.nativeSymbol.slice(),
     innerWindowID: frameTable.innerWindowID.slice(),
     line: frameTable.line.slice(),
     column: frameTable.column.slice(),
     originalLocation: frameTable.originalLocation.slice(),
     length: frameTable.length,
+  };
+}
+
+export function finishRawFrameTableBuilder(
+  builder: RawFrameTableBuilder
+): RawFrameTable {
+  return {
+    ...builder,
+    address: new Int32Array(builder.address),
+    inlineDepth: new Uint8Array(builder.inlineDepth),
+    func: new Int32Array(builder.func),
   };
 }
 
@@ -274,7 +414,7 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
   };
 }
 
-export function getEmptyJsAllocationsTable(): JsAllocationsTable {
+export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -296,7 +436,7 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllocationsTable {
+export function getEmptyRawUnbalancedNativeAllocationsTable(): RawUnbalancedNativeAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -314,7 +454,7 @@ export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllo
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocationsTable {
+export function getEmptyRawBalancedNativeAllocationsTable(): RawBalancedNativeAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -327,6 +467,33 @@ export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocati
     memoryAddress: [],
     threadId: [],
     length: 0,
+  };
+}
+
+export function finishRawJsAllocationsTableBuilder(
+  builder: RawJsAllocationsTableBuilder
+): RawJsAllocationsTable {
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
+}
+
+export function finishRawUnbalancedNativeAllocationsTableBuilder(
+  builder: RawUnbalancedNativeAllocationsTableBuilder
+): RawUnbalancedNativeAllocationsTable {
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
+}
+
+export function finishRawBalancedNativeAllocationsTableBuilder(
+  builder: RawBalancedNativeAllocationsTableBuilder
+): RawBalancedNativeAllocationsTable {
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
   };
 }
 
@@ -420,7 +587,9 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     pid: '0',
     tid: 0,
     // Creating samples with event delay since it's the new samples table.
-    samples: getEmptySamplesTableWithEventDelay(),
+    samples: finishRawSamplesTableBuilder(
+      getRawSamplesTableBuilderWithEventDelay()
+    ),
     markers: getEmptyRawMarkerTable(),
   };
 
@@ -433,7 +602,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
 export function getEmptySharedData(): RawProfileSharedData {
   return {
     stackTable: finishRawStackTableBuilder(getRawStackTableBuilder()),
-    frameTable: getEmptyFrameTable(),
+    frameTable: finishRawFrameTableBuilder(getRawFrameTableBuilder()),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
     nativeSymbols: getEmptyNativeSymbolTable(),

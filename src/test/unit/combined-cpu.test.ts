@@ -10,7 +10,7 @@ function createSamplesTable(time: number[], cpuRatio: number[]): SamplesTable {
   const percentValues = cpuRatio.map((v) => Math.round(v * 100));
   percentValues.push(0);
   return {
-    time,
+    time: Float64Array.from(time),
     threadCPUPercent: Uint8Array.from(percentValues),
     hasCPUDeltas: true,
     // Other required fields (stubbed for test purposes)
@@ -35,7 +35,7 @@ describe('combineCPUDataFromThreads', function () {
     const result = combineCPUDataFromThreads(samples);
 
     expect(result).not.toBeNull();
-    expect(result!.time).toEqual([0, 100, 200]);
+    expect(Array.from(result!.time)).toEqual([0, 100, 200]);
     expect(Array.from(result!.cpuRatio)).toEqual([0.0, 0.5, 0.8]);
   });
 
@@ -48,7 +48,7 @@ describe('combineCPUDataFromThreads', function () {
     const result = combineCPUDataFromThreads(samples);
 
     expect(result).not.toBeNull();
-    expect(result!.time).toEqual([0, 100, 200]);
+    expect(Array.from(result!.time)).toEqual([0, 100, 200]);
     expect(Array.from(result!.cpuRatio)).toEqual([0, 0.9, 0.8]);
   });
 
@@ -62,7 +62,7 @@ describe('combineCPUDataFromThreads', function () {
 
     expect(result).not.toBeNull();
     // Should have all unique time points
-    expect(result!.time).toEqual([0, 50, 100, 150, 200, 250]);
+    expect(Array.from(result!.time)).toEqual([0, 50, 100, 150, 200, 250]);
 
     //       0: thread1=bef, thread2=bef → 0.0
     //   0- 50: thread1=0.5, thread2=bef → 0.5
@@ -87,7 +87,7 @@ describe('combineCPUDataFromThreads', function () {
     const result = combineCPUDataFromThreads(samples);
 
     expect(result).not.toBeNull();
-    expect(result!.time).toEqual([0, 10, 20, 30, 40, 50]);
+    expect(Array.from(result!.time)).toEqual([0, 10, 20, 30, 40, 50]);
 
     // At times 0, 10, 20: only thread1 has samples
     // At times 30, 40, 50: thread1 has ended (30 > 20), only thread2 contributes

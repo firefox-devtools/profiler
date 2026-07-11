@@ -22,6 +22,7 @@ import {
   extractProfileFilterPageData,
   findAddressProofForFile,
   calculateFunctionSizeLowerBound,
+  computeFrameTableFromRawFrameTable,
   getNativeSymbolsForCallNode,
   getNativeSymbolInfo,
   computeTimeColumnForRawSamplesTable,
@@ -1475,7 +1476,7 @@ describe('calculateFunctionSizeLowerBound', function () {
     const nativeSymbolIndex = nativeSymbolsDict.symSomeFunc;
 
     const functionSizeLowerBound = calculateFunctionSizeLowerBound(
-      shared.frameTable,
+      computeFrameTableFromRawFrameTable(shared.frameTable),
       0x1000,
       nativeSymbolIndex
     );
@@ -1769,12 +1770,13 @@ describe('getNativeSymbolInfo', function () {
     const { shared } = profile;
     const stringTable = StringTable.withBackingArray(shared.stringArray);
     const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
+    const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
 
     expect(
       getNativeSymbolInfo(
         symSomeFunc,
         shared.nativeSymbols,
-        shared.frameTable,
+        frameTable,
         stringTable
       )
     ).toEqual({
@@ -1788,7 +1790,7 @@ describe('getNativeSymbolInfo', function () {
       getNativeSymbolInfo(
         symOtherFunc,
         shared.nativeSymbols,
-        shared.frameTable,
+        frameTable,
         stringTable
       )
     ).toEqual({

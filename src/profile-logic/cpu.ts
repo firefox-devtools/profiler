@@ -103,7 +103,7 @@ export function computeReferenceCPUDeltaPerMs(profile: Profile): number {
  */
 export function computeThreadCPUPercent(
   threadCPUDelta: Array<number | null>,
-  timeDeltas: number[],
+  timeDeltas: number[] | Float64Array<ArrayBuffer>,
   referenceCPUDeltaPerMs: number
 ): Uint8Array {
   const threadCPUPercent: Uint8Array = new Uint8Array(
