@@ -6,6 +6,18 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 67
+
+The following raw columns can now optionally be stored as typed arrays, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
+- `thread.samples.time` and `thread.samples.timeDeltas` (`Float64Array`)
+- `counter.samples.time` and `counter.samples.timeDeltas` (`Float64Array`)
+- `thread.jsAllocations.time` (`Float64Array`)
+- `thread.nativeAllocations.time` (`Float64Array`)
+- `profile.shared.frameTable.func` (`Int32Array`)
+- `profile.shared.frameTable.address` (`Int32Array`, with `-1` as the sentinel for missing addresses)
+- `profile.shared.frameTable.inlineDepth` (`Uint8Array`)
+
 ### Version 66
 
 The `prefix` column of `profile.shared.stackTable` was replaced with a `prefixOffset` column, to improve compressibility.

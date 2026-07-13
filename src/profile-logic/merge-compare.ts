@@ -11,12 +11,14 @@ import {
   getEmptyProfile,
   getEmptyResourceTable,
   getEmptyNativeSymbolTable,
-  getEmptyFrameTable,
+  finishRawFrameTableBuilder,
+  finishRawSamplesTableBuilder,
+  getRawFrameTableBuilder,
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
   getEmptyRawMarkerTable,
-  getEmptySamplesTableWithEventDelay,
+  getRawSamplesTableBuilderWithEventDelay,
   shallowCloneRawMarkerTable,
   getEmptySourceTable,
 } from './data-structures';
@@ -51,7 +53,7 @@ import type {
   IndexIntoSourceTable,
   IndexIntoSourceLocationTable,
   FuncTable,
-  FrameTable,
+  RawFrameTable,
   Lib,
   NativeSymbolTable,
   ResourceTable,
@@ -1057,9 +1059,9 @@ function mergeFrameTables(
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   translationMapsForOriginalLocation: TranslationMapForOriginalLocation[],
   translationMapsForCategories: TranslationMapForCategories[]
-): { frameTable: FrameTable; translationMaps: TranslationMapForFrames[] } {
+): { frameTable: RawFrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
-  const newFrameTable = getEmptyFrameTable();
+  const newFrameTable = getRawFrameTableBuilder();
 
   profiles.forEach((profile, profileIndex) => {
     const { frameTable } = profile.shared;
@@ -1108,7 +1110,10 @@ function mergeFrameTables(
     translationMaps.push(oldFrameToNewFramePlusOne);
   });
 
-  return { frameTable: newFrameTable, translationMaps };
+  return {
+    frameTable: finishRawFrameTableBuilder(newFrameTable),
+    translationMaps,
+  };
 }
 
 /**
@@ -1184,7 +1189,7 @@ function combineSamplesDiffing(
   const newWeight: number[] = [];
   const newThreadId: Tid[] = [];
   const newSamples = {
-    ...getEmptySamplesTableWithEventDelay(),
+    ...getRawSamplesTableBuilderWithEventDelay(),
     weight: newWeight,
     threadId: newThreadId,
   };
@@ -1237,7 +1242,7 @@ function combineSamplesDiffing(
     }
   }
 
-  return newSamples;
+  return finishRawSamplesTableBuilder(newSamples);
 }
 
 type ThreadAndWeightMultiplier = {
@@ -1352,9 +1357,8 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const samplesPerThread: RawSamplesTable[] = threads.map(
     (thread) => thread.samples
   );
-  const sampleTimesPerThread: Milliseconds[][] = samplesPerThread.map(
-    computeTimeColumnForRawSamplesTable
-  );
+  const sampleTimesPerThread: Float64Array<ArrayBuffer>[] =
+    samplesPerThread.map(computeTimeColumnForRawSamplesTable);
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
   const nextSampleIndexPerThread: number[] = Array(
@@ -1365,7 +1369,7 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const newThreadId: Tid[] = [];
   // Creating a new empty samples table to fill.
   const newSamples = {
-    ...getEmptySamplesTableWithEventDelay(),
+    ...getRawSamplesTableBuilderWithEventDelay(),
     threadId: newThreadId,
   };
 
@@ -1451,9 +1455,12 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   }
 
   if (newThreadCPUDelta !== undefined) {
-    return { ...newSamples, threadCPUDelta: newThreadCPUDelta };
+    return finishRawSamplesTableBuilder({
+      ...newSamples,
+      threadCPUDelta: newThreadCPUDelta,
+    });
   }
-  return newSamples;
+  return finishRawSamplesTableBuilder(newSamples);
 }
 
 /**

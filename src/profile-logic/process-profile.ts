@@ -12,10 +12,14 @@ import { attemptToConvertDhat } from './import/dhat';
 import { GlobalDataCollector } from './global-data-collector';
 import { AddressLocator } from './address-locator';
 import {
+  finishRawBalancedNativeAllocationsTableBuilder,
+  finishRawJsAllocationsTableBuilder,
+  finishRawUnbalancedNativeAllocationsTableBuilder,
   getEmptyExtensions,
   getEmptyRawMarkerTable,
-  getEmptyJsAllocationsTable,
-  getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyRawJsAllocationsTable,
+  getEmptyRawUnbalancedNativeAllocationsTable,
+  type RawFrameTableBuilder,
   type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
@@ -52,7 +56,6 @@ import type {
   RawThread,
   RawCounter,
   ExtensionTable,
-  FrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
   RawMarkerTable,
@@ -61,9 +64,9 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStringTable,
   JsTracerTable,
-  JsAllocationsTable,
+  RawJsAllocationsTable,
   ProfilerOverhead,
-  NativeAllocationsTable,
+  RawNativeAllocationsTable,
   Milliseconds,
   Microseconds,
   Address,
@@ -521,7 +524,7 @@ function _extractUnknownFunctionType(
  */
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
-  sharedFrameTable: FrameTable,
+  sharedFrameTable: RawFrameTableBuilder,
   frameFuncs: IndexIntoFuncTable[],
   frameAddresses: (Address | null)[]
 ): IndexIntoFrameTable {
@@ -631,8 +634,8 @@ function _convertPayloadStackToIndex(
  * Process the markers.
  *  Convert stacks to causes.
  *  Process GC markers.
- *  Extract JS allocations into the JsAllocationsTable.
- *  Extract Native allocations into the NativeAllocationsTable.
+ *  Extract JS allocations into the RawJsAllocationsTable.
+ *  Extract Native allocations into the RawNativeAllocationsTable.
  */
 function _processMarkers(
   geckoMarkers: GeckoMarkerStruct,
@@ -642,13 +645,13 @@ function _processMarkers(
   stackIndexOffset: IndexIntoStackTable
 ): {
   markers: RawMarkerTable;
-  jsAllocations: JsAllocationsTable | null;
-  nativeAllocations: NativeAllocationsTable | null;
+  jsAllocations: RawJsAllocationsTable | null;
+  nativeAllocations: RawNativeAllocationsTable | null;
 } {
   const markers = getEmptyRawMarkerTable();
-  const jsAllocations = getEmptyJsAllocationsTable();
+  const jsAllocations = getEmptyRawJsAllocationsTable();
   const inProgressNativeAllocations =
-    getEmptyUnbalancedNativeAllocationsTable();
+    getEmptyRawUnbalancedNativeAllocationsTable();
   const memoryAddress: number[] = [];
   const threadId: number[] = [];
 
@@ -756,29 +759,24 @@ function _processMarkers(
     nativeAllocations = null;
   } else if (hasMemoryAddresses) {
     // This is the newer native allocations with memory addresses.
-    nativeAllocations = {
-      time: inProgressNativeAllocations.time,
-      weight: inProgressNativeAllocations.weight,
-      weightType: inProgressNativeAllocations.weightType,
-      stack: inProgressNativeAllocations.stack,
+    nativeAllocations = finishRawBalancedNativeAllocationsTableBuilder({
+      ...inProgressNativeAllocations,
       memoryAddress,
       threadId,
-      length: inProgressNativeAllocations.length,
-    };
+    });
   } else {
     // There is the older native allocations, without memory addresses.
-    nativeAllocations = {
-      time: inProgressNativeAllocations.time,
-      weight: inProgressNativeAllocations.weight,
-      weightType: inProgressNativeAllocations.weightType,
-      stack: inProgressNativeAllocations.stack,
-      length: inProgressNativeAllocations.length,
-    };
+    nativeAllocations = finishRawUnbalancedNativeAllocationsTableBuilder(
+      inProgressNativeAllocations
+    );
   }
 
   return {
     markers: markers,
-    jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
+    jsAllocations:
+      jsAllocations.length === 0
+        ? null
+        : finishRawJsAllocationsTableBuilder(jsAllocations),
     nativeAllocations,
   };
 }
@@ -1471,10 +1469,9 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustTableTimestamps<Table extends { time: Milliseconds[] }>(
-  table: Table,
-  delta: Milliseconds
-): Table {
+export function adjustTableTimestamps<
+  Table extends { time: Milliseconds[] | Float64Array<ArrayBuffer> },
+>(table: Table, delta: Milliseconds): Table {
   return {
     ...table,
     time: table.time.map((time) => time + delta),
@@ -1482,7 +1479,7 @@ export function adjustTableTimestamps<Table extends { time: Milliseconds[] }>(
 }
 
 export function adjustTableTimeDeltas<
-  Table extends { timeDeltas?: Milliseconds[] },
+  Table extends { timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer> },
 >(table: Table, delta: Milliseconds): Table {
   const { timeDeltas } = table;
   if (timeDeltas === undefined) {

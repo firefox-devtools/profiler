@@ -13,7 +13,10 @@ import {
   getMergedProfileFromTextSamples,
   getProfileWithUnbalancedNativeAllocations,
 } from '../fixtures/profiles/processed-profile';
-import { getEmptySamplesTableWithEventDelay } from '../../profile-logic/data-structures';
+import {
+  finishRawSamplesTableBuilder,
+  getRawSamplesTableBuilderWithEventDelay,
+} from '../../profile-logic/data-structures';
 
 describe('getUsefulTabs', function () {
   it('hides the network chart and JS tracer when no data is in the thread', function () {
@@ -79,7 +82,9 @@ describe('getUsefulTabs', function () {
   it('shows sample related tabs even when there are only allocation samples in the profile', function () {
     const { profile } = getProfileWithUnbalancedNativeAllocations();
     for (const thread of profile.threads) {
-      thread.samples = getEmptySamplesTableWithEventDelay();
+      thread.samples = finishRawSamplesTableBuilder(
+        getRawSamplesTableBuilderWithEventDelay()
+      );
     }
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
