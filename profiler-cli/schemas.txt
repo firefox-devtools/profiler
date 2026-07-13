@@ -30,7 +30,8 @@ CounterSummary:
   {
     counterHandle, counterIndex, name, label, category,
     unit, graphType,
-    color, pid, mainThreadIndex, mainThreadHandle, mainThreadName,
+    color, pid, processIndex, processName, etld1?,
+    mainThreadIndex, mainThreadHandle, mainThreadName,
     rangeSampleCount,
     stats: [{ source, label, value, formattedValue, carbon? }],
     graph: [number]

@@ -24,7 +24,9 @@ import {
   pickTier,
 } from 'firefox-profiler/components/timeline/TrackCounterTooltipFormat';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { getCounterHandle, parseCounterHandle } from '../counter-map';
+import { getProcessName } from '../process-thread-list';
 import type {
   CounterIndex,
   CounterDisplayConfig,
@@ -184,6 +186,7 @@ function collectCounterStats(
 export function collectCounterSummary(
   store: Store,
   threadMap: ThreadMap,
+  processIndexMap: Map<string, number>,
   counterIndex: CounterIndex
 ): CounterSummary {
   const state = store.getState();
@@ -197,7 +200,14 @@ export function collectCounterSummary(
     counterIndex
   );
 
-  const mainThreadName = profile.threads[counter.mainThreadIndex]?.name ?? '';
+  const mainThread = ensureExists(
+    profile.threads[counter.mainThreadIndex],
+    `Counter ${getCounterHandle(counterIndex)} references thread ${counter.mainThreadIndex}, which does not exist.`
+  );
+  const processIndex = ensureExists(
+    processIndexMap.get(counter.pid),
+    `Counter ${getCounterHandle(counterIndex)} belongs to pid ${counter.pid}, which has no matching process in the profile.`
+  );
 
   return {
     counterHandle: getCounterHandle(counterIndex),
@@ -209,9 +219,12 @@ export function collectCounterSummary(
     graphType: display.graphType,
     color: display.color,
     pid: counter.pid,
+    processIndex,
+    processName: getProcessName(mainThread),
+    etld1: mainThread['eTLD+1'],
     mainThreadIndex: counter.mainThreadIndex,
     mainThreadHandle: threadMap.handleForThreadIndex(counter.mainThreadIndex),
-    mainThreadName,
+    mainThreadName: mainThread.name,
     rangeSampleCount: Math.max(0, rangeEndIndex - rangeStartIndex),
     stats: collectCounterStats(store, counterIndex),
     graph: collectCounterGraph(store, counterIndex),
@@ -224,12 +237,13 @@ export function collectCounterSummary(
  */
 export function collectCounterList(
   store: Store,
-  threadMap: ThreadMap
+  threadMap: ThreadMap,
+  processIndexMap: Map<string, number>
 ): CounterListResult {
   return {
     type: 'counter-list',
     counters: getSortedCounterIndexes(store).map((index) =>
-      collectCounterSummary(store, threadMap, index)
+      collectCounterSummary(store, threadMap, processIndexMap, index)
     ),
   };
 }
@@ -503,6 +517,7 @@ function collectCounterGraph(
 export function collectCounterInfo(
   store: Store,
   threadMap: ThreadMap,
+  processIndexMap: Map<string, number>,
   timestampManager: TimestampManager,
   counterHandle: string
 ): CounterInfoResult {
@@ -510,7 +525,12 @@ export function collectCounterInfo(
   const counters = getCounters(state) ?? [];
   const counterIndex = parseCounterHandle(counterHandle, counters.length);
 
-  const summary = collectCounterSummary(store, threadMap, counterIndex);
+  const summary = collectCounterSummary(
+    store,
+    threadMap,
+    processIndexMap,
+    counterIndex
+  );
   const selectors = getCounterSelectors(counterIndex);
   const counter = selectors.getCounter(state);
   const [rangeStartIndex, rangeEndIndex] = getInRangeSampleIndexes(
