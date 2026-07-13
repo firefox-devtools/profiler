@@ -465,6 +465,13 @@ describe('marker schema formatting', function () {
   it('supports complex formats', function () {
     const entries: Array<[MarkerFormatType, unknown]> = [
       ['url', 'http://example.com'],
+      // A whole-string URL is linkified.
+      ['url', 'https://example.com/path?query=1'],
+      // A URL embedded in a longer string is left as plain text.
+      ['url', 'loaded https://example.com successfully'],
+      // A string that starts with a URL but continues with a text is left as
+      // plain text.
+      ['url', 'https://example.com then some more text'],
       ['file-path', '/Users/me/gecko'],
       ['file-path', null],
       ['file-path', undefined],
