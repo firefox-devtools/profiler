@@ -476,11 +476,10 @@ function formatCounterStats(counter: CounterSummary): string {
   return `${stats} [${counter.rangeSampleCount} samples]`;
 }
 
-/** `p-N Process Name (etld+1)`, dropping the handle when the process is unknown. */
+/** `p-N Process Name (etld+1)` identifying the owning process. */
 function formatCounterProcessName(counter: CounterSummary): string {
-  const handle = counter.processIndex >= 0 ? `p-${counter.processIndex} ` : '';
   const etld1 = counter.etld1 ? ` (${counter.etld1})` : '';
-  return `${handle}${counter.processName}${etld1}`;
+  return `p-${counter.processIndex} ${counter.processName}${etld1}`;
 }
 
 /** The ` [p-N Process Name (etld+1), pid X]` segment identifying the owning process. */

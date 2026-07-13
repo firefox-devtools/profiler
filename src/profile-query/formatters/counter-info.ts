@@ -24,6 +24,7 @@ import {
   pickTier,
 } from 'firefox-profiler/components/timeline/TrackCounterTooltipFormat';
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { getCounterHandle, parseCounterHandle } from '../counter-map';
 import { getProcessName } from '../process-thread-list';
 import type {
@@ -199,7 +200,14 @@ export function collectCounterSummary(
     counterIndex
   );
 
-  const mainThread = profile.threads[counter.mainThreadIndex];
+  const mainThread = ensureExists(
+    profile.threads[counter.mainThreadIndex],
+    `Counter ${getCounterHandle(counterIndex)} references thread ${counter.mainThreadIndex}, which does not exist.`
+  );
+  const processIndex = ensureExists(
+    processIndexMap.get(counter.pid),
+    `Counter ${getCounterHandle(counterIndex)} belongs to pid ${counter.pid}, which has no matching process in the profile.`
+  );
 
   return {
     counterHandle: getCounterHandle(counterIndex),
@@ -211,12 +219,12 @@ export function collectCounterSummary(
     graphType: display.graphType,
     color: display.color,
     pid: counter.pid,
-    processIndex: processIndexMap.get(counter.pid) ?? -1,
-    processName: mainThread ? getProcessName(mainThread) : 'unknown',
-    etld1: mainThread?.['eTLD+1'],
+    processIndex,
+    processName: getProcessName(mainThread),
+    etld1: mainThread['eTLD+1'],
     mainThreadIndex: counter.mainThreadIndex,
     mainThreadHandle: threadMap.handleForThreadIndex(counter.mainThreadIndex),
-    mainThreadName: mainThread?.name ?? '',
+    mainThreadName: mainThread.name,
     rangeSampleCount: Math.max(0, rangeEndIndex - rangeStartIndex),
     stats: collectCounterStats(store, counterIndex),
     graph: collectCounterGraph(store, counterIndex),
