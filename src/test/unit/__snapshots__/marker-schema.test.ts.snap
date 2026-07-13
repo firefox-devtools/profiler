@@ -16,6 +16,31 @@ Array [
     "http://example.com",
   ],
   Array [
+    "url",
+    "https://example.com/path?query=1",
+    <a
+      className="marker-link-value"
+      href="https://example.com/path?query=1"
+      rel="noreferrer"
+      target="_blank"
+    >
+      example.com/path?query=1
+    </a>,
+    "https://example.com/path?query=1",
+  ],
+  Array [
+    "url",
+    "loaded https://example.com successfully",
+    "loaded https://example.com successfully",
+    "loaded https://example.com successfully",
+  ],
+  Array [
+    "url",
+    "https://example.com then some more text",
+    "https://example.com then some more text",
+    "https://example.com then some more text",
+  ],
+  Array [
     "file-path",
     "/Users/me/gecko",
     "/Users/me/gecko",
