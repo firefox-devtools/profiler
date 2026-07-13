@@ -27,7 +27,9 @@ import type {
   JsTracerTable,
   RawSamplesTable,
   SamplesTable,
+  RawNativeAllocationsTable,
   NativeAllocationsTable,
+  RawJsAllocationsTable,
   JsAllocationsTable,
   SamplesLikeTable,
   Selector,
@@ -143,11 +145,25 @@ export function getBasicThreadSelectorsPerThread(
           )
         : null
   );
-  const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
+  const getRawNativeAllocations: Selector<RawNativeAllocationsTable | void> = (
     state
   ) => getRawThread(state).nativeAllocations;
-  const getJsAllocations: Selector<JsAllocationsTable | void> = (state) =>
+  const getRawJsAllocations: Selector<RawJsAllocationsTable | void> = (state) =>
     getRawThread(state).jsAllocations;
+  const getNativeAllocations: Selector<NativeAllocationsTable | undefined> =
+    createSelector(getRawNativeAllocations, (raw) =>
+      raw
+        ? ProfileData.computeNativeAllocationsTableFromRawNativeAllocationsTable(
+            raw
+          )
+        : undefined
+    );
+  const getJsAllocations: Selector<JsAllocationsTable | undefined> =
+    createSelector(getRawJsAllocations, (raw) =>
+      raw
+        ? ProfileData.computeJsAllocationsTableFromRawJsAllocationsTable(raw)
+        : undefined
+    );
   const getThreadRange: Selector<StartEndRange> = (state) =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
@@ -183,8 +199,7 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread,
     getSamplesTable,
     ProfileSelectors.getStackTable,
-    (state: State) =>
-      ProfileSelectors.getRawProfileSharedData(state).frameTable,
+    ProfileSelectors.getFrameTable,
     ProfileSelectors.getFunctionsReservedFuncTable,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).nativeSymbols,
@@ -195,6 +210,8 @@ export function getBasicThreadSelectorsPerThread(
     getTracedValuesBuffer,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).sourceLocationTable,
+    getJsAllocations,
+    getNativeAllocations,
     ProfileData.createThreadFromDerivedTables
   );
 

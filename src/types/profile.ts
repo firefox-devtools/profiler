@@ -126,9 +126,9 @@ export type RawSamplesTable = {
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<Milliseconds | null>;
   stack: Array<IndexIntoStackTable | null>;
-  time?: Milliseconds[];
+  time?: Milliseconds[] | Float64Array<ArrayBuffer>;
   // If the `time` column is not present, then the `timeDeltas` column must be present.
-  timeDeltas?: Milliseconds[];
+  timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer>;
   argumentValues?: Array<number | null>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
@@ -151,9 +151,11 @@ export type RawSamplesTable = {
 /**
  * JS allocations are recorded as a marker payload, but in profile processing they
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ *
+ * There is also a derived `JsAllocationsTable` type, see profile-derived.js.
  */
-export type JsAllocationsTable = {
-  time: Milliseconds[];
+export type RawJsAllocationsTable = {
+  time: Milliseconds[] | Float64Array<ArrayBuffer>;
   className: string[];
   typeName: string[]; // Currently only 'JSObject'
   coarseType: string[]; // Currently only 'Object',
@@ -170,8 +172,8 @@ export type JsAllocationsTable = {
  * This variant is the original version of the table, before the memory address
  * and threadId were added.
  */
-export type UnbalancedNativeAllocationsTable = {
-  time: Milliseconds[];
+export type RawUnbalancedNativeAllocationsTable = {
+  time: Milliseconds[] | Float64Array<ArrayBuffer>;
   // "weight" is used here rather than "bytes", so that this type can be
   // used as a SamplesLikeTable.
   weight: Bytes[];
@@ -184,8 +186,8 @@ export type UnbalancedNativeAllocationsTable = {
 /**
  * The memory address and thread ID were added later.
  */
-export type BalancedNativeAllocationsTable =
-  UnbalancedNativeAllocationsTable & {
+export type RawBalancedNativeAllocationsTable =
+  RawUnbalancedNativeAllocationsTable & {
     memoryAddress: number[];
     threadId: number[];
   };
@@ -195,10 +197,12 @@ export type BalancedNativeAllocationsTable =
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
  * Currently they include native allocations and deallocations. However, both
  * of them are sampled independently, so they will be unbalanced if summed togther.
+ *
+ * There is also a derived `NativeAllocationsTable` type, see profile-derived.js.
  */
-export type NativeAllocationsTable =
-  | UnbalancedNativeAllocationsTable
-  | BalancedNativeAllocationsTable;
+export type RawNativeAllocationsTable =
+  | RawUnbalancedNativeAllocationsTable
+  | RawBalancedNativeAllocationsTable;
 
 /**
  * Markers represent arbitrary events that happen within the browser. They have a
@@ -229,7 +233,7 @@ export type RawMarkerTable = {
  * Frames contain the context information about the function execution at the moment in
  * time. The caller/callee relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {
+export type RawFrameTable = {
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
   //
@@ -241,7 +245,9 @@ export type FrameTable = {
   //
   // The library which this address is relative to is given by the frame's nativeSymbol:
   // frame -> nativeSymbol -> lib.
-  address: Array<Address | -1>;
+  //
+  // Frames with no address use the sentinel value `-1`.
+  address: Array<Address | -1> | Int32Array<ArrayBuffer>;
 
   // The inline depth for this frame. If there is an inline stack at an address,
   // we create multiple frames with the same address, one for each depth.
@@ -269,7 +275,7 @@ export type FrameTable = {
   //
   // The frames of an inline stack at an address all have the same address and the same
   // nativeSymbol, but each has a different func and line.
-  inlineDepth: number[];
+  inlineDepth: number[] | Uint8Array<ArrayBuffer>;
 
   // The category of the frame. This is used to calculate the category of the stack nodes
   // which use this frame:
@@ -286,7 +292,7 @@ export type FrameTable = {
   subcategory: (IndexIntoSubcategoryListForCategory | null)[];
 
   // The frame's function.
-  func: IndexIntoFuncTable[];
+  func: IndexIntoFuncTable[] | Int32Array<ArrayBuffer>;
 
   // The symbol index (referring into this thread's nativeSymbols table) corresponding
   // to symbol that covers the frame address of this frame. Only non-null for native
@@ -530,8 +536,8 @@ export type JsTracerTable = {
 };
 
 export type RawCounterSamplesTable = {
-  time?: Milliseconds[];
-  timeDeltas?: Milliseconds[];
+  time?: Milliseconds[] | Float64Array<ArrayBuffer>;
+  timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer>;
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[];
@@ -764,8 +770,8 @@ export type RawThread = {
   pid: Pid;
   tid: Tid;
   samples: RawSamplesTable;
-  jsAllocations?: JsAllocationsTable;
-  nativeAllocations?: NativeAllocationsTable;
+  jsAllocations?: RawJsAllocationsTable;
+  nativeAllocations?: RawNativeAllocationsTable;
   markers: RawMarkerTable;
   jsTracer?: JsTracerTable;
   // If present and true, this thread was launched for a private browsing session only.
@@ -1082,7 +1088,7 @@ export type SourceLocationTable = {
 
 export type RawProfileSharedData = {
   stackTable: RawStackTable;
-  frameTable: FrameTable;
+  frameTable: RawFrameTable;
   funcTable: FuncTable;
   resourceTable: ResourceTable;
   nativeSymbols: NativeSymbolTable;

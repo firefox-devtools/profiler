@@ -3,10 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
   getRawStackTableBuilder,
+  finishRawFrameTableBuilder,
   finishRawStackTableBuilder,
   shallowCloneFuncTable,
   shallowCloneNativeSymbolTable,
-  shallowCloneFrameTable,
+  getRawFrameTableBuilderWithExistingContents,
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
@@ -716,7 +717,7 @@ function _partiallyApplySymbolicationStep(
 
   // Integrate the new native symbol column into the frame table and make a
   // copy so that we can add new frames below.
-  const frameTable = shallowCloneFrameTable({
+  const frameTable = getRawFrameTableBuilderWithExistingContents({
     ...oldFrameTable,
     nativeSymbol: newFrameTableNativeSymbolsColumn,
   });
@@ -892,7 +893,7 @@ function _partiallyApplySymbolicationStep(
 
   const newShared = {
     ...shared,
-    frameTable,
+    frameTable: finishRawFrameTableBuilder(frameTable),
     funcTable,
     nativeSymbols,
   };

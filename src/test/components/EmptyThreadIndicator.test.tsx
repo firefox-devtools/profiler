@@ -29,7 +29,7 @@ describe('EmptyThreadIndicator', function () {
   thread.processShutdownTime = 10;
   thread.registerTime = 3;
   thread.unregisterTime = 9;
-  thread.samples.time = [5, 6, 7];
+  thread.samples.time = Float64Array.of(5, 6, 7);
 
   // Make it really easy to generate the component's props.
   function propsFromViewportRange(viewport: StartEndRange) {

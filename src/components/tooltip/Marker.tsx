@@ -580,8 +580,10 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-// This regexp is used to test for URLs and remove their scheme for display.
-const URL_SCHEME_REGEXP = /^http(s?):\/\//;
+// Matches a value that is *entirely* a single http(s) URL. We only render a
+// clickable link when the whole string is a URL, so a longer descriptive
+// string is never turned into a broken link.
+const URL_REGEXP = /^(https?:\/\/)\S+$/;
 
 /**
  * This function may return structured markup for some types suchs as table,
@@ -689,7 +691,8 @@ export function renderMarkerFieldValue(
         </ul>
       );
     case 'url': {
-      if (!URL_SCHEME_REGEXP.test(value)) {
+      const match = URL_REGEXP.exec(value);
+      if (!match) {
         return value;
       }
       return (
@@ -699,7 +702,7 @@ export function renderMarkerFieldValue(
           rel="noreferrer"
           className="marker-link-value"
         >
-          {value.replace(URL_SCHEME_REGEXP, '')}
+          {value.slice(match[1].length)}
         </a>
       );
     }
