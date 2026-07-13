@@ -65,7 +65,12 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType, FrameFlag } from 'firefox-profiler/types';
+import {
+  SelectedState,
+  ResourceType,
+  FrameFlag,
+  FuncFlag,
+} from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -290,7 +295,8 @@ describe('process-profile', function () {
       expect(shared.frameTable.address[22]).toEqual(0x1a45);
       expect(shared.frameTable.address[24]).toEqual(0xf84);
       expect(shared.frameTable.address[25]).toEqual(0xf84);
-      const funcTableNames = shared.funcTable.name.map(
+      const funcTableNames = Array.from(
+        shared.funcTable.name,
         (nameIndex) => shared.stringArray[nameIndex]
       );
       expect(funcTableNames[0]).toEqual('(root)');
@@ -895,7 +901,7 @@ describe('filter-by-implementation', function () {
     }
     const frameIndex = filteredThread.stackTable.frame[stackIndex];
     const funcIndex = filteredThread.frameTable.func[frameIndex];
-    return filteredThread.funcTable.isJS[funcIndex];
+    return (filteredThread.funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0;
   }
 
   it('will return the same thread if filtering to "all"', function () {

@@ -68,8 +68,9 @@
 
 import {
   finishRawFrameTableBuilder,
-  shallowCloneFuncTable,
+  finishRawFuncTableBuilder,
   getRawFrameTableBuilderWithExistingContents,
+  getRawFuncTableBuilderWithExistingContents,
   shallowCloneSourceLocationTable,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
@@ -91,14 +92,14 @@ import type { FunctionScope } from './source-map-scope-tree';
 import type {
   IndexIntoSourceTable,
   IndexIntoFuncTable,
+  RawFuncTable,
   IndexIntoFrameTable,
-  FuncTable,
   RawFrameTable,
   RawProfileSharedData,
   SourceLocationTable,
   SourceTable,
 } from '../types';
-import { FrameFlag } from '../types';
+import { FrameFlag, FuncFlag } from '../types';
 import type { NullableMappedPosition } from 'source-map';
 import type { SourceMapConsumer } from './source-map-store';
 import type {
@@ -135,7 +136,7 @@ type ParsedSource = {
 // tables from the current shared state at apply time.
 export type SourceMapSymbolicationInput = {
   frameTable: RawFrameTable;
-  funcTable: FuncTable;
+  funcTable: RawFuncTable;
   sourceLocationTable: SourceLocationTable;
   sources: SourceTable;
   stringArray: string[];
@@ -188,7 +189,7 @@ export function symbolicateWithSourceMaps(
  */
 function _identifyToSymbolicate(
   frameTable: RawFrameTable,
-  funcTable: FuncTable,
+  funcTable: RawFuncTable,
   sources: SourceTable
 ): {
   funcsToSymbolicate: IndexIntoFuncTable[];
@@ -211,10 +212,13 @@ function _identifyToSymbolicate(
       eligibility = _isFuncSymbolicable(funcIndex, funcTable, sources) ? 1 : 2;
       funcEligibility[funcIndex] = eligibility;
 
-      if (eligibility === 1 && funcTable.originalLocation[funcIndex] === null) {
-        const funcLine = funcTable.lineNumber[funcIndex];
-        const funcCol = funcTable.columnNumber[funcIndex];
-        if (funcLine !== null && funcCol !== null) {
+      if (eligibility === 1) {
+        const funcFlags = funcTable.flags[funcIndex];
+        if (
+          (funcFlags & FuncFlag.HasOriginalLocation) === 0 &&
+          (funcFlags & FuncFlag.HasLine) !== 0 &&
+          (funcFlags & FuncFlag.HasColumn) !== 0
+        ) {
           funcsToSymbolicate.push(funcIndex);
         }
       }
@@ -237,16 +241,14 @@ function _identifyToSymbolicate(
 
 function _isFuncSymbolicable(
   funcIndex: IndexIntoFuncTable,
-  funcTable: FuncTable,
+  funcTable: RawFuncTable,
   sources: SourceTable
 ): boolean {
-  if (!funcTable.isJS[funcIndex]) {
+  const flags = funcTable.flags[funcIndex];
+  if ((flags & FuncFlag.IsJS) === 0 || (flags & FuncFlag.HasSource) === 0) {
     return false;
   }
   const sourceIndex = funcTable.source[funcIndex];
-  if (sourceIndex === null) {
-    return false;
-  }
   return sources.sourceMapURL[sourceIndex] !== null;
 }
 
@@ -337,19 +339,19 @@ function _buildSourceMapSymbolicationResponse(
 
   // Function definitions. These get an original source file.
   for (const funcIndex of funcsToSymbolicate) {
-    const sourceIndex = funcTable.source[funcIndex];
-    if (sourceIndex === null) {
+    const funcFlags = funcTable.flags[funcIndex];
+    const requiredFlags =
+      FuncFlag.HasSource | FuncFlag.HasLine | FuncFlag.HasColumn;
+    if ((funcFlags & requiredFlags) !== requiredFlags) {
       continue;
     }
+    const sourceIndex = funcTable.source[funcIndex];
     const consumer = sourceMapStore.getConsumer(sourceIndex);
     if (consumer === null) {
       continue;
     }
     const line = funcTable.lineNumber[funcIndex];
     const column = funcTable.columnNumber[funcIndex];
-    if (line === null || column === null) {
-      continue;
-    }
     const remap = _remapPosition(
       consumer,
       line,
@@ -407,10 +409,11 @@ function _buildSourceMapSymbolicationResponse(
   // inlined code it may differ (e.g. a function from utils.ts inlined into
   // app.ts maps frames back to utils.ts).
   for (const frameIndex of framesToSymbolicate) {
-    const sourceIndex = funcTable.source[frameTable.func[frameIndex]];
-    if (sourceIndex === null) {
+    const funcIndex = frameTable.func[frameIndex];
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
       continue;
     }
+    const sourceIndex = funcTable.source[funcIndex];
     const consumer = sourceMapStore.getConsumer(sourceIndex);
     if (consumer === null) {
       continue;
@@ -956,7 +959,7 @@ export function applySourceMapSymbolicationResponse(
   shared: RawProfileSharedData,
   response: SourceMapSymbolicationResponse
 ): {
-  newFuncTable: FuncTable;
+  newFuncTable: RawFuncTable;
   newFrameTable: RawFrameTable;
   newSourceLocationTable: SourceLocationTable;
   newSources: SourceTable;
@@ -965,7 +968,7 @@ export function applySourceMapSymbolicationResponse(
   const { funcTable, frameTable, sourceLocationTable, sources, stringArray } =
     shared;
 
-  const newFuncTable = shallowCloneFuncTable(funcTable);
+  const newFuncTable = getRawFuncTableBuilderWithExistingContents(funcTable);
   const newFrameTable = getRawFrameTableBuilderWithExistingContents(frameTable);
   const newSourceLocationTable =
     shallowCloneSourceLocationTable(sourceLocationTable);
@@ -1006,7 +1009,7 @@ export function applySourceMapSymbolicationResponse(
     // A concurrent run got here first. Skip the whole entry: the row and
     // the name go together; writing a name without a sourceLocationTable row
     // would be inconsistent.
-    if (newFuncTable.originalLocation[funcIndex] !== null) {
+    if ((newFuncTable.flags[funcIndex] & FuncFlag.HasOriginalLocation) !== 0) {
       continue;
     }
     const sourceIndex = urlToSourceIndex.get(resolution.originalSource);
@@ -1019,6 +1022,7 @@ export function applySourceMapSymbolicationResponse(
     newSourceLocationTable.column.push(resolution.originalColumn);
     newSourceLocationTable.length++;
     newFuncTable.originalLocation[funcIndex] = rowIndex;
+    newFuncTable.flags[funcIndex] |= FuncFlag.HasOriginalLocation;
     if (resolution.name !== null) {
       newFuncTable.name[funcIndex] = stringTable.indexForString(
         resolution.name
@@ -1053,7 +1057,7 @@ export function applySourceMapSymbolicationResponse(
   }
 
   return {
-    newFuncTable,
+    newFuncTable: finishRawFuncTableBuilder(newFuncTable),
     newFrameTable: finishRawFrameTableBuilder(newFrameTable),
     newSourceLocationTable,
     newSources,

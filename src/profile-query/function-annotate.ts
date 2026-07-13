@@ -21,6 +21,7 @@ import {
   getNativeSymbolsForFunc,
   findAddressProofForFile,
   getOriginalPositionForFrame,
+  computeFuncTableFromRawFuncTable,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
@@ -33,6 +34,7 @@ import type {
   SamplesLikeTable,
   Thread,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import type {
   FunctionAnnotateResult,
   AnnotateMode,
@@ -81,8 +83,8 @@ async function fetchSourceAnnotation(
   contextOption: string
 ): Promise<SourceAnnotationResult> {
   const warnings: string[] = [];
-  const compiledSourceIndex = profile.shared.funcTable.source[funcIndex];
-  if (compiledSourceIndex === null) {
+  const rawFuncTable = profile.shared.funcTable;
+  if ((rawFuncTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
     if (mode === 'src') {
       warnings.push(
         `Function ${functionHandle} has no source index. Use --mode asm for assembly view.`
@@ -90,6 +92,7 @@ async function fetchSourceAnnotation(
     }
     return { annotation: null, warnings };
   }
+  const compiledSourceIndex = rawFuncTable.source[funcIndex];
 
   const {
     stackTable,
@@ -338,7 +341,8 @@ export async function functionAnnotate(
 ): Promise<FunctionAnnotateResult> {
   const state = store.getState();
   const profile = getProfile(state);
-  const { funcTable, stringArray, resourceTable } = profile.shared;
+  const { stringArray, resourceTable } = profile.shared;
+  const funcTable = computeFuncTableFromRawFuncTable(profile.shared.funcTable);
 
   const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
   const funcName = stringArray[funcTable.name[funcIndex]];

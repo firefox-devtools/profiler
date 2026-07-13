@@ -20,7 +20,6 @@ import type {
   ProcessType,
   PausedRange,
   RawMarkerTable,
-  FuncTable,
   ResourceTable,
   JsTracerTable,
   IndexIntoStackTable,
@@ -301,6 +300,27 @@ export type FrameTable = {
   innerWindowID: Float64Array<ArrayBuffer>;
   line: Int32Array<ArrayBuffer>;
   column: Int32Array<ArrayBuffer>;
+  originalLocation: Int32Array<ArrayBuffer>;
+  length: number;
+};
+
+/**
+ * The `FuncTable` type of the derived thread.
+ *
+ * Differs from `RawFuncTable` in that all columns are always stored as typed
+ * arrays. In `RawFuncTable`, these columns may be either regular arrays or
+ * typed arrays, since regular arrays are convenient during construction.
+ *
+ * See the comment on `RawFuncTable` for the semantics of the `flags` column
+ * and how it relates to the other columns.
+ */
+export type FuncTable = {
+  flags: Uint8Array<ArrayBuffer>;
+  name: Int32Array<ArrayBuffer>;
+  resource: Int32Array<ArrayBuffer>;
+  source: Int32Array<ArrayBuffer>;
+  lineNumber: Int32Array<ArrayBuffer>;
+  columnNumber: Int32Array<ArrayBuffer>;
   originalLocation: Int32Array<ArrayBuffer>;
   length: number;
 };

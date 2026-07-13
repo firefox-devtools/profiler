@@ -18,7 +18,7 @@ import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
-import { ResourceType, FrameFlag } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import { callTreeFromProfile, formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { addTransformToStack } from '../../actions/profile-view';
@@ -1051,7 +1051,9 @@ describe('mergeProfilesForDiffing with source tables', function () {
     sharedA.sourceLocationTable.column.push(22);
     sharedA.sourceLocationTable.length = 1;
     sharedA.funcTable.originalLocation[0] = 0;
+    sharedA.funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
     sharedA.frameTable.originalLocation[0] = 0;
+    sharedA.frameTable.flags[0] |= FrameFlag.HasOriginalLocation;
 
     const sharedB = profileB.profile.shared;
     sharedB.sourceLocationTable.source.push(0);
@@ -1059,7 +1061,9 @@ describe('mergeProfilesForDiffing with source tables', function () {
     sharedB.sourceLocationTable.column.push(44);
     sharedB.sourceLocationTable.length = 1;
     sharedB.funcTable.originalLocation[0] = 0;
+    sharedB.funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
     sharedB.frameTable.originalLocation[0] = 0;
+    sharedB.frameTable.flags[0] |= FrameFlag.HasOriginalLocation;
 
     const profileState = stateFromLocation({
       pathname: '/public/fakehash1/',
@@ -1098,10 +1102,14 @@ describe('mergeProfilesForDiffing with source tables', function () {
     expect(funcAIndex).toBeGreaterThanOrEqual(0);
     expect(funcBIndex).toBeGreaterThanOrEqual(0);
 
+    expect(funcTable.flags[funcAIndex] & FuncFlag.HasOriginalLocation).not.toBe(
+      0
+    );
+    expect(funcTable.flags[funcBIndex] & FuncFlag.HasOriginalLocation).not.toBe(
+      0
+    );
     const funcAOriginalLocationIdx = funcTable.originalLocation[funcAIndex];
     const funcBOriginalLocationIdx = funcTable.originalLocation[funcBIndex];
-    expect(funcAOriginalLocationIdx).not.toBeNull();
-    expect(funcBOriginalLocationIdx).not.toBeNull();
     expect(
       sourceLocationTable.line[ensureExists(funcAOriginalLocationIdx)]
     ).toBe(11);
@@ -1143,8 +1151,9 @@ describe('mergeProfilesForDiffing with source tables', function () {
     expect(sourceLocationTable.length).toBe(0);
     expect(funcTable.originalLocation).toHaveLength(funcTable.length);
     expect(frameTable.originalLocation).toHaveLength(frameTable.length);
-    for (const v of funcTable.originalLocation) {
-      expect(v).toBeNull();
+    // No HasOriginalLocation bits should be set on any func.
+    for (let i = 0; i < funcTable.length; i++) {
+      expect(funcTable.flags[i] & FuncFlag.HasOriginalLocation).toBe(0);
     }
     // On the frame table, no HasOriginalLocation bits should be set.
     for (let i = 0; i < frameTable.length; i++) {
