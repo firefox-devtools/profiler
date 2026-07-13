@@ -31,6 +31,7 @@ Run `profiler-cli --help` for the full options reference.
 ```bash
 profiler-cli load <PATH>                   # Start daemon and load profile (file or http/https URL)
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
+profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)

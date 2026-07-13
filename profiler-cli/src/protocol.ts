@@ -53,6 +53,7 @@ export type {
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
+  ProfileMetaResult,
   ProfileLogsResult,
   ThreadSelectResult,
   CounterSummary,
@@ -77,6 +78,7 @@ import type {
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -104,6 +106,10 @@ export type ClientCommand =
       subcommand: 'info' | 'threads';
       all?: boolean;
       search?: string;
+    }
+  | {
+      command: 'profile';
+      subcommand: 'meta';
     }
   | {
       command: 'profile';
@@ -203,6 +209,7 @@ export type CommandResult =
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
   | WithContext<ProfileInfoResult>
+  | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>
   | WithContext<ThreadSamplesTopDownResult>
   | WithContext<ThreadSamplesBottomUpResult>

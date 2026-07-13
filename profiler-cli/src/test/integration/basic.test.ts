@@ -18,6 +18,7 @@ import {
 
 import type {
   FilterStackResult,
+  ProfileMetaResult,
   SessionMetadata,
   StatusResult,
   ThreadSamplesResult,
@@ -69,6 +70,28 @@ describe('profiler-cli basic functionality', () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('This profile contains');
+  });
+
+  it('profile meta works after load', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cli(ctx, ['profile', 'meta']);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('Recording:');
+    expect(result.stdout).toContain('Sampling interval:');
+  });
+
+  it('profile meta --json returns typed structured output', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cli(ctx, ['profile', 'meta', '--json']);
+
+    expect(result.exitCode).toBe(0);
+    const meta = JSON.parse(result.stdout) as WithContext<ProfileMetaResult>;
+    expect(meta.type).toBe('profile-meta');
+    expect(typeof meta.product).toBe('string');
+    expect(typeof meta.interval).toBe('number');
   });
 
   it('thread select works immediately after load', async () => {

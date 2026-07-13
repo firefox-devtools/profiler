@@ -20,6 +20,7 @@ import type {
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -44,7 +45,10 @@ import type {
 } from './protocol';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
-import { formatTimestamp as formatDuration } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatTimestamp as formatDuration,
+  formatBytes,
+} from 'firefox-profiler/utils/format-numbers';
 
 // Maximum display width for function names in call-tree and sample views.
 const FUNC_NAME_WIDTH = 120;
@@ -471,6 +475,165 @@ Name: ${result.name}\n`;
   }
 
   return output;
+}
+
+function formatCpuCores(result: ProfileMetaResult): string | null {
+  const { physicalCPUs, logicalCPUs } = result;
+  if (physicalCPUs !== undefined && logicalCPUs !== undefined) {
+    return `${physicalCPUs} physical, ${logicalCPUs} logical cores`;
+  }
+  if (physicalCPUs !== undefined) {
+    return `${physicalCPUs} physical cores`;
+  }
+  if (logicalCPUs !== undefined) {
+    return `${logicalCPUs} logical cores`;
+  }
+  return null;
+}
+
+/**
+ * Format the sampling interval. Size profiles measure the "interval" in bytes,
+ * everything else in time.
+ */
+function formatInterval(result: ProfileMetaResult): string {
+  if (result.sampleUnits?.time === 'bytes') {
+    return formatBytes(result.interval);
+  }
+  return formatDuration(result.interval, 4, 1);
+}
+
+/**
+ * Format a ProfileMetaResult as plain text, grouped into the same sections the
+ * web UI's "Profile Info" panel uses. Absent fields (and empty sections) are
+ * skipped.
+ */
+export function formatProfileMetaResult(
+  result: WithContext<ProfileMetaResult>
+): string {
+  const blocks: string[] = [];
+  const pushSection = (heading: string, rows: string[]) => {
+    if (rows.length) {
+      blocks.push(`${heading}:\n` + rows.map((row) => `  ${row}`).join('\n'));
+    }
+  };
+
+  // ===== Recording =====
+  const recording: string[] = [];
+  if (result.startTimeFormatted) {
+    recording.push(`Started: ${result.startTimeFormatted}`);
+  }
+  if (result.durationMs !== undefined) {
+    recording.push(`Duration: ${formatDuration(result.durationMs)}`);
+  }
+  if (result.endTimeFormatted) {
+    recording.push(`Main process ended: ${result.endTimeFormatted}`);
+  }
+  recording.push(`Sampling interval: ${formatInterval(result)}`);
+  if (result.bufferCapacityBytes !== undefined) {
+    recording.push(
+      `Buffer capacity: ${formatBytes(result.bufferCapacityBytes, 0)}`
+    );
+  }
+  if (result.bufferDuration !== undefined) {
+    recording.push(`Buffer duration: ${result.bufferDuration}s`);
+  }
+  if (result.symbolicated !== undefined) {
+    recording.push(`Symbolicated: ${result.symbolicated ? 'yes' : 'no'}`);
+  }
+  if (result.features && result.features.length) {
+    recording.push(`Features: ${result.features.join(', ')}`);
+  }
+  if (result.threadsFilter && result.threadsFilter.length) {
+    recording.push(`Threads filter: ${result.threadsFilter.join(', ')}`);
+  }
+  pushSection('Recording', recording);
+
+  // ===== Application =====
+  const application: string[] = [];
+  if (result.productAndVersion) {
+    let name = result.productAndVersion;
+    if (result.appBuildID) {
+      name += ` (build ${result.appBuildID})`;
+    }
+    application.push(`Name: ${name}`);
+  } else if (result.appBuildID) {
+    application.push(`Build ID: ${result.appBuildID}`);
+  }
+  if (result.uptimeMs !== undefined) {
+    application.push(`Uptime: ${formatDuration(result.uptimeMs)}`);
+  }
+  if (result.updateChannel) {
+    application.push(`Update channel: ${result.updateChannel}`);
+  }
+  if (result.debug !== undefined) {
+    application.push(`Build type: ${result.debug ? 'debug' : 'opt'}`);
+  }
+  if (result.sourceURL) {
+    application.push(`Source URL: ${result.sourceURL}`);
+  }
+  if (result.arguments) {
+    application.push(`Arguments: ${result.arguments}`);
+  }
+  if (result.extensions && result.extensions.length) {
+    const names = result.extensions.map((ext) => ext.name).join(', ');
+    application.push(`Extensions (${result.extensions.length}): ${names}`);
+  }
+  pushSection('Application', application);
+
+  // ===== Platform =====
+  const platform: string[] = [];
+  if (result.device) {
+    platform.push(`Device: ${result.device}`);
+  }
+  if (result.platform) {
+    let os = result.platform;
+    if (result.abi) {
+      os += ` (${result.abi})`;
+    }
+    platform.push(`OS: ${os}`);
+  } else if (result.abi) {
+    platform.push(`ABI: ${result.abi}`);
+  }
+  const cpuCores = formatCpuCores(result);
+  if (result.cpuName) {
+    let cpu = result.cpuName;
+    if (cpuCores) {
+      cpu += ` (${cpuCores})`;
+    }
+    platform.push(`CPU: ${cpu}`);
+  } else if (cpuCores) {
+    platform.push(`CPU cores: ${cpuCores}`);
+  }
+  if (result.mainMemoryBytes !== undefined) {
+    platform.push(`Memory: ${formatBytes(result.mainMemoryBytes)}`);
+  }
+  pushSection('Platform', platform);
+
+  // ===== Import =====
+  const importInfo: string[] = [];
+  if (result.importedFrom) {
+    importInfo.push(`Imported from: ${result.importedFrom}`);
+  }
+  if (result.fileName) {
+    importInfo.push(`File name: ${result.fileName}`);
+  }
+  if (result.fileSize !== undefined) {
+    importInfo.push(`File size: ${formatBytes(result.fileSize)}`);
+  }
+  pushSection('Import', importInfo);
+
+  // ===== Extra =====
+  if (result.extra) {
+    for (const section of result.extra) {
+      const rows = section.entries.map(
+        (entry) => `${entry.label}: ${entry.formatted}`
+      );
+      pushSection(section.label, rows);
+    }
+  }
+
+  const contextHeader = formatContextHeader(result.context);
+  return `${contextHeader}\n\n${blocks.join('\n\n')}`;
 }
 
 function formatCounterStatInline(
