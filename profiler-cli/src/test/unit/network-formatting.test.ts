@@ -34,6 +34,7 @@ function makeRequest(
     url: 'https://example.com/resource',
     startTime: 0,
     duration: 100,
+    status: 'STATUS_STOP',
     incomplete: false,
     startedBeforeRecording: false,
     phases: {},
@@ -342,6 +343,25 @@ describe('formatThreadNetworkResult', function () {
     expect(formatThreadNetworkResult(startResult)).toContain('chronological');
   });
 
+  it('labels a redirect leg instead of showing "???"', function () {
+    const result = makeResult();
+    result.requests = [makeRequest({ status: 'STATUS_REDIRECT' })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('redirect');
+    expect(output).not.toContain('???');
+  });
+
+  it('labels a canceled leg instead of showing "???"', function () {
+    const result = makeResult();
+    result.requests = [makeRequest({ status: 'STATUS_CANCEL' })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('canceled');
+    expect(output).not.toContain('???');
+  });
 });
 
 function makeSummaryRequest(

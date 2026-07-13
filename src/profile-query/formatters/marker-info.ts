@@ -14,6 +14,9 @@ import {
   intervalUnionMs,
   peakConcurrency,
   classifyCache,
+  gatherNetworkRecords,
+  clampInterval,
+  clampedDurationMs,
 } from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
@@ -51,7 +54,6 @@ import type {
   ProfileLogsResult,
 } from '../types';
 import {
-  isNetworkMarker,
   LOG_LEVEL_STRING_TO_LETTER,
   LOG_LETTER_TO_LEVEL,
   formatLogTimestamp,
@@ -1164,70 +1166,53 @@ export function collectThreadNetwork(
 
   const threadSelectors = getThreadSelectors(threadIndexes);
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
-  const fullMarkerList = threadSelectors.getFullMarkerList(state);
-  const allMarkerIndexes = threadSelectors.getFullMarkerListIndexes(state);
   const range = getCommittedRange(state);
   const rangeDurationMs = range.end - range.start;
 
-  // The displayable request set is completed (STATUS_STOP) markers plus
-  // requests still in flight at the end (STATUS_START only, no stop event).
-  // "In flight at end" is keyed off the status, not the derived `incomplete`
-  // flag: that flag is also set for a STOP whose START predates the recording,
-  // which did complete and must not be miscounted as in flight.
-  const requestIndexes = allMarkerIndexes.filter((i) => {
-    const marker = fullMarkerList[i];
-    if (!isNetworkMarker(marker)) {
-      return false;
-    }
-    const status = (marker.data as NetworkPayload).status;
-    return status === 'STATUS_STOP' || status === 'STATUS_START';
-  });
-  const incompleteCount = requestIndexes.filter(
-    (i) => (fullMarkerList[i].data as NetworkPayload).status === 'STATUS_START'
-  ).length;
-  const totalRequestCount = requestIndexes.length - incompleteCount;
+  // Gather the derived network records through the shared helper, so this
+  // listing and the `profile info` / `thread info` summaries agree on what a
+  // request is: all legs intersecting the range, including redirect / cancel.
+  const [representativeIndex] = threadIndexes;
+  const records = gatherNetworkRecords(
+    state,
+    representativeIndex,
+    threadIndexes,
+    range
+  );
 
-  // In-range duration: a request can start before the range or end after it
-  // (requests still in flight at the recording end). Clamping keeps the
-  // reported duration from exceeding what the profile can show.
-  const durationOf = (markerIndex: MarkerIndex): number => {
-    const marker = fullMarkerList[markerIndex];
-    const start = Math.max(marker.start, range.start);
-    const end = Math.min(marker.end ?? marker.start, range.end);
-    return Math.max(0, end - start);
-  };
-
-  // Wall-clock: interval union and peak concurrency over all requests
-  // intersecting the range, independent of the display filters below.
-  const inFlightIntervals: Array<[number, number]> = [];
-  for (const i of requestIndexes) {
-    const marker = fullMarkerList[i];
-    const start = marker.start;
-    const end = marker.end ?? marker.start;
-    if (end < range.start || start > range.end) {
-      continue;
+  // Completed = STATUS_STOP; in flight = STATUS_START (no stop event). Redirect
+  // and cancel legs are listed but counted as neither; the formatter flags
+  // them so they aren't read as completed requests.
+  let totalRequestCount = 0;
+  let incompleteCount = 0;
+  for (const record of records) {
+    if (record.incomplete) {
+      incompleteCount++;
+    } else if (record.data.status === 'STATUS_STOP') {
+      totalRequestCount++;
     }
-    inFlightIntervals.push([
-      Math.max(start, range.start),
-      Math.min(end, range.end),
-    ]);
   }
+
+  // Wall-clock: interval union and peak concurrency over all records
+  // intersecting the range, independent of the display filters below.
+  const inFlightIntervals = records.map((record) =>
+    clampInterval(record, range)
+  );
   const inFlightMs = intervalUnionMs(inFlightIntervals);
 
   // Apply filters
-  let filteredIndexes = requestIndexes;
+  let filteredRecords = records;
 
   if (searchString) {
     const lowerSearch = searchString.toLowerCase();
-    filteredIndexes = filteredIndexes.filter((i) => {
-      const data = fullMarkerList[i].data as NetworkPayload;
-      return data.URI.toLowerCase().includes(lowerSearch);
-    });
+    filteredRecords = filteredRecords.filter((record) =>
+      record.data.URI.toLowerCase().includes(lowerSearch)
+    );
   }
 
   if (minDuration !== undefined || maxDuration !== undefined) {
-    filteredIndexes = filteredIndexes.filter((i) => {
-      const duration = durationOf(i);
+    filteredRecords = filteredRecords.filter((record) => {
+      const duration = clampedDurationMs(record, range);
       if (minDuration !== undefined && duration < minDuration) {
         return false;
       }
@@ -1238,7 +1223,7 @@ export function collectThreadNetwork(
     });
   }
 
-  const filteredRequestCount = filteredIndexes.length;
+  const filteredRequestCount = filteredRecords.length;
 
   // Accumulate summary stats across all filtered requests (before limit)
   const phaseTotals: NetworkPhaseTimings = {};
@@ -1246,8 +1231,8 @@ export function collectThreadNetwork(
   let cacheMiss = 0;
   let cacheUnknown = 0;
 
-  for (const i of filteredIndexes) {
-    const data = fullMarkerList[i].data as NetworkPayload;
+  for (const record of filteredRecords) {
+    const data = record.data;
     switch (classifyCache(data.cache)) {
       case 'hit':
         cacheHit++;
@@ -1283,42 +1268,42 @@ export function collectThreadNetwork(
 
   // Sort before applying the limit so a limited window shows the intended
   // requests (slowest by default; chronological with --sort start).
-  const sortedIndexes = filteredIndexes.slice();
+  const sortedRecords = filteredRecords.slice();
   if (sort === 'duration') {
-    sortedIndexes.sort((a, b) => durationOf(b) - durationOf(a));
-  } else {
-    sortedIndexes.sort(
-      (a, b) => fullMarkerList[a].start - fullMarkerList[b].start
+    sortedRecords.sort(
+      (a, b) => clampedDurationMs(b, range) - clampedDurationMs(a, range)
     );
+  } else {
+    sortedRecords.sort((a, b) => a.start - b.start);
   }
 
   // Apply limit after accumulating summary stats and sorting.
   // limit === 0 means "show all" (no limit).
-  const limitedIndexes =
+  const limitedRecords =
     limit !== undefined && limit > 0
-      ? sortedIndexes.slice(0, limit)
-      : sortedIndexes;
+      ? sortedRecords.slice(0, limit)
+      : sortedRecords;
 
   // Build per-request entries
-  const requests: NetworkRequestEntry[] = limitedIndexes.map((i) => {
-    const marker = fullMarkerList[i];
-    const data = marker.data as NetworkPayload;
-    const duration = durationOf(i);
-    const inFlight = data.status === 'STATUS_START';
+  const requests: NetworkRequestEntry[] = limitedRecords.map((record) => {
+    const data = record.data;
+    const duration = clampedDurationMs(record, range);
 
     return {
-      markerHandle: markerMap.handleForMarker(threadIndexes, i),
+      markerHandle: markerMap.handleForMarker(
+        record.threadIndexes,
+        record.markerIndex
+      ),
       url: data.URI,
       httpStatus: data.responseStatus,
       httpVersion: data.httpVersion,
       cacheStatus: data.cache,
       transferSizeKB: data.count !== undefined ? data.count / 1024 : undefined,
-      startTime: marker.start,
+      startTime: record.start,
       duration,
-      incomplete: inFlight,
-      // Completed request whose START predates the recording: the reported
-      // duration is a lower bound (clamped to the range).
-      startedBeforeRecording: marker.incomplete === true && !inFlight,
+      status: data.status,
+      incomplete: record.incomplete,
+      startedBeforeRecording: record.startedBeforeRecording,
       phases: buildNetworkPhases(data),
     };
   });

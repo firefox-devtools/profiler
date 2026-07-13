@@ -796,6 +796,70 @@ describe('collectThreadNetwork', function () {
     expect(result.requests[0].httpStatus).toBe(200);
   });
 
+  it('lists a redirect leg but does not count it as a completed request', function () {
+    // A redirect chain: the original channel (id 1) starts then redirects to a
+    // new channel (id 2) that completes. Gecko emits START(1) -> REDIRECT(1)
+    // and START(2) -> STOP(2), which derive to two separate markers.
+    const start1: TestDefinedMarker = [
+      'Load 1: https://example.com/from',
+      0,
+      1,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 0,
+        endTime: 1,
+        pri: 0,
+        status: 'STATUS_START',
+        URI: 'https://example.com/from',
+      },
+    ];
+    const redirect1: TestDefinedMarker = [
+      'Load 1: https://example.com/from',
+      1,
+      5,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 1,
+        endTime: 5,
+        pri: 0,
+        status: 'STATUS_REDIRECT',
+        URI: 'https://example.com/from',
+        RedirectURI: 'https://example.com/to',
+        redirectId: 2,
+      },
+    ];
+    const store = storeWithProfile(
+      getProfileWithMarkers([
+        start1,
+        redirect1,
+        ...getNetworkMarkers({
+          id: 2,
+          uri: 'https://example.com/to',
+          startTime: 5,
+          fetchStart: 6,
+          endTime: 20,
+        }),
+      ])
+    );
+    const threadMap = new ThreadMap();
+    threadMap.handleForThreadIndex(0);
+
+    const result = collectThreadNetwork(store, threadMap, new MarkerMap());
+
+    // Only the final STOP leg counts as a completed request.
+    expect(result.totalRequestCount).toBe(1);
+    expect(result.incompleteCount).toBe(0);
+    // But both legs are listed, so the redirect is visible for drill-down.
+    expect(result.requests).toHaveLength(2);
+    const redirectLeg = result.requests.find(
+      (r) => r.status === 'STATUS_REDIRECT'
+    );
+    expect(redirectLeg).toBeDefined();
+    expect(redirectLeg!.url).toBe('https://example.com/from');
+  });
+
   it('filters by searchString case-insensitively', function () {
     const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {

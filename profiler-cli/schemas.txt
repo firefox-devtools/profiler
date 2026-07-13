@@ -189,7 +189,8 @@ profiler-cli thread network --json
     },
     requests: [{
       markerHandle, url, httpStatus?, httpVersion?, cacheStatus?,
-      transferSizeKB?, startTime, duration, incomplete, startedBeforeRecording,
+      transferSizeKB?, startTime, duration, status,
+      incomplete, startedBeforeRecording,
       phases: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
     }],
     context: SessionContext

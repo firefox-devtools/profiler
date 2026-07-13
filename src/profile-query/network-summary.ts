@@ -29,7 +29,7 @@ type State = ReturnType<Store['getState']>;
 /**
  * One derived network marker, resolved to absolute times and a handle.
  */
-type NetworkRecord = {
+export type NetworkRecord = {
   threadIndex: ThreadIndex;
   threadIndexes: Set<ThreadIndex>;
   markerIndex: MarkerIndex;
@@ -86,7 +86,7 @@ function threadHasRawNetworkMarker(
  * Gather the derived network markers for a thread set that intersect `range`.
  * Times are absolute (same scale as `range`); intervals are clamped by callers.
  */
-function gatherNetworkRecords(
+export function gatherNetworkRecords(
   state: State,
   threadIndex: ThreadIndex,
   threadIndexes: Set<ThreadIndex>,
@@ -179,7 +179,7 @@ export function peakConcurrency(intervals: Array<[number, number]>): number {
 /**
  * Clamp a record's interval to the range.
  */
-function clampInterval(
+export function clampInterval(
   record: NetworkRecord,
   range: StartEndRange
 ): [number, number] {
@@ -191,7 +191,7 @@ function clampInterval(
  * after it; clamping keeps the reported duration from exceeding what the
  * profile can actually show.
  */
-function clampedDurationMs(
+export function clampedDurationMs(
   record: NetworkRecord,
   range: StartEndRange
 ): number {

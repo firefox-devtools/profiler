@@ -440,6 +440,10 @@ export type NetworkRequestEntry = {
   transferSizeKB?: number;
   startTime: number;
   duration: number;
+  // The derived marker's status. STATUS_REDIRECT / STATUS_CANCEL legs are
+  // listed alongside completed requests but flagged so they aren't mistaken
+  // for them.
+  status: NetworkStatus;
   // True when the request was still in flight when the recording stopped
   // (only a START event, no stop); its duration is measured until the end of
   // the recording.

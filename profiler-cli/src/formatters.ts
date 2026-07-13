@@ -1510,6 +1510,10 @@ export function formatThreadNetworkResult(
     let status: string;
     if (req.incomplete) {
       status = 'in flight';
+    } else if (req.status === 'STATUS_REDIRECT') {
+      status = 'redirect';
+    } else if (req.status === 'STATUS_CANCEL') {
+      status = 'canceled';
     } else if (req.httpStatus !== undefined) {
       status = String(req.httpStatus);
     } else {
