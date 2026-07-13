@@ -257,7 +257,7 @@ describe('mergeProfilesForDiffing function', function () {
       ],
       address: [0x20, 0x50],
       libIndex: [0, 0],
-      functionSize: [null, null],
+      functionSize: [-1, -1],
     };
 
     sampleProfileB.profile.shared.nativeSymbols = {
@@ -268,7 +268,7 @@ describe('mergeProfilesForDiffing function', function () {
       ],
       address: [0x25, 0x45],
       libIndex: [0, 0],
-      functionSize: [null, null],
+      functionSize: [-1, -1],
     };
 
     const profileState = stateFromLocation({
@@ -283,7 +283,9 @@ describe('mergeProfilesForDiffing function', function () {
 
     // The merged profile has a single merged libs list, so the native symbols
     // should now be merged with updated libIndexes.
-    expect(mergedProfile.shared.nativeSymbols.libIndex).toEqual([0, 0, 1, 1]);
+    expect([...mergedProfile.shared.nativeSymbols.libIndex]).toEqual([
+      0, 0, 1, 1,
+    ]);
   });
 
   it('should use marker timing if there are no samples', () => {

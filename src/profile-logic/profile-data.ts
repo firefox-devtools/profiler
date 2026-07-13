@@ -59,6 +59,7 @@ import type {
   FrameTable,
   FuncTable,
   NativeSymbolTable,
+  RawNativeSymbolTable,
   ResourceTable,
   CategoryList,
   IndexIntoCategoryList,
@@ -4616,20 +4617,22 @@ export function getNativeSymbolInfo(
   frameTable: FrameTable,
   stringTable: StringTable
 ): NativeSymbolInfo {
-  const functionSizeOrNull = nativeSymbols.functionSize[nativeSymbol];
-  const functionSize =
-    functionSizeOrNull ??
-    calculateFunctionSizeLowerBound(
-      frameTable,
-      nativeSymbols.address[nativeSymbol],
-      nativeSymbol
-    );
+  // `-1` is the sentinel for "size unknown" in the derived table.
+  const rawFunctionSize = nativeSymbols.functionSize[nativeSymbol];
+  const functionSizeIsKnown = rawFunctionSize !== -1;
+  const functionSize = functionSizeIsKnown
+    ? rawFunctionSize
+    : calculateFunctionSizeLowerBound(
+        frameTable,
+        nativeSymbols.address[nativeSymbol],
+        nativeSymbol
+      );
   return {
     libIndex: nativeSymbols.libIndex[nativeSymbol],
     address: nativeSymbols.address[nativeSymbol],
     name: stringTable.getString(nativeSymbols.name[nativeSymbol]),
     functionSize,
-    functionSizeIsKnown: functionSizeOrNull !== null,
+    functionSizeIsKnown,
   };
 }
 
@@ -4794,6 +4797,18 @@ export function computeFrameTableFromRawFrameTable(
     column: toInt32Array(rawFrameTable.column),
     originalLocation: toInt32Array(rawFrameTable.originalLocation),
     length: rawFrameTable.length,
+  };
+}
+
+export function computeNativeSymbolTableFromRawNativeSymbolTable(
+  raw: RawNativeSymbolTable
+): NativeSymbolTable {
+  return {
+    libIndex: toInt32Array(raw.libIndex),
+    address: toUint32Array(raw.address),
+    name: toInt32Array(raw.name),
+    functionSize: toInt32Array(raw.functionSize),
+    length: raw.length,
   };
 }
 

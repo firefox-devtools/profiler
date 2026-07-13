@@ -3433,6 +3433,33 @@ const _upgraders: {
       frameTable.address = new Uint32Array(frameTable.address);
     }
   },
+  [72]: (profile: any) => {
+    // The columns of the native symbol table (`profile.shared.nativeSymbols`)
+    // can now optionally be stored as typed arrays:
+    //  - `libIndex` (`Int32Array`)
+    //  - `address` (`Int32Array`)
+    //  - `name` (`Int32Array`)
+    //  - `functionSize` (`Int32Array`).
+    //
+    // Regular JS / JSON arrays are still accepted.
+    //
+    // For `functionSize`, the sentinel for "size unknown" is now `-1`.
+    //
+    // This upgrader also removes any `null` values in the `address` column;
+    // the `address` column never allowed null according to the type, but the
+    // upgrader for version 36 inserted null in some cases, so we fix it here.
+    const { nativeSymbols } = profile.shared;
+    for (let i = 0; i < nativeSymbols.length; i++) {
+      // null -> -1 for functionSize:
+      if (nativeSymbols.functionSize[i] === null) {
+        nativeSymbols.functionSize[i] = -1;
+      }
+      // null -> 0 for address (null was never valid but the 36 upgrader used it)
+      if (nativeSymbols.address[i] === null) {
+        nativeSymbols.address[i] = 0;
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

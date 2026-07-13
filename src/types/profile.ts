@@ -441,16 +441,19 @@ export type FuncTable = {
  * considered a "symbol table" - normally, a "symbol table" is something that
  * contains *all* symbols of a given library. But this table only contains a
  * subset of those symbols, and mixes symbols from multiple libraries.
+ *
+ * Each column may be stored as a regular array or as a typed array.
  */
-export type NativeSymbolTable = {
+export type RawNativeSymbolTable = {
   // The library that this native symbol is in.
-  libIndex: Array<IndexIntoLibs>;
+  libIndex: Array<IndexIntoLibs> | Int32Array<ArrayBuffer>;
   // The library-relative offset of this symbol.
-  address: Array<Address>;
+  address: Array<Address> | Uint32Array<ArrayBuffer>;
   // The symbol name, demangled.
-  name: Array<IndexIntoStringTable>;
-  // The size of the function's machine code (if known), in bytes.
-  functionSize: Array<Bytes | null>;
+  name: Array<IndexIntoStringTable> | Int32Array<ArrayBuffer>;
+  // The size of the function's machine code, in bytes.
+  // The sentinel `-1` means "size unknown".
+  functionSize: Array<Bytes | -1> | Int32Array<ArrayBuffer>;
 
   length: number;
 };
@@ -1152,7 +1155,7 @@ export type RawProfileSharedData = {
   frameTable: RawFrameTable;
   funcTable: FuncTable;
   resourceTable: ResourceTable;
-  nativeSymbols: NativeSymbolTable;
+  nativeSymbols: RawNativeSymbolTable;
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringArray: string[];
