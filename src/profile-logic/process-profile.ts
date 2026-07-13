@@ -49,6 +49,7 @@ import {
 import {
   getFriendlyThreadName,
   nudgeReturnAddresses,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   subcategoriesNeedSixteenBits,
 } from '../profile-logic/profile-data';
 import {
@@ -2160,7 +2161,7 @@ function convertSharedTablesEligibleColumns(
   shared: RawProfileSharedData,
   categories: CategoryList | undefined
 ): RawProfileSharedData {
-  const { stackTable, frameTable } = shared;
+  const { stackTable, frameTable, nativeSymbols } = shared;
   return {
     ...shared,
     stackTable: {
@@ -2185,6 +2186,8 @@ function convertSharedTablesEligibleColumns(
       column: toInt32Array(frameTable.column),
       originalLocation: toInt32Array(frameTable.originalLocation),
     },
+    nativeSymbols:
+      computeNativeSymbolTableFromRawNativeSymbolTable(nativeSymbols),
   };
 }
 

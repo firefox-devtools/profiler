@@ -137,6 +137,8 @@ describe('upgrading processed profiles', function () {
   });
 
   it('adds PII categories to marker schema fields', function () {
+    // TODO: This profile isn't a valid 71 profile so this test will probably
+    // fail as we add more upgraders, see #6320.
     const profile: any = {
       meta: {
         preprocessedProfileVersion: 71,
@@ -151,6 +153,15 @@ describe('upgrading processed profiles', function () {
             fields: [{ key: 'prefValue', format: 'string' }],
           },
         ],
+      },
+      shared: {
+        nativeSymbols: {
+          libIndex: [],
+          address: [],
+          name: [],
+          functionSize: [],
+          length: 0,
+        },
       },
       threads: [],
     };
