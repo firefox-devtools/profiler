@@ -220,7 +220,11 @@ export class ProfileQuerier {
   }
 
   async counterList(): Promise<WithContext<CounterListResult>> {
-    const result = collectCounterList(this._store, this._threadMap);
+    const result = collectCounterList(
+      this._store,
+      this._threadMap,
+      this._processIndexMap
+    );
     return { ...result, context: this._getContext() };
   }
 
@@ -230,6 +234,7 @@ export class ProfileQuerier {
     const result = collectCounterInfo(
       this._store,
       this._threadMap,
+      this._processIndexMap,
       this._timestampManager,
       counterHandle
     );

@@ -2,6 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import type { RawThread } from 'firefox-profiler/types';
+
+/** The display name of the process a thread belongs to. */
+export function getProcessName(thread: RawThread): string {
+  return thread.processName || thread.processType || 'unknown';
+}
+
 export type ThreadInfo = {
   threadIndex: number;
   name: string;

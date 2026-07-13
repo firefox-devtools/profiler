@@ -34,6 +34,8 @@ function makeCounter(overrides: Partial<CounterSummary> = {}): CounterSummary {
     graphType: 'line-accumulated',
     color: 'orange',
     pid: '123',
+    processIndex: 0,
+    processName: 'Parent Process',
     mainThreadIndex: 0,
     mainThreadHandle: 't-0',
     mainThreadName: 'GeckoMain',
@@ -64,6 +66,10 @@ describe('formatCounterListResult', function () {
           label: 'Bandwidth',
           category: 'Bandwidth',
           graphType: 'line-rate',
+          processIndex: 3,
+          processName: 'Isolated Web Content',
+          etld1: 'example.com',
+          pid: '456',
           stats: [
             {
               source: 'count-range',
@@ -78,10 +84,14 @@ describe('formatCounterListResult', function () {
 
     const output = formatCounterListResult(result);
     expect(output).toContain('Counters (2):');
-    expect(output).toContain('c-0: Memory (Memory)');
+    expect(output).toContain(
+      'c-0: Memory (Memory) [p-0 Parent Process, pid 123]'
+    );
     expect(output).toContain('memory range in graph: 27B');
     expect(output).toContain('[7 samples]');
-    expect(output).toContain('c-1: Bandwidth (Bandwidth)');
+    expect(output).toContain(
+      'c-1: Bandwidth (Bandwidth) [p-3 Isolated Web Content (example.com), pid 456]'
+    );
     expect(output).toContain('Data transferred in the visible range: 2KB');
   });
 
@@ -180,6 +190,7 @@ describe('formatCounterInfoResult', function () {
     expect(output).toContain('Category: Memory');
     expect(output).toContain('Unit: bytes');
     expect(output).toContain('Graph type: line-accumulated');
+    expect(output).toContain('Process: p-0 Parent Process [pid 123]');
     expect(output).toContain('Main thread: t-0 (GeckoMain)');
     expect(output).toContain('Description: Amount of allocated memory');
     expect(output).toContain('memory range in graph: 27B');

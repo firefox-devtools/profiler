@@ -699,6 +699,9 @@ export type CounterSummary = {
   graphType: CounterGraphType;
   color: string;
   pid: string;
+  processIndex: number;
+  processName: string; // e.g. "Parent Process"
+  etld1?: string; // eTLD+1 of an isolated content process, when known
   mainThreadIndex: number;
   mainThreadHandle: string; // e.g. "t-0"
   mainThreadName: string;

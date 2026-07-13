@@ -370,12 +370,15 @@ describe('ProfileQuerier', function () {
     }
 
     it('counterList returns a schema-driven summary per counter', async function () {
-      const { profile } = profileWithMemoryCounter();
+      const { profile, counter } = profileWithMemoryCounter();
       const result = await querierFor(profile).counterList();
 
       expect(result.counters).toHaveLength(1);
       expect(result.counters[0].counterHandle).toBe('c-0');
       expect(result.counters[0].label).toBe('Memory');
+      expect(result.counters[0].pid).toBe(counter.pid);
+      expect(result.counters[0].processIndex).toBeGreaterThanOrEqual(0);
+      expect(result.counters[0].processName).toBeTruthy();
       expect(
         result.counters[0].stats.some((s) => s.source === 'count-range')
       ).toBe(true);
