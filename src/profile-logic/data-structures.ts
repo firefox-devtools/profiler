@@ -147,37 +147,37 @@ export function getRawStackTableBuilder(): RawStackTableBuilder {
   };
 }
 
-/**
- * Return a `RawSamplesTableBuilder` view of an existing samples table. If the
- * table's time / timeDeltas columns are already plain arrays, they are aliased
- * through so that in-place mutations on the builder are visible via the
- * returned reference. If they are typed arrays (only produced by the JSLB
- * loader), they are copied into plain arrays.
- *
- * The returned builder shares object identity with `existing` in the common
- * (plain-array) case, so callers do not need to reassign it back onto the
- * thread. In the typed-array case a new object is returned; callers should
- * reassign it (`thread.samples = builder`) to preserve mutations.
- */
 export function getRawSamplesTableBuilderFromExisting(
   existing: RawSamplesTable
 ): RawSamplesTableBuilder {
-  const time = existing.time;
-  const timeDeltas = existing.timeDeltas;
-  if (
-    (time === undefined || Array.isArray(time)) &&
-    (timeDeltas === undefined || Array.isArray(timeDeltas))
-  ) {
-    return existing as RawSamplesTableBuilder;
-  }
-  return {
-    ...existing,
-    time: time === undefined || Array.isArray(time) ? time : Array.from(time),
-    timeDeltas:
-      timeDeltas === undefined || Array.isArray(timeDeltas)
-        ? timeDeltas
-        : Array.from(timeDeltas),
+  const builder: RawSamplesTableBuilder = {
+    stack: existing.stack.slice(),
+    weight: existing.weight === null ? null : existing.weight.slice(),
+    weightType: existing.weightType,
+    length: existing.length,
   };
+  if (existing.responsiveness !== undefined) {
+    builder.responsiveness = existing.responsiveness.slice();
+  }
+  if (existing.eventDelay !== undefined) {
+    builder.eventDelay = existing.eventDelay.slice();
+  }
+  if (existing.time !== undefined) {
+    builder.time = Array.from(existing.time);
+  }
+  if (existing.timeDeltas !== undefined) {
+    builder.timeDeltas = Array.from(existing.timeDeltas);
+  }
+  if (existing.argumentValues !== undefined) {
+    builder.argumentValues = existing.argumentValues.slice();
+  }
+  if (existing.threadCPUDelta !== undefined) {
+    builder.threadCPUDelta = existing.threadCPUDelta.slice();
+  }
+  if (existing.threadId !== undefined) {
+    builder.threadId = existing.threadId.slice();
+  }
+  return builder;
 }
 
 export function finishRawSamplesTableBuilder(
