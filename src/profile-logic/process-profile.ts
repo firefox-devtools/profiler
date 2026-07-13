@@ -47,6 +47,11 @@ import {
   getFriendlyThreadName,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
+import {
+  toInt32Array,
+  toUint8Array,
+  toFloat64Array,
+} from '../utils/typed-arrays';
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
@@ -109,6 +114,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoFrameTable,
   CounterDisplayConfig,
+  RawProfileSharedData,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
@@ -2056,6 +2062,90 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
  */
 export function serializeProfileToJsonString(profile: Profile): string {
   return jsonEncodeObjectWithTypedArraysAsRegularArrays(profile);
+}
+
+/**
+ * Convert all columns of a profile which are eligible to be stored as typed
+ * arrays into typed arrays.
+ *
+ * This is useful if the profile will be saved as a JSLB file:
+ * `serializeProfileToJsonSlabsFile` will be able to store these columns as binary
+ * slabs instead of as JSON arrays, which speeds up both the saving and the loading
+ * of the file.
+ *
+ * Does not mutate the input profile.
+ */
+export function optimizeProfileForStorage(profile: Profile): Profile {
+  return {
+    ...profile,
+    shared: convertSharedTablesEligibleColumns(profile.shared),
+    threads: profile.threads.map(convertThreadEligibleColumns),
+    counters: profile.counters?.map(convertCounterEligibleColumns),
+  };
+}
+
+function convertSharedTablesEligibleColumns(
+  shared: RawProfileSharedData
+): RawProfileSharedData {
+  const { stackTable, frameTable } = shared;
+  return {
+    ...shared,
+    stackTable: {
+      frame: toInt32Array(stackTable.frame),
+      prefixOffset: toInt32Array(stackTable.prefixOffset),
+      length: stackTable.length,
+    },
+    frameTable: {
+      ...frameTable,
+      address: toInt32Array(frameTable.address),
+      inlineDepth: toUint8Array(frameTable.inlineDepth),
+      func: toInt32Array(frameTable.func),
+    },
+  };
+}
+
+function convertThreadEligibleColumns(thread: RawThread): RawThread {
+  const newThread: RawThread = {
+    ...thread,
+    samples: convertSamplesTimesToTypedArrays(thread.samples),
+  };
+  if (thread.jsAllocations !== undefined) {
+    newThread.jsAllocations = {
+      ...thread.jsAllocations,
+      time: toFloat64Array(thread.jsAllocations.time),
+    };
+  }
+  if (thread.nativeAllocations !== undefined) {
+    newThread.nativeAllocations = {
+      ...thread.nativeAllocations,
+      time: toFloat64Array(thread.nativeAllocations.time),
+    };
+  }
+  return newThread;
+}
+
+function convertSamplesTimesToTypedArrays(
+  samples: RawSamplesTable
+): RawSamplesTable {
+  const result = { ...samples };
+  if (samples.time !== undefined) {
+    result.time = toFloat64Array(samples.time);
+  }
+  if (samples.timeDeltas !== undefined) {
+    result.timeDeltas = toFloat64Array(samples.timeDeltas);
+  }
+  return result;
+}
+
+function convertCounterEligibleColumns(counter: RawCounter): RawCounter {
+  const samples: RawCounterSamplesTable = { ...counter.samples };
+  if (counter.samples.time !== undefined) {
+    samples.time = toFloat64Array(counter.samples.time);
+  }
+  if (counter.samples.timeDeltas !== undefined) {
+    samples.timeDeltas = toFloat64Array(counter.samples.timeDeltas);
+  }
+  return { ...counter, samples };
 }
 
 /**

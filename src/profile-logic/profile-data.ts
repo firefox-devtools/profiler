@@ -111,6 +111,11 @@ import type {
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import {
+  toFloat64Array,
+  toInt32Array,
+  toUint8Array,
+} from 'firefox-profiler/utils/typed-arrays';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1944,7 +1949,7 @@ export function computeTimeColumnForRawSamplesTable(
 ): Float64Array<ArrayBuffer> {
   const { time, timeDeltas } = samples;
   if (time !== undefined) {
-    return time instanceof Float64Array ? time : new Float64Array(time);
+    return toFloat64Array(time);
   }
   return numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
@@ -2793,8 +2798,7 @@ export function computeJsAllocationsTableFromRawJsAllocationsTable(
   raw: RawJsAllocationsTable
 ): JsAllocationsTable {
   return {
-    time:
-      raw.time instanceof Float64Array ? raw.time : new Float64Array(raw.time),
+    time: toFloat64Array(raw.time),
     className: raw.className,
     typeName: raw.typeName,
     coarseType: raw.coarseType,
@@ -2809,8 +2813,7 @@ export function computeJsAllocationsTableFromRawJsAllocationsTable(
 export function computeNativeAllocationsTableFromRawNativeAllocationsTable(
   raw: RawNativeAllocationsTable
 ): NativeAllocationsTable {
-  const time =
-    raw.time instanceof Float64Array ? raw.time : new Float64Array(raw.time);
+  const time = toFloat64Array(raw.time);
   if ('memoryAddress' in raw) {
     return {
       time,
@@ -4784,18 +4787,9 @@ export function computeTabToThreadIndexesMap(
 export function computeFrameTableFromRawFrameTable(
   rawFrameTable: RawFrameTable
 ): FrameTable {
-  const address =
-    rawFrameTable.address instanceof Int32Array
-      ? rawFrameTable.address
-      : new Int32Array(rawFrameTable.address);
-  const inlineDepth =
-    rawFrameTable.inlineDepth instanceof Uint8Array
-      ? rawFrameTable.inlineDepth
-      : new Uint8Array(rawFrameTable.inlineDepth);
-  const func =
-    rawFrameTable.func instanceof Int32Array
-      ? rawFrameTable.func
-      : new Int32Array(rawFrameTable.func);
+  const address = toInt32Array(rawFrameTable.address);
+  const inlineDepth = toUint8Array(rawFrameTable.inlineDepth);
+  const func = toInt32Array(rawFrameTable.func);
   return {
     address,
     inlineDepth,
@@ -4863,10 +4857,7 @@ export function computeStackTableFromRawStackTable(
   }
 
   // The frame column is a typed array in the derived stack table.
-  const frame =
-    rawStackTable.frame instanceof Int32Array
-      ? rawStackTable.frame
-      : new Int32Array(rawStackTable.frame);
+  const frame = toInt32Array(rawStackTable.frame);
 
   return {
     frame,
