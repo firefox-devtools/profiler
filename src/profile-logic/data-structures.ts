@@ -174,9 +174,6 @@ export function getRawSamplesTableBuilderFromExisting(
   if (existing.threadCPUDelta !== undefined) {
     builder.threadCPUDelta = existing.threadCPUDelta.slice();
   }
-  if (existing.threadId !== undefined) {
-    builder.threadId = existing.threadId.slice();
-  }
   return builder;
 }
 
