@@ -230,6 +230,7 @@ export class ProfileQuerier {
     const result = collectCounterInfo(
       this._store,
       this._threadMap,
+      this._timestampManager,
       counterHandle
     );
     return { ...result, context: this._getContext() };

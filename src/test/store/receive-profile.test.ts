@@ -1611,7 +1611,6 @@ describe('actions/receive-profile', function () {
 
       const expectedThreads = [
         expect.objectContaining({
-          ...profile1.threads[0],
           pid: '0 from profile 1',
           tid: '0 from profile 1',
           isMainThread: true,

@@ -2,10 +2,14 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  getEmptySamplesTableWithEventDelay,
+  getRawSamplesTableBuilderWithEventDelay,
   getEmptyRawMarkerTable,
+  finishRawFrameTableBuilder,
+  finishRawSamplesTableBuilder,
   finishRawStackTableBuilder,
   getRawStackTableBuilderWithExistingContents,
+  getRawFrameTableBuilderWithExistingContents,
+  type RawSamplesTableBuilder,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/types';
@@ -501,8 +505,8 @@ export function convertJsTracerToThreadWithoutSamples(
   thread: RawThread;
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
 } {
-  const samples: RawSamplesTable = {
-    ...getEmptySamplesTableWithEventDelay(),
+  const samples: RawSamplesTableBuilder = {
+    ...getRawSamplesTableBuilderWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
   };
@@ -514,7 +518,10 @@ export function convertJsTracerToThreadWithoutSamples(
     samples,
   };
 
-  const { funcTable, frameTable } = shared;
+  const { funcTable } = shared;
+  const frameTable = getRawFrameTableBuilderWithExistingContents(
+    shared.frameTable
+  );
   const stackTable = getRawStackTableBuilderWithExistingContents(
     shared.stackTable
   );
@@ -625,8 +632,10 @@ export function convertJsTracerToThreadWithoutSamples(
     unmatchedEventEnds[unmatchedIndex] = end;
   }
 
-  // Write the augmented stackTable back to the shared data.
+  // Write the augmented stackTable and frameTable back to the shared data.
   shared.stackTable = finishRawStackTableBuilder(stackTable);
+  shared.frameTable = finishRawFrameTableBuilder(frameTable);
+  thread.samples = finishRawSamplesTableBuilder(samples);
 
   return { thread, stackMap };
 }
@@ -798,7 +807,7 @@ export function getSelfTimeSamplesFromJsTracer(
   const isNearlyEqual = (a: number, b: number) => Math.abs(a - b) < epsilon;
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
-  const samples = getEmptySamplesTableWithEventDelay();
+  const samples = getRawSamplesTableBuilderWithEventDelay();
   const sampleWeights: number[] = [];
   samples.weight = sampleWeights;
 
@@ -1003,5 +1012,5 @@ export function getSelfTimeSamplesFromJsTracer(
     );
   }
 
-  return samples;
+  return finishRawSamplesTableBuilder(samples);
 }
