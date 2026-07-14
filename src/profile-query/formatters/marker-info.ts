@@ -1136,6 +1136,7 @@ function buildNetworkPhases(data: NetworkPayload): NetworkPhaseTimings {
 export function collectThreadNetwork(
   store: Store,
   threadMap: ThreadMap,
+  markerMap: MarkerMap,
   threadHandle?: string,
   filterOptions: {
     searchString?: string;
@@ -1253,6 +1254,7 @@ export function collectThreadNetwork(
     const duration = data.endTime - data.startTime;
 
     return {
+      markerHandle: markerMap.handleForMarker(threadIndexes, i),
       url: data.URI,
       httpStatus: data.responseStatus,
       httpVersion: data.httpVersion,
