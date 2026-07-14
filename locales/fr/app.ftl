@@ -81,6 +81,15 @@ CallNodeContextMenu--transform-focus-function = Focus sur la fonction
 CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (inversé)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title = Le focus sur « soi-même » fonctionne comme le focus sur une fonction, mais ne conserve que les échantillons qui contribuent directement à l’exécution propre de la fonction. Les échantillons provenant des fonctions appelées sont ignorés, et l’arbre d’appels est recentré sur la fonction ciblée.
+CallNodeContextMenu--transform-focus-self = Focus sur soi-même uniquement
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
 ##
 
 CallNodeContextMenu--transform-focus-subtree = Focus sur le sous-arbre uniquement
@@ -523,6 +532,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitée
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nom et version :
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Disponibilité :
 MenuButtons--metaInfo--update-channel = Canal de mise à jour :
 MenuButtons--metaInfo--build-id = Identifiant de compilation :
 MenuButtons--metaInfo--build-type = Type de compilation :
@@ -799,6 +810,32 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = Masquer le processus
 
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = mémoire relative à ce moment-là
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = plage de mémoire dans le graphique
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allocations et désallocations depuis l‘échantillon précédent
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = Processeur
+
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
@@ -844,6 +881,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
     .label = Puissance moyenne pour la sélection actuelle
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
+    .label = Énergie moyenne dans la sélection actuelle
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:
@@ -978,6 +1020,12 @@ TransformNavigator--focus-subtree = Focus sur le nœud : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus : { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Focus sur soi-même : { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
