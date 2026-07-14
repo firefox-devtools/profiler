@@ -1053,6 +1053,7 @@ export class ProfileQuerier {
     const result = collectThreadNetwork(
       this._store,
       this._threadMap,
+      this._markerMap,
       threadHandle,
       filterOptions
     );
