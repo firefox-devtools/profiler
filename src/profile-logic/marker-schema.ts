@@ -98,6 +98,42 @@ export function getSchemaFromMarker(
   return schemaName ? (markerSchemaByName[schemaName] ?? null) : null;
 }
 
+/**
+ * Returns the value of a marker payload field. For fields declared as
+ * `unique-string` / `flow-id` / `terminating-flow-id` in the schema, the
+ * string-table index is dereferenced. Other formats — and fields not declared
+ * in the schema, or callers passing no schema — return the raw payload value.
+ * Returns undefined if the field isn't present on the marker, or if a
+ * unique-string field's value isn't a valid index into the string table.
+ */
+export function getMarkerFieldValue(
+  markerData: MarkerPayload | null,
+  fieldKey: string,
+  markerSchema: MarkerSchema | null,
+  stringTable: StringTable
+): unknown {
+  if (!markerData) {
+    return undefined;
+  }
+  const value = (markerData as any)[fieldKey];
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const field = markerSchema?.fields.find((f) => f.key === fieldKey);
+  if (
+    field &&
+    (field.format === 'unique-string' ||
+      field.format === 'flow-id' ||
+      field.format === 'terminating-flow-id')
+  ) {
+    if (typeof value !== 'number' || !stringTable.hasIndex(value)) {
+      return undefined;
+    }
+    return stringTable.getString(value);
+  }
+  return value;
+}
+
 // Matches ternary expressions inside marker labels, ie {marker.data.field ? 'truthy' : 'falsy'}
 const TERNARY_RE = /^\s*([\w.]+)\s*\?\s*'([^']*)'\s*:\s*'([^']*)'\s*$/;
 
@@ -633,34 +669,16 @@ export function markerPayloadMatchesSearch(
 
   // Check if fields match the search regular expression.
   for (const payloadField of markerSchema.fields) {
-    let value = (data as any)[payloadField.key];
-    if (value === undefined || value === null) {
-      // The value is missing, but this is OK, values are optional.
+    const value = getMarkerFieldValue(
+      data,
+      payloadField.key,
+      markerSchema,
+      stringTable
+    );
+    if (value === undefined || value === '') {
       continue;
     }
-
-    if (
-      payloadField.format === 'unique-string' ||
-      payloadField.format === 'flow-id' ||
-      payloadField.format === 'terminating-flow-id'
-    ) {
-      if (typeof value !== 'number') {
-        console.warn(
-          `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
-        );
-        continue;
-      }
-
-      if (!stringTable.hasIndex(value)) {
-        console.warn(
-          `In marker ${marker.name}, the key ${payloadField.key} has an invalid index "${value}" as a unique string, as it's missing from the string table.`
-        );
-        continue;
-      }
-      value = stringTable.getString(value);
-    }
-
-    if (value !== '' && testFun(value, payloadField.key)) {
+    if (testFun(String(value), payloadField.key)) {
       return true;
     }
   }
