@@ -8,7 +8,7 @@ import {
   getRangeFilteredCombinedThreadActivitySlices,
 } from 'firefox-profiler/selectors/profile';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state';
-import { buildProcessThreadList } from '../process-thread-list';
+import { buildProcessThreadList, getProcessName } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
 import { collectCounterSummary, getSortedCounterIndexes } from './counter-info';
 import type { Store } from '../../types/store';
@@ -92,10 +92,7 @@ export function collectProfileInfo(
       (t) => t.pid === processItem.pid
     );
     if (threadFromProcess) {
-      processItem.name =
-        threadFromProcess.processName ||
-        threadFromProcess.processType ||
-        'unknown';
+      processItem.name = getProcessName(threadFromProcess);
       processItem.etld1 = threadFromProcess['eTLD+1'];
       processItem.startTime = threadFromProcess.processStartupTime;
       processItem.endTime = threadFromProcess.processShutdownTime;
@@ -110,7 +107,12 @@ export function collectProfileInfo(
 
   const countersByPid = new Map<string, CounterSummary[]>();
   for (const index of getSortedCounterIndexes(store)) {
-    const counter = collectCounterSummary(store, threadMap, index);
+    const counter = collectCounterSummary(
+      store,
+      threadMap,
+      processIndexMap,
+      index
+    );
     const list = countersByPid.get(counter.pid) ?? [];
     list.push(counter);
     countersByPid.set(counter.pid, list);

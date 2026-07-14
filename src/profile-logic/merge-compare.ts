@@ -1177,21 +1177,19 @@ function combineSamplesDiffing(
 ): RawSamplesTable {
   const [
     {
-      thread: { samples: samples1, tid: tid1 },
+      thread: { samples: samples1 },
       weightMultiplier: weightMultiplier1,
     },
     {
-      thread: { samples: samples2, tid: tid2 },
+      thread: { samples: samples2 },
       weightMultiplier: weightMultiplier2,
     },
   ] = threadsAndWeightMultipliers;
 
   const newWeight: number[] = [];
-  const newThreadId: Tid[] = [];
   const newSamples = {
     ...getRawSamplesTableBuilderWithEventDelay(),
     weight: newWeight,
-    threadId: newThreadId,
   };
 
   const samples1Time = computeTimeColumnForRawSamplesTable(samples1);
@@ -1217,7 +1215,6 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay!.push(null);
       newSamples.time!.push(samples1Time[i]);
-      newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
       // base profile.
@@ -1233,7 +1230,6 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay!.push(null);
       newSamples.time!.push(samples2Time[j]);
-      newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
 
@@ -1364,13 +1360,9 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const nextSampleIndexPerThread: number[] = Array(
     samplesPerThread.length
   ).fill(0);
-  // This array will contain the source thread ids. It will be added to the
-  // samples table after the loop.
-  const newThreadId: Tid[] = [];
   // Creating a new empty samples table to fill.
   const newSamples = {
     ...getRawSamplesTableBuilderWithEventDelay(),
-    threadId: newThreadId,
   };
 
   // If every source thread has threadCPUDelta, and if the threads are
@@ -1437,11 +1429,6 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
     newSamples.time!.push(sourceThreadSamplesTimeCol[sourceThreadSampleIndex]);
-    newThreadId.push(
-      sourceThreadSamples.threadId
-        ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
-        : threads[sourceThreadIndex].tid
-    );
     if (newThreadCPUDelta !== undefined) {
       newThreadCPUDelta.push(
         ensureExists(sourceThreadSamples.threadCPUDelta)[

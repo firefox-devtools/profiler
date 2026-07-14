@@ -11,6 +11,7 @@ import {
 import { parse as parseToml } from 'smol-toml';
 
 import {
+  optimizeProfileForStorage,
   serializeProfileToJsonSlabsFile,
   serializeProfileToJsonString,
   unserializeProfileOfArbitraryFormat,
@@ -205,7 +206,9 @@ async function encodeProfileWithFilename(
   filename: string
 ): Promise<Uint8Array> {
   if (filename.endsWith('.jslb') || filename.endsWith('.jslb.gz')) {
-    const bytes = serializeProfileToJsonSlabsFile(profile);
+    const bytes = serializeProfileToJsonSlabsFile(
+      optimizeProfileForStorage(profile)
+    );
     if (filename.endsWith('.jslb.gz')) {
       return compress(bytes);
     }

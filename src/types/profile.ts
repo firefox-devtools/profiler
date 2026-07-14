@@ -142,9 +142,6 @@ export type RawSamplesTable = {
   // The first value is ignored - it's not meaningful because there is no previous
   // sample.
   threadCPUDelta?: Array<number | null>;
-  // This property isn't present in normal threads. However it's present for
-  // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[];
   length: number;
 };
 
