@@ -150,9 +150,6 @@ export type SamplesTable = {
   category: Uint8Array;
   // The subcategory of each sample's stack in the unfiltered thread.
   subcategory: Uint16Array | Uint8Array;
-  // This property isn't present in normal threads. However it's present for
-  // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[];
   argumentValues?: Array<number | null>;
   length: number;
 };
