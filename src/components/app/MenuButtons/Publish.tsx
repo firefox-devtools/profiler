@@ -410,6 +410,10 @@ export const PublishPanel = explicitConnect<
 });
 
 const DOWNLOAD_FORMAT_MENU_ID = 'PublishDownloadFormatContextMenu';
+// react-contextmenu positions the menu with its top-left at `position`. To
+// right-anchor to the toggle button we subtract an estimated menu width; the
+// actual width is pinned to this value via CSS.
+const DOWNLOAD_FORMAT_MENU_WIDTH_PX = 220;
 
 type DownloadSplitButtonProps = {
   readonly jslbEncodingState: SanitizedProfileEncodingState;
@@ -451,12 +455,15 @@ class DownloadSplitButton extends React.PureComponent<
     }
 
     const rect = event.currentTarget.getBoundingClientRect();
-    // The menu is right-aligned to the toggle button since it sits near the
-    // right edge of the publish panel.
+    // Right-anchor the menu: its top-right sits at the toggle button's
+    // bottom-right, so it grows leftwards into the panel.
     showMenu({
       data: null,
       id: DOWNLOAD_FORMAT_MENU_ID,
-      position: { x: rect.right, y: rect.bottom },
+      position: {
+        x: rect.right - DOWNLOAD_FORMAT_MENU_WIDTH_PX,
+        y: rect.bottom,
+      },
       target: event.target,
     });
   };

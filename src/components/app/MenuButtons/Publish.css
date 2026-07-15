@@ -195,6 +195,13 @@
   transform: translate(-50%, -25%);
 }
 
+/* Pin the download-format menu to a fixed width. The JS side subtracts this
+ * width from the toggle button's right edge to right-anchor the menu; the
+ * two must stay in sync. */
+.publishPanelDownloadFormatContextMenu {
+  width: 220px;
+}
+
 .menuButtonsDownloadSize {
   display: inline-block;
   margin: 0 4px;
