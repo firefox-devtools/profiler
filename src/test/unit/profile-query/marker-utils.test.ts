@@ -18,7 +18,10 @@ import {
   getProfileFromTextSamples,
   getNetworkMarkers,
 } from '../../fixtures/profiles/processed-profile';
-import type { NetworkMarkersOptions } from '../../fixtures/profiles/processed-profile';
+import type {
+  NetworkMarkersOptions,
+  TestDefinedMarker,
+} from '../../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../../fixtures/stores';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
@@ -759,6 +762,104 @@ describe('collectThreadNetwork', function () {
     expect(result.requests).toHaveLength(2);
   });
 
+  it('counts a request that started before the recording as completed', function () {
+    // A lone STOP marker (no matching START): the request completed during the
+    // recording but started before it, so derivation flags it incomplete even
+    // though it did finish. It must count as completed, not in flight.
+    const stopOnly: TestDefinedMarker = [
+      'Load 1: https://example.com/early',
+      0,
+      10,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 0,
+        endTime: 10,
+        pri: 0,
+        status: 'STATUS_STOP',
+        URI: 'https://example.com/early',
+        responseStatus: 200,
+        contentType: 'text/html',
+      },
+    ];
+    const store = storeWithProfile(getProfileWithMarkers([stopOnly]));
+    const threadMap = new ThreadMap();
+    threadMap.handleForThreadIndex(0);
+
+    const result = collectThreadNetwork(store, threadMap, new MarkerMap());
+
+    expect(result.totalRequestCount).toBe(1);
+    expect(result.incompleteCount).toBe(0);
+    expect(result.requests).toHaveLength(1);
+    expect(result.requests[0].incomplete).toBe(false);
+    expect(result.requests[0].startedBeforeRecording).toBe(true);
+    expect(result.requests[0].httpStatus).toBe(200);
+  });
+
+  it('lists a redirect leg but does not count it as a completed request', function () {
+    // A redirect chain: the original channel (id 1) starts then redirects to a
+    // new channel (id 2) that completes. Gecko emits START(1) -> REDIRECT(1)
+    // and START(2) -> STOP(2), which derive to two separate markers.
+    const start1: TestDefinedMarker = [
+      'Load 1: https://example.com/from',
+      0,
+      1,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 0,
+        endTime: 1,
+        pri: 0,
+        status: 'STATUS_START',
+        URI: 'https://example.com/from',
+      },
+    ];
+    const redirect1: TestDefinedMarker = [
+      'Load 1: https://example.com/from',
+      1,
+      5,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 1,
+        endTime: 5,
+        pri: 0,
+        status: 'STATUS_REDIRECT',
+        URI: 'https://example.com/from',
+        RedirectURI: 'https://example.com/to',
+        redirectId: 2,
+      },
+    ];
+    const store = storeWithProfile(
+      getProfileWithMarkers([
+        start1,
+        redirect1,
+        ...getNetworkMarkers({
+          id: 2,
+          uri: 'https://example.com/to',
+          startTime: 5,
+          fetchStart: 6,
+          endTime: 20,
+        }),
+      ])
+    );
+    const threadMap = new ThreadMap();
+    threadMap.handleForThreadIndex(0);
+
+    const result = collectThreadNetwork(store, threadMap, new MarkerMap());
+
+    // Only the final STOP leg counts as a completed request.
+    expect(result.totalRequestCount).toBe(1);
+    expect(result.incompleteCount).toBe(0);
+    // But both legs are listed, so the redirect is visible for drill-down.
+    expect(result.requests).toHaveLength(2);
+    const redirectLeg = result.requests.find(
+      (r) => r.status === 'STATUS_REDIRECT'
+    );
+    expect(redirectLeg).toBeDefined();
+    expect(redirectLeg!.url).toBe('https://example.com/from');
+  });
+
   it('filters by searchString case-insensitively', function () {
     const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
@@ -938,37 +1039,37 @@ describe('collectThreadNetwork', function () {
         startTime: 2,
         fetchStart: 2,
         endTime: 3,
-        payload: { cache: 'MemoryHit' },
+        payload: { cache: 'HitViaReval' },
       },
       {
         id: 3,
         startTime: 4,
         fetchStart: 4,
         endTime: 5,
-        payload: { cache: 'Prefetched' },
+        payload: { cache: 'Missed' },
       },
       {
         id: 4,
         startTime: 6,
         fetchStart: 6,
         endTime: 7,
-        payload: { cache: 'Miss' },
+        payload: { cache: 'MissedViaReval' },
       },
       {
         id: 5,
         startTime: 8,
         fetchStart: 8,
         endTime: 9,
-        payload: { cache: 'DiskStorage' },
+        payload: { cache: 'Unresolved' },
       },
       { id: 6, startTime: 10, fetchStart: 10, endTime: 11 },
     ]);
 
     const result = collectThreadNetwork(store, threadMap, markerMap);
 
-    expect(result.summary.cacheHit).toBe(3);
+    expect(result.summary.cacheHit).toBe(2);
     expect(result.summary.cacheMiss).toBe(2);
-    expect(result.summary.cacheUnknown).toBe(1);
+    expect(result.summary.cacheUnknown).toBe(2);
   });
 
   it('extracts phase timings per request', function () {

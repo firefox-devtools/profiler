@@ -31,6 +31,10 @@ CORE WORKFLOW
     profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
     profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
 
+    See the "Network activity" section in "profile info": if requests are in
+    flight for much of the profile while threads are idle, the bottleneck may be
+    the network -- follow the m-N handles (zoom push / marker info) to dig in.
+
   Step 3: Select a thread to analyze
     profiler-cli thread select t-0     Select a specific thread (persists for future commands)
 
@@ -68,7 +72,8 @@ CORE WORKFLOW
     profiler-cli thread markers --list                   Flat chronological list (one row per marker)
     profiler-cli thread markers --search X --list        List all individual X markers with handles
 
-    profiler-cli thread network                          First 20 requests with timing phases (default)
+    profiler-cli thread network                          Top 20 requests (slowest first) with timing phases
+    profiler-cli thread network --sort start             Chronological order instead of slowest-first
     profiler-cli thread network --limit 0                All requests (no limit)
     profiler-cli thread network --search "api.example"  Filter by URL substring
     profiler-cli thread network --min-duration 200       Only requests >= 200ms
@@ -320,7 +325,8 @@ COMMON ANALYSIS PATTERNS
     Marker handles shown in page-load output can be passed to "marker info" or "zoom push".
 
   Analyze network activity:
-    profiler-cli thread network                      All requests with timing phases
+    profiler-cli thread network                      Top requests, slowest first, with timing phases
+    profiler-cli thread network --sort start         Chronological order instead
     profiler-cli thread network --min-duration 200   Slow requests only (>= 200ms)
     profiler-cli thread network --search "api"       Filter by URL substring
     profiler-cli thread markers --category Network   Cross-reference with marker view
@@ -349,10 +355,19 @@ UNDERSTANDING THE OUTPUT
     samples-bottom-up   Hot leaf functions at top with their callers.
                         Use to understand what calls a frequently-seen function.
 
+  Network summary ("thread network"):
+    "In flight" is the wall-clock signal: time at least one request was open
+    (overlaps counted once) plus peak concurrency. "Phase totals" are summed
+    across concurrent requests, so they can exceed the wall clock -- judge
+    network stall by "In flight", not the phase sum.
+
 TIPS
 
   - Start with "profile info"; GeckoMain is usually the main thread -- use
     "--search GeckoMain" to find it quickly
+  - CPU time is not the only signal. A profile where threads are mostly idle but
+    network is in flight for most of the duration is a network-bound profile --
+    report the slow requests, not the hottest function.
   - Idle time alone is not a finding: only investigate idle during a period when the
     thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
     lock contention or blocking on another thread
