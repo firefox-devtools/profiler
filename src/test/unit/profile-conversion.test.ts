@@ -209,6 +209,217 @@ describe('converting Google Chrome profile', function () {
     expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
+  describe('positionTicks (executed line numbers)', function () {
+    // A minimal node-style single-CpuProfile with:
+    //  - node 2 "doWork": a JS frame whose self time spans two executed lines
+    //    (12 with 3 ticks, 15 with 1 tick).
+    //  - node 3 "leaf": a JS frame with a single executed line (22).
+    //  - node 4 "nativeThing": a native frame (no url) that still carries
+    //    positionTicks, which must be ignored.
+    // Line/column in callFrame are 0-based; positionTicks lines are 1-based.
+    function makeProfileText(): string {
+      const cpuProfile = {
+        startTime: 0,
+        endTime: 10000,
+        nodes: [
+          {
+            id: 1,
+            callFrame: {
+              functionName: '(root)',
+              scriptId: 0,
+              url: '',
+              lineNumber: -1,
+              columnNumber: -1,
+            },
+            hitCount: 0,
+            children: [2, 4],
+          },
+          {
+            id: 2,
+            callFrame: {
+              functionName: 'doWork',
+              scriptId: 1,
+              url: 'file:///app.js',
+              lineNumber: 9,
+              columnNumber: 2,
+            },
+            hitCount: 4,
+            children: [3],
+            positionTicks: [
+              { line: 12, ticks: 3 },
+              { line: 15, ticks: 1 },
+            ],
+          },
+          {
+            id: 3,
+            callFrame: {
+              functionName: 'leaf',
+              scriptId: 1,
+              url: 'file:///app.js',
+              lineNumber: 19,
+              columnNumber: 4,
+            },
+            hitCount: 2,
+            positionTicks: [{ line: 22, ticks: 2 }],
+          },
+          {
+            id: 4,
+            callFrame: {
+              functionName: 'nativeThing',
+              scriptId: 0,
+              url: '',
+              lineNumber: -1,
+              columnNumber: -1,
+            },
+            hitCount: 1,
+            positionTicks: [{ line: 99, ticks: 1 }],
+          },
+        ],
+        // One µs delta per sample: with a 500µs target interval every sample is
+        // emitted, so counts below are deterministic.
+        samples: [2, 2, 2, 2, 3, 3, 4],
+        timeDeltas: [1000, 1000, 1000, 1000, 1000, 1000, 1000],
+      };
+      return JSON.stringify(cpuProfile);
+    }
+
+    function findFuncByName(profile: Profile, name: string): number {
+      const { funcTable, stringArray } = profile.shared;
+      for (let i = 0; i < funcTable.length; i++) {
+        if (stringArray[funcTable.name[i]] === name) {
+          return i;
+        }
+      }
+      throw new Error(`Could not find a func named "${name}".`);
+    }
+
+    function framesForFunc(profile: Profile, funcIndex: number): number[] {
+      const { frameTable } = profile.shared;
+      const frames = [];
+      for (let i = 0; i < frameTable.length; i++) {
+        if (frameTable.func[i] === funcIndex) {
+          frames.push(i);
+        }
+      }
+      return frames;
+    }
+
+    it('splits a multi-line node into per-line frames and distributes its samples', async function () {
+      const profile =
+        await unserializeProfileOfArbitraryFormat(makeProfileText());
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+      assertProfileIntegrity(profile);
+
+      const { frameTable, funcTable, stackTable } = profile.shared;
+      const doWork = findFuncByName(profile, 'doWork');
+
+      // The func keeps its 1-based definition line, and there's exactly one
+      // func even though it now has multiple frames.
+      expect(funcTable.lineNumber[doWork]).toBe(10);
+
+      // The neutral structural frame is separate from the executed-line frames.
+      const frames = framesForFunc(profile, doWork);
+      const locations = frames
+        .map((frame) => ({
+          line: frameTable.line[frame],
+          column: frameTable.column[frame],
+        }))
+        .sort((a, b) => (a.line ?? 0) - (b.line ?? 0));
+      expect(locations).toEqual([
+        { line: null, column: null },
+        { line: 12, column: null },
+        { line: 15, column: null },
+      ]);
+
+      // Leaf samples are distributed proportionally to the tick counts (3:1).
+      const thread = profile.threads[0];
+      const hitsByLine = new Map();
+      for (let i = 0; i < thread.samples.length; i++) {
+        const stackIndex = thread.samples.stack[i];
+        if (stackIndex === null) {
+          continue;
+        }
+        const frame = stackTable.frame[stackIndex];
+        if (frameTable.func[frame] === doWork) {
+          const line = frameTable.line[frame];
+          hitsByLine.set(line, (hitsByLine.get(line) ?? 0) + 1);
+        }
+      }
+      expect(hitsByLine.get(12)).toBe(3);
+      expect(hitsByLine.get(15)).toBe(1);
+      expect(hitsByLine.has(null)).toBe(false);
+    });
+
+    it('uses the single executed line for a node with one positionTick line', async function () {
+      const profile =
+        await unserializeProfileOfArbitraryFormat(makeProfileText());
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      const { frameTable, funcTable, stackTable } = profile.shared;
+      const doWork = findFuncByName(profile, 'doWork');
+      const leaf = findFuncByName(profile, 'leaf');
+
+      // A single executed line still has a neutral structural frame.
+      const frames = framesForFunc(profile, leaf);
+      const locations = frames
+        .map((frame) => ({
+          line: frameTable.line[frame],
+          column: frameTable.column[frame],
+        }))
+        .sort((a, b) => (a.line ?? 0) - (b.line ?? 0));
+      expect(locations).toEqual([
+        { line: null, column: null },
+        { line: 22, column: null },
+      ]);
+      expect(funcTable.lineNumber[leaf]).toBe(20);
+
+      const thread = profile.threads[0];
+      const leafSampleStacks = thread.samples.stack.filter((stackIndex) => {
+        if (stackIndex === null) {
+          return false;
+        }
+        return frameTable.func[stackTable.frame[stackIndex]] === leaf;
+      });
+      expect(leafSampleStacks).toHaveLength(2);
+      for (const stackIndex of leafSampleStacks) {
+        if (stackIndex === null) {
+          throw new Error('Expected a stack for the leaf sample.');
+        }
+        const leafFrame = stackTable.frame[stackIndex];
+        expect(frameTable.line[leafFrame]).toBe(22);
+
+        const prefixOffset = stackTable.prefixOffset[stackIndex];
+        if (prefixOffset === 0) {
+          throw new Error('Expected the leaf stack to have a prefix.');
+        }
+        const prefixStack = stackIndex - prefixOffset;
+        const prefixFrame = stackTable.frame[prefixStack];
+        expect(frameTable.func[prefixFrame]).toBe(doWork);
+        expect(frameTable.line[prefixFrame]).toBe(null);
+        expect(funcTable.lineNumber[doWork]).toBe(10);
+      }
+    });
+
+    it('ignores positionTicks on native frames that have no source', async function () {
+      const profile =
+        await unserializeProfileOfArbitraryFormat(makeProfileText());
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      const { frameTable } = profile.shared;
+      const nativeThing = findFuncByName(profile, 'nativeThing');
+      const frames = framesForFunc(profile, nativeThing);
+      expect(frames).toHaveLength(1);
+      // positionTicks line 99 must be ignored; there's no source to map it to.
+      expect(frameTable.line[frames[0]]).toBe(null);
+    });
+  });
+
   it('successfully imports a profile with DevTools timestamp in filename', async function () {
     const fs = require('fs');
     const profileFilename =
