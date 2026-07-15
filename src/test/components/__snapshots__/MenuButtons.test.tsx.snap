@@ -1964,15 +1964,29 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
         >
           Download
         </button>
-        <div
-          class="buttonWithPanel publishPanelSplitButtonToggle"
-        >
-          <button
-            aria-expanded="false"
-            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
-            title="Show other download formats"
-            type="button"
-          />
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
         </div>
       </div>
       <button
@@ -2205,15 +2219,29 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
             )
           </span>
         </a>
-        <div
-          class="buttonWithPanel publishPanelSplitButtonToggle"
-        >
-          <button
-            aria-expanded="false"
-            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
-            title="Show other download formats"
-            type="button"
-          />
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
         </div>
       </div>
       <button
@@ -2337,15 +2365,29 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             )
           </span>
         </a>
-        <div
-          class="buttonWithPanel publishPanelSplitButtonToggle"
-        >
-          <button
-            aria-expanded="false"
-            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
-            title="Show other download formats"
-            type="button"
-          />
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
         </div>
       </div>
       <button
@@ -2464,15 +2506,29 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             )
           </span>
         </a>
-        <div
-          class="buttonWithPanel publishPanelSplitButtonToggle"
-        >
-          <button
-            aria-expanded="false"
-            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
-            title="Show other download formats"
-            type="button"
-          />
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
         </div>
       </div>
       <button

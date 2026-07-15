@@ -29,7 +29,8 @@ import {
   getSanitizedProfileEncodingStates,
 } from 'firefox-profiler/selectors/publish';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
-import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
+import { ContextMenu } from 'firefox-profiler/components/shared/ContextMenu';
+import { MenuItem, showMenu } from '@firefox-devtools/react-contextmenu';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
@@ -408,6 +409,8 @@ export const PublishPanel = explicitConnect<
   component: PublishPanelImpl,
 });
 
+const DOWNLOAD_FORMAT_MENU_ID = 'PublishDownloadFormatContextMenu';
+
 type DownloadSplitButtonProps = {
   readonly jslbEncodingState: SanitizedProfileEncodingState;
   readonly jsonEncodingState: SanitizedProfileEncodingState;
@@ -416,19 +419,71 @@ type DownloadSplitButtonProps = {
   readonly onJsonDropdownOpen: () => void;
 };
 
+type DownloadSplitButtonState = {
+  readonly isMenuVisible: boolean;
+  // react-contextmenu hides the menu on mousedown even if it's already
+  // visible. We track visibility at mousedown time so that clicking the
+  // toggle button while the menu is open results in a net "close" rather
+  // than a hide-then-reshow.
+  readonly wasMenuVisibleOnMouseDown: boolean;
+};
+
 /**
  * Split button: the main body downloads the profile as JSLB, and the arrow
  * on the right opens a dropdown menu with alternate download formats.
+ * The dropdown uses the same react-contextmenu-based menu style as the
+ * marker chart's filter/copy buttons.
  */
-class DownloadSplitButton extends React.PureComponent<DownloadSplitButtonProps> {
+class DownloadSplitButton extends React.PureComponent<
+  DownloadSplitButtonProps,
+  DownloadSplitButtonState
+> {
+  override state: DownloadSplitButtonState = {
+    isMenuVisible: false,
+    wasMenuVisibleOnMouseDown: false,
+  };
+
+  _onToggleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (this.state.wasMenuVisibleOnMouseDown) {
+      // The menu was already open on mousedown, so react-contextmenu has
+      // already hidden it. Don't reopen it.
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    // The menu is right-aligned to the toggle button since it sits near the
+    // right edge of the publish panel.
+    showMenu({
+      data: null,
+      id: DOWNLOAD_FORMAT_MENU_ID,
+      position: { x: rect.right, y: rect.bottom },
+      target: event.target,
+    });
+  };
+
+  _onToggleMouseDown = () => {
+    this.setState((state) => ({
+      wasMenuVisibleOnMouseDown: state.isMenuVisible,
+    }));
+  };
+
+  _onMenuShow = () => {
+    this.setState({ isMenuVisible: true });
+    this.props.onJsonDropdownOpen();
+  };
+
+  _onMenuHide = () => {
+    this.setState({ isMenuVisible: false });
+  };
+
   override render() {
     const {
       jslbEncodingState,
       jsonEncodingState,
       jslbDownloadFileName,
       jsonDownloadFileName,
-      onJsonDropdownOpen,
     } = this.props;
+    const { isMenuVisible } = this.state;
 
     return (
       <div className="publishPanelSplitButton">
@@ -436,19 +491,27 @@ class DownloadSplitButton extends React.PureComponent<DownloadSplitButtonProps> 
           encodingState={jslbEncodingState}
           downloadFileName={jslbDownloadFileName}
         />
-        <ButtonWithPanel
-          className="publishPanelSplitButtonToggle"
-          buttonClassName="photon-button publishPanelSplitButtonToggleButton"
-          panelClassName="publishPanelSplitButtonPanel"
-          label=""
-          title="Show other download formats"
-          onPanelOpen={onJsonDropdownOpen}
-          panelContent={
-            <DownloadFormatMenu
-              jsonEncodingState={jsonEncodingState}
-              jsonDownloadFileName={jsonDownloadFileName}
-            />
-          }
+        <button
+          type="button"
+          className={classNames(
+            'photon-button',
+            'publishPanelSplitButtonToggleButton',
+            {
+              'publishPanelSplitButtonToggleButton--open': isMenuVisible,
+            }
+          )}
+          title="Other download formats"
+          aria-haspopup="menu"
+          aria-expanded={isMenuVisible}
+          onClick={this._onToggleClick}
+          onMouseDown={this._onToggleMouseDown}
+        />
+        <DownloadFormatContextMenu
+          menuId={DOWNLOAD_FORMAT_MENU_ID}
+          onShow={this._onMenuShow}
+          onHide={this._onMenuHide}
+          jsonEncodingState={jsonEncodingState}
+          jsonDownloadFileName={jsonDownloadFileName}
         />
       </div>
     );
@@ -512,68 +575,98 @@ class DownloadPrimary extends React.PureComponent<DownloadPrimaryProps> {
   }
 }
 
-type DownloadFormatMenuProps = {
+type DownloadFormatContextMenuProps = {
+  readonly menuId: string;
+  readonly onShow: () => void;
+  readonly onHide: () => void;
   readonly jsonEncodingState: SanitizedProfileEncodingState;
   readonly jsonDownloadFileName: string;
 };
 
 /**
- * Content of the dropdown panel: alternative download formats.
+ * Trigger a file download for a Blob without needing a persistent
+ * BlobUrlLink anchor. Used from a react-contextmenu MenuItem's onClick,
+ * where we can't wrap the item in an <a download>.
  */
-class DownloadFormatMenu extends React.PureComponent<DownloadFormatMenuProps> {
-  override render() {
-    const { jsonEncodingState, jsonDownloadFileName } = this.props;
-    const itemClassName = 'publishPanelSplitButtonMenuItem';
+function _triggerBlobDownload(blob: Blob, downloadFileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = downloadFileName;
+  anchor.style.display = 'none';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  // Revoke asynchronously so Safari has a chance to start the download.
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
 
+/**
+ * The dropdown menu for alternative download formats, rendered as a
+ * react-contextmenu (the same menu style used next to the marker chart
+ * search field).
+ */
+class DownloadFormatContextMenu extends React.PureComponent<DownloadFormatContextMenuProps> {
+  _onDownloadJson = () => {
+    const { jsonEncodingState, jsonDownloadFileName } = this.props;
+    if (jsonEncodingState.phase !== 'DONE') {
+      return;
+    }
+    _triggerBlobDownload(
+      jsonEncodingState.profileData,
+      `${jsonDownloadFileName}.gz`
+    );
+  };
+
+  _renderJsonMenuItemLabel() {
+    const { jsonEncodingState } = this.props;
     switch (jsonEncodingState.phase) {
-      case 'DONE': {
-        const { profileData } = jsonEncodingState;
+      case 'DONE':
         return (
-          <BlobUrlLink
-            blob={profileData}
-            download={`${jsonDownloadFileName}.gz`}
-            className={itemClassName}
-          >
+          <>
             <Localized id="MenuButtons--publish--download-json">
               Download as JSON
-            </Localized>{' '}
-            <span className="menuButtonsDownloadSize">
-              ({prettyBytes(profileData.size)})
-            </span>
-          </BlobUrlLink>
-        );
-      }
-      case 'ERROR': {
-        return (
-          <span
-            className={classNames(
-              itemClassName,
-              'publishPanelSplitButtonMenuItemDisabled'
-            )}
-          >
-            <Localized id="MenuButtons--publish--download-json-error">
-              Error preparing JSON download
             </Localized>
-          </span>
+            {` (${prettyBytes(jsonEncodingState.profileData.size)})`}
+          </>
         );
-      }
+      case 'ERROR':
+        return (
+          <Localized id="MenuButtons--publish--download-json-error">
+            Error preparing JSON download
+          </Localized>
+        );
       case 'INITIAL':
-      case 'ENCODING': {
+      case 'ENCODING':
         return (
-          <span
-            className={classNames(
-              itemClassName,
-              'publishPanelSplitButtonMenuItemDisabled'
-            )}
-          >
-            <Localized id="MenuButtons--publish--compressing">
-              Compressing…
-            </Localized>
-          </span>
+          <Localized id="MenuButtons--publish--compressing">
+            Compressing…
+          </Localized>
         );
-      }
       default:
         throw assertExhaustiveCheck(jsonEncodingState);
     }
+  }
+
+  override render() {
+    const { menuId, onShow, onHide, jsonEncodingState } = this.props;
+    const jsonReady = jsonEncodingState.phase === 'DONE';
+
+    return (
+      <ContextMenu
+        id={menuId}
+        className="publishPanelDownloadFormatContextMenu"
+        onShow={onShow}
+        onHide={onHide}
+      >
+        <MenuItem
+          onClick={this._onDownloadJson}
+          disabled={!jsonReady}
+          preventClose={!jsonReady}
+        >
+          {this._renderJsonMenuItemLabel()}
+        </MenuItem>
+      </ContextMenu>
+    );
   }
 }
