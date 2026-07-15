@@ -428,6 +428,7 @@ export type NetworkPhaseTimings = {
 };
 
 export type NetworkRequestEntry = {
+  markerHandle: string;
   url: string;
   httpStatus?: number;
   httpVersion?: string;

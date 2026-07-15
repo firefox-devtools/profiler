@@ -24,6 +24,7 @@ function makeRequest(
   overrides: Partial<NetworkRequestEntry> = {}
 ): NetworkRequestEntry {
   return {
+    markerHandle: 'm-1',
     url: 'https://example.com/resource',
     startTime: 0,
     duration: 100,
@@ -253,5 +254,14 @@ describe('formatThreadNetworkResult', function () {
     const output = formatThreadNetworkResult(result);
 
     expect(output).toContain('No network requests');
+  });
+
+  it('shows a marker handle for each request', function () {
+    const result = makeResult();
+    result.requests = [makeRequest({ markerHandle: 'm-42' })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('m-42');
   });
 });

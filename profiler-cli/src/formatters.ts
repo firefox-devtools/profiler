@@ -1322,7 +1322,7 @@ export function formatThreadNetworkResult(
         ? `  size=${req.transferSizeKB.toFixed(1)}KB`
         : '';
 
-    lines.push(`  ${url}`);
+    lines.push(`  ${req.markerHandle}  ${url}`);
     lines.push(
       `    ${status}${version}${cache}${size}  duration=${formatDuration(req.duration)}`
     );
