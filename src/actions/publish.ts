@@ -62,7 +62,10 @@ import type {
   SharingMode,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
-import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
+import {
+  optimizeProfileForStorage,
+  serializeProfileToJsonSlabsFile,
+} from 'firefox-profiler/profile-logic/process-profile';
 
 export function updateSharingOption(
   mode: SharingMode,
@@ -322,9 +325,10 @@ export function encodeSanitizedProfile(
       // synchronous failure here could dispatch FAILED, which the reducer drops.
       await Promise.resolve();
       try {
-        const gzipData = await compress(
-          serializeProfileToJsonString(sanitizedProfile)
+        const jslbData = serializeProfileToJsonSlabsFile(
+          optimizeProfileForStorage(sanitizedProfile)
         );
+        const gzipData = await compress(jslbData);
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
         dispatch(
           sanitizedProfileEncodingCompleted(mode, sanitizedProfile, blob)
