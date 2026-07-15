@@ -420,6 +420,186 @@ describe('converting Google Chrome profile', function () {
     });
   });
 
+  describe('per-sample positions (trace ProfileChunk format)', function () {
+    // A minimal traceEvents profile (Profile + ProfileChunk) where the chunk
+    // carries per-sample `lines` and `columns` arrays. Node 2 "doWork" is a JS
+    // frame whose four samples were taken at two columns on line 11. Node 3
+    // "nativeThing" has no source, so its position is ignored.
+    function makeTraceText(includeColumns = true): string {
+      const events = [
+        {
+          name: 'Profile',
+          ph: 'P',
+          id: '0x1',
+          cat: 'disabled-by-default-v8.cpu_profiler',
+          pid: 1,
+          tid: 1,
+          ts: 0,
+          args: { data: { startTime: 0 } },
+        },
+        {
+          name: 'ProfileChunk',
+          ph: 'P',
+          id: '0x1',
+          cat: 'disabled-by-default-v8.cpu_profiler',
+          pid: 1,
+          tid: 1,
+          ts: 0,
+          args: {
+            data: {
+              cpuProfile: {
+                nodes: [
+                  {
+                    id: 1,
+                    callFrame: {
+                      functionName: '(root)',
+                      scriptId: 0,
+                      url: '',
+                      lineNumber: -1,
+                      columnNumber: -1,
+                    },
+                    children: [2, 3],
+                  },
+                  {
+                    id: 2,
+                    callFrame: {
+                      functionName: 'doWork',
+                      scriptId: 1,
+                      url: 'file:///app.js',
+                      lineNumber: 9,
+                      columnNumber: 2,
+                    },
+                  },
+                  {
+                    id: 3,
+                    callFrame: {
+                      functionName: 'nativeThing',
+                      scriptId: 0,
+                      url: '',
+                      lineNumber: -1,
+                      columnNumber: -1,
+                    },
+                  },
+                ],
+                samples: [2, 2, 2, 2, 3],
+              },
+              lines: [11, 11, 11, 11, 42],
+              columns: includeColumns ? [10, 10, 20, 20, 7] : undefined,
+              timeDeltas: [1000, 1000, 1000, 1000, 1000],
+            },
+          },
+        },
+      ];
+      return JSON.stringify(events);
+    }
+
+    function findFuncByName(profile: Profile, name: string): number {
+      const { funcTable, stringArray } = profile.shared;
+      for (let i = 0; i < funcTable.length; i++) {
+        if (stringArray[funcTable.name[i]] === name) {
+          return i;
+        }
+      }
+      throw new Error(`Could not find a func named "${name}".`);
+    }
+
+    it('creates executed-position frames and routes samples to them', async function () {
+      const profile =
+        await unserializeProfileOfArbitraryFormat(makeTraceText());
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+      assertProfileIntegrity(profile);
+
+      const { frameTable, funcTable, stackTable } = profile.shared;
+      const doWork = findFuncByName(profile, 'doWork');
+
+      // The definition location lives on the func, while the frames contain
+      // the actual sampled positions plus the neutral structural frame.
+      expect(funcTable.columnNumber[doWork]).toBe(3);
+      const doWorkFrames = [];
+      for (let f = 0; f < frameTable.length; f++) {
+        if (frameTable.func[f] === doWork) {
+          doWorkFrames.push(f);
+        }
+      }
+      const locations = doWorkFrames
+        .map((f) => ({
+          line: frameTable.line[f],
+          column: frameTable.column[f],
+        }))
+        .sort((a, b) => (a.column ?? 0) - (b.column ?? 0));
+      expect(locations).toEqual([
+        { line: null, column: null },
+        { line: 11, column: 10 },
+        { line: 11, column: 20 },
+      ]);
+
+      // Samples split 2/2 across the two columns.
+      const thread = profile.threads[0];
+      const hitsByColumn = new Map();
+      for (let i = 0; i < thread.samples.length; i++) {
+        const s = thread.samples.stack[i];
+        if (s === null) {
+          continue;
+        }
+        const frame = stackTable.frame[s];
+        if (frameTable.func[frame] === doWork) {
+          const column = frameTable.column[frame];
+          hitsByColumn.set(column, (hitsByColumn.get(column) ?? 0) + 1);
+        }
+      }
+      expect(hitsByColumn.get(10)).toBe(2);
+      expect(hitsByColumn.get(20)).toBe(2);
+    });
+
+    it('keeps columns null when a trace only provides lines', async function () {
+      const profile = await unserializeProfileOfArbitraryFormat(
+        makeTraceText(false)
+      );
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+      assertProfileIntegrity(profile);
+
+      const { frameTable } = profile.shared;
+      const doWork = findFuncByName(profile, 'doWork');
+      const locations = [];
+      for (let f = 0; f < frameTable.length; f++) {
+        if (frameTable.func[f] === doWork) {
+          locations.push({
+            line: frameTable.line[f],
+            column: frameTable.column[f],
+          });
+        }
+      }
+      expect(locations).toEqual([
+        { line: null, column: null },
+        { line: 11, column: null },
+      ]);
+    });
+
+    it('ignores per-sample positions on native frames without a source', async function () {
+      const profile =
+        await unserializeProfileOfArbitraryFormat(makeTraceText());
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+
+      const { frameTable } = profile.shared;
+      const nativeThing = findFuncByName(profile, 'nativeThing');
+      const frames = [];
+      for (let f = 0; f < frameTable.length; f++) {
+        if (frameTable.func[f] === nativeThing) {
+          frames.push(f);
+        }
+      }
+      // The sampled line 42 is dropped; only the base frame exists.
+      expect(frames).toHaveLength(1);
+      expect(frameTable.line[frames[0]]).toBe(null);
+    });
+  });
+
   it('successfully imports a profile with DevTools timestamp in filename', async function () {
     const fs = require('fs');
     const profileFilename =
