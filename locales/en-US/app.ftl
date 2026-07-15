@@ -745,6 +745,8 @@ MenuButtons--publish--cancel-upload = Cancel Upload
 MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong when uploading the profile.
 MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--download = Download
+MenuButtons--publish--download-json = Download as JSON
+MenuButtons--publish--download-json-error = Error preparing JSON download
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
 

@@ -20,15 +20,16 @@ import {
 import {
   getAbortFunction,
   getCheckedSharingOptions,
-  getFilenameString,
+  getDownloadFilename,
   getUploadPhase,
   getUploadProgress,
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
-  getSanitizedProfileEncodingState,
+  getSanitizedProfileEncodingStates,
 } from 'firefox-profiler/selectors/publish';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
+import { ButtonWithPanel } from 'firefox-profiler/components/shared/ButtonWithPanel';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
@@ -44,6 +45,7 @@ import type {
   StartEndRange,
   UploadPhase,
   SanitizedProfileEncodingState,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 
 import './Publish.css';
@@ -59,8 +61,12 @@ type StateProps = {
   readonly shouldShowPreferenceOption: boolean;
   readonly profileContainsPrivateBrowsingInformation: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
-  readonly downloadFileName: string;
+  readonly sanitizedProfileEncodingStates: Record<
+    PublishProfileFormat,
+    SanitizedProfileEncodingState
+  >;
+  readonly jslbDownloadFileName: string;
+  readonly jsonDownloadFileName: string;
   readonly uploadPhase: UploadPhase;
   readonly uploadProgress: number;
   readonly uploadProgressString: string;
@@ -79,19 +85,40 @@ type DispatchProps = {
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
-  _inflightEncoding: InflightProfileEncoding | undefined;
+  _inflightEncodings: Record<
+    PublishProfileFormat,
+    InflightProfileEncoding | undefined
+  > = { jslb: undefined, json: undefined };
 
   override componentDidMount(): void {
-    this._inflightEncoding = this.props.encodeSanitizedProfile();
+    this._inflightEncodings.jslb = this.props.encodeSanitizedProfile('jslb');
   }
+
+  _refreshEncoding = (format: PublishProfileFormat) => {
+    this._inflightEncodings[format] = this.props.encodeSanitizedProfile(
+      format,
+      this._inflightEncodings[format]
+    );
+  };
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sharingOption = e.target.name as keyof CheckedSharingOptions;
     this.props.updateSharingOption(sharingOption, e.target.checked);
 
-    this._inflightEncoding = this.props.encodeSanitizedProfile(
-      this._inflightEncoding
-    );
+    this._refreshEncoding('jslb');
+    // Only keep the JSON encoding fresh if it has already been requested at
+    // least once (i.e. the user has opened the download dropdown).
+    if (this.props.sanitizedProfileEncodingStates.json.phase !== 'INITIAL') {
+      this._refreshEncoding('json');
+    }
+  };
+
+  _onJsonDropdownOpen = () => {
+    this._refreshEncoding('json');
+  };
+
+  _onSubmit = () => {
+    this.props.attemptToPublish(this._inflightEncodings.jslb);
   };
 
   _renderCheckbox(
@@ -115,16 +142,28 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     );
   }
 
-  _onSubmit = () => {
-    this.props.attemptToPublish(this._inflightEncoding);
-  };
+  _renderDownloadButton() {
+    const {
+      sanitizedProfileEncodingStates,
+      jslbDownloadFileName,
+      jsonDownloadFileName,
+    } = this.props;
+    return (
+      <DownloadSplitButton
+        jslbEncodingState={sanitizedProfileEncodingStates.jslb}
+        jsonEncodingState={sanitizedProfileEncodingStates.json}
+        jslbDownloadFileName={jslbDownloadFileName}
+        jsonDownloadFileName={jsonDownloadFileName}
+        onJsonDropdownOpen={this._onJsonDropdownOpen}
+      />
+    );
+  }
 
   _renderPublishPanel() {
     const {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
-      sanitizedProfileEncodingState,
-      downloadFileName,
+      sanitizedProfileEncodingStates,
       shouldSanitizeByDefault,
       isRepublish,
     } = this.props;
@@ -211,7 +250,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                 )
               : null}
           </div>
-          {sanitizedProfileEncodingState.phase === 'ERROR' ? (
+          {sanitizedProfileEncodingStates.jslb.phase === 'ERROR' ? (
             <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
               <div className="photon-message-bar-inner-text">
                 <Localized id="MenuButtons--publish--error-while-compressing">
@@ -222,14 +261,11 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             </div>
           ) : null}
           <div className="publishPanelButtons">
-            <DownloadButton
-              downloadFileName={downloadFileName}
-              sanitizedProfileEncodingState={sanitizedProfileEncodingState}
-            />
+            {this._renderDownloadButton()}
             <button
               type="submit"
               className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
-              disabled={sanitizedProfileEncodingState.phase === 'ERROR'}
+              disabled={sanitizedProfileEncodingStates.jslb.phase === 'ERROR'}
             >
               <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
               <Localized id="MenuButtons--publish--button-upload">
@@ -243,13 +279,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   }
 
   _renderUploadPanel() {
-    const {
-      uploadProgress,
-      uploadProgressString,
-      abortFunction,
-      downloadFileName,
-      sanitizedProfileEncodingState,
-    } = this.props;
+    const { uploadProgress, uploadProgressString, abortFunction } = this.props;
 
     return (
       <div
@@ -273,10 +303,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           </div>
         </div>
         <div className="publishPanelButtons">
-          <DownloadButton
-            downloadFileName={downloadFileName}
-            sanitizedProfileEncodingState={sanitizedProfileEncodingState}
-          />
+          {this._renderDownloadButton()}
           <button
             type="button"
             className="photon-button photon-button-default publishPanelButton publishPanelButtonsCancelUpload"
@@ -362,8 +389,9 @@ export const PublishPanel = explicitConnect<
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
-    downloadFileName: getFilenameString(state),
-    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
+    jslbDownloadFileName: getDownloadFilename(state, 'jslb'),
+    jsonDownloadFileName: getDownloadFilename(state, 'json'),
+    sanitizedProfileEncodingStates: getSanitizedProfileEncodingStates(state),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
@@ -380,23 +408,70 @@ export const PublishPanel = explicitConnect<
   component: PublishPanelImpl,
 });
 
-type DownloadButtonProps = {
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+type DownloadSplitButtonProps = {
+  readonly jslbEncodingState: SanitizedProfileEncodingState;
+  readonly jsonEncodingState: SanitizedProfileEncodingState;
+  readonly jslbDownloadFileName: string;
+  readonly jsonDownloadFileName: string;
+  readonly onJsonDropdownOpen: () => void;
+};
+
+/**
+ * Split button: the main body downloads the profile as JSLB, and the arrow
+ * on the right opens a dropdown menu with alternate download formats.
+ */
+class DownloadSplitButton extends React.PureComponent<DownloadSplitButtonProps> {
+  override render() {
+    const {
+      jslbEncodingState,
+      jsonEncodingState,
+      jslbDownloadFileName,
+      jsonDownloadFileName,
+      onJsonDropdownOpen,
+    } = this.props;
+
+    return (
+      <div className="publishPanelSplitButton">
+        <DownloadPrimary
+          encodingState={jslbEncodingState}
+          downloadFileName={jslbDownloadFileName}
+        />
+        <ButtonWithPanel
+          className="publishPanelSplitButtonToggle"
+          buttonClassName="photon-button publishPanelSplitButtonToggleButton"
+          panelClassName="publishPanelSplitButtonPanel"
+          label=""
+          title="Show other download formats"
+          onPanelOpen={onJsonDropdownOpen}
+          panelContent={
+            <DownloadFormatMenu
+              jsonEncodingState={jsonEncodingState}
+              jsonDownloadFileName={jsonDownloadFileName}
+            />
+          }
+        />
+      </div>
+    );
+  }
+}
+
+type DownloadPrimaryProps = {
+  readonly encodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
 };
 
 /**
- * The DownloadButton handles unpacking the compressed profile promise.
+ * The primary (left) part of the split button. Downloads the profile as JSLB.
  */
-class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
+class DownloadPrimary extends React.PureComponent<DownloadPrimaryProps> {
   override render() {
-    const { sanitizedProfileEncodingState, downloadFileName } = this.props;
+    const { encodingState, downloadFileName } = this.props;
     const className =
-      'photon-button publishPanelButton publishPanelButtonsDownload';
+      'photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload';
 
-    switch (sanitizedProfileEncodingState.phase) {
+    switch (encodingState.phase) {
       case 'DONE': {
-        const { profileData } = sanitizedProfileEncodingState;
+        const { profileData } = encodingState;
         return (
           <BlobUrlLink
             blob={profileData}
@@ -432,7 +507,73 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
         );
       }
       default:
-        throw assertExhaustiveCheck(sanitizedProfileEncodingState);
+        throw assertExhaustiveCheck(encodingState);
+    }
+  }
+}
+
+type DownloadFormatMenuProps = {
+  readonly jsonEncodingState: SanitizedProfileEncodingState;
+  readonly jsonDownloadFileName: string;
+};
+
+/**
+ * Content of the dropdown panel: alternative download formats.
+ */
+class DownloadFormatMenu extends React.PureComponent<DownloadFormatMenuProps> {
+  override render() {
+    const { jsonEncodingState, jsonDownloadFileName } = this.props;
+    const itemClassName = 'publishPanelSplitButtonMenuItem';
+
+    switch (jsonEncodingState.phase) {
+      case 'DONE': {
+        const { profileData } = jsonEncodingState;
+        return (
+          <BlobUrlLink
+            blob={profileData}
+            download={`${jsonDownloadFileName}.gz`}
+            className={itemClassName}
+          >
+            <Localized id="MenuButtons--publish--download-json">
+              Download as JSON
+            </Localized>{' '}
+            <span className="menuButtonsDownloadSize">
+              ({prettyBytes(profileData.size)})
+            </span>
+          </BlobUrlLink>
+        );
+      }
+      case 'ERROR': {
+        return (
+          <span
+            className={classNames(
+              itemClassName,
+              'publishPanelSplitButtonMenuItemDisabled'
+            )}
+          >
+            <Localized id="MenuButtons--publish--download-json-error">
+              Error preparing JSON download
+            </Localized>
+          </span>
+        );
+      }
+      case 'INITIAL':
+      case 'ENCODING': {
+        return (
+          <span
+            className={classNames(
+              itemClassName,
+              'publishPanelSplitButtonMenuItemDisabled'
+            )}
+          >
+            <Localized id="MenuButtons--publish--compressing">
+              Compressing…
+            </Localized>
+          </span>
+        );
+      }
+      default:
+        throw assertExhaustiveCheck(jsonEncodingState);
     }
   }
 }

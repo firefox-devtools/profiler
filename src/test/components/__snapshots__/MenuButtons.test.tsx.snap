@@ -1954,13 +1954,27 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
     <div
       class="publishPanelButtons"
     >
-      <button
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        disabled=""
-        type="button"
+      <div
+        class="publishPanelSplitButton"
       >
-        Download
-      </button>
+        <button
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          disabled=""
+          type="button"
+        >
+          Download
+        </button>
+        <div
+          class="buttonWithPanel publishPanelSplitButtonToggle"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
+            title="Show other download formats"
+            type="button"
+          />
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         disabled=""
@@ -2170,24 +2184,38 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
     <div
       class="publishPanelButtons"
     >
-      <a
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.jslb.gz"
-        href="mockCreateObjectUrl"
+      <div
+        class="publishPanelSplitButton"
       >
-        <span
-          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
+        <a
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          download="Firefox 1970-01-01 00.00 profile.jslb.gz"
+          href="mockCreateObjectUrl"
         >
-          (
-          1.58 kB
-          )
-        </span>
-      </a>
+          <span
+            class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+          />
+          Download
+           
+          <span
+            class="menuButtonsDownloadSize"
+          >
+            (
+            1.58 kB
+            )
+          </span>
+        </a>
+        <div
+          class="buttonWithPanel publishPanelSplitButtonToggle"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
+            title="Show other download formats"
+            type="button"
+          />
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"
@@ -2288,24 +2316,38 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="publishPanelButtons"
     >
-      <a
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.jslb.gz"
-        href="mockCreateObjectUrl"
+      <div
+        class="publishPanelSplitButton"
       >
-        <span
-          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
+        <a
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          download="Firefox 1970-01-01 00.00 profile.jslb.gz"
+          href="mockCreateObjectUrl"
         >
-          (
-          1.58 kB
-          )
-        </span>
-      </a>
+          <span
+            class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+          />
+          Download
+           
+          <span
+            class="menuButtonsDownloadSize"
+          >
+            (
+            1.58 kB
+            )
+          </span>
+        </a>
+        <div
+          class="buttonWithPanel publishPanelSplitButtonToggle"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
+            title="Show other download formats"
+            type="button"
+          />
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"
@@ -2401,24 +2443,38 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="publishPanelButtons"
     >
-      <a
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.jslb.gz"
-        href="mockCreateObjectUrl"
+      <div
+        class="publishPanelSplitButton"
       >
-        <span
-          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
+        <a
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          download="Firefox 1970-01-01 00.00 profile.jslb.gz"
+          href="mockCreateObjectUrl"
         >
-          (
-          1.58 kB
-          )
-        </span>
-      </a>
+          <span
+            class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+          />
+          Download
+           
+          <span
+            class="menuButtonsDownloadSize"
+          >
+            (
+            1.58 kB
+            )
+          </span>
+        </a>
+        <div
+          class="buttonWithPanel publishPanelSplitButtonToggle"
+        >
+          <button
+            aria-expanded="false"
+            class="buttonWithPanelButton photon-button publishPanelSplitButtonToggleButton"
+            title="Show other download formats"
+            type="button"
+          />
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"

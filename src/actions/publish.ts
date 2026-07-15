@@ -58,11 +58,13 @@ import type {
   Pid,
   TrackIndex,
   ProfileIndexTranslationMaps,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import {
   optimizeProfileForStorage,
   serializeProfileToJsonSlabsFile,
+  serializeProfileToJsonString,
 } from 'firefox-profiler/profile-logic/process-profile';
 
 export function updateSharingOption(
@@ -77,31 +79,37 @@ export function updateSharingOption(
 }
 
 export function sanitizedProfileEncodingStarted(
+  format: PublishProfileFormat,
   sanitizedProfile: Profile
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_STARTED',
+    format,
     sanitizedProfile,
   };
 }
 
 export function sanitizedProfileEncodingCompleted(
+  format: PublishProfileFormat,
   sanitizedProfile: Profile,
   profileData: Blob
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_COMPLETED',
+    format,
     sanitizedProfile,
     profileData,
   };
 }
 
 export function sanitizedProfileEncodingFailed(
+  format: PublishProfileFormat,
   sanitizedProfile: Profile,
   error: Error
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_FAILED',
+    format,
     sanitizedProfile,
     error,
   };
@@ -271,9 +279,26 @@ function unwrapEncodedProfile(encodingResult: ProfileEncodingResult): Blob {
 }
 
 export type InflightProfileEncoding = {
+  format: PublishProfileFormat;
   sanitizedProfile: Profile;
   encodingPromise: Promise<ProfileEncodingResult>;
 };
+
+function serializeSanitizedProfile(
+  format: PublishProfileFormat,
+  sanitizedProfile: Profile
+): string | Uint8Array<ArrayBuffer> {
+  switch (format) {
+    case 'jslb':
+      return serializeProfileToJsonSlabsFile(
+        optimizeProfileForStorage(sanitizedProfile)
+      );
+    case 'json':
+      return serializeProfileToJsonString(sanitizedProfile);
+    default:
+      throw new Error(`Unknown publish format: ${format as string}`);
+  }
+}
 
 /**
  * Kick off "encoding" of the sanitized profile. Specifically this means:
@@ -292,26 +317,31 @@ export type InflightProfileEncoding = {
  * This thunk action is synchronous.
  */
 export function encodeSanitizedProfile(
+  format: PublishProfileFormat,
   previousInflightEncoding?: InflightProfileEncoding
 ): ThunkAction<InflightProfileEncoding> {
   return (dispatch, getState): InflightProfileEncoding => {
     const state = getState();
     const sanitizedProfile = getSanitizedProfile(state).profile;
 
-    if (previousInflightEncoding?.sanitizedProfile === sanitizedProfile) {
+    if (
+      previousInflightEncoding?.format === format &&
+      previousInflightEncoding.sanitizedProfile === sanitizedProfile
+    ) {
       // No need to kick of another compression. The current encoding may still
       // be in-flight, and returning the original promise allows the caller to
       // await it.
       return previousInflightEncoding;
     }
 
-    const encodingState = getSanitizedProfileEncodingState(state);
+    const encodingState = getSanitizedProfileEncodingState(state, format);
     if (
       encodingState.phase === 'DONE' &&
       encodingState.sanitizedProfile === sanitizedProfile
     ) {
       // We already have an encoded version of this profile in our state! Use it.
       return {
+        format,
         sanitizedProfile,
         encodingPromise: Promise.resolve({
           type: 'SUCCESS',
@@ -324,22 +354,24 @@ export function encodeSanitizedProfile(
     // just return it as part of the InflightProfileEncoding.
     const encodingPromise: Promise<ProfileEncodingResult> = (async function () {
       try {
-        dispatch(sanitizedProfileEncodingStarted(sanitizedProfile));
-        const jslbData = serializeProfileToJsonSlabsFile(
-          optimizeProfileForStorage(sanitizedProfile)
-        );
-        const gzipData = await compress(jslbData);
+        dispatch(sanitizedProfileEncodingStarted(format, sanitizedProfile));
+        const serialized = serializeSanitizedProfile(format, sanitizedProfile);
+        const gzipData = await compress(serialized);
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
-        dispatch(sanitizedProfileEncodingCompleted(sanitizedProfile, blob));
+        dispatch(
+          sanitizedProfileEncodingCompleted(format, sanitizedProfile, blob)
+        );
         return { type: 'SUCCESS', profileData: blob };
       } catch (error) {
-        dispatch(sanitizedProfileEncodingFailed(sanitizedProfile, error));
+        dispatch(
+          sanitizedProfileEncodingFailed(format, sanitizedProfile, error)
+        );
         console.error('Error while compressing the profile data', error);
         return { type: 'ERROR', error };
       }
     })();
 
-    return { sanitizedProfile, encodingPromise };
+    return { format, sanitizedProfile, encodingPromise };
   };
 }
 
@@ -392,7 +424,7 @@ export function attemptToPublish(
 
       const sanitizedInformation = getSanitizedProfile(prePublishedState);
       const profileEncoding = dispatch(
-        encodeSanitizedProfile(previousInflightEncoding)
+        encodeSanitizedProfile('jslb', previousInflightEncoding)
       );
       const encodingResult = await profileEncoding.encodingPromise;
 

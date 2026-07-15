@@ -154,6 +154,63 @@
   background: var(--internal-download-icon) center center no-repeat;
 }
 
+/* Split-button styling: primary "Download" button on the left, dropdown
+ * toggle on the right, visually joined. */
+.publishPanelSplitButton {
+  display: inline-flex;
+  margin: 0 8px;
+}
+
+.publishPanelSplitButtonMain {
+  margin: 0;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.publishPanelSplitButtonToggle {
+  /* Override the flex-column from .buttonWithPanel — we want the button
+   * baseline to line up with the primary button, not stack. */
+  flex-flow: row nowrap;
+}
+
+.publishPanelSplitButtonToggleButton {
+  width: 24px;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  border-left: 1px solid var(--grey-30-a60, rgb(12 12 13 / 0.2));
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  cursor: default;
+}
+
+.publishPanelSplitButtonToggleButton::after {
+  content: '▾';
+  font-size: 10px;
+  line-height: 1;
+}
+
+.publishPanelSplitButtonPanel {
+  --width: 220px;
+}
+
+.publishPanelSplitButtonMenuItem {
+  display: inline-block;
+  color: var(--clickable-foreground-color);
+  cursor: default;
+  text-decoration: none;
+}
+
+.publishPanelSplitButtonMenuItem:not(
+    .publishPanelSplitButtonMenuItemDisabled
+  ):hover {
+  text-decoration: underline;
+}
+
+.publishPanelSplitButtonMenuItemDisabled {
+  opacity: 0.6;
+}
+
 .menuButtonsDownloadSize {
   display: inline-block;
   margin: 0 4px;
