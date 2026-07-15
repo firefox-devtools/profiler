@@ -12,6 +12,7 @@ import type {
   CounterGraphType,
   CounterTooltipDataSource,
   NetworkStatus,
+  SampleUnits,
 } from 'firefox-profiler/types';
 
 // ===== Utility types =====
@@ -904,4 +905,72 @@ export type ProfileInfoResult = {
     depthLevel: number;
   }> | null;
   networkActivity: ProfileNetworkSummary | null;
+};
+
+/**
+ * Structured view of the profile's `meta` field, mirroring the "Profile Info"
+ * panel in the web UI (`src/components/app/MenuButtons/MetaInfo.tsx`). Fields
+ * are grouped by the panel's sections and are all optional except `interval`
+ * and `product`. Absent fields are omitted entirely rather than set to
+ * `undefined`, so the text formatter and `--json` output stay compact.
+ */
+export type ProfileMetaResult = {
+  type: 'profile-meta';
+
+  // ===== Recording =====
+  // Wall-clock start of the recording (ms since epoch). When
+  // `meta.profilingStartTime` is defined this is `startTime + profilingStartTime`
+  // (the actual moment recording began), otherwise the raw `meta.startTime`.
+  startTime?: number;
+  startTimeFormatted?: string; // ISO string of `startTime`
+  // Length of the recording in milliseconds, when derivable.
+  durationMs?: number;
+  endTime?: number; // raw `meta.endTime` (main process ended, ms since epoch)
+  endTimeFormatted?: string; // ISO string of `endTime`
+  interval: number; // sampling interval, in ms (or bytes for size profiles)
+  symbolicated?: boolean;
+  // Recording buffer, from `meta.configuration`. Capacity is converted from
+  // entries (8 bytes each) to bytes here.
+  bufferCapacityBytes?: number;
+  bufferDuration?: number; // buffer duration in seconds
+  features?: string[]; // enabled profiler features
+  threadsFilter?: string[]; // thread name filters
+
+  // ===== Application =====
+  product: string;
+  productAndVersion?: string; // e.g. "Firefox 130"
+  uptimeMs?: number; // time from process start to recording start
+  appBuildID?: string;
+  sourceURL?: string;
+  updateChannel?: string;
+  debug?: boolean;
+  arguments?: string;
+  extensions?: Array<{ name: string; id: string; baseURL?: string }>;
+
+  // ===== Platform =====
+  platform?: string; // formatted via `formatPlatform`
+  oscpu?: string; // raw `meta.oscpu`
+  abi?: string;
+  device?: string;
+  cpuName?: string;
+  physicalCPUs?: number;
+  logicalCPUs?: number;
+  mainMemoryBytes?: number;
+
+  // ===== Import / misc =====
+  importedFrom?: string;
+  fileName?: string;
+  fileSize?: number;
+  version?: number; // Gecko profile format version
+  preprocessedProfileVersion?: number;
+  sampleUnits?: SampleUnits;
+
+  // ===== Extra =====
+  // Free-form importer sections (`meta.extra`). `value` is passed through raw so
+  // `--json` stays machine-usable; `formatted` is the human-readable string
+  // produced with the entry's marker-schema format.
+  extra?: Array<{
+    label: string;
+    entries: Array<{ label: string; value: any; formatted: string }>;
+  }>;
 };

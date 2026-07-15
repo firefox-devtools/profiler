@@ -47,6 +47,7 @@ import { getLibForFunc } from './function-list';
 import { MarkerMap } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
+import { collectProfileMeta } from './formatters/profile-meta';
 import {
   collectThreadInfo,
   collectThreadSamples,
@@ -88,6 +89,7 @@ import type {
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -219,6 +221,10 @@ export class ProfileQuerier {
       search
     );
     return { ...result, context: this._getContext() };
+  }
+
+  async profileMeta(): Promise<WithContext<ProfileMetaResult>> {
+    return { ...collectProfileMeta(this._store), context: this._getContext() };
   }
 
   async counterList(): Promise<WithContext<CounterListResult>> {
