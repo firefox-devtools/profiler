@@ -687,14 +687,17 @@ async function processTracingEvents(
             columnNumber === undefined ? null : columnNumber
           );
 
-          // Node indexes start at 1, while frame indexes start at 0.
-          const frameIndex = nodeIndex - 1;
           const prefixStackIndex = nodeIdToStackId.get(parent);
           if (prefixStackIndex === undefined) {
             throw new Error(
               'Unable to find the prefix stack index from a node index.'
             );
           }
+
+          // Allocate a fresh frame index from the shared frame table. Node ids
+          // restart at 1 for each thread, so deriving the frame index from the
+          // node id would make different threads collide in this global table.
+          const frameIndex = frameTable.length++;
           frameTable.address[frameIndex] = -1;
           frameTable.category[frameIndex] = category;
           frameTable.subcategory[frameIndex] = 0;
@@ -706,7 +709,6 @@ async function processTracingEvents(
           frameTable.column[frameIndex] =
             columnNumber === undefined ? null : columnNumber;
           frameTable.originalLocation[frameIndex] = null;
-          frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);
           stackTable.prefix.push(prefixStackIndex);
