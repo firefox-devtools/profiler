@@ -27,6 +27,7 @@ import {
   getMouseEvent,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { getRawMarkerTableBuilderFromExisting } from '../../profile-logic/data-structures';
 import {
   autoMockElementSize,
   setMockedElementSize,
@@ -79,15 +80,17 @@ function setup(
       },
     ],
   });
+  const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+  thread.markers = markers;
   const addMarker = (startTime: number, first: number, second: number) => {
     // @ts-expect-error - Invalid payload by our type system
-    thread.markers.data.push({ type: 'Marker', first: first, second: second });
-    thread.markers.name.push(markerStringIndex);
-    thread.markers.startTime.push(startTime);
-    thread.markers.endTime.push(startTime + 1);
-    thread.markers.phase.push(1);
-    thread.markers.category.push(4);
-    thread.markers.length++;
+    markers.data.push({ type: 'Marker', first: first, second: second });
+    markers.name.push(markerStringIndex);
+    markers.startTime.push(startTime);
+    markers.endTime.push(startTime + 1);
+    markers.phase.push(1);
+    markers.category.push(4);
+    markers.length++;
   };
 
   values.forEach((value, index) => {

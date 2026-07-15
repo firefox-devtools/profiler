@@ -423,7 +423,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 67,
+    "preprocessedProfileVersion": 68,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
