@@ -4,7 +4,7 @@
 
 import {
   getEmptyExtensions,
-  shallowCloneRawMarkerTable,
+  getRawMarkerTableBuilderFromExisting,
   shallowCloneFuncTable,
 } from './data-structures';
 import { computeCompactedProfile } from './profile-compacting';
@@ -456,7 +456,7 @@ function sanitizeThreadPII(
     return null;
   }
 
-  let markerTable = shallowCloneRawMarkerTable(thread.markers);
+  let markerTable = getRawMarkerTableBuilderFromExisting(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
   // status.

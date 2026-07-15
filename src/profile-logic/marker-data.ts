@@ -4,6 +4,7 @@
 import {
   getDefaultCategories,
   getEmptyRawMarkerTable,
+  type RawMarkerTableBuilder,
 } from './data-structures';
 import { getFriendlyThreadName, getTimeRangeForThread } from './profile-data';
 import {
@@ -1187,7 +1188,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   markersToDelete: Set<IndexIntoRawMarkerTable>,
   filterRange: StartEndRange | null
 ): {
-  rawMarkerTable: RawMarkerTable;
+  rawMarkerTable: RawMarkerTableBuilder;
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>;
 } {
   const newMarkerTable = getEmptyRawMarkerTable();

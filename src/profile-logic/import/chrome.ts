@@ -14,6 +14,8 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getRawSamplesTableBuilderWithEventDelay,
+  getRawMarkerTableBuilderFromExisting,
+  type RawMarkerTableBuilder,
   type RawSamplesTableBuilder,
   type RawStackTableBuilder,
 } from '../data-structures';
@@ -274,6 +276,7 @@ export function attemptToConvertChromeProfile(
 type ThreadInfo = {
   thread: RawThread;
   samples: RawSamplesTableBuilder;
+  markers: RawMarkerTableBuilder;
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>;
   lastSeenTime: number;
   lastSampledTime: number;
@@ -404,9 +407,13 @@ function getThreadInfo(
   const nodeIdToStackId = new Map<number | void, IndexIntoStackTable | null>();
   nodeIdToStackId.set(undefined, null);
 
+  const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+  thread.markers = markers;
+
   const threadInfo: ThreadInfo = {
     thread,
     samples,
+    markers,
     nodeIdToStackId,
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
@@ -808,7 +815,7 @@ async function extractScreenshots(
     // No screenshots were found, exit early.
     return;
   }
-  const { thread } = getThreadInfo(
+  const { markers } = getThreadInfo(
     threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
@@ -833,21 +840,19 @@ async function extractScreenshots(
       // The image could not be processed, do not add it.
       continue;
     }
-    thread.markers.data.push({
+    markers.data.push({
       type: 'CompositorScreenshot',
       url: stringTable.indexForString(urlString),
       windowID: 'id',
       windowWidth: size.width,
       windowHeight: size.height,
     });
-    thread.markers.name.push(
-      stringTable.indexForString('CompositorScreenshot')
-    );
-    thread.markers.startTime.push(screenshot.ts / 1000);
-    thread.markers.endTime.push(null);
-    thread.markers.phase.push(INSTANT);
-    thread.markers.category.push(graphicsIndex);
-    thread.markers.length++;
+    markers.name.push(stringTable.indexForString('CompositorScreenshot'));
+    markers.startTime.push(screenshot.ts / 1000);
+    markers.endTime.push(null);
+    markers.phase.push(INSTANT);
+    markers.category.push(graphicsIndex);
+    markers.length++;
   }
 }
 
@@ -999,8 +1004,7 @@ function extractMarkers(
           profile,
           event
         );
-        const { thread } = threadInfo;
-        const { markers } = thread;
+        const { markers } = threadInfo;
         let argData:
           | (object & { type2?: unknown; category2?: unknown; detail?: string })
           | null = null;

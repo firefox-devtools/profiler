@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 68
+
+The `startTime` and `endTime` columns of the raw marker table (`thread.markers`) can now optionally be stored as `Float64Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
+When using regular arrays, these columns can contain `null` values - but only if the marker **phase** also marks that value as meaningless. Specifically, for `INSTANT` and `INTERVAL_START` markers, the `endTime` value isn't read (and can be `null`), and for `INTERVAL_END` markers, the `startTime` value isn't read (and can be `null`). But it can also be any other non-`null` value; it's ignored either way. When using typed arrays, there is no equivalent `null` sentinel value, but since the value is ignored anyway, you can pick any value. For example zero, or to the value of the previous marker (maybe for better compressibility).
+
 ### Version 67
 
 The following raw columns can now optionally be stored as typed arrays, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
