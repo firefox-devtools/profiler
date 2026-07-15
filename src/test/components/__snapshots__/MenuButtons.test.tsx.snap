@@ -2172,7 +2172,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
     >
       <a
         class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        download="Firefox 1970-01-01 00.00 profile.jslb.gz"
         href="mockCreateObjectUrl"
       >
         <span
@@ -2290,7 +2290,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     >
       <a
         class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        download="Firefox 1970-01-01 00.00 profile.jslb.gz"
         href="mockCreateObjectUrl"
       >
         <span
@@ -2403,7 +2403,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     >
       <a
         class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
+        download="Firefox 1970-01-01 00.00 profile.jslb.gz"
         href="mockCreateObjectUrl"
       >
         <span

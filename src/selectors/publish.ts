@@ -65,7 +65,7 @@ export const getFilenameString: Selector<string> = createSelector(
     const dateString = `${year}-${month}-${day} ${hour}.${min}`;
 
     // Return the final file name
-    return `${product} ${dateString} profile.json`;
+    return `${product} ${dateString} profile.jslb`;
   }
 );
 
