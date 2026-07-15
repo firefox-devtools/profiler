@@ -476,7 +476,10 @@ class DownloadSplitButton extends React.PureComponent<
 
   _onMenuShow = () => {
     this.setState({ isMenuVisible: true });
-    this.props.onJsonDropdownOpen();
+    // Defer the JSON encoding so the menu can paint first. The serializer
+    // is synchronous and can take a while on large profiles; running it on
+    // the current task would delay the menu's first paint.
+    setTimeout(this.props.onJsonDropdownOpen, 0);
   };
 
   _onMenuHide = () => {
