@@ -60,11 +60,13 @@ import type {
   ProfileIndexTranslationMaps,
   ProfileEncodingResult,
   SharingMode,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import {
   optimizeProfileForStorage,
   serializeProfileToJsonSlabsFile,
+  serializeProfileToJsonString,
 } from 'firefox-profiler/profile-logic/process-profile';
 
 export function updateSharingOption(
@@ -82,12 +84,14 @@ export function updateSharingOption(
 
 export function sanitizedProfileEncodingStarted(
   mode: SharingMode,
+  format: PublishProfileFormat,
   sanitizedProfile: Profile,
   encodingPromise: Promise<ProfileEncodingResult>
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_STARTED',
     mode,
+    format,
     sanitizedProfile,
     encodingPromise,
   };
@@ -95,12 +99,14 @@ export function sanitizedProfileEncodingStarted(
 
 export function sanitizedProfileEncodingCompleted(
   mode: SharingMode,
+  format: PublishProfileFormat,
   sanitizedProfile: Profile,
   profileData: Blob
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_COMPLETED',
     mode,
+    format,
     sanitizedProfile,
     profileData,
   };
@@ -108,12 +114,14 @@ export function sanitizedProfileEncodingCompleted(
 
 export function sanitizedProfileEncodingFailed(
   mode: SharingMode,
+  format: PublishProfileFormat,
   sanitizedProfile: Profile,
   error: Error
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_FAILED',
     mode,
+    format,
     sanitizedProfile,
     error,
   };
@@ -277,6 +285,22 @@ function unwrapEncodedProfile(encodingResult: ProfileEncodingResult): Blob {
   return encodingResult.profileData;
 }
 
+function serializeSanitizedProfile(
+  format: PublishProfileFormat,
+  sanitizedProfile: Profile
+): string | Uint8Array<ArrayBuffer> {
+  switch (format) {
+    case 'jslb':
+      return serializeProfileToJsonSlabsFile(
+        optimizeProfileForStorage(sanitizedProfile)
+      );
+    case 'json':
+      return serializeProfileToJsonString(sanitizedProfile);
+    default:
+      throw new Error(`Unknown publish format: ${format as string}`);
+  }
+}
+
 /**
  * Kick off "encoding" of the sanitized profile. Specifically this means:
  * - Compute the sanitized profile
@@ -293,13 +317,14 @@ function unwrapEncodedProfile(encodingResult: ProfileEncodingResult): Blob {
  * This thunk action is synchronous.
  */
 export function encodeSanitizedProfile(
-  mode: SharingMode
+  mode: SharingMode,
+  format: PublishProfileFormat
 ): ThunkAction<Promise<ProfileEncodingResult>> {
   return (dispatch, getState): Promise<ProfileEncodingResult> => {
     const state = getState();
     const sanitizedProfile = getSanitizedProfile(state, mode).profile;
 
-    const encodingState = getSanitizedProfileEncodingState(state, mode);
+    const encodingState = getSanitizedProfileEncodingState(state, mode, format);
     if (
       encodingState.phase === 'ENCODING' &&
       encodingState.sanitizedProfile === sanitizedProfile
@@ -325,24 +350,34 @@ export function encodeSanitizedProfile(
       // synchronous failure here could dispatch FAILED, which the reducer drops.
       await Promise.resolve();
       try {
-        const jslbData = serializeProfileToJsonSlabsFile(
-          optimizeProfileForStorage(sanitizedProfile)
-        );
-        const gzipData = await compress(jslbData);
+        const serialized = serializeSanitizedProfile(format, sanitizedProfile);
+        const gzipData = await compress(serialized);
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
         dispatch(
-          sanitizedProfileEncodingCompleted(mode, sanitizedProfile, blob)
+          sanitizedProfileEncodingCompleted(
+            mode,
+            format,
+            sanitizedProfile,
+            blob
+          )
         );
         return { type: 'SUCCESS', profileData: blob };
       } catch (error) {
-        dispatch(sanitizedProfileEncodingFailed(mode, sanitizedProfile, error));
+        dispatch(
+          sanitizedProfileEncodingFailed(mode, format, sanitizedProfile, error)
+        );
         console.error('Error while compressing the profile data', error);
         return { type: 'ERROR', error };
       }
     })();
 
     dispatch(
-      sanitizedProfileEncodingStarted(mode, sanitizedProfile, encodingPromise)
+      sanitizedProfileEncodingStarted(
+        mode,
+        format,
+        sanitizedProfile,
+        encodingPromise
+      )
     );
     return encodingPromise;
   };
@@ -395,7 +430,9 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         prePublishedState,
         'upload'
       );
-      const encodingResult = await dispatch(encodeSanitizedProfile('upload'));
+      const encodingResult = await dispatch(
+        encodeSanitizedProfile('upload', 'jslb')
+      );
 
       // The previous line was async, check to make sure that this request is still valid.
       // The upload could have been aborted while we were compressing the data.

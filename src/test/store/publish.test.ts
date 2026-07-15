@@ -187,8 +187,8 @@ describe('encodeSanitizedProfile', function () {
     const { profile } = getProfileFromTextSamples('A');
     const { dispatch } = storeWithProfile(profile);
 
-    const first = dispatch(encodeSanitizedProfile('upload'));
-    const second = dispatch(encodeSanitizedProfile('upload'));
+    const first = dispatch(encodeSanitizedProfile('upload', 'jslb'));
+    const second = dispatch(encodeSanitizedProfile('upload', 'jslb'));
 
     expect(second).toBe(first);
     await first;
@@ -200,13 +200,13 @@ describe('encodeSanitizedProfile', function () {
 
     // The two modes sanitize to different profiles, so they each need their own
     // encoding...
-    const download = dispatch(encodeSanitizedProfile('download'));
-    const upload = dispatch(encodeSanitizedProfile('upload'));
+    const download = dispatch(encodeSanitizedProfile('download', 'jslb'));
+    const upload = dispatch(encodeSanitizedProfile('upload', 'jslb'));
     expect(upload).not.toBe(download);
 
     // ...but reopening a panel must not start a third and fourth encoding.
-    expect(dispatch(encodeSanitizedProfile('download'))).toBe(download);
-    expect(dispatch(encodeSanitizedProfile('upload'))).toBe(upload);
+    expect(dispatch(encodeSanitizedProfile('download', 'jslb'))).toBe(download);
+    expect(dispatch(encodeSanitizedProfile('upload', 'jslb'))).toBe(upload);
 
     await Promise.all([download, upload]);
   });
@@ -225,22 +225,27 @@ describe('encodeSanitizedProfile', function () {
 
     // Opt into URLs for uploading only, and let that encoding finish.
     dispatch(updateSharingOption('upload', 'includeUrls', true));
-    await dispatch(encodeSanitizedProfile('upload'));
-    expect(getSanitizedProfileEncodingState(getState(), 'upload').phase).toBe(
-      'DONE'
-    );
+    await dispatch(encodeSanitizedProfile('upload', 'jslb'));
+    expect(
+      getSanitizedProfileEncodingState(getState(), 'upload', 'jslb').phase
+    ).toBe('DONE');
 
     // The download panel, whose options still strip URLs, must not see it.
     const forDownload = getSanitizedProfileEncodingState(
       getState(),
-      'download'
+      'download',
+      'jslb'
     );
     expect(forDownload.phase).toBe('INITIAL');
 
     // And once download has encoded too, each mode keeps its own blob.
-    await dispatch(encodeSanitizedProfile('download'));
+    await dispatch(encodeSanitizedProfile('download', 'jslb'));
     const encodedBlob = (mode: SharingMode) => {
-      const encodingState = getSanitizedProfileEncodingState(getState(), mode);
+      const encodingState = getSanitizedProfileEncodingState(
+        getState(),
+        mode,
+        'jslb'
+      );
       if (encodingState.phase !== 'DONE') {
         throw new Error(
           `Expected the ${mode} encoding to be DONE, but it is ${encodingState.phase}.`

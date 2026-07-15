@@ -46,6 +46,7 @@ import type {
   TableViewOptions,
   DecodedInstruction,
   ProfileEncodingResult,
+  PublishProfileFormat,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -657,18 +658,21 @@ type PublishAction =
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly mode: SharingMode;
+      readonly format: PublishProfileFormat;
       readonly sanitizedProfile: Profile;
       readonly encodingPromise: Promise<ProfileEncodingResult>;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';
       readonly mode: SharingMode;
+      readonly format: PublishProfileFormat;
       readonly sanitizedProfile: Profile;
       readonly profileData: Blob;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_FAILED';
       readonly mode: SharingMode;
+      readonly format: PublishProfileFormat;
       readonly sanitizedProfile: Profile;
       readonly error: Error;
     }
