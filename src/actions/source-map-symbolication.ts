@@ -4,12 +4,18 @@
 
 import { getRawProfileSharedData } from 'firefox-profiler/selectors';
 import { applySourceMapSymbolicationResponse } from 'firefox-profiler/profile-logic/source-map-symbolication';
+import {
+  getSourcesWithSourceMapURL,
+  parseSourceMapFileContents,
+  matchSourceMapToSource,
+} from 'firefox-profiler/profile-logic/source-map-matching';
 
 import type {
   WorkerInput,
   WorkerOutput,
 } from 'firefox-profiler/profile-logic/source-map-worker-types';
 import type { IndexIntoSourceTable, ThunkAction } from 'firefox-profiler/types';
+import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
 import type { RawSourceMap } from 'source-map';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -84,6 +90,97 @@ export function doSourceMapSymbolication(
         return 'no-match';
       default:
         throw assertExhaustiveCheck(result);
+    }
+  };
+}
+
+/**
+ * The ways applying a user-supplied `.map` file can fail.
+ */
+export type ApplySourceMapError =
+  | 'invalid-source-map'
+  | 'no-eligible-sources'
+  | 'symbolication-failed';
+
+/**
+ * The outcome of applying a user-supplied `.map` file to the profile.
+ */
+export type ApplySourceMapFileResult =
+  // `filename` is the resolved bundle source the map was applied to, so the UI
+  // can show which source was matched (auto-matched or user-picked).
+  | { type: 'applied'; filename: string }
+  | { type: 'no-match'; filename: string }
+  | { type: 'ambiguous'; candidates: EligibleSource[] }
+  | { type: 'error'; error: ApplySourceMapError };
+
+/**
+ * Apply a source map file that the user selected from disk. Parses the file,
+ * auto-matches it to a bundle source (unless `sourceIndex` is provided, e.g.
+ * after the user disambiguated in the picker), and feeds it into the existing
+ * source map symbolication pipeline.
+ */
+export function applySourceMapFile(
+  fileName: string,
+  fileContents: string,
+  // Set when the user picked a bundle in the picker; skips auto-matching.
+  sourceIndex?: IndexIntoSourceTable
+): ThunkAction<Promise<ApplySourceMapFileResult>> {
+  return async (dispatch, getState) => {
+    const map = parseSourceMapFileContents(fileContents);
+    if (map === null) {
+      return { type: 'error', error: 'invalid-source-map' };
+    }
+
+    const shared = getRawProfileSharedData(getState());
+
+    let targetSourceIndex: IndexIntoSourceTable;
+    if (sourceIndex !== undefined) {
+      targetSourceIndex = sourceIndex;
+    } else {
+      const eligible = getSourcesWithSourceMapURL(
+        shared.sources,
+        shared.stringArray
+      );
+      const result = matchSourceMapToSource(map, fileName, eligible);
+      switch (result.type) {
+        case 'no-eligible-sources':
+          return { type: 'error', error: 'no-eligible-sources' };
+        case 'ambiguous':
+          return { type: 'ambiguous', candidates: result.candidates };
+        case 'match':
+          targetSourceIndex = result.sourceIndex;
+          break;
+        default:
+          throw assertExhaustiveCheck(result);
+      }
+    }
+
+    const filename =
+      shared.stringArray[shared.sources.filename[targetSourceIndex]];
+
+    // Feed the bundle's stored content as the compiled source when we have it,
+    // which enables full scope-tree name resolution.
+    const compiledContent = shared.sources.content[targetSourceIndex];
+    const compiledSources =
+      compiledContent !== null
+        ? new Map([[targetSourceIndex, compiledContent]])
+        : new Map<IndexIntoSourceTable, string>();
+
+    const outcome = await dispatch(
+      doSourceMapSymbolication(
+        new Map([[targetSourceIndex, map]]),
+        compiledSources
+      )
+    );
+    switch (outcome) {
+      case 'applied':
+        return { type: 'applied', filename };
+      case 'no-match':
+        return { type: 'no-match', filename };
+      case 'error':
+        return { type: 'error', error: 'symbolication-failed' };
+      default:
+        throw assertExhaustiveCheck(outcome);
     }
   };
 }
