@@ -121,7 +121,7 @@ then land the version bump on `main` before publishing.
 From the repository root:
 
 ```
-yarn publish-profiler-cli
+yarn publish-cli
 ```
 
 [`scripts/publish-profiler-cli.mjs`](../scripts/publish-profiler-cli.mjs) will:
@@ -139,10 +139,10 @@ Extra arguments are forwarded to `npm publish`. For example:
 
 ```
 # Build and verify, but do not actually publish.
-yarn publish-profiler-cli --dry-run
+yarn publish-cli --dry-run
 
 # Override the automatic dist-tag.
-yarn publish-profiler-cli --tag alpha
+yarn publish-cli --tag alpha
 ```
 
 ## Verify the release

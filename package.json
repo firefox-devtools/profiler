@@ -25,7 +25,7 @@
     "build-profile-query:quiet": "yarn build-profile-query",
     "build-cli": "cross-env NODE_ENV=production node scripts/build-profiler-cli.mjs",
     "build-cli:quiet": "yarn build-cli",
-    "publish-profiler-cli": "node scripts/publish-profiler-cli.mjs",
+    "publish-cli": "node scripts/publish-profiler-cli.mjs",
     "lint": "node bin/output-fixing-commands.js run-p lint-js lint-css fmt-check",
     "lint-fix": "run-p lint-fix-js lint-fix-css fmt",
     "lint-js": "node bin/output-fixing-commands.js eslint . --report-unused-disable-directives --cache --cache-strategy content",
