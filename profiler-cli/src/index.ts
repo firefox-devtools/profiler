@@ -15,7 +15,7 @@
  *   profiler-cli session use <id>                      Switch the current session
  *
  * Build:
- *   yarn build-profiler-cli
+ *   yarn build-cli
  *
  * Run:
  *   profiler-cli <command>                              (if profiler-cli is in PATH)

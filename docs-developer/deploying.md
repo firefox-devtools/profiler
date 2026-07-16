@@ -126,7 +126,7 @@ yarn publish-profiler-cli
 
 [`scripts/publish-profiler-cli.mjs`](../scripts/publish-profiler-cli.mjs) will:
 
-1. Run `yarn build-profiler-cli` to produce `profiler-cli/dist/profiler-cli.js` (a
+1. Run `yarn build-cli` to produce `profiler-cli/dist/profiler-cli.js` (a
    single self-contained bundle with no runtime dependencies).
 2. Run `npm publish profiler-cli/`, picking `--tag next` when the version
    contains `-` (e.g. `0.1.0-next.1`) and `--tag latest` otherwise.
