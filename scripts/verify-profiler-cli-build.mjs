@@ -14,7 +14,7 @@ const distPath = fileURLToPath(distUrl);
 if (!existsSync(distUrl)) {
   console.error(
     `profiler-cli bundle not found at ${distPath}.\n` +
-      `Run 'yarn build-profiler-cli' from the repo root before publishing.`
+      `Run 'yarn build-cli' from the repo root before publishing.`
   );
   process.exit(1);
 }
@@ -26,7 +26,7 @@ const needle = JSON.stringify(version);
 if (!bundle.includes(needle)) {
   console.error(
     `profiler-cli bundle does not embed the current package.json version (${version}).\n` +
-      `The bundle is stale — rebuild with 'yarn build-profiler-cli' from the repo root.`
+      `The bundle is stale — rebuild with 'yarn build-cli' from the repo root.`
   );
   process.exit(1);
 }

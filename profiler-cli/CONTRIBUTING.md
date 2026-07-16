@@ -45,7 +45,7 @@ All test scripts automatically set `PROFILER_CLI_SESSION_DIR="./.profiler-cli-de
 **Build:**
 
 ```bash
-yarn build-profiler-cli # Creates ./dist/profiler-cli.js
+yarn build-cli # Creates ./dist/profiler-cli.js
 ```
 
 **Unit tests:**
