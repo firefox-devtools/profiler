@@ -604,6 +604,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolicate profile
 MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
+MenuButtons--metaInfo--source-maps = Source maps:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Apply source map…
+    .title = Load a .map file from disk to symbolicate a minified JavaScript bundle, to recover original function names and source locations.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Choose which bundle this source map applies to:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Apply
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Cancel
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Original sources resolved for { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = No stack positions in { $filename } matched this source map.
+MenuButtons--metaInfo--source-map-error-invalid = The selected file is not a valid source map.
+MenuButtons--metaInfo--source-map-error-no-eligible = This profile has no JS bundles with source map URLs.
+MenuButtons--metaInfo--source-map-error-failed = Could not apply this source map to the profile.
 MenuButtons--metaInfo--cpu-model = CPU model:
 MenuButtons--metaInfo--cpu-cores = CPU cores:
 MenuButtons--metaInfo--main-memory = Main memory:
