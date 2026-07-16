@@ -26,13 +26,15 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  * text (fetched alongside the source maps). Used for scope-tree-based function
  * name resolution.
  */
+export type SourceMapSymbolicationResult = 'applied' | 'no-match' | 'error';
+
 export function doSourceMapSymbolication(
   resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>,
   compiledSources: Map<IndexIntoSourceTable, string>
-): ThunkAction<Promise<void>> {
+): ThunkAction<Promise<SourceMapSymbolicationResult>> {
   return async (dispatch, getState) => {
     if (resolvedSourceMaps.size === 0) {
-      return;
+      return 'no-match';
     }
 
     const shared = getRawProfileSharedData(getState());
@@ -61,7 +63,7 @@ export function doSourceMapSymbolication(
         );
         if (applied === null) {
           dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
-          break;
+          return 'no-match';
         }
         dispatch({
           type: 'BULK_SOURCE_MAP_SYMBOLICATION',
@@ -71,15 +73,15 @@ export function doSourceMapSymbolication(
           newSources: applied.newSources,
           newStringArray: applied.newStringArray,
         });
-        break;
+        return 'applied';
       }
       case 'error':
         console.warn('Source map worker error:', result.message);
         dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
-        break;
+        return 'error';
       case 'no-op':
         dispatch({ type: 'SOURCE_MAP_SYMBOLICATION_FAILED' });
-        break;
+        return 'no-match';
       default:
         throw assertExhaustiveCheck(result);
     }
