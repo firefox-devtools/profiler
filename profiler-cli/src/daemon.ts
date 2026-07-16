@@ -303,6 +303,8 @@ export class Daemon {
         switch (command.subcommand) {
           case 'info':
             return this.querier.profileInfo(command.all, command.search);
+          case 'meta':
+            return this.querier.profileMeta();
           case 'threads':
             throw new Error('unimplemented');
           case 'logs':

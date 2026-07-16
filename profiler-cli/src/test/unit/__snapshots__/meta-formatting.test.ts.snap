@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`formatProfileMetaResult renders a full Firefox recording grouped into sections 1`] = `
+"[Thread: t-0 (GeckoMain) | View: Full profile | Full: 3s]
+
+Recording:
+  Started: 2024-09-02T14:35:00.000Z
+  Duration: 5.200s
+  Main process ended: 2024-09-02T14:35:10.000Z
+  Sampling interval: 1ms
+  Buffer capacity: 8MB
+  Buffer duration: 20s
+  Symbolicated: yes
+  Features: js, stackwalk
+  Threads filter: GeckoMain
+
+Application:
+  Name: Firefox 130 (build 20240902143034)
+  Uptime: 34s
+  Update channel: nightly
+  Build type: opt
+  Extensions (2): uBlock Origin, 1Password
+
+Platform:
+  OS: macOS 14.6 (aarch64-gcc3)
+  CPU: Apple M1 Max (10 physical, 10 logical cores)
+  Memory: 34.4GB"
+`;
+
+exports[`formatProfileMetaResult renders a sparse imported profile, skipping absent sections 1`] = `
+"[Thread: t-0 (GeckoMain) | View: Full profile | Full: 3s]
+
+Recording:
+  Sampling interval: 1ms
+
+Application:
+  Name: Google Chrome
+
+Import:
+  Imported from: Chrome Trace
+  File name: trace.json
+  File size: 2.50MB"
+`;
+
+exports[`formatProfileMetaResult renders extra importer sections as their own heading blocks 1`] = `
+"[Thread: t-0 (GeckoMain) | View: Full profile | Full: 3s]
+
+Recording:
+  Sampling interval: 1ms
+
+System:
+  Kernel: 6.1.0
+  CPUs: 16"
+`;

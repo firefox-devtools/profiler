@@ -11,6 +11,8 @@ import type {
   Transform,
   CounterGraphType,
   CounterTooltipDataSource,
+  NetworkStatus,
+  SampleUnits,
 } from 'firefox-profiler/types';
 
 // ===== Utility types =====
@@ -309,6 +311,7 @@ export type ThreadInfoResult = {
     cpuMs: number;
     depthLevel: number;
   }> | null;
+  networkActivity: ThreadNetworkSummary | null;
 };
 
 export type TopFunctionInfo = FunctionDisplayInfo & {
@@ -427,6 +430,8 @@ export type NetworkPhaseTimings = {
   mainThread?: number;
 };
 
+export type NetworkRequestSort = 'start' | 'duration';
+
 export type NetworkRequestEntry = {
   markerHandle: string;
   url: string;
@@ -436,6 +441,17 @@ export type NetworkRequestEntry = {
   transferSizeKB?: number;
   startTime: number;
   duration: number;
+  // The derived marker's status. STATUS_REDIRECT / STATUS_CANCEL legs are
+  // listed alongside completed requests but flagged so they aren't mistaken
+  // for them.
+  status: NetworkStatus;
+  // True when the request was still in flight when the recording stopped
+  // (only a START event, no stop); its duration is measured until the end of
+  // the recording.
+  incomplete: boolean;
+  // True when the request completed during the recording but its START event
+  // predates it, so the reported duration is a lower bound.
+  startedBeforeRecording: boolean;
   phases: NetworkPhaseTimings;
 };
 
@@ -444,7 +460,11 @@ export type ThreadNetworkResult = {
   threadHandle: string;
   friendlyThreadName: string;
   totalRequestCount: number;
+  // Requests still in flight when the recording stopped.
+  incompleteCount: number;
   filteredRequestCount: number;
+  // How the request list is ordered.
+  sort: NetworkRequestSort;
   filters?: {
     searchString?: string;
     minDuration?: number;
@@ -455,9 +475,93 @@ export type ThreadNetworkResult = {
     cacheHit: number;
     cacheMiss: number;
     cacheUnknown: number;
+    // Interval union of all requests intersecting the range: wall-clock
+    // time, unlike the summed phase totals.
+    inFlightMs: number;
+    inFlightPercentage: number;
+    peakConcurrency: number;
+    rangeDurationMs: number;
     phaseTotals: NetworkPhaseTimings;
   };
   requests: NetworkRequestEntry[];
+};
+
+/**
+ * A single network request surfaced in a network summary (profile- or
+ * thread-level). Carries handles so the next drill-down command
+ * (`zoom push m-N`, `marker info m-N`) is obvious.
+ */
+export type NetworkSummaryRequest = {
+  markerHandle: string;
+  threadHandle: string;
+  url: string;
+  durationMs: number;
+  startTime: number;
+  transferSizeKB?: number;
+  httpStatus?: number;
+  // The derived marker's status. STATUS_REDIRECT / STATUS_CANCEL legs are
+  // surfaced (they carry in-flight time and the pre-redirect URL) but are not
+  // completed requests, so the formatter labels them.
+  status: NetworkStatus;
+  // True when the request was still in flight when the recording stopped.
+  incomplete: boolean;
+  // True when the request completed but its START event predates the
+  // recording, so the reported duration is a lower bound.
+  startedBeforeRecording: boolean;
+};
+
+/**
+ * Network activity summary for a single thread, scoped to the current range.
+ * The headline metric is `inFlightPercentage` (interval-union "in flight"
+ * time), which unlike summed phase durations can't exceed the wall clock.
+ */
+export type ThreadNetworkSummary = {
+  threadHandle: string;
+  threadName: string;
+  // Completed (STATUS_STOP) requests intersecting the range.
+  requestCount: number;
+  // Requests still in flight when the recording stopped.
+  incompleteCount: number;
+  // Interval union of all (clamped) request intervals.
+  inFlightMs: number;
+  inFlightPercentage: number;
+  // Max simultaneous in-flight requests.
+  peakConcurrency: number;
+  // Requests with responseStatus >= 400.
+  errorCount: number;
+  cacheHit: number;
+  cacheMiss: number;
+  cacheUnknown: number;
+  rangeDurationMs: number;
+  slowest: NetworkSummaryRequest[];
+};
+
+/**
+ * Per-thread breakdown row in a profile-wide network summary. Counts are the
+ * thread's own (not deduped) so process attribution stays visible.
+ */
+export type ProfileNetworkThreadBreakdown = {
+  threadHandle: string;
+  threadName: string;
+  requestCount: number;
+  inFlightMs: number;
+};
+
+/**
+ * Profile-wide network summary. The headline numbers are deduped across
+ * processes (the parent process carries a copy of every request), while
+ * `byThread` keeps each thread's own counts for attribution.
+ */
+export type ProfileNetworkSummary = {
+  requestCount: number;
+  incompleteCount: number;
+  inFlightMs: number;
+  inFlightPercentage: number;
+  peakConcurrency: number;
+  errorCount: number;
+  rangeDurationMs: number;
+  slowest: NetworkSummaryRequest[];
+  byThread: ProfileNetworkThreadBreakdown[];
 };
 
 export type ThreadMarkersResult = {
@@ -800,4 +904,73 @@ export type ProfileInfoResult = {
     cpuMs: number;
     depthLevel: number;
   }> | null;
+  networkActivity: ProfileNetworkSummary | null;
+};
+
+/**
+ * Structured view of the profile's `meta` field, mirroring the "Profile Info"
+ * panel in the web UI (`src/components/app/MenuButtons/MetaInfo.tsx`). Fields
+ * are grouped by the panel's sections and are all optional except `interval`
+ * and `product`. Absent fields are omitted entirely rather than set to
+ * `undefined`, so the text formatter and `--json` output stay compact.
+ */
+export type ProfileMetaResult = {
+  type: 'profile-meta';
+
+  // ===== Recording =====
+  // Wall-clock start of the recording (ms since epoch). When
+  // `meta.profilingStartTime` is defined this is `startTime + profilingStartTime`
+  // (the actual moment recording began), otherwise the raw `meta.startTime`.
+  startTime?: number;
+  startTimeFormatted?: string; // ISO string of `startTime`
+  // Length of the recording in milliseconds, when derivable.
+  durationMs?: number;
+  endTime?: number; // raw `meta.endTime` (main process ended, ms since epoch)
+  endTimeFormatted?: string; // ISO string of `endTime`
+  interval: number; // sampling interval, in ms (or bytes for size profiles)
+  symbolicated?: boolean;
+  // Recording buffer, from `meta.configuration`. Capacity is converted from
+  // entries (8 bytes each) to bytes here.
+  bufferCapacityBytes?: number;
+  bufferDuration?: number; // buffer duration in seconds
+  features?: string[]; // enabled profiler features
+  threadsFilter?: string[]; // thread name filters
+
+  // ===== Application =====
+  product: string;
+  productAndVersion?: string; // e.g. "Firefox 130"
+  uptimeMs?: number; // time from process start to recording start
+  appBuildID?: string;
+  sourceURL?: string;
+  updateChannel?: string;
+  debug?: boolean;
+  arguments?: string;
+  extensions?: Array<{ name: string; id: string; baseURL?: string }>;
+
+  // ===== Platform =====
+  platform?: string; // formatted via `formatPlatform`
+  oscpu?: string; // raw `meta.oscpu`
+  abi?: string;
+  device?: string;
+  cpuName?: string;
+  physicalCPUs?: number;
+  logicalCPUs?: number;
+  mainMemoryBytes?: number;
+
+  // ===== Import / misc =====
+  importedFrom?: string;
+  fileName?: string;
+  fileSize?: number;
+  version?: number; // Gecko profile format version
+  preprocessedProfileVersion?: number;
+  sampleUnits?: SampleUnits;
+
+  // ===== Extra =====
+  // Free-form importer sections (`meta.extra`). `value` is passed through raw so
+  // `--json` stays machine-usable; `formatted` is the human-readable string
+  // produced with the entry's marker-schema format.
+  extra?: Array<{
+    label: string;
+    entries: Array<{ label: string; value: any; formatted: string }>;
+  }>;
 };

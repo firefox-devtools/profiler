@@ -92,6 +92,7 @@
   --comment-node-color: #5c5c5f;
 
   color: var(--base-foreground-color);
+  color-scheme: light;
 }
 
 :root.dark-mode {

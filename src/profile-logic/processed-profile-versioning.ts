@@ -3288,6 +3288,15 @@ const _upgraders: {
     // Regular JS / JSON arrays are still accepted. All valid v66 profiles
     // are valid v67 profiles, so no upgrader is needed.
   },
+  [68]: (_profile: any) => {
+    // The `startTime` and `endTime` columns of the raw marker table
+    // (`thread.markers`) can now optionally be stored as `Float64Array`.
+    // Each marker's `phase` determines which of the two is meaningful, so
+    // slots that would otherwise be `null` may carry a placeholder value
+    // (typically `0`); those slots are never read. Regular JS / JSON arrays
+    // are still accepted. All valid v67 profiles are valid v68 profiles, so
+    // no upgrader is needed.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

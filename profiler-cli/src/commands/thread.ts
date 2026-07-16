@@ -304,16 +304,28 @@ export function registerThreadCommand(
         'Filter by maximum total request duration in milliseconds'
       )
       .option('--limit <N>', 'Max requests to show (default: 20, 0 = show all)')
+      .option(
+        '--sort <order>',
+        'Sort requests by "duration" (default, slowest first) or "start" (chronological)'
+      )
   ).action(async (opts) => {
     const networkFilters: {
       searchString?: string;
       minDuration?: number;
       maxDuration?: number;
       limit?: number;
+      sort?: 'start' | 'duration';
     } = {};
 
     if (opts.search !== undefined) {
       networkFilters.searchString = opts.search;
+    }
+    if (opts.sort !== undefined) {
+      if (opts.sort !== 'start' && opts.sort !== 'duration') {
+        console.error('Error: --sort must be "start" or "duration"');
+        process.exit(1);
+      }
+      networkFilters.sort = opts.sort;
     }
     if (opts.minDuration !== undefined) {
       networkFilters.minDuration = parseFloatArg(

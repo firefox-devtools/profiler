@@ -30,6 +30,7 @@ import type {
   IndexIntoFrameTable,
   IndexIntoFuncTable,
   IndexIntoStackTable,
+  IndexIntoStringTable,
   IndexIntoCategoryList,
   IndexIntoSubcategoryListForCategory,
   IndexIntoNativeSymbolTable,
@@ -39,6 +40,8 @@ import type {
   Bytes,
   Milliseconds,
   Tid,
+  MarkerPhase,
+  MarkerPayload,
   WeightType,
 } from 'firefox-profiler/types';
 
@@ -62,6 +65,17 @@ export type RawSamplesTableBuilder = {
   weightType: WeightType;
   threadCPUDelta?: Array<number | null>;
   threadId?: Tid[];
+  length: number;
+};
+
+export type RawMarkerTableBuilder = {
+  data: Array<MarkerPayload | null>;
+  name: IndexIntoStringTable[];
+  startTime: Array<Milliseconds | null>;
+  endTime: Array<Milliseconds | null>;
+  phase: MarkerPhase[];
+  category: IndexIntoCategoryList[];
+  threadId?: Array<Tid | null>;
   length: number;
 };
 
@@ -189,6 +203,28 @@ export function finishRawSamplesTableBuilder(
         ? undefined
         : new Float64Array(builder.timeDeltas),
   };
+}
+
+export function getRawMarkerTableBuilderFromExisting(
+  markerTable: RawMarkerTable
+): RawMarkerTableBuilder {
+  const builder: RawMarkerTableBuilder = {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: markerTable.data.slice(),
+    name: markerTable.name.slice(),
+    startTime: Array.from(markerTable.startTime),
+    endTime: Array.from(markerTable.endTime),
+    phase: markerTable.phase.slice(),
+    category: markerTable.category.slice(),
+    length: markerTable.length,
+  };
+  if (markerTable.threadId !== undefined) {
+    builder.threadId = markerTable.threadId.slice();
+  }
+  return builder;
 }
 
 export function getRawStackTableBuilderWithExistingContents(
@@ -395,7 +431,7 @@ export function getEmptyNativeSymbolTable(): NativeSymbolTable {
   };
 }
 
-export function getEmptyRawMarkerTable(): RawMarkerTable {
+export function getEmptyRawMarkerTable(): RawMarkerTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -491,24 +527,6 @@ export function finishRawBalancedNativeAllocationsTableBuilder(
   return {
     ...builder,
     time: new Float64Array(builder.time),
-  };
-}
-
-export function shallowCloneRawMarkerTable(
-  markerTable: RawMarkerTable
-): RawMarkerTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    data: markerTable.data.slice(),
-    name: markerTable.name.slice(),
-    startTime: markerTable.startTime.slice(),
-    endTime: markerTable.endTime.slice(),
-    phase: markerTable.phase.slice(),
-    category: markerTable.category.slice(),
-    length: markerTable.length,
   };
 }
 
