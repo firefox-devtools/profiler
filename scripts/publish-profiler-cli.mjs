@@ -26,5 +26,5 @@ function run(cmd, args) {
 }
 
 run('yarn', ['test-all']);
-run('yarn', ['build-profiler-cli']);
+run('yarn', ['build-cli']);
 run('npm', ['publish', 'profiler-cli/', ...tagArgs, ...forwardedArgs]);

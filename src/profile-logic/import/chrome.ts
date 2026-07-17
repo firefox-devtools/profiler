@@ -47,6 +47,7 @@ export type TracingEventUnion =
   | ThreadSortIndexEvent
   | ScreenshotEvent
   | FallbackEndEvent
+  | ScriptCatchupEvent
   | TracingStartedInBrowserEvent;
 
 type TracingEvent<Event> = {
@@ -186,6 +187,27 @@ type ScreenshotEvent = TracingEvent<{
 type TracingStartedInBrowserEvent = TracingEvent<{
   name: 'TracingStartedInBrowser';
   ph: 'I';
+}>;
+
+// Emitted for every parsed script when a trace is recorded with the
+// "disabled-by-default-devtools.v8-source-rundown" category (the DevTools
+// Performance panel enables it by default). This is the only place a Chrome
+// trace exposes the source map URL for a script. The CPU profile callFrames
+// don't carry it (for now?).
+type ScriptCatchupEvent = TracingEvent<{
+  name: 'ScriptCatchup';
+  args: {
+    data: {
+      executionContextId: number;
+      hasSourceUrl: boolean;
+      isModule: boolean;
+      isolate: string;
+      scriptId: number;
+      url?: string;
+      // The source map URL as declared by the script, often relative to `url`.
+      sourceMapUrl?: string;
+    };
+  };
 }>;
 
 function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
@@ -532,6 +554,21 @@ async function processTracingEvents(
     ensureExists(profile.meta.categories)
   );
 
+  // Build a lookup from script URL to its source map URL from any ScriptCatchup
+  // events in the trace. The declared source map URL is often relative to the
+  // script URL which matches how Gecko profiles store this column.
+  // Keyed by URL because the source table is deduped by URL too, and the CPU
+  // profile callFrames only expose the script URL (not the isolate), which is
+  // what would be needed to disambiguate scriptIds across isolates.
+  const sourceMapURLByScriptURL = new Map<string, string>();
+  for (const event of (eventsByName.get('ScriptCatchup') ??
+    []) as ScriptCatchupEvent[]) {
+    const { data } = event.args;
+    if (data.url && data.sourceMapUrl) {
+      sourceMapURLByScriptURL.set(data.url, data.sourceMapUrl);
+    }
+  }
+
   const threadInfoByPidAndTid = new Map<string, ThreadInfo>();
   const threadInfoByThread = new Map<RawThread, ThreadInfo>();
   for (const profileEvent of profileEvents) {
@@ -628,7 +665,15 @@ async function processTracingEvents(
             functionName !== '' ? functionName : '(anonymous)'
           );
           const source =
-            isJS && url ? globalDataCollector.indexForSource(null, url) : null;
+            isJS && url
+              ? globalDataCollector.indexForSource(
+                  null,
+                  url,
+                  1,
+                  1,
+                  sourceMapURLByScriptURL.get(url) ?? null
+                )
+              : null;
           const resource = isJS
             ? globalDataCollector.indexForURIResource(url || '<unknown>')
             : -1;

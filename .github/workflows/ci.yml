@@ -87,7 +87,7 @@ jobs:
           path: node-tools-dist/
 
       - name: Build profiler-cli
-        run: yarn build-profiler-cli
+        run: yarn build-cli
 
       - name: Upload profiler-cli artifact
         if: matrix.os == 'ubuntu-latest'
