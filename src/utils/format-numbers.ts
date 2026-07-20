@@ -310,7 +310,7 @@ export function formatSI(num: number): string {
 }
 
 export function formatHexadecimal(num: number): string {
-  return '0x' + Number(num).toString(16);
+  return '0x' + (num >>> 0).toString(16);
 }
 
 export function formatNanoseconds(

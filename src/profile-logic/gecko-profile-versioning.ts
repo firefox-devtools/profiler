@@ -1563,6 +1563,13 @@ const _upgraders: {
     }
     convertToVersion34Recursive(profile);
   },
+  [35]: (_: any) => {
+    // This version bump added a new marker schema format type, named "hexadecimal",
+    // which older frontends will not be able to display.
+    // No upgrade is needed, as older versions of firefox would not generate
+    // marker data with hexadecimal typed data, and no modification is needed in the
+    // frontend to display older formats.
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.

@@ -45,7 +45,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "ART Trace (Android)",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 2686,
@@ -1025,7 +1025,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "ART Trace (Android)",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 5412,
@@ -2308,7 +2308,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 26,
@@ -2700,7 +2700,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 26,
@@ -3089,7 +3089,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 47,
@@ -3190,7 +3190,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 0,
@@ -3543,7 +3543,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 164,
@@ -3608,7 +3608,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 231,
@@ -3762,7 +3762,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Chrome Trace",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 47,
@@ -3820,7 +3820,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Firefox",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 202,
@@ -4210,7 +4210,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Firefox",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 610,
@@ -4268,7 +4268,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Firefox",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 229,
@@ -4326,7 +4326,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Firefox",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 802,
@@ -5322,7 +5322,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "target/debug/examples/work_log (dhat)",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 430,
@@ -5455,7 +5455,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Flamegraph",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 154,
@@ -5513,7 +5513,7 @@ Object {
       "preprocessedProfileVersion": 68,
       "product": "Flamegraph",
       "symbolicated": true,
-      "version": 34,
+      "version": 35,
     },
     "sharedCounts": Object {
       "frames": 5,
