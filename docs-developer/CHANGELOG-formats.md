@@ -207,6 +207,10 @@ Older versions are not documented in this changelog but can be found in [process
 
 ## Gecko profile format
 
+### Version 35
+
+A new `hexadecimal` marker schema field format type has been added, which displays an integer value in hexadecimal with a `0x` prefix.
+
 ### Version 34
 
 The `SourceTable` schema was updated:

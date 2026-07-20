@@ -80,6 +80,9 @@ export type MarkerFormatType =
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
   | 'decimal'
+  // An integer displayed in hexadecimal with a "0x" prefix, e.g. for bit flags.
+  // "Label: 0xff"
+  | 'hexadecimal'
   | 'pid'
   | 'tid'
   | 'list'
