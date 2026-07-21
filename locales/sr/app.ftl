@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     да увезе профиле са локалне машине у овом прегледачу. Уместо тога, отворите
     ову страницу у { -firefox-brand-name }-у или Chrome-у.
     .title = Safari не може да увезе локалне профиле
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Овај профил користи формат који ово издање { -profiler-brand-name }-а не подржава.
+    Покушајте да освежите страницу да бисте проверили да ли је доступно ажурирање за { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = URL адреса коју сте покушали да посетите није препозната.
 
@@ -349,6 +354,15 @@ Home--chrome-extension-instructions =
     да бисте ухватили профиле перформанси у Chrome-у и анализирали их у
     { -profiler-brand-name }. Инсталирајте додатак са Chrome Web Store-а.
 Home--chrome-extension-recording-instructions = Када га инсталирате, употребите иконицу додатка на алатној траци или пречице да бисте покренули и зауставили профилисање. Такође можете да извезете профиле и учитате их овде за детаљну анализу.
+
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Унесите изразе филтера (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
