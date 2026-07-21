@@ -20,6 +20,9 @@ import { ProfileQuerier } from 'firefox-profiler/profile-query';
 import {
   getProfileFromTextSamples,
   getCounterForThread,
+  getCounterForThreadWithSamples,
+  getProfileWithMarkers,
+  getNetworkMarkers,
 } from '../../fixtures/profiles/processed-profile';
 import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
@@ -369,12 +372,15 @@ describe('ProfileQuerier', function () {
     }
 
     it('counterList returns a schema-driven summary per counter', async function () {
-      const { profile } = profileWithMemoryCounter();
+      const { profile, counter } = profileWithMemoryCounter();
       const result = await querierFor(profile).counterList();
 
       expect(result.counters).toHaveLength(1);
       expect(result.counters[0].counterHandle).toBe('c-0');
       expect(result.counters[0].label).toBe('Memory');
+      expect(result.counters[0].pid).toBe(counter.pid);
+      expect(result.counters[0].processIndex).toBeGreaterThanOrEqual(0);
+      expect(result.counters[0].processName).toBeTruthy();
       expect(
         result.counters[0].stats.some((s) => s.source === 'count-range')
       ).toBe(true);
@@ -450,6 +456,155 @@ describe('ProfileQuerier', function () {
         'Unknown counter c-0'
       );
     });
+
+    it('reports counter values over time', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4  5  6  7  8  9
+        A  A  A  A  A  A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        {
+          count: [0, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
+          length: 10,
+        },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.overTime.length).toBeGreaterThan(0);
+      // Accumulated counters report a per-bucket level, delta, and share of peak.
+      expect(info.overTime.every((b) => b.delta !== undefined)).toBe(true);
+      expect(info.overTime.every((b) => b.percentage !== undefined)).toBe(true);
+      expect(info.overTime[0].startTimeName).toMatch(/^ts-/);
+      // Memory only grows here, so the last level is at least the first.
+      const first = info.overTime[0].value;
+      const last = info.overTime[info.overTime.length - 1].value;
+      expect(last).toBeGreaterThanOrEqual(first);
+      // The sparkline is of fixed width.
+      expect(info.graph.length).toBe(50);
+    });
+
+    it('renders a zero delta as a bare "0", without sign or unit', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4
+        A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: [0, 0, 0, 0, 0], length: 5 },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      // Memory never changes here, so every bucket's delta is zero.
+      expect(info.overTime.length).toBeGreaterThan(0);
+      for (const bucket of info.overTime) {
+        expect(bucket.delta).toBe(0);
+        expect(bucket.formattedDelta).toBe('0');
+      }
+    });
+
+    it('gives the graph a fixed width, wider than the over-time buckets', async function () {
+      const columns = Array.from({ length: 60 }, (_, i) => i);
+      const { profile } = getProfileFromTextSamples(
+        `${columns.join('  ')}\n${columns.map(() => 'A').join('  ')}`
+      );
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: columns.map(() => 1000), length: 60 },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.overTime.length).toBe(10);
+      expect(info.graph.length).toBe(50);
+    });
+
+    it('reports a per-bucket amount (no delta) for rate counters', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4  5  6  7  8  9
+        A  A  A  A  A  A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], length: 10 },
+        'eth0',
+        'Bandwidth'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.graphType).toBe('line-rate');
+      expect(info.overTime.length).toBeGreaterThan(0);
+      // Rate counters report an amount per bucket (no level/delta) and a share
+      // of the range total.
+      expect(info.overTime.every((b) => b.delta === undefined)).toBe(true);
+      expect(info.overTime.every((b) => b.percentage !== undefined)).toBe(true);
+      expect(info.graph.length).toBeGreaterThan(0);
+    });
+
+    it('reports range times relative to the profile start, not double-offset', async function () {
+      // Profile that does not start at zero.
+      const { profile } = getProfileFromTextSamples(`
+        1000  1010  1020
+        A     A     A
+      `);
+      const counter = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+      });
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.rangeStart).not.toBeNull();
+      expect(info.rangeStart! - info.context.rootRange.start).toBe(0);
+    });
+
+    it('excludes the padded boundary samples when zoomed', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  10  20  30  40
+        A  A   A   A   A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        {
+          time: [0, 10, 20, 30, 40],
+          count: [0, 100, 100, 100, 100],
+          length: 5,
+        },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const querier = querierFor(profile);
+      const startName = querier._timestampManager.nameForTimestamp(15);
+      const endName = querier._timestampManager.nameForTimestamp(35);
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const info = await querier.counterInfo('c-0');
+
+      // Only the samples at 20 and 30 are inside [15, 35]; the boundary samples
+      // at 10 and 40 (which the counter selectors pad the range with) are not.
+      expect(info.rangeSampleCount).toBe(2);
+    });
   });
 
   describe('threadSamples', function () {
@@ -472,6 +627,71 @@ describe('ProfileQuerier', function () {
         'X',
         'Y',
       ]);
+    });
+  });
+
+  describe('networkActivity', function () {
+    function querierWithNetwork() {
+      const markers = [
+        ...getNetworkMarkers({
+          id: 1,
+          uri: 'https://a.com/x',
+          startTime: 0,
+          fetchStart: 0,
+          endTime: 40,
+        }),
+        ...getNetworkMarkers({
+          id: 2,
+          uri: 'https://b.com/y',
+          startTime: 20,
+          fetchStart: 20,
+          endTime: 100,
+        }),
+      ];
+      const profile = getProfileWithMarkers(markers);
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('profileInfo includes networkActivity when network markers exist', async function () {
+      const info = await querierWithNetwork().profileInfo();
+      expect(info.networkActivity).not.toBeNull();
+      expect(info.networkActivity!.requestCount).toBe(2);
+      expect(info.networkActivity!.slowest.length).toBeGreaterThan(0);
+      expect(info.networkActivity!.slowest[0].markerHandle).toMatch(/^m-\d+$/);
+    });
+
+    it('threadInfo includes networkActivity for a thread with network markers', async function () {
+      const info = await querierWithNetwork().threadInfo('t-0');
+      expect(info.networkActivity).not.toBeNull();
+      expect(info.networkActivity!.requestCount).toBe(2);
+    });
+
+    it('networkActivity is null when the profile has no network markers', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        A  A  A
+      `);
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      const info = await querier.profileInfo();
+      expect(info.networkActivity).toBeNull();
+      const threadInfo = await querier.threadInfo('t-0');
+      expect(threadInfo.networkActivity).toBeNull();
+    });
+
+    it('zoom narrows the in-flight numbers', async function () {
+      const querier = querierWithNetwork();
+      const full = await querier.profileInfo();
+      const fullInFlight = full.networkActivity!.inFlightMs;
+
+      // Zoom into a sub-range that only partly overlaps the requests.
+      await querier.pushViewRange('50ms,80ms');
+      const zoomed = await querier.profileInfo();
+
+      expect(zoomed.networkActivity!.inFlightMs).toBeLessThan(fullInFlight);
     });
   });
 });

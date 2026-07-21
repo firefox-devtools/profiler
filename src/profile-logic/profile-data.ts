@@ -7,9 +7,10 @@ import MixedTupleMap from 'mixedtuplemap';
 import { oneLine } from 'common-tags';
 import {
   getRawStackTableBuilder,
+  finishRawFrameTableBuilder,
   finishRawStackTableBuilder,
   getEmptyCallNodeTable,
-  shallowCloneFrameTable,
+  getRawFrameTableBuilderWithExistingContents,
   shallowCloneFuncTable,
 } from './data-structures';
 import {
@@ -54,6 +55,7 @@ import type {
   RawStackTable,
   SampleUnits,
   StackTable,
+  RawFrameTable,
   FrameTable,
   FuncTable,
   NativeSymbolTable,
@@ -73,6 +75,9 @@ import type {
   CounterIndex,
   RawCounterSamplesTable,
   CounterSamplesTable,
+  RawJsAllocationsTable,
+  JsAllocationsTable,
+  RawNativeAllocationsTable,
   NativeAllocationsTable,
   InnerWindowID,
   BalancedNativeAllocationsTable,
@@ -106,6 +111,11 @@ import type {
 } from 'firefox-profiler/types';
 import { SelectedState, ResourceType } from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import {
+  toFloat64Array,
+  toInt32Array,
+  toUint8Array,
+} from 'firefox-profiler/utils/typed-arrays';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -1936,9 +1946,12 @@ function _computeStackMatchesFromFuncMatches(
 
 export function computeTimeColumnForRawSamplesTable(
   samples: RawSamplesTable | RawCounterSamplesTable
-): number[] {
+): Float64Array<ArrayBuffer> {
   const { time, timeDeltas } = samples;
-  return time ?? numberSeriesFromDeltas(ensureExists(timeDeltas));
+  if (time !== undefined) {
+    return toFloat64Array(time);
+  }
+  return numberSeriesFromDeltas(ensureExists(timeDeltas));
 }
 
 export function computeSampleCategoriesAndSubcategories(
@@ -2011,7 +2024,10 @@ export function hasUsefulSamples(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  times: { time: Milliseconds[]; length: number },
+  times: {
+    time: Milliseconds[] | Float64Array<ArrayBuffer>;
+    length: number;
+  },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2019,7 +2035,7 @@ export function getSampleIndexRangeForSelection(
 }
 
 export function getIndexRangeForSelection(
-  times: Milliseconds[],
+  times: Milliseconds[] | Float64Array<ArrayBuffer>,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2034,7 +2050,10 @@ export function getIndexRangeForSelection(
  * sure that some charts will not be cut off at the edges when zoomed in to a range.
  */
 export function getInclusiveSampleIndexRangeForSelection(
-  table: { time: Milliseconds[]; length: number },
+  table: {
+    time: Milliseconds[] | Float64Array<ArrayBuffer>;
+    length: number;
+  },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2042,7 +2061,7 @@ export function getInclusiveSampleIndexRangeForSelection(
 }
 
 export function getInclusiveIndexRangeForSelection(
-  times: Milliseconds[],
+  times: Milliseconds[] | Float64Array<ArrayBuffer>,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -2150,13 +2169,6 @@ export function filterThreadSamplesToRange(
 
   if (samples.argumentValues) {
     newSamples.argumentValues = samples.argumentValues.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadId) {
-    newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2283,13 +2295,6 @@ export function filterRawThreadSamplesToRange(
 
   if (samples.argumentValues) {
     newSamples.argumentValues = samples.argumentValues.slice(
-      beginSampleIndex,
-      endSampleIndex
-    );
-  }
-
-  if (samples.threadId) {
-    newSamples.threadId = samples.threadId.slice(
       beginSampleIndex,
       endSampleIndex
     );
@@ -2726,7 +2731,6 @@ export function computeSamplesTableFromRawSamplesTable(
     threadCPUDelta,
     weight,
     weightType,
-    threadId,
     length,
   } = rawSamples;
 
@@ -2763,7 +2767,6 @@ export function computeSamplesTableFromRawSamplesTable(
     stack,
     weight,
     weightType,
-    threadId,
     length,
 
     // These fields are derived:
@@ -2772,6 +2775,48 @@ export function computeSamplesTableFromRawSamplesTable(
     hasCPUDeltas,
     category: sampleCategories,
     subcategory: sampleSubcategories,
+  };
+}
+
+export function computeJsAllocationsTableFromRawJsAllocationsTable(
+  raw: RawJsAllocationsTable
+): JsAllocationsTable {
+  return {
+    time: toFloat64Array(raw.time),
+    className: raw.className,
+    typeName: raw.typeName,
+    coarseType: raw.coarseType,
+    weight: raw.weight,
+    weightType: raw.weightType,
+    inNursery: raw.inNursery,
+    stack: raw.stack,
+    length: raw.length,
+  };
+}
+
+export function computeNativeAllocationsTableFromRawNativeAllocationsTable(
+  raw: RawNativeAllocationsTable
+): NativeAllocationsTable {
+  const time = toFloat64Array(raw.time);
+  if ('memoryAddress' in raw) {
+    return {
+      time,
+      weight: raw.weight,
+      weightType: raw.weightType,
+      stack: raw.stack,
+      argumentValues: raw.argumentValues,
+      memoryAddress: raw.memoryAddress,
+      threadId: raw.threadId,
+      length: raw.length,
+    };
+  }
+  return {
+    time,
+    weight: raw.weight,
+    weightType: raw.weightType,
+    stack: raw.stack,
+    argumentValues: raw.argumentValues,
+    length: raw.length,
   };
 }
 
@@ -2789,7 +2834,9 @@ export function createThreadFromDerivedTables(
   stringTable: StringTable,
   sources: SourceTable,
   tracedValuesBuffer: ArrayBuffer | undefined,
-  sourceLocationTable: SourceLocationTable
+  sourceLocationTable: SourceLocationTable,
+  jsAllocations: JsAllocationsTable | undefined,
+  nativeAllocations: NativeAllocationsTable | undefined
 ): Thread {
   const {
     processType,
@@ -2806,8 +2853,6 @@ export function createThreadFromDerivedTables(
     isJsTracer,
     pid,
     tid,
-    jsAllocations,
-    nativeAllocations,
     markers,
     jsTracer,
     isPrivateBrowsing,
@@ -2896,11 +2941,11 @@ export function updateThreadStacksByGeneratingNewStackColumns(
   newStackTable: StackTable,
   computeMappedStackColumn: (
     oldStack: Array<IndexIntoStackTable | null>,
-    sampleTime: Array<Milliseconds>
+    sampleTime: Float64Array<ArrayBuffer>
   ) => Array<IndexIntoStackTable | null>,
   computeMappedSyncBacktraceStackColumn: (
     oldStack: Array<IndexIntoStackTable | null>,
-    sampleTime: Array<Milliseconds>
+    sampleTime: Float64Array<ArrayBuffer>
   ) => Array<IndexIntoStackTable | null>,
   computeMappedMarkerDataColumn: (
     markerData: Array<MarkerPayload | null>
@@ -4309,7 +4354,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
   // Create the new frame table.
   // Frames that were observed both from the instruction pointer and from
   // stack walking have to be duplicated.
-  const newFrameTable = shallowCloneFrameTable(frameTable);
+  const newFrameTable = getRawFrameTableBuilderWithExistingContents(frameTable);
   // Iterate over all *return address* frames, i.e. all frames that were obtained
   // by stack walking.
   for (const [frame, address] of returnAddressFrames) {
@@ -4392,7 +4437,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
 
   const newShared: RawProfileSharedData = {
     ...profile.shared,
-    frameTable: newFrameTable,
+    frameTable: finishRawFrameTableBuilder(newFrameTable),
     stackTable: finishRawStackTableBuilder(newStackTable),
   };
 
@@ -4723,6 +4768,27 @@ export function computeTabToThreadIndexesMap(
   return tabToThreadIndexesMap;
 }
 
+export function computeFrameTableFromRawFrameTable(
+  rawFrameTable: RawFrameTable
+): FrameTable {
+  const address = toInt32Array(rawFrameTable.address);
+  const inlineDepth = toUint8Array(rawFrameTable.inlineDepth);
+  const func = toInt32Array(rawFrameTable.func);
+  return {
+    address,
+    inlineDepth,
+    category: rawFrameTable.category,
+    subcategory: rawFrameTable.subcategory,
+    func,
+    nativeSymbol: rawFrameTable.nativeSymbol,
+    innerWindowID: rawFrameTable.innerWindowID,
+    line: rawFrameTable.line,
+    column: rawFrameTable.column,
+    originalLocation: rawFrameTable.originalLocation,
+    length: rawFrameTable.length,
+  };
+}
+
 export function computeStackTableFromRawStackTable(
   rawStackTable: RawStackTable,
   frameTable: FrameTable,
@@ -4775,10 +4841,7 @@ export function computeStackTableFromRawStackTable(
   }
 
   // The frame column is a typed array in the derived stack table.
-  const frame =
-    rawStackTable.frame instanceof Int32Array
-      ? rawStackTable.frame
-      : new Int32Array(rawStackTable.frame);
+  const frame = toInt32Array(rawStackTable.frame);
 
   return {
     frame,

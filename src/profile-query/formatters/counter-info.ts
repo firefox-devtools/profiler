@@ -4,9 +4,10 @@
 
 import {
   getProfile,
-  getProfileRootRange,
   getCounters,
   getCounterSelectors,
+  getCommittedRange,
+  getProfileInterval,
   getMeta,
 } from 'firefox-profiler/selectors/profile';
 import {
@@ -22,21 +23,34 @@ import {
   ENERGY_LADDER,
   pickTier,
 } from 'firefox-profiler/components/timeline/TrackCounterTooltipFormat';
+import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import { getCounterHandle, parseCounterHandle } from '../counter-map';
+import { getProcessName } from '../process-thread-list';
 import type {
   CounterIndex,
+  CounterDisplayConfig,
   CounterTooltipDataSource,
   CounterTooltipFormat,
+  CounterTooltipRow,
   ProfileMeta,
 } from 'firefox-profiler/types';
 import type { Store } from '../../types/store';
 import type { ThreadMap } from '../thread-map';
+import type { TimestampManager } from '../timestamps';
 import type {
   CounterStat,
   CounterSummary,
+  CounterTimeBucket,
   CounterListResult,
   CounterInfoResult,
 } from '../types';
+
+// Number of buckets in the detailed "over time" table.
+const OVER_TIME_BUCKET_COUNT = 10;
+
+// Width (in characters/points) of the higher-resolution sparkline series.
+const GRAPH_BUCKET_COUNT = 50;
 
 // The tooltip schema describes many per-sample and preview-selection rows that
 // only make sense at a hover point. These are the two sources that aggregate
@@ -172,6 +186,7 @@ function collectCounterStats(
 export function collectCounterSummary(
   store: Store,
   threadMap: ThreadMap,
+  processIndexMap: Map<string, number>,
   counterIndex: CounterIndex
 ): CounterSummary {
   const state = store.getState();
@@ -180,10 +195,19 @@ export function collectCounterSummary(
   const counter = selectors.getCounter(state);
   const { display } = counter;
 
-  const [rangeStartIndex, rangeEndIndex] =
-    selectors.getCommittedRangeCounterSampleRange(state);
+  const [rangeStartIndex, rangeEndIndex] = getInRangeSampleIndexes(
+    store,
+    counterIndex
+  );
 
-  const mainThreadName = profile.threads[counter.mainThreadIndex]?.name ?? '';
+  const mainThread = ensureExists(
+    profile.threads[counter.mainThreadIndex],
+    `Counter ${getCounterHandle(counterIndex)} references thread ${counter.mainThreadIndex}, which does not exist.`
+  );
+  const processIndex = ensureExists(
+    processIndexMap.get(counter.pid),
+    `Counter ${getCounterHandle(counterIndex)} belongs to pid ${counter.pid}, which has no matching process in the profile.`
+  );
 
   return {
     counterHandle: getCounterHandle(counterIndex),
@@ -195,11 +219,15 @@ export function collectCounterSummary(
     graphType: display.graphType,
     color: display.color,
     pid: counter.pid,
+    processIndex,
+    processName: getProcessName(mainThread),
+    etld1: mainThread['eTLD+1'],
     mainThreadIndex: counter.mainThreadIndex,
     mainThreadHandle: threadMap.handleForThreadIndex(counter.mainThreadIndex),
-    mainThreadName,
+    mainThreadName: mainThread.name,
     rangeSampleCount: Math.max(0, rangeEndIndex - rangeStartIndex),
     stats: collectCounterStats(store, counterIndex),
+    graph: collectCounterGraph(store, counterIndex),
   };
 }
 
@@ -209,14 +237,278 @@ export function collectCounterSummary(
  */
 export function collectCounterList(
   store: Store,
-  threadMap: ThreadMap
+  threadMap: ThreadMap,
+  processIndexMap: Map<string, number>
 ): CounterListResult {
   return {
     type: 'counter-list',
     counters: getSortedCounterIndexes(store).map((index) =>
-      collectCounterSummary(store, threadMap, index)
+      collectCounterSummary(store, threadMap, processIndexMap, index)
     ),
   };
+}
+
+/**
+ * Decide how to aggregate a counter's values per time bucket, and which tooltip
+ * format to render them with. Accumulated counters report the running level;
+ * rate counters report the amount summed over the bucket (using their
+ * range-aggregate row's format), except process CPU, which averages its ratio.
+ */
+function getOverTimeMode(display: CounterDisplayConfig): {
+  kind: 'level' | 'sum' | 'avg-ratio';
+  format: CounterTooltipFormat;
+} {
+  type ValueRow = Extract<CounterTooltipRow, { type: 'value' }>;
+  const rowFor = (source: CounterTooltipDataSource): ValueRow | undefined => {
+    for (const row of display.tooltipRows) {
+      if (row.type === 'value' && row.source === source) {
+        return row;
+      }
+    }
+    return undefined;
+  };
+  const fallback: CounterTooltipFormat = {
+    unit: display.unit === 'bytes' ? 'bytes' : 'number',
+  };
+
+  if (display.graphType === 'line-accumulated') {
+    return { kind: 'level', format: rowFor('accumulated')?.format ?? fallback };
+  }
+
+  const rangeRow = rowFor('count-range') ?? rowFor('committed-range-total');
+  if (rangeRow) {
+    return { kind: 'sum', format: rangeRow.format };
+  }
+  const cpuRow = rowFor('cpu-ratio');
+  if (cpuRow) {
+    return { kind: 'avg-ratio', format: cpuRow.format };
+  }
+  return { kind: 'sum', format: rowFor('count')?.format ?? fallback };
+}
+
+/**
+ * The sample indexes strictly inside the committed range. The counter
+ * selectors' committed range is padded by one sample on each side (for graph
+ * continuity); those boundary samples are outside the current view, so counts,
+ * sums, and time spans should exclude them.
+ */
+function getInRangeSampleIndexes(
+  store: Store,
+  counterIndex: CounterIndex
+): [number, number] {
+  const state = store.getState();
+  const { samples } = getCounterSelectors(counterIndex).getCounter(state);
+  const range = getCommittedRange(state);
+  return getSampleIndexRangeForSelection(samples, range.start, range.end);
+}
+
+type CounterBucket = {
+  startTime: number;
+  endTime: number;
+  value: number;
+  delta?: number; // accumulated counters only
+};
+
+type CounterBuckets = {
+  kind: 'level' | 'sum' | 'avg-ratio';
+  format: CounterTooltipFormat;
+  countRange: number; // for the accumulated (level) share
+  totalSum: number; // for the rate (sum) share
+  buckets: CounterBucket[];
+};
+
+/**
+ * Split the current committed range into `requestedBucketCount` equal-width time
+ * buckets and compute a raw value per bucket. Sample times are absolute. Shared
+ * by the detailed "over time" table and the sparkline.
+ *
+ * `capToSampleCount` keeps the table from showing more rows than there are
+ * samples; the sparkline leaves it off for a consistent width, filling
+ * sample-less buckets by carrying the level forward (accumulated) or with zero.
+ */
+function getCounterBuckets(
+  store: Store,
+  counterIndex: CounterIndex,
+  requestedBucketCount: number,
+  capToSampleCount: boolean
+): CounterBuckets | null {
+  const state = store.getState();
+  const selectors = getCounterSelectors(counterIndex);
+  const counter = selectors.getCounter(state);
+  const { samples, display } = counter;
+  const range = getCommittedRange(state);
+  const [startIndex, endIndex] = getInRangeSampleIndexes(store, counterIndex);
+  const { minCount, countRange, accumulatedCounts } =
+    selectors.getAccumulateCounterSamples(state);
+
+  const span = range.end - range.start;
+  if (endIndex <= startIndex || span <= 0) {
+    return null;
+  }
+
+  const { kind, format } = getOverTimeMode(display);
+  const interval = getProfileInterval(state);
+  // Use the same range-aware max as the timeline's cpu-ratio tooltip
+  // (getMaxRangeCounterSampleCountPerMs), so the CLI and UI agree.
+  const maxCountPerMs =
+    kind === 'avg-ratio'
+      ? selectors.getMaxRangeCounterSampleCountPerMs(state)
+      : 0;
+
+  const bucketCount = Math.max(
+    1,
+    capToSampleCount
+      ? Math.min(requestedBucketCount, endIndex - startIndex)
+      : requestedBucketCount
+  );
+  const width = span / bucketCount;
+
+  type Acc = {
+    sum: number;
+    ratioSum: number;
+    ratioN: number;
+    level: number | null;
+  };
+  const accs: Acc[] = Array.from({ length: bucketCount }, () => ({
+    sum: 0,
+    ratioSum: 0,
+    ratioN: 0,
+    level: null,
+  }));
+
+  for (let i = startIndex; i < endIndex; i++) {
+    const bucketIndex = Math.min(
+      bucketCount - 1,
+      Math.max(0, Math.floor((samples.time[i] - range.start) / width))
+    );
+    const acc = accs[bucketIndex];
+    if (kind === 'level') {
+      acc.level = accumulatedCounts[i] - minCount;
+    } else if (kind === 'sum') {
+      acc.sum += samples.count[i];
+    } else {
+      const dt = i === 0 ? interval : samples.time[i] - samples.time[i - 1];
+      if (dt > 0 && maxCountPerMs > 0) {
+        acc.ratioSum += samples.count[i] / dt / maxCountPerMs;
+        acc.ratioN += 1;
+      }
+    }
+  }
+
+  const totalSum = accs.reduce((sum, acc) => sum + acc.sum, 0);
+
+  let carriedLevel = 0;
+  const buckets: CounterBucket[] = accs.map((acc, bucketIndex) => {
+    const startTime = range.start + bucketIndex * width;
+    const endTime =
+      bucketIndex === bucketCount - 1
+        ? range.end
+        : range.start + (bucketIndex + 1) * width;
+
+    let value: number;
+    let delta: number | undefined;
+    if (kind === 'level') {
+      const level = acc.level ?? carriedLevel;
+      delta = level - carriedLevel;
+      carriedLevel = level;
+      value = level;
+    } else if (kind === 'avg-ratio') {
+      value = acc.ratioN > 0 ? acc.ratioSum / acc.ratioN : 0;
+    } else {
+      value = acc.sum;
+    }
+    return { startTime, endTime, value, delta };
+  });
+
+  return { kind, format, countRange, totalSum, buckets };
+}
+
+/**
+ * The detailed "over time" table: a small number of buckets with formatted
+ * values, deltas, and per-slice shares. Rate buckets are shown as a share of the
+ * range total; accumulated buckets as a share of the range peak (countRange).
+ */
+function collectCounterOverTime(
+  store: Store,
+  counterIndex: CounterIndex,
+  timestampManager: TimestampManager
+): CounterTimeBucket[] {
+  const counterBuckets = getCounterBuckets(
+    store,
+    counterIndex,
+    OVER_TIME_BUCKET_COUNT,
+    true
+  );
+  if (counterBuckets === null) {
+    return [];
+  }
+  const meta = getMeta(store.getState());
+  const { kind, format, countRange, totalSum, buckets } = counterBuckets;
+
+  return buckets.map((bucket): CounterTimeBucket => {
+    const { formattedValue, carbon } = formatCounterRowValue(
+      bucket.value,
+      format,
+      meta
+    );
+
+    let formattedDelta: string | undefined;
+    if (bucket.delta !== undefined) {
+      if (bucket.delta === 0) {
+        formattedDelta = '0';
+      } else {
+        const sign = bucket.delta < 0 ? '-' : '+';
+        formattedDelta =
+          sign +
+          formatCounterRowValue(Math.abs(bucket.delta), format, meta)
+            .formattedValue;
+      }
+    }
+
+    let percentage: number | undefined;
+    if (kind === 'level' && countRange > 0) {
+      percentage = bucket.value / countRange;
+    } else if (kind === 'sum' && totalSum > 0) {
+      percentage = bucket.value / totalSum;
+    }
+    const formattedPercentage =
+      percentage !== undefined ? formatPercent(percentage) : undefined;
+
+    return {
+      startTime: bucket.startTime,
+      startTimeName: timestampManager.nameForTimestamp(bucket.startTime),
+      startTimeStr: timestampManager.timestampString(bucket.startTime),
+      endTime: bucket.endTime,
+      endTimeName: timestampManager.nameForTimestamp(bucket.endTime),
+      endTimeStr: timestampManager.timestampString(bucket.endTime),
+      value: bucket.value,
+      formattedValue,
+      delta: bucket.delta,
+      formattedDelta,
+      percentage,
+      formattedPercentage,
+      carbon,
+    };
+  });
+}
+
+/**
+ * A higher-resolution series of raw per-bucket values for the sparkline,
+ * independent of the detailed "over time" table's coarser buckets.
+ */
+function collectCounterGraph(
+  store: Store,
+  counterIndex: CounterIndex
+): number[] {
+  const counterBuckets = getCounterBuckets(
+    store,
+    counterIndex,
+    GRAPH_BUCKET_COUNT,
+    false
+  );
+  return counterBuckets === null
+    ? []
+    : counterBuckets.buckets.map((bucket) => bucket.value);
 }
 
 /**
@@ -225,26 +517,32 @@ export function collectCounterList(
 export function collectCounterInfo(
   store: Store,
   threadMap: ThreadMap,
+  processIndexMap: Map<string, number>,
+  timestampManager: TimestampManager,
   counterHandle: string
 ): CounterInfoResult {
   const state = store.getState();
   const counters = getCounters(state) ?? [];
   const counterIndex = parseCounterHandle(counterHandle, counters.length);
 
-  const summary = collectCounterSummary(store, threadMap, counterIndex);
+  const summary = collectCounterSummary(
+    store,
+    threadMap,
+    processIndexMap,
+    counterIndex
+  );
   const selectors = getCounterSelectors(counterIndex);
   const counter = selectors.getCounter(state);
-  const [rangeStartIndex, rangeEndIndex] =
-    selectors.getCommittedRangeCounterSampleRange(state);
+  const [rangeStartIndex, rangeEndIndex] = getInRangeSampleIndexes(
+    store,
+    counterIndex
+  );
 
-  const zeroAt = getProfileRootRange(state).start;
+  // Sample times are already in absolute profile-time space (the same space as
+  // the committed range), so they need no zeroAt offset here.
   const hasRange = rangeEndIndex > rangeStartIndex;
-  const rangeStart = hasRange
-    ? counter.samples.time[rangeStartIndex] + zeroAt
-    : null;
-  const rangeEnd = hasRange
-    ? counter.samples.time[rangeEndIndex - 1] + zeroAt
-    : null;
+  const rangeStart = hasRange ? counter.samples.time[rangeStartIndex] : null;
+  const rangeEnd = hasRange ? counter.samples.time[rangeEndIndex - 1] : null;
 
   return {
     ...summary,
@@ -253,5 +551,6 @@ export function collectCounterInfo(
     sampleCount: counter.samples.length,
     rangeStart,
     rangeEnd,
+    overTime: collectCounterOverTime(store, counterIndex, timestampManager),
   };
 }

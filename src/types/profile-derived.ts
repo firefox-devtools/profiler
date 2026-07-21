@@ -7,10 +7,13 @@ import type { MarkerPayload, MarkerSchema } from './markers';
 import type {
   ThreadIndex,
   Pid,
+  InnerWindowID,
   IndexIntoFuncTable,
   IndexIntoJsTracerEvents,
   IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
   IndexIntoResourceTable,
+  IndexIntoNativeSymbolTable,
   IndexIntoLibs,
   CounterIndex,
   IndexIntoRawMarkerTable,
@@ -19,10 +22,7 @@ import type {
   Tid,
   ProcessType,
   PausedRange,
-  JsAllocationsTable,
-  NativeAllocationsTable,
   RawMarkerTable,
-  FrameTable,
   FuncTable,
   ResourceTable,
   NativeSymbolTable,
@@ -31,6 +31,7 @@ import type {
   WeightType,
   SourceTable,
   IndexIntoSourceTable,
+  IndexIntoSourceLocationTable,
   CounterDisplayConfig,
   SourceLocationTable,
 } from './profile';
@@ -130,7 +131,7 @@ export type SamplesTable = {
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<Milliseconds | null>;
   stack: Array<IndexIntoStackTable | null>;
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[];
@@ -149,9 +150,6 @@ export type SamplesTable = {
   category: Uint8Array;
   // The subcategory of each sample's stack in the unfiltered thread.
   subcategory: Uint16Array | Uint8Array;
-  // This property isn't present in normal threads. However it's present for
-  // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[];
   argumentValues?: Array<number | null>;
   length: number;
 };
@@ -165,7 +163,7 @@ export type SampleCategoriesAndSubcategories = {
 
 export type SamplesLikeTable = {
   stack: Array<IndexIntoStackTable | null>;
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[];
@@ -175,7 +173,7 @@ export type SamplesLikeTable = {
 };
 
 export type CounterSamplesTable = {
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[];
@@ -184,6 +182,55 @@ export type CounterSamplesTable = {
   argumentValues?: Array<number | null>;
   length: number;
 };
+
+/**
+ * The `JsAllocationsTable` type of the derived thread.
+ *
+ * Differs from `RawJsAllocationsTable` in that the `time` column is always a
+ * `Float64Array`.
+ */
+export type JsAllocationsTable = {
+  time: Float64Array<ArrayBuffer>;
+  className: string[];
+  typeName: string[];
+  coarseType: string[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+/**
+ * The `UnbalancedNativeAllocationsTable` type of the derived thread.
+ *
+ * Differs from `RawUnbalancedNativeAllocationsTable` in that the `time` column
+ * is always a `Float64Array`.
+ */
+export type UnbalancedNativeAllocationsTable = {
+  time: Float64Array<ArrayBuffer>;
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  length: number;
+};
+
+/**
+ * The `BalancedNativeAllocationsTable` type of the derived thread.
+ */
+export type BalancedNativeAllocationsTable =
+  UnbalancedNativeAllocationsTable & {
+    memoryAddress: number[];
+    threadId: number[];
+  };
+
+/**
+ * The `NativeAllocationsTable` type of the derived thread.
+ */
+export type NativeAllocationsTable =
+  | UnbalancedNativeAllocationsTable
+  | BalancedNativeAllocationsTable;
 
 export type Counter = {
   name: string;
@@ -233,6 +280,33 @@ export type StackTable = {
   // Derived from RawStackTable + FrameTable
   category: Uint8Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoCategoryList>
   subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoSubcategoryListForCategory>
+};
+
+/**
+ * The `FrameTable` type of the derived thread.
+ *
+ * Differs from `RawFrameTable` in that the following columns are always
+ * stored as typed arrays: `address` (`Int32Array`, with `-1` as the sentinel
+ * for missing addresses), `inlineDepth` (`Uint8Array`), and `func`
+ * (`Int32Array`). In `RawFrameTable`, these columns may be either regular
+ * arrays or typed arrays, since regular arrays are convenient during
+ * construction.
+ */
+export type FrameTable = {
+  // Differs from RawFrameTable: always Int32Array (-1 sentinel preserved).
+  address: Int32Array<ArrayBuffer>;
+  // Differs from RawFrameTable: always Uint8Array.
+  inlineDepth: Uint8Array<ArrayBuffer>;
+  category: (IndexIntoCategoryList | null)[];
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  // Differs from RawFrameTable: always Int32Array.
+  func: Int32Array<ArrayBuffer>;
+  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
+  innerWindowID: (InnerWindowID | null)[];
+  line: (number | null)[];
+  column: (number | null)[];
+  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  length: number;
 };
 
 /**

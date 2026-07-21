@@ -10,7 +10,8 @@ import type {
   Category,
 } from '../types/profile';
 import {
-  shallowCloneFrameTable,
+  finishRawFrameTableBuilder,
+  getRawFrameTableBuilderWithExistingContents,
   shallowCloneFuncTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -105,7 +106,7 @@ export function insertStackLabels(
     sources,
     stringArray,
   } = profile.shared;
-  const frameTable = shallowCloneFrameTable(oldFrameTable);
+  const frameTable = getRawFrameTableBuilderWithExistingContents(oldFrameTable);
   const funcTable = shallowCloneFuncTable(oldFuncTable);
   const stringTable = StringTable.withBackingArray(stringArray);
 
@@ -274,7 +275,12 @@ export function insertStackLabels(
     length: newStackCount,
   };
 
-  const newShared = { ...profile.shared, stackTable, frameTable, funcTable };
+  const newShared = {
+    ...profile.shared,
+    stackTable,
+    frameTable: finishRawFrameTableBuilder(frameTable),
+    funcTable,
+  };
   const newThreads = updateRawThreadStacks(profile.threads, (oldStack) =>
     oldStack !== null ? oldStackToNewStackPlusOne[oldStack] - 1 : null
   );

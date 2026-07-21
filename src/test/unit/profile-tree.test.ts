@@ -13,6 +13,7 @@ import {
 } from '../../profile-logic/call-tree';
 import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
 import {
+  computeFrameTableFromRawFrameTable,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
   getOriginAnnotationForFunc,
@@ -726,7 +727,7 @@ describe('origin annotation', function () {
     return getOriginAnnotationForFunc(
       funcNames.indexOf(funcName),
       null,
-      shared.frameTable,
+      computeFrameTableFromRawFrameTable(shared.frameTable),
       shared.funcTable,
       shared.resourceTable,
       stringTable,
@@ -795,7 +796,7 @@ describe('getOriginAnnotationForFunc with originalLocation', function () {
       return getOriginAnnotationForFunc(
         0,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         shared.resourceTable,
         stringTable,
@@ -883,7 +884,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -901,7 +902,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -914,7 +915,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -929,7 +930,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -947,7 +948,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         null,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -966,7 +967,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        shared.frameTable,
+        computeFrameTableFromRawFrameTable(shared.frameTable),
         shared.funcTable,
         null
       )

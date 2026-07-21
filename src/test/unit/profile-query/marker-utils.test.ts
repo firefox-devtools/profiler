@@ -18,9 +18,13 @@ import {
   getProfileFromTextSamples,
   getNetworkMarkers,
 } from '../../fixtures/profiles/processed-profile';
-import type { NetworkMarkersOptions } from '../../fixtures/profiles/processed-profile';
+import type {
+  NetworkMarkersOptions,
+  TestDefinedMarker,
+} from '../../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../../fixtures/stores';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { getRawMarkerTableBuilderFromExisting } from 'firefox-profiler/profile-logic/data-structures';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
 
 import type { Marker } from 'firefox-profiler/types';
@@ -695,17 +699,19 @@ describe('collectMarkerStack', function () {
       profile.shared.stringArray
     );
     const markerNameIdx = stringTable.indexForString('TestMarker');
-    thread.markers.name.push(markerNameIdx);
-    thread.markers.startTime.push(1);
-    thread.markers.endTime.push(5);
-    thread.markers.phase.push(INTERVAL);
-    thread.markers.category.push(0);
-    thread.markers.data.push({
+    const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+    thread.markers = markers;
+    markers.name.push(markerNameIdx);
+    markers.startTime.push(1);
+    markers.endTime.push(5);
+    markers.phase.push(INTERVAL);
+    markers.category.push(0);
+    markers.data.push({
       type: 'Text',
       name: 'TestMarker',
       cause: { stack: stackIndex },
     });
-    thread.markers.length++;
+    markers.length++;
 
     const store = storeWithProfile(profile);
     const threadMap = new ThreadMap();
@@ -731,11 +737,12 @@ describe('collectThreadNetwork', function () {
     const store = storeWithProfile(profile);
     const threadMap = new ThreadMap();
     threadMap.handleForThreadIndex(0);
-    return { store, threadMap };
+    const markerMap = new MarkerMap();
+    return { store, threadMap, markerMap };
   }
 
   it('counts only STATUS_STOP markers, ignoring STATUS_START', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         uri: 'https://example.com/a',
@@ -752,14 +759,112 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
 
     expect(result.totalRequestCount).toBe(2);
     expect(result.requests).toHaveLength(2);
   });
 
+  it('counts a request that started before the recording as completed', function () {
+    // A lone STOP marker (no matching START): the request completed during the
+    // recording but started before it, so derivation flags it incomplete even
+    // though it did finish. It must count as completed, not in flight.
+    const stopOnly: TestDefinedMarker = [
+      'Load 1: https://example.com/early',
+      0,
+      10,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 0,
+        endTime: 10,
+        pri: 0,
+        status: 'STATUS_STOP',
+        URI: 'https://example.com/early',
+        responseStatus: 200,
+        contentType: 'text/html',
+      },
+    ];
+    const store = storeWithProfile(getProfileWithMarkers([stopOnly]));
+    const threadMap = new ThreadMap();
+    threadMap.handleForThreadIndex(0);
+
+    const result = collectThreadNetwork(store, threadMap, new MarkerMap());
+
+    expect(result.totalRequestCount).toBe(1);
+    expect(result.incompleteCount).toBe(0);
+    expect(result.requests).toHaveLength(1);
+    expect(result.requests[0].incomplete).toBe(false);
+    expect(result.requests[0].startedBeforeRecording).toBe(true);
+    expect(result.requests[0].httpStatus).toBe(200);
+  });
+
+  it('lists a redirect leg but does not count it as a completed request', function () {
+    // A redirect chain: the original channel (id 1) starts then redirects to a
+    // new channel (id 2) that completes. Gecko emits START(1) -> REDIRECT(1)
+    // and START(2) -> STOP(2), which derive to two separate markers.
+    const start1: TestDefinedMarker = [
+      'Load 1: https://example.com/from',
+      0,
+      1,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 0,
+        endTime: 1,
+        pri: 0,
+        status: 'STATUS_START',
+        URI: 'https://example.com/from',
+      },
+    ];
+    const redirect1: TestDefinedMarker = [
+      'Load 1: https://example.com/from',
+      1,
+      5,
+      {
+        type: 'Network',
+        id: 1,
+        startTime: 1,
+        endTime: 5,
+        pri: 0,
+        status: 'STATUS_REDIRECT',
+        URI: 'https://example.com/from',
+        RedirectURI: 'https://example.com/to',
+        redirectId: 2,
+      },
+    ];
+    const store = storeWithProfile(
+      getProfileWithMarkers([
+        start1,
+        redirect1,
+        ...getNetworkMarkers({
+          id: 2,
+          uri: 'https://example.com/to',
+          startTime: 5,
+          fetchStart: 6,
+          endTime: 20,
+        }),
+      ])
+    );
+    const threadMap = new ThreadMap();
+    threadMap.handleForThreadIndex(0);
+
+    const result = collectThreadNetwork(store, threadMap, new MarkerMap());
+
+    // Only the final STOP leg counts as a completed request.
+    expect(result.totalRequestCount).toBe(1);
+    expect(result.incompleteCount).toBe(0);
+    // But both legs are listed, so the redirect is visible for drill-down.
+    expect(result.requests).toHaveLength(2);
+    const redirectLeg = result.requests.find(
+      (r) => r.status === 'STATUS_REDIRECT'
+    );
+    expect(redirectLeg).toBeDefined();
+    expect(redirectLeg!.url).toBe('https://example.com/from');
+  });
+
   it('filters by searchString case-insensitively', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         uri: 'https://api.example.com/data',
@@ -783,9 +888,15 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap, undefined, {
-      searchString: 'API',
-    });
+    const result = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        searchString: 'API',
+      }
+    );
 
     expect(result.totalRequestCount).toBe(3);
     expect(result.filteredRequestCount).toBe(2);
@@ -793,7 +904,7 @@ describe('collectThreadNetwork', function () {
   });
 
   it('filters by minDuration', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         uri: 'https://example.com/fast',
@@ -810,16 +921,22 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap, undefined, {
-      minDuration: 5,
-    });
+    const result = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        minDuration: 5,
+      }
+    );
 
     expect(result.filteredRequestCount).toBe(1);
     expect(result.requests[0].url).toContain('slow');
   });
 
   it('filters by maxDuration', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         uri: 'https://example.com/fast',
@@ -836,16 +953,22 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap, undefined, {
-      maxDuration: 5,
-    });
+    const result = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        maxDuration: 5,
+      }
+    );
 
     expect(result.filteredRequestCount).toBe(1);
     expect(result.requests[0].url).toContain('fast');
   });
 
   it('limit restricts the requests list but summary stats cover all filtered results', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         uri: 'https://example.com/a',
@@ -869,9 +992,15 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap, undefined, {
-      limit: 2,
-    });
+    const result = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        limit: 2,
+      }
+    );
 
     expect(result.filteredRequestCount).toBe(3);
     expect(result.requests).toHaveLength(2);
@@ -880,21 +1009,27 @@ describe('collectThreadNetwork', function () {
   });
 
   it('limit 0 means no limit — all requests are returned', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       { id: 1, startTime: 0, fetchStart: 0, endTime: 5 },
       { id: 2, startTime: 6, fetchStart: 6, endTime: 11 },
       { id: 3, startTime: 12, fetchStart: 12, endTime: 17 },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap, undefined, {
-      limit: 0,
-    });
+    const result = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        limit: 0,
+      }
+    );
 
     expect(result.requests).toHaveLength(3);
   });
 
   it('accumulates cache stats correctly', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         startTime: 0,
@@ -907,41 +1042,41 @@ describe('collectThreadNetwork', function () {
         startTime: 2,
         fetchStart: 2,
         endTime: 3,
-        payload: { cache: 'MemoryHit' },
+        payload: { cache: 'HitViaReval' },
       },
       {
         id: 3,
         startTime: 4,
         fetchStart: 4,
         endTime: 5,
-        payload: { cache: 'Prefetched' },
+        payload: { cache: 'Missed' },
       },
       {
         id: 4,
         startTime: 6,
         fetchStart: 6,
         endTime: 7,
-        payload: { cache: 'Miss' },
+        payload: { cache: 'MissedViaReval' },
       },
       {
         id: 5,
         startTime: 8,
         fetchStart: 8,
         endTime: 9,
-        payload: { cache: 'DiskStorage' },
+        payload: { cache: 'Unresolved' },
       },
       { id: 6, startTime: 10, fetchStart: 10, endTime: 11 },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
 
-    expect(result.summary.cacheHit).toBe(3);
+    expect(result.summary.cacheHit).toBe(2);
     expect(result.summary.cacheMiss).toBe(2);
-    expect(result.summary.cacheUnknown).toBe(1);
+    expect(result.summary.cacheUnknown).toBe(2);
   });
 
   it('extracts phase timings per request', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         startTime: 0,
@@ -959,7 +1094,7 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
     const phases = result.requests[0].phases;
 
     expect(phases.dns).toBe(5);
@@ -971,7 +1106,7 @@ describe('collectThreadNetwork', function () {
   });
 
   it('extracts TLS phase only when secureConnectionStart > 0', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         startTime: 0,
@@ -986,13 +1121,13 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
 
     expect(result.requests[0].phases.tls).toBe(8);
   });
 
   it('skips TLS phase when secureConnectionStart is 0', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         startTime: 0,
@@ -1005,13 +1140,13 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
 
     expect(result.requests[0].phases.tls).toBeUndefined();
   });
 
   it('accumulates phase totals in summary across all filtered requests', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         startTime: 0,
@@ -1028,20 +1163,26 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
 
     expect(result.summary.phaseTotals.ttfb).toBe(20);
   });
 
   it('sets filters field only when at least one filter is applied', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       { id: 1, startTime: 0, fetchStart: 0, endTime: 5 },
     ]);
 
-    const noFilters = collectThreadNetwork(store, threadMap);
-    const withFilter = collectThreadNetwork(store, threadMap, undefined, {
-      searchString: 'example',
-    });
+    const noFilters = collectThreadNetwork(store, threadMap, markerMap);
+    const withFilter = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        searchString: 'example',
+      }
+    );
 
     expect(noFilters.filters).toBeUndefined();
     expect(withFilter.filters).toBeDefined();
@@ -1049,7 +1190,7 @@ describe('collectThreadNetwork', function () {
   });
 
   it('returns zero requests when no markers match filters', function () {
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       {
         id: 1,
         uri: 'https://example.com/',
@@ -1059,9 +1200,15 @@ describe('collectThreadNetwork', function () {
       },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap, undefined, {
-      searchString: 'no-match-here',
-    });
+    const result = collectThreadNetwork(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        searchString: 'no-match-here',
+      }
+    );
 
     expect(result.totalRequestCount).toBe(1);
     expect(result.filteredRequestCount).toBe(0);
@@ -1071,12 +1218,22 @@ describe('collectThreadNetwork', function () {
   it('returns correct duration on each request entry', function () {
     // The merged marker sets data.startTime to the START marker's table time
     // (0), so total duration = endTime - startTime = 25 - 0 = 25.
-    const { store, threadMap } = setupWithNetworkMarkers([
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
       { id: 1, startTime: 0, fetchStart: 5, endTime: 25 },
     ]);
 
-    const result = collectThreadNetwork(store, threadMap);
+    const result = collectThreadNetwork(store, threadMap, markerMap);
 
     expect(result.requests[0].duration).toBe(25);
+  });
+
+  it('assigns a marker handle to each request entry', function () {
+    const { store, threadMap, markerMap } = setupWithNetworkMarkers([
+      { id: 1, startTime: 0, fetchStart: 0, endTime: 5 },
+    ]);
+
+    const result = collectThreadNetwork(store, threadMap, markerMap);
+
+    expect(result.requests[0].markerHandle).toBe('m-1');
   });
 });

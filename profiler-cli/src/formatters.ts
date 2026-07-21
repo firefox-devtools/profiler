@@ -20,6 +20,7 @@ import type {
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -28,6 +29,9 @@ import type {
   ThreadNetworkResult,
   ThreadPageLoadResult,
   NetworkPhaseTimings,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
   MarkerGroupData,
   CallTreeNode,
   InlineStatus,
@@ -41,7 +45,10 @@ import type {
 } from './protocol';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
-import { formatTimestamp as formatDuration } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatTimestamp as formatDuration,
+  formatBytes,
+} from 'firefox-profiler/utils/format-numbers';
 
 // Maximum display width for function names in call-tree and sample views.
 const FUNC_NAME_WIDTH = 120;
@@ -280,6 +287,11 @@ CPU activity over time:`;
     output += '\nNo significant activity.';
   }
 
+  if (result.networkActivity) {
+    output +=
+      '\n\n' + formatThreadNetworkActivity(result.networkActivity).join('\n');
+  }
+
   return output;
 }
 
@@ -455,7 +467,173 @@ Name: ${result.name}\n`;
     output += 'No significant activity.\n';
   }
 
+  if (result.networkActivity) {
+    output +=
+      '\n' +
+      formatProfileNetworkActivity(result.networkActivity).join('\n') +
+      '\n';
+  }
+
   return output;
+}
+
+function formatCpuCores(result: ProfileMetaResult): string | null {
+  const { physicalCPUs, logicalCPUs } = result;
+  if (physicalCPUs !== undefined && logicalCPUs !== undefined) {
+    return `${physicalCPUs} physical, ${logicalCPUs} logical cores`;
+  }
+  if (physicalCPUs !== undefined) {
+    return `${physicalCPUs} physical cores`;
+  }
+  if (logicalCPUs !== undefined) {
+    return `${logicalCPUs} logical cores`;
+  }
+  return null;
+}
+
+/**
+ * Format the sampling interval. Size profiles measure the "interval" in bytes,
+ * everything else in time.
+ */
+function formatInterval(result: ProfileMetaResult): string {
+  if (result.sampleUnits?.time === 'bytes') {
+    return formatBytes(result.interval);
+  }
+  return formatDuration(result.interval, 4, 1);
+}
+
+/**
+ * Format a ProfileMetaResult as plain text, grouped into the same sections the
+ * web UI's "Profile Info" panel uses. Absent fields (and empty sections) are
+ * skipped.
+ */
+export function formatProfileMetaResult(
+  result: WithContext<ProfileMetaResult>
+): string {
+  const blocks: string[] = [];
+  const pushSection = (heading: string, rows: string[]) => {
+    if (rows.length) {
+      blocks.push(`${heading}:\n` + rows.map((row) => `  ${row}`).join('\n'));
+    }
+  };
+
+  // ===== Recording =====
+  const recording: string[] = [];
+  if (result.startTimeFormatted) {
+    recording.push(`Started: ${result.startTimeFormatted}`);
+  }
+  if (result.durationMs !== undefined) {
+    recording.push(`Duration: ${formatDuration(result.durationMs)}`);
+  }
+  if (result.endTimeFormatted) {
+    recording.push(`Main process ended: ${result.endTimeFormatted}`);
+  }
+  recording.push(`Sampling interval: ${formatInterval(result)}`);
+  if (result.bufferCapacityBytes !== undefined) {
+    recording.push(
+      `Buffer capacity: ${formatBytes(result.bufferCapacityBytes, 0)}`
+    );
+  }
+  if (result.bufferDuration !== undefined) {
+    recording.push(`Buffer duration: ${result.bufferDuration}s`);
+  }
+  if (result.symbolicated !== undefined) {
+    recording.push(`Symbolicated: ${result.symbolicated ? 'yes' : 'no'}`);
+  }
+  if (result.features && result.features.length) {
+    recording.push(`Features: ${result.features.join(', ')}`);
+  }
+  if (result.threadsFilter && result.threadsFilter.length) {
+    recording.push(`Threads filter: ${result.threadsFilter.join(', ')}`);
+  }
+  pushSection('Recording', recording);
+
+  // ===== Application =====
+  const application: string[] = [];
+  if (result.productAndVersion) {
+    let name = result.productAndVersion;
+    if (result.appBuildID) {
+      name += ` (build ${result.appBuildID})`;
+    }
+    application.push(`Name: ${name}`);
+  } else if (result.appBuildID) {
+    application.push(`Build ID: ${result.appBuildID}`);
+  }
+  if (result.uptimeMs !== undefined) {
+    application.push(`Uptime: ${formatDuration(result.uptimeMs)}`);
+  }
+  if (result.updateChannel) {
+    application.push(`Update channel: ${result.updateChannel}`);
+  }
+  if (result.debug !== undefined) {
+    application.push(`Build type: ${result.debug ? 'debug' : 'opt'}`);
+  }
+  if (result.sourceURL) {
+    application.push(`Source URL: ${result.sourceURL}`);
+  }
+  if (result.arguments) {
+    application.push(`Arguments: ${result.arguments}`);
+  }
+  if (result.extensions && result.extensions.length) {
+    const names = result.extensions.map((ext) => ext.name).join(', ');
+    application.push(`Extensions (${result.extensions.length}): ${names}`);
+  }
+  pushSection('Application', application);
+
+  // ===== Platform =====
+  const platform: string[] = [];
+  if (result.device) {
+    platform.push(`Device: ${result.device}`);
+  }
+  if (result.platform) {
+    let os = result.platform;
+    if (result.abi) {
+      os += ` (${result.abi})`;
+    }
+    platform.push(`OS: ${os}`);
+  } else if (result.abi) {
+    platform.push(`ABI: ${result.abi}`);
+  }
+  const cpuCores = formatCpuCores(result);
+  if (result.cpuName) {
+    let cpu = result.cpuName;
+    if (cpuCores) {
+      cpu += ` (${cpuCores})`;
+    }
+    platform.push(`CPU: ${cpu}`);
+  } else if (cpuCores) {
+    platform.push(`CPU cores: ${cpuCores}`);
+  }
+  if (result.mainMemoryBytes !== undefined) {
+    platform.push(`Memory: ${formatBytes(result.mainMemoryBytes)}`);
+  }
+  pushSection('Platform', platform);
+
+  // ===== Import =====
+  const importInfo: string[] = [];
+  if (result.importedFrom) {
+    importInfo.push(`Imported from: ${result.importedFrom}`);
+  }
+  if (result.fileName) {
+    importInfo.push(`File name: ${result.fileName}`);
+  }
+  if (result.fileSize !== undefined) {
+    importInfo.push(`File size: ${formatBytes(result.fileSize)}`);
+  }
+  pushSection('Import', importInfo);
+
+  // ===== Extra =====
+  if (result.extra) {
+    for (const section of result.extra) {
+      const rows = section.entries.map(
+        (entry) => `${entry.label}: ${entry.formatted}`
+      );
+      pushSection(section.label, rows);
+    }
+  }
+
+  const contextHeader = formatContextHeader(result.context);
+  return `${contextHeader}\n\n${blocks.join('\n\n')}`;
 }
 
 function formatCounterStatInline(
@@ -476,8 +654,19 @@ function formatCounterStats(counter: CounterSummary): string {
   return `${stats} [${counter.rangeSampleCount} samples]`;
 }
 
+/** `p-N Process Name (etld+1)` identifying the owning process. */
+function formatCounterProcessName(counter: CounterSummary): string {
+  const etld1 = counter.etld1 ? ` (${counter.etld1})` : '';
+  return `p-${counter.processIndex} ${counter.processName}${etld1}`;
+}
+
+/** The ` [p-N Process Name (etld+1), pid X]` segment identifying the owning process. */
+function formatCounterProcess(counter: CounterSummary): string {
+  return ` [${formatCounterProcessName(counter)}, pid ${counter.pid}]`;
+}
+
 function formatCounterSummaryLine(counter: CounterSummary): string {
-  return `  ${counter.counterHandle}: ${counter.label} (${counter.category})${formatCounterStats(counter)}`;
+  return `  ${counter.counterHandle}: ${counter.label} (${counter.category})${formatCounterProcess(counter)}${formatCounterStats(counter)}`;
 }
 
 /**
@@ -490,8 +679,61 @@ export function formatCounterListResult(
   if (result.counters.length === 0) {
     return `${contextHeader}\n\nNo counters in this profile.`;
   }
-  const lines = result.counters.map(formatCounterSummaryLine);
-  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${lines.join('\n')}`;
+  const blocks = result.counters.map((counter) => {
+    const block = [formatCounterSummaryLine(counter)];
+    if (counter.graph.length > 0) {
+      block.push(`      ${counterSparkline(counter)}`);
+    }
+    return block.join('\n');
+  });
+  // Trailing blank line so the last counter's sparkline is separated from the
+  // prompt, matching the blank lines between counters.
+  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${blocks.join('\n\n')}\n`;
+}
+
+const SPARKLINE_CHARS = '▁▂▃▄▅▆▇█';
+
+/**
+ * Render a compact sparkline of the values using block characters, scaled
+ * between `min` (floor) and `max` (top). Values are clamped to that range; a
+ * zero-width range renders at mid-height so it doesn't read as the floor.
+ */
+function renderSparkline(values: number[], min: number, max: number): string {
+  if (values.length === 0) {
+    return '';
+  }
+  const range = max - min;
+  const lastIndex = SPARKLINE_CHARS.length - 1;
+  if (range <= 0) {
+    return SPARKLINE_CHARS[Math.floor(lastIndex / 2)].repeat(values.length);
+  }
+  return values
+    .map((value) => {
+      const clamped = Math.min(max, Math.max(min, value));
+      const index = Math.round(((clamped - min) / range) * lastIndex);
+      return SPARKLINE_CHARS[index];
+    })
+    .join('');
+}
+
+/**
+ * Render a counter's sparkline, choosing the baseline per graph type so the
+ * heights are meaningful: accumulated counters (e.g. Memory) are relative, so
+ * they scale between their own min and max; rate counters are absolute and
+ * anchored at zero, with percent counters (e.g. Process CPU) pinned to 0-100%.
+ */
+function counterSparkline(counter: CounterSummary): string {
+  const { graph } = counter;
+  if (graph.length === 0) {
+    return '';
+  }
+  if (counter.graphType === 'line-accumulated') {
+    return renderSparkline(graph, Math.min(...graph), Math.max(...graph));
+  }
+  if (counter.unit === 'percent') {
+    return renderSparkline(graph, 0, 1);
+  }
+  return renderSparkline(graph, 0, Math.max(...graph));
 }
 
 /**
@@ -514,6 +756,9 @@ export function formatCounterInfoResult(
   lines.push(`  Unit: ${result.unit || '(none)'}`);
   lines.push(`  Graph type: ${result.graphType}`);
   lines.push(
+    `  Process: ${formatCounterProcessName(result)} [pid ${result.pid}]`
+  );
+  lines.push(
     `  Main thread: ${result.mainThreadHandle} (${result.mainThreadName})`
   );
   lines.push(
@@ -532,6 +777,36 @@ export function formatCounterInfoResult(
         ? `${stat.formattedValue} (${stat.carbon})`
         : stat.formattedValue;
       lines.push(`    ${stat.label}: ${value}`);
+    }
+  }
+  if (result.overTime.length > 0) {
+    lines.push(`  ${result.label} over time:`);
+    if (result.graph.length > 0) {
+      lines.push(`    ${counterSparkline(result)}`);
+      lines.push('');
+    }
+    // Build the columns first, then pad each to its widest cell so the values
+    // line up in a column.
+    const rows = result.overTime.map((bucket) => {
+      const extras = [
+        bucket.formattedDelta,
+        bucket.formattedPercentage,
+        bucket.carbon,
+      ].filter((part) => part !== undefined);
+      return {
+        handles: `[${bucket.startTimeName} → ${bucket.endTimeName}]`,
+        times: `(${bucket.startTimeStr} - ${bucket.endTimeStr})`,
+        value: bucket.formattedValue,
+        extras: extras.length > 0 ? `(${extras.join(', ')})` : '',
+      };
+    });
+    const handlesWidth = Math.max(...rows.map((row) => row.handles.length));
+    const timesWidth = Math.max(...rows.map((row) => row.times.length));
+    const valueWidth = Math.max(...rows.map((row) => row.value.length));
+    for (const row of rows) {
+      lines.push(
+        `    ${row.handles.padEnd(handlesWidth)}  ${row.times.padEnd(timesWidth)}  ${row.value.padEnd(valueWidth)}  ${row.extras}`.trimEnd()
+      );
     }
   }
   return lines.join('\n');
@@ -1124,6 +1399,172 @@ export function formatThreadFunctionsResult(
   return lines.join('\n');
 }
 
+const STARTED_BEFORE_SUFFIX = ' (started before recording)';
+const IN_FLIGHT_SUFFIX = ' (in flight at end)';
+const REDIRECT_SUFFIX = ' (redirect)';
+const CANCELED_SUFFIX = ' (canceled)';
+
+/**
+ * Status-derived suffix for a summary request. STATUS_STOP is the normal
+ * completed request (no suffix); in-flight is handled separately via
+ * `incomplete`. Redirect / cancel legs are surfaced but flagged so they aren't
+ * mistaken for slow completed requests.
+ */
+function networkStatusSuffix(request: NetworkSummaryRequest): string {
+  switch (request.status) {
+    case 'STATUS_REDIRECT':
+      return REDIRECT_SUFFIX;
+    case 'STATUS_CANCEL':
+      return CANCELED_SUFFIX;
+    default:
+      return '';
+  }
+}
+
+/**
+ * Middle-truncate a URL keeping the host (which carries the signal) and the
+ * tail of the path (bare filenames like "channel" are useless on their own).
+ */
+function truncateNetworkUrl(url: string, maxLen: number = 70): string {
+  if (url.length <= maxLen) {
+    return url;
+  }
+  let host = '';
+  let rest = url;
+  try {
+    const parsed = new URL(url);
+    host = parsed.host;
+    rest = parsed.pathname + parsed.search;
+  } catch {
+    // Not a parseable URL; fall through to a raw middle-truncation.
+  }
+  if (host === '') {
+    const keep = Math.max(0, maxLen - 3);
+    const head = Math.ceil(keep / 2);
+    const tail = Math.floor(keep / 2);
+    return url.slice(0, head) + '...' + url.slice(url.length - tail);
+  }
+  const budget = maxLen - host.length;
+  if (budget <= 4) {
+    return host.length > maxLen ? host.slice(0, maxLen - 3) + '...' : host;
+  }
+  if (rest.length <= budget) {
+    return host + rest;
+  }
+  const keep = budget - 3;
+  const head = Math.ceil(keep / 2);
+  const tail = Math.floor(keep / 2);
+  return host + rest.slice(0, head) + '...' + rest.slice(rest.length - tail);
+}
+
+/**
+ * Render a thread-scoped network-activity section (used by `thread info`).
+ * Returns the lines; the caller joins and places them.
+ */
+function formatThreadNetworkActivity(summary: ThreadNetworkSummary): string[] {
+  const lines: string[] = [];
+  const incompletePart =
+    summary.incompleteCount > 0
+      ? `, ${summary.incompleteCount} still in flight at end of recording`
+      : '';
+  lines.push(
+    `Network activity: ${summary.requestCount} completed requests${incompletePart}`
+  );
+
+  const pct = Math.round(summary.inFlightPercentage);
+  const cacheParts: string[] = [];
+  if (summary.cacheHit > 0) {
+    cacheParts.push(`${summary.cacheHit} hit`);
+  }
+  if (summary.cacheMiss > 0) {
+    cacheParts.push(`${summary.cacheMiss} miss`);
+  }
+  if (summary.cacheUnknown > 0) {
+    cacheParts.push(`${summary.cacheUnknown} unknown`);
+  }
+  const cacheStr =
+    cacheParts.length > 0 ? `; cache: ${cacheParts.join(' / ')}` : '';
+  lines.push(
+    `  In flight ${pct}% of the thread's range (${formatDuration(summary.inFlightMs)} of ${formatDuration(summary.rangeDurationMs)}), peak ${summary.peakConcurrency} concurrent${cacheStr}; ${summary.errorCount} failed`
+  );
+
+  if (summary.slowest.length > 0) {
+    lines.push('  Slowest requests:');
+    for (const request of summary.slowest) {
+      const size =
+        request.transferSizeKB !== undefined
+          ? `${request.transferSizeKB.toFixed(1)}KB`
+          : '';
+      const suffix =
+        (request.incomplete ? IN_FLIGHT_SUFFIX : '') +
+        networkStatusSuffix(request) +
+        (request.startedBeforeRecording ? STARTED_BEFORE_SUFFIX : '');
+      const parts = [
+        `    ${request.markerHandle}`,
+        formatDuration(request.durationMs),
+        truncateNetworkUrl(request.url, 60),
+        size,
+      ].filter((part) => part !== '');
+      lines.push(parts.join('  ') + suffix);
+    }
+  }
+  return lines;
+}
+
+/**
+ * Render a profile-wide network-activity section (used by `profile info`).
+ * Returns the lines; the caller joins and places them.
+ */
+function formatProfileNetworkActivity(
+  summary: ProfileNetworkSummary
+): string[] {
+  const lines: string[] = [];
+  const incompletePart =
+    summary.incompleteCount > 0
+      ? `, ${summary.incompleteCount} still in flight at end of recording`
+      : '';
+  lines.push(
+    `Network activity: ${summary.requestCount} completed requests (deduped across processes)${incompletePart}`
+  );
+
+  const pct = Math.round(summary.inFlightPercentage);
+  lines.push(
+    `  In flight ${pct}% of the profile (${formatDuration(summary.inFlightMs)} of ${formatDuration(summary.rangeDurationMs)}), peak ${summary.peakConcurrency} concurrent; ${summary.errorCount} failed`
+  );
+
+  if (summary.slowest.length > 0) {
+    lines.push('  Slowest requests:');
+    for (const request of summary.slowest) {
+      const size =
+        request.transferSizeKB !== undefined
+          ? `${request.transferSizeKB.toFixed(1)}KB`
+          : '';
+      const suffix =
+        (request.incomplete ? IN_FLIGHT_SUFFIX : '') +
+        networkStatusSuffix(request) +
+        (request.startedBeforeRecording ? STARTED_BEFORE_SUFFIX : '');
+      const parts = [
+        `    ${request.markerHandle}`,
+        formatDuration(request.durationMs),
+        truncateNetworkUrl(request.url, 60),
+        `[${request.threadHandle}]`,
+        size,
+      ].filter((part) => part !== '');
+      lines.push(parts.join('  ') + suffix);
+    }
+  }
+
+  if (summary.byThread.length > 0) {
+    const parts = summary.byThread.map(
+      (thread) =>
+        `${thread.threadHandle} ${thread.threadName} (${thread.requestCount} reqs, ${formatDuration(thread.inFlightMs)} in flight)`
+    );
+    lines.push(`  By thread: ${parts.join(', ')}`);
+  }
+
+  return lines;
+}
+
 function formatNetworkPhases(phases: NetworkPhaseTimings): string {
   const parts: string[] = [];
   if (phases.dns !== undefined) {
@@ -1152,25 +1593,39 @@ export function formatThreadNetworkResult(
 ): string {
   const lines: string[] = [formatContextHeader(result.context), ''];
 
+  // totalRequestCount counts only completed requests; the candidate set the
+  // filters run against also includes the incomplete (in-flight) ones.
+  const totalCandidates = result.totalRequestCount + result.incompleteCount;
   const filterSuffix =
     result.filters !== undefined &&
-    result.filteredRequestCount !== result.totalRequestCount
-      ? ` (filtered from ${result.totalRequestCount})`
+    result.filteredRequestCount !== totalCandidates
+      ? ` (filtered from ${totalCandidates})`
       : '';
 
   const truncated = result.requests.length < result.filteredRequestCount;
+  const sortLabel =
+    result.sort === 'duration' ? 'slowest first' : 'chronological';
   const countStr = truncated
-    ? `${result.requests.length} of ${result.filteredRequestCount} requests`
-    : `${result.filteredRequestCount} requests`;
+    ? `${result.requests.length} of ${result.filteredRequestCount} requests (${sortLabel})`
+    : `${result.filteredRequestCount} requests (${sortLabel})`;
 
   lines.push(
     `Network requests in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${countStr}${filterSuffix}`
   );
+  if (result.incompleteCount > 0) {
+    lines.push(
+      `${result.incompleteCount} request(s) did not complete during the recording (in flight at end).`
+    );
+  }
   lines.push('');
 
   // Summary
   const s = result.summary;
   lines.push('Summary:');
+  // Lead with the wall-clock metric
+  lines.push(
+    `  In flight: ${formatDuration(s.inFlightMs)} of ${formatDuration(s.rangeDurationMs)} (${Math.round(s.inFlightPercentage)}%), peak ${s.peakConcurrency} concurrent`
+  );
   lines.push(
     `  Cache: ${s.cacheHit} hit, ${s.cacheMiss} miss, ${s.cacheUnknown} unknown`
   );
@@ -1185,7 +1640,7 @@ export function formatThreadNetworkResult(
     pt.mainThread !== undefined;
 
   if (hasPhaseTotals) {
-    lines.push('  Phase totals:');
+    lines.push('  Phase totals (summed across concurrent requests):');
     if (pt.dns !== undefined) {
       lines.push(`    DNS:              ${formatDuration(pt.dns)}`);
     }
@@ -1215,8 +1670,21 @@ export function formatThreadNetworkResult(
 
   for (const req of result.requests) {
     const url = req.url.length > 100 ? req.url.slice(0, 97) + '...' : req.url;
-    const status =
-      req.httpStatus !== undefined ? String(req.httpStatus) : '???';
+    let status: string;
+    if (req.incomplete) {
+      status = 'in flight';
+    } else if (req.status === 'STATUS_REDIRECT') {
+      status = 'redirect';
+    } else if (req.status === 'STATUS_CANCEL') {
+      status = 'canceled';
+    } else if (req.httpStatus !== undefined) {
+      status = String(req.httpStatus);
+    } else {
+      status = '???';
+    }
+    if (req.startedBeforeRecording) {
+      status += ' (started before recording)';
+    }
     const version = req.httpVersion !== undefined ? `  ${req.httpVersion}` : '';
     const cache =
       req.cacheStatus !== undefined ? `  cache=${req.cacheStatus}` : '';
@@ -1225,7 +1693,7 @@ export function formatThreadNetworkResult(
         ? `  size=${req.transferSizeKB.toFixed(1)}KB`
         : '';
 
-    lines.push(`  ${url}`);
+    lines.push(`  ${req.markerHandle}  ${url}`);
     lines.push(
       `    ${status}${version}${cache}${size}  duration=${formatDuration(req.duration)}`
     );
@@ -1240,11 +1708,11 @@ export function formatThreadNetworkResult(
 
   if (truncated) {
     lines.push(
-      `Use --limit 0 to show all requests, or --limit <N> to set a different limit.`
+      `Use --limit 0 to show all requests, --limit <N> for a different window, or --sort start for chronological order.`
     );
   } else {
     lines.push(
-      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, or --limit <N> to filter.'
+      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, --limit <N>, or --sort start|duration to filter and order.'
     );
   }
 

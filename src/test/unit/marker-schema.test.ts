@@ -355,6 +355,10 @@ describe('marker schema formatting', function () {
       ['decimal', 12.3456789],
       ['decimal', 123456.789],
       ['decimal', 0.000123456],
+      ['hexadecimal', 0],
+      ['hexadecimal', 0xff],
+      ['hexadecimal', 0xffffffff],
+      ['hexadecimal', -255],
       ['percentage', 0],
       ['percentage', 0.1],
       ['percentage', 0.123456789],
@@ -446,6 +450,10 @@ describe('marker schema formatting', function () {
         "decimal - 12",
         "decimal - 123,457",
         "decimal - 0.000",
+        "hexadecimal - 0x0",
+        "hexadecimal - 0xff",
+        "hexadecimal - 0xffffffff",
+        "hexadecimal - 0xffffff01",
         "percentage - 0%",
         "percentage - 10%",
         "percentage - 12%",
@@ -465,6 +473,13 @@ describe('marker schema formatting', function () {
   it('supports complex formats', function () {
     const entries: Array<[MarkerFormatType, unknown]> = [
       ['url', 'http://example.com'],
+      // A whole-string URL is linkified.
+      ['url', 'https://example.com/path?query=1'],
+      // A URL embedded in a longer string is left as plain text.
+      ['url', 'loaded https://example.com successfully'],
+      // A string that starts with a URL but continues with a text is left as
+      // plain text.
+      ['url', 'https://example.com then some more text'],
       ['file-path', '/Users/me/gecko'],
       ['file-path', null],
       ['file-path', undefined],

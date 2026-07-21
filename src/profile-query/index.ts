@@ -47,6 +47,7 @@ import { getLibForFunc } from './function-list';
 import { MarkerMap } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
+import { collectProfileMeta } from './formatters/profile-meta';
 import {
   collectThreadInfo,
   collectThreadSamples,
@@ -88,11 +89,13 @@ import type {
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadNetworkResult,
+  NetworkRequestSort,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   ProfileLogsResult,
@@ -212,6 +215,7 @@ export class ProfileQuerier {
       this._store,
       this._timestampManager,
       this._threadMap,
+      this._markerMap,
       this._processIndexMap,
       showAll,
       search
@@ -219,8 +223,16 @@ export class ProfileQuerier {
     return { ...result, context: this._getContext() };
   }
 
+  async profileMeta(): Promise<WithContext<ProfileMetaResult>> {
+    return { ...collectProfileMeta(this._store), context: this._getContext() };
+  }
+
   async counterList(): Promise<WithContext<CounterListResult>> {
-    const result = collectCounterList(this._store, this._threadMap);
+    const result = collectCounterList(
+      this._store,
+      this._threadMap,
+      this._processIndexMap
+    );
     return { ...result, context: this._getContext() };
   }
 
@@ -230,6 +242,8 @@ export class ProfileQuerier {
     const result = collectCounterInfo(
       this._store,
       this._threadMap,
+      this._processIndexMap,
+      this._timestampManager,
       counterHandle
     );
     return { ...result, context: this._getContext() };
@@ -242,6 +256,7 @@ export class ProfileQuerier {
       this._store,
       this._timestampManager,
       this._threadMap,
+      this._markerMap,
       threadHandle
     );
     return { ...result, context: this._getContext() };
@@ -1042,11 +1057,13 @@ export class ProfileQuerier {
       minDuration?: number;
       maxDuration?: number;
       limit?: number;
+      sort?: NetworkRequestSort;
     }
   ): Promise<WithContext<ThreadNetworkResult>> {
     const result = collectThreadNetwork(
       this._store,
       this._threadMap,
+      this._markerMap,
       threadHandle,
       filterOptions
     );

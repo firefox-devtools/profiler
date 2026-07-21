@@ -2,9 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { formatThreadNetworkResult } from '../../formatters';
+import {
+  formatThreadNetworkResult,
+  formatThreadInfoResult,
+} from '../../formatters';
 import type {
   ThreadNetworkResult,
+  ThreadInfoResult,
+  ThreadNetworkSummary,
+  NetworkSummaryRequest,
   NetworkRequestEntry,
   NetworkPhaseTimings,
   SessionContext,
@@ -24,10 +30,30 @@ function makeRequest(
   overrides: Partial<NetworkRequestEntry> = {}
 ): NetworkRequestEntry {
   return {
+    markerHandle: 'm-1',
     url: 'https://example.com/resource',
     startTime: 0,
     duration: 100,
+    status: 'STATUS_STOP',
+    incomplete: false,
+    startedBeforeRecording: false,
     phases: {},
+    ...overrides,
+  };
+}
+
+function makeSummary(
+  overrides: Partial<ThreadNetworkResult['summary']> = {}
+): ThreadNetworkResult['summary'] {
+  return {
+    cacheHit: 0,
+    cacheMiss: 0,
+    cacheUnknown: 1,
+    inFlightMs: 100,
+    inFlightPercentage: 10,
+    peakConcurrency: 1,
+    rangeDurationMs: 1000,
+    phaseTotals: {},
     ...overrides,
   };
 }
@@ -41,13 +67,10 @@ function makeResult(
     threadHandle: 't-0',
     friendlyThreadName: 'GeckoMain',
     totalRequestCount: 1,
+    incompleteCount: 0,
     filteredRequestCount: 1,
-    summary: {
-      cacheHit: 0,
-      cacheMiss: 0,
-      cacheUnknown: 1,
-      phaseTotals: {},
-    },
+    sort: 'duration',
+    summary: makeSummary(),
     requests: [makeRequest()],
     ...overrides,
   };
@@ -136,12 +159,7 @@ describe('formatThreadNetworkResult', function () {
 
   it('shows cache summary counts', function () {
     const result = makeResult({
-      summary: {
-        cacheHit: 4,
-        cacheMiss: 2,
-        cacheUnknown: 1,
-        phaseTotals: {},
-      },
+      summary: makeSummary({ cacheHit: 4, cacheMiss: 2, cacheUnknown: 1 }),
     });
 
     const output = formatThreadNetworkResult(result);
@@ -151,10 +169,27 @@ describe('formatThreadNetworkResult', function () {
     expect(output).toContain('1 unknown');
   });
 
+  it('leads the summary with the wall-clock in-flight metric', function () {
+    const result = makeResult({
+      summary: makeSummary({
+        inFlightMs: 870,
+        inFlightPercentage: 87,
+        peakConcurrency: 14,
+        rangeDurationMs: 1000,
+      }),
+    });
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('In flight');
+    expect(output).toContain('87%');
+    expect(output).toContain('peak 14 concurrent');
+  });
+
   it('shows phase totals section when any phase total is present', function () {
     const phaseTotals: NetworkPhaseTimings = { ttfb: 50, download: 30 };
     const result = makeResult({
-      summary: { cacheHit: 0, cacheMiss: 1, cacheUnknown: 0, phaseTotals },
+      summary: makeSummary({ cacheMiss: 1, cacheUnknown: 0, phaseTotals }),
     });
 
     const output = formatThreadNetworkResult(result);
@@ -164,9 +199,19 @@ describe('formatThreadNetworkResult', function () {
     expect(output).toContain('Download');
   });
 
+  it('labels phase totals as summed across concurrent requests', function () {
+    const result = makeResult({
+      summary: makeSummary({ phaseTotals: { download: 30 } }),
+    });
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('summed across concurrent requests');
+  });
+
   it('omits phase totals section when no phases are present', function () {
     const result = makeResult({
-      summary: { cacheHit: 1, cacheMiss: 0, cacheUnknown: 0, phaseTotals: {} },
+      summary: makeSummary({ cacheHit: 1, cacheUnknown: 0 }),
     });
 
     const output = formatThreadNetworkResult(result);
@@ -253,5 +298,176 @@ describe('formatThreadNetworkResult', function () {
     const output = formatThreadNetworkResult(result);
 
     expect(output).toContain('No network requests');
+  });
+
+  it('shows a marker handle for each request', function () {
+    const result = makeResult();
+    result.requests = [makeRequest({ markerHandle: 'm-42' })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('m-42');
+  });
+
+  it('reports incomplete requests', function () {
+    const result = makeResult({ incompleteCount: 2 });
+    result.requests = [makeRequest({ incomplete: true })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('did not complete during the recording');
+    expect(output).toContain('in flight');
+  });
+
+  it('annotates requests that started before the recording', function () {
+    const result = makeResult();
+    result.requests = [
+      makeRequest({ httpStatus: 200, startedBeforeRecording: true }),
+    ];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('started before recording');
+    // Shows the real status, not "in flight".
+    expect(output).not.toContain('in flight');
+    expect(output).toContain('200');
+  });
+
+  it('reflects the sort order in the header', function () {
+    const durationResult = makeResult({ sort: 'duration' });
+    expect(formatThreadNetworkResult(durationResult)).toContain(
+      'slowest first'
+    );
+
+    const startResult = makeResult({ sort: 'start' });
+    expect(formatThreadNetworkResult(startResult)).toContain('chronological');
+  });
+
+  it('labels a redirect leg instead of showing "???"', function () {
+    const result = makeResult();
+    result.requests = [makeRequest({ status: 'STATUS_REDIRECT' })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('redirect');
+    expect(output).not.toContain('???');
+  });
+
+  it('labels a canceled leg instead of showing "???"', function () {
+    const result = makeResult();
+    result.requests = [makeRequest({ status: 'STATUS_CANCEL' })];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('canceled');
+    expect(output).not.toContain('???');
+  });
+});
+
+function makeSummaryRequest(
+  overrides: Partial<NetworkSummaryRequest> = {}
+): NetworkSummaryRequest {
+  return {
+    markerHandle: 'm-1',
+    threadHandle: 't-0',
+    url: 'https://example.com/resource',
+    durationMs: 100,
+    startTime: 0,
+    status: 'STATUS_STOP',
+    incomplete: false,
+    startedBeforeRecording: false,
+    ...overrides,
+  };
+}
+
+function makeThreadInfoResult(
+  networkActivity: ThreadNetworkSummary | null
+): WithContext<ThreadInfoResult> {
+  return {
+    context: createContext(),
+    type: 'thread-info',
+    threadHandle: 't-0',
+    name: 'GeckoMain',
+    friendlyName: 'GeckoMain',
+    tid: 1,
+    createdAt: 0,
+    createdAtName: 'start',
+    endedAt: null,
+    endedAtName: null,
+    sampleCount: 0,
+    markerCount: 0,
+    cpuActivity: null,
+    networkActivity,
+  };
+}
+
+function makeThreadNetworkSummary(
+  slowest: NetworkSummaryRequest[]
+): ThreadNetworkSummary {
+  return {
+    threadHandle: 't-0',
+    threadName: 'GeckoMain',
+    requestCount: slowest.filter((r) => !r.incomplete).length,
+    incompleteCount: slowest.filter((r) => r.incomplete).length,
+    inFlightMs: 100,
+    inFlightPercentage: 10,
+    peakConcurrency: 1,
+    errorCount: 0,
+    cacheHit: 0,
+    cacheMiss: 0,
+    cacheUnknown: slowest.length,
+    rangeDurationMs: 1000,
+    slowest,
+  };
+}
+
+describe('formatThreadInfoResult network activity', function () {
+  it('annotates an in-flight request in the slowest list', function () {
+    const summary = makeThreadNetworkSummary([
+      makeSummaryRequest({ incomplete: true, durationMs: 999 }),
+    ]);
+
+    const output = formatThreadInfoResult(makeThreadInfoResult(summary));
+
+    expect(output).toContain('Slowest requests:');
+    expect(output).toContain('(in flight at end)');
+  });
+
+  it('does not annotate a completed request as in flight', function () {
+    const summary = makeThreadNetworkSummary([makeSummaryRequest()]);
+
+    const output = formatThreadInfoResult(makeThreadInfoResult(summary));
+
+    expect(output).toContain('Slowest requests:');
+    expect(output).not.toContain('(in flight at end)');
+  });
+
+  it('labels a redirect leg in the slowest list', function () {
+    const summary = makeThreadNetworkSummary([
+      makeSummaryRequest({ status: 'STATUS_REDIRECT' }),
+    ]);
+
+    const output = formatThreadInfoResult(makeThreadInfoResult(summary));
+
+    expect(output).toContain('(redirect)');
+  });
+
+  it('labels a canceled leg in the slowest list', function () {
+    const summary = makeThreadNetworkSummary([
+      makeSummaryRequest({ status: 'STATUS_CANCEL' }),
+    ]);
+
+    const output = formatThreadInfoResult(makeThreadInfoResult(summary));
+
+    expect(output).toContain('(canceled)');
+  });
+
+  it('does not label a completed request with a status suffix', function () {
+    const summary = makeThreadNetworkSummary([makeSummaryRequest()]);
+
+    const output = formatThreadInfoResult(makeThreadInfoResult(summary));
+
+    expect(output).not.toContain('(redirect)');
+    expect(output).not.toContain('(canceled)');
   });
 });

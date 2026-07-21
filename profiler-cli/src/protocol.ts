@@ -33,7 +33,12 @@ export type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   NetworkRequestEntry,
+  NetworkRequestSort,
   NetworkPhaseTimings,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
+  ProfileNetworkThreadBreakdown,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   NavigationMilestone,
@@ -48,6 +53,7 @@ export type {
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
+  ProfileMetaResult,
   ProfileLogsResult,
   ThreadSelectResult,
   CounterSummary,
@@ -72,11 +78,13 @@ import type {
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadNetworkResult,
+  NetworkRequestSort,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   FilterStackResult,
@@ -98,6 +106,10 @@ export type ClientCommand =
       subcommand: 'info' | 'threads';
       all?: boolean;
       search?: string;
+    }
+  | {
+      command: 'profile';
+      subcommand: 'meta';
     }
   | {
       command: 'profile';
@@ -133,6 +145,7 @@ export type ClientCommand =
         minDuration?: number;
         maxDuration?: number;
         limit?: number;
+        sort?: NetworkRequestSort;
       };
       pageLoadOptions?: {
         navigationIndex?: number;
@@ -196,6 +209,7 @@ export type CommandResult =
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
   | WithContext<ProfileInfoResult>
+  | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>
   | WithContext<ThreadSamplesTopDownResult>
   | WithContext<ThreadSamplesBottomUpResult>

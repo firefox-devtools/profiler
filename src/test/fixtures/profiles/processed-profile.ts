@@ -5,11 +5,20 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getEmptyJsTracerTable,
-  getEmptyJsAllocationsTable,
-  getEmptyUnbalancedNativeAllocationsTable,
-  getEmptyBalancedNativeAllocationsTable,
+  getEmptyRawJsAllocationsTable,
+  getEmptyRawUnbalancedNativeAllocationsTable,
+  getEmptyRawBalancedNativeAllocationsTable,
   getRawStackTableBuilderWithExistingContents,
+  finishRawBalancedNativeAllocationsTableBuilder,
+  finishRawFrameTableBuilder,
+  finishRawJsAllocationsTableBuilder,
+  finishRawSamplesTableBuilder,
+  finishRawUnbalancedNativeAllocationsTableBuilder,
+  getRawSamplesTableBuilderFromExisting,
+  getRawMarkerTableBuilderFromExisting,
   finishRawStackTableBuilder,
+  getRawFrameTableBuilderWithExistingContents,
+  getRawSamplesTableBuilderWithEventDelay,
 } from '../../../profile-logic/data-structures';
 import { mergeProfilesForDiffing } from '../../../profile-logic/merge-compare';
 import { computeReferenceCPUDeltaPerMs } from '../../../profile-logic/cpu';
@@ -119,7 +128,8 @@ export function addRawMarkersToThread(
   markers: TestDefinedRawMarker[]
 ) {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
-  const markersTable = thread.markers;
+  const markersTable = getRawMarkerTableBuilderFromExisting(thread.markers);
+  thread.markers = markersTable;
 
   for (const { name, startTime, endTime, phase, category, data } of markers) {
     markersTable.name.push(
@@ -172,7 +182,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
   markers: TestDefinedMarker[]
 ) {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
-  const markersTable = thread.markers;
+  const markersTable = getRawMarkerTableBuilderFromExisting(thread.markers);
+  thread.markers = markersTable;
   const allTimes = new Set<number>();
 
   markers.forEach((tuple) => {
@@ -209,7 +220,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
   // control the initial range. Because of that we need to add samples so that
   // the range includes these markers. Note that when a thread has no sample,
   // then the markers are used to compute the initial range.
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderFromExisting(thread.samples);
   if (samples.length) {
     const firstMarkerTime = Math.min(...allTimes);
     const lastMarkerTime = Math.max(...allTimes);
@@ -255,6 +266,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
       samples.length++;
     }
   }
+  thread.samples = finishRawSamplesTableBuilder(samples);
 }
 
 export function getThreadWithMarkers(
@@ -876,7 +888,7 @@ function _buildThreadFromTextOnlyStacks(
 ): RawThread {
   const thread = getEmptyThread();
 
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderWithEventDelay();
   const stringTable = globalDataCollector.getStringTable();
 
   const frameTable = globalDataCollector.getFrameTable();
@@ -1017,6 +1029,8 @@ function _buildThreadFromTextOnlyStacks(
   if (sampleTimes) {
     samples.time = sampleTimes;
   }
+
+  thread.samples = finishRawSamplesTableBuilder(samples);
 
   return thread;
 }
@@ -1501,13 +1515,13 @@ export function getCounterForThread(
     pid: thread.pid,
     mainThreadIndex,
     samples: {
-      time: sampleTimes.slice(),
+      time: Array.from(sampleTimes),
       // Create some arbitrary (positive integer) values for the number.
       number: config.hasCountNumber
-        ? sampleTimes.map((_, i) => Math.floor(50 * Math.sin(i) + 50))
+        ? Array.from(sampleTimes, (_, i) => Math.floor(50 * Math.sin(i) + 50))
         : undefined,
       // Create some arbitrary values for the count.
-      count: sampleTimes.map((_, i) => Math.sin(i)),
+      count: Array.from(sampleTimes, (_, i) => Math.sin(i)),
       length: thread.samples.length,
     },
     display: deriveCounterDisplay(category, name),
@@ -1522,7 +1536,7 @@ export function getCounterForThreadWithSamples(
   thread: RawThread,
   mainThreadIndex: ThreadIndex,
   samples: {
-    time?: number[];
+    time?: number[] | Float64Array<ArrayBuffer>;
     number?: number[];
     count?: number[];
     length: number;
@@ -1628,9 +1642,8 @@ export function getProfileWithJsAllocations() {
              I[lib:libI.so]
   `);
 
-  // Now add a JsAllocationsTable.
-  const jsAllocations = getEmptyJsAllocationsTable();
-  profile.threads[0].jsAllocations = jsAllocations;
+  // Now add a RawJsAllocationsTable.
+  const jsAllocations = getEmptyRawJsAllocationsTable();
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
@@ -1656,6 +1669,9 @@ export function getProfileWithJsAllocations() {
     jsAllocations.stack.push(stack);
     jsAllocations.length++;
   }
+
+  profile.threads[0].jsAllocations =
+    finishRawJsAllocationsTableBuilder(jsAllocations);
 
   return { profile, funcNamesDict, funcNames };
 }
@@ -1708,9 +1724,8 @@ export function getProfileWithUnbalancedNativeAllocations() {
     `
   );
 
-  // Now add a NativeAllocationsTable.
-  const nativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
-  profile.threads[0].nativeAllocations = nativeAllocations;
+  // Now add a RawNativeAllocationsTable.
+  const nativeAllocations = getEmptyRawUnbalancedNativeAllocationsTable();
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
@@ -1737,6 +1752,9 @@ export function getProfileWithUnbalancedNativeAllocations() {
     nativeAllocations.stack.push(stack);
     nativeAllocations.length++;
   }
+
+  profile.threads[0].nativeAllocations =
+    finishRawUnbalancedNativeAllocationsTableBuilder(nativeAllocations);
 
   return { profile, funcNamesDict };
 }
@@ -1776,10 +1794,9 @@ export function getProfileWithBalancedNativeAllocations() {
     `
   );
 
-  // Now add a NativeAllocationsTable.
-  const nativeAllocations = getEmptyBalancedNativeAllocationsTable();
+  // Now add a RawNativeAllocationsTable.
+  const nativeAllocations = getEmptyRawBalancedNativeAllocationsTable();
   const [thread] = profile.threads;
-  thread.nativeAllocations = nativeAllocations;
   const threadId = thread.tid;
   if (typeof threadId !== 'number') {
     throw new Error(
@@ -1824,6 +1841,9 @@ export function getProfileWithBalancedNativeAllocations() {
     nativeAllocations.threadId.push(threadId);
     nativeAllocations.length++;
   }
+
+  thread.nativeAllocations =
+    finishRawBalancedNativeAllocationsTableBuilder(nativeAllocations);
 
   return { profile, funcNamesDict };
 }
@@ -2013,7 +2033,7 @@ export function addInnerWindowIdToStacks(
   callNodesToDupe?: CallNodePath[]
 ) {
   const { stackTable, frameTable } = shared;
-  const { samples } = thread;
+  const samples = getRawSamplesTableBuilderFromExisting(thread.samples);
   const usedInnerWindowIDsSet = new Set<number>();
 
   for (const { innerWindowID, callNodes } of listOfOperations) {
@@ -2043,30 +2063,38 @@ export function addInnerWindowIdToStacks(
 
     const stackTableBuilder =
       getRawStackTableBuilderWithExistingContents(stackTable);
+    const frameTableBuilder =
+      getRawFrameTableBuilderWithExistingContents(frameTable);
 
     for (const callNode of callNodesToDupe) {
       const stackIndex = getStackIndexForCallNodePath(shared, callNode);
       const foundFrameIndex = stackTable.frame[stackIndex];
       // The found one comes from the first tab.
-      frameTable.innerWindowID[foundFrameIndex] =
+      frameTableBuilder.innerWindowID[foundFrameIndex] =
         listOfOperations[0].innerWindowID;
 
       // Clone this frame
-      const newFrameIndex = frameTable.length++;
-      frameTable.address.push(frameTable.address[foundFrameIndex]);
-      frameTable.inlineDepth.push(frameTable.inlineDepth[foundFrameIndex]);
-      frameTable.category.push(frameTable.category[foundFrameIndex]);
-      frameTable.subcategory.push(frameTable.subcategory[foundFrameIndex]);
-      frameTable.func.push(frameTable.func[foundFrameIndex]);
-      frameTable.nativeSymbol.push(frameTable.nativeSymbol[foundFrameIndex]);
-      frameTable.line.push(frameTable.line[foundFrameIndex]);
-      frameTable.column.push(frameTable.column[foundFrameIndex]);
-      frameTable.originalLocation.push(
+      const newFrameIndex = frameTableBuilder.length++;
+      frameTableBuilder.address.push(frameTable.address[foundFrameIndex]);
+      frameTableBuilder.inlineDepth.push(
+        frameTable.inlineDepth[foundFrameIndex]
+      );
+      frameTableBuilder.category.push(frameTable.category[foundFrameIndex]);
+      frameTableBuilder.subcategory.push(
+        frameTable.subcategory[foundFrameIndex]
+      );
+      frameTableBuilder.func.push(frameTable.func[foundFrameIndex]);
+      frameTableBuilder.nativeSymbol.push(
+        frameTable.nativeSymbol[foundFrameIndex]
+      );
+      frameTableBuilder.line.push(frameTable.line[foundFrameIndex]);
+      frameTableBuilder.column.push(frameTable.column[foundFrameIndex]);
+      frameTableBuilder.originalLocation.push(
         frameTable.originalLocation[foundFrameIndex]
       );
 
       // And that one comes from the second tab.
-      frameTable.innerWindowID.push(listOfOperations[1].innerWindowID);
+      frameTableBuilder.innerWindowID.push(listOfOperations[1].innerWindowID);
 
       // Clone the stack
       const newStackIndex = stackTableBuilder.length++;
@@ -2079,6 +2107,7 @@ export function addInnerWindowIdToStacks(
     }
 
     shared.stackTable = finishRawStackTableBuilder(stackTableBuilder);
+    shared.frameTable = finishRawFrameTableBuilder(frameTableBuilder);
 
     const sampleTimes = ensureExists(samples.time);
     for (let sampleIndex = samples.length; sampleIndex >= 0; sampleIndex--) {
@@ -2111,6 +2140,8 @@ export function addInnerWindowIdToStacks(
       samples.length++;
     }
   }
+
+  thread.samples = finishRawSamplesTableBuilder(samples);
 
   if (usedInnerWindowIDsSet.size !== 0) {
     thread.usedInnerWindowIDs = Array.from(usedInnerWindowIDsSet);

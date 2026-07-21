@@ -6,6 +6,24 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 68
+
+The `startTime` and `endTime` columns of the raw marker table (`thread.markers`) can now optionally be stored as `Float64Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
+When using regular arrays, these columns can contain `null` values - but only if the marker **phase** also marks that value as meaningless. Specifically, for `INSTANT` and `INTERVAL_START` markers, the `endTime` value isn't read (and can be `null`), and for `INTERVAL_END` markers, the `startTime` value isn't read (and can be `null`). But it can also be any other non-`null` value; it's ignored either way. When using typed arrays, there is no equivalent `null` sentinel value, but since the value is ignored anyway, you can pick any value. For example zero, or to the value of the previous marker (maybe for better compressibility).
+
+### Version 67
+
+The following raw columns can now optionally be stored as typed arrays, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
+- `thread.samples.time` and `thread.samples.timeDeltas` (`Float64Array`)
+- `counter.samples.time` and `counter.samples.timeDeltas` (`Float64Array`)
+- `thread.jsAllocations.time` (`Float64Array`)
+- `thread.nativeAllocations.time` (`Float64Array`)
+- `profile.shared.frameTable.func` (`Int32Array`)
+- `profile.shared.frameTable.address` (`Int32Array`, with `-1` as the sentinel for missing addresses)
+- `profile.shared.frameTable.inlineDepth` (`Uint8Array`)
+
 ### Version 66
 
 The `prefix` column of `profile.shared.stackTable` was replaced with a `prefixOffset` column, to improve compressibility.
@@ -188,6 +206,10 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
+
+### Version 35
+
+A new `hexadecimal` marker schema field format type has been added, which displays an integer value in hexadecimal with a `0x` prefix.
 
 ### Version 34
 

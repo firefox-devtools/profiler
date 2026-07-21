@@ -11,14 +11,17 @@ import {
   getEmptyProfile,
   getEmptyResourceTable,
   getEmptyNativeSymbolTable,
-  getEmptyFrameTable,
+  finishRawFrameTableBuilder,
+  finishRawSamplesTableBuilder,
+  getRawFrameTableBuilder,
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
   getEmptyRawMarkerTable,
-  getEmptySamplesTableWithEventDelay,
-  shallowCloneRawMarkerTable,
+  getRawSamplesTableBuilderWithEventDelay,
+  getRawMarkerTableBuilderFromExisting,
   getEmptySourceTable,
+  type RawMarkerTableBuilder,
 } from './data-structures';
 import {
   filterRawThreadSamplesToRange,
@@ -51,7 +54,7 @@ import type {
   IndexIntoSourceTable,
   IndexIntoSourceLocationTable,
   FuncTable,
-  FrameTable,
+  RawFrameTable,
   Lib,
   NativeSymbolTable,
   ResourceTable,
@@ -1057,9 +1060,9 @@ function mergeFrameTables(
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   translationMapsForOriginalLocation: TranslationMapForOriginalLocation[],
   translationMapsForCategories: TranslationMapForCategories[]
-): { frameTable: FrameTable; translationMaps: TranslationMapForFrames[] } {
+): { frameTable: RawFrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
-  const newFrameTable = getEmptyFrameTable();
+  const newFrameTable = getRawFrameTableBuilder();
 
   profiles.forEach((profile, profileIndex) => {
     const { frameTable } = profile.shared;
@@ -1108,7 +1111,10 @@ function mergeFrameTables(
     translationMaps.push(oldFrameToNewFramePlusOne);
   });
 
-  return { frameTable: newFrameTable, translationMaps };
+  return {
+    frameTable: finishRawFrameTableBuilder(newFrameTable),
+    translationMaps,
+  };
 }
 
 /**
@@ -1172,21 +1178,19 @@ function combineSamplesDiffing(
 ): RawSamplesTable {
   const [
     {
-      thread: { samples: samples1, tid: tid1 },
+      thread: { samples: samples1 },
       weightMultiplier: weightMultiplier1,
     },
     {
-      thread: { samples: samples2, tid: tid2 },
+      thread: { samples: samples2 },
       weightMultiplier: weightMultiplier2,
     },
   ] = threadsAndWeightMultipliers;
 
   const newWeight: number[] = [];
-  const newThreadId: Tid[] = [];
   const newSamples = {
-    ...getEmptySamplesTableWithEventDelay(),
+    ...getRawSamplesTableBuilderWithEventDelay(),
     weight: newWeight,
-    threadId: newThreadId,
   };
 
   const samples1Time = computeTimeColumnForRawSamplesTable(samples1);
@@ -1212,7 +1216,6 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay!.push(null);
       newSamples.time!.push(samples1Time[i]);
-      newThreadId.push(samples1.threadId ? samples1.threadId[i] : tid1);
       // TODO (issue #3151): Figure out a way to diff CPU usage numbers.
       // We add the first thread with a negative weight, because this is the
       // base profile.
@@ -1228,7 +1231,6 @@ function combineSamplesDiffing(
       // of eventDelay/responsiveness don't mean anything.
       newSamples.eventDelay!.push(null);
       newSamples.time!.push(samples2Time[j]);
-      newThreadId.push(samples2.threadId ? samples2.threadId[j] : tid2);
       const sampleWeight = samples2.weight ? samples2.weight[j] : 1;
       newWeight.push(weightMultiplier2 * sampleWeight);
 
@@ -1237,7 +1239,7 @@ function combineSamplesDiffing(
     }
   }
 
-  return newSamples;
+  return finishRawSamplesTableBuilder(newSamples);
 }
 
 type ThreadAndWeightMultiplier = {
@@ -1352,21 +1354,16 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   const samplesPerThread: RawSamplesTable[] = threads.map(
     (thread) => thread.samples
   );
-  const sampleTimesPerThread: Milliseconds[][] = samplesPerThread.map(
-    computeTimeColumnForRawSamplesTable
-  );
+  const sampleTimesPerThread: Float64Array<ArrayBuffer>[] =
+    samplesPerThread.map(computeTimeColumnForRawSamplesTable);
   // This is the array that holds the latest processed sample index for each
   // thread's samplesTable.
   const nextSampleIndexPerThread: number[] = Array(
     samplesPerThread.length
   ).fill(0);
-  // This array will contain the source thread ids. It will be added to the
-  // samples table after the loop.
-  const newThreadId: Tid[] = [];
   // Creating a new empty samples table to fill.
   const newSamples = {
-    ...getEmptySamplesTableWithEventDelay(),
-    threadId: newThreadId,
+    ...getRawSamplesTableBuilderWithEventDelay(),
   };
 
   // If every source thread has threadCPUDelta, and if the threads are
@@ -1433,11 +1430,6 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
     // from independent threads instead.
     ensureExists(newSamples.eventDelay).push(null);
     newSamples.time!.push(sourceThreadSamplesTimeCol[sourceThreadSampleIndex]);
-    newThreadId.push(
-      sourceThreadSamples.threadId
-        ? sourceThreadSamples.threadId[sourceThreadSampleIndex]
-        : threads[sourceThreadIndex].tid
-    );
     if (newThreadCPUDelta !== undefined) {
       newThreadCPUDelta.push(
         ensureExists(sourceThreadSamples.threadCPUDelta)[
@@ -1451,9 +1443,12 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
   }
 
   if (newThreadCPUDelta !== undefined) {
-    return { ...newSamples, threadCPUDelta: newThreadCPUDelta };
+    return finishRawSamplesTableBuilder({
+      ...newSamples,
+      threadCPUDelta: newThreadCPUDelta,
+    });
   }
-  return newSamples;
+  return finishRawSamplesTableBuilder(newSamples);
 }
 
 /**
@@ -1461,7 +1456,7 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
  */
 function mergeMarkers(threads: RawThread[]): RawMarkerTable {
   const newThreadId: Array<Tid | null> = [];
-  const newMarkerTable: RawMarkerTable = {
+  const newMarkerTable: RawMarkerTableBuilder = {
     ...getEmptyRawMarkerTable(),
     threadId: newThreadId,
   };
@@ -1496,7 +1491,9 @@ function getThreadMarkersAndScreenshotMarkers(
   threads: RawThread[],
   targetThread: RawThread
 ): RawMarkerTable {
-  const targetMarkerTable = shallowCloneRawMarkerTable(targetThread.markers);
+  const targetMarkerTable = getRawMarkerTableBuilderFromExisting(
+    targetThread.markers
+  );
 
   // Find screenshot markers in the other threads and add them to the target thread.
   for (const thread of threads) {

@@ -12,6 +12,7 @@ import {
   formatTimestamp,
   formatMicroseconds,
   formatNanoseconds,
+  formatHexadecimal,
 } from '../utils/format-numbers';
 import { ensureExists } from '../utils/types';
 import type {
@@ -587,6 +588,8 @@ export function formatFromMarkerSchema(
       return formatNumber(value, 0, 0);
     case 'decimal':
       return formatNumber(value);
+    case 'hexadecimal':
+      return formatHexadecimal(value);
     case 'percentage':
       return formatPercent(value);
     case 'pid':

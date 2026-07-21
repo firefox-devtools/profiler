@@ -23,6 +23,43 @@ profiler-cli profile info --json
       counters?: [CounterSummary]
     }],
     remainingProcesses?: { count, combinedCpuMs, maxCpuMs },
+    networkActivity: ProfileNetworkSummary | null,
+    context: SessionContext
+  }
+
+NetworkSummaryRequest:
+  {
+    markerHandle, threadHandle, url,
+    durationMs, startTime,
+    transferSizeKB?, httpStatus?, status,
+    incomplete, startedBeforeRecording
+  }
+
+ProfileNetworkSummary:
+  {
+    requestCount, incompleteCount,
+    inFlightMs, inFlightPercentage,
+    peakConcurrency, errorCount, rangeDurationMs,
+    slowest: [NetworkSummaryRequest],
+    byThread: [{ threadHandle, threadName, requestCount, inFlightMs }]
+  }
+
+profiler-cli profile meta --json
+  All fields except type, interval, and product are optional and omitted when
+  absent. Times are in milliseconds since the epoch; *Formatted fields are ISO
+  strings of the same value.
+  {
+    type: "profile-meta",
+    startTime?, startTimeFormatted?, durationMs?,
+    endTime?, endTimeFormatted?, interval, symbolicated?,
+    bufferCapacityBytes?, bufferDuration?, features?: [string], threadsFilter?: [string],
+    product, productAndVersion?, uptimeMs?,
+    appBuildID?, sourceURL?, updateChannel?, debug?, arguments?,
+    extensions?: [{ name, id, baseURL? }],
+    platform?, oscpu?, abi?, device?, cpuName?, physicalCPUs?, logicalCPUs?, mainMemoryBytes?,
+    importedFrom?, fileName?, fileSize?, version?, preprocessedProfileVersion?,
+    sampleUnits?: { time, eventDelay, threadCPUDelta },
+    extra?: [{ label, entries: [{ label, value, formatted }] }],
     context: SessionContext
   }
 
@@ -30,9 +67,11 @@ CounterSummary:
   {
     counterHandle, counterIndex, name, label, category,
     unit, graphType,
-    color, pid, mainThreadIndex, mainThreadHandle, mainThreadName,
+    color, pid, processIndex, processName, etld1?,
+    mainThreadIndex, mainThreadHandle, mainThreadName,
     rangeSampleCount,
-    stats: [{ source, label, value, formattedValue, carbon? }]
+    stats: [{ source, label, value, formattedValue, carbon? }],
+    graph: [number]
   }
 
 profiler-cli counter list --json
@@ -49,7 +88,33 @@ profiler-cli counter info --json
     description,
     sampleCount,
     rangeStart, rangeEnd,
+    overTime: [{ startTime, startTimeName, startTimeStr,
+                 endTime, endTimeName, endTimeStr,
+                 value, formattedValue, delta?, formattedDelta?,
+                 percentage?, formattedPercentage?, carbon? }],
     context: SessionContext
+  }
+
+profiler-cli thread info --json
+  {
+    type: "thread-info",
+    threadHandle, name, friendlyName, tid,
+    createdAt, createdAtName,
+    endedAt: number | null, endedAtName: string | null,
+    sampleCount, markerCount,
+    cpuActivity: [{ startTime, startTimeName, startTimeStr,
+                    endTime, endTimeName, endTimeStr, cpuMs, depthLevel }] | null,
+    networkActivity: ThreadNetworkSummary | null,
+    context: SessionContext
+  }
+
+ThreadNetworkSummary:
+  {
+    threadHandle, threadName,
+    requestCount, incompleteCount,
+    inFlightMs, inFlightPercentage, peakConcurrency,
+    errorCount, cacheHit, cacheMiss, cacheUnknown, rangeDurationMs,
+    slowest: [NetworkSummaryRequest]
   }
 
 profiler-cli thread samples --json
@@ -124,6 +189,29 @@ profiler-cli thread functions --json
                   selfSamples, selfPercentage, totalSamples, totalPercentage,
                   fullSelfPercentage?, fullTotalPercentage? }],
     activeFilters?, ephemeralFilters?,
+    context: SessionContext
+  }
+
+profiler-cli thread network --json
+  {
+    type: "thread-network",
+    threadHandle, friendlyThreadName,
+    totalRequestCount,
+    incompleteCount,
+    filteredRequestCount,
+    sort: "duration" | "start",
+    filters?: { searchString?, minDuration?, maxDuration?, limit? },
+    summary: {
+      cacheHit, cacheMiss, cacheUnknown,
+      inFlightMs, inFlightPercentage, peakConcurrency, rangeDurationMs,
+      phaseTotals: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
+    },
+    requests: [{
+      markerHandle, url, httpStatus?, httpVersion?, cacheStatus?,
+      transferSizeKB?, startTime, duration, status,
+      incomplete, startedBeforeRecording,
+      phases: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
+    }],
     context: SessionContext
   }
 

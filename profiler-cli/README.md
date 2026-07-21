@@ -31,6 +31,7 @@ Run `profiler-cli --help` for the full options reference.
 ```bash
 profiler-cli load <PATH>                   # Start daemon and load profile (file or http/https URL)
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
+profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
@@ -39,7 +40,7 @@ profiler-cli thread samples-top-down       # Show top-down call tree (where CPU 
 profiler-cli thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
 profiler-cli thread markers                # List markers with aggregated statistics [--list for flat per-marker view]
 profiler-cli thread functions              # List all functions with CPU percentages
-profiler-cli thread network                # Show network requests with timing phases [--search] [--min-duration] [--max-duration] [--limit]
+profiler-cli thread network                # Show network requests with timing phases [--search] [--min-duration] [--max-duration] [--limit] [--sort]
 profiler-cli thread page-load              # Show page load summary (navigation timing, resources, CPU, jank)
 profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
@@ -86,6 +87,7 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | `--json`               | Output as JSON (for use with `jq`, etc.)                                                                                                                 |
 | `--limit <N>`          | Limit number of results shown                                                                                                                            |
 | `--max-lines <N>`      | Limit call tree nodes for `samples-top-down`/`samples-bottom-up` (default: 100)                                                                          |
+| `--sort <order>`       | Order `thread network` requests: `duration` (default, slowest first) or `start` (chronological)                                                          |
 | `--scoring <strategy>` | Call tree scoring: `exponential-0.95`, `exponential-0.9` (default), `exponential-0.8`, `harmonic-0.1`, `harmonic-0.5`, `harmonic-1.0`, `percentage-only` |
 | `--navigation <N>`     | Select which navigation to show in `thread page-load` (1-based, default: last completed)                                                                 |
 | `--jank-limit <N>`     | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |

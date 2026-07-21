@@ -39,6 +39,23 @@ export function registerProfileCommand(
     );
   });
 
+  addGlobalOptions(
+    profile
+      .command('meta')
+      .description(
+        'Print profile metadata (application, platform, recording settings)'
+      )
+  ).action(async (opts) => {
+    await runCommand(
+      sessionDir,
+      {
+        command: 'profile',
+        subcommand: 'meta',
+      },
+      opts
+    );
+  });
+
   const VALID_LOG_LEVELS = ['error', 'warn', 'info', 'debug', 'verbose'];
 
   addGlobalOptions(

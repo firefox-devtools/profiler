@@ -12,10 +12,16 @@ import { attemptToConvertDhat } from './import/dhat';
 import { GlobalDataCollector } from './global-data-collector';
 import { AddressLocator } from './address-locator';
 import {
+  finishRawBalancedNativeAllocationsTableBuilder,
+  finishRawJsAllocationsTableBuilder,
+  finishRawUnbalancedNativeAllocationsTableBuilder,
   getEmptyExtensions,
   getEmptyRawMarkerTable,
-  getEmptyJsAllocationsTable,
-  getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyRawJsAllocationsTable,
+  getEmptyRawUnbalancedNativeAllocationsTable,
+  getRawMarkerTableBuilderFromExisting,
+  type RawFrameTableBuilder,
+  type RawMarkerTableBuilder,
   type RawStackTableBuilder,
 } from './data-structures';
 import { immutableUpdate, ensureExists } from '../utils/types';
@@ -43,6 +49,12 @@ import {
   getFriendlyThreadName,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
+import {
+  toInt32Array,
+  toUint8Array,
+  toFloat64Array,
+  toFloat64ArraySetNullToZero,
+} from '../utils/typed-arrays';
 import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
@@ -52,7 +64,6 @@ import type {
   RawThread,
   RawCounter,
   ExtensionTable,
-  FrameTable,
   RawCounterSamplesTable,
   RawSamplesTable,
   RawMarkerTable,
@@ -61,9 +72,9 @@ import type {
   IndexIntoFuncTable,
   IndexIntoStringTable,
   JsTracerTable,
-  JsAllocationsTable,
+  RawJsAllocationsTable,
   ProfilerOverhead,
-  NativeAllocationsTable,
+  RawNativeAllocationsTable,
   Milliseconds,
   Microseconds,
   Address,
@@ -106,6 +117,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoFrameTable,
   CounterDisplayConfig,
+  RawProfileSharedData,
 } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
@@ -521,7 +533,7 @@ function _extractUnknownFunctionType(
  */
 function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
-  sharedFrameTable: FrameTable,
+  sharedFrameTable: RawFrameTableBuilder,
   frameFuncs: IndexIntoFuncTable[],
   frameAddresses: (Address | null)[]
 ): IndexIntoFrameTable {
@@ -631,8 +643,8 @@ function _convertPayloadStackToIndex(
  * Process the markers.
  *  Convert stacks to causes.
  *  Process GC markers.
- *  Extract JS allocations into the JsAllocationsTable.
- *  Extract Native allocations into the NativeAllocationsTable.
+ *  Extract JS allocations into the RawJsAllocationsTable.
+ *  Extract Native allocations into the RawNativeAllocationsTable.
  */
 function _processMarkers(
   geckoMarkers: GeckoMarkerStruct,
@@ -642,13 +654,13 @@ function _processMarkers(
   stackIndexOffset: IndexIntoStackTable
 ): {
   markers: RawMarkerTable;
-  jsAllocations: JsAllocationsTable | null;
-  nativeAllocations: NativeAllocationsTable | null;
+  jsAllocations: RawJsAllocationsTable | null;
+  nativeAllocations: RawNativeAllocationsTable | null;
 } {
   const markers = getEmptyRawMarkerTable();
-  const jsAllocations = getEmptyJsAllocationsTable();
+  const jsAllocations = getEmptyRawJsAllocationsTable();
   const inProgressNativeAllocations =
-    getEmptyUnbalancedNativeAllocationsTable();
+    getEmptyRawUnbalancedNativeAllocationsTable();
   const memoryAddress: number[] = [];
   const threadId: number[] = [];
 
@@ -756,29 +768,24 @@ function _processMarkers(
     nativeAllocations = null;
   } else if (hasMemoryAddresses) {
     // This is the newer native allocations with memory addresses.
-    nativeAllocations = {
-      time: inProgressNativeAllocations.time,
-      weight: inProgressNativeAllocations.weight,
-      weightType: inProgressNativeAllocations.weightType,
-      stack: inProgressNativeAllocations.stack,
+    nativeAllocations = finishRawBalancedNativeAllocationsTableBuilder({
+      ...inProgressNativeAllocations,
       memoryAddress,
       threadId,
-      length: inProgressNativeAllocations.length,
-    };
+    });
   } else {
     // There is the older native allocations, without memory addresses.
-    nativeAllocations = {
-      time: inProgressNativeAllocations.time,
-      weight: inProgressNativeAllocations.weight,
-      weightType: inProgressNativeAllocations.weightType,
-      stack: inProgressNativeAllocations.stack,
-      length: inProgressNativeAllocations.length,
-    };
+    nativeAllocations = finishRawUnbalancedNativeAllocationsTableBuilder(
+      inProgressNativeAllocations
+    );
   }
 
   return {
     markers: markers,
-    jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
+    jsAllocations:
+      jsAllocations.length === 0
+        ? null
+        : finishRawJsAllocationsTableBuilder(jsAllocations),
     nativeAllocations,
   };
 }
@@ -1471,10 +1478,9 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustTableTimestamps<Table extends { time: Milliseconds[] }>(
-  table: Table,
-  delta: Milliseconds
-): Table {
+export function adjustTableTimestamps<
+  Table extends { time: Milliseconds[] | Float64Array<ArrayBuffer> },
+>(table: Table, delta: Milliseconds): Table {
   return {
     ...table,
     time: table.time.map((time) => time + delta),
@@ -1482,7 +1488,7 @@ export function adjustTableTimestamps<Table extends { time: Milliseconds[] }>(
 }
 
 export function adjustTableTimeDeltas<
-  Table extends { timeDeltas?: Milliseconds[] },
+  Table extends { timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer> },
 >(table: Table, delta: Milliseconds): Table {
   const { timeDeltas } = table;
   if (timeDeltas === undefined) {
@@ -1545,13 +1551,23 @@ export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
-  function adjustTimeIfNotNull(time: number | null) {
-    return time === null ? time : time + delta;
+  function adjustTimes(
+    times: Array<number | null> | Float64Array<ArrayBuffer>
+  ): Array<number | null> | Float64Array<ArrayBuffer> {
+    if (Array.isArray(times)) {
+      return times.map((time) => (time === null ? time : time + delta));
+    }
+    // JSLB Float64Array: no nulls; shift every value.
+    const out = new Float64Array(times.length);
+    for (let i = 0; i < times.length; i++) {
+      out[i] = times[i] + delta;
+    }
+    return out;
   }
   return {
     ...markers,
-    startTime: markers.startTime.map(adjustTimeIfNotNull),
-    endTime: markers.endTime.map(adjustTimeIfNotNull),
+    startTime: adjustTimes(markers.startTime),
+    endTime: adjustTimes(markers.endTime),
     data: markers.data.map((data) => {
       if (!data) {
         return data;
@@ -2062,6 +2078,101 @@ export function serializeProfileToJsonString(profile: Profile): string {
 }
 
 /**
+ * Convert all columns of a profile which are eligible to be stored as typed
+ * arrays into typed arrays.
+ *
+ * This is useful if the profile will be saved as a JSLB file:
+ * `serializeProfileToJsonSlabsFile` will be able to store these columns as binary
+ * slabs instead of as JSON arrays, which speeds up both the saving and the loading
+ * of the file.
+ *
+ * Does not mutate the input profile.
+ */
+export function optimizeProfileForStorage(profile: Profile): Profile {
+  return {
+    ...profile,
+    shared: convertSharedTablesEligibleColumns(profile.shared),
+    threads: profile.threads.map(convertThreadEligibleColumns),
+    counters: profile.counters?.map(convertCounterEligibleColumns),
+  };
+}
+
+function convertSharedTablesEligibleColumns(
+  shared: RawProfileSharedData
+): RawProfileSharedData {
+  const { stackTable, frameTable } = shared;
+  return {
+    ...shared,
+    stackTable: {
+      frame: toInt32Array(stackTable.frame),
+      prefixOffset: toInt32Array(stackTable.prefixOffset),
+      length: stackTable.length,
+    },
+    frameTable: {
+      ...frameTable,
+      address: toInt32Array(frameTable.address),
+      inlineDepth: toUint8Array(frameTable.inlineDepth),
+      func: toInt32Array(frameTable.func),
+    },
+  };
+}
+
+function convertThreadEligibleColumns(thread: RawThread): RawThread {
+  const newThread: RawThread = {
+    ...thread,
+    samples: convertSamplesTimesToTypedArrays(thread.samples),
+    markers: convertMarkersEligibleColumnsToTypedArrays(thread.markers),
+  };
+  if (thread.jsAllocations !== undefined) {
+    newThread.jsAllocations = {
+      ...thread.jsAllocations,
+      time: toFloat64Array(thread.jsAllocations.time),
+    };
+  }
+  if (thread.nativeAllocations !== undefined) {
+    newThread.nativeAllocations = {
+      ...thread.nativeAllocations,
+      time: toFloat64Array(thread.nativeAllocations.time),
+    };
+  }
+  return newThread;
+}
+
+function convertSamplesTimesToTypedArrays(
+  samples: RawSamplesTable
+): RawSamplesTable {
+  const result = { ...samples };
+  if (samples.time !== undefined) {
+    result.time = toFloat64Array(samples.time);
+  }
+  if (samples.timeDeltas !== undefined) {
+    result.timeDeltas = toFloat64Array(samples.timeDeltas);
+  }
+  return result;
+}
+
+function convertMarkersEligibleColumnsToTypedArrays(
+  markers: RawMarkerTable
+): RawMarkerTable {
+  return {
+    ...markers,
+    startTime: toFloat64ArraySetNullToZero(markers.startTime),
+    endTime: toFloat64ArraySetNullToZero(markers.endTime),
+  };
+}
+
+function convertCounterEligibleColumns(counter: RawCounter): RawCounter {
+  const samples: RawCounterSamplesTable = { ...counter.samples };
+  if (counter.samples.time !== undefined) {
+    samples.time = toFloat64Array(counter.samples.time);
+  }
+  if (counter.samples.timeDeltas !== undefined) {
+    samples.timeDeltas = toFloat64Array(counter.samples.timeDeltas);
+  }
+  return { ...counter, samples };
+}
+
+/**
  * Take a profile and convert it to a Uint8Array in the JsonSlabs format.
  *
  * This is more efficient than JSON if the profile contains large typed arrays.
@@ -2369,8 +2480,17 @@ export function processVisualMetrics(
     (cat) => cat.name === 'Test'
   );
 
+  const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
+    mainThread.markers
+  );
+  mainThread.markers = mainThreadMarkers;
+  const tabThreadMarkers = getRawMarkerTableBuilderFromExisting(
+    tabThread.markers
+  );
+  tabThread.markers = tabThreadMarkers;
+
   function maybeAddMetricMarker(
-    thread: RawThread,
+    markers: RawMarkerTableBuilder,
     name: string,
     phase: MarkerPhase,
     startTime: number | null,
@@ -2388,14 +2508,13 @@ export function processVisualMetrics(
       // browsertime bug here: https://github.com/sitespeedio/browsertime/issues/1746.
       return;
     }
-    // Add the marker to the given thread.
-    thread.markers.name.push(stringTable.indexForString(name));
-    thread.markers.startTime.push(startTime);
-    thread.markers.endTime.push(endTime);
-    thread.markers.phase.push(phase);
-    thread.markers.category.push(testingCategoryIdx);
-    thread.markers.data.push(payload ?? null);
-    thread.markers.length++;
+    markers.name.push(stringTable.indexForString(name));
+    markers.startTime.push(startTime);
+    markers.endTime.push(endTime);
+    markers.phase.push(phase);
+    markers.category.push(testingCategoryIdx);
+    markers.data.push(payload ?? null);
+    markers.length++;
   }
 
   // Find the navigation start time in the tab thread for specifying the marker
@@ -2426,9 +2545,21 @@ export function processVisualMetrics(
 
     // Add the progress marker to the parent process main thread.
     const markerName = `${metricName} Progress`;
-    maybeAddMetricMarker(mainThread, markerName, INTERVAL, startTime, endTime);
+    maybeAddMetricMarker(
+      mainThreadMarkers,
+      markerName,
+      INTERVAL,
+      startTime,
+      endTime
+    );
     // Add the progress marker to the tab process main thread.
-    maybeAddMetricMarker(tabThread, markerName, INTERVAL, startTime, endTime);
+    maybeAddMetricMarker(
+      tabThreadMarkers,
+      markerName,
+      INTERVAL,
+      startTime,
+      endTime
+    );
 
     // Add progress markers for every visual progress change for more fine grained information.
     const progressMarkerSchema: MarkerSchema = {
@@ -2451,7 +2582,7 @@ export function processVisualMetrics(
 
       // Add it to the parent process main thread.
       maybeAddMetricMarker(
-        mainThread,
+        mainThreadMarkers,
         changeMarkerName,
         INSTANT,
         timestamp,
@@ -2460,7 +2591,7 @@ export function processVisualMetrics(
       );
       // Add it to the tab process main thread.
       maybeAddMetricMarker(
-        tabThread,
+        tabThreadMarkers,
         changeMarkerName,
         INSTANT,
         timestamp,

@@ -423,7 +423,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 66,
+    "preprocessedProfileVersion": 68,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -431,7 +431,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 34,
+    "version": 35,
   },
   "pages": Array [
     Object {
@@ -443,7 +443,7 @@ Object {
   ],
   "shared": Object {
     "frameTable": Object {
-      "address": Array [
+      "address": Int32Array [
         -1,
         -1,
         -1,
@@ -476,7 +476,7 @@ Object {
         null,
         null,
       ],
-      "func": Array [
+      "func": Int32Array [
         0,
         1,
         2,
@@ -487,7 +487,7 @@ Object {
         7,
         8,
       ],
-      "inlineDepth": Array [
+      "inlineDepth": Uint8Array [
         0,
         0,
         0,
@@ -912,6 +912,7 @@ Object {
           55,
           56,
         ],
+        "timeDeltas": undefined,
         "weight": null,
         "weightType": "samples",
       },
@@ -1055,7 +1056,8 @@ Object {
         "eventDelay": Array [],
         "length": 0,
         "stack": Array [],
-        "time": Array [],
+        "time": Float64Array [],
+        "timeDeltas": undefined,
         "weight": null,
         "weightType": "samples",
       },
@@ -1265,6 +1267,7 @@ Array [
         55,
         56,
       ],
+      "timeDeltas": undefined,
       "weight": null,
       "weightType": "samples",
     },
@@ -1408,7 +1411,8 @@ Array [
       "eventDelay": Array [],
       "length": 0,
       "stack": Array [],
-      "time": Array [],
+      "time": Float64Array [],
+      "timeDeltas": undefined,
       "weight": null,
       "weightType": "samples",
     },
@@ -2396,7 +2400,7 @@ CallTree {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       4,
       5,
     ],
@@ -2410,7 +2414,7 @@ CallTree {
   "_thread": Object {
     "eTLD+1": undefined,
     "frameTable": Object {
-      "address": Array [
+      "address": Int32Array [
         -1,
         -1,
         -1,
@@ -2443,7 +2447,7 @@ CallTree {
         null,
         null,
       ],
-      "func": Array [
+      "func": Int32Array [
         0,
         1,
         2,
@@ -2454,7 +2458,7 @@ CallTree {
         7,
         8,
       ],
-      "inlineDepth": Array [
+      "inlineDepth": Uint8Array [
         0,
         0,
         0,
@@ -2684,7 +2688,7 @@ CallTree {
         100,
         100,
       ],
-      "time": Array [
+      "time": Float64Array [
         3,
         4,
         5,
@@ -2798,7 +2802,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -2831,7 +2835,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -2842,7 +2846,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -3072,7 +3076,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       3,
       4,
       5,
@@ -3266,7 +3270,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -3299,7 +3303,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -3310,7 +3314,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -3530,7 +3534,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       4,
       5,
     ],
@@ -3640,7 +3644,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -3673,7 +3677,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -3684,7 +3688,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -3914,7 +3918,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       3,
       4,
       5,
@@ -4026,7 +4030,7 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "eTLD+1": undefined,
   "frameTable": Object {
-    "address": Array [
+    "address": Int32Array [
       -1,
       -1,
       -1,
@@ -4059,7 +4063,7 @@ Object {
       null,
       null,
     ],
-    "func": Array [
+    "func": Int32Array [
       0,
       1,
       2,
@@ -4070,7 +4074,7 @@ Object {
       7,
       8,
     ],
-    "inlineDepth": Array [
+    "inlineDepth": Uint8Array [
       0,
       0,
       0,
@@ -4300,7 +4304,7 @@ Object {
       100,
       100,
     ],
-    "time": Array [
+    "time": Float64Array [
       3,
       4,
       5,

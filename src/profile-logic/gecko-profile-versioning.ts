@@ -495,7 +495,7 @@ const _upgraders: {
                 frame[schemaIndexCategory] =
                   oldCategoryToNewCategory[frame[schemaIndexCategory]];
               } else {
-                frame[schemaIndexCategory] = 1 /* Other*/;
+                frame[schemaIndexCategory] = 1; /* Other*/
               }
             }
           }
@@ -1463,7 +1463,13 @@ const _upgraders: {
             // upgraded counters; ignore them.
             continue;
           }
-          counter.samples = counter.sample_groups[0].samples;
+          // A counter that collected no data has an empty sample_groups array
+          // (see the version 18 upgrader), so fall back to an empty samples
+          // table when there is no group to unwrap.
+          counter.samples =
+            counter.sample_groups.length > 0
+              ? counter.sample_groups[0].samples
+              : { schema: { time: 0, count: 1, number: 2 }, data: [] };
           delete counter.sample_groups;
         }
       }
@@ -1556,6 +1562,13 @@ const _upgraders: {
       }
     }
     convertToVersion34Recursive(profile);
+  },
+  [35]: (_: any) => {
+    // This version bump added a new marker schema format type, named "hexadecimal",
+    // which older frontends will not be able to display.
+    // No upgrade is needed, as older versions of firefox would not generate
+    // marker data with hexadecimal typed data, and no modification is needed in the
+    // frontend to display older formats.
   },
 
   // If you add a new upgrader here, please document the change in
