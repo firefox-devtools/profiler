@@ -495,7 +495,7 @@ const _upgraders: {
                 frame[schemaIndexCategory] =
                   oldCategoryToNewCategory[frame[schemaIndexCategory]];
               } else {
-                frame[schemaIndexCategory] = 1 /* Other*/;
+                frame[schemaIndexCategory] = 1; /* Other*/
               }
             }
           }

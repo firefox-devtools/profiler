@@ -26,12 +26,9 @@
   align-items: center;
   gap: 2px 5px;
   grid-template-columns:
-    /* Label */
-    1fr
-    /* Value */
-    min-content
-    /* Percentage */
-    min-content;
+    /* Label */ 1fr
+    /* Value */ min-content
+    /* Percentage */ min-content;
 }
 
 .sidebar-titlegroup,
