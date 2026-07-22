@@ -6,6 +6,7 @@ import type {
   Profile,
   RawThread,
   IndexIntoStackTable,
+  IndexIntoFuncTable,
   MixedObject,
 } from 'firefox-profiler/types';
 
@@ -18,6 +19,7 @@ import {
   type RawMarkerTableBuilder,
   type RawSamplesTableBuilder,
   type RawStackTableBuilder,
+  type RawFrameTableBuilder,
 } from '../data-structures';
 import type { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/types';
@@ -101,9 +103,16 @@ type ProfileChunkEvent = TracingEvent<{
           };
           id: number;
           parent?: number;
+          // Per-source-line breakdown of the node's self time. Line numbers are
+          // 1-based here, unlike the 0-based callFrame.lineNumber.
+          positionTicks?: Array<{ line: number; ticks: number }>;
         }>;
         samples: number[]; // Index into cpuProfile nodes
       };
+      // Per-sample executed source positions, parallel to cpuProfile.samples.
+      // This is what the DevTools trace format uses instead of positionTicks.
+      lines?: number[];
+      columns?: number[];
       timeDeltas: number[];
     };
   };
@@ -141,6 +150,9 @@ type CpuProfileData = {
     };
     id: number;
     children?: number[];
+    // Per-source-line breakdown of the node's self time. Line numbers are
+    // 1-based here, unlike the 0-based callFrame.lineNumber.
+    positionTicks?: Array<{ line: number; ticks: number }>;
   }>;
   samples: number[]; // Index into cpuProfile nodes
   timeDeltas: number[];
@@ -295,11 +307,47 @@ export function attemptToConvertChromeProfile(
   return processTracingEvents(eventsByName, profileUrl);
 }
 
+// When V8's positionTicks provide executed source lines for a node, we create
+// one stack per line and distribute the node's leaf samples across them in
+// proportion to their tick counts.
+type SampleStackChooser = {
+  // The candidate stacks, one per distinct executed line.
+  stacks: IndexIntoStackTable[];
+  // Tick weight for each stack, parallel to `stacks`.
+  weights: number[];
+  // Sum of `weights`.
+  totalWeight: number;
+  // Error-diffusion state: how many samples we've assigned to each stack.
+  assigned: number[];
+  // Total samples emitted for this node so far.
+  emitted: number;
+};
+
+// Everything needed to lazily materialize an executed-position frame for a node
+// during resampling. Used by the trace ProfileChunk format, which records a
+// per-sample position rather than the per-node positionTicks of the .cpuprofile
+// format.
+type NodeFrameInfo = {
+  prefixStackIndex: IndexIntoStackTable | null;
+  baseStackIndex: IndexIntoStackTable;
+  funcId: IndexIntoFuncTable;
+  category: number;
+  hasSource: boolean;
+};
+
 type ThreadInfo = {
   thread: RawThread;
   samples: RawSamplesTableBuilder;
   markers: RawMarkerTableBuilder;
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>;
+  // Populated for nodes with valid positionTicks.
+  nodeIdToSampleChooser: Map<number, SampleStackChooser>;
+  // Per-node data used to lazily create executed-position frames.
+  nodeIdToFrameInfo: Map<number, NodeFrameInfo>;
+  // Cache of executed-position stacks, keyed by base stack index, line, and
+  // column. Keyed by base stack rather than node id because node ids restart
+  // when a new Profile session begins on the same thread.
+  positionStackCache: Map<string, IndexIntoStackTable>;
   lastSeenTime: number;
   lastSampledTime: number;
   pid: number;
@@ -307,6 +355,72 @@ type ThreadInfo = {
   threadSortIndex: number;
   tieBreakerIndex: number;
 };
+
+// Pick the stack for the next leaf sample of a node with positionTicks, keeping
+// the per-line distribution proportional to the tick weights. Uses deterministic
+// largest-deficit rounding so results are reproducible.
+function pickSampleStack(chooser: SampleStackChooser): IndexIntoStackTable {
+  const { stacks, weights, totalWeight, assigned } = chooser;
+  chooser.emitted++;
+  let bestIndex = 0;
+  let bestDeficit = -Infinity;
+  for (let i = 0; i < stacks.length; i++) {
+    const target = (weights[i] / totalWeight) * chooser.emitted;
+    const deficit = target - assigned[i];
+    if (deficit > bestDeficit) {
+      bestDeficit = deficit;
+      bestIndex = i;
+    }
+  }
+  assigned[bestIndex]++;
+  return stacks[bestIndex];
+}
+
+// Look up or create a stack for a leaf sample recorded at an exact source
+// position from a trace ProfileChunk.
+// Falls back to the base stack when the node has no source to attribute the
+// position to.
+function getOrCreatePositionStack(
+  threadInfo: ThreadInfo,
+  nodeIndex: number,
+  line: number,
+  column: number | null,
+  frameTable: RawFrameTableBuilder,
+  stackTable: RawStackTableBuilder
+): IndexIntoStackTable {
+  const info = threadInfo.nodeIdToFrameInfo.get(nodeIndex);
+  if (!info || !info.hasSource) {
+    return info
+      ? info.baseStackIndex
+      : ensureExists(
+          threadInfo.nodeIdToStackId.get(nodeIndex),
+          'Could not find the stack information for a sample when decoding a Chrome profile.'
+        );
+  }
+
+  const key = `${info.baseStackIndex}:${line}:${column ?? ''}`;
+  let stackIndex = threadInfo.positionStackCache.get(key);
+  if (stackIndex === undefined) {
+    const frameIndex = frameTable.length++;
+    frameTable.address[frameIndex] = -1;
+    frameTable.category[frameIndex] = info.category;
+    frameTable.subcategory[frameIndex] = 0;
+    frameTable.func[frameIndex] = info.funcId;
+    frameTable.nativeSymbol[frameIndex] = null;
+    frameTable.innerWindowID[frameIndex] = 0;
+    // Positive values in data.lines and data.columns are 1-based, which
+    // matches the Firefox profiler convention.
+    frameTable.line[frameIndex] = line;
+    frameTable.column[frameIndex] = column;
+    frameTable.originalLocation[frameIndex] = null;
+
+    stackTable.frame.push(frameIndex);
+    stackTable.prefix.push(info.prefixStackIndex);
+    stackIndex = stackTable.length++;
+    threadInfo.positionStackCache.set(key, stackIndex);
+  }
+  return stackIndex;
+}
 
 function findEvent<T extends TracingEventUnion>(
   eventsByName: Map<string, TracingEventUnion[]>,
@@ -437,6 +551,9 @@ function getThreadInfo(
     samples,
     markers,
     nodeIdToStackId,
+    nodeIdToSampleChooser: new Map(),
+    nodeIdToFrameInfo: new Map(),
+    positionStackCache: new Map(),
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
     pid: chunk.pid,
@@ -615,6 +732,21 @@ async function processTracingEvents(
         continue;
       }
 
+      // The trace ProfileChunk format records the exact executed source
+      // position of each sample in arrays parallel to `samples`. This is what
+      // the DevTools trace format uses instead of the per-node positionTicks of
+      // the .cpuprofile format, so when it's present it takes precedence.
+      const lines: number[] | undefined = Array.isArray(
+        profileChunk.args.data.lines
+      )
+        ? profileChunk.args.data.lines
+        : undefined;
+      const columns: number[] | undefined = Array.isArray(
+        profileChunk.args.data.columns
+      )
+        ? profileChunk.args.data.columns
+        : undefined;
+
       if (nodes) {
         const parentMap = new Map<number, number>();
         for (const node of nodes) {
@@ -687,30 +819,92 @@ async function processTracingEvents(
             columnNumber === undefined ? null : columnNumber
           );
 
-          // Node indexes start at 1, while frame indexes start at 0.
-          const frameIndex = nodeIndex - 1;
           const prefixStackIndex = nodeIdToStackId.get(parent);
           if (prefixStackIndex === undefined) {
             throw new Error(
               'Unable to find the prefix stack index from a node index.'
             );
           }
-          frameTable.address[frameIndex] = -1;
-          frameTable.category[frameIndex] = category;
-          frameTable.subcategory[frameIndex] = 0;
-          frameTable.func[frameIndex] = funcId;
-          frameTable.nativeSymbol[frameIndex] = null;
-          frameTable.innerWindowID[frameIndex] = 0;
-          frameTable.line[frameIndex] =
-            lineNumber === undefined ? null : lineNumber;
-          frameTable.column[frameIndex] =
-            columnNumber === undefined ? null : columnNumber;
-          frameTable.originalLocation[frameIndex] = null;
-          frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
-          stackTable.frame.push(frameIndex);
-          stackTable.prefix.push(prefixStackIndex);
-          nodeIdToStackId.set(nodeIndex, stackTable.length++);
+          // Create a frame with the given line and a stack for it, hanging off
+          // the node's prefix. Node ids restart at 1 for each thread, so a fresh
+          // frame index is allocated from the shared frame table instead of
+          // being derived from the node id (which would collide across threads).
+          const pushFrameAndStack = (
+            line: number | null,
+            column: number | null
+          ): IndexIntoStackTable => {
+            const frameIndex = frameTable.length++;
+            frameTable.address[frameIndex] = -1;
+            frameTable.category[frameIndex] = category;
+            frameTable.subcategory[frameIndex] = 0;
+            frameTable.func[frameIndex] = funcId;
+            frameTable.nativeSymbol[frameIndex] = null;
+            frameTable.innerWindowID[frameIndex] = 0;
+            frameTable.line[frameIndex] = line;
+            frameTable.column[frameIndex] = column;
+            frameTable.originalLocation[frameIndex] = null;
+
+            stackTable.frame.push(frameIndex);
+            stackTable.prefix.push(prefixStackIndex);
+            return stackTable.length++;
+          };
+
+          // V8's positionTicks give the self-time breakdown per executed source
+          // line. We only trust them for JS frames that resolve to a source. For
+          // native frames the line has nothing to map to. Aggregate ticks per
+          // line (1-based already) so we can create an executed-line frame. This
+          // is skipped when the chunk carries per-sample lines, which are more
+          // precise and take precedence.
+          let executedLines: Array<[number, number]> | null = null;
+          if (source !== null && node.positionTicks && lines === undefined) {
+            const ticksByLine = new Map<number, number>();
+            for (const { line, ticks } of node.positionTicks) {
+              if (line > 0 && ticks > 0) {
+                ticksByLine.set(line, (ticksByLine.get(line) ?? 0) + ticks);
+              }
+            }
+            if (ticksByLine.size > 0) {
+              // Sort by descending ticks, then ascending line for a stable order.
+              executedLines = [...ticksByLine.entries()].sort(
+                (a, b) => b[1] - a[1] || a[0] - b[0]
+              );
+            }
+          }
+
+          // Keep a neutral frame as the structural stack that children hang
+          // off of. The definition location lives in the func table, while
+          // positionTicks describe only this node's self samples.
+          const baseStackIndex = pushFrameAndStack(null, null);
+          nodeIdToStackId.set(nodeIndex, baseStackIndex);
+
+          // Remember what's needed to build executed-position frames lazily for
+          // this node when the trace carries per-sample positions.
+          threadInfo.nodeIdToFrameInfo.set(nodeIndex, {
+            prefixStackIndex,
+            baseStackIndex,
+            funcId,
+            category,
+            hasSource: source !== null,
+          });
+
+          // Add sibling stacks for every executed line and spread only this
+          // node's leaf samples across them.
+          if (executedLines) {
+            const stacks: IndexIntoStackTable[] = [];
+            const weights: number[] = [];
+            for (const [line, ticks] of executedLines) {
+              stacks.push(pushFrameAndStack(line, null));
+              weights.push(ticks);
+            }
+            threadInfo.nodeIdToSampleChooser.set(nodeIndex, {
+              stacks,
+              weights,
+              totalWeight: weights.reduce((sum, w) => sum + w, 0),
+              assigned: new Array(stacks.length).fill(0),
+              emitted: 0,
+            });
+          }
         }
       }
 
@@ -720,7 +914,6 @@ async function processTracingEvents(
       // is most likely slightly higher. Chrome profiles have been observed sampling
       // between 100us to 300us. Reconstruct the profile at 500us, which is a somewhat
       // reasonable interval.
-
       for (let i = 0; i < samples.length; i++) {
         const nodeIndex = samples[i];
         // Convert to milliseconds:
@@ -730,10 +923,39 @@ async function processTracingEvents(
           profile.meta.interval
         ) {
           threadInfo.lastSampledTime = threadInfo.lastSeenTime;
-          const stackIndex = ensureExists(
-            nodeIdToStackId.get(nodeIndex),
-            'Could not find the stack information for a sample when decoding a Chrome profile.'
-          );
+
+          // Route the sample to a leaf frame carrying the executed position:
+          //  1. a per-sample line and optional column, when provided;
+          //  2. otherwise a positionTicks per-line stack (.cpuprofile format);
+          //  3. otherwise the node's base stack.
+          // Chrome uses 0 for unavailable positions. Our frame tables use null.
+          const lineValue = lines?.[i];
+          const line =
+            typeof lineValue === 'number' && lineValue > 0 ? lineValue : null;
+          const columnValue = columns?.[i];
+          const column =
+            typeof columnValue === 'number' && columnValue > 0
+              ? columnValue
+              : null;
+          const chooser = threadInfo.nodeIdToSampleChooser.get(nodeIndex);
+          let stackIndex: IndexIntoStackTable;
+          if (line !== null) {
+            stackIndex = getOrCreatePositionStack(
+              threadInfo,
+              nodeIndex,
+              line,
+              column,
+              frameTable,
+              stackTable
+            );
+          } else if (chooser) {
+            stackIndex = pickSampleStack(chooser);
+          } else {
+            stackIndex = ensureExists(
+              nodeIdToStackId.get(nodeIndex),
+              'Could not find the stack information for a sample when decoding a Chrome profile.'
+            );
+          }
           ensureExists(
             samplesTable.eventDelay,
             'Could not find the eventDelay in samplesTable inside the newly created Chrome profile thread.'
