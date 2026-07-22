@@ -20,6 +20,7 @@ import type {
   IndexIntoCategoryList,
   LineNumber,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 describe('getStackLineInfo', function () {
   it('computes results for all stacks', function () {
@@ -134,10 +135,11 @@ describe('getLineTimings for getStackLineInfo', function () {
     const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
 
-    // Manually set frameTable.line to null for the leaf frame
+    // Manually clear the HasLine flag for the leaf frame
     // to simulate a case where frame line info is missing
     const leafFrame = stackTable.frame[stackTable.length - 1];
-    frameTable.line[leafFrame] = null;
+    frameTable.flags[leafFrame] &= ~FrameFlag.HasLine;
+    frameTable.line[leafFrame] = 0;
 
     // Set funcTable.lineNumber to a value for the func of that frame
     const func = frameTable.func[leafFrame];
@@ -383,10 +385,11 @@ describe('getTotalLineTimingsForCallNode', function () {
     const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable } = thread;
 
-    // Manually set frameTable.line to null for the leaf frame
+    // Manually clear the HasLine flag for the leaf frame
     // to simulate a case where frame line info is missing
     const leafFrame = stackTable.frame[stackTable.length - 1];
-    frameTable.line[leafFrame] = null;
+    frameTable.flags[leafFrame] &= ~FrameFlag.HasLine;
+    frameTable.line[leafFrame] = 0;
 
     // Set funcTable.lineNumber to a value for the func of that frame
     const func = frameTable.func[leafFrame];

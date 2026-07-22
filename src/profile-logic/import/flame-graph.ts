@@ -10,6 +10,7 @@ import type {
   IndexIntoStackTable,
   Profile,
 } from 'firefox-profiler/types/profile';
+import { FrameFlag } from 'firefox-profiler/types/profile';
 import {
   finishRawSamplesTableBuilder,
   getEmptyProfile,
@@ -115,16 +116,16 @@ export function convertFlameGraphProfile(profileText: string): Profile {
 
     // Create frame.
     frameIndex = frameTable.length;
-    frameTable.address.push(-1);
-    frameTable.inlineDepth.push(0);
+    frameTable.flags.push(FrameFlag.HasCategory);
+    frameTable.address.push(0);
     frameTable.category.push(category);
     frameTable.subcategory.push(0);
     frameTable.func.push(funcIndex);
-    frameTable.nativeSymbol.push(null);
-    frameTable.innerWindowID.push(null);
-    frameTable.line.push(null);
-    frameTable.column.push(null);
-    frameTable.originalLocation.push(null);
+    frameTable.nativeSymbol.push(0);
+    frameTable.innerWindowID.push(0);
+    frameTable.line.push(0);
+    frameTable.column.push(0);
+    frameTable.originalLocation.push(0);
     frameTable.length++;
     frameMap.set(frameString, frameIndex);
 

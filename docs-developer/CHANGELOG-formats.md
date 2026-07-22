@@ -6,6 +6,31 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 69
+
+The frame table (`profile.shared.frameTable`) representation changed:
+
+- A new `flags` bitfield column was added. It can be stored as a plain array of numbers or as a `Uint8Array` (for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files). The bits are:
+  - `1 << 0` — `IsInlined`: this frame is an inline expansion of another function.
+  - `1 << 1` — `HasAddress`: `address[i]` is meaningful.
+  - `1 << 2` — `HasCategory`: `category[i]` and `subcategory[i]` are meaningful; if unset, the stack node using this frame inherits category and subcategory from its parent (or from the default category).
+  - `1 << 3` — `HasNativeSymbol`: `nativeSymbol[i]` is meaningful.
+  - `1 << 4` — `HasLine`: `line[i]` is meaningful.
+  - `1 << 5` — `HasColumn`: `column[i]` is meaningful.
+  - `1 << 6` — `HasOriginalLocation`: `originalLocation[i]` is meaningful.
+- The `inlineDepth` column was removed. Prior versions used a numeric depth, but only the boolean "was this frame inlined" was ever consumed — that's now the `IsInlined` flag.
+- The `category`, `subcategory`, `nativeSymbol`, `innerWindowID`, `line`, `column`, and `originalLocation` columns are no longer nullable. Each may still be stored as a plain array, but the values are always numbers, and when the corresponding "Has..." flag is unset, the value in the column is ignored (producers typically write `0`).
+- The following columns can now optionally be stored as typed arrays:
+  - `category` (`Int32Array`)
+  - `subcategory` (`Int32Array`)
+  - `nativeSymbol` (`Int32Array`)
+  - `innerWindowID` (`Float64Array`)
+  - `line` (`Int32Array`)
+  - `column` (`Int32Array`)
+  - `originalLocation` (`Int32Array`)
+
+The gecko profile format is unchanged.
+
 ### Version 68
 
 The `startTime` and `endTime` columns of the raw marker table (`thread.markers`) can now optionally be stored as `Float64Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.

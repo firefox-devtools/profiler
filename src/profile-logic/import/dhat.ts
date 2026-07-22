@@ -8,6 +8,7 @@ import type {
   Bytes,
   IndexIntoStackTable,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 import {
   finishRawUnbalancedNativeAllocationsTableBuilder,
@@ -206,16 +207,16 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     null
   );
 
-  frameTable.address.push(-1);
-  frameTable.line.push(null);
-  frameTable.column.push(null);
+  frameTable.flags.push(FrameFlag.HasCategory);
+  frameTable.address.push(0);
+  frameTable.line.push(0);
+  frameTable.column.push(0);
   frameTable.category.push(otherCategory);
   frameTable.subcategory.push(otherSubCategory);
-  frameTable.innerWindowID.push(null);
-  frameTable.nativeSymbol.push(null);
-  frameTable.inlineDepth.push(0);
+  frameTable.innerWindowID.push(0);
+  frameTable.nativeSymbol.push(0);
   frameTable.func.push(rootFuncIndex);
-  frameTable.originalLocation.push(null);
+  frameTable.originalLocation.push(0);
   const rootFrameIndex = frameTable.length++;
 
   stackTable.frame.push(rootFrameIndex);
@@ -273,16 +274,26 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
       column
     );
 
-    frameTable.address.push(address);
-    frameTable.line.push(line);
-    frameTable.column.push(column);
+    let flags = FrameFlag.HasCategory;
+    if (address !== -1) {
+      flags |= FrameFlag.HasAddress;
+    }
+    if (line !== null) {
+      flags |= FrameFlag.HasLine;
+    }
+    if (column !== null) {
+      flags |= FrameFlag.HasColumn;
+    }
+    frameTable.flags.push(flags);
+    frameTable.address.push(address === -1 ? 0 : address);
+    frameTable.line.push(line ?? 0);
+    frameTable.column.push(column ?? 0);
     frameTable.category.push(otherCategory);
     frameTable.subcategory.push(otherSubCategory);
-    frameTable.innerWindowID.push(null);
-    frameTable.nativeSymbol.push(null);
-    frameTable.inlineDepth.push(0);
+    frameTable.innerWindowID.push(0);
+    frameTable.nativeSymbol.push(0);
     frameTable.func.push(funcIndex);
-    frameTable.originalLocation.push(null);
+    frameTable.originalLocation.push(0);
     frameTable.length++;
   }
 

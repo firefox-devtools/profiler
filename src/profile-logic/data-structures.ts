@@ -112,16 +112,16 @@ export type RawBalancedNativeAllocationsTableBuilder = {
 };
 
 export type RawFrameTableBuilder = {
-  address: Array<Address | -1>;
-  inlineDepth: number[];
-  category: (IndexIntoCategoryList | null)[];
-  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  flags: number[];
+  address: Address[];
+  category: IndexIntoCategoryList[];
+  subcategory: IndexIntoSubcategoryListForCategory[];
   func: IndexIntoFuncTable[];
-  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
-  innerWindowID: (InnerWindowID | null)[];
-  line: (number | null)[];
-  column: (number | null)[];
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  nativeSymbol: IndexIntoNativeSymbolTable[];
+  innerWindowID: InnerWindowID[];
+  line: number[];
+  column: number[];
+  originalLocation: IndexIntoSourceLocationTable[];
   length: number;
 };
 
@@ -284,8 +284,8 @@ export function getRawFrameTableBuilder(): RawFrameTableBuilder {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    flags: [],
     address: [],
-    inlineDepth: [],
     category: [],
     subcategory: [],
     func: [],
@@ -306,16 +306,16 @@ export function getRawFrameTableBuilderWithExistingContents(
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    flags: Array.from(frameTable.flags),
     address: Array.from(frameTable.address),
-    inlineDepth: Array.from(frameTable.inlineDepth),
-    category: frameTable.category.slice(),
-    subcategory: frameTable.subcategory.slice(),
+    category: Array.from(frameTable.category),
+    subcategory: Array.from(frameTable.subcategory),
     func: Array.from(frameTable.func),
-    nativeSymbol: frameTable.nativeSymbol.slice(),
-    innerWindowID: frameTable.innerWindowID.slice(),
-    line: frameTable.line.slice(),
-    column: frameTable.column.slice(),
-    originalLocation: frameTable.originalLocation.slice(),
+    nativeSymbol: Array.from(frameTable.nativeSymbol),
+    innerWindowID: Array.from(frameTable.innerWindowID),
+    line: Array.from(frameTable.line),
+    column: Array.from(frameTable.column),
+    originalLocation: Array.from(frameTable.originalLocation),
     length: frameTable.length,
   };
 }
@@ -325,8 +325,8 @@ export function finishRawFrameTableBuilder(
 ): RawFrameTable {
   return {
     ...builder,
+    flags: new Uint8Array(builder.flags),
     address: new Int32Array(builder.address),
-    inlineDepth: new Uint8Array(builder.inlineDepth),
     func: new Int32Array(builder.func),
   };
 }

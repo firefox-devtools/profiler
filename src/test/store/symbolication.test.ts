@@ -11,7 +11,7 @@ import {
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import type { MarkerPayload } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 import type {
   AddressResult,
   LibSymbolicationRequest,
@@ -345,12 +345,16 @@ describe('doSymbolicateProfile', function () {
 
       // 0x000a at inline depth 0 should be at line 14, in the first symbol.
       expect(frameTable.line[firstFrameAt0x000a]).toBe(14);
-      expect(frameTable.inlineDepth[firstFrameAt0x000a]).toBe(0);
+      expect(
+        (frameTable.flags[firstFrameAt0x000a] & FrameFlag.IsInlined) !== 0
+      ).toBe(false);
       expect(frameTable.func[firstFrameAt0x000a]).toBe(firstSymbolFuncIndex);
 
       // 0x000a at inline depth 1 should be at line 37, in the second symbol.
       expect(frameTable.line[secondFrameAt0x000a]).toBe(37);
-      expect(frameTable.inlineDepth[secondFrameAt0x000a]).toBe(1);
+      expect(
+        (frameTable.flags[secondFrameAt0x000a] & FrameFlag.IsInlined) !== 0
+      ).toBe(true);
       expect(frameTable.func[secondFrameAt0x000a]).toBe(secondSymbolFuncIndex);
     });
 

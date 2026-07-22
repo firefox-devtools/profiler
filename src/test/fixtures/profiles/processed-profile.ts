@@ -62,6 +62,7 @@ import type {
   MarkerSchema,
   MixedObject,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
@@ -587,7 +588,7 @@ export type ProfileWithDicts = {
  *  - [file:*] - The filename, affects funcTable.file
  *  - [line:*] - The line, affects frameTable.line
  *  - [address:*] - The frame address, affects frameTable.address
- *  - [inl:*] - The inline depth, affects frameTable.inlineDepth
+ *  - [inl:*] - The inline depth, affects the IsInlined bit of frameTable.flags
  *  - [sym:<name>:<hex_address>:<hex_size>] - The native symbol, affects frameTable.nativeSymbol (keyed on <name>)
 
 ```js
@@ -939,11 +940,11 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
       const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
-      const address =
+      const parsedAddress =
         _findAddressFromFuncName(funcNameWithModifier) ??
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
 
-      let nativeSymbol = null;
+      let nativeSymbol: number | null = null;
       const nativeSymbolInfo =
         _findNativeSymbolNameFromFuncName(funcNameWithModifier);
       if (nativeSymbolInfo) {
@@ -965,17 +966,38 @@ function _buildThreadFromTextOnlyStacks(
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
+      let flags = 0;
+      if (inlineDepth > 0) {
+        flags |= FrameFlag.IsInlined;
+      }
+      if (parsedAddress !== -1) {
+        flags |= FrameFlag.HasAddress;
+      }
+      if (category !== null) {
+        flags |= FrameFlag.HasCategory;
+      }
+      if (nativeSymbol !== null) {
+        flags |= FrameFlag.HasNativeSymbol;
+      }
+      if (lineNumber !== null) {
+        flags |= FrameFlag.HasLine;
+      }
+      const address = parsedAddress === -1 ? 0 : parsedAddress;
+      const storedCategory = category ?? 0;
+      const storedNativeSymbol = nativeSymbol ?? 0;
+      const storedLineNumber = lineNumber ?? 0;
+
       // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
-          category === frameTable.category[i] &&
-          lineNumber === frameTable.line[i] &&
+          flags === frameTable.flags[i] &&
+          storedCategory === frameTable.category[i] &&
+          storedLineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
-          inlineDepth === frameTable.inlineDepth[i] &&
-          nativeSymbol === frameTable.nativeSymbol[i]
+          storedNativeSymbol === frameTable.nativeSymbol[i]
         ) {
           frameIndex = i;
           break;
@@ -983,16 +1005,16 @@ function _buildThreadFromTextOnlyStacks(
       }
 
       if (frameIndex === undefined) {
+        frameTable.flags.push(flags);
         frameTable.func.push(funcIndex);
         frameTable.address.push(address);
-        frameTable.inlineDepth.push(inlineDepth);
-        frameTable.category.push(category);
+        frameTable.category.push(storedCategory);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
-        frameTable.nativeSymbol.push(nativeSymbol);
-        frameTable.line.push(lineNumber);
-        frameTable.column.push(null);
-        frameTable.originalLocation.push(null);
+        frameTable.nativeSymbol.push(storedNativeSymbol);
+        frameTable.line.push(storedLineNumber);
+        frameTable.column.push(0);
+        frameTable.originalLocation.push(0);
         frameIndex = frameTable.length++;
       }
 
@@ -2075,10 +2097,8 @@ export function addInnerWindowIdToStacks(
 
       // Clone this frame
       const newFrameIndex = frameTableBuilder.length++;
+      frameTableBuilder.flags.push(frameTable.flags[foundFrameIndex]);
       frameTableBuilder.address.push(frameTable.address[foundFrameIndex]);
-      frameTableBuilder.inlineDepth.push(
-        frameTable.inlineDepth[foundFrameIndex]
-      );
       frameTableBuilder.category.push(frameTable.category[foundFrameIndex]);
       frameTableBuilder.subcategory.push(
         frameTable.subcategory[foundFrameIndex]

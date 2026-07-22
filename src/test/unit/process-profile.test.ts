@@ -38,6 +38,7 @@ import type {
   IndexIntoStackTable,
   GeckoSamples,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
   // These location strings are turned into the proper funcs.
@@ -470,7 +471,13 @@ describe('js allocation processing', function () {
     const addresses = [];
     let stack = stackIndex;
     while (stack !== null) {
-      addresses.push(shared.frameTable.address[shared.stackTable.frame[stack]]);
+      const frame = shared.stackTable.frame[stack];
+      const flags = shared.frameTable.flags[frame];
+      addresses.push(
+        (flags & FrameFlag.HasAddress) !== 0
+          ? shared.frameTable.address[frame]
+          : -1
+      );
       const offset = shared.stackTable.prefixOffset[stack];
       stack = offset === 0 ? null : stack - offset;
     }

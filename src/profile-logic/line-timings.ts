@@ -14,6 +14,7 @@ import type {
   IndexIntoLineSetTable,
   SourceLocationTable,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
 
 /**
@@ -66,10 +67,15 @@ export function getStackLineInfo(
     // its per-stack {source, line, column} allocation, skip resolving the
     // column entirely, and defer the line lookup until we know the source
     // matches.
-    const frameOriginalLocationIdx = frameTable.originalLocation[frame];
+    const frameFlags = frameTable.flags[frame];
+    const frameHasOriginalLocation =
+      (frameFlags & FrameFlag.HasOriginalLocation) !== 0;
+    const frameOriginalLocationIdx = frameHasOriginalLocation
+      ? frameTable.originalLocation[frame]
+      : -1;
     const funcOriginalLocationIdx = funcTable.originalLocation[func];
     let sourceIndexOfThisStack;
-    if (frameOriginalLocationIdx !== null) {
+    if (frameHasOriginalLocation) {
       sourceIndexOfThisStack =
         sourceLocationTable.source[frameOriginalLocationIdx];
     } else if (funcOriginalLocationIdx !== null) {
@@ -85,12 +91,14 @@ export function getStackLineInfo(
     } else {
       let selfLineOrNull: number | null = null;
       if (matchesSource) {
-        if (frameOriginalLocationIdx !== null) {
+        if (frameHasOriginalLocation) {
           selfLineOrNull = sourceLocationTable.line[frameOriginalLocationIdx];
         } else if (funcOriginalLocationIdx !== null) {
           selfLineOrNull = sourceLocationTable.line[funcOriginalLocationIdx];
+        } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
+          selfLineOrNull = frameTable.line[frame];
         } else {
-          selfLineOrNull = frameTable.line[frame] ?? funcTable.lineNumber[func];
+          selfLineOrNull = funcTable.lineNumber[func];
         }
       }
 
@@ -215,17 +223,19 @@ export function getTotalLineTimingsForCallNode(
     // func's compiled line. Inlined from getOriginalPositionForFrame to avoid
     // the per-sample object allocation.
     const funcIndex = frameTable.func[callNodeFrame];
-    const frameOriginalLocationIdx = frameTable.originalLocation[callNodeFrame];
+    const frameFlags = frameTable.flags[callNodeFrame];
     let frameLine: number | null;
-    if (frameOriginalLocationIdx !== null) {
-      frameLine = sourceLocationTable.line[frameOriginalLocationIdx];
+    if ((frameFlags & FrameFlag.HasOriginalLocation) !== 0) {
+      frameLine =
+        sourceLocationTable.line[frameTable.originalLocation[callNodeFrame]];
     } else {
       const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
       if (funcOriginalLocationIdx !== null) {
         frameLine = sourceLocationTable.line[funcOriginalLocationIdx];
+      } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
+        frameLine = frameTable.line[callNodeFrame];
       } else {
-        frameLine =
-          frameTable.line[callNodeFrame] ?? funcTable.lineNumber[funcIndex];
+        frameLine = funcTable.lineNumber[funcIndex];
       }
     }
     const line = frameLine !== null ? frameLine : funcLine;
