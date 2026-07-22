@@ -27,7 +27,8 @@ describe('source map worker stub', function () {
     };
 
     // Without the worker mock, this dispatch never resolves. The stub worker
-    // responds with { type: 'no-op' } so the dispatch finishes cleanly.
+    // responds with { type: 'no-op' } so the dispatch finishes cleanly,
+    // resolving to 'no-match'.
     await expect(
       dispatch(
         doSourceMapSymbolication(
@@ -35,6 +36,6 @@ describe('source map worker stub', function () {
           new Map([[0, 'function a(){}\n']])
         )
       )
-    ).resolves.toBeUndefined();
+    ).resolves.toBe('no-match');
   });
 });
