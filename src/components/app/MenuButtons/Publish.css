@@ -154,6 +154,54 @@
   background: var(--internal-download-icon) center center no-repeat;
 }
 
+/* Split-button styling: primary "Download" button on the left, dropdown
+ * toggle on the right, visually joined. */
+.publishPanelSplitButton {
+  display: inline-flex;
+  margin: 0 8px;
+}
+
+.publishPanelSplitButtonMain {
+  margin: 0;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.publishPanelSplitButtonToggleButton {
+  position: relative;
+  width: 24px;
+  min-width: 0;
+  height: 32px;
+  padding: 0;
+  border-left: 1px solid var(--grey-30-a60, rgb(12 12 13 / 0.2));
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  cursor: default;
+}
+
+/* Down-caret drawn with borders, matching the marker-chart filter/copy
+ * buttons' style. */
+.publishPanelSplitButtonToggleButton::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-top: 5px solid;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  color: var(--clickable-foreground-color);
+  content: '';
+  transform: translate(-50%, -25%);
+}
+
+/* Pin the download-format menu to a fixed width. The JS side subtracts this
+ * width from the toggle button's right edge to right-anchor the menu; the
+ * two must stay in sync. */
+.publishPanelDownloadFormatContextMenu {
+  width: 220px;
+}
+
 .menuButtonsDownloadSize {
   display: inline-block;
   margin: 0 4px;

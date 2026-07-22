@@ -37,6 +37,7 @@ import type {
   ThreadIndex,
   CounterIndex,
   SanitizedProfileEncodingState,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -46,7 +47,7 @@ export const getCheckedSharingOptions: Selector<CheckedSharingOptions> = (
   state
 ) => getPublishState(state).checkedSharingOptions;
 
-export const getFilenameString: Selector<string> = createSelector(
+const getFilenameStem: Selector<string> = createSelector(
   getProfile,
   getProfileRootRange,
   (profile, rootRange) => {
@@ -64,10 +65,16 @@ export const getFilenameString: Selector<string> = createSelector(
     const min = pad(date.getMinutes());
     const dateString = `${year}-${month}-${day} ${hour}.${min}`;
 
-    // Return the final file name
-    return `${product} ${dateString} profile.json`;
+    return `${product} ${dateString} profile`;
   }
 );
+
+export function getDownloadFilename(
+  state: State,
+  format: PublishProfileFormat
+): string {
+  return `${getFilenameStem(state)}.${format}`;
+}
 
 export const getRemoveProfileInformation: Selector<RemoveProfileInformation | null> =
   createSelector(
@@ -216,9 +223,16 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> =
     sanitizePII
   );
 
-export const getSanitizedProfileEncodingState: Selector<
-  SanitizedProfileEncodingState
-> = (state) => getPublishState(state).sanitizedProfileEncodingState;
+export const getSanitizedProfileEncodingStates: Selector<
+  Record<PublishProfileFormat, SanitizedProfileEncodingState>
+> = (state) => getPublishState(state).sanitizedProfileEncodingStates;
+
+export function getSanitizedProfileEncodingState(
+  state: State,
+  format: PublishProfileFormat
+): SanitizedProfileEncodingState {
+  return getSanitizedProfileEncodingStates(state)[format];
+}
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;

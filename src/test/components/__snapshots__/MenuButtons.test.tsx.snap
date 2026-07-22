@@ -1954,13 +1954,41 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
     <div
       class="publishPanelButtons"
     >
-      <button
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        disabled=""
-        type="button"
+      <div
+        class="publishPanelSplitButton"
       >
-        Download
-      </button>
+        <button
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          disabled=""
+          type="button"
+        >
+          Download
+        </button>
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         disabled=""
@@ -2170,24 +2198,52 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
     <div
       class="publishPanelButtons"
     >
-      <a
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
-        href="mockCreateObjectUrl"
+      <div
+        class="publishPanelSplitButton"
       >
-        <span
-          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
+        <a
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          download="Firefox 1970-01-01 00.00 profile.jslb.gz"
+          href="mockCreateObjectUrl"
         >
-          (
-          1.58 kB
-          )
-        </span>
-      </a>
+          <span
+            class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+          />
+          Download
+           
+          <span
+            class="menuButtonsDownloadSize"
+          >
+            (
+            1.58 kB
+            )
+          </span>
+        </a>
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"
@@ -2288,24 +2344,52 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="publishPanelButtons"
     >
-      <a
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
-        href="mockCreateObjectUrl"
+      <div
+        class="publishPanelSplitButton"
       >
-        <span
-          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
+        <a
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          download="Firefox 1970-01-01 00.00 profile.jslb.gz"
+          href="mockCreateObjectUrl"
         >
-          (
-          1.58 kB
-          )
-        </span>
-      </a>
+          <span
+            class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+          />
+          Download
+           
+          <span
+            class="menuButtonsDownloadSize"
+          >
+            (
+            1.58 kB
+            )
+          </span>
+        </a>
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"
@@ -2401,24 +2485,52 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="publishPanelButtons"
     >
-      <a
-        class="photon-button publishPanelButton publishPanelButtonsDownload"
-        download="Firefox 1970-01-01 00.00 profile.json.gz"
-        href="mockCreateObjectUrl"
+      <div
+        class="publishPanelSplitButton"
       >
-        <span
-          class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
-        />
-        Download
-         
-        <span
-          class="menuButtonsDownloadSize"
+        <a
+          class="photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload"
+          download="Firefox 1970-01-01 00.00 profile.jslb.gz"
+          href="mockCreateObjectUrl"
         >
-          (
-          1.58 kB
-          )
-        </span>
-      </a>
+          <span
+            class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
+          />
+          Download
+           
+          <span
+            class="menuButtonsDownloadSize"
+          >
+            (
+            1.58 kB
+            )
+          </span>
+        </a>
+        <button
+          aria-expanded="false"
+          aria-haspopup="menu"
+          class="photon-button publishPanelSplitButtonToggleButton"
+          title="Other download formats"
+          type="button"
+        />
+        <div>
+          <nav
+            class="react-contextmenu publishPanelDownloadFormatContextMenu"
+            role="menu"
+            style="position: fixed; opacity: 0; pointer-events: none;"
+            tabindex="-1"
+          >
+            <div
+              aria-disabled="true"
+              class="react-contextmenu-item react-contextmenu-item--disabled"
+              role="menuitem"
+              tabindex="-1"
+            >
+              Compressing…
+            </div>
+          </nav>
+        </div>
+      </div>
       <button
         class="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
         type="submit"

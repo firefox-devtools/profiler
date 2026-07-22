@@ -13,6 +13,7 @@ import type {
   Reducer,
   State,
   SanitizedProfileEncodingState,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
@@ -213,32 +214,53 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
-  state = { phase: 'INITIAL' },
+type EncodingStates = Record<
+  PublishProfileFormat,
+  SanitizedProfileEncodingState
+>;
+
+const INITIAL_ENCODING_STATES: EncodingStates = {
+  jslb: { phase: 'INITIAL' },
+  json: { phase: 'INITIAL' },
+};
+
+const sanitizedProfileEncodingStates: Reducer<EncodingStates> = (
+  state = INITIAL_ENCODING_STATES,
   action
-): SanitizedProfileEncodingState => {
+): EncodingStates => {
   switch (action.type) {
     case 'SANITIZED_PROFILE_ENCODING_STARTED': {
-      const { sanitizedProfile } = action;
-      return { phase: 'ENCODING', sanitizedProfile };
+      const { format, sanitizedProfile } = action;
+      return {
+        ...state,
+        [format]: { phase: 'ENCODING', sanitizedProfile },
+      };
     }
     case 'SANITIZED_PROFILE_ENCODING_COMPLETED': {
-      const { sanitizedProfile, profileData } = action;
+      const { format, sanitizedProfile, profileData } = action;
+      const current = state[format];
       if (
-        state.phase === 'ENCODING' &&
-        state.sanitizedProfile === sanitizedProfile
+        current.phase === 'ENCODING' &&
+        current.sanitizedProfile === sanitizedProfile
       ) {
-        return { phase: 'DONE', sanitizedProfile, profileData };
+        return {
+          ...state,
+          [format]: { phase: 'DONE', sanitizedProfile, profileData },
+        };
       }
       return state; // Ignore updates from earlier encodings.
     }
     case 'SANITIZED_PROFILE_ENCODING_FAILED': {
-      const { sanitizedProfile, error } = action;
+      const { format, sanitizedProfile, error } = action;
+      const current = state[format];
       if (
-        state.phase === 'ENCODING' &&
-        state.sanitizedProfile === sanitizedProfile
+        current.phase === 'ENCODING' &&
+        current.sanitizedProfile === sanitizedProfile
       ) {
-        return { phase: 'ERROR', sanitizedProfile, error };
+        return {
+          ...state,
+          [format]: { phase: 'ERROR', sanitizedProfile, error },
+        };
       }
       return state; // Ignore updates from earlier encodings.
     }
@@ -249,7 +271,7 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
 
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
-  sanitizedProfileEncodingState,
+  sanitizedProfileEncodingStates,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,
