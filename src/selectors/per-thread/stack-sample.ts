@@ -819,11 +819,14 @@ export function getStackAndSampleSelectorsPerThread(
       ProfileData.computeLowerWingMaxDepthPlusOne
     );
 
-  // Self wing: focusSelf(rangeAndTransformFilteredThread, selectedFunc, implFilter)
+  // Self wing: previewFiltered(focusSelf(rangeAndTransformFilteredThread,
+  //                                      selectedFunc, implFilter))
   // This uses the thread BEFORE the implementation filter so that native frames
   // that are "inside" the selected function's self time are visible even when
-  // the implementation filter is set to "JS only".
-  const getSelfWingThread: Selector<Thread> = createSelector(
+  // the implementation filter is set to "JS only". Preview filtering is applied
+  // AFTER focusSelf so that dragging a selection only re-slices sample arrays
+  // instead of re-running the expensive focusSelf pass over the stack table.
+  const _getFocusedSelfWingThread: Selector<Thread> = createSelector(
     threadSelectors.getRangeAndTransformFilteredThread,
     getSelectedFunctionIndex,
     UrlState.getImplementationFilter,
@@ -832,6 +835,22 @@ export function getStackAndSampleSelectorsPerThread(
         return thread;
       }
       return Transforms.focusSelf(thread, funcIndex, implFilter);
+    }
+  );
+
+  const getSelfWingThread: Selector<Thread> = createSelector(
+    _getFocusedSelfWingThread,
+    ProfileSelectors.getPreviewSelection,
+    (thread, previewSelection): Thread => {
+      if (!previewSelection) {
+        return thread;
+      }
+      const { selectionStart, selectionEnd } = previewSelection;
+      return ProfileData.filterThreadSamplesToRange(
+        thread,
+        selectionStart,
+        selectionEnd
+      );
     }
   );
 
