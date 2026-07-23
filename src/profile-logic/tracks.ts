@@ -24,6 +24,10 @@ import {
   computeStackTableFromRawStackTable,
   computeFrameTableFromRawFrameTable,
 } from './profile-data';
+import {
+  computeCombinedMarkerSchemaList,
+  getMarkerTypesForDisplay,
+} from './marker-data';
 import { intersectSets, subtractSets } from '../utils/set';
 import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
@@ -324,8 +328,15 @@ export function computeLocalTracksByPid(
   }
 
   // find markers that might have their own track.
-  const markerSchemasWithGraphs = (profile.meta.markerSchema || []).filter(
+  const markerSchema = computeCombinedMarkerSchemaList(
+    profile.meta.markerSchema || []
+  );
+  const markerSchemasWithGraphs = markerSchema.filter(
     (schema) => Array.isArray(schema.graphs) && schema.graphs.length > 0
+  );
+  const ipcTimelineMarkerTypes = getMarkerTypesForDisplay(
+    markerSchema,
+    'timeline-ipc'
   );
 
   for (
@@ -356,7 +367,11 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'network', threadIndex });
     }
 
-    if (markers.data.some((datum) => datum && datum.type === 'IPC')) {
+    if (
+      markers.data.some(
+        (datum) => datum && ipcTimelineMarkerTypes.has(datum.type)
+      )
+    ) {
       // This thread has IPC markers.
       tracks.push({ type: 'ipc', threadIndex });
     }
