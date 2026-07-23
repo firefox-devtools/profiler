@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { FlameGraph } from 'firefox-profiler/components/flame-graph/FlameGraph';
 import { computeBucketFlameGraphData } from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
 import { encodeUintArrayForUrlComponent } from 'firefox-profiler/utils/uintarray-encoding';
+import { CURRENT_URL_VERSION } from 'firefox-profiler/app-logic/url-handling';
 
 import type {
   BucketFlameGraphData,
@@ -60,6 +61,12 @@ function buildDeepLinkUrl(
   const params = new URLSearchParams();
   params.set('thread', encodeUintArrayForUrlComponent([threadIndex]));
   params.set('transforms', transforms.join('~'));
+  // Without an explicit version, the URL parser assumes v=0 and runs every
+  // upgrader in sequence. The v5→v6 upgrader re-encodes `thread` from its old
+  // decimal form to uintarray encoding, but our URL is already in the new
+  // form — so a threadIndex of 10 ("a") is parsed as NaN and encoded back as
+  // "0", silently reselecting thread 0.
+  params.set('v', String(CURRENT_URL_VERSION));
 
   url.pathname = newPathname;
   url.search = `?${params.toString()}`;
