@@ -284,6 +284,8 @@ describe('MarkerChart', function () {
       fireMouseEvent('mousemove', {
         offsetX: x,
         offsetY: y,
+        clientX: x,
+        clientY: y,
         pageX: x,
         pageY: y,
       });
@@ -323,6 +325,8 @@ describe('MarkerChart', function () {
       const positioningOptions = {
         offsetX: pos.x,
         offsetY: pos.y,
+        clientX: pos.x,
+        clientY: pos.y,
         pageX: pos.x,
         pageY: pos.y,
       };
@@ -353,6 +357,8 @@ describe('MarkerChart', function () {
     fireMouseEvent('mousemove', {
       offsetX: 0,
       offsetY: 0,
+      clientX: 0,
+      clientY: 0,
       pageX: 0,
       pageY: 0,
     });
@@ -373,6 +379,8 @@ describe('MarkerChart', function () {
     fireMouseEvent('mousemove', {
       offsetX: 0,
       offsetY: 0,
+      clientX: 0,
+      clientY: 0,
       pageX: 0,
       pageY: 0,
     });
@@ -399,6 +407,8 @@ describe('MarkerChart', function () {
     fireMouseEvent('mousemove', {
       offsetX: x,
       offsetY: y,
+      clientX: x,
+      clientY: y,
       pageX: x,
       pageY: y,
     });
@@ -432,6 +442,8 @@ describe('MarkerChart', function () {
     fireMouseEvent('mousemove', {
       offsetX: x,
       offsetY: y,
+      clientX: x,
+      clientY: y,
       pageX: x,
       pageY: y,
     });
@@ -448,6 +460,8 @@ describe('MarkerChart', function () {
     fireMouseEvent('mousemove', {
       offsetX: x2,
       offsetY: y2,
+      clientX: x2,
+      clientY: y2,
       pageX: x2,
       pageY: y2,
     });

@@ -106,11 +106,22 @@ compare.
       type="url"
       value=""
     />
-    <input
-      class="compareHomeSubmitButton photon-button photon-button-primary"
-      type="submit"
-      value="Retrieve profiles"
-    />
+    <div
+      class="compareHomeButtons"
+    >
+      <input
+        class="photon-button photon-button-primary"
+        type="submit"
+        value="Retrieve profiles"
+      />
+      <button
+        class="photon-button photon-button-default"
+        name="benchmark"
+        type="submit"
+      >
+        Compare Benchmark Profiles
+      </button>
+    </div>
   </form>
 </main>
 `;

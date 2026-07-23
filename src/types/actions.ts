@@ -86,6 +86,9 @@ export type DataSource =
   // This is used when comparing two profiles. The displayed profile is a
   // comparison profile created from two input profiles.
   | 'compare'
+  // This is used for the benchmark comparison page at /compare-benchmark/.
+  // It loads two benchmark profiles and shows statistical comparison tables.
+  | 'compare-benchmark'
   // This is a page which displays a list of profiles that were uploaded from
   // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
@@ -569,6 +572,10 @@ type UrlStateAction =
       readonly searchString: string;
     }
   | { readonly type: 'CHANGE_PROFILES_TO_COMPARE'; readonly profiles: string[] }
+  | {
+      readonly type: 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK';
+      readonly profiles: string[];
+    }
   | {
       readonly type: 'CHANGE_PROFILE_NAME';
       readonly profileName: string | null;
