@@ -249,49 +249,58 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
     const isUploading =
       uploadPhase === 'uploading' || uploadPhase === 'compressing';
-
-    if (isUploading) {
-      return (
-        <button
-          type="button"
-          className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon menuButtonsShareButtonButton-uploading"
-          onClick={abortFunction}
-        >
-          <Localized id="MenuButtons--index--cancel-upload">
-            Cancel Upload
-          </Localized>
-        </button>
-      );
-    }
-
     const uploadedStatus = this._getUploadedStatus(dataSource, profileUrl);
     const isRepublish = uploadedStatus === 'uploaded';
     const isError = uploadPhase === 'error';
 
-    let labelL10nId = 'MenuButtons--index--share-upload';
+    let shareLabelId = 'MenuButtons--index--share';
     if (isRepublish) {
-      labelL10nId = 'MenuButtons--index--share-re-upload';
+      shareLabelId = 'MenuButtons--index--reshare';
     }
-
     if (isError) {
-      labelL10nId = 'MenuButtons--index--share-error-uploading';
+      shareLabelId = 'MenuButtons--index--share-error-uploading';
     }
 
     return (
-      <Localized id={labelL10nId} attrs={{ label: true }}>
-        <ButtonWithPanel
-          buttonClassName={classNames(
-            'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
-            {
-              menuButtonsShareButtonError: isError,
-            }
-          )}
-          panelClassName="publishPanelPanel"
-          // The value for the label following will be replaced
-          label=""
-          panelContent={<PublishPanel isRepublish={isRepublish} />}
-        />
-      </Localized>
+      <>
+        <Localized id="MenuButtons--index--download" attrs={{ label: true }}>
+          <ButtonWithPanel
+            buttonClassName="menuButtonsButton menuButtonsDownloadButton menuButtonsButton-hasIcon"
+            panelClassName="publishPanelPanel"
+            // The value for the label following will be replaced
+            label=""
+            panelContent={<PublishPanel mode="download" />}
+          />
+        </Localized>
+        {isUploading ? (
+          <button
+            type="button"
+            className="menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon menuButtonsShareButtonButton-uploading"
+            onClick={abortFunction}
+          >
+            <Localized id="MenuButtons--index--cancel-upload">
+              Cancel Upload
+            </Localized>
+          </button>
+        ) : (
+          <Localized id={shareLabelId} attrs={{ label: true }}>
+            <ButtonWithPanel
+              buttonClassName={classNames(
+                'menuButtonsButton menuButtonsShareButtonButton menuButtonsButton-hasIcon',
+                {
+                  menuButtonsShareButtonError: isError,
+                }
+              )}
+              panelClassName="publishPanelPanel"
+              // The value for the label following will be replaced
+              label=""
+              panelContent={
+                <PublishPanel mode="share" isRepublish={isRepublish} />
+              }
+            />
+          </Localized>
+        )}
+      </>
     );
   }
 
