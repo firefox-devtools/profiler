@@ -39,6 +39,7 @@ import type {
   IndexIntoResourceTable,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
   readonly profile: Profile;
@@ -190,10 +191,11 @@ export function sanitizePII(
         shallowCloneFuncTable(funcTable));
       const newFrameTable = (newShared.frameTable = {
         ...frameTable,
-        innerWindowID: frameTable.innerWindowID.slice(),
-        func: frameTable.func.slice(),
-        line: frameTable.line.slice(),
-        column: frameTable.column.slice(),
+        flags: Array.from(frameTable.flags),
+        innerWindowID: Array.from(frameTable.innerWindowID),
+        func: Array.from(frameTable.func),
+        line: Array.from(frameTable.line),
+        column: Array.from(frameTable.column),
       });
 
       for (const [
@@ -237,9 +239,12 @@ export function sanitizePII(
 
         // In both cases, nullify some information in all frames.
         frameIndexes.forEach((frameIndex) => {
-          newFrameTable.line[frameIndex] = null;
-          newFrameTable.column[frameIndex] = null;
-          newFrameTable.innerWindowID[frameIndex] = null;
+          newFrameTable.flags[frameIndex] &= ~(
+            FrameFlag.HasLine | FrameFlag.HasColumn
+          );
+          newFrameTable.line[frameIndex] = 0;
+          newFrameTable.column[frameIndex] = 0;
+          newFrameTable.innerWindowID[frameIndex] = 0;
         });
       }
 

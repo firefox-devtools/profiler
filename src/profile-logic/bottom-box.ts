@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 
 import type {
   Thread,
@@ -173,21 +173,22 @@ export function getBottomBoxInfoForStackFrame(
       : null;
 
   // Get native symbol for this frame
-  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
-  const nativeSymbolInfos =
-    nativeSymbol !== null
-      ? [
-          getNativeSymbolInfo(
-            nativeSymbol,
-            nativeSymbols,
-            frameTable,
-            stringTable
-          ),
-        ]
-      : [];
+  const frameFlags = frameTable.flags[frameIndex];
+  const hasNativeSymbol = (frameFlags & FrameFlag.HasNativeSymbol) !== 0;
+  const nativeSymbolInfos = hasNativeSymbol
+    ? [
+        getNativeSymbolInfo(
+          frameTable.nativeSymbol[frameIndex],
+          nativeSymbols,
+          frameTable,
+          stringTable
+        ),
+      ]
+    : [];
 
-  const instructionAddress =
-    nativeSymbol !== null ? frameTable.address[frameIndex] : -1;
+  const hasAddress =
+    hasNativeSymbol && (frameFlags & FrameFlag.HasAddress) !== 0;
+  const instructionAddress = hasAddress ? frameTable.address[frameIndex] : -1;
 
   return {
     libIndex,
@@ -196,9 +197,7 @@ export function getBottomBoxInfoForStackFrame(
     initialNativeSymbol: 0,
     scrollToLineNumber: lineNumber ?? undefined,
     highlightedLineNumber: lineNumber,
-    scrollToInstructionAddress:
-      instructionAddress !== -1 ? instructionAddress : undefined,
-    highlightedInstructionAddress:
-      instructionAddress !== -1 ? instructionAddress : null,
+    scrollToInstructionAddress: hasAddress ? instructionAddress : undefined,
+    highlightedInstructionAddress: hasAddress ? instructionAddress : null,
   };
 }

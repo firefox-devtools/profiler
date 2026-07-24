@@ -26,6 +26,7 @@ import type {
   JsTracerTiming,
   Microseconds,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 // See the function below for more information.
 type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
@@ -606,15 +607,23 @@ export function convertJsTracerToThreadWithoutSamples(
 
     // Every event gets a unique frame entry.
     const frameIndex = frameTable.length++;
+    let flags = FrameFlag.HasCategory;
+    if (line !== null) {
+      flags |= FrameFlag.HasLine;
+    }
+    if (column !== null) {
+      flags |= FrameFlag.HasColumn;
+    }
+    frameTable.flags.push(flags);
     frameTable.address.push(blankStringIndex);
-    frameTable.inlineDepth.push(0);
     frameTable.category.push(otherCategory);
+    frameTable.subcategory.push(0);
     frameTable.func.push(funcIndex);
-    frameTable.nativeSymbol.push(null);
+    frameTable.nativeSymbol.push(0);
     frameTable.innerWindowID.push(0);
-    frameTable.line.push(line);
-    frameTable.column.push(column);
-    frameTable.originalLocation.push(null);
+    frameTable.line.push(line ?? 0);
+    frameTable.column.push(column ?? 0);
+    frameTable.originalLocation.push(0);
 
     // Each event gets a stack table entry.
     const stackIndex = stackTable.length++;

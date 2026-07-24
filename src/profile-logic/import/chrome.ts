@@ -8,6 +8,7 @@ import type {
   IndexIntoStackTable,
   MixedObject,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 import {
   finishRawSamplesTableBuilder,
@@ -695,17 +696,23 @@ async function processTracingEvents(
               'Unable to find the prefix stack index from a node index.'
             );
           }
-          frameTable.address[frameIndex] = -1;
+          let flags = FrameFlag.HasCategory;
+          if (lineNumber !== undefined) {
+            flags |= FrameFlag.HasLine;
+          }
+          if (columnNumber !== undefined) {
+            flags |= FrameFlag.HasColumn;
+          }
+          frameTable.flags[frameIndex] = flags;
+          frameTable.address[frameIndex] = 0;
           frameTable.category[frameIndex] = category;
           frameTable.subcategory[frameIndex] = 0;
           frameTable.func[frameIndex] = funcId;
-          frameTable.nativeSymbol[frameIndex] = null;
+          frameTable.nativeSymbol[frameIndex] = 0;
           frameTable.innerWindowID[frameIndex] = 0;
-          frameTable.line[frameIndex] =
-            lineNumber === undefined ? null : lineNumber;
-          frameTable.column[frameIndex] =
-            columnNumber === undefined ? null : columnNumber;
-          frameTable.originalLocation[frameIndex] = null;
+          frameTable.line[frameIndex] = lineNumber ?? 0;
+          frameTable.column[frameIndex] = columnNumber ?? 0;
+          frameTable.originalLocation[frameIndex] = 0;
           frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);

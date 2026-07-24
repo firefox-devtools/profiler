@@ -235,10 +235,47 @@ export type RawMarkerTable = {
 };
 
 /**
+ * Bit flags for the `flags` column of the RawFrameTable / FrameTable.
+ * Each flag indicates whether the corresponding column carries a meaningful
+ * value for that frame; when a flag bit is unset, the value in the associated
+ * column is ignored.
+ */
+export const FrameFlag = {
+  // Set when this frame is one of the "inline" expansions of a native address
+  // (i.e. the code at this address was inlined from another function, and this
+  // frame represents that inlined function). See the comment on `flags` below.
+  IsInlined: 1 << 0,
+  // Set when `address` is meaningful (i.e. it's a real library-relative
+  // address, not the sentinel).
+  HasAddress: 1 << 1,
+  // Set when `category` and `subcategory` are meaningful. Otherwise the
+  // stack node using this frame inherits its category/subcategory from its
+  // parent stack node (or from the default category, if there is no parent).
+  HasCategory: 1 << 2,
+  // Set when `nativeSymbol` is meaningful.
+  HasNativeSymbol: 1 << 3,
+  // Set when `line` is meaningful.
+  HasLine: 1 << 4,
+  // Set when `column` is meaningful.
+  HasColumn: 1 << 5,
+  // Set when `originalLocation` is meaningful.
+  HasOriginalLocation: 1 << 6,
+} as const;
+
+export type FrameFlags = number;
+
+/**
  * Frames contain the context information about the function execution at the moment in
  * time. The caller/callee relationship between frames is defined by the StackTable.
  */
 export type RawFrameTable = {
+  // A bitfield with one bit per optional column, drawn from `FrameFlag`.
+  // For each row, the flag bit tells you whether the value in the
+  // corresponding column is meaningful. When a bit is unset, the value in the
+  // corresponding column has no meaning; producers can store any value there
+  // (typically 0) and consumers must ignore it.
+  flags: number[] | Uint8Array<ArrayBuffer>;
+
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
   //
@@ -251,21 +288,23 @@ export type RawFrameTable = {
   // The library which this address is relative to is given by the frame's nativeSymbol:
   // frame -> nativeSymbol -> lib.
   //
-  // Frames with no address use the sentinel value `-1`.
-  address: Array<Address | -1> | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasAddress` is set in `flags`.
+  address: Address[] | Int32Array<ArrayBuffer>;
 
-  // The inline depth for this frame. If there is an inline stack at an address,
-  // we create multiple frames with the same address, one for each depth.
-  // The outermost frame always has depth 0.
+  // The `IsInlined` flag indicates whether this frame is an inline expansion.
+  //
+  // If there is an inline stack at an address, we create multiple frames with
+  // the same address; the outermost one has `IsInlined` unset, and the inner
+  // expansions have `IsInlined` set.
   //
   // Example:
-  // If the raw stack is 0x10 -> 0x20 -> 0x30, and symbolication adds two inline frames
-  // for 0x10, no inline frame for 0x20, and one inline frame for 0x30, then the
-  // symbolicated stack will be the following:
+  // If the raw stack is 0x10 -> 0x20 -> 0x30, and symbolication adds two inline
+  // frames for 0x10, no inline frame for 0x20, and one inline frame for 0x30,
+  // then the symbolicated stack will be the following:
   //
   // func:        outer1 -> inline1a -> inline1b -> outer2 -> outer3 -> inline3a
   // address:     0x10   -> 0x10     -> 0x10     -> 0x20   -> 0x30   -> 0x30
-  // inlineDepth:    0   ->    1     ->    2     ->    0   ->    0   ->    1
+  // IsInlined:    no    ->   yes    ->   yes    ->   no   ->   no   ->  yes
   //
   // Background:
   // When a compiler performs an inlining optimization, it removes a call to a function
@@ -273,53 +312,54 @@ export type RawFrameTable = {
   // function. But it remembers which instructions were the result of this inlining,
   // so that information about the inlined function can be recovered from the debug
   // information during symbolication, based on the instruction address.
-  // The compiler can choose to do inlining multiple levels deep: An instruction can
-  // be the result of a whole "inline stack" of functions.
-  // Before symbolication, all frames have depth 0. During symbolication, we resolve
-  // addresses to inline stacks, and create extra frames with non-zero depths as needed.
+  // Before symbolication, no frames have `IsInlined` set. During symbolication, we
+  // resolve addresses to inline stacks, and create extra frames with `IsInlined`
+  // set as needed.
   //
-  // The frames of an inline stack at an address all have the same address and the same
-  // nativeSymbol, but each has a different func and line.
-  inlineDepth: number[] | Uint8Array<ArrayBuffer>;
+  // The frames of an inline stack at an address all have the same address and the
+  // same nativeSymbol, but each has a different func and line.
 
-  // The category of the frame. This is used to calculate the category of the stack nodes
-  // which use this frame:
-  // - If the frame has a null category, the stack node inherits its parent node's category
-  //   and subcategory. If there is no parent node, we use the "default category" (see ProfileMeta.categories).
-  // - If the frame has a non-null category, this category and subcategory is used for the stack node.
-  category: (IndexIntoCategoryList | null)[];
+  // The category of the frame. This is used to calculate the category of the
+  // stack nodes which use this frame:
+  // - If `HasCategory` is unset, the stack node inherits its parent node's
+  //   category and subcategory. If there is no parent node, we use the
+  //   "default category" (see ProfileMeta.categories).
+  // - If `HasCategory` is set, this category and subcategory is used for the
+  //   stack node.
+  category: IndexIntoCategoryList[] | Int32Array<ArrayBuffer>;
 
-  // The subcategory of a frame. This is used to calculate the subcategory of the stack nodes
-  // which use this frame.
-  // Must be non-null if the frame's category is non-null.
-  // Ignored if the frame's category is null.
-  // 0 is always a valid value and refers to the "Other" subcategory (see Category.subcategories).
-  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  // The subcategory of a frame. Only meaningful when `HasCategory` is set.
+  // 0 is always a valid value and refers to the "Other" subcategory (see
+  // Category.subcategories).
+  subcategory: IndexIntoSubcategoryListForCategory[] | Int32Array<ArrayBuffer>;
 
   // The frame's function.
   func: IndexIntoFuncTable[] | Int32Array<ArrayBuffer>;
 
-  // The symbol index (referring into this thread's nativeSymbols table) corresponding
-  // to symbol that covers the frame address of this frame. Only non-null for native
-  // frames (e.g. C / C++ / Rust code). Null before symbolication.
-  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
+  // The symbol index (referring into this thread's nativeSymbols table)
+  // corresponding to the symbol that covers the frame address of this frame.
+  // Only meaningful when `HasNativeSymbol` is set. Only set for native frames
+  // (e.g. C / C++ / Rust code), and only after symbolication.
+  nativeSymbol: IndexIntoNativeSymbolTable[] | Int32Array<ArrayBuffer>;
 
-  // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
-  // It's used to determine which JS frame belongs to which web page so we can display
-  // that information and filter for single tab profiling.
-  // `0` for non-JS frames and the JS frames that failed to get the ID. `0` means "null value"
-  // because that's what Firefox platform DOM side assigns when it fails to get the ID or
-  // something bad happens during that process. It's not `null` or `-1` because that information
-  // is being stored as `uint64_t` there.
-  innerWindowID: (InnerWindowID | null)[];
+  // Inner window ID of JS frames. JS frames can be correlated to a Page through
+  // this value. It's used to determine which JS frame belongs to which web page
+  // so we can display that information and filter for single tab profiling.
+  // `0` for non-JS frames and the JS frames that failed to get the ID. `0` means
+  // "no innerWindowID"; on the Firefox platform side it's stored as `uint64_t`
+  // so there is no natural null representation, and code should treat `0` as
+  // "unset".
+  innerWindowID: InnerWindowID[] | Float64Array<ArrayBuffer>;
 
-  line: (number | null)[];
-  column: (number | null)[];
+  // Only meaningful when `HasLine` is set.
+  line: number[] | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasColumn` is set.
+  column: number[] | Int32Array<ArrayBuffer>;
 
-  // Index into the sourceLocationTable, or null if not source-mapped.
-  // Points to the original source file, line, and column for this frame's
-  // execution point.
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  // Index into the sourceLocationTable, pointing at the original source file,
+  // line, and column for this frame's execution point. Only meaningful when
+  // `HasOriginalLocation` is set.
+  originalLocation: IndexIntoSourceLocationTable[] | Int32Array<ArrayBuffer>;
 
   length: number;
 };

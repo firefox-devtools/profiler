@@ -75,16 +75,16 @@ export default function getProfile(): Profile {
   ] = frameFuncs.map((_, i) => i);
 
   const frameTable: RawFrameTable = {
+    flags: Array(frameFuncs.length).fill(0),
     func: frameFuncs.map((stringIndex) => funcTable.name.indexOf(stringIndex)),
-    address: Array(frameFuncs.length).fill(-1),
-    inlineDepth: Array(frameFuncs.length).fill(0),
-    nativeSymbol: Array(frameFuncs.length).fill(null),
-    category: Array(frameFuncs.length).fill(null),
-    subcategory: Array(frameFuncs.length).fill(null),
-    innerWindowID: Array(frameFuncs.length).fill(null),
-    line: Array(frameFuncs.length).fill(null),
-    column: Array(frameFuncs.length).fill(null),
-    originalLocation: Array(frameFuncs.length).fill(null),
+    address: Array(frameFuncs.length).fill(0),
+    nativeSymbol: Array(frameFuncs.length).fill(0),
+    category: Array(frameFuncs.length).fill(0),
+    subcategory: Array(frameFuncs.length).fill(0),
+    innerWindowID: Array(frameFuncs.length).fill(0),
+    line: Array(frameFuncs.length).fill(0),
+    column: Array(frameFuncs.length).fill(0),
+    originalLocation: Array(frameFuncs.length).fill(0),
     length: frameFuncs.length,
   };
 

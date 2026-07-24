@@ -9,6 +9,7 @@ import type {
   Profile,
   Category,
 } from '../types/profile';
+import { FrameFlag } from '../types/profile';
 import {
   finishRawFrameTableBuilder,
   getRawFrameTableBuilderWithExistingContents,
@@ -133,16 +134,16 @@ export function insertStackLabels(
     funcTable.relevantForJS[funcIndex] = true;
 
     const frameIndex = frameTable.length++;
+    frameTable.flags[frameIndex] = FrameFlag.HasCategory;
     frameTable.func[frameIndex] = funcIndex;
     frameTable.category[frameIndex] = labelCategoryIndex;
     frameTable.subcategory[frameIndex] = 0;
-    frameTable.nativeSymbol[frameIndex] = null;
+    frameTable.nativeSymbol[frameIndex] = 0;
     frameTable.address[frameIndex] = 0;
-    frameTable.inlineDepth[frameIndex] = 0;
-    frameTable.line[frameIndex] = null;
-    frameTable.column[frameIndex] = null;
-    frameTable.originalLocation[frameIndex] = null;
-    frameTable.innerWindowID[frameIndex] = null;
+    frameTable.line[frameIndex] = 0;
+    frameTable.column[frameIndex] = 0;
+    frameTable.originalLocation[frameIndex] = 0;
+    frameTable.innerWindowID[frameIndex] = 0;
   }
 
   // Run the function name against the substring matchers and return the first

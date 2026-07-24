@@ -18,6 +18,7 @@ import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { callTreeFromProfile, formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { addTransformToStack } from '../../actions/profile-view';
@@ -1091,15 +1092,16 @@ describe('mergeProfilesForDiffing with source tables', function () {
     const { funcTable, frameTable, sourceLocationTable } = mergedProfile.shared;
 
     // Even without any symbolicated entries on the inputs, the columns must
-    // be filled (not undefined) so downstream `x !== null` checks work.
+    // be filled so downstream checks work.
     expect(sourceLocationTable.length).toBe(0);
     expect(funcTable.originalLocation).toHaveLength(funcTable.length);
     expect(frameTable.originalLocation).toHaveLength(frameTable.length);
     for (const v of funcTable.originalLocation) {
       expect(v).toBeNull();
     }
-    for (const v of frameTable.originalLocation) {
-      expect(v).toBeNull();
+    // On the frame table, no HasOriginalLocation bits should be set.
+    for (let i = 0; i < frameTable.length; i++) {
+      expect(frameTable.flags[i] & FrameFlag.HasOriginalLocation).toBe(0);
     }
   });
 });
