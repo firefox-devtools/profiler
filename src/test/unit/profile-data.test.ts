@@ -19,6 +19,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getTreeOrderComparator,
   getSampleSelectedStates,
+  getSamplesSelectedStatesForFunction,
   extractProfileFilterPageData,
   findAddressProofForFile,
   calculateFunctionSizeLowerBound,
@@ -1230,6 +1231,149 @@ describe('getSampleSelectedStates', function () {
       expect(comparator(1, 1)).toBe(0);
       expect(comparator(4, 4)).toBe(0);
     });
+  });
+});
+
+describe('getSamplesSelectedStatesForFunction', function () {
+  function setup(textSamples: string) {
+    const {
+      derivedThreads,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
+    const [thread] = derivedThreads;
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      0
+    );
+    const sampleCallNodes = getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    );
+    return {
+      callNodeTable: callNodeInfo.getCallNodeTable(),
+      sampleCallNodes,
+      funcNamesDict,
+    };
+  }
+
+  it('marks all non-filtered samples as selected when nothing is selected', function () {
+    const { callNodeTable, sampleCallNodes } = setup(`
+      A  A  A
+      B  C
+    `);
+    expect(
+      Array.from(
+        getSamplesSelectedStatesForFunction(
+          sampleCallNodes,
+          null,
+          callNodeTable
+        )
+      )
+    ).toEqual([
+      SelectedState.Selected,
+      SelectedState.Selected,
+      SelectedState.Selected,
+    ]);
+  });
+
+  it('marks samples as selected when their call stack contains the selected function', function () {
+    //   0  1  2  3  4
+    //   A  A  A  A  A
+    //   B  D  B  D  D
+    //   C  E  F  G
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { B, D },
+    } = setup(`
+      A  A  A  A  A
+      B  D  B  D  D
+      C  E  F  G
+    `);
+
+    // Selecting function B: samples 0, 2 have B in their stack
+    expect(
+      Array.from(
+        getSamplesSelectedStatesForFunction(sampleCallNodes, B, callNodeTable)
+      )
+    ).toEqual([
+      SelectedState.Selected,
+      SelectedState.UnselectedOrderedBeforeSelected,
+      SelectedState.Selected,
+      SelectedState.UnselectedOrderedBeforeSelected,
+      SelectedState.UnselectedOrderedBeforeSelected,
+    ]);
+
+    // Selecting function D: samples 1, 3, 4 have D in their stack
+    expect(
+      Array.from(
+        getSamplesSelectedStatesForFunction(sampleCallNodes, D, callNodeTable)
+      )
+    ).toEqual([
+      SelectedState.UnselectedOrderedBeforeSelected,
+      SelectedState.Selected,
+      SelectedState.UnselectedOrderedBeforeSelected,
+      SelectedState.Selected,
+      SelectedState.Selected,
+    ]);
+  });
+
+  it('marks filtered-out samples as FilteredOutByTransform', function () {
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { B },
+    } = setup(`
+      A  A  A
+      B  C
+    `);
+    // Sample 2 has no stack (null), treated as filtered out.
+    // Manually null out sample 2's call node.
+    sampleCallNodes[2] = null;
+
+    expect(
+      Array.from(
+        getSamplesSelectedStatesForFunction(sampleCallNodes, B, callNodeTable)
+      )
+    ).toEqual([
+      SelectedState.Selected,
+      SelectedState.UnselectedOrderedBeforeSelected,
+      SelectedState.FilteredOutByTransform,
+    ]);
+  });
+
+  it('selects samples whose ancestor call node contains the function, not just the leaf', function () {
+    //   0  1
+    //   A  A
+    //   B  C
+    //   D
+    // Selecting A should match all samples (A is an ancestor of everything).
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { A, B },
+    } = setup(`
+      A  A
+      B  C
+      D
+    `);
+
+    expect(
+      Array.from(
+        getSamplesSelectedStatesForFunction(sampleCallNodes, A, callNodeTable)
+      )
+    ).toEqual([SelectedState.Selected, SelectedState.Selected]);
+
+    // Selecting B only matches sample 0 (B is in the path A->B->D).
+    expect(
+      Array.from(
+        getSamplesSelectedStatesForFunction(sampleCallNodes, B, callNodeTable)
+      )
+    ).toEqual([
+      SelectedState.Selected,
+      SelectedState.UnselectedOrderedBeforeSelected,
+    ]);
   });
 });
 

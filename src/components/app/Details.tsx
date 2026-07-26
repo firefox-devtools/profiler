@@ -10,6 +10,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { TabBar } from './TabBar';
 import { LocalizedErrorBoundary } from './ErrorBoundary';
 import { ProfileCallTreeView } from 'firefox-profiler/components/calltree/ProfileCallTreeView';
+import { ProfileFunctionListView } from 'firefox-profiler/components/calltree/ProfileFunctionListView';
 import { MarkerTable } from 'firefox-profiler/components/marker-table';
 import { StackChart } from 'firefox-profiler/components/stack-chart/';
 import { MarkerChart } from 'firefox-profiler/components/marker-chart/';
@@ -26,6 +27,10 @@ import { getSelectedTab } from 'firefox-profiler/selectors/url-state';
 import { getIsSidebarOpen } from 'firefox-profiler/selectors/app';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { CallNodeContextMenu } from 'firefox-profiler/components/shared/CallNodeContextMenu';
+import {
+  FunctionListContextMenu,
+  LowerWingContextMenu,
+} from 'firefox-profiler/components/shared/WingContextMenu';
 import { MaybeMarkerContextMenu } from 'firefox-profiler/components/shared/MarkerContextMenu';
 import { toValidTabSlug } from 'firefox-profiler/utils/types';
 
@@ -122,6 +127,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
             {
               {
                 calltree: <ProfileCallTreeView />,
+                'function-list': <ProfileFunctionListView />,
                 'flame-graph': <FlameGraph />,
                 'stack-chart': <StackChart />,
                 'marker-chart': <MarkerChart />,
@@ -133,6 +139,8 @@ class ProfileViewerImpl extends PureComponent<Props> {
           </LocalizedErrorBoundary>
         </Localized>
         <CallNodeContextMenu />
+        <FunctionListContextMenu />
+        <LowerWingContextMenu />
         <MaybeMarkerContextMenu />
       </div>
     );
