@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedThreadIndexes,
+  getAllCommittedRanges,
+} from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getCategories,
@@ -711,6 +714,12 @@ export function collectThreadMarkers(
       ? threadSelectors.getSearchFilteredMarkerIndexes(state)
       : threadSelectors.getCommittedRangeFilteredMarkerIndexes(state);
 
+    // When zoomed, show this thread's marker count over the full time range.
+    const isZoomed = getAllCommittedRanges(state).length > 0;
+    const fullRangeMarkerCount = isZoomed
+      ? threadSelectors.getFullMarkerListIndexes(state).length
+      : undefined;
+
     // Apply all marker filters
     filteredIndexes = applyMarkerFilters(
       filteredIndexes,
@@ -866,6 +875,7 @@ export function collectThreadMarkers(
       friendlyThreadName,
       totalMarkerCount: originalCount,
       filteredMarkerCount: filteredIndexes.length,
+      fullRangeMarkerCount,
       filters,
       byType,
       byCategory,

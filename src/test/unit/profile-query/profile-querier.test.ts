@@ -714,6 +714,8 @@ describe('ProfileQuerier', function () {
       const full = await querier.threadMarkers('t-0');
       expect(full.totalMarkerCount).toBe(4);
       expect(full.filteredMarkerCount).toBe(4);
+      // Not zoomed: no full-range baseline is reported.
+      expect(full.fullRangeMarkerCount).toBeUndefined();
 
       // Zoom to a window that only contains the marker at 20ms.
       const startName = querier._timestampManager.nameForTimestamp(
@@ -727,6 +729,8 @@ describe('ProfileQuerier', function () {
       const zoomed = await querier.threadMarkers('t-0');
       expect(zoomed.totalMarkerCount).toBe(1);
       expect(zoomed.filteredMarkerCount).toBe(1);
+      // Zoomed: the whole-profile baseline is surfaced alongside the in-view count.
+      expect(zoomed.fullRangeMarkerCount).toBe(4);
       const zoomedNames = zoomed.byType.map((t) => t.markerName);
       expect(zoomedNames).toContain('Beta');
       expect(zoomedNames).not.toContain('Alpha');
