@@ -25,10 +25,8 @@ export class SourceMapStore {
   ): Promise<SourceMapStore> {
     const consumers = new Map<IndexIntoSourceTable, SourceMapConsumer>();
 
-    // `initialize` is a static method at runtime but typed as instance method
-    // in the .d.ts. https://github.com/mozilla/source-map/pull/520
     // No-op if already initialized.
-    await (LibSourceMapConsumer as any).initialize({
+    LibSourceMapConsumer.initialize({
       'lib/mappings.wasm': wasmUrl,
     });
 

@@ -141,8 +141,8 @@
 }
 
 .react-contextmenu-item--selected.checked:not(
-    .react-contextmenu-item--disabled
-  )::before {
+  .react-contextmenu-item--disabled
+)::before {
   /* Invert the colors of the checkmark when selected */
   border-color: var(--internal-active-foreground-color);
 }

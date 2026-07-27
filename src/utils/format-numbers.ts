@@ -309,6 +309,10 @@ export function formatSI(num: number): string {
   return formatNumber(num / (1000 * 1000 * 1000), 3, 2) + 'G';
 }
 
+export function formatHexadecimal(num: number): string {
+  return '0x' + (num >>> 0).toString(16);
+}
+
 export function formatNanoseconds(
   time: Nanoseconds,
   significantDigits: number = 3,

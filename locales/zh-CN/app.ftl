@@ -46,6 +46,9 @@ AppViewRouter--error-compare = 无法获取分析记录。
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari = 由于 <a>Safari 浏览器的特殊限制</a>，{ -profiler-brand-name } 无法使用此浏览器从本地导入分析记录。请在 { -firefox-brand-name } 或 Chrome 中打开此页面。
     .title = Safari 浏览器无法导入本地性能分析记录
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version = 此性能分析记录所用的格式不受当前版本的 { -profiler-brand-name } 支持。请尝试刷新页面，检查 { -profiler-brand-name } 是否有可用更新。
 AppViewRouter--route-not-found--home =
     .specialMessage = 无法识别您尝试访问的 URL。
 
@@ -776,6 +779,14 @@ TrackNameButton--hide-track =
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = 隐藏进程
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

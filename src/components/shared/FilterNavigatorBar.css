@@ -127,16 +127,16 @@
 
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover,
 .filterNavigatorBarItem:has(
-    .profileFilterNavigator--tab-selector.button
-  ):hover {
+  .profileFilterNavigator--tab-selector.button
+):hover {
   background-color: var(--internal-hover-background-color);
   color: var(--internal-hover-color);
 }
 
 .filterNavigatorBarItem:not(
-    .filterNavigatorBarRootItem,
-    .filterNavigatorBarLeafItem
-  ):hover::before,
+  .filterNavigatorBarRootItem,
+  .filterNavigatorBarLeafItem
+):hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):hover::after {
   border-color: var(--internal-hover-background-color);
 }
@@ -146,9 +146,9 @@
 }
 
 .filterNavigatorBarItem:not(
-    .filterNavigatorBarRootItem,
-    .filterNavigatorBarLeafItem
-  ):active:hover::before,
+  .filterNavigatorBarRootItem,
+  .filterNavigatorBarLeafItem
+):active:hover::before,
 .filterNavigatorBarItem:not(.filterNavigatorBarLeafItem):active:hover::after {
   border-color: var(--internal-active-background-color);
 }
