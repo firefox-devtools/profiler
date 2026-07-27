@@ -702,12 +702,14 @@ export function collectThreadMarkers(
     const markerSchemaByName = getMarkerSchemaByName(state);
     const stringTable = getStringTable(state);
 
-    // Get marker indexes - use search-filtered if search is active, otherwise all markers
+    // Get marker indexes scoped to the committed (zoom) range. When a search is
+    // active we use the search-filtered set, which is itself built on top of the
+    // committed-range-filtered indexes, so both paths respect the current zoom.
     const originalCount =
-      threadSelectors.getFullMarkerListIndexes(state).length;
+      threadSelectors.getCommittedRangeFilteredMarkerIndexes(state).length;
     let filteredIndexes = searchString
       ? threadSelectors.getSearchFilteredMarkerIndexes(state)
-      : threadSelectors.getFullMarkerListIndexes(state);
+      : threadSelectors.getCommittedRangeFilteredMarkerIndexes(state);
 
     // Apply all marker filters
     filteredIndexes = applyMarkerFilters(
