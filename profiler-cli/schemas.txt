@@ -168,6 +168,7 @@ profiler-cli thread markers --json
     type: "thread-markers",
     threadHandle, friendlyThreadName,
     totalMarkerCount, filteredMarkerCount,
+    fullRangeMarkerCount?,
     byType: [{
       markerName, count, isInterval,
       durationStats?: { min, max, avg, median, p95, p99 },

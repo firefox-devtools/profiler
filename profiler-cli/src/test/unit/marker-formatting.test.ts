@@ -148,3 +148,24 @@ describe('formatThreadMarkersResult flat list mode', function () {
     expect(output).not.toContain('By Category');
   });
 });
+
+describe('formatThreadMarkersResult zoom baseline', function () {
+  it('notes the full-range total when zoomed', function () {
+    const result = makeResult({
+      filteredMarkerCount: 3,
+      totalMarkerCount: 3,
+      fullRangeMarkerCount: 42,
+    });
+
+    const output = formatThreadMarkersResult(result);
+    expect(output).toContain('3 markers in view (of 42 in the full range)');
+  });
+
+  it('omits the full-range note when not zoomed', function () {
+    const result = makeResult({ filteredMarkerCount: 3, totalMarkerCount: 3 });
+
+    const output = formatThreadMarkersResult(result);
+    expect(output).not.toContain('in the full range');
+    expect(output).toContain('3 markers');
+  });
+});
