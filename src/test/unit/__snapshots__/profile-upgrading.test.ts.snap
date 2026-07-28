@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 68,
+    "preprocessedProfileVersion": 69,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -7620,6 +7620,7 @@ Object {
       Object {
         "display": Array [
           "marker-table",
+          "timeline-network",
         ],
         "fields": Array [],
         "name": "Network",
@@ -7643,7 +7644,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 68,
+    "preprocessedProfileVersion": 69,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8996,6 +8997,7 @@ Object {
       Object {
         "display": Array [
           "marker-table",
+          "timeline-network",
         ],
         "fields": Array [],
         "name": "Network",
@@ -9019,7 +9021,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 68,
+    "preprocessedProfileVersion": 69,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10540,6 +10542,7 @@ Object {
       Object {
         "display": Array [
           "marker-table",
+          "timeline-network",
         ],
         "fields": Array [],
         "name": "Network",
@@ -10563,7 +10566,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 68,
+    "preprocessedProfileVersion": 69,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

@@ -3297,6 +3297,19 @@ const _upgraders: {
     // are still accepted. All valid v67 profiles are valid v68 profiles, so
     // no upgrader is needed.
   },
+  [69]: (profile: any) => {
+    // A new marker schema display location, "timeline-network", was added.
+    // Add it to any "Network" marker schema already present in the profile.
+    for (const schema of profile.meta.markerSchema ?? []) {
+      if (
+        schema.name === 'Network' &&
+        schema.display &&
+        !schema.display.includes('timeline-network')
+      ) {
+        schema.display.push('timeline-network');
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
