@@ -77,6 +77,7 @@ import {
   hasUsefulSamples,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { doSourceMapSymbolication } from './source-map-symbolication';
+import type { SourceMapSymbolicationResult } from './source-map-symbolication';
 
 import type { RawSourceMap } from 'source-map';
 import type {
@@ -254,7 +255,8 @@ export function finalizeProfileView(
     // funcs aren't in those sets), and the JS apply step reads current
     // shared state at dispatch time so it composes with whatever native
     // has committed by then. Requires WebChannel version 7+.
-    let sourceMapSymbolicationPromise: Promise<void> | null = null;
+    let sourceMapSymbolicationPromise: Promise<SourceMapSymbolicationResult> | null =
+      null;
     if (browserConnection !== null && browserConnection.supportsGetSourceMap) {
       sourceMapSymbolicationPromise = doResolveSourceMaps(
         profile,
@@ -1156,7 +1158,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-function _fileReader(input: File) {
+export function _fileReader(input: File) {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of
