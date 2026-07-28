@@ -126,7 +126,7 @@
     "@babel/preset-typescript": "^7.29.7",
     "@eslint/js": "^9.39.5",
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@types/clamp": "^1.0.3",
     "@types/common-tags": "^1.8.4",
