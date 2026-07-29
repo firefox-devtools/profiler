@@ -564,6 +564,8 @@ MenuButtons--metaInfo--source-map-success = Ursprungliga källor lösta för { $
 #   $filename (String) - The bundle source the source map was applied to.
 MenuButtons--metaInfo--source-map-no-match = Inga stackpositioner i { $filename } matchade denna källkarta.
 MenuButtons--metaInfo--source-map-error-invalid = Den valda filen är inte en giltig källkarta.
+MenuButtons--metaInfo--source-map-error-no-eligible = Den här profilen har inga JS-paket med källmappnings-URL:er.
+MenuButtons--metaInfo--source-map-error-failed = Det gick inte att tillämpa denna källkarta på profilen.
 MenuButtons--metaInfo--cpu-model = CPU-modell:
 MenuButtons--metaInfo--cpu-cores = CPU-kärnor:
 MenuButtons--metaInfo--main-memory = Huvudminne:
