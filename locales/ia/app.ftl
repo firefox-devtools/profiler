@@ -535,6 +535,10 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolisar le profilo
 MenuButtons--metaInfo--symbolicate-profile = { $logicalCPUs } nucleo logic
 MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
 MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Applicar
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Cancellar
 MenuButtons--metaInfo--cpu-model = Modello de CPU:
 MenuButtons--metaInfo--cpu-cores = Cordes del CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
