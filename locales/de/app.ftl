@@ -525,6 +525,10 @@ MenuButtons--metaInfo--resymbolicate-profile = Profil erneut symbolisieren
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolisieren
 MenuButtons--metaInfo--attempting-resymbolicate = Versuch, das Profil erneut zu symbolisieren
 MenuButtons--metaInfo--currently-symbolicating = Profil wird aktuell symbolisiert
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Anwenden
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Abbrechen
 MenuButtons--metaInfo--cpu-model = Prozessormodell
 MenuButtons--metaInfo--cpu-cores = Prozessorkerne:
 MenuButtons--metaInfo--main-memory = Hauptspeicher:
