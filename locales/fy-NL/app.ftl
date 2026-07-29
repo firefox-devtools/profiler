@@ -549,6 +549,7 @@ MenuButtons--metaInfo--resymbolicate-profile = Profyl opnij symbolisearje
 MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
 MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
 MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
+MenuButtons--metaInfo--source-maps = Boarnekaarten:
 MenuButtons--metaInfo--cpu-model = CPU-model:
 MenuButtons--metaInfo--cpu-cores = CPU-kearnen:
 MenuButtons--metaInfo--main-memory = Haadûnthâld:
