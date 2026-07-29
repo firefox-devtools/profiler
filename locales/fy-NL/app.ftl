@@ -564,6 +564,13 @@ MenuButtons--metaInfo--source-map-cancel = Annulearje
 # Variable:
 #   $filename (String) - The bundle source the source map was applied to.
 MenuButtons--metaInfo--source-map-success = Oarspronklike boarnen foar { $filename } oplost.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Gjin inkelde stapelposysje yn { $filename } komt oerien mei dizze boarnekaart.
+MenuButtons--metaInfo--source-map-error-invalid = It selektearre bestân is gjin jildige boarnekaart.
+MenuButtons--metaInfo--source-map-error-no-eligible = Dit profyl hat gjin JS-bondels mei boarnekaart-URL’s.
+MenuButtons--metaInfo--source-map-error-failed = Kin dizze boarnekaart net tapasse op it profyl.
 MenuButtons--metaInfo--cpu-model = CPU-model:
 MenuButtons--metaInfo--cpu-cores = CPU-kearnen:
 MenuButtons--metaInfo--main-memory = Haadûnthâld:
