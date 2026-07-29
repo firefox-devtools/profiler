@@ -459,6 +459,27 @@ MenuButtons--metaInfo--resymbolicate-profile = Risimbolizza il profilo
 MenuButtons--metaInfo--symbolicate-profile = Simbolizza il profilo
 MenuButtons--metaInfo--attempting-resymbolicate = Tentativo di risimbolizzare il profilo
 MenuButtons--metaInfo--currently-symbolicating = Profilo attualmente in fase di simbolizzazione
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Applica mappa delle origini…
+    .title = Carica un file .map dal disco per associare un bundle JavaScript minimizzato al codice sorgente originale, recuperando i nomi delle funzioni e le posizioni nel sorgente.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Scegli il bundle a cui applicare questa mappa delle origini:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Applica
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Annulla
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Sorgenti originali risolti per { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Nessuna posizione dello stack in { $filename } corrisponde a questa mappa delle origini.
+MenuButtons--metaInfo--source-map-error-invalid = Il file selezionato non è una mappa delle origini valida.
+MenuButtons--metaInfo--source-map-error-no-eligible = Questo profilo non ha bundle JS con URL per la mappa delle origini.
+MenuButtons--metaInfo--source-map-error-failed = Impossibile applicare questa mappa delle origini al profilo.
 MenuButtons--metaInfo--cpu-model = Modello CPU:
 MenuButtons--metaInfo--cpu-cores = Core della CPU:
 MenuButtons--metaInfo--main-memory = Memoria principale:
