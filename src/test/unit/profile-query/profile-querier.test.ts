@@ -694,4 +694,63 @@ describe('ProfileQuerier', function () {
       expect(zoomed.networkActivity!.inFlightMs).toBeLessThan(fullInFlight);
     });
   });
+
+  describe('threadMarkers', function () {
+    function querierWithMarkers() {
+      const profile = getProfileWithMarkers([
+        ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+        ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+        ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+        ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { querier: new ProfileQuerier(store, rootRange), rootRange };
+    }
+
+    it('restricts the default marker list to the committed (zoom) range', async function () {
+      const { querier, rootRange } = querierWithMarkers();
+
+      const full = await querier.threadMarkers('t-0');
+      expect(full.totalMarkerCount).toBe(4);
+      expect(full.filteredMarkerCount).toBe(4);
+      // Not zoomed: no full-range baseline is reported.
+      expect(full.fullRangeMarkerCount).toBeUndefined();
+
+      // Zoom to a window that only contains the marker at 20ms.
+      const startName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 2
+      );
+      const endName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 18
+      );
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const zoomed = await querier.threadMarkers('t-0');
+      expect(zoomed.totalMarkerCount).toBe(1);
+      expect(zoomed.filteredMarkerCount).toBe(1);
+      // Zoomed: the whole-profile baseline is surfaced alongside the in-view count.
+      expect(zoomed.fullRangeMarkerCount).toBe(4);
+      const zoomedNames = zoomed.byType.map((t) => t.markerName);
+      expect(zoomedNames).toContain('Beta');
+      expect(zoomedNames).not.toContain('Alpha');
+      expect(zoomedNames).not.toContain('Delta');
+    });
+
+    it('restricts the --list output to the committed (zoom) range', async function () {
+      const { querier, rootRange } = querierWithMarkers();
+
+      const startName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 2
+      );
+      const endName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 18
+      );
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const zoomed = await querier.threadMarkers('t-0', { list: true });
+      const listedNames = zoomed.flatMarkers!.map((m) => m.name);
+      expect(listedNames).toEqual(['Beta']);
+    });
+  });
 });

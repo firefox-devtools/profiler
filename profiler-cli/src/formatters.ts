@@ -1124,8 +1124,14 @@ export function formatThreadMarkersResult(
       ? ` (filtered from ${result.totalMarkerCount})`
       : '';
 
+  // When zoomed, show the in-view count against this thread's full-range total.
+  const zoomSuffix =
+    result.fullRangeMarkerCount !== undefined
+      ? ` in view (of ${result.fullRangeMarkerCount} in the full range)`
+      : '';
+
   lines.push(
-    `Markers in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredMarkerCount} markers${filterSuffix}`
+    `Markers in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredMarkerCount} markers${filterSuffix}${zoomSuffix}`
   );
   lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
 
