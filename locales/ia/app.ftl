@@ -535,10 +535,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolisar le profilo
 MenuButtons--metaInfo--symbolicate-profile = { $logicalCPUs } nucleo logic
 MenuButtons--metaInfo--attempting-resymbolicate = { $logicalCPUs } nucleos logic
 MenuButtons--metaInfo--currently-symbolicating = Actualmente symbolisante le profilo
+MenuButtons--metaInfo--source-maps = Mappas del codification fonte:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Applicar mappa del codification fonte…
+    .title = Carga de disco un file .map pro symbolisar un pacco JavaScript minimisate, pro recuperar nomines de function e positiones de codification fonte original.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Elige a que pacco iste mappa del codification fonte se applica:
 # Button to confirm the chosen source and apply the source map to it.
 MenuButtons--metaInfo--source-map-apply = Applicar
 # Button to dismiss the source chooser without symbolicating.
 MenuButtons--metaInfo--source-map-cancel = Cancellar
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Codificationes fonte original resolvite pro { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Necun position de pila in { $filename } concordava iste mappa del codification fonte.
+MenuButtons--metaInfo--source-map-error-invalid = Le file eligite non es un mappa del codification fonte valide.
+MenuButtons--metaInfo--source-map-error-no-eligible = Impossibile applicar iste mappa del codification fonte al profilo.
+MenuButtons--metaInfo--source-map-error-failed = Impossibile applicar iste mappa del codification fonte al profilo.
 MenuButtons--metaInfo--cpu-model = Modello de CPU:
 MenuButtons--metaInfo--cpu-cores = Cordes del CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
