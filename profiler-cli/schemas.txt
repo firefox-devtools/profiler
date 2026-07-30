@@ -244,3 +244,13 @@ profiler-cli sourcemap sources --json
   }
 
   SourceMapLocation = { kind: "url", url } | { kind: "inline", mediaType, byteLength }
+
+profiler-cli sourcemap apply <path> --json
+  {
+    type: "sourcemap-applied" | "sourcemap-unchanged" | "sourcemap-ambiguous" | "sourcemap-error",
+    sourceHandle?,
+    filename?,
+    candidates?: [{ sourceHandle, sourceIndex, filename, sourceMap: SourceMapLocation }],
+    error?: "invalid-source-map" | "no-eligible-sources" | "symbolication-failed",
+    context: SessionContext
+  }

@@ -11,7 +11,8 @@
     "pq": "dist/profiler-cli.js"
   },
   "files": [
-    "dist/profiler-cli.js"
+    "dist/profiler-cli.js",
+    "dist/mappings.wasm"
   ],
   "engines": {
     "node": ">= 24"

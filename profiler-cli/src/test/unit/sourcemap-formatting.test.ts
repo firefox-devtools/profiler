@@ -2,11 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { formatSourceMapSourcesResult } from '../../formatters';
+import {
+  formatSourceMapSourcesResult,
+  formatApplySourceMapResult,
+} from '../../formatters';
 import type {
   SessionContext,
   SourceEntry,
   SourceMapSourcesResult,
+  ApplySourceMapResult,
   WithContext,
 } from 'firefox-profiler/profile-query/types';
 
@@ -83,5 +87,70 @@ describe('formatSourceMapSourcesResult', () => {
     expect(Math.max(...text.split('\n').map((l) => l.length))).toBeLessThan(
       120
     );
+  });
+});
+
+describe('formatApplySourceMapResult', () => {
+  function withContext(
+    result: ApplySourceMapResult
+  ): WithContext<ApplySourceMapResult> {
+    return { ...result, context: createContext() };
+  }
+
+  it('formats applied', () => {
+    expect(
+      formatApplySourceMapResult(
+        withContext({
+          type: 'sourcemap-applied',
+          sourceHandle: 'src-0',
+          filename: 'bundle.js',
+        })
+      )
+    ).toContain('Applied source map to bundle.js (src-0)');
+  });
+
+  it('formats unchanged', () => {
+    expect(
+      formatApplySourceMapResult(
+        withContext({
+          type: 'sourcemap-unchanged',
+          sourceHandle: 'src-0',
+          filename: 'bundle.js',
+        })
+      )
+    ).toContain('nothing changed');
+  });
+
+  it('formats ambiguous with candidate handles', () => {
+    const text = formatApplySourceMapResult(
+      withContext({
+        type: 'sourcemap-ambiguous',
+        candidates: [
+          makeEntry({ sourceHandle: 'src-0', filename: 'a.js' }),
+          makeEntry({ sourceHandle: 'src-1', filename: 'b.js' }),
+        ],
+      })
+    );
+    expect(text).toContain('--to <src-N>');
+    expect(text).toContain('src-0  a.js');
+    expect(text).toContain('src-1  b.js');
+  });
+
+  it('formats each error variant', () => {
+    expect(
+      formatApplySourceMapResult(
+        withContext({ type: 'sourcemap-error', error: 'invalid-source-map' })
+      )
+    ).toContain('not a valid source map');
+    expect(
+      formatApplySourceMapResult(
+        withContext({ type: 'sourcemap-error', error: 'no-eligible-sources' })
+      )
+    ).toContain('No sources in this profile');
+    expect(
+      formatApplySourceMapResult(
+        withContext({ type: 'sourcemap-error', error: 'symbolication-failed' })
+      )
+    ).toContain('symbolication failed');
   });
 });

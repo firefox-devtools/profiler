@@ -22,6 +22,7 @@ import {
   getProfile,
   getProfileRootRange,
   getSourcesWithSourceMaps,
+  getSourceTable,
 } from 'firefox-profiler/selectors/profile';
 import {
   getAllCommittedRanges,
@@ -44,9 +45,20 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
 import { ThreadMap } from './thread-map';
 import { parseFunctionHandle } from './function-map';
-import { getSourceHandle } from './source-handle';
-import { toSourceMapLocation } from './source-map';
-import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
+import { getSourceHandle, parseSourceHandle } from './source-handle';
+import {
+  runSourceMapSymbolicationNode,
+  toSourceMapLocation,
+} from './source-map';
+import {
+  applySourceMapFile,
+  type ApplySourceMapFileResult,
+} from 'firefox-profiler/actions/source-map-symbolication';
+import {
+  basename,
+  type EligibleSource,
+} from 'firefox-profiler/profile-logic/source-map-matching';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { getLibForFunc } from './function-list';
 import { MarkerMap } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
@@ -75,6 +87,7 @@ import { parseTimeValue } from './time-range-parser';
 import { describeTransformGroup, pushSpecTransforms } from './filter-stack';
 import { functionAnnotate as computeFunctionAnnotate } from './function-annotate';
 import type {
+  IndexIntoSourceTable,
   StartEndRange,
   ThreadIndex,
   ThreadsKey,
@@ -107,6 +120,7 @@ import type {
   CounterInfoResult,
   SourceMapSourcesResult,
   SourceEntry,
+  ApplySourceMapResult,
   MarkerFilterOptions,
   FunctionFilterOptions,
   SampleFilterSpec,
@@ -117,6 +131,7 @@ import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
 import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
 import type { Store } from '../types/store';
+import * as fs from 'fs';
 
 function toSourceEntry(source: EligibleSource): SourceEntry {
   return {
@@ -597,6 +612,118 @@ export class ProfileQuerier {
       sources,
       context: this._getContext(),
     };
+  }
+
+  /**
+   * Apply a `.map` file (read from `absPath`) to the profile. Mirrors the web
+   * app's "Apply source map…" flow via the shared `applySourceMapFile` thunk,
+   * injecting the Node runner since the daemon has no Web Worker. When
+   * `sourceHandle` is set the auto-match step is skipped and the map is applied
+   * to that source directly.
+   */
+  async applySourceMap(
+    absPath: string,
+    sourceHandle?: string
+  ): Promise<WithContext<ApplySourceMapResult>> {
+    // Resolved before reading the file so a bad `--to` fails without touching
+    // the filesystem.
+    const sourceIndex =
+      sourceHandle !== undefined
+        ? this._resolveTargetSource(sourceHandle)
+        : undefined;
+
+    let contents: string;
+    try {
+      contents = fs.readFileSync(absPath, 'utf8');
+    } catch (e) {
+      throw new Error(
+        `Could not read source map file ${absPath}: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
+    }
+
+    const result = await this._store.dispatch(
+      applySourceMapFile(
+        basename(absPath),
+        contents,
+        sourceIndex,
+        runSourceMapSymbolicationNode
+      )
+    );
+
+    return {
+      ...this._mapApplyResult(result),
+      context: this._getContext(),
+    };
+  }
+
+  /**
+   * Resolve a `--to src-N` handle to the source it targets, rejecting sources
+   * that carry no `sourceMapURL`. That is the same set the web app's picker
+   * offers, and it matters because applying a map to any other source skips the
+   * auto-match step's `no-eligible-sources` guard and then de-minifies nothing,
+   * which reads as a successful apply.
+   */
+  private _resolveTargetSource(sourceHandle: string): IndexIntoSourceTable {
+    const state = this._store.getState();
+    const sourceIndex = parseSourceHandle(
+      sourceHandle,
+      getSourceTable(state).length
+    );
+
+    const eligible = getSourcesWithSourceMaps(state);
+    if (eligible.some((source) => source.sourceIndex === sourceIndex)) {
+      return sourceIndex;
+    }
+
+    if (eligible.length === 0) {
+      throw new Error(
+        `Source ${sourceHandle} has no source map URL, and neither does any other source in this profile.`
+      );
+    }
+
+    const handles = eligible
+      .map(
+        (source) =>
+          `${getSourceHandle(source.sourceIndex)} (${source.filename})`
+      )
+      .join(', ');
+    throw new Error(
+      `Source ${sourceHandle} has no source map URL. Sources you can apply a map to: ${handles}.`
+    );
+  }
+
+  /**
+   * Translate the shared thunk's `ApplySourceMapFileResult` into the CLI's
+   * `ApplySourceMapResult`, converting source indexes into `src-N` handles.
+   */
+  private _mapApplyResult(
+    result: ApplySourceMapFileResult
+  ): ApplySourceMapResult {
+    switch (result.type) {
+      case 'applied':
+        return {
+          type: 'sourcemap-applied',
+          sourceHandle: getSourceHandle(result.sourceIndex),
+          filename: result.filename,
+        };
+      case 'no-match':
+        return {
+          type: 'sourcemap-unchanged',
+          sourceHandle: getSourceHandle(result.sourceIndex),
+          filename: result.filename,
+        };
+      case 'ambiguous':
+        return {
+          type: 'sourcemap-ambiguous',
+          candidates: result.candidates.map(toSourceEntry),
+        };
+      case 'error':
+        return { type: 'sourcemap-error', error: result.error };
+      default:
+        throw assertExhaustiveCheck(result);
+    }
   }
 
   /**

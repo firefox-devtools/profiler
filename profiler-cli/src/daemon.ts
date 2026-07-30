@@ -468,6 +468,11 @@ export class Daemon {
         switch (command.subcommand) {
           case 'sources':
             return this.querier.listSourceMapSources();
+          case 'apply':
+            if (!command.path) {
+              throw new Error('path is required for sourcemap apply');
+            }
+            return this.querier.applySourceMap(command.path, command.to);
           default:
             throw assertExhaustiveCheck(command);
         }
