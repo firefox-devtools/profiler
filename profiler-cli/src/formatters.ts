@@ -45,6 +45,7 @@ import type {
   SourceEntry,
   SourceMapLocation,
   SourceMapSourcesResult,
+  ApplySourceMapResult,
 } from './protocol';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
@@ -2110,7 +2111,7 @@ function describeSourceMapLocation(sourceMap: SourceMapLocation): string {
   }
 }
 
-/** One `src-N  filename  (sourceMapURL: ...)` line. */
+/** One `src-N  filename  (sourceMapURL: ...)` line, shared by sources and ambiguous. */
 function formatSourceEntry(entry: SourceEntry): string {
   return `  ${entry.sourceHandle}  ${entry.filename}  (sourceMapURL: ${describeSourceMapLocation(entry.sourceMap)})`;
 }
@@ -2124,4 +2125,46 @@ export function formatSourceMapSourcesResult(
   }
   const lines = result.sources.map(formatSourceEntry);
   return `${contextHeader}\n\nSources with source maps (${result.sources.length}):\n${lines.join('\n')}`;
+}
+
+const APPLY_SOURCE_MAP_AMBIGUOUS_HEADERS: Record<
+  Extract<ApplySourceMapResult, { type: 'sourcemap-ambiguous' }>['reason'],
+  string
+> = {
+  'multiple-matches':
+    'The source map matches more than one source. Re-run with --to <src-N> to pick one:',
+  'no-matches':
+    'The source map does not match any source in this profile. Re-run with --to <src-N> to apply it to one of these anyway:',
+};
+
+const APPLY_SOURCE_MAP_ERROR_MESSAGES: Record<
+  Extract<ApplySourceMapResult, { type: 'sourcemap-error' }>['error'],
+  string
+> = {
+  'invalid-source-map':
+    'The file is not a valid source map (invalid JSON, or not a source map).',
+  'no-eligible-sources':
+    'No sources in this profile carry a source map URL, so nothing to apply to.',
+  'symbolication-failed': 'Source map symbolication failed.',
+};
+
+export function formatApplySourceMapResult(
+  result: WithContext<ApplySourceMapResult>
+): string {
+  switch (result.type) {
+    case 'sourcemap-applied':
+      return `Applied source map to ${result.filename} (${result.sourceHandle}). Re-run thread commands to see de-minified names.`;
+    case 'sourcemap-unchanged':
+      return `Source map applied to ${result.filename} (${result.sourceHandle}) but nothing changed (no stack positions mapped).`;
+    case 'sourcemap-ambiguous': {
+      const lines = result.candidates.map(formatSourceEntry);
+      return [APPLY_SOURCE_MAP_AMBIGUOUS_HEADERS[result.reason], ...lines].join(
+        '\n'
+      );
+    }
+    case 'sourcemap-error':
+      return `Error: ${APPLY_SOURCE_MAP_ERROR_MESSAGES[result.error]}`;
+    default:
+      throw assertExhaustiveCheck(result);
+  }
 }

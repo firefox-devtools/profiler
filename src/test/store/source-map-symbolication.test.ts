@@ -546,6 +546,7 @@ describe('receive-profile -> JS source map symbolication', function () {
       if (result.type !== 'ambiguous') {
         throw new Error('expected ambiguous');
       }
+      expect(result.reason).toBe('no-matches');
       const candidateForA = result.candidates.find(
         (c) => c.filename === 'a.js'
       );

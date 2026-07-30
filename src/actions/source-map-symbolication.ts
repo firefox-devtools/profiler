@@ -15,7 +15,10 @@ import type {
   WorkerOutput,
 } from 'firefox-profiler/profile-logic/source-map-worker-types';
 import type { IndexIntoSourceTable, ThunkAction } from 'firefox-profiler/types';
-import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
+import type {
+  EligibleSource,
+  SourceMapAmbiguityReason,
+} from 'firefox-profiler/profile-logic/source-map-matching';
 import type { RawSourceMap } from 'source-map';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -122,7 +125,14 @@ export type ApplySourceMapFileResult =
   // index to report its `src-N` handle.
   | { type: 'applied'; sourceIndex: IndexIntoSourceTable; filename: string }
   | { type: 'no-match'; sourceIndex: IndexIntoSourceTable; filename: string }
-  | { type: 'ambiguous'; candidates: EligibleSource[] }
+  // Auto-matching couldn't pick a source, so the caller has to let the user
+  // choose among `candidates`. `reason` says whether that's because several
+  // sources matched or because none did.
+  | {
+      type: 'ambiguous';
+      reason: SourceMapAmbiguityReason;
+      candidates: EligibleSource[];
+    }
   | { type: 'error'; error: ApplySourceMapError };
 
 /**
@@ -161,7 +171,11 @@ export function applySourceMapFile(
         case 'no-eligible-sources':
           return { type: 'error', error: 'no-eligible-sources' };
         case 'ambiguous':
-          return { type: 'ambiguous', candidates: result.candidates };
+          return {
+            type: 'ambiguous',
+            reason: result.reason,
+            candidates: result.candidates,
+          };
         case 'match':
           targetSourceIndex = result.sourceIndex;
           break;

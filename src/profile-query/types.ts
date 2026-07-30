@@ -1006,3 +1006,29 @@ export type SourceMapSourcesResult = {
   type: 'sourcemap-sources';
   sources: SourceEntry[];
 };
+
+/**
+ * Outcome of `sourcemap apply`, mirroring `ApplySourceMapFileResult` from the
+ * web thunk. `unchanged` means the map was matched to a source but symbolication
+ * changed nothing. `ambiguous` and `error` map to a non-zero CLI exit.
+ *
+ * `ambiguous` covers both "the map matched several sources" and "the map
+ * matched none of them", which `reason` tells apart. `candidates` is what to
+ * pass to `--to` in either case: the sources that matched, or every eligible
+ * source when nothing matched.
+ */
+export type ApplySourceMapResult =
+  | { type: 'sourcemap-applied'; sourceHandle: string; filename: string }
+  | { type: 'sourcemap-unchanged'; sourceHandle: string; filename: string }
+  | {
+      type: 'sourcemap-ambiguous';
+      reason: 'multiple-matches' | 'no-matches';
+      candidates: SourceEntry[];
+    }
+  | {
+      type: 'sourcemap-error';
+      error:
+        | 'invalid-source-map'
+        | 'no-eligible-sources'
+        | 'symbolication-failed';
+    };

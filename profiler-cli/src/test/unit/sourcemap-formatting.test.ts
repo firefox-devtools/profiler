@@ -2,11 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { formatSourceMapSourcesResult } from '../../formatters';
+import {
+  formatSourceMapSourcesResult,
+  formatApplySourceMapResult,
+} from '../../formatters';
 import type {
   SessionContext,
   SourceEntry,
   SourceMapSourcesResult,
+  ApplySourceMapResult,
   WithContext,
 } from 'firefox-profiler/profile-query/types';
 
@@ -98,5 +102,88 @@ describe('formatSourceMapSourcesResult', () => {
     expect(formatSourceMapSourcesResult(result)).toContain(
       'inline data: URL, unknown media type, 535KB'
     );
+  });
+});
+
+describe('formatApplySourceMapResult', () => {
+  function withContext(
+    result: ApplySourceMapResult
+  ): WithContext<ApplySourceMapResult> {
+    return { ...result, context: createContext() };
+  }
+
+  it('formats applied', () => {
+    expect(
+      formatApplySourceMapResult(
+        withContext({
+          type: 'sourcemap-applied',
+          sourceHandle: 'src-0',
+          filename: 'bundle.js',
+        })
+      )
+    ).toContain('Applied source map to bundle.js (src-0)');
+  });
+
+  it('formats unchanged', () => {
+    expect(
+      formatApplySourceMapResult(
+        withContext({
+          type: 'sourcemap-unchanged',
+          sourceHandle: 'src-0',
+          filename: 'bundle.js',
+        })
+      )
+    ).toContain('nothing changed');
+  });
+
+  it('formats ambiguous with candidate handles', () => {
+    const text = formatApplySourceMapResult(
+      withContext({
+        type: 'sourcemap-ambiguous',
+        reason: 'multiple-matches',
+        candidates: [
+          makeEntry({ sourceHandle: 'src-0', filename: 'a.js' }),
+          makeEntry({ sourceHandle: 'src-1', filename: 'b.js' }),
+        ],
+      })
+    );
+    expect(text).toContain('matches more than one source');
+    expect(text).toContain('--to <src-N>');
+    expect(text).toContain('src-0  a.js');
+    expect(text).toContain('src-1  b.js');
+  });
+
+  it('says nothing matched when the map matched no source', () => {
+    const text = formatApplySourceMapResult(
+      withContext({
+        type: 'sourcemap-ambiguous',
+        reason: 'no-matches',
+        candidates: [
+          makeEntry({ sourceHandle: 'src-0', filename: 'a.js' }),
+          makeEntry({ sourceHandle: 'src-1', filename: 'b.js' }),
+        ],
+      })
+    );
+    expect(text).toContain('does not match any source');
+    expect(text).not.toContain('matches more than one source');
+    expect(text).toContain('src-0  a.js');
+  });
+
+  it('formats each error variant', () => {
+    expect(
+      formatApplySourceMapResult(
+        withContext({ type: 'sourcemap-error', error: 'invalid-source-map' })
+      )
+    ).toContain('not a valid source map');
+    expect(
+      formatApplySourceMapResult(
+        withContext({ type: 'sourcemap-error', error: 'no-eligible-sources' })
+      )
+    ).toContain('No sources in this profile');
+    expect(
+      formatApplySourceMapResult(
+        withContext({ type: 'sourcemap-error', error: 'symbolication-failed' })
+      )
+    ).toContain('symbolication failed');
   });
 });

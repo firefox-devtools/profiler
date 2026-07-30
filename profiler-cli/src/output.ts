@@ -32,6 +32,7 @@ import {
   formatCounterListResult,
   formatCounterInfoResult,
   formatSourceMapSourcesResult,
+  formatApplySourceMapResult,
 } from './formatters';
 
 /**
@@ -100,6 +101,11 @@ export function formatOutput(
       return formatCounterInfoResult(result);
     case 'sourcemap-sources':
       return formatSourceMapSourcesResult(result);
+    case 'sourcemap-applied':
+    case 'sourcemap-unchanged':
+    case 'sourcemap-ambiguous':
+    case 'sourcemap-error':
+      return formatApplySourceMapResult(result);
     default:
       throw assertExhaustiveCheck(result);
   }

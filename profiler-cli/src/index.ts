@@ -92,6 +92,7 @@ Examples:
   profiler-cli zoom push 2.7,3.1
   profiler-cli filter push --excludes-function f-184
   profiler-cli sourcemap sources
+  profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
   profiler-cli stop --all`
     );
