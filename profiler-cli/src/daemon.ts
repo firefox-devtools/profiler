@@ -464,6 +464,13 @@ export class Daemon {
           default:
             throw assertExhaustiveCheck(command);
         }
+      case 'sourcemap':
+        switch (command.subcommand) {
+          case 'sources':
+            return this.querier.listSourceMapSources();
+          default:
+            throw assertExhaustiveCheck(command);
+        }
       case 'status':
         return this.querier.getStatus();
       default:

@@ -235,3 +235,12 @@ profiler-cli status --json
     rootRange: { start, end },
     filterStacks: [{ threadHandle, filters: FilterEntry[] }]
   }
+
+profiler-cli sourcemap sources --json
+  {
+    type: "sourcemap-sources",
+    sources: [{ sourceHandle, sourceIndex, filename, sourceMap: SourceMapLocation }],
+    context: SessionContext
+  }
+
+  SourceMapLocation = { kind: "url", url } | { kind: "inline", mediaType, byteLength }
