@@ -31,6 +31,7 @@ import {
   formatThreadSelectResult,
   formatCounterListResult,
   formatCounterInfoResult,
+  formatSourceMapSourcesResult,
 } from './formatters';
 
 /**
@@ -97,6 +98,8 @@ export function formatOutput(
       return formatCounterListResult(result);
     case 'counter-info':
       return formatCounterInfoResult(result);
+    case 'sourcemap-sources':
+      return formatSourceMapSourcesResult(result);
     default:
       throw assertExhaustiveCheck(result);
   }

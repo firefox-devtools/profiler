@@ -42,7 +42,11 @@ import type {
   CounterSummary,
   CounterListResult,
   CounterInfoResult,
+  SourceEntry,
+  SourceMapLocation,
+  SourceMapSourcesResult,
 } from './protocol';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
 import {
@@ -2091,4 +2095,33 @@ export function formatThreadSelectResult(
     return `Selected thread: ${result.threadHandle} (${names})`;
   }
   return `Selected ${count} threads: ${result.threadHandle} (${names})`;
+}
+
+function describeSourceMapLocation(sourceMap: SourceMapLocation): string {
+  switch (sourceMap.kind) {
+    case 'url':
+      return sourceMap.url;
+    case 'inline': {
+      const mediaType = sourceMap.mediaType ?? 'unknown media type';
+      return `inline data: URL, ${mediaType}, ${formatBytes(sourceMap.byteLength)}`;
+    }
+    default:
+      throw assertExhaustiveCheck(sourceMap);
+  }
+}
+
+/** One `src-N  filename  (sourceMapURL: ...)` line. */
+function formatSourceEntry(entry: SourceEntry): string {
+  return `  ${entry.sourceHandle}  ${entry.filename}  (sourceMapURL: ${describeSourceMapLocation(entry.sourceMap)})`;
+}
+
+export function formatSourceMapSourcesResult(
+  result: WithContext<SourceMapSourcesResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  if (result.sources.length === 0) {
+    return `${contextHeader}\n\nNo sources with a source map URL in this profile.`;
+  }
+  const lines = result.sources.map(formatSourceEntry);
+  return `${contextHeader}\n\nSources with source maps (${result.sources.length}):\n${lines.join('\n')}`;
 }

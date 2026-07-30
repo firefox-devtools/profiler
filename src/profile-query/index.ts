@@ -21,6 +21,7 @@
 import {
   getProfile,
   getProfileRootRange,
+  getSourcesWithSourceMaps,
 } from 'firefox-profiler/selectors/profile';
 import {
   getAllCommittedRanges,
@@ -43,6 +44,9 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
 import { ThreadMap } from './thread-map';
 import { parseFunctionHandle } from './function-map';
+import { getSourceHandle } from './source-handle';
+import { toSourceMapLocation } from './source-map';
+import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
 import { getLibForFunc } from './function-list';
 import { MarkerMap } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
@@ -101,6 +105,8 @@ import type {
   ProfileLogsResult,
   CounterListResult,
   CounterInfoResult,
+  SourceMapSourcesResult,
+  SourceEntry,
   MarkerFilterOptions,
   FunctionFilterOptions,
   SampleFilterSpec,
@@ -111,6 +117,15 @@ import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
 import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
 import type { Store } from '../types/store';
+
+function toSourceEntry(source: EligibleSource): SourceEntry {
+  return {
+    sourceHandle: getSourceHandle(source.sourceIndex),
+    sourceIndex: source.sourceIndex,
+    filename: source.filename,
+    sourceMap: toSourceMapLocation(source.sourceMapURL),
+  };
+}
 
 export class ProfileQuerier {
   _store: Store;
@@ -566,6 +581,20 @@ export class ProfileQuerier {
       type: 'thread-select',
       threadHandle,
       threadNames,
+      context: this._getContext(),
+    };
+  }
+
+  /**
+   * List every bundle source that carries a `sourceMapURL` and is therefore
+   * eligible for `sourcemap apply`. Read-only.
+   */
+  listSourceMapSources(): WithContext<SourceMapSourcesResult> {
+    const eligible = getSourcesWithSourceMaps(this._store.getState());
+    const sources: SourceEntry[] = eligible.map(toSourceEntry);
+    return {
+      type: 'sourcemap-sources',
+      sources,
       context: this._getContext(),
     };
   }

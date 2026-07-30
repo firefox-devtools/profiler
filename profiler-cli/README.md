@@ -54,6 +54,7 @@ profiler-cli filter push <filter-flag>     # Push a sticky sample filter (see fi
 profiler-cli filter pop [N]                # Pop the last N filters (default: 1)
 profiler-cli filter list                   # List active filters for current thread
 profiler-cli filter clear                  # Remove all filters for current thread
+profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
