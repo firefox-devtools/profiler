@@ -116,10 +116,12 @@ export type ApplySourceMapError =
  * The outcome of applying a user-supplied `.map` file to the profile.
  */
 export type ApplySourceMapFileResult =
-  // `filename` is the resolved bundle source the map was applied to, so the UI
-  // can show which source was matched (auto-matched or user-picked).
-  | { type: 'applied'; filename: string }
-  | { type: 'no-match'; filename: string }
+  // `sourceIndex` / `filename` identify the resolved bundle source the map was
+  // applied to, so callers can show which source was matched (auto-matched or
+  // user-picked). The web UI shows the filename; profiler-cli also needs the
+  // index to report its `src-N` handle.
+  | { type: 'applied'; sourceIndex: IndexIntoSourceTable; filename: string }
+  | { type: 'no-match'; sourceIndex: IndexIntoSourceTable; filename: string }
   | { type: 'ambiguous'; candidates: EligibleSource[] }
   | { type: 'error'; error: ApplySourceMapError };
 
@@ -188,9 +190,9 @@ export function applySourceMapFile(
     );
     switch (outcome) {
       case 'applied':
-        return { type: 'applied', filename };
+        return { type: 'applied', sourceIndex: targetSourceIndex, filename };
       case 'no-match':
-        return { type: 'no-match', filename };
+        return { type: 'no-match', sourceIndex: targetSourceIndex, filename };
       case 'error':
         return { type: 'error', error: 'symbolication-failed' };
       default:
