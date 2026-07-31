@@ -379,6 +379,7 @@ function _shouldAllowSymbolServerUrl(symbolServerUrl: string) {
       'symbols.mozilla.org',
       'symbolication.services.mozilla.com',
       'stage.reliost.nonprod.webservices.mozgcp.net',
+      'mozilla.symbols.samplyprofiler.com',
     ];
     if (!otherAllowedHostnames.includes(url.hostname)) {
       console.error(
