@@ -36,6 +36,7 @@ import {
 } from '../../selectors/url-state';
 import {
   getHasPreferenceMarkers,
+  getHasJSTracingArgumentValues,
   getGlobalTracks,
 } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
@@ -220,6 +221,59 @@ describe('getRemoveProfileInformation', function () {
     expect(
       ensureExists(getRemoveProfileInformation(getState())).shouldRemoveThreads
     ).toEqual(new Set([2, 3]));
+  });
+
+  describe('traced argument values', function () {
+    function getStoreWithArgumentValues() {
+      const { profile } = getProfileFromTextSamples('A  B');
+      const [thread] = profile.threads;
+      thread.samples.argumentValues = [null, 6];
+      // A real values buffer recorded by the JS execution tracer.
+      thread.tracedValuesBuffer = 'AgAAABIAAQAAAAwHAAAAAAYAAAABAAcAAQAAABE=';
+      thread.tracedObjectShapes = [['MouseEvent']];
+      return storeWithProfile(profile);
+    }
+
+    it('should bail out early when the profile has no traced argument values', function () {
+      const { getState, dispatch } = storeWithProfile();
+      expect(getHasJSTracingArgumentValues(getState())).toEqual(false);
+
+      // The checkbox is hidden for these profiles, so leaving it unchecked must
+      // not drag the profile into the sanitization path.
+      dispatch(updateSharingOption('includeArgumentValues', false));
+      expect(getRemoveProfileInformation(getState())).toEqual(null);
+    });
+
+    it('should ignore an argumentValues column with no values buffer', function () {
+      // Gecko emits the column even when the JS execution tracer wasn't
+      // running, so the column alone must not count as having any data.
+      const { profile } = getProfileFromTextSamples('A  B');
+      profile.threads[0].samples.argumentValues = [null, null];
+      const { getState } = storeWithProfile(profile);
+
+      expect(getHasJSTracingArgumentValues(getState())).toEqual(false);
+      expect(getRemoveProfileInformation(getState())).toEqual(null);
+    });
+
+    it('should remove the traced argument values by default', function () {
+      const { getState } = getStoreWithArgumentValues();
+      expect(getHasJSTracingArgumentValues(getState())).toEqual(true);
+
+      // The option starts out unchecked, because the values may contain PII.
+      expect(
+        getCheckedSharingOptions(getState()).includeArgumentValues
+      ).toEqual(false);
+      expect(
+        ensureExists(getRemoveProfileInformation(getState()))
+          .shouldRemoveArgumentValues
+      ).toEqual(true);
+    });
+
+    it('should keep the traced argument values once the user opts in', function () {
+      const { getState, dispatch } = getStoreWithArgumentValues();
+      dispatch(updateSharingOption('includeArgumentValues', true));
+      expect(getRemoveProfileInformation(getState())).toEqual(null);
+    });
   });
 });
 
