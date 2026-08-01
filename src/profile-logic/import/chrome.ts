@@ -699,6 +699,7 @@ async function processTracingEvents(
           frameTable.category[frameIndex] = category;
           frameTable.subcategory[frameIndex] = 0;
           frameTable.func[frameIndex] = funcId;
+          frameTable.lib[frameIndex] = -1;
           frameTable.nativeSymbol[frameIndex] = null;
           frameTable.innerWindowID[frameIndex] = 0;
           frameTable.line[frameIndex] =

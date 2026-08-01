@@ -697,7 +697,6 @@ describe('origin annotation', function () {
     shared.funcTable.source[funcIndex] = location
       ? addSourceToTable(shared.sources, stringTable.indexForString(location))
       : null;
-    shared.resourceTable.lib.push(-1);
     shared.resourceTable.name.push(stringTable.indexForString(name));
     shared.resourceTable.host.push(
       host ? stringTable.indexForString(host) : null

@@ -110,14 +110,15 @@ describe('extract functions and resource from location strings', function () {
   globalDataCollector.addExtensionOrigins(extensions);
 
   it('extracts the information for all different types of locations', function () {
-    const { frameFuncs } = extractFuncsAndResourcesFromFrameLocations(
-      locationIndexes,
-      locationIndexes.map(() => false),
-      geckoThreadStringArray,
-      libs,
-      globalDataCollector,
-      getEmptySourceTable()
-    );
+    const { frameFuncs, frameLibs } =
+      extractFuncsAndResourcesFromFrameLocations(
+        locationIndexes,
+        locationIndexes.map(() => false),
+        geckoThreadStringArray,
+        libs,
+        globalDataCollector,
+        getEmptySourceTable()
+      );
 
     const {
       shared: { sources, funcTable, resourceTable },
@@ -139,15 +140,13 @@ describe('extract functions and resource from location strings', function () {
           fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
         const lineNumber = funcTable.lineNumber[funcIndex];
         const columnNumber = funcTable.columnNumber[funcIndex];
-
-        let libIndex, resourceName, host, resourceType;
+        let resourceName, host, resourceType;
         if (resourceIndex === -1) {
           resourceName = null;
           host = null;
           resourceType = null;
         } else {
           const hostStringIndex = resourceTable.host[resourceIndex];
-          libIndex = resourceTable.lib[resourceIndex];
           resourceName = stringTable.getString(
             resourceTable.name[resourceIndex]
           );
@@ -157,10 +156,8 @@ describe('extract functions and resource from location strings', function () {
               : stringTable.getString(hostStringIndex);
           resourceType = resourceTable.type[resourceIndex];
         }
-        const lib =
-          libIndex === undefined || libIndex === null || libIndex === -1
-            ? undefined
-            : libs[libIndex];
+        const libIndex = frameLibs[locationIndex];
+        const lib = libIndex === null ? undefined : libs[libIndex];
 
         return [
           locationName,

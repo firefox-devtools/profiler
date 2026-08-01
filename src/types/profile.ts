@@ -240,7 +240,7 @@ export type RawMarkerTable = {
  */
 export type RawFrameTable = {
   // If this is a frame for native code, the address is the address of the frame's
-  // assembly instruction,  relative to the native library that contains it.
+  // assembly instruction,  relative to the native library given by `lib`.
   //
   // For frames obtained from stack walking, the address points into the call instruction.
   // It is not a return address, it is a "nudged" return address (i.e. return address
@@ -248,11 +248,13 @@ export type RawFrameTable = {
   // is performed at the end of profile processing. See the big comment above
   // nudgeReturnAddresses for more details.
   //
-  // The library which this address is relative to is given by the frame's nativeSymbol:
-  // frame -> nativeSymbol -> lib.
-  //
   // Frames with no address use the sentinel value `-1`.
   address: Array<Address | -1> | Int32Array<ArrayBuffer>;
+
+  // The native library that this frame's code is in. Frames which aren't native
+  // code (JS frames, label frames), or whose library is unknown, use the
+  // sentinel value `-1`.
+  lib: Array<IndexIntoLibs | -1> | Int32Array<ArrayBuffer>;
 
   // The inline depth for this frame. If there is an inline stack at an address,
   // we create multiple frames with the same address, one for each depth.
@@ -408,12 +410,12 @@ export const enum ResourceType {
 }
 
 /**
- * The ResourceTable holds additional information about functions. It tends to contain
- * sparse arrays. Multiple functions can point to the same resource.
+ * "Resources" are groupings of functions - for example, these functions came
+ * from JS code from add-on X, or from JS files hosted at a certain origin,
+ * or from a native library with some name.
  */
 export type ResourceTable = {
   length: number;
-  lib: Array<IndexIntoLibs | null>;
   name: Array<IndexIntoStringTable>;
   host: Array<IndexIntoStringTable | null>;
   type: ResourceType[];

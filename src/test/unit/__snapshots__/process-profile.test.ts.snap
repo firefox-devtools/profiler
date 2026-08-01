@@ -207,7 +207,7 @@ Array [
       "host": null,
       "isJS": false,
       "lib": undefined,
-      "libIndex": undefined,
+      "libIndex": null,
       "lineNumber": null,
       "resourceIndex": -1,
       "resourceName": null,

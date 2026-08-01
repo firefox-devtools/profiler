@@ -52,9 +52,8 @@ function buildTopDownResult(
   const state = store.getState();
   const threadSelectors = getThreadSelectors(0);
   const callTree = threadSelectors.getCallTree(state);
-  const libs = profile.libs;
 
-  const regularCallTree = collectCallTree(callTree, libs, options);
+  const regularCallTree = collectCallTree(callTree, options);
 
   return {
     type: 'thread-samples-top-down',
@@ -76,7 +75,6 @@ function buildBottomUpResult(
   const store = storeWithProfile(profile);
   const state = store.getState();
   const threadSelectors = getThreadSelectors(0);
-  const libs = profile.libs;
 
   // Build inverted call tree (bottom-up view)
   let collectedInvertedTree = null;
@@ -118,7 +116,7 @@ function buildBottomUpResult(
       weightType
     );
 
-    collectedInvertedTree = collectCallTree(invertedTree, libs, options);
+    collectedInvertedTree = collectCallTree(invertedTree, options);
   } catch (e) {
     // Failed to create inverted tree
     console.error('Failed to create inverted call tree:', e);

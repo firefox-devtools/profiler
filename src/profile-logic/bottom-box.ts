@@ -2,12 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ResourceType } from 'firefox-profiler/types';
-
 import type {
   Thread,
   IndexIntoStackTable,
   IndexIntoCallNodeTable,
+  IndexIntoLibs,
   BottomBoxInfo,
   SamplesLikeTable,
 } from 'firefox-profiler/types';
@@ -37,14 +36,8 @@ export function getBottomBoxInfoForCallNode(
   thread: Thread,
   samples: SamplesLikeTable
 ): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    stringTable,
-    resourceTable,
-    nativeSymbols,
-  } = thread;
+  const { stackTable, frameTable, funcTable, stringTable, nativeSymbols } =
+    thread;
 
   const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
   const { source: sourceIndex, line: funcLine } = getOriginalPositionForFrame(
@@ -54,16 +47,13 @@ export function getBottomBoxInfoForCallNode(
     funcTable,
     thread.sourceLocationTable
   );
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
-      ? resourceTable.lib[resource]
-      : null;
   const callNodeFramePerStack = getCallNodeFramePerStack(
     callNodeIndex,
     callNodeInfo,
     stackTable
   );
+
+  const libIndex: IndexIntoLibs | null = null; // unused, removed in next patch
 
   // If we have at least one native symbol to show assembly for, pick
   // the one with the highest total. But first, create the full list of
@@ -148,14 +138,8 @@ export function getBottomBoxInfoForStackFrame(
   stackIndex: IndexIntoStackTable,
   thread: Thread
 ): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
-    stringTable,
-  } = thread;
+  const { stackTable, frameTable, funcTable, nativeSymbols, stringTable } =
+    thread;
 
   const frameIndex = stackTable.frame[stackIndex];
   const funcIndex = frameTable.func[frameIndex];
@@ -166,11 +150,8 @@ export function getBottomBoxInfoForStackFrame(
     funcTable,
     thread.sourceLocationTable
   );
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
-      ? resourceTable.lib[resource]
-      : null;
+  const frameLib = frameTable.lib[frameIndex];
+  const libIndex = frameLib !== -1 ? frameLib : null;
 
   // Get native symbol for this frame
   const nativeSymbol = frameTable.nativeSymbol[frameIndex];

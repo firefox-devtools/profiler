@@ -31,7 +31,6 @@ import type {
   CallNodePath,
   Lib,
 } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
   AddressResult,
@@ -119,9 +118,13 @@ import { updateRawThreadStacks } from './profile-data';
  *    It also creates a nativeSymbols table but leaves it completely empty.
  *  - The frame and its func both get their address field set to the
  *    library-relative offset.
- *  - The func's resource field is set to a resource of type "library" that
- *    points to the lib object in the thread's "libs" list that contained this
- *    address. The frame's and func's address fields are relative to that lib.
+ *  - The frame's lib field is set to the index of the containing library in
+ *    profile.libs. The frame's address field is relative to that lib.
+ *    Symbolication groups frames by this field.
+ *  - The func's resource field is set to a resource of type "library" with the
+ *    name of the library. Multiple libraries with the same name can exist and
+ *    they will share the same resource, for example in a merged profile from
+ *    two different builds of the same library.
  *  - All frames start out with their nativeSymbol field set to null.
  *  - All return addresses are adjusted by subtracting one byte, to point into
  *    the call instruction. See nudgeReturnAddresses for details.
@@ -208,8 +211,9 @@ export type SymbolicationStepCallback = (
 ) => void;
 
 type ProfileLibSymbolicationInfo = {
-  // The resourceIndex for this lib in this thread.
-  resourceIndex: IndexIntoResourceTable;
+  // The resource to give to funcs which are newly created for this lib, or -1
+  // if this lib's frames have no resource. Multiple libs can share a resource.
+  resourceIndex: IndexIntoResourceTable | -1;
   // The libIndex for this lib in this thread.
   libIndex: IndexIntoLibs;
   // The set of funcs for this lib in this thread.
@@ -283,78 +287,107 @@ function makeConsensusMap<K, V>(
 /**
  * Gather the symbols needed in this thread, and some auxiliary information that
  * allows the symbol substitation step at the end to work efficiently.
- * Returns a map with one entry for each library resource.
+ * Returns a map with one entry for each library that has frames in the profile.
  */
 function getSymbolicationInfo(
   shared: RawProfileSharedData,
   libs: Lib[]
 ): ProfileSymbolicationInfo {
-  const { frameTable, funcTable, nativeSymbols, resourceTable } = shared;
+  const { frameTable, funcTable, nativeSymbols } = shared;
+
+  // Pass 1 over the frames: group frames (and their addresses) by library, and
+  // work out which library each func belongs to.
+  //
+  // A func can be referenced by frames from more than one library, for example
+  // when two builds of the same library share a resource and symbolication has
+  // resolved frames from both builds to the same name. Such a func must not be
+  // recycled by either library, so we mark it with FUNC_LIB_SHARED.
+  const FUNC_LIB_NONE = -1;
+  const FUNC_LIB_SHARED = -2;
+  const libForFunc = new Int32Array(funcTable.length).fill(FUNC_LIB_NONE);
+  const framesByLib = new Map<
+    IndexIntoLibs,
+    { frames: IndexIntoFrameTable[]; addresses: Address[] }
+  >();
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+    const libIndex = frameTable.lib[frameIndex];
+    if (libIndex === -1) {
+      continue;
+    }
+    let entry = framesByLib.get(libIndex);
+    if (entry === undefined) {
+      entry = { frames: [], addresses: [] };
+      framesByLib.set(libIndex, entry);
+    }
+    entry.frames.push(frameIndex);
+    entry.addresses.push(frameTable.address[frameIndex]);
+
+    const funcIndex = frameTable.func[frameIndex];
+    const knownLib = libForFunc[funcIndex];
+    if (knownLib === FUNC_LIB_NONE) {
+      libForFunc[funcIndex] = libIndex;
+    } else if (knownLib !== libIndex) {
+      libForFunc[funcIndex] = FUNC_LIB_SHARED;
+    }
+  }
+
+  // Pass over the funcs: assign each func to the library that gets to recycle
+  // it, and remember one resource per library for the funcs we create later.
+  const funcsByLib = new Map<IndexIntoLibs, Set<IndexIntoFuncTable>>();
+  const resourceForLib = new Map<IndexIntoLibs, IndexIntoResourceTable>();
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    const libIndex = libForFunc[funcIndex];
+    if (libIndex < 0) {
+      continue;
+    }
+    let funcs = funcsByLib.get(libIndex);
+    if (funcs === undefined) {
+      funcs = new Set();
+      funcsByLib.set(libIndex, funcs);
+    }
+    funcs.add(funcIndex);
+    if (!resourceForLib.has(libIndex)) {
+      const resourceIndex = funcTable.resource[funcIndex];
+      if (resourceIndex !== -1) {
+        resourceForLib.set(libIndex, resourceIndex);
+      }
+    }
+  }
+
+  // Pass over the native symbols: group them by library.
+  const nativeSymbolsByLib = new Map<
+    IndexIntoLibs,
+    Set<IndexIntoNativeSymbolTable>
+  >();
+  for (
+    let nativeSymbolIndex = 0;
+    nativeSymbolIndex < nativeSymbols.length;
+    nativeSymbolIndex++
+  ) {
+    const libIndex = nativeSymbols.libIndex[nativeSymbolIndex];
+    let symbols = nativeSymbolsByLib.get(libIndex);
+    if (symbols === undefined) {
+      symbols = new Set();
+      nativeSymbolsByLib.set(libIndex, symbols);
+    }
+    symbols.add(nativeSymbolIndex);
+  }
 
   const map = new Map<string, ProfileLibSymbolicationInfo>();
-  for (
-    let resourceIndex = 0;
-    resourceIndex < resourceTable.length;
-    resourceIndex++
-  ) {
-    const resourceType = resourceTable.type[resourceIndex];
-    if (resourceType !== ResourceType.Library) {
-      continue;
-    }
-    const libIndex = resourceTable.lib[resourceIndex];
-    if (libIndex === null) {
-      // We can get here if we have pre-symbolicated "funcName (in LibraryName)"
-      // frames. Those get ResourceType.Library but no libIndex.
-      continue;
-    }
+  for (const [libIndex, { frames, addresses }] of framesByLib) {
     const lib = libs[libIndex];
     if (lib === undefined) {
       throw new Error('Did not find a lib.');
     }
 
-    // Collect the set of funcs for this library in this thread.
-    const allFuncsForThisLib = new Set<IndexIntoFuncTable>();
-    for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-      if (funcTable.resource[funcIndex] !== resourceIndex) {
-        continue;
-      }
-      allFuncsForThisLib.add(funcIndex);
-    }
-
-    // Collect the set of native symbols for this library in this thread.
-    const allNativeSymbolsForThisLib: Set<IndexIntoNativeSymbolTable> =
-      new Set();
-    for (
-      let nativeSymbolIndex = 0;
-      nativeSymbolIndex < nativeSymbols.length;
-      nativeSymbolIndex++
-    ) {
-      if (nativeSymbols.libIndex[nativeSymbolIndex] !== libIndex) {
-        continue;
-      }
-      allNativeSymbolsForThisLib.add(nativeSymbolIndex);
-    }
-
-    // Collect the sets of frames and addresses for this library.
-    const allFramesForThisLib = [];
-    const frameAddresses = [];
-    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-      const funcIndex = frameTable.func[frameIndex];
-      if (funcTable.resource[funcIndex] !== resourceIndex) {
-        continue;
-      }
-      allFramesForThisLib.push(frameIndex);
-      frameAddresses.push(frameTable.address[frameIndex]);
-    }
-
     const libKey = `${lib.debugName}/${lib.breakpadId}`;
     map.set(libKey, {
       libIndex,
-      resourceIndex,
-      allFuncsForThisLib,
-      allNativeSymbolsForThisLib,
-      allFramesForThisLib,
-      frameAddresses,
+      resourceIndex: resourceForLib.get(libIndex) ?? -1,
+      allFuncsForThisLib: funcsByLib.get(libIndex) ?? new Set(),
+      allNativeSymbolsForThisLib: nativeSymbolsByLib.get(libIndex) ?? new Set(),
+      allFramesForThisLib: frames,
+      frameAddresses: addresses,
     });
   }
   return map;
@@ -903,6 +936,7 @@ function _partiallyApplySymbolicationStep(
         frameTable.subcategory[expansionFrameIndex] = subcategory;
         frameTable.innerWindowID[expansionFrameIndex] = innerWindowID;
         frameTable.address[expansionFrameIndex] = address;
+        frameTable.lib[expansionFrameIndex] = libIndex;
         frameTable.nativeSymbol[expansionFrameIndex] = nativeSymbolIndex;
         frameTable.originalLocation[expansionFrameIndex] = null;
 

@@ -257,7 +257,6 @@ export function sanitizePII(
       if (resourcesToBeSanitized.size) {
         const newResourceTable = (newShared.resourceTable = {
           ...resourceTable,
-          lib: resourceTable.lib.slice(),
           name: resourceTable.name.slice(),
           host: resourceTable.host.slice(),
         });
@@ -272,7 +271,6 @@ export function sanitizePII(
               `<Resource #${resourceIndex}>`
             );
             newResourceTable.name[resourceIndex] = name;
-            newResourceTable.lib[resourceIndex] = null;
             newResourceTable.host[resourceIndex] = null;
           }
         }

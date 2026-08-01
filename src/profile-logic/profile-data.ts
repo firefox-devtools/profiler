@@ -4358,6 +4358,7 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
       newFrameTable.category.push(frameTable.category[frame]);
       newFrameTable.subcategory.push(frameTable.subcategory[frame]);
       newFrameTable.func.push(frameTable.func[frame]);
+      newFrameTable.lib.push(frameTable.lib[frame]);
       newFrameTable.nativeSymbol.push(frameTable.nativeSymbol[frame]);
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[frame]);
       newFrameTable.line.push(frameTable.line[frame]);
@@ -4453,7 +4454,7 @@ export function findAddressProofForFile(
   sourceIndex: IndexIntoSourceTable
 ): AddressProof | null {
   const { libs } = profile;
-  const { frameTable, funcTable, resourceTable } = profile.shared;
+  const { frameTable, funcTable } = profile.shared;
   const func = funcTable.source.indexOf(sourceIndex);
   if (func === -1) {
     return null;
@@ -4466,12 +4467,8 @@ export function findAddressProofForFile(
   if (address === null) {
     return null;
   }
-  const resource = funcTable.resource[func];
-  if (resourceTable.type[resource] !== ResourceType.Library) {
-    return null;
-  }
-  const libIndex = resourceTable.lib[resource];
-  if (libIndex === null) {
+  const libIndex = frameTable.lib[frame];
+  if (libIndex === -1) {
     return null;
   }
   const lib = libs[libIndex];
@@ -4768,6 +4765,7 @@ export function computeFrameTableFromRawFrameTable(
     category: rawFrameTable.category,
     subcategory: rawFrameTable.subcategory,
     func,
+    lib: toInt32Array(rawFrameTable.lib),
     nativeSymbol: rawFrameTable.nativeSymbol,
     innerWindowID: rawFrameTable.innerWindowID,
     line: rawFrameTable.line,

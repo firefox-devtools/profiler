@@ -120,6 +120,7 @@ export function convertFlameGraphProfile(profileText: string): Profile {
     frameTable.category.push(category);
     frameTable.subcategory.push(0);
     frameTable.func.push(funcIndex);
+    frameTable.lib.push(-1);
     frameTable.nativeSymbol.push(null);
     frameTable.innerWindowID.push(null);
     frameTable.line.push(null);

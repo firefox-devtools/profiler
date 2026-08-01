@@ -61,7 +61,7 @@ import {
   type EligibleSource,
 } from 'firefox-profiler/profile-logic/source-map-matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { getLibForFunc } from './function-list';
+import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
 import { MarkerMap } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
@@ -1110,12 +1110,9 @@ export class ProfileQuerier {
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
     const funcName = stringArray[funcTable.name[funcIndex]];
-    const library = getLibForFunc(
-      funcIndex,
-      funcTable,
-      resourceTable,
-      profile.libs
-    )?.name;
+    const library =
+      getLibNameForFunc(funcIndex, funcTable, resourceTable, stringArray) ??
+      undefined;
     const fullName = library ? `${library}!${funcName}` : funcName;
 
     return {
@@ -1156,10 +1153,9 @@ export class ProfileQuerier {
       };
     }
 
-    const lib = getLibForFunc(
+    const lib = getAnyLibForFunc(
       funcIndex,
-      funcTable,
-      resourceTable,
+      profile.shared.frameTable,
       profile.libs
     );
     if (lib) {

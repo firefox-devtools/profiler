@@ -12,7 +12,7 @@ export const GECKO_PROFILE_VERSION = 36;
 // The current version of the "processed" profile format.
 // Please don't forget to update the processed profile format changelog in
 // `docs-developer/CHANGELOG-formats.md`.
-export const PROCESSED_PROFILE_VERSION = 69;
+export const PROCESSED_PROFILE_VERSION = 70;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.

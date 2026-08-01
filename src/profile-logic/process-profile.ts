@@ -116,6 +116,7 @@ import type {
   GeckoSourceTable,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
+  IndexIntoLibs,
   CounterDisplayConfig,
   RawProfileSharedData,
 } from 'firefox-profiler/types';
@@ -202,7 +203,11 @@ type ExtractionInfo = {
   addressLocator: AddressLocator;
   stringToNewFuncIndexAndFrameAddress: Map<
     string,
-    { funcIndex: IndexIntoFuncTable; frameAddress: Address | null }
+    {
+      funcIndex: IndexIntoFuncTable;
+      frameAddress: Address | null;
+      libIndex: IndexIntoLibs | null;
+    }
   >;
   globalDataCollector: GlobalDataCollector;
   geckoSourceTable: GeckoSourceTable;
@@ -226,6 +231,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
 ): {
   frameFuncs: IndexIntoFuncTable[];
   frameAddresses: (Address | null)[];
+  frameLibs: (IndexIntoLibs | null)[];
 } {
   const stringTable = globalDataCollector.getStringTable();
 
@@ -242,6 +248,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
   // information by applying various string matching heuristics.
   const frameFuncs = [];
   const frameAddresses = [];
+  const frameLibs: (IndexIntoLibs | null)[] = [];
   for (let frameIndex = 0; frameIndex < frameLocations.length; frameIndex++) {
     const originalLocationIndex = frameLocations[frameIndex];
     const locationString = ensureExists(
@@ -253,9 +260,10 @@ export function extractFuncsAndResourcesFromFrameLocations(
       extractionInfo.stringToNewFuncIndexAndFrameAddress.get(locationString);
     if (info !== undefined) {
       // The location string was already processed.
-      const { funcIndex, frameAddress } = info;
+      const { funcIndex, frameAddress, libIndex } = info;
       frameFuncs.push(funcIndex);
       frameAddresses.push(frameAddress);
+      frameLibs.push(libIndex);
       continue;
     }
 
@@ -263,6 +271,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     // resource information.
     let funcIndex = null;
     let frameAddress = null;
+    let libIndex: IndexIntoLibs | null = null;
     const unsymbolicatedInfo = _extractUnsymbolicatedFunction(
       extractionInfo,
       locationString,
@@ -271,6 +280,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     if (unsymbolicatedInfo !== null) {
       funcIndex = unsymbolicatedInfo.funcIndex;
       frameAddress = unsymbolicatedInfo.frameAddress;
+      libIndex = unsymbolicatedInfo.libIndex;
     } else {
       funcIndex = _extractCppFunction(extractionInfo, locationString);
       if (funcIndex === null) {
@@ -289,15 +299,18 @@ export function extractFuncsAndResourcesFromFrameLocations(
     extractionInfo.stringToNewFuncIndexAndFrameAddress.set(locationString, {
       funcIndex,
       frameAddress,
+      libIndex,
     });
 
     frameFuncs.push(funcIndex);
     frameAddresses.push(frameAddress);
+    frameLibs.push(libIndex);
   }
 
   return {
     frameFuncs,
     frameAddresses,
+    frameLibs,
   };
 }
 
@@ -308,23 +321,25 @@ export function extractFuncsAndResourcesFromFrameLocations(
  * into the same function, so cannot do any function grouping. So we get one "function" per
  * address.
  * We also associate the address with the library that contains it, and convert the address
- * into a library-relative offset. This association is established via the function's
- * "resource": The function points to the resource (of type ResourceType.Library), and the
- * resource has the index to the library in thread.libs.
- * We return the index of the newly-added function, and the address as a library-relative
- * offset.
+ * into a library-relative offset. The library index goes onto the frame (frameTable.lib);
+ * and the function additionally gets a "resource" of type ResourceType.Library.
  */
 function _extractUnsymbolicatedFunction(
   extractionInfo: ExtractionInfo,
   locationString: string,
   locationIndex: IndexIntoStringTable
-): { funcIndex: IndexIntoFuncTable; frameAddress: Address } | null {
+): {
+  funcIndex: IndexIntoFuncTable;
+  frameAddress: Address;
+  libIndex: IndexIntoLibs | null;
+} | null {
   if (!locationString.startsWith('0x')) {
     return null;
   }
   const { addressLocator, globalDataCollector } = extractionInfo;
 
   let resourceIndex = -1;
+  let libIndex: IndexIntoLibs | null = null;
   let addressRelativeToLib: Address = -1;
 
   try {
@@ -343,8 +358,8 @@ function _extractUnsymbolicatedFunction(
       // Yes, we found the library whose mapping covers this address!
       addressRelativeToLib = relativeAddress;
 
-      const libIndex = globalDataCollector.indexForLib(lib);
-      resourceIndex = globalDataCollector.indexForLibResource(libIndex);
+      libIndex = globalDataCollector.indexForLib(lib);
+      resourceIndex = globalDataCollector.indexForLibResourceByLib(libIndex);
     }
   } catch (_e) {
     // Probably a hex parse error. Ignore.
@@ -359,7 +374,7 @@ function _extractUnsymbolicatedFunction(
     null,
     null
   );
-  return { funcIndex, frameAddress: addressRelativeToLib };
+  return { funcIndex, frameAddress: addressRelativeToLib, libIndex };
 }
 
 /**
@@ -401,7 +416,7 @@ function _extractCppFunction(
     return frameInfo.funcIndex;
   }
 
-  const resourceIndex = globalDataCollector.indexForNameOnlyLibResource(
+  const resourceIndex = globalDataCollector.indexForLibResourceByName(
     libraryNameStringIndex
   );
   return globalDataCollector.indexForFunc(
@@ -535,7 +550,8 @@ function _processFrameTable(
   geckoFrameStruct: GeckoFrameStruct,
   sharedFrameTable: RawFrameTableBuilder,
   frameFuncs: IndexIntoFuncTable[],
-  frameAddresses: (Address | null)[]
+  frameAddresses: (Address | null)[],
+  frameLibs: (IndexIntoLibs | null)[]
 ): IndexIntoFrameTable {
   const frameIndexOffset = sharedFrameTable.length;
   for (let i = 0; i < geckoFrameStruct.length; i++) {
@@ -545,6 +561,7 @@ function _processFrameTable(
     sharedFrameTable.category[newIndex] = geckoFrameStruct.category[i];
     sharedFrameTable.subcategory[newIndex] = geckoFrameStruct.subcategory[i];
     sharedFrameTable.func[newIndex] = frameFuncs[i];
+    sharedFrameTable.lib[newIndex] = frameLibs[i] ?? -1;
     sharedFrameTable.nativeSymbol[newIndex] = null;
     sharedFrameTable.innerWindowID[newIndex] =
       geckoFrameStruct.innerWindowID[i];
@@ -1327,7 +1344,7 @@ function _processThread(
   const { libs, pausedRanges, meta, sources } = processProfile;
   const { shutdownTime } = meta;
 
-  const { frameFuncs, frameAddresses } =
+  const { frameFuncs, frameAddresses, frameLibs } =
     extractFuncsAndResourcesFromFrameLocations(
       geckoFrameStruct.location,
       geckoFrameStruct.relevantForJS,
@@ -1341,7 +1358,8 @@ function _processThread(
     geckoFrameStruct,
     globalDataCollector.getFrameTable(),
     frameFuncs,
-    frameAddresses
+    frameAddresses,
+    frameLibs
   );
   const stackIndexOffset = _processStackTable(
     geckoStackTable,
@@ -2113,6 +2131,7 @@ function convertSharedTablesEligibleColumns(
       address: toInt32Array(frameTable.address),
       inlineDepth: toUint8Array(frameTable.inlineDepth),
       func: toInt32Array(frameTable.func),
+      lib: toInt32Array(frameTable.lib),
     },
   };
 }
