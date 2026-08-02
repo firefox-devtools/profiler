@@ -229,9 +229,16 @@ export type SanitizedProfileEncodingState =
     }
   | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
 
+// The upload path always uses 'jslb'; 'json' is only used for the "Download
+// as JSON" option in the publish panel's split download button.
+export type PublishProfileFormat = 'jslb' | 'json';
+
 export type PublishState = {
   readonly checkedSharingOptions: CheckedSharingOptions;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  readonly sanitizedProfileEncodingStates: Record<
+    PublishProfileFormat,
+    SanitizedProfileEncodingState
+  >;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
