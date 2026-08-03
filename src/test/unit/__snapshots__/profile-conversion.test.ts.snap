@@ -3092,12 +3092,12 @@ Object {
       "version": 35,
     },
     "sharedCounts": Object {
-      "frames": 47,
+      "frames": 252,
       "funcs": 41,
       "libs": 0,
       "nativeSymbols": 0,
       "resources": 1,
-      "stacks": 47,
+      "stacks": 252,
       "strings": 47,
     },
     "threads": Array [
@@ -3150,10 +3150,10 @@ Object {
     Object {
       "stacks": Array [
         "2 (2x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value -> tick -> forEach -> (anonymous) -> Object.create.setAttribute.value -> value -> value -> NewComponent -> module.exports.Component -> updateProperties -> module.exports.Object.create.emit.value -> dispatchEvent",
-        "2 (2x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value",
         "2 (2x) (root) -> (program)",
         "2 (2x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value -> tick -> Object.create.setAttribute.value -> value -> updateProperties -> (anonymous) -> emitChange -> module.exports.Object.create.emit.value -> dispatchEvent",
         "1 (1x) (root) -> hookedCallback -> onAnimationFrame -> window.requestAnimationFrame.callback -> requestAnimationFrame",
+        "1 (1x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value",
       ],
       "thread": "CrRendererMain",
       "tid": "19485:19517",
@@ -3546,12 +3546,12 @@ Object {
       "version": 35,
     },
     "sharedCounts": Object {
-      "frames": 164,
+      "frames": 270,
       "funcs": 117,
       "libs": 0,
       "nativeSymbols": 0,
       "resources": 45,
-      "stacks": 164,
+      "stacks": 270,
       "strings": 139,
     },
     "threads": Array [
@@ -3576,9 +3576,9 @@ Object {
       "stacks": Array [
         "11 (11x) (root) -> (anonymous) -> prepareMainThreadExecution -> initializeCJSLoader -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader",
         "5 (5x) (root) -> (anonymous) -> prepareMainThreadExecution -> initializeCJSLoader -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader -> (anonymous) -> nativeModuleRequire -> compileForInternalLoader",
-        "5 (5x) (root) -> (anonymous) -> executeUserEntryPoint -> resolveMainPath -> Module._findPath -> toRealPath -> realpathSync",
-        "4 (4x) (root) -> (anonymous) -> prepareMainThreadExecution -> patchProcessObject",
-        "4 (4x) (root) -> (anonymous) -> prepareMainThreadExecution",
+        "3 (3x) (root) -> (program)",
+        "3 (3x) (root) -> (anonymous) -> prepareMainThreadExecution -> initializeReport -> nativeModuleRequire -> compileForInternalLoader",
+        "3 (3x) (root) -> (anonymous) -> executeUserEntryPoint -> Module._load -> Module.load -> Module._extensions..js -> Module._compile -> (anonymous) -> consoleCall -> log -> value -> get -> getStdout -> createWritableStdioStream",
       ],
       "thread": "Chrome Thread",
       "tid": "0:0",
@@ -3611,12 +3611,12 @@ Object {
       "version": 35,
     },
     "sharedCounts": Object {
-      "frames": 231,
+      "frames": 247,
       "funcs": 142,
       "libs": 0,
       "nativeSymbols": 0,
       "resources": 23,
-      "stacks": 231,
+      "stacks": 247,
       "strings": 164,
     },
     "threads": Array [
@@ -3765,12 +3765,12 @@ Object {
       "version": 35,
     },
     "sharedCounts": Object {
-      "frames": 47,
+      "frames": 252,
       "funcs": 41,
       "libs": 0,
       "nativeSymbols": 0,
       "resources": 1,
-      "stacks": 47,
+      "stacks": 252,
       "strings": 37,
     },
     "threads": Array [
@@ -3794,10 +3794,10 @@ Object {
     Object {
       "stacks": Array [
         "2 (2x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value -> tick -> forEach -> (anonymous) -> Object.create.setAttribute.value -> value -> value -> NewComponent -> module.exports.Component -> updateProperties -> module.exports.Object.create.emit.value -> dispatchEvent",
-        "2 (2x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value",
         "2 (2x) (root) -> (program)",
         "2 (2x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value -> tick -> Object.create.setAttribute.value -> value -> updateProperties -> (anonymous) -> emitChange -> module.exports.Object.create.emit.value -> dispatchEvent",
         "1 (1x) (root) -> hookedCallback -> onAnimationFrame -> window.requestAnimationFrame.callback -> requestAnimationFrame",
+        "1 (1x) (root) -> hookedCallback -> onAnimationFrame -> onAnimationFrame -> bound -> value -> value",
       ],
       "thread": "Chrome Thread",
       "tid": "0:0",
