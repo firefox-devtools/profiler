@@ -95,6 +95,26 @@ describe('app/MenuButtons', function () {
     return { profile };
   }
 
+  function createArgumentValuesProfile(updateChannel = 'release') {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.meta.updateChannel = updateChannel;
+    const [thread] = profile.threads;
+    thread.samples.argumentValues = [null, 6];
+    // A real values buffer recorded by the JS execution tracer.
+    thread.tracedValuesBuffer = 'AgAAABIAAQAAAAwHAAAAAAYAAAABAAcAAQAAABE=';
+    thread.tracedObjectShapes = [['MouseEvent']];
+    return { profile };
+  }
+
+  // Gecko emits the `argumentValues` column even when the JS execution tracer
+  // wasn't running, so most profiles carry an all-null column and no buffer.
+  function createEmptyArgumentValuesProfile(updateChannel = 'release') {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.meta.updateChannel = updateChannel;
+    profile.threads[0].samples.argumentValues = [null, null];
+    return { profile };
+  }
+
   function createPreferenceReadProfile(updateChannel = 'release') {
     const profile = getProfileWithMarkers([
       [
@@ -233,6 +253,10 @@ describe('app/MenuButtons', function () {
         screen.getByRole('checkbox', {
           name: /Include the data from other tabs/,
         });
+      const queryArgumentValuesCheckbox = () =>
+        screen.queryByRole('checkbox', {
+          name: /Include JavaScript execution tracing function argument values/,
+        });
       const getPanel = () => screen.getByTestId('PublishPanel-container');
       const openPublishPanel = async () => {
         fireFullClick(getPublishButton());
@@ -250,6 +274,7 @@ describe('app/MenuButtons', function () {
         queryPrivateBrowsingCheckbox,
         getPrivateBrowsingCheckbox,
         getRemoveOtherTabsCheckbox,
+        queryArgumentValuesCheckbox,
         openPublishPanel,
         resolveUpload,
         rejectUpload,
@@ -361,6 +386,48 @@ describe('app/MenuButtons', function () {
         setupForPublish(profile);
       await openPublishPanel();
       expect(queryPrivateBrowsingCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('shows the argument values checkbox when the JS tracer recorded them', async () => {
+      const { profile } = createArgumentValuesProfile();
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+
+      const argumentValuesCheckbox = queryArgumentValuesCheckbox();
+      expect(argumentValuesCheckbox).toBeInTheDocument();
+      // The values may contain PII, so sharing them has to be opt-in, and the
+      // checkbox carries a warning icon saying why.
+      expect(argumentValuesCheckbox).not.toBeChecked();
+      expect(
+        screen.getByTitle(/may include personal data/)
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the argument values checkbox when the profile has none', async () => {
+      const { profile } = createSimpleProfile();
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('does not show the argument values checkbox for an empty argumentValues column', async () => {
+      const { profile } = createEmptyArgumentValuesProfile();
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('does not show the argument values checkbox in nightly either', async () => {
+      // Nightly starts from the mostly-non-sanitizing defaults, so this guards
+      // against the checkbox appearing through that path.
+      const { profile } = createEmptyArgumentValuesProfile('nightly');
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
     });
 
     it('can publish and revert', async () => {
