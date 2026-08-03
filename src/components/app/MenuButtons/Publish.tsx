@@ -111,8 +111,10 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           onChange={this._onCheckboxChange}
           checked={checkedSharingOptions[slug]}
         />
-        <Localized id={labelL10nId} />
-        {additionalContent}
+        <span>
+          <Localized id={labelL10nId} />
+          {additionalContent}
+        </span>
       </label>
     );
   }
@@ -216,7 +218,17 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             {profileHasJSTracingArgumentValues
               ? this._renderCheckbox(
                   'includeArgumentValues',
-                  'MenuButtons--publish--renderCheckbox-label-argument-values'
+                  'MenuButtons--publish--renderCheckbox-label-argument-values',
+                  <Localized
+                    id="MenuButtons--publish--renderCheckbox-label-argument-values-warning-image"
+                    attrs={{ title: true }}
+                  >
+                    <img
+                      className="publishPanelDataChoicesIndicator"
+                      src={WarningImage}
+                      title="This profile contains function argument values recorded from the page, which may include personal data"
+                    />
+                  </Localized>
                 )
               : null}
           </div>

@@ -396,8 +396,12 @@ describe('app/MenuButtons', function () {
 
       const argumentValuesCheckbox = queryArgumentValuesCheckbox();
       expect(argumentValuesCheckbox).toBeInTheDocument();
-      // The values may contain PII, so sharing them has to be opt-in.
+      // The values may contain PII, so sharing them has to be opt-in, and the
+      // checkbox carries a warning icon saying why.
       expect(argumentValuesCheckbox).not.toBeChecked();
+      expect(
+        screen.getByTitle(/may include personal data/)
+      ).toBeInTheDocument();
     });
 
     it('does not show the argument values checkbox when the profile has none', async () => {
