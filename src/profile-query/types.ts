@@ -570,6 +570,7 @@ export type ThreadMarkersResult = {
   friendlyThreadName: string;
   totalMarkerCount: number;
   filteredMarkerCount: number;
+  fullRangeMarkerCount?: number;
   filters?: {
     searchString?: string;
     minDuration?: number;

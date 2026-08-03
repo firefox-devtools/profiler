@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedThreadIndexes,
+  getAllCommittedRanges,
+} from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getCategories,
@@ -702,12 +705,20 @@ export function collectThreadMarkers(
     const markerSchemaByName = getMarkerSchemaByName(state);
     const stringTable = getStringTable(state);
 
-    // Get marker indexes - use search-filtered if search is active, otherwise all markers
+    // Get marker indexes scoped to the committed (zoom) range. When a search is
+    // active we use the search-filtered set, which is itself built on top of the
+    // committed-range-filtered indexes, so both paths respect the current zoom.
     const originalCount =
-      threadSelectors.getFullMarkerListIndexes(state).length;
+      threadSelectors.getCommittedRangeFilteredMarkerIndexes(state).length;
     let filteredIndexes = searchString
       ? threadSelectors.getSearchFilteredMarkerIndexes(state)
-      : threadSelectors.getFullMarkerListIndexes(state);
+      : threadSelectors.getCommittedRangeFilteredMarkerIndexes(state);
+
+    // When zoomed, show this thread's marker count over the full time range.
+    const isZoomed = getAllCommittedRanges(state).length > 0;
+    const fullRangeMarkerCount = isZoomed
+      ? threadSelectors.getFullMarkerListIndexes(state).length
+      : undefined;
 
     // Apply all marker filters
     filteredIndexes = applyMarkerFilters(
@@ -864,6 +875,7 @@ export function collectThreadMarkers(
       friendlyThreadName,
       totalMarkerCount: originalCount,
       filteredMarkerCount: filteredIndexes.length,
+      fullRangeMarkerCount,
       filters,
       byType,
       byCategory,

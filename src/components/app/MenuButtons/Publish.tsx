@@ -16,6 +16,7 @@ import {
   getProfileRootRange,
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
+  getHasJSTracingArgumentValues,
 } from 'firefox-profiler/selectors/profile';
 import {
   getAbortFunction,
@@ -58,6 +59,7 @@ type StateProps = {
   readonly rootRange: StartEndRange;
   readonly shouldShowPreferenceOption: boolean;
   readonly profileContainsPrivateBrowsingInformation: boolean;
+  readonly profileHasJSTracingArgumentValues: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
@@ -109,8 +111,10 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           onChange={this._onCheckboxChange}
           checked={checkedSharingOptions[slug]}
         />
-        <Localized id={labelL10nId} />
-        {additionalContent}
+        <span>
+          <Localized id={labelL10nId} />
+          {additionalContent}
+        </span>
       </label>
     );
   }
@@ -123,6 +127,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     const {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
+      profileHasJSTracingArgumentValues,
       sanitizedProfileEncodingState,
       downloadFileName,
       shouldSanitizeByDefault,
@@ -206,6 +211,22 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                       className="publishPanelDataChoicesIndicator"
                       src={WarningImage}
                       title="This profile contains private browsing data"
+                    />
+                  </Localized>
+                )
+              : null}
+            {profileHasJSTracingArgumentValues
+              ? this._renderCheckbox(
+                  'includeArgumentValues',
+                  'MenuButtons--publish--renderCheckbox-label-argument-values',
+                  <Localized
+                    id="MenuButtons--publish--renderCheckbox-label-argument-values-warning-image"
+                    attrs={{ title: true }}
+                  >
+                    <img
+                      className="publishPanelDataChoicesIndicator"
+                      src={WarningImage}
+                      title="This profile contains function argument values recorded from the page, which may include personal data"
                     />
                   </Localized>
                 )
@@ -361,6 +382,7 @@ export const PublishPanel = explicitConnect<
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
+    profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
     downloadFileName: getFilenameString(state),
     sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),

@@ -549,6 +549,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Profyl opnij symbolisearje
 MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
 MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
 MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
+MenuButtons--metaInfo--source-maps = Boarnekaarten:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Boarnekaart tapasse…
+    .title = In .map-bestân fan jo skiif lade om in minimalisearre JavaScript-bondel te symbolisearjen, om oarspronklike funksjenammen en boarnelokaasjes te werstellen.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Kies op hokker bondel dizze boarnekaart fan tapassing is:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Tapasse
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Annulearje
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Oarspronklike boarnen foar { $filename } oplost.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Gjin inkelde stapelposysje yn { $filename } komt oerien mei dizze boarnekaart.
+MenuButtons--metaInfo--source-map-error-invalid = It selektearre bestân is gjin jildige boarnekaart.
+MenuButtons--metaInfo--source-map-error-no-eligible = Dit profyl hat gjin JS-bondels mei boarnekaart-URL’s.
+MenuButtons--metaInfo--source-map-error-failed = Kin dizze boarnekaart net tapasse op it profyl.
 MenuButtons--metaInfo--cpu-model = CPU-model:
 MenuButtons--metaInfo--cpu-cores = CPU-kearnen:
 MenuButtons--metaInfo--main-memory = Haadûnthâld:

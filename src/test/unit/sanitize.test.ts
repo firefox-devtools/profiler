@@ -26,6 +26,11 @@ import {
   callTreeFromProfile,
   formatTree,
 } from 'firefox-profiler/test/fixtures/utils';
+import {
+  base64StringToBytes,
+  bytesToBase64,
+} from 'firefox-profiler/utils/base64';
+import { ValueSummaryReader } from 'devtools-reps';
 import type {
   MarkerSchemaByName,
   RawThread,
@@ -46,6 +51,7 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
+      shouldRemoveArgumentValues: false,
     };
 
     const PIIToRemove: RemoveProfileInformation = {
@@ -132,9 +138,18 @@ describe('sanitizePII', function () {
       },
     };
 
+    // Mirror what the `getTracedValuesBuffer` selector hands to `sanitizePII`
+    // in the app, instead of pretending that no thread has a buffer.
+    const tracedValuesBuffers = originalProfile.threads.map((thread) =>
+      thread.tracedValuesBuffer
+        ? base64StringToBytes(thread.tracedValuesBuffer)
+        : undefined
+    );
+
     const sanitizedProfile = sanitizePII(
       originalProfile,
       derivedMarkerInfoForAllThreads,
+      tracedValuesBuffers,
       PIIToRemove,
       markerSchemaByName
     ).profile;
@@ -899,6 +914,242 @@ describe('sanitizePII', function () {
     ).toBe(0);
   });
 
+  describe('traced argument values', function () {
+    // A real values buffer recorded by the JS execution tracer. It holds two
+    // entries: a MouseEvent object summary whose data starts at byte offset 6,
+    // and the number 0 whose data starts at byte offset 24.
+    const TRACED_VALUES_BUFFER = 'AgAAABIAAQAAAAwHAAAAAAYAAAABAAcAAQAAABE=';
+    const TRACED_OBJECT_SHAPES = [['MouseEvent']];
+    const MOUSE_EVENT_ENTRY = 6;
+    const NUMBER_ENTRY = 24;
+
+    function setupTracerProfile(piiConfig: Partial<RemoveProfileInformation>) {
+      // Four samples, at times 0, 1, 2 and 3.
+      const { profile } = getProfileFromTextSamples('A  B  C  D');
+      const [thread] = profile.threads;
+      thread.tracedValuesBuffer = TRACED_VALUES_BUFFER;
+      thread.tracedObjectShapes = TRACED_OBJECT_SHAPES;
+      thread.samples.argumentValues = [
+        null,
+        MOUSE_EVENT_ENTRY,
+        NUMBER_ENTRY,
+        null,
+      ];
+      return setup(piiConfig, profile);
+    }
+
+    // Decodes the arguments recorded for a single sample, going through the
+    // thread's own index so that a buffer rewrite has to keep them in sync.
+    function readArgumentsForSample(thread: RawThread, sampleIndex: number) {
+      const argumentValues = ensureExists(thread.samples.argumentValues);
+      return ValueSummaryReader.getArgumentSummaries(
+        base64StringToBytes(ensureExists(thread.tracedValuesBuffer)),
+        TRACED_OBJECT_SHAPES,
+        ensureExists(argumentValues[sampleIndex])
+      );
+    }
+
+    // Walks the entry size headers to enumerate every entry a buffer still
+    // holds. This lets us assert on the data that actually ships, rather than
+    // only on the indices that happen to point into it.
+    function readAllEntries(base64Buffer: string) {
+      const buffer = base64StringToBytes(base64Buffer);
+      const view = new DataView(buffer);
+      const entries = [];
+      // Skip the 4-byte version header.
+      let offset = 4;
+      while (offset + 2 <= buffer.byteLength) {
+        const entrySize = view.getUint16(offset, true);
+        if (entrySize === 0) {
+          break;
+        }
+        entries.push(
+          ValueSummaryReader.getArgumentSummaries(
+            buffer,
+            TRACED_OBJECT_SHAPES,
+            offset + 2
+          )
+        );
+        offset += entrySize;
+      }
+      return entries;
+    }
+
+    it('keeps the argument values when the user includes them', function () {
+      const { sanitizedProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: false,
+      });
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.tracedObjectShapes).toEqual(TRACED_OBJECT_SHAPES);
+      expect(thread.tracedValuesBuffer).toBeDefined();
+
+      // Both entries still decode to the values they started with.
+      expect(readArgumentsForSample(thread, 1)).toEqual([
+        expect.objectContaining({ type: 'object', class: 'MouseEvent' }),
+      ]);
+      expect(readArgumentsForSample(thread, 2)).toEqual([0]);
+    });
+
+    it('removes the argument values when the user excludes them', function () {
+      const { sanitizedProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: true,
+      });
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.tracedValuesBuffer).toBeUndefined();
+      expect(thread.tracedObjectShapes).toBeUndefined();
+      // The indices have to go as well, otherwise they dangle into a buffer
+      // that is no longer part of the profile.
+      expect(thread.samples.argumentValues).toBeUndefined();
+    });
+
+    it('does not mutate the original thread while removing argument values', function () {
+      const { originalProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: true,
+      });
+      expect(originalProfile.threads[0].samples.argumentValues).toEqual([
+        null,
+        MOUSE_EVENT_ENTRY,
+        NUMBER_ENTRY,
+        null,
+      ]);
+    });
+
+    it('drops the argument values from outside the committed range', function () {
+      // The buffer starts out holding both entries.
+      expect(readAllEntries(TRACED_VALUES_BUFFER)).toHaveLength(2);
+
+      // Samples sit at 0, 1, 2 and 3, so this keeps the last two. That drops
+      // sample 1, which is the only sample referencing the MouseEvent entry.
+      const { sanitizedProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: false,
+        shouldFilterToCommittedRange: { start: 2, end: 4 },
+      });
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.samples.length).toBe(2);
+      // The surviving entry moved within the buffer, and its index moved with
+      // it, so it still decodes to the same value.
+      expect(readArgumentsForSample(thread, 0)).toEqual([0]);
+      expect(ensureExists(thread.samples.argumentValues)[1]).toBe(null);
+
+      // The MouseEvent data is gone from the exported buffer altogether, not
+      // just left unreferenced in it.
+      expect(readAllEntries(ensureExists(thread.tracedValuesBuffer))).toEqual([
+        [0],
+      ]);
+    });
+
+    it('drops the argument values of private browsing samples', function () {
+      const {
+        profile,
+        funcNamesDictPerThread: [{ A, Cjs, Djs }],
+      } = getProfileFromTextSamples(`
+        A    A
+        Cjs  Djs
+      `);
+
+      const {
+        firstTabTabID: privateTabTabID,
+        firstTabInnerWindowIDs: privateTabInnerWindowIDs,
+        secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
+      } = addTabInformationToProfile(profile);
+      markTabIdsAsPrivateBrowsing(profile, [privateTabTabID]);
+      addInnerWindowIdToStacks(profile.shared, profile.threads[0], [
+        {
+          innerWindowID: nonPrivateTabInnerWindowIDs[0],
+          callNodes: [[A, Cjs]],
+        },
+        {
+          innerWindowID: privateTabInnerWindowIDs[0],
+          callNodes: [[A, Djs]],
+        },
+      ]);
+
+      const [thread] = profile.threads;
+      thread.tracedValuesBuffer = TRACED_VALUES_BUFFER;
+      thread.tracedObjectShapes = TRACED_OBJECT_SHAPES;
+      // Sample 0 is non-private, sample 1 comes from the private window.
+      thread.samples.argumentValues = [NUMBER_ENTRY, MOUSE_EVENT_ENTRY];
+
+      const { sanitizedProfile } = setup(
+        {
+          shouldRemovePrivateBrowsingData: true,
+          shouldRemoveArgumentValues: false,
+        },
+        profile
+      );
+      const [sanitizedThread] = sanitizedProfile.threads;
+
+      // The private browsing sample lost its stack, and its arguments went
+      // with it.
+      expect(sanitizedThread.samples.stack[1]).toBe(null);
+      expect(ensureExists(sanitizedThread.samples.argumentValues)[1]).toBe(
+        null
+      );
+
+      // The non-private sample keeps its arguments.
+      expect(readArgumentsForSample(sanitizedThread, 0)).toEqual([0]);
+
+      // And the MouseEvent recorded for the private browsing sample is gone
+      // from the exported buffer, not just left unreferenced in it.
+      expect(
+        readAllEntries(ensureExists(sanitizedThread.tracedValuesBuffer))
+      ).toEqual([[0]]);
+
+      // The original thread is untouched.
+      expect(profile.threads[0].samples.argumentValues).toEqual([
+        NUMBER_ENTRY,
+        MOUSE_EVENT_ENTRY,
+      ]);
+    });
+
+    it('removes the argument values when the buffer cannot be read', function () {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // The version header says 3 instead of 2, which is what a profile
+      // recorded by a Gecko using a newer tracer format looks like. The reader
+      // throws on it, and we can't publish argument values we can't filter.
+      const bytes = base64StringToBytes(TRACED_VALUES_BUFFER);
+      new DataView(bytes).setUint32(0, 3, true);
+
+      const { profile } = getProfileFromTextSamples('A  B');
+      const [thread] = profile.threads;
+      thread.tracedValuesBuffer = bytesToBase64(bytes);
+      thread.tracedObjectShapes = TRACED_OBJECT_SHAPES;
+      thread.samples.argumentValues = [null, MOUSE_EVENT_ENTRY];
+
+      const { sanitizedProfile } = setup(
+        { shouldRemoveArgumentValues: false },
+        profile
+      );
+      const [sanitizedThread] = sanitizedProfile.threads;
+
+      expect(sanitizedThread.tracedValuesBuffer).toBeUndefined();
+      expect(sanitizedThread.tracedObjectShapes).toBeUndefined();
+      expect(sanitizedThread.samples.argumentValues).toBeUndefined();
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('removes the argument values when the buffer is missing', function () {
+      const { profile } = getProfileFromTextSamples('A  B');
+      // A thread can carry indices without the profile carrying the buffer
+      // they point into. There is nothing to export in that case.
+      profile.threads[0].samples.argumentValues = [null, MOUSE_EVENT_ENTRY];
+      profile.threads[0].tracedObjectShapes = TRACED_OBJECT_SHAPES;
+
+      const { sanitizedProfile } = setup(
+        { shouldRemoveArgumentValues: false },
+        profile
+      );
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.samples.argumentValues).toBeUndefined();
+      expect(thread.tracedObjectShapes).toBeUndefined();
+    });
+  });
+
   it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {
     // Create a simple profile with eTLD+1 field in its thread.
     const { profile } = getProfileFromTextSamples('A');
@@ -1285,7 +1536,13 @@ describe('sanitizePII', function () {
 
     // A null `RemoveProfileInformation` means the user kept all sharing options
     // checked, so no other sanitization happens.
-    const { profile: sanitizedProfile } = sanitizePII(profile, [], null, {});
+    const { profile: sanitizedProfile } = sanitizePII(
+      profile,
+      [],
+      [],
+      null,
+      {}
+    );
 
     expect(sanitizedProfile.shared.sources.content.length).toEqual(
       profile.shared.sources.content.length

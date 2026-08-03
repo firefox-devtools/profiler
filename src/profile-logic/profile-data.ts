@@ -116,6 +116,8 @@ import {
   toInt32Array,
   toUint8Array,
 } from 'firefox-profiler/utils/typed-arrays';
+import { bytesToBase64 } from 'firefox-profiler/utils/base64';
+import { ValueSummaryReader } from 'devtools-reps';
 
 /**
  * Various helpers for dealing with the profile as a data structure.
@@ -2399,12 +2401,63 @@ export function filterCounterSamplesToRange(
     number: samples.number
       ? samples.number.slice(beginSampleIndex, endSampleIndex)
       : undefined,
-    argumentValues: samples.argumentValues
-      ? samples.argumentValues.slice(beginSampleIndex, endSampleIndex)
-      : undefined,
   };
 
   return newCounter;
+}
+
+/**
+ * Filter a traced values buffer to only include entries that are referenced
+ * by the given argument values array. This is used during sanitization when
+ * filtering to a committed time range.
+ *
+ * Returns null when the buffer can't be read, so that the caller drops the
+ * argument values instead of exporting them.
+ */
+export function filterTracedValuesBufferToEntries(
+  tracedValuesBuffer: ArrayBuffer,
+  thread: RawThread
+): RawThread | null {
+  if (
+    !thread.samples.argumentValues ||
+    !thread.tracedValuesBuffer ||
+    !thread.tracedObjectShapes
+  ) {
+    throw new Error(
+      'filterTracedValuesBufferToEntries should only be called with JS Execution Tracer profiles'
+    );
+  }
+
+  const newThread: RawThread = { ...thread };
+  const argumentValues: Array<number | null> = [
+    ...thread.samples.argumentValues,
+  ];
+
+  let filtered;
+  try {
+    filtered = ValueSummaryReader.filterValuesBufferToEntries(
+      tracedValuesBuffer,
+      argumentValues
+    );
+  } catch (error) {
+    // The reader throws on a buffer format it doesn't know, which shouldn't
+    // happen since we update it before Gecko emits a new format version. But a
+    // buffer we can't filter must not be exported as it is, so the caller drops
+    // the argument values instead.
+    console.error(
+      'Failed to filter the traced values buffer, the argument values will be removed from the sanitized profile.',
+      error
+    );
+    return null;
+  }
+
+  newThread.tracedValuesBuffer = bytesToBase64(filtered.valuesBuffer);
+  newThread.samples = {
+    ...newThread.samples,
+    argumentValues: filtered.entryIndices,
+  };
+
+  return newThread;
 }
 
 /**
@@ -4106,71 +4159,6 @@ export function _gatherSingleThreadStackReferences(
       }
     }
   }
-}
-
-/**
- * Collect all source table indices referenced by the given threads.
- * Walks samples, jsAllocations, and nativeAllocations, following stack prefix
- * chains. Includes both compiled sources (funcTable.source) and
- * post-symbolication original sources (via sourceLocationTable).
- */
-export function collectSourceIndicesFromThreads(
-  threadIndexes: Iterable<ThreadIndex>,
-  threads: RawThread[],
-  shared: RawProfileSharedData
-): Set<IndexIntoSourceTable> {
-  const { stackTable, frameTable, funcTable, sourceLocationTable } = shared;
-  const sourceIndices = new Set<IndexIntoSourceTable>();
-  const visitedStacks = makeBitSet(stackTable.length);
-
-  const addStackChain = (stackIndex: IndexIntoStackTable | null) => {
-    let current = stackIndex;
-    while (current !== null && !checkBit(visitedStacks, current)) {
-      setBit(visitedStacks, current);
-      const frameIndex = stackTable.frame[current];
-      const funcIndex = frameTable.func[frameIndex];
-
-      const compiledSource = funcTable.source[funcIndex];
-      if (compiledSource !== null) {
-        sourceIndices.add(compiledSource);
-      }
-
-      const frameOriginalLocationIdx = frameTable.originalLocation[frameIndex];
-      if (frameOriginalLocationIdx !== null) {
-        sourceIndices.add(sourceLocationTable.source[frameOriginalLocationIdx]);
-      }
-
-      const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
-      if (funcOriginalLocationIdx !== null) {
-        sourceIndices.add(sourceLocationTable.source[funcOriginalLocationIdx]);
-      }
-
-      const prefixOffset = stackTable.prefixOffset[current];
-      current = prefixOffset !== 0 ? current - prefixOffset : null;
-    }
-  };
-
-  for (const threadIndex of threadIndexes) {
-    if (threadIndex >= threads.length) {
-      continue;
-    }
-    const thread = threads[threadIndex];
-    for (const s of thread.samples.stack) {
-      addStackChain(s);
-    }
-    if (thread.jsAllocations !== undefined) {
-      for (const s of thread.jsAllocations.stack) {
-        addStackChain(s);
-      }
-    }
-    if (thread.nativeAllocations !== undefined) {
-      for (const s of thread.nativeAllocations.stack) {
-        addStackChain(s);
-      }
-    }
-  }
-
-  return sourceIndices;
 }
 
 /**
