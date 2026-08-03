@@ -525,6 +525,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Profil erneut symbolisieren
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolisieren
 MenuButtons--metaInfo--attempting-resymbolicate = Versuch, das Profil erneut zu symbolisieren
 MenuButtons--metaInfo--currently-symbolicating = Profil wird aktuell symbolisiert
+MenuButtons--metaInfo--source-maps = Source-Maps:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Source-Map anwenden…
+    .title = Laden Sie eine .map-Datei von der Festplatte, um ein minimiertes JavaScript-Bundle zu symbolisieren und so die ursprünglichen Funktionsnamen und Quellcode-Positionen wiederherzustellen.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Wählen Sie, auf welches Paket diese Source-Map angewendet werden soll:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Anwenden
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Abbrechen
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Originalquelltexte für { $filename } aufgelöst.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = In { $filename } wurden keine Stack-Positionen gefunden, die mit dieser Source-Map übereinstimmen.
+MenuButtons--metaInfo--source-map-error-invalid = Die ausgewählte Datei ist keine gültige Source-Map.
+MenuButtons--metaInfo--source-map-error-no-eligible = Dieses Profil hat keine JS-Sets mit Source-Map-URLs.
+MenuButtons--metaInfo--source-map-error-failed = Diese Source-Map konnte nicht auf das Profil angewendet werden.
 MenuButtons--metaInfo--cpu-model = Prozessormodell
 MenuButtons--metaInfo--cpu-cores = Prozessorkerne:
 MenuButtons--metaInfo--main-memory = Hauptspeicher:

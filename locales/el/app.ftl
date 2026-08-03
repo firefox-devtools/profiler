@@ -544,6 +544,10 @@ MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός 
 MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
 MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτήν τη στιγμή
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Εφαρμογή
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Ακύρωση
 MenuButtons--metaInfo--cpu-model = Μοντέλο CPU:
 MenuButtons--metaInfo--cpu-cores = Πυρήνες CPU:
 MenuButtons--metaInfo--main-memory = Κύρια μνήμη:

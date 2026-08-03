@@ -549,6 +549,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Profiel opnieuw symboliseren
 MenuButtons--metaInfo--symbolicate-profile = Profiel symboliseren
 MenuButtons--metaInfo--attempting-resymbolicate = Poging tot hersymboliseren profiel
 MenuButtons--metaInfo--currently-symbolicating = Profiel wordt gesymboliseerd
+MenuButtons--metaInfo--source-maps = Bronkaarten:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Bronkaart toepassen…
+    .title = Een .map-bestand van uw schijf laden om een geminimaliseerde JavaScript-bundel te symboliseren, om oorspronkelijke functienamen en bronlocaties te herstellen.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Kies op welke bundel deze bronkaart van toepassing is:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Toepassen
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Annuleren
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Oorspronkelijke bronnen voor { $filename } opgelost.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Geen enkele stackpositie in { $filename } komt overeen met deze bronkaart.
+MenuButtons--metaInfo--source-map-error-invalid = Het geselecteerde bestand is geen geldige bronkaart.
+MenuButtons--metaInfo--source-map-error-no-eligible = Dit profiel heeft geen JS-bundels met URL’s van bronkaarten.
+MenuButtons--metaInfo--source-map-error-failed = Kan deze bronkaart niet toepassen op het profiel.
 MenuButtons--metaInfo--cpu-model = CPU-model:
 MenuButtons--metaInfo--cpu-cores = CPU-kernen:
 MenuButtons--metaInfo--main-memory = Hoofdgeheugen:

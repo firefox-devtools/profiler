@@ -539,6 +539,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Ресимволизироват�
 MenuButtons--metaInfo--symbolicate-profile = Символизировать профиль
 MenuButtons--metaInfo--attempting-resymbolicate = Попытка пересимволизировать профиль
 MenuButtons--metaInfo--currently-symbolicating = Символизированный в настоящий момент профиль
+MenuButtons--metaInfo--source-maps = Карты исходного кода:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Применить карту исходного кода…
+    .title = Загрузить с диска .map-файл, чтобы восстановить в минифицированной сборке JavaScript исходные имена функций и их расположение в коде.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Выберите сборку, к которой относится эта карта исходного кода:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Применить
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Отмена
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Для { $filename } определены исходные файлы.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = В { $filename } не найдено позиций в стеке, соответствующих этой карте исходного кода.
+MenuButtons--metaInfo--source-map-error-invalid = Выбранный файл не является корректной картой исходного кода.
+MenuButtons--metaInfo--source-map-error-no-eligible = В этом профиле нет сборок JavaScript с URL карт исходного кода.
+MenuButtons--metaInfo--source-map-error-failed = Не удалось применить эту карту исходного кода к профилю.
 MenuButtons--metaInfo--cpu-model = Модель процессора:
 MenuButtons--metaInfo--cpu-cores = Ядер процессора:
 MenuButtons--metaInfo--main-memory = Основная память:
