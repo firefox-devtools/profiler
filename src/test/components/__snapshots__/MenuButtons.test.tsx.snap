@@ -1899,7 +1899,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
           name="includeHiddenThreads"
           type="checkbox"
         />
-        Include hidden threads
+        <span>
+          Include hidden threads
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -1909,7 +1911,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
           name="includeFullTimeRange"
           type="checkbox"
         />
-        Include hidden time range
+        <span>
+          Include hidden time range
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -1919,7 +1923,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
           name="includeScreenshots"
           type="checkbox"
         />
-        Include screenshots
+        <span>
+          Include screenshots
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -1929,7 +1935,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs and paths
+        <span>
+          Include resource URLs and paths
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -1939,7 +1947,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
           name="includeExtension"
           type="checkbox"
         />
-        Include extension information
+        <span>
+          Include extension information
+        </span>
       </label>
     </div>
     <div
@@ -2124,7 +2134,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           name="includeHiddenThreads"
           type="checkbox"
         />
-        Include hidden threads
+        <span>
+          Include hidden threads
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2134,7 +2146,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           name="includeFullTimeRange"
           type="checkbox"
         />
-        Include hidden time range
+        <span>
+          Include hidden time range
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2144,7 +2158,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           name="includeScreenshots"
           type="checkbox"
         />
-        Include screenshots
+        <span>
+          Include screenshots
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2154,7 +2170,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs and paths
+        <span>
+          Include resource URLs and paths
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2164,7 +2182,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
           name="includeExtension"
           type="checkbox"
         />
-        Include extension information
+        <span>
+          Include extension information
+        </span>
       </label>
     </div>
     <div
@@ -2238,7 +2258,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeHiddenThreads"
           type="checkbox"
         />
-        Include hidden threads
+        <span>
+          Include hidden threads
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2249,7 +2271,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeFullTimeRange"
           type="checkbox"
         />
-        Include hidden time range
+        <span>
+          Include hidden time range
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2260,7 +2284,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeScreenshots"
           type="checkbox"
         />
-        Include screenshots
+        <span>
+          Include screenshots
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2271,7 +2297,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs and paths
+        <span>
+          Include resource URLs and paths
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2282,7 +2310,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeExtension"
           type="checkbox"
         />
-        Include extension information
+        <span>
+          Include extension information
+        </span>
       </label>
     </div>
     <div
@@ -2355,7 +2385,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeHiddenThreads"
           type="checkbox"
         />
-        Include hidden threads
+        <span>
+          Include hidden threads
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2365,7 +2397,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeFullTimeRange"
           type="checkbox"
         />
-        Include hidden time range
+        <span>
+          Include hidden time range
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2375,7 +2409,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeScreenshots"
           type="checkbox"
         />
-        Include screenshots
+        <span>
+          Include screenshots
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2385,7 +2421,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeUrls"
           type="checkbox"
         />
-        Include resource URLs and paths
+        <span>
+          Include resource URLs and paths
+        </span>
       </label>
       <label
         class="photon-label publishPanelDataChoicesLabel"
@@ -2395,7 +2433,9 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           name="includeExtension"
           type="checkbox"
         />
-        Include extension information
+        <span>
+          Include extension information
+        </span>
       </label>
     </div>
     <div
