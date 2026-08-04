@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 69
+
+A new marker schema display location, `timeline-network`, was added. A marker schema can list `timeline-network` in its `display` array to have markers of that type surfaced in the Network track.
+
 ### Version 68
 
 The `startTime` and `endTime` columns of the raw marker table (`thread.markers`) can now optionally be stored as `Float64Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
