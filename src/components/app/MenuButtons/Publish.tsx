@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import type { InflightProfileEncoding } from 'firefox-profiler/actions/publish';
 import {
   updateSharingOption,
   attemptToPublish,
@@ -42,6 +41,7 @@ import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
 import type {
   Profile,
   CheckedSharingOptions,
+  SharingMode,
   StartEndRange,
   UploadPhase,
   SanitizedProfileEncodingState,
@@ -51,7 +51,7 @@ import './Publish.css';
 import { Localized } from '@fluent/react';
 
 type OwnProps = {
-  readonly mode: 'download' | 'share';
+  readonly mode: SharingMode;
   readonly isRepublish?: boolean;
 };
 
@@ -82,19 +82,19 @@ type DispatchProps = {
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
-  _inflightEncoding: InflightProfileEncoding | undefined;
-
   override componentDidMount(): void {
-    this._inflightEncoding = this.props.encodeSanitizedProfile();
+    this.props.encodeSanitizedProfile(this.props.mode);
   }
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sharingOption = e.target.name as keyof CheckedSharingOptions;
-    this.props.updateSharingOption(sharingOption, e.target.checked);
-
-    this._inflightEncoding = this.props.encodeSanitizedProfile(
-      this._inflightEncoding
+    this.props.updateSharingOption(
+      this.props.mode,
+      sharingOption,
+      e.target.checked
     );
+
+    this.props.encodeSanitizedProfile(this.props.mode);
   };
 
   _renderCheckbox(
@@ -124,7 +124,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   }
 
   _onSubmit = () => {
-    this.props.attemptToPublish(this._inflightEncoding);
+    this.props.attemptToPublish();
   };
 
   _renderPublishPanel() {
@@ -416,14 +416,14 @@ export const PublishPanel = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: (state) => ({
+  mapStateToProps: (state, ownProps) => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
-    checkedSharingOptions: getCheckedSharingOptions(state),
+    checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
     downloadFileName: getFilenameString(state),
     sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
     uploadPhase: getUploadPhase(state),

@@ -295,7 +295,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
               // The value for the label following will be replaced
               label=""
               panelContent={
-                <PublishPanel mode="share" isRepublish={isRepublish} />
+                <PublishPanel mode="upload" isRepublish={isRepublish} />
               }
             />
           </Localized>
