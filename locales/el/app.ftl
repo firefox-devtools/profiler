@@ -544,10 +544,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός 
 MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
 MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτήν τη στιγμή
+MenuButtons--metaInfo--source-maps = Χάρτες πηγής:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Εφαρμογή χάρτη πηγής…
+    .title = Φόρτωση αρχείου .map από το δίσκο για συμβολισμό ενός πακέτου JavaScript σε ελαχιστοποίηση, ανάκτησης ονομάτων αρχικών συναρτήσεων και τοποθεσιών πηγής.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Επιλέξτε σε ποιο πακέτο θα εφαρμοστεί αυτός ο χάρτης πηγής:
 # Button to confirm the chosen source and apply the source map to it.
 MenuButtons--metaInfo--source-map-apply = Εφαρμογή
 # Button to dismiss the source chooser without symbolicating.
 MenuButtons--metaInfo--source-map-cancel = Ακύρωση
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Οι αρχικές πηγές επιλύθηκαν για { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Καμία καταχώρηση στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
+MenuButtons--metaInfo--source-map-error-invalid = Το επιλεγμένο αρχείο δεν είναι συμβατή πηγή χάρτη.
+MenuButtons--metaInfo--source-map-error-no-eligible = Αυτό το προφίλ δεν έχει πακέτα JS με URL χαρτών πηγής.
+MenuButtons--metaInfo--source-map-error-failed = Δεν ήταν δυνατή η εφαρμογή αυτού του χάρτη πηγής στο προφίλ.
 MenuButtons--metaInfo--cpu-model = Μοντέλο CPU:
 MenuButtons--metaInfo--cpu-cores = Πυρήνες CPU:
 MenuButtons--metaInfo--main-memory = Κύρια μνήμη:
