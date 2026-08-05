@@ -203,3 +203,25 @@ export function describeStaleSocketFailure(
     `Underlying error: ${toErrorMessage(error)}`,
   ].join('\n');
 }
+
+/**
+ * How to get rid of a daemon that cannot be reached through its socket.
+ * "profiler-cli stop" is no help there, because it asks the daemon to shut
+ * itself down over that same socket, so the only way out is to signal the
+ * process directly.
+ */
+export function describeManualKill(pid: number): string {
+  const command =
+    process.platform === 'win32' ? `taskkill /PID ${pid} /F` : `kill ${pid}`;
+  return `The daemon may still be running as pid ${pid}. "profiler-cli stop" needs the same socket, so run "${command}" if you no longer need it.`;
+}
+
+/**
+ * Indent a block of text so it reads as quoted output inside a larger message.
+ */
+export function indentBlock(text: string, prefix: string = '  '): string {
+  return text
+    .split('\n')
+    .map((line) => `${prefix}${line}`)
+    .join('\n');
+}

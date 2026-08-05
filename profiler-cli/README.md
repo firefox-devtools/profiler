@@ -116,6 +116,8 @@ For `filter push`, exactly one flag per push. For ephemeral use, multiple flags 
 
 Sessions are stored in `~/.profiler-cli/` (or `$PROFILER_CLI_SESSION_DIR` to override).
 
+Each session keeps a metadata file, a Unix domain socket (a named pipe on Windows), and a daemon log in that directory. The daemon log is the first place to look when a session misbehaves, and `profiler-cli` prints its path in error messages.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for architecture, build instructions, and how to add new commands.

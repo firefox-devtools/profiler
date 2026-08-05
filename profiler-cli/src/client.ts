@@ -21,12 +21,18 @@ import {
   generateSessionId,
   getCurrentSessionId,
   getCurrentSocketPath,
+  getLogPath,
+  getLogSize,
   getSocketPath,
+  getStartupErrorPath,
   isDaemonReachable,
   loadSessionMetadata,
+  readLogTail,
+  takeStartupError,
   validateSession,
   waitForSocketClose,
 } from './session';
+import { describeManualKill, indentBlock } from './diagnostics';
 import { BUILD_HASH } from './constants';
 
 type BuildMismatchShutdownResult = 'stopped' | 'already-dead' | 'still-running';
@@ -222,15 +228,103 @@ function hasProxyEnvVar(): boolean {
   );
 }
 
-function formatEarlyExitError(earlyExit: {
+type DaemonEarlyExit = {
   code: number | null;
   signal: NodeJS.Signals | null;
-}): string {
-  const reason =
-    earlyExit.signal !== null
-      ? `signal ${earlyExit.signal}`
-      : `exit code ${earlyExit.code}`;
-  return `Daemon process exited unexpectedly during startup (${reason}). Run with PROFILER_CLI_SESSION_DIR set and check the session directory for a log file, or re-run after upgrading Node.js.`;
+};
+
+/**
+ * What is needed to dig a failure reason out of a session directory.
+ * `logStartByte` is where the log stood before this daemon was spawned, so that
+ * a session id reused after an earlier failure cannot pass off that earlier
+ * daemon's output as this one's.
+ */
+type DaemonFailureContext = {
+  sessionDir: string;
+  sessionId: string;
+  logStartByte: number;
+};
+
+/**
+ * What the client knows about the daemon at the point it gives up on it.
+ */
+type DaemonCondition =
+  // The process is gone. `foregroundCommand` reproduces the spawn with stdio
+  // attached, which is the only way to see output from a daemon that died
+  // without writing anything.
+  | { kind: 'exited'; foregroundCommand: string }
+  // The process is alive but has not published its session metadata yet.
+  | { kind: 'still-starting'; pid: number | undefined };
+
+/**
+ * Describe the daemon's condition, to go under a headline that has already
+ * stated what went wrong. `silent` says the daemon left neither a startup error
+ * nor a log, so this is all the message will have to go on.
+ */
+function describeDaemonCondition(
+  condition: DaemonCondition,
+  silent: boolean
+): string[] {
+  if (condition.kind === 'still-starting') {
+    return [
+      'It has not exited, so it is most likely still starting, and retrying often works.',
+      ...(condition.pid ? [describeManualKill(condition.pid)] : []),
+    ];
+  }
+
+  if (!silent) {
+    // Whatever it managed to log says more about how far it got than a guess.
+    return [];
+  }
+
+  return [
+    'It died before it could report a reason, so either the runtime failed to start or something outside the process killed it (out of memory, or a sandbox shutting it down).',
+    `Run it in the foreground to see what the runtime prints: ${condition.foregroundCommand}`,
+  ];
+}
+
+/**
+ * Turn a daemon that never came up into an actionable message.
+ *
+ * The daemon runs detached with its stdio discarded, so the reason has to be
+ * recovered from the session directory: first the startup error file the daemon
+ * writes on the way out, then the tail of its log, and failing both, whatever
+ * its condition allows us to say.
+ */
+function formatDaemonFailure(
+  context: DaemonFailureContext,
+  headline: string,
+  condition: DaemonCondition
+): string {
+  const { sessionDir, sessionId, logStartByte } = context;
+
+  const startupError = takeStartupError(sessionDir, sessionId);
+  if (startupError) {
+    // The daemon said why itself, which beats anything inferred here.
+    return [`${headline}:`, indentBlock(startupError)].join('\n');
+  }
+
+  const logPath = getLogPath(sessionDir, sessionId);
+  const logTail = readLogTail(sessionDir, sessionId, logStartByte);
+  if (logTail) {
+    return [
+      `${headline}.`,
+      ...describeDaemonCondition(condition, false),
+      `Last lines of ${logPath}:`,
+      indentBlock(logTail),
+    ].join('\n');
+  }
+
+  return [
+    `${headline}, without writing anything to ${logPath}.`,
+    ...describeDaemonCondition(condition, true),
+  ].join('\n');
+}
+
+function describeDaemonExit(earlyExit: DaemonEarlyExit): string {
+  return earlyExit.signal !== null
+    ? `killed by signal ${earlyExit.signal}`
+    : `exit code ${earlyExit.code}`;
 }
 
 /**
@@ -260,6 +354,16 @@ export async function startNewDaemon(
   // Generate a session ID upfront if not provided, so we know exactly which
   // session to wait for (avoids race condition with existing sessions)
   const targetSessionId = sessionId || generateSessionId();
+
+  // A record left by an earlier daemon on this session id would be mistaken
+  // for this one's. The log cannot be deleted the same way, since it is kept
+  // on purpose for debugging, so note where it ends instead.
+  fs.rmSync(getStartupErrorPath(sessionDir, targetSessionId), { force: true });
+  const failureContext: DaemonFailureContext = {
+    sessionDir,
+    sessionId: targetSessionId,
+    logStartByte: getLogSize(sessionDir, targetSessionId),
+  };
 
   if (sessionId) {
     const existingSession = await validateSession(sessionDir, targetSessionId);
@@ -319,7 +423,7 @@ export async function startNewDaemon(
   // Observe early daemon death so spawn-time failures surface immediately
   // instead of as a generic 500ms validation timeout.
   const daemonStartupState: {
-    earlyExit: { code: number | null; signal: NodeJS.Signals | null } | null;
+    earlyExit: DaemonEarlyExit | null;
     spawnError: Error | null;
   } = { earlyExit: null, spawnError: null };
   child.once('exit', (code, signal) => {
@@ -328,6 +432,17 @@ export async function startNewDaemon(
   child.once('error', (err) => {
     daemonStartupState.spawnError = err;
   });
+
+  const foregroundCommand = `${process.execPath} ${scriptPath} --daemon ${absolutePath} --session ${targetSessionId}`;
+
+  const daemonExitedError = (earlyExit: DaemonEarlyExit, what: string) =>
+    new Error(
+      formatDaemonFailure(
+        failureContext,
+        `The profiler-cli daemon ${what} (${describeDaemonExit(earlyExit)})`,
+        { kind: 'exited', foregroundCommand }
+      )
+    );
 
   // Phase 1: Wait for daemon to be validated (short timeout)
   const daemonStartMaxAttempts = 10; // 10 * 50ms = 500ms
@@ -339,11 +454,18 @@ export async function startNewDaemon(
 
     if (daemonStartupState.spawnError) {
       throw new Error(
-        `Failed to spawn daemon: ${daemonStartupState.spawnError.message}`
+        [
+          `Failed to spawn the profiler-cli daemon (${process.execPath}).`,
+          `Underlying error: ${daemonStartupState.spawnError.message}`,
+          'Sandboxes and process-limited environments can refuse to start detached child processes.',
+        ].join('\n')
       );
     }
     if (daemonStartupState.earlyExit) {
-      throw new Error(formatEarlyExitError(daemonStartupState.earlyExit));
+      throw daemonExitedError(
+        daemonStartupState.earlyExit,
+        'exited during startup'
+      );
     }
 
     // Validate the session (checks metadata exists, process running, socket exists)
@@ -356,10 +478,20 @@ export async function startNewDaemon(
   // Check if daemon started successfully after polling
   if (!(await validateSession(sessionDir, targetSessionId))) {
     if (daemonStartupState.earlyExit) {
-      throw new Error(formatEarlyExitError(daemonStartupState.earlyExit));
+      throw daemonExitedError(
+        daemonStartupState.earlyExit,
+        'exited during startup'
+      );
     }
+
+    // It has not exited and has not published its metadata, so it is still
+    // starting. Saying it died here would be wrong.
     throw new Error(
-      `Failed to start daemon: session not validated after ${daemonStartMaxAttempts * 50}ms`
+      formatDaemonFailure(
+        failureContext,
+        `The profiler-cli daemon did not become ready within ${daemonStartMaxAttempts * 50}ms`,
+        { kind: 'still-starting', pid: child.pid }
+      )
     );
   }
 
@@ -375,6 +507,15 @@ export async function startNewDaemon(
   while (attempts < profileLoadMaxAttempts) {
     await new Promise((resolve) => setTimeout(resolve, 100));
     attempts++;
+
+    // A daemon that dies while loading (out of memory, killed by the sandbox)
+    // would otherwise keep us polling a dead socket until the load timeout.
+    if (daemonStartupState.earlyExit) {
+      throw daemonExitedError(
+        daemonStartupState.earlyExit,
+        'died while loading the profile'
+      );
+    }
 
     try {
       const response = await sendStatusMessage(sessionDir, targetSessionId);

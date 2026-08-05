@@ -102,6 +102,63 @@ export function writeStartupError(
 }
 
 /**
+ * Read and delete the startup failure record for a session, if there is one.
+ */
+export function takeStartupError(
+  sessionDir: string,
+  sessionId: string
+): string | null {
+  const errorPath = getStartupErrorPath(sessionDir, sessionId);
+  try {
+    const message = fs.readFileSync(errorPath, 'utf-8').trim();
+    fs.rmSync(errorPath, { force: true });
+    return message || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Current size of a session's daemon log, or 0 if it has none.
+ *
+ * Daemons append to the log of the session id they are given, and the log is
+ * kept on purpose across sessions, so callers that only care about one daemon's
+ * output record the size before starting it and read from there.
+ */
+export function getLogSize(sessionDir: string, sessionId: string): number {
+  try {
+    return fs.statSync(getLogPath(sessionDir, sessionId)).size;
+  } catch {
+    return 0;
+  }
+}
+
+/**
+ * Read the last `maxLines` lines of a session's daemon log, if it has one,
+ * ignoring everything before `fromByte`.
+ */
+export function readLogTail(
+  sessionDir: string,
+  sessionId: string,
+  fromByte: number = 0,
+  maxLines: number = 15
+): string | null {
+  try {
+    const contents = fs
+      .readFileSync(getLogPath(sessionDir, sessionId))
+      .subarray(fromByte)
+      .toString('utf-8')
+      .trimEnd();
+    if (!contents) {
+      return null;
+    }
+    return contents.split('\n').slice(-maxLines).join('\n');
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Save session metadata to disk.
  */
 export function saveSessionMetadata(
