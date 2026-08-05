@@ -72,6 +72,36 @@ export function getMetadataPath(sessionDir: string, sessionId: string): string {
 }
 
 /**
+ * Get the path of the startup failure record for a session.
+ *
+ * The daemon is spawned detached with its stdio discarded, so this file is how
+ * it tells the client why it could not start. The extension deliberately isn't
+ * `.json`, which `listSessions` uses to enumerate sessions.
+ */
+export function getStartupErrorPath(
+  sessionDir: string,
+  sessionId: string
+): string {
+  return path.join(sessionDir, `${sessionId}.error`);
+}
+
+/**
+ * Record why the daemon failed to start, for the client to pick up.
+ */
+export function writeStartupError(
+  sessionDir: string,
+  sessionId: string,
+  message: string
+): void {
+  try {
+    fs.writeFileSync(getStartupErrorPath(sessionDir, sessionId), message);
+  } catch {
+    // The session directory being unwritable is itself one of the failures
+    // this file reports, so there is nothing useful to do here.
+  }
+}
+
+/**
  * Save session metadata to disk.
  */
 export function saveSessionMetadata(
@@ -203,6 +233,10 @@ export function cleanupSession(sessionDir: string, sessionId: string): void {
 
   // Remove metadata file
   fs.rmSync(metadataPath, { force: true });
+
+  // Remove any startup failure record left behind by a previous daemon that
+  // reused this session id.
+  fs.rmSync(getStartupErrorPath(sessionDir, sessionId), { force: true });
 
   // Remove current session file if it points to this session
   const currentSessionId = getCurrentSessionId(sessionDir);
