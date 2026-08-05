@@ -9,6 +9,7 @@ import { ProfileViewer } from './ProfileViewer';
 import { ZipFileViewer } from './ZipFileViewer';
 import { Home } from './Home';
 import { CompareHome } from './CompareHome';
+import { BenchmarkCompareViewer } from './BenchmarkCompareViewer';
 import { ProfileRootMessage } from './ProfileRootMessage';
 import { getView } from 'firefox-profiler/selectors/app';
 import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
@@ -34,6 +35,7 @@ const ERROR_MESSAGES_L10N_ID: { [key: string]: string } = Object.freeze({
   public: 'AppViewRouter--error-public',
   'from-url': 'AppViewRouter--error-from-url',
   compare: 'AppViewRouter--error-compare',
+  'compare-benchmark': 'AppViewRouter--error-compare',
 });
 
 type AppViewRouterStateProps = {
@@ -61,6 +63,11 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
           return <CompareHome />;
         }
         break;
+      case 'compare-benchmark':
+        if (profilesToCompare === null) {
+          return <CompareHome />;
+        }
+        return <BenchmarkCompareViewer />;
       case 'uploaded-recordings':
         return <UploadedRecordingsHome />;
       case 'from-browser':

@@ -1,0 +1,405 @@
+.benchmarkCompareViewer {
+  --internal-text-muted: var(--grey-70);
+  --internal-text-hint: var(--grey-60);
+  --internal-cell-border: var(--grey-20);
+  --internal-strong-border: var(--grey-40);
+  --internal-header-background: var(--grey-10);
+  --internal-row-hover-background: var(--grey-10);
+  --internal-expansion-background: var(--grey-10);
+  --internal-inner-hover-background: var(--grey-20);
+  --internal-inner-expansion-background: var(--grey-20);
+  --internal-panel-border: var(--grey-30);
+  --internal-panel-label-background: var(--grey-20);
+  --internal-spinner-track: var(--grey-30);
+  --internal-spinner-active: var(--blue-50);
+  --internal-error-border: var(--red-50);
+  --internal-error-background: #ffe8e8;
+  --internal-error-color: var(--red-70);
+  --internal-regressed-color: var(--red-70);
+  --internal-improved-color: var(--green-80);
+  --internal-regressed-background: #ffe8e8;
+  --internal-improved-background: #d3f3d8;
+
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+
+  /* this element is a child in a horizontal flex parent */
+  align-self: flex-start; /* allow extending beyond the parent's height */
+  padding: 2em 3em;
+  background: var(--base-background-color);
+}
+
+:root.dark-mode {
+  .benchmarkCompareViewer {
+    --internal-text-muted: var(--grey-30);
+    --internal-text-hint: var(--grey-40);
+    --internal-cell-border: var(--grey-70);
+    --internal-strong-border: var(--grey-50);
+    --internal-header-background: var(--grey-80);
+    --internal-row-hover-background: rgb(255 255 255 / 0.06);
+    --internal-expansion-background: rgb(255 255 255 / 0.04);
+    --internal-inner-hover-background: rgb(255 255 255 / 0.09);
+    --internal-inner-expansion-background: rgb(255 255 255 / 0.07);
+    --internal-panel-border: var(--grey-60);
+    --internal-panel-label-background: var(--grey-80);
+    --internal-spinner-track: var(--grey-70);
+    --internal-spinner-active: var(--blue-40);
+    --internal-error-border: var(--red-60);
+    --internal-error-background: rgb(255 0 57 / 0.15);
+    --internal-error-color: #ff8a8a;
+    --internal-regressed-color: #ff8a8a;
+    --internal-improved-color: #7ed77e;
+    --internal-regressed-background: rgb(255 0 57 / 0.22);
+    --internal-improved-background: rgb(48 230 11 / 0.18);
+  }
+}
+
+.benchmarkResults {
+  font-size: 14px;
+}
+
+.benchmarkCompareViewer__spacer {
+  height: 100vh;
+}
+
+.benchmarkTitle {
+  margin-bottom: 1em;
+}
+
+/* Loading */
+
+.benchmarkLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 4em;
+  color: var(--internal-text-hint);
+  gap: 1em;
+}
+
+.benchmarkSpinner {
+  width: 2em;
+  height: 2em;
+  border: 3px solid var(--internal-spinner-track);
+  border-radius: 50%;
+  border-top-color: var(--internal-spinner-active);
+  animation: benchmarkSpin 0.8s linear infinite;
+}
+
+@keyframes benchmarkSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error */
+
+.benchmarkError {
+  padding: 1em;
+  border: 1px solid var(--internal-error-border);
+  border-radius: 4px;
+  background: var(--internal-error-background);
+  color: var(--internal-error-color);
+}
+
+/* Profile URLs */
+
+.benchmarkProfileUrls {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5em;
+  color: var(--internal-text-muted);
+  font-size: 0.9em;
+  gap: 0.25em;
+  word-break: break-all;
+}
+
+/* Section headings */
+
+.benchmarkSectionTitle {
+  margin: 1.5em 0 0.5em;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+/* Suite details */
+
+.benchmarkSuiteDetails > .benchmarkSectionTitle {
+  cursor: pointer;
+  user-select: none;
+}
+
+.benchmarkSuiteDetails > .benchmarkSectionTitle::marker {
+  font-size: 0.8em;
+}
+
+.benchmarkNoChanges {
+  padding: 0.5em 0;
+  color: var(--internal-text-hint);
+  font-style: italic;
+}
+
+/* Filter controls (sliders that raise / lower the significance thresholds). */
+
+.benchmarkFilters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75em;
+  color: var(--internal-text-muted);
+  font-size: 0.9em;
+  gap: 1.5em;
+}
+
+.benchmarkFilter {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.benchmarkFilter__label {
+  white-space: nowrap;
+}
+
+.benchmarkFilter__value {
+  min-width: 3.5em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Tables */
+
+.benchmarkTable {
+  width: 100%;
+  margin-bottom: 1em;
+  border-collapse: collapse;
+  font-size: 0.9em;
+
+  /* Fixed layout so the numeric column widths are honored exactly. With
+   * the same numeric widths in both the outer score table and the inner
+   * subtest tables, and zero right-padding on the expansion row, the
+   * numeric columns line up vertically across both tables. The first
+   * column (label / bucket name) flexes to fill the remaining space. */
+  table-layout: fixed;
+}
+
+.benchmarkTable th,
+.benchmarkTable td {
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--internal-cell-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.benchmarkTable th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  background: var(--internal-header-background);
+  font-weight: bold;
+}
+
+.benchmarkCell--number {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.benchmarkCell--colFixed {
+  width: 9rem;
+}
+
+.benchmarkCell--bucketName,
+.benchmarkCell--scoreLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.benchmarkRow--overall td {
+  border-bottom: 2px solid var(--internal-strong-border);
+  font-weight: bold;
+}
+
+.benchmarkCell--indented {
+  padding-left: 1.5em;
+}
+
+/* Expandable subtest rows in the score table */
+
+.benchmarkRow--suite-expandable {
+  cursor: pointer;
+}
+
+.benchmarkRow--suite-expandable:hover {
+  background: var(--internal-row-hover-background);
+}
+
+.benchmarkCell--suiteLabel {
+  position: relative;
+}
+
+.benchmarkDisclosure {
+  display: inline-block;
+  width: 1em;
+  margin-right: 0.25em;
+  color: var(--internal-text-hint);
+  font-size: 0.75em;
+  text-align: center;
+  user-select: none;
+}
+
+.benchmarkRow--expansion > td {
+  padding: 0.5em 0 0.5em 2.5em;
+  background: var(--internal-expansion-background);
+}
+
+.benchmarkRow--expansion .benchmarkTable {
+  margin-bottom: 0;
+}
+
+/* Color coding.
+ *
+ * Confidence drives shading (background): HIGH = full, MEDIUM = muted,
+ * LOW = no shading. Effect size drives boldness: Large = bold,
+ * Moderate = semibold, Small/Negligible = normal.
+ */
+
+.benchmarkCell--regressed {
+  color: var(--internal-regressed-color);
+}
+
+.benchmarkCell--improved {
+  color: var(--internal-improved-color);
+}
+
+.benchmarkCell--regressed.benchmarkCell--conf-high {
+  background: var(--internal-regressed-background);
+}
+
+.benchmarkCell--regressed.benchmarkCell--conf-medium {
+  background: color-mix(
+    in srgb,
+    var(--internal-regressed-background) 40%,
+    transparent
+  );
+}
+
+.benchmarkCell--improved.benchmarkCell--conf-high {
+  background: var(--internal-improved-background);
+}
+
+.benchmarkCell--improved.benchmarkCell--conf-medium {
+  background: color-mix(
+    in srgb,
+    var(--internal-improved-background) 40%,
+    transparent
+  );
+}
+
+.benchmarkCell--effect-large {
+  font-weight: bold;
+}
+
+.benchmarkCell--effect-moderate {
+  font-weight: 600;
+}
+
+/* Expandable bucket rows (inner table). Mirror the suite-row styling. */
+
+.benchmarkRow--bucket-expandable {
+  cursor: pointer;
+}
+
+.benchmarkRow--bucket-expandable:hover {
+  background: var(--internal-inner-hover-background);
+}
+
+.benchmarkRow--bucket-expansion > td {
+  padding: 0.5em 0;
+  background: var(--internal-inner-expansion-background);
+  white-space: normal;
+}
+
+/* Stacked base / new flame graphs for one expanded bucket. The base flame
+ * graph is on top, the new one below, so they can be visually compared by
+ * scanning vertically. Each side's width is set inline (as a percentage)
+ * proportional to its total sample count, so 1 sample takes up the same
+ * pixel width on both sides. */
+
+.bucketFlameGraphPair {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5em 1em;
+  gap: 0.5em;
+}
+
+.bucketFlameGraphSide {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  height: 280px;
+  flex-direction: column;
+  border: 1px solid var(--internal-panel-border);
+  border-radius: 4px;
+  background: var(--base-background-color);
+}
+
+.bucketFlameGraphSide__label {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--internal-panel-border);
+  background: var(--internal-panel-label-background);
+  color: var(--internal-text-muted);
+  font-size: 0.85em;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.bucketFlameGraphSide__labelText {
+  overflow: hidden;
+  flex: 1;
+  padding: 4px 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Anchor stretched to the full height of the label bar and flush with the
+ * right edge, so the whole rectangle is a click target. */
+.bucketFlameGraphSide__openInNewTab {
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  color: inherit;
+  font-weight: normal;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.bucketFlameGraphSide__openInNewTab:hover {
+  background: var(--internal-inner-hover-background);
+  text-decoration: underline;
+}
+
+.bucketFlameGraphSide__sampleCount {
+  color: var(--internal-text-hint);
+  font-weight: normal;
+  text-transform: none;
+}
+
+.bucketFlameGraphSide__chart {
+  display: flex;
+  overflow: hidden;
+  flex: 1;
+  flex-direction: column;
+}
+
+.bucketFlameGraphSide__empty {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  color: var(--internal-text-hint);
+  font-style: italic;
+}

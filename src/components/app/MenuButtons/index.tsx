@@ -109,6 +109,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         return isLocalURL(profileUrl) ? 'local' : 'uploaded';
       case 'none':
       case 'uploaded-recordings':
+      case 'compare-benchmark':
         throw new Error(`The datasource ${dataSource} shouldn't happen here.`);
       default:
         throw assertExhaustiveCheck(dataSource);
