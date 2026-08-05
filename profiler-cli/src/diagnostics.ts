@@ -3,12 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * Human-readable diagnostics for the ways daemon startup can fail.
+ * Human-readable diagnostics for the ways daemon startup and client/daemon
+ * communication can fail.
  *
  * The daemon is spawned detached with its stdio discarded, so without help the
  * client can only report an exit code. Most real-world failures come from
  * sandboxes: a home directory that cannot be written, or a policy that refuses
- * bind() on Unix domain sockets.
+ * bind()/connect() on Unix domain sockets.
  */
 
 import * as fs from 'fs';
@@ -41,6 +42,15 @@ const MAX_UNIX_SOCKET_PATH_BYTES = process.platform === 'linux' ? 107 : 103;
 export function getErrnoCode(error: unknown): string | undefined {
   const code = (error as NodeJS.ErrnoException | undefined)?.code;
   return typeof code === 'string' ? code : undefined;
+}
+
+/**
+ * Whether a failure is the kernel refusing an operation this process is not
+ * allowed to perform, which in this codebase almost always means a sandbox.
+ */
+export function isPermissionErrno(error: unknown): boolean {
+  const code = getErrnoCode(error);
+  return code === 'EACCES' || code === 'EPERM';
 }
 
 export function toErrorMessage(error: unknown): string {
@@ -274,6 +284,45 @@ export function describeStaleSocketFailure(
     'Remove it, or load the profile under a different session id with --session.',
     `Underlying error: ${toErrorMessage(error)}`,
   ].join('\n');
+}
+
+/**
+ * Explain a failure to reach a daemon over its socket.
+ */
+export function describeSocketConnectError(
+  socketPath: string,
+  error: unknown
+): string {
+  const detail = `Underlying error: ${toErrorMessage(error)}`;
+
+  switch (getErrnoCode(error)) {
+    case 'ENOENT':
+      return [
+        `No daemon socket at ${socketPath}.`,
+        'The session is gone. Run "profiler-cli load <PATH>" to start a new one.',
+      ].join('\n');
+    case 'ECONNREFUSED':
+      return [
+        `Nothing is accepting connections on ${socketPath}.`,
+        'The daemon exited without cleaning up. Run "profiler-cli load <PATH>" to start a new one.',
+      ].join('\n');
+    case 'EACCES':
+    case 'EPERM':
+      return [
+        `Not allowed to connect to the daemon socket at ${socketPath}.`,
+        SOCKET_SANDBOX_HINT,
+        detail,
+      ].join('\n');
+    case 'ETIMEDOUT':
+      return [
+        `Timed out connecting to the daemon at ${socketPath}.`,
+        'The daemon may be busy or wedged. Run "profiler-cli stop" and load the profile again.',
+      ].join('\n');
+    default:
+      return [`Failed to talk to the daemon on ${socketPath}.`, detail].join(
+        '\n'
+      );
+  }
 }
 
 /**

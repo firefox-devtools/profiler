@@ -16,7 +16,7 @@ import * as net from 'net';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import type { SessionMetadata } from './protocol';
-import { describeSessionDirFailure } from './diagnostics';
+import { describeSessionDirFailure, getErrnoCode } from './diagnostics';
 
 /**
  * Ensure the session directory exists.
@@ -230,25 +230,44 @@ export function getCurrentSocketPath(sessionDir: string): string | null {
 }
 
 /**
- * Check if a daemon is reachable by attempting a socket connection.
+ * Attempt a socket connection to a daemon. Resolves with null when the daemon
+ * answers, or with the connection error when it does not.
+ *
+ * Callers use the errno to tell "there is no daemon" (ENOENT, ECONNREFUSED)
+ * apart from "this process is not allowed to reach the daemon" (EACCES,
+ * EPERM), which are very different problems with the same symptom.
  * Works for both Unix domain sockets and Windows named pipes.
  */
-export async function isDaemonReachable(socketPath: string): Promise<boolean> {
+export async function probeDaemonSocket(
+  socketPath: string
+): Promise<NodeJS.ErrnoException | null> {
   return new Promise((resolve) => {
     const socket = net.connect(socketPath);
     socket.setTimeout(1000);
     socket.on('connect', () => {
       socket.destroy();
-      resolve(true);
+      resolve(null);
     });
-    socket.on('error', () => {
-      resolve(false);
+    socket.on('error', (error: NodeJS.ErrnoException) => {
+      socket.destroy();
+      resolve(error);
     });
     socket.on('timeout', () => {
       socket.destroy();
-      resolve(false);
+      const error: NodeJS.ErrnoException = new Error(
+        `connect ETIMEDOUT ${socketPath}`
+      );
+      error.code = 'ETIMEDOUT';
+      resolve(error);
     });
   });
+}
+
+/**
+ * Check if a daemon is reachable by attempting a socket connection.
+ */
+export async function isDaemonReachable(socketPath: string): Promise<boolean> {
+  return (await probeDaemonSocket(socketPath)) === null;
 }
 
 /**
@@ -286,7 +305,13 @@ export function cleanupSession(sessionDir: string, sessionId: string): void {
   // cleanupSession concurrently during version-mismatch shutdown, so the file
   // may already be gone by the time the second caller tries to unlink it.
   if (process.platform !== 'win32') {
-    fs.rmSync(socketPath, { force: true });
+    try {
+      fs.rmSync(socketPath, { force: true });
+    } catch {
+      // Something that is not a socket sits at the socket path (a directory,
+      // say). Removing the metadata below is what actually retires the
+      // session, so it must not be blocked by junk we cannot unlink.
+    }
   }
 
   // Remove metadata file
@@ -301,6 +326,55 @@ export function cleanupSession(sessionDir: string, sessionId: string): void {
   if (currentSessionId === sessionId) {
     fs.rmSync(currentSessionFile, { force: true });
   }
+}
+
+/**
+ * Errnos that prove no daemon is listening on a socket path: nothing is there
+ * (ENOENT), something is there but has no listener (ECONNREFUSED), or what is
+ * there is not a socket at all and so cannot have one (ENOTSOCK).
+ *
+ * Every other failure, such as EACCES from a sandbox policy or ETIMEDOUT from
+ * a busy daemon, leaves open the possibility that the daemon is alive and well.
+ */
+function isDaemonProvablyGone(error: NodeJS.ErrnoException): boolean {
+  const code = getErrnoCode(error);
+  return code === 'ENOENT' || code === 'ECONNREFUSED' || code === 'ENOTSOCK';
+}
+
+/**
+ * Why a session could not be reached, and whether its files were removed.
+ */
+export type UnreachableSession = {
+  error: NodeJS.ErrnoException;
+  cleanedUp: boolean;
+};
+
+/**
+ * Probe a session that failed validation, and clean up after it only when its
+ * daemon is provably gone. Resolves with null when the daemon answers after
+ * all, meaning the failed validation was a blip.
+ *
+ * A dead daemon and a sandbox that forbids connect() are indistinguishable to
+ * `validateSession`, but only the first justifies deleting the session files:
+ * discarding a healthy session because this process may not talk to it orphans
+ * a running daemon and destroys the socket it was reachable through.
+ */
+export async function cleanupIfDaemonGone(
+  sessionDir: string,
+  sessionId: string,
+  socketPath: string
+): Promise<UnreachableSession | null> {
+  const error = await probeDaemonSocket(socketPath);
+  if (!error) {
+    return null;
+  }
+
+  const cleanedUp = isDaemonProvablyGone(error);
+  if (cleanedUp) {
+    cleanupSession(sessionDir, sessionId);
+  }
+
+  return { error, cleanedUp };
 }
 
 /**

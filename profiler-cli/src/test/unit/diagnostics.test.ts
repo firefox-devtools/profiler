@@ -13,10 +13,12 @@ import * as path from 'path';
 import {
   assertSocketPathUsable,
   describeSessionDirFailure,
+  describeSocketConnectError,
   describeSocketListenError,
   describeStaleSocketFailure,
   ensureSessionDirUsable,
   getErrnoCode,
+  indentBlock,
 } from '../../diagnostics';
 
 function errnoError(code: string, message: string): NodeJS.ErrnoException {
@@ -170,8 +172,8 @@ describe('profiler-cli diagnostics', function () {
       expect(message).toContain(socketPath);
       expect(message).toContain('It is a directory, not a socket.');
       expect(message).toContain('Path is a directory');
-      // The directory holding the socket is not the problem here, so pointing
-      // at it would send the user off in the wrong direction.
+      // The client verifies the session directory before spawning the daemon,
+      // so pointing at the directory here would contradict that check.
       expect(message).not.toContain('session directory');
       expect(message).not.toContain('PROFILER_CLI_SESSION_DIR');
     });
@@ -199,6 +201,32 @@ describe('profiler-cli diagnostics', function () {
         errnoError('EPERM', 'operation not permitted')
       );
       expect(message).toContain('operation not permitted');
+    });
+  });
+
+  describe('describeSocketConnectError', function () {
+    it('tells the user to reload when the socket is gone', function () {
+      const message = describeSocketConnectError(
+        '/tmp/s.sock',
+        errnoError('ENOENT', 'connect ENOENT')
+      );
+      expect(message).toContain('profiler-cli load');
+    });
+
+    it('distinguishes a denied connection from a missing daemon', function () {
+      const message = describeSocketConnectError(
+        '/tmp/s.sock',
+        errnoError('EPERM', 'connect EPERM')
+      );
+      expect(message).toContain('Not allowed to connect');
+      expect(message).toContain('sandbox');
+      expect(message).not.toContain('profiler-cli load');
+    });
+  });
+
+  describe('indentBlock', function () {
+    it('indents every line', function () {
+      expect(indentBlock('a\nb')).toBe('  a\n  b');
     });
   });
 });

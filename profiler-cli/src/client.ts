@@ -17,6 +17,7 @@ import type {
   CommandResult,
 } from './protocol';
 import {
+  cleanupIfDaemonGone,
   cleanupSession,
   generateSessionId,
   getCurrentSessionId,
@@ -27,6 +28,7 @@ import {
   getStartupErrorPath,
   isDaemonReachable,
   loadSessionMetadata,
+  probeDaemonSocket,
   readLogTail,
   takeStartupError,
   validateSession,
@@ -35,8 +37,10 @@ import {
 import {
   assertSocketPathUsable,
   describeManualKill,
+  describeSocketConnectError,
   ensureSessionDirUsable,
   indentBlock,
+  toErrorMessage,
 } from './diagnostics';
 import { BUILD_HASH } from './constants';
 
@@ -73,12 +77,16 @@ async function sendMessageToSocket(
     });
 
     socket.on('error', (error) => {
-      reject(new Error(`Socket error: ${error.message}`));
+      reject(new Error(describeSocketConnectError(socketPath, error)));
     });
 
     socket.on('timeout', () => {
       socket.destroy();
-      reject(new Error('Connection timeout'));
+      reject(
+        new Error(
+          `Timed out after ${timeoutMs}ms waiting for the daemon on ${socketPath} to answer.`
+        )
+      );
     });
 
     socket.setTimeout(timeoutMs);
@@ -130,6 +138,53 @@ async function attemptShutdownOnBuildMismatch(
 }
 
 /**
+ * Explain why a session that has metadata on disk cannot be reached, and clean
+ * up after it when the daemon is provably gone.
+ *
+ * A dead daemon and a sandbox that forbids connect() look identical to
+ * `validateSession`, but only the first one justifies deleting the session
+ * files. Throwing away a healthy session because this process is not allowed
+ * to talk to it would make the situation worse.
+ */
+export async function explainUnreachableSession(
+  sessionDir: string,
+  sessionId: string
+): Promise<string> {
+  const metadata = loadSessionMetadata(sessionDir, sessionId);
+
+  if (!metadata) {
+    // Read the startup record before cleaning up, which deletes it.
+    const startupError = takeStartupError(sessionDir, sessionId);
+    cleanupSession(sessionDir, sessionId);
+    if (startupError) {
+      return [
+        `The daemon for session ${sessionId} failed to start:`,
+        indentBlock(startupError),
+      ].join('\n');
+    }
+    return `Unknown session ${sessionId}: no metadata found in ${sessionDir}. Run "profiler-cli load <PATH>" to start a session.`;
+  }
+
+  const unreachable = await cleanupIfDaemonGone(
+    sessionDir,
+    sessionId,
+    metadata.socketPath
+  );
+  if (!unreachable) {
+    // The daemon answered on the retry, so the original check was a blip.
+    return `Session ${sessionId} could not be validated, but its daemon is responding again. Please retry the command.`;
+  }
+
+  return [
+    `Session ${sessionId} is not reachable.`,
+    describeSocketConnectError(metadata.socketPath, unreachable.error),
+    ...(unreachable.cleanedUp
+      ? []
+      : [`Daemon log: ${metadata.logPath}`, describeManualKill(metadata.pid)]),
+  ].join('\n');
+}
+
+/**
  * Send a message to the daemon and return the raw response.
  */
 async function sendRawMessage(
@@ -145,9 +200,8 @@ async function sendRawMessage(
 
   // Validate the session
   if (!(await validateSession(sessionDir, resolvedSessionId))) {
-    cleanupSession(sessionDir, resolvedSessionId);
     throw new Error(
-      `Session ${resolvedSessionId} is not running or is invalid.`
+      await explainUnreachableSession(sessionDir, resolvedSessionId)
     );
   }
 
@@ -380,15 +434,42 @@ export async function startNewDaemon(
   };
 
   if (sessionId) {
+    const alreadyRunning = `Session ${targetSessionId} is already running. Stop it first or choose a different session id.`;
+
     const existingSession = await validateSession(sessionDir, targetSessionId);
     if (existingSession) {
-      throw new Error(
-        `Session ${targetSessionId} is already running. Stop it first or choose a different session id.`
-      );
+      throw new Error(alreadyRunning);
     }
 
-    if (loadSessionMetadata(sessionDir, targetSessionId)) {
-      cleanupSession(sessionDir, targetSessionId);
+    // Taking over the id unlinks the socket and overwrites the metadata, so
+    // only retire the old session once its daemon is provably gone.
+    const staleMetadata = loadSessionMetadata(sessionDir, targetSessionId);
+    if (staleMetadata) {
+      const unreachable = await cleanupIfDaemonGone(
+        sessionDir,
+        targetSessionId,
+        staleMetadata.socketPath
+      );
+
+      if (unreachable === null) {
+        // Answered on the retry, so the failed validation was a blip.
+        throw new Error(alreadyRunning);
+      }
+
+      if (!unreachable.cleanedUp) {
+        throw new Error(
+          [
+            `Session ${targetSessionId} already exists and cannot be reached, so its files were left in place.`,
+            describeSocketConnectError(
+              staleMetadata.socketPath,
+              unreachable.error
+            ),
+            `Daemon log: ${staleMetadata.logPath}`,
+            describeManualKill(staleMetadata.pid),
+            'Alternatively, load the profile under a different session id with --session.',
+          ].join('\n')
+        );
+      }
     }
   }
 
@@ -498,6 +579,23 @@ export async function startNewDaemon(
       );
     }
 
+    // The daemon is still alive, so either it published its socket and this
+    // process is not allowed to connect to it, or it has not got that far yet.
+    const metadata = loadSessionMetadata(sessionDir, targetSessionId);
+    if (metadata) {
+      const probeError = await probeDaemonSocket(metadata.socketPath);
+      if (probeError) {
+        throw new Error(
+          [
+            `The profiler-cli daemon started but cannot be reached.`,
+            describeSocketConnectError(metadata.socketPath, probeError),
+            `Daemon log: ${metadata.logPath}`,
+            describeManualKill(metadata.pid),
+          ].join('\n')
+        );
+      }
+    }
+
     // It has not exited and has not published its metadata, so it is still
     // starting. Saying it died here would be wrong, and would send the user
     // looking for an environment problem that the checks above have ruled out.
@@ -582,6 +680,10 @@ export async function startNewDaemon(
 
 /**
  * Stop a running daemon.
+ *
+ * Only reports success once the daemon is known to be gone. One that merely
+ * cannot be reached may still be running, and saying it stopped would leave
+ * the user with a process no command can find.
  */
 export async function stopDaemon(
   sessionDir: string,
@@ -593,16 +695,47 @@ export async function stopDaemon(
     throw new Error('No active session to stop.');
   }
 
-  // Send shutdown command
+  const metadata = loadSessionMetadata(sessionDir, resolvedSessionId);
+  if (!metadata) {
+    cleanupSession(sessionDir, resolvedSessionId);
+    console.log(`Session ${resolvedSessionId} was not running.`);
+    return;
+  }
+
   try {
     await sendMessage(sessionDir, { type: 'shutdown' }, resolvedSessionId);
   } catch (error) {
-    // If the daemon is already dead, that's fine
-    console.error(`Note: ${error}`);
+    // An already-dead daemon is a successful stop, an unreachable live one is
+    // not.
+    const unreachable = await cleanupIfDaemonGone(
+      sessionDir,
+      resolvedSessionId,
+      metadata.socketPath
+    );
+    if (unreachable === null || !unreachable.cleanedUp) {
+      // The quoted reason already ends with the kill advice, so no
+      // describeManualKill().
+      throw new Error(
+        [
+          `Session ${resolvedSessionId} could not be stopped, and its daemon (pid ${metadata.pid}) may still be running:`,
+          indentBlock(toErrorMessage(error)),
+        ].join('\n')
+      );
+    }
+
+    console.error(['Note:', indentBlock(toErrorMessage(error))].join('\n'));
+    console.log(`Session ${resolvedSessionId} is no longer running.`);
+    return;
   }
 
-  // Wait a bit for cleanup
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  if (!(await waitForSocketClose(metadata.socketPath))) {
+    throw new Error(
+      [
+        `Session ${resolvedSessionId} acknowledged the shutdown but its daemon is still listening on ${metadata.socketPath}.`,
+        describeManualKill(metadata.pid),
+      ].join('\n')
+    );
+  }
 
   console.log(`Session ${resolvedSessionId} stopped`);
 }

@@ -17,9 +17,16 @@ import {
   rmSync,
   writeFileSync,
 } from 'fs';
+import { readFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { cli, cliFail, type CliTestContext } from './utils';
+import {
+  createTestContext,
+  cleanupTestContext,
+  cli,
+  cliFail,
+  type CliTestContext,
+} from './utils';
 
 const PROFILE = 'src/test/fixtures/upgrades/processed-1.json';
 
@@ -30,7 +37,8 @@ const skipUnix = process.platform === 'win32';
 const skipUnixPermissions = skipUnix || isRoot;
 
 /**
- * Run profiler-cli against an arbitrary session directory.
+ * Run profiler-cli against an arbitrary session directory, bypassing the
+ * per-test context (whose directory is deliberately healthy).
  */
 function contextForSessionDir(sessionDir: string): CliTestContext {
   return {
@@ -122,30 +130,6 @@ describe('unusable session directory', () => {
   });
 });
 
-describe('unusable socket path', () => {
-  it('rejects a socket path too long for sockaddr_un before spawning', async () => {
-    if (skipUnix) {
-      return;
-    }
-
-    const scratchDir = mkdtempSync(join(tmpdir(), 'profiler-cli-fail-'));
-    const sessionDir = join(scratchDir, ...Array(12).fill('abcdefghij'));
-
-    try {
-      const result = await cliFail(contextForSessionDir(sessionDir), [
-        'load',
-        PROFILE,
-      ]);
-
-      const text = output(result);
-      expect(text).toContain('byte limit');
-      expect(text).toContain('PROFILER_CLI_SESSION_DIR');
-    } finally {
-      rmSync(scratchDir, { recursive: true, force: true });
-    }
-  });
-});
-
 describe('socket path blocked by something else', () => {
   let scratchDir: string;
 
@@ -179,5 +163,215 @@ describe('socket path blocked by something else', () => {
     expect(text).toContain('It is a directory, not a socket.');
     expect(text).toContain('--session');
     expect(text).not.toContain('session directory');
+  });
+});
+
+describe('unusable socket path', () => {
+  it('rejects a socket path too long for sockaddr_un before spawning', async () => {
+    if (skipUnix) {
+      return;
+    }
+
+    const scratchDir = mkdtempSync(join(tmpdir(), 'profiler-cli-fail-'));
+    const sessionDir = join(scratchDir, ...Array(12).fill('abcdefghij'));
+
+    try {
+      const result = await cliFail(contextForSessionDir(sessionDir), [
+        'load',
+        PROFILE,
+      ]);
+
+      const text = output(result);
+      expect(text).toContain('byte limit');
+      expect(text).toContain('PROFILER_CLI_SESSION_DIR');
+    } finally {
+      rmSync(scratchDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('unreachable daemon', () => {
+  let ctx: CliTestContext;
+
+  beforeEach(async () => {
+    ctx = await createTestContext();
+  });
+
+  afterEach(async () => {
+    await cleanupTestContext(ctx);
+  });
+
+  it('reports the socket state when the daemon died without cleaning up', async () => {
+    const loadResult = await cli(ctx, ['load', PROFILE]);
+    const sessionId = (loadResult.stdout as string).match(
+      /Session started: (\w+)/
+    )![1];
+
+    const metadata = JSON.parse(
+      await readFile(join(ctx.sessionDir, `${sessionId}.json`), 'utf-8')
+    );
+    process.kill(metadata.pid, 'SIGKILL');
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    const result = await cliFail(ctx, ['profile', 'info']);
+
+    const text = output(result);
+    expect(text).toContain(`Session ${sessionId} is not reachable`);
+    expect(text).toContain('profiler-cli load');
+  });
+
+  it('reports an unknown session id instead of a bare "invalid"', async () => {
+    const result = await cliFail(ctx, [
+      'profile',
+      'info',
+      '--session',
+      'no-such-session',
+    ]);
+
+    const text = output(result);
+    expect(text).toContain('Unknown session no-such-session');
+    expect(text).toContain(ctx.sessionDir);
+  });
+});
+
+describe('session denied by policy', () => {
+  let ctx: CliTestContext;
+  let sessionId: string;
+  let socketPath: string;
+  let daemonPid: number;
+
+  // The whole fixture is a denied connect(), so it cannot even be set up where
+  // permission bits do not apply.
+  beforeEach(async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    ctx = await createTestContext();
+    const loadResult = await cli(ctx, ['load', PROFILE]);
+    sessionId = (loadResult.stdout as string).match(
+      /Session started: (\w+)/
+    )![1];
+    socketPath = join(ctx.sessionDir, `${sessionId}.sock`);
+    daemonPid = JSON.parse(
+      await readFile(join(ctx.sessionDir, `${sessionId}.json`), 'utf-8')
+    ).pid;
+    // Deny connect() to a daemon that is alive and well, which is what a
+    // sandbox policy looks like from the client side.
+    chmodSync(socketPath, 0o000);
+  });
+
+  afterEach(async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    // A test may have stopped the daemon, which takes the socket with it.
+    if (existsSync(socketPath)) {
+      chmodSync(socketPath, 0o755);
+    }
+    await cleanupTestContext(ctx);
+  });
+
+  it('keeps a live session listed as unreachable instead of deleting it', async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    const result = await cli(ctx, ['session', 'list']);
+
+    const text = output(result);
+    expect(text).toContain('Could not reach the following sessions');
+    expect(text).toContain(`${sessionId} [daemon pid: ${daemonPid}]`);
+    expect(text).toContain('sandbox');
+    // An unreachable daemon cannot be stopped through its own socket, so the
+    // pid has to be enough to act on.
+    expect(text).toContain('kill these by pid');
+    expect(text).not.toContain('Cleaned up');
+
+    // The daemon is still running, so its files have to survive: deleting the
+    // socket would orphan it permanently.
+    expect(existsSync(socketPath)).toBe(true);
+    expect(existsSync(join(ctx.sessionDir, `${sessionId}.json`))).toBe(true);
+
+    chmodSync(socketPath, 0o755);
+    const recovered = await cli(ctx, ['profile', 'info']);
+    expect(output(recovered)).toContain('This profile contains');
+  });
+
+  it('explains a denied session instead of reporting it as not found', async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    const result = await cliFail(ctx, ['session', 'use', sessionId]);
+
+    const text = output(result);
+    expect(text).toContain('Not allowed to connect');
+    expect(text).toContain('sandbox');
+    expect(text).toContain(`kill ${daemonPid}`);
+    expect(text).not.toContain('not found or not running');
+    expect(existsSync(join(ctx.sessionDir, `${sessionId}.json`))).toBe(true);
+  });
+
+  it('does not claim to have stopped a daemon it cannot reach', async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    const result = await cliFail(ctx, ['stop', sessionId]);
+
+    const text = output(result);
+    expect(text).toContain('may still be running');
+    expect(text).toContain(`kill ${daemonPid}`);
+    // The old message announced success while the daemon kept running.
+    expect(text).not.toContain(`Session ${sessionId} stopped`);
+
+    chmodSync(socketPath, 0o755);
+    const stopped = await cli(ctx, ['stop', sessionId]);
+    expect(output(stopped)).toContain(`Session ${sessionId} stopped`);
+  });
+
+  it('fails "stop --all" when one of the sessions cannot be stopped', async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    const result = await cliFail(ctx, ['stop', '--all']);
+
+    const text = output(result);
+    expect(text).toContain('Could not stop 1 of 1 sessions');
+    expect(text).not.toContain(`Session ${sessionId} stopped`);
+    expect(existsSync(join(ctx.sessionDir, `${sessionId}.json`))).toBe(true);
+  });
+
+  it('refuses to reuse the session id rather than orphaning its daemon', async () => {
+    if (skipUnixPermissions) {
+      return;
+    }
+
+    const result = await cliFail(ctx, [
+      'load',
+      PROFILE,
+      '--session',
+      sessionId,
+    ]);
+
+    const text = output(result);
+    expect(text).toContain('cannot be reached');
+    expect(text).toContain(`kill ${daemonPid}`);
+    expect(text).toContain('--session');
+
+    // Taking over the id would have unlinked this socket and overwritten this
+    // metadata, leaving the daemon running with nothing able to find it.
+    expect(existsSync(socketPath)).toBe(true);
+    const metadata = JSON.parse(
+      await readFile(join(ctx.sessionDir, `${sessionId}.json`), 'utf-8')
+    );
+    expect(metadata.pid).toBe(daemonPid);
+
+    chmodSync(socketPath, 0o755);
+    const recovered = await cli(ctx, ['profile', 'info']);
+    expect(output(recovered)).toContain('This profile contains');
   });
 });
