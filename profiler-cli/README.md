@@ -118,6 +118,23 @@ Sessions are stored in `~/.profiler-cli/` (or `$PROFILER_CLI_SESSION_DIR` to ove
 
 Each session keeps a metadata file, a Unix domain socket (a named pipe on Windows), and a daemon log in that directory. The daemon log is the first place to look when a session misbehaves, and `profiler-cli` prints its path in error messages.
 
+## Running in a sandbox
+
+`profiler-cli` runs its daemon in a separate process and talks to it over a Unix domain socket in the session directory, so a sandbox has to allow two things:
+
+- writing to the session directory, and
+- creating and connecting to Unix domain sockets inside it.
+
+If the home directory is not writable, point the CLI somewhere it can write:
+
+```bash
+export PROFILER_CLI_SESSION_DIR=/tmp/profiler-cli
+```
+
+Keep that path short. Unix socket paths are limited to 104 bytes on macOS and 108 on Linux, and the session directory is part of the socket path.
+
+If Unix domain sockets are blocked outright, allow them in the sandbox policy or run `profiler-cli` outside the sandbox.
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for architecture, build instructions, and how to add new commands.

@@ -32,7 +32,12 @@ import {
   validateSession,
   waitForSocketClose,
 } from './session';
-import { describeManualKill, indentBlock } from './diagnostics';
+import {
+  assertSocketPathUsable,
+  describeManualKill,
+  ensureSessionDirUsable,
+  indentBlock,
+} from './diagnostics';
 import { BUILD_HASH } from './constants';
 
 type BuildMismatchShutdownResult = 'stopped' | 'already-dead' | 'still-running';
@@ -355,6 +360,15 @@ export async function startNewDaemon(
   // session to wait for (avoids race condition with existing sessions)
   const targetSessionId = sessionId || generateSessionId();
 
+  // Before ensureSessionDirUsable(), so a path the kernel will never accept is
+  // rejected without first creating a directory tree for it.
+  assertSocketPathUsable(getSocketPath(sessionDir, targetSessionId));
+
+  // The daemon cannot report an unusable session directory, because it needs
+  // that directory to reach us at all, so check it here, while there is still
+  // a terminal to print to.
+  ensureSessionDirUsable(sessionDir);
+
   // A record left by an earlier daemon on this session id would be mistaken
   // for this one's. The log cannot be deleted the same way, since it is kept
   // on purpose for debugging, so note where it ends instead.
@@ -485,7 +499,8 @@ export async function startNewDaemon(
     }
 
     // It has not exited and has not published its metadata, so it is still
-    // starting. Saying it died here would be wrong.
+    // starting. Saying it died here would be wrong, and would send the user
+    // looking for an environment problem that the checks above have ruled out.
     throw new Error(
       formatDaemonFailure(
         failureContext,

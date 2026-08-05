@@ -16,6 +16,7 @@ import * as net from 'net';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import type { SessionMetadata } from './protocol';
+import { describeSessionDirFailure } from './diagnostics';
 
 /**
  * Ensure the session directory exists.
@@ -211,7 +212,7 @@ export function getCurrentSessionId(sessionDir: string): string | null {
     if (error && error.code === 'ENOENT') {
       return null;
     }
-    throw error;
+    throw new Error(describeSessionDirFailure(sessionDir, 'read', error));
   }
 }
 
@@ -326,8 +327,18 @@ export async function validateSession(
  * List all session IDs.
  */
 export function listSessions(sessionDir: string): string[] {
-  ensureSessionDir(sessionDir);
-  const files = fs.readdirSync(sessionDir);
+  let files: string[];
+  try {
+    files = fs.readdirSync(sessionDir);
+  } catch (error) {
+    // A missing session directory simply means there are no sessions, so there
+    // is no reason to create it just to list nothing.
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return [];
+    }
+    throw new Error(describeSessionDirFailure(sessionDir, 'read', error));
+  }
+
   return files
     .filter((f) => f.endsWith('.json'))
     .map((f) => path.basename(f, '.json'));

@@ -11,9 +11,11 @@ import * as net from 'net';
 import * as os from 'os';
 import * as path from 'path';
 import {
+  assertSocketPathUsable,
   describeSessionDirFailure,
   describeSocketListenError,
   describeStaleSocketFailure,
+  ensureSessionDirUsable,
   getErrnoCode,
 } from '../../diagnostics';
 
@@ -23,8 +25,11 @@ function errnoError(code: string, message: string): NodeJS.ErrnoException {
   return error;
 }
 
-// Unix domain sockets do not exist on Windows.
+const isRoot = typeof process.getuid === 'function' && process.getuid() === 0;
+// Unix domain sockets do not exist on Windows, and permission bits do not
+// constrain root.
 const skipUnix = process.platform === 'win32';
+const skipUnixPermissions = skipUnix || isRoot;
 
 describe('profiler-cli diagnostics', function () {
   let tmpDir: string;
@@ -50,6 +55,41 @@ describe('profiler-cli diagnostics', function () {
     });
   });
 
+  describe('ensureSessionDirUsable', function () {
+    it('creates a missing session directory', function () {
+      const sessionDir = path.join(tmpDir, 'nested', 'sessions');
+      expect(() => ensureSessionDirUsable(sessionDir)).not.toThrow();
+      expect(fs.existsSync(sessionDir)).toBe(true);
+    });
+
+    it('leaves no probe file behind', function () {
+      ensureSessionDirUsable(tmpDir);
+      expect(fs.readdirSync(tmpDir)).toEqual([]);
+    });
+
+    it('rejects a path that is a file', function () {
+      const filePath = path.join(tmpDir, 'not-a-dir');
+      fs.writeFileSync(filePath, '');
+      expect(() => ensureSessionDirUsable(filePath)).toThrow(
+        /exists but is not a directory/
+      );
+    });
+
+    it('rejects an existing directory that cannot be written to', function () {
+      if (skipUnixPermissions) {
+        return;
+      }
+
+      fs.chmodSync(tmpDir, 0o555);
+      expect(() => ensureSessionDirUsable(tmpDir)).toThrow(
+        /Cannot write to the profiler-cli session directory/
+      );
+      expect(() => ensureSessionDirUsable(tmpDir)).toThrow(
+        /PROFILER_CLI_SESSION_DIR/
+      );
+    });
+  });
+
   describe('describeSessionDirFailure', function () {
     it('explains permission errors and points at the env var', function () {
       const message = describeSessionDirFailure(
@@ -70,6 +110,23 @@ describe('profiler-cli diagnostics', function () {
         errnoError('EWEIRD', 'something unusual happened')
       );
       expect(message).toContain('something unusual happened');
+    });
+  });
+
+  describe('assertSocketPathUsable', function () {
+    it('accepts a short path', function () {
+      expect(() => assertSocketPathUsable('/tmp/p/abc.sock')).not.toThrow();
+    });
+
+    it('rejects a path that cannot fit in sockaddr_un', function () {
+      if (skipUnix) {
+        return;
+      }
+
+      const longPath = `/tmp/${'a'.repeat(200)}.sock`;
+      expect(() => assertSocketPathUsable(longPath)).toThrow(
+        /over this platform's \d+-byte limit/
+      );
     });
   });
 

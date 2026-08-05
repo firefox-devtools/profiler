@@ -117,6 +117,77 @@ export function describeSessionDirFailure(
 }
 
 /**
+ * Verify the session directory exists and is writable, throwing an explanatory
+ * error if not. Called before spawning a daemon so that an unusable directory
+ * is reported by the client, which still has a terminal to print to.
+ */
+export function ensureSessionDirUsable(sessionDir: string): void {
+  let stats: fs.Stats | null = null;
+  try {
+    stats = fs.statSync(sessionDir);
+  } catch (error) {
+    if (getErrnoCode(error) !== 'ENOENT') {
+      throw new Error(describeSessionDirFailure(sessionDir, 'read', error));
+    }
+  }
+
+  if (stats && !stats.isDirectory()) {
+    throw new Error(
+      [
+        `The profiler-cli session directory ${sessionDir} exists but is not a directory.`,
+        sessionDirHint(),
+      ].join('\n')
+    );
+  }
+
+  try {
+    fs.mkdirSync(sessionDir, { recursive: true });
+  } catch (error) {
+    throw new Error(describeSessionDirFailure(sessionDir, 'create', error));
+  }
+
+  // mkdirSync() is a no-op on an existing directory even when that directory is
+  // read-only, and sandboxes usually surface as a denied write rather than a
+  // denied mkdir, so probe with a real file.
+  const probePath = path.join(sessionDir, `.write-probe-${process.pid}`);
+  try {
+    fs.writeFileSync(probePath, '');
+  } catch (error) {
+    throw new Error(describeSessionDirFailure(sessionDir, 'write to', error));
+  } finally {
+    try {
+      fs.rmSync(probePath, { force: true });
+    } catch {
+      // Leaving the probe behind is harmless.
+    }
+  }
+}
+
+/**
+ * Reject socket paths that cannot fit in `sockaddr_un`. Node reports these as
+ * a bare EINVAL from listen(), which is impossible to act on.
+ */
+export function assertSocketPathUsable(socketPath: string): void {
+  if (process.platform === 'win32') {
+    return;
+  }
+
+  const byteLength = Buffer.byteLength(socketPath);
+  if (byteLength <= MAX_UNIX_SOCKET_PATH_BYTES) {
+    return;
+  }
+
+  throw new Error(
+    [
+      `The Unix socket path for this session is ${byteLength} bytes, over this platform's ${MAX_UNIX_SOCKET_PATH_BYTES}-byte limit:`,
+      `  ${socketPath}`,
+      `Use a shorter session directory, for example:`,
+      `  PROFILER_CLI_SESSION_DIR=${suggestedSessionDir()} profiler-cli load <PATH>`,
+    ].join('\n')
+  );
+}
+
+/**
  * Explain a failure to create the daemon's listening socket.
  */
 export function describeSocketListenError(
@@ -187,9 +258,10 @@ function describePathContents(targetPath: string): string | null {
 /**
  * Explain a failure to clear the path the daemon binds its socket to.
  *
- * Deliberately not a `describeSessionDirFailure`: what is wrong is this one
- * path, not the directory holding it, and the way out is to clear it or use
- * another session id.
+ * Deliberately not a `describeSessionDirFailure`: the client checks that the
+ * session directory is writable before it spawns the daemon, so blaming the
+ * directory here would contradict a check that has just passed. What is wrong
+ * is this one path, and the way out is to clear it or use another session id.
  */
 export function describeStaleSocketFailure(
   socketPath: string,
