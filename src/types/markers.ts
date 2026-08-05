@@ -116,6 +116,8 @@ export type MarkerDisplayLocation =
   | 'timeline-ipc'
   // This adds markers to the FileIO timeline area in the header.
   | 'timeline-fileio'
+  // This adds markers to the Network track.
+  | 'timeline-network'
   // TODO - This is not supported yet.
   | 'stack-chart';
 
