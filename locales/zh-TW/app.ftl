@@ -453,6 +453,28 @@ MenuButtons--metaInfo--resymbolicate-profile = 重新將檢測檔符號化
 MenuButtons--metaInfo--symbolicate-profile = 符號化檢測檔
 MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢測檔
 MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
+MenuButtons--metaInfo--source-maps = 原始碼對應表：
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = 套用原始碼對應表…
+    .title = 從磁碟中載入 .map 檔，讓最小化過的 JavaScript 組合檔能夠符號化，以找回原始函數名稱與在原始碼中的位置。
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = 選擇這份原始碼對應表要套用至哪個組合檔：
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = 套用
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = 取消
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = 已解析 { $filename } 的原始碼。
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = { $filename } 中沒有堆疊位置與此對應表相符。
+MenuButtons--metaInfo--source-map-error-invalid = 選擇的檔案不是有效的原始碼對應表。
+MenuButtons--metaInfo--source-map-error-no-eligible = 此檢測檔中沒有包含原始碼對應表網址的 JS 組合檔。
+MenuButtons--metaInfo--source-map-error-failed = 無法將此對應表套用至檢測檔。
 MenuButtons--metaInfo--cpu-model = CPU 型號：
 MenuButtons--metaInfo--cpu-cores = CPU 核心數：
 MenuButtons--metaInfo--main-memory = 主要記憶體：

@@ -544,6 +544,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Symbolisera profilen igen
 MenuButtons--metaInfo--symbolicate-profile = Symbolisera profil
 MenuButtons--metaInfo--attempting-resymbolicate = Försöker att symbolisera profilen på nytt
 MenuButtons--metaInfo--currently-symbolicating = Profilen symboliseras för närvarande
+MenuButtons--metaInfo--source-maps = Källkartor:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Tillämpa källkarta…
+    .title = Ladda en .map-fil från disk för att symbolisera ett minifierat JavaScript-paket, för att återställa ursprungliga funktionsnamn och källplatser.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Välj vilket paket denna källkarta ska gälla för:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Tillämpa
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Avbryt
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Ursprungliga källor lösta för { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Inga stackpositioner i { $filename } matchade denna källkarta.
+MenuButtons--metaInfo--source-map-error-invalid = Den valda filen är inte en giltig källkarta.
+MenuButtons--metaInfo--source-map-error-no-eligible = Den här profilen har inga JS-paket med källmappnings-URL:er.
+MenuButtons--metaInfo--source-map-error-failed = Det gick inte att tillämpa denna källkarta på profilen.
 MenuButtons--metaInfo--cpu-model = CPU-modell:
 MenuButtons--metaInfo--cpu-cores = CPU-kärnor:
 MenuButtons--metaInfo--main-memory = Huvudminne:
