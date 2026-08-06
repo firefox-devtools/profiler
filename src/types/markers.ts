@@ -556,6 +556,15 @@ export type NetworkPayload = {
   // Used to show the HTTP response status code
   responseStatus?: number;
 
+  // The `Sec-Purpose` request header, only present for prefetches.
+  // It's always absent in Firefox < 155.
+  secPurpose?: string;
+
+  // Matches PerformanceNavigationTiming's deliveryType. Only present when the
+  // navigation was served from a prefetch, as "navigational-prefetch".
+  // It's always absent in Firefox < 155.
+  deliveryType?: string;
+
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
   // `src/profile-logic/marker-data.js` for more information.

@@ -686,6 +686,30 @@ describe('TooltipMarker', function () {
     expect(container.firstChild).toMatchSnapshot();
   });
 
+  it('renders the Sec-Purpose of a prefetched request', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        uri: 'https://example.org/next-page.html',
+        payload: { secPurpose: 'prefetch;anonymous-client-ip' },
+      })
+    );
+
+    expect(getValueForProperty('Sec-Purpose')).toBe(
+      'prefetch;anonymous-client-ip'
+    );
+  });
+
+  it('renders the delivery type of a navigation served from a prefetch', () => {
+    setupWithPayload(
+      getNetworkMarkers({
+        uri: 'https://example.org/next-page.html',
+        payload: { deliveryType: 'navigational-prefetch' },
+      })
+    );
+
+    expect(getValueForProperty('Delivery Type')).toBe('navigational-prefetch');
+  });
+
   it('renders the page information for network markers', () => {
     setupWithPayload(
       getNetworkMarkers({
