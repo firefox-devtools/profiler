@@ -474,10 +474,27 @@ MenuButtons--metaInfo--symbolicate-profile = Simbolizar perfil
 MenuButtons--metaInfo--attempting-resymbolicate = Intentando volver a simbolizar el perfil
 MenuButtons--metaInfo--currently-symbolicating = Perfil actualmente simbolizado
 MenuButtons--metaInfo--source-maps = Mapas de origen:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Aplicar mapa de origen…
+    .title = Carga un archivo .map desde el disco para simbolizar un paquete JavaScript minimizado, con el fin de recuperar los nombres de las funciones originales y las ubicaciones del código fuente.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Elige a qué paquete se aplica este mapa de origen:
 # Button to confirm the chosen source and apply the source map to it.
 MenuButtons--metaInfo--source-map-apply = Aplicar
 # Button to dismiss the source chooser without symbolicating.
 MenuButtons--metaInfo--source-map-cancel = Cancelar
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Fuentes originales resueltas para { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Ninguna posición de pila en { $filename } coincidió con este mapa de origen.
+MenuButtons--metaInfo--source-map-error-invalid = El archivo seleccionado no es un mapa de origen válido.
+MenuButtons--metaInfo--source-map-error-no-eligible = Este perfil no tiene paquetes JS con URL de mapas de origen.
+MenuButtons--metaInfo--source-map-error-failed = No se pudo aplicar este mapa de origen al perfil.
 MenuButtons--metaInfo--cpu-model = Modelo de CPU:
 MenuButtons--metaInfo--cpu-cores = Núcleos de CPU:
 MenuButtons--metaInfo--main-memory = Memoria principal:
@@ -603,6 +620,9 @@ MenuButtons--publish--renderCheckbox-label-preference = Incluir valores de prefe
 MenuButtons--publish--renderCheckbox-label-private-browsing = Incluir los datos de las ventanas de navegación privadas
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Este perfil contiene datos privados de navegación.
+MenuButtons--publish--renderCheckbox-label-argument-values = Incluir los valores de los argumentos de la función de seguimiento de ejecución de JavaScript
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Este perfil contiene valores de argumentos de función registrados desde la página, que pueden incluir datos personales.
 MenuButtons--publish--reupload-performance-profile = Volver a subir perfil de rendimiento
 MenuButtons--publish--share-performance-profile = Compartir perfil de rendimiento
 MenuButtons--publish--info-description = Sube tu perfil y hazlo accesible a cualquiera que tenga el enlace.
