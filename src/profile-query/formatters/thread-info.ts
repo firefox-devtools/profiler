@@ -32,8 +32,13 @@ import {
   computeCallTreeTimings,
   getCallTree,
   computeCallNodeSelfAndSummary,
+  extractSamplesLikeTable,
 } from 'firefox-profiler/profile-logic/call-tree';
-import { getInvertedCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
+import { getAvailableStrategies } from '../call-tree-strategy';
+import {
+  getInvertedCallNodeInfo,
+  getSampleIndexToCallNodeIndex,
+} from 'firefox-profiler/profile-logic/profile-data';
 import type { Store } from '../../types/store';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
@@ -93,6 +98,7 @@ export function collectThreadInfo(
     markerCount: thread.markers.length,
     cpuActivity,
     networkActivity,
+    availableStrategies: getAvailableStrategies(state, threadIndexes),
   };
 }
 
@@ -124,13 +130,13 @@ export function collectThreadSamples(
   // Sort by total and take top 50
   const sortedByTotal = functions
     .slice()
-    .sort((a, b) => b.total - a.total)
+    .sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
     .slice(0, 50);
 
   // Sort by self and take top 50
   const sortedBySelf = functions
     .slice()
-    .sort((a, b) => b.self - a.self)
+    .sort((a, b) => Math.abs(b.self) - Math.abs(a.self))
     .slice(0, 50);
 
   // Convert top functions to structured format
@@ -172,7 +178,7 @@ export function collectThreadSamples(
 
   if (roots.length > 0) {
     let heaviestPath: CallNodePath = [];
-    let maxSelfSamples = Number.NEGATIVE_INFINITY;
+    let maxAbsSelfSamples = -1;
 
     for (const root of roots) {
       const candidatePath = callTree._internal.findHeaviestPathInSubtree(root);
@@ -183,10 +189,12 @@ export function collectThreadSamples(
         continue;
       }
 
-      const candidateSelfSamples = callTree.getNodeData(leafNodeIndex).self;
-      if (candidateSelfSamples > maxSelfSamples) {
+      const candidateSelfSamples = Math.abs(
+        callTree.getNodeData(leafNodeIndex).self
+      );
+      if (candidateSelfSamples > maxAbsSelfSamples) {
         heaviestPath = candidatePath;
-        maxSelfSamples = candidateSelfSamples;
+        maxAbsSelfSamples = candidateSelfSamples;
       }
     }
 
@@ -237,6 +245,8 @@ export function collectThreadSamples(
     type: 'thread-samples',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     topFunctionsByTotal,
     topFunctionsBySelf,
     heaviestStack,
@@ -270,10 +280,10 @@ export function collectThreadSamplesBottomUp(
   const weightType = threadSelectors.getWeightTypeForCallTree(state);
 
   const samples = threadSelectors.getPreviewFilteredCtssSamples(state);
-  const sampleIndexToCallNodeIndex =
-    threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-      state
-    );
+  const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
+    samples.stack,
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+  );
 
   const callNodeSelfAndSummary = computeCallNodeSelfAndSummary(
     samples,
@@ -307,6 +317,8 @@ export function collectThreadSamplesBottomUp(
     type: 'thread-samples-bottom-up',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType,
     invertedCallTree,
   };
 }
@@ -338,13 +350,15 @@ export function collectThreadSamplesTopDown(
     type: 'thread-samples-top-down',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     regularCallTree,
   };
 }
 
 /**
  * Collect thread functions data in structured format.
- * Lists all functions with their CPU percentages, supporting search and filtering.
+ * Lists all functions with their weight percentages, supporting search and filtering.
  */
 export function collectThreadFunctions(
   store: Store,
@@ -377,16 +391,19 @@ export function collectThreadFunctions(
   // We can compute this from any function in allFunctions that has a non-zero totalRelative
   // Formula: fullTotalSamples = total / totalRelative
   // But since totalRelative is based on current view, we need the UNzoomed totalRelative
-  // Simpler approach: The raw thread has all samples - count them directly
+  // Simpler approach: The unzoomed strategy table has all samples - count them directly
   let fullProfileTotalSamples: number | null = null;
   if (isZoomed) {
-    // Use the same weighting as the call tree: sum weights, exclude null-stack samples
-    const rawThread = threadSelectors.getRawThread(state);
-    const { weight, stack } = rawThread.samples;
+    // Use the same weighting as the call tree: sum absolute weights, exclude null-stack samples
+    const unzoomedSamples = extractSamplesLikeTable(
+      threadSelectors.getThread(state),
+      threadSelectors.getCallTreeSummaryStrategy(state)
+    );
+    const { weight, stack } = unzoomedSamples;
     let total = 0;
-    for (let i = 0; i < rawThread.samples.length; i++) {
+    for (let i = 0; i < unzoomedSamples.length; i++) {
       if (stack[i] !== null) {
-        total += weight ? (weight[i] ?? 1) : 1;
+        total += weight ? Math.abs(weight[i] ?? 1) : 1;
       }
     }
     fullProfileTotalSamples = total;
@@ -403,16 +420,14 @@ export function collectThreadFunctions(
     );
   }
 
-  // Filter by minimum self time percentage
   if (filterOptions?.minSelf !== undefined) {
     const minSelfFraction = filterOptions.minSelf / 100;
     filteredFunctions = filteredFunctions.filter(
-      (func) => func.selfRelative >= minSelfFraction
+      (func) => Math.abs(func.selfRelative) >= minSelfFraction
     );
   }
 
-  // Sort by self time (descending)
-  filteredFunctions.sort((a, b) => b.self - a.self);
+  filteredFunctions.sort((a, b) => Math.abs(b.self) - Math.abs(a.self));
 
   // Apply limit
   const limit = filterOptions?.limit ?? filteredFunctions.length;
@@ -460,6 +475,8 @@ export function collectThreadFunctions(
     type: 'thread-functions',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     totalFunctionCount,
     filteredFunctionCount: filteredFunctions.length,
     filters: filterOptions
