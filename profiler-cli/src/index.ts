@@ -149,9 +149,21 @@ Examples:
   ).action(async (idArg: string | undefined, opts) => {
     if (opts.all) {
       const sessionIds = listSessions(SESSION_DIR);
-      await Promise.all(
+      // Settled, so one session that refuses to stop does not hide the others.
+      const results = await Promise.allSettled(
         sessionIds.map((id: string) => stopDaemon(SESSION_DIR, id))
       );
+      const failures = results.filter((r) => r.status === 'rejected');
+      for (const failure of failures) {
+        console.error(
+          `Error: ${failure.reason instanceof Error ? failure.reason.message : failure.reason}`
+        );
+      }
+      if (failures.length !== 0) {
+        throw new Error(
+          `Could not stop ${failures.length} of ${sessionIds.length} sessions.`
+        );
+      }
     } else {
       const sessionId = idArg ?? opts.session;
       await stopDaemon(SESSION_DIR, sessionId);

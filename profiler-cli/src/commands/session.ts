@@ -7,14 +7,23 @@
  */
 
 import type { Command } from 'commander';
+import type { SessionMetadata } from '../protocol';
 import { wasExplicit } from './shared';
 import {
+  cleanupIfDaemonGone,
   cleanupSession,
   getCurrentSessionId,
   listSessions,
+  loadSessionMetadata,
   setCurrentSession,
   validateSession,
 } from '../session';
+import { explainUnreachableSession } from '../client';
+import {
+  SOCKET_SANDBOX_HINT,
+  isPermissionErrno,
+  toErrorMessage,
+} from '../diagnostics';
 
 export function registerSessionCommand(
   program: Command,
@@ -31,15 +40,43 @@ export function registerSessionCommand(
       const sessionIds = listSessions(sessionDir);
       let numCleaned = 0;
       const runningSessionMetadata = [];
+      const unreachableSessions: Array<{
+        metadata: SessionMetadata;
+        error: NodeJS.ErrnoException;
+      }> = [];
 
       for (const sessionId of sessionIds) {
         const metadata = await validateSession(sessionDir, sessionId);
-        if (metadata === null) {
+        if (metadata !== null) {
+          runningSessionMetadata.push(metadata);
+          continue;
+        }
+
+        const staleMetadata = loadSessionMetadata(sessionDir, sessionId);
+        if (staleMetadata === null) {
+          // No metadata to tell us where the socket is, so there is nothing
+          // left to protect.
           cleanupSession(sessionDir, sessionId);
           numCleaned++;
           continue;
         }
-        runningSessionMetadata.push(metadata);
+
+        const unreachable = await cleanupIfDaemonGone(
+          sessionDir,
+          sessionId,
+          staleMetadata.socketPath
+        );
+        if (unreachable === null) {
+          // The daemon answered on the retry, so the first check was a blip.
+          runningSessionMetadata.push(staleMetadata);
+        } else if (unreachable.cleanedUp) {
+          numCleaned++;
+        } else {
+          unreachableSessions.push({
+            metadata: staleMetadata,
+            error: unreachable.error,
+          });
+        }
       }
 
       if (numCleaned !== 0) {
@@ -62,6 +99,24 @@ export function registerSessionCommand(
         );
       }
 
+      if (unreachableSessions.length !== 0) {
+        console.log();
+        console.log(
+          'Could not reach the following sessions. Their files were left in place because their daemons may still be running:'
+        );
+        for (const { metadata, error } of unreachableSessions) {
+          console.log(
+            `  ${metadata.id} [daemon pid: ${metadata.pid}]: ${toErrorMessage(error)}`
+          );
+        }
+        if (unreachableSessions.some(({ error }) => isPermissionErrno(error))) {
+          console.log(SOCKET_SANDBOX_HINT);
+        }
+        console.log(
+          '"profiler-cli stop" needs the same socket, so kill these by pid if you no longer need them.'
+        );
+      }
+
       if (!wasExplicit('session', 'list')) {
         console.log('\nOther subcommands: profiler-cli session use <id>');
       }
@@ -73,7 +128,9 @@ export function registerSessionCommand(
     .action(async (sessionId: string) => {
       const metadata = await validateSession(sessionDir, sessionId);
       if (metadata === null) {
-        console.error(`Error: session "${sessionId}" not found or not running`);
+        console.error(
+          `Error: ${await explainUnreachableSession(sessionDir, sessionId)}`
+        );
         process.exit(1);
       }
       setCurrentSession(sessionDir, sessionId);
