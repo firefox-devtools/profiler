@@ -4,7 +4,6 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import type { InflightProfileEncoding } from 'firefox-profiler/actions/publish';
 import {
   updateSharingOption,
   attemptToPublish,
@@ -42,6 +41,7 @@ import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
 import type {
   Profile,
   CheckedSharingOptions,
+  SharingMode,
   StartEndRange,
   UploadPhase,
   SanitizedProfileEncodingState,
@@ -51,6 +51,7 @@ import './Publish.css';
 import { Localized } from '@fluent/react';
 
 type OwnProps = {
+  readonly mode: SharingMode;
   readonly isRepublish?: boolean;
 };
 
@@ -81,19 +82,19 @@ type DispatchProps = {
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
-  _inflightEncoding: InflightProfileEncoding | undefined;
-
   override componentDidMount(): void {
-    this._inflightEncoding = this.props.encodeSanitizedProfile();
+    this.props.encodeSanitizedProfile(this.props.mode);
   }
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sharingOption = e.target.name as keyof CheckedSharingOptions;
-    this.props.updateSharingOption(sharingOption, e.target.checked);
-
-    this._inflightEncoding = this.props.encodeSanitizedProfile(
-      this._inflightEncoding
+    this.props.updateSharingOption(
+      this.props.mode,
+      sharingOption,
+      e.target.checked
     );
+
+    this.props.encodeSanitizedProfile(this.props.mode);
   };
 
   _renderCheckbox(
@@ -101,7 +102,9 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     labelL10nId: string,
     additionalContent?: React.ReactNode
   ) {
-    const { checkedSharingOptions } = this.props;
+    const { checkedSharingOptions, uploadPhase } = this.props;
+    const isUploading =
+      uploadPhase === 'uploading' || uploadPhase === 'compressing';
     return (
       <label className="photon-label publishPanelDataChoicesLabel">
         <input
@@ -110,6 +113,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           name={slug}
           onChange={this._onCheckboxChange}
           checked={checkedSharingOptions[slug]}
+          disabled={isUploading}
         />
         <span>
           <Localized id={labelL10nId} />
@@ -120,7 +124,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   }
 
   _onSubmit = () => {
-    this.props.attemptToPublish(this._inflightEncoding);
+    this.props.attemptToPublish();
   };
 
   _renderPublishPanel() {
@@ -132,30 +136,50 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       downloadFileName,
       shouldSanitizeByDefault,
       isRepublish,
+      mode,
     } = this.props;
+
+    const isDownload = mode === 'download';
+
+    let title;
+    if (isDownload) {
+      title = (
+        <Localized id="MenuButtons--publish--download-performance-profile">
+          Download Performance Profile
+        </Localized>
+      );
+    } else if (isRepublish) {
+      title = (
+        <Localized id="MenuButtons--publish--reshare-performance-profile">
+          Re-share Performance Profile
+        </Localized>
+      );
+    } else {
+      title = (
+        <Localized id="MenuButtons--publish--share-performance-profile">
+          Share Performance Profile
+        </Localized>
+      );
+    }
 
     return (
       <div data-testid="PublishPanel-container">
         <form
           className="publishPanelContent photon-body-10"
-          onSubmit={this._onSubmit}
+          onSubmit={isDownload ? undefined : this._onSubmit}
         >
-          <h1 className="publishPanelTitle photon-title-40">
-            {isRepublish ? (
-              <Localized id="MenuButtons--publish--reupload-performance-profile">
-                Re-upload Performance Profile
+          <h1 className="publishPanelTitle photon-title-30">{title}</h1>
+          <p className="publishPanelInfoDescription">
+            {isDownload ? (
+              <Localized id="MenuButtons--publish--download-info-description">
+                Save this profile as a file on your computer.
               </Localized>
             ) : (
-              <Localized id="MenuButtons--publish--share-performance-profile">
-                Share Performance Profile
+              <Localized id="MenuButtons--publish--info-description">
+                Upload your profile and make it accessible to anyone with the
+                link.
               </Localized>
-            )}
-          </h1>
-          <p className="publishPanelInfoDescription">
-            <Localized id="MenuButtons--publish--info-description">
-              Upload your profile and make it accessible to anyone with the
-              link.
-            </Localized>{' '}
+            )}{' '}
             {shouldSanitizeByDefault ? (
               <Localized id="MenuButtons--publish--info-description-default">
                 By default, your personal data is removed.
@@ -243,20 +267,33 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             </div>
           ) : null}
           <div className="publishPanelButtons">
-            <DownloadButton
-              downloadFileName={downloadFileName}
-              sanitizedProfileEncodingState={sanitizedProfileEncodingState}
-            />
-            <button
-              type="submit"
-              className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
-              disabled={sanitizedProfileEncodingState.phase === 'ERROR'}
-            >
-              <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
-              <Localized id="MenuButtons--publish--button-upload">
-                Upload
-              </Localized>
-            </button>
+            {isDownload ? (
+              <DownloadButton
+                primary
+                downloadFileName={downloadFileName}
+                sanitizedProfileEncodingState={sanitizedProfileEncodingState}
+              />
+            ) : (
+              <button
+                type="submit"
+                className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
+                disabled={sanitizedProfileEncodingState.phase === 'ERROR'}
+              >
+                <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
+                <Localized id="MenuButtons--publish--button-upload">
+                  Upload
+                </Localized>{' '}
+                {sanitizedProfileEncodingState.phase === 'DONE' ? (
+                  <span className="menuButtonsDownloadSize">
+                    (
+                    {prettyBytes(
+                      sanitizedProfileEncodingState.profileData.size
+                    )}
+                    )
+                  </span>
+                ) : null}
+              </button>
+            )}
           </div>
         </form>
       </div>
@@ -355,7 +392,10 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   }
 
   override render() {
-    const { uploadPhase } = this.props;
+    const { uploadPhase, mode } = this.props;
+    if (mode === 'download') {
+      return this._renderPublishPanel();
+    }
     switch (uploadPhase) {
       case 'error':
         return this._renderErrorPanel();
@@ -376,14 +416,14 @@ export const PublishPanel = explicitConnect<
   StateProps,
   DispatchProps
 >({
-  mapStateToProps: (state) => ({
+  mapStateToProps: (state, ownProps) => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     shouldShowPreferenceOption: getHasPreferenceMarkers(state),
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
-    checkedSharingOptions: getCheckedSharingOptions(state),
+    checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
     downloadFileName: getFilenameString(state),
     sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
     uploadPhase: getUploadPhase(state),
@@ -405,6 +445,7 @@ export const PublishPanel = explicitConnect<
 type DownloadButtonProps = {
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
+  readonly primary?: boolean;
 };
 
 /**
@@ -412,9 +453,12 @@ type DownloadButtonProps = {
  */
 class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
   override render() {
-    const { sanitizedProfileEncodingState, downloadFileName } = this.props;
-    const className =
-      'photon-button publishPanelButton publishPanelButtonsDownload';
+    const { sanitizedProfileEncodingState, downloadFileName, primary } =
+      this.props;
+    const className = classNames(
+      'photon-button publishPanelButton publishPanelButtonsDownload',
+      { 'photon-button-primary publishPanelButtonsDownloadPrimary': primary }
+    );
 
     switch (sanitizedProfileEncodingState.phase) {
       case 'DONE': {
