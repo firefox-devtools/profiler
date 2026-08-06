@@ -23,6 +23,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import {
   getSchemaFromMarker,
+  isStringIndexMarkerField,
   markerPayloadMatchesSearch,
   markerSchemaFrontEndOnly,
 } from './marker-schema';
@@ -1468,15 +1469,45 @@ export function removePrefMarkerPreferenceValues(
 }
 
 /**
- * Sanitize Text marker's name property for potential URLs.
+ * Apply a transformation to a Text marker's text. The schema tells us whether the
+ * payload holds the text inline or as a string table index. In the latter case the
+ * result is interned as a new string, as other markers and frames may share that
+ * entry.
+ */
+function _updateTextMarkerText(
+  payload: TextMarkerPayload,
+  markerSchema: MarkerSchema | null,
+  stringTable: StringTable,
+  transform: (text: string) => string
+): TextMarkerPayload {
+  // The casts below follow the storage layout the schema declares, which
+  // TypeScript can't verify from the payload type alone.
+  if (!isStringIndexMarkerField(markerSchema, 'name')) {
+    return { ...payload, name: transform(payload.name as string) };
+  }
+
+  const nameIndex = payload.name as IndexIntoStringTable;
+  if (!stringTable.hasIndex(nameIndex)) {
+    return payload;
+  }
+  const text = stringTable.getString(nameIndex);
+  const newText = transform(text);
+  if (newText === text) {
+    return payload;
+  }
+  return { ...payload, name: stringTable.indexForString(newText) };
+}
+
+/**
+ * Sanitize Text marker's name property for potential URLs. Only for payloads
+ * holding their text inline, as the string table is sanitized as a whole.
  */
 export function sanitizeTextMarker(
-  payload: TextMarkerPayload
+  payload: TextMarkerPayload,
+  markerSchema: MarkerSchema | null,
+  stringTable: StringTable
 ): TextMarkerPayload {
-  return {
-    ...payload,
-    name: removeURLs(payload.name),
-  };
+  return _updateTextMarkerText(payload, markerSchema, stringTable, removeURLs);
 }
 
 /**
@@ -1484,20 +1515,20 @@ export function sanitizeTextMarker(
  */
 export function sanitizeExtensionTextMarker(
   markerName: string,
-  payload: TextMarkerPayload
+  payload: TextMarkerPayload,
+  markerSchema: MarkerSchema | null,
+  stringTable: StringTable
 ): TextMarkerPayload {
   if (['ExtensionParent', 'ExtensionChild'].includes(markerName)) {
-    return {
-      ...payload,
-      name: payload.name.replace(/^.*, (api_(call|event): )/, '$1'),
-    };
+    return _updateTextMarkerText(payload, markerSchema, stringTable, (text) =>
+      text.replace(/^.*, (api_(call|event): )/, '$1')
+    );
   }
 
   if (markerName === 'Extension Suspend') {
-    return {
-      ...payload,
-      name: payload.name.replace(/ by .*$/, ''),
-    };
+    return _updateTextMarkerText(payload, markerSchema, stringTable, (text) =>
+      text.replace(/ by .*$/, '')
+    );
   }
 
   return payload;
@@ -1732,6 +1763,17 @@ export function formatLogTimestamp(absoluteMs: number): string {
 }
 
 /**
+ * Resolve a new format Log marker's message, which newer profiles hold as an
+ * index into the string table.
+ */
+export function resolveLogMarkerMessage(
+  message: string | IndexIntoStringTable,
+  stringArray: string[]
+): string {
+  return typeof message === 'number' ? (stringArray[message] ?? '') : message;
+}
+
+/**
  * Format a Log marker payload into a MOZ_LOG canonical line.
  *
  * Returns null if the entry has no message content and should be skipped.
@@ -1754,12 +1796,13 @@ export function formatLogStatement(
   stringArray: string[]
 ): string | null {
   if ('message' in data) {
-    if (!data.message) {
+    const message = resolveLogMarkerMessage(data.message, stringArray);
+    if (!message) {
       return null;
     }
     const levelStr = stringArray[data.level] ?? '';
     const levelLetter = LOG_LEVEL_STRING_TO_LETTER[levelStr] ?? 'D';
-    return `${timestampStr} - [${processName} ${pid}: ${threadName}]: ${levelLetter}/${moduleName} ${data.message.trim()}`;
+    return `${timestampStr} - [${processName} ${pid}: ${threadName}]: ${levelLetter}/${moduleName} ${message.trim()}`;
   }
   if (!data.name) {
     return null;

@@ -642,11 +642,7 @@ export function markerPayloadMatchesSearch(
       continue;
     }
 
-    if (
-      payloadField.format === 'unique-string' ||
-      payloadField.format === 'flow-id' ||
-      payloadField.format === 'terminating-flow-id'
-    ) {
+    if (isStringIndexFormat(payloadField.format)) {
       if (typeof value !== 'number') {
         console.warn(
           `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
@@ -672,6 +668,38 @@ export function markerPayloadMatchesSearch(
 }
 
 /**
+ * Whether this field format means the payload holds a string table index.
+ */
+export function isStringIndexFormat(
+  format: MarkerFormatType | undefined
+): boolean {
+  return (
+    format === 'unique-string' ||
+    format === 'flow-id' ||
+    format === 'terminating-flow-id'
+  );
+}
+
+/**
+ * Whether the schema declares this payload field as a string table index.
+ */
+export function isStringIndexMarkerField(
+  markerSchema: MarkerSchema | null,
+  fieldKey: string
+): boolean {
+  if (!markerSchema) {
+    return false;
+  }
+
+  for (const field of markerSchema.fields) {
+    if (field.key === fieldKey) {
+      return isStringIndexFormat(field.format);
+    }
+  }
+  return false;
+}
+
+/**
  * Returns a map of marker schema name -> array of field keys, listing any fields
  * that contain indexes into the string table. If a marker schema has no such
  * fields, then we don't put an entry for it in the returned map.
@@ -689,12 +717,7 @@ export function computeStringIndexMarkerFieldsByDataType(
     const { name, fields } = schema;
     const stringIndexFields = [];
     for (const field of fields) {
-      if (
-        (field.format === 'unique-string' ||
-          field.format === 'flow-id' ||
-          field.format === 'terminating-flow-id') &&
-        field.key
-      ) {
+      if (isStringIndexFormat(field.format) && field.key) {
         stringIndexFields.push(field.key);
       }
     }
