@@ -15,6 +15,7 @@ import {
   fireEvent,
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
+import { StringTable } from '../../utils/string-table';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -800,7 +801,10 @@ describe('MarkerChart', function () {
   });
 
   describe('Colored markers', () => {
-    function setupColoredMarkerTest(markers: TestDefinedMarker[]) {
+    function setupColoredMarkerTest(
+      markers: TestDefinedMarker[],
+      colorFieldFormat: 'string' | 'unique-string' = 'string'
+    ) {
       const profile = getProfileWithMarkers(markers);
 
       // Add marker schema with colorField to the profile
@@ -813,13 +817,31 @@ describe('MarkerChart', function () {
             {
               key: 'statusColor',
               label: 'Color',
-              format: 'string',
+              format: colorFieldFormat,
               hidden: true,
             },
           ],
           colorField: 'statusColor',
         },
       ];
+
+      // getProfileWithMarkers only auto-interns unique-string fields for
+      // marker types in the default fixtures schema. The 'Test' schema is
+      // installed afterwards, so for unique-string we replace each
+      // statusColor value with its string-table index by hand.
+      if (colorFieldFormat === 'unique-string') {
+        const stringTable = StringTable.withBackingArray(
+          profile.shared.stringArray
+        );
+        for (const thread of profile.threads) {
+          for (let i = 0; i < thread.markers.length; i++) {
+            const data: any = thread.markers.data[i];
+            if (data && typeof data.statusColor === 'string') {
+              data.statusColor = stringTable.indexForString(data.statusColor);
+            }
+          }
+        }
+      }
 
       const { flushRafCalls } = setupWithProfile(profile);
       flushRafCalls();
@@ -877,6 +899,41 @@ describe('MarkerChart', function () {
           getFillColor('yellow'),
         ])
       );
+    });
+
+    it('renders markers with colors from a unique-string colorField', () => {
+      const markersWithColors: TestDefinedMarker[] = [
+        [
+          'Green Test',
+          0,
+          5,
+          {
+            type: 'Test',
+            status: 'success',
+            statusColor: 'green',
+          },
+        ],
+        [
+          'Red Test',
+          6,
+          10,
+          {
+            type: 'Test',
+            status: 'failure',
+            statusColor: 'red',
+          },
+        ],
+      ];
+
+      const fillColors = setupColoredMarkerTest(
+        markersWithColors,
+        'unique-string'
+      );
+
+      expect(fillColors).toEqual(
+        expect.arrayContaining([getFillColor('green'), getFillColor('red')])
+      );
+      expect(fillColors).not.toContain(DEFAULT_FILL_COLOR);
     });
 
     it('falls back to default blue for markers without color data', () => {

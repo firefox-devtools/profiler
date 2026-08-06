@@ -58,7 +58,10 @@ import {
   getTextColor,
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
-import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
+import {
+  getSchemaFromMarker,
+  getMarkerFieldValue,
+} from 'firefox-profiler/profile-logic/marker-schema';
 import { getBottomBoxInfoForStackFrame } from 'firefox-profiler/profile-logic/bottom-box';
 
 import type {
@@ -203,7 +206,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     strokeColor: string;
     textColor: string;
   } {
-    const { getMarker, markerSchemaByName } = this.props;
+    const { getMarker, markerSchemaByName, thread } = this.props;
     const marker = getMarker(markerIndex);
 
     let color: GraphColor | null = null;
@@ -211,17 +214,16 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     // Try to get color from the marker schema's colorField
     const schema = getSchemaFromMarker(markerSchemaByName, marker.data);
 
-    if (
-      schema &&
-      schema.colorField &&
-      marker.data &&
-      typeof marker.data === 'object'
-    ) {
-      // Use type assertion to safely access dynamic property
-      const fieldValue = (marker.data as any)[schema.colorField];
+    if (schema && schema.colorField) {
+      const fieldValue = getMarkerFieldValue(
+        marker.data,
+        schema.colorField,
+        schema,
+        thread.stringTable
+      );
       // Validate that the field value is a valid GraphColor
       if (typeof fieldValue === 'string' && isValidGraphColor(fieldValue)) {
-        color = fieldValue as GraphColor;
+        color = fieldValue;
       }
     }
 
