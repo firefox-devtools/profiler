@@ -20,6 +20,7 @@ function createContext(): SessionContext {
     selectedThreads: [{ threadIndex: 0, name: 'GeckoMain' }],
     currentViewRange: null,
     rootRange: { start: 0, end: 3000 },
+    callTreeSummaryStrategy: 'timing',
   };
 }
 
