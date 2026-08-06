@@ -28,6 +28,7 @@ import {
   formatLogTimestamp,
   formatLogStatement,
 } from 'firefox-profiler/profile-logic/marker-data';
+import { computeStringIndexMarkerFieldsByDataType } from 'firefox-profiler/profile-logic/marker-schema';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -287,6 +288,11 @@ export function addDataToWindowObject(
     const profile = selectorsForConsole.profile.getProfile(getState());
     const range =
       selectorsForConsole.profile.getPreviewSelectionRange(getState());
+    // The schema tells us which payload fields hold string table indexes.
+    const stringIndexMarkerFieldsByDataType =
+      computeStringIndexMarkerFieldsByDataType(
+        selectorsForConsole.profile.getMarkerSchema(getState())
+      );
 
     for (const thread of profile.threads) {
       const { markers } = thread;
@@ -315,7 +321,8 @@ export function addDataToWindowObject(
             thread.name,
             data,
             moduleName,
-            stringArray
+            stringArray,
+            stringIndexMarkerFieldsByDataType
           );
           if (statement !== null) {
             logs.push(statement);

@@ -7,6 +7,7 @@ import {
   computeRateStats,
   collectMarkerInfo,
   collectMarkerStack,
+  collectProfileLogs,
   collectThreadMarkers,
   collectThreadNetwork,
 } from 'firefox-profiler/profile-query/formatters/marker-info';
@@ -1235,5 +1236,34 @@ describe('collectThreadNetwork', function () {
     const result = collectThreadNetwork(store, threadMap, markerMap);
 
     expect(result.requests[0].markerHandle).toBe('m-1');
+  });
+});
+
+describe('collectProfileLogs', function () {
+  it('filters on the text of a message held as a string table index', function () {
+    // The fixtures intern `level` and `message`, so these payloads hold string
+    // table indexes like the ones Firefox emits now. The search filter runs
+    // against the message, so it has to be resolved first.
+    const { store, threadMap } = setupWithMarkers([
+      [
+        'nsHttp',
+        170,
+        null,
+        { type: 'Log', level: 'Error', message: 'ParentChannelListener' },
+      ],
+      [
+        'nsJarProtocol',
+        190,
+        null,
+        { type: 'Log', level: 'Debug', message: 'nsJARChannel::nsJARChannel' },
+      ],
+    ]);
+
+    const { entries } = collectProfileLogs(store, threadMap, {
+      search: 'nsJARChannel',
+    });
+    expect(entries).toEqual([
+      '1970-01-01 00:00:00.190000000 UTC - [Unknown Process 0: Empty]: D/nsJarProtocol nsJARChannel::nsJARChannel',
+    ]);
   });
 });
