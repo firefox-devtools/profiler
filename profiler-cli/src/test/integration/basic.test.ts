@@ -21,9 +21,14 @@ import type {
   ProfileMetaResult,
   SessionMetadata,
   StatusResult,
+  StrategySelectResult,
+  ThreadInfoResult,
   ThreadSamplesResult,
   WithContext,
 } from '../../protocol';
+
+/** A DHAT heap profile, i.e. native allocations with no timing samples. */
+const ALLOCATION_PROFILE = 'src/test/fixtures/upgrades/dhat.json.gz';
 
 describe('profiler-cli basic functionality', () => {
   let ctx: CliTestContext;
@@ -321,6 +326,109 @@ describe('profiler-cli basic functionality', () => {
     expect(result.exitCode).not.toBe(0);
     const output = String(result.stdout || '') + String(result.stderr || '');
     expect(output).toContain('--max-lines must be a positive integer');
+  });
+
+  it('an unknown --strategy is rejected with the list of valid ones', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, [
+      'thread',
+      'samples',
+      '--strategy',
+      'bogus',
+    ]);
+
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('--strategy must be one of:');
+    expect(output).toContain('native-retained-allocations');
+  });
+
+  it('a strategy with no data in the thread is an error, not a fallback to timing', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, [
+      'thread',
+      'samples',
+      '--strategy',
+      'js-allocations',
+    ]);
+
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain("Strategy 'js-allocations' has no data");
+    expect(output).toContain('Available: timing');
+  });
+
+  it('an allocation profile reports bytes and lists its available strategies', async () => {
+    await cli(ctx, ['load', ALLOCATION_PROFILE]);
+
+    const infoResult = await cli(ctx, ['thread', 'info', '--json']);
+    const info = JSON.parse(infoResult.stdout) as WithContext<ThreadInfoResult>;
+    expect(info.availableStrategies).toEqual([
+      'native-allocations',
+      'native-deallocations-sites',
+    ]);
+
+    const samplesResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.weightType).toBe('bytes');
+    // The thread has no timing samples, so the call tree falls forward to
+    // native allocations even though the session setting is still timing.
+    expect(samples.callTreeSummaryStrategy).toBe('native-allocations');
+    expect(samples.context.callTreeSummaryStrategy).toBe('timing');
+  });
+
+  it('an ephemeral --strategy does not persist into session state', async () => {
+    await cli(ctx, ['load', ALLOCATION_PROFILE]);
+
+    const samplesResult = await cli(ctx, [
+      'thread',
+      'samples',
+      '--json',
+      '--strategy',
+      'native-deallocations-sites',
+    ]);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.callTreeSummaryStrategy).toBe('native-deallocations-sites');
+
+    const statusResult = await cli(ctx, ['status', '--json']);
+    const status = JSON.parse(statusResult.stdout) as StatusResult;
+    expect(status.callTreeSummaryStrategy).toBe('timing');
+  });
+
+  it('thread strategy persists across commands', async () => {
+    await cli(ctx, ['load', ALLOCATION_PROFILE]);
+
+    const selectResult = await cli(ctx, [
+      'thread',
+      'strategy',
+      'native-deallocations-sites',
+      '--json',
+    ]);
+    const selected = JSON.parse(
+      selectResult.stdout
+    ) as WithContext<StrategySelectResult>;
+    expect(selected.type).toBe('strategy-select');
+    expect(selected.strategy).toBe('native-deallocations-sites');
+    expect(selected.availableStrategies).toEqual([
+      'native-allocations',
+      'native-deallocations-sites',
+    ]);
+
+    const statusResult = await cli(ctx, ['status', '--json']);
+    const status = JSON.parse(statusResult.stdout) as StatusResult;
+    expect(status.callTreeSummaryStrategy).toBe('native-deallocations-sites');
+
+    const samplesResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.callTreeSummaryStrategy).toBe('native-deallocations-sites');
   });
 
   it('build hash mismatch stops the daemon before cleaning up the session', async () => {

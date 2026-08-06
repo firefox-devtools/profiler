@@ -9,11 +9,15 @@
 
 import type {
   Transform,
+  CallTreeSummaryStrategy,
   CounterGraphType,
   CounterTooltipDataSource,
   NetworkStatus,
   SampleUnits,
+  WeightType,
 } from 'firefox-profiler/types';
+
+export type { CallTreeSummaryStrategy, WeightType };
 
 // ===== Utility types =====
 
@@ -126,6 +130,7 @@ export type SessionContext = {
     start: number;
     end: number;
   };
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 };
 
 /**
@@ -158,6 +163,7 @@ export type StatusResult = {
     threadHandle: string;
     filters: FilterEntry[];
   }>;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 };
 
 // ===== Function Commands =====
@@ -250,6 +256,8 @@ export type FunctionAnnotateResult = {
   friendlyThreadName: string;
   totalSelfSamples: number;
   totalTotalSamples: number;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   mode: AnnotateMode;
   srcAnnotation: FunctionSourceAnnotation | null;
   asmAnnotations: FunctionAsmAnnotation[];
@@ -289,6 +297,13 @@ export type ThreadSelectResult = {
   threadNames: string[];
 };
 
+export type StrategySelectResult = {
+  type: 'strategy-select';
+  threadHandle: string;
+  strategy: CallTreeSummaryStrategy;
+  availableStrategies: CallTreeSummaryStrategy[];
+};
+
 export type ThreadInfoResult = {
   type: 'thread-info';
   threadHandle: string;
@@ -312,6 +327,7 @@ export type ThreadInfoResult = {
     depthLevel: number;
   }> | null;
   networkActivity: ThreadNetworkSummary | null;
+  availableStrategies: CallTreeSummaryStrategy[];
 };
 
 export type TopFunctionInfo = FunctionDisplayInfo & {
@@ -331,6 +347,8 @@ export type ThreadSamplesResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {
@@ -365,6 +383,8 @@ export type ThreadSamplesTopDownResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   regularCallTree: CallTreeNode;
 };
 
@@ -376,6 +396,8 @@ export type ThreadSamplesBottomUpResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   invertedCallTree: CallTreeNode | null;
 };
 
@@ -645,6 +667,8 @@ export type ThreadFunctionsResult = {
   activeOnly?: boolean;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   totalFunctionCount: number;
   filteredFunctionCount: number;
   filters?: {

@@ -48,6 +48,9 @@ CORE WORKFLOW
     All samples commands exclude idle by default so percentages reflect active CPU time.
     Use --include-idle to include idle samples (e.g. to see what fraction of wall time is idle).
 
+    Use --strategy to summarize allocated bytes instead of CPU time on profiles with
+    allocation tracking. See DATA SOURCES below.
+
     Use --search to focus the call tree on paths containing a specific function:
     profiler-cli thread samples-top-down --search GC
     profiler-cli thread samples-bottom-up --search "JS::Compile"
@@ -268,6 +271,29 @@ SOURCE MAPS
 
   Maps that carry "sourcesContent" also give you the original source, so
   "function annotate f-N" can show it with per-line sample counts.
+
+
+DATA SOURCES
+
+  By default the samples and functions commands summarize sample timing. Profiles
+  recorded with allocation tracking can be summarized by allocated bytes instead.
+
+    timing                        CPU sample counts (default)
+    js-allocations                Bytes of JavaScript allocated
+    native-retained-allocations   Bytes allocated and never freed
+    native-allocations            Bytes allocated, freed or not
+    native-deallocations-memory   Bytes freed, attributed to the allocation site
+    native-deallocations-sites    Bytes freed, attributed to the free site
+
+  Allocation sources report bytes, so "total" and "self" read as sizes (e.g. 1.2MB)
+  rather than sample counts.
+
+    profiler-cli thread info                              Which sources this thread has
+    profiler-cli thread strategy native-allocations       Sticky: applies to later commands
+    profiler-cli thread samples --strategy js-allocations Ephemeral: one command only
+
+  Asking for a source the thread has no data for is an error, so byte-free output
+  never gets mistaken for allocation data.
 
 
 JSON OUTPUT
