@@ -46,6 +46,7 @@ import type {
   ApiQueryError,
   TableViewOptions,
   DecodedInstruction,
+  ProfileEncodingResult,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -161,6 +162,8 @@ export type CheckedSharingOptions = {
   includePrivateBrowsingData: boolean;
   includeArgumentValues: boolean;
 };
+
+export type SharingMode = 'download' | 'upload';
 
 // This type is used when selecting tracks in the timeline. Ctrl and Meta are
 // stored in the same property to accommodate all OSes.
@@ -649,12 +652,14 @@ type SidebarAction = {
 type PublishAction =
   | {
       readonly type: 'UPDATE_SHARING_OPTION';
+      readonly mode: SharingMode;
       readonly slug: keyof CheckedSharingOptions;
       readonly value: boolean;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly sanitizedProfile: Profile;
+      readonly encodingPromise: Promise<ProfileEncodingResult>;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';

@@ -4,6 +4,7 @@
 
 import {
   attemptToPublish,
+  encodeSanitizedProfile,
   resetUploadState,
   updateSharingOption,
   revertToPrePublishedState,
@@ -107,7 +108,7 @@ describe('getCheckedSharingOptions', function () {
       const { profile } = getProfileFromTextSamples('A');
       profile.meta.updateChannel = updateChannel;
       const { getState } = storeWithProfile(profile);
-      return getCheckedSharingOptions(getState());
+      return getCheckedSharingOptions(getState(), 'upload');
     }
 
     it('does not filter with nightly', function () {
@@ -146,22 +147,50 @@ describe('getCheckedSharingOptions', function () {
       profile.meta.updateChannel = 'release';
 
       const { getState, dispatch } = storeWithProfile(profile);
-      expect(getCheckedSharingOptions(getState())).toMatchObject({
+      expect(getCheckedSharingOptions(getState(), 'upload')).toMatchObject({
         includeHiddenThreads: false,
       });
 
-      dispatch(updateSharingOption('includeHiddenThreads', true));
+      dispatch(updateSharingOption('upload', 'includeHiddenThreads', true));
 
-      expect(getCheckedSharingOptions(getState())).toMatchObject({
+      expect(getCheckedSharingOptions(getState(), 'upload')).toMatchObject({
         includeHiddenThreads: true,
       });
 
-      dispatch(updateSharingOption('includeHiddenThreads', false));
+      dispatch(updateSharingOption('upload', 'includeHiddenThreads', false));
 
-      expect(getCheckedSharingOptions(getState())).toMatchObject({
+      expect(getCheckedSharingOptions(getState(), 'upload')).toMatchObject({
         includeHiddenThreads: false,
       });
     });
+
+    it('keeps the download and upload options independent', function () {
+      const { profile } = getProfileFromTextSamples('A');
+      profile.meta.updateChannel = 'nightly';
+      const { getState, dispatch } = storeWithProfile(profile);
+
+      dispatch(updateSharingOption('download', 'includeHiddenThreads', false));
+
+      expect(
+        getCheckedSharingOptions(getState(), 'download').includeHiddenThreads
+      ).toBe(false);
+      expect(
+        getCheckedSharingOptions(getState(), 'upload').includeHiddenThreads
+      ).toBe(true);
+    });
+  });
+});
+
+describe('encodeSanitizedProfile', function () {
+  it('reuses the in-flight encoding instead of compressing the same profile twice', async function () {
+    const { profile } = getProfileFromTextSamples('A');
+    const { dispatch } = storeWithProfile(profile);
+
+    const first = dispatch(encodeSanitizedProfile('upload'));
+    const second = dispatch(encodeSanitizedProfile('upload'));
+
+    expect(second.encodingPromise).toBe(first.encodingPromise);
+    await first.encodingPromise;
   });
 });
 
@@ -172,12 +201,15 @@ describe('getRemoveProfileInformation', function () {
     expect(getHasPreferenceMarkers(getState())).toEqual(false);
 
     // Setting includePreferenceValues option to false
-    dispatch(updateSharingOption('includePreferenceValues', false));
+    dispatch(updateSharingOption('upload', 'includePreferenceValues', false));
     expect(
-      getCheckedSharingOptions(getState()).includePreferenceValues
+      getCheckedSharingOptions(getState(), 'upload').includePreferenceValues
     ).toEqual(false);
 
-    const removeProfileInformation = getRemoveProfileInformation(getState());
+    const removeProfileInformation = getRemoveProfileInformation(
+      getState(),
+      'upload'
+    );
     // It should return early with null value.
     expect(removeProfileInformation).toEqual(null);
   });
@@ -196,7 +228,7 @@ describe('getRemoveProfileInformation', function () {
       '  - show [thread Thread <3>]',
     ]);
 
-    expect(getRemoveProfileInformation(getState())).toBe(null);
+    expect(getRemoveProfileInformation(getState(), 'upload')).toBe(null);
 
     // Hide the second process
     dispatch(hideGlobalTrack(1));
@@ -215,11 +247,12 @@ describe('getRemoveProfileInformation', function () {
     ]);
 
     // Change the preference to remove hidden tracks
-    dispatch(updateSharingOption('includeHiddenThreads', false));
+    dispatch(updateSharingOption('upload', 'includeHiddenThreads', false));
     // Note: Jest doesn't check Set values with toMatchObject, so we're checking the
     // properties individually. See https://github.com/facebook/jest/issues/11250
     expect(
-      ensureExists(getRemoveProfileInformation(getState())).shouldRemoveThreads
+      ensureExists(getRemoveProfileInformation(getState(), 'upload'))
+        .shouldRemoveThreads
     ).toEqual(new Set([2, 3]));
   });
 
@@ -240,8 +273,8 @@ describe('getRemoveProfileInformation', function () {
 
       // The checkbox is hidden for these profiles, so leaving it unchecked must
       // not drag the profile into the sanitization path.
-      dispatch(updateSharingOption('includeArgumentValues', false));
-      expect(getRemoveProfileInformation(getState())).toEqual(null);
+      dispatch(updateSharingOption('upload', 'includeArgumentValues', false));
+      expect(getRemoveProfileInformation(getState(), 'upload')).toEqual(null);
     });
 
     it('should ignore an argumentValues column with no values buffer', function () {
@@ -252,7 +285,7 @@ describe('getRemoveProfileInformation', function () {
       const { getState } = storeWithProfile(profile);
 
       expect(getHasJSTracingArgumentValues(getState())).toEqual(false);
-      expect(getRemoveProfileInformation(getState())).toEqual(null);
+      expect(getRemoveProfileInformation(getState(), 'upload')).toEqual(null);
     });
 
     it('should remove the traced argument values by default', function () {
@@ -261,18 +294,18 @@ describe('getRemoveProfileInformation', function () {
 
       // The option starts out unchecked, because the values may contain PII.
       expect(
-        getCheckedSharingOptions(getState()).includeArgumentValues
+        getCheckedSharingOptions(getState(), 'upload').includeArgumentValues
       ).toEqual(false);
       expect(
-        ensureExists(getRemoveProfileInformation(getState()))
+        ensureExists(getRemoveProfileInformation(getState(), 'upload'))
           .shouldRemoveArgumentValues
       ).toEqual(true);
     });
 
     it('should keep the traced argument values once the user opts in', function () {
       const { getState, dispatch } = getStoreWithArgumentValues();
-      dispatch(updateSharingOption('includeArgumentValues', true));
-      expect(getRemoveProfileInformation(getState())).toEqual(null);
+      dispatch(updateSharingOption('upload', 'includeArgumentValues', true));
+      expect(getRemoveProfileInformation(getState(), 'upload')).toEqual(null);
     });
   });
 });
@@ -539,7 +572,7 @@ describe('attemptToPublish', function () {
     expect(getSelectedTab(getState())).toEqual(originalTab);
 
     // Ensure we are sanitizing something.
-    dispatch(updateSharingOption('includeUrls', false));
+    dispatch(updateSharingOption('upload', 'includeUrls', false));
 
     // Now upload.
     const publishAttempt = dispatch(attemptToPublish());
@@ -644,7 +677,7 @@ describe('attemptToPublish', function () {
 
     // Keep screenshots in the sanitized profile so the screenshot track
     // survives sanitization (only the hidden thread will be removed).
-    dispatch(updateSharingOption('includeScreenshots', true));
+    dispatch(updateSharingOption('upload', 'includeScreenshots', true));
 
     // Locate the global track indexes.
     const globalTracksBefore = getGlobalTracks(getState());
@@ -743,7 +776,7 @@ describe('attemptToPublish', function () {
     const { dispatch, getState, resolveUpload, assertUploadSuccess } =
       setupFakeUploadsWithStore(store);
 
-    dispatch(updateSharingOption('includeScreenshots', true));
+    dispatch(updateSharingOption('upload', 'includeScreenshots', true));
     dispatch(changeTabFilter(tab1ID));
 
     const globalTracksBefore = getGlobalTracks(getState());
@@ -873,7 +906,7 @@ describe('attemptToPublish', function () {
       dispatch(commitRange(2, 4)); // This will keep samples 2, 3.
 
       // This shouldn't be sanitized, but let's double check.
-      expect(getRemoveProfileInformation(getState())).toBe(null);
+      expect(getRemoveProfileInformation(getState(), 'upload')).toBe(null);
 
       const publishAttempt = dispatch(attemptToPublish());
       resolveUpload(JWT_TOKEN);
@@ -924,10 +957,10 @@ describe('attemptToPublish', function () {
       // Profiles with updateChannel == 'release' are sanitized by
       // default, but let's make sure of that so that we don't have surprises in
       // the future.
-      expect(getCheckedSharingOptions(getState()).includeFullTimeRange).toEqual(
-        false
-      );
-      expect(getRemoveProfileInformation(getState())).toMatchObject({
+      expect(
+        getCheckedSharingOptions(getState(), 'upload').includeFullTimeRange
+      ).toEqual(false);
+      expect(getRemoveProfileInformation(getState(), 'upload')).toMatchObject({
         shouldFilterToCommittedRange: {
           start: 2,
           end: 4,
@@ -985,7 +1018,7 @@ describe('attemptToPublish', function () {
       dispatch(commitRange(1, 4)); // This will keep samples 1, 2, 3.
 
       // This shouldn't be sanitized, but let's double check.
-      expect(getRemoveProfileInformation(getState())).toBe(null);
+      expect(getRemoveProfileInformation(getState(), 'upload')).toBe(null);
 
       const publishAttempt1 = dispatch(attemptToPublish());
 
@@ -1002,8 +1035,8 @@ describe('attemptToPublish', function () {
       abortFunction();
 
       // Then we check new options to sanitize the profile, and attempt a new publish.
-      dispatch(updateSharingOption('includeFullTimeRange', false));
-      expect(getRemoveProfileInformation(getState())).toMatchObject({
+      dispatch(updateSharingOption('upload', 'includeFullTimeRange', false));
+      expect(getRemoveProfileInformation(getState(), 'upload')).toMatchObject({
         shouldFilterToCommittedRange: { start: 1, end: 4 },
       });
       const publishAttempt2 = dispatch(attemptToPublish());

@@ -12,6 +12,7 @@ import type {
   TrackReference,
   TimelineType,
   CheckedSharingOptions,
+  SharingMode,
   LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -217,11 +218,19 @@ export type UploadState = {
   generation: number;
 };
 
+export type ProfileEncodingResult =
+  | { type: 'SUCCESS'; profileData: Blob }
+  | { type: 'ERROR'; error: Error };
+
 export type SanitizedProfileEncodingState =
   | {
       phase: 'INITIAL';
     }
-  | { phase: 'ENCODING'; sanitizedProfile: Profile }
+  | {
+      phase: 'ENCODING';
+      sanitizedProfile: Profile;
+      encodingPromise: Promise<ProfileEncodingResult>;
+    }
   | {
       phase: 'DONE';
       sanitizedProfile: Profile;
@@ -230,7 +239,7 @@ export type SanitizedProfileEncodingState =
   | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
 
 export type PublishState = {
-  readonly checkedSharingOptions: CheckedSharingOptions;
+  readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
