@@ -414,12 +414,21 @@ export class Daemon {
               throw new Error('thread handle required for thread select');
             }
             return this.querier.threadSelect(command.thread);
+          case 'strategy':
+            if (!command.strategy) {
+              throw new Error('strategy name required for thread strategy');
+            }
+            return this.querier.strategySelect(
+              command.strategy,
+              command.thread
+            );
           case 'samples':
             return this.querier.threadSamples(
               command.thread,
               command.includeIdle,
               command.search,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'samples-top-down':
             return this.querier.threadSamplesTopDown(
@@ -427,7 +436,8 @@ export class Daemon {
               command.callTreeOptions,
               command.includeIdle,
               command.search,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'samples-bottom-up':
             return this.querier.threadSamplesBottomUp(
@@ -435,7 +445,8 @@ export class Daemon {
               command.callTreeOptions,
               command.includeIdle,
               command.search,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'markers':
             return this.querier.threadMarkers(
@@ -447,7 +458,8 @@ export class Daemon {
               command.thread,
               command.functionFilters,
               command.includeIdle,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'network':
             return this.querier.threadNetwork(
@@ -522,7 +534,8 @@ export class Daemon {
               command.function,
               command.annotateMode ?? 'src',
               command.symbolServerUrl,
-              command.annotateContext ?? '2'
+              command.annotateContext ?? '2',
+              command.strategy
             );
           default:
             throw assertExhaustiveCheck(command);

@@ -39,10 +39,14 @@ import type {
   SampleFilterSpec,
   ProfileLogsResult,
   ThreadSelectResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
+  WeightType,
   CounterSummary,
   CounterListResult,
   CounterInfoResult,
 } from './protocol';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
 import {
@@ -70,6 +74,38 @@ function inlineSuffix(status: InlineStatus | undefined): string {
 const INLINE_LEGEND =
   'Note: (inl) = inlined by the compiler into the nearest non-inlined ancestor above. ' +
   '(inl?) = some calls were inlined by the compiler.';
+
+/**
+ * Format a call tree weight in the unit the current data source measures in.
+ */
+function formatWeight(value: number, weightType: WeightType): string {
+  switch (weightType) {
+    case 'bytes':
+      return formatBytes(value);
+    case 'tracing-ms':
+      return formatDuration(value);
+    case 'samples':
+      return String(Math.round(value));
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
+/**
+ * As formatWeight, but with a trailing unit word where the number alone would be
+ * ambiguous. formatBytes and formatDuration already embed their units.
+ */
+function formatWeightWithUnit(value: number, weightType: WeightType): string {
+  const formatted = formatWeight(value, weightType);
+  return weightType === 'samples' ? `${formatted} samples` : formatted;
+}
+
+/**
+ * The noun for a weight in headings like "Top Functions (by self bytes)".
+ */
+function weightHeadingNoun(weightType: WeightType): string {
+  return weightType === 'bytes' ? 'bytes' : 'time';
+}
 
 /**
  * Format a SessionContext as a compact header line.
@@ -154,7 +190,8 @@ export function formatStatusResult(result: StatusResult): string {
   return `\
 Session Status:
   Selected thread: ${threadInfo}
-  View range: ${rangesInfo}${filterSection}`;
+  View range: ${rangesInfo}
+  Data source: ${result.callTreeSummaryStrategy}${filterSection}`;
 }
 
 /**
@@ -272,6 +309,7 @@ Created at: ${result.createdAtName}
 Ended at: ${endedAtStr}
 
 This thread contains ${result.sampleCount} samples and ${result.markerCount} markers.
+Data sources: ${result.availableStrategies.join(', ') || 'none'}
 
 CPU activity over time:`;
 
@@ -943,15 +981,22 @@ function formatSamplesPreamble(result: {
   activeOnly?: boolean;
   search?: string;
   friendlyThreadName: string;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 }): string {
   const contextHeader = formatContextHeader(
     result.context,
     result.activeFilters,
     result.ephemeralFilters
   );
-  const activeOnlyNote = result.activeOnly
-    ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
-    : '';
+  const strategy = result.callTreeSummaryStrategy;
+  const isTiming = strategy === 'timing';
+  const dataSourceNote = isTiming ? '' : `Data source: ${strategy}\n\n`;
+  // Idle samples only exist in the timing table, so the note would be
+  // meaningless under an allocation strategy.
+  const activeOnlyNote =
+    result.activeOnly && isTiming
+      ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
+      : '';
   const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   const filtersParts: string[] = [
     ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
@@ -960,7 +1005,7 @@ function formatSamplesPreamble(result: {
   ];
   const filtersNote =
     filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
-  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
+  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${searchNote}${filtersNote}`;
 }
 
 /**
@@ -980,12 +1025,14 @@ export function formatThreadSamplesResult(
     return output;
   }
 
-  // Top functions by total time
-  output += 'Top Functions (by total time):\n';
+  const { weightType } = result;
+  const weightNoun = weightHeadingNoun(weightType);
+
+  output += `Top Functions (by total ${weightNoun}):\n`;
   output +=
     '  (For a call tree starting from these functions, use: profiler-cli thread samples-top-down)\n\n';
   for (const func of result.topFunctionsByTotal) {
-    const totalCount = Math.round(func.totalSamples);
+    const totalCount = formatWeight(func.totalSamples, weightType);
     const totalPct = func.totalPercentage.toFixed(1);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
@@ -996,12 +1043,11 @@ export function formatThreadSamplesResult(
 
   output += '\n';
 
-  // Top functions by self time
-  output += 'Top Functions (by self time):\n';
+  output += `Top Functions (by self ${weightNoun}):\n`;
   output +=
     '  (For a call tree showing what calls these functions, use: profiler-cli thread samples-bottom-up)\n\n';
   for (const func of result.topFunctionsBySelf) {
-    const selfCount = Math.round(func.selfSamples);
+    const selfCount = formatWeight(func.selfSamples, weightType);
     const selfPct = func.selfPercentage.toFixed(1);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
@@ -1014,7 +1060,11 @@ export function formatThreadSamplesResult(
 
   // Heaviest stack
   const stack = result.heaviestStack;
-  output += `Heaviest stack (${stack.selfSamples.toFixed(1)} samples, ${stack.frameCount} frames):\n`;
+  const heaviestSelf =
+    weightType === 'samples'
+      ? `${stack.selfSamples.toFixed(1)} samples`
+      : formatWeight(stack.selfSamples, weightType);
+  output += `Heaviest stack (${heaviestSelf}, ${stack.frameCount} frames):\n`;
 
   if (stack.hasInlinedFrames) {
     output += `  ${INLINE_LEGEND}\n\n`;
@@ -1025,12 +1075,12 @@ export function formatThreadSamplesResult(
   } else if (stack.frameCount <= 200) {
     // Show all frames
     for (let i = 0; i < stack.frames.length; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
   } else {
     // Show first 100
     for (let i = 0; i < 100; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
 
     // Show placeholder for skipped frames
@@ -1039,7 +1089,7 @@ export function formatThreadSamplesResult(
 
     // Show last 100
     for (let i = stack.frameCount - 100; i < stack.frameCount; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
   }
 
@@ -1048,16 +1098,17 @@ export function formatThreadSamplesResult(
 
 function formatHeaviestStackFrame(
   frame: ThreadSamplesResult['heaviestStack']['frames'][number],
-  i: number
+  i: number,
+  weightType: WeightType
 ): string {
   const displayName = truncateFunctionName(
     frame.nameWithLibrary,
     FUNC_NAME_WIDTH
   );
   const inlineMark = inlineSuffix(frame.inlineStatus);
-  const totalCount = Math.round(frame.totalSamples);
+  const totalCount = formatWeight(frame.totalSamples, weightType);
   const totalPct = frame.totalPercentage.toFixed(1);
-  const selfCount = Math.round(frame.selfSamples);
+  const selfCount = formatWeight(frame.selfSamples, weightType);
   const selfPct = frame.selfPercentage.toFixed(1);
   return `  ${i + 1}. ${displayName}${inlineMark} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
 }
@@ -1314,7 +1365,14 @@ export function formatThreadFunctionsResult(
     `Functions in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredFunctionCount} functions${filterSuffix}\n`
   );
 
-  if (result.activeOnly) {
+  const { weightType } = result;
+  const isTiming = result.callTreeSummaryStrategy === 'timing';
+
+  if (!isTiming) {
+    lines.push(`Data source: ${result.callTreeSummaryStrategy}\n`);
+  }
+
+  if (result.activeOnly && isTiming) {
     lines.push(
       'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n'
     );
@@ -1361,11 +1419,10 @@ export function formatThreadFunctionsResult(
     lines.push(`Filters: ${filterParts.join(', ')}\n`);
   }
 
-  // List functions sorted by self time
-  lines.push('Functions (by self time):');
+  lines.push(`Functions (by self ${weightHeadingNoun(weightType)}):`);
   for (const func of result.functions) {
-    const selfCount = Math.round(func.selfSamples);
-    const totalCount = Math.round(func.totalSamples);
+    const selfCount = formatWeight(func.selfSamples, weightType);
+    const totalCount = formatWeight(func.totalSamples, weightType);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
       FUNC_NAME_WIDTH
@@ -1735,11 +1792,19 @@ export function formatFunctionAnnotateResult(
   out.push(contextHeader, '');
   out.push(`Function ${result.functionHandle}: ${result.name}`);
   out.push(`Thread: ${result.friendlyThreadName} (${result.threadHandle})`, '');
+  const { weightType } = result;
+  const weightNoun = weightHeadingNoun(weightType);
+  // Wider columns for byte sizes, which read as "123.4KB" rather than "1234".
+  const W_SELF = weightType === 'bytes' ? 9 : 6;
+  const W_TOTAL = weightType === 'bytes' ? 10 : 7;
   out.push(
-    `Self time: ${Math.round(result.totalSelfSamples)} samples, ` +
-      `Total time: ${Math.round(result.totalTotalSamples)} samples`
+    `Self ${weightNoun}: ${formatWeightWithUnit(result.totalSelfSamples, weightType)}, ` +
+      `Total ${weightNoun}: ${formatWeightWithUnit(result.totalTotalSamples, weightType)}`
   );
   out.push(`Mode: ${result.mode}`);
+  if (result.callTreeSummaryStrategy !== 'timing') {
+    out.push(`Data source: ${result.callTreeSummaryStrategy}`);
+  }
 
   for (const w of result.warnings) {
     out.push('', `Warning: ${w}`);
@@ -1752,14 +1817,12 @@ export function formatFunctionAnnotateResult(
       src.totalFileLines !== null ? ` (${src.totalFileLines} lines)` : '';
     out.push('', `Source file: ${src.filename}${fileSuffix}`);
     out.push(
-      `  ${Math.round(src.samplesWithLineInfo)} of ${Math.round(src.samplesWithFunction)} ` +
-        `samples have line number information`
+      `  ${formatWeight(src.samplesWithLineInfo, weightType)} of ` +
+        `${formatWeightWithUnit(src.samplesWithFunction, weightType)} have line number information`
     );
     out.push(`  Showing: ${src.contextMode}`, '');
 
     const W_LINE = 5;
-    const W_SELF = 6;
-    const W_TOTAL = 7;
 
     out.push(
       `${'Line'.padStart(W_LINE)}  ${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Source`
@@ -1775,12 +1838,12 @@ export function formatFunctionAnnotateResult(
       prevLine = line.lineNumber;
 
       const selfStr =
-        line.selfSamples > 0
-          ? String(Math.round(line.selfSamples)).padStart(W_SELF)
+        line.selfSamples !== 0
+          ? formatWeight(line.selfSamples, weightType).padStart(W_SELF)
           : ' '.repeat(W_SELF);
       const totalStr =
-        line.totalSamples > 0
-          ? String(Math.round(line.totalSamples)).padStart(W_TOTAL)
+        line.totalSamples !== 0
+          ? formatWeight(line.totalSamples, weightType).padStart(W_TOTAL)
           : ' '.repeat(W_TOTAL);
       const srcText = line.sourceText !== null ? `  ${line.sourceText}` : '';
       out.push(
@@ -1806,20 +1869,20 @@ export function formatFunctionAnnotateResult(
 
     out.push('');
     out.push(
-      `  ${'Address'.padEnd(18)}${'Self'.padStart(6)}  ${'Total'.padStart(7)}  Instruction`
+      `  ${'Address'.padEnd(18)}${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Instruction`
     );
     out.push('  ' + '─'.repeat(70));
 
     for (const instr of asm.instructions) {
       const addrStr = `0x${instr.address.toString(16)}`.padEnd(18);
       const selfStr =
-        instr.selfSamples > 0
-          ? String(Math.round(instr.selfSamples)).padStart(6)
-          : ' '.repeat(6);
+        instr.selfSamples !== 0
+          ? formatWeight(instr.selfSamples, weightType).padStart(W_SELF)
+          : ' '.repeat(W_SELF);
       const totalStr =
-        instr.totalSamples > 0
-          ? String(Math.round(instr.totalSamples)).padStart(7)
-          : ' '.repeat(7);
+        instr.totalSamples !== 0
+          ? formatWeight(instr.totalSamples, weightType).padStart(W_TOTAL)
+          : ' '.repeat(W_TOTAL);
       out.push(`  ${addrStr}${selfStr}  ${totalStr}  ${instr.decodedString}`);
     }
   }
@@ -2091,4 +2154,16 @@ export function formatThreadSelectResult(
     return `Selected thread: ${result.threadHandle} (${names})`;
   }
   return `Selected ${count} threads: ${result.threadHandle} (${names})`;
+}
+
+/**
+ * Format a StrategySelectResult as plain text.
+ */
+export function formatStrategySelectResult(
+  result: WithContext<StrategySelectResult>
+): string {
+  return (
+    `Data source: ${result.strategy}\n` +
+    `Available in ${result.threadHandle}: ${result.availableStrategies.join(', ')}`
+  );
 }

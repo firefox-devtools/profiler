@@ -11,7 +11,8 @@ import { Option } from 'commander';
 import { collectStrings } from '../utils/parse';
 import { sendCommand } from '../client';
 import { formatOutput } from '../output';
-import type { ClientCommand } from '../protocol';
+import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-query/call-tree-strategy';
+import type { ClientCommand, CallTreeSummaryStrategy } from '../protocol';
 
 /**
  * Options shared by every command action via `addGlobalOptions`.
@@ -75,6 +76,38 @@ export function parseFloatArg(
     process.exit(1);
   }
   return v;
+}
+
+/**
+ * Parse a --strategy value and exit with an error if it is not a valid strategy.
+ */
+export function parseStrategyArg(value: string): CallTreeSummaryStrategy {
+  if (!(CALL_TREE_SUMMARY_STRATEGIES as string[]).includes(value)) {
+    console.error(
+      `Error: --strategy must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
+    );
+    process.exit(1);
+  }
+  return value as CallTreeSummaryStrategy;
+}
+
+/**
+ * As parseStrategyArg, but for the optional --strategy flag.
+ */
+export function parseOptionalStrategyArg(
+  value: string | undefined
+): CallTreeSummaryStrategy | undefined {
+  return value === undefined ? undefined : parseStrategyArg(value);
+}
+
+/**
+ * Add the --strategy option to a command.
+ */
+export function addStrategyOption(cmd: Command): Command {
+  return cmd.option(
+    '--strategy <name>',
+    `Data source to summarize: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}. Allocation strategies report bytes instead of samples.`
+  );
 }
 
 /**
