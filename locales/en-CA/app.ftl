@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     to import profiles from the local machine in this browser. Please open
     this page in { -firefox-brand-name } or Chrome instead.
     .title = Safari cannot import local profiles
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    This profile uses a format that is not supported by this version of { -profiler-brand-name }.
+    Try refreshing the page to check if there is an update available for { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
@@ -389,6 +394,15 @@ Home--chrome-extension-recording-instructions =
     Once installed, use the extension’s
     toolbar icon or the shortcuts to start and stop profiling. You can also
     export profiles and load them here for detailed analysis.
+
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Enter filter terms (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
