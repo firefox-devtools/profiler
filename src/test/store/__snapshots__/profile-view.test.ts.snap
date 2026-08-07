@@ -283,6 +283,11 @@ Object {
             "key": "level",
             "label": "Level",
           },
+          Object {
+            "format": "unique-string",
+            "key": "message",
+            "label": "Message",
+          },
         ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",

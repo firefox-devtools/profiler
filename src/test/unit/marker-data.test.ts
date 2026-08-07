@@ -15,6 +15,7 @@ import { processGeckoProfile } from '../../profile-logic/process-profile';
 import {
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
+  formatLogStatement,
 } from '../../profile-logic/marker-data';
 
 import {
@@ -37,6 +38,7 @@ import { getEmptySharedData } from '../../profile-logic/data-structures';
 
 import type {
   IndexIntoRawMarkerTable,
+  LogMarkerPayload,
   Milliseconds,
   NetworkPayload,
   ScreenshotPayload,
@@ -1390,5 +1392,48 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
     });
 
     expect(markerNames).toEqual(['A', 'B', 'E', 'G']);
+  });
+});
+
+describe('formatLogStatement', function () {
+  const timestamp = '1970-01-01 00:00:00.170000000 UTC';
+  const stringArray = ['', 'Error', 'the log message\n'];
+
+  function format(data: LogMarkerPayload) {
+    return formatLogStatement(
+      timestamp,
+      'GeckoMain',
+      1234,
+      'GeckoMain',
+      data,
+      'nsHttp',
+      stringArray
+    );
+  }
+
+  it('formats a message held as an index into the string table', function () {
+    expect(format({ type: 'Log', level: 1, message: 2 })).toBe(
+      `${timestamp} - [GeckoMain 1234: GeckoMain]: E/nsHttp the log message`
+    );
+  });
+
+  it('formats a message held inline, as older profiles do', function () {
+    expect(
+      format({ type: 'Log', level: 1, message: 'the log message\n' })
+    ).toBe(
+      `${timestamp} - [GeckoMain 1234: GeckoMain]: E/nsHttp the log message`
+    );
+  });
+
+  it('skips a marker whose message index resolves to an empty string', function () {
+    expect(format({ type: 'Log', level: 1, message: 0 })).toBe(null);
+  });
+
+  it('formats a legacy message held in the name field', function () {
+    expect(
+      format({ type: 'Log', module: 'D/nsHttp', name: 'the log message\n' })
+    ).toBe(
+      `${timestamp} - [GeckoMain 1234: GeckoMain]: D/nsHttp the log message`
+    );
   });
 });

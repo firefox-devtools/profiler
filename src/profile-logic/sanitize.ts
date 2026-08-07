@@ -18,7 +18,7 @@ import {
   sanitizeTextMarker,
   sanitizeFromMarkerSchema,
 } from './marker-data';
-import { getSchemaFromMarker } from './marker-schema';
+import { getSchemaFromMarker, isStringIndexMarkerField } from './marker-schema';
 import {
   filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
@@ -509,9 +509,17 @@ function sanitizeThreadPII(
           markerTable.name[i] = stringTable.indexForString(sanitizedRequestStr);
         }
 
-        if (currentMarker.type === 'Text') {
+        if (
+          currentMarker.type === 'Text' &&
+          !isStringIndexMarkerField(markerSchema, 'name')
+        ) {
           // Sanitize all the name fields of text markers in case they contain URLs.
-          markerTable.data[i] = sanitizeTextMarker(currentMarker);
+          // Newer profiles hold the text in the string table, sanitized above.
+          markerTable.data[i] = sanitizeTextMarker(
+            currentMarker,
+            markerSchema,
+            stringTable
+          );
           // Re-assign the value of currentMarker as the marker may be
           // sanitized again to remove extension ids.
           currentMarker = markerTable.data[i];
@@ -524,10 +532,13 @@ function sanitizeThreadPII(
         currentMarker.type === 'Text'
       ) {
         const markerName = stringTable.getString(markerTable.name[i]);
-        // Sanitize extension ids out of known extension markers.
+        // Sanitize extension ids out of known extension markers. Unlike URLs,
+        // these aren't removed from the string table as a whole.
         markerTable.data[i] = sanitizeExtensionTextMarker(
           markerName,
-          currentMarker
+          currentMarker,
+          getSchemaFromMarker(markerSchemaByName, currentMarker),
+          stringTable
         );
       }
 
