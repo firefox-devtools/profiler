@@ -40,6 +40,7 @@ import { registerFunctionCommand } from './commands/function';
 import { registerCounterCommand } from './commands/counter';
 import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
+import { registerSourcemapCommand } from './commands/sourcemap';
 import { registerSessionCommand } from './commands/session';
 
 // Read session directory from environment (only place this is read)
@@ -90,6 +91,8 @@ Examples:
   profiler-cli counter info c-0
   profiler-cli zoom push 2.7,3.1
   profiler-cli filter push --excludes-function f-184
+  profiler-cli sourcemap sources
+  profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
   profiler-cli stop --all`
     );
@@ -193,6 +196,7 @@ Examples:
   registerCounterCommand(program, SESSION_DIR);
   registerZoomCommand(program, SESSION_DIR);
   registerFilterCommand(program, SESSION_DIR);
+  registerSourcemapCommand(program, SESSION_DIR);
   registerSessionCommand(program, SESSION_DIR);
 
   try {

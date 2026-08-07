@@ -42,7 +42,12 @@ import type {
   CounterSummary,
   CounterListResult,
   CounterInfoResult,
+  SourceEntry,
+  SourceMapLocation,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
 } from './protocol';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
 import {
@@ -2091,4 +2096,64 @@ export function formatThreadSelectResult(
     return `Selected thread: ${result.threadHandle} (${names})`;
   }
   return `Selected ${count} threads: ${result.threadHandle} (${names})`;
+}
+
+function describeSourceMapLocation(sourceMap: SourceMapLocation): string {
+  switch (sourceMap.kind) {
+    case 'url':
+      return sourceMap.url;
+    case 'inline':
+      return `inline data: URL, ${sourceMap.mediaType}, ${formatBytes(sourceMap.byteLength)}`;
+    default:
+      throw assertExhaustiveCheck(sourceMap);
+  }
+}
+
+/** One `src-N  filename  (sourceMapURL: ...)` line, shared by sources and ambiguous. */
+function formatSourceEntry(entry: SourceEntry): string {
+  return `  ${entry.sourceHandle}  ${entry.filename}  (sourceMapURL: ${describeSourceMapLocation(entry.sourceMap)})`;
+}
+
+export function formatSourceMapSourcesResult(
+  result: WithContext<SourceMapSourcesResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  if (result.sources.length === 0) {
+    return `${contextHeader}\n\nNo sources with a source map URL in this profile.`;
+  }
+  const lines = result.sources.map(formatSourceEntry);
+  return `${contextHeader}\n\nSources with source maps (${result.sources.length}):\n${lines.join('\n')}`;
+}
+
+const APPLY_SOURCE_MAP_ERROR_MESSAGES: Record<
+  Extract<ApplySourceMapResult, { type: 'sourcemap-error' }>['error'],
+  string
+> = {
+  'invalid-source-map':
+    'The file is not a valid source map (invalid JSON, or not a source map).',
+  'no-eligible-sources':
+    'No sources in this profile carry a source map URL, so nothing to apply to.',
+  'symbolication-failed': 'Source map symbolication failed.',
+};
+
+export function formatApplySourceMapResult(
+  result: WithContext<ApplySourceMapResult>
+): string {
+  switch (result.type) {
+    case 'sourcemap-applied':
+      return `Applied source map to ${result.filename} (${result.sourceHandle}). Re-run thread commands to see de-minified names.`;
+    case 'sourcemap-unchanged':
+      return `Source map applied to ${result.filename} (${result.sourceHandle}) but nothing changed (no stack positions mapped).`;
+    case 'sourcemap-ambiguous': {
+      const lines = result.candidates.map(formatSourceEntry);
+      return [
+        'The source map matches more than one source. Re-run with --to <src-N> to pick one:',
+        ...lines,
+      ].join('\n');
+    }
+    case 'sourcemap-error':
+      return `Error: ${APPLY_SOURCE_MAP_ERROR_MESSAGES[result.error]}`;
+    default:
+      throw assertExhaustiveCheck(result);
+  }
 }

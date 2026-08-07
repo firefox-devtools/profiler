@@ -975,3 +975,48 @@ export type ProfileMetaResult = {
     entries: Array<{ label: string; value: any; formatted: string }>;
   }>;
 };
+
+// ===== Sourcemap Commands =====
+
+/**
+ * Where a source's map lives. Firefox stores an inline map's entire `data:` URL
+ * in the source table, so for those we report facts about the map rather than the
+ * payload, which can run to megabytes of base64.
+ */
+export type SourceMapLocation =
+  | { kind: 'url'; url: string }
+  | { kind: 'inline'; mediaType: string; byteLength: number };
+
+/**
+ * One bundle source that carries a `sourceMapURL` and is therefore eligible to
+ * have a user-supplied `.map` applied. `sourceHandle` is the `src-N` handle for
+ * `sourcemap apply --to`.
+ */
+export type SourceEntry = {
+  sourceHandle: string; // "src-N"
+  sourceIndex: number;
+  filename: string;
+  sourceMap: SourceMapLocation;
+};
+
+export type SourceMapSourcesResult = {
+  type: 'sourcemap-sources';
+  sources: SourceEntry[];
+};
+
+/**
+ * Outcome of `sourcemap apply`, mirroring `ApplySourceMapFileResult` from the
+ * web thunk. `unchanged` means the map was matched to a source but symbolication
+ * changed nothing. `ambiguous` and `error` map to a non-zero CLI exit.
+ */
+export type ApplySourceMapResult =
+  | { type: 'sourcemap-applied'; sourceHandle: string; filename: string }
+  | { type: 'sourcemap-unchanged'; sourceHandle: string; filename: string }
+  | { type: 'sourcemap-ambiguous'; candidates: SourceEntry[] }
+  | {
+      type: 'sourcemap-error';
+      error:
+        | 'invalid-source-map'
+        | 'no-eligible-sources'
+        | 'symbolication-failed';
+    };
