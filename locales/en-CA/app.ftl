@@ -545,6 +545,19 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolicate profile
 MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Cancel
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Original sources resolved for { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = No stack positions in { $filename } matched this source map.
+MenuButtons--metaInfo--source-map-error-invalid = The selected file is not a valid source map.
+MenuButtons--metaInfo--source-map-error-no-eligible = This profile has no JS bundles with source map URLs.
+MenuButtons--metaInfo--source-map-error-failed = Could not apply this source map to the profile.
 MenuButtons--metaInfo--cpu-model = CPU model:
 MenuButtons--metaInfo--cpu-cores = CPU cores:
 MenuButtons--metaInfo--main-memory = Main memory:
@@ -670,8 +683,14 @@ MenuButtons--publish--renderCheckbox-label-preference = Include preference value
 MenuButtons--publish--renderCheckbox-label-private-browsing = Include the data from private browsing windows
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = This profile contains private browsing data
+MenuButtons--publish--renderCheckbox-label-argument-values = Include JavaScript execution tracing function argument values
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = This profile contains function argument values recorded from the page, which may include personal data
 MenuButtons--publish--share-performance-profile = Share Performance Profile
+MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
+MenuButtons--publish--download-performance-profile = Download Performance Profile
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
+MenuButtons--publish--download-info-description = Save this profile as a file on your computer.
 MenuButtons--publish--info-description-default = By default, your personal data is removed.
 MenuButtons--publish--info-description-firefox-nightly2 = This profile is from { -firefox-nightly-brand-name }, so by default most information is included.
 MenuButtons--publish--include-additional-data = Include additional data that may be identifiable
