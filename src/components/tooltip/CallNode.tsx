@@ -307,6 +307,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     // JS Tracer threads have data relevant to the microsecond level.
     const isHighPrecision: boolean = Boolean(thread.isJsTracer);
 
+    // For inverted root nodes self === total, so per-category self values would
+    // just duplicate the running column. Pass null to suppress them.
+    const selfTimeForCategories = maybeTimings.isInvertedRoot
+      ? { ...selfTime, breakdownByCategory: null }
+      : selfTime;
+
     return (
       <div className="tooltipCallNodeCategory">
         {/* grid row -------------------------------------------------- */}
@@ -349,7 +355,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         </div>
         {totalBreakdownByCategory.map((_, categoryIndex) =>
           this._maybeRenderOneCategoryGroup(
-            { totalTime, selfTime },
+            { totalTime, selfTime: selfTimeForCategories },
             categoryIndex,
             isHighPrecision
           )

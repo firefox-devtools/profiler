@@ -707,6 +707,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,
+    getPreviewFilteredCtssSampleIndexOffsets,
     getPreviewFilteredCtssSampleCategoriesAndSubcategories,
     getHasFilteredCtssSamples,
     getHasPreviewFilteredCtssSamples,
