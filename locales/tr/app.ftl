@@ -444,6 +444,12 @@ MenuButtons--index--metaInfo-button =
     .label = Profil Bilgileri
 MenuButtons--index--full-view = Tam Görünüm
 MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
+MenuButtons--index--download =
+    .label = İndir…
+MenuButtons--index--share =
+    .label = Paylaş…
+MenuButtons--index--reshare =
+    .label = Yeniden paylaş…
 MenuButtons--index--share-error-uploading =
     .label = Yükleme başarısız
 MenuButtons--index--revert = Orijinal profile geri dön
@@ -464,6 +470,21 @@ MenuButtons--metaInfo--resymbolicate-profile = Profili yeniden sembolleştir
 MenuButtons--metaInfo--symbolicate-profile = Profili sembolleştir
 MenuButtons--metaInfo--attempting-resymbolicate = Profil yeniden sembolleştirilmeye çalışılıyor
 MenuButtons--metaInfo--currently-symbolicating = Şu anda profil sembolleştiriliyor
+MenuButtons--metaInfo--source-maps = Kaynak haritaları:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Kaynak haritasını uygula…
+    .title = Küçültülmüş bir JavaScript paketini sembolleştirmek ve özgün işlev adları ile kaynak konumlarını geri yüklemek için diskten bir .map dosyası yükleyin.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Bu kaynak haritasının uygulanacağı paketi seçin:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Uygula
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Vazgeç
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = { $filename } için özgün kaynaklar çözümlendi.
 MenuButtons--metaInfo--cpu-model = İşlemci modeli:
 MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
 MenuButtons--metaInfo--main-memory = Ana bellek:
