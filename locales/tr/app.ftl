@@ -359,6 +359,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Seçimi işaretçinin süresine göre ayarla
 MarkerContextMenu--start-selection-here = Seçimi buradan başlat
 MarkerContextMenu--end-selection-here = Seçimi burada sonlandır
 MarkerContextMenu--start-selection-at-marker-start = Seçimi işaretçinin <strong>başlangıcından</strong> başlat
@@ -611,7 +612,10 @@ MenuButtons--publish--renderCheckbox-label-private-browsing = Gizli gezinti penc
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Bu profil gizli gezinti verileri içeriyor
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
+MenuButtons--publish--reshare-performance-profile = Performans Profilini Yeniden Paylaş
+MenuButtons--publish--download-performance-profile = Performans Profilini İndir
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
+MenuButtons--publish--download-info-description = Bu profili bilgisayarınıza dosya olarak kaydedin.
 MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
 MenuButtons--publish--info-description-firefox-nightly2 = Bu profil { -firefox-nightly-brand-name }’ye ait olduğu için çoğu bilgi varsayılan olarak dahil edilmiştir.
 MenuButtons--publish--include-additional-data = Tanımlanabilir olabilecek ek verileri dahil et
