@@ -520,10 +520,12 @@ MenuButtons--index--metaInfo-button =
     .label = Πληροφορίες προφίλ
 MenuButtons--index--full-view = Πλήρης προβολή
 MenuButtons--index--cancel-upload = Ακύρωση μεταφόρτωσης
-MenuButtons--index--share-upload =
-    .label = Μεταφόρτωση τοπικού προφίλ
-MenuButtons--index--share-re-upload =
-    .label = Νέα μεταφόρτωση
+MenuButtons--index--download =
+    .label = Λήψη…
+MenuButtons--index--share =
+    .label = Κοινή χρήση…
+MenuButtons--index--reshare =
+    .label = Νέα κοινή χρήση…
 MenuButtons--index--share-error-uploading =
     .label = Σφάλμα μεταφόρτωσης
 MenuButtons--index--revert = Επιστροφή στο αρχικό προφίλ
@@ -544,10 +546,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός 
 MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
 MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτήν τη στιγμή
+MenuButtons--metaInfo--source-maps = Χάρτες πηγής:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Εφαρμογή χάρτη πηγής…
+    .title = Φόρτωση αρχείου .map από το δίσκο για συμβολισμό ενός πακέτου JavaScript σε ελαχιστοποίηση, ανάκτησης ονομάτων αρχικών συναρτήσεων και τοποθεσιών πηγής.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Επιλέξτε σε ποιο πακέτο θα εφαρμοστεί αυτός ο χάρτης πηγής:
 # Button to confirm the chosen source and apply the source map to it.
 MenuButtons--metaInfo--source-map-apply = Εφαρμογή
 # Button to dismiss the source chooser without symbolicating.
 MenuButtons--metaInfo--source-map-cancel = Ακύρωση
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Οι αρχικές πηγές επιλύθηκαν για { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Καμία καταχώρηση στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
+MenuButtons--metaInfo--source-map-error-invalid = Το επιλεγμένο αρχείο δεν είναι συμβατή πηγή χάρτη.
+MenuButtons--metaInfo--source-map-error-no-eligible = Αυτό το προφίλ δεν έχει πακέτα JS με URL χαρτών πηγής.
+MenuButtons--metaInfo--source-map-error-failed = Δεν ήταν δυνατή η εφαρμογή αυτού του χάρτη πηγής στο προφίλ.
 MenuButtons--metaInfo--cpu-model = Μοντέλο CPU:
 MenuButtons--metaInfo--cpu-cores = Πυρήνες CPU:
 MenuButtons--metaInfo--main-memory = Κύρια μνήμη:
@@ -673,9 +693,14 @@ MenuButtons--publish--renderCheckbox-label-preference = Συμπερίληψη �
 MenuButtons--publish--renderCheckbox-label-private-browsing = Συμπερίληψη δεδομένων από τα παράθυρα ιδιωτικής περιήγησης
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Αυτό το προφίλ περιέχει δεδομένα ιδιωτικής περιήγησης
-MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωση προφίλ επιδόσεων
+MenuButtons--publish--renderCheckbox-label-argument-values = Συμπερίληψη τιμών ορίσματος της λειτουργίας καταγραφής εκτέλεσης JavaScript
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Αυτό το προφίλ περιέχει τιμές ορίσματος συνάρτησης που έχουν καταγραφεί από τη σελίδα, οι οποίες ενδέχεται να περιλαμβάνουν προσωπικά δεδομένα.
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
+MenuButtons--publish--reshare-performance-profile = Νέα κοινή χρήση προφίλ επιδόσεων
+MenuButtons--publish--download-performance-profile = Λήψη προφίλ επιδόσεων
 MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
+MenuButtons--publish--download-info-description = Αποθηκεύστε αυτό το προφίλ ως αρχείο στον υπολογιστή σας.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
 MenuButtons--publish--info-description-firefox-nightly2 = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται οι περισσότερες πληροφορίες από προεπιλογή.
 MenuButtons--publish--include-additional-data = Συμπερίληψη επιπλέον δεδομένων που ίσως να είναι αναγνωρίσιμα
