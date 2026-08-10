@@ -1570,6 +1570,14 @@ const _upgraders: {
     // marker data with hexadecimal typed data, and no modification is needed in the
     // frontend to display older formats.
   },
+  [36]: (_: any) => {
+    // The Text marker's "name" field and the Log marker's "message" field are
+    // now unique strings, so their payloads hold a string table index instead
+    // of the text itself.
+    // No upgrade is needed, as the frontend reads the field format from the
+    // marker schema. This bump is only here so that older frontends, which read
+    // these two fields directly, get updated.
+  },
 
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
