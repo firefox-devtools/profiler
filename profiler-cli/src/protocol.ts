@@ -59,6 +59,10 @@ export type {
   CounterSummary,
   CounterListResult,
   CounterInfoResult,
+  SourceEntry,
+  SourceMapLocation,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
 } from '../../src/profile-query/types';
 export type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -92,6 +96,8 @@ import type {
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
 } from '../../src/profile-query/types';
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -186,6 +192,14 @@ export type ClientCommand =
       spec?: SampleFilterSpec;
       count?: number;
     }
+  | {
+      command: 'sourcemap';
+      subcommand: 'sources' | 'apply';
+      /** Absolute path to the `.map` file (resolved client-side). */
+      path?: string;
+      /** `src-N` handle of the target source; skips auto-matching when set. */
+      to?: string;
+    }
   | { command: 'status' };
 
 export type ServerResponse =
@@ -221,7 +235,9 @@ export type CommandResult =
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
   | WithContext<CounterListResult>
-  | WithContext<CounterInfoResult>;
+  | WithContext<CounterInfoResult>
+  | WithContext<SourceMapSourcesResult>
+  | WithContext<ApplySourceMapResult>;
 
 export interface SessionMetadata {
   id: string;

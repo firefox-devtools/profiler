@@ -624,7 +624,8 @@ export type UserTimingMarkerPayload = {
 
 export type TextMarkerPayload = {
   type: 'Text';
-  name: string;
+  // A string table index in newer profiles, the text itself in older ones.
+  name: string | IndexIntoStringTable;
   cause?: CauseBacktrace;
   innerWindowID?: number;
 };
@@ -658,7 +659,8 @@ export type LogMarkerPayload =
       type: 'Log';
       // String table index resolving to "Error", "Warning", "Info", "Debug", or "Verbose".
       level: number;
-      message: string;
+      // A string table index in newer profiles, the message itself in older ones.
+      message: string | IndexIntoStringTable;
       color?: string;
     };
 
