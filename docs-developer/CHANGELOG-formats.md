@@ -211,6 +211,12 @@ Older versions are not documented in this changelog but can be found in [process
 
 ## Gecko profile format
 
+### Version 36
+
+The `Text` marker's `name` field and the `Log` marker's `message` field are now unique strings, so their payloads hold a string table index instead of the text itself. Both marker schemas declare this with the `unique-string` field format.
+
+No profile format upgrade is needed, as the frontend reads the field format from the marker schema. But older frontends read these two fields directly instead of looking at their schema, so they throw an error while sanitizing the profile for upload and while extracting the MOZ_LOG output. This version bump makes sure that these older frontend versions get updated.
+
 ### Version 35
 
 A new `hexadecimal` marker schema field format type has been added, which displays an integer value in hexadecimal with a `0x` prefix.
