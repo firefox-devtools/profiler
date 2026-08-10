@@ -1,6 +1,6 @@
 {
   "name": "@firefox-devtools/profiler-cli",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Command-line interface for querying Firefox Profiler profiles with persistent daemon sessions",
   "scripts": {
     "prepublishOnly": "node ../scripts/verify-profiler-cli-build.mjs"
@@ -11,7 +11,8 @@
     "pq": "dist/profiler-cli.js"
   },
   "files": [
-    "dist/profiler-cli.js"
+    "dist/profiler-cli.js",
+    "dist/mappings.wasm"
   ],
   "engines": {
     "node": ">= 24"

@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 69
+
+A new marker schema display location, `timeline-network`, was added. A marker schema can list `timeline-network` in its `display` array to have markers of that type surfaced in the Network track.
+
 ### Version 68
 
 The `startTime` and `endTime` columns of the raw marker table (`thread.markers`) can now optionally be stored as `Float64Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
@@ -206,6 +210,12 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
+
+### Version 36
+
+The `Text` marker's `name` field and the `Log` marker's `message` field are now unique strings, so their payloads hold a string table index instead of the text itself. Both marker schemas declare this with the `unique-string` field format.
+
+No profile format upgrade is needed, as the frontend reads the field format from the marker schema. But older frontends read these two fields directly instead of looking at their schema, so they throw an error while sanitizing the profile for upload and while extracting the MOZ_LOG output. This version bump makes sure that these older frontend versions get updated.
 
 ### Version 35
 

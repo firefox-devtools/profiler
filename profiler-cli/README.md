@@ -54,6 +54,8 @@ profiler-cli filter push <filter-flag>     # Push a sticky sample filter (see fi
 profiler-cli filter pop [N]                # Pop the last N filters (default: 1)
 profiler-cli filter list                   # List active filters for current thread
 profiler-cli filter clear                  # Remove all filters for current thread
+profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
+profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
@@ -93,6 +95,7 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | `--jank-limit <N>`     | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |
 | `--list`               | Show a flat chronological list of individual markers (for `thread markers`)                                                                              |
 | `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
+| `--to <src-N>`         | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
 | `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
 
 ## Sample Filter Flags
@@ -115,6 +118,25 @@ For `filter push`, exactly one flag per push. For ephemeral use, multiple flags 
 ## Session Storage
 
 Sessions are stored in `~/.profiler-cli/` (or `$PROFILER_CLI_SESSION_DIR` to override).
+
+Each session keeps a metadata file, a Unix domain socket (a named pipe on Windows), and a daemon log in that directory. The daemon log is the first place to look when a session misbehaves, and `profiler-cli` prints its path in error messages.
+
+## Running in a sandbox
+
+`profiler-cli` runs its daemon in a separate process and talks to it over a Unix domain socket in the session directory, so a sandbox has to allow two things:
+
+- writing to the session directory, and
+- creating and connecting to Unix domain sockets inside it.
+
+If the home directory is not writable, point the CLI somewhere it can write:
+
+```bash
+export PROFILER_CLI_SESSION_DIR=/tmp/profiler-cli
+```
+
+Keep that path short. Unix socket paths are limited to 104 bytes on macOS and 108 on Linux, and the session directory is part of the socket path.
+
+If Unix domain sockets are blocked outright, allow them in the sandbox policy or run `profiler-cli` outside the sandbox.
 
 ## Contributing
 

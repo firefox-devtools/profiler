@@ -9,6 +9,7 @@ import {
   shallowCloneNativeSymbolTable,
   getRawFrameTableBuilderWithExistingContents,
 } from './data-structures';
+import type { RawFrameTableBuilder } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
 import type {
@@ -16,10 +17,15 @@ import type {
   RawProfileSharedData,
   RawThread,
   RawStackTable,
+  FuncTable,
+  NativeSymbolTable,
+  SourceTable,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
+  IndexIntoSourceTable,
+  IndexIntoStringTable,
   IndexIntoLibs,
   Address,
   CallNodePath,
@@ -224,6 +230,20 @@ export type SymbolicationStepInfo = {
 };
 
 export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
+
+// The mutable tables which the symbolication steps of one batch operate on.
+// These are created once per batch and mutated in place by each step.
+type SymbolicationTables = {
+  frameTable: RawFrameTableBuilder;
+  funcTable: FuncTable;
+  nativeSymbols: NativeSymbolTable;
+  sources: SourceTable;
+  // Maps a filename string index to the index of the native (id === null)
+  // source entry for that filename, so that we don't have to scan the sources
+  // table for every new func.
+  sourceIndexForNativeFilename: Map<IndexIntoStringTable, IndexIntoSourceTable>;
+  stringTable: StringTable;
+};
 
 type ProfileSymbolicationInfo = Map<LibKey, ProfileLibSymbolicationInfo>;
 
@@ -480,16 +500,54 @@ export function applySymbolicationSteps(
     IndexIntoFrameTable,
     IndexIntoFrameTable[]
   >();
-  let shared = oldShared;
+
+  // Create the mutable copies of the shared tables once, and let every
+  // symbolication step mutate them in place. Copying the frameTable in and out
+  // of its builder form is expensive (it converts multiple typed array columns
+  // to regular arrays and back), so doing it once per batch rather than once
+  // per step is a big win when many libraries are symbolicated at the same time.
+  const frameTable = getRawFrameTableBuilderWithExistingContents(
+    oldShared.frameTable
+  );
+  const funcTable = shallowCloneFuncTable(oldShared.funcTable);
+  const nativeSymbols = shallowCloneNativeSymbolTable(oldShared.nativeSymbols);
+  const { sources, stringArray } = oldShared;
+  const stringTable = StringTable.withBackingArray(stringArray);
+  const sourceIndexForNativeFilename = new Map<
+    IndexIntoStringTable,
+    IndexIntoSourceTable
+  >();
+  for (let i = 0; i < sources.length; i++) {
+    if (sources.id[i] === null) {
+      sourceIndexForNativeFilename.set(sources.filename[i], i);
+    }
+  }
+  const tables: SymbolicationTables = {
+    frameTable,
+    funcTable,
+    nativeSymbols,
+    sources,
+    sourceIndexForNativeFilename,
+    stringTable,
+  };
+
   for (const symbolicationStep of symbolicationSteps) {
-    shared = _partiallyApplySymbolicationStep(
-      shared,
+    _partiallyApplySymbolicationStep(
+      tables,
       symbolicationStep,
       oldFuncToNewFuncsMap,
       shouldStacksWithThisFrameBeRemoved,
       frameIndexToInlineExpansionFrames
     );
   }
+
+  let shared: RawProfileSharedData = {
+    ...oldShared,
+    frameTable: finishRawFrameTableBuilder(frameTable),
+    funcTable,
+    nativeSymbols,
+  };
+
   const newStackInfo = _computeStackTableWithAddedExpansionStacks(
     shared.stackTable,
     shouldStacksWithThisFrameBeRemoved,
@@ -541,9 +599,14 @@ export function applySymbolicationSteps(
  * Creating a new stackTable can be very expensive; doing it in the caller allows
  * the caller to delay the creation of the new stackTable until the symbolication
  * steps from multiple libraries have been processed. This can be much faster.
+ *
+ * The tables in `tables` are mutated in place, and are shared between all the
+ * symbolication steps of a batch. Each step only touches the frames, funcs and
+ * native symbols which belong to its own library, so the steps don't interfere
+ * with each other.
  */
 function _partiallyApplySymbolicationStep(
-  shared: RawProfileSharedData,
+  tables: SymbolicationTables,
   symbolicationStepInfo: SymbolicationStepInfo,
   oldFuncToNewFuncsMap: FuncToFuncsMap,
   shouldStacksWithThisFrameBeRemoved: Uint8Array,
@@ -551,15 +614,15 @@ function _partiallyApplySymbolicationStep(
     IndexIntoFrameTable,
     IndexIntoFrameTable[]
   >
-): RawProfileSharedData {
+): void {
   const {
-    frameTable: oldFrameTable,
-    funcTable: oldFuncTable,
-    nativeSymbols: oldNativeSymbols,
-    stringArray,
+    frameTable,
+    funcTable,
+    nativeSymbols,
     sources,
-  } = shared;
-  const stringTable = StringTable.withBackingArray(stringArray);
+    sourceIndexForNativeFilename,
+    stringTable,
+  } = tables;
   const { libSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
   const {
     resourceIndex,
@@ -588,7 +651,7 @@ function _partiallyApplySymbolicationStep(
   const inlinedFrames = [];
   const nonInlinedFrames = [];
   for (const frameIndex of allFramesForThisLib) {
-    if (oldFrameTable.inlineDepth[frameIndex] > 0) {
+    if (frameTable.inlineDepth[frameIndex] > 0) {
       inlinedFrames.push(frameIndex);
       shouldStacksWithThisFrameBeRemoved[frameIndex] = 1;
     } else {
@@ -606,16 +669,16 @@ function _partiallyApplySymbolicationStep(
   // Afterwards, we create funcs for symbols with the same name, and then group frames
   // into funcs.
   for (const frameIndex of nonInlinedFrames) {
-    const oldFrameSymbol = oldFrameTable.nativeSymbol[frameIndex];
-    const address = oldFrameTable.address[frameIndex];
+    const oldFrameSymbol = frameTable.nativeSymbol[frameIndex];
+    const address = frameTable.address[frameIndex];
     let addressResult: AddressResult | void = resultsForLib.get(address);
     if (addressResult === undefined) {
       if (oldFrameSymbol !== null) {
         const oldSymbolName = stringTable.getString(
-          oldNativeSymbols.name[oldFrameSymbol]
+          nativeSymbols.name[oldFrameSymbol]
         );
         addressResult = {
-          symbolAddress: oldNativeSymbols.address[oldFrameSymbol],
+          symbolAddress: nativeSymbols.address[oldFrameSymbol],
           name: oldSymbolName,
         };
       } else {
@@ -677,7 +740,6 @@ function _partiallyApplySymbolicationStep(
   // Find a canonical symbolIndex for any symbolAddress that doesn't have one yet,
   // and give the canonical symbol the right address and symbol.
   const availableNativeSymbolIterator = availableNativeSymbols.values();
-  const nativeSymbols = shallowCloneNativeSymbolTable(oldNativeSymbols);
   for (const [symbolAddress, addressResult] of symbolAddressToInfoMap) {
     const symbolStringIndex = stringTable.indexForString(addressResult.name);
     let symbolIndex = symbolAddressToCanonicalSymbolIndexMap.get(symbolAddress);
@@ -702,8 +764,7 @@ function _partiallyApplySymbolicationStep(
   }
 
   // Now we have a canonical symbol for every symbolAddress.
-  // Make a new frameTable with the updated nativeSymbol assignments.
-  const newFrameTableNativeSymbolsColumn = oldFrameTable.nativeSymbol.slice();
+  // Update the frameTable with the new nativeSymbol assignments.
   for (const [frameIndex, symbolAddress] of frameToSymbolAddressMap) {
     const symbolIndex =
       symbolAddressToCanonicalSymbolIndexMap.get(symbolAddress);
@@ -712,22 +773,14 @@ function _partiallyApplySymbolicationStep(
         'Impossible, all symbolAddresses have a canonical symbol at this point.'
       );
     }
-    newFrameTableNativeSymbolsColumn[frameIndex] = symbolIndex;
+    frameTable.nativeSymbol[frameIndex] = symbolIndex;
   }
-
-  // Integrate the new native symbol column into the frame table and make a
-  // copy so that we can add new frames below.
-  const frameTable = getRawFrameTableBuilderWithExistingContents({
-    ...oldFrameTable,
-    nativeSymbol: newFrameTableNativeSymbolsColumn,
-  });
 
   // Now it is time to look at funcs.
   // For funcs belonging to a native library, we group frames into funcs based
   // on the function name string and the file name. (We don't expect there to
   // be multiple functions with the same name in the same file. If there are,
   // then they'll be treated as the same function.)
-  const funcTable = shallowCloneFuncTable(oldFuncTable);
   const availableFuncIter = availableFuncs.values();
 
   // funcKey -> funcIndex, where funcKey = `${nameStringIndex}:${fileStringIndex}`
@@ -737,12 +790,12 @@ function _partiallyApplySymbolicationStep(
   const oldFuncToNewFuncsEntries: Array<[IndexIntoFuncTable, string]> = [];
 
   for (const frameIndex of nonInlinedFrames) {
-    const oldFunc = oldFrameTable.func[frameIndex];
-    const nativeSymbolIndex = newFrameTableNativeSymbolsColumn[frameIndex];
+    const oldFunc = frameTable.func[frameIndex];
+    const nativeSymbolIndex = frameTable.nativeSymbol[frameIndex];
     if (nativeSymbolIndex === null) {
       throw new Error('Impossible, all frames now have native symbols.');
     }
-    const address = oldFrameTable.address[frameIndex];
+    const address = frameTable.address[frameIndex];
     let addressResult = resultsForLib.get(address);
     if (addressResult === undefined) {
       const symbolName = nativeSymbols.name[nativeSymbolIndex];
@@ -758,7 +811,7 @@ function _partiallyApplySymbolicationStep(
           fileNameIndex !== null
             ? stringTable.getString(fileNameIndex)
             : undefined,
-        line: oldFrameTable.line[frameIndex] ?? undefined,
+        line: frameTable.line[frameIndex] ?? undefined,
       };
     }
     // Make a combined list which contains both the outer function and the inlines.
@@ -807,18 +860,10 @@ function _partiallyApplySymbolicationStep(
         funcTable.name[funcIndex] = functionStringIndex;
         // Store filename in sources table if we have one
         if (fileNameStringIndex !== null) {
-          // Find or create source entry
-          let sourceIndex = null;
-          for (let i = 0; i < sources.filename.length; i++) {
-            if (
-              sources.filename[i] === fileNameStringIndex &&
-              sources.id[i] === null
-            ) {
-              sourceIndex = i;
-              break;
-            }
-          }
-          if (sourceIndex === null) {
+          // Find or create the native source entry for this filename.
+          let sourceIndex =
+            sourceIndexForNativeFilename.get(fileNameStringIndex);
+          if (sourceIndex === undefined) {
             sourceIndex = sources.filename.length;
             sources.filename.push(fileNameStringIndex);
             sources.id.push(null);
@@ -827,6 +872,7 @@ function _partiallyApplySymbolicationStep(
             sources.sourceMapURL.push(null);
             sources.content.push(null);
             sources.length++;
+            sourceIndexForNativeFilename.set(fileNameStringIndex, sourceIndex);
           }
           funcTable.source[funcIndex] = sourceIndex;
         } else {
@@ -891,16 +937,8 @@ function _partiallyApplySymbolicationStep(
     );
   }
 
-  const newShared = {
-    ...shared,
-    frameTable: finishRawFrameTableBuilder(frameTable),
-    funcTable,
-    nativeSymbols,
-  };
-
-  // We have the finished new frameTable and new funcTable.
-  // The new stackTable will be built by the caller.
-  return newShared;
+  // The tables have been updated in place. The caller finishes the frameTable
+  // and builds the new stackTable once all steps of the batch are done.
 }
 
 /**

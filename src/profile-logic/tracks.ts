@@ -338,6 +338,10 @@ export function computeLocalTracksByPid(
     markerSchema,
     'timeline-ipc'
   );
+  const networkTimelineMarkerTypes = getMarkerTypesForDisplay(
+    markerSchema,
+    'timeline-network'
+  );
 
   for (
     let threadIndex = 0;
@@ -362,7 +366,11 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'thread', threadIndex });
     }
 
-    if (markers.data.some((datum) => datum && datum.type === 'Network')) {
+    if (
+      markers.data.some(
+        (datum) => datum && networkTimelineMarkerTypes.has(datum.type)
+      )
+    ) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
     }

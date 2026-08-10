@@ -175,4 +175,20 @@ describe('shared/ButtonWithPanel', () => {
     });
     expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
+
+  it('marks the button as no longer open as soon as the panel starts closing', () => {
+    const { container } = setup();
+
+    fireFullClick(screen.getByText('My Button'));
+    act(() => {
+      jest.runAllTimers();
+    });
+    ensureExists(container.querySelector('.buttonWithPanel.open'));
+
+    fireFullClick(screen.getByText('My Button'));
+
+    // Timers are deliberately not run: the panel is still animating out.
+    expect(container.querySelector('.buttonWithPanel.open')).toBe(null);
+    ensureExists(container.querySelector('.arrowPanel'));
+  });
 });

@@ -32,6 +32,10 @@ import {
   cleanupSession,
   validateSession,
   listSessions,
+  getLogSize,
+  readLogTail,
+  writeStartupError,
+  takeStartupError,
 } from '../../session';
 import type { SessionMetadata } from '../../protocol';
 
@@ -374,6 +378,39 @@ describe('profiler-cli session management', function () {
       } finally {
         await new Promise<void>((resolve) => server.close(() => resolve()));
       }
+    });
+  });
+
+  describe('daemon log and startup error', function () {
+    it('returns null when there is no log', function () {
+      expect(readLogTail(testSessionDir, 'no-log')).toBe(null);
+      expect(getLogSize(testSessionDir, 'no-log')).toBe(0);
+    });
+
+    it('ignores everything before the given offset', function () {
+      const logPath = getLogPath(testSessionDir, 'reused');
+      fs.writeFileSync(logPath, 'from an earlier daemon\n');
+      const offset = getLogSize(testSessionDir, 'reused');
+      fs.appendFileSync(logPath, 'from this daemon\n');
+
+      const tail = readLogTail(testSessionDir, 'reused', offset);
+      expect(tail).toBe('from this daemon');
+      expect(readLogTail(testSessionDir, 'reused')).toContain(
+        'from an earlier daemon'
+      );
+    });
+
+    it('reads back and consumes a startup error', function () {
+      writeStartupError(testSessionDir, 'failed', 'could not bind\n');
+
+      expect(takeStartupError(testSessionDir, 'failed')).toBe('could not bind');
+      // Consumed, so a later failure cannot inherit this one's reason.
+      expect(takeStartupError(testSessionDir, 'failed')).toBe(null);
+    });
+
+    it('does not make startup errors look like sessions', function () {
+      writeStartupError(testSessionDir, 'failed', 'could not bind');
+      expect(listSessions(testSessionDir)).toEqual([]);
     });
   });
 

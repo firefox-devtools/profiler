@@ -15,7 +15,9 @@ import { processGeckoProfile } from '../../profile-logic/process-profile';
 import {
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
+  formatLogStatement,
 } from '../../profile-logic/marker-data';
+import { computeStringIndexMarkerFieldsByDataType } from '../../profile-logic/marker-schema';
 
 import {
   createGeckoProfile,
@@ -37,6 +39,9 @@ import { getEmptySharedData } from '../../profile-logic/data-structures';
 
 import type {
   IndexIntoRawMarkerTable,
+  LogMarkerPayload,
+  MarkerFormatType,
+  MarkerSchema,
   Milliseconds,
   NetworkPayload,
   ScreenshotPayload,
@@ -1390,5 +1395,67 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
     });
 
     expect(markerNames).toEqual(['A', 'B', 'E', 'G']);
+  });
+});
+
+describe('formatLogStatement', function () {
+  const timestamp = '1970-01-01 00:00:00.170000000 UTC';
+  const stringArray = ['', 'Error', 'the log message\n'];
+
+  // The schema decides whether the payload holds the message inline or as an
+  // index into the string table.
+  function logSchema(messageFormat: MarkerFormatType): MarkerSchema {
+    return {
+      name: 'Log',
+      display: ['marker-chart', 'marker-table'],
+      fields: [
+        { key: 'level', label: 'Level', format: 'unique-string' },
+        { key: 'message', label: 'Message', format: messageFormat },
+      ],
+    };
+  }
+
+  function format(data: LogMarkerPayload, messageFormat: MarkerFormatType) {
+    return formatLogStatement(
+      timestamp,
+      'GeckoMain',
+      1234,
+      'GeckoMain',
+      data,
+      'nsHttp',
+      stringArray,
+      computeStringIndexMarkerFieldsByDataType([logSchema(messageFormat)])
+    );
+  }
+
+  it('formats a message held as an index into the string table', function () {
+    expect(format({ type: 'Log', level: 1, message: 2 }, 'unique-string')).toBe(
+      `${timestamp} - [GeckoMain 1234: GeckoMain]: E/nsHttp the log message`
+    );
+  });
+
+  it('formats a message held inline, as older profiles do', function () {
+    expect(
+      format({ type: 'Log', level: 1, message: 'the log message\n' }, 'string')
+    ).toBe(
+      `${timestamp} - [GeckoMain 1234: GeckoMain]: E/nsHttp the log message`
+    );
+  });
+
+  it('skips a marker whose message index resolves to an empty string', function () {
+    expect(format({ type: 'Log', level: 1, message: 0 }, 'unique-string')).toBe(
+      null
+    );
+  });
+
+  it('formats a legacy message held in the name field', function () {
+    expect(
+      format(
+        { type: 'Log', module: 'D/nsHttp', name: 'the log message\n' },
+        'unique-string'
+      )
+    ).toBe(
+      `${timestamp} - [GeckoMain 1234: GeckoMain]: D/nsHttp the log message`
+    );
   });
 });

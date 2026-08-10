@@ -283,6 +283,11 @@ Object {
             "key": "level",
             "label": "Level",
           },
+          Object {
+            "format": "unique-string",
+            "key": "message",
+            "label": "Message",
+          },
         ],
         "name": "Log",
         "tableLabel": "({marker.data.module}) {marker.data.name}",
@@ -423,7 +428,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 68,
+    "preprocessedProfileVersion": 69,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -431,7 +436,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 35,
+    "version": 36,
   },
   "pages": Array [
     Object {
