@@ -18,7 +18,11 @@ import {
   sanitizeTextMarker,
   sanitizeFromMarkerSchema,
 } from './marker-data';
-import { getSchemaFromMarker } from './marker-schema';
+import {
+  computeStringIndexMarkerFieldsByDataType,
+  getSchemaFromMarker,
+  isStringIndexMarkerField,
+} from './marker-schema';
 import {
   filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
@@ -140,6 +144,11 @@ export function sanitizePII(
     ...unconditionallySanitizedShared,
     stringArray,
   };
+
+  // Precompute the payload fields that hold string table indexes, so that the
+  // marker loop below doesn't have to walk the schema fields for every marker.
+  const stringIndexMarkerFieldsByDataType =
+    computeStringIndexMarkerFieldsByDataType(Object.values(markerSchemaByName));
 
   let stackFlags: Uint8Array | null = null;
 
@@ -326,6 +335,7 @@ export function sanitizePII(
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
         markerSchemaByName,
+        stringIndexMarkerFieldsByDataType,
         stackFlags
       );
 
@@ -441,6 +451,7 @@ function sanitizeThreadPII(
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
   markerSchemaByName: MarkerSchemaByName,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   stackFlags: Uint8Array | null
 ): RawThread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
@@ -509,9 +520,21 @@ function sanitizeThreadPII(
           markerTable.name[i] = stringTable.indexForString(sanitizedRequestStr);
         }
 
-        if (currentMarker.type === 'Text') {
+        if (
+          currentMarker.type === 'Text' &&
+          !isStringIndexMarkerField(
+            stringIndexMarkerFieldsByDataType,
+            'Text',
+            'name'
+          )
+        ) {
           // Sanitize all the name fields of text markers in case they contain URLs.
-          markerTable.data[i] = sanitizeTextMarker(currentMarker);
+          // Newer profiles hold the text in the string table, sanitized above.
+          markerTable.data[i] = sanitizeTextMarker(
+            currentMarker,
+            stringIndexMarkerFieldsByDataType,
+            stringTable
+          );
           // Re-assign the value of currentMarker as the marker may be
           // sanitized again to remove extension ids.
           currentMarker = markerTable.data[i];
@@ -524,10 +547,13 @@ function sanitizeThreadPII(
         currentMarker.type === 'Text'
       ) {
         const markerName = stringTable.getString(markerTable.name[i]);
-        // Sanitize extension ids out of known extension markers.
+        // Sanitize extension ids out of known extension markers. Unlike URLs,
+        // these aren't removed from the string table as a whole.
         markerTable.data[i] = sanitizeExtensionTextMarker(
           markerName,
-          currentMarker
+          currentMarker,
+          stringIndexMarkerFieldsByDataType,
+          stringTable
         );
       }
 
