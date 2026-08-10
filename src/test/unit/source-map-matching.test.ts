@@ -181,6 +181,7 @@ describe('matchSourceMapToSource', function () {
     const result = matchSourceMapToSource(makeMap(), 'bundle.js.map', eligible);
     expect(result).toEqual({
       type: 'ambiguous',
+      reason: 'multiple-matches',
       candidates: [eligible[0], eligible[1]],
     });
   });
@@ -285,6 +286,7 @@ describe('matchSourceMapToSource', function () {
     );
     expect(result).toEqual({
       type: 'ambiguous',
+      reason: 'multiple-matches',
       candidates: [eligible[0], eligible[1]],
     });
   });
@@ -307,6 +309,10 @@ describe('matchSourceMapToSource', function () {
       'totally-unrelated.map',
       eligible
     );
-    expect(result).toEqual({ type: 'ambiguous', candidates: eligible });
+    expect(result).toEqual({
+      type: 'ambiguous',
+      reason: 'no-matches',
+      candidates: eligible,
+    });
   });
 });

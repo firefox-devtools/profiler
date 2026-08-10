@@ -11,9 +11,22 @@ const distUrl = new URL(
 );
 const distPath = fileURLToPath(distUrl);
 
+// The `source-map` package reads this next to the bundle at runtime, so it is a
+// required build artifact, not an optional extra. See scripts/build-profiler-cli.mjs.
+const wasmUrl = new URL('../profiler-cli/dist/mappings.wasm', import.meta.url);
+
 if (!existsSync(distUrl)) {
   console.error(
     `profiler-cli bundle not found at ${distPath}.\n` +
+      `Run 'yarn build-cli' from the repo root before publishing.`
+  );
+  process.exit(1);
+}
+
+if (!existsSync(wasmUrl)) {
+  console.error(
+    `profiler-cli source map parser not found at ${fileURLToPath(wasmUrl)}.\n` +
+      `Without it, 'sourcemap apply' silently applies nothing.\n` +
       `Run 'yarn build-cli' from the repo root before publishing.`
   );
   process.exit(1);

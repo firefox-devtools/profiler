@@ -975,3 +975,60 @@ export type ProfileMetaResult = {
     entries: Array<{ label: string; value: any; formatted: string }>;
   }>;
 };
+
+// ===== Sourcemap Commands =====
+
+/**
+ * Where a source's map lives. Firefox stores an inline map's entire `data:` URL
+ * in the source table, so for those we report facts about the map rather than the
+ * payload, which can run to megabytes of base64.
+ *
+ * `mediaType` is null when the `data:` URL is malformed. `byteLength` is the
+ * length of the whole `data:` URL, header included.
+ */
+export type SourceMapLocation =
+  | { kind: 'url'; url: string }
+  | { kind: 'inline'; mediaType: string | null; byteLength: number };
+
+/**
+ * One bundle source that carries a `sourceMapURL` and is therefore eligible to
+ * have a user-supplied `.map` applied. `sourceHandle` is the `src-N` handle for
+ * `sourcemap apply --to`.
+ */
+export type SourceEntry = {
+  sourceHandle: string; // "src-N"
+  sourceIndex: number;
+  filename: string;
+  sourceMap: SourceMapLocation;
+};
+
+export type SourceMapSourcesResult = {
+  type: 'sourcemap-sources';
+  sources: SourceEntry[];
+};
+
+/**
+ * Outcome of `sourcemap apply`, mirroring `ApplySourceMapFileResult` from the
+ * web thunk. `unchanged` means the map was matched to a source but symbolication
+ * changed nothing. `ambiguous` and `error` map to a non-zero CLI exit.
+ *
+ * `ambiguous` covers both "the map matched several sources" and "the map
+ * matched none of them", which `reason` tells apart. `candidates` is what to
+ * pass to `--to` in either case: the sources that matched, or every eligible
+ * source when nothing matched.
+ */
+export type ApplySourceMapResult =
+  | { type: 'sourcemap-applied'; sourceHandle: string; filename: string }
+  | { type: 'sourcemap-unchanged'; sourceHandle: string; filename: string }
+  | {
+      type: 'sourcemap-ambiguous';
+      reason: 'multiple-matches' | 'no-matches';
+      candidates: SourceEntry[];
+    }
+  | {
+      type: 'sourcemap-error';
+      error:
+        | 'invalid-source-map'
+        | 'no-eligible-sources'
+        | 'symbolication-failed';
+    };

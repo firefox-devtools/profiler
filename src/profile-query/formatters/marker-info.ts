@@ -9,6 +9,7 @@ import {
 import {
   getProfile,
   getCategories,
+  getMarkerSchema,
   getMarkerSchemaByName,
   getStringTable,
   getCommittedRange,
@@ -23,6 +24,7 @@ import {
 } from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
+  computeStringIndexMarkerFieldsByDataType,
   formatFromMarkerSchema,
   getLabelGetter,
 } from 'firefox-profiler/profile-logic/marker-schema';
@@ -61,6 +63,7 @@ import {
   LOG_LETTER_TO_LEVEL,
   formatLogTimestamp,
   formatLogStatement,
+  resolveLogMarkerMessage,
 } from 'firefox-profiler/profile-logic/marker-data';
 import { formatFunctionNameWithLibrary } from '../function-list';
 import type {
@@ -1369,6 +1372,9 @@ export function collectProfileLogs(
   const profile = getProfile(state);
   const profileStartTime = profile.meta.startTime;
   const stringArray = profile.shared.stringArray;
+  // The schema tells us which payload fields hold string table indexes.
+  const stringIndexMarkerFieldsByDataType =
+    computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state));
 
   // Resolve which thread indexes to include.
   const threadIndexes: Set<number> | null =
@@ -1423,13 +1429,18 @@ export function collectProfileLogs(
       let levelLetter: string;
 
       if ('message' in logData) {
-        if (!logData.message) {
+        const rawMessage = resolveLogMarkerMessage(
+          logData.message,
+          stringArray,
+          stringIndexMarkerFieldsByDataType
+        );
+        if (!rawMessage) {
           continue;
         }
         moduleName = stringArray[markers.name[i]] ?? '';
         const levelStr = stringArray[logData.level] ?? '';
         levelLetter = LOG_LEVEL_STRING_TO_LETTER[levelStr] ?? 'D';
-        message = logData.message.trim();
+        message = rawMessage.trim();
       } else {
         if (!logData.name) {
           continue;
@@ -1473,7 +1484,8 @@ export function collectProfileLogs(
         threadName,
         logData,
         moduleName,
-        stringArray
+        stringArray,
+        stringIndexMarkerFieldsByDataType
       );
       if (formatted !== null) {
         entries.push(formatted);

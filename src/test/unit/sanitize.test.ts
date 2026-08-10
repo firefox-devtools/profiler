@@ -31,6 +31,7 @@ import {
   bytesToBase64,
 } from 'firefox-profiler/utils/base64';
 import { ValueSummaryReader } from 'devtools-reps';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
   MarkerSchemaByName,
   RawThread,
@@ -40,7 +41,8 @@ import type {
 describe('sanitizePII', function () {
   function setup(
     piiConfig: Partial<RemoveProfileInformation>,
-    originalProfile = processGeckoProfile(createGeckoProfile())
+    originalProfile = processGeckoProfile(createGeckoProfile()),
+    extraMarkerSchemas: MarkerSchemaByName = {}
   ) {
     const defaultsPii: RemoveProfileInformation = {
       shouldRemoveThreads: new Set(),
@@ -136,6 +138,7 @@ describe('sanitizePII', function () {
           },
         ],
       },
+      ...extraMarkerSchemas,
     };
 
     // Mirror what the `getTracedValuesBuffer` selector hands to `sanitizePII`
@@ -159,6 +162,136 @@ describe('sanitizePII', function () {
       originalProfile,
     };
   }
+
+  // Mirrors what Firefox emits now: the schema declares `name` as a unique
+  // string, so the payload holds a string table index.
+  const uniqueStringTextSchema: MarkerSchemaByName = {
+    Text: {
+      name: 'Text',
+      tableLabel: '{marker.name} — {marker.data.name}',
+      display: ['marker-chart', 'marker-table'],
+      fields: [{ key: 'name', label: 'Details', format: 'unique-string' }],
+    },
+  };
+
+  function setupWithUniqueStringTextMarkers(
+    piiConfig: Partial<RemoveProfileInformation>,
+    markers: Array<[string, string]>
+  ) {
+    const profile = getProfileWithMarkers(
+      markers.map(([markerName, text]) => [
+        markerName,
+        0,
+        1,
+        { type: 'Text', name: text },
+      ])
+    );
+    // The fixtures use their own schema, where Text holds its text inline, so
+    // both the schema and the payloads are replaced here.
+    profile.meta.markerSchema = [uniqueStringTextSchema.Text];
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    profile.threads[0].markers.data = markers.map(([, text]) => ({
+      type: 'Text',
+      name: stringTable.indexForString(text),
+    }));
+
+    const { sanitizedProfile } = setup(
+      piiConfig,
+      profile,
+      uniqueStringTextSchema
+    );
+    const { stringArray } = sanitizedProfile.shared;
+    return sanitizedProfile.threads[0].markers.data.map((data) => {
+      if (!data || data.type !== 'Text') {
+        throw new Error('Expected a Text marker');
+      }
+      if (typeof data.name !== 'number') {
+        throw new Error(
+          'Expected the text to be an index into the string table'
+        );
+      }
+      return stringArray[data.name];
+    });
+  }
+
+  it('should sanitize the URLs inside text markers holding a unique string', function () {
+    // URLs are removed from the whole string table, so nothing else is needed.
+    expect(
+      setupWithUniqueStringTextMarkers({ shouldRemoveUrls: true }, [
+        [
+          'Extension Suspend',
+          'onBeforeRequest https://profiler.firefox.com/ by extension',
+        ],
+      ])
+    ).toEqual(['onBeforeRequest https://<URL> by extension']);
+  });
+
+  it('should sanitize extension ids inside text markers holding a unique string', function () {
+    expect(
+      setupWithUniqueStringTextMarkers({ shouldRemoveExtensions: true }, [
+        [
+          'ExtensionParent',
+          'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener',
+        ],
+        [
+          'ExtensionChild',
+          'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener',
+        ],
+      ])
+    ).toEqual([
+      'api_call: runtime.onUpdateAvailable.addListener',
+      'api_call: runtime.onUpdateAvailable.addListener',
+    ]);
+  });
+
+  it('should sanitize both URLs and extension ids inside text markers holding a unique string', function () {
+    expect(
+      setupWithUniqueStringTextMarkers(
+        { shouldRemoveUrls: true, shouldRemoveExtensions: true },
+        [
+          [
+            'Extension Suspend',
+            'onBeforeRequest https://profiler.firefox.com/ by extension',
+          ],
+        ]
+      )
+    ).toEqual(['onBeforeRequest https://<URL>']);
+  });
+
+  it('should not alter other strings when sanitizing a shared text marker string', function () {
+    // The string table is shared, so the sanitized text has to be interned as a
+    // new string instead of replacing an entry others may point to.
+    const text =
+      'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener';
+    const profile = getProfileWithMarkers([
+      ['ExtensionParent', 0, 1, { type: 'Text', name: text }],
+      ['SomeOtherMarker', 0, 1, { type: 'Text', name: text }],
+    ]);
+    profile.meta.markerSchema = [uniqueStringTextSchema.Text];
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    const textIndex = stringTable.indexForString(text);
+    profile.threads[0].markers.data = [
+      { type: 'Text', name: textIndex },
+      { type: 'Text', name: textIndex },
+    ];
+
+    const { sanitizedProfile } = setup(
+      { shouldRemoveExtensions: true },
+      profile,
+      uniqueStringTextSchema
+    );
+
+    const { stringArray } = sanitizedProfile.shared;
+    const [sanitized, untouched] = sanitizedProfile.threads[0].markers.data.map(
+      (data) => stringArray[(data as any).name]
+    );
+    expect(sanitized).toBe('api_call: runtime.onUpdateAvailable.addListener');
+    expect(untouched).toBe(text);
+  });
 
   it('should sanitize the threads if they are provided', function () {
     const { originalProfile, sanitizedProfile } = setup({
