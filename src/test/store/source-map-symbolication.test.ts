@@ -501,7 +501,11 @@ describe('receive-profile -> JS source map symbolication', function () {
         applySourceMapFile('bundle.js.map', JSON.stringify(map))
       );
 
-      expect(result).toEqual({ type: 'applied', filename: 'bundle.js' });
+      expect(result).toEqual({
+        type: 'applied',
+        filename: 'bundle.js',
+        sourceIndex: expect.any(Number),
+      });
 
       const { funcTable, frameTable, stringArray } =
         getRawProfileSharedData(getState());
@@ -542,6 +546,7 @@ describe('receive-profile -> JS source map symbolication', function () {
       if (result.type !== 'ambiguous') {
         throw new Error('expected ambiguous');
       }
+      expect(result.reason).toBe('no-matches');
       const candidateForA = result.candidates.find(
         (c) => c.filename === 'a.js'
       );
@@ -554,7 +559,11 @@ describe('receive-profile -> JS source map symbolication', function () {
           candidateForA!.sourceIndex
         )
       );
-      expect(applied).toEqual({ type: 'applied', filename: 'a.js' });
+      expect(applied).toEqual({
+        type: 'applied',
+        filename: 'a.js',
+        sourceIndex: candidateForA!.sourceIndex,
+      });
 
       ({ funcTable, stringArray } = getRawProfileSharedData(getState()));
       expect(stringArray[funcTable.name[0]]).toBe('greet');

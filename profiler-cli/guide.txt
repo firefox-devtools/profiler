@@ -125,6 +125,7 @@ HANDLE SYSTEM
     f-12       Function handles (from "thread samples", "thread functions")
     c-0, c-1   Counter handles (from "counter list" or "profile info")
     ts-6       Timestamp handles (named points in time, usable with "zoom push")
+    src-3      Source handles (from "sourcemap sources")
 
   Handle lifetime and stability:
 
@@ -137,6 +138,8 @@ HANDLE SYSTEM
     c-N      counter list      Yes -- direct index into the profile's counter
                                array; same profile always yields the same c-N
     ts-N     thread markers    No -- position-based, session-scoped
+    src-N    sourcemap         Yes -- direct index into the profile's source
+             sources           table; same profile always yields the same src-N
     ──────────────────────────────────────────────────────────────────────────
 
   Function handles (f-N) can be saved and reused across sessions for the same profile.
@@ -247,6 +250,24 @@ COUNTERS
 
       profiler-cli zoom push 2.7,3.1
       profiler-cli counter info c-0
+
+
+SOURCE MAPS
+
+  If a JavaScript stack shows minified names (e.g. "a", "t.exports"), you can
+  de-minify it by applying a source map.
+
+    profiler-cli sourcemap sources               List sources that carry a source map URL
+    profiler-cli sourcemap apply bundle.js.map   Apply a .map, auto-matching a source
+
+  "apply" re-symbolicates the affected stacks in place. When the map could match
+  more than one source it exits non-zero and prints the candidates, so re-run with
+  one of their src-N handles:
+
+    profiler-cli sourcemap apply bundle.js.map --to src-3
+
+  Maps that carry "sourcesContent" also give you the original source, so
+  "function annotate f-N" can show it with per-line sample counts.
 
 
 JSON OUTPUT

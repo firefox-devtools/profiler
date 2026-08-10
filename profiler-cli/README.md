@@ -54,6 +54,8 @@ profiler-cli filter push <filter-flag>     # Push a sticky sample filter (see fi
 profiler-cli filter pop [N]                # Pop the last N filters (default: 1)
 profiler-cli filter list                   # List active filters for current thread
 profiler-cli filter clear                  # Remove all filters for current thread
+profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
+profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
@@ -93,6 +95,7 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | `--jank-limit <N>`     | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |
 | `--list`               | Show a flat chronological list of individual markers (for `thread markers`)                                                                              |
 | `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
+| `--to <src-N>`         | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
 | `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
 
 ## Sample Filter Flags

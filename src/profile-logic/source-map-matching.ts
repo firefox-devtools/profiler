@@ -16,12 +16,24 @@ export type EligibleSource = {
 };
 
 /**
+ * Why auto-matching couldn't settle on a single source. `multiple-matches`:
+ * several sources matched the uploaded map. `no-matches`: none did, and every
+ * eligible source is offered as a candidate instead. Either way the caller has
+ * to ask the user to pick, but the two mean very different things to the user.
+ */
+export type SourceMapAmbiguityReason = 'multiple-matches' | 'no-matches';
+
+/**
  * The outcome of trying to auto-match an uploaded source map file to a bundle
  * source in the profile.
  */
 export type SourceMapMatchResult =
   | { type: 'match'; sourceIndex: IndexIntoSourceTable }
-  | { type: 'ambiguous'; candidates: EligibleSource[] }
+  | {
+      type: 'ambiguous';
+      reason: SourceMapAmbiguityReason;
+      candidates: EligibleSource[];
+    }
   | { type: 'no-eligible-sources' };
 
 /**
@@ -137,9 +149,10 @@ function matchByBasename(
  * All we have to go on is the uploaded file's name and its parsed contents, so
  * matching is heuristic: we compare basenames across a series of increasingly
  * lenient criteria (see `criteria` below) and take the first that lands on a
- * single source. More than one hit is `ambiguous` (the caller asks the user to
- * pick); no hit under any criterion falls through to `ambiguous` over all
- * eligible sources.
+ * single source. More than one hit is `ambiguous` with reason
+ * `multiple-matches`; no hit under any criterion falls through to `ambiguous`
+ * with reason `no-matches` over all eligible sources. In both cases the caller
+ * asks the user to pick.
  *
  * The two trivial cases short-circuit first: zero eligible sources, or exactly
  * one, which we match unconditionally regardless of name.
@@ -184,9 +197,13 @@ export function matchSourceMapToSource(
       return { type: 'match', sourceIndex: hits[0].sourceIndex };
     }
     if (hits.length > 1) {
-      return { type: 'ambiguous', candidates: hits };
+      return {
+        type: 'ambiguous',
+        reason: 'multiple-matches',
+        candidates: hits,
+      };
     }
   }
 
-  return { type: 'ambiguous', candidates: eligible };
+  return { type: 'ambiguous', reason: 'no-matches', candidates: eligible };
 }

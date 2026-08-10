@@ -72,7 +72,11 @@ describe('ApplySourceMapButton', function () {
     mockedApply.mockReset();
     // The action returns a thunk; default it to a successful apply.
     mockedApply.mockReturnValue(() =>
-      Promise.resolve({ type: 'applied', filename: 'app.min.js' })
+      Promise.resolve({
+        type: 'applied',
+        sourceIndex: 0,
+        filename: 'app.min.js',
+      })
     );
   });
 
@@ -125,7 +129,11 @@ describe('ApplySourceMapButton', function () {
 
   it('reports when the map matched nothing', async function () {
     mockedApply.mockReturnValue(() =>
-      Promise.resolve({ type: 'no-match', filename: 'app.min.js' })
+      Promise.resolve({
+        type: 'no-match',
+        sourceIndex: 0,
+        filename: 'app.min.js',
+      })
     );
     setup([{ filename: 'app.min.js', sourceMapURL: 'app.min.js.map' }]);
 
@@ -158,7 +166,11 @@ describe('ApplySourceMapButton', function () {
       Promise.resolve({ type: 'ambiguous', candidates })
     );
     mockedApply.mockReturnValueOnce(() =>
-      Promise.resolve({ type: 'applied', filename: 'vendor.min.js' })
+      Promise.resolve({
+        type: 'applied',
+        sourceIndex: vendorIndex,
+        filename: 'vendor.min.js',
+      })
     );
 
     selectFile('unrelated-name.map');

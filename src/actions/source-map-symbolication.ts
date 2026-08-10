@@ -15,14 +15,18 @@ import type {
   WorkerOutput,
 } from 'firefox-profiler/profile-logic/source-map-worker-types';
 import type { IndexIntoSourceTable, ThunkAction } from 'firefox-profiler/types';
-import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
+import type {
+  EligibleSource,
+  SourceMapAmbiguityReason,
+} from 'firefox-profiler/profile-logic/source-map-matching';
 import type { RawSourceMap } from 'source-map';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 /**
  * Run source map symbolication using previously-fetched source maps from Redux
- * state. Offloads source parsing and source-map lookups to a dedicated Web
- * Worker so the main thread stays responsive.
+ * state. By default, offloads source parsing and source-map lookups to a
+ * dedicated Web Worker so the main thread stays responsive. Pass `run` to
+ * substitute another runner (see `SourceMapRunner`).
  *
  * Reads the current profile from Redux state at dispatch time. Callers must
  * ensure native symbolication has already committed its changes before
@@ -34,9 +38,18 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  */
 export type SourceMapSymbolicationResult = 'applied' | 'no-match' | 'error';
 
+/**
+ * Runs the source map symbolication core and returns its output. The browser
+ * default (`_runSourceMapWorker`) offloads to a Web Worker; other environments
+ * (for example, profiler-cli node daemon) inject a runner that calls
+ * `runSourceMapSymbolicationCore` directly.
+ */
+export type SourceMapRunner = (input: WorkerInput) => Promise<WorkerOutput>;
+
 export function doSourceMapSymbolication(
   resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>,
-  compiledSources: Map<IndexIntoSourceTable, string>
+  compiledSources: Map<IndexIntoSourceTable, string>,
+  run: SourceMapRunner = _runSourceMapWorker
 ): ThunkAction<Promise<SourceMapSymbolicationResult>> {
   return async (dispatch, getState) => {
     if (resolvedSourceMaps.size === 0) {
@@ -56,7 +69,7 @@ export function doSourceMapSymbolication(
     };
 
     dispatch({ type: 'START_SOURCE_MAP_SYMBOLICATION' });
-    const result = await _runSourceMapWorker(input);
+    const result = await run(input);
     switch (result.type) {
       case 'success': {
         // Apply against the current shared state (not the snapshot the worker
@@ -106,11 +119,20 @@ export type ApplySourceMapError =
  * The outcome of applying a user-supplied `.map` file to the profile.
  */
 export type ApplySourceMapFileResult =
-  // `filename` is the resolved bundle source the map was applied to, so the UI
-  // can show which source was matched (auto-matched or user-picked).
-  | { type: 'applied'; filename: string }
-  | { type: 'no-match'; filename: string }
-  | { type: 'ambiguous'; candidates: EligibleSource[] }
+  // `sourceIndex` / `filename` identify the resolved bundle source the map was
+  // applied to, so callers can show which source was matched (auto-matched or
+  // user-picked). The web UI shows the filename; profiler-cli also needs the
+  // index to report its `src-N` handle.
+  | { type: 'applied'; sourceIndex: IndexIntoSourceTable; filename: string }
+  | { type: 'no-match'; sourceIndex: IndexIntoSourceTable; filename: string }
+  // Auto-matching couldn't pick a source, so the caller has to let the user
+  // choose among `candidates`. `reason` says whether that's because several
+  // sources matched or because none did.
+  | {
+      type: 'ambiguous';
+      reason: SourceMapAmbiguityReason;
+      candidates: EligibleSource[];
+    }
   | { type: 'error'; error: ApplySourceMapError };
 
 /**
@@ -123,7 +145,10 @@ export function applySourceMapFile(
   fileName: string,
   fileContents: string,
   // Set when the user picked a bundle in the picker; skips auto-matching.
-  sourceIndex?: IndexIntoSourceTable
+  sourceIndex?: IndexIntoSourceTable,
+  // Injected by non-browser callers (e.g. the Node daemon) that can't spawn a
+  // Web Worker. Browser callers omit it and get the default worker runner.
+  run?: SourceMapRunner
 ): ThunkAction<Promise<ApplySourceMapFileResult>> {
   return async (dispatch, getState) => {
     const map = parseSourceMapFileContents(fileContents);
@@ -146,7 +171,11 @@ export function applySourceMapFile(
         case 'no-eligible-sources':
           return { type: 'error', error: 'no-eligible-sources' };
         case 'ambiguous':
-          return { type: 'ambiguous', candidates: result.candidates };
+          return {
+            type: 'ambiguous',
+            reason: result.reason,
+            candidates: result.candidates,
+          };
         case 'match':
           targetSourceIndex = result.sourceIndex;
           break;
@@ -169,14 +198,15 @@ export function applySourceMapFile(
     const outcome = await dispatch(
       doSourceMapSymbolication(
         new Map([[targetSourceIndex, map]]),
-        compiledSources
+        compiledSources,
+        run
       )
     );
     switch (outcome) {
       case 'applied':
-        return { type: 'applied', filename };
+        return { type: 'applied', sourceIndex: targetSourceIndex, filename };
       case 'no-match':
-        return { type: 'no-match', filename };
+        return { type: 'no-match', sourceIndex: targetSourceIndex, filename };
       case 'error':
         return { type: 'error', error: 'symbolication-failed' };
       default:
