@@ -1093,7 +1093,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         hitTest={this.hitTest}
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
-        stickyTooltips={true}
+        // Experiment: sticky tooltips are disabled because clicking a marker
+        // now also updates the flow panel, and the persisting tooltips (one
+        // from the marker chart plus one from the flow panel's marker chart)
+        // get in the way.
+        stickyTooltips={false}
         selectedItem={selectedMarkerIndex}
         selectedItemTooltipOffset={this._getSelectedItemTooltipOffset()}
       />
