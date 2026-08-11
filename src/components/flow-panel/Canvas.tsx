@@ -1092,7 +1092,8 @@ class FlowPanelCanvasImpl extends React.PureComponent<Props> {
         hitTest={this.hitTest}
         onMouseMove={this.onMouseMove}
         onMouseLeave={this.onMouseLeave}
-        stickyTooltips={true}
+        // Experiment: see the same comment in the marker chart canvas.
+        stickyTooltips={false}
       />
     );
   }
