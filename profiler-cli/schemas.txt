@@ -130,8 +130,18 @@ profiler-cli thread samples --json
       frames: [{ name, nameWithLibrary, library?,
                  selfSamples, selfPercentage, totalSamples, totalPercentage }]
     },
+    categoryBreakdown: CategoryBreakdown,
     activeFilters?, ephemeralFilters?,
     context: SessionContext
+  }
+
+CategoryBreakdown:
+  {
+    totalSamples,
+    categories: [{
+      name, categoryIndex, samples, percentage,
+      subcategories: [{ name, subcategoryIndex, samples, percentage }]
+    }]
   }
 
 profiler-cli thread samples-top-down --json
@@ -213,6 +223,20 @@ profiler-cli thread network --json
       incomplete, startedBeforeRecording,
       phases: { dns?, tcp?, tls?, ttfb?, download?, mainThread? }
     }],
+    context: SessionContext
+  }
+
+profiler-cli function info --json
+  {
+    type: "function-info",
+    functionHandle, funcIndex, name, fullName, isJS, relevantForJS,
+    resource?: { name, index },
+    library?: { name, path, debugName?, debugPath?, breakpadId? },
+    categoryBreakdown: {
+      threadHandle, friendlyThreadName, threadSamples,
+      running: CategoryBreakdown & { samples, percentageOfThread },
+      self:    CategoryBreakdown & { samples, percentageOfThread }
+    },
     context: SessionContext
   }
 
