@@ -44,10 +44,31 @@ function run(cmd, args, options = {}) {
   }
 }
 
+function runNpm(args) {
+  run('npm', args, { env: envWithoutNpmConfig() });
+}
+
+// `npm publish` needs a token in ~/.npmrc to start at all, and fails with
+// ENEEDAUTH rather than offering to log you in. Get that out of the way before
+// the long test run instead of after it. The separate browser round trip npm
+// makes at publish time is the 2FA check for the upload itself, so being
+// logged in here does not replace it.
+function isLoggedIn() {
+  const result = spawnSync('npm', ['whoami'], {
+    cwd: repoRoot,
+    env: envWithoutNpmConfig(),
+    stdio: 'ignore',
+  });
+  return result.status === 0;
+}
+
 console.log(`Publishing ${name}@${version} ${tagArgs.join(' ')}`.trim());
+
+if (!isLoggedIn()) {
+  console.log('Not logged in to npm, running `npm login`.');
+  runNpm(['login']);
+}
 
 run('yarn', ['test-all']);
 run('yarn', ['build-cli']);
-run('npm', ['publish', 'profiler-cli/', ...tagArgs, ...forwardedArgs], {
-  env: envWithoutNpmConfig(),
-});
+runNpm(['publish', 'profiler-cli/', ...tagArgs, ...forwardedArgs]);
