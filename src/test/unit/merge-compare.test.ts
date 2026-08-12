@@ -18,7 +18,7 @@ import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 import { callTreeFromProfile, formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { addTransformToStack } from '../../actions/profile-view';
@@ -30,11 +30,13 @@ import {
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
+    // The frames need addresses, because the frame's lib is only meaningful
+    // together with an address (they share the HasAddress flag).
     const sampleProfileA = getProfileFromTextSamples(
-      'A[lib:libA]  B[lib:libA]'
+      'A[lib:libA][address:10]  B[lib:libA][address:20]'
     );
     const sampleProfileB = getProfileFromTextSamples(
-      'A[lib:libA]  A[lib:libB]  C[lib:libC]'
+      'A[lib:libA][address:10]  A[lib:libB][address:30]  C[lib:libC][address:40]'
     );
     const profileState = stateFromLocation({
       pathname: '/public/fakehash1/',
@@ -105,8 +107,12 @@ describe('mergeProfilesForDiffing function', function () {
     // Both builds have the same name, so they share a single resource, but they
     // have different breakpadIds and so must stay separate libs - symbols have
     // to be looked up separately for each build.
-    const sampleProfileA = getProfileFromTextSamples('A[lib:libxul.so]');
-    const sampleProfileB = getProfileFromTextSamples('A[lib:libxul.so]');
+    const sampleProfileA = getProfileFromTextSamples(
+      'A[lib:libxul.so][address:10]'
+    );
+    const sampleProfileB = getProfileFromTextSamples(
+      'A[lib:libxul.so][address:10]'
+    );
     sampleProfileB.profile.libs[0] = {
       ...sampleProfileB.profile.libs[0],
       breakpadId: 'A_DIFFERENT_BUILD',
@@ -1129,15 +1135,16 @@ describe('mergeProfilesForDiffing with source tables', function () {
     const { funcTable, frameTable, sourceLocationTable } = mergedProfile.shared;
 
     // Even without any symbolicated entries on the inputs, the columns must
-    // be filled (not undefined) so downstream `x !== null` checks work.
+    // be filled so downstream checks work.
     expect(sourceLocationTable.length).toBe(0);
     expect(funcTable.originalLocation).toHaveLength(funcTable.length);
     expect(frameTable.originalLocation).toHaveLength(frameTable.length);
     for (const v of funcTable.originalLocation) {
       expect(v).toBeNull();
     }
-    for (const v of frameTable.originalLocation) {
-      expect(v).toBeNull();
+    // On the frame table, no HasOriginalLocation bits should be set.
+    for (let i = 0; i < frameTable.length; i++) {
+      expect(frameTable.flags[i] & FrameFlag.HasOriginalLocation).toBe(0);
     }
   });
 });

@@ -67,6 +67,7 @@ import {
   resolveLogMarkerMessage,
 } from 'firefox-profiler/profile-logic/marker-data';
 import { formatFunctionNameWithLibrary } from '../function-list';
+import { FrameFlag } from 'firefox-profiler/types';
 import type {
   NetworkPayload,
   LogMarkerPayload,
@@ -962,9 +963,8 @@ function collectStackTrace(
     const nameWithLibrary = formatFunctionNameWithLibrary(funcIndex, thread);
 
     let library: string | undefined;
-    const libIndex = frameTable.lib[frameIndex];
-    if (libIndex !== -1 && libs) {
-      library = libs[libIndex].name;
+    if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0 && libs) {
+      library = libs[frameTable.lib[frameIndex]].name;
     }
 
     frames.push({ name: funcName, nameWithLibrary, library });

@@ -35,6 +35,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 
 import type { BrowserConnection } from '../../app-logic/browser-connection';
 import type { Profile } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import type {
   WorkerInput,
   WorkerOutput,
@@ -132,6 +133,7 @@ function makeProfileWithJsSources(sources: SourceDescriptor[]): Profile {
   for (let i = 0; i < sources.length; i++) {
     funcTable.lineNumber[i] = 1;
     funcTable.columnNumber[i] = 10;
+    frameTable.flags[i] |= FrameFlag.HasLine | FrameFlag.HasColumn;
     frameTable.line[i] = 1;
     frameTable.column[i] = 15;
   }
