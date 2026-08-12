@@ -11,7 +11,7 @@ import {
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import type { MarkerPayload } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 import type {
   AddressResult,
   LibSymbolicationRequest,
@@ -345,12 +345,16 @@ describe('doSymbolicateProfile', function () {
 
       // 0x000a at inline depth 0 should be at line 14, in the first symbol.
       expect(frameTable.line[firstFrameAt0x000a]).toBe(14);
-      expect(frameTable.inlineDepth[firstFrameAt0x000a]).toBe(0);
+      expect(
+        (frameTable.flags[firstFrameAt0x000a] & FrameFlag.IsInlined) !== 0
+      ).toBe(false);
       expect(frameTable.func[firstFrameAt0x000a]).toBe(firstSymbolFuncIndex);
 
       // 0x000a at inline depth 1 should be at line 37, in the second symbol.
       expect(frameTable.line[secondFrameAt0x000a]).toBe(37);
-      expect(frameTable.inlineDepth[secondFrameAt0x000a]).toBe(1);
+      expect(
+        (frameTable.flags[secondFrameAt0x000a] & FrameFlag.IsInlined) !== 0
+      ).toBe(true);
       expect(frameTable.func[secondFrameAt0x000a]).toBe(secondSymbolFuncIndex);
     });
 
@@ -598,15 +602,16 @@ function _createUnsymbolicatedProfile() {
     // "0x000a" and "0x0000" are both in the first symbol, and should be merged.
     // See "exampleSymbolTable" for the actual function boundary ranges.
     `
-      0x000a  0x0000  0x1a0f  0x0f0f
-      0x2000  0x2000
+      0x000a[lib:firefox.exe]  0x0000[lib:firefox.exe]  0x1a0f[lib:firefox.exe]  0x0f0f[lib:firefox.exe]
+      0x2000[lib:firefox.exe]  0x2000[lib:firefox.exe]
     `
   );
   const { threads, shared } = profile;
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const thread = threads[0];
 
-  // Add a mock lib.
+  // Replace the lib that the text fixture created with a mock lib whose
+  // debugName / breakpadId match the symbol table requests we assert on below.
   const libIndex = 0;
   profile.libs[libIndex] = {
     arch: '',
@@ -629,6 +634,7 @@ function _createUnsymbolicatedProfile() {
   }
   for (let i = 0; i < profile.shared.frameTable.length; i++) {
     profile.shared.frameTable.lib[i] = libIndex;
+    profile.shared.frameTable.flags[i] |= FrameFlag.HasAddress;
   }
 
   // Add a marker with a cause stack. We use the stack of the first sample.

@@ -1572,7 +1572,7 @@ function _computeThreadSampleScore(
     : -1;
   const derivedStackTable = computeStackTableFromRawStackTable(
     stackTable,
-    computeFrameTableFromRawFrameTable(frameTable),
+    computeFrameTableFromRawFrameTable(frameTable, meta.categories),
     meta.categories,
     defaultCategory
   );
