@@ -143,6 +143,8 @@ CallTree--samples-total = Toplam (örnekler)
         “Toplam” örnek sayısı, bu fonksiyonun yığın üzerinde görüldüğü her örneğin
         bir özetini içerir. Fonksiyonun gerçekten çalıştığı süre ile bu fonksiyondan
         çağrılan fonksiyonlarda geçirilen süre de buna dahildir.
+CallTree--bytes-total = Toplam Boyut (bayt)
+    .title = “Toplam boyut”, bu işlevin çağrı yığınında bulunduğu süre boyunca ayrılan veya serbest bırakılan tüm baytların özetini içerir. Buna hem işlevin gerçekten çalıştığı sıradaki baytlar hem de bu işlevden yapılan çağrılara ait baytlar dahildir.
 
 ## Call tree "badges" (icons) with tooltips
 ##
