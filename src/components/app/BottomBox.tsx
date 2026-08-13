@@ -38,6 +38,7 @@ import {
 import {
   getSourceViewFile,
   getSourceViewStartLine,
+  getSourceViewSourceId,
 } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
@@ -60,6 +61,7 @@ import './BottomBox.css';
 type StateProps = {
   readonly isFullscreen: boolean;
   readonly sourceViewFile: string | null;
+  readonly sourceViewHasValidId: boolean;
   readonly sourceViewCode: SourceCodeStatus | void;
   readonly sourceViewScrollGeneration: number;
   readonly sourceViewScrollToLineNumber?: number;
@@ -82,13 +84,29 @@ type DispatchProps = {
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-export function SourceCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
+type SourceCodeErrorOverlayProps = CodeErrorOverlayProps & {
+  readonly hasValidId: boolean;
+};
+
+export function SourceCodeErrorOverlay({
+  errors,
+  hasValidId,
+}: SourceCodeErrorOverlayProps) {
   return (
     <div className="sourceCodeErrorOverlay">
       <div>
         <Localized id="BottomBox--source-code-not-available-title">
           <h3>Source code not available</h3>
         </Localized>
+        {hasValidId ? (
+          <Localized id="SourceView--enable-js-sources-feature-hint">
+            <p>
+              To view the source of this JavaScript file, enable the “JavaScript
+              Sources” feature in the recording settings on about:profiling
+              before recording the profile.
+            </p>
+          </Localized>
+        ) : null}
         <Localized
           id="SourceView--source-not-available-text"
           elems={{
@@ -186,6 +204,7 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const {
       isFullscreen,
       sourceViewFile,
+      sourceViewHasValidId,
       sourceViewCode,
       globalLineTimings,
       sourceViewScrollGeneration,
@@ -278,7 +297,10 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               <CodeLoadingOverlay source={sourceViewCode.source} />
             ) : null}
             {sourceViewCode !== undefined && sourceViewCode.type === 'ERROR' ? (
-              <SourceCodeErrorOverlay errors={sourceViewCode.errors} />
+              <SourceCodeErrorOverlay
+                errors={sourceViewCode.errors}
+                hasValidId={sourceViewHasValidId}
+              />
             ) : null}
           </div>
         </div>
@@ -341,6 +363,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     isFullscreen: getIsBottomBoxFullscreen(state),
     sourceViewFile: getSourceViewFile(state),
+    sourceViewHasValidId: getSourceViewSourceId(state) !== null,
     sourceViewCode: getSourceViewCode(state),
     globalLineTimings: selectedThreadSelectors.getSourceViewLineTimings(state),
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
