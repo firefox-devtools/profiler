@@ -770,7 +770,7 @@ export function computeGlobalTracks(
           // Coerce the payload to a screenshot one. Don't do a runtime check that
           // this is correct.
           const data = markers.data[markerIndex] as ScreenshotPayload;
-          ids.add(data.windowID);
+          ids.add(String(data.windowID));
         }
       }
       for (const id of ids) {

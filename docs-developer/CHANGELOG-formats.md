@@ -6,6 +6,12 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 70
+
+The `CompositorScreenshot` marker payload's `windowWidth` and `windowHeight` fields were replaced with a single `windowSize` field of the form `{ width, height }`.
+
+Two marker schema field formats were added to describe these markers: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL. Profiles containing `CompositorScreenshot` markers don't necessarily carry a schema for them, so the front end supplies one.
+
 ### Version 69
 
 A new marker schema display location, `timeline-network`, was added. A marker schema can list `timeline-network` in its `display` array to have markers of that type surfaced in the Network track.

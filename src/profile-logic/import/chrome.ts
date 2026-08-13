@@ -889,8 +889,7 @@ async function extractScreenshots(
       type: 'CompositorScreenshot',
       url: stringTable.indexForString(urlString),
       windowID: 'id',
-      windowWidth: size.width,
-      windowHeight: size.height,
+      windowSize: { width: size.width, height: size.height },
     });
     markers.name.push(stringTable.indexForString('CompositorScreenshot'));
     markers.startTime.push(screenshot.ts / 1000);

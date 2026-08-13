@@ -3310,6 +3310,25 @@ const _upgraders: {
       }
     }
   },
+  [70]: (profile: any) => {
+    // The CompositorScreenshot marker payload's `windowWidth` and
+    // `windowHeight` fields were replaced with a single `windowSize` field.
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (!data || data.type !== 'CompositorScreenshot') {
+          continue;
+        }
+        const { windowWidth, windowHeight } = data;
+        if (windowWidth !== undefined && windowHeight !== undefined) {
+          data.windowSize = { width: windowWidth, height: windowHeight };
+        }
+        delete data.windowWidth;
+        delete data.windowHeight;
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

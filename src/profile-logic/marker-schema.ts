@@ -85,6 +85,28 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
       },
     ],
   },
+  {
+    // A profile can contain these markers without carrying a schema for them,
+    // so the front end defines one.
+    name: 'CompositorScreenshot',
+    display: ['marker-chart', 'marker-table'],
+    fields: [
+      {
+        key: 'url',
+        label: 'Image',
+        format: {
+          type: 'screenshot-data-url',
+          sizeFieldForAspectRatio: 'windowSize',
+        },
+      },
+      { key: 'windowSize', label: 'Window Size', format: 'screenshot-size' },
+      { key: 'windowID', label: 'Window ID', format: 'string' },
+    ],
+    description: oneLine`
+      This marker spans the time between each composite of a window and shows
+      the window contents during that time.
+    `,
+  },
 ];
 
 /**
@@ -554,9 +576,12 @@ export function formatFromMarkerSchema(
         rows.push(...cellRows);
         return rows.map((row) => `(${row.join(', ')})`).join(',');
       }
+      case 'screenshot-data-url':
+        // Don't expand a base64-encoded image into text output.
+        return '(screenshot)';
       default:
         throw new Error(
-          `Unknown format type ${JSON.stringify(format.type as never)}`
+          `Unknown format type ${JSON.stringify(format as never)}`
         );
     }
   }
@@ -609,6 +634,8 @@ export function formatFromMarkerSchema(
           formatFromMarkerSchema(markerType, 'string', v, stringTable)
         )
         .join(', ');
+    case 'screenshot-size':
+      return `${value.width}px × ${value.height}px`;
     default:
       console.warn(
         `A marker schema of type "${markerType}" had an unknown format ${JSON.stringify(
@@ -642,7 +669,16 @@ export function markerPayloadMatchesSearch(
       continue;
     }
 
-    if (isStringIndexFormat(payloadField.format)) {
+    const { format } = payloadField;
+    if (typeof format === 'object' && format.type === 'screenshot-data-url') {
+      // Searching a base64-encoded image isn't useful.
+      continue;
+    }
+    if (format === 'screenshot-size') {
+      value = formatFromMarkerSchema(data.type, format, value, stringTable);
+    }
+
+    if (isStringIndexFormat(format)) {
       if (typeof value !== 'number') {
         console.warn(
           `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
@@ -673,6 +709,9 @@ export function markerPayloadMatchesSearch(
 export function isStringIndexFormat(
   format: MarkerFormatType | undefined
 ): boolean {
+  if (typeof format === 'object') {
+    return format.type === 'screenshot-data-url';
+  }
   return (
     format === 'unique-string' ||
     format === 'flow-id' ||
@@ -684,17 +723,15 @@ export function isStringIndexFormat(
  * Returns a map of marker schema name -> array of field keys, listing any fields
  * that contain indexes into the string table. If a marker schema has no such
  * fields, then we don't put an entry for it in the returned map.
+ * The front-end-only schemas are always covered, whether or not they're in
+ * `markerSchemas`.
  */
 export function computeStringIndexMarkerFieldsByDataType(
   markerSchemas: MarkerSchema[]
 ): Map<string, string[]> {
   const stringIndexMarkerFieldsByDataType = new Map<string, string[]>();
 
-  // 'CompositorScreenshot' markers currently don't have a schema (#5303),
-  // hardcode the url field (which is a string index) until they do.
-  stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
-
-  for (const schema of markerSchemas) {
+  for (const schema of [...markerSchemas, ...markerSchemaFrontEndOnly]) {
     const { name, fields } = schema;
     const stringIndexFields = [];
     for (const field of fields) {

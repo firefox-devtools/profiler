@@ -1156,8 +1156,7 @@ describe('TooltipMarker', function () {
           type: 'CompositorScreenshot',
           url: screenshotUrlIndex,
           windowID: 'XXX',
-          windowWidth: 600,
-          windowHeight: 300,
+          windowSize: { width: 600, height: 300 },
         },
       ],
     ]);
@@ -1189,7 +1188,6 @@ describe('TooltipMarker', function () {
         {
           type: 'CompositorScreenshot',
           windowID: 'XXX',
-          url: undefined,
         },
       ],
     ]);
@@ -1276,8 +1274,7 @@ describe('TooltipMarker', function () {
             type: 'CompositorScreenshot',
             url: screenshotUrlIndex,
             windowID: 'XXX',
-            windowWidth: 600,
-            windowHeight: 300,
+            windowSize: { width: 600, height: 300 },
           },
         ],
       ]
