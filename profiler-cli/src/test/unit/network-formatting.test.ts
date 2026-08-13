@@ -23,6 +23,7 @@ function createContext(): SessionContext {
     selectedThreads: [{ threadIndex: 0, name: 'GeckoMain' }],
     currentViewRange: null,
     rootRange: { start: 0, end: 1000 },
+    callTreeSummaryStrategy: 'timing',
   };
 }
 
@@ -398,6 +399,7 @@ function makeThreadInfoResult(
     markerCount: 0,
     cpuActivity: null,
     networkActivity,
+    availableStrategies: ['timing'],
   };
 }
 
