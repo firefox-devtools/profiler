@@ -102,9 +102,13 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     labelL10nId: string,
     additionalContent?: React.ReactNode
   ) {
-    const { checkedSharingOptions, uploadPhase } = this.props;
+    const { checkedSharingOptions, uploadPhase, mode } = this.props;
+    // Only the panel whose upload is in flight needs to freeze its options.
+    // The two modes have independent options, so an upload started from Share
+    // is no reason to stop someone adjusting what they save to disk.
     const isUploading =
-      uploadPhase === 'uploading' || uploadPhase === 'compressing';
+      mode === 'upload' &&
+      (uploadPhase === 'uploading' || uploadPhase === 'compressing');
     return (
       <label className="photon-label publishPanelDataChoicesLabel">
         <input
