@@ -19,6 +19,8 @@
   --internal-improved-color: var(--green-80);
   --internal-regressed-background: #ffe8e8;
   --internal-improved-background: #d3f3d8;
+  --internal-badge-background: var(--grey-30);
+  --internal-badge-color: var(--grey-90);
 
   width: 100%;
   min-height: 100%;
@@ -52,6 +54,8 @@
     --internal-improved-color: #7ed77e;
     --internal-regressed-background: rgb(255 0 57 / 0.22);
     --internal-improved-background: rgb(48 230 11 / 0.18);
+    --internal-badge-background: rgb(255 255 255 / 0.14);
+    --internal-badge-color: var(--grey-10);
   }
 }
 
@@ -262,8 +266,23 @@
   cursor: help;
 }
 
-.benchmarkCell--bucketName,
-.benchmarkCell--scoreLabel {
+.benchmarkCell--bucketName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* The score label is a row of three things -- disclosure, name, count badge --
+ * of which only the name may be truncated, so the ellipsis lives on the name
+ * rather than on the cell. (The flex box is inside the `td` rather than being
+ * it: a `display: flex` table cell stops being a table cell, and the column
+ * alignment with the inner bucket tables depends on it staying one.) */
+.benchmarkScoreLabel {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+}
+
+.benchmarkScoreLabel__text {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -299,6 +318,31 @@
   font-size: 0.75em;
   text-align: center;
   user-select: none;
+}
+
+/* How many functions the expansion holds under the current filter. Deliberately
+ * quiet: it is a count, not a result, and the row's Δ% columns are what should
+ * catch the eye. A zero drops the pill entirely so that a screen full of empty
+ * subtests reads as empty at a glance. */
+.benchmarkBadge {
+  min-width: 1.4em;
+  flex: none;
+  padding: 0 0.4em;
+  border-radius: 1em;
+  margin-left: 0.5em;
+  background: var(--internal-badge-background);
+  color: var(--internal-badge-color);
+  font-size: 0.8em;
+  font-weight: normal;
+  line-height: 1.5;
+  text-align: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+.benchmarkBadge--zero {
+  background: none;
+  color: var(--internal-text-hint);
 }
 
 .benchmarkRow--expansion > td {
