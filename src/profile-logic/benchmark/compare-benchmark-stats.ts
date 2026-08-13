@@ -373,13 +373,24 @@ export function classifyChange(
   return resolved ? 'unchanged' : 'unresolved';
 }
 
-/** Plain-language gloss for a verdict, for a tooltip or a legend. */
-export function describeVerdict(verdict: Verdict, mde: string): string {
+/**
+ * Plain-language gloss for a verdict, for a tooltip or a legend.
+ *
+ * `names` are what to call the two sides. "Slower" on its own is only
+ * unambiguous when the two sides are the same build before and after a patch;
+ * in a Chrome-vs-Firefox report the reader has to be told which one is meant,
+ * every time.
+ */
+export function describeVerdict(
+  verdict: Verdict,
+  mde: string,
+  names: { base: string; new: string }
+): string {
   switch (verdict) {
     case 'slower':
-      return 'Slower, by more than this comparison could explain by chance.';
+      return `${names.new} is slower than ${names.base} here, by more than this comparison could explain by chance.`;
     case 'faster':
-      return 'Faster, by more than this comparison could explain by chance.';
+      return `${names.new} is faster than ${names.base} here, by more than this comparison could explain by chance.`;
     case 'unchanged':
       return `No change. A change of ${mde} would have shown up, so this really did not move.`;
     case 'unresolved':
