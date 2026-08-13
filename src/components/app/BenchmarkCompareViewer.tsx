@@ -25,6 +25,7 @@ import type {
   ComparisonStats,
   ScoreComparison,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
+import { pValueToConfidence } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
 import type {
   ConfidenceRating,
   EffectSize,
@@ -67,43 +68,37 @@ type State =
 const TOP_N = 100;
 
 /**
- * What a bucket row has to clear to be worth showing.
+ * How much of the overall score a bucket has to move to be worth a row.
  *
- * Filtering on a standardised effect size (Cohen's d, and Cliff's delta before
- * it) was the wrong instrument. d divides by the bucket's own spread, so it
- * discriminates against exactly the rows that matter most: a 1.16ms drop in a
- * 21ms bucket is only 0.25 sd, and it was the single largest contributor to one
- * comparison's score change. Meanwhile no d cutoff below 0.3 discriminated at
- * all -- it admitted ~250 rows whether or not the two builds differed.
+ * This is a *materiality* floor, not error control -- `SIGNIFICANCE_Q` does the
+ * error control now, and the two jobs are separate. A bucket can be a rock-solid
+ * discovery and still not be worth anyone's afternoon: on the two reference
+ * profile pairs the rows that clear q ≤ 0.05 but not this floor are a function
+ * that went from 0.04ms to 0.15ms and one that appeared at 0.06ms. Both are
+ * almost certainly real. Neither is actionable.
  *
- * What works is the pair of questions a perf engineer is actually asking: did
- * this move, and does it matter. Significance answers the first. Impact on the
- * overall score answers the second, and it is the right denominator because it
- * means the same thing in the overall table as in a subtest table -- the "Δ%
- * overall" column is already on that common scale.
+ * 0.01%. That is an order of magnitude below the 0.04% this used to be, and the
+ * slack came from replacing the uncorrected p-value: the floor was previously
+ * doubling as the only defence against ~340 expected false positives, which took
+ * a threshold high enough to also hide real small changes.
  *
- * Measured on two profile pairs, one with nothing detectable at subtest level
- * and one with a large real change, counting global buckets that clear both
- * p <= 0.05 and a minimum impact on the score:
- *
- *   min |Δ% overall|   no-difference pair   real-change pair
- *             0.010%                    29                 30
- *             0.020%                     5                 12
- *             0.030%                     5                  5
- *             0.040%                     0                  5
- *             0.050%                     0                  3
- *
- * 0.04% is where the no-difference pair empties out while the real one still
- * shows every change in it: the three canvas buckets whose work shifted between
- * them, the largest absolute mover, and one more at -16%. At 0.05% the last two
- * drop off; at 0.03% five phantom rows appear.
+ * Not a tuned edge. Across the two reference pairs, the q ≤ 0.05 rows that fall
+ * below this floor are at 0.0039% and 0.0066%, and the ones above it start at
+ * 0.0298% -- anything from 0.008% to 0.02% gives the same answer.
  */
-const MIN_SCORE_IMPACT = 0.0004;
+const MIN_SCORE_IMPACT = 0.0001;
 
-/** p-value cutoff for "this moved". Uncorrected, and with ~6800 buckets in the
- * global view that matters: see docs-developer/benchmark-compare-fdr.md. The
- * impact floor is what keeps the row count sane in the default mode. */
-const SIGNIFICANCE_P = 0.05;
+/**
+ * False discovery rate a bucket row has to clear.
+ *
+ * `q`, not `p`. There are ~6800 buckets in the global view and ~120 to ~800 in
+ * each subtest view, so an uncorrected p ≤ 0.05 admits hundreds of rows from two
+ * builds that do not differ at all -- 133 of them, measured. `q ≤ 0.05` says
+ * instead that about one row in twenty of *what is shown* is expected to be
+ * spurious, which is a claim worth making. See
+ * docs-developer/benchmark-compare-fdr.md.
+ */
+const SIGNIFICANCE_Q = 0.05;
 
 type BucketFilterMode = 'movers' | 'significant' | 'none';
 
@@ -116,17 +111,16 @@ const BUCKET_FILTER_MODES: Array<{
     mode: 'movers',
     label: 'Moved the score',
     title:
-      'Buckets that changed significantly (p ≤ 0.05) and shifted the overall ' +
-      'score by at least 0.04%. On a comparison of two builds that do not ' +
-      'differ, this shows nothing.',
+      'Buckets that survive the multiple-comparisons correction (q ≤ 0.05) and ' +
+      'shifted the overall score by at least 0.01%. On a comparison of two ' +
+      'builds that do not differ, this shows nothing.',
   },
   {
     mode: 'significant',
-    label: 'All significant',
+    label: 'All discoveries',
     title:
-      'Every bucket with p ≤ 0.05, however small. Uncorrected for multiple ' +
-      'comparisons: with thousands of buckets, roughly 5% of them clear this ' +
-      'by chance alone, so expect around a hundred rows of noise.',
+      'Every bucket with q ≤ 0.05, however small its impact. About one row in ' +
+      'twenty of these is expected to be spurious.',
   },
   {
     mode: 'none',
@@ -277,16 +271,39 @@ function impactOnGeomean(suiteRel: number, numSuites: number): number {
 }
 
 /**
+ * Confidence to judge and colour a row by.
+ *
+ * For a bucket, that is the corrected q-value: its raw p-value is one of
+ * thousands from the same table, and reading it on its own is what made the
+ * unfiltered view a wall of coloured noise. Score rows have no family to be
+ * corrected against, so they keep their own p-value.
+ *
+ * The same cut points serve both, which is a deliberate reuse rather than an
+ * oversight. `pValueToConfidence` is really asking "how much of this could be
+ * chance", and both quantities answer that on a 0-1 scale where small is good --
+ * a q of 0.15 means about one row in seven of what is shown is noise, which is
+ * the same "worth a look, not established" that a p of 0.15 conveys. They are
+ * not interchangeable *quantities*, but they support the same three verdicts.
+ */
+function correctedConfidence(row: ComparisonStats): ConfidenceRating {
+  return pValueToConfidence(row.qValue ?? row.pValue);
+}
+
+/**
  * Tooltip for the MDE cell, spelling out what the number means for this row.
  * The distinction it exists to draw: "did not move" and "could not tell" both
  * show no significant change, and only the MDE separates them.
  */
 function mdeTitle(row: ComparisonStats): string {
   const method = row.pValueMethod === 'permutation' ? 'permutation' : 'Welch t';
-  const p = `p=${row.pValue.toPrecision(2)} (${method})`;
+  const p =
+    row.qValue === null
+      ? `p=${row.pValue.toPrecision(2)} (${method})`
+      : `q=${row.qValue.toPrecision(2)}, from p=${row.pValue.toPrecision(2)} ` +
+        `(${method}) corrected for every bucket in this table`;
   const mde = `\u00b1${row.mde.toFixed(2)}`;
-  if (row.confidence === 'HIGH') {
-    return `${p}. Smallest change that would have been called significant: ${mde}.`;
+  if (correctedConfidence(row) === 'HIGH') {
+    return `${p}. Smallest change that would have been reported: ${mde}.`;
   }
   // "Small next to what?" — relative to the row's own size, since an MDE of
   // 0.9ms is tight for a 30ms bucket and hopeless for a 1.5ms one.
@@ -330,7 +347,39 @@ function changeClass(
   return classes.join(' ');
 }
 
-const SCORE_TABLE_COLUMN_COUNT = 7;
+const SCORE_TABLE_COLUMN_COUNT = 8;
+
+/**
+ * The q-value cell. Two significant figures is all the permutation resolves, and
+ * the floor of 1 / (drawCount + 1) is shown as "≤" rather than as a number the
+ * calibration cannot actually support.
+ */
+function formatQValue(q: number): string {
+  if (q < 0.001) {
+    return '≤0.001';
+  }
+  return q >= 0.1 ? q.toFixed(2) : q.toPrecision(2);
+}
+
+function QValueCell({ row }: { row: ComparisonStats }) {
+  if (row.qValue === null) {
+    return <td className="benchmarkCell--number benchmarkCell--q">—</td>;
+  }
+  const text = formatQValue(row.qValue);
+  const familyWise =
+    row.familyWiseP === null
+      ? ''
+      : ` Chance that any bucket in the table would look this extreme with ` +
+        `nothing changed anywhere: ${row.familyWiseP.toPrecision(2)}.`;
+  return (
+    <td
+      className="benchmarkCell--number benchmarkCell--q"
+      title={`Expected share of noise among the rows at least this extreme: ${text}.${familyWise}`}
+    >
+      {text}
+    </td>
+  );
+}
 
 function ScoreRow({
   row,
@@ -367,16 +416,17 @@ function ScoreRow({
         className={
           subtestRel === null
             ? 'benchmarkCell--number'
-            : `benchmarkCell--number ${changeClass(subtestRel, row.confidence, row.effectSize)}`
+            : `benchmarkCell--number ${changeClass(subtestRel, correctedConfidence(row), row.effectSize)}`
         }
       >
         {subtestRel === null ? '—' : formatChange(subtestRel)}
       </td>
       <td
-        className={`benchmarkCell--number ${changeClass(overallRel, row.confidence, row.effectSize)}`}
+        className={`benchmarkCell--number ${changeClass(overallRel, correctedConfidence(row), row.effectSize)}`}
       >
         {formatChange(overallRel)}
       </td>
+      <QValueCell row={row} />
     </>
   );
 }
@@ -442,9 +492,11 @@ function ScoreTable({
             className="benchmarkCell--number benchmarkCell--colFixed"
             title={
               'Minimum detectable effect: the smallest Δ abs this row could have ' +
-              'shown and still been called significant. A blank Δ% next to a small ' +
-              'MDE means it really did not move; next to a large MDE it means the ' +
-              'measurement could not resolve it.'
+              'shown and still been reported. A blank Δ% next to a small MDE means ' +
+              'it really did not move; next to a large MDE it means the measurement ' +
+              'could not resolve it. For a bucket this is the bar its whole table ' +
+              'imposes, so the same bucket has a larger MDE in the 6800-row overall ' +
+              'view than in a subtest of a few hundred.'
             }
           >
             MDE
@@ -454,6 +506,18 @@ function ScoreTable({
           </th>
           <th className="benchmarkCell--number benchmarkCell--colFixed">
             Δ% overall
+          </th>
+          <th
+            className="benchmarkCell--number benchmarkCell--colNarrow"
+            title={
+              'False discovery rate: the share of the rows at least this extreme ' +
+              'that are expected to be noise. Already corrected for every bucket ' +
+              'in the table, so it is comparable between a 20-row subtest and the ' +
+              '6800-row overall view. Blank on score rows, which are not one of a ' +
+              'family.'
+            }
+          >
+            q
           </th>
         </tr>
       </thead>
@@ -581,7 +645,7 @@ function BucketTable({
   baseViewerUrl: string;
   newViewerUrl: string;
 }) {
-  const columnCount = 7;
+  const columnCount = SCORE_TABLE_COLUMN_COUNT;
 
   // For a subtest expansion, filter to samples inside that suite's iteration
   // markers so flame graphs reflect only what contributed to the subtest
@@ -636,7 +700,9 @@ function BucketTable({
       if (filterMode === 'none') {
         return true;
       }
-      if (c.pValue > SIGNIFICANCE_P) {
+      // qValue is null only if the family could not be calibrated at all, in
+      // which case the uncorrected p-value is the best there is.
+      if ((c.qValue ?? c.pValue) > SIGNIFICANCE_Q) {
         return false;
       }
       return (
@@ -650,8 +716,8 @@ function BucketTable({
     return (
       <p className="benchmarkNoChanges">
         {filterMode === 'movers'
-          ? `Nothing in ${label} both changed significantly and moved the overall score by 0.04% or more.`
-          : `No bucket in ${label} changed significantly (p ≤ 0.05).`}
+          ? `Nothing in ${label} both survived the multiple-comparisons correction and moved the overall score by 0.01% or more.`
+          : `No bucket in ${label} survived the multiple-comparisons correction (q ≤ 0.05).`}
       </p>
     );
   }
@@ -669,6 +735,7 @@ function BucketTable({
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
+        <col className="benchmarkCell--colNarrow" />
       </colgroup>
       <tbody>
         {significant.map(({ c, absDiff, subtestRel, overallRel }) => {
@@ -712,16 +779,17 @@ function BucketTable({
                   className={
                     subtestRel === null
                       ? 'benchmarkCell--number'
-                      : `benchmarkCell--number ${changeClass(subtestRel, c.confidence, c.effectSize)}`
+                      : `benchmarkCell--number ${changeClass(subtestRel, correctedConfidence(c), c.effectSize)}`
                   }
                 >
                   {subtestRel === null ? '—' : formatChange(subtestRel)}
                 </td>
                 <td
-                  className={`benchmarkCell--number ${changeClass(overallRel, c.confidence, c.effectSize)}`}
+                  className={`benchmarkCell--number ${changeClass(overallRel, correctedConfidence(c), c.effectSize)}`}
                 >
                   {formatChange(overallRel)}
                 </td>
+                <QValueCell row={c} />
               </tr>
               {expandable && isExpanded ? (
                 <tr className="benchmarkRow--bucket-expansion">

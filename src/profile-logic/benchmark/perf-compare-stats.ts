@@ -542,6 +542,383 @@ export function permutationTwoSidedP(
 }
 
 // ---------------------------------------------------------------------------
+// Multiple comparisons: FDR and FWER from one joint relabelling of the family
+// ---------------------------------------------------------------------------
+
+/**
+ * Relative slack when asking whether one |t| reaches another. Matches the
+ * tolerance `permutationTwoSidedP` applies to its own threshold.
+ */
+const COMPARISON_TOLERANCE = 1e-9;
+
+/**
+ * One bucket's two per-iteration weight vectors. Every member of a family must
+ * have the same two lengths, since they are the same iterations.
+ */
+export type FamilyMember = {
+  base: ArrayLike<number>;
+  comp: ArrayLike<number>;
+};
+
+export type FamilyCorrection = {
+  /** Observed |t| per member, in input order. Recomputed here rather than taken
+   * from `welchTTest` so that it comes from exactly the same arithmetic as the
+   * null values it is compared against. */
+  absT: Float64Array;
+  /** Estimated false discovery rate at the least stringent |t| threshold that
+   * still rejects this member. Monotone: a larger |t| never gets a larger q. */
+  qValues: Float64Array;
+  /** Westfall-Young single-step FWER-adjusted p-value: the fraction of
+   * relabellings whose *largest* |t| anywhere in the family reached this
+   * member's observed |t|. */
+  familyWisePValues: Float64Array;
+  /**
+   * The |t| a member has to reach to stand out from a family this size — the bar
+   * this particular comparison set turned out to impose, which is what a
+   * corrected minimum detectable effect has to be measured against.
+   *
+   * It is the family-wise bar: the `1 - familyWiseAlpha` quantile of the largest
+   * |t| seen anywhere in the family per relabelling. That is the right bar for an
+   * MDE even though rows are reported on `qValues`, because an MDE asks what a
+   * row would have needed *on its own* — and for a lone row the two bars very
+   * nearly coincide. `V̂(c) = E[#exceedances]` and the family-wise rate is
+   * `P(#exceedances ≥ 1)`, which agree to first order once exceedances are rare,
+   * i.e. exactly where a threshold sits. Where a table does have other
+   * discoveries the FDR bar is genuinely lower, so this errs conservative.
+   *
+   * The alternative — reading the bar off the FDR curve — is not usable: on a
+   * comparison with no real changes in it nothing on the observed grid reaches
+   * `q ≤ alpha`, so the bar would come out as infinity for every row of exactly
+   * the tables an MDE is most needed for.
+   */
+  criticalAbsT: number;
+};
+
+/**
+ * Correct a whole family of bucket comparisons for multiplicity, by relabelling
+ * the iterations of every bucket *jointly* and reading the null off the family
+ * as a whole.
+ *
+ * ## Why not Benjamini-Hochberg on the per-bucket p-values
+ *
+ * BH needs the smallest p-value to be under `alpha / n`, which for the ~6800
+ * buckets of the global view is 7.4e-6. A permutation p-value from
+ * `PERMUTATION_COUNT` relabellings cannot go below 1 / (count + 1) = 5.0e-4, so
+ * BH rejects nothing at all — not even a bucket that moved by 73% with a Cohen's
+ * d of 1.0. The p-value floor, not the evidence, is the binding constraint.
+ *
+ * The way out is to stop going through per-bucket p-values. What FDR control
+ * actually needs is `E[V(c)]`, the number of *buckets* expected to clear a
+ * threshold `c` by chance — a quantity about the family, not about any one
+ * bucket. Estimating it pools `memberCount × drawCount` null statistics (13.6
+ * million for the global view), so the resolution problem disappears: the floor
+ * on the estimate is one null exceedance in the whole pooled set, not one in
+ * `drawCount`.
+ *
+ * ## The estimator
+ *
+ * With `R(c)` the observed count at or above `c` and `V̂(c)` the mean null count
+ * at or above `c` over the relabellings,
+ *
+ *     FDR(c) = V̂(c) / R(c),   q(bucket) = min over c ≤ |t_bucket| of FDR(c)
+ *
+ * (Tusher, Tibshirani & Chu 2001, PNAS 98(9):5116-5121 — SAM; Storey & Tibshirani
+ * 2003, PNAS 100(16):9440-9445 for the q-value.) `V̂` averages over relabellings
+ * rather than assuming a null distribution, and it makes no assumption that the
+ * buckets are alike: it estimates `Σ_b P(|t_b| ≥ c)` term by term, which is
+ * exactly what `E[V(c)]` is when every bucket is null. Buckets that are *not*
+ * null inflate `V̂`, so the estimate errs conservative — the usual `π₀` refinement
+ * would sharpen it, but with a handful of real movers among thousands of buckets
+ * `π₀` is within a rounding error of 1 and is not worth the extra assumption.
+ *
+ * ## Dependence
+ *
+ * The buckets partition the same samples, so they are negatively correlated by
+ * construction, and BH's validity condition (positive regression dependence) does
+ * not obviously hold. This construction does not need it: the relabelling is
+ * applied to all buckets at once, so whatever dependence exists is reproduced in
+ * every draw. That is also why `familyWisePValues` is exact under arbitrary
+ * dependence (Westfall & Young 1993; the same max-statistic construction as
+ * cluster-based permutation inference, Nichols & Holmes 2002).
+ *
+ * ## The statistic
+ *
+ * Thresholding a studentised |t| shared across buckets, rather than each bucket's
+ * own p-value, means a sparse bucket and a dense one are held to the same bar
+ * even though the sparse one has the heavier null tail. That costs the dense
+ * buckets a little power; it does not cost validity, because `V̂` counts the
+ * sparse buckets' null exceedances too and so prices their heavier tail into the
+ * FDR at every threshold.
+ *
+ * Returns null if the family is empty or its members disagree about how many
+ * iterations there were, in which case there is nothing to correct against.
+ */
+export function computeFamilyCorrection(
+  members: ReadonlyArray<FamilyMember>,
+  permutations: Int32Array[],
+  familyWiseAlpha: number = 0.05
+): FamilyCorrection | null {
+  const memberCount = members.length;
+  const drawCount = permutations.length;
+  if (memberCount === 0 || drawCount === 0) {
+    return null;
+  }
+  const nBase = members[0].base.length;
+  const nNew = members[0].comp.length;
+  if (nBase < 2 || nNew < 2) {
+    return null;
+  }
+  for (const member of members) {
+    if (member.base.length !== nBase || member.comp.length !== nNew) {
+      return null;
+    }
+  }
+  const total = nBase + nNew;
+
+  // Pooled values in sparse form, all members in three flat arrays. Most buckets
+  // are zero in most iterations — a single function accounts for no samples at
+  // all in the majority of them — so iterating the nonzeros is what makes
+  // memberCount × drawCount evaluations affordable at all. Flat arrays rather
+  // than one pair per member because there are thousands of members.
+  const offsets = new Int32Array(memberCount + 1);
+  for (let m = 0; m < memberCount; m++) {
+    const { base, comp } = members[m];
+    let count = 0;
+    for (let i = 0; i < nBase; i++) {
+      if (base[i] !== 0) {
+        count++;
+      }
+    }
+    for (let i = 0; i < nNew; i++) {
+      if (comp[i] !== 0) {
+        count++;
+      }
+    }
+    offsets[m + 1] = offsets[m] + count;
+  }
+  const pooledIndex = new Int32Array(offsets[memberCount]);
+  const pooledValue = new Float64Array(offsets[memberCount]);
+  const totalSum = new Float64Array(memberCount);
+  const totalSumSquares = new Float64Array(memberCount);
+  for (let m = 0; m < memberCount; m++) {
+    const { base, comp } = members[m];
+    let o = offsets[m];
+    let sum = 0;
+    let sumSquares = 0;
+    for (let i = 0; i < nBase; i++) {
+      const v = base[i];
+      if (v !== 0) {
+        pooledIndex[o] = i;
+        pooledValue[o] = v;
+        o++;
+        sum += v;
+        sumSquares += v * v;
+      }
+    }
+    for (let i = 0; i < nNew; i++) {
+      const v = comp[i];
+      if (v !== 0) {
+        pooledIndex[o] = nBase + i;
+        pooledValue[o] = v;
+        o++;
+        sum += v;
+        sumSquares += v * v;
+      }
+    }
+    totalSum[m] = sum;
+    totalSumSquares[m] = sumSquares;
+  }
+
+  // Which pooled positions the current relabelling assigns to the base group.
+  // A mask rather than an index list, because the sparse inner loop walks the
+  // bucket's nonzeros and asks which side each one landed on.
+  const inBase = new Uint8Array(total);
+  const absTForMember = (m: number): number => {
+    let sumBase = 0;
+    let sumSquaresBase = 0;
+    const end = offsets[m + 1];
+    for (let o = offsets[m]; o < end; o++) {
+      if (inBase[pooledIndex[o]] === 1) {
+        const v = pooledValue[o];
+        sumBase += v;
+        sumSquaresBase += v * v;
+      }
+    }
+    const meanBase = sumBase / nBase;
+    const meanNew = (totalSum[m] - sumBase) / nNew;
+    // Clamped: a difference of similar magnitudes, so an exactly zero variance
+    // can come out very slightly negative.
+    const ssBase = Math.max(0, sumSquaresBase - nBase * meanBase * meanBase);
+    const ssNew = Math.max(
+      0,
+      totalSumSquares[m] - sumSquaresBase - nNew * meanNew * meanNew
+    );
+    const se = Math.sqrt(
+      ssBase / (nBase - 1) / nBase + ssNew / (nNew - 1) / nNew
+    );
+    const t = Math.abs(tStatistic(meanNew - meanBase, se));
+    return Number.isNaN(t) ? 0 : t;
+  };
+
+  const absT = new Float64Array(memberCount);
+  for (let i = 0; i < nBase; i++) {
+    inBase[i] = 1;
+  }
+  for (let m = 0; m < memberCount; m++) {
+    absT[m] = absTForMember(m);
+  }
+  // Ascending, so index i is also the count of members strictly below it.
+  // Infinity — a bucket that appeared or disappeared outright — sorts last,
+  // which is where it belongs.
+  const ascending = absT.slice().sort();
+
+  // For each null value, the number of observed thresholds it clears; summed
+  // into a histogram over that count so the pooled null never has to be stored.
+  //
+  // Widened by a relative tolerance, for the same reason permutationTwoSidedP
+  // uses one, but with more at stake here: a null value is compared against
+  // *other* buckets' thresholds, and |t| is computed through a subtraction of
+  // similar magnitudes, so two arithmetically equal values can land an ULP
+  // apart. Without the tolerance, multiplying every bucket by one shared
+  // constant — which is exactly what the geomean-normalised global view does —
+  // shifts q by a count or two. Erring towards counting an exceedance keeps that
+  // on the conservative side.
+  const nullsClearing = new Float64Array(memberCount + 1);
+  const maxima = new Float64Array(drawCount);
+  for (let p = 0; p < drawCount; p++) {
+    inBase.fill(0);
+    const indices = permutations[p];
+    for (let k = 0; k < indices.length; k++) {
+      inBase[indices[k]] = 1;
+    }
+    let max = 0;
+    for (let m = 0; m < memberCount; m++) {
+      const v = absTForMember(m);
+      if (v > max) {
+        max = v;
+      }
+      nullsClearing[
+        countAtOrBelow(ascending, v * (1 + COMPARISON_TOLERANCE))
+      ]++;
+    }
+    maxima[p] = max;
+  }
+
+  // nullExceeding[i] = null values reaching ascending[i], i.e. clearing more
+  // than i thresholds.
+  const nullExceeding = new Float64Array(memberCount);
+  let running = 0;
+  for (let i = memberCount - 1; i >= 0; i--) {
+    running += nullsClearing[i + 1];
+    nullExceeding[i] = running;
+  }
+
+  // FDR at each distinct threshold. Ties share one threshold, so they must also
+  // share one rejection count — the one for the whole tied group.
+  const fdrAtThreshold = new Float64Array(memberCount);
+  for (let i = 0; i < memberCount;) {
+    let last = i;
+    while (last + 1 < memberCount && ascending[last + 1] === ascending[i]) {
+      last++;
+    }
+    // (+1) / (drawCount + 1) for the same reason permutationTwoSidedP uses it:
+    // no finite number of relabellings can establish that a threshold is never
+    // cleared by chance, so the smallest reportable q is 1 / (drawCount + 1).
+    const expectedFalse = (nullExceeding[i] + 1) / (drawCount + 1);
+    const value = Math.min(1, expectedFalse / (memberCount - i));
+    for (let k = i; k <= last; k++) {
+      fdrAtThreshold[k] = value;
+    }
+    i = last + 1;
+  }
+
+  // q is the best FDR available at any threshold that still rejects the member,
+  // which also makes it monotone in |t| — the estimate itself need not be.
+  let best = 1;
+  for (let i = 0; i < memberCount; i++) {
+    if (fdrAtThreshold[i] < best) {
+      best = fdrAtThreshold[i];
+    }
+    fdrAtThreshold[i] = best;
+  }
+
+  maxima.sort();
+  const qValues = new Float64Array(memberCount);
+  const familyWisePValues = new Float64Array(memberCount);
+  for (let m = 0; m < memberCount; m++) {
+    const t = absT[m];
+    qValues[m] = fdrAtThreshold[countBelow(ascending, t)];
+    familyWisePValues[m] =
+      (1 + drawCount - countBelow(maxima, t * (1 - COMPARISON_TOLERANCE))) /
+      (drawCount + 1);
+  }
+
+  // The smallest |t| whose family-wise rate is within `familyWiseAlpha`, so that
+  // "|t| ≥ criticalAbsT" and "pFWER ≤ alpha" are the same statement.
+  //
+  // Solving one for the other: a member at `maxima[k]` has `pFWER = (1 +
+  // drawCount - k) / (drawCount + 1)`, which is within alpha exactly when
+  // `k ≥ (1 - alpha) · (drawCount + 1)`. Clamped, because a small enough alpha
+  // asks for a quantile past the largest draw, and the largest draw is then the
+  // most the permutation can support.
+  let criticalIndex = Math.min(
+    drawCount - 1,
+    Math.ceil((1 - familyWiseAlpha) * (drawCount + 1))
+  );
+  // That `k` is only the answer if it starts a run. Equal maxima all carry the
+  // rate of the *first* of them — being one of six draws that tied at 4.2 is
+  // still six draws that reached 4.2 — so an index landing part-way into a run
+  // names a value whose real rate is worse than alpha. Skip to the next distinct
+  // one. Ties are the common case rather than a curiosity here: per-iteration
+  // bucket weights are small integers, so a whole run of relabellings can come
+  // out at exactly the same |t|.
+  while (
+    criticalIndex > 0 &&
+    criticalIndex < drawCount - 1 &&
+    maxima[criticalIndex] === maxima[criticalIndex - 1]
+  ) {
+    criticalIndex++;
+  }
+
+  return {
+    absT,
+    qValues,
+    familyWisePValues,
+    criticalAbsT: maxima[criticalIndex],
+  };
+}
+
+/** Number of entries of an ascending array that are <= `value`. */
+function countAtOrBelow(sorted: Float64Array, value: number): number {
+  let lo = 0;
+  let hi = sorted.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sorted[mid] <= value) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  return lo;
+}
+
+/** Number of entries of an ascending array that are < `value`. */
+function countBelow(sorted: Float64Array, value: number): number {
+  let lo = 0;
+  let hi = sorted.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sorted[mid] < value) {
+      lo = mid + 1;
+    } else {
+      hi = mid;
+    }
+  }
+  return lo;
+}
+
+// ---------------------------------------------------------------------------
 // Confidence rating from p-value
 // ---------------------------------------------------------------------------
 
