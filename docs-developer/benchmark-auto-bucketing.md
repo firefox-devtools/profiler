@@ -84,12 +84,14 @@ traps:
 
 ### 3.1 Test the mean difference, and get the null by permutation
 
-The current code uses Mann-Whitney U. For per-iteration bucket weights that is
-the wrong tool, for a concrete reason: the weights are small integers (a
-function accounts for 0, 1 or 2 samples in an iteration), so base and new tie on
-13–44% of all pairs in real data. Rank statistics are then dominated by tie
-handling, which is exactly how the geomean-normalised global view came to report
-75 phantom effects, none of which survived a correct normalisation.
+The comparison used Mann-Whitney U when this was written. For per-iteration
+bucket weights that is the wrong tool, for a concrete reason: the weights are
+small integers (a function accounts for 0, 1 or 2 samples in an iteration), so
+base and new tie on 13–44% of all pairs in real data. Rank statistics are then
+dominated by tie handling, which is exactly how the geomean-normalised global
+view came to report 75 phantom effects, none of which survived a correct
+normalisation. This section is now implemented for the fixed-bucket comparison
+too — see [§9](#what-step-1-turned-into).
 
 Use the **mean difference** instead:
 
@@ -422,10 +424,9 @@ reason for them to share a bucket.
 
 ## 9. Suggested order of work
 
-1. **Replace Mann-Whitney with a permutation test on the mean difference, and
-   add an MDE column.** No bucketing change at all, and it fixes the tie
-   fragility for good while turning every null result into a quantitative
-   statement. Largest honesty-per-line-changed ratio available.
+1. ~~**Replace Mann-Whitney with a permutation test on the mean difference, and
+   add an MDE column.**~~ **Done**, for the existing fixed-bucket comparison —
+   see below.
 2. **Collapse direct recursion when forming bucket keys.** Cheap, and Example 4
    shows it is worth real power.
 3. **Split `GC / CC`**, and audit the other coarse labels by hand. Zero new
@@ -437,3 +438,37 @@ reason for them to share a bucket.
    everything above.
 6. Shared-factor adjustment (Example 6) last: it is the most powerful and the
    most delicate, and its failure mode is silent.
+
+### What step 1 turned into
+
+Applied to the existing fixed-bucket comparison, not only to the automatic
+scheme: the tie fragility was measured _there_, so that is where it had to be
+fixed. Mann-Whitney U and Cliff's delta are gone from
+[perf-compare-stats.ts](../src/profile-logic/benchmark/perf-compare-stats.ts),
+replaced by Welch's t on the per-iteration mean difference, with:
+
+- **p-values from permutation** where the verdict could turn on it — any bucket
+  whose Welch p is below 0.25, plus sparse buckets (zero in more than half their
+  iterations, where a t-distribution p-value is not trustworthy however large
+  the sample looks) up to a p of 0.5. One set of relabellings is shared by every
+  bucket, so their p-values are comparable. The CLI marks Welch-approximated
+  rows with `~`.
+- **Sequential stopping** (Besag & Clifford 1991): draw until 20 relabellings
+  come out at least as extreme, then report hits/draws. Necessary, not merely
+  nice — the naive version took **37.6 s** on one profile pair, and this brings
+  it to **0.3 s**. Most buckets settle in well under a hundred draws; only real
+  candidates run the full 1999.
+- **Cohen's d** in place of Cliff's delta for the effect-size filter, whose
+  0.2/0.5/0.8 cut points sit close to the 0.15/0.33/0.47 they replace.
+- **An MDE column** in both the UI and the CLI.
+
+Two things worth knowing about the switch. First, it makes the shared-factor bug
+that motivated all of this far less dangerous: a mismatched rescale now biases
+the point estimate smoothly, in proportion to the drift, instead of moving
+Cliff's delta by the tied-pair fraction. The shared factor is still correct and
+still needed, but its failure mode is no longer explosive. Second, writing the
+tests turned up a bug the switch would otherwise have introduced: a bucket with
+zero spread on both sides but different means — an _appeared_ or _disappeared_
+bucket, base weight 0 in every iteration and nonzero in every one of the new
+ones — has `se == 0`, and the obvious `se > 0 ? delta / se : 0` guard reports the
+most clear-cut change in the profile as no change at all. It now yields ±∞.

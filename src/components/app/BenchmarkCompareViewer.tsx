@@ -22,6 +22,7 @@ import {
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
   BucketComparison,
+  ComparisonStats,
   ScoreComparison,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
@@ -65,9 +66,9 @@ type State =
 
 const TOP_N = 100;
 
-/** Default |Cliff's delta| cutoff: matches the previous "effectSize !==
- * 'Negligible'" threshold (Negligible ends at 0.15 in interpretEffectSize). */
-const DEFAULT_MIN_CLIFFS_DELTA = 0.15;
+/** Default |Cohen's d| cutoff: the "effectSize !== 'Negligible'" boundary in
+ * interpretStandardizedEffect. */
+const DEFAULT_MIN_EFFECT = 0.2;
 
 async function loadOneProfile(viewerUrl: string) {
   let url = viewerUrl;
@@ -208,6 +209,26 @@ function impactOnGeomean(suiteRel: number, numSuites: number): number {
   return Math.pow(1 + suiteRel, 1 / numSuites) - 1;
 }
 
+/**
+ * Tooltip for the MDE cell, spelling out what the number means for this row.
+ * The distinction it exists to draw: "did not move" and "could not tell" both
+ * show no significant change, and only the MDE separates them.
+ */
+function mdeTitle(row: ComparisonStats): string {
+  const method = row.pValueMethod === 'permutation' ? 'permutation' : 'Welch t';
+  const p = `p=${row.pValue.toPrecision(2)} (${method})`;
+  const mde = `\u00b1${row.mde.toFixed(2)}`;
+  if (row.confidence === 'HIGH') {
+    return `${p}. Smallest change that would have been called significant: ${mde}.`;
+  }
+  // "Small next to what?" — relative to the row's own size, since an MDE of
+  // 0.9ms is tight for a 30ms bucket and hopeless for a 1.5ms one.
+  const resolved = row.mde <= 0.05 * Math.abs(row.baseMean);
+  return resolved
+    ? `${p}. A change of ${mde} would have been detected, so this really did not move.`
+    : `${p}. Only a change of ${mde} or larger could have been detected, so this is unresolved rather than unchanged.`;
+}
+
 function formatChange(rel: number): string {
   if (!isFinite(rel)) {
     return rel > 0 ? 'appeared' : 'disappeared';
@@ -242,7 +263,7 @@ function changeClass(
   return classes.join(' ');
 }
 
-const SCORE_TABLE_COLUMN_COUNT = 6;
+const SCORE_TABLE_COLUMN_COUNT = 7;
 
 function ScoreRow({
   row,
@@ -270,6 +291,12 @@ function ScoreRow({
       <td className="benchmarkCell--number">{row.newMean.toFixed(2)}</td>
       <td className="benchmarkCell--number">{absDiffStr}</td>
       <td
+        className="benchmarkCell--number benchmarkCell--mde"
+        title={mdeTitle(row)}
+      >
+        {'\u00b1' + row.mde.toFixed(2)}
+      </td>
+      <td
         className={
           subtestRel === null
             ? 'benchmarkCell--number'
@@ -292,7 +319,7 @@ function ScoreTable({
   suiteScores,
   suiteComparisonsByName,
   globalComparisons,
-  minCliffsDelta,
+  minEffect,
   baseBundle,
   newBundle,
   baseViewerUrl,
@@ -302,7 +329,7 @@ function ScoreTable({
   suiteScores: ScoreComparison[];
   suiteComparisonsByName: Map<string, BucketComparison[]>;
   globalComparisons: BucketComparison[];
-  minCliffsDelta: number;
+  minEffect: number;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
   baseViewerUrl: string;
@@ -344,6 +371,17 @@ function ScoreTable({
           <th className="benchmarkCell--number benchmarkCell--colFixed">
             Δ abs
           </th>
+          <th
+            className="benchmarkCell--number benchmarkCell--colFixed"
+            title={
+              'Minimum detectable effect: the smallest Δ abs this row could have ' +
+              'shown and still been called significant. A blank Δ% next to a small ' +
+              'MDE means it really did not move; next to a large MDE it means the ' +
+              'measurement could not resolve it.'
+            }
+          >
+            MDE
+          </th>
           <th className="benchmarkCell--number benchmarkCell--colFixed">
             Δ% subtest
           </th>
@@ -380,7 +418,7 @@ function ScoreTable({
                 enclosingBaseMean={overallScore.baseMean}
                 isOverall={true}
                 numSuites={numSuites}
-                minCliffsDelta={minCliffsDelta}
+                minEffect={minEffect}
                 baseBundle={baseBundle}
                 newBundle={newBundle}
                 baseViewerUrl={baseViewerUrl}
@@ -424,7 +462,7 @@ function ScoreTable({
                       enclosingBaseMean={row.baseMean}
                       isOverall={false}
                       numSuites={numSuites}
-                      minCliffsDelta={minCliffsDelta}
+                      minEffect={minEffect}
                       baseBundle={baseBundle}
                       newBundle={newBundle}
                       baseViewerUrl={baseViewerUrl}
@@ -447,7 +485,7 @@ function BucketTable({
   enclosingBaseMean,
   isOverall,
   numSuites,
-  minCliffsDelta,
+  minEffect,
   baseBundle,
   newBundle,
   baseViewerUrl,
@@ -467,8 +505,8 @@ function BucketTable({
    * comes from impactOnGeomean. */
   isOverall: boolean;
   numSuites: number;
-  /** Include buckets whose |Cliff's delta| is at least this. */
-  minCliffsDelta: number;
+  /** Include buckets whose |Cohen's d| is at least this. */
+  minEffect: number;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
   /** Viewer URLs of the two source profiles, forwarded to BucketFlameGraphPair
@@ -477,7 +515,7 @@ function BucketTable({
   baseViewerUrl: string;
   newViewerUrl: string;
 }) {
-  const columnCount = 6;
+  const columnCount = 7;
 
   // For a subtest expansion, filter to samples inside that suite's iteration
   // markers so flame graphs reflect only what contributed to the subtest
@@ -514,7 +552,7 @@ function BucketTable({
   }, []);
 
   const significant = comparisons
-    .filter((c) => Math.abs(c.cliffdsDelta) >= minCliffsDelta)
+    .filter((c) => Math.abs(c.standardizedEffect) >= minEffect)
     .sort(
       (a, b) =>
         Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
@@ -536,6 +574,7 @@ function BucketTable({
        * columns. */}
       <colgroup>
         <col />
+        <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
@@ -586,6 +625,12 @@ function BucketTable({
                   {c.newMean.toFixed(2)}
                 </td>
                 <td className="benchmarkCell--number">{absDiffStr}</td>
+                <td
+                  className="benchmarkCell--number benchmarkCell--mde"
+                  title={mdeTitle(c)}
+                >
+                  {'\u00b1' + c.mde.toFixed(2)}
+                </td>
                 <td
                   className={
                     subtestRel === null
@@ -651,13 +696,11 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
     [data.newProfile]
   );
 
-  const [minCliffsDelta, setMinCliffsDelta] = useState(
-    DEFAULT_MIN_CLIFFS_DELTA
-  );
+  const [minEffect, setMinEffect] = useState(DEFAULT_MIN_EFFECT);
 
-  const handleMinCliffsDeltaChange = useCallback(
+  const handleMinEffectChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      setMinCliffsDelta(e.currentTarget.valueAsNumber);
+      setMinEffect(e.currentTarget.valueAsNumber);
     },
     []
   );
@@ -682,18 +725,16 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
       <h3 className="benchmarkSectionTitle">Score and subtest totals</h3>
       <div className="benchmarkFilters">
         <label className="benchmarkFilter">
-          <span className="benchmarkFilter__label">Min |Cliff&apos;s δ|</span>
+          <span className="benchmarkFilter__label">Min |Cohen&apos;s d|</span>
           <input
             type="range"
             min={0}
-            max={0.5}
-            step={0.01}
-            value={minCliffsDelta}
-            onChange={handleMinCliffsDeltaChange}
+            max={1.5}
+            step={0.05}
+            value={minEffect}
+            onChange={handleMinEffectChange}
           />
-          <span className="benchmarkFilter__value">
-            {minCliffsDelta.toFixed(2)}
-          </span>
+          <span className="benchmarkFilter__value">{minEffect.toFixed(2)}</span>
         </label>
       </div>
       <ScoreTable
@@ -701,7 +742,7 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
         suiteScores={data.suiteScores}
         suiteComparisonsByName={suiteComparisonsByName}
         globalComparisons={data.globalComparisons}
-        minCliffsDelta={minCliffsDelta}
+        minEffect={minEffect}
         baseBundle={baseBundle}
         newBundle={newBundle}
         baseViewerUrl={data.baseUrl}
