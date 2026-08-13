@@ -66,9 +66,21 @@ type State =
 
 const TOP_N = 100;
 
-/** Default |Cohen's d| cutoff: the "effectSize !== 'Negligible'" boundary in
- * interpretStandardizedEffect. */
-const DEFAULT_MIN_EFFECT = 0.2;
+/**
+ * Default |Cohen's d| cutoff. Not the "Negligible" boundary of 0.2, which is far
+ * too permissive here: with ~6800 buckets in the global view, 0.2 admits about
+ * 250 of them, and it admits the same ~250 whether or not the two builds
+ * actually differ (measured: 248 on a pair with no difference detectable at
+ * subtest level, 265 on a pair with a large real one). A filter that passes the
+ * same number of rows either way is not filtering.
+ *
+ * 0.4 is the smallest cutoff at which the no-difference pair goes completely
+ * empty while the real change still comes through intact. The cost is that it
+ * also hides changes in large, noisy buckets whose absolute impact is what
+ * matters -- a 1.16ms drop in a 21ms bucket is only 0.25 sd, but it was the
+ * single largest contributor to that comparison's score change.
+ */
+const DEFAULT_MIN_EFFECT = 0.4;
 
 async function loadOneProfile(viewerUrl: string) {
   let url = viewerUrl;
