@@ -10,6 +10,7 @@ import {
   changeProfilesToCompare,
   changeProfilesToCompareBenchmark,
 } from 'firefox-profiler/actions/app';
+import { DEFAULT_BENCHMARK_PROFILE_NAMES } from './BenchmarkCompareForm';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
@@ -44,7 +45,10 @@ class CompareHomeImpl extends PureComponent<Props, State> {
       submitter instanceof HTMLButtonElement &&
       submitter.name === 'benchmark'
     ) {
-      changeProfilesToCompareBenchmark([profile1, profile2]);
+      changeProfilesToCompareBenchmark(
+        [profile1, profile2],
+        DEFAULT_BENCHMARK_PROFILE_NAMES
+      );
     } else {
       changeProfilesToCompare([profile1, profile2]);
     }

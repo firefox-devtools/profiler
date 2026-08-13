@@ -7,7 +7,14 @@ import type { ChangeEvent, MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AppHeader } from './AppHeader';
-import { getProfilesToCompare } from 'firefox-profiler/selectors/url-state';
+import {
+  BenchmarkCompareForm,
+  resolveBenchmarkProfileNames,
+} from './BenchmarkCompareForm';
+import {
+  getProfileNamesToCompare,
+  getProfilesToCompare,
+} from 'firefox-profiler/selectors/url-state';
 import { fetchProfile } from 'firefox-profiler/utils/profile-fetch';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { expandUrl } from 'firefox-profiler/utils/shorten-url';
@@ -62,6 +69,7 @@ type ComparisonData = {
 };
 
 type State =
+  | { phase: 'empty' }
   | { phase: 'loading' }
   | { phase: 'error'; error: string }
   | { phase: 'done'; data: ComparisonData };
@@ -132,6 +140,33 @@ const BUCKET_FILTER_MODES: Array<{
 
 const DEFAULT_BUCKET_FILTER_MODE: BucketFilterMode = 'movers';
 
+/**
+ * Profiles already downloaded this session, keyed by viewer URL.
+ *
+ * Swapping the two sides, or replacing one of them, re-runs the whole
+ * comparison — and these are multi-megabyte artifacts fetched from Taskcluster,
+ * so re-downloading the side that did not change would make the swap button
+ * unusable. Keyed by the URL the user typed, since that is what identifies a
+ * profile here; entries are never evicted, which is fine for a page whose whole
+ * job is comparing two of them.
+ */
+const profileCache = new Map<string, Promise<Profile>>();
+
+function loadOneProfileCached(viewerUrl: string): Promise<Profile> {
+  const cached = profileCache.get(viewerUrl);
+  if (cached !== undefined) {
+    return cached;
+  }
+  // Don't cache a rejection: a failed fetch is usually transient, and the
+  // obvious way to retry is to press the button again.
+  const promise = loadOneProfile(viewerUrl).catch((err) => {
+    profileCache.delete(viewerUrl);
+    throw err;
+  });
+  profileCache.set(viewerUrl, promise);
+  return promise;
+}
+
 async function loadOneProfile(viewerUrl: string) {
   let url = viewerUrl;
   if (
@@ -157,8 +192,8 @@ async function computeComparison(
   newUrl: string
 ): Promise<ComparisonData> {
   const [baseProfile, newProfile] = await Promise.all([
-    loadOneProfile(baseUrl),
-    loadOneProfile(newUrl),
+    loadOneProfileCached(baseUrl),
+    loadOneProfileCached(newUrl),
   ]);
 
   const baseStats = extractBenchmarkStatsFromProfile(baseProfile);
@@ -1052,21 +1087,6 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
 
   return (
     <div className="benchmarkResults">
-      <div className="benchmarkProfileUrls">
-        <span>
-          <strong>Base:</strong>{' '}
-          <a href={data.baseUrl} target="_blank" rel="noopener noreferrer">
-            {data.baseUrl}
-          </a>
-        </span>
-        <span>
-          <strong>New:</strong>{' '}
-          <a href={data.newUrl} target="_blank" rel="noopener noreferrer">
-            {data.newUrl}
-          </a>
-        </span>
-      </div>
-
       <h3 className="benchmarkSectionTitle">Score and subtest totals</h3>
       <div className="benchmarkFilters">
         <span className="benchmarkFilter__label">Show buckets that</span>
@@ -1100,26 +1120,92 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
 
 export function BenchmarkCompareViewer() {
   const profilesToCompare = useSelector(getProfilesToCompare);
-  const [state, setState] = useState<State>({ phase: 'loading' });
+  const profileNamesToCompare = useSelector(getProfileNamesToCompare);
+  const [state, setState] = useState<State>({ phase: 'empty' });
+
+  // Destructured into two strings rather than kept as an array, so that the
+  // effect doesn't re-run (and re-compute a ~7000-bucket comparison) every time
+  // an unrelated dispatch hands us a fresh array with the same contents.
+  const baseUrl = profilesToCompare?.[0] ?? '';
+  const newUrl = profilesToCompare?.[1] ?? '';
+  const [baseName, newName] = resolveBenchmarkProfileNames(
+    profileNamesToCompare
+  );
 
   useEffect(() => {
-    if (!profilesToCompare || profilesToCompare.length < 2) {
-      setState({ phase: 'error', error: 'Two profile URLs are required.' });
-      return;
+    // A second edit while the first pair is still downloading would otherwise
+    // race, and whichever finished last would win.
+    let cancelled = false;
+    if (baseUrl === '' || newUrl === '') {
+      setState({ phase: 'empty' });
+    } else {
+      setState({ phase: 'loading' });
+      computeComparison(baseUrl, newUrl)
+        .then((data) => !cancelled && setState({ phase: 'done', data }))
+        .catch(
+          (err) =>
+            !cancelled &&
+            setState({ phase: 'error', error: String(err?.message ?? err) })
+        );
     }
-    setState({ phase: 'loading' });
-    const [baseUrl, newUrl] = profilesToCompare;
-    computeComparison(baseUrl, newUrl)
-      .then((data) => setState({ phase: 'done', data }))
-      .catch((err) =>
-        setState({ phase: 'error', error: String(err?.message ?? err) })
-      );
-  }, [profilesToCompare]);
+    return () => {
+      cancelled = true;
+    };
+  }, [baseUrl, newUrl]);
+
+  const form = (
+    <BenchmarkCompareForm
+      // Remount when the compared pair changes (including via history
+      // navigation) so the inputs show what is actually on screen.
+      key={`${baseUrl}\n${newUrl}\n${baseName}\n${newName}`}
+      initialUrls={[baseUrl, newUrl]}
+      initialNames={[baseName, newName]}
+      submitLabel={state.phase === 'empty' ? 'Compare' : 'Update comparison'}
+    />
+  );
 
   return (
     <main className="benchmarkCompareViewer">
       <AppHeader />
       <h2 className="photon-title-20 benchmarkTitle">Benchmark Comparison</h2>
+
+      {state.phase === 'empty' ? (
+        <>
+          <p className="photon-body-20">
+            Enter two benchmark profiles to compare. The report is written from
+            the first one’s point of view: every percentage says what happens to
+            it when it is replaced by the second.
+          </p>
+          {form}
+        </>
+      ) : (
+        <details className="benchmarkComparing">
+          <summary>
+            <span className="benchmarkComparing__summaryText">
+              Comparing{' '}
+              <span className="benchmarkComparing__name">{baseName}</span>
+              {' with '}
+              <span className="benchmarkComparing__name">{newName}</span> — edit
+              or swap
+            </span>
+          </summary>
+          {form}
+          <div className="benchmarkProfileUrls">
+            <span>
+              <strong>{baseName}:</strong>{' '}
+              <a href={baseUrl} target="_blank" rel="noopener noreferrer">
+                {baseUrl}
+              </a>
+            </span>
+            <span>
+              <strong>{newName}:</strong>{' '}
+              <a href={newUrl} target="_blank" rel="noopener noreferrer">
+                {newUrl}
+              </a>
+            </span>
+          </div>
+        </details>
+      )}
 
       {state.phase === 'loading' && (
         <div className="benchmarkLoading">
