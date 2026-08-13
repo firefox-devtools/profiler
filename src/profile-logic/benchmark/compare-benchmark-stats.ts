@@ -25,19 +25,13 @@ import type {
 } from './extract-benchmark-stats';
 import {
   computeFamilyCorrection,
-  interpretStandardizedEffect,
   makePermutationBaseIndices,
   minimumDetectableEffect,
   permutationTwoSidedP,
-  standardizedMeanDifference,
   studentTTwoSidedP,
   welchTTest,
 } from './perf-compare-stats';
-import type {
-  EffectSize,
-  FamilyMember,
-  WelchResult,
-} from './perf-compare-stats';
+import type { FamilyMember, WelchResult } from './perf-compare-stats';
 import type { IndexIntoFuncTable } from '../../types/profile';
 
 // ---------------------------------------------------------------------------
@@ -69,9 +63,9 @@ function suiteTotalWeight(suite: SuiteStats): number {
  * measured change. For a suite whose own total moved by 1%, every function in it
  * picks up a spurious 1% change pointing in the same direction, whether or not
  * that function did anything. A shared factor is a common positive scale
- * instead: it multiplies delta and se together, leaving the standardised effect
- * and the p-value untouched, so a bucket confined to one suite gets the same
- * verdict globally as it does in that suite's own comparison.
+ * instead: it multiplies delta and se together, leaving the studentised |t| and
+ * so the p-value untouched, which is what lets a bucket confined to one suite
+ * carry the same evidence globally as in that suite's own comparison.
  *
  * This also used to be much worse than a 1% bias. While the comparison ran on
  * Mann-Whitney U, the mismatched scaling broke the exact-equality ties that a
@@ -203,10 +197,9 @@ export type ComparisonStats = {
   delta: number;
   /** Standard error of `delta`. */
   se: number;
-  /** Standardised mean difference (Cohen's d); what the effect-size filter
-   * compares against. */
-  standardizedEffect: number;
-  effectSize: EffectSize;
+  /** Welch-Satterthwaite degrees of freedom. Kept so that a critical value can be
+   * re-derived at a corrected alpha after the fact — see `mde`. */
+  df: number;
   /**
    * Uncorrected. For a bucket row this is *not* the number to judge by — see
    * `qValue`. It is kept because it answers a different and still useful
@@ -245,47 +238,10 @@ export type ComparisonStats = {
 };
 
 /**
- * How small a Welch p-value has to be before it is worth spending permutations
- * on refining it. Buckets well away from significance cannot change verdict, and
- * there are ~14000 of them per profile pair.
- */
-const PERMUTATION_PREFILTER_P = 0.25;
-
-/**
  * Number of relabellings. 1999 puts the smallest reportable p-value at 5e-4,
  * comfortably below the thresholds `pValueToConfidence` uses.
  */
 const PERMUTATION_COUNT = 1999;
-
-/**
- * A bucket whose weight is zero in most iterations breaks the t-distribution
- * approximation however large the sample looks: 200 iterations of a bucket that
- * is nonzero in eight of them carries eight observations' worth of information.
- * Those always get the permutation treatment regardless of their Welch p.
- */
-const SPARSE_ZERO_FRACTION = 0.5;
-
-/**
- * Sparse buckets get a wider gate than dense ones, because their Welch p-value
- * is the untrustworthy one. Not an unconditional gate: a sparse bucket whose
- * approximate p-value is 0.8 is not going to turn out significant, and there are
- * thousands of them.
- */
-const SPARSE_PREFILTER_P = 0.5;
-
-function zeroFraction(values: ArrayLike<number>): number {
-  const n = values.length;
-  if (n === 0) {
-    return 1;
-  }
-  let zeros = 0;
-  for (let i = 0; i < n; i++) {
-    if (values[i] === 0) {
-      zeros++;
-    }
-  }
-  return zeros / n;
-}
 
 /**
  * Lazily built relabellings, keyed by sample sizes. One set is shared by every
@@ -305,26 +261,39 @@ function permutationsFor(nBase: number, nNew: number): Int32Array[] {
 }
 
 /**
- * Statistics for one bucket: Welch's t on the mean difference, with the p-value
- * refined by permutation where that could matter.
+ * Where a comparison's p-value should come from.
+ *
+ * A **score** row has to relabel its own iterations: there are only 21 score
+ * rows and nothing else for them to borrow from. Cheap at that count.
+ *
+ * A **bucket** row leaves it to `applyFamilyCorrection`, which is relabelling
+ * every bucket in the table jointly anyway and can read each one's own p-value
+ * off the same pass for one extra comparison per value. That is not just a
+ * saving: a separate pass could not afford to relabel *every* bucket, so it used
+ * to spend permutations only on the ones that might change verdict and leave the
+ * rest on a Welch approximation that is not trustworthy for a bucket whose
+ * weight is zero in most iterations. Now every bucket gets an exact p-value and
+ * the three thresholds that used to decide who deserved one are gone.
+ */
+export type PValueSource = 'own-permutation' | 'family';
+
+/**
+ * Statistics for one comparison: Welch's t on the mean difference, with an exact
+ * permutation p-value where `source` says to compute one here.
  */
 export function computeComparisonStats(
   baseIter: ArrayLike<number>,
-  newIter: ArrayLike<number>
+  newIter: ArrayLike<number>,
+  source: PValueSource
 ): ComparisonStats {
   const welch: WelchResult = welchTTest(baseIter, newIter);
-  const welchP = studentTTwoSidedP(welch.t, welch.df);
 
-  let pValue = welchP;
+  // For 'family', the Welch p-value stands in until applyFamilyCorrection
+  // replaces it -- and remains as the fallback if the family turns out to be
+  // uncalibratable, which is the only case where a row keeps an approximate one.
+  let pValue = studentTTwoSidedP(welch.t, welch.df);
   let pValueMethod: PValueMethod = 'welch';
-  const sparse =
-    zeroFraction(baseIter) > SPARSE_ZERO_FRACTION ||
-    zeroFraction(newIter) > SPARSE_ZERO_FRACTION;
-  if (
-    welch.se > 0 &&
-    (welchP <= PERMUTATION_PREFILTER_P ||
-      (sparse && welchP <= SPARSE_PREFILTER_P))
-  ) {
+  if (source === 'own-permutation' && welch.se > 0) {
     pValue = permutationTwoSidedP(
       baseIter,
       newIter,
@@ -333,15 +302,13 @@ export function computeComparisonStats(
     pValueMethod = 'permutation';
   }
 
-  const standardizedEffect = standardizedMeanDifference(welch);
   return {
     baseMean: welch.meanBase,
     newMean: welch.meanNew,
     relChange: welch.meanBase === 0 ? Infinity : welch.delta / welch.meanBase,
     delta: welch.delta,
     se: welch.se,
-    standardizedEffect,
-    effectSize: interpretStandardizedEffect(standardizedEffect),
+    df: welch.df,
     pValue,
     pValueMethod,
     mde: minimumDetectableEffect(welch),
@@ -350,6 +317,72 @@ export function computeComparisonStats(
     qValue: null,
     familyWiseP: null,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Verdicts
+// ---------------------------------------------------------------------------
+
+/**
+ * What a row is actually telling the reader.
+ *
+ * The point of this view is one question — "did my patch change anything, and
+ * did it make anything worse" — and the person asking it usually has a try push,
+ * not a statistics background. So the answer is a word, and there are four of
+ * them rather than three, because **"nothing changed" and "we could not tell" are
+ * different answers and conflating them is how a performance tool misleads
+ * people.** A run that had the power to see a 0.5% regression and did not see one
+ * is evidence the patch is fine. A run that could only have seen 4% is no
+ * evidence at all, and must not read the same way.
+ */
+export type Verdict = 'slower' | 'faster' | 'unchanged' | 'unresolved';
+
+/**
+ * How close the minimum detectable effect has to get, as a fraction of the row's
+ * own size, before a null result may be reported as "unchanged" rather than
+ * "unresolved".
+ *
+ * 2%. Measured on the reference pairs, subtest MDEs run 1.8% to 4.3% of their own
+ * mean and the overall score's is 1.5%, so at this tolerance a 20-run pair can
+ * say "unchanged" about the overall score and about the tighter subtests, and has
+ * to admit "unresolved" for the rest. That is the honest split rather than a
+ * flattering one: it tells a developer chasing a 1% subtest regression that this
+ * many runs cannot see it, which is the most useful thing the tool can say to
+ * them. Raising it to 5% would relabel most of those "unchanged" and quietly
+ * promise a sensitivity that is not there.
+ */
+export const RESOLUTION_TOLERANCE = 0.02;
+
+/**
+ * Weight is time, so up is slower. `alpha` is compared against the corrected
+ * `qValue` when the row has one and its own `pValue` when it does not — see
+ * `ComparisonStats.qValue` for which rows are which.
+ */
+export function classifyChange(
+  row: ComparisonStats,
+  alpha: number = 0.05
+): Verdict {
+  if ((row.qValue ?? row.pValue) <= alpha) {
+    return row.delta > 0 ? 'slower' : 'faster';
+  }
+  const resolved = row.mde <= RESOLUTION_TOLERANCE * Math.abs(row.baseMean);
+  return resolved ? 'unchanged' : 'unresolved';
+}
+
+/** Plain-language gloss for a verdict, for a tooltip or a legend. */
+export function describeVerdict(verdict: Verdict, mde: string): string {
+  switch (verdict) {
+    case 'slower':
+      return 'Slower, by more than this comparison could explain by chance.';
+    case 'faster':
+      return 'Faster, by more than this comparison could explain by chance.';
+    case 'unchanged':
+      return `No change. A change of ${mde} would have shown up, so this really did not move.`;
+    case 'unresolved':
+      return `Can't tell. Only a change of ${mde} or larger would have shown up here, and nothing that big happened — which is not the same as nothing happening.`;
+    default:
+      throw new Error(`Unhandled verdict ${verdict as string}`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -507,7 +540,7 @@ export function compareBuckets(
       bucketName: displayName,
       baseFunc: baseEntry?.representativeFunc ?? null,
       newFunc: newEntry?.representativeFunc ?? null,
-      ...computeComparisonStats(baseIter, newIter),
+      ...computeComparisonStats(baseIter, newIter, 'family'),
     });
     family.push({ base: baseIter, comp: newIter });
   }
@@ -544,6 +577,9 @@ function applyFamilyCorrection(
   }
   for (let i = 0; i < results.length; i++) {
     const row = results[i];
+    // Exact, from the same relabellings, replacing the Welch stand-in.
+    row.pValue = correction.pValues[i];
+    row.pValueMethod = 'permutation';
     row.qValue = correction.qValues[i];
     row.familyWiseP = correction.familyWisePValues[i];
     // Re-base the MDE on the bar that now actually applies. `computeComparisonStats`
@@ -590,5 +626,71 @@ export function compareIterationTotals(
   baseIter: number[],
   newIter: number[]
 ): ScoreComparison {
-  return { label, ...computeComparisonStats(baseIter, newIter) };
+  return {
+    label,
+    ...computeComparisonStats(baseIter, newIter, 'own-permutation'),
+  };
+}
+
+/**
+ * Correct the subtest scores for the fact that there are 20 of them.
+ *
+ * Twenty is a small enough family that plain Benjamini-Hochberg works, which the
+ * ~6800-bucket tables could not use: BH rejects the k-th smallest of n p-values
+ * when `p_k ≤ q · k / n`, so at n = 20 the most extreme subtest needs
+ * `p ≤ 0.05 / 20 = 2.5e-3` — comfortably above the permutation floor of 5e-4,
+ * where `0.05 / 6798 = 7.4e-6` was hopelessly below it. No joint relabelling
+ * needed here, so this stays the simple, standard procedure.
+ *
+ * **Do not pass the overall score in.** It is the one hypothesis the developer
+ * came to ask about, stated before any data was seen: "did my patch move the
+ * score". Correcting it for the company of the 20 subtests would be answering a
+ * question nobody asked, and would make the headline number harder to clear the
+ * more subtests the benchmark happens to have.
+ *
+ * BH is valid here under positive dependence, which the subtest scores plausibly
+ * have (a machine-wide effect moves all of them together) — and unlike the
+ * buckets they are not a partition of shared samples, so there is no built-in
+ * negative correlation to worry about.
+ */
+export function applyBenjaminiHochberg(
+  subtestScores: ScoreComparison[],
+  alpha: number = 0.05
+) {
+  const n = subtestScores.length;
+  if (n === 0) {
+    return;
+  }
+
+  // Re-base the MDE on the corrected bar, for the same reason the bucket tables
+  // do: it is defined as the smallest change that would have been *reported*, so
+  // correcting what gets reported without correcting it leaves the column
+  // promising a sensitivity that is not there. Without this, a subtest could show
+  // a Δ larger than its own MDE and still be labelled "no change" — which is what
+  // Perf-Dashboard did, at Δ = -1.83 against ±1.52.
+  //
+  // The bar is `alpha / n`, which is BH's own threshold at rank 1: what a subtest
+  // would have needed to clear on its own, with no help from any other subtest
+  // also having moved. Same choice as the buckets' family-wise bar, and here it is
+  // exactly the procedure's own first step rather than an approximation of it.
+  for (const row of subtestScores) {
+    row.mde = minimumDetectableEffect(row, alpha / n);
+  }
+  const ascending = subtestScores
+    .map((row, index) => ({ index, pValue: row.pValue }))
+    .sort((a, b) => a.pValue - b.pValue);
+
+  // Walk from the least to the most extreme, carrying the smallest adjusted
+  // value seen so far. That running minimum is what makes the result monotone:
+  // BH's raw `p_k · n / k` is not, so a subtest could otherwise come out with a
+  // better q than one with a smaller p-value.
+  let best = 1;
+  for (let k = n; k >= 1; k--) {
+    const { index, pValue } = ascending[k - 1];
+    best = Math.min(best, Math.min(1, (pValue * n) / k));
+    subtestScores[index].qValue = best;
+  }
+  // `familyWiseP` stays null: there is no joint relabelling here, so no
+  // max-statistic null to read one off. Bonferroni-Holm would be the analogue,
+  // and nothing needs it yet.
 }

@@ -3,11 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
+  applyBenjaminiHochberg,
+  classifyChange,
   compareBuckets,
   compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
+  describeVerdict,
 } from '../../profile-logic/benchmark/compare-benchmark-stats';
+import type { ScoreComparison } from '../../profile-logic/benchmark/compare-benchmark-stats';
+import { studentTCritical } from '../../profile-logic/benchmark/perf-compare-stats';
 import type { ProfileBenchmarkStats } from '../../profile-logic/benchmark/extract-benchmark-stats';
 
 /**
@@ -223,14 +228,10 @@ describe('global bucket comparison', function () {
 
     // A shared per-suite factor is a common positive scale. It multiplies both
     // delta and se by the same constant, so everything scale-free is unchanged:
-    // the standardised effect, the bucket's own p-value, and the effect label.
-    expect(globalFast?.standardizedEffect).toBeCloseTo(
-      perSuite[0].standardizedEffect,
-      10
-    );
+    // the bucket's own p-value, how that p-value was obtained, and the relative
+    // change.
     expect(globalFast?.pValue).toBeCloseTo(perSuite[0].pValue, 10);
     expect(globalFast?.pValueMethod).toBe(perSuite[0].pValueMethod);
-    expect(globalFast?.effectSize).toBe(perSuite[0].effectSize);
     expect(globalFast?.relChange).toBeCloseTo(perSuite[0].relChange, 10);
 
     // The scale-dependent quantities move by that one factor. Derived from se,
@@ -347,6 +348,21 @@ describe('multiple-comparisons correction', function () {
     );
   }
 
+  /**
+   * A score row with real spread and degrees of freedom -- the MDE re-basing
+   * needs both -- but a p-value set directly, because what is under test is BH's
+   * arithmetic over a known set of p-values, not how those p-values arose.
+   */
+  function makeScore(label: string, pValue: number): ScoreComparison {
+    const row = compareIterationTotals(
+      label,
+      [10, 12, 11, 13, 9, 11, 10, 12],
+      [11, 13, 12, 14, 10, 12, 11, 13]
+    );
+    row.pValue = pValue;
+    return row;
+  }
+
   it('gives every bucket a q-value, and no score row one', function () {
     const comparisons = compareFamily(40);
     expect(comparisons).toHaveLength(41);
@@ -385,11 +401,93 @@ describe('multiple-comparisons correction', function () {
     expect(pick(large).mde).toBeGreaterThan(pick(small).mde);
     expect(pick(small).mde / pick(small).se).toBeGreaterThan(2.1);
 
-    // And it stays consistent with the filter: everything reported has moved by
-    // at least its own MDE. That is the invariant the uncorrected MDE broke.
-    const reported = large.filter((c) => (c.qValue ?? 1) <= 0.05);
-    expect(reported.length).toBeGreaterThan(0);
-    expect(reported.filter((c) => Math.abs(c.delta) < c.mde)).toEqual([]);
+    // The bar belongs to the table, not to the row, so every bucket in one table
+    // divides out to exactly the same critical |t|. That is the property to hold
+    // on to; the tempting stronger claim -- that everything reported has moved by
+    // at least its own MDE -- is *not* guaranteed and must not be asserted. The
+    // MDE is what a row would have needed on its own, while FDR rejects the k-th
+    // best row on a looser threshold than the first, so a row can be reported on a
+    // budget shared with other genuine movers and come in just under its own bar.
+    // `realMover` has zero spread on both sides, so its ratio is 0/0 and says
+    // nothing; every row that has a spread to divide by must agree.
+    const criticalAbsT = new Set(
+      large.filter((c) => c.se > 0).map((c) => (c.mde / c.se).toPrecision(9))
+    );
+    expect(criticalAbsT.size).toBe(1);
+    expect(large.filter((c) => c.se === 0)).toHaveLength(1);
+  });
+
+  it('corrects the subtest scores, and only them', function () {
+    // Twenty subtests is a small enough family for plain Benjamini-Hochberg, and
+    // the overall score is left out on purpose: it is the question the developer
+    // came to ask, not one of twenty they went looking through.
+    const subtests = [0.0004, 0.002, 0.01, 0.2, 0.9].map((pValue, i) =>
+      makeScore(`suite${i}`, pValue)
+    );
+    applyBenjaminiHochberg(subtests);
+
+    // BH's adjusted value is p * n / k at rank k, made monotone by carrying the
+    // running minimum down from the least extreme end.
+    expect(subtests.map((s) => s.qValue)).toEqual([
+      0.002, // 0.0004 * 5 / 1
+      0.005, // 0.002  * 5 / 2
+      expect.closeTo(0.016666666, 6), // 0.01 * 5 / 3
+      0.25, // 0.2 * 5 / 4
+      0.9, // 0.9 * 5 / 5
+    ]);
+    // Monotone, and never better than the raw p-value.
+    for (const s of subtests) {
+      expect(s.qValue!).toBeGreaterThanOrEqual(s.pValue);
+    }
+
+    // And the MDE moves with the bar, or the column would promise a sensitivity
+    // the correction took away.
+    const uncorrected = makeScore('suite0', 0.0004);
+    expect(subtests[0].mde).toBeGreaterThan(uncorrected.mde);
+    expect(subtests[0].mde).toBeCloseTo(
+      studentTCritical(subtests[0].df, 0.05 / 5) * subtests[0].se,
+      10
+    );
+  });
+
+  it('separates "nothing changed" from "we could not tell"', function () {
+    // The distinction the fourth verdict exists for. Same non-significant result
+    // twice, once from a run tight enough to have seen a change worth caring
+    // about and once from a run that could not have. Reporting both as "no change"
+    // is how a performance tool tells someone their patch is fine when it has no
+    // idea.
+    const tight = makeScore('tight', 0.6);
+    tight.baseMean = 100;
+    tight.mde = 1; // 1% of the row, inside RESOLUTION_TOLERANCE
+    expect(classifyChange(tight)).toBe('unchanged');
+
+    const noisy = makeScore('noisy', 0.6);
+    noisy.baseMean = 100;
+    noisy.mde = 8; // 8% of the row: this run proves nothing
+    expect(classifyChange(noisy)).toBe('unresolved');
+
+    // Wording has to keep them apart too -- this is the text a reader acts on.
+    expect(describeVerdict('unchanged', '±1.00')).toContain('did not move');
+    expect(describeVerdict('unresolved', '±8.00')).toContain("Can't tell");
+  });
+
+  it('reads the direction off the sign, since weight is time', function () {
+    const slower = makeScore('slower', 0.001);
+    slower.delta = 5;
+    expect(classifyChange(slower)).toBe('slower');
+
+    const faster = makeScore('faster', 0.001);
+    faster.delta = -5;
+    expect(classifyChange(faster)).toBe('faster');
+
+    // And it is the corrected value that decides, when there is one: the same
+    // p-value that reads "slower" on its own says nothing once it has been
+    // charged for the company it was found in.
+    const corrected = makeScore('corrected', 0.001);
+    corrected.delta = 5;
+    corrected.qValue = 0.4;
+    corrected.mde = 0.001 * Math.abs(corrected.baseMean);
+    expect(classifyChange(corrected)).toBe('unchanged');
   });
 
   it('keeps a real change and drops the buckets that only look like one', function () {

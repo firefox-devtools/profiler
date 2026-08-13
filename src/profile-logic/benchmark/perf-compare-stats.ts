@@ -360,10 +360,13 @@ export function interpretStandardizedEffect(d: number): EffectSize {
  * the measurement could not resolve it.
  */
 export function minimumDetectableEffect(
-  result: WelchResult,
+  // Only the spread and the degrees of freedom, so that a caller holding a
+  // finished comparison row can re-derive this at a corrected alpha without
+  // having to keep the whole WelchResult around. `WelchResult` satisfies it.
+  spread: { se: number; df: number },
   alpha: number = 0.05
 ): number {
-  return studentTCritical(result.df, alpha) * result.se;
+  return studentTCritical(spread.df, alpha) * spread.se;
 }
 
 // ---------------------------------------------------------------------------
@@ -565,6 +568,20 @@ export type FamilyCorrection = {
    * from `welchTTest` so that it comes from exactly the same arithmetic as the
    * null values it is compared against. */
   absT: Float64Array;
+  /**
+   * Each member's own two-sided permutation p-value, judged against its own
+   * relabellings alone and ignoring the rest of the family — "did *this* bucket
+   * move", with no multiplicity in it.
+   *
+   * It comes out of this pass for nothing. The relabellings are already being
+   * applied to every member, so counting how many of a member's own null values
+   * reach its observed one is one comparison per value that would otherwise cost
+   * a whole second pass. Exact for every member, too, which a separate pass could
+   * not afford to be: it used to be worth spending relabellings only on the
+   * buckets that might change verdict, leaving the rest with a Welch
+   * approximation that is not trustworthy on sparse counts.
+   */
+  pValues: Float64Array;
   /** Estimated false discovery rate at the least stringent |t| threshold that
    * still rejects this member. Monotone: a larger |t| never gets a larger q. */
   qValues: Float64Array;
@@ -785,6 +802,9 @@ export function computeFamilyCorrection(
   // on the conservative side.
   const nullsClearing = new Float64Array(memberCount + 1);
   const maxima = new Float64Array(drawCount);
+  // How often each member's own relabellings reached its own observation. The
+  // per-member p-value, for one comparison per null value.
+  const ownHits = new Float64Array(memberCount);
   for (let p = 0; p < drawCount; p++) {
     inBase.fill(0);
     const indices = permutations[p];
@@ -797,9 +817,11 @@ export function computeFamilyCorrection(
       if (v > max) {
         max = v;
       }
-      nullsClearing[
-        countAtOrBelow(ascending, v * (1 + COMPARISON_TOLERANCE))
-      ]++;
+      const widened = v * (1 + COMPARISON_TOLERANCE);
+      if (widened >= absT[m]) {
+        ownHits[m]++;
+      }
+      nullsClearing[countAtOrBelow(ascending, widened)]++;
     }
     maxima[p] = max;
   }
@@ -843,10 +865,14 @@ export function computeFamilyCorrection(
   }
 
   maxima.sort();
+  const pValues = new Float64Array(memberCount);
   const qValues = new Float64Array(memberCount);
   const familyWisePValues = new Float64Array(memberCount);
   for (let m = 0; m < memberCount; m++) {
     const t = absT[m];
+    // The same (hits + 1) / (draws + 1) as permutationTwoSidedP: no finite set of
+    // relabellings can show that an observation is never matched by chance.
+    pValues[m] = (ownHits[m] + 1) / (drawCount + 1);
     qValues[m] = fdrAtThreshold[countBelow(ascending, t)];
     familyWisePValues[m] =
       (1 + drawCount - countBelow(maxima, t * (1 - COMPARISON_TOLERANCE))) /
@@ -882,6 +908,7 @@ export function computeFamilyCorrection(
 
   return {
     absT,
+    pValues,
     qValues,
     familyWisePValues,
     criticalAbsT: maxima[criticalIndex],

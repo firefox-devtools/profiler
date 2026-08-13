@@ -452,6 +452,33 @@ describe('computeFamilyCorrection', function () {
     };
   }
 
+  it('gives each member the p-value it would have got on its own', function () {
+    // The per-member p-value is now read off the family pass instead of from a
+    // second pass of its own, so it has to still be the same number
+    // permutationTwoSidedP would have produced from the same relabellings.
+    //
+    // Nineteen draws, which is fewer than permutationTwoSidedP's sequential-stop
+    // threshold, so it cannot take its early exit and both routes reduce to the
+    // same (hits + 1) / (draws + 1). Any disagreement is then a real one rather
+    // than the two stopping rules talking past each other.
+    const family = nullFamily(1234, 30);
+    const draws = makePermutationBaseIndices(ITERATIONS, ITERATIONS, 19, 9);
+    const correction = computeFamilyCorrection(family, draws);
+    if (correction === null) {
+      throw new Error('expected a correction');
+    }
+    expect(Array.from(correction.pValues)).toEqual(
+      family.map(({ base, comp }) => permutationTwoSidedP(base, comp, draws))
+    );
+    // And it really is the uncorrected quantity, not a second name for q: on a
+    // family of 30 nulls the best p-value is well ahead of the best q-value, and
+    // no q comes anywhere near a discovery.
+    expect(Math.min(...correction.pValues)).toBeLessThan(
+      Math.min(...correction.qValues)
+    );
+    expect(Math.min(...correction.qValues)).toBeGreaterThan(0.2);
+  });
+
   it('counts a relabelling that ties with the observation as reaching it', function () {
     // "At least as extreme", not "more extreme". The difference only shows up
     // when a relabelling reproduces the observed statistic exactly, so build that

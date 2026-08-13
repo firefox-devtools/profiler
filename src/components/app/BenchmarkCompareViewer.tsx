@@ -14,22 +14,23 @@ import { expandUrl } from 'firefox-profiler/utils/shorten-url';
 import { getProfileFetchUrl } from 'firefox-profiler/actions/receive-profile';
 import { extractBenchmarkStatsFromProfile } from 'firefox-profiler/profile-logic/benchmark/extract-benchmark-stats';
 import {
+  applyBenjaminiHochberg,
+  classifyChange,
   compareBuckets,
   compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
+  describeVerdict,
   suiteIterationTotals,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
   BucketComparison,
   ComparisonStats,
   ScoreComparison,
+  Verdict,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import { pValueToConfidence } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
-import type {
-  ConfidenceRating,
-  EffectSize,
-} from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
+import type { ConfidenceRating } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
 import type { Profile } from 'firefox-profiler/types';
 import { BucketFlameGraphPair } from './BucketFlameGraphPair';
 import {
@@ -207,6 +208,7 @@ async function computeComparison(
       compareIterationTotals(baseSuite.suiteName, baseIter, newIter)
     );
   }
+  applyBenjaminiHochberg(suiteScores);
   suiteScores.sort((a, b) => a.label.localeCompare(b.label));
 
   const suiteComparisons = baseStats.suites.flatMap((baseSuite) => {
@@ -302,15 +304,11 @@ function mdeTitle(row: ComparisonStats): string {
       : `q=${row.qValue.toPrecision(2)}, from p=${row.pValue.toPrecision(2)} ` +
         `(${method}) corrected for every bucket in this table`;
   const mde = `\u00b1${row.mde.toFixed(2)}`;
-  if (correctedConfidence(row) === 'HIGH') {
+  const verdict = classifyChange(row);
+  if (verdict === 'slower' || verdict === 'faster') {
     return `${p}. Smallest change that would have been reported: ${mde}.`;
   }
-  // "Small next to what?" — relative to the row's own size, since an MDE of
-  // 0.9ms is tight for a 30ms bucket and hopeless for a 1.5ms one.
-  const resolved = row.mde <= 0.05 * Math.abs(row.baseMean);
-  return resolved
-    ? `${p}. A change of ${mde} would have been detected, so this really did not move.`
-    : `${p}. Only a change of ${mde} or larger could have been detected, so this is unresolved rather than unchanged.`;
+  return `${p}. ${describeVerdict(verdict, mde)}`;
 }
 
 function formatChange(rel: number): string {
@@ -321,10 +319,34 @@ function formatChange(rel: number): string {
   return rel >= 0 ? `+${pct}%` : `${pct}%`;
 }
 
+/**
+ * Impact on the overall score at which a Δ% cell gets full emphasis: 0.1%, ten
+ * times the floor for being shown at all. On the reference pair whose only code
+ * change was in canvas, that picks out exactly the two buckets the work moved
+ * between (+0.140% and −0.128%) and leaves the third (−0.049%) a tier down.
+ */
+const BOLD_SCORE_IMPACT = 0.001;
+
+/**
+ * Colour and weight for a Δ% cell.
+ *
+ * Two independent channels, for the two questions a reader has. **Colour** is
+ * confidence: is this real. **Weight** is impact on the overall score: does it
+ * matter. Keeping them separate is what lets a row read as
+ * obviously-real-but-tiny, or as big-but-unproven, without the styling implying
+ * something it should not.
+ *
+ * Weight used to come from the standardised effect size, which was wrong twice
+ * over. Cohen's d divides by the row's own spread, so it emphasised whichever
+ * rows happened to be quiet rather than whichever ones moved the benchmark --
+ * the same objection that got d removed from the row *filter*, applied to the
+ * styling. And nothing tied it to significance, so a bucket could come out bold
+ * on the strength of a large d while its q-value sat at 1.0.
+ */
 function changeClass(
   relChange: number,
   confidence: ConfidenceRating,
-  effectSize: EffectSize
+  impactOnOverall: number
 ): string {
   if (!isFinite(relChange) || relChange === 0) {
     return '';
@@ -338,16 +360,41 @@ function changeClass(
   } else if (confidence === 'MEDIUM') {
     classes.push(`benchmarkCell--${direction}`, 'benchmarkCell--conf-medium');
   }
-  if (effectSize === 'Large') {
+  const impact = Math.abs(impactOnOverall);
+  if (impact >= BOLD_SCORE_IMPACT) {
     classes.push('benchmarkCell--effect-large');
-  } else if (effectSize === 'Moderate') {
+  } else if (impact >= MIN_SCORE_IMPACT) {
     classes.push('benchmarkCell--effect-moderate');
   }
-  // Small / Negligible: normal weight.
+  // Below the floor for being worth a row at all: normal weight.
   return classes.join(' ');
 }
 
-const SCORE_TABLE_COLUMN_COUNT = 8;
+/**
+ * The whole point of the view in one word per row, because the reader's question
+ * is "did my patch change anything, and did it make anything worse" and they may
+ * not want to interpret a q-value to find out.
+ */
+const VERDICT_LABELS: Record<Verdict, string> = {
+  slower: 'slower',
+  faster: 'faster',
+  unchanged: 'no change',
+  unresolved: "can't tell",
+};
+
+function VerdictCell({ row }: { row: ComparisonStats }) {
+  const verdict = classifyChange(row);
+  return (
+    <td
+      className={`benchmarkCell--verdict benchmarkCell--verdict-${verdict}`}
+      title={describeVerdict(verdict, `±${row.mde.toFixed(2)}`)}
+    >
+      {VERDICT_LABELS[verdict]}
+    </td>
+  );
+}
+
+const SCORE_TABLE_COLUMN_COUNT = 9;
 
 /**
  * The q-value cell. Two significant figures is all the permutation resolves, and
@@ -416,17 +463,18 @@ function ScoreRow({
         className={
           subtestRel === null
             ? 'benchmarkCell--number'
-            : `benchmarkCell--number ${changeClass(subtestRel, correctedConfidence(row), row.effectSize)}`
+            : `benchmarkCell--number ${changeClass(subtestRel, correctedConfidence(row), overallRel)}`
         }
       >
         {subtestRel === null ? '—' : formatChange(subtestRel)}
       </td>
       <td
-        className={`benchmarkCell--number ${changeClass(overallRel, correctedConfidence(row), row.effectSize)}`}
+        className={`benchmarkCell--number ${changeClass(overallRel, correctedConfidence(row), overallRel)}`}
       >
         {formatChange(overallRel)}
       </td>
       <QValueCell row={row} />
+      <VerdictCell row={row} />
     </>
   );
 }
@@ -518,6 +566,17 @@ function ScoreTable({
             }
           >
             q
+          </th>
+          <th
+            className="benchmarkCell--colVerdict"
+            title={
+              'What this row is telling you. "no change" and "can\'t tell" are ' +
+              'different answers: the first means a change worth caring about ' +
+              'would have shown up and did not, the second means this comparison ' +
+              'was not sensitive enough to say either way — check the MDE.'
+            }
+          >
+            Verdict
           </th>
         </tr>
       </thead>
@@ -736,6 +795,7 @@ function BucketTable({
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colNarrow" />
+        <col className="benchmarkCell--colVerdict" />
       </colgroup>
       <tbody>
         {significant.map(({ c, absDiff, subtestRel, overallRel }) => {
@@ -779,17 +839,18 @@ function BucketTable({
                   className={
                     subtestRel === null
                       ? 'benchmarkCell--number'
-                      : `benchmarkCell--number ${changeClass(subtestRel, correctedConfidence(c), c.effectSize)}`
+                      : `benchmarkCell--number ${changeClass(subtestRel, correctedConfidence(c), overallRel)}`
                   }
                 >
                   {subtestRel === null ? '—' : formatChange(subtestRel)}
                 </td>
                 <td
-                  className={`benchmarkCell--number ${changeClass(overallRel, correctedConfidence(c), c.effectSize)}`}
+                  className={`benchmarkCell--number ${changeClass(overallRel, correctedConfidence(c), overallRel)}`}
                 >
                   {formatChange(overallRel)}
                 </td>
                 <QValueCell row={c} />
+                <VerdictCell row={c} />
               </tr>
               {expandable && isExpanded ? (
                 <tr className="benchmarkRow--bucket-expansion">

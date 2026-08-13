@@ -218,6 +218,36 @@
   width: 5rem;
 }
 
+.benchmarkCell--colVerdict {
+  width: 7rem;
+}
+
+/* The verdict is the answer to the question the reader came with, so unlike the
+ * MDE and the q-value it is not subordinate to the Δ% columns. It still gets its
+ * colour from the same variables as those columns so the two agree at a glance. */
+.benchmarkCell--verdict {
+  text-align: left;
+  white-space: nowrap;
+}
+
+.benchmarkCell--verdict-slower {
+  color: var(--internal-regressed-color);
+  font-weight: bold;
+}
+
+.benchmarkCell--verdict-faster {
+  color: var(--internal-improved-color);
+  font-weight: bold;
+}
+
+/* "no change" is a real finding, so it stays in the default text colour and is
+ * simply not shouted. "can't tell" is an absence of information and must not read
+ * as a finding at all. */
+.benchmarkCell--verdict-unresolved {
+  color: var(--grey-50);
+  font-style: italic;
+}
+
 /* Like the MDE, the q-value qualifies the Δ% columns rather than competing with
  * them for attention. */
 .benchmarkCell--q {
