@@ -7,38 +7,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { changeProfilesToCompareBenchmark } from 'firefox-profiler/actions/app';
-
-/**
- * What the two sides are called when the URL doesn't say.
- *
- * The view started out as a before-patch / after-patch tool and its wording was
- * baked in accordingly, but the same comparison is just as useful for Chrome vs
- * Firefox or Release vs Nightly. Everything user-visible now goes through these
- * names, so the only thing that is still specific to the patch workflow is what
- * they default to.
- */
-export const DEFAULT_BENCHMARK_PROFILE_NAMES = ['Baseline', 'New'];
-
-/**
- * Fill in the blanks in a pair of names from the URL.
- *
- * Names arrive from an editable query parameter, so they can be missing, empty,
- * or (if someone hand-edits the URL) duplicated. The last case matters more than
- * it looks: a whole report that says "Firefox is 3% slower than Firefox" is
- * unreadable, so a collision is broken by number rather than passed through.
- */
-export function resolveBenchmarkProfileNames(
-  names: string[] | null
-): [string, string] {
-  const resolve = (i: number) =>
-    names?.[i]?.trim() || DEFAULT_BENCHMARK_PROFILE_NAMES[i];
-  const first = resolve(0);
-  let second = resolve(1);
-  if (first === second) {
-    second = `${second} (2)`;
-  }
-  return [first, second];
-}
+import { DEFAULT_BENCHMARK_PROFILE_NAMES } from './BenchmarkProfileNames';
 
 type Props = {
   /** Pre-filled values, i.e. what is currently being compared. */

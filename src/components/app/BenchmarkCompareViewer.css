@@ -258,8 +258,14 @@
   position: sticky;
   z-index: 1;
   top: 0;
+
+  /* The mean columns are headed by user-supplied profile names, which can be
+   * any length; with table-layout: fixed they would otherwise spill over the
+   * neighbouring header. Each one carries a title with the full text. */
+  overflow: hidden;
   background: var(--internal-header-background);
   font-weight: bold;
+  text-overflow: ellipsis;
 }
 
 .benchmarkCell--number {
@@ -275,15 +281,21 @@
   width: 5rem;
 }
 
+/* Wide enough for "<name> slower" at the default names. A longer name is
+ * ellipsised rather than given more room: the verdict's job is to be readable
+ * in one glance down the column, and a column that resizes itself to the
+ * longest profile name would push the numbers around. */
 .benchmarkCell--colVerdict {
-  width: 7rem;
+  width: 10rem;
 }
 
 /* The verdict is the answer to the question the reader came with, so unlike the
  * MDE and the q-value it is not subordinate to the Δ% columns. It still gets its
  * colour from the same variables as those columns so the two agree at a glance. */
 .benchmarkCell--verdict {
+  overflow: hidden;
   text-align: left;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 

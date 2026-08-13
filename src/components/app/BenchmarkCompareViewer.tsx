@@ -7,10 +7,13 @@ import type { ChangeEvent, MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 
 import { AppHeader } from './AppHeader';
+import { BenchmarkCompareForm } from './BenchmarkCompareForm';
 import {
-  BenchmarkCompareForm,
+  BenchmarkProfileNamesContext,
   resolveBenchmarkProfileNames,
-} from './BenchmarkCompareForm';
+  useBenchmarkProfileNames,
+} from './BenchmarkProfileNames';
+import type { BenchmarkProfileNames } from './BenchmarkProfileNames';
 import {
   getProfileNamesToCompare,
   getProfilesToCompare,
@@ -122,7 +125,7 @@ const BUCKET_FILTER_MODES: Array<{
     title:
       'Buckets that survive the multiple-comparisons correction (q ≤ 0.05) and ' +
       'shifted the overall score by at least 0.01%. On a comparison of two ' +
-      'builds that do not differ, this shows nothing.',
+      'profiles that do not differ, this shows nothing.',
   },
   {
     mode: 'significant',
@@ -331,7 +334,7 @@ function correctedConfidence(row: ComparisonStats): ConfidenceRating {
  * The distinction it exists to draw: "did not move" and "could not tell" both
  * show no significant change, and only the MDE separates them.
  */
-function mdeTitle(row: ComparisonStats): string {
+function mdeTitle(row: ComparisonStats, names: BenchmarkProfileNames): string {
   const method = row.pValueMethod === 'permutation' ? 'permutation' : 'Welch t';
   const p =
     row.qValue === null
@@ -343,7 +346,7 @@ function mdeTitle(row: ComparisonStats): string {
   if (verdict === 'slower' || verdict === 'faster') {
     return `${p}. Smallest change that would have been reported: ${mde}.`;
   }
-  return `${p}. ${describeVerdict(verdict, mde)}`;
+  return `${p}. ${describeVerdict(verdict, mde, names)}`;
 }
 
 function formatChange(rel: number): string {
@@ -406,25 +409,40 @@ function changeClass(
 }
 
 /**
- * The whole point of the view in one word per row, because the reader's question
- * is "did my patch change anything, and did it make anything worse" and they may
- * not want to interpret a q-value to find out.
+ * The whole point of the view in a couple of words per row, because the reader's
+ * question is "did anything change, and did it get worse" and they may not want
+ * to interpret a q-value to find out.
+ *
+ * "slower" alone was enough when the two sides were one build before and after a
+ * patch, since there was only one thing it could be describing. It is not enough
+ * for Chrome vs Firefox, where a column of bare "slower"s leaves the reader
+ * silently guessing which side they refer to — so the moving side is named.
  */
-const VERDICT_LABELS: Record<Verdict, string> = {
-  slower: 'slower',
-  faster: 'faster',
-  unchanged: 'no change',
-  unresolved: "can't tell",
-};
+function verdictLabel(verdict: Verdict, names: BenchmarkProfileNames): string {
+  switch (verdict) {
+    case 'slower':
+      return `${names.new} slower`;
+    case 'faster':
+      return `${names.new} faster`;
+    case 'unchanged':
+      return 'no change';
+    case 'unresolved':
+      return "can't tell";
+    default:
+      throw new Error(`Unhandled verdict ${verdict as string}`);
+  }
+}
 
 function VerdictCell({ row }: { row: ComparisonStats }) {
+  const names = useBenchmarkProfileNames();
   const verdict = classifyChange(row);
+  const description = describeVerdict(verdict, `±${row.mde.toFixed(2)}`, names);
   return (
     <td
       className={`benchmarkCell--verdict benchmarkCell--verdict-${verdict}`}
-      title={describeVerdict(verdict, `±${row.mde.toFixed(2)}`)}
+      title={description}
     >
-      {VERDICT_LABELS[verdict]}
+      {verdictLabel(verdict, names)}
     </td>
   );
 }
@@ -483,6 +501,7 @@ function ScoreRow({
   const overallRel = isOverall
     ? row.relChange
     : impactOnGeomean(row.relChange, numSuites);
+  const names = useBenchmarkProfileNames();
   return (
     <>
       <td className="benchmarkCell--number">{row.baseMean.toFixed(2)}</td>
@@ -490,7 +509,7 @@ function ScoreRow({
       <td className="benchmarkCell--number">{absDiffStr}</td>
       <td
         className="benchmarkCell--number benchmarkCell--mde"
-        title={mdeTitle(row)}
+        title={mdeTitle(row, names)}
       >
         {'\u00b1' + row.mde.toFixed(2)}
       </td>
@@ -633,6 +652,7 @@ function ScoreTable({
 }) {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const numSuites = suiteScores.length;
+  const names = useBenchmarkProfileNames();
 
   const handleToggle = useCallback((e: MouseEvent<HTMLTableRowElement>) => {
     const label = e.currentTarget.dataset.toggleLabel;
@@ -694,13 +714,22 @@ function ScoreTable({
       <thead>
         <tr>
           <th>Score</th>
-          <th className="benchmarkCell--number benchmarkCell--colFixed">
-            Base mean
+          <th
+            className="benchmarkCell--number benchmarkCell--colFixed"
+            title={`Mean over ${names.base}'s iterations, in milliseconds.`}
+          >
+            {names.base} mean
           </th>
-          <th className="benchmarkCell--number benchmarkCell--colFixed">
-            New mean
+          <th
+            className="benchmarkCell--number benchmarkCell--colFixed"
+            title={`Mean over ${names.new}'s iterations, in milliseconds.`}
+          >
+            {names.new} mean
           </th>
-          <th className="benchmarkCell--number benchmarkCell--colFixed">
+          <th
+            className="benchmarkCell--number benchmarkCell--colFixed"
+            title={`${names.new} minus ${names.base}, in milliseconds. Positive means ${names.new} spends more time here.`}
+          >
             Δ abs
           </th>
           <th
@@ -716,10 +745,24 @@ function ScoreTable({
           >
             MDE
           </th>
-          <th className="benchmarkCell--number benchmarkCell--colFixed">
+          <th
+            className="benchmarkCell--number benchmarkCell--colFixed"
+            title={
+              `How much of this subtest's ${names.base} time the difference is ` +
+              `worth: the change ${names.base} would see on this subtest if it ` +
+              `behaved like ${names.new} here.`
+            }
+          >
             Δ% subtest
           </th>
-          <th className="benchmarkCell--number benchmarkCell--colFixed">
+          <th
+            className="benchmarkCell--number benchmarkCell--colFixed"
+            title={
+              `The same thing carried through to the overall score: what ` +
+              `${names.base} would score if it behaved like ${names.new} here ` +
+              `and nowhere else.`
+            }
+          >
             Δ% overall
           </th>
           <th
@@ -737,10 +780,11 @@ function ScoreTable({
           <th
             className="benchmarkCell--colVerdict"
             title={
-              'What this row is telling you. "no change" and "can\'t tell" are ' +
-              'different answers: the first means a change worth caring about ' +
-              'would have shown up and did not, the second means this comparison ' +
-              'was not sensitive enough to say either way — check the MDE.'
+              `What this row is telling you, always about ${names.new} relative ` +
+              `to ${names.base}. "no change" and "can't tell" are different ` +
+              'answers: the first means a change worth caring about would have ' +
+              'shown up and did not, the second means this comparison was not ' +
+              'sensitive enough to say either way — check the MDE.'
             }
           >
             Verdict
@@ -893,6 +937,7 @@ function BucketTable({
   newViewerUrl: string;
 }) {
   const columnCount = SCORE_TABLE_COLUMN_COUNT;
+  const names = useBenchmarkProfileNames();
 
   // For a subtest expansion, filter to samples inside that suite's iteration
   // markers so flame graphs reflect only what contributed to the subtest
@@ -999,7 +1044,7 @@ function BucketTable({
                 <td className="benchmarkCell--number">{absDiffStr}</td>
                 <td
                   className="benchmarkCell--number benchmarkCell--mde"
-                  title={mdeTitle(c)}
+                  title={mdeTitle(c, names)}
                 >
                   {'\u00b1' + c.mde.toFixed(2)}
                 </td>
@@ -1128,9 +1173,11 @@ export function BenchmarkCompareViewer() {
   // an unrelated dispatch hands us a fresh array with the same contents.
   const baseUrl = profilesToCompare?.[0] ?? '';
   const newUrl = profilesToCompare?.[1] ?? '';
-  const [baseName, newName] = resolveBenchmarkProfileNames(
-    profileNamesToCompare
+  const names = useMemo(
+    () => resolveBenchmarkProfileNames(profileNamesToCompare),
+    [profileNamesToCompare]
   );
+  const { base: baseName, new: newName } = names;
 
   useEffect(() => {
     // A second edit while the first pair is still downloading would otherwise
@@ -1165,69 +1212,71 @@ export function BenchmarkCompareViewer() {
   );
 
   return (
-    <main className="benchmarkCompareViewer">
-      <AppHeader />
-      <h2 className="photon-title-20 benchmarkTitle">Benchmark Comparison</h2>
+    <BenchmarkProfileNamesContext.Provider value={names}>
+      <main className="benchmarkCompareViewer">
+        <AppHeader />
+        <h2 className="photon-title-20 benchmarkTitle">Benchmark Comparison</h2>
 
-      {state.phase === 'empty' ? (
-        <>
-          <p className="photon-body-20">
-            Enter two benchmark profiles to compare. The report is written from
-            the first one’s point of view: every percentage says what happens to
-            it when it is replaced by the second.
-          </p>
-          {form}
-        </>
-      ) : (
-        <details className="benchmarkComparing">
-          <summary>
-            <span className="benchmarkComparing__summaryText">
-              Comparing{' '}
-              <span className="benchmarkComparing__name">{baseName}</span>
-              {' with '}
-              <span className="benchmarkComparing__name">{newName}</span> — edit
-              or swap
-            </span>
-          </summary>
-          {form}
-          <div className="benchmarkProfileUrls">
-            <span>
-              <strong>{baseName}:</strong>{' '}
-              <a href={baseUrl} target="_blank" rel="noopener noreferrer">
-                {baseUrl}
-              </a>
-            </span>
-            <span>
-              <strong>{newName}:</strong>{' '}
-              <a href={newUrl} target="_blank" rel="noopener noreferrer">
-                {newUrl}
-              </a>
-            </span>
+        {state.phase === 'empty' ? (
+          <>
+            <p className="photon-body-20">
+              Enter two benchmark profiles to compare. The report is written
+              from the first one’s point of view: every percentage says what
+              happens to it when it is replaced by the second.
+            </p>
+            {form}
+          </>
+        ) : (
+          <details className="benchmarkComparing">
+            <summary>
+              <span className="benchmarkComparing__summaryText">
+                Comparing{' '}
+                <span className="benchmarkComparing__name">{baseName}</span>
+                {' with '}
+                <span className="benchmarkComparing__name">{newName}</span> —
+                edit or swap
+              </span>
+            </summary>
+            {form}
+            <div className="benchmarkProfileUrls">
+              <span>
+                <strong>{baseName}:</strong>{' '}
+                <a href={baseUrl} target="_blank" rel="noopener noreferrer">
+                  {baseUrl}
+                </a>
+              </span>
+              <span>
+                <strong>{newName}:</strong>{' '}
+                <a href={newUrl} target="_blank" rel="noopener noreferrer">
+                  {newUrl}
+                </a>
+              </span>
+            </div>
+          </details>
+        )}
+
+        {state.phase === 'loading' && (
+          <div className="benchmarkLoading">
+            <div className="benchmarkSpinner" />
+            <p>Loading profiles and computing statistics…</p>
           </div>
-        </details>
-      )}
+        )}
 
-      {state.phase === 'loading' && (
-        <div className="benchmarkLoading">
-          <div className="benchmarkSpinner" />
-          <p>Loading profiles and computing statistics…</p>
-        </div>
-      )}
+        {state.phase === 'error' && (
+          <div className="benchmarkError">
+            <p>
+              <strong>Error:</strong> {state.error}
+            </p>
+          </div>
+        )}
 
-      {state.phase === 'error' && (
-        <div className="benchmarkError">
-          <p>
-            <strong>Error:</strong> {state.error}
-          </p>
-        </div>
-      )}
+        {state.phase === 'done' && <ComparisonResults data={state.data} />}
 
-      {state.phase === 'done' && <ComparisonResults data={state.data} />}
-
-      {/* Keeps enough page height below the content that collapsing a section
-       * doesn't force the viewport to scroll up, which would visually move the
-       * clicked row. */}
-      <div className="benchmarkCompareViewer__spacer" aria-hidden="true" />
-    </main>
+        {/* Keeps enough page height below the content that collapsing a section
+         * doesn't force the viewport to scroll up, which would visually move the
+         * clicked row. */}
+        <div className="benchmarkCompareViewer__spacer" aria-hidden="true" />
+      </main>
+    </BenchmarkProfileNamesContext.Provider>
   );
 }

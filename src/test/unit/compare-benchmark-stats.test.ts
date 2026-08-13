@@ -467,8 +467,19 @@ describe('multiple-comparisons correction', function () {
     expect(classifyChange(noisy)).toBe('unresolved');
 
     // Wording has to keep them apart too -- this is the text a reader acts on.
-    expect(describeVerdict('unchanged', '±1.00')).toContain('did not move');
-    expect(describeVerdict('unresolved', '±8.00')).toContain("Can't tell");
+    const names = { base: 'Chrome', new: 'Firefox' };
+    expect(describeVerdict('unchanged', '±1.00', names)).toContain(
+      'did not move'
+    );
+    expect(describeVerdict('unresolved', '±8.00', names)).toContain(
+      "Can't tell"
+    );
+
+    // A verdict of "slower" is meaningless without saying slower than what, so
+    // both sides get named and the moving one comes first.
+    expect(describeVerdict('slower', '±1.00', names)).toBe(
+      'Firefox is slower than Chrome here, by more than this comparison could explain by chance.'
+    );
   });
 
   it('reads the direction off the sign, since weight is time', function () {
