@@ -5,7 +5,10 @@
 
 import fs from 'fs';
 import minimist from 'minimist';
+import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
+import { extractBenchmarkStatsFromProfile } from 'firefox-profiler/profile-logic/benchmark/extract-benchmark-stats';
 import type { ProfileBenchmarkStats } from 'firefox-profiler/profile-logic/benchmark/extract-benchmark-stats';
+import type { BenchmarkHarness } from 'firefox-profiler/profile-logic/benchmark/benchmark-stuff';
 import {
   applyBenjaminiHochberg,
   classifyChange,
@@ -155,6 +158,70 @@ function printBucketResults(
 }
 
 // ---------------------------------------------------------------------------
+// Input
+// ---------------------------------------------------------------------------
+
+/**
+ * Read either a profile or an already-extracted stats file, whichever it turns
+ * out to be.
+ *
+ * Two profiles is the common case — a try push with and without a patch — and
+ * having to run `extract-benchmark-stats` twice first, remember where the
+ * intermediate files went, and pass the right pair of them is friction for no
+ * benefit. `extract-benchmark-stats` is still there and its output is still
+ * accepted, which is worth keeping for iterating on the comparison itself: it is
+ * the expensive half, roughly ten seconds and 1.3 GB against a tenth of a second
+ * to re-read the stats.
+ *
+ * Detection rather than a flag, because the answer is unambiguous from the bytes:
+ * a profile is either gzipped or JSON without a `bucketNames` array in it.
+ */
+async function loadStats(
+  path: string,
+  harness: BenchmarkHarness
+): Promise<ProfileBenchmarkStats> {
+  const bytes = fs.readFileSync(path, null);
+  const asStats = parseStatsFile(bytes);
+  if (asStats !== null) {
+    return asStats;
+  }
+  let profile;
+  try {
+    profile = await unserializeProfileOfArbitraryFormat(bytes.buffer);
+  } catch (error) {
+    // Passing the wrong file is the likeliest way to get here, and the
+    // unserializer's own message does not mention that a stats file would also
+    // have been fine. Say what was expected rather than dumping a stack.
+    throw new Error(
+      `${path} is neither a profile nor a stats file from ` +
+        `extract-benchmark-stats: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
+  return extractBenchmarkStatsFromProfile(profile, harness);
+}
+
+function parseStatsFile(bytes: Buffer): ProfileBenchmarkStats | null {
+  // Gzip magic: a profile, and not worth handing to JSON.parse.
+  if (bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b) {
+    return null;
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(bytes.toString('utf8'));
+  } catch {
+    return null;
+  }
+  const candidate = parsed as Partial<ProfileBenchmarkStats>;
+  if (
+    !Array.isArray(candidate?.bucketNames) ||
+    !Array.isArray(candidate.suites)
+  ) {
+    return null;
+  }
+  return candidate as ProfileBenchmarkStats;
+}
+
+// ---------------------------------------------------------------------------
 // CLI entry point
 // ---------------------------------------------------------------------------
 
@@ -163,9 +230,18 @@ async function main() {
 
   if (!argv.base || !argv.new) {
     console.error(
-      'Usage: compare-benchmark-stats --base <base-stats.json> --new <new-stats.json>\n' +
-        '  [--suite <name>] [--global] [--top 100] [--all] [--no-appeared]\n' +
-        '  [--qvalue 0.05]'
+      'Usage: compare-benchmark-stats --base <before> --new <after>\n' +
+        '\n' +
+        '  <before> and <after> are each either a profile (as captured, .gz and\n' +
+        '  all) or a stats file from extract-benchmark-stats. Detected, not\n' +
+        '  declared.\n' +
+        '\n' +
+        '  [--suite <name>]  per-suite tables; "" for all of them\n' +
+        '  [--global]        the across-suite table too (default when no --suite)\n' +
+        '  [--qvalue 0.05]   false discovery rate a bucket has to clear\n' +
+        '  [--top 100]       cap each table; --all for no cap\n' +
+        '  [--no-appeared]   skip buckets present in only one of the two\n' +
+        '  [--harness speedometer|jetstream]'
     );
     process.exit(1);
   }
@@ -177,12 +253,12 @@ async function main() {
   // minimist turns --no-appeared into { appeared: false }
   const excludeAppearedDisappeared: boolean = argv.appeared === false;
 
-  const base: ProfileBenchmarkStats = JSON.parse(
-    fs.readFileSync(argv.base, 'utf8')
-  );
-  const newStats: ProfileBenchmarkStats = JSON.parse(
-    fs.readFileSync(argv.new, 'utf8')
-  );
+  const harness: BenchmarkHarness = argv.harness ?? 'speedometer';
+  // Sequentially, not with Promise.all: extracting from a profile peaks around
+  // 1.3 GB, and doing both at once would need that twice over for no gain, since
+  // it is CPU-bound rather than waiting on anything.
+  const base = await loadStats(argv.base, harness);
+  const newStats = await loadStats(argv.new, harness);
 
   // bucketFuncs was added later; older stats files don't include it. The CLI
   // doesn't need real func indices (no flame graph here), so fill with -1.
@@ -316,6 +392,12 @@ async function main() {
 }
 
 main().catch((err) => {
-  console.error(err);
+  // The message, not the stack: the errors reachable from here are about which
+  // files were passed, and a stack through the bundler's minified output tells
+  // the reader nothing. `--stack` for when it is a real bug.
+  const argv = process.argv.slice(2);
+  console.error(
+    err instanceof Error && !argv.includes('--stack') ? err.message : err
+  );
   process.exit(1);
 });
