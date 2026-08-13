@@ -479,6 +479,102 @@ function ScoreRow({
   );
 }
 
+type BucketRow = {
+  c: BucketComparison;
+  absDiff: number;
+  /** Null in the overall expansion, where there is no enclosing subtest. */
+  subtestRel: number | null;
+  overallRel: number;
+};
+
+/**
+ * The rows of a bucket table: every bucket that passes `filterMode`, with the
+ * two relative figures the table displays.
+ *
+ * This lives outside `BucketTable` because the count is needed before the table
+ * exists -- the badge on a collapsed subtest row is exactly this list's length,
+ * and it has to agree with what expanding the row shows. Unsorted and uncapped;
+ * `BucketTable` does both, since neither changes the count of what matched.
+ */
+function bucketRowsForFilter(
+  comparisons: BucketComparison[],
+  enclosingBaseMean: number,
+  isOverall: boolean,
+  numSuites: number,
+  filterMode: BucketFilterMode
+): BucketRow[] {
+  const rows: BucketRow[] = [];
+  for (const c of comparisons) {
+    const absDiff = c.newMean - c.baseMean;
+    const impactRel =
+      enclosingBaseMean === 0 ? Infinity : absDiff / enclosingBaseMean;
+    const overallRel = isOverall
+      ? impactRel
+      : impactOnGeomean(impactRel, numSuites);
+    if (filterMode !== 'none') {
+      // qValue is null only if the family could not be calibrated at all, in
+      // which case the uncorrected p-value is the best there is.
+      if ((c.qValue ?? c.pValue) > SIGNIFICANCE_Q) {
+        continue;
+      }
+      if (filterMode === 'movers' && Math.abs(overallRel) < MIN_SCORE_IMPACT) {
+        continue;
+      }
+    }
+    rows.push({
+      c,
+      absDiff,
+      subtestRel: isOverall ? null : impactRel,
+      overallRel,
+    });
+  }
+  return rows;
+}
+
+/**
+ * How many functions an expansion would show, next to the row that expands it.
+ *
+ * Most subtests have nothing to show under the default filter, and finding that
+ * out used to cost a click each. A "0" here is a result in its own right, so it
+ * stays visible rather than being hidden -- just unshaded, so the eye skips it.
+ */
+function BucketCountBadge({
+  count,
+  filterMode,
+}: {
+  count: number;
+  filterMode: BucketFilterMode;
+}) {
+  const noun = count === 1 ? 'function' : 'functions';
+  let title;
+  switch (filterMode) {
+    case 'movers':
+      title =
+        `${count} ${noun} here both survived the multiple-comparisons ` +
+        `correction (q ≤ 0.05) and moved the overall score by 0.01% or more.`;
+      break;
+    case 'significant':
+      title = `${count} ${noun} here survived the multiple-comparisons correction (q ≤ 0.05).`;
+      break;
+    case 'none':
+      title = `${count} ${noun} here, unfiltered.`;
+      break;
+    default:
+      throw new Error(`Unhandled filter mode ${filterMode as string}`);
+  }
+  if (count > TOP_N) {
+    title += ` Only the top ${TOP_N} by absolute change are listed.`;
+  }
+  return (
+    <span
+      className={`benchmarkBadge${count === 0 ? ' benchmarkBadge--zero' : ''}`}
+      title={title}
+    >
+      {count}
+    </span>
+  );
+}
+
 function ScoreTable({
   overallScore,
   suiteScores,
@@ -521,6 +617,42 @@ function ScoreTable({
 
   const overallExpanded = expanded.has(overallScore.label);
   const overallExpandable = globalComparisons.length > 0;
+
+  // The badge counts are the same filtering the expansions do, run for every
+  // row whether or not it is expanded, so they are worth memoising: the overall
+  // list alone is ~6800 buckets and this otherwise reruns on every expand.
+  const overallBucketCount = useMemo(
+    () =>
+      bucketRowsForFilter(
+        globalComparisons,
+        overallScore.baseMean,
+        true,
+        numSuites,
+        filterMode
+      ).length,
+    [globalComparisons, overallScore.baseMean, numSuites, filterMode]
+  );
+  const suiteBucketCounts = useMemo(
+    () =>
+      new Map(
+        suiteScores.map((row) => {
+          const comparisons = suiteComparisonsByName.get(row.label);
+          return [
+            row.label,
+            comparisons === undefined
+              ? null
+              : bucketRowsForFilter(
+                  comparisons,
+                  row.baseMean,
+                  false,
+                  numSuites,
+                  filterMode
+                ).length,
+          ];
+        })
+      ),
+    [suiteScores, suiteComparisonsByName, numSuites, filterMode]
+  );
 
   return (
     <table className="benchmarkTable">
@@ -590,12 +722,22 @@ function ScoreTable({
             className="benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
             title={overallScore.label}
           >
-            {overallExpandable ? (
-              <span className="benchmarkDisclosure" aria-hidden="true">
-                {overallExpanded ? '▼' : '▶'}
+            <div className="benchmarkScoreLabel">
+              {overallExpandable ? (
+                <span className="benchmarkDisclosure" aria-hidden="true">
+                  {overallExpanded ? '▼' : '▶'}
+                </span>
+              ) : null}
+              <span className="benchmarkScoreLabel__text">
+                {overallScore.label}
               </span>
-            ) : null}
-            {overallScore.label}
+              {overallExpandable ? (
+                <BucketCountBadge
+                  count={overallBucketCount}
+                  filterMode={filterMode}
+                />
+              ) : null}
+            </div>
           </td>
           <ScoreRow row={overallScore} isOverall={true} numSuites={numSuites} />
         </tr>
@@ -621,6 +763,7 @@ function ScoreTable({
           const isExpanded = expanded.has(row.label);
           const comparisons = suiteComparisonsByName.get(row.label);
           const expandable = comparisons !== undefined;
+          const bucketCount = suiteBucketCounts.get(row.label) ?? null;
           return (
             <Fragment key={row.label}>
               <tr
@@ -634,12 +777,22 @@ function ScoreTable({
                   className="benchmarkCell--indented benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
                   title={row.label}
                 >
-                  {expandable ? (
-                    <span className="benchmarkDisclosure" aria-hidden="true">
-                      {isExpanded ? '▼' : '▶'}
+                  <div className="benchmarkScoreLabel">
+                    {expandable ? (
+                      <span className="benchmarkDisclosure" aria-hidden="true">
+                        {isExpanded ? '▼' : '▶'}
+                      </span>
+                    ) : null}
+                    <span className="benchmarkScoreLabel__text">
+                      {row.label}
                     </span>
-                  ) : null}
-                  {row.label}
+                    {bucketCount === null ? null : (
+                      <BucketCountBadge
+                        count={bucketCount}
+                        filterMode={filterMode}
+                      />
+                    )}
+                  </div>
                 </td>
                 <ScoreRow row={row} isOverall={false} numSuites={numSuites} />
               </tr>
@@ -740,34 +893,14 @@ function BucketTable({
     });
   }, []);
 
-  // Each row's impact on the overall score has to be known before filtering,
-  // not just for display, so compute both relative figures up front.
-  const rows = comparisons.map((c) => {
-    const absDiff = c.newMean - c.baseMean;
-    const impactRel =
-      enclosingBaseMean === 0 ? Infinity : absDiff / enclosingBaseMean;
-    return {
-      c,
-      absDiff,
-      subtestRel: isOverall ? null : impactRel,
-      overallRel: isOverall ? impactRel : impactOnGeomean(impactRel, numSuites),
-    };
-  });
-
-  const significant = rows
-    .filter(({ c, overallRel }) => {
-      if (filterMode === 'none') {
-        return true;
-      }
-      // qValue is null only if the family could not be calibrated at all, in
-      // which case the uncorrected p-value is the best there is.
-      if ((c.qValue ?? c.pValue) > SIGNIFICANCE_Q) {
-        return false;
-      }
-      return (
-        filterMode === 'significant' || Math.abs(overallRel) >= MIN_SCORE_IMPACT
-      );
-    })
+  // The same list the collapsed row's badge counted, now ranked and capped.
+  const significant = bucketRowsForFilter(
+    comparisons,
+    enclosingBaseMean,
+    isOverall,
+    numSuites,
+    filterMode
+  )
     .sort((a, b) => Math.abs(b.absDiff) - Math.abs(a.absDiff))
     .slice(0, TOP_N);
 
@@ -886,11 +1019,15 @@ function withSuiteFilteredThread(
 }
 
 function ComparisonResults({ data }: { data: ComparisonData }) {
-  const suiteComparisonsByName = new Map(
-    data.suiteComparisons.map(({ suiteName, comparisons }) => [
-      suiteName,
-      comparisons,
-    ])
+  const suiteComparisonsByName = useMemo(
+    () =>
+      new Map(
+        data.suiteComparisons.map(({ suiteName, comparisons }) => [
+          suiteName,
+          comparisons,
+        ])
+      ),
+    [data.suiteComparisons]
   );
 
   const baseBundle = useMemo(
