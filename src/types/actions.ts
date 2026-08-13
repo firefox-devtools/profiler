@@ -656,16 +656,19 @@ type PublishAction =
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly encodingPromise: Promise<ProfileEncodingResult>;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly profileData: Blob;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_FAILED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly error: Error;
     }

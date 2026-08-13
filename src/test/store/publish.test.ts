@@ -23,6 +23,7 @@ import {
   getUploadProgress,
   getUploadProgressString,
   getUploadGeneration,
+  getSanitizedProfileEncodingState,
 } from '../../selectors/publish';
 import {
   getUrlState,
@@ -68,7 +69,7 @@ import {
   listAllUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
-import type { Store, UploadPhase } from 'firefox-profiler/types';
+import type { Store, UploadPhase, SharingMode } from 'firefox-profiler/types';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
 autoMockIndexedDB();
@@ -191,6 +192,67 @@ describe('encodeSanitizedProfile', function () {
 
     expect(second.encodingPromise).toBe(first.encodingPromise);
     await first.encodingPromise;
+  });
+
+  it('keeps a separate encoding per mode, so alternating panel opens each reuse their own', async function () {
+    const { profile } = getProfileFromTextSamples('A');
+    const { dispatch } = storeWithProfile(profile);
+
+    // The two modes sanitize to different profiles, so they each need their own
+    // encoding...
+    const download = dispatch(encodeSanitizedProfile('download'));
+    const upload = dispatch(encodeSanitizedProfile('upload'));
+    expect(upload.encodingPromise).not.toBe(download.encodingPromise);
+
+    // ...but reopening a panel must not start a third and fourth encoding.
+    expect(dispatch(encodeSanitizedProfile('download')).encodingPromise).toBe(
+      download.encodingPromise
+    );
+    expect(dispatch(encodeSanitizedProfile('upload')).encodingPromise).toBe(
+      upload.encodingPromise
+    );
+
+    await Promise.all([download.encodingPromise, upload.encodingPromise]);
+  });
+
+  it('never exposes a mode the blob that was encoded for the other mode', async function () {
+    const { profile } = getProfileFromTextSamples('A');
+    profile.pages = [
+      {
+        tabID: 1,
+        innerWindowID: 1,
+        url: 'https://example.com/private-page',
+        embedderInnerWindowID: 0,
+      },
+    ];
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    // Opt into URLs for uploading only, and let that encoding finish.
+    dispatch(updateSharingOption('upload', 'includeUrls', true));
+    await dispatch(encodeSanitizedProfile('upload')).encodingPromise;
+    expect(getSanitizedProfileEncodingState(getState(), 'upload').phase).toBe(
+      'DONE'
+    );
+
+    // The download panel, whose options still strip URLs, must not see it.
+    const forDownload = getSanitizedProfileEncodingState(
+      getState(),
+      'download'
+    );
+    expect(forDownload.phase).toBe('INITIAL');
+
+    // And once download has encoded too, each mode keeps its own blob.
+    await dispatch(encodeSanitizedProfile('download')).encodingPromise;
+    const encodedBlob = (mode: SharingMode) => {
+      const encodingState = getSanitizedProfileEncodingState(getState(), mode);
+      if (encodingState.phase !== 'DONE') {
+        throw new Error(
+          `Expected the ${mode} encoding to be DONE, but it is ${encodingState.phase}.`
+        );
+      }
+      return encodingState.profileData;
+    };
+    expect(encodedBlob('download')).not.toBe(encodedBlob('upload'));
   });
 });
 

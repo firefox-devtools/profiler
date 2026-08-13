@@ -46,8 +46,10 @@ function _getMostlyNonSanitizingSharingOptions(): CheckedSharingOptions {
   };
 }
 
-// Both modes reference the same object until one is edited, so an untouched
-// profile is only encoded once.
+// Both modes start out referencing the same options object. Note that this
+// does not make them share an encoding: the sanitized profile is memoized per
+// mode, and sanitizePII always returns a fresh object, so each mode encodes
+// its own copy. See sanitizedProfileEncodingStates below.
 function _sharingOptionsForBothModes(
   options: CheckedSharingOptions
 ): Record<SharingMode, CheckedSharingOptions> {
@@ -230,32 +232,53 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
-  state = { phase: 'INITIAL' },
+type EncodingStates = Record<SharingMode, SanitizedProfileEncodingState>;
+
+const INITIAL_ENCODING_STATES: EncodingStates = {
+  download: { phase: 'INITIAL' },
+  upload: { phase: 'INITIAL' },
+};
+
+// One slot per sharing mode. Keying by mode keeps each panel's encoding
+// stable across reopens, and guarantees a panel can never be handed a blob
+// that was encoded for the other mode's sharing options.
+const sanitizedProfileEncodingStates: Reducer<EncodingStates> = (
+  state = INITIAL_ENCODING_STATES,
   action
-): SanitizedProfileEncodingState => {
+): EncodingStates => {
   switch (action.type) {
     case 'SANITIZED_PROFILE_ENCODING_STARTED': {
-      const { sanitizedProfile, encodingPromise } = action;
-      return { phase: 'ENCODING', sanitizedProfile, encodingPromise };
+      const { mode, sanitizedProfile, encodingPromise } = action;
+      return {
+        ...state,
+        [mode]: { phase: 'ENCODING', sanitizedProfile, encodingPromise },
+      };
     }
     case 'SANITIZED_PROFILE_ENCODING_COMPLETED': {
-      const { sanitizedProfile, profileData } = action;
+      const { mode, sanitizedProfile, profileData } = action;
+      const current = state[mode];
       if (
-        state.phase === 'ENCODING' &&
-        state.sanitizedProfile === sanitizedProfile
+        current.phase === 'ENCODING' &&
+        current.sanitizedProfile === sanitizedProfile
       ) {
-        return { phase: 'DONE', sanitizedProfile, profileData };
+        return {
+          ...state,
+          [mode]: { phase: 'DONE', sanitizedProfile, profileData },
+        };
       }
       return state; // Ignore updates from earlier encodings.
     }
     case 'SANITIZED_PROFILE_ENCODING_FAILED': {
-      const { sanitizedProfile, error } = action;
+      const { mode, sanitizedProfile, error } = action;
+      const current = state[mode];
       if (
-        state.phase === 'ENCODING' &&
-        state.sanitizedProfile === sanitizedProfile
+        current.phase === 'ENCODING' &&
+        current.sanitizedProfile === sanitizedProfile
       ) {
-        return { phase: 'ERROR', sanitizedProfile, error };
+        return {
+          ...state,
+          [mode]: { phase: 'ERROR', sanitizedProfile, error },
+        };
       }
       return state; // Ignore updates from earlier encodings.
     }
@@ -266,7 +289,7 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
 
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
-  sanitizedProfileEncodingState,
+  sanitizedProfileEncodingStates,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,

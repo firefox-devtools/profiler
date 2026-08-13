@@ -275,9 +275,14 @@ export const getSanitizedProfile: DangerousSelectorWithArguments<
   SharingMode
 > = (state, mode) => _sanitizedProfileSelectors[mode](state);
 
-export const getSanitizedProfileEncodingState: Selector<
-  SanitizedProfileEncodingState
-> = (state) => getPublishState(state).sanitizedProfileEncodingState;
+export const getSanitizedProfileEncodingStates: Selector<
+  Record<SharingMode, SanitizedProfileEncodingState>
+> = (state) => getPublishState(state).sanitizedProfileEncodingStates;
+
+export const getSanitizedProfileEncodingState: DangerousSelectorWithArguments<
+  SanitizedProfileEncodingState,
+  SharingMode
+> = (state, mode) => getSanitizedProfileEncodingStates(state)[mode];
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;

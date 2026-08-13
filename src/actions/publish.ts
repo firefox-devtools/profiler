@@ -78,33 +78,39 @@ export function updateSharingOption(
 }
 
 export function sanitizedProfileEncodingStarted(
+  mode: SharingMode,
   sanitizedProfile: Profile,
   encodingPromise: Promise<ProfileEncodingResult>
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_STARTED',
+    mode,
     sanitizedProfile,
     encodingPromise,
   };
 }
 
 export function sanitizedProfileEncodingCompleted(
+  mode: SharingMode,
   sanitizedProfile: Profile,
   profileData: Blob
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_COMPLETED',
+    mode,
     sanitizedProfile,
     profileData,
   };
 }
 
 export function sanitizedProfileEncodingFailed(
+  mode: SharingMode,
   sanitizedProfile: Profile,
   error: Error
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_FAILED',
+    mode,
     sanitizedProfile,
     error,
   };
@@ -295,7 +301,7 @@ export function encodeSanitizedProfile(
     const state = getState();
     const sanitizedProfile = getSanitizedProfile(state, mode).profile;
 
-    const encodingState = getSanitizedProfileEncodingState(state);
+    const encodingState = getSanitizedProfileEncodingState(state, mode);
     if (
       encodingState.phase === 'ENCODING' &&
       encodingState.sanitizedProfile === sanitizedProfile
@@ -331,17 +337,19 @@ export function encodeSanitizedProfile(
           serializeProfileToJsonString(sanitizedProfile)
         );
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
-        dispatch(sanitizedProfileEncodingCompleted(sanitizedProfile, blob));
+        dispatch(
+          sanitizedProfileEncodingCompleted(mode, sanitizedProfile, blob)
+        );
         return { type: 'SUCCESS', profileData: blob };
       } catch (error) {
-        dispatch(sanitizedProfileEncodingFailed(sanitizedProfile, error));
+        dispatch(sanitizedProfileEncodingFailed(mode, sanitizedProfile, error));
         console.error('Error while compressing the profile data', error);
         return { type: 'ERROR', error };
       }
     })();
 
     dispatch(
-      sanitizedProfileEncodingStarted(sanitizedProfile, encodingPromise)
+      sanitizedProfileEncodingStarted(mode, sanitizedProfile, encodingPromise)
     );
     return { sanitizedProfile, encodingPromise };
   };

@@ -239,7 +239,14 @@ export type SanitizedProfileEncodingState =
 
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  // One encoding slot per sharing mode. The two modes have independent
+  // sharing options, so they sanitize to different profiles and must not
+  // share a slot: otherwise each mode's encoding clobbers the other's, and a
+  // panel could offer a blob that was encoded for the *other* mode's options.
+  readonly sanitizedProfileEncodingStates: Record<
+    SharingMode,
+    SanitizedProfileEncodingState
+  >;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
