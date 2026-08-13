@@ -7,18 +7,21 @@ import fs from 'fs';
 import minimist from 'minimist';
 import type { ProfileBenchmarkStats } from 'firefox-profiler/profile-logic/benchmark/extract-benchmark-stats';
 import {
+  applyBenjaminiHochberg,
+  classifyChange,
   compareBuckets,
   compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
+  RESOLUTION_TOLERANCE,
   suiteIterationTotals,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
   BucketComparison,
   ComparisonStats,
   ScoreComparison,
+  Verdict,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
-import { pValueToConfidence } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
 
 // ---------------------------------------------------------------------------
 // Formatting
@@ -27,13 +30,14 @@ import { pValueToConfidence } from 'firefox-profiler/profile-logic/benchmark/per
 /**
  * Minimum detectable effect, tagged "~" when it rests on an approximation.
  *
- * A bucket's MDE comes from the family's permutation-derived critical |t|, so it
- * is never approximate. A score row's comes from the Welch t distribution, which
- * is only as good as that approximation is for the row in question \u2014 which
- * `pValueMethod` is exactly the flag for.
+ * A bucket MDE is built on the family pass's permutation-derived critical |t|, so
+ * it rests on no approximation. A score row MDE comes from the Welch t
+ * distribution, which is only as good as that approximation is for the row in
+ * question. The family pass supplies familyWiseP exactly when it supplied the MDE,
+ * so that is the flag.
  */
 function formatMde(row: ComparisonStats): string {
-  const approximate = row.qValue === null && row.pValueMethod === 'welch';
+  const approximate = row.familyWiseP === null;
   return `${approximate ? '~' : ''}\u00b1${row.mde.toFixed(2)}`;
 }
 
@@ -45,31 +49,49 @@ function formatChange(rel: number): string {
   return rel >= 0 ? `+${pct}%` : `${pct}%`;
 }
 
+/** Plain-language answer for a row, which is what the reader came for. */
+const VERDICT_LABELS: Record<Verdict, string> = {
+  slower: 'SLOWER',
+  faster: 'FASTER',
+  unchanged: 'no change',
+  unresolved: "can't tell",
+};
+
 function printScoreAndSubtests(
   overall: ScoreComparison,
   suites: ScoreComparison[]
 ) {
   const COL = 45;
-  const overallAbsDiff = overall.newMean - overall.baseMean;
-  const overallAbsStr =
-    (overallAbsDiff >= 0 ? '+' : '') + overallAbsDiff.toFixed(2);
-  console.log(
-    `${'Score'.padEnd(COL)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'MDE'.padStart(9)} ${'Δ%'.padStart(10)} ${'effect'.padStart(10)} ${'confidence'.padStart(12)}`
-  );
-  console.log('-'.repeat(COL + 74));
-  console.log(
-    `${'Overall (geomean-normalised)'.padEnd(COL)} ${overall.baseMean.toFixed(2).padStart(10)} ${overall.newMean.toFixed(2).padStart(10)} ${overallAbsStr.padStart(10)} ${formatMde(overall).padStart(9)} ${formatChange(overall.relChange).padStart(10)} ${overall.effectSize.padStart(10)} ${pValueToConfidence(overall.pValue).padStart(12)}`
-  );
-  console.log('');
-  for (const s of suites) {
+  const row = (label: string, s: ScoreComparison) => {
     const absDiff = s.newMean - s.baseMean;
     const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
+    return (
+      `${label.padEnd(COL)} ${s.baseMean.toFixed(2).padStart(10)} ` +
+      `${s.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ` +
+      `${formatMde(s).padStart(9)} ${formatChange(s.relChange).padStart(10)} ` +
+      `${formatCorrected(s.qValue).padStart(9)} ` +
+      `${VERDICT_LABELS[classifyChange(s)].padStart(11)}`
+    );
+  };
+  console.log(
+    `${'Score'.padEnd(COL)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'MDE'.padStart(9)} ${'Δ%'.padStart(10)} ${'q'.padStart(9)} ${'verdict'.padStart(11)}`
+  );
+  console.log('-'.repeat(COL + 72));
+  console.log(row('Overall (geomean-normalised)', overall));
+  console.log('');
+  for (const s of suites) {
     const label =
       s.label.length > COL - 2 ? s.label.slice(0, COL - 5) + '...' : s.label;
-    console.log(
-      `${'  ' + label.padEnd(COL - 2)} ${s.baseMean.toFixed(2).padStart(10)} ${s.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(s).padStart(9)} ${formatChange(s.relChange).padStart(10)} ${s.effectSize.padStart(10)} ${pValueToConfidence(s.pValue).padStart(12)}`
-    );
+    console.log(row('  ' + label, s));
   }
+  console.log(
+    '\nThe subtest q-values are corrected for there being 20 subtests. The ' +
+      'overall\nscore has no q: it is the one hypothesis you came to ask about, ' +
+      'so it is judged\non its own p-value. "can\'t tell" means the MDE beside ' +
+      'it is more than ' +
+      `${(RESOLUTION_TOLERANCE * 100).toFixed(0)}% of the\nrow, i.e. this many ` +
+      'runs could not have resolved a change worth caring about.'
+  );
 }
 
 /** A corrected p-value, or "-" for a row that is not part of a family. */
@@ -228,6 +250,7 @@ async function main() {
         compareIterationTotals(baseSuite.suiteName, baseIter, newIter)
       );
     }
+    applyBenjaminiHochberg(suiteScores);
 
     console.log('\n--- Score and subtest totals ---\n');
     printScoreAndSubtests(overallScore, suiteScores);
