@@ -144,6 +144,79 @@ const BUCKET_FILTER_MODES: Array<{
 const DEFAULT_BUCKET_FILTER_MODE: BucketFilterMode = 'movers';
 
 /**
+ * Which buckets to list: all of them, or only the ones where a named side is the
+ * slow one.
+ *
+ * A mixed list is the right default when you are asking "what did my patch do",
+ * because the answer includes both. It is the wrong shape for the other question
+ * this view now serves — "where is Firefox losing to Chrome" — where the wins and
+ * the losses are separate pieces of work and interleaving them by size means
+ * scanning past half the table to read either one. The old comparison report
+ * built a separate list per direction for exactly this reason.
+ *
+ * Selected by naming the *slower* side rather than as "slower"/"faster" relative
+ * to the new one. Both say the same thing about two profiles, but only one of
+ * them still says anything about three: "Firefox is faster" does not identify a
+ * subset once there is a Safari column, whereas "Firefox is slower" does. So the
+ * options are one per profile, plus "either way".
+ */
+type BucketDirection = 'both' | 'base-slower' | 'new-slower';
+
+const DEFAULT_BUCKET_DIRECTION: BucketDirection = 'both';
+
+/** The side a direction singles out as the slow one, or null for "either way".
+ * Every sentence about a direction is built from this, so that they all use the
+ * one verb the choice is actually about. */
+function slowerSideName(
+  direction: BucketDirection,
+  names: BenchmarkProfileNames
+): string | null {
+  switch (direction) {
+    case 'both':
+      return null;
+    case 'base-slower':
+      return names.base;
+    case 'new-slower':
+      return names.new;
+    default:
+      throw new Error(`Unhandled direction ${direction as string}`);
+  }
+}
+
+/** The options, in profile order, so the list reads the way the mean columns
+ * do. */
+function bucketDirections(names: BenchmarkProfileNames): Array<{
+  direction: BucketDirection;
+  label: string;
+  title: string;
+}> {
+  const oneSide = (direction: BucketDirection, slow: string, fast: string) => ({
+    direction,
+    label: `${slow} is slower`,
+    title:
+      `Only where ${slow} spends more time than ${fast}: the list of things to ` +
+      `fix in ${slow}, with nothing to scroll past between them.`,
+  });
+  return [
+    {
+      direction: 'both',
+      label: 'either way',
+      title: 'Both directions, ranked together by how far they moved.',
+    },
+    oneSide('base-slower', names.base, names.new),
+    oneSide('new-slower', names.new, names.base),
+  ];
+}
+
+/** What the reader picked in the two filter groups. Carried as one object
+ * because every level of the table needs both, and because the badge count and
+ * the expansion have to be computed from exactly the same pair. */
+type BucketFilter = {
+  mode: BucketFilterMode;
+  direction: BucketDirection;
+};
+
+/**
  * Profiles already downloaded this session, keyed by viewer URL.
  *
  * Swapping the two sides, or replacing one of them, re-runs the whole
@@ -542,8 +615,8 @@ type BucketRow = {
 };
 
 /**
- * The rows of a bucket table: every bucket that passes `filterMode`, with the
- * two relative figures the table displays.
+ * The rows of a bucket table: every bucket that passes `filter`, with the two
+ * relative figures the table displays.
  *
  * This lives outside `BucketTable` because the count is needed before the table
  * exists -- the badge on a collapsed subtest row is exactly this list's length,
@@ -555,11 +628,20 @@ function bucketRowsForFilter(
   enclosingBaseMean: number,
   isOverall: boolean,
   numSuites: number,
-  filterMode: BucketFilterMode
+  { mode: filterMode, direction }: BucketFilter
 ): BucketRow[] {
   const rows: BucketRow[] = [];
   for (const c of comparisons) {
     const absDiff = c.newMean - c.baseMean;
+    // Weight is time, so a positive difference means the new side spends more
+    // of it. A bucket that moved by exactly nothing has no slower side at all,
+    // hence the sign tests rather than a negation of one of them.
+    if (
+      (direction === 'new-slower' && !(absDiff > 0)) ||
+      (direction === 'base-slower' && !(absDiff < 0))
+    ) {
+      continue;
+    }
     const impactRel =
       enclosingBaseMean === 0 ? Infinity : absDiff / enclosingBaseMean;
     const overallRel = isOverall
@@ -594,27 +676,30 @@ function bucketRowsForFilter(
  */
 function BucketCountBadge({
   count,
-  filterMode,
+  filter,
 }: {
   count: number;
-  filterMode: BucketFilterMode;
+  filter: BucketFilter;
 }) {
+  const names = useBenchmarkProfileNames();
   const noun = count === 1 ? 'function' : 'functions';
+  const slow = slowerSideName(filter.direction, names);
+  const where = slow === null ? ' here' : ` here where ${slow} is slower`;
   let title;
-  switch (filterMode) {
+  switch (filter.mode) {
     case 'movers':
       title =
-        `${count} ${noun} here both survived the multiple-comparisons ` +
+        `${count} ${noun}${where} both survived the multiple-comparisons ` +
         `correction (q ≤ 0.05) and moved the overall score by 0.01% or more.`;
       break;
     case 'significant':
-      title = `${count} ${noun} here survived the multiple-comparisons correction (q ≤ 0.05).`;
+      title = `${count} ${noun}${where} survived the multiple-comparisons correction (q ≤ 0.05).`;
       break;
     case 'none':
-      title = `${count} ${noun} here, unfiltered.`;
+      title = `${count} ${noun}${where}, unfiltered.`;
       break;
     default:
-      throw new Error(`Unhandled filter mode ${filterMode as string}`);
+      throw new Error(`Unhandled filter mode ${filter.mode as string}`);
   }
   if (count > TOP_N) {
     title += ` Only the top ${TOP_N} by absolute change are listed.`;
@@ -634,7 +719,7 @@ function ScoreTable({
   suiteScores,
   suiteComparisonsByName,
   globalComparisons,
-  filterMode,
+  filter,
   baseBundle,
   newBundle,
   baseViewerUrl,
@@ -644,7 +729,7 @@ function ScoreTable({
   suiteScores: ScoreComparison[];
   suiteComparisonsByName: Map<string, BucketComparison[]>;
   globalComparisons: BucketComparison[];
-  filterMode: BucketFilterMode;
+  filter: BucketFilter;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
   baseViewerUrl: string;
@@ -683,9 +768,9 @@ function ScoreTable({
         overallScore.baseMean,
         true,
         numSuites,
-        filterMode
+        filter
       ).length,
-    [globalComparisons, overallScore.baseMean, numSuites, filterMode]
+    [globalComparisons, overallScore.baseMean, numSuites, filter]
   );
   const suiteBucketCounts = useMemo(
     () =>
@@ -701,12 +786,12 @@ function ScoreTable({
                   row.baseMean,
                   false,
                   numSuites,
-                  filterMode
+                  filter
                 ).length,
           ];
         })
       ),
-    [suiteScores, suiteComparisonsByName, numSuites, filterMode]
+    [suiteScores, suiteComparisonsByName, numSuites, filter]
   );
 
   return (
@@ -811,10 +896,7 @@ function ScoreTable({
                 {overallScore.label}
               </span>
               {overallExpandable ? (
-                <BucketCountBadge
-                  count={overallBucketCount}
-                  filterMode={filterMode}
-                />
+                <BucketCountBadge count={overallBucketCount} filter={filter} />
               ) : null}
             </div>
           </td>
@@ -829,7 +911,7 @@ function ScoreTable({
                 enclosingBaseMean={overallScore.baseMean}
                 isOverall={true}
                 numSuites={numSuites}
-                filterMode={filterMode}
+                filter={filter}
                 baseBundle={baseBundle}
                 newBundle={newBundle}
                 baseViewerUrl={baseViewerUrl}
@@ -866,10 +948,7 @@ function ScoreTable({
                       {row.label}
                     </span>
                     {bucketCount === null ? null : (
-                      <BucketCountBadge
-                        count={bucketCount}
-                        filterMode={filterMode}
-                      />
+                      <BucketCountBadge count={bucketCount} filter={filter} />
                     )}
                   </div>
                 </td>
@@ -884,7 +963,7 @@ function ScoreTable({
                       enclosingBaseMean={row.baseMean}
                       isOverall={false}
                       numSuites={numSuites}
-                      filterMode={filterMode}
+                      filter={filter}
                       baseBundle={baseBundle}
                       newBundle={newBundle}
                       baseViewerUrl={baseViewerUrl}
@@ -907,7 +986,7 @@ function BucketTable({
   enclosingBaseMean,
   isOverall,
   numSuites,
-  filterMode,
+  filter,
   baseBundle,
   newBundle,
   baseViewerUrl,
@@ -927,7 +1006,7 @@ function BucketTable({
    * comes from impactOnGeomean. */
   isOverall: boolean;
   numSuites: number;
-  filterMode: BucketFilterMode;
+  filter: BucketFilter;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
   /** Viewer URLs of the two source profiles, forwarded to BucketFlameGraphPair
@@ -979,17 +1058,22 @@ function BucketTable({
     enclosingBaseMean,
     isOverall,
     numSuites,
-    filterMode
+    filter
   )
     .sort((a, b) => Math.abs(b.absDiff) - Math.abs(a.absDiff))
     .slice(0, TOP_N);
 
   if (significant.length === 0) {
+    // Naming the direction matters most in exactly this case: an empty list
+    // under "only where X is slower" is a real answer, and reading it as "no
+    // differences at all" would be the wrong one.
+    const slow = slowerSideName(filter.direction, names);
+    const where = slow === null ? '' : ` where ${slow} is slower`;
     return (
       <p className="benchmarkNoChanges">
-        {filterMode === 'movers'
-          ? `Nothing in ${label} both survived the multiple-comparisons correction and moved the overall score by 0.01% or more.`
-          : `No bucket in ${label} survived the multiple-comparisons correction (q ≤ 0.05).`}
+        {filter.mode === 'movers'
+          ? `Nothing in ${label}${where} both survived the multiple-comparisons correction and moved the overall score by 0.01% or more.`
+          : `No bucket in ${label}${where} survived the multiple-comparisons correction (q ≤ 0.05).`}
       </p>
     );
   }
@@ -1119,13 +1203,23 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
     [data.newProfile]
   );
 
-  const [filterMode, setFilterMode] = useState<BucketFilterMode>(
-    DEFAULT_BUCKET_FILTER_MODE
-  );
+  const names = useBenchmarkProfileNames();
+  const [filter, setFilter] = useState<BucketFilter>({
+    mode: DEFAULT_BUCKET_FILTER_MODE,
+    direction: DEFAULT_BUCKET_DIRECTION,
+  });
 
   const handleFilterModeChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      setFilterMode(e.currentTarget.value as BucketFilterMode);
+      const mode = e.currentTarget.value as BucketFilterMode;
+      setFilter((prev) => ({ ...prev, mode }));
+    },
+    []
+  );
+  const handleDirectionChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const direction = e.currentTarget.value as BucketDirection;
+      setFilter((prev) => ({ ...prev, direction }));
     },
     []
   );
@@ -1141,8 +1235,23 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
               type="radio"
               name="benchmarkBucketFilter"
               value={mode}
-              checked={filterMode === mode}
+              checked={filter.mode === mode}
               onChange={handleFilterModeChange}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
+      </div>
+      <div className="benchmarkFilters">
+        <span className="benchmarkFilter__label">…and where</span>
+        {bucketDirections(names).map(({ direction, label, title }) => (
+          <label className="benchmarkFilter" key={direction} title={title}>
+            <input
+              type="radio"
+              name="benchmarkBucketDirection"
+              value={direction}
+              checked={filter.direction === direction}
+              onChange={handleDirectionChange}
             />
             <span>{label}</span>
           </label>
@@ -1153,7 +1262,7 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
         suiteScores={data.suiteScores}
         suiteComparisonsByName={suiteComparisonsByName}
         globalComparisons={data.globalComparisons}
-        filterMode={filterMode}
+        filter={filter}
         baseBundle={baseBundle}
         newBundle={newBundle}
         baseViewerUrl={data.baseUrl}
