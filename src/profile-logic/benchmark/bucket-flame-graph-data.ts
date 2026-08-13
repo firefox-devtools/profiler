@@ -15,6 +15,7 @@
  */
 
 import {
+  computeFrameTableFromRawFrameTable,
   computeStackTableFromRawStackTable,
   computeSamplesTableFromRawSamplesTable,
   reserveFunctionsForCollapsedResources,
@@ -105,9 +106,10 @@ export function buildDerivedThread(
   const stringTable = StringTable.withBackingArray(
     shared.stringArray as string[]
   );
+  const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
-    shared.frameTable,
+    frameTable,
     categories,
     defaultCategory
   );
@@ -130,14 +132,18 @@ export function buildDerivedThread(
     rawThread,
     samples,
     stackTable,
-    shared.frameTable,
+    frameTable,
     funcTable,
     shared.nativeSymbols,
     shared.resourceTable,
     stringTable,
     shared.sources,
     tracedValuesBuffer,
-    shared.sourceLocationTable
+    shared.sourceLocationTable,
+    // Benchmark profiles are sampled, not allocation-logged; nothing downstream
+    // of here (focusSelf, the call tree, the flame graph) reads these anyway.
+    undefined,
+    undefined
   );
 }
 
