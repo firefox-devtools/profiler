@@ -462,6 +462,12 @@ replaced by Welch's t on the per-iteration mean difference, with:
   0.2/0.5/0.8 cut points sit close to the 0.15/0.33/0.47 they replace.
 - **An MDE column** in both the UI and the CLI.
 
+What it did not fix is multiplicity: ~6800 buckets each get an uncorrected
+p-value, so `p ≤ 0.05` on one row means little. The UI's default filter leans on
+an impact floor to keep that in check rather than correcting for it. See
+[benchmark-compare-fdr.md](benchmark-compare-fdr.md), which also lists the two
+profile pairs used throughout this report.
+
 Two things worth knowing about the switch. First, it makes the shared-factor bug
 that motivated all of this far less dangerous: a mismatched rescale now biases
 the point estimate smoothly, in proportion to the drift, instead of moving
