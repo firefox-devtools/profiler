@@ -10,7 +10,7 @@ import {
   changeProfilesToCompare,
   changeProfilesToCompareBenchmark,
 } from 'firefox-profiler/actions/app';
-import { DEFAULT_BENCHMARK_PROFILE_NAMES } from './BenchmarkCompareForm';
+import { DEFAULT_BENCHMARK_PROFILE_NAMES } from './BenchmarkProfileNames';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './CompareHome.css';
