@@ -4,6 +4,7 @@
 
 import {
   compareBuckets,
+  compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
 } from '../../profile-logic/benchmark/compare-benchmark-stats';
@@ -222,24 +223,28 @@ describe('global bucket comparison', function () {
 
     // A shared per-suite factor is a common positive scale. It multiplies both
     // delta and se by the same constant, so everything scale-free is unchanged:
-    // the standardised effect, the p-value, and both verdict labels.
+    // the standardised effect, the bucket's own p-value, and the effect label.
     expect(globalFast?.standardizedEffect).toBeCloseTo(
       perSuite[0].standardizedEffect,
       10
     );
     expect(globalFast?.pValue).toBeCloseTo(perSuite[0].pValue, 10);
     expect(globalFast?.pValueMethod).toBe(perSuite[0].pValueMethod);
-    expect(globalFast?.confidence).toBe(perSuite[0].confidence);
     expect(globalFast?.effectSize).toBe(perSuite[0].effectSize);
     expect(globalFast?.relChange).toBeCloseTo(perSuite[0].relChange, 10);
 
-    // The scale-dependent quantities all move by that one factor. Derived from
-    // se, which is strictly positive, rather than from delta, which is allowed
-    // to be arbitrarily close to zero.
+    // The scale-dependent quantities move by that one factor. Derived from se,
+    // which is strictly positive, rather than from delta, which is allowed to be
+    // arbitrarily close to zero.
     const factor = globalFast!.se / perSuite[0].se;
     expect(factor).toBeGreaterThan(1);
     expect(globalFast!.delta).toBeCloseTo(perSuite[0].delta * factor, 8);
-    expect(globalFast!.mde).toBeCloseTo(perSuite[0].mde * factor, 8);
+
+    // The MDE deliberately does *not* follow, beyond that scale factor: it is
+    // now measured against the bar its own table imposes, and the global table
+    // has more buckets in it than the suite table does. Same for qValue. See the
+    // "multiple-comparisons correction" tests below.
+    expect(globalFast!.mde / factor).toBeGreaterThanOrEqual(perSuite[0].mde);
   });
 
   it('biases the estimate if each profile uses its own factors', function () {
@@ -292,5 +297,117 @@ describe('global bucket comparison', function () {
 
     expect(shared.relChange).toBeCloseTo(perSuite.relChange, 10);
     expect(Math.abs(own.relChange - perSuite.relChange)).toBeGreaterThan(1e-3);
+  });
+});
+
+describe('multiple-comparisons correction', function () {
+  /** `count` buckets drawn from one process on both sides, so none of them
+   * changed, plus one that plainly did. Deterministic. */
+  function makeFamilyPair(count: number) {
+    const iterationCount = 16;
+    let seed = 20250812;
+    const random = () => {
+      seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+      return seed / 0x7fffffff;
+    };
+    const draw = () =>
+      Array.from({ length: iterationCount }, () => (random() < 0.4 ? 1 : 0));
+
+    const bucketNames = ['realMover'];
+    const baseBuckets: Array<[number, number[]]> = [
+      [0, new Array<number>(iterationCount).fill(1)],
+    ];
+    const newBuckets: Array<[number, number[]]> = [
+      [0, new Array<number>(iterationCount).fill(4)],
+    ];
+    for (let i = 1; i <= count; i++) {
+      bucketNames.push(`noise${i}`);
+      baseBuckets.push([i, draw()]);
+      newBuckets.push([i, draw()]);
+    }
+    return {
+      baseStats: makeStats(bucketNames, [
+        { suiteName: 'Only', buckets: baseBuckets },
+      ]),
+      newStats: makeStats(bucketNames, [
+        { suiteName: 'Only', buckets: newBuckets },
+      ]),
+      iterationCount,
+    };
+  }
+
+  function compareFamily(count: number) {
+    const { baseStats, newStats, iterationCount } = makeFamilyPair(count);
+    return compare(
+      baseStats,
+      newStats,
+      baseStats.suites[0].buckets,
+      newStats.suites[0].buckets,
+      iterationCount
+    );
+  }
+
+  it('gives every bucket a q-value, and no score row one', function () {
+    const comparisons = compareFamily(40);
+    expect(comparisons).toHaveLength(41);
+    for (const c of comparisons) {
+      expect(c.qValue).not.toBe(null);
+      expect(c.familyWiseP).not.toBe(null);
+      expect(c.qValue).toBeGreaterThan(0);
+      expect(c.qValue).toBeLessThanOrEqual(1);
+    }
+
+    // A score is not one of a family of thousands, so there is nothing to
+    // correct it against and it keeps its own p-value.
+    const score = compareIterationTotals(
+      'Overall',
+      [10, 12, 11, 13, 9, 11, 10, 12],
+      [14, 16, 15, 13, 17, 15, 16, 14]
+    );
+    expect(score.qValue).toBe(null);
+    expect(score.familyWiseP).toBe(null);
+    expect(score.pValue).toBeLessThan(0.05);
+  });
+
+  it('measures the MDE against the bar the table actually imposes', function () {
+    // The MDE's job is to separate "did not move" from "could not tell", so it
+    // has to be the smallest change that would have been *reported* — and what
+    // gets reported is now q ≤ 0.05, not p ≤ 0.05. Left uncorrected it would
+    // promise a sensitivity a table of hundreds does not have.
+    const small = compareFamily(20);
+    const large = compareFamily(400);
+    const pick = (rows: typeof small) => rows.find((c) => c.key === 'noise1')!;
+
+    // Same bucket, same data, same se either way.
+    expect(pick(large).se).toBeCloseTo(pick(small).se, 12);
+    // But a harder bar in the bigger table, and a harder bar than uncorrected in
+    // both: the uncorrected t critical value for these df is under 2.1.
+    expect(pick(large).mde).toBeGreaterThan(pick(small).mde);
+    expect(pick(small).mde / pick(small).se).toBeGreaterThan(2.1);
+
+    // And it stays consistent with the filter: everything reported has moved by
+    // at least its own MDE. That is the invariant the uncorrected MDE broke.
+    const reported = large.filter((c) => (c.qValue ?? 1) <= 0.05);
+    expect(reported.length).toBeGreaterThan(0);
+    expect(reported.filter((c) => Math.abs(c.delta) < c.mde)).toEqual([]);
+  });
+
+  it('keeps a real change and drops the buckets that only look like one', function () {
+    const comparisons = compareFamily(300);
+    const mover = comparisons.find((c) => c.key === 'realMover')!;
+    expect(mover.qValue).toBeLessThanOrEqual(0.05);
+    expect(mover.familyWiseP).toBeLessThanOrEqual(0.05);
+
+    // Uncorrected, 300 nulls hand out a handful of rows at p ≤ 0.05 — fewer
+    // than the nominal 15, because 16 Bernoulli iterations per side are coarse
+    // enough that the permutation test is conservative on them.
+    const uncorrected = comparisons.filter(
+      (c) => c.key !== 'realMover' && c.pValue <= 0.05
+    );
+    expect(uncorrected.length).toBeGreaterThanOrEqual(5);
+    const survivors = comparisons.filter(
+      (c) => c.key !== 'realMover' && (c.qValue ?? 1) <= 0.05
+    );
+    expect(survivors.map((c) => c.key)).toEqual([]);
   });
 });

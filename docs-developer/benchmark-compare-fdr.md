@@ -1,116 +1,228 @@
 # Multiple comparisons in the benchmark compare view
 
-Handoff notes for making the per-bucket p-values in the benchmark compare view
-mean something across thousands of buckets. Written for someone picking this up
-cold, so it includes the backstory and the profile pairs to test against.
+The benchmark compare view tests ~6800 buckets in the global view and ~120 to
+~800 in each of the 20 subtest views. Every one of them gets a p-value, so
+"p ≤ 0.05" on a single row means very little on its own: on a profile pair with
+no difference detectable at subtest level, 133 global buckets clear it.
 
-The short version: there are ~6800 buckets in the global view and each one gets
-an independent p-value with no multiplicity correction, so "p ≤ 0.05" on a single
-row is close to meaningless. Benjamini-Hochberg is the obvious fix, it is already
-prototyped, and it **does not work yet** for a reason that is worth understanding
-before you start: the permutation p-values are floored at 5.0e-4, and BH needs
-p ≤ 7.4e-6 to reject even the single best bucket.
+This is now corrected. Each table reports a **q-value** — the share of the rows
+at least that extreme which are expected to be noise — and the UI filters on it
+instead of on the raw p-value. On the same no-difference pair, zero buckets
+survive.
 
-## Where things stand
+The route there is not the obvious one, and the reason is worth reading before
+changing any of it.
 
-`compare-benchmark-stats.ts` compares two Speedometer 3 profiles bucket by
-bucket. A "bucket" is the innermost `isJS`-or-`relevantForJS` function on a
-sample's stack, so buckets partition the samples and their mean differences add
-up to the total score change. There are ~6800 of them in the geomean-normalised
-global view and ~7400 more across the 20 per-subtest views.
-
-Each bucket carries per-iteration weights: 200 numbers per side (20 browser runs
-× 10 iterations). The statistics live in
-[perf-compare-stats.ts](../src/profile-logic/benchmark/perf-compare-stats.ts):
-
-- **Welch's t on the mean difference**, not a rank test. Rank tests were tried
-  and removed; see [§3.1 of the bucketing report](benchmark-auto-bucketing.md).
-  The mean difference is also the additive quantity, so it is the number the
-  budget columns show.
-- **Permutation p-values** where the verdict could turn on it: any bucket with
-  Welch p ≤ 0.25, plus sparse buckets (zero in more than half their iterations,
-  where the t approximation is not trustworthy) up to p ≤ 0.5. Otherwise the
-  Welch p is used, and the CLI marks those rows with `~`.
-- **Sequential stopping** (Besag & Clifford 1991): draw relabellings until 20
-  come out at least as extreme, then report hits/draws. Without this a comparison
-  took 37.6 s; with it, 0.3 s. `PERMUTATION_COUNT` is 1999.
-- **MDE** (`tCrit · se`) on every row, so a null result says whether the bucket
-  did not move or could not be resolved.
-
-The UI does not currently rely on an uncorrected p-value alone. Its default
-filter requires `p ≤ 0.05` **and** an impact of at least 0.04% of the overall
-score, and the impact floor is what keeps the row count sane — see
-`MIN_SCORE_IMPACT` in
-[BenchmarkCompareViewer.tsx](../src/components/app/BenchmarkCompareViewer.tsx).
-That is a workaround, not a correction. Its threshold was tuned against two
-profile pairs, which is a thin basis, and the "All significant" mode has no
-defence at all.
-
-## The problem, quantified
-
-With 6798 buckets tested at p ≤ 0.05 you expect ~340 false positives. Measured on
-a pair of profiles with **no difference detectable at subtest level** (every
-subtest p-value between 0.12 and 0.97), the number of global buckets reporting
-`p ≤ 0.05` was **130**. Fewer than chance expectation, which is the point: those
-130 rows are essentially all noise, and nothing in the current output
-distinguishes them from the real ones.
-
-## Why Benjamini-Hochberg does not work yet
+## Why Benjamini-Hochberg does not work here
 
 BH at q ≤ 0.05 rejects the k-th smallest p-value when `p_k ≤ 0.05 · k / n`. With
-n = 6798 that means the smallest p-value has to be under `0.05 / 6798 = 7.4e-6`
-to reject anything at all at rank 1.
+n = 6798 the smallest p-value has to be under `0.05 / 6798 = 7.4e-6` to reject
+anything at all.
 
-The permutation p-value floor is `1 / (PERMUTATION_COUNT + 1) = 1 / 2000 =
-5.0e-4`, about 68× too coarse. So BH rejects **nothing** — including
+The permutation p-values are floored at `1 / (PERMUTATION_COUNT + 1) = 5.0e-4`,
+about 68× too coarse. BH therefore rejects **nothing** — including
 `CanvasRenderingContext2D.stroke`, which moved +73% with a Cohen's d of 1.00 and
-is not in any doubt. Verified by prototyping BH over the p-values from both
-profile pairs: zero survivors in each.
+is not in any doubt. This was verified by prototyping BH over both reference
+pairs: zero survivors in each. The floor, not the evidence, is the binding
+constraint.
 
-Two ways out, and they compose:
+Raising `PERMUTATION_COUNT` to fix that is the wrong move. Resolving a p-value of
+7.4e-6 needs on the order of 136000 relabellings for the single best bucket, and
+the sparse buckets cannot get there at any count: a bucket that is nonzero in 8
+of 200 iterations has a genuinely coarse permutation null, and no number of draws
+makes its p-value smaller than the discreteness allows.
 
-1. **Escalate the permutation count for survivors only.** Run the current cheap
-   pass, take the few dozen buckets at or near the floor, and re-run those with
-   enough relabellings to resolve the tail — roughly `n / (q · rank)`, so ~136000
-   for rank 1 at q = 0.05. Only a handful of buckets need it, and sequential
-   stopping means the ones that do not need it stay cheap. Watch the cost model:
-   a 136000-draw run on one bucket is ~70× a full 1999-draw run, so budget by
-   counting draws rather than buckets.
-2. **Use a tail approximation for the extreme p-values.** Fit a generalised
-   Pareto to the upper tail of the permutation distribution (Knijnenburg et al.,
-   Bioinformatics 2009, "Fewer permutations, more accurate P-values") and read
-   the far tail off the fit instead of counting hits. Standard in genomics for
-   exactly this problem. Cheaper than (1) but introduces a modelling assumption
-   where there currently is none, which matters because avoiding distributional
-   assumptions is why permutation was chosen in the first place.
+## What is implemented instead
 
-Whichever you pick, the sparse buckets are the awkward case: a bucket that is
-nonzero in 8 of 200 iterations has a genuinely coarse permutation null — there
-are only so many distinguishable relabellings — and no number of draws makes its
-p-value smaller than the discreteness allows. Those buckets may simply not be
-resolvable at FDR-corrected significance, which is a true and useful thing for
-the UI to be able to say. `SPARSE_ZERO_FRACTION` already identifies them.
+`computeFamilyCorrection` in
+[perf-compare-stats.ts](../src/profile-logic/benchmark/perf-compare-stats.ts).
 
-## Things to decide, not just implement
+The observation that unlocks it: FDR control does not need per-bucket p-values.
+It needs `E[V(c)]`, the number of _buckets_ expected to clear a threshold `c` by
+chance — a quantity about the family, not about any one bucket. So estimate that
+directly, by relabelling the iterations of every bucket at once and counting how
+many buckets clear `c` in each draw:
 
-- **Is BH even the right family?** The 6800 buckets are not independent — they
-  partition the same samples, so they are negatively correlated by construction,
-  and nested-in-a-subtree relationships exist between the funcs. BH is valid
-  under positive regression dependence; under general dependence you want
-  Benjamini-Yekutieli, which is more conservative by a factor of `ln(n) ≈ 8.8`.
-  Or sidestep the question with a **max-statistic permutation threshold**, which
-  handles arbitrary dependence exactly because the permutation is done jointly
-  across buckets. That approach is already worked out for the tree-search case in
-  [§3.3 of the bucketing report](benchmark-auto-bucketing.md) and reuses the same
-  relabelling machinery; it may be the better fit here too.
-- **What is the family?** The global view and 20 subtest views test overlapping
-  hypotheses about the same samples. Correcting within each view separately is
-  the easy choice and is not obviously the right one.
-- **What replaces the impact floor?** If FDR control works, `MIN_SCORE_IMPACT`
-  may be able to drop a long way, which would surface real-but-small changes the
-  current default hides. Do not remove it without checking: it is also doing
-  materiality filtering, which is a different job from error control, and a
-  statistically real 0.001% change is still not worth a row.
+```
+V̂(c) = mean over draws of  #{buckets with |t| ≥ c}
+R(c) = #{buckets with observed |t| ≥ c}
+FDR(c) = V̂(c) / R(c)
+q(bucket) = min over c ≤ |t_bucket| of FDR(c)
+```
+
+This is SAM (Tusher, Tibshirani & Chu 2001) with Storey & Tibshirani's q-value.
+Three things fall out of it:
+
+- **The floor problem disappears.** `V̂` pools `memberCount × drawCount` null
+  statistics — 13.6 million for the global view — so its resolution is one null
+  exceedance in the whole pooled set, not one in `drawCount`.
+- **Dependence is handled by construction.** The buckets partition the same
+  samples, so they are negatively correlated, and BH's positive-regression-
+  dependence condition does not obviously hold. Relabelling all buckets jointly
+  reproduces whatever dependence exists in every draw, so the question does not
+  arise. This is the same idea as the max-statistic calibration in
+  [§3.3 of the bucketing report](benchmark-auto-bucketing.md).
+- **The buckets need not be alike.** `V̂` estimates `Σ_b P(|t_b| ≥ c)` term by
+  term. Sparse buckets with heavy null tails contribute their own heavier terms,
+  so their discreteness is priced into the FDR rather than having to be
+  special-cased.
+
+Alongside the q-value, the same pass produces a **Westfall-Young single-step
+FWER-adjusted p-value** from the distribution of `max |t|` across the family —
+exact under arbitrary dependence, and essentially free once the null values are
+being computed. It is the stricter reading, for answering "is there anything here
+at all" rather than "which rows".
+
+### Choices made, and what would change them
+
+- **π₀ is assumed to be 1.** The usual Storey refinement would sharpen the
+  estimate, but with a handful of real movers among thousands of buckets π₀ is
+  within a rounding error of 1, and assuming it errs conservative. Not worth the
+  extra assumption unless a use case appears where the real movers are a large
+  fraction of the family.
+- **The statistic is a shared |t| threshold**, not each bucket's own p-value.
+  That holds a sparse bucket and a dense one to the same bar even though the
+  sparse one has the heavier null tail, which costs the dense buckets a little
+  power. It does not cost validity, for the reason above. Fixing it would mean
+  going back through per-bucket p-values, which is where the floor lives.
+- **The family is one table.** The global view is corrected against the global
+  view and each subtest against itself. Those 21 tables overlap — they are
+  hypotheses about the same samples, so a bucket appearing in several has had
+  several chances. Correcting across all of them at once is the conservative
+  reading, but it would mean that opening a subtest table changed the numbers in
+  it, which is a worse property than the error it fixes.
+- **Score rows are not corrected.** The overall score and the 20 subtest scores
+  keep their own p-values (`qValue` is null on them). The 20 subtest scores _are_
+  a family of 20, and BH would work fine on them — n = 20 needs only
+  `0.05 / 20 = 2.5e-3` at rank 1, which is above the permutation floor. That is
+  the obvious next increment; it is not done here.
+
+### The MDE had to move with it
+
+`MDE = tCrit · se` is defined as the smallest change a row could have shown and
+still been reported. Changing what "reported" means changes the MDE, and it is
+easy to miss: the column keeps rendering a plausible number while quietly
+promising a sensitivity the table no longer has, and the tooltip's "so this
+really did not move" becomes an overclaim on every quiet row.
+
+So a bucket's `tCrit` is now the family's critical |t| rather than the
+uncorrected `studentTCritical(df, 0.05)`. On the reference pairs that is about
+2.1× larger — `CanvasRenderingContext2D.arc` reads ±0.44 instead of ±0.21, and
+its Δ of −0.49 now sits just above its bar rather than looking twice clear of it,
+which matches its q of 2.0e-3.
+
+The bar used is the **family-wise** critical |t|, not one read off the FDR curve,
+for two reasons. It is always defined: on a comparison with nothing in it,
+nothing on the observed grid reaches q ≤ 0.05, so an FDR-derived bar would come
+out infinite for every row of exactly the tables an MDE is most needed for. And
+it is the right question anyway — an MDE asks what a row would have needed _on
+its own_, and for a lone row the two bars nearly coincide, since `V̂(c) =
+E[#exceedances]` and `P(#exceedances ≥ 1)` agree to first order once exceedances
+are rare. Where a table has other discoveries to share the error budget with, the
+FDR bar is genuinely lower and this errs conservative.
+
+Score rows keep the uncorrected MDE, because they are judged on their own
+p-value. `ComparisonStats.mde` is therefore "the bar that applies to this row",
+which differs by row type — and, for buckets, by view. There is a test pinning
+the invariant that makes it all hang together: every row the filter reports has
+moved by at least its own MDE.
+
+### Cost
+
+Affordable only because the pooled values are stored sparsely: most buckets are
+zero in most iterations, so each of the 13.6 million null evaluations walks a
+handful of nonzeros rather than 400 entries. Measured end to end on the CLI
+(pair B, including ~0.25s of JSON parsing):
+
+| run                      | before | after |
+| ------------------------ | ------ | ----- |
+| global view only         | 0.32s  | 2.25s |
+| global + all 20 subtests | 0.60s  | 5.20s |
+
+So about 4.6s of added compute for the full 21-table analysis. The UI does this
+behind its existing spinner, after downloading and parsing two ~39 MB profiles,
+which dominates.
+
+The family pass reuses the same 1999 relabellings as the per-bucket p-values. It
+does not need nearly that many — `V̂` pools over thousands of buckets, so a few
+hundred draws would estimate it about as well and would cut the cost roughly
+fourfold. Sharing one set is simpler and the cost is not currently a problem;
+that is the knob to reach for if it becomes one.
+
+For comparison, the alternative the floor problem seemed to demand — escalating
+`PERMUTATION_COUNT` to ~136000 for the top buckets — is ~70× a full pass _per
+bucket_.
+
+## What the numbers look like
+
+Measured on the two reference pairs below, `--top` output from the CLI.
+
+**Pair A, the negative control.** 21 tables, ~15000 hypotheses:
+
+| view            | buckets | p ≤ 0.05 | q ≤ 0.05 | FWER ≤ 0.05 |
+| --------------- | ------- | -------- | -------- | ----------- |
+| global          | 6803    | 133      | 0        | 0           |
+| all 20 subtests | 8279    | 155      | 1        | 1           |
+
+The one survivor is a function that went from 0.04ms to 0.15ms in NewsSite-Next
+— 0.0039% of the overall score, below the materiality floor, and quite possibly
+a real difference between the two CI runs rather than an error.
+
+**Pair B, a real change in canvas drawing.** Global view, 6798 buckets, 141 at
+p ≤ 0.05:
+
+| bucket                            | Δ     | Δ% overall | q      | pFWER  |
+| --------------------------------- | ----- | ---------- | ------ | ------ |
+| `CanvasRenderingContext2D.stroke` | +1.40 | +0.140%    | 2.5e-4 | 5.0e-4 |
+| `CanvasRenderingContext2D.fill`   | −1.28 | −0.128%    | 2.5e-4 | 5.0e-4 |
+| `CanvasRenderingContext2D.arc`    | −0.49 | −0.049%    | 2.0e-3 | 6.0e-3 |
+
+The same three dominate the Charts-chartjs expansion, and Perf-Dashboard
+independently turns up `fill` and `beginPath`. One coherent story, found in three
+places.
+
+**`HTMLElement.click` does not survive**, and that is the honest answer rather
+than a failure. It is the largest absolute contributor in pair B (−1.16, −0.116%
+of the score) but its p-value is only 1.6e-2, because it is a 21ms bucket with
+proportionally large run-to-run spread. `V̂` at that threshold is ~110 against
+R = 141, so q ≈ 0.8: at a bar that admits it, four rows in five would be noise.
+Shrinking the family is the only thing that would recover it — see "a
+permutation-invariant screen" below.
+
+## What the impact floor is for now
+
+`MIN_SCORE_IMPACT` in
+[BenchmarkCompareViewer.tsx](../src/components/app/BenchmarkCompareViewer.tsx)
+used to be the _only_ defence against ~340 expected false positives, which took a
+threshold (0.04% of the overall score) high enough to also hide real small
+changes. With FDR doing the error control it is back to its proper job —
+materiality — and has dropped an order of magnitude, to **0.01%**.
+
+It is still needed. Both pairs produce rows that are statistically solid and
+completely immaterial: a function appearing at 0.06ms, another going 0.04 → 0.15.
+An inlining change that splits or renames functions could produce dozens of them
+at once, all real. Error control and materiality are different questions and the
+UI asks both.
+
+The two thresholds sit in a wide gap rather than on a tuned edge. Across both
+reference pairs, the q ≤ 0.05 rows that fall _below_ the floor are at 0.0039%
+(pair A's lone survivor) and 0.0066% (`window.qsa` in pair B's ES5 view); the
+ones _above_ it start at 0.0298%. Anywhere from 0.008% to 0.02% would give the
+same answer on this evidence.
+
+## What is left
+
+- **Correct the 20 subtest score rows.** BH works there (n = 20, no floor
+  problem). Small, self-contained, and it would stop `NewsSite-Nuxt` at p = 0.03
+  reading the same as a subtest that really moved.
+- **A permutation-invariant screen on the family.** Restricting the family to
+  buckets whose _pooled_ weight is large enough to matter is legitimate — pooled
+  weight is unchanged by relabelling, so the null is not disturbed (Bourgon et
+  al. 2010) — and it would shrink n by roughly an order of magnitude, buying
+  power for borderline rows. It would not rescue `HTMLElement.click` (at n ≈ 500
+  its q is still ≈ 0.4), so it is a refinement rather than a fix, and it adds a
+  tuning knob. Measure before adding it.
+- **Storey's π₀.** Only worth it if a use case appears with many real movers.
 
 ## Test profiles
 
@@ -128,6 +240,21 @@ curl -L -o base.jslb.gz \
 | A    | negative control | `U17Ba7fhRqmehH_VQeEp3w` | `OtZhWS5QQrqfMH9RvR6IKQ` |
 | B    | real change      | `aMtf0V-ISGGKPhd05BphmA` | `VnqrcVeORJKwjVkIN0UTZg` |
 
+For the CLI, which is much faster to iterate on than the UI:
+
+```sh
+yarn build-node-tools
+node --max-old-space-size=8192 node-tools-dist/extract-benchmark-stats.js \
+  --input base.jslb.gz --output base-stats.json
+node --max-old-space-size=8192 node-tools-dist/extract-benchmark-stats.js \
+  --input new.jslb.gz --output new-stats.json
+node node-tools-dist/compare-benchmark-stats.js \
+  --base base-stats.json --new new-stats.json --top 20
+node node-tools-dist/compare-benchmark-stats.js \
+  --base base-stats.json --new new-stats.json --suite Charts-chartjs
+# --suite "" for every subtest; --qvalue 0.2 to loosen the bar
+```
+
 Ready-to-paste UI links, with the dev server running (`yarn start`):
 
 Pair A:
@@ -142,25 +269,12 @@ Pair B:
 http://localhost:4242/compare-benchmark/?profiles[]=https%3A%2F%2Fprofiler.firefox.com%2Ffrom-url%2Fhttps%253A%252F%252Ffirefox-ci-tc.services.mozilla.com%252Fapi%252Fqueue%252Fv1%252Ftask%252FaMtf0V-ISGGKPhd05BphmA%252Fruns%252F0%252Fartifacts%252Fpublic%252Ftest_info%252Fprofile_speedometer3_compact.jslb.gz&profiles[]=https%3A%2F%2Fprofiler.firefox.com%2Ffrom-url%2Fhttps%253A%252F%252Ffirefox-ci-tc.services.mozilla.com%252Fapi%252Fqueue%252Fv1%252Ftask%252FVnqrcVeORJKwjVkIN0UTZg%252Fruns%252F0%252Fartifacts%252Fpublic%252Ftest_info%252Fprofile_speedometer3_compact.jslb.gz
 ```
 
-For the CLI, which is much faster to iterate on:
-
-```sh
-yarn build-node-tools
-node node-tools-dist/extract-benchmark-stats.js --input base.jslb.gz --output base-stats.json
-node node-tools-dist/extract-benchmark-stats.js --input new.jslb.gz  --output new-stats.json
-node node-tools-dist/compare-benchmark-stats.js --base base-stats.json --new new-stats.json --top 20
-node node-tools-dist/compare-benchmark-stats.js --base base-stats.json --new new-stats.json --suite Charts-chartjs
-```
-
-`extract-benchmark-stats` needs `--max-old-space-size=8192`.
-
 ### What each pair should tell you
 
 **Pair A is the negative control.** Every subtest p-value is between 0.12 and
 0.97 and the overall score moved −0.24% against an MDE of ±14.90, so there is
-nothing here to find. Any method that reports findings on pair A is reporting
-noise. Current behaviour: 130 buckets at p ≤ 0.05, 0 surviving the shipped
-default filter.
+nothing here to find. Any method that reports a list of findings on pair A is
+reporting noise.
 
 Pair A also has history worth knowing. It is the pair that exposed a bug where
 the geomean-normalised global view reported 75 "significant" buckets, none of
@@ -172,29 +286,44 @@ rank statistic — but it is a good reminder that this data's failure modes are
 silent and plausible-looking. If a change makes pair A produce a tidy list of
 findings, that is the bug, not the feature.
 
-**Pair B has a real, checkable change** in canvas drawing:
+**Pair B has a real, checkable change** in canvas drawing: work moved out of
+`fill` and `arc` into `stroke`, concentrated in Charts-chartjs. At subtest level
+only Perf-Dashboard (−2.27%) and NewsSite-Nuxt (+0.99%) clear p ≤ 0.05, so most
+of this is invisible without per-bucket analysis. That is the case for doing this
+work at all.
 
-| bucket                            | base  | new   | Δ     | Δ% overall | d     | p      |
-| --------------------------------- | ----- | ----- | ----- | ---------- | ----- | ------ |
-| `CanvasRenderingContext2D.stroke` | 1.92  | 3.32  | +1.40 | +0.140%    | 1.00  | ≤5e-4  |
-| `CanvasRenderingContext2D.fill`   | 3.83  | 2.54  | −1.28 | −0.128%    | −0.92 | ≤5e-4  |
-| `HTMLElement.click`               | 21.49 | 20.33 | −1.16 | −0.116%    | −0.24 | 1.6e-2 |
-| `CanvasRenderingContext2D.arc`    | 1.54  | 1.05  | −0.49 | −0.049%    | −0.46 | ≤5e-4  |
-| `set Node.textContent`            | 2.69  | 2.25  | −0.44 | −0.044%    | −0.27 | 4.0e-3 |
+## Traps
 
-The canvas rows are one coherent story — work moved out of `fill` and `arc` into
-`stroke` — and they concentrate in Charts-chartjs, where the same three dominate
-the subtest expansion. At subtest level only Perf-Dashboard (−2.27%) and
-NewsSite-Nuxt (+0.99%) clear p ≤ 0.05, so most of this is invisible without
-per-bucket analysis. That is the case for doing this work at all.
+Two that each cost a debugging cycle:
 
-`HTMLElement.click` is the row to watch. It is the largest absolute contributor
-in the pair and it has the weakest standardised effect of the five, because it is
-a 21 ms bucket with proportionally large run-to-run spread. Any criterion built
-on standardised effect size drops it. A good FDR implementation should keep it;
-if it does not, check whether the reason is real (its p-value genuinely is only
-1.6e-2, and after correcting for 6800 comparisons that may honestly not survive)
-or an artefact of the p-value floor.
+- **`se == 0` with different means.** A bucket that appeared or disappeared —
+  base weight 0 in every iteration, new weight nonzero in every one — has zero
+  spread on both sides. The natural `se > 0 ? delta / se : 0` guard reports the
+  most clear-cut change in the profile as no change at all. `tStatistic` returns
+  ±∞ for that case; keep it that way. In the family correction it works out
+  correctly on its own: |t| is infinite for the observed labelling and finite for
+  essentially every relabelling of a mixed pool, so the bucket lands at the floor
+  of `1 / (drawCount + 1)`.
+- **Cross-bucket floating point.** `permutationTwoSidedP` compares a bucket
+  against its own relabellings, so a relative tolerance on one comparison is
+  enough. The family correction compares one bucket's |t| against _other_
+  buckets' null values, and |t| comes out of a subtraction of similar
+  magnitudes — so multiplying every bucket by one shared constant (exactly what
+  the geomean-normalised view does) moves each |t| by an ULP and reshuffles
+  near-ties. Without a tolerance on the exceedance count, q shifted by a count or
+  two. `COMPARISON_TOLERANCE` handles it; the residual sensitivity is confined to
+  q ≈ 0.8, where hundreds of nulls are packed shoulder to shoulder and nothing is
+  being claimed.
+
+- **Quantiles of a tied distribution.** `criticalAbsT` is "the smallest |t| whose
+  family-wise rate is within alpha", and the tempting implementation — index
+  `ceil((1-alpha)·(draws+1))` into the sorted maxima — is wrong whenever that
+  index lands part-way into a run of equal values. Equal maxima all carry the
+  rate of the _first_ of them, so the named value's real rate is worse than
+  alpha. Small-integer weights make such runs ordinary rather than exotic. Both
+  this and a plain off-by-one in the same expression were found by mutation
+  testing, not by reading; the reference test now pins the bar by its definition
+  rather than by an index.
 
 ## Reading order
 
@@ -203,19 +332,13 @@ or an artefact of the p-value floor.
    calibration machinery, including a worked case where searching over candidates
    produced a "significant" finding in 62% of trials on data with no difference
    in it.
-2. [perf-compare-stats.ts](../src/profile-logic/benchmark/perf-compare-stats.ts)
-   — `permutationTwoSidedP`, `makePermutationBaseIndices`, and the constants
-   around them.
-3. `computeComparisonStats` in
+2. `computeFamilyCorrection` in
+   [perf-compare-stats.ts](../src/profile-logic/benchmark/perf-compare-stats.ts),
+   and `permutationTwoSidedP` / `makePermutationBaseIndices` above it.
+3. `applyFamilyCorrection` in
    [compare-benchmark-stats.ts](../src/profile-logic/benchmark/compare-benchmark-stats.ts)
-   — the Welch/permutation gate, and where a q-value would be added.
+   — where the family boundary is drawn.
 4. [perf-compare-stats.test.ts](../src/test/unit/perf-compare-stats.test.ts) —
-   includes a calibration test asserting the permutation p-value is not
-   anti-conservative on sparse counts, which is the property to preserve.
-
-One trap worth flagging, because it cost a debugging cycle: a bucket with zero
-spread on both sides but different means — base weight 0 in every iteration, new
-weight nonzero in every one, i.e. one that appeared or disappeared — has `se ==
-0`. The natural `se > 0 ? delta / se : 0` guard then reports the most clear-cut
-change in the profile as no change at all. `tStatistic` returns ±∞ for that case;
-keep it that way, and be careful that any q-value machinery handles p = 0.
+   the calibration tests, which are the properties to preserve: no discoveries on
+   null families, real changes still found, q monotone in |t|, and invariance
+   under a shared rescale.
