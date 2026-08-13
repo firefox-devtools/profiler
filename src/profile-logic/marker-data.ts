@@ -614,7 +614,7 @@ export function deriveMarkersFromRawMarkerTable(
     return {
       ...startData,
       ...endData,
-    };
+    } as MarkerPayload;
   }
 
   // We don't add a screenshot marker as we find it, because to know its
@@ -734,7 +734,7 @@ export function deriveMarkersFromRawMarkerTable(
           // raw marker of the same type and the same window, we convert them to
           // Interval markers with a a start and end time.
 
-          const { windowID } = data;
+          const windowID = String(data.windowID);
           const previousScreenshotMarker =
             previousScreenshotMarkers.get(windowID);
           if (previousScreenshotMarker !== undefined) {
@@ -1443,10 +1443,11 @@ export function groupScreenshotsById(
     const marker = getMarker(markerIndex);
     const { data } = marker;
     if (data && data.type === 'CompositorScreenshot') {
-      let markers = idToScreenshotMarkers.get(data.windowID);
+      const windowID = String(data.windowID);
+      let markers = idToScreenshotMarkers.get(windowID);
       if (markers === undefined) {
         markers = [];
-        idToScreenshotMarkers.set(data.windowID, markers);
+        idToScreenshotMarkers.set(windowID, markers);
       }
 
       markers.push(marker);
@@ -1639,10 +1640,10 @@ export function filterMarkerByDisplayLocation(
  * Compute the Screenshot image's thumbnail size.
  */
 export function computeScreenshotSize(
-  payload: { windowWidth: number; windowHeight: number },
+  windowSize: { width: number; height: number },
   maximumSize: number
 ): { readonly width: number; readonly height: number } {
-  const { windowWidth, windowHeight } = payload;
+  const { width: windowWidth, height: windowHeight } = windowSize;
 
   // Coefficient should be according to bigger side.
   const coefficient =

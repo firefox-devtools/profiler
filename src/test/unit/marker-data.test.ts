@@ -329,8 +329,7 @@ describe('Derive markers from Gecko phase markers', function () {
     const basePayload = {
       type: 'CompositorScreenshot' as const,
       url: 16,
-      windowWidth: 1280,
-      windowHeight: 1000,
+      windowSize: { width: 1280, height: 1000 },
     };
     const payloadsForWindowA: ScreenshotPayload[] = [
       {
@@ -339,7 +338,7 @@ describe('Derive markers from Gecko phase markers', function () {
       },
       {
         ...basePayload,
-        windowWidth: 500,
+        windowSize: { width: 500, height: 1000 },
         windowID: '0xAAAAAAAAA',
       },
     ];
@@ -812,8 +811,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
         type: 'CompositorScreenshot',
         url: expect.anything(),
         windowID: '0x136888400',
-        windowWidth: 1280,
-        windowHeight: 1000,
+        windowSize: { width: 1280, height: 1000 },
       },
       name: 'CompositorScreenshot',
       start: 25,

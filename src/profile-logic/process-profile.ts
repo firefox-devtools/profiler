@@ -955,10 +955,18 @@ function _processMarkerPayload(
   // here, and then to `MarkerPayload` as the return value for this function.
   // This doesn't provide type safety but it shows the intent of going from an
   // object without much type safety, to a specific type definition.
-  const data: MarkerPayload = payload as any;
+  let data: MarkerPayload = payload as any;
 
   if (!data.type) {
     return data;
+  }
+
+  if (data.type === 'CompositorScreenshot') {
+    const { windowWidth, windowHeight, ...rest } = data as any;
+    data =
+      windowWidth === undefined || windowHeight === undefined
+        ? rest
+        : { ...rest, windowSize: { width: windowWidth, height: windowHeight } };
   }
 
   const stringIndexMarkerFields = stringIndexMarkerFieldsByDataType.get(
