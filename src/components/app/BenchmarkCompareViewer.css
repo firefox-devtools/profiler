@@ -140,7 +140,11 @@
  * competing with the numbers for attention until it is opened. */
 
 .benchmarkComparing {
+  /* The app's 11px base is too small for a header that is also the control for
+   * swapping the compared pair, so set a readable size for the whole block and
+   * let the URL list below shrink relative to that. */
   margin-bottom: 1.5em;
+  font-size: 13px;
 }
 
 .benchmarkComparing > summary {
@@ -150,7 +154,6 @@
 
 .benchmarkComparing__summaryText {
   color: var(--internal-text-muted);
-  font-size: 0.9em;
 }
 
 .benchmarkComparing__name {
