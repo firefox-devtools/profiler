@@ -91,11 +91,16 @@ at all" rather than "which rows".
   several chances. Correcting across all of them at once is the conservative
   reading, but it would mean that opening a subtest table changed the numbers in
   it, which is a worse property than the error it fixes.
-- **Score rows are not corrected.** The overall score and the 20 subtest scores
-  keep their own p-values (`qValue` is null on them). The 20 subtest scores _are_
-  a family of 20, and BH would work fine on them — n = 20 needs only
-  `0.05 / 20 = 2.5e-3` at rank 1, which is above the permutation floor. That is
-  the obvious next increment; it is not done here.
+- **The 20 subtest scores get plain Benjamini-Hochberg**, in
+  `applyBenjaminiHochberg`. A family of 20 is small enough for it: rank 1 needs
+  only `0.05 / 20 = 2.5e-3`, comfortably above the permutation floor, where the
+  6798-bucket table needed `7.4e-6` and could not get there. No joint relabelling,
+  no q-value machinery — the standard procedure is correct here.
+- **The overall score is not corrected**, and `qValue` stays null on it. It is the
+  one hypothesis the developer came to ask about, stated before any data was seen:
+  "did my patch move the score". Correcting it for the company of 20 subtests
+  would answer a question nobody asked, and would make the headline number harder
+  to clear the more subtests the benchmark happens to have.
 
 ### The MDE had to move with it
 
@@ -121,11 +126,60 @@ E[#exceedances]` and `P(#exceedances ≥ 1)` agree to first order once exceedanc
 are rare. Where a table has other discoveries to share the error budget with, the
 FDR bar is genuinely lower and this errs conservative.
 
-Score rows keep the uncorrected MDE, because they are judged on their own
-p-value. `ComparisonStats.mde` is therefore "the bar that applies to this row",
-which differs by row type — and, for buckets, by view. There is a test pinning
-the invariant that makes it all hang together: every row the filter reports has
-moved by at least its own MDE.
+The subtest scores needed the same treatment, and this is easy to miss twice: the
+first version of this work corrected the bucket MDEs and left the subtest ones
+alone, and `Perf-Dashboard` then reported "no change" while showing Δ = −1.83
+against an MDE of ±1.52 — a row that had moved by more than the smallest change it
+claimed it could see. Their bar is `alpha / n`, which is BH's own rank-1
+threshold. Only the overall score keeps the uncorrected MDE, because only it is
+judged on an uncorrected p-value.
+
+So `ComparisonStats.mde` means "the bar that applies to this row", which differs
+by row type and, for buckets, by view.
+
+One thing **not** to assert about it, tempting though it is: that every reported
+row has moved by at least its own MDE. It does not follow. The MDE is what a row
+would have needed _on its own_, while both FDR and BH reject the k-th best row on
+a looser threshold than the first — so a row found alongside other genuine movers
+can be reported on a shared error budget and still come in just under its own bar.
+A test asserted this invariant and passed by luck on the data it used; it now
+asserts what actually holds, which is that every bucket in one table divides out
+to the same critical |t|.
+
+### Saying it in words, for the person who actually asks
+
+The reader is usually a developer with a try push with and without their patch,
+asking "did I change anything, and did I make anything worse". They may have no
+statistics background at all, so every row now carries a **verdict** —
+`classifyChange` — and there are four of them, not three:
+
+| verdict      | means                                                         |
+| ------------ | ------------------------------------------------------------- |
+| `slower`     | moved, in the bad direction (weight is time, so up is slower) |
+| `faster`     | moved, in the good direction                                  |
+| `unchanged`  | a change worth caring about would have shown up, and did not  |
+| `unresolved` | this comparison could not have seen one either way            |
+
+The fourth is the whole point. "Nothing changed" and "we could not tell" are
+different answers and running them together is how a performance tool tells
+somebody their patch is fine when it has no idea. The separator is the MDE against
+`RESOLUTION_TOLERANCE` (2% of the row's own size, chosen against the measured
+1.8%–4.3% spread of subtest MDEs).
+
+On the reference pairs this is bracing: at 20 runs × 10 iterations most subtests
+read "can't tell", and only the overall score and the two tightest subtests can
+say "no change". That is the honest reading, and it is more useful than the old
+output — which labelled every subtest "Negligible" on a Cohen's d, including
+`Perf-Dashboard` at a real −2.27%. A developer who reads "can't tell" knows to go
+to the bucket tables, which pool across suites and do find things, or to push more
+runs. A developer who read "Negligible" learned nothing and was misled.
+
+The same reasoning removed effect size from the styling. Cohen's d divides by the
+row's own spread, so emphasis-by-d highlighted whichever rows happened to be quiet
+rather than whichever ones moved the benchmark, and nothing tied it to
+significance — a bucket could render bold on a large d with its q-value at 1.0.
+Weight now tracks impact on the overall score and colour tracks confidence, which
+are the two questions being asked and are properly independent of each other.
 
 ### Cost
 
@@ -143,11 +197,21 @@ So about 4.6s of added compute for the full 21-table analysis. The UI does this
 behind its existing spinner, after downloading and parsing two ~39 MB profiles,
 which dominates.
 
-The family pass reuses the same 1999 relabellings as the per-bucket p-values. It
-does not need nearly that many — `V̂` pools over thousands of buckets, so a few
-hundred draws would estimate it about as well and would cut the cost roughly
-fourfold. Sharing one set is simpler and the cost is not currently a problem;
-that is the knob to reach for if it becomes one.
+Each bucket's own p-value comes out of the same pass, for one extra comparison per
+null value. That is not just a saving. A separate pass could not afford to relabel
+_every_ bucket, so it spent relabellings only on the ones that might change
+verdict — three tuning constants' worth of prefilter — and left everything else on
+a Welch p-value that is not trustworthy for a bucket whose weight is zero in most
+iterations. Now every bucket has an exact permutation p-value and the prefilter is
+gone. On the reference pairs the uncorrected count shifts a little as a result
+(141 → 146 on pair B, 133 → 123 on pair A), which is the approximation being
+replaced rather than anything changing.
+
+The family pass reuses the same 1999 relabellings. It does not need nearly that
+many — `V̂` pools over thousands of buckets, so a few hundred draws would estimate
+it about as well and would cut the cost roughly fourfold. Sharing one set is
+simpler and the cost is not currently a problem; that is the knob to reach for if
+it becomes one.
 
 For comparison, the alternative the floor problem seemed to demand — escalating
 `PERMUTATION_COUNT` to ~136000 for the top buckets — is ~70× a full pass _per
