@@ -123,7 +123,16 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     );
   }
 
-  _onSubmit = () => {
+  _onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // Without this, submitting the form navigates to the current URL and
+    // reloads the whole app. Today that is masked by attemptToPublish
+    // dispatching synchronously, which unmounts the form before the browser
+    // gets to the default action -- don't rely on that.
+    event.preventDefault();
+    if (this.props.mode === 'download') {
+      // The download panel has no submit button; there is nothing to publish.
+      return;
+    }
     this.props.attemptToPublish();
   };
 
@@ -166,7 +175,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       <div data-testid="PublishPanel-container">
         <form
           className="publishPanelContent photon-body-10"
-          onSubmit={isDownload ? undefined : this._onSubmit}
+          onSubmit={this._onSubmit}
         >
           <h1 className="publishPanelTitle photon-title-30">{title}</h1>
           <p className="publishPanelInfoDescription">
