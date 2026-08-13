@@ -210,6 +210,13 @@
   width: 9rem;
 }
 
+/* The minimum detectable effect is context for the Δ% columns rather than a
+ * result in its own right, so it stays visually subordinate to them. */
+.benchmarkCell--mde {
+  color: var(--grey-50);
+  cursor: help;
+}
+
 .benchmarkCell--bucketName,
 .benchmarkCell--scoreLabel {
   overflow: hidden;

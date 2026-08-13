@@ -15,12 +15,20 @@ import {
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
   BucketComparison,
+  ComparisonStats,
   ScoreComparison,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 
 // ---------------------------------------------------------------------------
 // Formatting
 // ---------------------------------------------------------------------------
+
+/** Minimum detectable effect, tagged with how the p-value was obtained: "~" for
+ * the Welch approximation, no marker for an exact permutation p-value. */
+function formatMde(row: ComparisonStats): string {
+  const marker = row.pValueMethod === 'permutation' ? '' : '~';
+  return `${marker}\u00b1${row.mde.toFixed(2)}`;
+}
 
 function formatChange(rel: number): string {
   if (!isFinite(rel)) {
@@ -39,11 +47,11 @@ function printScoreAndSubtests(
   const overallAbsStr =
     (overallAbsDiff >= 0 ? '+' : '') + overallAbsDiff.toFixed(2);
   console.log(
-    `${'Score'.padEnd(COL)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'Δ%'.padStart(10)} ${'effect'.padStart(10)} ${'confidence'.padStart(12)}`
+    `${'Score'.padEnd(COL)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'MDE'.padStart(9)} ${'Δ%'.padStart(10)} ${'effect'.padStart(10)} ${'confidence'.padStart(12)}`
   );
-  console.log('-'.repeat(COL + 64));
+  console.log('-'.repeat(COL + 74));
   console.log(
-    `${'Overall (geomean-normalised)'.padEnd(COL)} ${overall.baseMean.toFixed(2).padStart(10)} ${overall.newMean.toFixed(2).padStart(10)} ${overallAbsStr.padStart(10)} ${formatChange(overall.relChange).padStart(10)} ${overall.effectSize.padStart(10)} ${overall.confidence.padStart(12)}`
+    `${'Overall (geomean-normalised)'.padEnd(COL)} ${overall.baseMean.toFixed(2).padStart(10)} ${overall.newMean.toFixed(2).padStart(10)} ${overallAbsStr.padStart(10)} ${formatMde(overall).padStart(9)} ${formatChange(overall.relChange).padStart(10)} ${overall.effectSize.padStart(10)} ${overall.confidence.padStart(12)}`
   );
   console.log('');
   for (const s of suites) {
@@ -52,7 +60,7 @@ function printScoreAndSubtests(
     const label =
       s.label.length > COL - 2 ? s.label.slice(0, COL - 5) + '...' : s.label;
     console.log(
-      `${'  ' + label.padEnd(COL - 2)} ${s.baseMean.toFixed(2).padStart(10)} ${s.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatChange(s.relChange).padStart(10)} ${s.effectSize.padStart(10)} ${s.confidence.padStart(12)}`
+      `${'  ' + label.padEnd(COL - 2)} ${s.baseMean.toFixed(2).padStart(10)} ${s.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(s).padStart(9)} ${formatChange(s.relChange).padStart(10)} ${s.effectSize.padStart(10)} ${s.confidence.padStart(12)}`
     );
   }
 }
@@ -82,9 +90,9 @@ function printBucketResults(
         : ':')
   );
   console.log(
-    `${'Bucket name'.padEnd(60)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'Δ%'.padStart(10)} ${'effect'.padStart(10)} ${'confidence'.padStart(12)}`
+    `${'Bucket name'.padEnd(60)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'MDE'.padStart(9)} ${'Δ%'.padStart(10)} ${'effect'.padStart(10)} ${'confidence'.padStart(12)}`
   );
-  console.log('-'.repeat(125));
+  console.log('-'.repeat(135));
   for (const c of shown) {
     const name =
       c.bucketName.length > 59
@@ -93,7 +101,7 @@ function printBucketResults(
     const absDiff = c.newMean - c.baseMean;
     const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
     console.log(
-      `${name.padEnd(60)} ${c.baseMean.toFixed(2).padStart(10)} ${c.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatChange(c.relChange).padStart(10)} ${c.effectSize.padStart(10)} ${c.confidence.padStart(12)}`
+      `${name.padEnd(60)} ${c.baseMean.toFixed(2).padStart(10)} ${c.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(c).padStart(9)} ${formatChange(c.relChange).padStart(10)} ${c.effectSize.padStart(10)} ${c.confidence.padStart(12)}`
     );
   }
 }

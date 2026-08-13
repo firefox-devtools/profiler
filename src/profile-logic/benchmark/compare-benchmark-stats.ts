@@ -2,8 +2,6 @@
  * Compare two benchmark profile stats files (produced by extract-benchmark-stats)
  * and report which buckets changed significantly between them.
  *
- * Uses Mann-Whitney U test with normal approximation.
- *
  * Usage:
  *   yarn build-node-tools
  *   node node-tools-dist/compare-benchmark-stats.js \
@@ -24,13 +22,20 @@ import type {
   SuiteStats,
 } from './extract-benchmark-stats';
 import {
-  mannWhitneyU,
-  mannWhitneyPValue,
-  cliffsDelta,
-  interpretEffectSize,
+  interpretStandardizedEffect,
+  makePermutationBaseIndices,
+  minimumDetectableEffect,
+  permutationTwoSidedP,
   pValueToConfidence,
+  standardizedMeanDifference,
+  studentTTwoSidedP,
+  welchTTest,
 } from './perf-compare-stats';
-import type { EffectSize, ConfidenceRating } from './perf-compare-stats';
+import type {
+  EffectSize,
+  ConfidenceRating,
+  WelchResult,
+} from './perf-compare-stats';
 import type { IndexIntoFuncTable } from '../../types/profile';
 
 // ---------------------------------------------------------------------------
@@ -57,17 +62,20 @@ function suiteTotalWeight(suite: SuiteStats): number {
  * sides of the comparison.
  *
  * Scaling each side by its own `geomean / suiteTotal` (what a single-profile
- * score computation uses) would break the rank statistics. Per-iteration
- * bucket weights are small integers — a function typically accounts for 0, 1
- * or 2 samples in an iteration — so base and new tie on a large fraction of
- * pairs, and `mannWhitneyU` detects those ties by exact equality. Two factors
- * that differ by even 0.1% turn every nonzero tie into a strict inequality,
- * all pointing the same way, which shifts Cliff's delta by the tied-pair
- * fraction (routinely 0.1-0.2) in a direction set only by whether that suite
- * happened to get slightly faster or slower overall. A shared factor is a
- * common positive scale, which rank tests are invariant to: ties survive
- * exactly, and a bucket confined to one suite gets the same delta and p-value
- * globally as it does in that suite's own comparison.
+ * score computation uses) means the two sides are divided by *different*
+ * constants, so the drift between those constants is added to every bucket's
+ * measured change. For a suite whose own total moved by 1%, every function in it
+ * picks up a spurious 1% change pointing in the same direction, whether or not
+ * that function did anything. A shared factor is a common positive scale
+ * instead: it multiplies delta and se together, leaving the standardised effect
+ * and the p-value untouched, so a bucket confined to one suite gets the same
+ * verdict globally as it does in that suite's own comparison.
+ *
+ * This also used to be much worse than a 1% bias. While the comparison ran on
+ * Mann-Whitney U, the mismatched scaling broke the exact-equality ties that a
+ * rank statistic depends on, and a 0.1% difference in factors moved Cliff's
+ * delta by the tied-pair fraction — routinely 0.1 to 0.2. See
+ * docs-developer/benchmark-auto-bucketing.md §3.1.
  *
  * The shared factor is the geometric mean of the two profiles' own factors,
  * i.e. normalisation by the geometric mean of the two suite totals. Suites
@@ -122,8 +130,8 @@ export function computeSharedSuiteFactors(
  *
  * Suites are visited in name order rather than in the profile's own marker
  * discovery order, so that the floating-point summation order is the same for
- * both profiles. Otherwise a bucket appearing in several suites could end up a
- * few ULPs apart on the two sides and lose ties that ought to hold exactly.
+ * both profiles and a bucket appearing in several suites cannot come out a few
+ * ULPs apart on the two sides for no reason.
  */
 export function computeGlobalBuckets(
   stats: ProfileBenchmarkStats,
@@ -176,6 +184,142 @@ export function computeGlobalBuckets(
 }
 
 // ---------------------------------------------------------------------------
+// Shared statistics for one bucket
+// ---------------------------------------------------------------------------
+
+/** How a comparison's p-value was arrived at. */
+export type PValueMethod = 'permutation' | 'welch';
+
+/** Statistics every comparison row carries, whether it is a bucket or a score. */
+export type ComparisonStats = {
+  baseMean: number;
+  newMean: number;
+  /** Relative change: (newMean - baseMean) / baseMean */
+  relChange: number;
+  /** newMean - baseMean, in the same units as the means. Adds up across a
+   * bucket partition, so a list of these is a budget for the total change. */
+  delta: number;
+  /** Standard error of `delta`. */
+  se: number;
+  /** Standardised mean difference (Cohen's d); what the effect-size filter
+   * compares against. */
+  standardizedEffect: number;
+  effectSize: EffectSize;
+  pValue: number;
+  pValueMethod: PValueMethod;
+  confidence: ConfidenceRating;
+  /** Smallest |delta| that would have been called significant. A null result
+   * with a small MDE means "did not move"; with a large MDE it means "could not
+   * tell". */
+  mde: number;
+};
+
+/**
+ * How small a Welch p-value has to be before it is worth spending permutations
+ * on refining it. Buckets well away from significance cannot change verdict, and
+ * there are ~14000 of them per profile pair.
+ */
+const PERMUTATION_PREFILTER_P = 0.25;
+
+/**
+ * Number of relabellings. 1999 puts the smallest reportable p-value at 5e-4,
+ * comfortably below the thresholds `pValueToConfidence` uses.
+ */
+const PERMUTATION_COUNT = 1999;
+
+/**
+ * A bucket whose weight is zero in most iterations breaks the t-distribution
+ * approximation however large the sample looks: 200 iterations of a bucket that
+ * is nonzero in eight of them carries eight observations' worth of information.
+ * Those always get the permutation treatment regardless of their Welch p.
+ */
+const SPARSE_ZERO_FRACTION = 0.5;
+
+/**
+ * Sparse buckets get a wider gate than dense ones, because their Welch p-value
+ * is the untrustworthy one. Not an unconditional gate: a sparse bucket whose
+ * approximate p-value is 0.8 is not going to turn out significant, and there are
+ * thousands of them.
+ */
+const SPARSE_PREFILTER_P = 0.5;
+
+function zeroFraction(values: ArrayLike<number>): number {
+  const n = values.length;
+  if (n === 0) {
+    return 1;
+  }
+  let zeros = 0;
+  for (let i = 0; i < n; i++) {
+    if (values[i] === 0) {
+      zeros++;
+    }
+  }
+  return zeros / n;
+}
+
+/**
+ * Lazily built relabellings, keyed by sample sizes. One set is shared by every
+ * bucket in a comparison so that all p-values are judged against the same
+ * relabellings, and so that generating them is not paid for per bucket.
+ */
+const permutationCache: Map<string, Int32Array[]> = new Map();
+
+function permutationsFor(nBase: number, nNew: number): Int32Array[] {
+  const key = `${nBase}:${nNew}`;
+  let permutations = permutationCache.get(key);
+  if (permutations === undefined) {
+    permutations = makePermutationBaseIndices(nBase, nNew, PERMUTATION_COUNT);
+    permutationCache.set(key, permutations);
+  }
+  return permutations;
+}
+
+/**
+ * Statistics for one bucket: Welch's t on the mean difference, with the p-value
+ * refined by permutation where that could matter.
+ */
+export function computeComparisonStats(
+  baseIter: ArrayLike<number>,
+  newIter: ArrayLike<number>
+): ComparisonStats {
+  const welch: WelchResult = welchTTest(baseIter, newIter);
+  const welchP = studentTTwoSidedP(welch.t, welch.df);
+
+  let pValue = welchP;
+  let pValueMethod: PValueMethod = 'welch';
+  const sparse =
+    zeroFraction(baseIter) > SPARSE_ZERO_FRACTION ||
+    zeroFraction(newIter) > SPARSE_ZERO_FRACTION;
+  if (
+    welch.se > 0 &&
+    (welchP <= PERMUTATION_PREFILTER_P ||
+      (sparse && welchP <= SPARSE_PREFILTER_P))
+  ) {
+    pValue = permutationTwoSidedP(
+      baseIter,
+      newIter,
+      permutationsFor(baseIter.length, newIter.length)
+    );
+    pValueMethod = 'permutation';
+  }
+
+  const standardizedEffect = standardizedMeanDifference(welch);
+  return {
+    baseMean: welch.meanBase,
+    newMean: welch.meanNew,
+    relChange: welch.meanBase === 0 ? Infinity : welch.delta / welch.meanBase,
+    delta: welch.delta,
+    se: welch.se,
+    standardizedEffect,
+    effectSize: interpretStandardizedEffect(standardizedEffect),
+    pValue,
+    pValueMethod,
+    confidence: pValueToConfidence(pValue),
+    mde: minimumDetectableEffect(welch),
+  };
+}
+
+// ---------------------------------------------------------------------------
 // Comparison logic
 // ---------------------------------------------------------------------------
 
@@ -191,14 +335,7 @@ export type BucketComparison = {
   baseFunc: IndexIntoFuncTable | null;
   /** Func index of the bucket in the new profile, or null if absent there. */
   newFunc: IndexIntoFuncTable | null;
-  baseMean: number;
-  newMean: number;
-  /** Relative change: (newMean - baseMean) / baseMean */
-  relChange: number;
-  cliffdsDelta: number;
-  effectSize: EffectSize;
-  confidence: ConfidenceRating;
-};
+} & ComparisonStats;
 
 type KeyMapEntry = {
   /** Human-readable display name for this key (taken from the first bucket
@@ -324,20 +461,9 @@ export function compareBuckets(
     const baseIter = baseEntry?.iterationTotals ?? zeros;
     const newIter = newEntry?.iterationTotals ?? zeros;
 
-    const baseMean = mean(baseIter);
-    const newMean = mean(newIter);
-
-    if (baseMean === 0 && newMean === 0) {
+    if (mean(baseIter) === 0 && mean(newIter) === 0) {
       continue;
     }
-
-    const u = mannWhitneyU(baseIter, newIter);
-    const pValue = mannWhitneyPValue(u, baseIter, newIter);
-    const relChange =
-      baseMean === 0 ? Infinity : (newMean - baseMean) / baseMean;
-    const delta = cliffsDelta(u, baseIter.length, newIter.length);
-    const effectSize = interpretEffectSize(delta);
-    const confidence = pValueToConfidence(pValue);
 
     // Prefer the base profile's display name; fall back to the new one.
     const displayName = baseEntry?.displayName ?? newEntry?.displayName ?? key;
@@ -347,12 +473,7 @@ export function compareBuckets(
       bucketName: displayName,
       baseFunc: baseEntry?.representativeFunc ?? null,
       newFunc: newEntry?.representativeFunc ?? null,
-      baseMean,
-      newMean,
-      relChange,
-      cliffdsDelta: delta,
-      effectSize,
-      confidence,
+      ...computeComparisonStats(baseIter, newIter),
     });
   }
 
@@ -387,34 +508,12 @@ export function suiteIterationTotals(
 
 export type ScoreComparison = {
   label: string;
-  baseMean: number;
-  newMean: number;
-  relChange: number;
-  cliffdsDelta: number;
-  effectSize: EffectSize;
-  confidence: ConfidenceRating;
-};
+} & ComparisonStats;
 
 export function compareIterationTotals(
   label: string,
   baseIter: number[],
   newIter: number[]
 ): ScoreComparison {
-  const baseMean = mean(baseIter);
-  const newMean = mean(newIter);
-  const u = mannWhitneyU(baseIter, newIter);
-  const pValue = mannWhitneyPValue(u, baseIter, newIter);
-  const relChange = baseMean === 0 ? Infinity : (newMean - baseMean) / baseMean;
-  const delta = cliffsDelta(u, baseIter.length, newIter.length);
-  const effectSize = interpretEffectSize(delta);
-  const confidence = pValueToConfidence(pValue);
-  return {
-    label,
-    baseMean,
-    newMean,
-    relChange,
-    cliffdsDelta: delta,
-    effectSize,
-    confidence,
-  };
+  return { label, ...computeComparisonStats(baseIter, newIter) };
 }
