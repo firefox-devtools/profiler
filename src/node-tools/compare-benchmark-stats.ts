@@ -18,16 +18,23 @@ import type {
   ComparisonStats,
   ScoreComparison,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
+import { pValueToConfidence } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
 
 // ---------------------------------------------------------------------------
 // Formatting
 // ---------------------------------------------------------------------------
 
-/** Minimum detectable effect, tagged with how the p-value was obtained: "~" for
- * the Welch approximation, no marker for an exact permutation p-value. */
+/**
+ * Minimum detectable effect, tagged "~" when it rests on an approximation.
+ *
+ * A bucket's MDE comes from the family's permutation-derived critical |t|, so it
+ * is never approximate. A score row's comes from the Welch t distribution, which
+ * is only as good as that approximation is for the row in question \u2014 which
+ * `pValueMethod` is exactly the flag for.
+ */
 function formatMde(row: ComparisonStats): string {
-  const marker = row.pValueMethod === 'permutation' ? '' : '~';
-  return `${marker}\u00b1${row.mde.toFixed(2)}`;
+  const approximate = row.qValue === null && row.pValueMethod === 'welch';
+  return `${approximate ? '~' : ''}\u00b1${row.mde.toFixed(2)}`;
 }
 
 function formatChange(rel: number): string {
@@ -51,7 +58,7 @@ function printScoreAndSubtests(
   );
   console.log('-'.repeat(COL + 74));
   console.log(
-    `${'Overall (geomean-normalised)'.padEnd(COL)} ${overall.baseMean.toFixed(2).padStart(10)} ${overall.newMean.toFixed(2).padStart(10)} ${overallAbsStr.padStart(10)} ${formatMde(overall).padStart(9)} ${formatChange(overall.relChange).padStart(10)} ${overall.effectSize.padStart(10)} ${overall.confidence.padStart(12)}`
+    `${'Overall (geomean-normalised)'.padEnd(COL)} ${overall.baseMean.toFixed(2).padStart(10)} ${overall.newMean.toFixed(2).padStart(10)} ${overallAbsStr.padStart(10)} ${formatMde(overall).padStart(9)} ${formatChange(overall.relChange).padStart(10)} ${overall.effectSize.padStart(10)} ${pValueToConfidence(overall.pValue).padStart(12)}`
   );
   console.log('');
   for (const s of suites) {
@@ -60,39 +67,58 @@ function printScoreAndSubtests(
     const label =
       s.label.length > COL - 2 ? s.label.slice(0, COL - 5) + '...' : s.label;
     console.log(
-      `${'  ' + label.padEnd(COL - 2)} ${s.baseMean.toFixed(2).padStart(10)} ${s.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(s).padStart(9)} ${formatChange(s.relChange).padStart(10)} ${s.effectSize.padStart(10)} ${s.confidence.padStart(12)}`
+      `${'  ' + label.padEnd(COL - 2)} ${s.baseMean.toFixed(2).padStart(10)} ${s.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(s).padStart(9)} ${formatChange(s.relChange).padStart(10)} ${s.effectSize.padStart(10)} ${pValueToConfidence(s.pValue).padStart(12)}`
     );
   }
+}
+
+/** A corrected p-value, or "-" for a row that is not part of a family. */
+function formatCorrected(value: number | null): string {
+  if (value === null) {
+    return '-';
+  }
+  return value >= 0.1 ? value.toFixed(2) : value.toPrecision(2);
 }
 
 function printBucketResults(
   label: string,
   comparisons: BucketComparison[],
-  topN: number | null
+  topN: number | null,
+  qThreshold: number
 ) {
-  const significant = comparisons
-    .filter((c) => c.confidence !== 'LOW')
+  // The uncorrected count is printed alongside the corrected one because the gap
+  // between them is the whole point: at ~6800 buckets, p ≤ 0.05 admits hundreds
+  // of rows on two builds that do not differ at all.
+  const uncorrected = comparisons.filter((c) => c.pValue <= 0.05).length;
+  const familyWise = comparisons.filter(
+    (c) => c.familyWiseP !== null && c.familyWiseP <= 0.05
+  ).length;
+  const discoveries = comparisons
+    .filter((c) => c.qValue !== null && c.qValue <= qThreshold)
     .sort(
       (a, b) =>
         Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
     );
 
-  if (significant.length === 0) {
-    console.log(`\n[${label}] No significant bucket changes.`);
+  console.log(
+    `\n[${label}] ${comparisons.length} buckets tested. ` +
+      `${uncorrected} at p ≤ 0.05 (uncorrected), ` +
+      `${discoveries.length} at q ≤ ${qThreshold} (FDR), ` +
+      `${familyWise} at FWER ≤ 0.05.`
+  );
+  if (discoveries.length === 0) {
+    console.log('No bucket survives the multiple-comparisons correction.');
     return;
   }
 
-  const shown = topN !== null ? significant.slice(0, topN) : significant;
+  const shown = topN !== null ? discoveries.slice(0, topN) : discoveries;
+  if (topN !== null && discoveries.length > topN) {
+    console.log(`Showing the top ${topN} by absolute impact:`);
+  }
   console.log(
-    `\n[${label}] ${significant.length} significant buckets` +
-      (topN !== null && significant.length > topN
-        ? `, showing top ${topN} by absolute impact:`
-        : ':')
+    `${'Bucket name'.padEnd(60)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'MDE'.padStart(9)} ${'Δ%'.padStart(10)} ${'q'.padStart(9)} ${'pFWER'.padStart(9)}`
   );
-  console.log(
-    `${'Bucket name'.padEnd(60)} ${'base mean'.padStart(10)} ${'new mean'.padStart(10)} ${'Δ abs'.padStart(10)} ${'MDE'.padStart(9)} ${'Δ%'.padStart(10)} ${'effect'.padStart(10)} ${'confidence'.padStart(12)}`
-  );
-  console.log('-'.repeat(135));
+  console.log('-'.repeat(132));
   for (const c of shown) {
     const name =
       c.bucketName.length > 59
@@ -101,7 +127,7 @@ function printBucketResults(
     const absDiff = c.newMean - c.baseMean;
     const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
     console.log(
-      `${name.padEnd(60)} ${c.baseMean.toFixed(2).padStart(10)} ${c.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(c).padStart(9)} ${formatChange(c.relChange).padStart(10)} ${c.effectSize.padStart(10)} ${c.confidence.padStart(12)}`
+      `${name.padEnd(60)} ${c.baseMean.toFixed(2).padStart(10)} ${c.newMean.toFixed(2).padStart(10)} ${absDiffStr.padStart(10)} ${formatMde(c).padStart(9)} ${formatChange(c.relChange).padStart(10)} ${formatCorrected(c.qValue).padStart(9)} ${formatCorrected(c.familyWiseP).padStart(9)}`
     );
   }
 }
@@ -116,12 +142,14 @@ async function main() {
   if (!argv.base || !argv.new) {
     console.error(
       'Usage: compare-benchmark-stats --base <base-stats.json> --new <new-stats.json>\n' +
-        '  [--suite <name>] [--global] [--top 100] [--all] [--no-appeared]'
+        '  [--suite <name>] [--global] [--top 100] [--all] [--no-appeared]\n' +
+        '  [--qvalue 0.05]'
     );
     process.exit(1);
   }
 
   const topN: number | null = argv.all ? null : (argv.top ?? 100);
+  const qThreshold: number = argv.qvalue ?? 0.05;
   const suiteFilter: string | undefined = argv.suite;
   const showGlobal: boolean = !suiteFilter || argv.global;
   // minimist turns --no-appeared into { appeared: false }
@@ -216,7 +244,12 @@ async function main() {
       base.bucketKeys,
       newStats.bucketKeys
     );
-    printBucketResults('Global (geomean-normalised)', globalComparisons, topN);
+    printBucketResults(
+      'Global (geomean-normalised)',
+      globalComparisons,
+      topN,
+      qThreshold
+    );
   }
 
   if (suiteFilter !== undefined) {
@@ -254,7 +287,7 @@ async function main() {
         base.bucketKeys,
         newStats.bucketKeys
       );
-      printBucketResults(baseSuite.suiteName, comparisons, topN);
+      printBucketResults(baseSuite.suiteName, comparisons, topN, qThreshold);
     }
   }
 }

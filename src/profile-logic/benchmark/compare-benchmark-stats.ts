@@ -9,11 +9,13 @@
  *     --new  /tmp/new-stats.json
  *
  * Options:
- *   --suite <name>    Show per-suite results for this suite (substring match)
+ *   --suite <name>    Show per-suite results for this suite (substring match;
+ *                     pass "" for every suite)
  *   --global          Show results from the geomean-normalised global view (default)
- *   --pvalue <0.05>   Significance threshold (default 0.05)
- *   --top <20>        Show top N changed buckets (default 20)
- *   --all             Show all significant buckets, not just top N
+ *   --qvalue <0.05>   False discovery rate a bucket has to clear (default 0.05)
+ *   --top <100>       Show top N changed buckets (default 100)
+ *   --all             Show every bucket that clears --qvalue, not just top N
+ *   --no-appeared     Skip buckets present in only one of the two profiles
  */
 
 import type {
@@ -22,18 +24,18 @@ import type {
   SuiteStats,
 } from './extract-benchmark-stats';
 import {
+  computeFamilyCorrection,
   interpretStandardizedEffect,
   makePermutationBaseIndices,
   minimumDetectableEffect,
   permutationTwoSidedP,
-  pValueToConfidence,
   standardizedMeanDifference,
   studentTTwoSidedP,
   welchTTest,
 } from './perf-compare-stats';
 import type {
   EffectSize,
-  ConfidenceRating,
+  FamilyMember,
   WelchResult,
 } from './perf-compare-stats';
 import type { IndexIntoFuncTable } from '../../types/profile';
@@ -205,13 +207,41 @@ export type ComparisonStats = {
    * compares against. */
   standardizedEffect: number;
   effectSize: EffectSize;
+  /**
+   * Uncorrected. For a bucket row this is *not* the number to judge by — see
+   * `qValue`. It is kept because it answers a different and still useful
+   * question: whether this one bucket moved, asked on its own, which is what a
+   * perf engineer who already suspects a specific function wants to know.
+   */
   pValue: number;
   pValueMethod: PValueMethod;
-  confidence: ConfidenceRating;
-  /** Smallest |delta| that would have been called significant. A null result
-   * with a small MDE means "did not move"; with a large MDE it means "could not
-   * tell". */
+  /**
+   * Smallest |delta| that would have been called significant *by the rule that
+   * applies to this row*. A null result with a small MDE means "did not move";
+   * with a large MDE it means "could not tell".
+   *
+   * Which rule that is differs by row type, and so does the MDE. A score row is
+   * judged on its own p-value, so its MDE comes from the uncorrected t critical
+   * value. A bucket row is judged on `qValue`, against the thousands of buckets
+   * in its table, so `applyFamilyCorrection` re-bases its MDE on the bar that
+   * table imposes — several times larger, and view-dependent for the same reason
+   * `qValue` is: the same bucket is easier to claim in a 118-row subtest than in
+   * the 6800-row overall view.
+   */
   mde: number;
+  /**
+   * Estimated false discovery rate among the rows of this table that are at
+   * least this extreme — `pValue` corrected for the thousands of buckets tested
+   * alongside this one. This is the number to filter on; the uncorrected
+   * `pValue` means very little on its own at these family sizes. Null on score
+   * rows, which are not one of a family.
+   */
+  qValue: number | null;
+  /** Probability that *any* bucket in this table would look this extreme if
+   * nothing had changed anywhere. Exact under the buckets' dependence, and a far
+   * stricter bar than `qValue`: use it to answer "is there anything here at
+   * all", not to pick out rows. Null on score rows. */
+  familyWiseP: number | null;
 };
 
 /**
@@ -314,8 +344,11 @@ export function computeComparisonStats(
     effectSize: interpretStandardizedEffect(standardizedEffect),
     pValue,
     pValueMethod,
-    confidence: pValueToConfidence(pValue),
     mde: minimumDetectableEffect(welch),
+    // Filled in by compareBuckets, which is the level that knows what the family
+    // is. A single comparison in isolation has nothing to be corrected against.
+    qValue: null,
+    familyWiseP: null,
   };
 }
 
@@ -455,6 +488,7 @@ export function compareBuckets(
   const zeros = new Array<number>(iterationCount).fill(0);
 
   const results: BucketComparison[] = [];
+  const family: FamilyMember[] = [];
   for (const key of allKeys) {
     const baseEntry = baseMap.get(key);
     const newEntry = newMap.get(key);
@@ -475,9 +509,50 @@ export function compareBuckets(
       newFunc: newEntry?.representativeFunc ?? null,
       ...computeComparisonStats(baseIter, newIter),
     });
+    family.push({ base: baseIter, comp: newIter });
   }
 
+  applyFamilyCorrection(results, family);
   return results;
+}
+
+/**
+ * Correct one table's worth of bucket p-values for the fact that there are
+ * thousands of them, and write the result onto the rows.
+ *
+ * **What the family is.** Every bucket in this one comparison, and no more: the
+ * global view is corrected against the global view, and each subtest against
+ * itself. Those 21 tables do overlap — they are hypotheses about the same
+ * samples — so a bucket that shows up in several of them has had several
+ * chances. Correcting across all of them at once would be the conservative
+ * reading, but it would also mean opening a subtest table changed the numbers in
+ * it, which is worse than the error it fixes. Each table is honest about itself.
+ */
+function applyFamilyCorrection(
+  results: BucketComparison[],
+  family: FamilyMember[]
+) {
+  if (family.length === 0) {
+    return;
+  }
+  const correction = computeFamilyCorrection(
+    family,
+    permutationsFor(family[0].base.length, family[0].comp.length)
+  );
+  if (correction === null) {
+    return;
+  }
+  for (let i = 0; i < results.length; i++) {
+    const row = results[i];
+    row.qValue = correction.qValues[i];
+    row.familyWiseP = correction.familyWisePValues[i];
+    // Re-base the MDE on the bar that now actually applies. `computeComparisonStats`
+    // set it from the uncorrected t critical value, which for a bucket row is no
+    // longer the threshold anything is judged against — leaving it would have the
+    // table promise a sensitivity it does not have, and turn "this really did not
+    // move" into an overclaim on every quiet row.
+    row.mde = correction.criticalAbsT * row.se;
+  }
 }
 
 export function mean(arr: ArrayLike<number>): number {
