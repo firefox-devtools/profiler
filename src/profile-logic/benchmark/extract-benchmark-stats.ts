@@ -90,13 +90,11 @@ export type ProfileBenchmarkStats = {
    * a focusSelf() flame graph.
    */
   bucketFuncs: Array<IndexIntoFuncTable>;
-  /**
-   * Per-bucket weight summed across all suites, with suite geomean factors applied,
-   * per iteration. Sparse: only buckets with nonzero global total.
-   * This is the "geomean-normalised" global view.
-   */
-  globalBuckets: SparseBucketEntry[];
-  /** Per-suite sparse bucket data. */
+  /** Per-suite sparse bucket data. This is the only per-bucket weight data
+   * stored; the geomean-normalised "global" view across all suites is derived
+   * from it at comparison time by `computeGlobalBuckets`, because the
+   * normalisation factors have to be shared between the two profiles being
+   * compared rather than computed per profile. */
   suites: SuiteStats[];
 };
 
@@ -240,7 +238,7 @@ export function extractBenchmarkStatsFromProfile(
   });
 
   const bucketCount = bucketFuncs.length;
-  const { allSuiteScores, factorPerSuite } = benchmarkScores;
+  const { allSuiteScores } = benchmarkScores;
 
   // Build per-suite sparse entries
   const suites: SuiteStats[] = allSuiteScores.map((suiteScores) => {
@@ -266,42 +264,5 @@ export function extractBenchmarkStatsFromProfile(
     };
   });
 
-  // Build global sparse entries: sum factorPerSuite[s] * bucketIterationTotals[s][b][i]
-  // All suites share the same iterationCount, so we can use the first suite's value.
-  const iterationCount = allSuiteScores[0].bucketStats!.iterationCount;
-  const globalIterTotals = new Float64Array(bucketCount * iterationCount);
-
-  for (let suiteIndex = 0; suiteIndex < allSuiteScores.length; suiteIndex++) {
-    const factor = factorPerSuite[suiteIndex];
-    const suiteScores = allSuiteScores[suiteIndex];
-    for (let b = 0; b < bucketCount; b++) {
-      if (suiteScores.bucketTotals[b] === 0) {
-        continue;
-      }
-      const base = b * iterationCount;
-      for (let i = 0; i < iterationCount; i++) {
-        globalIterTotals[base + i] +=
-          factor * suiteScores.bucketIterationTotals[base + i];
-      }
-    }
-  }
-
-  const globalBuckets: SparseBucketEntry[] = [];
-  for (let b = 0; b < bucketCount; b++) {
-    const base = b * iterationCount;
-    let total = 0;
-    for (let i = 0; i < iterationCount; i++) {
-      total += globalIterTotals[base + i];
-    }
-    if (total === 0) {
-      continue;
-    }
-    const iterationTotals = globalIterTotals.subarray(
-      base,
-      base + iterationCount
-    );
-    globalBuckets.push({ bucketIndex: b, iterationTotals });
-  }
-
-  return { bucketNames, bucketKeys, bucketFuncs, globalBuckets, suites };
+  return { bucketNames, bucketKeys, bucketFuncs, suites };
 }

@@ -16,6 +16,8 @@ import { extractBenchmarkStatsFromProfile } from 'firefox-profiler/profile-logic
 import {
   compareBuckets,
   compareIterationTotals,
+  computeGlobalBuckets,
+  computeSharedSuiteFactors,
   suiteIterationTotals,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
@@ -49,8 +51,10 @@ type ComparisonData = {
     comparisons: BucketComparison[];
   }>;
   /** Per-bucket comparisons across all suites, using the geomean-normalised
-   * global bucket weights. Buckets flagged as significant here may not be
-   * significant in any single suite. */
+   * global bucket weights. A bucket that runs in a single suite gets the same
+   * effect size and p-value here as in that suite's own comparison; one that
+   * runs in several can be significant here without being significant in any
+   * single suite, since the global view pools their iterations. */
   globalComparisons: BucketComparison[];
 };
 
@@ -99,14 +103,26 @@ async function computeComparison(
 
   const iterationCount = baseStats.suites[0]?.iterationCount ?? 1;
 
+  // Both profiles' global (across-suite) bucket weights are normalised with
+  // one shared set of per-suite factors, so that the rank statistics compare
+  // like with like. See computeSharedSuiteFactors.
+  const sharedSuiteFactors = computeSharedSuiteFactors(baseStats, newStats);
+  const baseGlobalBuckets = computeGlobalBuckets(
+    baseStats,
+    sharedSuiteFactors,
+    iterationCount
+  );
+  const newGlobalBuckets = computeGlobalBuckets(
+    newStats,
+    sharedSuiteFactors,
+    iterationCount
+  );
+
   const baseGlobalIter = suiteIterationTotals(
-    baseStats.globalBuckets,
+    baseGlobalBuckets,
     iterationCount
   );
-  const newGlobalIter = suiteIterationTotals(
-    newStats.globalBuckets,
-    iterationCount
-  );
+  const newGlobalIter = suiteIterationTotals(newGlobalBuckets, iterationCount);
   const overallScore = compareIterationTotals(
     'Overall (geomean-normalised)',
     baseGlobalIter,
@@ -155,8 +171,8 @@ async function computeComparison(
   suiteComparisons.sort((a, b) => a.suiteName.localeCompare(b.suiteName));
 
   const globalComparisons = compareBuckets(
-    baseStats.globalBuckets,
-    newStats.globalBuckets,
+    baseGlobalBuckets,
+    newGlobalBuckets,
     baseStats.bucketNames,
     newStats.bucketNames,
     baseStats.bucketFuncs,
@@ -527,7 +543,7 @@ function BucketTable({
         <col className="benchmarkCell--colFixed" />
       </colgroup>
       <tbody>
-        {significant.map((c, i) => {
+        {significant.map((c) => {
           const absDiff = c.newMean - c.baseMean;
           const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
           const impactRel =
