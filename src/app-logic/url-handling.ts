@@ -174,6 +174,7 @@ type BaseQuery = {
   file: string; // Path into a zip file.
   transforms: string;
   profiles: string[];
+  names: string[]; // Display names for `profiles`, e.g. ["Chrome", "Firefox"]
   profileName: string;
   symbolServer: string;
   view: string;
@@ -277,7 +278,10 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         return '';
       }
       return queryString.stringify(
-        { profiles: urlState.profilesToCompare },
+        {
+          profiles: urlState.profilesToCompare,
+          names: urlState.profileNamesToCompare ?? undefined,
+        },
         { arrayFormat: 'bracket' }
       );
     case 'public':
@@ -612,6 +616,7 @@ export function stateFromLocation(
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     profilesToCompare: query.profiles || null,
+    profileNamesToCompare: query.names || null,
     selectedTab,
     pathInZipFile: query.file || null,
     profileName: query.profileName,
