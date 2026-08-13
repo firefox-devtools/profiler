@@ -28,6 +28,14 @@ const compareBenchmarkStatsConfig = {
   outfile: 'node-tools-dist/compare-benchmark-stats.js',
 };
 
+// Dumps the call subtree below one benchmark bucket as per-iteration weight
+// vectors, for docs-developer/auto-bucketing-prototype.mjs to consume.
+const dumpBucketSubtreeConfig = {
+  ...nodeBaseConfig,
+  entryPoints: ['src/node-tools/dump-bucket-subtree.ts'],
+  outfile: 'node-tools-dist/dump-bucket-subtree.js',
+};
+
 async function build() {
   await esbuild.build(profilerEditConfig);
   console.log('✅ profiler-edit build completed');
@@ -37,6 +45,8 @@ async function build() {
   console.log('✅ extract-benchmark-stats build completed');
   await esbuild.build(compareBenchmarkStatsConfig);
   console.log('✅ compare-benchmark-stats build completed');
+  await esbuild.build(dumpBucketSubtreeConfig);
+  console.log('✅ dump-bucket-subtree build completed');
 }
 
 build().catch(console.error);
