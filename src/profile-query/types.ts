@@ -160,6 +160,42 @@ export type StatusResult = {
   }>;
 };
 
+// ===== Category Breakdown =====
+
+export type CategorySubBreakdownEntry = {
+  name: string;
+  subcategoryIndex: number;
+  samples: number;
+  percentage: number; // Of the breakdown's totalSamples, like the parent category row
+};
+
+export type CategoryBreakdownEntry = {
+  name: string;
+  categoryIndex: number;
+  samples: number;
+  percentage: number;
+  subcategories: CategorySubBreakdownEntry[]; // Empty unless the category has more than one
+};
+
+/** Categories sorted descending, with the empty ones removed. */
+export type CategoryBreakdown = {
+  totalSamples: number; // Sum of the absolute category values, i.e. the percentage denominator
+  categories: CategoryBreakdownEntry[];
+};
+
+export type FunctionCategoryBreakdown = CategoryBreakdown & {
+  samples: number; // Signed, and unlike totalSamples only counts this function
+  percentageOfThread: number;
+};
+
+export type FunctionCategoryBreakdowns = {
+  threadHandle: string;
+  friendlyThreadName: string;
+  threadSamples: number;
+  running: FunctionCategoryBreakdown;
+  self: FunctionCategoryBreakdown;
+};
+
 // ===== Function Commands =====
 
 export type FunctionExpandResult = {
@@ -190,6 +226,7 @@ export type FunctionInfoResult = {
     debugPath?: string;
     breakpadId?: string;
   };
+  categoryBreakdown: FunctionCategoryBreakdowns;
 };
 
 // ===== Function Annotate =====
@@ -331,6 +368,7 @@ export type ThreadSamplesResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  categoryBreakdown: CategoryBreakdown;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {

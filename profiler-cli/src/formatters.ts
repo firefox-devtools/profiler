@@ -34,6 +34,7 @@ import type {
   ProfileNetworkSummary,
   MarkerGroupData,
   CallTreeNode,
+  CategoryBreakdown,
   InlineStatus,
   FilterEntry,
   SampleFilterSpec,
@@ -75,6 +76,68 @@ function inlineSuffix(status: InlineStatus | undefined): string {
 const INLINE_LEGEND =
   'Note: (inl) = inlined by the compiler into the nearest non-inlined ancestor above. ' +
   '(inl?) = some calls were inlined by the compiler.';
+
+const BAR_WIDTH = 28;
+
+/**
+ * Render aligned `label / bar / count / percentage` rows. `barRatio` is the
+ * fraction of the bar's full width to fill, which is not always the same as
+ * `percentage`; some tables scale their bars against the largest row instead.
+ */
+function formatBarRows(
+  rows: Array<{
+    label: string;
+    count: number;
+    percentage: number;
+    barRatio: number;
+  }>
+): string[] {
+  const maxLabelLen = Math.max(...rows.map((row) => row.label.length));
+
+  return rows.map((row) => {
+    const barLen = Math.round(row.barRatio * BAR_WIDTH);
+    const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
+    const label = row.label.padEnd(maxLabelLen);
+    const countStr = String(row.count).padStart(6);
+    const pctStr = row.percentage.toFixed(1).padStart(5);
+    return `  ${label}  ${bar}  ${countStr}  ${pctStr}%`;
+  });
+}
+
+/**
+ * Render a category breakdown as a `──── title ────` section, with each
+ * category followed by its non-empty subcategories, indented.
+ */
+function formatCategoryBreakdown(
+  title: string,
+  breakdown: CategoryBreakdown,
+  emptyMessage: string
+): string[] {
+  const lines = [`──── ${title} ────`, ''];
+
+  if (breakdown.categories.length === 0) {
+    lines.push(`  ${emptyMessage}`);
+    return lines;
+  }
+
+  const rows = breakdown.categories.flatMap((category) => [
+    {
+      label: category.name,
+      count: Math.round(category.samples),
+      percentage: category.percentage,
+      barRatio: Math.abs(category.samples) / breakdown.totalSamples,
+    },
+    ...category.subcategories.map((subcategory) => ({
+      label: `  ${subcategory.name}`,
+      count: Math.round(subcategory.samples),
+      percentage: subcategory.percentage,
+      barRatio: Math.abs(subcategory.samples) / breakdown.totalSamples,
+    })),
+  ]);
+
+  lines.push(...formatBarRows(rows));
+  return lines;
+}
 
 /**
  * Format a SessionContext as a compact header line.
@@ -224,6 +287,28 @@ Function ${result.functionHandle}:
     }
     if (result.library.breakpadId) {
       output += `\n  Breakpad ID: ${result.library.breakpadId}`;
+    }
+  }
+
+  const { running, self, threadHandle, friendlyThreadName } =
+    result.categoryBreakdown;
+
+  if (running.samples === 0) {
+    output += `\n\n  No samples for this function on ${threadHandle} (${friendlyThreadName}) in the current view.`;
+  } else {
+    for (const [kind, breakdown] of [
+      ['running', running],
+      ['self', self],
+    ] as const) {
+      const count = Math.round(breakdown.samples);
+      const share = breakdown.percentageOfThread.toFixed(1);
+      output +=
+        '\n\n' +
+        formatCategoryBreakdown(
+          `Categories: ${kind} (${count} samples, ${share}% of thread)`,
+          breakdown,
+          `No ${kind} samples for this function in the current view.`
+        ).join('\n');
     }
   }
 
@@ -984,6 +1069,13 @@ export function formatThreadSamplesResult(
       '     "|" is treated as a literal character, not OR.\n';
     return output;
   }
+
+  output +=
+    formatCategoryBreakdown(
+      `Categories (${Math.round(result.categoryBreakdown.totalSamples)} running samples)`,
+      result.categoryBreakdown,
+      'No samples in the current view.'
+    ).join('\n') + '\n\n';
 
   // Top functions by total time
   output += 'Top Functions (by total time):\n';
@@ -2028,19 +2120,18 @@ export function formatThreadPageLoadResult(
   if (result.categories.length === 0) {
     lines.push('  No sample data available during page load.');
   } else {
-    const BAR_WIDTH = 28;
     const maxCount = result.categories[0].count;
-    const maxNameLen = Math.max(...result.categories.map((c) => c.name.length));
 
-    for (const cat of result.categories) {
-      const barLen =
-        maxCount > 0 ? Math.round((cat.count / maxCount) * BAR_WIDTH) : 0;
-      const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
-      const name = cat.name.padEnd(maxNameLen);
-      const countStr = String(cat.count).padStart(6);
-      const pctStr = cat.percentage.toFixed(1).padStart(5);
-      lines.push(`  ${name}  ${bar}  ${countStr}  ${pctStr}%`);
-    }
+    lines.push(
+      ...formatBarRows(
+        result.categories.map((cat) => ({
+          label: cat.name,
+          count: cat.count,
+          percentage: cat.percentage,
+          barRatio: maxCount > 0 ? cat.count / maxCount : 0,
+        }))
+      )
+    );
   }
 
   lines.push('');
