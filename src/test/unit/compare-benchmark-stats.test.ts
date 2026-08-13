@@ -35,11 +35,11 @@ function makeStats(
   };
 }
 
-// A function that runs only in suite "Fast". The two sides are close enough
-// that the change isn't significant, and — crucially — both are small integers,
-// so most (base, new) pairs are exact ties.
+// A function that runs only in suite "Fast": total weight 12 -> 8. Small
+// integers, so most (base, new) pairs are exact ties — which is what made the
+// rank statistic this replaced so sensitive to a rescale.
 const FAST_BUCKET_BASE = [1, 0, 1, 2, 0, 1, 0, 1, 1, 0, 2, 1, 0, 1, 1, 0];
-const FAST_BUCKET_NEW = [0, 1, 1, 0, 1, 1, 0, 2, 0, 1, 1, 1, 1, 0, 2, 0];
+const FAST_BUCKET_NEW = [0, 1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0];
 
 // Filler in suite "Slow", which regresses by ~10%. This is what makes the two
 // profiles' geomean normalisation factors differ.
@@ -85,8 +85,8 @@ describe('computeSharedSuiteFactors', function () {
     const { baseStats, newStats } = makePair();
     const factors = computeSharedSuiteFactors(baseStats, newStats);
 
-    // Suite totals: Fast is 12 (base) / 12 (new), Slow is 400 / 440.
-    const fastTotal = Math.sqrt(12 * 12);
+    // Suite totals: Fast is 12 (base) / 8 (new), Slow is 400 / 440.
+    const fastTotal = Math.sqrt(12 * 8);
     const slowTotal = Math.sqrt(400 * 440);
     const geomean = Math.sqrt(fastTotal * slowTotal);
     expect(factors.get('Fast')).toBeCloseTo(geomean / fastTotal, 10);
@@ -220,30 +220,45 @@ describe('global bucket comparison', function () {
     );
     const globalFast = global.find((c) => c.key === 'fastOnlyFunc');
 
-    // A shared per-suite factor is a common positive scale, and rank
-    // statistics are invariant to those.
-    expect(globalFast?.cliffdsDelta).toBe(perSuite[0].cliffdsDelta);
+    // A shared per-suite factor is a common positive scale. It multiplies both
+    // delta and se by the same constant, so everything scale-free is unchanged:
+    // the standardised effect, the p-value, and both verdict labels.
+    expect(globalFast?.standardizedEffect).toBeCloseTo(
+      perSuite[0].standardizedEffect,
+      10
+    );
+    expect(globalFast?.pValue).toBeCloseTo(perSuite[0].pValue, 10);
+    expect(globalFast?.pValueMethod).toBe(perSuite[0].pValueMethod);
     expect(globalFast?.confidence).toBe(perSuite[0].confidence);
     expect(globalFast?.effectSize).toBe(perSuite[0].effectSize);
     expect(globalFast?.relChange).toBeCloseTo(perSuite[0].relChange, 10);
+
+    // The scale-dependent quantities all move by that one factor. Derived from
+    // se, which is strictly positive, rather than from delta, which is allowed
+    // to be arbitrarily close to zero.
+    const factor = globalFast!.se / perSuite[0].se;
+    expect(factor).toBeGreaterThan(1);
+    expect(globalFast!.delta).toBeCloseTo(perSuite[0].delta * factor, 8);
+    expect(globalFast!.mde).toBeCloseTo(perSuite[0].mde * factor, 8);
   });
 
-  it('would inflate the effect size if each profile used its own factors', function () {
-    // This is the bug the shared factor fixes: per-iteration weights are small
-    // integers, so base and new tie on many pairs. Scaling the two sides by
-    // even slightly different constants breaks every nonzero tie in the same
-    // direction, moving Cliff's delta by the tied-pair fraction.
+  it('biases the estimate if each profile uses its own factors', function () {
+    // What the shared factor buys, stated as a property: with per-profile
+    // factors the two sides are scaled by *different* constants, so the
+    // normalisation drift leaks into the point estimate and the measured
+    // relative change no longer matches the suite's own.
     const { baseStats, newStats, iterationCount } = makePair();
 
-    const perSuiteDelta = compare(
+    const perSuite = compare(
       baseStats,
       newStats,
       baseStats.suites[0].buckets,
       newStats.suites[0].buckets,
       iterationCount
-    )[0].cliffdsDelta;
+    )[0];
 
-    const ownDelta = compare(
+    // Passing one profile twice yields that profile's own factors.
+    const own = compare(
       baseStats,
       newStats,
       computeGlobalBuckets(
@@ -257,8 +272,25 @@ describe('global bucket comparison', function () {
         iterationCount
       ),
       iterationCount
-    ).find((c) => c.key === 'fastOnlyFunc')!.cliffdsDelta;
+    ).find((c) => c.key === 'fastOnlyFunc')!;
 
-    expect(Math.abs(ownDelta)).toBeGreaterThan(Math.abs(perSuiteDelta) + 0.1);
+    const shared = compare(
+      baseStats,
+      newStats,
+      computeGlobalBuckets(
+        baseStats,
+        computeSharedSuiteFactors(baseStats, newStats),
+        iterationCount
+      ),
+      computeGlobalBuckets(
+        newStats,
+        computeSharedSuiteFactors(baseStats, newStats),
+        iterationCount
+      ),
+      iterationCount
+    ).find((c) => c.key === 'fastOnlyFunc')!;
+
+    expect(shared.relChange).toBeCloseTo(perSuite.relChange, 10);
+    expect(Math.abs(own.relChange - perSuite.relChange)).toBeGreaterThan(1e-3);
   });
 });
