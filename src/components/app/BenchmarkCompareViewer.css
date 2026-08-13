@@ -488,6 +488,21 @@
  * proportional to its total sample count, so 1 sample takes up the same
  * pixel width on both sides. */
 
+/* The row's numbers as a sentence, above the flame graphs it introduces. Sized
+ * up slightly from the table it sits under: the reader has stopped scanning and
+ * started reading by the time they get here. */
+.bucketCounterfactual {
+  padding: 0.25em 1em 0;
+  margin: 0;
+  color: var(--internal-text-muted);
+  font-size: 1em;
+}
+
+.bucketCounterfactual em {
+  font-style: normal;
+  overflow-wrap: anywhere;
+}
+
 .bucketFlameGraphPair {
   display: flex;
   flex-direction: column;

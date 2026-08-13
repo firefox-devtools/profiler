@@ -909,6 +909,7 @@ function ScoreTable({
                 comparisons={globalComparisons}
                 label={overallScore.label}
                 enclosingBaseMean={overallScore.baseMean}
+                enclosingNewMean={overallScore.newMean}
                 isOverall={true}
                 numSuites={numSuites}
                 filter={filter}
@@ -961,6 +962,7 @@ function ScoreTable({
                       comparisons={comparisons}
                       label={row.label}
                       enclosingBaseMean={row.baseMean}
+                      enclosingNewMean={row.newMean}
                       isOverall={false}
                       numSuites={numSuites}
                       filter={filter}
@@ -980,10 +982,83 @@ function ScoreTable({
   );
 }
 
+/**
+ * The row's numbers, said out loud, for the reader who just expanded it.
+ *
+ * Δ abs and the two Δ% columns already contain this, but they contain it as
+ * three signed numbers whose reference point ("percent of what?") is only in a
+ * header tooltip. The old comparison report led with the sentence instead --
+ * "Making Firefox as fast as Chrome on this function would reduce its time on
+ * TodoMVC by 4%" -- and that is the form a bug report gets written in.
+ *
+ * Always phrased as the slower side catching up with the faster one, whichever
+ * that is per row, since that is the only direction anyone can act on. Note the
+ * denominators differ from the table's: the table divides by the base side's
+ * total throughout, so that every row's contribution to the score is on one
+ * scale, whereas a saving is a fraction of the total belonging to the side that
+ * would be doing the saving.
+ */
+function BucketCounterfactual({
+  bucketName,
+  absDiff,
+  enclosingBaseMean,
+  enclosingNewMean,
+  suiteName,
+  numSuites,
+}: {
+  bucketName: string;
+  /** New minus base, in ms. Positive means the new side is the slow one here. */
+  absDiff: number;
+  enclosingBaseMean: number;
+  enclosingNewMean: number;
+  /** Null in the overall expansion, where there is no enclosing subtest. */
+  suiteName: string | null;
+  numSuites: number;
+}) {
+  const names = useBenchmarkProfileNames();
+  if (absDiff === 0) {
+    return null;
+  }
+  const newIsSlower = absDiff > 0;
+  const slow = newIsSlower ? names.new : names.base;
+  const fast = newIsSlower ? names.base : names.new;
+  const slowTotal = newIsSlower ? enclosingNewMean : enclosingBaseMean;
+  if (!(slowTotal > 0)) {
+    return null;
+  }
+
+  const savingRel = Math.abs(absDiff) / slowTotal;
+  // In a subtest expansion, `savingRel` is a fraction of that subtest, and the
+  // overall score is a geomean over all of them. In the overall expansion the
+  // buckets are already geomean-normalised, so it is the overall figure itself.
+  const overallSaving =
+    suiteName === null ? savingRel : -impactOnGeomean(-savingRel, numSuites);
+  const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
+
+  // A profile of a single subtest -- which is a normal way to capture one -- has
+  // a subtest figure and an overall figure that are the same number, and naming
+  // both would just say it twice.
+  const showSubtest = suiteName !== null && numSuites > 1;
+
+  return (
+    <p className="bucketCounterfactual">
+      If <strong>{slow}</strong> were as fast as <strong>{fast}</strong> on{' '}
+      <em>{bucketName}</em>, it would spend{' '}
+      {showSubtest ? (
+        <>
+          <strong>{pct(savingRel)}</strong> less time on {suiteName}, and{' '}
+        </>
+      ) : null}
+      <strong>{pct(overallSaving)}</strong> less time overall.
+    </p>
+  );
+}
+
 function BucketTable({
   comparisons,
   label,
   enclosingBaseMean,
+  enclosingNewMean,
   isOverall,
   numSuites,
   filter,
@@ -998,6 +1073,11 @@ function BucketTable({
    * Each bucket's absDiff is expressed relative to this to compute the
    * bucket's impact on the enclosing score. */
   enclosingBaseMean: number;
+  /** The other side of the same score row. Only the base one is needed to
+   * express a bucket's impact on the score, but the counterfactual sentence is
+   * written from whichever side is the slower one, and that side's own total is
+   * what its saving is a fraction of. */
+  enclosingNewMean: number;
   /** True when this table is expanded under the overall row (globalBuckets).
    * The Δ% subtest column then shows "—" and the Δ% overall column shows
    * absDiff / enclosingBaseMean directly (global buckets are already
@@ -1152,6 +1232,14 @@ function BucketTable({
               {expandable && isExpanded ? (
                 <tr className="benchmarkRow--bucket-expansion">
                   <td colSpan={columnCount}>
+                    <BucketCounterfactual
+                      bucketName={c.bucketName}
+                      absDiff={absDiff}
+                      enclosingBaseMean={enclosingBaseMean}
+                      enclosingNewMean={enclosingNewMean}
+                      suiteName={isOverall ? null : label}
+                      numSuites={numSuites}
+                    />
                     <BucketFlameGraphPair
                       baseBundle={baseInnerBundle}
                       newBundle={newInnerBundle}
