@@ -140,7 +140,7 @@
   font-style: italic;
 }
 
-/* Filter controls (sliders that raise / lower the significance thresholds). */
+/* Filter controls: which bucket rows the expansions show. */
 
 .benchmarkFilters {
   display: flex;
@@ -149,23 +149,27 @@
   margin-bottom: 0.75em;
   color: var(--internal-text-muted);
   font-size: 0.9em;
-  gap: 1.5em;
+
+  /* Tight, because these are one group of related choices rather than
+   * independent controls. */
+  gap: 0.25em 1em;
 }
 
 .benchmarkFilter {
   display: flex;
   align-items: center;
-  gap: 0.5em;
+
+  /* Each option carries a title explaining what it admits and what it costs. */
+  cursor: help;
+  gap: 0.35em;
+}
+
+.benchmarkFilter input[type='radio'] {
+  margin: 0;
 }
 
 .benchmarkFilter__label {
   white-space: nowrap;
-}
-
-.benchmarkFilter__value {
-  min-width: 3.5em;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
 }
 
 /* Tables */

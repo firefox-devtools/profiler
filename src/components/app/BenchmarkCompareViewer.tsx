@@ -67,20 +67,75 @@ type State =
 const TOP_N = 100;
 
 /**
- * Default |Cohen's d| cutoff. Not the "Negligible" boundary of 0.2, which is far
- * too permissive here: with ~6800 buckets in the global view, 0.2 admits about
- * 250 of them, and it admits the same ~250 whether or not the two builds
- * actually differ (measured: 248 on a pair with no difference detectable at
- * subtest level, 265 on a pair with a large real one). A filter that passes the
- * same number of rows either way is not filtering.
+ * What a bucket row has to clear to be worth showing.
  *
- * 0.4 is the smallest cutoff at which the no-difference pair goes completely
- * empty while the real change still comes through intact. The cost is that it
- * also hides changes in large, noisy buckets whose absolute impact is what
- * matters -- a 1.16ms drop in a 21ms bucket is only 0.25 sd, but it was the
- * single largest contributor to that comparison's score change.
+ * Filtering on a standardised effect size (Cohen's d, and Cliff's delta before
+ * it) was the wrong instrument. d divides by the bucket's own spread, so it
+ * discriminates against exactly the rows that matter most: a 1.16ms drop in a
+ * 21ms bucket is only 0.25 sd, and it was the single largest contributor to one
+ * comparison's score change. Meanwhile no d cutoff below 0.3 discriminated at
+ * all -- it admitted ~250 rows whether or not the two builds differed.
+ *
+ * What works is the pair of questions a perf engineer is actually asking: did
+ * this move, and does it matter. Significance answers the first. Impact on the
+ * overall score answers the second, and it is the right denominator because it
+ * means the same thing in the overall table as in a subtest table -- the "Δ%
+ * overall" column is already on that common scale.
+ *
+ * Measured on two profile pairs, one with nothing detectable at subtest level
+ * and one with a large real change, counting global buckets that clear both
+ * p <= 0.05 and a minimum impact on the score:
+ *
+ *   min |Δ% overall|   no-difference pair   real-change pair
+ *             0.010%                    29                 30
+ *             0.020%                     5                 12
+ *             0.030%                     5                  5
+ *             0.040%                     0                  5
+ *             0.050%                     0                  3
+ *
+ * 0.04% is where the no-difference pair empties out while the real one still
+ * shows every change in it: the three canvas buckets whose work shifted between
+ * them, the largest absolute mover, and one more at -16%. At 0.05% the last two
+ * drop off; at 0.03% five phantom rows appear.
  */
-const DEFAULT_MIN_EFFECT = 0.4;
+const MIN_SCORE_IMPACT = 0.0004;
+
+/** p-value cutoff for "this moved". Uncorrected, and with ~6800 buckets in the
+ * global view that matters: see docs-developer/benchmark-compare-fdr.md. The
+ * impact floor is what keeps the row count sane in the default mode. */
+const SIGNIFICANCE_P = 0.05;
+
+type BucketFilterMode = 'movers' | 'significant' | 'none';
+
+const BUCKET_FILTER_MODES: Array<{
+  mode: BucketFilterMode;
+  label: string;
+  title: string;
+}> = [
+  {
+    mode: 'movers',
+    label: 'Moved the score',
+    title:
+      'Buckets that changed significantly (p ≤ 0.05) and shifted the overall ' +
+      'score by at least 0.04%. On a comparison of two builds that do not ' +
+      'differ, this shows nothing.',
+  },
+  {
+    mode: 'significant',
+    label: 'All significant',
+    title:
+      'Every bucket with p ≤ 0.05, however small. Uncorrected for multiple ' +
+      'comparisons: with thousands of buckets, roughly 5% of them clear this ' +
+      'by chance alone, so expect around a hundred rows of noise.',
+  },
+  {
+    mode: 'none',
+    label: 'Unfiltered',
+    title: 'Every bucket, ranked by absolute impact.',
+  },
+];
+
+const DEFAULT_BUCKET_FILTER_MODE: BucketFilterMode = 'movers';
 
 async function loadOneProfile(viewerUrl: string) {
   let url = viewerUrl;
@@ -331,7 +386,7 @@ function ScoreTable({
   suiteScores,
   suiteComparisonsByName,
   globalComparisons,
-  minEffect,
+  filterMode,
   baseBundle,
   newBundle,
   baseViewerUrl,
@@ -341,7 +396,7 @@ function ScoreTable({
   suiteScores: ScoreComparison[];
   suiteComparisonsByName: Map<string, BucketComparison[]>;
   globalComparisons: BucketComparison[];
-  minEffect: number;
+  filterMode: BucketFilterMode;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
   baseViewerUrl: string;
@@ -430,7 +485,7 @@ function ScoreTable({
                 enclosingBaseMean={overallScore.baseMean}
                 isOverall={true}
                 numSuites={numSuites}
-                minEffect={minEffect}
+                filterMode={filterMode}
                 baseBundle={baseBundle}
                 newBundle={newBundle}
                 baseViewerUrl={baseViewerUrl}
@@ -474,7 +529,7 @@ function ScoreTable({
                       enclosingBaseMean={row.baseMean}
                       isOverall={false}
                       numSuites={numSuites}
-                      minEffect={minEffect}
+                      filterMode={filterMode}
                       baseBundle={baseBundle}
                       newBundle={newBundle}
                       baseViewerUrl={baseViewerUrl}
@@ -497,7 +552,7 @@ function BucketTable({
   enclosingBaseMean,
   isOverall,
   numSuites,
-  minEffect,
+  filterMode,
   baseBundle,
   newBundle,
   baseViewerUrl,
@@ -517,8 +572,7 @@ function BucketTable({
    * comes from impactOnGeomean. */
   isOverall: boolean;
   numSuites: number;
-  /** Include buckets whose |Cohen's d| is at least this. */
-  minEffect: number;
+  filterMode: BucketFilterMode;
   baseBundle: BucketProfileBundle;
   newBundle: BucketProfileBundle;
   /** Viewer URLs of the two source profiles, forwarded to BucketFlameGraphPair
@@ -563,18 +617,41 @@ function BucketTable({
     });
   }, []);
 
-  const significant = comparisons
-    .filter((c) => Math.abs(c.standardizedEffect) >= minEffect)
-    .sort(
-      (a, b) =>
-        Math.abs(b.newMean - b.baseMean) - Math.abs(a.newMean - a.baseMean)
-    )
+  // Each row's impact on the overall score has to be known before filtering,
+  // not just for display, so compute both relative figures up front.
+  const rows = comparisons.map((c) => {
+    const absDiff = c.newMean - c.baseMean;
+    const impactRel =
+      enclosingBaseMean === 0 ? Infinity : absDiff / enclosingBaseMean;
+    return {
+      c,
+      absDiff,
+      subtestRel: isOverall ? null : impactRel,
+      overallRel: isOverall ? impactRel : impactOnGeomean(impactRel, numSuites),
+    };
+  });
+
+  const significant = rows
+    .filter(({ c, overallRel }) => {
+      if (filterMode === 'none') {
+        return true;
+      }
+      if (c.pValue > SIGNIFICANCE_P) {
+        return false;
+      }
+      return (
+        filterMode === 'significant' || Math.abs(overallRel) >= MIN_SCORE_IMPACT
+      );
+    })
+    .sort((a, b) => Math.abs(b.absDiff) - Math.abs(a.absDiff))
     .slice(0, TOP_N);
 
   if (significant.length === 0) {
     return (
       <p className="benchmarkNoChanges">
-        No bucket changes in {label} pass the current effect-size threshold.
+        {filterMode === 'movers'
+          ? `Nothing in ${label} both changed significantly and moved the overall score by 0.04% or more.`
+          : `No bucket in ${label} changed significantly (p ≤ 0.05).`}
       </p>
     );
   }
@@ -594,20 +671,8 @@ function BucketTable({
         <col className="benchmarkCell--colFixed" />
       </colgroup>
       <tbody>
-        {significant.map((c) => {
-          const absDiff = c.newMean - c.baseMean;
+        {significant.map(({ c, absDiff, subtestRel, overallRel }) => {
           const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
-          const impactRel =
-            enclosingBaseMean === 0 ? Infinity : absDiff / enclosingBaseMean;
-          // Mirror ScoreRow: overall-row expansion leaves the subtest column
-          // blank (there's no enclosing subtest) and shows the bucket's direct
-          // impact on the overall geomean. Subtest expansions show the
-          // bucket's contribution to the subtest and its indirect impact on
-          // the overall geomean via impactOnGeomean.
-          const subtestRel = isOverall ? null : impactRel;
-          const overallRel = isOverall
-            ? impactRel
-            : impactOnGeomean(impactRel, numSuites);
           // A bucket can be expanded if at least one side has a func index.
           // (If both are null it's a degenerate "appeared/disappeared with no
           // attributable func" case.)
@@ -708,11 +773,13 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
     [data.newProfile]
   );
 
-  const [minEffect, setMinEffect] = useState(DEFAULT_MIN_EFFECT);
+  const [filterMode, setFilterMode] = useState<BucketFilterMode>(
+    DEFAULT_BUCKET_FILTER_MODE
+  );
 
-  const handleMinEffectChange = useCallback(
+  const handleFilterModeChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      setMinEffect(e.currentTarget.valueAsNumber);
+      setFilterMode(e.currentTarget.value as BucketFilterMode);
     },
     []
   );
@@ -736,25 +803,26 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
 
       <h3 className="benchmarkSectionTitle">Score and subtest totals</h3>
       <div className="benchmarkFilters">
-        <label className="benchmarkFilter">
-          <span className="benchmarkFilter__label">Min |Cohen&apos;s d|</span>
-          <input
-            type="range"
-            min={0}
-            max={1.5}
-            step={0.05}
-            value={minEffect}
-            onChange={handleMinEffectChange}
-          />
-          <span className="benchmarkFilter__value">{minEffect.toFixed(2)}</span>
-        </label>
+        <span className="benchmarkFilter__label">Show buckets that</span>
+        {BUCKET_FILTER_MODES.map(({ mode, label, title }) => (
+          <label className="benchmarkFilter" key={mode} title={title}>
+            <input
+              type="radio"
+              name="benchmarkBucketFilter"
+              value={mode}
+              checked={filterMode === mode}
+              onChange={handleFilterModeChange}
+            />
+            <span>{label}</span>
+          </label>
+        ))}
       </div>
       <ScoreTable
         overallScore={data.overallScore}
         suiteScores={data.suiteScores}
         suiteComparisonsByName={suiteComparisonsByName}
         globalComparisons={data.globalComparisons}
-        minEffect={minEffect}
+        filterMode={filterMode}
         baseBundle={baseBundle}
         newBundle={newBundle}
         baseViewerUrl={data.baseUrl}
