@@ -64,9 +64,8 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
         }
         break;
       case 'compare-benchmark':
-        if (profilesToCompare === null) {
-          return <CompareHome />;
-        }
+        // The viewer shows its own input form when there is nothing to compare
+        // yet, so that the URLs and names stay editable once a report is up.
         return <BenchmarkCompareViewer />;
       case 'uploaded-recordings':
         return <UploadedRecordingsHome />;

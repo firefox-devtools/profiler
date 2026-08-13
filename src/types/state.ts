@@ -397,6 +397,10 @@ export type UrlState = {
   readonly profileUrl: string;
   // This is used for the "compare" dataSource, to compare 2 profiles.
   readonly profilesToCompare: string[] | null;
+  // Display names for `profilesToCompare`, used by the "compare-benchmark"
+  // dataSource. Null when the URL doesn't name them, in which case the
+  // benchmark view falls back to DEFAULT_BENCHMARK_PROFILE_NAMES.
+  readonly profileNamesToCompare: string[] | null;
   readonly selectedTab: TabSlug;
   readonly pathInZipFile: string | null;
   readonly profileName: string | null;

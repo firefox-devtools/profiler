@@ -97,6 +97,18 @@ const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
   }
 };
 
+const profileNamesToCompare: Reducer<string[] | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
+      return action.profileNames;
+    default:
+      return state;
+  }
+};
+
 const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
@@ -865,6 +877,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     hash,
     profileUrl,
     profilesToCompare,
+    profileNamesToCompare,
     selectedTab,
     pathInZipFile,
     profileSpecific,

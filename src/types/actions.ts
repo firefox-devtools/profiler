@@ -577,6 +577,11 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK';
       readonly profiles: string[];
+      /** Display names for the two profiles, parallel to `profiles`. The
+       * comparison is not necessarily before-patch vs after-patch: it can just
+       * as well be Chrome vs Firefox or Release vs Nightly, and the whole
+       * report is worded in terms of these. */
+      readonly profileNames: string[];
     }
   | {
       readonly type: 'CHANGE_PROFILE_NAME';

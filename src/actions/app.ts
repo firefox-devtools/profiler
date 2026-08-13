@@ -78,10 +78,14 @@ export function changeProfilesToCompare(profiles: string[]): Action {
   };
 }
 
-export function changeProfilesToCompareBenchmark(profiles: string[]): Action {
+export function changeProfilesToCompareBenchmark(
+  profiles: string[],
+  profileNames: string[]
+): Action {
   return {
     type: 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK',
     profiles,
+    profileNames,
   };
 }
 
