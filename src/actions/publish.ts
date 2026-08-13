@@ -274,11 +274,6 @@ function unwrapEncodedProfile(encodingResult: ProfileEncodingResult): Blob {
   return encodingResult.profileData;
 }
 
-export type InflightProfileEncoding = {
-  sanitizedProfile: Profile;
-  encodingPromise: Promise<ProfileEncodingResult>;
-};
-
 /**
  * Kick off "encoding" of the sanitized profile. Specifically this means:
  * - Compute the sanitized profile
@@ -287,7 +282,7 @@ export type InflightProfileEncoding = {
  *
  * The asynchronous compression can take a few seconds, so we kick it off
  * immediately when the download or share panel is opened. The in-flight
- * compression is tracked in the redux state, so opening the other panel or
+ * compression is tracked in the redux state, so reopening the panel or
  * pressing Upload reuses it (for the same sanitized profile) instead of
  * compressing again. The returned promise lets the caller wait on the
  * compressed result.
@@ -296,8 +291,8 @@ export type InflightProfileEncoding = {
  */
 export function encodeSanitizedProfile(
   mode: SharingMode
-): ThunkAction<InflightProfileEncoding> {
-  return (dispatch, getState): InflightProfileEncoding => {
+): ThunkAction<Promise<ProfileEncodingResult>> {
+  return (dispatch, getState): Promise<ProfileEncodingResult> => {
     const state = getState();
     const sanitizedProfile = getSanitizedProfile(state, mode).profile;
 
@@ -307,27 +302,21 @@ export function encodeSanitizedProfile(
       encodingState.sanitizedProfile === sanitizedProfile
     ) {
       // A compression for this profile is already in-flight; reuse it.
-      return {
-        sanitizedProfile,
-        encodingPromise: encodingState.encodingPromise,
-      };
+      return encodingState.encodingPromise;
     }
     if (
       encodingState.phase === 'DONE' &&
       encodingState.sanitizedProfile === sanitizedProfile
     ) {
       // We already have an encoded version of this profile in our state! Use it.
-      return {
-        sanitizedProfile,
-        encodingPromise: Promise.resolve({
-          type: 'SUCCESS',
-          profileData: encodingState.profileData,
-        }),
-      };
+      return Promise.resolve({
+        type: 'SUCCESS',
+        profileData: encodingState.profileData,
+      });
     }
 
     // Kick off a new encoding for this profile. Don't await the promise,
-    // just return it as part of the InflightProfileEncoding.
+    // just hand it back to the caller.
     const encodingPromise: Promise<ProfileEncodingResult> = (async function () {
       // Yield so the ENCODING phase (dispatched below) is in the store before a
       // synchronous failure here could dispatch FAILED, which the reducer drops.
@@ -351,7 +340,7 @@ export function encodeSanitizedProfile(
     dispatch(
       sanitizedProfileEncodingStarted(mode, sanitizedProfile, encodingPromise)
     );
-    return { sanitizedProfile, encodingPromise };
+    return encodingPromise;
   };
 }
 
@@ -402,8 +391,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         prePublishedState,
         'upload'
       );
-      const profileEncoding = dispatch(encodeSanitizedProfile('upload'));
-      const encodingResult = await profileEncoding.encodingPromise;
+      const encodingResult = await dispatch(encodeSanitizedProfile('upload'));
 
       // The previous line was async, check to make sure that this request is still valid.
       // The upload could have been aborted while we were compressing the data.
