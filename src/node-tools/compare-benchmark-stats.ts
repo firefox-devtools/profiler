@@ -9,6 +9,8 @@ import type { ProfileBenchmarkStats } from 'firefox-profiler/profile-logic/bench
 import {
   compareBuckets,
   compareIterationTotals,
+  computeGlobalBuckets,
+  computeSharedSuiteFactors,
   suiteIterationTotals,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
@@ -144,12 +146,28 @@ async function main() {
   const iterationCount = base.suites[0]?.iterationCount ?? 1;
 
   if (showGlobal) {
+    // One shared set of per-suite normalisation factors for both profiles, so
+    // that the rank statistics compare like with like. Older stats files also
+    // carry a per-profile `globalBuckets` array; it's ignored, since its
+    // factors were computed from that profile alone.
+    const sharedSuiteFactors = computeSharedSuiteFactors(base, newStats);
+    const baseGlobalBuckets = computeGlobalBuckets(
+      base,
+      sharedSuiteFactors,
+      iterationCount
+    );
+    const newGlobalBuckets = computeGlobalBuckets(
+      newStats,
+      sharedSuiteFactors,
+      iterationCount
+    );
+
     const baseGlobalIter = suiteIterationTotals(
-      base.globalBuckets,
+      baseGlobalBuckets,
       iterationCount
     );
     const newGlobalIter = suiteIterationTotals(
-      newStats.globalBuckets,
+      newGlobalBuckets,
       iterationCount
     );
     const overallScore = compareIterationTotals(
@@ -179,8 +197,8 @@ async function main() {
     printScoreAndSubtests(overallScore, suiteScores);
 
     const globalComparisons = compareBuckets(
-      base.globalBuckets,
-      newStats.globalBuckets,
+      baseGlobalBuckets,
+      newGlobalBuckets,
       base.bucketNames,
       newStats.bucketNames,
       base.bucketFuncs,

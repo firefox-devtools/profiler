@@ -35,7 +35,6 @@ async function main() {
   );
   console.log(
     `Wrote ${stats.suites.length} suites, ` +
-      `${stats.globalBuckets.length} global buckets, ` +
       `${stats.suites.reduce((s, su) => s + su.buckets.length, 0)} suite-bucket pairs ` +
       `to ${argv.output}`
   );
