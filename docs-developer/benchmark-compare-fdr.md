@@ -308,12 +308,24 @@ For the CLI, which is much faster to iterate on than the UI:
 
 ```sh
 yarn build-node-tools
-node --max-old-space-size=8192 node-tools-dist/extract-benchmark-stats.js \
-  --input base.jslb.gz --output base-stats.json
-node --max-old-space-size=8192 node-tools-dist/extract-benchmark-stats.js \
-  --input new.jslb.gz --output new-stats.json
 node node-tools-dist/compare-benchmark-stats.js \
-  --base base-stats.json --new new-stats.json --top 20
+  --base base.jslb.gz --new new.jslb.gz --top 20
+```
+
+That is the whole thing — `--base` and `--new` take profiles as captured, and
+`compare-benchmark-stats` extracts them itself. About 3.7s and 1.9 GB peak for the
+Speedometer 3 pairs below, which fits inside Node's default heap; the
+`--max-old-space-size=8192` this used to need was never necessary.
+
+`extract-benchmark-stats` still exists and its output is still accepted on
+`--base`/`--new`, which is worth it when iterating on the comparison rather than on
+the profiles: extraction is the expensive half, so pre-extracting brings a re-run
+down from 3.7s to 2.3s. Which kind of file was passed is detected rather than
+declared — a profile is either gzipped or JSON without a `bucketNames` array.
+
+```sh
+node node-tools-dist/extract-benchmark-stats.js --input base.jslb.gz --output base-stats.json
+node node-tools-dist/compare-benchmark-stats.js --base base-stats.json --new new.jslb.gz
 node node-tools-dist/compare-benchmark-stats.js \
   --base base-stats.json --new new-stats.json --suite Charts-chartjs
 # --suite "" for every subtest; --qvalue 0.2 to loosen the bar

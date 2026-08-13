@@ -5,8 +5,11 @@
  * Usage:
  *   yarn build-node-tools
  *   node node-tools-dist/compare-benchmark-stats.js \
- *     --base /tmp/base-stats.json \
- *     --new  /tmp/new-stats.json
+ *     --base before.jslb.gz \
+ *     --new  after.jslb.gz
+ *
+ * `--base` and `--new` each take either a profile as captured or a stats file
+ * from extract-benchmark-stats; see `loadStats` in the CLI entry point.
  *
  * Options:
  *   --suite <name>    Show per-suite results for this suite (substring match;
@@ -16,6 +19,7 @@
  *   --top <100>       Show top N changed buckets (default 100)
  *   --all             Show every bucket that clears --qvalue, not just top N
  *   --no-appeared     Skip buckets present in only one of the two profiles
+ *   --harness <name>  speedometer (default) or jetstream
  */
 
 import type {
