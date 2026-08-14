@@ -22,6 +22,7 @@ import type {
   Profile,
   RawProfileSharedData,
   RawThread,
+  RawFuncTable,
   RawStackTable,
   SourceTable,
   IndexIntoFuncTable,
@@ -38,6 +39,7 @@ import type {
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
+  AddressInlineFrame,
   AddressResult,
   LibSymbolicationRequest,
 } from './symbol-store';
@@ -243,6 +245,9 @@ export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 // The mutable tables which the symbolication steps of one batch operate on.
 // These are created once per batch and mutated in place by each step.
 type SymbolicationTables = {
+  // Read fallback metadata from the original table because func slots in the
+  // builder can be recycled before their original frames are processed.
+  oldFuncTable: RawFuncTable;
   frameTable: RawFrameTableBuilder;
   funcTable: RawFuncTableBuilder;
   nativeSymbols: RawNativeSymbolTableBuilder;
@@ -565,6 +570,7 @@ export function applySymbolicationSteps(
     }
   }
   const tables: SymbolicationTables = {
+    oldFuncTable: oldShared.funcTable,
     frameTable,
     funcTable,
     nativeSymbols,
@@ -658,6 +664,7 @@ function _partiallyApplySymbolicationStep(
   >
 ): void {
   const {
+    oldFuncTable,
     frameTable,
     funcTable,
     nativeSymbols,
@@ -785,7 +792,12 @@ function _partiallyApplySymbolicationStep(
   // and give the canonical symbol the right address and symbol.
   const availableNativeSymbolIterator = availableNativeSymbols.values();
   for (const [symbolAddress, addressResult] of symbolAddressToInfoMap) {
-    const symbolStringIndex = stringTable.indexForString(addressResult.name);
+    // The native symbol gets the raw symbol name. This can be different from the
+    // name we use for the func, for example for JIT frames whose symbol name is
+    // "Ion: doWork (app.js:42:10)" but whose function name is just "doWork".
+    const symbolStringIndex = stringTable.indexForString(
+      addressResult.symbolName ?? addressResult.name
+    );
     let symbolIndex = symbolAddressToCanonicalSymbolIndexMap.get(symbolAddress);
     if (symbolIndex === undefined) {
       // Repurpose a symbol from availableNativeSymbols as the canonical symbol for this
@@ -839,15 +851,16 @@ function _partiallyApplySymbolicationStep(
     const address = frameTable.address[frameIndex];
     let addressResult = resultsForLib.get(address);
     if (addressResult === undefined) {
-      const symbolName = nativeSymbols.name[nativeSymbolIndex];
       let fileNameIndex = null;
-      if ((funcTable.flags[oldFunc] & FuncFlag.HasSource) !== 0) {
-        const sourceIndex = funcTable.source[oldFunc];
+      if ((oldFuncTable.flags[oldFunc] & FuncFlag.HasSource) !== 0) {
+        const sourceIndex = oldFuncTable.source[oldFunc];
         fileNameIndex = sources.filename[sourceIndex];
       }
+      // No symbols were found for this address. Make a synthetic result that
+      // just leaves all pieces of information as they were.
       addressResult = {
         symbolAddress: nativeSymbols.address[nativeSymbolIndex],
-        name: stringTable.getString(symbolName),
+        name: stringTable.getString(oldFuncTable.name[oldFunc]),
         file:
           fileNameIndex !== null
             ? stringTable.getString(fileNameIndex)
@@ -856,17 +869,25 @@ function _partiallyApplySymbolicationStep(
           (frameTable.flags[frameIndex] & FrameFlag.HasLine) !== 0
             ? frameTable.line[frameIndex]
             : undefined,
+        column:
+          (frameTable.flags[frameIndex] & FrameFlag.HasColumn) !== 0
+            ? frameTable.column[frameIndex]
+            : undefined,
+        functionStartLine:
+          (oldFuncTable.flags[oldFunc] & FuncFlag.HasLine) !== 0
+            ? oldFuncTable.lineNumber[oldFunc]
+            : undefined,
+        functionStartColumn:
+          (oldFuncTable.flags[oldFunc] & FuncFlag.HasColumn) !== 0
+            ? oldFuncTable.columnNumber[oldFunc]
+            : undefined,
       };
     }
     // Make a combined list which contains both the outer function and the inlines.
-    const framesAtThisAddress = addressResult.inlines
+    const framesAtThisAddress: AddressInlineFrame[] = addressResult.inlines
       ? addressResult.inlines.slice()
       : [];
-    framesAtThisAddress.push({
-      name: addressResult.name,
-      file: addressResult.file,
-      line: addressResult.line,
-    });
+    framesAtThisAddress.push(addressResult);
     framesAtThisAddress.reverse(); // Now the frames are from outside to inside.
 
     const inlineExpansionFrames = [];
@@ -882,39 +903,46 @@ function _partiallyApplySymbolicationStep(
         frameInfo.file !== undefined
           ? stringTable.indexForString(frameInfo.file)
           : null;
-      // Group frames into the same function if the have the same function name
-      // and the same file.
-      const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}`;
+      const isJS =
+        frameInfo.isScript ??
+        (oldFuncTable.flags[oldFunc] & FuncFlag.IsJS) !== 0;
+      const relevantForJS =
+        frameInfo.isScript ??
+        (oldFuncTable.flags[oldFunc] & FuncFlag.RelevantForJS) !== 0;
+      const funcStartLine = frameInfo.functionStartLine ?? null;
+      const funcStartColumn = frameInfo.functionStartColumn ?? null;
+      // Group frames into the same function if they have the same function name,
+      // the same file, and the same function start position. (The start position
+      // matters for script functions: A script can contain multiple different
+      // functions with the same name, e.g. multiple anonymous functions.)
+      const funcKey = `${functionStringIndex}:${fileNameStringIndex ?? ''}:${funcStartLine ?? ''}:${funcStartColumn ?? ''}:${isJS ? 'js' : ''}`;
       let funcIndex = funcKeyToFuncMap.get(funcKey);
       if (funcIndex === undefined) {
         funcIndex = availableFuncIter.next().value;
-        const preservedFlagsMask = FuncFlag.IsJS | FuncFlag.RelevantForJS;
         if (funcIndex === undefined) {
-          // Need a new func.
+          // Need a new func. All its fields are filled below.
           funcIndex = funcTable.length;
-          funcTable.flags[funcIndex] =
-            (funcTable.flags[oldFunc] & preservedFlagsMask) |
-            FuncFlag.HasResource;
-          funcTable.resource[funcIndex] = resourceIndex;
-          funcTable.source[funcIndex] = 0;
-          funcTable.lineNumber[funcIndex] = 0;
-          funcTable.columnNumber[funcIndex] = 0;
-          funcTable.originalLocation[funcIndex] = 0;
-          // The name field will be filled below.
           funcTable.length++;
-        } else {
-          // Reuse an existing func slot: preserve IsJS/RelevantForJS, set
-          // HasResource, and clear the other flag bits since we're overwriting
-          // the source/line/column/originalLocation columns below.
-          funcTable.flags[funcIndex] =
-            (funcTable.flags[funcIndex] & preservedFlagsMask) |
-            FuncFlag.HasResource;
-          funcTable.resource[funcIndex] = resourceIndex;
-          funcTable.lineNumber[funcIndex] = 0;
-          funcTable.columnNumber[funcIndex] = 0;
-          funcTable.originalLocation[funcIndex] = 0;
         }
+        let funcFlags: number = FuncFlag.HasResource;
+        if (isJS) {
+          funcFlags |= FuncFlag.IsJS;
+        }
+        if (relevantForJS) {
+          funcFlags |= FuncFlag.RelevantForJS;
+        }
+        if (funcStartLine !== null) {
+          funcFlags |= FuncFlag.HasLine;
+        }
+        if (funcStartColumn !== null) {
+          funcFlags |= FuncFlag.HasColumn;
+        }
+        funcTable.flags[funcIndex] = funcFlags;
         funcTable.name[funcIndex] = functionStringIndex;
+        funcTable.resource[funcIndex] = resourceIndex;
+        funcTable.lineNumber[funcIndex] = funcStartLine ?? 0;
+        funcTable.columnNumber[funcIndex] = funcStartColumn ?? 0;
+        funcTable.originalLocation[funcIndex] = 0;
         // Store filename in sources table if we have one
         if (fileNameStringIndex !== null) {
           // Find or create the native source entry for this filename.
@@ -987,10 +1015,15 @@ function _partiallyApplySymbolicationStep(
         flags &= ~FrameFlag.HasLine;
         frameTable.line[expansionFrameIndex] = 0;
       }
-      flags &= ~FrameFlag.HasColumn;
+      if (frameInfo.column !== undefined) {
+        flags |= FrameFlag.HasColumn;
+        frameTable.column[expansionFrameIndex] = frameInfo.column;
+      } else {
+        flags &= ~FrameFlag.HasColumn;
+        frameTable.column[expansionFrameIndex] = 0;
+      }
       frameTable.flags[expansionFrameIndex] = flags;
       frameTable.func[expansionFrameIndex] = funcIndex;
-      frameTable.column[expansionFrameIndex] = 0;
       inlineExpansionFrames.push(expansionFrameIndex);
     }
     if (inlineExpansionFrames.length > 1) {

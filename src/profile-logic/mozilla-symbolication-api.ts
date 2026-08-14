@@ -37,16 +37,34 @@ export type QuerySymbolicationApiCallback = (
 // says whether the symbol server had symbols for this library.
 const APIFoundModulesV5Schema = v.record(v.string(), v.nullable(v.boolean()));
 
+// The properties which describe the position inside a function. These are
+// present both on the frame for the outer function at the looked-up address and
+// on the frames for the functions that were inlined into it.
+const APIFramePositionInfoV5Schema = {
+  // The path of the file that contains the function this frame was in, optional.
+  // For JIT frames for script functions, this is the script URL.
+  file: v.optional(v.string()),
+  // The line number that contains the source code that generated the
+  // instructions at the address, optional. e.g. 543
+  line: v.optional(v.number()),
+  // The column number inside `line`, optional. e.g. 12
+  col: v.optional(v.number()),
+  // The line number at which this frame's function starts, optional. e.g. 538
+  function_start_line: v.optional(v.number()),
+  // The column number (inside function_start_line) at which this frame's
+  // function starts, optional. e.g. 3
+  function_start_col: v.optional(v.number()),
+  // Whether this frame's function is a function in a script, e.g. a JS function
+  // that was compiled to machine code by a JIT compiler. Optional; symbol
+  // servers which only deal with native code don't return this property.
+  is_script: v.optional(v.boolean()),
+};
+
 // Information about functions that were inlined at this address.
 const APIInlineFrameInfoV5Schema = v.object({
   // The name of the function this inline frame was in, if known.
   function: v.optional(v.string()),
-  // The path of the file that contains the function this inline frame was in, optional.
-  file: v.optional(v.string()),
-  // The line number that contains the source code for this inline frame that
-  // contributed to the instruction at the looked-up address, optional.
-  // e.g. 543
-  line: v.optional(v.number()),
+  ...APIFramePositionInfoV5Schema,
 });
 
 const APIFrameInfoV5Schema = v.object({
@@ -58,16 +76,19 @@ const APIFrameInfoV5Schema = v.object({
   frame: v.number(),
   // The name of the function this frame was in, if symbols were found.
   function: v.optional(v.string()),
+  // The raw name of the symbol which contains the requested address, if it
+  // differs from `function`. `function` usually comes from the debug info,
+  // `symbol` usually comes from the symbol table.
+  // Jitdump example: function "doWork", symbol "Ion: doWork (app.js:42:10)"
+  // C++ example: function "someFunc(int)", symbol "someFunc(int).cold".
+  symbol: v.optional(v.string()),
   // The hex offset between the requested address and the start of the function,
   // e.g. "0x3c".
   function_offset: v.optional(v.string()),
   // An optional size, in bytes, of the machine code of the outer function that
   // this address belongs to, as a hex string, e.g. "0x270".
   function_size: v.optional(v.string()),
-  // The path of the file that contains the function this frame was in, optional.
-  file: v.optional(v.string()),
-  // The line number that contains the source code that generated the instructions at the address, optional.
-  line: v.optional(v.number()),
+  ...APIFramePositionInfoV5Schema,
   // Information about functions that were inlined at this address.
   // Ordered from inside to outside.
   inlines: v.optional(v.array(APIInlineFrameInfoV5Schema)),
@@ -130,14 +151,18 @@ function getV5ResultForLibRequest(
       let inlines;
       if (info.inlines !== undefined) {
         const inlineCount = info.inlines.length;
-        inlines = info.inlines.map(({ function: name, file, line }, i) => {
+        inlines = info.inlines.map((inline, i) => {
           const depth = inlineCount - i;
           return {
             name:
-              name ??
+              inline.function ??
               `<unknown at ${info.module_offset} at inline depth ${depth}>`,
-            file,
-            line,
+            file: inline.file,
+            line: inline.line,
+            column: inline.col,
+            functionStartLine: inline.function_start_line,
+            functionStartColumn: inline.function_start_col,
+            isScript: inline.is_script,
           };
         });
       }
@@ -149,9 +174,14 @@ function getV5ResultForLibRequest(
 
       addressResult = {
         name,
+        symbolName: info.symbol,
         symbolAddress: address - functionOffset,
         file: info.file,
         line: info.line,
+        column: info.col,
+        functionStartLine: info.function_start_line,
+        functionStartColumn: info.function_start_col,
+        isScript: info.is_script,
         inlines,
         functionSize,
       };

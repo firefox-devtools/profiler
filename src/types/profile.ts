@@ -444,8 +444,9 @@ export type RawFuncTable = {
   // Only meaningful when `HasResource` is set in `flags`.
   resource: Array<IndexIntoResourceTable> | Int32Array<ArrayBuffer>;
 
-  // These are non-null for JS functions only. The line and column describe the
-  // location of the *start* of the JS function. As for the information about which
+  // These are set for JS functions, and for any other function whose start
+  // position was supplied by symbolication. The line and column describe the
+  // location of the *start* of the function. As for the information about which
   // which lines / columns inside the function were actually hit during execution,
   // that information is stored in the frameTable, not in the funcTable.
   // Only meaningful when `HasSource` is set.
