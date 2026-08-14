@@ -1808,6 +1808,7 @@ Object {
       "value": 2,
     },
   },
+  "isInvertedRoot": false,
   "rootTime": 2,
 }
 `;

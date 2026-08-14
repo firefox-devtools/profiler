@@ -4,11 +4,15 @@
  * */
 import * as React from 'react';
 import { InView } from 'react-intersection-observer';
+import memoizeOne from 'memoize-one';
 import type {
   ActivityFillGraphQuerier,
   CategoryDrawStyles,
 } from './ActivityGraphFills';
-import { computeActivityGraphFills } from './ActivityGraphFills';
+import {
+  computeActivityGraphFills,
+  precomputePositions,
+} from './ActivityGraphFills';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import { mapCategoryColorNameToStyles } from 'firefox-profiler/utils/colors';
 
@@ -46,6 +50,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     renderScheduled: false,
     inView: false,
   };
+  _memoizedPrecomputePositions = memoizeOne(precomputePositions);
 
   _renderCanvas() {
     if (!this._canvasState.inView) {
@@ -141,6 +146,17 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
     canvas.width = canvasPixelWidth;
     canvas.height = canvasPixelHeight;
 
+    const xPixelsPerMs = canvasPixelWidth / (rangeEnd - rangeStart);
+    const precomputedPositions = this._memoizedPrecomputePositions(
+      fullThread.samples.time,
+      sampleIndexOffset,
+      rangeFilteredThread.samples.length,
+      rangeStart,
+      xPixelsPerMs,
+      interval,
+      canvasPixelWidth
+    );
+
     const { fills, fillsQuerier } = computeActivityGraphFills({
       canvasPixelWidth,
       canvasPixelHeight,
@@ -154,6 +170,7 @@ export class ActivityGraphCanvas extends React.PureComponent<CanvasProps> {
       xPixelsPerMs: canvasPixelWidth / (rangeEnd - rangeStart),
       treeOrderSampleComparator,
       categoryDrawStyles: this._getCategoryDrawStyles(ctx!),
+      precomputedPositions,
     });
 
     // The value in fillsQuerier is needed in ActivityGraph but is computed in this method

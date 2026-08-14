@@ -277,9 +277,7 @@ export function collectThreadSamplesBottomUp(
 
   const samples = threadSelectors.getPreviewFilteredCtssSamples(state);
   const sampleIndexToCallNodeIndex =
-    threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-      state
-    );
+    threadSelectors.getPreviewFilteredCtssSampleCallNodes(state);
 
   const callNodeSelfAndSummary = computeCallNodeSelfAndSummary(
     samples,
