@@ -6,7 +6,10 @@ import type {
   Profile,
   RawThread,
   IndexIntoStackTable,
+  MarkerPhase,
+  Milliseconds,
   MixedObject,
+  ScreenshotPayload,
 } from 'firefox-profiler/types';
 import { FrameFlag } from 'firefox-profiler/types';
 
@@ -30,6 +33,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import { getTimeRangeForThread } from '../profile-data';
+import { getScreenshotMarkerName } from '../marker-data';
 import { GlobalDataCollector } from '../global-data-collector';
 
 // Chrome Tracing Event Spec:
@@ -886,6 +890,29 @@ async function extractScreenshots(
     );
   }
 
+  // Chrome's Screenshot events don't say which window they belong to, so they
+  // all share one made-up window ID.
+  const windowID = 'id';
+  const nameIndex = stringTable.indexForString(
+    getScreenshotMarkerName(windowID)
+  );
+
+  function pushScreenshotMarker(
+    data: ScreenshotPayload,
+    startTime: Milliseconds | null,
+    endTime: Milliseconds | null,
+    phase: MarkerPhase
+  ) {
+    markers.data.push(data);
+    markers.name.push(nameIndex);
+    markers.startTime.push(startTime);
+    markers.endTime.push(endTime);
+    markers.phase.push(phase);
+    markers.category.push(graphicsIndex);
+    markers.length++;
+  }
+
+  let hasOpenScreenshot = false;
   for (const screenshot of screenshots) {
     const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
     const size = await getImageSize(urlString);
@@ -893,18 +920,30 @@ async function extractScreenshots(
       // The image could not be processed, do not add it.
       continue;
     }
-    markers.data.push({
-      type: 'CompositorScreenshot',
-      url: stringTable.indexForString(urlString),
-      windowID: 'id',
-      windowSize: { width: size.width, height: size.height },
-    });
-    markers.name.push(stringTable.indexForString('CompositorScreenshot'));
-    markers.startTime.push(screenshot.ts / 1000);
-    markers.endTime.push(null);
-    markers.phase.push(INSTANT);
-    markers.category.push(graphicsIndex);
-    markers.length++;
+    const startTime = screenshot.ts / 1000;
+
+    // Each screenshot is valid until the next one.
+    if (hasOpenScreenshot) {
+      pushScreenshotMarker(
+        { type: 'CompositorScreenshot', windowID },
+        null,
+        startTime,
+        INTERVAL_END
+      );
+    }
+
+    pushScreenshotMarker(
+      {
+        type: 'CompositorScreenshot',
+        url: stringTable.indexForString(urlString),
+        windowID,
+        windowSize: { width: size.width, height: size.height },
+      },
+      startTime,
+      null,
+      INTERVAL_START
+    );
+    hasOpenScreenshot = true;
   }
 }
 

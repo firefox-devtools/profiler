@@ -559,7 +559,6 @@ export function correlateIPCMarkers(
  *   the thread range. For the reverse situation, it's set to the start.
  *
  * There is also some special handling of different markers.
- *   - CompositorScreenshot - They are turned from Instant markers to Interval markers
  *   - IPC - They are matched up.
  *   - Network - They have different network phases.
  *
@@ -617,10 +616,6 @@ export function deriveMarkersFromRawMarkerTable(
     } as MarkerPayload;
   }
 
-  // We don't add a screenshot marker as we find it, because to know its
-  // duration we need to wait until the next one or the end of the profile. So
-  // we keep it here.
-  const previousScreenshotMarkers: Map<string, MarkerIndex> = new Map();
   for (
     let rawMarkerIndex = 0;
     rawMarkerIndex < rawMarkers.length;
@@ -723,51 +718,6 @@ export function deriveMarkersFromRawMarkerTable(
                 incomplete: true,
               });
             }
-          }
-
-          continue;
-        }
-
-        case 'CompositorScreenshot': {
-          // Screenshot markers are already ordered. In the raw marker table,
-          // they're Instant markers, but since they're valid until the following
-          // raw marker of the same type and the same window, we convert them to
-          // Interval markers with a a start and end time.
-
-          const windowID = String(data.windowID);
-          const previousScreenshotMarker =
-            previousScreenshotMarkers.get(windowID);
-          if (previousScreenshotMarker !== undefined) {
-            previousScreenshotMarkers.delete(windowID);
-            const previousStartTime = ensureExists(
-              rawMarkers.startTime[previousScreenshotMarker],
-              'Expected to find a start time for a screenshot marker.'
-            );
-            const thisStartTime = ensureExists(
-              maybeStartTime,
-              'The CompositorScreenshot is assumed to have a start time.'
-            );
-            const data = rawMarkers.data[previousScreenshotMarker];
-            const markerThreadId = rawMarkers.threadId
-              ? rawMarkers.threadId[previousScreenshotMarker]
-              : null;
-            addMarker([previousScreenshotMarker], {
-              start: previousStartTime,
-              end: thisStartTime,
-              name: 'CompositorScreenshot',
-              category,
-              threadId: markerThreadId,
-              data,
-            });
-          }
-          if (stringArray[name] === 'CompositorScreenshotWindowDestroyed') {
-            // This marker is added when a window is destroyed. In this case we
-            // don't want to store it as the start of the next compositor
-            // marker. But we do want to keep it, so we break out of the
-            // switch/case so that the standard processing happens.
-            break;
-          } else {
-            previousScreenshotMarkers.set(windowID, rawMarkerIndex);
           }
 
           continue;
@@ -987,24 +937,6 @@ export function deriveMarkersFromRawMarkerTable(
       threadId: rawMarkers.threadId ? rawMarkers.threadId[startIndex] : null,
       data: rawMarkers.data[startIndex],
       incomplete: true,
-    });
-  }
-
-  // And we also need to add the "last screenshot markers".
-  for (const previousScreenshotMarker of previousScreenshotMarkers.values()) {
-    const start = ensureExists(
-      rawMarkers.startTime[previousScreenshotMarker],
-      'Expected to find a CompositorScreenshot marker with a start time.'
-    );
-    addMarker([previousScreenshotMarker], {
-      start,
-      end: Math.max(endOfThread, start),
-      name: 'CompositorScreenshot',
-      category: rawMarkers.category[previousScreenshotMarker],
-      threadId: rawMarkers.threadId
-        ? rawMarkers.threadId[previousScreenshotMarker]
-        : null,
-      data: rawMarkers.data[previousScreenshotMarker],
     });
   }
 
@@ -1432,6 +1364,10 @@ export function getColorClassNameForMimeType(
       }
       return 'network-color-other';
   }
+}
+
+export function getScreenshotMarkerName(windowID: number | string): string {
+  return `CompositorScreenshot ${windowID}`;
 }
 
 export function groupScreenshotsById(
