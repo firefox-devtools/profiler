@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type {
-  ScreenshotPayload,
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -29,7 +28,6 @@ import {
   getMarkerTypesForDisplay,
 } from './marker-data';
 import { intersectSets, subtractSets } from '../utils/set';
-import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/types';
 
@@ -717,12 +715,6 @@ export function computeGlobalTracks(
   let globalTracks: GlobalTrack[] = [];
 
   // Create the global tracks.
-  const { stringArray } = profile.shared;
-  const stringTable = StringTable.withBackingArray(stringArray);
-  const screenshotNameIndex = stringTable.hasString('CompositorScreenshot')
-    ? stringTable.indexForString('CompositorScreenshot')
-    : null;
-
   for (
     let threadIndex = 0;
     threadIndex < profile.threads.length;
@@ -762,20 +754,20 @@ export function computeGlobalTracks(
       }
     }
 
-    // Check for screenshots.
+    // Check for screenshots. Their marker name carries the window ID, so match
+    // on the payload type instead. Windows must keep being added in the order
+    // their first screenshot was taken: shared URLs refer to global tracks by
+    // index, so a different order would change what an existing URL selects.
     const ids: Set<string> = new Set();
-    if (screenshotNameIndex !== null) {
-      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-        if (markers.name[markerIndex] === screenshotNameIndex) {
-          // Coerce the payload to a screenshot one. Don't do a runtime check that
-          // this is correct.
-          const data = markers.data[markerIndex] as ScreenshotPayload;
-          ids.add(String(data.windowID));
-        }
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      const data = markers.data[markerIndex];
+      if (data === null || data.type !== 'CompositorScreenshot') {
+        continue;
       }
-      for (const id of ids) {
-        globalTracks.push({ type: 'screenshots', id, threadIndex });
-      }
+      ids.add(String(data.windowID));
+    }
+    for (const id of ids) {
+      globalTracks.push({ type: 'screenshots', id, threadIndex });
     }
   }
 

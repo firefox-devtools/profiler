@@ -42,6 +42,7 @@ import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import {
   PROCESSED_PROFILE_VERSION,
   INTERVAL,
+  INTERVAL_START,
   INTERVAL_END,
   INSTANT,
 } from '../app-logic/constants';
@@ -49,6 +50,7 @@ import {
   getFriendlyThreadName,
   nudgeReturnAddresses,
 } from '../profile-logic/profile-data';
+import { getScreenshotMarkerName } from './marker-data';
 import {
   toInt32Array,
   toUint8Array,
@@ -941,6 +943,91 @@ function _processMarkerPayload(
   return newData;
 }
 
+/**
+ * Gecko emits one instant marker per composite of a window, plus a
+ * CompositorScreenshotWindowDestroyed marker when the window goes away. Each
+ * screenshot is valid until the next one for the same window, so rewrite them
+ * into start / end marker pairs. A window that is never destroyed keeps its last
+ * screenshot open, so that marker gets extended to the end of the thread.
+ */
+function _convertScreenshotMarkersToStartEnd(
+  markers: RawMarkerTable,
+  stringTable: StringTable
+): RawMarkerTable {
+  const hasScreenshots = markers.data.some(
+    (data) => data !== null && data.type === 'CompositorScreenshot'
+  );
+  if (!hasScreenshots) {
+    return markers;
+  }
+
+  const newMarkers = getEmptyRawMarkerTable();
+  const openMarkerPerWindow = new Map<
+    string,
+    { name: IndexIntoStringTable; index: number }
+  >();
+
+  function push(
+    name: IndexIntoStringTable,
+    startTime: Milliseconds | null,
+    endTime: Milliseconds | null,
+    phase: MarkerPhase,
+    sourceIndex: number,
+    data: MarkerPayload | null
+  ) {
+    newMarkers.name.push(name);
+    newMarkers.startTime.push(startTime);
+    newMarkers.endTime.push(endTime);
+    newMarkers.phase.push(phase);
+    newMarkers.category.push(markers.category[sourceIndex]);
+    newMarkers.data.push(data);
+    newMarkers.length++;
+  }
+
+  for (let i = 0; i < markers.length; i++) {
+    const data = markers.data[i];
+    if (data === null || data.type !== 'CompositorScreenshot') {
+      push(
+        markers.name[i],
+        markers.startTime[i],
+        markers.endTime[i],
+        markers.phase[i],
+        i,
+        data
+      );
+      continue;
+    }
+
+    const windowID = String(data.windowID);
+    const time = markers.startTime[i];
+    const openMarker = openMarkerPerWindow.get(windowID);
+    if (openMarker !== undefined) {
+      openMarkerPerWindow.delete(windowID);
+      // The end marker only needs to identify the window: the start marker's
+      // payload is what the derived marker keeps.
+      push(openMarker.name, null, time, INTERVAL_END, openMarker.index, {
+        type: 'CompositorScreenshot',
+        windowID: data.windowID,
+      });
+    }
+
+    if (
+      stringTable.getString(markers.name[i]) ===
+      'CompositorScreenshotWindowDestroyed'
+    ) {
+      continue;
+    }
+
+    const name = stringTable.indexForString(
+      getScreenshotMarkerName(data.windowID)
+    );
+    push(name, time, null, INTERVAL_START, i, data);
+    openMarkerPerWindow.set(windowID, { name, index: i });
+  }
+
+  return newMarkers;
+}
+
 function _timeColumnToCompactTimeDeltas(time: Milliseconds[]): Milliseconds[] {
   const NS_PER_MS = 1000000;
 
@@ -1357,12 +1444,20 @@ function _processThread(
     frameIndexOffset
   );
 
-  const { markers, jsAllocations, nativeAllocations } = _processMarkers(
+  const {
+    markers: processedMarkers,
+    jsAllocations,
+    nativeAllocations,
+  } = _processMarkers(
     geckoMarkers,
     thread.stringTable,
     stringIndexMarkerFieldsByDataType,
     globalDataCollector,
     stackIndexOffset
+  );
+  const markers = _convertScreenshotMarkersToStartEnd(
+    processedMarkers,
+    globalDataCollector.getStringTable()
   );
   const samples = _processSamples(geckoSamples, stackIndexOffset);
 

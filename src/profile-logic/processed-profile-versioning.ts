@@ -3312,21 +3312,99 @@ const _upgraders: {
   },
   [70]: (profile: any) => {
     // The CompositorScreenshot marker payload's `windowWidth` and
-    // `windowHeight` fields were replaced with a single `windowSize` field.
+    // `windowHeight` fields were replaced with a single `windowSize` field, and
+    // these markers are now stored as start / end marker pairs whose name
+    // carries the window ID, instead of instant markers. The
+    // CompositorScreenshotWindowDestroyed marker becomes the end marker of that
+    // window's last screenshot.
+    const INTERVAL_START = 2;
+    const INTERVAL_END = 3;
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+
     for (const thread of profile.threads) {
       const { markers } = thread;
+      const newMarkers: any = {
+        data: [],
+        name: [],
+        startTime: [],
+        endTime: [],
+        phase: [],
+        category: [],
+        length: 0,
+      };
+      const hasThreadId = Boolean(markers.threadId);
+      if (hasThreadId) {
+        newMarkers.threadId = [];
+      }
+
+      const push = (
+        name: number,
+        startTime: number | null,
+        endTime: number | null,
+        phase: number,
+        sourceIndex: number,
+        data: any
+      ) => {
+        newMarkers.name.push(name);
+        newMarkers.startTime.push(startTime);
+        newMarkers.endTime.push(endTime);
+        newMarkers.phase.push(phase);
+        newMarkers.category.push(markers.category[sourceIndex]);
+        newMarkers.data.push(data);
+        if (hasThreadId) {
+          newMarkers.threadId.push(markers.threadId[sourceIndex]);
+        }
+        newMarkers.length++;
+      };
+
+      const openMarkerPerWindow = new Map();
       for (let i = 0; i < markers.length; i++) {
         const data = markers.data[i];
         if (!data || data.type !== 'CompositorScreenshot') {
+          push(
+            markers.name[i],
+            markers.startTime[i],
+            markers.endTime[i],
+            markers.phase[i],
+            i,
+            data
+          );
           continue;
         }
-        const { windowWidth, windowHeight } = data;
-        if (windowWidth !== undefined && windowHeight !== undefined) {
-          data.windowSize = { width: windowWidth, height: windowHeight };
+
+        const windowID = String(data.windowID);
+        const time = markers.startTime[i];
+        const openMarker = openMarkerPerWindow.get(windowID);
+        if (openMarker !== undefined) {
+          openMarkerPerWindow.delete(windowID);
+          push(openMarker.name, null, time, INTERVAL_END, openMarker.index, {
+            type: 'CompositorScreenshot',
+            windowID: data.windowID,
+          });
         }
-        delete data.windowWidth;
-        delete data.windowHeight;
+
+        if (
+          stringTable.getString(markers.name[i]) ===
+          'CompositorScreenshotWindowDestroyed'
+        ) {
+          continue;
+        }
+
+        const { windowWidth, windowHeight, ...startData } = data;
+        if (windowWidth !== undefined && windowHeight !== undefined) {
+          startData.windowSize = { width: windowWidth, height: windowHeight };
+        }
+
+        const name = stringTable.indexForString(
+          `CompositorScreenshot ${windowID}`
+        );
+        push(name, time, null, INTERVAL_START, i, startData);
+        openMarkerPerWindow.set(windowID, { name, index: i });
       }
+
+      thread.markers = newMarkers;
     }
   },
   // If you add a new upgrader here, please document the change in

@@ -64,6 +64,7 @@ import type {
 } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
+  getScreenshotMarkerName,
   IPCMarkerCorrelations,
 } from '../../../profile-logic/marker-data';
 import {
@@ -369,16 +370,30 @@ export function makeIntervalMarker(
  * A utility to make TestDefinedRawMarker
  */
 export function makeCompositorScreenshot(
-  startTime: Milliseconds
+  startTime: Milliseconds,
+  windowID: string = '0'
 ): TestDefinedRawMarker {
   return {
-    ...makeInstantMarker('CompositorScreenshot', startTime),
+    ...makeStartMarker(getScreenshotMarkerName(windowID), startTime),
     data: {
       type: 'CompositorScreenshot',
       url: 0,
-      windowID: '',
-      windowSize: { width: 100, height: 100 },
+      windowID,
+      windowSize: { width: 300, height: 150 },
     },
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeCompositorScreenshotEnd(
+  endTime: Milliseconds,
+  windowID: string = '0'
+): TestDefinedRawMarker {
+  return {
+    ...makeEndMarker(getScreenshotMarkerName(windowID), endTime),
+    data: { type: 'CompositorScreenshot', windowID },
   };
 }
 
@@ -415,6 +430,19 @@ export function getProfileWithMarkers(
   }
   profile.threads = markersPerThread.map((testDefinedMarkers, i) => ({
     ...getThreadWithMarkers(profile.shared, testDefinedMarkers),
+    tid: i,
+  }));
+  return profile;
+}
+
+export function getProfileWithRawMarkers(
+  ...markersPerThread: TestDefinedRawMarker[][]
+): Profile {
+  const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
+
+  profile.threads = markersPerThread.map((markers, i) => ({
+    ...getThreadWithRawMarkers(profile.shared, markers),
     tid: i,
   }));
   return profile;
@@ -1334,39 +1362,33 @@ export function getIPCTrackProfile() {
   return getProfileWithMarkers(arrayOfIPCMarkers);
 }
 
+/**
+ * One screenshot per millisecond, starting at 0. Each one ends where the next
+ * one starts; the last one is left open unless `destroyTime` is given.
+ */
 export function getScreenshotMarkersForWindowId(
   windowID: string,
-  count: number
-): TestDefinedMarker[] {
-  return Array(count)
-    .fill(undefined)
-    .map((_, i) => [
-      'CompositorScreenshot',
-      i,
-      null,
-      {
-        type: 'CompositorScreenshot',
-        url: 0, // Some arbitrary string.
-        windowID,
-        windowSize: { width: 300, height: 150 },
-      },
-    ]);
+  count: number,
+  destroyTime: Milliseconds | null = null
+): TestDefinedRawMarker[] {
+  const markers: TestDefinedRawMarker[] = [];
+  for (let i = 0; i < count; i++) {
+    if (i > 0) {
+      markers.push(makeCompositorScreenshotEnd(i, windowID));
+    }
+    markers.push(makeCompositorScreenshot(i, windowID));
+  }
+  if (destroyTime !== null) {
+    markers.push(makeCompositorScreenshotEnd(destroyTime, windowID));
+  }
+  return markers;
 }
 
 export function getScreenshotTrackProfile() {
-  return getProfileWithMarkers([
+  return getProfileWithRawMarkers([
     ...getScreenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
-    ...getScreenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
+    ...getScreenshotMarkersForWindowId('1', 5, 6), // This window is closed after screenshot 6.
     ...getScreenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
-    [
-      'CompositorScreenshotWindowDestroyed',
-      6,
-      null,
-      {
-        type: 'CompositorScreenshot',
-        windowID: '1',
-      },
-    ],
   ]);
 }
 

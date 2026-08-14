@@ -1179,22 +1179,6 @@ describe('TooltipMarker', function () {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders the tooltip of CompositorScreenshotWindowDestroyed', () => {
-    setupWithPayload([
-      [
-        'CompositorScreenshotWindowDestroyed',
-        1,
-        2,
-        {
-          type: 'CompositorScreenshot',
-          windowID: 'XXX',
-        },
-      ],
-    ]);
-
-    expect(document.body).toMatchSnapshot();
-  });
-
   it('shows the source thread for markers from a merged thread', function () {
     // We construct a profile that has 2 threads from 2 different tabs.
     const tab1Domain = 'https://mozilla.org';
