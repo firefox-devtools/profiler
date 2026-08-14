@@ -53,6 +53,13 @@ import './BenchmarkCompareViewer.css';
 type ComparisonData = {
   baseUrl: string;
   newUrl: string;
+  /** The `baseUrl`/`newUrl` after `expandUrl` resolves a share.firefox.dev
+   * (or perfht.ml / bit.ly) shortlink to its full profiler.firefox.com URL --
+   * or the original URL if it was already in that form. Deep links from each
+   * bucket's flame graph are rewritten off *this* URL, so a shortened input
+   * still yields a working link. */
+  baseViewerUrl: string;
+  newViewerUrl: string;
   /** The loaded source profiles, retained so we can render flame graphs of
    * individual buckets on demand (focusSelf on a bucket's representative func). */
   baseProfile: Profile;
@@ -226,33 +233,41 @@ type BucketFilter = {
  * profile here; entries are never evicted, which is fine for a page whose whole
  * job is comparing two of them.
  */
-const profileCache = new Map<string, Promise<Profile>>();
+type LoadedProfile = {
+  profile: Profile;
+  /** The URL after any shortlink expansion. This is the URL that actually
+   * points at a viewable profile in profiler.firefox.com; it's what deep
+   * links from each bucket's flame graph get rewritten from. */
+  viewerUrl: string;
+};
 
-function loadOneProfileCached(viewerUrl: string): Promise<Profile> {
-  const cached = profileCache.get(viewerUrl);
+const profileCache = new Map<string, Promise<LoadedProfile>>();
+
+function loadOneProfileCached(inputUrl: string): Promise<LoadedProfile> {
+  const cached = profileCache.get(inputUrl);
   if (cached !== undefined) {
     return cached;
   }
   // Don't cache a rejection: a failed fetch is usually transient, and the
   // obvious way to retry is to press the button again.
-  const promise = loadOneProfile(viewerUrl).catch((err) => {
-    profileCache.delete(viewerUrl);
+  const promise = loadOneProfile(inputUrl).catch((err) => {
+    profileCache.delete(inputUrl);
     throw err;
   });
-  profileCache.set(viewerUrl, promise);
+  profileCache.set(inputUrl, promise);
   return promise;
 }
 
-async function loadOneProfile(viewerUrl: string) {
-  let url = viewerUrl;
+async function loadOneProfile(inputUrl: string): Promise<LoadedProfile> {
+  let viewerUrl = inputUrl;
   if (
-    url.startsWith('https://perfht.ml/') ||
-    url.startsWith('https://share.firefox.dev/') ||
-    url.startsWith('https://bit.ly/')
+    viewerUrl.startsWith('https://perfht.ml/') ||
+    viewerUrl.startsWith('https://share.firefox.dev/') ||
+    viewerUrl.startsWith('https://bit.ly/')
   ) {
-    url = await expandUrl(url);
+    viewerUrl = await expandUrl(viewerUrl);
   }
-  const dataUrl = getProfileFetchUrl(url);
+  const dataUrl = getProfileFetchUrl(viewerUrl);
   const response = await fetchProfile({
     url: dataUrl,
     onTemporaryError: () => {},
@@ -260,14 +275,21 @@ async function loadOneProfile(viewerUrl: string) {
   if (response.responseType !== 'BYTES') {
     throw new Error('Expected a profile, not a zip file.');
   }
-  return unserializeProfileOfArbitraryFormat(response.bytes, dataUrl);
+  const profile = await unserializeProfileOfArbitraryFormat(
+    response.bytes,
+    dataUrl
+  );
+  return { profile, viewerUrl };
 }
 
 async function computeComparison(
   baseUrl: string,
   newUrl: string
 ): Promise<ComparisonData> {
-  const [baseProfile, newProfile] = await Promise.all([
+  const [
+    { profile: baseProfile, viewerUrl: baseViewerUrl },
+    { profile: newProfile, viewerUrl: newViewerUrl },
+  ] = await Promise.all([
     loadOneProfileCached(baseUrl),
     loadOneProfileCached(newUrl),
   ]);
@@ -361,6 +383,8 @@ async function computeComparison(
   return {
     baseUrl,
     newUrl,
+    baseViewerUrl,
+    newViewerUrl,
     baseProfile,
     newProfile,
     overallScore,
@@ -1353,8 +1377,8 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
         filter={filter}
         baseBundle={baseBundle}
         newBundle={newBundle}
-        baseViewerUrl={data.baseUrl}
-        newViewerUrl={data.newUrl}
+        baseViewerUrl={data.baseViewerUrl}
+        newViewerUrl={data.newViewerUrl}
       />
     </div>
   );
