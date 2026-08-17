@@ -77,7 +77,8 @@ export type ProfileBenchmarkStats = {
    *
    * For non-JS funcs (DOM-binding `relevantForJS` shims, inserted `Label`
    * funcs, etc.), the key is the name itself: those are already engine-
-   * neutral by design.
+   * neutral by design, apart from capitalisation, which `compareBuckets`
+   * ignores for name keys.
    *
    * Falls back to the name if a JS func has no source/line/col (e.g. the
    * profile wasn't run through `--canonicalize-js-location`).
