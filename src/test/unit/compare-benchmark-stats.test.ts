@@ -301,6 +301,89 @@ describe('global bucket comparison', function () {
   });
 });
 
+describe('bucket matching', function () {
+  // Two profiles that agree on everything except how they spell the bucket.
+  // Firefox reports IDBDatabase.transaction where the other engine reports
+  // IdbDatabase.transaction; with nothing but the name to match on, the case
+  // difference must not split them into two one-sided rows.
+  function comparePairNamed(baseName: string, newName: string) {
+    const weights = new Array<number>(8).fill(3);
+    const baseStats = makeStats(
+      [baseName],
+      [{ suiteName: 'Suite', buckets: [[0, weights]] }]
+    );
+    const newStats = makeStats(
+      [newName],
+      [{ suiteName: 'Suite', buckets: [[0, weights]] }]
+    );
+    return compare(
+      baseStats,
+      newStats,
+      baseStats.suites[0].buckets,
+      newStats.suites[0].buckets,
+      weights.length
+    );
+  }
+
+  it('matches name-keyed buckets that differ only in case', function () {
+    const results = comparePairNamed(
+      'IDBDatabase.transaction',
+      'IdbDatabase.transaction'
+    );
+
+    expect(results).toHaveLength(1);
+    // Matched on both sides, so neither appeared nor disappeared.
+    expect(results[0].baseFunc).not.toBeNull();
+    expect(results[0].newFunc).not.toBeNull();
+    // The row is reported with the base profile's spelling, not a case-folded
+    // one: the key is UI-facing identity, and folding is a matching detail.
+    expect(results[0].key).toBe('IDBDatabase.transaction');
+    expect(results[0].bucketName).toBe('IDBDatabase.transaction');
+  });
+
+  it('still separates buckets whose names differ by more than case', function () {
+    const results = comparePairNamed(
+      'IDBDatabase.transaction',
+      'IDBDatabase.objectStore'
+    );
+    expect(results).toHaveLength(2);
+  });
+
+  it('sums two same-name buckets within one profile', function () {
+    // Case folding also collapses within a profile: two funcs whose names
+    // differ only in case are one bucket, and their weights add.
+    const baseStats = makeStats(
+      ['Foo.bar', 'foo.Bar'],
+      [
+        {
+          suiteName: 'Suite',
+          buckets: [
+            [0, [1, 1, 1, 1]],
+            [1, [2, 2, 2, 2]],
+          ],
+        },
+      ]
+    );
+    const newStats = makeStats(
+      ['Foo.bar'],
+      [{ suiteName: 'Suite', buckets: [[0, [3, 3, 3, 3]]] }]
+    );
+
+    const results = compare(
+      baseStats,
+      newStats,
+      baseStats.suites[0].buckets,
+      newStats.suites[0].buckets,
+      4
+    );
+    expect(results).toHaveLength(1);
+    // 1 + 2 on the base side against 3 on the new side: no change.
+    expect(results[0].delta).toBeCloseTo(0, 10);
+    // The heavier of the two collapsed funcs represents the row.
+    expect(results[0].key).toBe('foo.Bar');
+  });
+});
+
 describe('multiple-comparisons correction', function () {
   /** `count` buckets drawn from one process on both sides, so none of them
    * changed, plus one that plainly did. Deterministic. */
