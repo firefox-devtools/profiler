@@ -61,12 +61,14 @@ type ColumnDescription<TCol> = null extends (
         | { type: 'NO_REF' };
 
 type TableDescription<T> = {
-  [K in keyof T as T[K] extends
-    | Array<any>
-    | Int32Array<ArrayBuffer>
-    | Uint8Array<ArrayBuffer>
-    ? K
-    : never]: ColumnDescription<T[K]>;
+  [
+    K in keyof T as T[K] extends
+      | Array<any>
+      | Int32Array<ArrayBuffer>
+      | Uint8Array<ArrayBuffer>
+      ? K
+      : never
+  ]: ColumnDescription<T[K]>;
 };
 
 const ColDesc = {
