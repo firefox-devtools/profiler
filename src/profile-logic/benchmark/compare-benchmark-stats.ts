@@ -407,7 +407,9 @@ export function describeVerdict(
 export type BucketComparison = {
   /** Cross-profile matching key (source location for JS funcs, name otherwise).
    * Stable across the same profile pair — safe to use as a React key or to
-   * anchor UI state (like which row is expanded) across re-filterings. */
+   * anchor UI state (like which row is expanded) across re-filterings. Name
+   * keys match case-insensitively, but this reports the spelling the profile
+   * used (the base profile's, when the two differ). */
   key: string;
   bucketName: string;
   /** Func index of the bucket in the base profile, or null if absent there.
@@ -422,6 +424,10 @@ type KeyMapEntry = {
   /** Human-readable display name for this key (taken from the first bucket
    * seen with this key — usually a function name). */
   displayName: string;
+  /** The key as it appeared in the profile, before case folding. Reported as
+   * the row's key so that callers see the bucket's own spelling rather than the
+   * lower-cased form matching uses internally. */
+  originalKey: string;
   /** Borrowed from `entry.iterationTotals` on first insert, then replaced by a
    * fresh Float64Array on collision (see buildKeyMap). Callers must not mutate
    * this unless `owned` is true. */
@@ -446,9 +452,19 @@ function buildKeyMap(
 ): Map<string, KeyMapEntry> {
   const map = new Map<string, KeyMapEntry>();
   for (const entry of buckets) {
-    const key = bucketKeys[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
+    const rawKey =
+      bucketKeys[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
     const name =
       bucketNames[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
+    // Name-based keys match case-insensitively: without a source location to
+    // pin the function down, the name is all we have, and engines disagree on
+    // the capitalisation of the same DOM entry point (Gecko's
+    // IDBDatabase.transaction vs IdbDatabase.transaction elsewhere). Location
+    // keys are left alone — filenames and URL paths are case-sensitive, so
+    // folding their case could merge two genuinely different sources. A key
+    // that is still the name is a name key, whether because the func has no
+    // usable location or because the stats file predates bucketKeys entirely.
+    const key = rawKey === name ? name.toLowerCase() : rawKey;
     const func = bucketFuncs[entry.bucketIndex];
     const iterTotals = entry.iterationTotals;
     const iterLen = iterTotals.length;
@@ -477,10 +493,12 @@ function buildKeyMap(
         existing.representativeFunc = func;
         existing.representativeWeight = weight;
         existing.displayName = name;
+        existing.originalKey = rawKey;
       }
     } else {
       map.set(key, {
         displayName: name,
+        originalKey: rawKey,
         iterationTotals: iterTotals,
         owned: false,
         representativeFunc: func,
@@ -495,7 +513,8 @@ function buildKeyMap(
  * Compare two sparse bucket lists, matching by bucket key across profiles.
  * For JS funcs, the key is the source location (filename:line:col) so that
  * naming differences across engines don't prevent the same function from
- * matching. For everything else, the key is the bucket name.
+ * matching. For everything else, the key is the bucket name, matched
+ * case-insensitively.
  *
  * Buckets that appear in only one profile are treated as
  * "appeared"/"disappeared" unless excludeAppearedDisappeared is set.
@@ -547,11 +566,13 @@ export function compareBuckets(
       continue;
     }
 
-    // Prefer the base profile's display name; fall back to the new one.
+    // Prefer the base profile's display name; fall back to the new one. Same
+    // for the key's original spelling, which the two sides may disagree on.
     const displayName = baseEntry?.displayName ?? newEntry?.displayName ?? key;
+    const originalKey = baseEntry?.originalKey ?? newEntry?.originalKey ?? key;
 
     results.push({
-      key,
+      key: originalKey,
       bucketName: displayName,
       baseFunc: baseEntry?.representativeFunc ?? null,
       newFunc: newEntry?.representativeFunc ?? null,
