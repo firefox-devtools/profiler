@@ -2079,9 +2079,9 @@ describe('actions/ProfileView', function () {
       const screenshots = screenshotMarkersById.get('0');
       expect(screenshots?.length).toEqual(5);
       for (const screenshot of screenshots ?? []) {
-        expect(screenshot.name).toEqual('CompositorScreenshot');
+        expect(screenshot.name).toEqual('CompositorScreenshot 0');
       }
-      expect(screenshotMarkersById.get('1')?.length).toEqual(6);
+      expect(screenshotMarkersById.get('1')?.length).toEqual(5);
       expect(screenshotMarkersById.get('2')?.length).toEqual(10);
     });
 
@@ -2090,9 +2090,9 @@ describe('actions/ProfileView', function () {
       const [{ markers }] = profile.threads;
       const { dispatch, getState } = storeWithProfile(profile);
 
-      // Double check that there are 21 markers in the test data, and commit a
-      // subsection of that range.
-      expect(markers.length).toBe(21);
+      // Double check that there are 38 raw markers in the test data, and commit
+      // a subsection of that range.
+      expect(markers.length).toBe(38);
       dispatch(ProfileView.commitRange(3.1, 7.5));
 
       // Get out the markers.

@@ -31,6 +31,7 @@ import {
   makeIntervalMarker,
   makeInstantMarker,
   makeCompositorScreenshot,
+  makeCompositorScreenshotEnd,
   makeStartMarker,
   makeEndMarker,
 } from '../fixtures/profiles/processed-profile';
@@ -325,12 +326,11 @@ describe('Derive markers from Gecko phase markers', function () {
     ]);
   });
 
-  it('has special handling for CompositorScreenshot', function () {
+  it('turns the instant CompositorScreenshot markers into intervals', function () {
     const basePayload = {
       type: 'CompositorScreenshot' as const,
       url: 16,
-      windowWidth: 1280,
-      windowHeight: 1000,
+      windowSize: { width: 1280, height: 1000 },
     };
     const payloadsForWindowA: ScreenshotPayload[] = [
       {
@@ -339,7 +339,7 @@ describe('Derive markers from Gecko phase markers', function () {
       },
       {
         ...basePayload,
-        windowWidth: 500,
+        windowSize: { width: 500, height: 1000 },
         windowID: '0xAAAAAAAAA',
       },
     ];
@@ -351,34 +351,33 @@ describe('Derive markers from Gecko phase markers', function () {
     const startTimesForWindowA = [2, 5];
     const startTimesForWindowB = [3, 6];
 
+    const windowBDestroyedTime = 8;
+
+    const screenshot = (
+      startTime: number,
+      data: ScreenshotPayload
+    ): TestDefinedGeckoMarker => ({
+      name: 'CompositorScreenshot',
+      startTime,
+      endTime: null,
+      phase: INSTANT,
+      data,
+    });
+
     const { markers, getState } = setupWithTestDefinedMarkers([
+      screenshot(startTimesForWindowA[0], payloadsForWindowA[0]),
+      screenshot(startTimesForWindowB[0], payloadsForWindowB[0]),
+      screenshot(startTimesForWindowA[1], payloadsForWindowA[1]),
+      screenshot(startTimesForWindowB[1], payloadsForWindowB[1]),
       {
-        name: 'CompositorScreenshot',
-        startTime: startTimesForWindowA[0],
+        name: 'CompositorScreenshotWindowDestroyed',
+        startTime: windowBDestroyedTime,
         endTime: null,
-        phase: INTERVAL_START,
-        data: payloadsForWindowA[0],
-      },
-      {
-        name: 'CompositorScreenshot',
-        startTime: startTimesForWindowB[0],
-        endTime: null,
-        phase: INTERVAL_START,
-        data: payloadsForWindowB[0],
-      },
-      {
-        name: 'CompositorScreenshot',
-        startTime: startTimesForWindowA[1],
-        endTime: null,
-        phase: INTERVAL_START,
-        data: payloadsForWindowA[1],
-      },
-      {
-        name: 'CompositorScreenshot',
-        startTime: startTimesForWindowB[1],
-        endTime: null,
-        phase: INTERVAL_START,
-        data: payloadsForWindowB[1],
+        phase: INSTANT,
+        data: {
+          type: 'CompositorScreenshot',
+          windowID: payloadsForWindowB[0].windowID,
+        },
       },
     ]);
 
@@ -388,7 +387,7 @@ describe('Derive markers from Gecko phase markers', function () {
       // The two firsts have a duration from the first screenshot to the next in
       // the same window.
       {
-        name: 'CompositorScreenshot',
+        name: 'CompositorScreenshot 0xAAAAAAAAA',
         data: {
           ...payloadsForWindowA[0],
           url: expect.anything(),
@@ -399,7 +398,7 @@ describe('Derive markers from Gecko phase markers', function () {
         threadId: null,
       },
       {
-        name: 'CompositorScreenshot',
+        name: 'CompositorScreenshot 0xBBBBBBBBB',
         data: {
           ...payloadsForWindowB[0],
           url: expect.anything(),
@@ -410,9 +409,10 @@ describe('Derive markers from Gecko phase markers', function () {
         threadId: null,
       },
 
-      // The 2 lasts have a duration until the end of the thread range.
+      // Window A is still open, so its last screenshot is extended to the end
+      // of the thread range.
       {
-        name: 'CompositorScreenshot',
+        name: 'CompositorScreenshot 0xAAAAAAAAA',
         data: {
           ...payloadsForWindowA[1],
           url: expect.anything(),
@@ -421,15 +421,18 @@ describe('Derive markers from Gecko phase markers', function () {
         end: threadRange.end,
         category: 0,
         threadId: null,
+        incomplete: true,
       },
+
+      // Window B was destroyed, so its last screenshot ends there.
       {
-        name: 'CompositorScreenshot',
+        name: 'CompositorScreenshot 0xBBBBBBBBB',
         data: {
           ...payloadsForWindowB[1],
           url: expect.anything(),
         },
         start: startTimesForWindowB[1],
-        end: threadRange.end,
+        end: windowBDestroyedTime,
         category: 0,
         threadId: null,
       },
@@ -501,7 +504,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
       'tracing:ArbitraryName',
       'Network:Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       'FileIO:FileIO',
-      'CompositorScreenshot:CompositorScreenshot',
+      'CompositorScreenshot:CompositorScreenshot 0x136888400',
       'PreferenceRead:PreferenceRead',
       'Text:RefreshDriverTick',
       'NoPayloadUserData:Navigation::Start',
@@ -812,12 +815,12 @@ describe('deriveMarkersFromRawMarkerTable', function () {
         type: 'CompositorScreenshot',
         url: expect.anything(),
         windowID: '0x136888400',
-        windowWidth: 1280,
-        windowHeight: 1000,
+        windowSize: { width: 1280, height: 1000 },
       },
-      name: 'CompositorScreenshot',
+      name: 'CompositorScreenshot 0x136888400',
       start: 25,
       end: 25,
+      incomplete: true,
     });
   });
 });
@@ -955,12 +958,17 @@ describe('filterRawMarkerTableToRange', () => {
       end: 5.6,
       markers: [
         makeCompositorScreenshot(0),
+        makeCompositorScreenshotEnd(3),
         makeCompositorScreenshot(3),
+        makeCompositorScreenshotEnd(7),
         makeCompositorScreenshot(7),
       ],
     });
 
-    expect(rawMarkerTable.startTime).toEqual([0, 3]);
+    // Both markers of a screenshot's pair are kept, and the screenshot taken
+    // after the range is dropped.
+    expect(rawMarkerTable.startTime).toEqual([0, null, 3, null]);
+    expect(rawMarkerTable.endTime).toEqual([null, 3, null, 7]);
   });
 
   it('keeps a screenshot markers happening before the range if there is no other marker', () => {
@@ -973,7 +981,7 @@ describe('filterRawMarkerTableToRange', () => {
         makeInstantMarker('EndMarkerOutOfRange', 8),
       ],
     });
-    expect(processedMarkerNames).toEqual(['CompositorScreenshot']);
+    expect(processedMarkerNames).toEqual(['CompositorScreenshot 0']);
   });
 
   it('filters network markers', () => {
