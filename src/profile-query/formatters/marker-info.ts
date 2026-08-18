@@ -13,6 +13,7 @@ import {
   getMarkerSchemaByName,
   getStringTable,
   getCommittedRange,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import {
   intervalUnionMs,
@@ -707,6 +708,9 @@ export function collectThreadMarkers(
     const categories = getCategories(state);
     const markerSchemaByName = getMarkerSchemaByName(state);
     const stringTable = getStringTable(state);
+    // Usually non-zero (earliest sample or marker across all threads), so
+    // reporting a raw marker time leaks that offset.
+    const zeroAt = getZeroAt(state);
 
     // Get marker indexes scoped to the committed (zoom) range. When a search is
     // active we use the search-filtered set, which is itself built on top of the
@@ -774,7 +778,7 @@ export function collectThreadMarkers(
       );
 
       // Add markerIndex to topMarkers in groups
-      customGroups = addMarkerIndexToGroups(groups);
+      customGroups = addMarkerIndexToGroups(groups, zeroAt);
     }
 
     // Aggregate by type (with optional auto-grouping)
@@ -801,12 +805,12 @@ export function collectThreadMarkers(
       topMarkers: stats.topMarkers.map((m) => ({
         handle: m.handle,
         label: m.label,
-        start: m.start,
+        start: m.start - zeroAt,
         duration: m.duration,
         hasStack: m.hasStack,
       })),
       subGroups: stats.subGroups
-        ? addMarkerIndexToGroups(stats.subGroups)
+        ? addMarkerIndexToGroups(stats.subGroups, zeroAt)
         : undefined,
       subGroupKey: stats.subGroupKey,
     }));
@@ -864,7 +868,7 @@ export function collectThreadMarkers(
           handle,
           name: marker.name,
           label: label || marker.name,
-          start: marker.start,
+          start: marker.start - zeroAt,
           duration,
           hasStack,
           category: categoryName,
@@ -896,7 +900,10 @@ export function collectThreadMarkers(
 /**
  * Helper to add markerIndex to topMarkers in MarkerGroup arrays.
  */
-function addMarkerIndexToGroups(groups: MarkerGroup[]): MarkerGroupData[] {
+function addMarkerIndexToGroups(
+  groups: MarkerGroup[],
+  zeroAt: number
+): MarkerGroupData[] {
   return groups.map((group) => ({
     groupName: group.groupName,
     count: group.count,
@@ -906,12 +913,12 @@ function addMarkerIndexToGroups(groups: MarkerGroup[]): MarkerGroupData[] {
     topMarkers: group.topMarkers.map((m) => ({
       handle: m.handle,
       label: m.label,
-      start: m.start,
+      start: m.start - zeroAt,
       duration: m.duration,
       hasStack: m.hasStack,
     })),
     subGroups: group.subGroups
-      ? addMarkerIndexToGroups(group.subGroups)
+      ? addMarkerIndexToGroups(group.subGroups, zeroAt)
       : undefined,
   }));
 }
@@ -996,7 +1003,13 @@ export function collectMarkerStack(
   let stack: StackTraceData | null = null;
   if (marker.data && 'cause' in marker.data && marker.data.cause) {
     const cause = marker.data.cause;
-    stack = collectStackTrace(cause.stack, thread, libs, cause.time);
+    const zeroAt = getZeroAt(state);
+    stack = collectStackTrace(
+      cause.stack,
+      thread,
+      libs,
+      cause.time !== undefined ? cause.time - zeroAt : undefined
+    );
   }
 
   return {
@@ -1036,6 +1049,7 @@ export function collectMarkerInfo(
   const markerSchemaByName = getMarkerSchemaByName(state);
   const stringTable = getStringTable(state);
   const threadHandleDisplay = threadMap.handleForThreadIndexes(threadIndexes);
+  const zeroAt = getZeroAt(state);
 
   // Get tooltip label
   const getTooltipLabel = getLabelGetter(
@@ -1093,7 +1107,12 @@ export function collectMarkerInfo(
     const thread = threadSelectors.getFilteredThread(state);
     const libs = profile.libs;
 
-    const fullStack = collectStackTrace(cause.stack, thread, libs, cause.time);
+    const fullStack = collectStackTrace(
+      cause.stack,
+      thread,
+      libs,
+      cause.time !== undefined ? cause.time - zeroAt : undefined
+    );
     if (fullStack && fullStack.frames.length > 0) {
       // Truncate to 20 frames
       const truncated = fullStack.frames.length > 20;
@@ -1118,8 +1137,8 @@ export function collectMarkerInfo(
       index: marker.category,
       name: categories[marker.category]?.name ?? 'Unknown',
     },
-    start: marker.start,
-    end: marker.end,
+    start: marker.start - zeroAt,
+    end: marker.end !== null ? marker.end - zeroAt : null,
     duration: marker.end !== null ? marker.end - marker.start : undefined,
     fields,
     schema: schemaInfo,

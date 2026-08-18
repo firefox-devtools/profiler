@@ -9,6 +9,7 @@ import {
   getCommittedRange,
   getProfileInterval,
   getMeta,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import {
   formatBytes,
@@ -538,11 +539,15 @@ export function collectCounterInfo(
     counterIndex
   );
 
-  // Sample times are already in absolute profile-time space (the same space as
-  // the committed range), so they need no zeroAt offset here.
+  // The indexes above are raw profile time; only what we report is rebased.
+  const zeroAt = getZeroAt(state);
   const hasRange = rangeEndIndex > rangeStartIndex;
-  const rangeStart = hasRange ? counter.samples.time[rangeStartIndex] : null;
-  const rangeEnd = hasRange ? counter.samples.time[rangeEndIndex - 1] : null;
+  const rangeStart = hasRange
+    ? counter.samples.time[rangeStartIndex] - zeroAt
+    : null;
+  const rangeEnd = hasRange
+    ? counter.samples.time[rangeEndIndex - 1] - zeroAt
+    : null;
 
   return {
     ...summary,

@@ -573,7 +573,9 @@ describe('ProfileQuerier', function () {
       const info = await querierFor(profile).counterInfo('c-0');
 
       expect(info.rangeStart).not.toBeNull();
-      expect(info.rangeStart! - info.context.rootRange.start).toBe(0);
+      // The first sample sits at the profile start, so this is 0, not 1000.
+      expect(info.rangeStart).toBe(0);
+      expect(info.context.rootRange.start).toBe(1000);
     });
 
     it('excludes the padded boundary samples when zoomed', async function () {

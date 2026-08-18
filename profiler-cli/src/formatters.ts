@@ -317,8 +317,7 @@ Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
   }
 
   if (result.stack.capturedAt !== undefined) {
-    const rootStart = result.context.rootRange.start;
-    output += `\nCaptured at: ${formatDuration(result.stack.capturedAt - rootStart)}\n`;
+    output += `\nCaptured at: ${formatDuration(result.stack.capturedAt)}\n`;
   }
 
   for (let i = 0; i < result.stack.frames.length; i++) {
@@ -352,11 +351,9 @@ Marker ${result.markerHandle}: ${result.name}`;
   output += `Type: ${result.markerType ?? 'None'}\n`;
   output += `Category: ${result.category.name}\n`;
 
-  // Time and duration (relative to profile root start)
-  const rootStart = result.context.rootRange.start;
-  const startStr = formatDuration(result.start - rootStart);
+  const startStr = formatDuration(result.start);
   if (result.end !== null) {
-    const endStr = formatDuration(result.end - rootStart);
+    const endStr = formatDuration(result.end);
     const durationStr = formatDuration(result.duration!);
     output += `Time: ${startStr} - ${endStr} (${durationStr})\n`;
   } else {
@@ -383,7 +380,7 @@ Marker ${result.markerHandle}: ${result.name}`;
   if (result.stack && result.stack.frames.length > 0) {
     output += '\nStack trace:\n';
     if (result.stack.capturedAt !== undefined) {
-      output += `  Captured at: ${formatDuration(result.stack.capturedAt - rootStart)}\n`;
+      output += `  Captured at: ${formatDuration(result.stack.capturedAt)}\n`;
     }
 
     for (let i = 0; i < result.stack.frames.length; i++) {
@@ -770,9 +767,8 @@ export function formatCounterInfoResult(
     `  Samples: ${result.sampleCount} total, ${result.rangeSampleCount} in current range`
   );
   if (result.rangeStart !== null && result.rangeEnd !== null) {
-    const zeroAt = result.context.rootRange.start;
     lines.push(
-      `  Time span: ${formatDuration(result.rangeStart - zeroAt)} → ${formatDuration(result.rangeEnd - zeroAt)}`
+      `  Time span: ${formatDuration(result.rangeStart)} → ${formatDuration(result.rangeEnd)}`
     );
   }
   if (result.stats.length > 0) {
@@ -1151,10 +1147,9 @@ export function formatThreadMarkersResult(
 
   // Flat list mode: one row per marker in chronological order
   if (result.flatMarkers) {
-    const rootStart = result.context.rootRange.start;
     for (const m of result.flatMarkers) {
       const stackIndicator = m.hasStack ? '✓' : '✗';
-      const startStr = `t=${formatDuration(m.start - rootStart)}`;
+      const startStr = `t=${formatDuration(m.start)}`;
       const durationStr =
         m.duration !== undefined ? formatDuration(m.duration) : 'instant';
       const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
