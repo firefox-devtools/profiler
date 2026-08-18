@@ -27,8 +27,10 @@ import type {
   SparseBucketEntry,
   SuiteStats,
 } from './extract-benchmark-stats';
+import { runToCompletion } from './chunked-work';
+import type { SlicedWork } from './chunked-work';
 import {
-  computeFamilyCorrection,
+  computeFamilyCorrectionInSlices,
   makePermutationBaseIndices,
   minimumDetectableEffect,
   permutationTwoSidedP,
@@ -535,12 +537,49 @@ export function compareBuckets(
   baseBucketKeys: string[] = baseBucketNames,
   newBucketKeys: string[] = newBucketNames
 ): BucketComparison[] {
+  return runToCompletion(
+    compareBucketsInSlices(
+      baseBuckets,
+      newBuckets,
+      baseBucketNames,
+      newBucketNames,
+      baseBucketFuncs,
+      newBucketFuncs,
+      iterationCount,
+      excludeAppearedDisappeared,
+      baseBucketKeys,
+      newBucketKeys
+    )
+  );
+}
+
+/**
+ * `compareBuckets`, interruptible. See there for what this computes.
+ *
+ * One of these is a second of arithmetic for the global view, so the UI runs it in
+ * slices; nothing else about it differs. Nearly all of the time is in the family
+ * correction, which brings its own yield points — the ones added here just keep
+ * the set-up from being one long task of its own on a very large table.
+ */
+export function* compareBucketsInSlices(
+  baseBuckets: SparseBucketEntry[],
+  newBuckets: SparseBucketEntry[],
+  baseBucketNames: string[],
+  newBucketNames: string[],
+  baseBucketFuncs: IndexIntoFuncTable[],
+  newBucketFuncs: IndexIntoFuncTable[],
+  iterationCount: number,
+  excludeAppearedDisappeared: boolean = false,
+  baseBucketKeys: string[] = baseBucketNames,
+  newBucketKeys: string[] = newBucketNames
+): SlicedWork<BucketComparison[]> {
   const baseMap = buildKeyMap(
     baseBuckets,
     baseBucketKeys,
     baseBucketNames,
     baseBucketFuncs
   );
+  yield;
   const newMap = buildKeyMap(
     newBuckets,
     newBucketKeys,
@@ -556,7 +595,14 @@ export function compareBuckets(
 
   const results: BucketComparison[] = [];
   const family: FamilyMember[] = [];
+  let sinceYield = 0;
   for (const key of allKeys) {
+    // A Welch t per key, so a few microseconds each; a few hundred at a time is
+    // well inside any slice a driver would pick.
+    if (++sinceYield === 256) {
+      sinceYield = 0;
+      yield;
+    }
     const baseEntry = baseMap.get(key);
     const newEntry = newMap.get(key);
     const baseIter = baseEntry?.iterationTotals ?? zeros;
@@ -581,7 +627,7 @@ export function compareBuckets(
     family.push({ base: baseIter, comp: newIter });
   }
 
-  applyFamilyCorrection(results, family);
+  yield* applyFamilyCorrection(results, family);
   return results;
 }
 
@@ -597,14 +643,14 @@ export function compareBuckets(
  * reading, but it would also mean opening a subtest table changed the numbers in
  * it, which is worse than the error it fixes. Each table is honest about itself.
  */
-function applyFamilyCorrection(
+function* applyFamilyCorrection(
   results: BucketComparison[],
   family: FamilyMember[]
-) {
+): SlicedWork<void> {
   if (family.length === 0) {
     return;
   }
-  const correction = computeFamilyCorrection(
+  const correction = yield* computeFamilyCorrectionInSlices(
     family,
     permutationsFor(family[0].base.length, family[0].comp.length)
   );
