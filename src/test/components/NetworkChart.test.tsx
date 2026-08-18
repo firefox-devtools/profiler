@@ -622,6 +622,62 @@ describe('NetworkChartRowBar MIME-type filter', function () {
   });
 });
 
+describe('Network chart prefetch search', function () {
+  // The fields are hidden in the schema, so they never render in the chart;
+  // they exist so a search for "prefetch" narrows to just these requests.
+  function setup() {
+    return setupWithPayload([
+      ...getNetworkMarkers({ uri: 'https://mozilla.org/plain', id: 1 }),
+      ...getNetworkMarkers({
+        uri: 'https://mozilla.org/speculative',
+        id: 2,
+        payload: { secPurpose: 'prefetch' },
+      }),
+      ...getNetworkMarkers({
+        uri: 'https://mozilla.org/activated',
+        id: 3,
+        payload: { deliveryType: 'navigational-prefetch' },
+      }),
+    ]);
+  }
+
+  function visibleUrls(container: HTMLElement) {
+    return Array.from(
+      container.querySelectorAll('.networkChartRowItemLabel')
+    ).map((node) => node.textContent);
+  }
+
+  it('shows every request when not searching', function () {
+    const { container } = setup();
+    expect(visibleUrls(container)).toHaveLength(3);
+  });
+
+  it('narrows to prefetches when searching for "prefetch"', function () {
+    const { container, dispatch } = setup();
+
+    act(() => {
+      dispatch(changeNetworkSearchString('prefetch'));
+    });
+
+    const urls = visibleUrls(container);
+    expect(urls).toHaveLength(2);
+    expect(urls.join(' ')).toContain('/speculative');
+    expect(urls.join(' ')).toContain('/activated');
+  });
+
+  it('narrows to the activated navigation alone', function () {
+    const { container, dispatch } = setup();
+
+    act(() => {
+      dispatch(changeNetworkSearchString('navigational-prefetch'));
+    });
+
+    const urls = visibleUrls(container);
+    expect(urls).toHaveLength(1);
+    expect(urls[0]).toContain('/activated');
+  });
+});
+
 describe('EmptyReasons', () => {
   it("shows a reason when a profile's network markers have been filtered out", () => {
     const { dispatch, container } = setupWithPayload([...NETWORK_MARKERS]);
