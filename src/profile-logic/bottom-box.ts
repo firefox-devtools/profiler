@@ -6,7 +6,6 @@ import type {
   Thread,
   IndexIntoStackTable,
   IndexIntoCallNodeTable,
-  IndexIntoLibs,
   BottomBoxInfo,
   SamplesLikeTable,
 } from 'firefox-profiler/types';
@@ -52,8 +51,6 @@ export function getBottomBoxInfoForCallNode(
     callNodeInfo,
     stackTable
   );
-
-  const libIndex: IndexIntoLibs | null = null; // unused, removed in next patch
 
   // If we have at least one native symbol to show assembly for, pick
   // the one with the highest total. But first, create the full list of
@@ -116,7 +113,6 @@ export function getBottomBoxInfoForCallNode(
   const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
 
   return {
-    libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
     initialNativeSymbol:
@@ -150,9 +146,6 @@ export function getBottomBoxInfoForStackFrame(
     funcTable,
     thread.sourceLocationTable
   );
-  const frameLib = frameTable.lib[frameIndex];
-  const libIndex = frameLib !== -1 ? frameLib : null;
-
   // Get native symbol for this frame
   const nativeSymbol = frameTable.nativeSymbol[frameIndex];
   const nativeSymbolInfos =
@@ -171,7 +164,6 @@ export function getBottomBoxInfoForStackFrame(
     nativeSymbol !== null ? frameTable.address[frameIndex] : -1;
 
   return {
-    libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfos,
     initialNativeSymbol: 0,

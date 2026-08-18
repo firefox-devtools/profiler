@@ -863,7 +863,6 @@ export type NativeSymbolInfo = {
  * assembly view) is updated.
  */
 export type BottomBoxInfo = {
-  libIndex: IndexIntoLibs | null;
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
   initialNativeSymbol: number | null; // index into `nativeSymbols`

@@ -11,7 +11,6 @@ import type {
   Pid,
   TabID,
   IndexIntoCategoryList,
-  IndexIntoLibs,
   PageList,
   IndexIntoSourceTable,
   FuncTable,
@@ -347,7 +346,6 @@ type ProfileAction =
     }
   | {
       readonly type: 'UPDATE_BOTTOM_BOX';
-      readonly libIndex: IndexIntoLibs | null;
       readonly sourceIndex: IndexIntoSourceTable | null;
       readonly nativeSymbols: NativeSymbolInfo[];
       readonly currentNativeSymbol: number | null;
