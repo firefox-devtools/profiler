@@ -110,12 +110,28 @@ export type FilterStackResult = {
 // ===== Session Context =====
 // Context information included in all command results for persistent display
 
+/** A thread as named in the context header: its own name and its process'. */
+export type ContextThreadInfo = {
+  threadIndex: number;
+  name: string;
+  /** Name of the process owning the thread, e.g. "WebExtensions". */
+  processName: string;
+};
+
 export type SessionContext = {
-  selectedThreadHandle: string | null; // Combined handle like "t-0" or "t-0,t-1,t-2"
-  selectedThreads: Array<{
-    threadIndex: number;
-    name: string;
-  }>;
+  /**
+   * The sticky session selection, as set by `thread select`. Combined handle
+   * like "t-0" or "t-0,t-1,t-2". Unaffected by a command's `--thread`.
+   */
+  selectedThreadHandle: string | null;
+  selectedThreads: ContextThreadInfo[];
+  /**
+   * The thread this particular result is about, when it is not the selected
+   * one: a `--thread`-scoped command, or a marker looked up in another thread.
+   * Null when the result is about the selection.
+   */
+  resultThreadHandle: string | null;
+  resultThreads: ContextThreadInfo[];
   currentViewRange: {
     start: number;
     startName: string;
@@ -139,10 +155,7 @@ export type WithContext<T> = T & { context: SessionContext };
 export type StatusResult = {
   type: 'status';
   selectedThreadHandle: string | null; // Combined handle like "t-0" or "t-0,t-1,t-2"
-  selectedThreads: Array<{
-    threadIndex: number;
-    name: string;
-  }>;
+  selectedThreads: ContextThreadInfo[];
   viewRanges: Array<{
     start: number;
     startName: string;
