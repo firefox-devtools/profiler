@@ -1384,6 +1384,28 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
   );
 }
 
+/**
+ * One of the two compared profiles, as a link that opens it in the profiler.
+ *
+ * The name is the link text and the URL is only the tooltip, because these are
+ * Taskcluster artifact URLs that wrap over several lines, and the name is what
+ * every other sentence in the report calls this profile anyway. The full URL is
+ * still there in the form's input when it is opened.
+ */
+function ProfileLink({ name, url }: { name: string; url: string }) {
+  return (
+    <a
+      className="benchmarkProfileLinks__link"
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={url}
+    >
+      {name}
+    </a>
+  );
+}
+
 export function BenchmarkCompareViewer() {
   const profilesToCompare = useSelector(getProfilesToCompare);
   const profileNamesToCompare = useSelector(getProfileNamesToCompare);
@@ -1448,32 +1470,28 @@ export function BenchmarkCompareViewer() {
             {form}
           </>
         ) : (
-          <details className="benchmarkComparing">
-            <summary>
-              <span className="benchmarkComparing__summaryText">
-                Comparing{' '}
-                <span className="benchmarkComparing__name">{baseName}</span>
-                {' with '}
-                <span className="benchmarkComparing__name">{newName}</span> —
-                edit or swap
-              </span>
-            </summary>
-            {form}
-            <div className="benchmarkProfileUrls">
-              <span>
-                <strong>{baseName}:</strong>{' '}
-                <a href={baseUrl} target="_blank" rel="noopener noreferrer">
-                  {baseUrl}
-                </a>
-              </span>
-              <span>
-                <strong>{newName}:</strong>{' '}
-                <a href={newUrl} target="_blank" rel="noopener noreferrer">
-                  {newUrl}
-                </a>
-              </span>
-            </div>
-          </details>
+          <div className="benchmarkComparingHeader">
+            {/* Which two profiles the report is about, always visible, with the
+             * names themselves as the links to them. Opening one of the source
+             * profiles is a routine step in reading a row -- the report says
+             * where the time went, the profile says what the code was doing --
+             * so it should not be a click into a collapsed form first. The
+             * disclosure below hides only the editing controls, which is the
+             * part nobody needs until they want a different pair. */}
+            <p className="benchmarkProfileLinks">
+              Profiles: <ProfileLink name={baseName} url={baseUrl} />
+              {' vs '}
+              <ProfileLink name={newName} url={newUrl} />
+            </p>
+            <details className="benchmarkComparing">
+              <summary>
+                <span className="benchmarkComparing__summaryText">
+                  Edit or swap the compared profiles
+                </span>
+              </summary>
+              {form}
+            </details>
+          </div>
         )}
 
         {state.phase === 'loading' && (
