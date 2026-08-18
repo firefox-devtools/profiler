@@ -409,6 +409,8 @@ export class Daemon {
         switch (command.subcommand) {
           case 'info':
             return this.querier.threadInfo(command.thread);
+          case 'list':
+            return this.querier.threadList(command.threadListOptions);
           case 'select':
             if (!command.thread) {
               throw new Error('thread handle required for thread select');

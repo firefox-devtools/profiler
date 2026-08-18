@@ -95,6 +95,17 @@ profiler-cli counter info --json
     context: SessionContext
   }
 
+profiler-cli thread list --json
+  {
+    type: "thread-list",
+    threads: [{ threadHandle, threadIndex, name, processName, etld1?,
+                pid, processIndex, tid, cpuMs, markerCount, selected }],
+    totalThreadCount, processCount, hiddenByLimit,
+    sort: "cpu" | "index" | "markers" | "name",
+    searchQuery?,
+    context: SessionContext
+  }
+
 profiler-cli thread info --json
   {
     type: "thread-info",

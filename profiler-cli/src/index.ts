@@ -83,6 +83,7 @@ async function main(): Promise<void> {
 Examples:
   profiler-cli load profile.json.gz
   profiler-cli profile info
+  profiler-cli thread list
   profiler-cli thread info
   profiler-cli thread samples
   profiler-cli thread functions --search GC --min-self 1

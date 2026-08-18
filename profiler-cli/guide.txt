@@ -29,6 +29,7 @@ CORE WORKFLOW
     profiler-cli profile info          Overview: processes, threads, time range, CPU activity
     profiler-cli profile info --all    Show all processes and threads (not just top 5)
     profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
+    profiler-cli thread list           Flat table of every thread: handle, name, process, pid, CPU, markers
     profiler-cli profile meta          Metadata: application, platform, and recording settings
     profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
 
@@ -128,7 +129,7 @@ SESSION STATE
 HANDLE SYSTEM
 
   Handles are short IDs shown in command output that reference specific items:
-    t-0, t-1   Thread handles (from "profile info")
+    t-0, t-1   Thread handles (from "thread list" or "profile info")
     m-1234     Marker handles (from "thread markers")
     f-12       Function handles (from "thread samples", "thread functions")
     c-0, c-1   Counter handles (from "counter list" or "profile info")
@@ -139,7 +140,8 @@ HANDLE SYSTEM
 
     Handle   Populated by      Stable across sessions?
     ──────────────────────────────────────────────────────────────────────────
-    t-N      profile info      Yes, if the same profile is loaded
+    t-N      thread list,      Yes, if the same profile is loaded
+             profile info
     m-N      thread markers    No -- rebuilt each time the daemon starts
     f-N      thread samples,   Yes -- direct index into the profile's function
              thread functions  table; same profile always yields the same f-N

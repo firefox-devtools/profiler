@@ -17,6 +17,7 @@ import type {
   ViewRangeResult,
   FilterStackResult,
   ThreadInfoResult,
+  ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
@@ -393,6 +394,80 @@ Marker ${result.markerHandle}: ${result.name}`;
     }
   }
 
+  return output;
+}
+
+/**
+ * Format a ThreadListResult as an aligned plain-text table.
+ *
+ * Unlike `profile info`, which nests threads under their process and only shows
+ * the busiest ones, this is one row per thread so a whole profile's thread
+ * inventory can be grepped. The selected thread is flagged with `*`.
+ */
+export function formatThreadListResult(
+  result: WithContext<ThreadListResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const threadCount = result.totalThreadCount;
+  const processCount = result.processCount;
+  const summary =
+    `${threadCount} thread${threadCount === 1 ? '' : 's'} across ` +
+    `${processCount} process${processCount === 1 ? '' : 'es'}`;
+
+  if (result.threads.length === 0) {
+    const reason =
+      result.searchQuery !== undefined
+        ? `No threads match '${result.searchQuery}' (${summary}).`
+        : 'No threads in this profile.';
+    return `${contextHeader}\n\n${reason}`;
+  }
+
+  const rows = result.threads.map((thread) => ({
+    marker: thread.selected ? '*' : ' ',
+    handle: thread.threadHandle,
+    name: thread.name,
+    process: thread.etld1
+      ? `${thread.processName} (${thread.etld1})`
+      : thread.processName,
+    pid: thread.pid,
+    cpu: `${thread.cpuMs.toFixed(3)}ms`,
+    markers: thread.markerCount.toLocaleString('en-US'),
+  }));
+
+  const width = (
+    header: string,
+    pick: (row: (typeof rows)[number]) => string
+  ): number => Math.max(header.length, ...rows.map((row) => pick(row).length));
+
+  const wHandle = width('HANDLE', (r) => r.handle);
+  const wName = width('NAME', (r) => r.name);
+  const wProcess = width('PROCESS', (r) => r.process);
+  const wPid = width('PID', (r) => r.pid);
+  const wCpu = width('CPU', (r) => r.cpu);
+  const wMarkers = width('MARKERS', (r) => r.markers);
+
+  const lines = [
+    `  ${'HANDLE'.padEnd(wHandle)}  ${'NAME'.padEnd(wName)}  ${'PROCESS'.padEnd(wProcess)}  ${'PID'.padStart(wPid)}  ${'CPU'.padStart(wCpu)}  ${'MARKERS'.padStart(wMarkers)}`,
+  ];
+  for (const row of rows) {
+    lines.push(
+      `${row.marker} ${row.handle.padEnd(wHandle)}  ${row.name.padEnd(wName)}  ${row.process.padEnd(wProcess)}  ${row.pid.padStart(wPid)}  ${row.cpu.padStart(wCpu)}  ${row.markers.padStart(wMarkers)}`
+    );
+  }
+
+  const shown =
+    result.threads.length === result.totalThreadCount
+      ? `Threads (${summary})`
+      : `Threads (${result.threads.length} of ${summary})`;
+  const heading = `${shown}, sorted by ${result.sort}${
+    result.searchQuery !== undefined ? `, matching '${result.searchQuery}'` : ''
+  }:`;
+
+  let output = `${contextHeader}\n\n${heading}\n${lines.join('\n')}\n`;
+  if (result.hiddenByLimit > 0) {
+    output += `  + ${result.hiddenByLimit} more threads (use --limit 0 to see all)\n`;
+  }
+  output += '\n* = currently selected thread\n';
   return output;
 }
 
