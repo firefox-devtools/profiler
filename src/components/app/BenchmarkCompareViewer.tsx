@@ -18,20 +18,11 @@ import {
   getProfileNamesToCompare,
   getProfilesToCompare,
 } from 'firefox-profiler/selectors/url-state';
-import { fetchProfile } from 'firefox-profiler/utils/profile-fetch';
-import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
-import { expandUrl } from 'firefox-profiler/utils/shorten-url';
-import { getProfileFetchUrl } from 'firefox-profiler/actions/receive-profile';
-import { extractBenchmarkStatsFromProfile } from 'firefox-profiler/profile-logic/benchmark/extract-benchmark-stats';
+import { runBenchmarkComparison } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
+import type { ComparisonProgress } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
 import {
-  applyBenjaminiHochberg,
   classifyChange,
-  compareBuckets,
-  compareIterationTotals,
-  computeGlobalBuckets,
-  computeSharedSuiteFactors,
   describeVerdict,
-  suiteIterationTotals,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import type {
   BucketComparison,
@@ -50,39 +41,16 @@ import {
 import type { BucketProfileBundle } from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
 import './BenchmarkCompareViewer.css';
 
-type ComparisonData = {
-  baseUrl: string;
-  newUrl: string;
-  /** The `baseUrl`/`newUrl` after `expandUrl` resolves a share.firefox.dev
-   * (or perfht.ml / bit.ly) shortlink to its full profiler.firefox.com URL --
-   * or the original URL if it was already in that form. Deep links from each
-   * bucket's flame graph are rewritten off *this* URL, so a shortened input
-   * still yields a working link. */
-  baseViewerUrl: string;
-  newViewerUrl: string;
-  /** The loaded source profiles, retained so we can render flame graphs of
-   * individual buckets on demand (focusSelf on a bucket's representative func). */
-  baseProfile: Profile;
-  newProfile: Profile;
-  overallScore: ScoreComparison;
-  suiteScores: ScoreComparison[];
-  suiteComparisons: Array<{
-    suiteName: string;
-    comparisons: BucketComparison[];
-  }>;
-  /** Per-bucket comparisons across all suites, using the geomean-normalised
-   * global bucket weights. A bucket that runs in a single suite gets the same
-   * effect size and p-value here as in that suite's own comparison; one that
-   * runs in several can be significant here without being significant in any
-   * single suite, since the global view pools their iterations. */
-  globalComparisons: BucketComparison[];
-};
-
 type State =
   | { phase: 'empty' }
+  /** The two profiles are being downloaded and read. Nothing to show but the
+   * header, which is why the links in it are not behind the disclosure. */
   | { phase: 'loading' }
   | { phase: 'error'; error: string }
-  | { phase: 'done'; data: ComparisonData };
+  /** At least the score rows exist. `progress.pendingLabels` says which rows are
+   * still waiting for their per-function table; the reader sees the table fill in
+   * from there. */
+  | { phase: 'results'; progress: ComparisonProgress };
 
 const TOP_N = 100;
 
@@ -222,177 +190,6 @@ type BucketFilter = {
   mode: BucketFilterMode;
   direction: BucketDirection;
 };
-
-/**
- * Profiles already downloaded this session, keyed by viewer URL.
- *
- * Swapping the two sides, or replacing one of them, re-runs the whole
- * comparison — and these are multi-megabyte artifacts fetched from Taskcluster,
- * so re-downloading the side that did not change would make the swap button
- * unusable. Keyed by the URL the user typed, since that is what identifies a
- * profile here; entries are never evicted, which is fine for a page whose whole
- * job is comparing two of them.
- */
-type LoadedProfile = {
-  profile: Profile;
-  /** The URL after any shortlink expansion. This is the URL that actually
-   * points at a viewable profile in profiler.firefox.com; it's what deep
-   * links from each bucket's flame graph get rewritten from. */
-  viewerUrl: string;
-};
-
-const profileCache = new Map<string, Promise<LoadedProfile>>();
-
-function loadOneProfileCached(inputUrl: string): Promise<LoadedProfile> {
-  const cached = profileCache.get(inputUrl);
-  if (cached !== undefined) {
-    return cached;
-  }
-  // Don't cache a rejection: a failed fetch is usually transient, and the
-  // obvious way to retry is to press the button again.
-  const promise = loadOneProfile(inputUrl).catch((err) => {
-    profileCache.delete(inputUrl);
-    throw err;
-  });
-  profileCache.set(inputUrl, promise);
-  return promise;
-}
-
-async function loadOneProfile(inputUrl: string): Promise<LoadedProfile> {
-  let viewerUrl = inputUrl;
-  if (
-    viewerUrl.startsWith('https://perfht.ml/') ||
-    viewerUrl.startsWith('https://share.firefox.dev/') ||
-    viewerUrl.startsWith('https://bit.ly/')
-  ) {
-    viewerUrl = await expandUrl(viewerUrl);
-  }
-  const dataUrl = getProfileFetchUrl(viewerUrl);
-  const response = await fetchProfile({
-    url: dataUrl,
-    onTemporaryError: () => {},
-  });
-  if (response.responseType !== 'BYTES') {
-    throw new Error('Expected a profile, not a zip file.');
-  }
-  const profile = await unserializeProfileOfArbitraryFormat(
-    response.bytes,
-    dataUrl
-  );
-  return { profile, viewerUrl };
-}
-
-async function computeComparison(
-  baseUrl: string,
-  newUrl: string
-): Promise<ComparisonData> {
-  const [
-    { profile: baseProfile, viewerUrl: baseViewerUrl },
-    { profile: newProfile, viewerUrl: newViewerUrl },
-  ] = await Promise.all([
-    loadOneProfileCached(baseUrl),
-    loadOneProfileCached(newUrl),
-  ]);
-
-  const baseStats = extractBenchmarkStatsFromProfile(baseProfile);
-  const newStats = extractBenchmarkStatsFromProfile(newProfile);
-
-  const iterationCount = baseStats.suites[0]?.iterationCount ?? 1;
-
-  // Both profiles' global (across-suite) bucket weights are normalised with
-  // one shared set of per-suite factors, so that the rank statistics compare
-  // like with like. See computeSharedSuiteFactors.
-  const sharedSuiteFactors = computeSharedSuiteFactors(baseStats, newStats);
-  const baseGlobalBuckets = computeGlobalBuckets(
-    baseStats,
-    sharedSuiteFactors,
-    iterationCount
-  );
-  const newGlobalBuckets = computeGlobalBuckets(
-    newStats,
-    sharedSuiteFactors,
-    iterationCount
-  );
-
-  const baseGlobalIter = suiteIterationTotals(
-    baseGlobalBuckets,
-    iterationCount
-  );
-  const newGlobalIter = suiteIterationTotals(newGlobalBuckets, iterationCount);
-  const overallScore = compareIterationTotals(
-    'Overall (geomean-normalised)',
-    baseGlobalIter,
-    newGlobalIter
-  );
-
-  const suiteScores: ScoreComparison[] = [];
-  for (const baseSuite of baseStats.suites) {
-    const newSuite = newStats.suites.find(
-      (s) => s.suiteName === baseSuite.suiteName
-    );
-    const baseIter = suiteIterationTotals(
-      baseSuite.buckets,
-      baseSuite.iterationCount
-    );
-    const newIter = newSuite
-      ? suiteIterationTotals(newSuite.buckets, newSuite.iterationCount)
-      : new Array<number>(baseSuite.iterationCount).fill(0);
-    suiteScores.push(
-      compareIterationTotals(baseSuite.suiteName, baseIter, newIter)
-    );
-  }
-  applyBenjaminiHochberg(suiteScores);
-  suiteScores.sort((a, b) => a.label.localeCompare(b.label));
-
-  const suiteComparisons = baseStats.suites.flatMap((baseSuite) => {
-    const newSuite = newStats.suites.find(
-      (s) => s.suiteName === baseSuite.suiteName
-    );
-    if (!newSuite) {
-      return [];
-    }
-    const comparisons = compareBuckets(
-      baseSuite.buckets,
-      newSuite.buckets,
-      baseStats.bucketNames,
-      newStats.bucketNames,
-      baseStats.bucketFuncs,
-      newStats.bucketFuncs,
-      baseSuite.iterationCount,
-      false,
-      baseStats.bucketKeys ?? baseStats.bucketNames,
-      newStats.bucketKeys ?? newStats.bucketNames
-    );
-    return [{ suiteName: baseSuite.suiteName, comparisons }];
-  });
-  suiteComparisons.sort((a, b) => a.suiteName.localeCompare(b.suiteName));
-
-  const globalComparisons = compareBuckets(
-    baseGlobalBuckets,
-    newGlobalBuckets,
-    baseStats.bucketNames,
-    newStats.bucketNames,
-    baseStats.bucketFuncs,
-    newStats.bucketFuncs,
-    iterationCount,
-    false,
-    baseStats.bucketKeys ?? baseStats.bucketNames,
-    newStats.bucketKeys ?? newStats.bucketNames
-  );
-
-  return {
-    baseUrl,
-    newUrl,
-    baseViewerUrl,
-    newViewerUrl,
-    baseProfile,
-    newProfile,
-    overallScore,
-    suiteScores,
-    suiteComparisons,
-    globalComparisons,
-  };
-}
 
 /**
  * Given a relative change of a single subtest's mean, compute the resulting
@@ -738,24 +535,104 @@ function BucketCountBadge({
   );
 }
 
+/**
+ * What is behind a score row's disclosure triangle, which is not always the same
+ * question as "how many functions moved".
+ *
+ * A row whose table has not been computed yet and a row that has no table at all
+ * both show no count, and the reader must not have to guess which they are looking
+ * at: the first is going to fill in on its own, the second is a subtest the new
+ * profile did not run. Hence three states rather than a nullable count.
+ */
+type RowExpansion =
+  | { status: 'pending' }
+  | { status: 'ready'; count: number }
+  | { status: 'none' };
+
+/** A spinner where the count will be, sized to sit in the badge's place so the
+ * row does not shift when the number arrives. */
+function PendingBadge() {
+  return (
+    <span
+      className="benchmarkSpinner benchmarkSpinner--badge"
+      title="Still working out which functions moved in this row."
+      aria-label="Computing"
+      role="progressbar"
+    />
+  );
+}
+
+/** Disclosure triangle, label, and the count of functions the expansion lists —
+ * or a spinner while that is still being computed. */
+function ScoreLabelCell({
+  label,
+  isOverall,
+  expansion,
+  isExpanded,
+  filter,
+}: {
+  label: string;
+  isOverall: boolean;
+  expansion: RowExpansion;
+  isExpanded: boolean;
+  filter: BucketFilter;
+}) {
+  return (
+    <td
+      className={
+        isOverall
+          ? 'benchmarkCell--suiteLabel benchmarkCell--scoreLabel'
+          : 'benchmarkCell--indented benchmarkCell--suiteLabel benchmarkCell--scoreLabel'
+      }
+      title={label}
+    >
+      <div className="benchmarkScoreLabel">
+        {expansion.status === 'ready' ? (
+          <span className="benchmarkDisclosure" aria-hidden="true">
+            {isExpanded ? '▼' : '▶'}
+          </span>
+        ) : null}
+        <span className="benchmarkScoreLabel__text">{label}</span>
+        {expansion.status === 'pending' ? <PendingBadge /> : null}
+        {expansion.status === 'ready' ? (
+          <BucketCountBadge count={expansion.count} filter={filter} />
+        ) : null}
+      </div>
+    </td>
+  );
+}
+
+function rowClass(isOverall: boolean, expandable: boolean): string {
+  const classes = [];
+  if (isOverall) {
+    classes.push('benchmarkRow--overall');
+  }
+  if (expandable) {
+    classes.push('benchmarkRow--suite-expandable');
+  }
+  return classes.join(' ');
+}
+
 function ScoreTable({
   overallScore,
   suiteScores,
-  suiteComparisonsByName,
-  globalComparisons,
+  bucketTables,
+  pendingLabels,
   filter,
-  baseBundle,
-  newBundle,
+  getBaseBundle,
+  getNewBundle,
   baseViewerUrl,
   newViewerUrl,
 }: {
   overallScore: ScoreComparison;
   suiteScores: ScoreComparison[];
-  suiteComparisonsByName: Map<string, BucketComparison[]>;
-  globalComparisons: BucketComparison[];
+  /** Per-function tables computed so far, keyed by score-row label. */
+  bucketTables: Map<string, BucketComparison[]>;
+  /** Rows whose table is still being computed. */
+  pendingLabels: string[];
   filter: BucketFilter;
-  baseBundle: BucketProfileBundle;
-  newBundle: BucketProfileBundle;
+  getBaseBundle: () => BucketProfileBundle;
+  getNewBundle: () => BucketProfileBundle;
   baseViewerUrl: string;
   newViewerUrl: string;
 }) {
@@ -779,44 +656,46 @@ function ScoreTable({
     });
   }, []);
 
-  const overallExpanded = expanded.has(overallScore.label);
-  const overallExpandable = globalComparisons.length > 0;
-
   // The badge counts are the same filtering the expansions do, run for every
   // row whether or not it is expanded, so they are worth memoising: the overall
-  // list alone is ~6800 buckets and this otherwise reruns on every expand.
-  const overallBucketCount = useMemo(
-    () =>
-      bucketRowsForFilter(
-        globalComparisons,
-        overallScore.baseMean,
-        true,
-        numSuites,
-        filter
-      ).length,
-    [globalComparisons, overallScore.baseMean, numSuites, filter]
-  );
-  const suiteBucketCounts = useMemo(
-    () =>
-      new Map(
-        suiteScores.map((row) => {
-          const comparisons = suiteComparisonsByName.get(row.label);
-          return [
-            row.label,
-            comparisons === undefined
-              ? null
-              : bucketRowsForFilter(
-                  comparisons,
-                  row.baseMean,
-                  false,
-                  numSuites,
-                  filter
-                ).length,
-          ];
-        })
-      ),
-    [suiteScores, suiteComparisonsByName, numSuites, filter]
-  );
+  // list alone is ~6800 buckets and this otherwise reruns on every expand. The
+  // whole map is recomputed each time another table arrives, which is a few
+  // hundred microseconds of arithmetic against the seconds it took to produce
+  // the table -- not worth the machinery to update one entry.
+  const bucketCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const row of [overallScore, ...suiteScores]) {
+      const comparisons = bucketTables.get(row.label);
+      if (comparisons === undefined) {
+        continue;
+      }
+      const isOverall = row === overallScore;
+      counts.set(
+        row.label,
+        bucketRowsForFilter(
+          comparisons,
+          row.baseMean,
+          isOverall,
+          numSuites,
+          filter
+        ).length
+      );
+    }
+    return counts;
+  }, [overallScore, suiteScores, bucketTables, numSuites, filter]);
+
+  const expansionOf = (label: string): RowExpansion => {
+    const comparisons = bucketTables.get(label);
+    if (comparisons === undefined) {
+      return pendingLabels.includes(label)
+        ? { status: 'pending' }
+        : { status: 'none' };
+    }
+    if (comparisons.length === 0) {
+      return { status: 'none' };
+    }
+    return { status: 'ready', count: bucketCounts.get(label) ?? 0 };
+  };
 
   return (
     <table className="benchmarkTable">
@@ -901,83 +780,31 @@ function ScoreTable({
         </tr>
       </thead>
       <tbody>
-        <tr
-          className={`benchmarkRow--overall${overallExpandable ? ' benchmarkRow--suite-expandable' : ''}`}
-          data-toggle-label={overallScore.label}
-          onClick={overallExpandable ? handleToggle : undefined}
-        >
-          <td
-            className="benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
-            title={overallScore.label}
-          >
-            <div className="benchmarkScoreLabel">
-              {overallExpandable ? (
-                <span className="benchmarkDisclosure" aria-hidden="true">
-                  {overallExpanded ? '▼' : '▶'}
-                </span>
-              ) : null}
-              <span className="benchmarkScoreLabel__text">
-                {overallScore.label}
-              </span>
-              {overallExpandable ? (
-                <BucketCountBadge count={overallBucketCount} filter={filter} />
-              ) : null}
-            </div>
-          </td>
-          <ScoreRow row={overallScore} isOverall={true} numSuites={numSuites} />
-        </tr>
-        {overallExpanded && overallExpandable ? (
-          <tr className="benchmarkRow--expansion">
-            <td colSpan={SCORE_TABLE_COLUMN_COUNT}>
-              <BucketTable
-                comparisons={globalComparisons}
-                label={overallScore.label}
-                enclosingBaseMean={overallScore.baseMean}
-                enclosingNewMean={overallScore.newMean}
-                isOverall={true}
-                numSuites={numSuites}
-                filter={filter}
-                baseBundle={baseBundle}
-                newBundle={newBundle}
-                baseViewerUrl={baseViewerUrl}
-                newViewerUrl={newViewerUrl}
-              />
-            </td>
-          </tr>
-        ) : null}
-        {suiteScores.map((row) => {
-          const isExpanded = expanded.has(row.label);
-          const comparisons = suiteComparisonsByName.get(row.label);
-          const expandable = comparisons !== undefined;
-          const bucketCount = suiteBucketCounts.get(row.label) ?? null;
+        {[overallScore, ...suiteScores].map((row) => {
+          const isOverall = row === overallScore;
+          const expansion = expansionOf(row.label);
+          const expandable = expansion.status === 'ready';
+          const isExpanded = expandable && expanded.has(row.label);
+          const comparisons = bucketTables.get(row.label);
           return (
             <Fragment key={row.label}>
               <tr
-                className={
-                  expandable ? 'benchmarkRow--suite-expandable' : undefined
-                }
+                className={rowClass(isOverall, expandable)}
                 data-toggle-label={row.label}
                 onClick={expandable ? handleToggle : undefined}
               >
-                <td
-                  className="benchmarkCell--indented benchmarkCell--suiteLabel benchmarkCell--scoreLabel"
-                  title={row.label}
-                >
-                  <div className="benchmarkScoreLabel">
-                    {expandable ? (
-                      <span className="benchmarkDisclosure" aria-hidden="true">
-                        {isExpanded ? '▼' : '▶'}
-                      </span>
-                    ) : null}
-                    <span className="benchmarkScoreLabel__text">
-                      {row.label}
-                    </span>
-                    {bucketCount === null ? null : (
-                      <BucketCountBadge count={bucketCount} filter={filter} />
-                    )}
-                  </div>
-                </td>
-                <ScoreRow row={row} isOverall={false} numSuites={numSuites} />
+                <ScoreLabelCell
+                  label={row.label}
+                  isOverall={isOverall}
+                  expansion={expansion}
+                  isExpanded={isExpanded}
+                  filter={filter}
+                />
+                <ScoreRow
+                  row={row}
+                  isOverall={isOverall}
+                  numSuites={numSuites}
+                />
               </tr>
               {isExpanded && comparisons ? (
                 <tr className="benchmarkRow--expansion">
@@ -987,11 +814,11 @@ function ScoreTable({
                       label={row.label}
                       enclosingBaseMean={row.baseMean}
                       enclosingNewMean={row.newMean}
-                      isOverall={false}
+                      isOverall={isOverall}
                       numSuites={numSuites}
                       filter={filter}
-                      baseBundle={baseBundle}
-                      newBundle={newBundle}
+                      getBaseBundle={getBaseBundle}
+                      getNewBundle={getNewBundle}
                       baseViewerUrl={baseViewerUrl}
                       newViewerUrl={newViewerUrl}
                     />
@@ -1086,8 +913,8 @@ function BucketTable({
   isOverall,
   numSuites,
   filter,
-  baseBundle,
-  newBundle,
+  getBaseBundle,
+  getNewBundle,
   baseViewerUrl,
   newViewerUrl,
 }: {
@@ -1111,8 +938,13 @@ function BucketTable({
   isOverall: boolean;
   numSuites: number;
   filter: BucketFilter;
-  baseBundle: BucketProfileBundle;
-  newBundle: BucketProfileBundle;
+  /** The flame-graph bundles, built on first call. Nothing above this component
+   * needs them, and building one derives every table of a multi-hundred-megabyte
+   * profile — so they are deliberately not on the path to the score table's first
+   * paint. Expanding a score row is the earliest point anything here can want one,
+   * and by then the reader has clicked something and is expecting a beat. */
+  getBaseBundle: () => BucketProfileBundle;
+  getNewBundle: () => BucketProfileBundle;
   /** Viewer URLs of the two source profiles, forwarded to BucketFlameGraphPair
    * so its "open in a new profiler tab" link can point back at the original
    * profile. */
@@ -1127,12 +959,18 @@ function BucketTable({
   // score. For the overall expansion, we want the full profile since global
   // buckets aggregate across all suites.
   const baseInnerBundle = useMemo(
-    () => (isOverall ? baseBundle : withSuiteFilteredThread(baseBundle, label)),
-    [baseBundle, label, isOverall]
+    () =>
+      isOverall
+        ? getBaseBundle()
+        : withSuiteFilteredThread(getBaseBundle(), label),
+    [getBaseBundle, label, isOverall]
   );
   const newInnerBundle = useMemo(
-    () => (isOverall ? newBundle : withSuiteFilteredThread(newBundle, label)),
-    [newBundle, label, isOverall]
+    () =>
+      isOverall
+        ? getNewBundle()
+        : withSuiteFilteredThread(getNewBundle(), label),
+    [getNewBundle, label, isOverall]
   );
 
   // Keyed by BucketComparison.key (a source-location string for JS funcs,
@@ -1294,25 +1132,36 @@ function withSuiteFilteredThread(
   return { ...bundle, thread: makeSuiteFilteredThread(bundle, suiteName) };
 }
 
-function ComparisonResults({ data }: { data: ComparisonData }) {
-  const suiteComparisonsByName = useMemo(
-    () =>
-      new Map(
-        data.suiteComparisons.map(({ suiteName, comparisons }) => [
-          suiteName,
-          comparisons,
-        ])
-      ),
-    [data.suiteComparisons]
-  );
+/**
+ * A `BucketProfileBundle` for `profile`, built the first time it is asked for and
+ * kept thereafter.
+ *
+ * It used to be a `useMemo`, which meant deriving the tables of both profiles
+ * during the render that first showed the score table — i.e. on the critical path
+ * to the thing the reader is waiting for, to prepare flame graphs they may never
+ * open. Nothing needs a bundle until a row is expanded, so nothing builds one
+ * until then.
+ */
+function lazyBundle(profile: Profile): () => BucketProfileBundle {
+  let bundle: BucketProfileBundle | null = null;
+  return () => {
+    if (bundle === null) {
+      bundle = makeBucketProfileBundle(profile, 'speedometer');
+    }
+    return bundle;
+  };
+}
 
-  const baseBundle = useMemo(
-    () => makeBucketProfileBundle(data.baseProfile, 'speedometer'),
-    [data.baseProfile]
+function ComparisonResults({ progress }: { progress: ComparisonProgress }) {
+  const { scores, bucketTables, pendingLabels } = progress;
+
+  const getBaseBundle = useMemo(
+    () => lazyBundle(scores.baseProfile),
+    [scores.baseProfile]
   );
-  const newBundle = useMemo(
-    () => makeBucketProfileBundle(data.newProfile, 'speedometer'),
-    [data.newProfile]
+  const getNewBundle = useMemo(
+    () => lazyBundle(scores.newProfile),
+    [scores.newProfile]
   );
 
   const names = useBenchmarkProfileNames();
@@ -1370,15 +1219,15 @@ function ComparisonResults({ data }: { data: ComparisonData }) {
         ))}
       </div>
       <ScoreTable
-        overallScore={data.overallScore}
-        suiteScores={data.suiteScores}
-        suiteComparisonsByName={suiteComparisonsByName}
-        globalComparisons={data.globalComparisons}
+        overallScore={scores.overallScore}
+        suiteScores={scores.suiteScores}
+        bucketTables={bucketTables}
+        pendingLabels={pendingLabels}
         filter={filter}
-        baseBundle={baseBundle}
-        newBundle={newBundle}
-        baseViewerUrl={data.baseViewerUrl}
-        newViewerUrl={data.newViewerUrl}
+        getBaseBundle={getBaseBundle}
+        getNewBundle={getNewBundle}
+        baseViewerUrl={scores.baseViewerUrl}
+        newViewerUrl={scores.newViewerUrl}
       />
     </div>
   );
@@ -1423,24 +1272,39 @@ export function BenchmarkCompareViewer() {
   const { base: baseName, new: newName } = names;
 
   useEffect(() => {
-    // A second edit while the first pair is still downloading would otherwise
-    // race, and whichever finished last would win.
-    let cancelled = false;
     if (baseUrl === '' || newUrl === '') {
       setState({ phase: 'empty' });
-    } else {
-      setState({ phase: 'loading' });
-      computeComparison(baseUrl, newUrl)
-        .then((data) => !cancelled && setState({ phase: 'done', data }))
-        .catch(
-          (err) =>
-            !cancelled &&
-            setState({ phase: 'error', error: String(err?.message ?? err) })
-        );
+      return undefined;
     }
-    return () => {
-      cancelled = true;
-    };
+    // A second edit while the first pair is still being worked on would
+    // otherwise race, and whichever finished last would win. Aborting also
+    // stops the comparison itself between slices, rather than leaving it to
+    // spend seconds finishing tables for a pair nobody is looking at any more.
+    const controller = new AbortController();
+    setState({ phase: 'loading' });
+    (async () => {
+      try {
+        for await (const progress of runBenchmarkComparison(
+          baseUrl,
+          newUrl,
+          controller.signal
+        )) {
+          if (controller.signal.aborted) {
+            return;
+          }
+          setState({ phase: 'results', progress });
+        }
+      } catch (err) {
+        // Includes the abort itself, which is not something to report.
+        if (!controller.signal.aborted) {
+          setState({
+            phase: 'error',
+            error: String((err as Error)?.message ?? err),
+          });
+        }
+      }
+    })();
+    return () => controller.abort();
   }, [baseUrl, newUrl]);
 
   const form = (
@@ -1497,7 +1361,11 @@ export function BenchmarkCompareViewer() {
         {state.phase === 'loading' && (
           <div className="benchmarkLoading">
             <div className="benchmarkSpinner" />
-            <p>Loading profiles and computing statistics…</p>
+            {/* Only covers the part with nothing to show yet: downloading the two
+             * profiles and reading their per-iteration weights out. From the
+             * score table onwards the remaining work is per-row, and each row
+             * says so itself. */}
+            <p>Loading profiles…</p>
           </div>
         )}
 
@@ -1509,7 +1377,9 @@ export function BenchmarkCompareViewer() {
           </div>
         )}
 
-        {state.phase === 'done' && <ComparisonResults data={state.data} />}
+        {state.phase === 'results' && (
+          <ComparisonResults progress={state.progress} />
+        )}
 
         {/* Keeps enough page height below the content that collapsing a section
          * doesn't force the viewport to scroll up, which would visually move the
