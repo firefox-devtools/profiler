@@ -230,9 +230,9 @@ describe('app/MenuButtons', function () {
       const setupResult = setup(storeWithProfile(profile));
 
       const getPublishButton = () =>
-        screen.getByText(/^(Re-upload|Upload Local Profile)$/);
+        screen.getByText(/^(Share…|Re-share…|Error uploading)$/);
       const findPublishButton = () =>
-        screen.findByText(/^(Re-upload|Upload Local Profile)$/);
+        screen.findByText(/^(Share…|Re-share…|Error uploading)$/);
       const getCancelButton = () => screen.getByText('Cancel Upload');
       const getPanelForm = () =>
         ensureExists(
@@ -258,9 +258,15 @@ describe('app/MenuButtons', function () {
           name: /Include JavaScript execution tracing function argument values/,
         });
       const getPanel = () => screen.getByTestId('PublishPanel-container');
+      // The Share button opens the panel with the Upload CTA and the submit form.
       const openPublishPanel = async () => {
         fireFullClick(getPublishButton());
-        await screen.findByText(/^(Share|Re-upload) Performance Profile$/);
+        await screen.findByText(/^(Share|Re-share) Performance Profile$/);
+      };
+      // The Download button opens the same panel but with the Download CTA.
+      const openDownloadPanel = async () => {
+        fireFullClick(screen.getByText('Download…'));
+        await screen.findByText('Download Performance Profile');
       };
 
       return {
@@ -276,6 +282,7 @@ describe('app/MenuButtons', function () {
         getRemoveOtherTabsCheckbox,
         queryArgumentValuesCheckbox,
         openPublishPanel,
+        openDownloadPanel,
         resolveUpload,
         rejectUpload,
       };
@@ -311,27 +318,34 @@ describe('app/MenuButtons', function () {
 
     it('matches the snapshot for the opened panel for a nightly profile', async () => {
       const { profile } = createSimpleProfile('nightly');
-      const { getPanel, openPublishPanel } = setupForPublish(profile);
-      await openPublishPanel();
+      const { getPanel, openDownloadPanel } = setupForPublish(profile);
+      await openDownloadPanel();
       await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', async () => {
       const { profile } = createSimpleProfile('release');
+      const { getPanel, openDownloadPanel } = setupForPublish(profile);
+      await openDownloadPanel();
+      await screen.findByRole('link', { name: /Download/ });
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the opened share panel', async () => {
+      const { profile } = createSimpleProfile('release');
       const { getPanel, openPublishPanel } = setupForPublish(profile);
       await openPublishPanel();
-      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', async () => {
       const { profile } = createSimpleProfile();
-      const { getPanel, container, navigateToHash, openPublishPanel } =
+      const { getPanel, container, navigateToHash, openDownloadPanel } =
         setupForPublish(profile);
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
-      await openPublishPanel();
+      await openDownloadPanel();
       await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
@@ -503,6 +517,19 @@ describe('app/MenuButtons', function () {
         expect.any(Error)
       );
       expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('keeps Download available but locks the options while uploading', async () => {
+      const { openPublishPanel, getPanelForm, openDownloadPanel } =
+        setupForPublish();
+      await openPublishPanel();
+      fireEvent.submit(getPanelForm());
+
+      // The Download button stays in the toolbar while the upload is running.
+      await openDownloadPanel();
+      expect(
+        screen.getByRole('checkbox', { name: /Include hidden threads/ })
+      ).toBeDisabled();
     });
   });
 

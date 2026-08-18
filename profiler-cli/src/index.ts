@@ -40,6 +40,7 @@ import { registerFunctionCommand } from './commands/function';
 import { registerCounterCommand } from './commands/counter';
 import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
+import { registerSourcemapCommand } from './commands/sourcemap';
 import { registerSessionCommand } from './commands/session';
 
 // Read session directory from environment (only place this is read)
@@ -90,6 +91,8 @@ Examples:
   profiler-cli counter info c-0
   profiler-cli zoom push 2.7,3.1
   profiler-cli filter push --excludes-function f-184
+  profiler-cli sourcemap sources
+  profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
   profiler-cli stop --all`
     );
@@ -149,9 +152,21 @@ Examples:
   ).action(async (idArg: string | undefined, opts) => {
     if (opts.all) {
       const sessionIds = listSessions(SESSION_DIR);
-      await Promise.all(
+      // Settled, so one session that refuses to stop does not hide the others.
+      const results = await Promise.allSettled(
         sessionIds.map((id: string) => stopDaemon(SESSION_DIR, id))
       );
+      const failures = results.filter((r) => r.status === 'rejected');
+      for (const failure of failures) {
+        console.error(
+          `Error: ${failure.reason instanceof Error ? failure.reason.message : failure.reason}`
+        );
+      }
+      if (failures.length !== 0) {
+        throw new Error(
+          `Could not stop ${failures.length} of ${sessionIds.length} sessions.`
+        );
+      }
     } else {
       const sessionId = idArg ?? opts.session;
       await stopDaemon(SESSION_DIR, sessionId);
@@ -181,6 +196,7 @@ Examples:
   registerCounterCommand(program, SESSION_DIR);
   registerZoomCommand(program, SESSION_DIR);
   registerFilterCommand(program, SESSION_DIR);
+  registerSourcemapCommand(program, SESSION_DIR);
   registerSessionCommand(program, SESSION_DIR);
 
   try {

@@ -17,6 +17,13 @@
   background-image: var(--internal-uploading-icon);
 }
 
+.menuButtonsDownloadButton::before {
+  background-image: url(../../../../res/img/svg/download.svg);
+
+  /* download.svg is 14x20, so size by height to fit the square icon slot. */
+  background-size: auto 12px;
+}
+
 .menuButtonsShareButtonError {
   --internal-error-foreground-color: white;
   --internal-error-background-color: var(--red-60);
@@ -58,6 +65,10 @@
     --internal-uploading-icon: url(../../../../res/img/svg/sharing-animated-dark-12.svg);
   }
 
+  .menuButtonsDownloadButton::before {
+    background-image: url(../../../../res/img/svg/download-light.svg);
+  }
+
   .menuButtonsShareButtonError {
     --internal-error-foreground-color: var(--grey-20);
   }
@@ -75,22 +86,22 @@
 .publishPanelContent {
   position: relative;
 
-  /* This aligns all content, except the big icon. */
-  padding-left: 70px;
+  /* Reserve space on the left for the title icon. */
+  padding-left: 34px;
 }
 
 .publishPanelTitle {
-  /* "60px" This is the value to put the background image at the right location.
-   * This background image is 44x44, so this puts it 16px left of the text. */
-  padding-left: 60px;
-  margin: 0 0 0 -60px;
+  padding-left: 28px;
+
+  /* Negative margin pulls the 18px icon back into the gutter, 10px before the text. */
+  margin: 0 0 6px -28px;
   background: var(--internal-info-icon) left center no-repeat;
-  line-height: 44px; /* This is the height of the background image */
+  background-size: 18px 18px;
+  line-height: 28px;
 }
 
 .publishPanelInfoDescription {
-  flex: 1;
-  margin-bottom: 1em;
+  margin: 0 0 12px;
   line-height: 1.5;
 }
 
@@ -111,7 +122,7 @@
 .publishPanelButtons {
   display: flex;
   justify-content: right;
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
 .publishPanelButton {
@@ -153,6 +164,10 @@
   width: 20px;
   height: 20px;
   background: var(--internal-download-icon) center center no-repeat;
+}
+
+.publishPanelButtonsDownloadPrimary .publishPanelButtonsSvgDownload {
+  background-image: url(../../../../res/img/svg/download-light.svg);
 }
 
 .menuButtonsDownloadSize {

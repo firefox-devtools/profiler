@@ -88,8 +88,6 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   _onPanelClose = () => {
-    this.setState({ open: false });
-
     // Let's focus the delete button after dismissing the dialog, but _only_ if
     // the focus was part of the dialog before.
     // Note this branch isn't tested because jsdom doesn't support the
@@ -116,6 +114,8 @@ export class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   closePanel() {
     if (this._panel && this.state.open) {
+      // Close immediately so the button doesn't stay active while the panel animates out.
+      this.setState({ open: false });
       this._panel.close();
     }
   }

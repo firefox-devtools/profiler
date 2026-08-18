@@ -2,8 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import esbuild from 'esbuild';
-import { chmodSync, readFileSync } from 'fs';
+import { chmodSync, copyFileSync, readFileSync } from 'fs';
+import { createRequire } from 'module';
 import { nodeBaseConfig } from './lib/esbuild-configs.mjs';
+
+const require = createRequire(import.meta.url);
 
 const { name, version } = JSON.parse(
   readFileSync(new URL('../profiler-cli/package.json', import.meta.url), 'utf8')
@@ -34,6 +37,16 @@ const profilerCliConfig = {
 async function build() {
   await esbuild.build(profilerCliConfig);
   chmodSync('profiler-cli/dist/profiler-cli.js', 0o755);
+
+  // The `source-map` package's Node build reads its WASM parser from
+  // `path.join(__dirname, 'mappings.wasm')` at runtime and its `initialize` is
+  // a no-op, so the .wasm must sit next to the bundle. esbuild bundles the JS
+  // but not this runtime file, so copy it in explicitly.
+  copyFileSync(
+    require.resolve('source-map/lib/mappings.wasm'),
+    'profiler-cli/dist/mappings.wasm'
+  );
+
   console.log('✅ profiler-cli build completed');
 }
 
