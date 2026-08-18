@@ -24,6 +24,10 @@ export type {
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  ThreadListResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListSort,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -89,6 +93,8 @@ import type {
   ThreadInfoResult,
   StrategySelectResult,
   CallTreeSummaryStrategy,
+  ThreadListResult,
+  ThreadListOptions,
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
@@ -142,6 +148,7 @@ export type ClientCommand =
       command: 'thread';
       subcommand:
         | 'info'
+        | 'list'
         | 'select'
         | 'samples'
         | 'samples-top-down'
@@ -156,6 +163,7 @@ export type ClientCommand =
       strategy?: CallTreeSummaryStrategy;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
+      threadListOptions?: ThreadListOptions;
       callTreeOptions?: CallTreeCollectionOptions;
       networkFilters?: {
         searchString?: string;
@@ -236,6 +244,7 @@ export type CommandResult =
   | ViewRangeResult
   | FilterStackResult
   | WithContext<ThreadInfoResult>
+  | WithContext<ThreadListResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
   | WithContext<ProfileInfoResult>
