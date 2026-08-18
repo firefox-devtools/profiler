@@ -83,6 +83,18 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
         label: 'Response Status',
         hidden: true,
       },
+      {
+        format: 'string',
+        key: 'secPurpose',
+        label: 'Sec-Purpose',
+        hidden: true,
+      },
+      {
+        format: 'string',
+        key: 'deliveryType',
+        label: 'Delivery Type',
+        hidden: true,
+      },
     ],
   },
 ];

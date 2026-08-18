@@ -338,6 +338,22 @@ export function getNetworkMarkerDetails(
     );
   }
 
+  if (payload.secPurpose) {
+    details.push(
+      <TooltipDetail label="Sec-Purpose" key="Network-Sec-Purpose">
+        {payload.secPurpose}
+      </TooltipDetail>
+    );
+  }
+
+  if (payload.deliveryType) {
+    details.push(
+      <TooltipDetail label="Delivery Type" key="Network-Delivery Type">
+        {payload.deliveryType}
+      </TooltipDetail>
+    );
+  }
+
   if (typeof payload.count === 'number') {
     details.push(
       <TooltipDetail label="Requested bytes" key="Network-Requested Bytes">
