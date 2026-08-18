@@ -247,4 +247,9 @@ export interface SessionMetadata {
   profilePath: string;
   createdAt: string;
   buildHash: string;
+  /**
+   * Who created this session, so `stop` can refuse someone else's. Optional:
+   * sessions from older builds have none and are stoppable by anyone.
+   */
+  owner?: string;
 }

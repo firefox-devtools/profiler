@@ -21,6 +21,7 @@ import type {
 } from './protocol';
 import {
   generateSessionId,
+  getSessionOwner,
   getSocketPath,
   getLogPath,
   saveSessionMetadata,
@@ -78,17 +79,22 @@ export class Daemon {
   private profileLoadError: string | null = null;
   private isListening: boolean = false;
   private hasPublishedMetadata: boolean = false;
+  private owner: string;
 
   constructor(
     sessionDir: string,
     profilePath: string,
     sessionId?: string,
-    symbolServerUrl?: string
+    symbolServerUrl?: string,
+    owner?: string
   ) {
     this.sessionDir = sessionDir;
     this.profilePath = profilePath;
     this.sessionId = sessionId || generateSessionId();
     this.symbolServerUrl = symbolServerUrl;
+    // The client passes the owner in the spawn environment; the fallback is
+    // only for a daemon started by hand with --daemon.
+    this.owner = owner ?? getSessionOwner();
     this.socketPath = getSocketPath(sessionDir, this.sessionId);
     this.logPath = getLogPath(sessionDir, this.sessionId);
 
@@ -226,6 +232,7 @@ export class Daemon {
         profilePath: this.profilePath,
         createdAt: new Date().toISOString(),
         buildHash: BUILD_HASH,
+        owner: this.owner,
       };
       try {
         saveSessionMetadata(this.sessionDir, metadata);
@@ -601,13 +608,15 @@ export async function startDaemon(
   sessionDir: string,
   profilePath: string,
   sessionId?: string,
-  symbolServerUrl?: string
+  symbolServerUrl?: string,
+  owner?: string
 ): Promise<void> {
   const daemon = new Daemon(
     sessionDir,
     profilePath,
     sessionId,
-    symbolServerUrl
+    symbolServerUrl,
+    owner
   );
   await daemon.start();
 }
