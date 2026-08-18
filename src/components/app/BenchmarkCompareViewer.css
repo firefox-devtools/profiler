@@ -91,6 +91,18 @@
   animation: benchmarkSpin 0.8s linear infinite;
 }
 
+/* In a score row, where that row's count of moved functions is going to appear.
+ * Sized and spaced like .benchmarkBadge so that the row does not shift sideways
+ * when the number replaces it. */
+.benchmarkSpinner--badge {
+  display: inline-block;
+  width: 0.9em;
+  height: 0.9em;
+  flex: none;
+  border-width: 2px;
+  margin-left: 0.75em;
+}
+
 @keyframes benchmarkSpin {
   to {
     transform: rotate(360deg);
