@@ -50,6 +50,14 @@ export type MarkerFilterOptions = {
   list?: boolean; // Return a flat chronological list of all individual markers
 };
 
+/** A marker payload field, as shown by `marker info`. */
+export type MarkerFieldValue = {
+  key: string;
+  label: string;
+  value: any; // Payload value, with string-table indexes resolved to strings
+  formattedValue: string; // Rendered per the schema's `format`
+};
+
 export type FlatMarkerItem = {
   handle: string;
   name: string;
@@ -58,6 +66,9 @@ export type FlatMarkerItem = {
   duration?: number; // Milliseconds if interval marker
   hasStack: boolean;
   category: string;
+  markerType?: string; // The payload's `type`, i.e. the marker schema name
+  fields?: MarkerFieldValue[]; // As `marker info --json` reports them
+  data?: { [key: string]: any }; // Raw payload, minus `type` and `cause`
 };
 
 export type FunctionFilterOptions = {
@@ -812,12 +823,7 @@ export type MarkerInfoResult = {
   start: number; // Ms since the profile start, as in `FlatMarkerItem`
   end: number | null;
   duration?: number;
-  fields?: Array<{
-    key: string;
-    label: string;
-    value: any;
-    formattedValue: string;
-  }>;
+  fields?: MarkerFieldValue[];
   schema?: {
     description?: string;
   };

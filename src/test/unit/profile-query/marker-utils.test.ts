@@ -26,7 +26,7 @@ import type {
 import { storeWithProfile } from '../../fixtures/stores';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { getRawMarkerTableBuilderFromExisting } from 'firefox-profiler/profile-logic/data-structures';
-import { INTERVAL } from 'firefox-profiler/app-logic/constants';
+import { INSTANT, INTERVAL } from 'firefox-profiler/app-logic/constants';
 
 import type { Marker } from 'firefox-profiler/types';
 
@@ -409,6 +409,39 @@ describe('marker-info utility functions', function () {
       ]);
     });
 
+    it('reports the same resolved value in fields[] and data for a unique-string field', function () {
+      // Log.level is `format: 'unique-string'`, so the raw payload holds a
+      // string-table index. `fields[].value` used to report that index while
+      // `data.level` reported the resolved string, so one --list row disagreed
+      // with itself about the same field.
+      const profile = getProfileWithMarkers([
+        [
+          'Log',
+          0,
+          null,
+          { type: 'Log', level: 'Error', message: 'a' } as Record<
+            string,
+            unknown
+          >,
+        ],
+      ]);
+      const store = storeWithProfile(profile);
+
+      const result = collectThreadMarkers(
+        store,
+        new ThreadMap(),
+        new MarkerMap(),
+        undefined,
+        { list: true }
+      );
+
+      const m = result.flatMarkers![0];
+      const level = m.fields?.find((f) => f.key === 'level');
+      expect(level?.value).toBe('Error');
+      expect(m.data!.level).toBe('Error');
+      expect(level?.value).toBe(m.data!.level);
+    });
+
     it('auto-groups by a schema-declared enum-like field (schema-driven)', function () {
       // With --auto-group and enough markers of the same name, pick a field
       // from the schema (not ad-hoc Object.keys heuristics) whose format is
@@ -726,6 +759,262 @@ describe('collectThreadMarkers list option', function () {
 
     expect(result.flatMarkers).toHaveLength(1);
     expect(result.flatMarkers![0].name).toBe('DOMEvent');
+  });
+
+  it('includes schema fields and raw payload data per marker', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      [
+        'DOMEvent',
+        0,
+        10,
+        {
+          type: 'DOMEvent',
+          eventType: 'keydown',
+          latency: 5,
+          innerWindowID: 1234,
+        },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.markerType).toBe('DOMEvent');
+
+    // `fields` carries both the raw value (comparable/matchable) and the
+    // schema-formatted rendering, exactly like `marker info --json`.
+    const eventType = m.fields!.find((f) => f.key === 'eventType');
+    expect(eventType).toEqual({
+      key: 'eventType',
+      label: expect.any(String),
+      value: 'keydown',
+      formattedValue: 'keydown',
+    });
+    const latency = m.fields!.find((f) => f.key === 'latency');
+    expect(latency!.value).toBe(5);
+    expect(typeof latency!.formattedValue).toBe('string');
+
+    // `data` is the raw payload, including innerWindowID, which correlates a
+    // marker to a specific document load.
+    expect(m.data).toMatchObject({
+      eventType: 'keydown',
+      latency: 5,
+      innerWindowID: 1234,
+    });
+    // `type` is reported as `markerType` instead.
+    expect(m.data).not.toHaveProperty('type');
+  });
+
+  it('reports the same field values as marker info for the same marker', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 3 }],
+    ]);
+    const handle = registerMarker(0);
+
+    const listed = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+    const info = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(listed.flatMarkers![0].fields).toEqual(info.fields);
+  });
+
+  it('omits `cause` from data but still reports hasStack', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      [
+        'DOMEvent',
+        0,
+        10,
+        {
+          type: 'DOMEvent',
+          eventType: 'click',
+          latency: 1,
+          cause: { time: 1, stack: 0 },
+        },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.hasStack).toBe(true);
+    expect(m.data).not.toHaveProperty('cause');
+  });
+
+  it('leaves fields/data/innerWindowID absent for markers with no payload beyond `type`', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['NoPayload', 0, 10],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.fields).toBeUndefined();
+    expect(m.data).toBeUndefined();
+  });
+
+  /**
+   * Build a profile with one CompositorScreenshot marker whose `url` is a real
+   * index into the string table, rather than an already-resolved string.
+   *
+   * Index resolution is driven by the marker schema: only fields the schema
+   * declares as unique-string are looked up. `markerSchemaForTests` has no
+   * CompositorScreenshot entry, so `url` reaches the output as the raw index
+   * and the elision path sees it unresolved.
+   */
+  function setupWithScreenshotMarker(url: string) {
+    const { profile } = getProfileFromTextSamples('someFunc');
+    const thread = profile.threads[0];
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    const urlIdx = stringTable.indexForString(url);
+    const markerNameIdx = stringTable.indexForString('CompositorScreenshot');
+    const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+    thread.markers = markers;
+    markers.name.push(markerNameIdx);
+    markers.startTime.push(1);
+    markers.endTime.push(null);
+    markers.phase.push(INSTANT);
+    markers.category.push(0);
+    markers.data.push({
+      type: 'CompositorScreenshot',
+      url: urlIdx,
+      windowID: '0x1',
+      windowWidth: 1280,
+      windowHeight: 951,
+    });
+    markers.length++;
+
+    const store = storeWithProfile(profile);
+    const threadMap = new ThreadMap();
+    const markerMap = new MarkerMap();
+    threadMap.handleForThreadIndex(0);
+    return { store, threadMap, markerMap, urlIdx };
+  }
+
+  it('resolves string-table indexes in data to their strings', function () {
+    // CompositorScreenshot's `url` holds an index into the string table. A bare
+    // index would be useless to a caller that only sees the JSON output.
+    // `url` is also an elided field, so resolution is observed through the
+    // stub's `preview`/`length`, which are computed from the resolved string --
+    // an unresolved index would be a number and never reach either.
+    const url = 'data:image/jpeg;base64,AAAA';
+    const { store, threadMap, markerMap } = setupWithScreenshotMarker(url);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.data!.url).toEqual({
+      elided: true,
+      length: url.length,
+      preview: url,
+    });
+    expect(m.data!.windowWidth).toBe(1280);
+  });
+
+  it('elides screenshot image blobs from data but keeps the key', function () {
+    // Screenshot data URLs run from ~2.8KB to tens of KB each. Inlining them on
+    // every row of a --list response is what turns a 27KB payload into 940KB.
+    // Note the length here is well under any plausible length cap: the field is
+    // elided by identity, not by size.
+    const url = `data:image/jpeg;base64,${'A'.repeat(600)}`;
+    const { store, threadMap, markerMap } = setupWithScreenshotMarker(url);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.data!.url).toEqual({
+      elided: true,
+      length: url.length,
+      preview: url.slice(0, 64),
+    });
+    // The small fields next to it must survive: for this marker type there is
+    // no schema, so `data` is the only route to the window dimensions.
+    expect(m.fields).toBeUndefined();
+    expect(m.data!.windowWidth).toBe(1280);
+    expect(m.data!.windowHeight).toBe(951);
+    // The whole row must stay small.
+    expect(JSON.stringify(m).length).toBeLessThan(1000);
+  });
+
+  it('keeps long values of fields that are not image blobs', function () {
+    // A real profile had a 2939-char `prefValue` only 84 chars away from a
+    // 2855-char screenshot data URL, so a length-based cap would either keep
+    // the blobs or drop this. Eliding by field identity keeps it.
+    const prefValue = 'x'.repeat(5000);
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      [
+        'Preference Read',
+        0,
+        null,
+        {
+          type: 'PreferenceRead',
+          prefName: 'some.long.pref',
+          prefKind: 'User',
+          prefType: 'String',
+          prefValue,
+        },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    expect(result.flatMarkers![0].data!.prefValue).toBe(prefValue);
   });
 });
 
