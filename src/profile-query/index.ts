@@ -65,7 +65,7 @@ import {
 } from 'firefox-profiler/profile-logic/source-map-matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
-import { MarkerMap } from './marker-map';
+import { MarkerMap, expandMarkerHandleSpecsDetailed } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
 import { collectProfileMeta } from './formatters/profile-meta';
@@ -118,6 +118,7 @@ import type {
   ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -1490,6 +1491,85 @@ export class ProfileQuerier {
     return {
       ...result,
       context: this._getContextForThreadHandle(result.threadHandle),
+    };
+  }
+
+  /**
+   * Show detailed information about several markers at once. A handle that does
+   * not resolve goes into `errors` rather than failing the whole query.
+   */
+  async markerInfoMulti(
+    markerHandleSpecs: string[]
+  ): Promise<WithContext<MarkerInfoMultiResult>> {
+    const { handles, ranges } =
+      expandMarkerHandleSpecsDetailed(markerHandleSpecs);
+    const markers: MarkerInfoResult[] = [];
+    const errors: MarkerInfoMultiResult['errors'] = [];
+
+    for (const markerHandle of handles) {
+      try {
+        markers.push(
+          await collectMarkerInfo(
+            this._store,
+            this._markerMap,
+            this._threadMap,
+            markerHandle
+          )
+        );
+      } catch (error) {
+        errors.push({
+          markerHandle,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    // Only ranges are checked: a typed-out list of handles from several threads
+    // is a deliberate comparison, not an accident of numbering. Each range is
+    // judged on the markers it expanded to, so an unrelated handle elsewhere in
+    // the command cannot make a single-thread range look like it spans threads.
+    const threadHandleFor = new Map(
+      markers.map((marker) => [marker.markerHandle, marker.threadHandle])
+    );
+    let rangeSpansThreadsWarning:
+      | MarkerInfoMultiResult['rangeSpansThreadsWarning']
+      | undefined;
+    const spanningRanges: string[] = [];
+    const spanningThreadHandles: string[] = [];
+    for (const range of ranges) {
+      const threadHandles: string[] = [];
+      for (const handle of range.handles) {
+        const threadHandle = threadHandleFor.get(handle);
+        if (
+          threadHandle !== undefined &&
+          !threadHandles.includes(threadHandle)
+        ) {
+          threadHandles.push(threadHandle);
+        }
+      }
+      if (threadHandles.length > 1) {
+        spanningRanges.push(range.spec);
+        for (const threadHandle of threadHandles) {
+          if (!spanningThreadHandles.includes(threadHandle)) {
+            spanningThreadHandles.push(threadHandle);
+          }
+        }
+      }
+    }
+    if (spanningRanges.length > 0) {
+      rangeSpansThreadsWarning = {
+        ranges: spanningRanges,
+        threadHandles: spanningThreadHandles,
+      };
+    }
+
+    return {
+      type: 'marker-info-multi',
+      requested: handles,
+      markers,
+      errors,
+      rangeSpansThreadsWarning,
+      context: this._getContext(),
     };
   }
 
