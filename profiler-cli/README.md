@@ -84,7 +84,7 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | Flag                   | Description                                                                                                                                              |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--thread <handle>`    | Specify thread (e.g., `t-0`)                                                                                                                             |
-| `--search <term>`      | Filter results by substring. For samples commands, comma-separates multiple terms that all must match (AND); `\|` is literal, not OR.                    |
+| `--search <term>`      | Filter by substring; `thread markers` also takes `field:value` (see its `--help`).                                                                       |
 | `--include-idle`       | Include idle samples (excluded by default in samples commands)                                                                                           |
 | `--json`               | Output as JSON (for use with `jq`, etc.)                                                                                                                 |
 | `--limit <N>`          | Limit number of results shown                                                                                                                            |

@@ -187,7 +187,12 @@ export function registerThreadCommand(
       .command('markers')
       .description('List markers with aggregated statistics')
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-      .option('--search <term>', 'Filter by substring')
+      .option(
+        '--search <term>',
+        'Filter markers. A bare term matches the marker name, category, payload ' +
+          'type and payload field values; "field:value" narrows to one field, ' +
+          '"-field:value" excludes, comma separates terms (OR). See "search syntax" below'
+      )
       .option(
         '--category <name>',
         'Filter by category name (case-insensitive substring match)'
@@ -215,6 +220,30 @@ export function registerThreadCommand(
         'Number of top markers to include per group in JSON output (default: 5)'
       )
       .option('--list', 'Show a flat chronological list of individual markers')
+      .addHelpText(
+        'after',
+        `
+--search syntax (as on profiler.firefox.com's marker search box):
+
+  bare term      matches the marker name, category, payload type AND every
+                 payload field value -- so "--search FAIL" also hits messages
+                 containing "Failed"
+  field:value    narrows to one field
+  -field:value   excludes; a bare "-term" is NOT a negation, the "-" is literal
+  a,b            comma separates: positives OR'd, then exclusions applied
+
+  "field" is the payload key from "marker info <handle> --json" fields[].key, not
+  the label that "marker info" prints (Glean: "id:abi", not "metric:abi"). An
+  unrecognized field is not an error -- the term is just matched literally.
+
+  "name:" is not a name-only filter: "name" is also a payload key on Text and
+  TextStack markers, so it matches their detail text too.
+
+Examples:
+  profiler-cli thread markers --search "eventType:keydown"
+  profiler-cli thread markers --search "-name:CompositorScreenshot"
+  profiler-cli thread markers --search "name:DOMEvent,-eventType:keydown"`
+      )
   ).action(async (opts) => {
     let markerFilters: MarkerFilterOptions | undefined;
 
