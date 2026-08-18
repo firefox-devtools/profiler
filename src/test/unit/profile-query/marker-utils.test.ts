@@ -11,7 +11,12 @@ import {
   collectThreadMarkers,
   collectThreadNetwork,
 } from 'firefox-profiler/profile-query/formatters/marker-info';
-import { MarkerMap } from 'firefox-profiler/profile-query/marker-map';
+import {
+  MarkerMap,
+  expandMarkerHandleSpecs,
+  expandMarkerHandleSpecsDetailed,
+  MAX_MARKER_RANGE_SIZE,
+} from 'firefox-profiler/profile-query/marker-map';
 import { ThreadMap } from 'firefox-profiler/profile-query/thread-map';
 import { getCategories } from 'firefox-profiler/selectors/profile';
 import {
@@ -556,6 +561,97 @@ describe('collectMarkerInfo', function () {
 
     const hiddenField = result.fields?.find((f) => f.key === 'hiddenString');
     expect(hiddenField).toBeUndefined();
+  });
+});
+
+describe('expandMarkerHandleSpecs', function () {
+  it('passes single handles through in order', function () {
+    expect(expandMarkerHandleSpecs(['m-5', 'm-1', 'm-3'])).toEqual([
+      'm-5',
+      'm-1',
+      'm-3',
+    ]);
+  });
+
+  it('expands an inclusive range', function () {
+    expect(expandMarkerHandleSpecs(['m-3..m-6'])).toEqual([
+      'm-3',
+      'm-4',
+      'm-5',
+      'm-6',
+    ]);
+  });
+
+  it('accepts a range whose end omits the m- prefix', function () {
+    expect(expandMarkerHandleSpecs(['m-8..10'])).toEqual([
+      'm-8',
+      'm-9',
+      'm-10',
+    ]);
+  });
+
+  it('accepts a single-marker range', function () {
+    expect(expandMarkerHandleSpecs(['m-7..m-7'])).toEqual(['m-7']);
+  });
+
+  it('mixes handles, ranges and comma-separated lists', function () {
+    expect(expandMarkerHandleSpecs(['m-1,m-4..m-6', 'm-9'])).toEqual([
+      'm-1',
+      'm-4',
+      'm-5',
+      'm-6',
+      'm-9',
+    ]);
+  });
+
+  it('drops duplicates, keeping the first occurrence', function () {
+    expect(expandMarkerHandleSpecs(['m-2..m-4', 'm-3', 'm-4..m-5'])).toEqual([
+      'm-2',
+      'm-3',
+      'm-4',
+      'm-5',
+    ]);
+  });
+
+  it('rejects a reversed range', function () {
+    expect(() => expandMarkerHandleSpecs(['m-9..m-4'])).toThrow(
+      'end m-4 is before start m-9'
+    );
+  });
+
+  it('rejects a spec that is not a handle or a range', function () {
+    expect(() => expandMarkerHandleSpecs(['t-3'])).toThrow(
+      'Invalid marker handle t-3'
+    );
+  });
+
+  it('accepts a range exactly at the size limit', function () {
+    const handles = expandMarkerHandleSpecs([
+      `m-1..m-${MAX_MARKER_RANGE_SIZE}`,
+    ]);
+
+    expect(handles).toHaveLength(MAX_MARKER_RANGE_SIZE);
+  });
+
+  it('rejects a range wider than the size limit', function () {
+    const end = MAX_MARKER_RANGE_SIZE + 1;
+
+    expect(() => expandMarkerHandleSpecs([`m-1..m-${end}`])).toThrow(
+      `covers ${end} handles, more than the maximum of ${MAX_MARKER_RANGE_SIZE}`
+    );
+  });
+
+  it('reports which specs were multi-element ranges', function () {
+    const { handles, ranges } = expandMarkerHandleSpecsDetailed([
+      'm-1',
+      'm-4..m-6',
+      'm-9..m-9',
+    ]);
+
+    expect(handles).toEqual(['m-1', 'm-4', 'm-5', 'm-6', 'm-9']);
+    // A single-element range cannot straddle two listings, so it is not
+    // reported as a range needing a provenance check.
+    expect(ranges).toEqual(['m-4..m-6']);
   });
 });
 
