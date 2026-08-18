@@ -951,8 +951,7 @@ function collectStackTrace(
     return null;
   }
 
-  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
-    thread;
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
   const frames: StackTraceData['frames'] = [];
 
   let currentStackIndex: IndexIntoStackTable = stackIndex;
@@ -960,19 +959,12 @@ function collectStackTrace(
     const frameIndex = stackTable.frame[currentStackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const funcName = stringTable.getString(funcTable.name[funcIndex]);
-    const nameWithLibrary = formatFunctionNameWithLibrary(
-      funcIndex,
-      thread,
-      libs
-    );
+    const nameWithLibrary = formatFunctionNameWithLibrary(funcIndex, thread);
 
     let library: string | undefined;
-    const resourceIndex = funcTable.resource[funcIndex];
-    if (resourceIndex !== -1) {
-      const libIndex = resourceTable.lib[resourceIndex];
-      if (libIndex !== null && libs) {
-        library = libs[libIndex].name;
-      }
+    const libIndex = frameTable.lib[frameIndex];
+    if (libIndex !== -1 && libs) {
+      library = libs[libIndex].name;
     }
 
     frames.push({ name: funcName, nameWithLibrary, library });

@@ -287,10 +287,10 @@ export type StackTable = {
  *
  * Differs from `RawFrameTable` in that the following columns are always
  * stored as typed arrays: `address` (`Int32Array`, with `-1` as the sentinel
- * for missing addresses), `inlineDepth` (`Uint8Array`), and `func`
- * (`Int32Array`). In `RawFrameTable`, these columns may be either regular
- * arrays or typed arrays, since regular arrays are convenient during
- * construction.
+ * for missing addresses), `inlineDepth` (`Uint8Array`), `func` (`Int32Array`),
+ * and `lib` (`Int32Array`, with `-1` as the sentinel for frames with no
+ * library). In `RawFrameTable`, these columns may be either regular arrays or
+ * typed arrays, since regular arrays are convenient during construction.
  */
 export type FrameTable = {
   // Differs from RawFrameTable: always Int32Array (-1 sentinel preserved).
@@ -301,6 +301,8 @@ export type FrameTable = {
   subcategory: (IndexIntoSubcategoryListForCategory | null)[];
   // Differs from RawFrameTable: always Int32Array.
   func: Int32Array<ArrayBuffer>;
+  // Differs from RawFrameTable: always Int32Array (-1 sentinel preserved).
+  lib: Int32Array<ArrayBuffer>;
   nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
   innerWindowID: (InnerWindowID | null)[];
   line: (number | null)[];
@@ -861,7 +863,6 @@ export type NativeSymbolInfo = {
  * assembly view) is updated.
  */
 export type BottomBoxInfo = {
-  libIndex: IndexIntoLibs | null;
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
   initialNativeSymbol: number | null; // index into `nativeSymbols`

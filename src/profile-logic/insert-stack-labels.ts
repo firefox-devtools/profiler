@@ -136,6 +136,7 @@ export function insertStackLabels(
     frameTable.func[frameIndex] = funcIndex;
     frameTable.category[frameIndex] = labelCategoryIndex;
     frameTable.subcategory[frameIndex] = 0;
+    frameTable.lib[frameIndex] = -1;
     frameTable.nativeSymbol[frameIndex] = null;
     frameTable.address[frameIndex] = 0;
     frameTable.inlineDepth[frameIndex] = 0;

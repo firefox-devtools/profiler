@@ -212,6 +212,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
   frameTable.category.push(otherCategory);
   frameTable.subcategory.push(otherSubCategory);
   frameTable.innerWindowID.push(null);
+  frameTable.lib.push(-1);
   frameTable.nativeSymbol.push(null);
   frameTable.inlineDepth.push(0);
   frameTable.func.push(rootFuncIndex);
@@ -279,6 +280,7 @@ export function attemptToConvertDhat(json: unknown): Profile | null {
     frameTable.category.push(otherCategory);
     frameTable.subcategory.push(otherSubCategory);
     frameTable.innerWindowID.push(null);
+    frameTable.lib.push(-1);
     frameTable.nativeSymbol.push(null);
     frameTable.inlineDepth.push(0);
     frameTable.func.push(funcIndex);

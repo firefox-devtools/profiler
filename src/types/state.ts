@@ -22,7 +22,6 @@ import type {
   ThreadIndex,
   Pid,
   TabID,
-  IndexIntoLibs,
   IndexIntoSourceTable,
 } from './profile';
 
@@ -260,13 +259,6 @@ export type SourceViewState = {
   scrollGeneration: number;
   // Optional line number to scroll to in the source view.
   scrollToLineNumber?: number;
-  // Non-null if this source file was opened for a function from native code.
-  // In theory, multiple different libraries can have source files with the same
-  // path but different content.
-  // Null if the source file is not for native code or if the lib is not known,
-  // for example if the source view was opened via the URL (the source URL param
-  // currently discards the libIndex).
-  libIndex: IndexIntoLibs | null;
   // Index into source table. Contains information (filename and uuid) about the
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;

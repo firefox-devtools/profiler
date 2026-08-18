@@ -620,13 +620,15 @@ function _createUnsymbolicatedProfile() {
 
   profile.shared.resourceTable = {
     length: 1,
-    lib: [libIndex],
     name: [stringTable.indexForString('example lib')],
     host: [stringTable.indexForString('example host')],
     type: [ResourceType.Library],
   };
   for (let i = 0; i < profile.shared.funcTable.length; i++) {
     profile.shared.funcTable.resource[i] = 0;
+  }
+  for (let i = 0; i < profile.shared.frameTable.length; i++) {
+    profile.shared.frameTable.lib[i] = libIndex;
   }
 
   // Add a marker with a cause stack. We use the stack of the first sample.

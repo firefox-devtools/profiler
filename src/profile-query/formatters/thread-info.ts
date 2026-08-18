@@ -9,7 +9,6 @@ import {
 import {
   getCategories,
   getDefaultCategory,
-  getProfile,
 } from 'firefox-profiler/selectors/profile';
 import { collectSliceTree } from '../cpu-activity';
 import { computeThreadNetworkSummary } from '../network-summary';
@@ -114,14 +113,13 @@ export function collectThreadSamples(
   const threadSelectors = getThreadSelectors(threadIndexes);
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
   const thread = threadSelectors.getFilteredThread(state);
-  const libs = getProfile(state).libs;
 
   // Get call trees for analysis
   const functionListTree = threadSelectors.getFunctionListTree(state);
   const callTree = threadSelectors.getCallTree(state);
 
   // Extract function data
-  const functions = extractFunctionData(functionListTree, thread, libs);
+  const functions = extractFunctionData(functionListTree, thread);
 
   // Sort by total and take top 50
   const sortedByTotal = functions
@@ -201,11 +199,7 @@ export function collectThreadSamples(
 
         let hasInlinedFrames = false;
         const frames = heaviestPath.map((funcIndex, depth) => {
-          const funcName = formatFunctionNameWithLibrary(
-            funcIndex,
-            thread,
-            libs
-          );
+          const funcName = formatFunctionNameWithLibrary(funcIndex, thread);
           const funcData = funcMap.get(funcIndex);
           const prefixPath = heaviestPath.slice(0, depth + 1);
           const frameCallNodeIndex =
@@ -307,8 +301,7 @@ export function collectThreadSamplesBottomUp(
     weightType
   );
 
-  const libs = getProfile(state).libs;
-  const invertedCallTree = collectCallTree(invertedTree, libs, callTreeOptions);
+  const invertedCallTree = collectCallTree(invertedTree, callTreeOptions);
 
   return {
     type: 'thread-samples-bottom-up',
@@ -337,10 +330,9 @@ export function collectThreadSamplesTopDown(
   const threadSelectors = getThreadSelectors(threadIndexes);
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
   const callTree = threadSelectors.getCallTree(state);
-  const libs = getProfile(state).libs;
 
   // Collect regular call tree
-  const regularCallTree = collectCallTree(callTree, libs, callTreeOptions);
+  const regularCallTree = collectCallTree(callTree, callTreeOptions);
 
   return {
     type: 'thread-samples-top-down',
@@ -369,13 +361,12 @@ export function collectThreadFunctions(
   const threadSelectors = getThreadSelectors(threadIndexes);
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
   const thread = threadSelectors.getFilteredThread(state);
-  const libs = getProfile(state).libs;
 
   // Get function list tree
   const functionListTree = threadSelectors.getFunctionListTree(state);
 
   // Extract function data
-  const allFunctions = extractFunctionData(functionListTree, thread, libs);
+  const allFunctions = extractFunctionData(functionListTree, thread);
   const totalFunctionCount = allFunctions.length;
 
   // Check if we're zoomed (have committed ranges)

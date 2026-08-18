@@ -354,7 +354,6 @@ describe('bottom box', function () {
 
     dispatch(
       updateBottomBoxContentsAndMaybeOpen('calltree', {
-        libIndex: null,
         sourceIndex: null,
         nativeSymbols: [],
         initialNativeSymbol: 0,

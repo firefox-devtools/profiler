@@ -23,10 +23,9 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // Collect with budget of 3 nodes
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 3,
       });
 
@@ -47,10 +46,9 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // With small budget, should still include D (100% at depth 3)
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 4,
       });
 
@@ -75,10 +73,9 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // With budget of 4: should get A, B (50%), D (50%), C (50%)
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 4,
       });
 
@@ -99,10 +96,9 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // With budget of 2: A and B, should show C/D/E as elided
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 2,
       });
 
@@ -125,9 +121,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 4,
         scoringStrategy: 'exponential-0.9',
       });
@@ -149,9 +144,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 4,
         scoringStrategy: 'percentage-only',
       });
@@ -175,9 +169,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 10,
         scoringStrategy: 'exponential-0.9',
       });
@@ -203,10 +196,9 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // Small budget to force truncation
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 3,
       });
 
@@ -237,7 +229,6 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // First verify that A has many children
       const roots = callTree.getRoots();
@@ -246,7 +237,7 @@ describe('call-tree collection', function () {
       const aChildren = callTree.getChildren(aCallNode);
       expect(aChildren.length).toBe(16); // B through Q
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 5, // Small budget to ensure truncation
         maxChildrenPerNode: 10,
       });
@@ -272,9 +263,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 10,
       });
 
@@ -302,9 +292,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 8,
         scoringStrategy: 'exponential-0.9',
       });
@@ -331,9 +320,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 100,
         maxDepth: 20,
       });
@@ -354,10 +342,9 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
       // Budget that includes A and B, but not the other children
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 2,
       });
 
@@ -392,9 +379,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 2,
       });
 
@@ -422,9 +408,8 @@ describe('call-tree collection', function () {
       const state = store.getState();
       const threadSelectors = getThreadSelectors(0);
       const callTree = threadSelectors.getCallTree(state);
-      const libs = profile.libs;
 
-      const result = collectCallTree(callTree, libs, {
+      const result = collectCallTree(callTree, {
         maxNodes: 1000, // High budget
         maxDepth: 10, // But limited depth
       });

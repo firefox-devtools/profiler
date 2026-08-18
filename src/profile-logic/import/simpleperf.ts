@@ -99,7 +99,6 @@ class FirefoxResourceTable {
   findOrAddResource(file: report.IFile): IndexIntoResourceTable {
     let resourceIndex = this.resourcesMap.get(file.id!);
     if (!resourceIndex) {
-      this.resourceTable.lib.push(null);
       this.resourceTable.name.push(this.strings.indexForString(file.path!));
       this.resourceTable.host.push(null);
       this.resourceTable.type.push(1); // Library
@@ -177,6 +176,7 @@ class FirefoxFrameTable {
       this.frameTable.category.push(category);
       this.frameTable.subcategory.push(0);
       this.frameTable.func.push(funcIndex);
+      this.frameTable.lib.push(-1);
       this.frameTable.nativeSymbol.push(null);
       this.frameTable.innerWindowID.push(null);
       this.frameTable.line.push(null);
