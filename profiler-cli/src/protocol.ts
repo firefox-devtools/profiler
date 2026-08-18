@@ -67,6 +67,9 @@ export type {
   ProfileInfoResult,
   ProfileMetaResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileMarkerItem,
+  ProfileMarkersThreadBreakdown,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -109,6 +112,7 @@ import type {
   ThreadPageLoadResult,
   FilterStackResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
@@ -132,6 +136,11 @@ export type ClientCommand =
   | {
       command: 'profile';
       subcommand: 'meta';
+    }
+  | {
+      command: 'profile';
+      subcommand: 'markers';
+      markerFilters?: MarkerFilterOptions & { thread?: string };
     }
   | {
       command: 'profile';
@@ -257,6 +266,7 @@ export type CommandResult =
   | WithContext<ThreadNetworkResult>
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
+  | WithContext<ProfileMarkersResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
   | WithContext<StrategySelectResult>

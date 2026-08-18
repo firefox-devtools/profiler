@@ -28,6 +28,7 @@ import {
   formatThreadFunctionsResult,
   formatThreadNetworkResult,
   formatProfileLogsResult,
+  formatProfileMarkersResult,
   formatThreadPageLoadResult,
   formatThreadSelectResult,
   formatStrategySelectResult,
@@ -95,6 +96,8 @@ export function formatOutput(
       return formatThreadNetworkResult(result);
     case 'profile-logs':
       return formatProfileLogsResult(result);
+    case 'profile-markers':
+      return formatProfileMarkersResult(result);
     case 'thread-page-load':
       return formatThreadPageLoadResult(result);
     case 'thread-select':

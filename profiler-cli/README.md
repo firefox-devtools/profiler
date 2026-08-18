@@ -33,6 +33,7 @@ profiler-cli load <PATH>                   # Start daemon and load profile (file
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
 profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
+profiler-cli profile markers               # Search markers across all threads [--search] [--thread] [--category] [--min-duration] [--max-duration] [--has-stack] [--limit]
 profiler-cli thread list                   # List all threads as a flat table [--sort] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
