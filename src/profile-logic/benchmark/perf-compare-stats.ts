@@ -15,6 +15,9 @@
 // handled rather than by the difference being measured. See
 // docs-developer/benchmark-auto-bucketing.md §3.1.
 
+import { runToCompletion } from './chunked-work';
+import type { SlicedWork } from './chunked-work';
+
 // ---------------------------------------------------------------------------
 // Normal distribution
 // ---------------------------------------------------------------------------
@@ -669,12 +672,39 @@ export type FamilyCorrection = {
  *
  * Returns null if the family is empty or its members disagree about how many
  * iterations there were, in which case there is nothing to correct against.
+ *
+ * This is the whole cost of a bucket table: `drawCount × memberCount` evaluations
+ * of `absTForMember`, about a second for the ~3200-member global view of a
+ * Speedometer pair. `computeFamilyCorrectionInSlices` is the same computation with
+ * a yield point after every draw, for callers that cannot hold the main thread
+ * for a second; this one runs it straight through.
  */
 export function computeFamilyCorrection(
   members: ReadonlyArray<FamilyMember>,
   permutations: Int32Array[],
   familyWiseAlpha: number = 0.05
 ): FamilyCorrection | null {
+  return runToCompletion(
+    computeFamilyCorrectionInSlices(members, permutations, familyWiseAlpha)
+  );
+}
+
+/**
+ * `computeFamilyCorrection`, interruptible between permutation draws. See there
+ * for what this computes and why.
+ *
+ * The draw loop is the only yield point, and it is a fine one: it is where all the
+ * time goes, and a single draw is ~0.5ms even for the largest family, so a driver
+ * can pace itself to whatever slice it wants. The per-draw work stays in a
+ * separate function rather than being written inline here, so that the arithmetic
+ * that runs millions of times is in an ordinary function and not in the body of a
+ * generator.
+ */
+export function* computeFamilyCorrectionInSlices(
+  members: ReadonlyArray<FamilyMember>,
+  permutations: Int32Array[],
+  familyWiseAlpha: number = 0.05
+): SlicedWork<FamilyCorrection | null> {
   const memberCount = members.length;
   const drawCount = permutations.length;
   if (memberCount === 0 || drawCount === 0) {
@@ -805,7 +835,7 @@ export function computeFamilyCorrection(
   // How often each member's own relabellings reached its own observation. The
   // per-member p-value, for one comparison per null value.
   const ownHits = new Float64Array(memberCount);
-  for (let p = 0; p < drawCount; p++) {
+  const accumulateDraw = (p: number) => {
     inBase.fill(0);
     const indices = permutations[p];
     for (let k = 0; k < indices.length; k++) {
@@ -824,6 +854,10 @@ export function computeFamilyCorrection(
       nullsClearing[countAtOrBelow(ascending, widened)]++;
     }
     maxima[p] = max;
+  };
+  for (let p = 0; p < drawCount; p++) {
+    accumulateDraw(p);
+    yield;
   }
 
   // nullExceeding[i] = null values reaching ascending[i], i.e. clearing more
