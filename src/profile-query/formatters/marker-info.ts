@@ -162,10 +162,25 @@ export function computeRateStats(markers: Marker[]): RateStats {
   }
 
   const sorted = [...markers].sort((a, b) => a.start - b.start);
-  const gaps: number[] = [];
 
+  // Accumulate the gap statistics in a single pass. Do not build an array of
+  // gaps and spread it into Math.min/Math.max: a spread passes one argument per
+  // element, which blows the stack ("Maximum call stack size exceeded") once a
+  // marker name has more than ~100k markers in it, as happens on the parent
+  // process main thread of a long profile.
+  let minGap = Infinity;
+  let maxGap = -Infinity;
+  let gapSum = 0;
+  const gapCount = sorted.length - 1;
   for (let i = 1; i < sorted.length; i++) {
-    gaps.push(sorted[i].start - sorted[i - 1].start);
+    const gap = sorted[i].start - sorted[i - 1].start;
+    if (gap < minGap) {
+      minGap = gap;
+    }
+    if (gap > maxGap) {
+      maxGap = gap;
+    }
+    gapSum += gap;
   }
 
   const timeRange = sorted[sorted.length - 1].start - sorted[0].start;
@@ -175,9 +190,9 @@ export function computeRateStats(markers: Marker[]): RateStats {
 
   return {
     markersPerSecond,
-    minGap: Math.min(...gaps),
-    avgGap: gaps.reduce((a, b) => a + b, 0) / gaps.length,
-    maxGap: Math.max(...gaps),
+    minGap,
+    avgGap: gapSum / gapCount,
+    maxGap,
   };
 }
 
