@@ -139,12 +139,21 @@
 /* The form as an editable header above a loaded report: present, but not
  * competing with the numbers for attention until it is opened. */
 
-.benchmarkComparing {
-  /* The app's 11px base is too small for a header that is also the control for
-   * swapping the compared pair, so set a readable size for the whole block and
-   * let the URL list below shrink relative to that. */
+.benchmarkComparingHeader {
+  /* The app's 11px base is too small for a header that names the two profiles
+   * and doubles as the control for swapping them, so set a readable size for
+   * the whole block and let its parts size relative to that. */
   margin-bottom: 1.5em;
   font-size: 13px;
+}
+
+.benchmarkProfileLinks {
+  margin: 0 0 0.4em;
+  color: var(--internal-text-muted);
+}
+
+.benchmarkProfileLinks__link {
+  font-weight: bold;
 }
 
 .benchmarkComparing > summary {
@@ -156,23 +165,8 @@
   color: var(--internal-text-muted);
 }
 
-.benchmarkComparing__name {
-  color: var(--base-font-color);
-  font-weight: bold;
-}
-
 .benchmarkComparing > .benchmarkCompareForm {
   padding: 0.75em 0 0.25em 1.2em;
-}
-
-.benchmarkProfileUrls {
-  display: flex;
-  flex-direction: column;
-  margin-top: 0.5em;
-  color: var(--internal-text-muted);
-  font-size: 0.85em;
-  gap: 0.25em;
-  word-break: break-all;
 }
 
 /* Section headings */
