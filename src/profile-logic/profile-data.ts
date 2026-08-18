@@ -4464,7 +4464,7 @@ export function findAddressProofForFile(
     return null;
   }
   const address = frameTable.address[frame];
-  if (address === null) {
+  if (address === -1) {
     return null;
   }
   const libIndex = frameTable.lib[frame];
