@@ -220,6 +220,28 @@ describe('marker-info utility functions', function () {
       expect(stats.avgGap).toBe(50);
       expect(stats.maxGap).toBe(100);
     });
+
+    it('handles more markers than fit in a spread call', function () {
+      // The gap statistics used to be computed with Math.min(...gaps) /
+      // Math.max(...gaps), which throws "Maximum call stack size exceeded"
+      // above roughly 100k elements. The parent process main thread of a long
+      // profile easily has that many markers with the same name.
+      const count = 300000;
+      const markers = Array.from({ length: count }, (_, i) =>
+        makeMarker(i * 2, null)
+      );
+      // Make one gap smaller and one larger than the uniform 2ms gap.
+      markers[1] = makeMarker(1, null);
+      markers[count - 1] = makeMarker((count - 2) * 2 + 10, null);
+
+      const stats = computeRateStats(markers);
+      expect(stats.minGap).toBe(1);
+      expect(stats.maxGap).toBe(10);
+      expect(stats.avgGap).toBeCloseTo(
+        ((count - 2) * 2 + 10) / (count - 1),
+        10
+      );
+    });
   });
 
   describe('collectThreadMarkers', function () {
@@ -272,6 +294,41 @@ describe('marker-info utility functions', function () {
           count: 1,
         }),
       ]);
+    });
+
+    it('aggregates a thread with more markers than fit in a spread call', function () {
+      // Regression test: `thread markers` on the parent process main thread of
+      // a long profile used to fail with "Maximum call stack size exceeded"
+      // because the per-name gap statistics were computed by spreading the gap
+      // array into Math.min/Math.max.
+      const count = 150000;
+      const markers: TestDefinedMarker[] = Array.from(
+        { length: count },
+        (_, i) => ['NotifyObservers', i * 2, i * 2 + 1] as TestDefinedMarker
+      );
+      const profile = getProfileWithMarkers(markers);
+      const store = storeWithProfile(profile);
+      const threadMap = new ThreadMap();
+      const markerMap = new MarkerMap();
+
+      const result = collectThreadMarkers(store, threadMap, markerMap);
+      expect(result.totalMarkerCount).toBe(count);
+      expect(result.byType).toHaveLength(1);
+      expect(result.byType[0].markerName).toBe('NotifyObservers');
+      expect(result.byType[0].count).toBe(count);
+      expect(result.byType[0].rateStats?.minGap).toBe(2);
+      expect(result.byType[0].rateStats?.maxGap).toBe(2);
+    });
+
+    it('reports an unknown thread handle as-is', function () {
+      const profile = getProfileWithMarkers([['A', 0, 1]]);
+      const store = storeWithProfile(profile);
+      const threadMap = new ThreadMap();
+      const markerMap = new MarkerMap();
+
+      expect(() =>
+        collectThreadMarkers(store, threadMap, markerMap, 't-999')
+      ).toThrow(/^Unknown thread t-999$/);
     });
 
     it('reports the raw categoryIndex in byCategory (not recovered by name)', function () {
