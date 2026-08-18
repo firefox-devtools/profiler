@@ -20,7 +20,7 @@ function createContext(): SessionContext {
 }
 
 function makeResult(
-  overrides: Partial<ThreadMarkersResult> = {}
+  overrides: Partial<WithContext<ThreadMarkersResult>> = {}
 ): WithContext<ThreadMarkersResult> {
   return {
     context: createContext(),
@@ -146,6 +146,22 @@ describe('formatThreadMarkersResult flat list mode', function () {
     const output = formatThreadMarkersResult(result);
     expect(output).not.toContain('By Name');
     expect(output).not.toContain('By Category');
+  });
+
+  // `start` is already profile-start-relative, so `t=` must print it verbatim.
+  // Needs a non-zero `rootRange.start`: at the 0 used elsewhere in this file, a
+  // second subtraction would be invisible.
+  it('renders the flat marker start verbatim, without re-subtracting rootRange.start', function () {
+    const result = makeResult({
+      context: { ...createContext(), rootRange: { start: 9.2, end: 3000 } },
+      filteredMarkerCount: 1,
+      flatMarkers: [makeFlat({ handle: 'm-1', start: 549.34 })],
+    });
+
+    const output = formatThreadMarkersResult(result);
+    const line = output.split('\n').find((l) => l.includes('m-1'))!;
+    expect(line).toContain('t=549.34ms');
+    expect(line).not.toContain('540.14ms'); // 549.34 - 9.2, if subtracted twice
   });
 });
 
