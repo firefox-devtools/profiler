@@ -7,7 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { parseEphemeralFilters } from '../utils/parse';
+import { parseEphemeralFilters, parseLimitArg } from '../utils/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
@@ -206,7 +206,7 @@ export function registerThreadCommand(
         'Filter by maximum duration in milliseconds'
       )
       .option('--has-stack', 'Show only markers with stack traces')
-      .option('--limit <N>', 'Limit the number of results shown')
+      .option('--limit <N>', 'Limit the number of results shown (0 = no limit)')
       .option(
         '--group-by <keys>',
         'Group by custom keys (e.g. "type,name" or "type,field:eventType")'
@@ -297,9 +297,7 @@ Examples:
           'Error: --max-duration must be a positive number (in milliseconds)'
         );
       }
-      if (opts.limit !== undefined) {
-        markerFilters.limit = parseIntArg('--limit', opts.limit, 1);
-      }
+      markerFilters.limit = parseLimitArg('--limit', opts.limit);
       if (opts.topN !== undefined) {
         markerFilters.topN = parseIntArg('--top-n', opts.topN, 1);
       }
@@ -332,7 +330,7 @@ Examples:
         '--max-duration <ms>',
         'Filter by maximum total request duration in milliseconds'
       )
-      .option('--limit <N>', 'Max requests to show (default: 20, 0 = show all)')
+      .option('--limit <N>', 'Max requests to show (default: 20, 0 = no limit)')
       .option(
         '--sort <order>',
         'Sort requests by "duration" (default, slowest first) or "start" (chronological)'
@@ -375,12 +373,7 @@ Examples:
       );
     }
     if (opts.limit !== undefined) {
-      networkFilters.limit = parseIntArg(
-        '--limit',
-        opts.limit,
-        0,
-        'Error: --limit must be a non-negative integer (0 = show all)'
-      );
+      networkFilters.limit = parseLimitArg('--limit', opts.limit) ?? 0;
     } else {
       networkFilters.limit = 20;
     }
@@ -426,12 +419,10 @@ Examples:
       );
     }
     if (opts.jankLimit !== undefined) {
-      pageLoadOptions.jankLimit = parseIntArg(
-        '--jank-limit',
-        opts.jankLimit,
-        0,
-        'Error: --jank-limit must be a non-negative integer (0 = show all)'
-      );
+      // `collectPageLoad` does `jankLimit ?? 10`, so forwarding `undefined`
+      // here would silently reinstate that default; 0 is its show-all sentinel.
+      pageLoadOptions.jankLimit =
+        parseLimitArg('--jank-limit', opts.jankLimit) ?? 0;
     }
 
     await runCommand(
@@ -458,7 +449,10 @@ Examples:
           '--min-self <percent>',
           'Filter by minimum self time percentage'
         )
-        .option('--limit <N>', 'Limit the number of results shown')
+        .option(
+          '--limit <N>',
+          'Limit the number of results shown (0 = no limit)'
+        )
         .option('--include-idle', 'Include idle samples in percentages')
     )
   ).action(async (opts) => {
@@ -482,9 +476,7 @@ Examples:
           'Error: --min-self must be a number between 0 and 100 (percentage)'
         );
       }
-      if (opts.limit !== undefined) {
-        functionFilters.limit = parseIntArg('--limit', opts.limit, 1);
-      }
+      functionFilters.limit = parseLimitArg('--limit', opts.limit);
     }
 
     const sampleFilters = parseEphemeralFilters(opts);

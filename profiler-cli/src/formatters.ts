@@ -1157,6 +1157,15 @@ export function formatThreadMarkersResult(
         `  ${m.handle.padEnd(8)}  ${m.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
       );
     }
+    // Truncating a chronological list silently would hide the tail of the
+    // timeline, so always say how much was dropped and how to get it back.
+    const omitted = result.filteredMarkerCount - result.flatMarkers.length;
+    if (omitted > 0) {
+      lines.push(
+        `\n  ... (${omitted} more markers omitted: showing the first ${result.flatMarkers.length} of ${result.filteredMarkerCount})`,
+        '  Use --limit 0 to list all of them, or --limit <N> for a larger window.'
+      );
+    }
     return lines.join('\n');
   }
 
@@ -1207,7 +1216,12 @@ export function formatThreadMarkersResult(
     }
 
     if (result.byType.length > 15) {
-      lines.push(`  ... (${result.byType.length - 15} more marker names)`);
+      // This list is capped at 15 by the formatter, not by --limit, so point at
+      // what does show the rest rather than leaving a dead end.
+      lines.push(
+        `  ... (${result.byType.length - 15} more marker names: showing the top 15 of ${result.byType.length})`,
+        '  Use --json for every marker name, or --search <term> to narrow to one.'
+      );
     }
 
     lines.push('');
@@ -1394,12 +1408,15 @@ export function formatThreadFunctionsResult(
 
   if (result.filteredFunctionCount > result.functions.length) {
     const omittedCount = result.filteredFunctionCount - result.functions.length;
-    lines.push(`\n  ... (${omittedCount} more functions omitted)`);
+    lines.push(
+      `\n  ... (${omittedCount} more functions omitted: showing the first ${result.functions.length} of ${result.filteredFunctionCount})`,
+      '  Use --limit 0 to list all of them, or --limit <N> for a larger window.'
+    );
   }
 
   lines.push('');
   lines.push(
-    'Use --search <term>, --min-self <percent>, or --limit <N> to filter functions, or f-<N> handles to inspect individual functions.'
+    'Use --search <term>, --min-self <percent>, or --limit <N> (0 = no limit) to filter functions, or f-<N> handles to inspect individual functions.'
   );
 
   return lines.join('\n');
@@ -1864,7 +1881,10 @@ export function formatProfileLogsResult(
   }
 
   if (isFiltered && shown < total) {
-    lines.push(`Showing ${shown} of ${total} log entries (filtered/limited)`);
+    lines.push(
+      `Showing the first ${shown} of ${total} log entries — ${total - shown} omitted by --limit ${shown}.`,
+      'Use --limit 0 to print all of them, or --limit <N> for a larger window.'
+    );
   } else if (isFiltered) {
     lines.push(`${total} log entries (filtered)`);
   } else {
