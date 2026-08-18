@@ -38,6 +38,7 @@ import type {
   FilterEntry,
   SampleFilterSpec,
   ProfileLogsResult,
+  ProfileMarkersResult,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -1875,6 +1876,95 @@ export function formatProfileLogsResult(
   for (const entry of result.entries) {
     lines.push(entry);
   }
+
+  return lines.join('\n');
+}
+
+/** How many threads the "Matches by thread" breakdown lists before truncating. */
+const PROFILE_MARKERS_THREADS_SHOWN = 10;
+
+/**
+ * Format a ProfileMarkersResult as plain text: `thread markers --list` rows
+ * prefixed with their thread, followed by a per-thread breakdown.
+ */
+export function formatProfileMarkersResult(
+  result: WithContext<ProfileMarkersResult>
+): string {
+  const lines: string[] = [formatContextHeader(result.context), ''];
+
+  const isFiltered = result.filters !== undefined;
+  // `--limit` on its own truncates the rows but selects nothing, so the set
+  // below is every marker in the profile rather than a set of matches.
+  const { limit, ...selectingFilters } = result.filters ?? {};
+  const isSelected = Object.values(selectingFilters).some(
+    (v) => v !== undefined
+  );
+  const shown = result.markers.length;
+  const total = result.totalCount;
+
+  if (total === 0) {
+    lines.push(
+      isFiltered
+        ? `No markers match the specified filters (searched ${result.searchedThreadCount} threads).`
+        : 'No markers found in this profile.'
+    );
+    return lines.join('\n');
+  }
+
+  const threadSuffix = `across ${result.matchingThreadCount} of ${result.searchedThreadCount} threads`;
+  if (shown < total) {
+    lines.push(`Showing ${shown} of ${total} markers ${threadSuffix}`);
+  } else {
+    lines.push(`${total} markers ${threadSuffix}`);
+  }
+  lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
+
+  for (const m of result.markers) {
+    const stackIndicator = m.hasStack ? '✓' : '✗';
+    const startStr = `t=${formatDuration(m.start)}`;
+    const durationStr =
+      m.duration !== undefined ? formatDuration(m.duration) : 'instant';
+    const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
+    lines.push(
+      `  ${m.threadHandle.padEnd(6)}  ${m.handle.padEnd(8)}  ${m.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
+    );
+  }
+
+  // With a single matching thread the breakdown only repeats the thread
+  // handle already on every row, so it is left out.
+  if (result.byThread.length > 1) {
+    // Nothing was "matched" unless something selected these markers, so an
+    // unfiltered browse gets a plain heading. Say "exact counts" whenever rows
+    // were capped: the counts are computed over every marker in the set, not
+    // over the rows above.
+    const heading = isSelected ? 'Matches by thread' : 'Markers by thread';
+    lines.push(
+      '',
+      shown < total ? `${heading} (exact counts):` : `${heading}:`
+    );
+    for (const t of result.byThread.slice(0, PROFILE_MARKERS_THREADS_SHOWN)) {
+      const who = `${t.threadName} (${t.processName}, pid ${t.pid})`;
+      lines.push(
+        `  ${t.threadHandle.padEnd(6)}  ${who.padEnd(50)}  ${t.count}`
+      );
+    }
+    const omitted = result.byThread.length - PROFILE_MARKERS_THREADS_SHOWN;
+    if (omitted > 0) {
+      lines.push(
+        `  ... and ${omitted} more ${omitted === 1 ? 'thread' : 'threads'}; --json lists them all`
+      );
+    }
+  }
+
+  lines.push('');
+  if (result.maxRowsClamped !== undefined) {
+    lines.push(
+      `Rows were capped at ${result.maxRowsClamped}, the most this command can return; the counts above are exact. Narrow with --search/--thread.`
+    );
+  }
+  lines.push(
+    'Use --thread <handle> to restrict the sweep, or "marker info m-<N>" to inspect one marker.'
+  );
 
   return lines.join('\n');
 }

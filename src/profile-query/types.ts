@@ -631,6 +631,47 @@ export type MarkerGroupData = {
   subGroups?: MarkerGroupData[];
 };
 
+/** One row of `profile markers`: a `thread markers --list` row plus its thread. */
+export type ProfileMarkerItem = FlatMarkerItem & {
+  threadHandle: string;
+  threadName: string; // Friendly thread name, e.g. "GPU Process"
+  processName: string;
+  pid: string;
+};
+
+/** Per-thread match count for a cross-thread marker search. */
+export type ProfileMarkersThreadBreakdown = {
+  threadHandle: string;
+  threadName: string;
+  processName: string;
+  pid: string;
+  count: number;
+};
+
+/**
+ * Cross-thread marker search: one chronological list gathered from every
+ * thread, plus a per-thread breakdown.
+ */
+export type ProfileMarkersResult = {
+  type: 'profile-markers';
+  markers: ProfileMarkerItem[]; // Chronological, after limit
+  totalCount: number; // Matches across all searched threads, before limit
+  searchedThreadCount: number;
+  matchingThreadCount: number;
+  byThread: ProfileMarkersThreadBreakdown[]; // Sorted by count, descending
+  // Set when rows were dropped at the hard row ceiling.
+  maxRowsClamped?: number;
+  filters?: {
+    thread?: string;
+    searchString?: string;
+    category?: string;
+    minDuration?: number;
+    maxDuration?: number;
+    hasStack?: boolean;
+    limit?: number;
+  };
+};
+
 export type ProfileLogsResult = {
   type: 'profile-logs';
   entries: string[];

@@ -87,6 +87,7 @@ Examples:
   profiler-cli thread samples
   profiler-cli thread functions --search GC --min-self 1
   profiler-cli thread markers --search DOMEvent --category Graphics
+  profiler-cli profile markers --search CompositorScreenshot
   profiler-cli counter list
   profiler-cli counter info c-0
   profiler-cli zoom push 2.7,3.1

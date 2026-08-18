@@ -7,7 +7,13 @@
  */
 
 import type { Command } from 'commander';
-import { addGlobalOptions, parseIntArg, runCommand } from './shared';
+import type { MarkerFilterOptions } from '../protocol';
+import {
+  addGlobalOptions,
+  parseFloatArg,
+  parseIntArg,
+  runCommand,
+} from './shared';
 
 export function registerProfileCommand(
   program: Command,
@@ -51,6 +57,97 @@ export function registerProfileCommand(
       {
         command: 'profile',
         subcommand: 'meta',
+      },
+      opts
+    );
+  });
+
+  addGlobalOptions(
+    profile
+      .command('markers')
+      .description(
+        'Search markers across all threads (same rows as `thread markers --list`, plus a thread column)'
+      )
+      .option(
+        '--search <term>',
+        'Filter by substring (also supports field:value and - negation)'
+      )
+      .option(
+        '--thread <handle>',
+        'Restrict the search to a specific thread (e.g. t-0); default is every thread'
+      )
+      .option(
+        '--category <name>',
+        'Filter by category name (case-insensitive substring match)'
+      )
+      .option(
+        '--min-duration <ms>',
+        'Filter by minimum duration in milliseconds'
+      )
+      .option(
+        '--max-duration <ms>',
+        'Filter by maximum duration in milliseconds'
+      )
+      .option('--has-stack', 'Show only markers with stack traces')
+      .option(
+        '--limit <N>',
+        'Limit the number of marker rows shown (max 100000; the per-thread counts stay exact)'
+      )
+  ).action(async (opts) => {
+    const markerFilters: MarkerFilterOptions & { thread?: string } = {};
+
+    if (opts.search !== undefined) {
+      markerFilters.searchString = opts.search;
+    }
+    if (opts.thread !== undefined) {
+      markerFilters.thread = opts.thread;
+    }
+    if (opts.category !== undefined) {
+      markerFilters.category = opts.category;
+    }
+    if (opts.hasStack) {
+      markerFilters.hasStack = true;
+    }
+    if (opts.minDuration !== undefined) {
+      markerFilters.minDuration = parseFloatArg(
+        '--min-duration',
+        opts.minDuration,
+        0,
+        Infinity,
+        'Error: --min-duration must be a positive number (in milliseconds)'
+      );
+    }
+    if (opts.maxDuration !== undefined) {
+      markerFilters.maxDuration = parseFloatArg(
+        '--max-duration',
+        opts.maxDuration,
+        0,
+        Infinity,
+        'Error: --max-duration must be a positive number (in milliseconds)'
+      );
+    }
+    // Without a filter this sweeps every marker in the profile and the first
+    // rows are whichever markers thread 0 happened to record first, which
+    // answers nothing. `--limit` is an explicit opt-in to that browsing mode.
+    if (Object.keys(markerFilters).length === 0 && opts.limit === undefined) {
+      console.error(
+        'Error: profile markers needs a filter: --search, --category, --min-duration, --max-duration, --has-stack, or --thread.\n' +
+          'For a thread inventory use "profile info"; to browse one thread use "thread markers".'
+      );
+      process.exit(1);
+    }
+
+    if (opts.limit !== undefined) {
+      markerFilters.limit = parseIntArg('--limit', opts.limit, 1);
+    }
+
+    await runCommand(
+      sessionDir,
+      {
+        command: 'profile',
+        subcommand: 'markers',
+        markerFilters:
+          Object.keys(markerFilters).length > 0 ? markerFilters : undefined,
       },
       opts
     );
