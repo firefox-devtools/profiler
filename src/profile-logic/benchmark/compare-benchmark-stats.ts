@@ -525,38 +525,10 @@ function buildKeyMap(
  * case-insensitively.
  *
  * Buckets that appear in only one profile are treated as
- * "appeared"/"disappeared" unless excludeAppearedDisappeared is set.
- *
- * `baseBucketKeys` / `newBucketKeys` may be missing (older stats files
- * predate the cross-engine matching key); in that case we fall back to
- * matching by name, which preserves prior behaviour.
+ * "appeared"/"disappeared" unless `excludeAppearedDisappeared` is set.
  */
-export function compareBuckets(
-  baseBuckets: SparseBucketEntry[],
-  newBuckets: SparseBucketEntry[],
-  baseBucketNames: string[],
-  newBucketNames: string[],
-  baseBucketFuncs: IndexIntoFuncTable[],
-  newBucketFuncs: IndexIntoFuncTable[],
-  iterationCount: number,
-  excludeAppearedDisappeared: boolean = false,
-  baseBucketKeys: string[] = baseBucketNames,
-  newBucketKeys: string[] = newBucketNames
-): BucketComparison[] {
-  return runToCompletion(
-    compareBucketsInSlices(
-      baseBuckets,
-      newBuckets,
-      baseBucketNames,
-      newBucketNames,
-      baseBucketFuncs,
-      newBucketFuncs,
-      iterationCount,
-      excludeAppearedDisappeared,
-      baseBucketKeys,
-      newBucketKeys
-    )
-  );
+export function compareBuckets(input: BucketTableInput): BucketComparison[] {
+  return runToCompletion(compareBucketsInSlices(input));
 }
 
 /**
@@ -571,40 +543,16 @@ export function compareBuckets(
  * the same code rather than two implementations that have to be kept agreeing.
  */
 export function* compareBucketsInSlices(
-  baseBuckets: SparseBucketEntry[],
-  newBuckets: SparseBucketEntry[],
-  baseBucketNames: string[],
-  newBucketNames: string[],
-  baseBucketFuncs: IndexIntoFuncTable[],
-  newBucketFuncs: IndexIntoFuncTable[],
-  iterationCount: number,
-  excludeAppearedDisappeared: boolean = false,
-  baseBucketKeys: string[] = baseBucketNames,
-  newBucketKeys: string[] = newBucketNames
+  input: BucketTableInput
 ): SlicedWork<BucketComparison[]> {
-  const shard = yield* computeBucketTableShardInSlices(
-    {
-      base: {
-        bucketNames: baseBucketNames,
-        bucketKeys: baseBucketKeys,
-        bucketFuncs: baseBucketFuncs,
-      },
-      new: {
-        bucketNames: newBucketNames,
-        bucketKeys: newBucketKeys,
-        bucketFuncs: newBucketFuncs,
-      },
-      baseBuckets,
-      newBuckets,
-      iterationCount,
-      excludeAppearedDisappeared,
-    },
-    { index: 0, count: 1 }
-  );
+  const shard = yield* computeBucketTableShardInSlices(input, {
+    index: 0,
+    count: 1,
+  });
   return combineBucketTableShards([shard]);
 }
 
-/** One profile's bucket metadata: what a table job needs to know about a side
+/** One profile's bucket metadata: what a table needs to know about a side
  * besides the per-iteration weights themselves. The three arrays are indexed by
  * `SparseBucketEntry.bucketIndex` and cover every bucket in the profile, not just
  * the ones in a given table, so a worker is sent them once rather than per job. */
@@ -614,8 +562,35 @@ export type BucketTableSide = {
   bucketFuncs: IndexIntoFuncTable[];
 };
 
-/** Everything one bucket table is computed from. The argument list of
- * `compareBuckets`, as an object, because it also has to go over a postMessage. */
+/**
+ * The metadata half of a table's input, from a stats file that may predate parts
+ * of it.
+ *
+ * `bucketKeys` and `bucketFuncs` were both added after the format was first
+ * written, and every caller had grown its own copy of the same two fallbacks.
+ * Keys fall back to the names, which is matching by name — what the comparison
+ * did before there were keys. Funcs fall back to -1, which reads as "no func to
+ * reach back into the profile with", and only the flame graphs want one.
+ */
+export function bucketTableSideOf(
+  stats: ProfileBenchmarkStats
+): BucketTableSide {
+  const { bucketNames } = stats;
+  return {
+    bucketNames,
+    bucketKeys: stats.bucketKeys ?? bucketNames,
+    bucketFuncs: stats.bucketFuncs ?? new Array(bucketNames.length).fill(-1),
+  };
+}
+
+/**
+ * Everything one bucket table is computed from.
+ *
+ * An object rather than an argument list, and not only because it has to go over
+ * a `postMessage`: this used to be ten positional parameters of which six were
+ * same-typed arrays — names, keys and funcs for each side — so transposing two of
+ * them type-checked, ran, and quietly compared the wrong things.
+ */
 export type BucketTableInput = {
   base: BucketTableSide;
   new: BucketTableSide;

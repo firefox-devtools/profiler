@@ -5,6 +5,7 @@
 import {
   applyBenjaminiHochberg,
   classifyChange,
+  bucketTableSideOf,
   combineBucketTableShards,
   compareBuckets,
   compareIterationTotals,
@@ -75,18 +76,13 @@ function compare(
   newBuckets: ProfileBenchmarkStats['suites'][0]['buckets'],
   iterationCount: number
 ) {
-  return compareBuckets(
+  return compareBuckets({
+    base: bucketTableSideOf(baseStats),
+    new: bucketTableSideOf(newStats),
     baseBuckets,
     newBuckets,
-    baseStats.bucketNames,
-    newStats.bucketNames,
-    baseStats.bucketFuncs,
-    newStats.bucketFuncs,
     iterationCount,
-    false,
-    baseStats.bucketKeys,
-    newStats.bucketKeys
-  );
+  });
 }
 
 describe('computeSharedSuiteFactors', function () {
@@ -613,16 +609,8 @@ describe('multiple-comparisons correction', function () {
     function compareFamilyInShards(count: number, shardCount: number) {
       const { baseStats, newStats, iterationCount } = makeFamilyPair(count);
       const input = {
-        base: {
-          bucketNames: baseStats.bucketNames,
-          bucketKeys: baseStats.bucketKeys,
-          bucketFuncs: baseStats.bucketFuncs,
-        },
-        new: {
-          bucketNames: newStats.bucketNames,
-          bucketKeys: newStats.bucketKeys,
-          bucketFuncs: newStats.bucketFuncs,
-        },
+        base: bucketTableSideOf(baseStats),
+        new: bucketTableSideOf(newStats),
         baseBuckets: baseStats.suites[0].buckets,
         newBuckets: newStats.suites[0].buckets,
         iterationCount,
