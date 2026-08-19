@@ -158,20 +158,8 @@ function messagePort(): MessagePort | null {
  * levels: the 21 bucket tables are independent of each other, and within one table
  * the permutation draws are independent too.
  *
- * The thing that makes moving it out cheap is that nothing a worker would need is
- * a `Profile`. A table job is two sparse bucket lists — `bucketIndex` plus a
- * `Float64Array` per bucket — with the name/key/func arrays, which is a few MB to
- * clone rather than the several hundred a profile weighs. The relabellings need not
- * be sent at all: `makePermutationBaseIndices` is seeded, so a worker regenerates
- * exactly the same ones. And the staging in run-benchmark-comparison.ts would not
- * change shape at all — it already awaits one table at a time and yields a
- * snapshot; only what it awaits changes.
- *
- * A table-per-worker pool gets to roughly the length of the longest single table
- * (the global one, ~1s). Going below that means splitting one table by draw range,
- * which the accumulators already permit: `nullsClearing`, `ownHits` and `maxima`
- * are per-draw counts that combine by addition and concatenation, and `absT` is
- * computed identically in every worker. Exactly reproducible either way, which
- * matters here — the q-values are load-bearing and must not depend on how many
- * cores the reader has.
+ * Moving it out would be cheap, mostly because nothing a worker needs is a
+ * `Profile`. The plan, the measurements it is based on, and the traps — chiefly
+ * that the result must not depend on how many cores the reader has — are written
+ * up in docs-developer/benchmark-compare-multithreading.md.
  */
