@@ -1561,9 +1561,12 @@ function formatProfileNetworkActivity(
   }
 
   if (summary.byThread.length > 0) {
+    // requestCount covers started requests (completed and still in flight) but
+    // excludes redirect and cancel legs, so this reads lower than
+    // `thread network`'s total for the same thread.
     const parts = summary.byThread.map(
       (thread) =>
-        `${thread.threadHandle} ${thread.threadName} (${thread.requestCount} reqs, ${formatDuration(thread.inFlightMs)} in flight)`
+        `${thread.threadHandle} ${thread.threadName} (${thread.requestCount} started reqs, ${formatDuration(thread.inFlightMs)} in flight)`
     );
     lines.push(`  By thread: ${parts.join(', ')}`);
   }
@@ -1599,9 +1602,8 @@ export function formatThreadNetworkResult(
 ): string {
   const lines: string[] = [formatContextHeader(result.context), ''];
 
-  // totalRequestCount counts only completed requests; the candidate set the
-  // filters run against also includes the incomplete (in-flight) ones.
-  const totalCandidates = result.totalRequestCount + result.incompleteCount;
+  // Not totalRequestCount + incompleteCount: redirect/cancel legs are in neither.
+  const totalCandidates = result.totalCandidateCount;
   const filterSuffix =
     result.filters !== undefined &&
     result.filteredRequestCount !== totalCandidates

@@ -5,11 +5,14 @@
 import {
   formatThreadNetworkResult,
   formatThreadInfoResult,
+  formatProfileInfoResult,
 } from '../../formatters';
 import type {
   ThreadNetworkResult,
   ThreadInfoResult,
   ThreadNetworkSummary,
+  ProfileInfoResult,
+  ProfileNetworkSummary,
   NetworkSummaryRequest,
   NetworkRequestEntry,
   NetworkPhaseTimings,
@@ -68,6 +71,7 @@ function makeResult(
     friendlyThreadName: 'GeckoMain',
     totalRequestCount: 1,
     incompleteCount: 0,
+    totalCandidateCount: 1,
     filteredRequestCount: 1,
     sort: 'duration',
     summary: makeSummary(),
@@ -97,6 +101,7 @@ describe('formatThreadNetworkResult', function () {
   it('shows "(filtered from N)" suffix when filter reduces count', function () {
     const result = makeResult({
       totalRequestCount: 10,
+      totalCandidateCount: 10,
       filteredRequestCount: 3,
       filters: { searchString: 'api' },
     });
@@ -111,6 +116,7 @@ describe('formatThreadNetworkResult', function () {
     const result = makeResult({
       filteredRequestCount: 50,
       totalRequestCount: 50,
+      totalCandidateCount: 50,
     });
     result.requests = [makeRequest(), makeRequest()]; // only 2 shown of 50
 
@@ -123,6 +129,7 @@ describe('formatThreadNetworkResult', function () {
     const result = makeResult({
       filteredRequestCount: 50,
       totalRequestCount: 50,
+      totalCandidateCount: 50,
     });
     result.requests = [makeRequest()];
 
@@ -147,6 +154,7 @@ describe('formatThreadNetworkResult', function () {
   it('does not show filtered suffix when counts are equal', function () {
     const result = makeResult({
       totalRequestCount: 2,
+      totalCandidateCount: 2,
       filteredRequestCount: 2,
       filters: { minDuration: 50 },
     });
@@ -155,6 +163,66 @@ describe('formatThreadNetworkResult', function () {
     const output = formatThreadNetworkResult(result);
 
     expect(output).not.toContain('filtered from');
+  });
+
+  it('counts redirect and cancel legs in the "filtered from" total', function () {
+    // Regression test: redirect and cancel legs are counted by neither
+    // totalRequestCount (STATUS_STOP only) nor incompleteCount, so deriving
+    // the pre-filter total as totalRequestCount + incompleteCount reported a
+    // number *below* the number of requests shown ("114 requests (filtered
+    // from 104)"). totalCandidateCount is the real candidate set.
+    const result = makeResult({
+      totalRequestCount: 104, // completed
+      incompleteCount: 0,
+      totalCandidateCount: 114, // + 7 redirect + 3 cancel legs
+      filteredRequestCount: 114, // nothing was actually filtered out
+      filters: { limit: 0 },
+    });
+    result.requests = [makeRequest()];
+
+    const output = formatThreadNetworkResult(result);
+
+    // Nothing was filtered out, so no suffix at all — and in particular never
+    // a total smaller than the count it qualifies.
+    expect(output).not.toContain('filtered from');
+    expect(output).not.toContain('filtered from 104');
+  });
+
+  it('reports the candidate total, not the completed count, when filtering', function () {
+    const result = makeResult({
+      totalRequestCount: 104,
+      incompleteCount: 0,
+      totalCandidateCount: 114,
+      filteredRequestCount: 12,
+      filters: { searchString: 'api' },
+    });
+    result.requests = [makeRequest()];
+
+    const output = formatThreadNetworkResult(result);
+
+    expect(output).toContain('(filtered from 114)');
+    expect(output).not.toContain('(filtered from 104)');
+  });
+
+  it('never reports a filtered-from total below the shown count', function () {
+    const result = makeResult({
+      totalRequestCount: 104,
+      incompleteCount: 0,
+      totalCandidateCount: 114,
+      filteredRequestCount: 4,
+      filters: { limit: 0 },
+    });
+    result.requests = [makeRequest(), makeRequest()];
+
+    const output = formatThreadNetworkResult(result);
+    const headerLine = output
+      .split('\n')
+      .find((l) => l.includes('Network requests in thread'))!;
+    const match = /filtered from (\d+)/.exec(headerLine);
+    // The candidate set the filters ran against, not the smaller
+    // totalRequestCount, which would report a total below the shown count.
+    expect(match).not.toBeNull();
+    expect(Number(match![1])).toBe(114);
   });
 
   it('shows cache summary counts', function () {
@@ -469,5 +537,72 @@ describe('formatThreadInfoResult network activity', function () {
 
     expect(output).not.toContain('(redirect)');
     expect(output).not.toContain('(canceled)');
+  });
+});
+
+describe('formatProfileInfoResult network by-thread breakdown', function () {
+  function makeProfileInfoResult(
+    networkActivity: ProfileNetworkSummary
+  ): WithContext<ProfileInfoResult> {
+    return {
+      context: createContext(),
+      type: 'profile-info',
+      name: 'test',
+      platform: 'macOS',
+      threadCount: 1,
+      processCount: 1,
+      processes: [
+        {
+          processIndex: 0,
+          pid: '1',
+          name: 'Parent Process',
+          cpuMs: 10,
+          threads: [
+            {
+              threadIndex: 0,
+              threadHandle: 't-0',
+              name: 'GeckoMain',
+              tid: 1,
+              cpuMs: 10,
+            },
+          ],
+        },
+      ],
+      cpuActivity: null,
+      networkActivity,
+    };
+  }
+
+  // The per-thread requestCount counts started requests -- completed and
+  // in-flight legs -- but not redirect/cancel legs, so on a thread with those it
+  // is lower than the candidate total `thread network` reports for the same
+  // thread. The label has to say so, or the two commands silently disagree
+  // (104 vs 114).
+  it('labels the per-thread count as started requests', function () {
+    const output = formatProfileInfoResult(
+      makeProfileInfoResult({
+        requestCount: 104,
+        incompleteCount: 0,
+        inFlightMs: 100,
+        inFlightPercentage: 10,
+        peakConcurrency: 3,
+        errorCount: 0,
+        rangeDurationMs: 1000,
+        slowest: [],
+        byThread: [
+          {
+            threadHandle: 't-0',
+            threadName: 'Parent Process',
+            requestCount: 104,
+            inFlightMs: 100,
+          },
+        ],
+      })
+    );
+
+    expect(output).toContain('By thread:');
+    expect(output).toContain('104 started reqs');
+    // A bare "104 reqs" would read as the thread's total request count.
+    expect(output).not.toMatch(/\(104 reqs/);
   });
 });
