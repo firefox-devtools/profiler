@@ -16,8 +16,14 @@
  */
 
 import { createTableWorkerPool } from '../../profile-logic/benchmark/benchmark-compare-worker-pool';
-import { compareBuckets } from '../../profile-logic/benchmark/compare-benchmark-stats';
-import type { BucketTableSide } from '../../profile-logic/benchmark/compare-benchmark-stats';
+import {
+  compareBucketsOf,
+  matchBucketKeys,
+} from '../../profile-logic/benchmark/compare-benchmark-stats';
+import type {
+  BucketTableMetadata,
+  BucketTableSide,
+} from '../../profile-logic/benchmark/compare-benchmark-stats';
 import type {
   WorkerInit,
   WorkerInput,
@@ -55,12 +61,23 @@ class FakeWorker {
   terminated = false;
   inits: WorkerInit[] = [];
   pending: WorkerJob[] = [];
+  /**
+   * Every string in every message this worker has sent or been sent, collected as
+   * it went past.
+   *
+   * At the time it went past, because a real `postMessage` copies and this fake one
+   * does not: the main thread writes the family correction onto the rows it gets
+   * back, so by the end of a test the shard object a worker "sent" holds values it
+   * could not have sent.
+   */
+  wireStrings: string[] = [];
 
   constructor() {
     FakeWorker.all.push(this);
   }
 
   postMessage(message: WorkerInput) {
+    this.wireStrings.push(...stringsIn(message));
     if (message.type === 'init') {
       this.inits.push(message);
       // Straight through: the metadata is all the worker keeps between messages,
@@ -92,12 +109,27 @@ class FakeWorker {
   }
 
   deliver(output: WorkerOutput) {
+    this.wireStrings.push(...stringsIn(output));
     this.onmessage?.(new MessageEvent('message', { data: output }));
   }
 
   fail(message: string) {
     this.onerror?.(new ErrorEvent('error', { message }));
   }
+}
+
+/** Every string value anywhere in a message, however deeply nested. */
+function stringsIn(value: unknown): string[] {
+  if (typeof value === 'string') {
+    return [value];
+  }
+  if (Array.isArray(value)) {
+    return value.flatMap(stringsIn);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.values(value).flatMap(stringsIn);
+  }
+  return [];
 }
 
 /** Answer every worker that has something outstanding, once each. */
@@ -141,7 +173,14 @@ function makeFixture(bucketCount: number) {
     bucketKeys: bucketNames,
     bucketFuncs: bucketNames.map((_, i) => i),
   };
-  return { side, baseBuckets, newBuckets, iterationCount };
+  const meta: BucketTableMetadata = { base: side, new: side };
+  return {
+    meta,
+    keys: matchBucketKeys(meta),
+    baseBuckets,
+    newBuckets,
+    iterationCount,
+  };
 }
 
 const FIXTURE = makeFixture(60);
@@ -166,8 +205,8 @@ function makeJob(
 function makePool(workerCount: number, jobCount: number = 1) {
   const controller = new AbortController();
   const setup: TableRunnerSetup = {
-    base: FIXTURE.side,
-    new: FIXTURE.side,
+    keys: FIXTURE.keys,
+    meta: FIXTURE.meta,
     jobCount,
     signal: controller.signal,
   };
@@ -180,9 +219,7 @@ function makePool(workerCount: number, jobCount: number = 1) {
 
 /** The answer one thread would have given, which is what the pool has to match. */
 function singleThreaded() {
-  return compareBuckets({
-    base: FIXTURE.side,
-    new: FIXTURE.side,
+  return compareBucketsOf(FIXTURE.meta, {
     baseBuckets: FIXTURE.baseBuckets,
     newBuckets: FIXTURE.newBuckets,
     iterationCount: FIXTURE.iterationCount,
@@ -231,16 +268,46 @@ describe('createTableWorkerPool', function () {
     FakeWorker.all = [];
   });
 
-  it('sends the bucket metadata once per worker, before any job', function () {
+  it('sends the bucket matching once per worker, before any job', function () {
     const { workers } = makePool(4);
     expect(workers).toHaveLength(4);
     for (const worker of workers) {
-      // A few thousand strings that every job needs all of: once each, not once
-      // per table.
+      // The same answer for every table, and every table needs all of it: once
+      // each, not once per table.
       expect(worker.inits).toHaveLength(1);
-      expect(worker.inits[0].base.bucketNames).toBe(FIXTURE.side.bucketNames);
+      expect(worker.inits[0].keys).toBe(FIXTURE.keys);
       expect(worker.pending).toHaveLength(0);
     }
+  });
+
+  it('puts nothing but tags on the wire, in either direction', async function () {
+    // What this is worth is in matchBucketKeys: reading the four arrays of bucket
+    // names and keys the init message used to carry cost each of eight workers
+    // ~90ms before it could start on a shard, plus ~35ms of shutdown GC to free
+    // them again -- mostly contention on the allocator, since all eight were doing
+    // it at the same moment. Nothing over there needs the text, so a change that
+    // sends a name or a key again should fail here rather than just be slower.
+    const { pool, workers } = makePool(2);
+    const table = pool.run(makeJob('Overall', true));
+    answerAll();
+    for (const worker of workers) {
+      // Message kinds and one enum, all of them fixed-vocabulary tags. Nothing
+      // that came out of a profile, and nothing that scales with the table:
+      // 'welch' is per row, but only shard 0 sends rows, and the main thread
+      // replaces it with the exact p-value method as it corrects the family.
+      expect([...new Set(worker.wireStrings)].sort()).toEqual(
+        worker === workers[0]
+          ? ['init', 'job', 'shard', 'welch']
+          : ['init', 'job', 'shard']
+      );
+    }
+    // The names are back on the rows by the time a caller sees them; they were
+    // looked up on this side.
+    const rows = await table;
+    expect(rows.map((row) => row.bucketName)).toEqual(
+      FIXTURE.meta.base.bucketNames
+    );
+    pool.dispose();
   });
 
   it('splits a table across every thread and gets exactly the single-threaded answer', async function () {

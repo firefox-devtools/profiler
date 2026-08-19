@@ -5,11 +5,13 @@
 /**
  * Web Worker entry point for the benchmark comparison's bucket tables.
  *
- * Takes one `init` message with the two profiles' bucket metadata, then a `job`
- * per shard of a table, and answers each with the shard's rows and its share of
- * the family correction. The reason this is cheap to have at all: **nothing here
- * needs a `Profile`.** A job is two lists of per-iteration weights and some
- * strings, single megabytes, against the several hundred a parsed profile weighs.
+ * Takes one `init` message saying which of the two profiles' buckets match, then a
+ * `job` per shard of a table, and answers each with the shard's rows and its share
+ * of the family correction. The reason this is cheap to have at all: **nothing here
+ * needs a `Profile`**, or for that matter a string. A job is two lists of
+ * per-iteration weights, single megabytes, against the several hundred a parsed
+ * profile weighs; what a row is called is looked up by the main thread once the row
+ * gets there. See `matchBucketKeys` and `resolveBucketTableRows`.
  *
  * `runToCompletion`, not `runInSlices`: slicing exists to keep a page painting,
  * and a worker has no page. Cancellation is `worker.terminate()` for the same
@@ -23,10 +25,10 @@ import { runToCompletion } from './chunked-work';
 import { computeBucketTableShardInSlices } from './compare-benchmark-stats';
 import { unpackBuckets } from './benchmark-compare-worker-types';
 import type {
-  WorkerInit,
   WorkerInput,
   WorkerOutput,
 } from './benchmark-compare-worker-types';
+import type { MatchedBucketKeys } from './compare-benchmark-stats';
 
 // Override the `self` type: in the browser this file runs as a DedicatedWorker,
 // but TypeScript's DOM lib types `self` as `Window & typeof globalThis`. Same
@@ -37,25 +39,24 @@ interface WorkerScope {
 }
 const scope = self as unknown as WorkerScope;
 
-/** The bucket metadata from the `init` message, kept for every job after it. */
-let sides: WorkerInit | null = null;
+/** The bucket matching from the `init` message, kept for every job after it. */
+let keys: MatchedBucketKeys | null = null;
 
 scope.onmessage = (e: MessageEvent<WorkerInput>) => {
   const message = e.data;
   if (message.type === 'init') {
-    sides = message;
+    keys = message.keys;
     return;
   }
   try {
-    if (sides === null) {
+    if (keys === null) {
       throw new Error('A benchmark compare job arrived before the metadata.');
     }
     const { requestId, iterationCount, shardIndex, shardCount } = message;
     const shard = runToCompletion(
       computeBucketTableShardInSlices(
         {
-          base: sides.base,
-          new: sides.new,
+          keys,
           baseBuckets: unpackBuckets(message.base, iterationCount),
           newBuckets: unpackBuckets(message.new, iterationCount),
           iterationCount,

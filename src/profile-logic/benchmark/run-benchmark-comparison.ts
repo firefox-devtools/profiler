@@ -40,11 +40,13 @@ import {
   compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
+  matchBucketKeys,
   suiteIterationTotals,
 } from './compare-benchmark-stats';
 import type {
   BucketComparison,
-  BucketTableSide,
+  BucketTableMetadata,
+  MatchedBucketKeys,
   ScoreComparison,
 } from './compare-benchmark-stats';
 import { runInSlices, yieldToBrowser } from './chunked-work';
@@ -126,8 +128,17 @@ export type BucketTableJob = {
 
 /** What a runner is told once, when a comparison starts. */
 export type TableRunnerSetup = {
-  base: BucketTableSide;
-  new: BucketTableSide;
+  /**
+   * Which of the two profiles' buckets are the same bucket. Matched once for the
+   * whole comparison — it is the same answer for every table — and this is the only
+   * part of the metadata a worker is sent.
+   */
+  keys: MatchedBucketKeys;
+  /**
+   * The two profiles' bucket metadata, for naming the rows on the way back. Stays
+   * on this thread: see `BucketTableMetadata`.
+   */
+  meta: BucketTableMetadata;
   /** How many tables this comparison will ask for, so a pool can size itself. */
   jobCount: number;
   /** Aborted when the comparison is abandoned. A runner is expected to stop and
@@ -173,13 +184,15 @@ export function createInProcessTableRunner(
     run: (job) => {
       const result = queue.then(() =>
         runInSlices(
-          compareBucketsInSlices({
-            base: setup.base,
-            new: setup.new,
-            baseBuckets: job.baseBuckets,
-            newBuckets: job.newBuckets,
-            iterationCount: job.iterationCount,
-          }),
+          compareBucketsInSlices(
+            {
+              keys: setup.keys,
+              baseBuckets: job.baseBuckets,
+              newBuckets: job.newBuckets,
+              iterationCount: job.iterationCount,
+            },
+            setup.meta
+          ),
           setup.signal
         )
       );
@@ -409,9 +422,16 @@ export async function* compareStatsProgressively(
   yield snapshot();
   await pause(signal);
 
-  const runner = makeTableRunner({
+  // Matching the two profiles' buckets is the same answer for every table, so it
+  // happens here rather than in each of them — which is also what keeps the key
+  // strings off the wire. See `matchBucketKeys`.
+  const meta: BucketTableMetadata = {
     base: bucketTableSideOf(baseStats),
     new: bucketTableSideOf(newStats),
+  };
+  const runner = makeTableRunner({
+    keys: matchBucketKeys(meta),
+    meta,
     jobCount: jobs.length,
     signal,
   });
