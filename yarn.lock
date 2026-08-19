@@ -2246,10 +2246,10 @@
   dependencies:
     "@sinonjs/commons" "^3.0.1"
 
-"@streamparser/json@^0.0.22":
-  version "0.0.22"
-  resolved "https://registry.yarnpkg.com/@streamparser/json/-/json-0.0.22.tgz#8ddcbcc8c3ca77aeadf80af47f54a64c8739a037"
-  integrity sha512-b6gTSBjJ8G8SuO3Gbbj+zXbVx8NSs1EbpbMKpzGLWMdkR+98McH9bEjSz3+0mPJf68c5nxa3CrJHp5EQNXM6zQ==
+"@streamparser/json@^0.0.25":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@streamparser/json/-/json-0.0.25.tgz#3de44ab1ee69bd8e01754a8fef26851b800d2c11"
+  integrity sha512-5JqkUVGO/Ocg02gPaR2IgV3DXy7wEi4MbHDd6yhjkY3tK0bHYXXA3lZx5uXaVRLrfFeKOY9uXSxk5OdJu3mhjA==
 
 "@szmarczak/http-timer@^5.0.1":
   version "5.0.1"
