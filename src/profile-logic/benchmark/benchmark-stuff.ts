@@ -11,7 +11,6 @@ import type {
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import { ensureExists } from 'firefox-profiler/utils/types';
-// import { computeBucketStats } from 'firefox-profiler/utils/stats';
 
 export type BenchmarkHarness = 'speedometer' | 'jetstream';
 
