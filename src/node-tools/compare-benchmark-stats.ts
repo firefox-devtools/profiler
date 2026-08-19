@@ -11,6 +11,7 @@ import type { ProfileBenchmarkStats } from 'firefox-profiler/profile-logic/bench
 import type { BenchmarkHarness } from 'firefox-profiler/profile-logic/benchmark/benchmark-stuff';
 import {
   applyBenjaminiHochberg,
+  bucketTableSideOf,
   classifyChange,
   compareBuckets,
   compareIterationTotals,
@@ -260,22 +261,10 @@ async function main() {
   const base = await loadStats(argv.base, harness);
   const newStats = await loadStats(argv.new, harness);
 
-  // bucketFuncs was added later; older stats files don't include it. The CLI
-  // doesn't need real func indices (no flame graph here), so fill with -1.
-  if (!base.bucketFuncs) {
-    base.bucketFuncs = new Array(base.bucketNames.length).fill(-1);
-  }
-  if (!newStats.bucketFuncs) {
-    newStats.bucketFuncs = new Array(newStats.bucketNames.length).fill(-1);
-  }
-  // bucketKeys was added later too; fall back to bucketNames so older stats
-  // files still match using the prior name-based behaviour.
-  if (!base.bucketKeys) {
-    base.bucketKeys = base.bucketNames;
-  }
-  if (!newStats.bucketKeys) {
-    newStats.bucketKeys = newStats.bucketNames;
-  }
+  // Names, keys and funcs for each side, with the fallbacks a stats file older
+  // than one of those fields needs. Once, here, rather than per table.
+  const baseSide = bucketTableSideOf(base);
+  const newSide = bucketTableSideOf(newStats);
 
   const iterationCount = base.suites[0]?.iterationCount ?? 1;
 
@@ -331,18 +320,14 @@ async function main() {
     console.log('\n--- Score and subtest totals ---\n');
     printScoreAndSubtests(overallScore, suiteScores);
 
-    const globalComparisons = compareBuckets(
-      baseGlobalBuckets,
-      newGlobalBuckets,
-      base.bucketNames,
-      newStats.bucketNames,
-      base.bucketFuncs,
-      newStats.bucketFuncs,
+    const globalComparisons = compareBuckets({
+      base: baseSide,
+      new: newSide,
+      baseBuckets: baseGlobalBuckets,
+      newBuckets: newGlobalBuckets,
       iterationCount,
       excludeAppearedDisappeared,
-      base.bucketKeys,
-      newStats.bucketKeys
-    );
+    });
     printBucketResults(
       'Global (geomean-normalised)',
       globalComparisons,
@@ -374,18 +359,14 @@ async function main() {
         );
         continue;
       }
-      const comparisons = compareBuckets(
-        baseSuite.buckets,
-        newSuite.buckets,
-        base.bucketNames,
-        newStats.bucketNames,
-        base.bucketFuncs,
-        newStats.bucketFuncs,
-        baseSuite.iterationCount,
+      const comparisons = compareBuckets({
+        base: baseSide,
+        new: newSide,
+        baseBuckets: baseSuite.buckets,
+        newBuckets: newSuite.buckets,
+        iterationCount: baseSuite.iterationCount,
         excludeAppearedDisappeared,
-        base.bucketKeys,
-        newStats.bucketKeys
-      );
+      });
       printBucketResults(baseSuite.suiteName, comparisons, topN, qThreshold);
     }
   }
