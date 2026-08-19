@@ -50,6 +50,10 @@ type ColumnDescription<TCol> = null extends (
   : Int32Array<ArrayBuffer> extends TCol
     ?
         | { type: 'INDEX_REF_INT32'; referencedTable: TableCompactionState }
+        | {
+            type: 'INDEX_REF_OR_NEG_ONE_INT32';
+            referencedTable: TableCompactionState;
+          }
         | { type: 'SELF_RELATIVE_PARENT' }
         | { type: 'NO_REF' }
     :
@@ -86,6 +90,10 @@ const ColDesc = {
   }),
   indexRefOrNegOne: (referencedTable: TableCompactionState) => ({
     type: 'INDEX_REF_OR_NEG_ONE' as const,
+    referencedTable,
+  }),
+  indexRefOrNegOneInt32: (referencedTable: TableCompactionState) => ({
+    type: 'INDEX_REF_OR_NEG_ONE_INT32' as const,
     referencedTable,
   }),
   selfPrefixOffset: () => ({ type: 'SELF_RELATIVE_PARENT' as const }),
@@ -170,6 +178,7 @@ export function computeCompactedProfile(
     category: ColDesc.noRef(),
     subcategory: ColDesc.noRef(),
     func: ColDesc.indexRefInt32(tcs.funcTable),
+    lib: ColDesc.indexRefOrNegOneInt32(tcs.libs),
     nativeSymbol: ColDesc.indexRefOrNull(tcs.nativeSymbols),
     innerWindowID: ColDesc.noRef(),
     line: ColDesc.noRef(),
@@ -194,7 +203,6 @@ export function computeCompactedProfile(
   const resourceTableDesc: TableDescription<ResourceTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
     host: ColDesc.indexRefOrNull(tcs.stringArray),
-    lib: ColDesc.indexRefOrNull(tcs.libs),
     type: ColDesc.noRef(),
   };
   const nativeSymbolsDesc: TableDescription<NativeSymbolTable> = {
@@ -355,6 +363,7 @@ function _markTableAndComputeTranslation<T>(
       case 'SELF_RELATIVE_PARENT':
         break; // already handled in the first pass
       case 'INDEX_REF_OR_NEG_ONE':
+      case 'INDEX_REF_OR_NEG_ONE_INT32':
         markColumnWithNegOneableFields(
           col,
           markBuffer,
@@ -419,10 +428,12 @@ function markSelfColumnPrefixOffset(
 }
 
 function markColumnWithNegOneableFields(
-  col: Array<number | -1>,
+  col: Array<number | -1> | Int32Array<ArrayBuffer>,
   shouldMark: BitSet,
   markBuf: BitSet
 ) {
+  // Polymorphic: indexing works the same on Int32Array as on number[], so the
+  // INDEX_REF_OR_NEG_ONE and INDEX_REF_OR_NEG_ONE_INT32 cases share this function.
   for (let i = 0; i < col.length; i++) {
     if (checkBit(shouldMark, i)) {
       const val = col[i];
@@ -554,6 +565,14 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
+      case 'INDEX_REF_OR_NEG_ONE_INT32':
+        result[key] = _compactColIndexOrNegOneInt32(
+          oldCol,
+          markBuffer,
+          desc.referencedTable.oldIndexToNewIndexPlusOne,
+          newLength
+        );
+        break;
       case 'NO_REF':
         result[key] = _compactColCopy(oldCol, markBuffer, newLength);
         break;
@@ -636,6 +655,23 @@ function _compactColIndexOrNegOne(
   newLength: number
 ): (number | -1)[] {
   const newCol: (number | -1)[] = new Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      const val = oldCol[i];
+      newCol[newIndex++] = val !== -1 ? oldIndexToNewIndexPlusOne[val] - 1 : -1;
+    }
+  }
+  return newCol;
+}
+
+function _compactColIndexOrNegOneInt32(
+  oldCol: Array<number | -1> | Int32Array<ArrayBuffer>,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
   let newIndex = 0;
   for (let i = 0; i < oldCol.length; i++) {
     if (checkBit(markBuffer, i)) {

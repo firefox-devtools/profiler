@@ -35,6 +35,7 @@ import type {
   IndexIntoSubcategoryListForCategory,
   IndexIntoNativeSymbolTable,
   IndexIntoSourceLocationTable,
+  IndexIntoLibs,
   InnerWindowID,
   Address,
   Bytes,
@@ -117,6 +118,7 @@ export type RawFrameTableBuilder = {
   category: (IndexIntoCategoryList | null)[];
   subcategory: (IndexIntoSubcategoryListForCategory | null)[];
   func: IndexIntoFuncTable[];
+  lib: Array<IndexIntoLibs | -1>;
   nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
   innerWindowID: (InnerWindowID | null)[];
   line: (number | null)[];
@@ -289,6 +291,7 @@ export function getRawFrameTableBuilder(): RawFrameTableBuilder {
     category: [],
     subcategory: [],
     func: [],
+    lib: [],
     nativeSymbol: [],
     innerWindowID: [],
     line: [],
@@ -311,6 +314,7 @@ export function getRawFrameTableBuilderWithExistingContents(
     category: frameTable.category.slice(),
     subcategory: frameTable.subcategory.slice(),
     func: Array.from(frameTable.func),
+    lib: Array.from(frameTable.lib),
     nativeSymbol: frameTable.nativeSymbol.slice(),
     innerWindowID: frameTable.innerWindowID.slice(),
     line: frameTable.line.slice(),
@@ -328,6 +332,7 @@ export function finishRawFrameTableBuilder(
     address: new Int32Array(builder.address),
     inlineDepth: new Uint8Array(builder.inlineDepth),
     func: new Int32Array(builder.func),
+    lib: new Int32Array(builder.lib),
   };
 }
 
@@ -409,7 +414,6 @@ export function getEmptyResourceTable(): ResourceTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    lib: [],
     name: [],
     host: [],
     type: [],

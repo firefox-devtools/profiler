@@ -1949,7 +1949,6 @@ export function updateBottomBoxContentsAndMaybeOpen(
   bottomBoxInfo: BottomBoxInfo
 ): Action {
   const {
-    libIndex,
     sourceIndex,
     nativeSymbols,
     initialNativeSymbol,
@@ -1970,7 +1969,6 @@ export function updateBottomBoxContentsAndMaybeOpen(
 
   return {
     type: 'UPDATE_BOTTOM_BOX',
-    libIndex,
     sourceIndex,
     nativeSymbols,
     currentNativeSymbol: initialNativeSymbol,

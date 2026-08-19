@@ -220,6 +220,28 @@ describe('marker-info utility functions', function () {
       expect(stats.avgGap).toBe(50);
       expect(stats.maxGap).toBe(100);
     });
+
+    it('handles more markers than fit in a spread call', function () {
+      // The gap statistics used to be computed with Math.min(...gaps) /
+      // Math.max(...gaps), which throws "Maximum call stack size exceeded"
+      // above roughly 100k elements. The parent process main thread of a long
+      // profile easily has that many markers with the same name.
+      const count = 300000;
+      const markers = Array.from({ length: count }, (_, i) =>
+        makeMarker(i * 2, null)
+      );
+      // Make one gap smaller and one larger than the uniform 2ms gap.
+      markers[1] = makeMarker(1, null);
+      markers[count - 1] = makeMarker((count - 2) * 2 + 10, null);
+
+      const stats = computeRateStats(markers);
+      expect(stats.minGap).toBe(1);
+      expect(stats.maxGap).toBe(10);
+      expect(stats.avgGap).toBeCloseTo(
+        ((count - 2) * 2 + 10) / (count - 1),
+        10
+      );
+    });
   });
 
   describe('collectThreadMarkers', function () {
@@ -272,6 +294,41 @@ describe('marker-info utility functions', function () {
           count: 1,
         }),
       ]);
+    });
+
+    it('aggregates a thread with more markers than fit in a spread call', function () {
+      // Regression test: `thread markers` on the parent process main thread of
+      // a long profile used to fail with "Maximum call stack size exceeded"
+      // because the per-name gap statistics were computed by spreading the gap
+      // array into Math.min/Math.max.
+      const count = 150000;
+      const markers: TestDefinedMarker[] = Array.from(
+        { length: count },
+        (_, i) => ['NotifyObservers', i * 2, i * 2 + 1] as TestDefinedMarker
+      );
+      const profile = getProfileWithMarkers(markers);
+      const store = storeWithProfile(profile);
+      const threadMap = new ThreadMap();
+      const markerMap = new MarkerMap();
+
+      const result = collectThreadMarkers(store, threadMap, markerMap);
+      expect(result.totalMarkerCount).toBe(count);
+      expect(result.byType).toHaveLength(1);
+      expect(result.byType[0].markerName).toBe('NotifyObservers');
+      expect(result.byType[0].count).toBe(count);
+      expect(result.byType[0].rateStats?.minGap).toBe(2);
+      expect(result.byType[0].rateStats?.maxGap).toBe(2);
+    });
+
+    it('reports an unknown thread handle as-is', function () {
+      const profile = getProfileWithMarkers([['A', 0, 1]]);
+      const store = storeWithProfile(profile);
+      const threadMap = new ThreadMap();
+      const markerMap = new MarkerMap();
+
+      expect(() =>
+        collectThreadMarkers(store, threadMap, markerMap, 't-999')
+      ).toThrow(/^Unknown thread t-999$/);
     });
 
     it('reports the raw categoryIndex in byCategory (not recovered by name)', function () {
@@ -461,8 +518,9 @@ describe('collectMarkerInfo', function () {
     expect(result.type).toBe('marker-info');
     expect(result.name).toBe('DOMEvent');
     expect(result.markerType).toBe('DOMEvent');
-    expect(result.start).toBe(10);
-    expect(result.end).toBe(30);
+    // `zeroAt` is the first marker at 10ms, so this one starts at 0.
+    expect(result.start).toBe(0);
+    expect(result.end).toBe(20);
     expect(result.duration).toBe(20);
     expect(result.fields).toBeDefined();
     const eventTypeField = result.fields!.find((f) => f.key === 'eventType');
@@ -598,7 +656,8 @@ describe('collectThreadMarkers list option', function () {
     const m = result.flatMarkers![0];
     expect(m.handle).toMatch(/^m-/);
     expect(m.name).toBe('DOMEvent');
-    expect(m.start).toBe(5);
+    // Relative to the profile start, which is the only marker's start (5ms).
+    expect(m.start).toBe(0);
     expect(m.duration).toBe(10);
     expect(m.hasStack).toBe(false);
     expect(m.category).toBeDefined();
@@ -726,6 +785,149 @@ describe('collectMarkerStack', function () {
     expect(result.stack!.frames.length).toBeGreaterThan(0);
     // Leaf frame first
     expect(result.stack!.frames[0].name).toBe('leafFunc');
+  });
+});
+
+// Marker times are ms since the profile start (`zeroAt`), never raw timestamps.
+describe('marker time base', function () {
+  // The earliest marker sits here, so `zeroAt` is 1000: reported times are
+  // 1000ms below the raw ones.
+  const ZERO_AT = 1000;
+
+  function setup() {
+    return setupWithMarkers([
+      ['Anchor', ZERO_AT, null, { type: 'Text', name: 'Anchor' }],
+      [
+        'DOMEvent',
+        ZERO_AT + 500,
+        ZERO_AT + 520,
+        { type: 'DOMEvent', eventType: 'keydown', latency: 1 },
+      ],
+    ]);
+  }
+
+  it('reports flatMarkers start relative to the profile start', function () {
+    const { store, threadMap, markerMap } = setup();
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      { list: true }
+    );
+
+    const starts = result.flatMarkers!.map((m) => m.start);
+    expect(starts).toEqual([0, 500]);
+  });
+
+  it('reports topMarkers start relative to the profile start', function () {
+    const { store, threadMap, markerMap } = setup();
+
+    const result = collectThreadMarkers(store, threadMap, markerMap);
+
+    const domEvent = result.byType.find((s) => s.markerName === 'DOMEvent');
+    expect(domEvent!.topMarkers[0].start).toBe(500);
+  });
+
+  it('reports grouped topMarkers start relative to the profile start', function () {
+    const { store, threadMap, markerMap } = setup();
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      { groupBy: 'name' }
+    );
+
+    const domEvent = result.customGroups!.find(
+      (g) => g.groupName === 'DOMEvent'
+    );
+    expect(domEvent!.topMarkers[0].start).toBe(500);
+  });
+
+  it('reports markerInfo start and end relative to the profile start', function () {
+    const { store, threadMap, markerMap, registerMarker } = setup();
+    const handle = registerMarker(1);
+
+    const result = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(result.start).toBe(500);
+    expect(result.end).toBe(520);
+    // The duration is a difference, so the time base cancels out.
+    expect(result.duration).toBe(20);
+  });
+
+  it('reports the flat list and markerInfo on the same time base', function () {
+    const { store, threadMap, markerMap, registerMarker } = setup();
+    const handle = registerMarker(1);
+
+    const listResult = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      { list: true }
+    );
+    const infoResult = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    const listed = listResult.flatMarkers!.find((m) => m.handle === handle);
+    expect(listed!.start).toBe(infoResult.start);
+    // Both paths read the same `zeroAt`, so agreement alone would pass even
+    // unrebased. Pin the value too.
+    expect(listed!.start).toBe(500);
+  });
+
+  it('reports the stack capturedAt relative to the profile start', function () {
+    const { profile } = getProfileFromTextSamples(`
+      rootFunc
+      leafFunc
+    `);
+    const thread = profile.threads[0];
+    const stackIndex = thread.samples.stack[0];
+
+    if (stackIndex === null || stackIndex === undefined) {
+      throw new Error('Expected a non-null stack index from text samples');
+    }
+
+    // Without this the profile starts at 0 and the two bases coincide.
+    const { time } = thread.samples;
+    if (time === undefined) {
+      throw new Error('Expected the text-sample thread to have sample times');
+    }
+    thread.samples.time = time.map((t) => t + ZERO_AT);
+
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    const markerNameIdx = stringTable.indexForString('TestMarker');
+    const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+    thread.markers = markers;
+    markers.name.push(markerNameIdx);
+    markers.startTime.push(ZERO_AT + 30);
+    markers.endTime.push(ZERO_AT + 50);
+    markers.phase.push(INTERVAL);
+    markers.category.push(0);
+    markers.data.push({
+      type: 'Text',
+      name: 'TestMarker',
+      cause: { stack: stackIndex, time: ZERO_AT + 30 },
+    });
+    markers.length++;
+
+    const store = storeWithProfile(profile);
+    const threadMap = new ThreadMap();
+    const markerMap = new MarkerMap();
+    threadMap.handleForThreadIndex(0);
+    const handle = markerMap.handleForMarker(new Set([0]), 0);
+
+    const stackResult = collectMarkerStack(store, markerMap, threadMap, handle);
+    const infoResult = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(stackResult.stack!.capturedAt).toBe(30);
+    expect(infoResult.start).toBe(30);
+    expect(infoResult.stack!.capturedAt).toBe(30);
   });
 });
 

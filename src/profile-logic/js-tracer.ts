@@ -610,6 +610,7 @@ export function convertJsTracerToThreadWithoutSamples(
     frameTable.inlineDepth.push(0);
     frameTable.category.push(otherCategory);
     frameTable.func.push(funcIndex);
+    frameTable.lib.push(-1);
     frameTable.nativeSymbol.push(null);
     frameTable.innerWindowID.push(0);
     frameTable.line.push(line);

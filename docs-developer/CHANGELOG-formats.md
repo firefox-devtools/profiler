@@ -6,6 +6,14 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 70
+
+The `lib` column moved off the `resourceTable` and onto the `frameTable`. Previously a frame's library was reached indirectly, via `frame -> func -> resource -> lib`; now the frame points at its library directly, and `resourceTable` has no `lib` column at all. Frames with no library have their lib set to the `-1` sentinel.
+
+This decouples resources from libraries.
+
+The `lib` column can optionally be stored as an `Int32Array`, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted - but note that `-1` (not `null`) must be used regardless of format.
+
 ### Version 69
 
 A new marker schema display location, `timeline-network`, was added. A marker schema can list `timeline-network` in its `display` array to have markers of that type surfaced in the Network track.

@@ -18,6 +18,7 @@ import { ensureExists } from 'firefox-profiler/utils/types';
 import { getTimeRangeIncludingAllThreads } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from '../../utils/string-table';
 import type { RawProfileSharedData, Profile } from 'firefox-profiler/types';
+import { ResourceType } from 'firefox-profiler/types';
 import { callTreeFromProfile, formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { addTransformToStack } from '../../actions/profile-view';
@@ -50,6 +51,7 @@ describe('mergeProfilesForDiffing function', function () {
     const mergedShared = mergedProfile.shared;
     const mergedResources = mergedShared.resourceTable;
     const mergedFunctions = mergedShared.funcTable;
+    const mergedFrames = mergedShared.frameTable;
     const stringArray = mergedShared.stringArray;
 
     expect(mergedLibs).toHaveLength(3);
@@ -59,9 +61,8 @@ describe('mergeProfilesForDiffing function', function () {
     // Now check that all functions are linked to the right resources.
     // We should have 2 A functions, linked to 2 different resources.
     // And we should have 1 B function, and 1 C function.
-    const libsForA = [];
-    const resourcesForA = [];
-    for (let funcIndex = 0; funcIndex < mergedFunctions.length; funcIndex++) {
+    for (let frameIndex = 0; frameIndex < mergedFrames.length; frameIndex++) {
+      const funcIndex = mergedFrames.func[frameIndex];
       const funcName = stringArray[mergedFunctions.name[funcIndex]];
       const resourceIndex = mergedFunctions.resource[funcIndex];
 
@@ -72,18 +73,17 @@ describe('mergeProfilesForDiffing function', function () {
         if (nameIndex >= 0) {
           resourceName = stringArray[nameIndex];
         }
-
-        const libIndex = mergedResources.lib[resourceIndex];
-        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
-          libName = mergedLibs[libIndex].name;
-        }
+      }
+      const libIndex = mergedFrames.lib[frameIndex];
+      if (libIndex !== null) {
+        libName = mergedLibs[libIndex].name;
       }
 
       /* eslint-disable jest/no-conditional-expect */
       switch (funcName) {
         case 'A':
-          libsForA.push(libName);
-          resourcesForA.push(resourceName);
+          expect(libName).toBeOneOf(['libA', 'libB']);
+          expect(resourceName).toBeOneOf(['libA', 'libB']);
           break;
         case 'B':
           expect(libName).toBe('libA');
@@ -97,8 +97,46 @@ describe('mergeProfilesForDiffing function', function () {
       }
       /* eslint-enable */
     }
-    expect(libsForA).toEqual(['libA', 'libB']);
-    expect(resourcesForA).toEqual(['libA', 'libB']);
+  });
+
+  it('keeps two builds of the same library apart while sharing one resource', function () {
+    // This is the case that motivated moving the lib column off the
+    // resourceTable and onto the frameTable: comparing two builds of libxul.
+    // Both builds have the same name, so they share a single resource, but they
+    // have different breakpadIds and so must stay separate libs - symbols have
+    // to be looked up separately for each build.
+    const sampleProfileA = getProfileFromTextSamples('A[lib:libxul.so]');
+    const sampleProfileB = getProfileFromTextSamples('A[lib:libxul.so]');
+    sampleProfileB.profile.libs[0] = {
+      ...sampleProfileB.profile.libs[0],
+      breakpadId: 'A_DIFFERENT_BUILD',
+    };
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [sampleProfileA.profile, sampleProfileB.profile],
+      [profileState, profileState]
+    );
+    const { resourceTable, frameTable, stringArray } = mergedProfile.shared;
+
+    // The two builds have separate libs.
+    expect(mergedProfile.libs.map((lib) => lib.breakpadId)).toEqual([
+      'SOMETHING_FAKE',
+      'A_DIFFERENT_BUILD',
+    ]);
+
+    // But there's only one resource because both libs are called `libxul.so`.
+    const libraryResources = resourceTable.name
+      .filter((_name, i) => resourceTable.type[i] === ResourceType.Library)
+      .map((nameIndex) => stringArray[nameIndex]);
+    expect(libraryResources).toEqual(['libxul.so']);
+
+    // The frames still have different libs.
+    expect([...frameTable.lib]).toEqual([0, 1]);
   });
 
   it('should set interval of merged profile to minimum of all intervals', function () {

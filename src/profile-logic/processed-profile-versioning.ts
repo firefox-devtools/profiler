@@ -3310,6 +3310,29 @@ const _upgraders: {
       }
     }
   },
+  [70]: (profile: any) => {
+    // The `lib` column moved off the resourceTable and onto the frameTable, so
+    // that resources and libraries can vary independently: multiple libs can
+    // now share one resource.
+    //
+    // Before: frame -> func -> resource -> lib
+    // After:  frame -> lib
+    // Frames with no library use the sentinel value -1.
+    const { frameTable, funcTable, resourceTable } = profile.shared;
+    const libForFunc = new Int32Array(funcTable.length).fill(-1);
+    for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+      const resourceIndex = funcTable.resource[funcIndex];
+      if (resourceIndex !== -1) {
+        libForFunc[funcIndex] = resourceTable.lib[resourceIndex] ?? -1;
+      }
+    }
+    const lib = new Array(frameTable.length).fill(-1);
+    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+      lib[frameIndex] = libForFunc[frameTable.func[frameIndex]];
+    }
+    frameTable.lib = lib;
+    delete resourceTable.lib;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

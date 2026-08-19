@@ -168,7 +168,7 @@ describe('formatCounterListResult', function () {
 
 describe('formatCounterInfoResult', function () {
   function makeInfo(
-    overrides: Partial<CounterInfoResult> = {}
+    overrides: Partial<WithContext<CounterInfoResult>> = {}
   ): WithContext<CounterInfoResult> {
     return {
       context: createContext(),
@@ -194,6 +194,19 @@ describe('formatCounterInfoResult', function () {
     expect(output).toContain('Main thread: t-0 (GeckoMain)');
     expect(output).toContain('Description: Amount of allocated memory');
     expect(output).toContain('memory range in graph: 27B');
+  });
+
+  // As above: already profile-start-relative, so "Time span" prints verbatim.
+  it('renders the time span verbatim, without re-subtracting rootRange.start', function () {
+    const output = formatCounterInfoResult(
+      makeInfo({
+        context: { ...createContext(), rootRange: { start: 9.2, end: 3000 } },
+        rangeStart: 91.81,
+        rangeEnd: 200,
+      })
+    );
+    expect(output).toContain('Time span: 91.810ms');
+    expect(output).not.toContain('82.610ms'); // 91.81 - 9.2, if subtracted twice
   });
 
   it('shows a CO2e estimate next to a stat when present', function () {

@@ -41,6 +41,7 @@ import type {
   Thread,
   ThreadIndex,
   IndexIntoCategoryList,
+  IndexIntoLibs,
   IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
@@ -583,7 +584,7 @@ export type ProfileWithDicts = {
  *
  * The following func and frame attributes are supported:
  *  - [cat:*] - The category name, affects frameTable.category
- *  - [lib:*] - The library name, affects funcTable.resource + resourceTable + libs
+ *  - [lib:*] - The library name, affects frameTable.lib + funcTable.resource + resourceTable + libs
  *  - [file:*] - The filename, affects funcTable.file
  *  - [line:*] - The line, affects frameTable.line
  *  - [address:*] - The frame address, affects frameTable.address
@@ -600,8 +601,8 @@ function getFrame(
 ) {
   const funcIndex = frameTable.func[frameIndex];
   let s = stringTable.getString(funcTable.name[funcIndex]);
-  const libIndex = resourceTable.lib[funcTable.resource[funcIndex]];
-  if (libIndex !== null) {
+  const libIndex = frameTable.lib[frameIndex];
+  if (libIndex !== -1) {
     const libName = libs[libIndex].name;
     s += `[lib:${libName}]`;
   }
@@ -902,7 +903,7 @@ function _buildThreadFromTextOnlyStacks(
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
       let resourceIndex = -1;
-      let libIndex = null;
+      let libIndex: IndexIntoLibs | -1 = -1;
       if (libraryName !== null) {
         libIndex = globalDataCollector.indexForLib({
           arch: '',
@@ -913,7 +914,7 @@ function _buildThreadFromTextOnlyStacks(
           breakpadId: 'SOMETHING_FAKE',
           codeId: null,
         });
-        resourceIndex = globalDataCollector.indexForLibResource(libIndex);
+        resourceIndex = globalDataCollector.indexForLibResourceByLib(libIndex);
       }
 
       // Find the file name from the function name
@@ -947,7 +948,7 @@ function _buildThreadFromTextOnlyStacks(
       const nativeSymbolInfo =
         _findNativeSymbolNameFromFuncName(funcNameWithModifier);
       if (nativeSymbolInfo) {
-        if (libIndex === null) {
+        if (libIndex === -1) {
           throw new Error(
             `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`
           );
@@ -975,7 +976,8 @@ function _buildThreadFromTextOnlyStacks(
           lineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
           inlineDepth === frameTable.inlineDepth[i] &&
-          nativeSymbol === frameTable.nativeSymbol[i]
+          nativeSymbol === frameTable.nativeSymbol[i] &&
+          libIndex === frameTable.lib[i]
         ) {
           frameIndex = i;
           break;
@@ -984,6 +986,7 @@ function _buildThreadFromTextOnlyStacks(
 
       if (frameIndex === undefined) {
         frameTable.func.push(funcIndex);
+        frameTable.lib.push(libIndex);
         frameTable.address.push(address);
         frameTable.inlineDepth.push(inlineDepth);
         frameTable.category.push(category);
@@ -2084,6 +2087,7 @@ export function addInnerWindowIdToStacks(
         frameTable.subcategory[foundFrameIndex]
       );
       frameTableBuilder.func.push(frameTable.func[foundFrameIndex]);
+      frameTableBuilder.lib.push(frameTable.lib[foundFrameIndex]);
       frameTableBuilder.nativeSymbol.push(
         frameTable.nativeSymbol[foundFrameIndex]
       );

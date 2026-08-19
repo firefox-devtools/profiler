@@ -2030,7 +2030,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex,
       nativeSymbols: [],
       initialNativeSymbol: null,
@@ -2065,7 +2064,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex,
       nativeSymbols: [],
       initialNativeSymbol: null,
@@ -2096,7 +2094,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       functionSizeIsKnown: false,
     };
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
@@ -2141,7 +2138,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       functionSizeIsKnown: false,
     };
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,

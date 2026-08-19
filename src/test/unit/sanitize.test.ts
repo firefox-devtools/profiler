@@ -1660,6 +1660,30 @@ describe('sanitizePII', function () {
     );
   });
 
+  it('should compact the libs and translate the frameTable lib column', function () {
+    // Thread 0's frames are in libA, thread 1's are in libB, and thread 2's
+    // frames have no library at all (lib === -1).
+    const { profile } = getProfileFromTextSamples(
+      `A[lib:libA.so]`,
+      `B[lib:libB.so]`,
+      `Cjs`
+    );
+
+    expect(profile.libs.map((lib) => lib.name)).toEqual(['libA.so', 'libB.so']);
+    expect([...profile.shared.frameTable.lib]).toEqual([0, 1, -1]);
+
+    // Remove thread 0, which is the only user of libA.so.
+    const { sanitizedProfile } = setup(
+      { shouldRemoveThreads: new Set([0]) },
+      profile
+    );
+
+    // libA.so is gone, and the surviving frames point at the reindexed libB.so
+    // while the lib-less frame keeps its -1 sentinel.
+    expect(sanitizedProfile.libs.map((lib) => lib.name)).toEqual(['libB.so']);
+    expect([...sanitizedProfile.shared.frameTable.lib]).toEqual([0, -1]);
+  });
+
   it('always removes source contents even when no PII removal is requested', function () {
     const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
     // There should be only one source.
