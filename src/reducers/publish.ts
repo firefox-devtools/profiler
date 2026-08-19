@@ -14,6 +14,7 @@ import type {
   Reducer,
   State,
   SanitizedProfileEncodingState,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
@@ -46,8 +47,10 @@ function _getMostlyNonSanitizingSharingOptions(): CheckedSharingOptions {
   };
 }
 
-// Both modes reference the same object until one is edited, so an untouched
-// profile is only encoded once.
+// Both modes start out referencing the same options object. Note that this
+// does not make them share an encoding: the sanitized profile is memoized per
+// mode, and sanitizePII always returns a fresh object, so each mode encodes
+// its own copy. See sanitizedProfileEncodingStates below.
 function _sharingOptionsForBothModes(
   options: CheckedSharingOptions
 ): Record<SharingMode, CheckedSharingOptions> {
@@ -230,32 +233,77 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
-  state = { phase: 'INITIAL' },
+type FormatEncodingStates = Record<
+  PublishProfileFormat,
+  SanitizedProfileEncodingState
+>;
+type EncodingStates = Record<SharingMode, FormatEncodingStates>;
+
+const INITIAL_FORMAT_ENCODING_STATES: FormatEncodingStates = {
+  jslb: { phase: 'INITIAL' },
+  json: { phase: 'INITIAL' },
+};
+
+const INITIAL_ENCODING_STATES: EncodingStates = {
+  download: INITIAL_FORMAT_ENCODING_STATES,
+  upload: INITIAL_FORMAT_ENCODING_STATES,
+};
+
+function _withEncodingState(
+  state: EncodingStates,
+  mode: SharingMode,
+  format: PublishProfileFormat,
+  encodingState: SanitizedProfileEncodingState
+): EncodingStates {
+  return {
+    ...state,
+    [mode]: { ...state[mode], [format]: encodingState },
+  };
+}
+
+// One slot per (sharing mode, format) pair. Keying by mode keeps each panel's
+// encoding stable across reopens, and guarantees a panel can never be handed a
+// blob that was encoded for the other mode's sharing options.
+const sanitizedProfileEncodingStates: Reducer<EncodingStates> = (
+  state = INITIAL_ENCODING_STATES,
   action
-): SanitizedProfileEncodingState => {
+): EncodingStates => {
   switch (action.type) {
     case 'SANITIZED_PROFILE_ENCODING_STARTED': {
-      const { sanitizedProfile, encodingPromise } = action;
-      return { phase: 'ENCODING', sanitizedProfile, encodingPromise };
+      const { mode, format, sanitizedProfile, encodingPromise } = action;
+      return _withEncodingState(state, mode, format, {
+        phase: 'ENCODING',
+        sanitizedProfile,
+        encodingPromise,
+      });
     }
     case 'SANITIZED_PROFILE_ENCODING_COMPLETED': {
-      const { sanitizedProfile, profileData } = action;
+      const { mode, format, sanitizedProfile, profileData } = action;
+      const current = state[mode][format];
       if (
-        state.phase === 'ENCODING' &&
-        state.sanitizedProfile === sanitizedProfile
+        current.phase === 'ENCODING' &&
+        current.sanitizedProfile === sanitizedProfile
       ) {
-        return { phase: 'DONE', sanitizedProfile, profileData };
+        return _withEncodingState(state, mode, format, {
+          phase: 'DONE',
+          sanitizedProfile,
+          profileData,
+        });
       }
       return state; // Ignore updates from earlier encodings.
     }
     case 'SANITIZED_PROFILE_ENCODING_FAILED': {
-      const { sanitizedProfile, error } = action;
+      const { mode, format, sanitizedProfile, error } = action;
+      const current = state[mode][format];
       if (
-        state.phase === 'ENCODING' &&
-        state.sanitizedProfile === sanitizedProfile
+        current.phase === 'ENCODING' &&
+        current.sanitizedProfile === sanitizedProfile
       ) {
-        return { phase: 'ERROR', sanitizedProfile, error };
+        return _withEncodingState(state, mode, format, {
+          phase: 'ERROR',
+          sanitizedProfile,
+          error,
+        });
       }
       return state; // Ignore updates from earlier encodings.
     }
@@ -266,7 +314,7 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
 
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
-  sanitizedProfileEncodingState,
+  sanitizedProfileEncodingStates,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,
