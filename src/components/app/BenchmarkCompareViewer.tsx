@@ -544,6 +544,12 @@ function BucketCountBadge({
  * both show no count, and the reader must not have to guess which they are looking
  * at: the first is going to fill in on its own, the second is a subtest the new
  * profile did not run. Hence three states rather than a nullable count.
+ *
+ * `pending` opens, `none` does not. A row that is going to have something behind it
+ * should look like it from the start: an arrow that appears a second or two later
+ * is an invitation the reader has already looked away from, and a reader who does
+ * notice it has no way to tell "not yet" from "never" before clicking. So the arrow
+ * is there immediately and the expansion says what it is waiting for.
  */
 type RowExpansion =
   | { status: 'pending' }
@@ -588,7 +594,7 @@ function ScoreLabelCell({
       title={label}
     >
       <div className="benchmarkScoreLabel">
-        {expansion.status === 'ready' ? (
+        {expansion.status !== 'none' ? (
           <span className="benchmarkDisclosure" aria-hidden="true">
             {isExpanded ? '▼' : '▶'}
           </span>
@@ -692,9 +698,12 @@ function ScoreTable({
         ? { status: 'pending' }
         : { status: 'none' };
     }
-    if (comparisons.length === 0) {
-      return { status: 'none' };
-    }
+    // A table that came back empty is `ready` with a count of zero, not `none`:
+    // `none` has to mean "there is no table and there never will be", because it
+    // is the one state that does not open. A row that opened while pending and
+    // then turned out to be empty would otherwise collapse under the reader,
+    // taking the message they were reading with it and leaving them no answer.
+    // `BucketTable` already has prose for a list that filters down to nothing.
     return { status: 'ready', count: bucketCounts.get(label) ?? 0 };
   };
 
@@ -784,7 +793,7 @@ function ScoreTable({
         {[overallScore, ...suiteScores].map((row) => {
           const isOverall = row === overallScore;
           const expansion = expansionOf(row.label);
-          const expandable = expansion.status === 'ready';
+          const expandable = expansion.status !== 'none';
           const isExpanded = expandable && expanded.has(row.label);
           const comparisons = bucketTables.get(row.label);
           return (
@@ -807,22 +816,31 @@ function ScoreTable({
                   numSuites={numSuites}
                 />
               </tr>
-              {isExpanded && comparisons ? (
+              {isExpanded ? (
                 <tr className="benchmarkRow--expansion">
                   <td colSpan={SCORE_TABLE_COLUMN_COUNT}>
-                    <BucketTable
-                      comparisons={comparisons}
-                      label={row.label}
-                      enclosingBaseMean={row.baseMean}
-                      enclosingNewMean={row.newMean}
-                      isOverall={isOverall}
-                      numSuites={numSuites}
-                      filter={filter}
-                      getBaseBundle={getBaseBundle}
-                      getNewBundle={getNewBundle}
-                      baseViewerUrl={baseViewerUrl}
-                      newViewerUrl={newViewerUrl}
-                    />
+                    {comparisons ? (
+                      <BucketTable
+                        comparisons={comparisons}
+                        label={row.label}
+                        enclosingBaseMean={row.baseMean}
+                        enclosingNewMean={row.newMean}
+                        isOverall={isOverall}
+                        numSuites={numSuites}
+                        filter={filter}
+                        getBaseBundle={getBaseBundle}
+                        getNewBundle={getNewBundle}
+                        baseViewerUrl={baseViewerUrl}
+                        newViewerUrl={newViewerUrl}
+                      />
+                    ) : (
+                      // Reached only from `pending`: `none` does not open, and
+                      // `ready` means the table is in `bucketTables`.
+                      <p className="benchmarkPendingBuckets">
+                        Still working out which functions moved in {row.label}.
+                        This takes a second or two per row.
+                      </p>
+                    )}
                   </td>
                 </tr>
               ) : null}

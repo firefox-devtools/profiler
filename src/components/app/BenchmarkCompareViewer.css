@@ -200,7 +200,11 @@
   font-size: 0.8em;
 }
 
-.benchmarkNoChanges {
+/* The two things an expansion can hold instead of a bucket table: a table that
+ * came back with nothing above the thresholds, and a table that has not come back
+ * yet. Both are an answer rather than an absence, so both read as prose. */
+.benchmarkNoChanges,
+.benchmarkPendingBuckets {
   padding: 0.5em 0;
   color: var(--internal-text-hint);
   font-style: italic;
