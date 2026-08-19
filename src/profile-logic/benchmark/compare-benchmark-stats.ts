@@ -30,14 +30,20 @@ import type {
 import { runToCompletion } from './chunked-work';
 import type { SlicedWork } from './chunked-work';
 import {
-  computeFamilyCorrectionInSlices,
+  accumulateFamilyPartialInSlices,
+  combineFamilyPartials,
   makePermutationBaseIndices,
   minimumDetectableEffect,
   permutationTwoSidedP,
   studentTTwoSidedP,
   welchTTest,
 } from './perf-compare-stats';
-import type { FamilyMember, WelchResult } from './perf-compare-stats';
+import type {
+  FamilyCorrection,
+  FamilyMember,
+  FamilyPartialCorrection,
+  WelchResult,
+} from './perf-compare-stats';
 import type { IndexIntoFuncTable } from '../../types/profile';
 
 // ---------------------------------------------------------------------------
@@ -560,6 +566,9 @@ export function compareBuckets(
  * slices; nothing else about it differs. Nearly all of the time is in the family
  * correction, which brings its own yield points — the ones added here just keep
  * the set-up from being one long task of its own on a very large table.
+ *
+ * A single shard covering every draw, so that this and the multi-threaded path are
+ * the same code rather than two implementations that have to be kept agreeing.
  */
 export function* compareBucketsInSlices(
   baseBuckets: SparseBucketEntry[],
@@ -573,18 +582,114 @@ export function* compareBucketsInSlices(
   baseBucketKeys: string[] = baseBucketNames,
   newBucketKeys: string[] = newBucketNames
 ): SlicedWork<BucketComparison[]> {
+  const shard = yield* computeBucketTableShardInSlices(
+    {
+      base: {
+        bucketNames: baseBucketNames,
+        bucketKeys: baseBucketKeys,
+        bucketFuncs: baseBucketFuncs,
+      },
+      new: {
+        bucketNames: newBucketNames,
+        bucketKeys: newBucketKeys,
+        bucketFuncs: newBucketFuncs,
+      },
+      baseBuckets,
+      newBuckets,
+      iterationCount,
+      excludeAppearedDisappeared,
+    },
+    { index: 0, count: 1 }
+  );
+  return combineBucketTableShards([shard]);
+}
+
+/** One profile's bucket metadata: what a table job needs to know about a side
+ * besides the per-iteration weights themselves. The three arrays are indexed by
+ * `SparseBucketEntry.bucketIndex` and cover every bucket in the profile, not just
+ * the ones in a given table, so a worker is sent them once rather than per job. */
+export type BucketTableSide = {
+  bucketNames: string[];
+  bucketKeys: string[];
+  bucketFuncs: IndexIntoFuncTable[];
+};
+
+/** Everything one bucket table is computed from. The argument list of
+ * `compareBuckets`, as an object, because it also has to go over a postMessage. */
+export type BucketTableInput = {
+  base: BucketTableSide;
+  new: BucketTableSide;
+  baseBuckets: SparseBucketEntry[];
+  newBuckets: SparseBucketEntry[];
+  iterationCount: number;
+  excludeAppearedDisappeared?: boolean;
+};
+
+/** Which of `count` equal parts of a table's permutation draws to run. */
+export type BucketTableShardSpec = {
+  index: number;
+  count: number;
+};
+
+/**
+ * One shard's worth of a bucket table: the rows, from whichever shard was asked
+ * to build them, and this shard's share of the family correction.
+ */
+export type BucketTableShard = {
+  /**
+   * The comparison rows, before the family correction is written onto them —
+   * only from shard 0, since every shard would produce the identical list and
+   * there is no point sending it back more than once.
+   */
+  rows: BucketComparison[] | null;
+  /** Null when the family cannot be calibrated at all; see
+   * `accumulateFamilyPartialInSlices`. Every shard of a table agrees about that,
+   * since it is a property of the family rather than of the draws. */
+  family: FamilyPartialCorrection | null;
+};
+
+/**
+ * Compute part of a bucket table: all of the set-up, and the draws in shard
+ * `index` of `count`.
+ *
+ * **The set-up is not divided, it is repeated.** Matching the two sides' buckets
+ * and taking a Welch t of each is ~150ms of the global view's ~1.1s, and it is
+ * deterministic from the input, so a shard recomputes it rather than being sent
+ * it — which is the only reason a shard can be described by two integers. What
+ * that costs is that a table stops getting faster once `count` is high enough for
+ * the repeated set-up to dominate the draws each shard has left.
+ *
+ * Shards other than 0 skip building the rows, which is most of that set-up. It
+ * saves them no wall clock — shard 0 is on the critical path either way — but on a
+ * machine with fewer cores than shards it is the difference between the other
+ * shards costing a little and costing as much again.
+ */
+export function* computeBucketTableShardInSlices(
+  input: BucketTableInput,
+  shard: BucketTableShardSpec
+): SlicedWork<BucketTableShard> {
+  const {
+    base,
+    new: newSide,
+    baseBuckets,
+    newBuckets,
+    iterationCount,
+    excludeAppearedDisappeared = false,
+  } = input;
+  const withRows = shard.index === 0;
+
   const baseMap = buildKeyMap(
     baseBuckets,
-    baseBucketKeys,
-    baseBucketNames,
-    baseBucketFuncs
+    base.bucketKeys,
+    base.bucketNames,
+    base.bucketFuncs
   );
   yield;
   const newMap = buildKeyMap(
     newBuckets,
-    newBucketKeys,
-    newBucketNames,
-    newBucketFuncs
+    newSide.bucketKeys,
+    newSide.bucketNames,
+    newSide.bucketFuncs
   );
 
   const allKeys = excludeAppearedDisappeared
@@ -593,7 +698,7 @@ export function* compareBucketsInSlices(
 
   const zeros = new Array<number>(iterationCount).fill(0);
 
-  const results: BucketComparison[] = [];
+  const rows: BucketComparison[] | null = withRows ? [] : null;
   const family: FamilyMember[] = [];
   let sinceYield = 0;
   for (const key of allKeys) {
@@ -612,28 +717,92 @@ export function* compareBucketsInSlices(
       continue;
     }
 
-    // Prefer the base profile's display name; fall back to the new one. Same
-    // for the key's original spelling, which the two sides may disagree on.
-    const displayName = baseEntry?.displayName ?? newEntry?.displayName ?? key;
-    const originalKey = baseEntry?.originalKey ?? newEntry?.originalKey ?? key;
-
-    results.push({
-      key: originalKey,
-      bucketName: displayName,
-      baseFunc: baseEntry?.representativeFunc ?? null,
-      newFunc: newEntry?.representativeFunc ?? null,
-      ...computeComparisonStats(baseIter, newIter, 'family'),
-    });
+    if (rows !== null) {
+      // Prefer the base profile's display name; fall back to the new one. Same
+      // for the key's original spelling, which the two sides may disagree on.
+      const displayName =
+        baseEntry?.displayName ?? newEntry?.displayName ?? key;
+      const originalKey =
+        baseEntry?.originalKey ?? newEntry?.originalKey ?? key;
+      rows.push({
+        key: originalKey,
+        bucketName: displayName,
+        baseFunc: baseEntry?.representativeFunc ?? null,
+        newFunc: newEntry?.representativeFunc ?? null,
+        ...computeComparisonStats(baseIter, newIter, 'family'),
+      });
+    }
     family.push({ base: baseIter, comp: newIter });
   }
 
-  yield* applyFamilyCorrection(results, family);
-  return results;
+  if (family.length === 0) {
+    return { rows, family: null };
+  }
+  const permutations = permutationsFor(
+    family[0].base.length,
+    family[0].comp.length
+  );
+  // Each shard takes a contiguous range, so that the ranges tile the draws
+  // however unevenly `count` divides them. Which draws a shard gets does not
+  // affect the result — they are exchangeable and every one of them is applied
+  // exactly once — so the split is by index alone.
+  const perShard = Math.ceil(permutations.length / shard.count);
+  const drawStart = Math.min(permutations.length, shard.index * perShard);
+  const drawEnd = Math.min(permutations.length, drawStart + perShard);
+  const partial = yield* accumulateFamilyPartialInSlices(
+    family,
+    permutations,
+    drawStart,
+    drawEnd
+  );
+  return { rows, family: partial };
 }
 
 /**
- * Correct one table's worth of bucket p-values for the fact that there are
- * thousands of them, and write the result onto the rows.
+ * Put a table's shards back together: combine their draw ranges into one family
+ * correction and write it onto the rows.
+ *
+ * Cheap — a few passes over the members plus a sort of the per-draw maxima, a
+ * fraction of a millisecond against the second the shards spent — which is why
+ * this can sit on the main thread even when the shards ran in workers.
+ */
+export function combineBucketTableShards(
+  shards: ReadonlyArray<BucketTableShard>
+): BucketComparison[] {
+  let rows: BucketComparison[] | null = null;
+  const families: FamilyPartialCorrection[] = [];
+  let uncalibratable = false;
+  for (const shard of shards) {
+    if (shard.rows !== null) {
+      if (rows !== null) {
+        throw new Error('More than one shard of a bucket table carried rows.');
+      }
+      rows = shard.rows;
+    }
+    if (shard.family === null) {
+      // Nothing to correct against, and every shard of the table says so, since
+      // it is a property of the family. Leaves the rows with the Welch stand-in
+      // `computeComparisonStats` put on them.
+      uncalibratable = true;
+    } else {
+      families.push(shard.family);
+    }
+  }
+  if (rows === null) {
+    throw new Error('No shard of a bucket table carried its rows.');
+  }
+  if (uncalibratable) {
+    return rows;
+  }
+  const correction = combineFamilyPartials(families);
+  if (correction !== null) {
+    applyFamilyCorrection(rows, correction);
+  }
+  return rows;
+}
+
+/**
+ * Write a family correction onto the rows it was computed from.
  *
  * **What the family is.** Every bucket in this one comparison, and no more: the
  * global view is corrected against the global view, and each subtest against
@@ -643,20 +812,10 @@ export function* compareBucketsInSlices(
  * reading, but it would also mean opening a subtest table changed the numbers in
  * it, which is worse than the error it fixes. Each table is honest about itself.
  */
-function* applyFamilyCorrection(
+function applyFamilyCorrection(
   results: BucketComparison[],
-  family: FamilyMember[]
-): SlicedWork<void> {
-  if (family.length === 0) {
-    return;
-  }
-  const correction = yield* computeFamilyCorrectionInSlices(
-    family,
-    permutationsFor(family[0].base.length, family[0].comp.length)
-  );
-  if (correction === null) {
-    return;
-  }
+  correction: FamilyCorrection
+) {
   for (let i = 0; i < results.length; i++) {
     const row = results[i];
     // Exact, from the same relabellings, replacing the Welch stand-in.
