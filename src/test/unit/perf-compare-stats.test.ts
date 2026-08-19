@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
+  accumulateFamilyPartialInSlices,
+  combineFamilyPartials,
   computeFamilyCorrection,
   interpretStandardizedEffect,
   makePermutationBaseIndices,
@@ -14,6 +16,7 @@ import {
   welchTTest,
 } from '../../profile-logic/benchmark/perf-compare-stats';
 import type { FamilyMember } from '../../profile-logic/benchmark/perf-compare-stats';
+import { runToCompletion } from '../../profile-logic/benchmark/chunked-work';
 
 describe('studentTTwoSidedP', function () {
   // Reference values obtained independently, by Simpson integration of the t
@@ -692,6 +695,110 @@ describe('computeFamilyCorrection', function () {
         9
       );
     }
+  });
+
+  describe('split over several draw ranges', function () {
+    /** Accumulate `[0, drawCount)` in `shardCount` contiguous ranges, the way the
+     * worker pool divides a table up, and combine them. */
+    function inShards(
+      family: FamilyMember[],
+      draws: Int32Array[],
+      shardCount: number
+    ) {
+      const perShard = Math.ceil(draws.length / shardCount);
+      const partials = [];
+      for (let index = 0; index < shardCount; index++) {
+        const drawStart = Math.min(draws.length, index * perShard);
+        const drawEnd = Math.min(draws.length, drawStart + perShard);
+        const partial = runToCompletion(
+          accumulateFamilyPartialInSlices(family, draws, drawStart, drawEnd)
+        );
+        if (partial === null) {
+          throw new Error('expected a partial correction');
+        }
+        partials.push(partial);
+      }
+      return combineFamilyPartials(partials);
+    }
+
+    it('gives exactly the same answer however many ranges it was split into', function () {
+      // `toEqual`, not `toBeCloseTo`, and that is the whole point of the test. The
+      // q-values decide which rows the report shows, so a reader on a four-core
+      // laptop and a reader on a workstation have to be told the same thing about
+      // the same two profiles. Two facts make it exact: the accumulators are
+      // integer counts, so summing them is order-independent; and every range
+      // recomputes the same observed |t|, so the thresholds those counts were
+      // taken against are bit-identical.
+      const random = makeRandom(4242);
+      const family: FamilyMember[] = nullFamily(4242, 60);
+      for (let i = 0; i < 4; i++) {
+        family.push({ base: drawBucket(random), comp: drawBucket(random, 1) });
+      }
+      const whole = computeFamilyCorrection(family, permutations);
+      if (whole === null) {
+        throw new Error('expected a correction');
+      }
+      // Including counts that do not divide 999 evenly, and one larger than the
+      // draw count -- a family can be split more ways than it has draws, and the
+      // ranges left over are empty rather than invalid.
+      for (const shardCount of [1, 2, 3, 7, 8, 999, 1000]) {
+        expect({
+          shardCount,
+          ...inShards(family, permutations, shardCount),
+        }).toEqual({ shardCount, ...whole });
+      }
+    });
+
+    it('declines to accumulate a family it cannot calibrate, whichever range it is given', function () {
+      const partial = runToCompletion(
+        accumulateFamilyPartialInSlices([], permutations, 10, 20)
+      );
+      expect(partial).toBe(null);
+      expect(combineFamilyPartials([])).toBe(null);
+    });
+
+    it('refuses to combine ranges that do not tile the draws', function () {
+      const family = nullFamily(31, 12);
+      const draws = makePermutationBaseIndices(ITERATIONS, ITERATIONS, 40, 3);
+      const range = (drawStart: number, drawEnd: number) => {
+        const partial = runToCompletion(
+          accumulateFamilyPartialInSlices(family, draws, drawStart, drawEnd)
+        );
+        if (partial === null) {
+          throw new Error('expected a partial correction');
+        }
+        return partial;
+      };
+      // A gap, an overlap, and a short covering: each would otherwise be a
+      // plausible-looking number with the wrong number of draws behind it.
+      expect(() =>
+        combineFamilyPartials([range(0, 10), range(20, 40)])
+      ).toThrow('do not tile');
+      expect(() =>
+        combineFamilyPartials([range(0, 30), range(20, 40)])
+      ).toThrow('do not tile');
+      expect(() => combineFamilyPartials([range(0, 30)])).toThrow(
+        'the family has 40 draws'
+      );
+    });
+
+    it('refuses to combine ranges taken over different families', function () {
+      const draws = makePermutationBaseIndices(ITERATIONS, ITERATIONS, 40, 3);
+      const first = runToCompletion(
+        accumulateFamilyPartialInSlices(nullFamily(51, 12), draws, 0, 20)
+      );
+      const other = runToCompletion(
+        accumulateFamilyPartialInSlices(nullFamily(52, 12), draws, 20, 40)
+      );
+      if (first === null || other === null) {
+        throw new Error('expected partial corrections');
+      }
+      // Same shapes throughout, so nothing but the observed |t| gives it away --
+      // which is exactly why that is compared element by element.
+      expect(() => combineFamilyPartials([first, other])).toThrow(
+        "disagree about member 0's observed |t|"
+      );
+    });
   });
 
   it('declines to correct a family it cannot calibrate', function () {

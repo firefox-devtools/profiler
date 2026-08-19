@@ -20,6 +20,7 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { runBenchmarkComparison } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
 import type { ComparisonProgress } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
+import { createBenchmarkTableWorkerPool } from 'firefox-profiler/profile-logic/benchmark/benchmark-compare-worker-pool';
 import {
   classifyChange,
   describeVerdict,
@@ -1278,8 +1279,9 @@ export function BenchmarkCompareViewer() {
     }
     // A second edit while the first pair is still being worked on would
     // otherwise race, and whichever finished last would win. Aborting also
-    // stops the comparison itself between slices, rather than leaving it to
-    // spend seconds finishing tables for a pair nobody is looking at any more.
+    // stops the comparison itself — terminating the workers computing its
+    // tables — rather than leaving it to spend seconds finishing tables for a
+    // pair nobody is looking at any more.
     const controller = new AbortController();
     setState({ phase: 'loading' });
     (async () => {
@@ -1287,7 +1289,10 @@ export function BenchmarkCompareViewer() {
         for await (const progress of runBenchmarkComparison(
           baseUrl,
           newUrl,
-          controller.signal
+          controller.signal,
+          // The seconds of arithmetic behind the bucket tables belong on other
+          // threads: the page has a score table to paint and links to follow.
+          createBenchmarkTableWorkerPool
         )) {
           if (controller.signal.aborted) {
             return;

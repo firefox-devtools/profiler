@@ -2,8 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { compareStatsProgressively } from '../../profile-logic/benchmark/run-benchmark-comparison';
-import type { ComparisonProgress } from '../../profile-logic/benchmark/run-benchmark-comparison';
+import {
+  compareStatsProgressively,
+  createInProcessTableRunner,
+} from '../../profile-logic/benchmark/run-benchmark-comparison';
+import type {
+  BucketTableJob,
+  ComparisonProgress,
+  TableRunnerFactory,
+} from '../../profile-logic/benchmark/run-benchmark-comparison';
 import type { ProfileBenchmarkStats } from '../../profile-logic/benchmark/extract-benchmark-stats';
 import type { Profile } from '../../types';
 
@@ -63,14 +70,17 @@ const SOURCES = {
   newProfile: {} as Profile,
 };
 
-async function collect(signal?: AbortSignal): Promise<ComparisonProgress[]> {
+async function collect(
+  options: { signal?: AbortSignal; makeRunner?: TableRunnerFactory } = {}
+): Promise<ComparisonProgress[]> {
   const { baseStats, newStats } = makePair();
   const snapshots = [];
   for await (const progress of compareStatsProgressively(
     baseStats,
     newStats,
     SOURCES,
-    signal ?? new AbortController().signal
+    options.signal ?? new AbortController().signal,
+    options.makeRunner
   )) {
     snapshots.push(progress);
   }
@@ -98,15 +108,136 @@ describe('compareStatsProgressively', function () {
     ]);
   });
 
-  it('adds one bucket table per snapshot, in the order the rows are listed', async function () {
+  it('adds one bucket table per snapshot', async function () {
+    // One *more* table per snapshot, not a particular table: the tables are
+    // computed in parallel when a runner has threads to spare, so which one lands
+    // first is up to how long each took. The UI reads `bucketTables` and
+    // `pendingLabels` as sets, so it does not care -- see the badge and the
+    // spinner in BenchmarkCompareViewer.
     const snapshots = await collect();
-    expect(snapshots.map((s) => [...s.bucketTables.keys()])).toEqual([
-      [],
-      ['Overall (geomean-normalised)'],
-      ['Overall (geomean-normalised)', 'Alpha'],
-      ['Overall (geomean-normalised)', 'Alpha', 'Beta'],
-    ]);
+    expect(snapshots.map((s) => s.bucketTables.size)).toEqual([0, 1, 2, 3]);
     expect(snapshots.map((s) => s.pendingLabels.length)).toEqual([3, 2, 1, 0]);
+    const last = snapshots[snapshots.length - 1];
+    expect([...last.bucketTables.keys()].sort()).toEqual([
+      'Alpha',
+      'Beta',
+      'Overall (geomean-normalised)',
+    ]);
+    // Gamma never gets one: only the base profile ran it.
+    expect(last.pendingLabels).toEqual([]);
+  });
+
+  it('yields a table as soon as it arrives, in whatever order that is', async function () {
+    // A runner that finishes the subtests before the overall table, which is what
+    // a pool of threads does when the biggest job is dispatched first.
+    const finished: string[] = [];
+    const makeRunner: TableRunnerFactory = (setup) => {
+      const inProcess = createInProcessTableRunner(setup);
+      let releaseOverall = () => {};
+      const overallHeldUntil = new Promise<void>((resolve) => {
+        releaseOverall = resolve;
+      });
+      let subtestsDone = 0;
+      return {
+        run: (job) =>
+          inProcess.run(job).then(async (comparisons) => {
+            if (job.label.startsWith('Overall')) {
+              await overallHeldUntil;
+              finished.push(job.label);
+              return comparisons;
+            }
+            finished.push(job.label);
+            if (++subtestsDone === 2) {
+              releaseOverall();
+            }
+            return comparisons;
+          }),
+        dispose: inProcess.dispose,
+      };
+    };
+    const snapshots = await collect({ makeRunner });
+    const arrival = snapshots
+      .slice(1)
+      .map((s) => [...s.bucketTables.keys()].pop());
+    // Dispatched Overall first, and it is the last of the three to be finished, so
+    // a snapshot went out for a subtest while the row above it was still pending.
+    expect(finished[0]).toBe('Alpha');
+    expect(finished[2]).toBe('Overall (geomean-normalised)');
+    expect(arrival[0]).toBe('Alpha');
+    expect(arrival.slice().sort()).toEqual([
+      'Alpha',
+      'Beta',
+      'Overall (geomean-normalised)',
+    ]);
+  });
+
+  it('asks for the global table to be spread over every thread, and no other', async function () {
+    const jobs: BucketTableJob[] = [];
+    await collect({
+      makeRunner: (setup) => {
+        const inProcess = createInProcessTableRunner(setup);
+        return {
+          run: (job) => {
+            jobs.push(job);
+            return inProcess.run(job);
+          },
+          dispose: inProcess.dispose,
+        };
+      },
+    });
+    // The global table is ~1s against ~130ms for a subtest, so it is the whole
+    // critical path once the subtests have a thread each.
+    expect(jobs.map((job) => [job.label, job.splitAcrossThreads])).toEqual([
+      ['Overall (geomean-normalised)', true],
+      ['Alpha', false],
+      ['Beta', false],
+    ]);
+  });
+
+  it('disposes of the runner when the comparison finishes', async function () {
+    let disposed = 0;
+    await collect({
+      makeRunner: (setup) => {
+        const inProcess = createInProcessTableRunner(setup);
+        return {
+          run: inProcess.run,
+          dispose: () => {
+            disposed++;
+          },
+        };
+      },
+    });
+    expect(disposed).toBe(1);
+  });
+
+  it('disposes of the runner when the comparison is abandoned part-way', async function () {
+    // What terminates the workers: the reader edited the pair, or navigated away,
+    // and finishing the tables would keep the machine busy for seconds on nothing.
+    let disposed = 0;
+    const controller = new AbortController();
+    const { baseStats, newStats } = makePair();
+    const iterator = compareStatsProgressively(
+      baseStats,
+      newStats,
+      SOURCES,
+      controller.signal,
+      (setup) => {
+        const inProcess = createInProcessTableRunner(setup);
+        return {
+          run: inProcess.run,
+          dispose: () => {
+            disposed++;
+          },
+        };
+      }
+    );
+    // One snapshot is the score rows; the runner exists from the next `next()` on.
+    await iterator.next();
+    await iterator.next();
+    expect(disposed).toBe(0);
+    controller.abort(new Error('the reader moved on'));
+    await expect(iterator.next()).rejects.toThrow('the reader moved on');
+    expect(disposed).toBe(1);
   });
 
   it('leaves earlier snapshots alone as later ones arrive', async function () {

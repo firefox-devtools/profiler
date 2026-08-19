@@ -150,16 +150,18 @@ function messagePort(): MessagePort | null {
 }
 
 /**
- * ## Why this is not a worker, yet
+ * ## What this is, and is not, for
  *
- * Slicing keeps the page responsive but does not make the comparison finish any
- * sooner — the ~3s of arithmetic still happens on the main thread, with a couple
- * of percent of overhead on top. The work is embarrassingly parallel at two
- * levels: the 21 bucket tables are independent of each other, and within one table
- * the permutation draws are independent too.
+ * Slicing keeps the page responsive; it does not make anything finish sooner. In
+ * the browser the bucket tables — which is nearly all of the arithmetic — are
+ * computed in workers instead, and they are the reason the comparison finishes in
+ * a fraction of the time rather than merely staying polite while it does not. See
+ * benchmark-compare-worker-pool.ts.
  *
- * Moving it out would be cheap, mostly because nothing a worker needs is a
- * `Profile`. The plan, the measurements it is based on, and the traps — chiefly
- * that the result must not depend on how many cores the reader has — are written
- * up in docs-developer/benchmark-compare-multithreading.md.
+ * What is left here still earns its keep. `runToCompletion` is what a worker
+ * drives the same computation with, since a worker has no UI to be polite to; and
+ * `runInSlices` remains the fallback path, the CLI's, and the driver for anything
+ * on the main thread that is long enough to be felt but too entangled with a
+ * `Profile` to ship anywhere — see "What not to move" in
+ * docs-developer/benchmark-compare-multithreading.md.
  */

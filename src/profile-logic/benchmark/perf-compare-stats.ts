@@ -566,6 +566,47 @@ export type FamilyMember = {
   comp: ArrayLike<number>;
 };
 
+/**
+ * One range of draws' contribution to a family correction, before anything a
+ * caller asked for has been derived from it.
+ *
+ * The draws are independent, so this is the unit that lets one family be spread
+ * over several threads: `accumulateFamilyPartialInSlices` over a range of draws,
+ * once per thread, then `combineFamilyPartials` over the results. Everything
+ * accumulated here is separable — see the field comments — which is what makes
+ * combining *exact* rather than merely close, and so makes a q-value independent
+ * of how many cores the reader has.
+ */
+export type FamilyPartialCorrection = {
+  memberCount: number;
+  /** Total draws in the family's relabelling set, not the count in this range.
+   * Every quantity read off the null is a fraction of this. */
+  drawCount: number;
+  /** Iterations per side, as the accumulator validated them. */
+  nBase: number;
+  nNew: number;
+  /** The half-open range of draws this covers. Empty ranges are allowed — a
+   * family can be split more ways than it has draws. */
+  drawStart: number;
+  drawEnd: number;
+  /** Observed |t| per member, in input order. Not accumulated at all: it is
+   * derived from the family alone, so every range recomputes the identical
+   * array rather than having it shipped to it. `combineFamilyPartials` checks
+   * that they do agree, since a disagreement would mean the ranges had counted
+   * exceedances against different thresholds. */
+  absT: Float64Array;
+  /** Histogram over "how many observed thresholds did this null value clear",
+   * summed over every member of every draw in this range. Length
+   * `memberCount + 1`. Integer counts, so ranges add elementwise, exactly. */
+  nullsClearing: Float64Array;
+  /** Per member, how many of this range's draws reached its own observation.
+   * Integer counts again, and again added elementwise. */
+  ownHits: Float64Array;
+  /** Largest |t| anywhere in the family, per draw — so each range writes only
+   * the `[drawStart, drawEnd)` slice, and zero elsewhere. */
+  maxima: Float64Array;
+};
+
 export type FamilyCorrection = {
   /** Observed |t| per member, in input order. Recomputed here rather than taken
    * from `welchTTest` so that it comes from exactly the same arithmetic as the
@@ -677,7 +718,9 @@ export type FamilyCorrection = {
  * of `absTForMember`, about a second for the ~3200-member global view of a
  * Speedometer pair. `computeFamilyCorrectionInSlices` is the same computation with
  * a yield point after every draw, for callers that cannot hold the main thread
- * for a second; this one runs it straight through.
+ * for a second; this one runs it straight through. Both are that one second on one
+ * thread — `accumulateFamilyPartialInSlices` plus `combineFamilyPartials` are the
+ * same computation again, split so the draws can be shared out over several.
  */
 export function computeFamilyCorrection(
   members: ReadonlyArray<FamilyMember>,
@@ -693,18 +736,49 @@ export function computeFamilyCorrection(
  * `computeFamilyCorrection`, interruptible between permutation draws. See there
  * for what this computes and why.
  *
- * The draw loop is the only yield point, and it is a fine one: it is where all the
- * time goes, and a single draw is ~0.5ms even for the largest family, so a driver
- * can pace itself to whatever slice it wants. The per-draw work stays in a
- * separate function rather than being written inline here, so that the arithmetic
- * that runs millions of times is in an ordinary function and not in the body of a
- * generator.
+ * Every draw at once, which is one thread's worth of work; the two halves it is
+ * written in terms of are what a caller with more than one thread uses.
  */
 export function* computeFamilyCorrectionInSlices(
   members: ReadonlyArray<FamilyMember>,
   permutations: Int32Array[],
   familyWiseAlpha: number = 0.05
 ): SlicedWork<FamilyCorrection | null> {
+  const partial = yield* accumulateFamilyPartialInSlices(members, permutations);
+  if (partial === null) {
+    return null;
+  }
+  return combineFamilyPartials([partial], familyWiseAlpha);
+}
+
+/**
+ * Apply the draws in `[drawStart, drawEnd)` to the whole family, and report what
+ * they found. `combineFamilyPartials` turns one or more of these into the
+ * correction itself.
+ *
+ * Returns null if the family is empty or its members disagree about how many
+ * iterations there were — the cases `computeFamilyCorrection` has nothing to
+ * correct against. Deterministic from `(members, permutations)`, so every range
+ * over one family reaches the same verdict about that.
+ *
+ * The draw loop is the only yield point, and it is a fine one: it is where all the
+ * time goes, and a single draw is ~0.5ms even for the largest family, so a driver
+ * can pace itself to whatever slice it wants. The per-draw work stays in a
+ * separate function rather than being written inline here, so that the arithmetic
+ * that runs millions of times is in an ordinary function and not in the body of a
+ * generator.
+ *
+ * The set-up before the loop is *not* proportional to the draw range: it is the
+ * whole family either way, ~150ms for the global view of a Speedometer pair. So a
+ * range is worth splitting off only while the draws it takes with it still cost
+ * more than that — see the shard count the worker pool picks.
+ */
+export function* accumulateFamilyPartialInSlices(
+  members: ReadonlyArray<FamilyMember>,
+  permutations: Int32Array[],
+  drawStart: number = 0,
+  drawEnd: number = permutations.length
+): SlicedWork<FamilyPartialCorrection | null> {
   const memberCount = members.length;
   const drawCount = permutations.length;
   if (memberCount === 0 || drawCount === 0) {
@@ -855,10 +929,74 @@ export function* computeFamilyCorrectionInSlices(
     }
     maxima[p] = max;
   };
-  for (let p = 0; p < drawCount; p++) {
+  for (let p = drawStart; p < drawEnd; p++) {
     accumulateDraw(p);
     yield;
   }
+
+  return {
+    memberCount,
+    drawCount,
+    nBase,
+    nNew,
+    drawStart,
+    drawEnd,
+    absT,
+    nullsClearing,
+    ownHits,
+    maxima,
+  };
+}
+
+/**
+ * Derive the correction from one or more draw ranges over the same family.
+ *
+ * **The result does not depend on how the draws were divided up, and that is a
+ * requirement rather than a nicety.** The q-values are load-bearing — they decide
+ * which rows the report shows — so a reader on a laptop and a reader on a
+ * workstation have to be given the same answers about the same two profiles. Two
+ * facts make the combination exact rather than approximate: `nullsClearing` and
+ * `ownHits` are integer counts, at most `memberCount × drawCount` and so far
+ * inside float64's exactly-representable range, which makes summing them
+ * order-independent; and `absT` is recomputed from the same members by every
+ * range, so the thresholds those counts were taken against are bit-identical.
+ * `maxima` needs neither argument, since the ranges are disjoint and each writes
+ * only its own slice.
+ *
+ * The invariants that would break that are checked rather than assumed: the ranges
+ * have to tile `[0, drawCount)` exactly once, and the ranges' `absT` have to
+ * agree. Both are cheap next to the accumulation, and getting either wrong would
+ * otherwise be a wrong number that still looks like a number.
+ */
+export function combineFamilyPartials(
+  partials: ReadonlyArray<FamilyPartialCorrection>,
+  familyWiseAlpha: number = 0.05
+): FamilyCorrection | null {
+  if (partials.length === 0) {
+    return null;
+  }
+  const { memberCount, drawCount, absT } = partials[0];
+
+  const nullsClearing = new Float64Array(memberCount + 1);
+  const ownHits = new Float64Array(memberCount);
+  const maxima = new Float64Array(drawCount);
+  for (const partial of partials) {
+    checkPartialAgrees(partial, partials[0]);
+    for (let i = 0; i <= memberCount; i++) {
+      nullsClearing[i] += partial.nullsClearing[i];
+    }
+    for (let m = 0; m < memberCount; m++) {
+      ownHits[m] += partial.ownHits[m];
+    }
+    for (let p = partial.drawStart; p < partial.drawEnd; p++) {
+      maxima[p] = partial.maxima[p];
+    }
+  }
+  checkDrawRangesTile(partials, drawCount);
+
+  // The same thresholds the ranges counted against, in the same order, since
+  // they are just the sorted `absT` every range agreed on.
+  const ascending = absT.slice().sort();
 
   // nullExceeding[i] = null values reaching ascending[i], i.e. clearing more
   // than i thresholds.
@@ -947,6 +1085,60 @@ export function* computeFamilyCorrectionInSlices(
     familyWisePValues,
     criticalAbsT: maxima[criticalIndex],
   };
+}
+
+/**
+ * Throw unless two ranges are talking about the same family.
+ *
+ * `absT` element by element, not just the shapes: it is the one thing a range
+ * recomputes rather than being told, so it is also the one thing that could
+ * silently differ — a range handed a different member order, or a different
+ * profile's weights, would still produce arrays of the right length full of
+ * plausible counts.
+ */
+function checkPartialAgrees(
+  partial: FamilyPartialCorrection,
+  first: FamilyPartialCorrection
+) {
+  for (const field of ['memberCount', 'drawCount', 'nBase', 'nNew'] as const) {
+    if (partial[field] !== first[field]) {
+      throw new Error(
+        `Cannot combine draw ranges of different families: they disagree about ` +
+          `${field} (${partial[field]} against ${first[field]}).`
+      );
+    }
+  }
+  for (let m = 0; m < first.memberCount; m++) {
+    if (partial.absT[m] !== first.absT[m]) {
+      throw new Error(
+        `Cannot combine draw ranges of different families: they disagree about member ${m}'s observed |t|.`
+      );
+    }
+  }
+}
+
+/** Throw unless the ranges cover every draw exactly once. */
+function checkDrawRangesTile(
+  partials: ReadonlyArray<FamilyPartialCorrection>,
+  drawCount: number
+) {
+  const ranges = partials
+    .map(({ drawStart, drawEnd }) => ({ drawStart, drawEnd }))
+    .sort((a, b) => a.drawStart - b.drawStart);
+  let next = 0;
+  for (const { drawStart, drawEnd } of ranges) {
+    if (drawStart !== next || drawEnd < drawStart) {
+      throw new Error(
+        `Draw ranges do not tile [0, ${drawCount}): expected one starting at ${next}, got [${drawStart}, ${drawEnd}).`
+      );
+    }
+    next = drawEnd;
+  }
+  if (next !== drawCount) {
+    throw new Error(
+      `Draw ranges cover [0, ${next}) but the family has ${drawCount} draws.`
+    );
+  }
 }
 
 /** Number of entries of an ascending array that are <= `value`. */

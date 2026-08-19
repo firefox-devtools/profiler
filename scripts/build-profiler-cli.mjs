@@ -27,9 +27,12 @@ const profilerCliConfig = {
     __BUILD_HASH__: JSON.stringify(BUILD_HASH),
     __PACKAGE_NAME__: JSON.stringify(name),
     __VERSION__: JSON.stringify(version),
-    // SOURCE_MAP_WORKER_PATH is injected by the browser build. The CLI doesn't
-    // use source map workers but the shared code references this constant.
+    // These are injected by the browser build. The CLI doesn't run workers but
+    // the shared code references the constants.
     SOURCE_MAP_WORKER_PATH: JSON.stringify('/source-map.worker.js'),
+    BENCHMARK_COMPARE_WORKER_PATH: JSON.stringify(
+      '/benchmark-compare.worker.js'
+    ),
   },
   external: [...nodeBaseConfig.external, 'gecko-profiler-demangle'],
 };

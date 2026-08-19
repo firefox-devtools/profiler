@@ -81,9 +81,12 @@ export const mainBundleConfig = {
       : 'undefined',
     // no need to define NODE_ENV:
     // esbuild automatically defines NODE_ENV based on the value for "minify"
-    // In dev, the worker is not hashed so the path is predictable.
-    // In production, build.mjs overrides this after building the worker first.
+    // In dev, the workers are not hashed so their paths are predictable.
+    // In production, build.mjs overrides these after building them first.
     SOURCE_MAP_WORKER_PATH: JSON.stringify('/source-map.worker.js'),
+    BENCHMARK_COMPARE_WORKER_PATH: JSON.stringify(
+      '/benchmark-compare.worker.js'
+    ),
   },
   external: ['zlib'],
   plugins: [
@@ -115,29 +118,47 @@ export const mainBundleConfig = {
   ],
 };
 
-// Source map worker bundle configuration.
-// Built as a standalone IIFE so that npm dependencies (lezer, source-map) are
-// bundled into a single file that can be loaded as a Web Worker without needing
-// ES module support. In production the output filename includes a content hash
-// (e.g. source-map-ABCD1234.worker.js). The path is then injected into the main
-// bundle via the SOURCE_MAP_WORKER_PATH define. In dev there is no hash since the
-// dev server always serves fresh content and the define can't be updated mid-watch.
-export const sourceMapWorkerConfig = {
-  ...baseConfig,
-  entryPoints: ['src/profile-logic/source-map.worker.ts'],
-  outdir: 'dist',
-  format: 'iife',
-  platform: 'browser',
-  target: browserslistToEsbuild(),
-  sourcemap: true,
-  splitting: false,
-  entryNames: isProduction ? '[name]-[hash]' : '[name]',
-  metafile: true,
-  plugins: [wasmLoader()],
-};
+// Web Worker bundle configuration.
+//
+// Each worker is built as a standalone IIFE, so that its dependencies end up in a
+// single file that can be loaded as a Web Worker without needing ES module
+// support. In production the output filename includes a content hash (e.g.
+// source-map.worker-ABCD1234.js), and the path is then injected into the main
+// bundle via a define. In dev there is no hash, since the dev server always serves
+// fresh content and the define can't be updated mid-watch.
+function workerConfig(entryPoint, plugins = []) {
+  return {
+    ...baseConfig,
+    entryPoints: [entryPoint],
+    outdir: 'dist',
+    format: 'iife',
+    platform: 'browser',
+    target: browserslistToEsbuild(),
+    sourcemap: true,
+    splitting: false,
+    entryNames: isProduction ? '[name]-[hash]' : '[name]',
+    metafile: true,
+    plugins,
+  };
+}
 
-export function getSourceMapWorkerPath(metafile) {
-  const [entryPoint] = sourceMapWorkerConfig.entryPoints;
+// Source map symbolication: needs the wasm loader for the `source-map` package's
+// mappings.wasm.
+export const sourceMapWorkerConfig = workerConfig(
+  'src/profile-logic/source-map.worker.ts',
+  [wasmLoader()]
+);
+
+// The benchmark comparison's bucket tables. Nothing but the comparison's own
+// arithmetic, so no plugins and a very small bundle.
+export const benchmarkCompareWorkerConfig = workerConfig(
+  'src/profile-logic/benchmark/benchmark-compare.worker.ts'
+);
+
+/** The URL to load a worker built with `workerConfig` from, read out of the
+ * build's metafile since in production the filename carries a content hash. */
+export function getWorkerPath(config, metafile) {
+  const [entryPoint] = config.entryPoints;
   const [outputPath] = Object.entries(metafile.outputs).find(
     ([, output]) => output.entryPoint === entryPoint
   );

@@ -6,29 +6,39 @@ import esbuild from 'esbuild';
 import {
   mainBundleConfig,
   sourceMapWorkerConfig,
-  getSourceMapWorkerPath,
+  benchmarkCompareWorkerConfig,
+  getWorkerPath,
 } from './lib/esbuild-configs.mjs';
 import { cleanDist, saveMetafile } from './lib/build-utils.mjs';
 
 async function build() {
   cleanDist();
 
-  // Build the worker first so we can read its output path from the metafile
-  // and inject it into the main bundle via SOURCE_MAP_WORKER_PATH.
-  const workerResult = await esbuild.build(sourceMapWorkerConfig);
+  // Build the workers first so we can read their output paths from their
+  // metafiles and inject them into the main bundle as defines.
+  const [sourceMapWorker, benchmarkCompareWorker] = await Promise.all([
+    esbuild.build(sourceMapWorkerConfig),
+    esbuild.build(benchmarkCompareWorkerConfig),
+  ]);
 
   const buildResult = await esbuild.build({
     ...mainBundleConfig,
     define: {
       ...mainBundleConfig.define,
       SOURCE_MAP_WORKER_PATH: JSON.stringify(
-        getSourceMapWorkerPath(workerResult.metafile)
+        getWorkerPath(sourceMapWorkerConfig, sourceMapWorker.metafile)
+      ),
+      BENCHMARK_COMPARE_WORKER_PATH: JSON.stringify(
+        getWorkerPath(
+          benchmarkCompareWorkerConfig,
+          benchmarkCompareWorker.metafile
+        )
       ),
     },
   });
 
   saveMetafile(buildResult);
-  console.log('✅ Main browser build and source map worker completed');
+  console.log('✅ Main browser build and workers completed');
 }
 
 build().catch(console.error);
