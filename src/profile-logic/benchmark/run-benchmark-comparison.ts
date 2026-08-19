@@ -35,6 +35,7 @@ import type {
 } from './extract-benchmark-stats';
 import {
   applyBenjaminiHochberg,
+  bucketTableSideOf,
   compareBucketsInSlices,
   compareIterationTotals,
   computeGlobalBuckets,
@@ -172,18 +173,13 @@ export function createInProcessTableRunner(
     run: (job) => {
       const result = queue.then(() =>
         runInSlices(
-          compareBucketsInSlices(
-            job.baseBuckets,
-            job.newBuckets,
-            setup.base.bucketNames,
-            setup.new.bucketNames,
-            setup.base.bucketFuncs,
-            setup.new.bucketFuncs,
-            job.iterationCount,
-            false,
-            setup.base.bucketKeys,
-            setup.new.bucketKeys
-          ),
+          compareBucketsInSlices({
+            base: setup.base,
+            new: setup.new,
+            baseBuckets: job.baseBuckets,
+            newBuckets: job.newBuckets,
+            iterationCount: job.iterationCount,
+          }),
           setup.signal
         )
       );
@@ -414,8 +410,8 @@ export async function* compareStatsProgressively(
   await pause(signal);
 
   const runner = makeTableRunner({
-    base: sideOf(baseStats),
-    new: sideOf(newStats),
+    base: bucketTableSideOf(baseStats),
+    new: bucketTableSideOf(newStats),
     jobCount: jobs.length,
     signal,
   });
@@ -456,17 +452,6 @@ export async function* compareStatsProgressively(
 }
 
 type TableResult = { label: string; comparisons: BucketComparison[] };
-
-/** The bucket metadata a table runner needs from one profile's stats.
- * `bucketKeys` was added after the rest, so a stats file that predates it falls
- * back to matching by name. */
-function sideOf(stats: ProfileBenchmarkStats): BucketTableSide {
-  return {
-    bucketNames: stats.bucketNames,
-    bucketKeys: stats.bucketKeys ?? stats.bucketNames,
-    bucketFuncs: stats.bucketFuncs,
-  };
-}
 
 function findSuite(stats: ProfileBenchmarkStats, suiteName: string) {
   return stats.suites.find((suite) => suite.suiteName === suiteName);

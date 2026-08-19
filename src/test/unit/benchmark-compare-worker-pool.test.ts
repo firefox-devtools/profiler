@@ -180,18 +180,13 @@ function makePool(workerCount: number, jobCount: number = 1) {
 
 /** The answer one thread would have given, which is what the pool has to match. */
 function singleThreaded() {
-  return compareBuckets(
-    FIXTURE.baseBuckets,
-    FIXTURE.newBuckets,
-    FIXTURE.side.bucketNames,
-    FIXTURE.side.bucketNames,
-    FIXTURE.side.bucketFuncs,
-    FIXTURE.side.bucketFuncs,
-    FIXTURE.iterationCount,
-    false,
-    FIXTURE.side.bucketKeys,
-    FIXTURE.side.bucketKeys
-  );
+  return compareBuckets({
+    base: FIXTURE.side,
+    new: FIXTURE.side,
+    baseBuckets: FIXTURE.baseBuckets,
+    newBuckets: FIXTURE.newBuckets,
+    iterationCount: FIXTURE.iterationCount,
+  });
 }
 
 describe('the benchmark compare worker', function () {
