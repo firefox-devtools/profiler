@@ -7,12 +7,13 @@ import {
   classifyChange,
   bucketTableSideOf,
   combineBucketTableShards,
-  compareBuckets,
+  compareBucketsOf,
   compareIterationTotals,
   computeBucketTableShardInSlices,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
   describeVerdict,
+  matchBucketKeys,
 } from '../../profile-logic/benchmark/compare-benchmark-stats';
 import type { ScoreComparison } from '../../profile-logic/benchmark/compare-benchmark-stats';
 import { studentTCritical } from '../../profile-logic/benchmark/perf-compare-stats';
@@ -76,13 +77,13 @@ function compare(
   newBuckets: ProfileBenchmarkStats['suites'][0]['buckets'],
   iterationCount: number
 ) {
-  return compareBuckets({
-    base: bucketTableSideOf(baseStats),
-    new: bucketTableSideOf(newStats),
-    baseBuckets,
-    newBuckets,
-    iterationCount,
-  });
+  return compareBucketsOf(
+    {
+      base: bucketTableSideOf(baseStats),
+      new: bucketTableSideOf(newStats),
+    },
+    { baseBuckets, newBuckets, iterationCount }
+  );
 }
 
 describe('computeSharedSuiteFactors', function () {
@@ -381,6 +382,60 @@ describe('bucket matching', function () {
     // The heavier of the two collapsed funcs represents the row.
     expect(results[0].key).toBe('foo.Bar');
   });
+
+  it('lets two tables pick different representatives for the same key', function () {
+    // Which of a profile's own colliding funcs speaks for the row is decided by
+    // weight, and the weights are the table's rather than the profile's -- so the
+    // same key can be named after one func in one subtest and the other in the
+    // next, and expand to a different flame graph in each. Which is why the choice
+    // belongs where the weights are, in the table, and not next to the matching in
+    // `matchBucketKeys`.
+    const light = [1, 1, 1, 1];
+    const heavy = [5, 5, 5, 5];
+    const stats = makeStats(
+      ['Foo.bar', 'foo.Bar'],
+      [
+        {
+          suiteName: 'A',
+          buckets: [
+            [0, heavy],
+            [1, light],
+          ],
+        },
+        {
+          suiteName: 'B',
+          buckets: [
+            [0, light],
+            [1, heavy],
+          ],
+        },
+      ]
+    );
+
+    const tableFor = (index: number) =>
+      compare(
+        stats,
+        stats,
+        stats.suites[index].buckets,
+        stats.suites[index].buckets,
+        light.length
+      );
+
+    const [inA] = tableFor(0);
+    const [inB] = tableFor(1);
+    expect([inA.key, inA.bucketName, inA.baseFunc, inA.newFunc]).toEqual([
+      'Foo.bar',
+      'Foo.bar',
+      0,
+      0,
+    ]);
+    expect([inB.key, inB.bucketName, inB.baseFunc, inB.newFunc]).toEqual([
+      'foo.Bar',
+      'foo.Bar',
+      1,
+      1,
+    ]);
+  });
 });
 
 describe('multiple-comparisons correction', function () {
@@ -608,9 +663,12 @@ describe('multiple-comparisons correction', function () {
      * permutation draws, combined afterwards. */
     function compareFamilyInShards(count: number, shardCount: number) {
       const { baseStats, newStats, iterationCount } = makeFamilyPair(count);
-      const input = {
+      const meta = {
         base: bucketTableSideOf(baseStats),
         new: bucketTableSideOf(newStats),
+      };
+      const input = {
+        keys: matchBucketKeys(meta),
         baseBuckets: baseStats.suites[0].buckets,
         newBuckets: newStats.suites[0].buckets,
         iterationCount,
@@ -626,7 +684,7 @@ describe('multiple-comparisons correction', function () {
           )
         );
       }
-      return { shards, table: combineBucketTableShards(shards) };
+      return { shards, table: combineBucketTableShards(shards, meta) };
     }
 
     it('produces exactly the table the single-threaded path does', function () {
@@ -657,9 +715,12 @@ describe('multiple-comparisons correction', function () {
     it('leaves a table it cannot calibrate uncorrected, from any number of shards', function () {
       // No buckets at all: there is no family to relabel, so the rows keep the
       // Welch stand-in and nothing throws on the way out.
-      const input = {
+      const meta = {
         base: { bucketNames: [], bucketKeys: [], bucketFuncs: [] },
         new: { bucketNames: [], bucketKeys: [], bucketFuncs: [] },
+      };
+      const input = {
+        keys: matchBucketKeys(meta),
         baseBuckets: [],
         newBuckets: [],
         iterationCount: 8,
@@ -670,7 +731,7 @@ describe('multiple-comparisons correction', function () {
         )
       );
       expect(shards.map((shard) => shard.family)).toEqual([null, null, null]);
-      expect(combineBucketTableShards(shards)).toEqual([]);
+      expect(combineBucketTableShards(shards, meta)).toEqual([]);
     });
   });
 });

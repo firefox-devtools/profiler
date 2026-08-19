@@ -217,7 +217,10 @@ export function createTableWorkerPool(
       table.shards.push(output.shard);
       if (table.shards.length === table.shardCount) {
         try {
-          const comparisons = combineBucketTableShards(table.shards);
+          const comparisons = combineBucketTableShards(
+            table.shards,
+            setup.meta
+          );
           settle(table, () => table.resolve(comparisons));
         } catch (err) {
           settle(table, () => table.reject(toError(err)));
@@ -244,13 +247,10 @@ export function createTableWorkerPool(
       );
     };
     workers.push(entry);
-    // Once per worker rather than once per job: a few thousand strings, and every
-    // job needs all of them.
-    const init: WorkerInput = {
-      type: 'init',
-      base: setup.base,
-      new: setup.new,
-    };
+    // Once per worker rather than once per job: the same answer for every table,
+    // and every table needs all of it. Three Int32Arrays; `setup.meta`, which is
+    // where the strings are, stays here.
+    const init: WorkerInput = { type: 'init', keys: setup.keys };
     worker.postMessage(init);
   }
 

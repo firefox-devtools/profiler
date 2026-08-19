@@ -13,7 +13,7 @@ import {
   applyBenjaminiHochberg,
   bucketTableSideOf,
   classifyChange,
-  compareBuckets,
+  compareBucketsOf,
   compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
@@ -263,8 +263,10 @@ async function main() {
 
   // Names, keys and funcs for each side, with the fallbacks a stats file older
   // than one of those fields needs. Once, here, rather than per table.
-  const baseSide = bucketTableSideOf(base);
-  const newSide = bucketTableSideOf(newStats);
+  const meta = {
+    base: bucketTableSideOf(base),
+    new: bucketTableSideOf(newStats),
+  };
 
   const iterationCount = base.suites[0]?.iterationCount ?? 1;
 
@@ -320,9 +322,7 @@ async function main() {
     console.log('\n--- Score and subtest totals ---\n');
     printScoreAndSubtests(overallScore, suiteScores);
 
-    const globalComparisons = compareBuckets({
-      base: baseSide,
-      new: newSide,
+    const globalComparisons = compareBucketsOf(meta, {
       baseBuckets: baseGlobalBuckets,
       newBuckets: newGlobalBuckets,
       iterationCount,
@@ -359,9 +359,7 @@ async function main() {
         );
         continue;
       }
-      const comparisons = compareBuckets({
-        base: baseSide,
-        new: newSide,
+      const comparisons = compareBucketsOf(meta, {
         baseBuckets: baseSuite.buckets,
         newBuckets: newSuite.buckets,
         iterationCount: baseSuite.iterationCount,

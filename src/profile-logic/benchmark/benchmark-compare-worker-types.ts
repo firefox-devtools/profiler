@@ -12,7 +12,7 @@
 import type { SparseBucketEntry } from './extract-benchmark-stats';
 import type {
   BucketTableShard,
-  BucketTableSide,
+  MatchedBucketKeys,
 } from './compare-benchmark-stats';
 
 /**
@@ -79,13 +79,19 @@ export function unpackBuckets(
 }
 
 /**
- * The two profiles' bucket metadata, sent once per worker rather than once per
- * job. A few thousand strings each, and every job needs all of it.
+ * Which of the two profiles' buckets are the same bucket, sent once per worker
+ * rather than once per job: it is the same answer for every table, and every table
+ * needs all of it.
+ *
+ * Three `Int32Array`s, which is all that is left of this message now that
+ * `matchBucketKeys` resolves the key strings away on the main thread. It used to be
+ * both profiles' `bucketNames` and `bucketKeys` — four arrays of a few thousand
+ * strings — and reading it cost each of eight workers ~90ms before it could start
+ * on a shard, plus ~35ms of shutdown GC to free them again.
  */
 export type WorkerInit = {
   type: 'init';
-  base: BucketTableSide;
-  new: BucketTableSide;
+  keys: MatchedBucketKeys;
 };
 
 /** One shard of one table. `shardCount` is how many of these the pool split this
