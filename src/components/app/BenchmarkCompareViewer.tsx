@@ -556,16 +556,28 @@ type RowExpansion =
   | { status: 'ready'; count: number }
   | { status: 'none' };
 
-/** A spinner where the count will be, sized to sit in the badge's place so the
- * row does not shift when the number arrives. */
+/**
+ * A spinner where the count will be.
+ *
+ * The outer element is a `benchmarkBadge`, the same one the count arrives in, with
+ * the spinner inside it — rather than a spinner styled to resemble a badge. Sizing
+ * the two to match by hand is what it was before, and the two boxes drifted: the
+ * spinner is a bordered empty box, so its height is its border box and all of that
+ * sits above the flex line's baseline, where a badge puts its descender space
+ * below. The row grew by a couple of pixels while it was there and shrank back when
+ * the number replaced it. Nesting makes the box identical because it is the same
+ * box.
+ */
 function PendingBadge() {
   return (
     <span
-      className="benchmarkSpinner benchmarkSpinner--badge"
+      className="benchmarkBadge benchmarkBadge--pending"
       title="Still working out which functions moved in this row."
       aria-label="Computing"
       role="progressbar"
-    />
+    >
+      <span className="benchmarkSpinner benchmarkSpinner--badge" />
+    </span>
   );
 }
 
