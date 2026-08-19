@@ -428,64 +428,166 @@ export type BucketComparison = {
   newFunc: IndexIntoFuncTable | null;
 } & ComparisonStats;
 
-type KeyMapEntry = {
-  /** Human-readable display name for this key (taken from the first bucket
-   * seen with this key — usually a function name). */
-  displayName: string;
-  /** The key as it appeared in the profile, before case folding. Reported as
-   * the row's key so that callers see the bucket's own spelling rather than the
-   * lower-cased form matching uses internally. */
-  originalKey: string;
+/**
+ * A `BucketComparison` before its names are looked up: what a table computes, and
+ * what comes back from a worker.
+ *
+ * The four string and func fields of a `BucketComparison` are all derived from a
+ * bucket index and the metadata, and the metadata never leaves the main thread, so
+ * a row travels as two integers and is resolved on arrival by
+ * `resolveBucketTableRows`. On a Speedometer 3 pair that is ~6800 rows not
+ * carrying two strings each back over a `postMessage`.
+ */
+export type BucketTableRow = {
+  /**
+   * `bucketIndex` of the base profile's representative bucket for this row's key,
+   * or -1 if the base profile has no bucket with that key.
+   *
+   * "Representative" because several of a profile's own buckets can share a key —
+   * an inlined and a non-inlined copy of one JS function have the same source
+   * location, and two spellings of a DOM entry point fold to the same name — in
+   * which case their weights are summed into one row and the heaviest of them
+   * stands for the group. So which bucket this is depends on the weights, and the
+   * weights are the table's, not the profile's: the same key can be represented by
+   * one bucket in the global table and by another in a subtest's. That is why the
+   * choice is made here, where the weights are, rather than alongside the matching.
+   */
+  baseBucket: number;
+  /** The same for the new profile. At least one of the two is not -1. */
+  newBucket: number;
+} & ComparisonStats;
+
+/**
+ * Which buckets of the two profiles are the same bucket, as integers.
+ *
+ * `base[b]` and `new[b]` are the *key id* of bucket `b` on that side: two buckets
+ * are the same bucket exactly when their key ids are equal, whether they are on
+ * the same side or on opposite ones. Ids run from 0 to `keyCount - 1` and are
+ * shared between the two arrays, so a table can index a dense array by one.
+ *
+ * This is the whole of what a bucket table needs to know about the keys, and the
+ * only form of it a worker is sent. See `matchBucketKeys` for why it is worth
+ * resolving the strings away before they get anywhere near a thread.
+ */
+export type MatchedBucketKeys = {
+  base: Int32Array;
+  new: Int32Array;
+  /** One past the largest id in either array. */
+  keyCount: number;
+};
+
+/**
+ * Decide which of the two profiles' buckets are the same bucket, once.
+ *
+ * **Why this is a step of its own.** Matching is the only thing a bucket table
+ * wants the key strings for, it is the same answer for every table, and it is
+ * pure function of metadata the main thread has anyway. Leaving it to the tables
+ * meant every worker was sent both profiles' `bucketNames` and `bucketKeys` — four
+ * arrays of a few thousand strings, and `bucketKeys` holds source locations, so
+ * long ones. Measured on a Speedometer 3 pair over eight workers, reading that one
+ * `init` message cost ~90ms per worker *before* it could start its shard, and
+ * freeing the strings again cost another ~35ms in each worker's shutdown GC. Most
+ * of both was contention on the process's jemalloc arena, since eight threads were
+ * allocating and freeing tens of thousands of small char buffers at once. Sending
+ * three `Int32Array`s instead costs none of it, and saves each shard the case
+ * folding and string hashing below, which the shards were repeating.
+ *
+ * **The folding.** Name-based keys match case-insensitively: without a source
+ * location to pin the function down, the name is all we have, and engines disagree
+ * on the capitalisation of the same DOM entry point (Gecko's
+ * IDBDatabase.transaction vs IdbDatabase.transaction elsewhere). Location keys are
+ * left alone — filenames and URL paths are case-sensitive, so folding their case
+ * could merge two genuinely different sources. A key that is still the name is a
+ * name key, whether because the func has no usable location or because the stats
+ * file predates `bucketKeys` entirely.
+ */
+export function matchBucketKeys(meta: BucketTableMetadata): MatchedBucketKeys {
+  // Shared across both sides: that a base bucket and a new bucket land on the
+  // same id is the entire point.
+  const idPerKey = new Map<string, number>();
+  const idsFor = (side: BucketTableSide): Int32Array => {
+    const { bucketNames, bucketKeys } = side;
+    const ids = new Int32Array(bucketNames.length);
+    for (let b = 0; b < bucketNames.length; b++) {
+      const fallback = `bucket#${b}`;
+      const rawKey = bucketKeys[b] ?? fallback;
+      const name = bucketNames[b] ?? fallback;
+      const key = rawKey === name ? name.toLowerCase() : rawKey;
+      let id = idPerKey.get(key);
+      if (id === undefined) {
+        id = idPerKey.size;
+        idPerKey.set(key, id);
+      }
+      ids[b] = id;
+    }
+    return ids;
+  };
+  // Base first, so that ids ascend in base-bucket order, which is the order the
+  // rows of a table come out in.
+  const base = idsFor(meta.base);
+  return { base, new: idsFor(meta.new), keyCount: idPerKey.size };
+}
+
+/** One key's worth of one side of a table: the buckets that share a key id,
+ * summed. */
+type KeyGroup = {
+  keyId: number;
   /** Borrowed from `entry.iterationTotals` on first insert, then replaced by a
-   * fresh Float64Array on collision (see buildKeyMap). Callers must not mutate
+   * fresh Float64Array on collision (see buildKeyGroups). Callers must not mutate
    * this unless `owned` is true. */
   iterationTotals: ArrayLike<number>;
-  /** True iff `iterationTotals` is a fresh Float64Array owned by this entry. */
+  /** True iff `iterationTotals` is a fresh Float64Array owned by this group. */
   owned: boolean;
-  /** Func index of the highest-weight bucket with this key (representative). */
-  representativeFunc: IndexIntoFuncTable;
+  /** `bucketIndex` of the highest-weight bucket in the group. What the row is
+   * named and drawn from; see `resolveBucketTableRows`. */
+  representativeBucket: number;
   /** Sum of iterationTotals for that representative bucket alone. */
   representativeWeight: number;
 };
 
-/** Build a key → iterationTotals + representative-func map for a set of sparse
- * bucket entries. Iteration-total arrays are borrowed by reference until a
- * collision forces a copy — the extraction step returns subarrays of a shared
- * Float64Array, so avoiding copies here saves ~200k small allocations per side. */
-function buildKeyMap(
+type KeyGroups = {
+  /** In the order the buckets were encountered, which is the order a table's rows
+   * come out in and so has to be the same in every shard of it. */
+  groups: KeyGroup[];
+  /** Key id → index into `groups`, or -1 for a key this side does not have. */
+  indexByKeyId: Int32Array;
+};
+
+/** Group one side's sparse bucket entries by key id, summing the ones that share
+ * an id. Iteration-total arrays are borrowed by reference until a collision forces
+ * a copy — the extraction step returns subarrays of a shared Float64Array, so
+ * avoiding copies here saves ~200k small allocations per side. */
+function buildKeyGroups(
   buckets: SparseBucketEntry[],
-  bucketKeys: string[],
-  bucketNames: string[],
-  bucketFuncs: IndexIntoFuncTable[]
-): Map<string, KeyMapEntry> {
-  const map = new Map<string, KeyMapEntry>();
+  keyIds: Int32Array,
+  keyCount: number
+): KeyGroups {
+  const groups: KeyGroup[] = [];
+  const indexByKeyId = new Int32Array(keyCount).fill(-1);
   for (const entry of buckets) {
-    const rawKey =
-      bucketKeys[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
-    const name =
-      bucketNames[entry.bucketIndex] ?? `bucket#${entry.bucketIndex}`;
-    // Name-based keys match case-insensitively: without a source location to
-    // pin the function down, the name is all we have, and engines disagree on
-    // the capitalisation of the same DOM entry point (Gecko's
-    // IDBDatabase.transaction vs IdbDatabase.transaction elsewhere). Location
-    // keys are left alone — filenames and URL paths are case-sensitive, so
-    // folding their case could merge two genuinely different sources. A key
-    // that is still the name is a name key, whether because the func has no
-    // usable location or because the stats file predates bucketKeys entirely.
-    const key = rawKey === name ? name.toLowerCase() : rawKey;
-    const func = bucketFuncs[entry.bucketIndex];
+    const { bucketIndex } = entry;
+    if (bucketIndex < 0 || bucketIndex >= keyIds.length) {
+      // Reading past the key ids would silently pick up id 0 and merge this
+      // bucket into whichever key that is, which is a wrong table rather than a
+      // missing one.
+      throw new Error(
+        `Bucket ${bucketIndex} has no key: the matched keys cover ${keyIds.length} buckets.`
+      );
+    }
+    const keyId = keyIds[bucketIndex];
     const iterTotals = entry.iterationTotals;
     const iterLen = iterTotals.length;
     let weight = 0;
     for (let i = 0; i < iterLen; i++) {
       weight += iterTotals[i];
     }
-    const existing = map.get(key);
-    if (existing !== undefined) {
+    const at = indexByKeyId[keyId];
+    if (at !== -1) {
       // Two funcs collapsed to the same matching key (e.g. an inlined and
       // non-inlined copy of the same JS function). Sum their iteration totals
       // together; on the first collision materialise into a fresh Float64Array
       // since the borrowed entry may be a subarray of the source buffer.
+      const existing = groups[at];
       let dest: Float64Array;
       if (existing.owned) {
         dest = existing.iterationTotals as Float64Array;
@@ -498,23 +600,21 @@ function buildKeyMap(
         dest[i] += iterTotals[i];
       }
       if (weight > existing.representativeWeight) {
-        existing.representativeFunc = func;
+        existing.representativeBucket = bucketIndex;
         existing.representativeWeight = weight;
-        existing.displayName = name;
-        existing.originalKey = rawKey;
       }
     } else {
-      map.set(key, {
-        displayName: name,
-        originalKey: rawKey,
+      indexByKeyId[keyId] = groups.length;
+      groups.push({
+        keyId,
         iterationTotals: iterTotals,
         owned: false,
-        representativeFunc: func,
+        representativeBucket: bucketIndex,
         representativeWeight: weight,
       });
     }
   }
-  return map;
+  return { groups, indexByKeyId };
 }
 
 /**
@@ -522,13 +622,29 @@ function buildKeyMap(
  * For JS funcs, the key is the source location (filename:line:col) so that
  * naming differences across engines don't prevent the same function from
  * matching. For everything else, the key is the bucket name, matched
- * case-insensitively.
+ * case-insensitively. `matchBucketKeys` has already decided all of that; what
+ * this sees of it is `input.keys`.
  *
  * Buckets that appear in only one profile are treated as
  * "appeared"/"disappeared" unless `excludeAppearedDisappeared` is set.
  */
-export function compareBuckets(input: BucketTableInput): BucketComparison[] {
-  return runToCompletion(compareBucketsInSlices(input));
+export function compareBuckets(
+  input: BucketTableInput,
+  meta: BucketTableMetadata
+): BucketComparison[] {
+  return runToCompletion(compareBucketsInSlices(input, meta));
+}
+
+/**
+ * `compareBuckets` for a caller with one table to compute and no matching in hand,
+ * which is the CLI and the tests. The browser matches once for the whole
+ * comparison instead; see `TableRunnerSetup`.
+ */
+export function compareBucketsOf(
+  meta: BucketTableMetadata,
+  table: Omit<BucketTableInput, 'keys'>
+): BucketComparison[] {
+  return compareBuckets({ keys: matchBucketKeys(meta), ...table }, meta);
 }
 
 /**
@@ -543,23 +659,38 @@ export function compareBuckets(input: BucketTableInput): BucketComparison[] {
  * the same code rather than two implementations that have to be kept agreeing.
  */
 export function* compareBucketsInSlices(
-  input: BucketTableInput
+  input: BucketTableInput,
+  meta: BucketTableMetadata
 ): SlicedWork<BucketComparison[]> {
   const shard = yield* computeBucketTableShardInSlices(input, {
     index: 0,
     count: 1,
   });
-  return combineBucketTableShards([shard]);
+  return combineBucketTableShards([shard], meta);
 }
 
 /** One profile's bucket metadata: what a table needs to know about a side
  * besides the per-iteration weights themselves. The three arrays are indexed by
  * `SparseBucketEntry.bucketIndex` and cover every bucket in the profile, not just
- * the ones in a given table, so a worker is sent them once rather than per job. */
+ * the ones in a given table. */
 export type BucketTableSide = {
   bucketNames: string[];
   bucketKeys: string[];
   bucketFuncs: IndexIntoFuncTable[];
+};
+
+/**
+ * Both profiles' bucket metadata.
+ *
+ * **Main-thread only, deliberately.** Two things are wanted from it: which buckets
+ * match, which `matchBucketKeys` resolves to integers up front, and what to call a
+ * row, which `resolveBucketTableRows` does to the rows as they come back. Neither
+ * happens where a table is computed, so none of these strings has to be anywhere
+ * near a worker — see `matchBucketKeys` for what it cost when they were.
+ */
+export type BucketTableMetadata = {
+  base: BucketTableSide;
+  new: BucketTableSide;
 };
 
 /**
@@ -592,8 +723,8 @@ export function bucketTableSideOf(
  * them type-checked, ran, and quietly compared the wrong things.
  */
 export type BucketTableInput = {
-  base: BucketTableSide;
-  new: BucketTableSide;
+  /** From `matchBucketKeys`, once per comparison rather than once per table. */
+  keys: MatchedBucketKeys;
   baseBuckets: SparseBucketEntry[];
   newBuckets: SparseBucketEntry[];
   iterationCount: number;
@@ -616,7 +747,7 @@ export type BucketTableShard = {
    * only from shard 0, since every shard would produce the identical list and
    * there is no point sending it back more than once.
    */
-  rows: BucketComparison[] | null;
+  rows: BucketTableRow[] | null;
   /** Null when the family cannot be calibrated at all; see
    * `accumulateFamilyPartialInSlices`. Every shard of a table agrees about that,
    * since it is a property of the family rather than of the draws. */
@@ -644,8 +775,7 @@ export function* computeBucketTableShardInSlices(
   shard: BucketTableShardSpec
 ): SlicedWork<BucketTableShard> {
   const {
-    base,
-    new: newSide,
+    keys,
     baseBuckets,
     newBuckets,
     iterationCount,
@@ -653,57 +783,56 @@ export function* computeBucketTableShardInSlices(
   } = input;
   const withRows = shard.index === 0;
 
-  const baseMap = buildKeyMap(
-    baseBuckets,
-    base.bucketKeys,
-    base.bucketNames,
-    base.bucketFuncs
-  );
+  const baseGroups = buildKeyGroups(baseBuckets, keys.base, keys.keyCount);
   yield;
-  const newMap = buildKeyMap(
-    newBuckets,
-    newSide.bucketKeys,
-    newSide.bucketNames,
-    newSide.bucketFuncs
-  );
+  const newGroups = buildKeyGroups(newBuckets, keys.new, keys.keyCount);
 
-  const allKeys = excludeAppearedDisappeared
-    ? new Set([...baseMap.keys()].filter((k) => newMap.has(k)))
-    : new Set([...baseMap.keys(), ...newMap.keys()]);
+  // The two sides paired up by key, in base-bucket order and then whatever only
+  // the new profile has. Materialised rather than walked in place because the loop
+  // below has to be able to yield out of the middle of it, and because the order
+  // is load-bearing: it is the order the rows come out in, and every shard of a
+  // table has to agree about it for `combineFamilyPartials` to be able to check
+  // that they were looking at the same members.
+  const pairs: Array<{ base: KeyGroup | null; new: KeyGroup | null }> = [];
+  for (const group of baseGroups.groups) {
+    const at = newGroups.indexByKeyId[group.keyId];
+    if (at !== -1) {
+      pairs.push({ base: group, new: newGroups.groups[at] });
+    } else if (!excludeAppearedDisappeared) {
+      pairs.push({ base: group, new: null });
+    }
+  }
+  if (!excludeAppearedDisappeared) {
+    for (const group of newGroups.groups) {
+      if (baseGroups.indexByKeyId[group.keyId] === -1) {
+        pairs.push({ base: null, new: group });
+      }
+    }
+  }
 
   const zeros = new Array<number>(iterationCount).fill(0);
 
-  const rows: BucketComparison[] | null = withRows ? [] : null;
+  const rows: BucketTableRow[] | null = withRows ? [] : null;
   const family: FamilyMember[] = [];
   let sinceYield = 0;
-  for (const key of allKeys) {
+  for (const pair of pairs) {
     // A Welch t per key, so a few microseconds each; a few hundred at a time is
     // well inside any slice a driver would pick.
     if (++sinceYield === 256) {
       sinceYield = 0;
       yield;
     }
-    const baseEntry = baseMap.get(key);
-    const newEntry = newMap.get(key);
-    const baseIter = baseEntry?.iterationTotals ?? zeros;
-    const newIter = newEntry?.iterationTotals ?? zeros;
+    const baseIter = pair.base?.iterationTotals ?? zeros;
+    const newIter = pair.new?.iterationTotals ?? zeros;
 
     if (mean(baseIter) === 0 && mean(newIter) === 0) {
       continue;
     }
 
     if (rows !== null) {
-      // Prefer the base profile's display name; fall back to the new one. Same
-      // for the key's original spelling, which the two sides may disagree on.
-      const displayName =
-        baseEntry?.displayName ?? newEntry?.displayName ?? key;
-      const originalKey =
-        baseEntry?.originalKey ?? newEntry?.originalKey ?? key;
       rows.push({
-        key: originalKey,
-        bucketName: displayName,
-        baseFunc: baseEntry?.representativeFunc ?? null,
-        newFunc: newEntry?.representativeFunc ?? null,
+        baseBucket: pair.base?.representativeBucket ?? -1,
+        newBucket: pair.new?.representativeBucket ?? -1,
         ...computeComparisonStats(baseIter, newIter, 'family'),
       });
     }
@@ -734,17 +863,54 @@ export function* computeBucketTableShardInSlices(
 }
 
 /**
+ * Look up what each row is called.
+ *
+ * The naming follows the base profile whenever it has the key at all, since the
+ * two sides can spell it differently — that is the whole point of the case folding
+ * in `matchBucketKeys` — and a report that switched between the two spellings
+ * depending on which side happened to weigh more would be reporting on its own
+ * arithmetic. Which of one side's own buckets speaks for it is `baseBucket`'s
+ * business; see `BucketTableRow`.
+ */
+function resolveBucketTableRows(
+  rows: BucketTableRow[],
+  meta: BucketTableMetadata
+): BucketComparison[] {
+  return rows.map(({ baseBucket, newBucket, ...stats }) => {
+    const named =
+      baseBucket !== -1
+        ? { side: meta.base, bucket: baseBucket }
+        : { side: meta.new, bucket: newBucket };
+    // Only reachable from a stats file whose metadata is shorter than its bucket
+    // indices, which `bucketTableSideOf` rules out for every real caller.
+    const fallback = `bucket#${named.bucket}`;
+    return {
+      key: named.side.bucketKeys[named.bucket] ?? fallback,
+      bucketName: named.side.bucketNames[named.bucket] ?? fallback,
+      baseFunc:
+        baseBucket === -1 ? null : (meta.base.bucketFuncs[baseBucket] ?? null),
+      newFunc:
+        newBucket === -1 ? null : (meta.new.bucketFuncs[newBucket] ?? null),
+      ...stats,
+    };
+  });
+}
+
+/**
  * Put a table's shards back together: combine their draw ranges into one family
- * correction and write it onto the rows.
+ * correction, write it onto the rows, and name them.
  *
  * Cheap — a few passes over the members plus a sort of the per-draw maxima, a
  * fraction of a millisecond against the second the shards spent — which is why
- * this can sit on the main thread even when the shards ran in workers.
+ * this can sit on the main thread even when the shards ran in workers. Which is
+ * also where `meta` has to be read: it is the one part of a comparison that is
+ * never sent anywhere.
  */
 export function combineBucketTableShards(
-  shards: ReadonlyArray<BucketTableShard>
+  shards: ReadonlyArray<BucketTableShard>,
+  meta: BucketTableMetadata
 ): BucketComparison[] {
-  let rows: BucketComparison[] | null = null;
+  let rows: BucketTableRow[] | null = null;
   const families: FamilyPartialCorrection[] = [];
   let uncalibratable = false;
   for (const shard of shards) {
@@ -767,13 +933,13 @@ export function combineBucketTableShards(
     throw new Error('No shard of a bucket table carried its rows.');
   }
   if (uncalibratable) {
-    return rows;
+    return resolveBucketTableRows(rows, meta);
   }
   const correction = combineFamilyPartials(families);
   if (correction !== null) {
     applyFamilyCorrection(rows, correction);
   }
-  return rows;
+  return resolveBucketTableRows(rows, meta);
 }
 
 /**
@@ -788,7 +954,7 @@ export function combineBucketTableShards(
  * it, which is worse than the error it fixes. Each table is honest about itself.
  */
 function applyFamilyCorrection(
-  results: BucketComparison[],
+  results: ComparisonStats[],
   correction: FamilyCorrection
 ) {
   for (let i = 0; i < results.length; i++) {
