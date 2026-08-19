@@ -6,11 +6,9 @@ import {
   accumulateFamilyPartialInSlices,
   combineFamilyPartials,
   computeFamilyCorrection,
-  interpretStandardizedEffect,
   makePermutationBaseIndices,
   minimumDetectableEffect,
   permutationTwoSidedP,
-  standardizedMeanDifference,
   studentTCritical,
   studentTTwoSidedP,
   welchTTest,
@@ -86,21 +84,18 @@ describe('welchTTest', function () {
       base.map((v) => v * scale),
       comp.map((v) => v * scale)
     );
-    // delta and se scale; t and the standardised effect do not.
+    // delta and se scale; t does not, which is what lets the geomean-normalised
+    // global view multiply every bucket by a shared constant without moving any
+    // p-value. See computeSharedSuiteFactors.
     expect(scaled.delta).toBeCloseTo(plain.delta * scale, 10);
     expect(scaled.se).toBeCloseTo(plain.se * scale, 10);
     expect(scaled.t).toBeCloseTo(plain.t, 10);
-    expect(standardizedMeanDifference(scaled)).toBeCloseTo(
-      standardizedMeanDifference(plain),
-      10
-    );
   });
 
   it('does not produce NaN for a bucket with no variation', function () {
     const result = welchTTest([2, 2, 2, 2], [2, 2, 2, 2]);
     expect(result.se).toBe(0);
     expect(result.t).toBe(0);
-    expect(standardizedMeanDifference(result)).toBe(0);
   });
 
   it('treats a perfect separation as maximally significant', function () {
@@ -120,27 +115,6 @@ describe('welchTTest', function () {
       new Array<number>(8).fill(0)
     );
     expect(disappeared.t).toBe(-Infinity);
-  });
-
-  it('reports an infinite standardised effect when only the mean moved', function () {
-    // Zero spread on both sides but different means: the change is real and
-    // unboundedly large in units of the (nonexistent) spread.
-    const result = welchTTest([2, 2, 2, 2], [3, 3, 3, 3]);
-    expect(standardizedMeanDifference(result)).toBe(Infinity);
-  });
-});
-
-describe('interpretStandardizedEffect', function () {
-  it('uses Cohen conventional cut points, symmetric in sign', function () {
-    expect(interpretStandardizedEffect(0)).toBe('Negligible');
-    expect(interpretStandardizedEffect(0.19)).toBe('Negligible');
-    expect(interpretStandardizedEffect(0.2)).toBe('Small');
-    expect(interpretStandardizedEffect(0.49)).toBe('Small');
-    expect(interpretStandardizedEffect(0.5)).toBe('Moderate');
-    expect(interpretStandardizedEffect(0.79)).toBe('Moderate');
-    expect(interpretStandardizedEffect(0.8)).toBe('Large');
-    expect(interpretStandardizedEffect(-0.8)).toBe('Large');
-    expect(interpretStandardizedEffect(-0.19)).toBe('Negligible');
   });
 });
 
