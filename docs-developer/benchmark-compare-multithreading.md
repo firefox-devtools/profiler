@@ -63,9 +63,11 @@ dispatched in. The UI has always read `bucketTables` and `pendingLabels` as sets
 so it does not care.
 
 **A worker needs no `Profile`,** which is what makes any of this cheap. A job is
-two sparse bucket lists plus an iteration count, and the metadata is three arrays
-of strings and func indices. Single megabytes, against the several hundred a parsed
-profile weighs.
+two sparse bucket lists plus an iteration count. Single megabytes, against the
+several hundred a parsed profile weighs.
+
+**A worker needs no strings either,** which is what makes it cheap in practice
+rather than only on paper. See [No strings on the wire](#no-strings-on-the-wire).
 
 **Both levels of parallelism are used.** The tables are independent of each other,
 so a subtest table gets a thread to itself. Within one table the permutation draws
@@ -89,11 +91,14 @@ Everything else the correction needs (`offsets`, `pooledIndex`, `pooledValue`,
 the family, so each range recomputes it rather than having it shipped — which is
 why a shard can be described by two integers.
 
-The same is true one level up, in `computeBucketTableShardInSlices`: matching the
-two sides' buckets and taking a Welch t of each is repeated per shard rather than
-divided. **That is what bounds the useful shard count.** The set-up is ~150ms of
-the global table's ~1.1s, so at eight shards a shard is ~150ms of set-up and ~105ms
-of draws and the next doubling would buy about 50ms — hence `MAX_WORKERS = 8` in
+The same is true one level up, in `computeBucketTableShardInSlices`: grouping the
+two sides' buckets by key id and taking a Welch t of each is repeated per shard
+rather than divided. **That is what bounds the useful shard count.** The set-up was
+~150ms of the global table's ~1.1s when `MAX_WORKERS` was picked — less than that
+now that the grouping indexes an `Int32Array` instead of hashing strings, though not
+enough less to move the cap — so at eight shards a shard is ~150ms of set-up and
+~105ms of draws and the next doubling would buy about 50ms. Hence `MAX_WORKERS = 8`
+in
 [benchmark-compare-worker-pool.ts](../src/profile-logic/benchmark/benchmark-compare-worker-pool.ts).
 Shards other than 0 skip building the comparison rows, which is most of that
 set-up; it saves no wall clock, since shard 0 is on the critical path either way,
@@ -119,12 +124,14 @@ There is one implementation, not two: `compareBuckets` and
 
 ### Wire format
 
-- **Per worker, once:** the two profiles' `bucketNames`, `bucketKeys` and
-  `bucketFuncs`.
+- **Per worker, once:** `MatchedBucketKeys` — which of the two profiles' buckets
+  are the same bucket, as three `Int32Array`s.
 - **Per shard:** the two bucket lists, packed, plus the iteration count and which
   shard of how many this is.
 - **Back:** the family accumulators, and — from shard 0 only, since every shard
-  would produce the identical list — the `BucketComparison[]` rows.
+  would produce the identical list — the `BucketTableRow[]`.
+
+Not a string anywhere in that list, which is the subject of the next section.
 
 The packing is not an optimisation for its own sake. `iterationTotals` values are
 `subarray` views into one big `Float64Array` per suite (see the allocation in
@@ -143,6 +150,62 @@ weights for the other tables and for the flame graphs. `SharedArrayBuffer` would
 avoid the per-thread copy altogether and is not available — it needs COOP/COEP
 headers the deployment does not set. Check `crossOriginIsolated` before assuming
 otherwise.
+
+### No strings on the wire
+
+The `init` message used to be the two profiles' `bucketNames`, `bucketKeys` and
+`bucketFuncs` — "single megabytes, and every job needs all of it", which sounded
+cheap and was not. Measured on a Speedometer 3 pair over eight workers, in a profile
+of the compare page itself:
+
+| where                                                                     | per worker |
+| ------------------------------------------------------------------------- | ---------- |
+| reading the `init` clone, 96% of it `JSStructuredCloneReader::readString` | **91ms**   |
+| the shutdown GC, 80% of it `JSLinearString::finalize` → `free`            | **34ms**   |
+| the shard itself                                                          | 356ms      |
+
+~14% of every worker, and the 91ms is the worst kind: it sits between the worker
+starting and its shard starting, so it is on the path to the first row the reader
+sees. Three quarters of both figures is not copying at all but
+`_os_unfair_lock_lock_slow` and `__ulock_wait2` under `moz_arena_malloc` and `free`
+— eight threads allocating and freeing tens of thousands of small char buffers
+through one process-wide jemalloc arena at the same instant. Serialised it would
+have been a few milliseconds. The shutdown GCs are worse than they look for the same
+reason: they hold that arena lock while the main thread is rendering the results.
+
+The fix is that **matching is a main-thread fact, so the answer travels instead of
+the inputs.** `matchBucketKeys` runs once per comparison, folds the case of name
+keys, and assigns every bucket on both sides an integer key id; two buckets are the
+same bucket exactly when their ids are equal. A table then matches by indexing a
+dense array, which is also faster than the string `Map` each of the eight shards was
+rebuilding.
+
+Coming back, a row is `baseBucket`/`newBucket` — the `bucketIndex` each side's
+representative — and `resolveBucketTableRows` turns those into `key`, `bucketName`,
+`baseFunc` and `newFunc` on arrival, from metadata that never left. `BucketTableSide`
+and `BucketTableMetadata` are main-thread-only by construction; only
+`MatchedBucketKeys` is in `WorkerInit`.
+
+**Why the representative is chosen in the worker and not next to the matching.**
+Several of one profile's own buckets can share a key — an inlined and a non-inlined
+copy of one JS function have the same source location, and two spellings of a DOM
+entry point fold to the same name — so their weights are summed into one row and the
+heaviest of them is what the row is named after and what its flame graph expands.
+That is a function of the weights, and the weights are the _table's_: the same key
+can be represented by one bucket in the global table and by another in a subtest's.
+Only the code holding the weights can pick it, so the worker picks it and reports an
+integer. `compare-benchmark-stats.test.ts` pins both halves — that the heavier of two
+collapsed funcs names the row, and that two tables can disagree about which that is.
+
+`benchmark-compare-worker-pool.test.ts` asserts the negative directly: every string
+crossing the fake `Worker`, in either direction, is one of `init`, `job`, `shard`,
+`welch`. Fixed-vocabulary tags, nothing out of a profile. A change that sends a name
+again fails there rather than merely being slower.
+
+The one string that is still per-row is `pValueMethod`'s `'welch'` stand-in, five
+characters that `applyFamilyCorrection` overwrites on this side anyway. Left alone:
+it is a rounding error next to what came off, and taking it off would mean encoding
+an enum that is nicer to read as a string.
 
 ### Inside the worker
 
