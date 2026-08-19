@@ -5,8 +5,10 @@
 import {
   applyBenjaminiHochberg,
   classifyChange,
+  combineBucketTableShards,
   compareBuckets,
   compareIterationTotals,
+  computeBucketTableShardInSlices,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
   describeVerdict,
@@ -14,6 +16,7 @@ import {
 import type { ScoreComparison } from '../../profile-logic/benchmark/compare-benchmark-stats';
 import { studentTCritical } from '../../profile-logic/benchmark/perf-compare-stats';
 import type { ProfileBenchmarkStats } from '../../profile-logic/benchmark/extract-benchmark-stats';
+import { runToCompletion } from '../../profile-logic/benchmark/chunked-work';
 
 /**
  * Build a minimal ProfileBenchmarkStats. Buckets are identified by index into
@@ -601,5 +604,85 @@ describe('multiple-comparisons correction', function () {
       (c) => c.key !== 'realMover' && (c.qValue ?? 1) <= 0.05
     );
     expect(survivors.map((c) => c.key)).toEqual([]);
+  });
+
+  describe('computed in shards', function () {
+    /** A table computed the way the worker pool computes one: `shardCount`
+     * independent shards, each doing all of the set-up and its own share of the
+     * permutation draws, combined afterwards. */
+    function compareFamilyInShards(count: number, shardCount: number) {
+      const { baseStats, newStats, iterationCount } = makeFamilyPair(count);
+      const input = {
+        base: {
+          bucketNames: baseStats.bucketNames,
+          bucketKeys: baseStats.bucketKeys,
+          bucketFuncs: baseStats.bucketFuncs,
+        },
+        new: {
+          bucketNames: newStats.bucketNames,
+          bucketKeys: newStats.bucketKeys,
+          bucketFuncs: newStats.bucketFuncs,
+        },
+        baseBuckets: baseStats.suites[0].buckets,
+        newBuckets: newStats.suites[0].buckets,
+        iterationCount,
+      };
+      const shards = [];
+      for (let index = 0; index < shardCount; index++) {
+        shards.push(
+          runToCompletion(
+            computeBucketTableShardInSlices(input, {
+              index,
+              count: shardCount,
+            })
+          )
+        );
+      }
+      return { shards, table: combineBucketTableShards(shards) };
+    }
+
+    it('produces exactly the table the single-threaded path does', function () {
+      // The contract the worker pool rests on, stated at the level the pool
+      // actually works in: a table split over threads is not approximately the
+      // table one thread would have computed, it is that table. `toEqual` on the
+      // whole list, so a q-value out by an ULP is a failure.
+      const whole = compareFamily(120);
+      for (const shardCount of [1, 2, 5, 8]) {
+        const { table } = compareFamilyInShards(120, shardCount);
+        expect({ shardCount, table }).toEqual({ shardCount, table: whole });
+      }
+    });
+
+    it('carries the rows on exactly one shard', function () {
+      // Every shard would build the identical list, and one of these is thousands
+      // of objects to clone back over a postMessage.
+      const { shards } = compareFamilyInShards(40, 4);
+      expect(shards.map((shard) => shard.rows !== null)).toEqual([
+        true,
+        false,
+        false,
+        false,
+      ]);
+      expect(shards.every((shard) => shard.family !== null)).toBe(true);
+    });
+
+    it('leaves a table it cannot calibrate uncorrected, from any number of shards', function () {
+      // No buckets at all: there is no family to relabel, so the rows keep the
+      // Welch stand-in and nothing throws on the way out.
+      const input = {
+        base: { bucketNames: [], bucketKeys: [], bucketFuncs: [] },
+        new: { bucketNames: [], bucketKeys: [], bucketFuncs: [] },
+        baseBuckets: [],
+        newBuckets: [],
+        iterationCount: 8,
+      };
+      const shards = [0, 1, 2].map((index) =>
+        runToCompletion(
+          computeBucketTableShardInSlices(input, { index, count: 3 })
+        )
+      );
+      expect(shards.map((shard) => shard.family)).toEqual([null, null, null]);
+      expect(combineBucketTableShards(shards)).toEqual([]);
+    });
   });
 });
