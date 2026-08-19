@@ -14,10 +14,12 @@
  * cost ~45ms to compute; the bucket tables cost ~3s between them, and used to be
  * on the path to seeing anything at all.
  *
- * Each stage hands the main thread back before it starts and, for the tables,
- * every 12ms while it runs, so the page paints each row as it fills in and a click
- * on one of the profile links is dispatched while the rest is still computing. See
- * chunked-work.ts.
+ * Each stage hands the main thread back before it starts, so the page paints each
+ * row as it fills in and a click on one of the profile links is dispatched while
+ * the rest is still computing. Where the tables themselves run is up to the
+ * injected `TableRunner`: in the browser, a pool of workers, so they finish
+ * sooner as well as politely; in the CLI and the tests, here, in slices. See
+ * chunked-work.ts and benchmark-compare-worker-pool.ts.
  */
 
 import { fetchProfile } from 'firefox-profiler/utils/profile-fetch';
@@ -27,7 +29,10 @@ import { getProfileFetchUrl } from 'firefox-profiler/actions/receive-profile';
 import type { Profile } from 'firefox-profiler/types';
 
 import { extractBenchmarkStatsFromProfile } from './extract-benchmark-stats';
-import type { ProfileBenchmarkStats } from './extract-benchmark-stats';
+import type {
+  ProfileBenchmarkStats,
+  SparseBucketEntry,
+} from './extract-benchmark-stats';
 import {
   applyBenjaminiHochberg,
   compareBucketsInSlices,
@@ -38,6 +43,7 @@ import {
 } from './compare-benchmark-stats';
 import type {
   BucketComparison,
+  BucketTableSide,
   ScoreComparison,
 } from './compare-benchmark-stats';
 import { runInSlices, yieldToBrowser } from './chunked-work';
@@ -92,6 +98,102 @@ export type ComparisonProgress = {
    */
   pendingLabels: string[];
 };
+
+/**
+ * One bucket table to compute: two sparse bucket lists and the row they belong
+ * to. Everything a table needs *except* the two profiles' bucket metadata, which
+ * is the same for every job and so lives in `TableRunnerSetup`.
+ */
+export type BucketTableJob = {
+  /** The score row this table expands, and the key it is stored under. */
+  label: string;
+  baseBuckets: SparseBucketEntry[];
+  newBuckets: SparseBucketEntry[];
+  iterationCount: number;
+  /**
+   * Whether a runner with several threads should put all of them on this one
+   * table rather than starting the next one.
+   *
+   * True for the global table only. It is ~1s against ~130ms for a subtest, so
+   * after the subtests have been spread one per thread it is the whole critical
+   * path — and it is also the row a reader expands first. The subtests are already
+   * parallel with each other, and splitting one of those would cost more in
+   * repeated set-up than it saved; see `computeBucketTableShardInSlices`.
+   */
+  splitAcrossThreads: boolean;
+};
+
+/** What a runner is told once, when a comparison starts. */
+export type TableRunnerSetup = {
+  base: BucketTableSide;
+  new: BucketTableSide;
+  /** How many tables this comparison will ask for, so a pool can size itself. */
+  jobCount: number;
+  /** Aborted when the comparison is abandoned. A runner is expected to stop and
+   * reject whatever is outstanding, which for a worker pool means terminating
+   * them: a comparison the reader has replaced should not go on spending seconds
+   * finishing tables nobody will look at. */
+  signal: AbortSignal;
+};
+
+/**
+ * How the bucket tables get computed. Jobs may be submitted all at once and may
+ * finish in any order.
+ */
+export type TableRunner = {
+  run: (job: BucketTableJob) => Promise<BucketComparison[]>;
+  /** Called once, when the comparison ends — including when it is abandoned
+   * part-way. */
+  dispose: () => void;
+};
+
+/**
+ * A factory rather than a plain function, because a runner has a lifetime: the
+ * worker pool spawns threads when a comparison starts, hands them the two
+ * profiles' bucket metadata once, and terminates them when it ends.
+ */
+export type TableRunnerFactory = (setup: TableRunnerSetup) => TableRunner;
+
+/**
+ * The default: compute the tables here, one at a time, in slices. What this did
+ * before there was anywhere else to do it, and still what the CLI and the tests
+ * get.
+ *
+ * One at a time *matters*. These are promises, so submitting every job at once
+ * would otherwise interleave them all through the same slice loop and finish them
+ * all at the end — which is exactly the progressiveness the slicing exists for,
+ * thrown away.
+ */
+export function createInProcessTableRunner(
+  setup: TableRunnerSetup
+): TableRunner {
+  let queue: Promise<unknown> = Promise.resolve();
+  return {
+    run: (job) => {
+      const result = queue.then(() =>
+        runInSlices(
+          compareBucketsInSlices(
+            job.baseBuckets,
+            job.newBuckets,
+            setup.base.bucketNames,
+            setup.new.bucketNames,
+            setup.base.bucketFuncs,
+            setup.new.bucketFuncs,
+            job.iterationCount,
+            false,
+            setup.base.bucketKeys,
+            setup.new.bucketKeys
+          ),
+          setup.signal
+        )
+      );
+      // The next job goes after this one whether or not this one worked out.
+      queue = result.catch(() => {});
+      return result;
+    },
+    dispose: () => {},
+  };
+}
 
 /**
  * Profiles already downloaded this session, keyed by viewer URL.
@@ -170,7 +272,8 @@ async function pause(signal: AbortSignal): Promise<void> {
 export async function* runBenchmarkComparison(
   baseUrl: string,
   newUrl: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  makeTableRunner: TableRunnerFactory = createInProcessTableRunner
 ): AsyncGenerator<ComparisonProgress, void, void> {
   const [
     { profile: baseProfile, viewerUrl: baseViewerUrl },
@@ -195,7 +298,8 @@ export async function* runBenchmarkComparison(
     baseStats,
     newStats,
     { baseProfile, newProfile, baseViewerUrl, newViewerUrl },
-    signal
+    signal,
+    makeTableRunner
   );
 }
 
@@ -211,7 +315,8 @@ export async function* compareStatsProgressively(
   baseStats: ProfileBenchmarkStats,
   newStats: ProfileBenchmarkStats,
   sources: ComparisonSources,
-  signal: AbortSignal
+  signal: AbortSignal,
+  makeTableRunner: TableRunnerFactory = createInProcessTableRunner
 ): AsyncGenerator<ComparisonProgress, void, void> {
   const iterationCount = baseStats.suites[0]?.iterationCount ?? 1;
 
@@ -262,21 +367,22 @@ export async function* compareStatsProgressively(
 
   const scores: ComparisonScores = { ...sources, overallScore, suiteScores };
 
-  // Tables are computed in the order the rows are listed, so the spinners resolve
-  // top to bottom. The overall one is both the first and the slowest — ~1s against
-  // ~130ms for a subtest, since it pools every bucket in the profile — which is
-  // the right way round: it is also the row a reader expands first.
+  // Tables are dispatched in the order the rows are listed, so the overall one —
+  // both the first and the slowest, ~1s against ~130ms for a subtest, since it
+  // pools every bucket in the profile — starts first. That is the right way round:
+  // it is also the row a reader expands first.
   //
   // Which tables there will be is settled here rather than being discovered as we
   // go, because the rows without one have to be able to say so immediately. A
   // subtest that only the base profile ran gets no table at all, and showing it a
   // spinner that never resolves would be a lie.
-  const jobs = [
+  const jobs: BucketTableJob[] = [
     {
       label: overallScore.label,
       baseBuckets: baseGlobalBuckets,
       newBuckets: newGlobalBuckets,
-      iterations: iterationCount,
+      iterationCount,
+      splitAcrossThreads: true,
     },
   ];
   for (const row of suiteScores) {
@@ -289,7 +395,8 @@ export async function* compareStatsProgressively(
       label: row.label,
       baseBuckets: baseSuite.buckets,
       newBuckets: newSuite.buckets,
-      iterations: baseSuite.iterationCount,
+      iterationCount: baseSuite.iterationCount,
+      splitAcrossThreads: false,
     });
   }
 
@@ -306,27 +413,59 @@ export async function* compareStatsProgressively(
   yield snapshot();
   await pause(signal);
 
-  for (const job of jobs) {
-    const comparisons = await runInSlices(
-      compareBucketsInSlices(
-        job.baseBuckets,
-        job.newBuckets,
-        baseStats.bucketNames,
-        newStats.bucketNames,
-        baseStats.bucketFuncs,
-        newStats.bucketFuncs,
-        job.iterations,
-        false,
-        baseStats.bucketKeys ?? baseStats.bucketNames,
-        newStats.bucketKeys ?? newStats.bucketNames
-      ),
-      signal
-    );
-    tables.set(job.label, comparisons);
-    pendingLabels = pendingLabels.filter((label) => label !== job.label);
-    yield snapshot();
-    await pause(signal);
+  const runner = makeTableRunner({
+    base: sideOf(baseStats),
+    new: sideOf(newStats),
+    jobCount: jobs.length,
+    signal,
+  });
+  try {
+    // Every job submitted at once, and then taken in whatever order they come
+    // back. Dispatch order is still the order the rows are listed, so a runner
+    // that finishes them one at a time (which the in-process one does) resolves
+    // the spinners top to bottom; a pool of threads will not, and the table only
+    // ever grows, so the reader sees no difference beyond which spinner stops
+    // first.
+    const pending = new Map<string, Promise<TableResult>>();
+    for (const job of jobs) {
+      const result = runner
+        .run(job)
+        .then((comparisons) => ({ label: job.label, comparisons }));
+      // `Promise.race` handles whichever rejection it reports; the rest would be
+      // unhandled rejections when a comparison is aborted with several jobs in
+      // flight.
+      result.catch(() => {});
+      pending.set(job.label, result);
+    }
+
+    while (pending.size > 0) {
+      const { label, comparisons } = await Promise.race(pending.values());
+      pending.delete(label);
+      tables.set(label, comparisons);
+      pendingLabels = pendingLabels.filter(
+        (pendingLabel) => pendingLabel !== label
+      );
+      yield snapshot();
+      await pause(signal);
+    }
+  } finally {
+    // Also on the way out of an abort, and when a consumer stops reading the
+    // generator without draining it.
+    runner.dispose();
   }
+}
+
+type TableResult = { label: string; comparisons: BucketComparison[] };
+
+/** The bucket metadata a table runner needs from one profile's stats.
+ * `bucketKeys` was added after the rest, so a stats file that predates it falls
+ * back to matching by name. */
+function sideOf(stats: ProfileBenchmarkStats): BucketTableSide {
+  return {
+    bucketNames: stats.bucketNames,
+    bucketKeys: stats.bucketKeys ?? stats.bucketNames,
+    bucketFuncs: stats.bucketFuncs,
+  };
 }
 
 function findSuite(stats: ProfileBenchmarkStats, suiteName: string) {
