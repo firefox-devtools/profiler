@@ -657,6 +657,13 @@ describe('computeFamilyCorrection', function () {
   });
 
   it('matches the observed |t| that welchTTest computes', function () {
+    // Close, not equal, and deliberately: the family pass gets each group's sums
+    // in one pass and derives the other group by subtraction, which is what makes
+    // millions of these affordable, while welchTTest takes the numerically better
+    // two passes for the number a row reports. They agree to about nine digits,
+    // which is three orders of magnitude inside COMPARISON_TOLERANCE, so no
+    // threshold can tell them apart. Do not tighten this to toEqual; see
+    // absTFromGroupSums.
     const family = nullFamily(606, 40);
     const correction = computeFamilyCorrection(family, permutations);
     if (correction === null) {

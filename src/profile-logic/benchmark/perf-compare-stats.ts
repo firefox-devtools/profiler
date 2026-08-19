@@ -313,10 +313,53 @@ export function makePermutationBaseIndices(
 }
 
 /**
- * |t| for one relabelling. Single pass over the base group, deriving the other
- * group's sums from the pooled totals, because this runs once per relabelling
- * per bucket and there are millions of those per profile pair.
+ * |t| for one relabelling, from the base group's sums and the pooled totals.
+ *
+ * **Why this is not `welchTTest`.** That takes two passes over each group: a mean,
+ * then the squared deviations from it, which is the numerically better way round
+ * and the right choice for the number a row *reports*. This takes one pass over
+ * the base group only, and gets the other group by subtraction — which is what
+ * makes `memberCount × drawCount` of them affordable at all, 13.6 million for the
+ * global view of a Speedometer pair. The price is the computational formula's
+ * cancellation: `Σx² − n·mean²` is a difference of similar magnitudes, so it loses
+ * a few of the last digits and can come out very slightly negative where the true
+ * variance is zero, hence the clamp.
+ *
+ * So a relabelling's |t| and `welchTTest`'s agree to about nine digits rather than
+ * exactly, which is fine — every threshold either value is compared against is
+ * widened by `COMPARISON_TOLERANCE`, which is three orders of magnitude wider than
+ * the disagreement. What is *not* fine is two copies of this arithmetic drifting
+ * apart, so both callers accumulate their sums however suits their data layout and
+ * then come here: the permutation test walks a dense pooled array with an index
+ * list, the family pass walks one member's nonzeros with a mask.
  */
+function absTFromGroupSums(
+  sumBase: number,
+  sumSquaresBase: number,
+  totalSum: number,
+  totalSumSquares: number,
+  nBase: number,
+  nNew: number
+): number {
+  const meanBase = sumBase / nBase;
+  const meanNew = (totalSum - sumBase) / nNew;
+  const ssBase = Math.max(0, sumSquaresBase - nBase * meanBase * meanBase);
+  const ssNew = Math.max(
+    0,
+    totalSumSquares - sumSquaresBase - nNew * meanNew * meanNew
+  );
+  const se = Math.sqrt(
+    (nBase > 1 ? ssBase / (nBase - 1) / nBase : 0) +
+      (nNew > 1 ? ssNew / (nNew - 1) / nNew : 0)
+  );
+  const t = Math.abs(tStatistic(meanNew - meanBase, se));
+  // A group of one has no spread to divide by, so `se` is zero and `tStatistic`
+  // has already answered; anything still NaN got there through a NaN weight, and
+  // reporting it as "not extreme" is the only useful reading of that.
+  return Number.isNaN(t) ? 0 : t;
+}
+
+/** `absTFromGroupSums` for one relabelling of a dense pooled array. */
 function absTForAssignment(
   pooled: Float64Array,
   baseIndices: ArrayLike<number>,
@@ -332,20 +375,56 @@ function absTForAssignment(
     sumBase += v;
     sumSquaresBase += v * v;
   }
-  const sumNew = totalSum - sumBase;
-  const sumSquaresNew = totalSumSquares - sumSquaresBase;
-  const meanBase = sumBase / nBase;
-  const meanNew = sumNew / nNew;
-  // Sum of squared deviations via the computational formula. Clamped at zero:
-  // it is a difference of similar magnitudes, so rounding can make an exactly
-  // zero variance come out very slightly negative.
-  const ssBase = Math.max(0, sumSquaresBase - nBase * meanBase * meanBase);
-  const ssNew = Math.max(0, sumSquaresNew - nNew * meanNew * meanNew);
-  const se = Math.sqrt(
-    (nBase > 1 ? ssBase / (nBase - 1) / nBase : 0) +
-      (nNew > 1 ? ssNew / (nNew - 1) / nNew : 0)
+  return absTFromGroupSums(
+    sumBase,
+    sumSquaresBase,
+    totalSum,
+    totalSumSquares,
+    nBase,
+    nNew
   );
-  return Math.abs(tStatistic(meanNew - meanBase, se));
+}
+
+/**
+ * Relative slack when asking whether one |t| reaches another.
+ *
+ * **One convention, everywhere: widen the candidate, never shrink the threshold.**
+ * `atLeastAsExtreme` is the boolean form and `lowestReaching` the form a binary
+ * search wants, and every "at least as extreme as" comparison in this file goes
+ * through one of them.
+ *
+ * There has to be some slack. |t| is computed through a subtraction of similar
+ * magnitudes, so two arithmetically equal values can land an ULP apart, and a
+ * relabelling that is numerically the observed labelling has to count as at least
+ * as extreme as it rather than fall on the wrong side of a `>=`. There is more at
+ * stake in the family pass, where a null value is compared against *other*
+ * buckets' thresholds: without the slack, multiplying every bucket by one shared
+ * constant — which is exactly what the geomean-normalised global view does — shifts
+ * q by a count or two. Erring towards counting an exceedance keeps that on the
+ * conservative side.
+ *
+ * 1e-9 is far above the ~1e-15 the arithmetic can drift and far below any
+ * difference between two |t| values that means anything.
+ */
+const COMPARISON_TOLERANCE = 1e-9;
+
+/** Whether `value` reaches `threshold`, up to `COMPARISON_TOLERANCE`. */
+function atLeastAsExtreme(value: number, threshold: number): boolean {
+  return widened(value) >= threshold;
+}
+
+/** `value` with the tolerance applied, for comparing against many thresholds at
+ * once (`countAtOrBelow(sortedThresholds, widened(v))` is how many of them it
+ * reaches). */
+function widened(value: number): number {
+  return value * (1 + COMPARISON_TOLERANCE);
+}
+
+/** The smallest value that would reach `threshold`, for the binary searches that
+ * need a bound rather than a predicate. `atLeastAsExtreme(v, threshold)` and
+ * `v >= lowestReaching(threshold)` are the same question. */
+function lowestReaching(threshold: number): number {
+  return threshold / (1 + COMPARISON_TOLERANCE);
 }
 
 /**
@@ -407,12 +486,9 @@ export function permutationTwoSidedP(
     nBase,
     nNew
   );
-  // A relative tolerance, so that relabellings which are numerically identical
-  // to the observed one count as "at least as extreme" rather than falling on
-  // the wrong side of a floating-point comparison. Stays correct when `observed`
-  // is Infinity: only equally perfect separations then clear the bar.
-  const threshold = observed * (1 - 1e-9);
-
+  // Stays correct when `observed` is Infinity -- an appeared or disappeared
+  // bucket: widening leaves it infinite, so only an equally perfect separation
+  // clears the bar. See COMPARISON_TOLERANCE.
   let hits = 0;
   for (let p = 0; p < permutations.length; p++) {
     const t = absTForAssignment(
@@ -423,7 +499,7 @@ export function permutationTwoSidedP(
       nBase,
       nNew
     );
-    if (t >= threshold) {
+    if (atLeastAsExtreme(t, observed)) {
       hits++;
       if (hits >= SEQUENTIAL_STOP_HITS) {
         return hits / (p + 1);
@@ -436,12 +512,6 @@ export function permutationTwoSidedP(
 // ---------------------------------------------------------------------------
 // Multiple comparisons: FDR and FWER from one joint relabelling of the family
 // ---------------------------------------------------------------------------
-
-/**
- * Relative slack when asking whether one |t| reaches another. Matches the
- * tolerance `permutationTwoSidedP` applies to its own threshold.
- */
-const COMPARISON_TOLERANCE = 1e-9;
 
 /**
  * One bucket's two per-iteration weight vectors. Every member of a family must
@@ -740,6 +810,8 @@ export function* accumulateFamilyPartialInSlices(
   // A mask rather than an index list, because the sparse inner loop walks the
   // bucket's nonzeros and asks which side each one landed on.
   const inBase = new Uint8Array(total);
+  // One member's |t| under the current relabelling: walk its nonzeros, ask which
+  // side each landed on, and let absTFromGroupSums do the statistic.
   const absTForMember = (m: number): number => {
     let sumBase = 0;
     let sumSquaresBase = 0;
@@ -751,20 +823,14 @@ export function* accumulateFamilyPartialInSlices(
         sumSquaresBase += v * v;
       }
     }
-    const meanBase = sumBase / nBase;
-    const meanNew = (totalSum[m] - sumBase) / nNew;
-    // Clamped: a difference of similar magnitudes, so an exactly zero variance
-    // can come out very slightly negative.
-    const ssBase = Math.max(0, sumSquaresBase - nBase * meanBase * meanBase);
-    const ssNew = Math.max(
-      0,
-      totalSumSquares[m] - sumSquaresBase - nNew * meanNew * meanNew
+    return absTFromGroupSums(
+      sumBase,
+      sumSquaresBase,
+      totalSum[m],
+      totalSumSquares[m],
+      nBase,
+      nNew
     );
-    const se = Math.sqrt(
-      ssBase / (nBase - 1) / nBase + ssNew / (nNew - 1) / nNew
-    );
-    const t = Math.abs(tStatistic(meanNew - meanBase, se));
-    return Number.isNaN(t) ? 0 : t;
   };
 
   const absT = new Float64Array(memberCount);
@@ -781,15 +847,7 @@ export function* accumulateFamilyPartialInSlices(
 
   // For each null value, the number of observed thresholds it clears; summed
   // into a histogram over that count so the pooled null never has to be stored.
-  //
-  // Widened by a relative tolerance, for the same reason permutationTwoSidedP
-  // uses one, but with more at stake here: a null value is compared against
-  // *other* buckets' thresholds, and |t| is computed through a subtraction of
-  // similar magnitudes, so two arithmetically equal values can land an ULP
-  // apart. Without the tolerance, multiplying every bucket by one shared
-  // constant — which is exactly what the geomean-normalised global view does —
-  // shifts q by a count or two. Erring towards counting an exceedance keeps that
-  // on the conservative side.
+  // See COMPARISON_TOLERANCE for why the null value is widened before it is asked.
   const nullsClearing = new Float64Array(memberCount + 1);
   const maxima = new Float64Array(drawCount);
   // How often each member's own relabellings reached its own observation. The
@@ -807,11 +865,11 @@ export function* accumulateFamilyPartialInSlices(
       if (v > max) {
         max = v;
       }
-      const widened = v * (1 + COMPARISON_TOLERANCE);
-      if (widened >= absT[m]) {
+      const reach = widened(v);
+      if (reach >= absT[m]) {
         ownHits[m]++;
       }
-      nullsClearing[countAtOrBelow(ascending, widened)]++;
+      nullsClearing[countAtOrBelow(ascending, reach)]++;
     }
     maxima[p] = max;
   };
@@ -881,11 +939,31 @@ export function combineFamilyPartials(
   checkDrawRangesTile(partials, drawCount);
 
   // The same thresholds the ranges counted against, in the same order, since
-  // they are just the sorted `absT` every range agreed on.
+  // they are just the sorted `absT` every range agreed on. Infinity — a bucket
+  // that appeared or disappeared outright — sorts last, which is where it belongs.
   const ascending = absT.slice().sort();
 
-  // nullExceeding[i] = null values reaching ascending[i], i.e. clearing more
-  // than i thresholds.
+  // ## What an index means from here down
+  //
+  // Everything below is indexed by position in `ascending`, and one reading holds
+  // throughout: **index `i` is the threshold `ascending[i]`, the one that rejects
+  // exactly the `memberCount - i` members at or above it.** So, for that i:
+  //
+  //   - `i` is itself the number of members strictly below the threshold, which is
+  //     why `countBelow(ascending, t)` is the index to look a member's own q up at;
+  //   - `memberCount - i` is the rejection count `R(c)` the FDR divides by;
+  //   - `nullsClearing[k]` is over a *different* range, 0 to memberCount
+  //     inclusive: it counts null values by how many thresholds they cleared, and
+  //     a null value above every threshold clears all `memberCount` of them, hence
+  //     the extra slot;
+  //   - so the null values reaching threshold `i` are those that cleared more than
+  //     `i` thresholds, i.e. the suffix `nullsClearing[i + 1 ..]`, which is what
+  //     `nullExceeding[i]` below sums.
+  //
+  // The two ranges being one apart is the whole of the fiddliness, and it is why
+  // ranges of draws can be added elementwise before any of this runs: a shard's
+  // `nullsClearing` is a histogram over the same thresholds, since the thresholds
+  // come from `absT` and every shard computes the same `absT`.
   const nullExceeding = new Float64Array(memberCount);
   let running = 0;
   for (let i = memberCount - 1; i >= 0; i--) {
@@ -933,8 +1011,7 @@ export function combineFamilyPartials(
     pValues[m] = (ownHits[m] + 1) / (drawCount + 1);
     qValues[m] = fdrAtThreshold[countBelow(ascending, t)];
     familyWisePValues[m] =
-      (1 + drawCount - countBelow(maxima, t * (1 - COMPARISON_TOLERANCE))) /
-      (drawCount + 1);
+      (1 + drawCount - countBelow(maxima, lowestReaching(t))) / (drawCount + 1);
   }
 
   // The smallest |t| whose family-wise rate is within `familyWiseAlpha`, so that
