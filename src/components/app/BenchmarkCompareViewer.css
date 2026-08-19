@@ -91,16 +91,17 @@
   animation: benchmarkSpin 0.8s linear infinite;
 }
 
-/* In a score row, where that row's count of moved functions is going to appear.
- * Sized and spaced like .benchmarkBadge so that the row does not shift sideways
- * when the number replaces it. */
+/* In a score row, inside the .benchmarkBadge the count is going to appear in — so
+ * the em sizes here are the badge's, and the badge's own min-width and line-height
+ * are what hold the row steady when the number replaces this. Kept inline-block and
+ * smaller than the badge's line box on purpose: a block child would make the badge
+ * as tall as the circle instead of as tall as a line of text. */
 .benchmarkSpinner--badge {
   display: inline-block;
   width: 0.9em;
   height: 0.9em;
-  flex: none;
+  box-sizing: border-box;
   border-width: 2px;
-  margin-left: 0.75em;
 }
 
 @keyframes benchmarkSpin {
@@ -421,6 +422,12 @@
 .benchmarkBadge--zero {
   background: none;
   color: var(--internal-text-hint);
+}
+
+/* Holding the count's place while it is computed. No pill behind it: the spinner
+ * is not a value, and a filled badge with no number in it reads as one. */
+.benchmarkBadge--pending {
+  background: none;
 }
 
 .benchmarkRow--expansion > td {
