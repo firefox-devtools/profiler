@@ -25,24 +25,65 @@ export type BenchmarkProfileNames = { base: string; new: string };
 export const DEFAULT_BENCHMARK_PROFILE_NAMES = ['Baseline', 'New'];
 
 /**
- * Fill in the blanks in a pair of names from the URL.
+ * What to call the profile at `index` when the URL doesn't say.
+ *
+ * The first two keep the before/after names the view started with, since that is
+ * still what two profiles usually are. A third has no such story -- nobody
+ * compares a "New (2)" -- so it is numbered.
+ */
+export function defaultBenchmarkProfileName(index: number): string {
+  return DEFAULT_BENCHMARK_PROFILE_NAMES[index] ?? `Profile ${index + 1}`;
+}
+
+/**
+ * Fill in the blanks in a list of names from the URL, and make sure no two of
+ * them are the same.
  *
  * Names arrive from an editable query parameter, so they can be missing, empty,
- * or (if someone hand-edits the URL) duplicated. The last case matters more than
- * it looks: a whole report that says "Firefox is 3% slower than Firefox" is
- * unreadable, so a collision is broken by number rather than passed through.
+ * or (if someone hand-edits the URL, or compares two runs of the same build)
+ * duplicated. The last case matters more than it looks: a report that says
+ * "Firefox is 3% slower than Firefox" is unreadable, and with more than two
+ * profiles a collision also makes the controls that pick between them by name
+ * ambiguous. So a repeat is numbered rather than passed through.
  */
+export function resolveBenchmarkProfileNameList(
+  names: string[] | null,
+  count: number
+): string[] {
+  const resolved: string[] = [];
+  const taken = new Set<string>();
+  for (let i = 0; i < count; i++) {
+    const wanted = names?.[i]?.trim() || defaultBenchmarkProfileName(i);
+    let name = wanted;
+    // "Firefox", "Firefox (2)", "Firefox (3)" -- and if the URL itself already
+    // says "Firefox (2)", the next one skips past it rather than colliding.
+    for (let n = 2; taken.has(name); n++) {
+      name = `${wanted} (${n})`;
+    }
+    taken.add(name);
+    resolved.push(name);
+  }
+  return resolved;
+}
+
+/** The two sides of one comparison, by their positions in the profile list. */
+export function benchmarkProfileNamePair(
+  allNames: string[],
+  baseIndex: number,
+  newIndex: number
+): BenchmarkProfileNames {
+  return { base: allNames[baseIndex], new: allNames[newIndex] };
+}
+
+/** The names of a two-profile comparison, straight from the URL's list. */
 export function resolveBenchmarkProfileNames(
   names: string[] | null
 ): BenchmarkProfileNames {
-  const resolve = (i: number) =>
-    names?.[i]?.trim() || DEFAULT_BENCHMARK_PROFILE_NAMES[i];
-  const base = resolve(0);
-  let neu = resolve(1);
-  if (base === neu) {
-    neu = `${neu} (2)`;
-  }
-  return { base, new: neu };
+  return benchmarkProfileNamePair(
+    resolveBenchmarkProfileNameList(names, 2),
+    0,
+    1
+  );
 }
 
 /**
