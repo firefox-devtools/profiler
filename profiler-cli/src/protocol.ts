@@ -51,6 +51,12 @@ export type {
   MarkerGroupData,
   MarkerInfoResult,
   MarkerStackResult,
+  MarkerScreenshotResult,
+  ScreenshotsResult,
+  ScreenshotEntry,
+  ScreenshotData,
+  ScreenshotsJson,
+  MarkerScreenshotJson,
   StackTraceData,
   ProfileInfoResult,
   ProfileMetaResult,
@@ -81,6 +87,8 @@ import type {
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerScreenshotResult,
+  ScreenshotsResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -162,8 +170,15 @@ export type ClientCommand =
     }
   | {
       command: 'marker';
-      subcommand: 'info' | 'select' | 'stack';
+      subcommand: 'info' | 'select' | 'stack' | 'screenshot';
       marker?: string;
+    }
+  | {
+      command: 'screenshots';
+      /** Instant to look up, e.g. "11.287", "11287ms", "10%" or "ts-6". */
+      at?: string;
+      /** Range to look up, e.g. "11.2,11.4". */
+      range?: string;
     }
   | {
       command: 'counter';
@@ -222,6 +237,8 @@ export type CommandResult =
   | WithContext<ThreadInfoResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
+  | WithContext<MarkerScreenshotResult>
+  | WithContext<ScreenshotsResult>
   | WithContext<ProfileInfoResult>
   | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>

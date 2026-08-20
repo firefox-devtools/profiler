@@ -18,6 +18,8 @@ import {
   formatThreadInfoResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
+  formatMarkerScreenshotResult,
+  formatScreenshotsResult,
   formatProfileInfoResult,
   formatProfileMetaResult,
   formatThreadSamplesResult,
@@ -34,6 +36,18 @@ import {
   formatSourceMapSourcesResult,
   formatApplySourceMapResult,
 } from './formatters';
+
+/**
+ * Serialize a JSON payload that is not a `CommandResult`.
+ *
+ * The screenshot commands reshape their result before printing `--json`: the
+ * image bytes are elided and the written file paths added. That shape is
+ * deliberately not a `CommandResult`, so it cannot go through `formatOutput`,
+ * whose switch must stay exhaustive over the text formatters.
+ */
+export function formatJson(payload: unknown): string {
+  return JSON.stringify(payload, null, 2);
+}
 
 /**
  * Format a command result for output.
@@ -73,6 +87,10 @@ export function formatOutput(
       return formatMarkerStackResult(result);
     case 'marker-info':
       return formatMarkerInfoResult(result);
+    case 'marker-screenshot':
+      return formatMarkerScreenshotResult(result);
+    case 'screenshots':
+      return formatScreenshotsResult(result);
     case 'profile-info':
       return formatProfileInfoResult(result);
     case 'profile-meta':
