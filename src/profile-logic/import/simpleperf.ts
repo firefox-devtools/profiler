@@ -32,7 +32,8 @@ import {
   type RawStackTableBuilder,
   getRawSamplesTableBuilder,
   type RawSamplesTableBuilder,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
   getEmptyNativeSymbolTable,
   getEmptySourceTable,
   getEmptySourceLocationTable,
@@ -292,7 +293,7 @@ class FirefoxThread {
       pid: this.pid.toString(),
       tid: this.tid,
       samples: finishRawSamplesTableBuilder(this.sampleTable),
-      markers: getEmptyRawMarkerTable(),
+      markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
     };
   }
 

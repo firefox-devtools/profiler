@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
   getRawSamplesTableBuilderWithEventDelay,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
   finishRawFrameTableBuilder,
   finishRawSamplesTableBuilder,
   finishRawStackTableBuilder,
@@ -511,7 +512,7 @@ export function convertJsTracerToThreadWithoutSamples(
     weight: [],
     weightType: 'tracing-ms',
   };
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
 
   const thread: RawThread = {
     ...fromThread,
@@ -646,6 +647,7 @@ export function convertJsTracerToThreadWithoutSamples(
   shared.stackTable = finishRawStackTableBuilder(stackTable);
   shared.frameTable = finishRawFrameTableBuilder(frameTable);
   thread.samples = finishRawSamplesTableBuilder(samples);
+  thread.markers = finishRawMarkerTableBuilder(markers);
 
   return { thread, stackMap };
 }

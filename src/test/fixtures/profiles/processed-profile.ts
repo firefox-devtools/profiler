@@ -16,6 +16,7 @@ import {
   finishRawUnbalancedNativeAllocationsTableBuilder,
   getRawSamplesTableBuilderFromExisting,
   getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
   finishRawStackTableBuilder,
   getRawFrameTableBuilderWithExistingContents,
   getRawSamplesTableBuilderWithEventDelay,
@@ -130,7 +131,6 @@ export function addRawMarkersToThread(
 ) {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = getRawMarkerTableBuilderFromExisting(thread.markers);
-  thread.markers = markersTable;
 
   for (const { name, startTime, endTime, phase, category, data } of markers) {
     markersTable.name.push(
@@ -143,6 +143,8 @@ export function addRawMarkersToThread(
     markersTable.category.push(category || 0);
     markersTable.length++;
   }
+
+  thread.markers = finishRawMarkerTableBuilder(markersTable);
 }
 
 // This function is called with test-defined payloads. For convenience, we allow
@@ -184,7 +186,6 @@ export function addMarkersToThreadWithCorrespondingSamples(
 ) {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const markersTable = getRawMarkerTableBuilderFromExisting(thread.markers);
-  thread.markers = markersTable;
   const allTimes = new Set<number>();
 
   markers.forEach((tuple) => {
@@ -268,6 +269,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     }
   }
   thread.samples = finishRawSamplesTableBuilder(samples);
+  thread.markers = finishRawMarkerTableBuilder(markersTable);
 }
 
 export function getThreadWithMarkers(

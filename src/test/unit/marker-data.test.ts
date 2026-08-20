@@ -960,7 +960,7 @@ describe('filterRawMarkerTableToRange', () => {
       ],
     });
 
-    expect(rawMarkerTable.startTime).toEqual([0, 3]);
+    expect(Array.from(rawMarkerTable.startTime)).toEqual([0, 3]);
   });
 
   it('keeps a screenshot markers happening before the range if there is no other marker', () => {

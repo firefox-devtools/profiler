@@ -27,7 +27,10 @@ import {
   getMouseEvent,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { getRawMarkerTableBuilderFromExisting } from '../../profile-logic/data-structures';
+import {
+  getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
+} from '../../profile-logic/data-structures';
 import {
   autoMockElementSize,
   setMockedElementSize,
@@ -81,7 +84,6 @@ function setup(
     ],
   });
   const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
-  thread.markers = markers;
   const addMarker = (startTime: number, first: number, second: number) => {
     // @ts-expect-error - Invalid payload by our type system
     markers.data.push({ type: 'Marker', first: first, second: second });
@@ -96,6 +98,7 @@ function setup(
   values.forEach((value, index) => {
     addMarker(index, value, value * 2);
   });
+  thread.markers = finishRawMarkerTableBuilder(markers);
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
