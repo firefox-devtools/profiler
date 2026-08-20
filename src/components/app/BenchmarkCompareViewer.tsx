@@ -2,7 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { Fragment, useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  Fragment,
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
 import type { ChangeEvent, MouseEvent } from 'react';
 import { useSelector } from 'react-redux';
 
@@ -10,7 +18,8 @@ import { AppHeader } from './AppHeader';
 import { BenchmarkCompareForm } from './BenchmarkCompareForm';
 import {
   BenchmarkProfileNamesContext,
-  resolveBenchmarkProfileNames,
+  benchmarkProfileNamePair,
+  resolveBenchmarkProfileNameList,
   useBenchmarkProfileNames,
 } from './BenchmarkProfileNames';
 import type { BenchmarkProfileNames } from './BenchmarkProfileNames';
@@ -20,8 +29,10 @@ import {
 } from 'firefox-profiler/selectors/url-state';
 import { runBenchmarkComparison } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
 import type { ComparisonProgress } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
+import type { ProfileMeans } from 'firefox-profiler/profile-logic/benchmark/profile-means';
 import { createBenchmarkTableWorkerPool } from 'firefox-profiler/profile-logic/benchmark/benchmark-compare-worker-pool';
 import {
+  bucketMatchKey,
   classifyChange,
   describeVerdict,
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
@@ -120,8 +131,8 @@ const BUCKET_FILTER_MODES: Array<{
 const DEFAULT_BUCKET_FILTER_MODE: BucketFilterMode = 'movers';
 
 /**
- * Which buckets to list: all of them, or only the ones where a named side is the
- * slow one.
+ * Which buckets to list: all of them, or only the ones on one side of the
+ * comparison.
  *
  * A mixed list is the right default when you are asking "what did my patch do",
  * because the answer includes both. It is the wrong shape for the other question
@@ -130,67 +141,188 @@ const DEFAULT_BUCKET_FILTER_MODE: BucketFilterMode = 'movers';
  * scanning past half the table to read either one. The old comparison report
  * built a separate list per direction for exactly this reason.
  *
- * Selected by naming the *slower* side rather than as "slower"/"faster" relative
- * to the new one. Both say the same thing about two profiles, but only one of
- * them still says anything about three: "Firefox is faster" does not identify a
- * subset once there is a Safari column, whereas "Firefox is slower" does. So the
- * options are one per profile, plus "either way".
+ * The choice is a sentence with two slots — which profile, then which direction
+ * — rather than one list naming the slower side. With two profiles the two forms
+ * select the same three subsets, so the difference is entirely one of reading: a
+ * list of "Firefox is slower" / "Chrome is slower" contains the answer to "where
+ * is Firefox faster" but never says the word, and a reader looking at an
+ * unfamiliar report does not reliably make the substitution. Observed, on a
+ * Firefox-vs-Chrome comparison: they asked how to show where Firefox was faster
+ * and did not recognise "Chrome is slower" as it. Naming a side once and then
+ * saying faster or slower about it costs one more control and answers the
+ * question as asked.
+ *
+ * The profile slot is the *subject* of that sentence and is deliberately not
+ * called the reference: `base` is the reference, meaning the side every Δ in the
+ * table is measured against, and picking a subject here does not touch a single
+ * number. The two would collide the moment a third profile makes the reference a
+ * control of its own.
  */
-type BucketDirection = 'both' | 'base-slower' | 'new-slower';
+type BucketShow = 'all' | 'faster' | 'slower';
 
-const DEFAULT_BUCKET_DIRECTION: BucketDirection = 'both';
+/**
+ * What the subject is being compared with: another profile by its position in
+ * the loaded list, or whichever of the others is quickest on the row in hand.
+ *
+ * The aggregate is the point of loading a third profile. "Firefox is slower than
+ * Chrome" is a question about Chrome; "Firefox is slower than the best of the
+ * others" is the question a browser engineer actually has, because its answer
+ * comes with an existence proof -- somebody does this faster, so it can be done
+ * faster. It is also why the comparand is a slot rather than the options being
+ * written out one per phrasing: "the best of the others" is not an ordered pair,
+ * so there is no ready-made sentence for it.
+ *
+ * With two profiles loaded, 'best' *is* the other profile, so the slot has one
+ * distinct value and is not shown.
+ */
+type BucketComparand = number | 'best';
 
-/** The side a direction singles out as the slow one, or null for "either way".
- * Every sentence about a direction is built from this, so that they all use the
- * one verb the choice is actually about. */
-function slowerSideName(
-  direction: BucketDirection,
-  names: BenchmarkProfileNames
-): string | null {
-  switch (direction) {
-    case 'both':
-      return null;
-    case 'base-slower':
-      return names.base;
-    case 'new-slower':
-      return names.new;
+const DEFAULT_BUCKET_SHOW: BucketShow = 'all';
+
+/** What the reader picked in the filter controls. Carried as one object because
+ * every level of the table needs all of it, and because the badge count and the
+ * expansion have to be computed from exactly the same choices. */
+type BucketFilter = {
+  mode: BucketFilterMode;
+  /** Position in the loaded profile list, not a side of the comparison: rows can
+   * be filtered on a profile that is only a column. */
+  subject: number;
+  comparand: BucketComparand;
+  show: BucketShow;
+};
+
+/**
+ * A profile's mean for one row, whether or not it is one of the compared two.
+ *
+ * The pair's means come off the row, where the comparison put them; the others'
+ * come from profile-means.ts, keyed by the same bucket-matching rule the
+ * comparison used. A profile with no bucket for a key spent no time in it, which
+ * is zero rather than missing -- the reading the comparison already gives a
+ * bucket only one side has.
+ */
+type MeanReader = (row: BucketComparison, profileIndex: number) => number;
+
+/** The comparand as a single profile, when it is one. 'best' is a single profile
+ * only when there is just one other for it to pick from. */
+function soleComparandIndex(
+  filter: BucketFilter,
+  profileCount: number
+): number | null {
+  if (filter.comparand !== 'best') {
+    return filter.comparand;
+  }
+  return profileCount === 2 ? 1 - filter.subject : null;
+}
+
+/**
+ * Does this row belong in the list the reader asked for?
+ *
+ * Strict inequalities both ways, so a bucket two profiles spend exactly the same
+ * time in is in neither the wins nor the losses. Against 'best' that reads as:
+ * slower than the best of the others means somebody here is faster, and faster
+ * than the best of the others means nobody is.
+ */
+function passesDirection(
+  row: BucketComparison,
+  filter: BucketFilter,
+  readMean: MeanReader,
+  profileCount: number
+): boolean {
+  if (filter.show === 'all') {
+    return true;
+  }
+  const subject = readMean(row, filter.subject);
+  let comparand;
+  if (filter.comparand === 'best') {
+    comparand = Infinity;
+    for (let i = 0; i < profileCount; i++) {
+      if (i !== filter.subject) {
+        comparand = Math.min(comparand, readMean(row, i));
+      }
+    }
+  } else {
+    comparand = readMean(row, filter.comparand);
+  }
+  return filter.show === 'slower' ? subject > comparand : subject < comparand;
+}
+
+/** The direction that picks out the same buckets once the two operands of the
+ * sentence have traded places. "Everything" is the same set either way round. */
+function oppositeShow(show: BucketShow): BucketShow {
+  switch (show) {
+    case 'all':
+      return 'all';
+    case 'faster':
+      return 'slower';
+    case 'slower':
+      return 'faster';
     default:
-      throw new Error(`Unhandled direction ${direction as string}`);
+      throw new Error(`Unhandled direction ${show as string}`);
   }
 }
 
-/** The options, in profile order, so the list reads the way the mean columns
- * do. */
-function bucketDirections(names: BenchmarkProfileNames): Array<{
-  direction: BucketDirection;
-  label: string;
-  title: string;
-}> {
-  const oneSide = (direction: BucketDirection, slow: string, fast: string) => ({
-    direction,
-    label: `${slow} is slower`,
-    title:
-      `Only where ${slow} spends more time than ${fast}: the list of things to ` +
-      `fix in ${slow}, with nothing to scroll past between them.`,
-  });
-  return [
-    {
-      direction: 'both',
-      label: 'either way',
-      title: 'Both directions, ranked together by how far they moved.',
-    },
-    oneSide('base-slower', names.base, names.new),
-    oneSide('new-slower', names.new, names.base),
-  ];
+/** What the comparand is called in a sentence, or null when there is only one
+ * other profile and naming it would be saying "than the other one". */
+function comparandName(
+  filter: BucketFilter,
+  allNames: string[]
+): string | null {
+  if (allNames.length <= 2) {
+    return null;
+  }
+  return filter.comparand === 'best'
+    ? 'the best of the others'
+    : allNames[filter.comparand];
 }
 
-/** What the reader picked in the two filter groups. Carried as one object
- * because every level of the table needs both, and because the badge count and
- * the expansion have to be computed from exactly the same pair. */
-type BucketFilter = {
-  mode: BucketFilterMode;
-  direction: BucketDirection;
-};
+/**
+ * How a direction reads out loud: "Chrome is faster", or "Firefox is slower than
+ * the best of the others".
+ *
+ * The control renders this sentence across three or four elements -- each operand
+ * is a dropdown and the direction is a radio, so "faster" on its own is all the
+ * radio can say -- and every sentence the report writes about the choice has to
+ * match the one the reader assembled. Both come from here, so they cannot drift.
+ */
+function showSentence(
+  filter: BucketFilter,
+  show: 'faster' | 'slower',
+  allNames: string[]
+): string {
+  const than = comparandName(filter, allNames);
+  const clause = than === null ? '' : ` than ${than}`;
+  return `${allNames[filter.subject]} is ${show}${clause}`;
+}
+
+/** How the direction choice reads inside a sentence -- "where Chrome is faster"
+ * -- or null when it admits everything. */
+function directionClause(
+  filter: BucketFilter,
+  allNames: string[]
+): string | null {
+  return filter.show === 'all'
+    ? null
+    : showSentence(filter, filter.show, allNames);
+}
+
+/** Wins before losses: the reader who came here for the losses will scan past
+ * one option to reach them, and the reader who came for the wins is the one who
+ * could not find them at all before. */
+const SHOW_DIRECTIONS: Array<'faster' | 'slower'> = ['faster', 'slower'];
+
+function directionTitle(
+  filter: BucketFilter,
+  show: 'faster' | 'slower',
+  allNames: string[]
+): string {
+  const subject = allNames[filter.subject];
+  const than = comparandName(filter, allNames) ?? allNames[1 - filter.subject];
+  return show === 'faster'
+    ? `Only where ${subject} spends less time than ${than}: what ${subject} is ` +
+        `already winning, and by how much.`
+    : `Only where ${subject} spends more time than ${than}: the list of things ` +
+        `to fix in ${subject}, with nothing to scroll past between them.`;
+}
 
 /**
  * Given a relative change of a single subtest's mean, compute the resulting
@@ -342,7 +474,99 @@ function VerdictCell({ row }: { row: ComparisonStats }) {
   );
 }
 
-const SCORE_TABLE_COLUMN_COUNT = 9;
+/**
+ * One mean column: a loaded profile, in the order the reader listed them.
+ *
+ * List order rather than "the compared two first, then the rest", so that a
+ * column means the same thing before and after the pair selection changes.
+ * Watching Firefox's numbers move to a different column because you asked a
+ * different question about them is exactly the kind of thing that makes a wide
+ * table unreadable.
+ */
+type MeanColumn = {
+  /** Position in the loaded profile list, which is also this filter's `subject`
+   * and the key of `otherMeans`. */
+  index: number;
+  name: string;
+  /** Which side of the comparison this profile is, or null when it is only a
+   * column -- in which case `means` has its numbers. */
+  side: 'base' | 'new' | null;
+  means: ProfileMeans | null;
+};
+
+/** Which side of the comparison a loaded profile is, if either. */
+function comparedSideOf(
+  index: number,
+  baseIndex: number,
+  newIndex: number
+): 'base' | 'new' | null {
+  if (index === baseIndex) {
+    return 'base';
+  }
+  return index === newIndex ? 'new' : null;
+}
+
+/**
+ * The mean columns, by context rather than by prop.
+ *
+ * Same reason as the names: every level of the table needs them -- the header,
+ * each score row, each bucket row -- and threading a list through four
+ * components would swamp the props that actually differ per row.
+ */
+const MeanColumnsContext = createContext<MeanColumn[]>([]);
+
+function useMeanColumns(): MeanColumn[] {
+  return useContext(MeanColumnsContext);
+}
+
+/** Every loaded profile's name, in the order the filter's `subject` indexes
+ * them -- which is the column order, because the columns are the profiles. */
+function useProfileNameList(): string[] {
+  const columns = useMeanColumns();
+  return useMemo(() => columns.map((column) => column.name), [columns]);
+}
+
+/** A score row's mean for one column, or null for a subtest the profile did not
+ * run -- which is not the same as having run it in no time. */
+function readScoreMean(
+  column: MeanColumn,
+  row: ScoreComparison
+): number | null {
+  switch (column.side) {
+    case 'base':
+      return row.baseMean;
+    case 'new':
+      return row.newMean;
+    default:
+      return column.means?.scoreMeans.get(row.label) ?? null;
+  }
+}
+
+/** Read any profile's mean off the rows of one bucket table. Bound to a label
+ * because that is what the means-only profiles are keyed by. */
+function makeMeanReader(columns: MeanColumn[], label: string): MeanReader {
+  return (row, profileIndex) => {
+    const column = columns[profileIndex];
+    switch (column?.side) {
+      case 'base':
+        return row.baseMean;
+      case 'new':
+        return row.newMean;
+      default:
+        return (
+          column?.means?.bucketMeans
+            .get(label)
+            ?.get(bucketMatchKey(row.key, row.bucketName)) ?? 0
+        );
+    }
+  };
+}
+
+/** Label, the mean columns, and the six that describe the comparison of two of
+ * them. */
+function scoreTableColumnCount(columnCount: number): number {
+  return 7 + columnCount;
+}
 
 /**
  * The q-value cell. Two significant figures is all the permutation resolves, and
@@ -397,10 +621,17 @@ function ScoreRow({
     ? row.relChange
     : impactOnGeomean(row.relChange, numSuites);
   const names = useBenchmarkProfileNames();
+  const columns = useMeanColumns();
   return (
     <>
-      <td className="benchmarkCell--number">{row.baseMean.toFixed(2)}</td>
-      <td className="benchmarkCell--number">{row.newMean.toFixed(2)}</td>
+      {columns.map((column) => {
+        const mean = readScoreMean(column, row);
+        return (
+          <td className="benchmarkCell--number" key={column.index}>
+            {mean === null ? '—' : mean.toFixed(2)}
+          </td>
+        );
+      })}
       <td className="benchmarkCell--number">{absDiffStr}</td>
       <td
         className="benchmarkCell--number benchmarkCell--mde"
@@ -450,18 +681,18 @@ function bucketRowsForFilter(
   enclosingBaseMean: number,
   isOverall: boolean,
   numSuites: number,
-  { mode: filterMode, direction }: BucketFilter
+  filter: BucketFilter,
+  /** How to read any loaded profile's mean for a row of *this* table. */
+  readMean: MeanReader,
+  profileCount: number
 ): BucketRow[] {
+  const filterMode = filter.mode;
   const rows: BucketRow[] = [];
   for (const c of comparisons) {
+    // Always the compared pair, whoever the direction filter is about: this is
+    // the Δ the table shows and ranks by.
     const absDiff = c.newMean - c.baseMean;
-    // Weight is time, so a positive difference means the new side spends more
-    // of it. A bucket that moved by exactly nothing has no slower side at all,
-    // hence the sign tests rather than a negation of one of them.
-    if (
-      (direction === 'new-slower' && !(absDiff > 0)) ||
-      (direction === 'base-slower' && !(absDiff < 0))
-    ) {
+    if (!passesDirection(c, filter, readMean, profileCount)) {
       continue;
     }
     const impactRel =
@@ -503,10 +734,9 @@ function BucketCountBadge({
   count: number;
   filter: BucketFilter;
 }) {
-  const names = useBenchmarkProfileNames();
   const noun = count === 1 ? 'function' : 'functions';
-  const slow = slowerSideName(filter.direction, names);
-  const where = slow === null ? ' here' : ` here where ${slow} is slower`;
+  const clause = directionClause(filter, useProfileNameList());
+  const where = clause === null ? ' here' : ` here where ${clause}`;
   let title;
   switch (filter.mode) {
     case 'movers':
@@ -658,6 +888,8 @@ function ScoreTable({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const numSuites = suiteScores.length;
   const names = useBenchmarkProfileNames();
+  const columns = useMeanColumns();
+  const columnCount = scoreTableColumnCount(columns.length);
 
   const handleToggle = useCallback((e: MouseEvent<HTMLTableRowElement>) => {
     const label = e.currentTarget.dataset.toggleLabel;
@@ -696,12 +928,14 @@ function ScoreTable({
           row.baseMean,
           isOverall,
           numSuites,
-          filter
+          filter,
+          makeMeanReader(columns, row.label),
+          columns.length
         ).length
       );
     }
     return counts;
-  }, [overallScore, suiteScores, bucketTables, numSuites, filter]);
+  }, [overallScore, suiteScores, bucketTables, numSuites, filter, columns]);
 
   const expansionOf = (label: string): RowExpansion => {
     const comparisons = bucketTables.get(label);
@@ -724,18 +958,22 @@ function ScoreTable({
       <thead>
         <tr>
           <th>Score</th>
-          <th
-            className="benchmarkCell--number benchmarkCell--colFixed"
-            title={`Mean over ${names.base}'s iterations, in milliseconds.`}
-          >
-            {names.base} mean
-          </th>
-          <th
-            className="benchmarkCell--number benchmarkCell--colFixed"
-            title={`Mean over ${names.new}'s iterations, in milliseconds.`}
-          >
-            {names.new} mean
-          </th>
+          {columns.map((column) => (
+            <th
+              className="benchmarkCell--number benchmarkCell--colFixed"
+              key={column.index}
+              title={
+                `Mean over ${column.name}'s iterations, in milliseconds.` +
+                (column.side === null
+                  ? ` ${column.name} is loaded but not compared: it has a ` +
+                    `column, and the filters can ask about it, but the Δ and q ` +
+                    `columns are ${names.new} against ${names.base}.`
+                  : '')
+              }
+            >
+              {column.name} mean
+            </th>
+          ))}
           <th
             className="benchmarkCell--number benchmarkCell--colFixed"
             title={`${names.new} minus ${names.base}, in milliseconds. Positive means ${names.new} spends more time here.`}
@@ -830,7 +1068,27 @@ function ScoreTable({
               </tr>
               {isExpanded ? (
                 <tr className="benchmarkRow--expansion">
-                  <td colSpan={SCORE_TABLE_COLUMN_COUNT}>
+                  <td colSpan={columnCount}>
+                    {/* What this subtest is worth, before the list of what is
+                     * in it. The reader who just opened "Charts-observable"
+                     * is deciding whether to spend an afternoon in there, and
+                     * that decision is the whole-subtest number, not any one
+                     * function's. It needs nothing but the score row, so it is
+                     * also the one thing the expansion can show while the
+                     * table behind it is still being computed. Not for the
+                     * overall row, where "as fast as X overall, it would spend
+                     * less time overall" is the Δ% column read back. */}
+                    {isOverall ? null : (
+                      <Counterfactual
+                        thingName={row.label}
+                        absDiff={row.newMean - row.baseMean}
+                        baseTotal={row.baseMean}
+                        newTotal={row.newMean}
+                        suiteName={null}
+                        alreadyOverall={false}
+                        numSuites={numSuites}
+                      />
+                    )}
                     {comparisons ? (
                       <BucketTable
                         comparisons={comparisons}
@@ -865,7 +1123,7 @@ function ScoreTable({
 }
 
 /**
- * The row's numbers, said out loud, for the reader who just expanded it.
+ * A row's numbers, said out loud, for the reader who just expanded it.
  *
  * Δ abs and the two Δ% columns already contain this, but they contain it as
  * three signed numbers whose reference point ("percent of what?") is only in a
@@ -879,22 +1137,35 @@ function ScoreTable({
  * total throughout, so that every row's contribution to the score is on one
  * scale, whereas a saving is a fraction of the total belonging to the side that
  * would be doing the saving.
+ *
+ * Said about a function inside a score row, and about a score row itself, which
+ * is why the thing being named and the thing the saving is a fraction of are
+ * separate props rather than "the bucket" and "its enclosing row".
  */
-function BucketCounterfactual({
-  bucketName,
+function Counterfactual({
+  thingName,
   absDiff,
-  enclosingBaseMean,
-  enclosingNewMean,
+  baseTotal,
+  newTotal,
   suiteName,
+  alreadyOverall,
   numSuites,
 }: {
-  bucketName: string;
+  /** What the sentence is about: a function, or a subtest. */
+  thingName: string;
   /** New minus base, in ms. Positive means the new side is the slow one here. */
   absDiff: number;
-  enclosingBaseMean: number;
-  enclosingNewMean: number;
-  /** Null in the overall expansion, where there is no enclosing subtest. */
+  /** The two sides of the total the saving is a fraction of: the enclosing score
+   * row for a function, and the row's own means when the row is the subject. */
+  baseTotal: number;
+  newTotal: number;
+  /** An enclosing subtest to quantify the saving against as well, or null when
+   * there is none to name -- the overall expansion, or a subtest row, whose
+   * saving is the subtest. */
   suiteName: string | null;
+  /** True when the saving is already an overall figure: the buckets under the
+   * overall row are geomean-normalised, so nothing has to be carried through. */
+  alreadyOverall: boolean;
   numSuites: number;
 }) {
   const names = useBenchmarkProfileNames();
@@ -904,17 +1175,17 @@ function BucketCounterfactual({
   const newIsSlower = absDiff > 0;
   const slow = newIsSlower ? names.new : names.base;
   const fast = newIsSlower ? names.base : names.new;
-  const slowTotal = newIsSlower ? enclosingNewMean : enclosingBaseMean;
+  const slowTotal = newIsSlower ? newTotal : baseTotal;
   if (!(slowTotal > 0)) {
     return null;
   }
 
   const savingRel = Math.abs(absDiff) / slowTotal;
-  // In a subtest expansion, `savingRel` is a fraction of that subtest, and the
-  // overall score is a geomean over all of them. In the overall expansion the
-  // buckets are already geomean-normalised, so it is the overall figure itself.
-  const overallSaving =
-    suiteName === null ? savingRel : -impactOnGeomean(-savingRel, numSuites);
+  // A saving inside one subtest reaches the overall score through the geomean
+  // over all of them.
+  const overallSaving = alreadyOverall
+    ? savingRel
+    : -impactOnGeomean(-savingRel, numSuites);
   const pct = (x: number) => `${(x * 100).toFixed(2)}%`;
 
   // A profile of a single subtest -- which is a normal way to capture one -- has
@@ -923,9 +1194,9 @@ function BucketCounterfactual({
   const showSubtest = suiteName !== null && numSuites > 1;
 
   return (
-    <p className="bucketCounterfactual">
+    <p className="benchmarkCounterfactual">
       If <strong>{slow}</strong> were as fast as <strong>{fast}</strong> on{' '}
-      <em>{bucketName}</em>, it would spend{' '}
+      <em>{thingName}</em>, it would spend{' '}
       {showSubtest ? (
         <>
           <strong>{pct(savingRel)}</strong> less time on {suiteName}, and{' '}
@@ -982,7 +1253,10 @@ function BucketTable({
   baseViewerUrl: string;
   newViewerUrl: string;
 }) {
-  const columnCount = SCORE_TABLE_COLUMN_COUNT;
+  const columns = useMeanColumns();
+  const allNames = useProfileNameList();
+  const columnCount = scoreTableColumnCount(columns.length);
+  const readMean = makeMeanReader(columns, label);
   const names = useBenchmarkProfileNames();
 
   // For a subtest expansion, filter to samples inside that suite's iteration
@@ -1031,7 +1305,9 @@ function BucketTable({
     enclosingBaseMean,
     isOverall,
     numSuites,
-    filter
+    filter,
+    readMean,
+    columns.length
   )
     .sort((a, b) => Math.abs(b.absDiff) - Math.abs(a.absDiff))
     .slice(0, TOP_N);
@@ -1040,8 +1316,8 @@ function BucketTable({
     // Naming the direction matters most in exactly this case: an empty list
     // under "only where X is slower" is a real answer, and reading it as "no
     // differences at all" would be the wrong one.
-    const slow = slowerSideName(filter.direction, names);
-    const where = slow === null ? '' : ` where ${slow} is slower`;
+    const clause = directionClause(filter, allNames);
+    const where = clause === null ? '' : ` where ${clause}`;
     return (
       <p className="benchmarkNoChanges">
         {filter.mode === 'movers'
@@ -1058,8 +1334,9 @@ function BucketTable({
        * columns. */}
       <colgroup>
         <col />
-        <col className="benchmarkCell--colFixed" />
-        <col className="benchmarkCell--colFixed" />
+        {columns.map((column) => (
+          <col className="benchmarkCell--colFixed" key={column.index} />
+        ))}
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
@@ -1092,12 +1369,11 @@ function BucketTable({
                   ) : null}
                   {c.bucketName}
                 </td>
-                <td className="benchmarkCell--number">
-                  {c.baseMean.toFixed(2)}
-                </td>
-                <td className="benchmarkCell--number">
-                  {c.newMean.toFixed(2)}
-                </td>
+                {columns.map((column) => (
+                  <td className="benchmarkCell--number" key={column.index}>
+                    {readMean(c, column.index).toFixed(2)}
+                  </td>
+                ))}
                 <td className="benchmarkCell--number">{absDiffStr}</td>
                 <td
                   className="benchmarkCell--number benchmarkCell--mde"
@@ -1125,12 +1401,13 @@ function BucketTable({
               {expandable && isExpanded ? (
                 <tr className="benchmarkRow--bucket-expansion">
                   <td colSpan={columnCount}>
-                    <BucketCounterfactual
-                      bucketName={c.bucketName}
+                    <Counterfactual
+                      thingName={c.bucketName}
                       absDiff={absDiff}
-                      enclosingBaseMean={enclosingBaseMean}
-                      enclosingNewMean={enclosingNewMean}
+                      baseTotal={enclosingBaseMean}
+                      newTotal={enclosingNewMean}
                       suiteName={isOverall ? null : label}
+                      alreadyOverall={isOverall}
                       numSuites={numSuites}
                     />
                     <BucketFlameGraphPair
@@ -1183,8 +1460,30 @@ function lazyBundle(profile: Profile): () => BucketProfileBundle {
   };
 }
 
-function ComparisonResults({ progress }: { progress: ComparisonProgress }) {
-  const { scores, bucketTables, pendingLabels } = progress;
+function ComparisonResults({
+  progress,
+  allNames,
+  baseIndex,
+  newIndex,
+}: {
+  progress: ComparisonProgress;
+  /** Every loaded profile's name, in list order. */
+  allNames: string[];
+  baseIndex: number;
+  newIndex: number;
+}) {
+  const { scores, otherMeans, bucketTables, pendingLabels } = progress;
+
+  const columns = useMemo(
+    (): MeanColumn[] =>
+      allNames.map((name, index) => ({
+        index,
+        name,
+        side: comparedSideOf(index, baseIndex, newIndex),
+        means: otherMeans.get(index) ?? null,
+      })),
+    [allNames, baseIndex, newIndex, otherMeans]
+  );
 
   const getBaseBundle = useMemo(
     () => lazyBundle(scores.baseProfile),
@@ -1196,9 +1495,16 @@ function ComparisonResults({ progress }: { progress: ComparisonProgress }) {
   );
 
   const names = useBenchmarkProfileNames();
+  const profileCount = allNames.length;
   const [filter, setFilter] = useState<BucketFilter>({
     mode: DEFAULT_BUCKET_FILTER_MODE,
-    direction: DEFAULT_BUCKET_DIRECTION,
+    // The new side of the compared pair, because every Δ and every verdict in
+    // the table is already said about it, so the rows and the control that
+    // filters them start out talking about the same profile. And against the
+    // best of the others, which with two loaded is just the other one.
+    subject: newIndex,
+    comparand: 'best',
+    show: DEFAULT_BUCKET_SHOW,
   });
 
   const handleFilterModeChange = useCallback(
@@ -1208,19 +1514,149 @@ function ComparisonResults({ progress }: { progress: ComparisonProgress }) {
     },
     []
   );
-  const handleDirectionChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      const direction = e.currentTarget.value as BucketDirection;
-      setFilter((prev) => ({ ...prev, direction }));
+  // Changing the subject re-says the same thing about the other side, so the
+  // direction flips with it and the listed rows do not move. Naming a subset a
+  // different way should not change which subset it is -- and watching the
+  // selection travel from "Firefox is slower" to "Chrome is faster" over an
+  // unchanged table is the clearest statement available that those are one
+  // question. What generalises is swapping the two *operands*, so this survives
+  // a third profile; picking one that was not in the sentence cannot preserve
+  // the rows and should not pretend to.
+  const handleSubjectChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      const subject = Number(e.currentTarget.value);
+      setFilter((prev) => ({
+        ...prev,
+        subject,
+        // A subject cannot be compared with itself. Falling back to the
+        // aggregate rather than to some other profile avoids picking one on the
+        // reader's behalf.
+        comparand: prev.comparand === subject ? 'best' : prev.comparand,
+        show:
+          soleComparandIndex(prev, profileCount) === subject
+            ? oppositeShow(prev.show)
+            : prev.show,
+      }));
+    },
+    [profileCount]
+  );
+  const handleComparandChange = useCallback(
+    (e: ChangeEvent<HTMLSelectElement>) => {
+      const raw = e.currentTarget.value;
+      const comparand: BucketComparand = raw === 'best' ? 'best' : Number(raw);
+      setFilter((prev) => ({ ...prev, comparand }));
     },
     []
   );
+  const handleShowChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const show = e.currentTarget.value as BucketShow;
+    setFilter((prev) => ({ ...prev, show }));
+  }, []);
 
   return (
     <div className="benchmarkResults">
       <h3 className="benchmarkSectionTitle">Score and subtest totals</h3>
+      {/* One sentence across four controls, rather than a list of options that
+       * each name a side. The dropdown is a slot in that sentence, not a role
+       * the report gives the profile in it: "reference" and "point of view"
+       * already mean the side every Δ is measured against, and that is still
+       * the base profile whatever is picked here. Written this way it also has
+       * somewhere to grow — a third profile turns "is slower" into "is slower
+       * than <which>" by adding a slot, where a list of ready-made sentences
+       * would need one entry per ordered pair. */}
       <div className="benchmarkFilters">
-        <span className="benchmarkFilter__label">Show buckets that</span>
+        <span className="benchmarkFilter__label">Show</span>
+        <label
+          className="benchmarkFilter"
+          title="Both directions, ranked together by how far they moved."
+        >
+          <input
+            type="radio"
+            name="benchmarkBucketShow"
+            value="all"
+            checked={filter.show === 'all'}
+            onChange={handleShowChange}
+          />
+          <span>Everything</span>
+        </label>
+        <div className="benchmarkFilterClause">
+          <span>or where</span>
+          <select
+            className="benchmarkFilterClause__select"
+            aria-label="Profile the direction is about"
+            value={filter.subject}
+            onChange={handleSubjectChange}
+            title={
+              'Which profile the direction beside it is said about. It changes ' +
+              'which rows are listed, not the numbers in them: every Δ stays ' +
+              `${names.new} measured against ${names.base}.`
+            }
+          >
+            {allNames.map((name, index) => (
+              <option key={name} value={index}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <span>is</span>
+          {SHOW_DIRECTIONS.map((show) => (
+            <label
+              className="benchmarkFilter"
+              key={show}
+              title={directionTitle(filter, show, allNames)}
+            >
+              <input
+                type="radio"
+                name="benchmarkBucketShow"
+                value={show}
+                checked={filter.show === show}
+                onChange={handleShowChange}
+                // The visible label is one word, because the rest of the
+                // sentence is spelled out around it and repeating it would read
+                // as two separate questions. Read on its own -- which is how a
+                // screen reader takes a radio -- one word is not an option, so
+                // the accessible name is the whole sentence.
+                aria-label={showSentence(filter, show, allNames)}
+              />
+              <span>{show}</span>
+            </label>
+          ))}
+          {/* The last slot, and the only one that is not always there: with two
+           * profiles loaded, "than the best of the others" and "than the other
+           * one" are the same set, so the choice would be between a value and
+           * itself. */}
+          {profileCount > 2 ? (
+            <>
+              <span>than</span>
+              <select
+                className="benchmarkFilterClause__select"
+                aria-label="Profile the direction is measured against"
+                value={filter.comparand}
+                onChange={handleComparandChange}
+                title={
+                  'What the subject is being compared with. "The best of the ' +
+                  'others" is per row -- whichever profile is quickest in that ' +
+                  'bucket -- so it asks whether anyone does this faster at all, ' +
+                  'which is the version of the question with an existence ' +
+                  'proof attached. Rows are selected by comparing means; the q ' +
+                  'column is still the comparison named above the table.'
+                }
+              >
+                <option value="best">the best of the others</option>
+                {allNames.map((name, index) =>
+                  index === filter.subject ? null : (
+                    <option key={name} value={index}>
+                      {name}
+                    </option>
+                  )
+                )}
+              </select>
+            </>
+          ) : null}
+        </div>
+      </div>
+      <div className="benchmarkFilters">
+        <span className="benchmarkFilter__label">…among buckets that</span>
         {BUCKET_FILTER_MODES.map(({ mode, label, title }) => (
           <label className="benchmarkFilter" key={mode} title={title}>
             <input
@@ -1234,32 +1670,29 @@ function ComparisonResults({ progress }: { progress: ComparisonProgress }) {
           </label>
         ))}
       </div>
-      <div className="benchmarkFilters">
-        <span className="benchmarkFilter__label">…and where</span>
-        {bucketDirections(names).map(({ direction, label, title }) => (
-          <label className="benchmarkFilter" key={direction} title={title}>
-            <input
-              type="radio"
-              name="benchmarkBucketDirection"
-              value={direction}
-              checked={filter.direction === direction}
-              onChange={handleDirectionChange}
-            />
-            <span>{label}</span>
-          </label>
-        ))}
-      </div>
-      <ScoreTable
-        overallScore={scores.overallScore}
-        suiteScores={scores.suiteScores}
-        bucketTables={bucketTables}
-        pendingLabels={pendingLabels}
-        filter={filter}
-        getBaseBundle={getBaseBundle}
-        getNewBundle={getNewBundle}
-        baseViewerUrl={scores.baseViewerUrl}
-        newViewerUrl={scores.newViewerUrl}
-      />
+      {profileCount > 2 ? (
+        // Said once, above the table, rather than in a tooltip on each extra
+        // header: a column with no q-value next to columns that have one is
+        // exactly the sort of thing a reader will assume is an oversight.
+        <p className="benchmarkColumnsNote">
+          Every Δ, q and verdict below is <strong>{names.new}</strong> against{' '}
+          <strong>{names.base}</strong>. The other columns are measured, not
+          tested — the filters can ask about them, but no comparison was run.
+        </p>
+      ) : null}
+      <MeanColumnsContext.Provider value={columns}>
+        <ScoreTable
+          overallScore={scores.overallScore}
+          suiteScores={scores.suiteScores}
+          bucketTables={bucketTables}
+          pendingLabels={pendingLabels}
+          filter={filter}
+          getBaseBundle={getBaseBundle}
+          getNewBundle={getNewBundle}
+          baseViewerUrl={scores.baseViewerUrl}
+          newViewerUrl={scores.newViewerUrl}
+        />
+      </MeanColumnsContext.Provider>
     </div>
   );
 }
@@ -1272,6 +1705,45 @@ function ComparisonResults({ progress }: { progress: ComparisonProgress }) {
  * every other sentence in the report calls this profile anyway. The full URL is
  * still there in the form's input when it is opened.
  */
+/** Two profiles are a comparison and read as "A vs B"; three or more are a list
+ * of what is loaded, and which two are being compared is said underneath. */
+function profileLinkSeparator(count: number): string {
+  return count === 2 ? ' vs ' : ', ';
+}
+
+/** One side of the "Comparing X vs Y" control, above a report of three or more
+ * profiles. */
+function PairSelect({
+  side,
+  label,
+  value,
+  names,
+  onChange,
+}: {
+  side: 'base' | 'new';
+  label: string;
+  value: number;
+  names: string[];
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+}) {
+  return (
+    <select
+      className="benchmarkComparingPair__select"
+      data-side={side}
+      aria-label={label}
+      title={label}
+      value={value}
+      onChange={onChange}
+    >
+      {names.map((name, i) => (
+        <option key={name} value={i}>
+          {name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 function ProfileLink({ name, url }: { name: string; url: string }) {
   return (
     <a
@@ -1291,22 +1763,70 @@ export function BenchmarkCompareViewer() {
   const profileNamesToCompare = useSelector(getProfileNamesToCompare);
   const [state, setState] = useState<State>({ phase: 'empty' });
 
-  // Destructured into two strings rather than kept as an array, so that the
-  // effect doesn't re-run (and re-compute a ~7000-bucket comparison) every time
-  // an unrelated dispatch hands us a fresh array with the same contents.
-  const baseUrl = profilesToCompare?.[0] ?? '';
-  const newUrl = profilesToCompare?.[1] ?? '';
-  const names = useMemo(
-    () => resolveBenchmarkProfileNames(profileNamesToCompare),
-    [profileNamesToCompare]
+  // Joined into one string rather than kept as an array, so that the effect
+  // doesn't re-run (and re-compute a ~7000-bucket comparison) every time an
+  // unrelated dispatch hands us a fresh array with the same contents.
+  const urlKey = (profilesToCompare ?? []).join('\n');
+  const urls = useMemo(
+    () => (urlKey === '' ? [] : urlKey.split('\n')),
+    [urlKey]
   );
-  const { base: baseName, new: newName } = names;
+  const allNames = useMemo(
+    () =>
+      resolveBenchmarkProfileNameList(
+        profileNamesToCompare,
+        Math.max(urls.length, 2)
+      ),
+    [profileNamesToCompare, urls.length]
+  );
+
+  /**
+   * Which two of the loaded profiles this report is of.
+   *
+   * More than two can be loaded, but one report is still of one pair: the whole
+   * table -- every Δ, every q, every verdict -- is two-sample. Choosing a
+   * different pair recomputes it, which is seconds of arithmetic but no
+   * downloads, since the profiles are cached by URL.
+   *
+   * Component state rather than URL state, so a shared link still opens the
+   * default pair rather than someone else's reading position. Reset when the
+   * profile list changes, since index 2 of the old list is not index 2 of the
+   * new one.
+   */
+  const [pair, setPair] = useState<[number, number]>([0, 1]);
+  useEffect(() => {
+    // Index 2 of the old list is not index 2 of the new one, so an edit to the
+    // profiles goes back to the first two. Returning `prev` unchanged when it is
+    // already the default keeps this from re-rendering on every mount.
+    setPair((prev) => (prev[0] === 0 && prev[1] === 1 ? prev : [0, 1]));
+  }, [urlKey]);
+  const [baseIndex, newIndex] =
+    pair[0] < urls.length && pair[1] < urls.length ? pair : [0, 1];
+  const names = useMemo(
+    () => benchmarkProfileNamePair(allNames, baseIndex, newIndex),
+    [allNames, baseIndex, newIndex]
+  );
+  const baseUrl = urls[baseIndex] ?? '';
+  const newUrl = urls[newIndex] ?? '';
+
+  const handlePairChange = useCallback((e: ChangeEvent<HTMLSelectElement>) => {
+    const side = e.currentTarget.dataset.side;
+    const index = Number(e.currentTarget.value);
+    setPair(([base, neu]) =>
+      // Picking a profile that is already on the other side swaps them, rather
+      // than producing a comparison of something with itself.
+      side === 'base'
+        ? [index, index === neu ? base : neu]
+        : [index === base ? neu : base, index]
+    );
+  }, []);
 
   useEffect(() => {
     if (baseUrl === '' || newUrl === '') {
       setState({ phase: 'empty' });
       return undefined;
     }
+    const allUrls = urlKey.split('\n');
     // A second edit while the first pair is still being worked on would
     // otherwise race, and whichever finished last would win. Aborting also
     // stops the comparison itself — terminating the workers computing its
@@ -1317,8 +1837,8 @@ export function BenchmarkCompareViewer() {
     (async () => {
       try {
         for await (const progress of runBenchmarkComparison(
-          baseUrl,
-          newUrl,
+          allUrls,
+          [baseIndex, newIndex],
           controller.signal,
           // The seconds of arithmetic behind the bucket tables belong on other
           // threads: the page has a score table to paint and links to follow.
@@ -1340,15 +1860,19 @@ export function BenchmarkCompareViewer() {
       }
     })();
     return () => controller.abort();
-  }, [baseUrl, newUrl]);
+    // `urlKey` rather than `urls`, for the same reason it exists: an unrelated
+    // dispatch that hands us an equal-but-fresh array must not re-run seconds of
+    // arithmetic. The indices are in the deps because picking a different pair
+    // out of an unchanged list is exactly what has to re-run it.
+  }, [urlKey, baseUrl, newUrl, baseIndex, newIndex]);
 
   const form = (
     <BenchmarkCompareForm
-      // Remount when the compared pair changes (including via history
+      // Remount when the loaded profiles change (including via history
       // navigation) so the inputs show what is actually on screen.
-      key={`${baseUrl}\n${newUrl}\n${baseName}\n${newName}`}
-      initialUrls={[baseUrl, newUrl]}
-      initialNames={[baseName, newName]}
+      key={`${urlKey}\n${allNames.join('\n')}`}
+      initialUrls={urls.length >= 2 ? urls : ['', '']}
+      initialNames={allNames}
       submitLabel={state.phase === 'empty' ? 'Compare' : 'Update comparison'}
     />
   );
@@ -1364,7 +1888,8 @@ export function BenchmarkCompareViewer() {
             <p className="photon-body-20">
               Enter two benchmark profiles to compare. The report is written
               from the first one’s point of view: every percentage says what
-              happens to it when it is replaced by the second.
+              happens to it when it is replaced by the second. Add more than two
+              to keep them all loaded and read any pair of them.
             </p>
             {form}
           </>
@@ -1378,10 +1903,40 @@ export function BenchmarkCompareViewer() {
              * disclosure below hides only the editing controls, which is the
              * part nobody needs until they want a different pair. */}
             <p className="benchmarkProfileLinks">
-              Profiles: <ProfileLink name={baseName} url={baseUrl} />
-              {' vs '}
-              <ProfileLink name={newName} url={newUrl} />
+              Profiles:{' '}
+              {urls.map((url, i) => (
+                <Fragment key={url}>
+                  {i === 0 ? null : profileLinkSeparator(urls.length)}
+                  <ProfileLink name={allNames[i]} url={url} />
+                </Fragment>
+              ))}
             </p>
+            {/* One report is of one pair, so with more than two loaded there has
+             * to be somewhere to say which. Both sides are selectable rather
+             * than just the second: which profile the percentages are measured
+             * against is as much a part of the question as which one is being
+             * asked about, and with three builds the useful baseline is not
+             * always the one that happens to be first in the URL. */}
+            {urls.length > 2 ? (
+              <p className="benchmarkComparingPair">
+                Comparing{' '}
+                <PairSelect
+                  side="base"
+                  label="Profile the percentages are measured against"
+                  value={baseIndex}
+                  names={allNames}
+                  onChange={handlePairChange}
+                />
+                {' vs '}
+                <PairSelect
+                  side="new"
+                  label="Profile being compared against it"
+                  value={newIndex}
+                  names={allNames}
+                  onChange={handlePairChange}
+                />
+              </p>
+            ) : null}
             <details className="benchmarkComparing">
               <summary>
                 <span className="benchmarkComparing__summaryText">
@@ -1413,7 +1968,12 @@ export function BenchmarkCompareViewer() {
         )}
 
         {state.phase === 'results' && (
-          <ComparisonResults progress={state.progress} />
+          <ComparisonResults
+            progress={state.progress}
+            allNames={allNames}
+            baseIndex={baseIndex}
+            newIndex={newIndex}
+          />
         )}
 
         {/* Keeps enough page height below the content that collapsing a section

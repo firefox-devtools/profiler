@@ -36,19 +36,33 @@ jest.mock(
     return {
       ...actual,
       runBenchmarkComparison: (
-        _baseUrl: string,
-        _newUrl: string,
+        urls: string[],
+        [baseIndex, newIndex]: [number, number],
         signal: AbortSignal
       ) => {
+        // Which pair the page asked for. The stats themselves are the same
+        // whatever is passed, so this is the only way to see that picking a
+        // different pair reached the pipeline.
+        comparedPairs.push([urls[baseIndex], urls[newIndex]]);
         // These helpers are function declarations, so they exist by
         // the time this is called even though jest hoists the mock above them.
-        const { baseStats, newStats } = mockStatsPair();
+        const { baseStats, newStats, thirdStats } = mockStatsPair();
+        // Whatever is loaded and not compared is a mean column. The stats are
+        // the same whichever pair is picked, so every such slot gets the one
+        // third profile.
+        const others = new Map<number, ProfileBenchmarkStats>();
+        for (let i = 0; i < urls.length; i++) {
+          if (i !== baseIndex && i !== newIndex) {
+            others.set(i, thirdStats);
+          }
+        }
         return actual.compareStatsProgressively(
           baseStats,
           newStats,
           mockSources(),
           signal,
-          mockHeldTableRunner
+          mockHeldTableRunner,
+          others
         );
       },
     };
@@ -65,6 +79,9 @@ jest.mock(
  * real in-process runner, so what is faked is only *when* it arrives.
  */
 const heldTables: Array<{ label: string; release: () => void }> = [];
+
+/** The (base, new) URLs of every comparison the page has started. */
+const comparedPairs: Array<[string, string]> = [];
 
 function mockHeldTableRunner(setup: TableRunnerSetup): TableRunner {
   const actual = jest.requireActual(
@@ -141,6 +158,14 @@ function mockStatsPair() {
       suite('Alpha', 0, 1),
       suite('Beta', 1, 2),
     ]),
+    // A third profile, for the questions that need one. On Beta it is the
+    // slowest of the three, which is what makes "slower than the best of the
+    // others" and "slower than this particular one" different answers rather
+    // than two spellings of the same one.
+    thirdStats: makeStats(bucketNames, [
+      suite('Alpha', 0, 1),
+      suite('Beta', 1, 3),
+    ]),
   };
 }
 
@@ -173,20 +198,24 @@ function mockSources() {
   };
 }
 
+const URLS = [
+  'https://profiler.firefox.com/public/base/',
+  'https://profiler.firefox.com/public/new/',
+  'https://profiler.firefox.com/public/third/',
+];
+
 describe('app/BenchmarkCompareViewer', () => {
   beforeEach(function () {
     heldTables.length = 0;
+    comparedPairs.length = 0;
   });
 
-  function setup() {
+  function setup(count: number = 2) {
     const store = blankStore();
     store.dispatch(
       changeProfilesToCompareBenchmark(
-        [
-          'https://profiler.firefox.com/public/base/',
-          'https://profiler.firefox.com/public/new/',
-        ],
-        ['Chrome', 'Firefox']
+        URLS.slice(0, count),
+        ['Chrome', 'Firefox', 'Safari'].slice(0, count)
       )
     );
     return render(
@@ -205,9 +234,12 @@ describe('app/BenchmarkCompareViewer', () => {
     expect(
       [...links].map((a) => [a.textContent, a.getAttribute('href')])
     ).toEqual([
-      ['Chrome', 'https://profiler.firefox.com/public/base/'],
-      ['Firefox', 'https://profiler.firefox.com/public/new/'],
+      ['Chrome', URLS[0]],
+      ['Firefox', URLS[1]],
     ]);
+    // Two profiles are the whole comparison, so there is nothing to choose
+    // between.
+    expect(document.querySelector('.benchmarkComparingPair')).toBeNull();
 
     // The score rows show up while their per-function tables are still being
     // computed, each with a spinner where its count will go.
@@ -256,6 +288,155 @@ describe('app/BenchmarkCompareViewer', () => {
     expect(document.querySelectorAll('.benchmarkTable--buckets')).toHaveLength(
       1
     );
+  });
+
+  it('keeps three profiles loaded and reads any pair of them', async () => {
+    setup(3);
+    await screen.findByText('Overall (geomean-normalised)');
+
+    // All three are linked, and the first two are compared until told
+    // otherwise.
+    expect(
+      [...document.querySelectorAll('.benchmarkProfileLinks a')].map(
+        (a) => a.textContent
+      )
+    ).toEqual(['Chrome', 'Firefox', 'Safari']);
+    expect(comparedPairs).toEqual([[URLS[0], URLS[1]]]);
+
+    // Picking a third profile for one side re-runs the comparison against it,
+    // without touching the other side.
+    const baseSelect = screen.getByLabelText(
+      'Profile the percentages are measured against'
+    );
+    const newSelect = screen.getByLabelText(
+      'Profile being compared against it'
+    );
+    fireEvent.change(newSelect, { target: { value: '2' } });
+    await waitFor(() => expect(comparedPairs).toHaveLength(2));
+    expect(comparedPairs[1]).toEqual([URLS[0], URLS[2]]);
+    // And the whole report is now about that pair, down to the column headers.
+    expect(await screen.findByText('Safari mean')).toBeInTheDocument();
+    expect(screen.getByText('Chrome mean')).toBeInTheDocument();
+
+    // Choosing the profile that is already on the other side swaps the two,
+    // rather than comparing Safari with itself.
+    fireEvent.change(baseSelect, { target: { value: '2' } });
+    await waitFor(() => expect(comparedPairs).toHaveLength(3));
+    expect(comparedPairs[2]).toEqual([URLS[2], URLS[0]]);
+  });
+
+  it('lists where a profile is behind the best of the others', async () => {
+    setup(3);
+    await screen.findByText('Overall (geomean-normalised)');
+    // Overall, then Alpha, then Beta; Gamma never gets one.
+    await releaseNextTable();
+    await releaseNextTable();
+    expect(await releaseNextTable()).toBe('Beta');
+
+    fireEvent.click(screen.getByLabelText('Unfiltered'));
+    fireEvent.click(screen.getByText('Beta').closest('tr') as HTMLElement);
+    const listed = () =>
+      [...document.querySelectorAll('.benchmarkCell--bucketName')].map((td) =>
+        td.getAttribute('title')
+      );
+
+    // Safari is measured but not compared, so it is a mean column and nothing
+    // else: on Beta it spends three times what Chrome does.
+    const means = [
+      ...document.querySelectorAll(
+        '.benchmarkTable--buckets .benchmarkCell--number'
+      ),
+    ].map((td) => td.textContent);
+    expect(means.slice(0, 3)).toEqual(['3.88', '7.75', '11.63']);
+
+    // Firefox is slower than Chrome here and faster than Safari, so the two
+    // ways of asking give different answers -- which is the whole reason the
+    // comparand is a control rather than "the other one".
+    fireEvent.click(
+      screen.getByLabelText('Firefox is slower than the best of the others')
+    );
+    expect(listed()).toEqual(['betaFunc']);
+
+    fireEvent.change(
+      screen.getByLabelText('Profile the direction is measured against'),
+      { target: { value: '2' } }
+    );
+    expect(
+      screen.getByLabelText('Firefox is slower than Safari')
+    ).toBeChecked();
+    expect(listed()).toEqual([]);
+    fireEvent.click(screen.getByLabelText('Firefox is faster than Safari'));
+    expect(listed()).toEqual(['betaFunc']);
+  });
+
+  it('says what a subtest is worth before its table arrives', async () => {
+    setup();
+    await screen.findByText('Overall (geomean-normalised)');
+
+    // Beta is the subtest the new profile is twice as slow on. Opening it says
+    // so in the form a bug report gets written in -- and says it immediately,
+    // because the sentence needs only the score row. The list of functions
+    // behind it is still seconds away.
+    fireEvent.click(screen.getByText('Beta').closest('tr') as HTMLElement);
+    expect(
+      document.querySelector('.benchmarkCounterfactual')?.textContent
+    ).toBe(
+      'If Firefox were as fast as Chrome on Beta, it would spend 20.63% less ' +
+        'time overall.'
+    );
+    expect(
+      screen.getByText(/Still working out which functions moved/)
+    ).toBeInTheDocument();
+
+    // The overall row is the one place it would only repeat the Δ% column back.
+    fireEvent.click(
+      screen
+        .getByText('Overall (geomean-normalised)')
+        .closest('tr') as HTMLElement
+    );
+    expect(document.querySelectorAll('.benchmarkCounterfactual')).toHaveLength(
+      1
+    );
+  });
+
+  it('lists a direction under either name for it', async () => {
+    setup();
+    await screen.findByText('Overall (geomean-normalised)');
+    expect(await releaseNextTable()).toBe('Overall (geomean-normalised)');
+
+    // Unfiltered, so that what the direction controls admit is the only thing
+    // deciding this list.
+    fireEvent.click(screen.getByLabelText('Unfiltered'));
+    const overall = screen
+      .getByText('Overall (geomean-normalised)')
+      .closest('tr') as HTMLTableRowElement;
+    fireEvent.click(overall);
+    const listed = () =>
+      [...document.querySelectorAll('.benchmarkCell--bucketName')].map((td) =>
+        td.getAttribute('title')
+      );
+
+    // Firefox is the new profile, so it is what the directions are about until
+    // the reader says otherwise, and "everything" is both of them -- plus
+    // alphaFunc, which is in neither because it did not move at all.
+    expect(screen.getByLabelText('Profile the direction is about')).toHaveValue(
+      '1'
+    );
+    expect(listed()).toEqual(['gammaFunc', 'betaFunc', 'alphaFunc']);
+    fireEvent.click(screen.getByLabelText('Firefox is slower'));
+    expect(listed()).toEqual(['betaFunc']);
+
+    // The same set, asked for the other way round. This is the whole point of
+    // splitting the choice in two: a reader who wants to know where Firefox
+    // wins can ask for that in those words, instead of having to work out that
+    // it is what "Chrome is slower" means.
+    fireEvent.change(screen.getByLabelText('Profile the direction is about'), {
+      target: { value: '0' },
+    });
+    expect(screen.getByLabelText('Chrome is faster')).toBeChecked();
+    expect(listed()).toEqual(['betaFunc']);
+    fireEvent.click(screen.getByLabelText('Chrome is slower'));
+    expect(listed()).toEqual(['gammaFunc']);
   });
 
   it('gives a subtest the new profile did not run no arrow at all', async () => {
