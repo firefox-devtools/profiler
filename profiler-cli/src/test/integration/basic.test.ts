@@ -21,6 +21,7 @@ import type {
   ProfileMetaResult,
   SessionMetadata,
   StatusResult,
+  ThreadListResult,
   ThreadSamplesResult,
   WithContext,
 } from '../../protocol';
@@ -102,6 +103,33 @@ describe('profiler-cli basic functionality', () => {
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Selected thread');
     expect(result.stdout).toContain('t-0');
+  });
+
+  it('thread list prints a flat table', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const list = await cli(ctx, ['thread', 'list']);
+    expect(list.exitCode).toBe(0);
+    expect(list.stdout).toContain('HANDLE');
+    expect(list.stdout).toContain('MARKERS');
+    expect(list.stdout).toContain('t-0');
+
+    const json = await cli(ctx, ['thread', 'list', '--json']);
+    const result = JSON.parse(json.stdout) as WithContext<ThreadListResult>;
+    expect(result.type).toBe('thread-list');
+    expect(result.threads.length).toBe(result.totalThreadCount);
+    expect(result.sort).toBe('cpu');
+    expect(result.threads[0].threadHandle).toBe('t-0');
+    expect(typeof result.threads[0].markerCount).toBe('number');
+  });
+
+  it('thread list rejects an unknown --sort', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, ['thread', 'list', '--sort', 'bogus']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('--sort must be one of');
   });
 
   it('stop cleans up session', async () => {

@@ -295,6 +295,50 @@ export type ThreadSelectResult = {
   threadNames: string[];
 };
 
+/** How `thread list` orders its rows. */
+export type ThreadListSort = 'cpu' | 'index' | 'markers' | 'name';
+
+export type ThreadListOptions = {
+  /** Ordering of the rows. Defaults to 'cpu' (busiest thread first). */
+  sort?: ThreadListSort;
+  /** Keep only threads whose name, process name, pid or tid matches. */
+  searchString?: string;
+  /** Show at most this many rows. Omitted or 0 means "no limit". */
+  limit?: number;
+};
+
+/**
+ * One row of the flat `thread list` table. `cpuMs` and `markerCount` cover the
+ * whole profile (not the current zoom range), matching `profile info`.
+ */
+export type ThreadListItem = {
+  threadHandle: string; // e.g. "t-0"
+  threadIndex: number;
+  name: string; // raw thread name, e.g. "GeckoMain"
+  processName: string; // e.g. "Parent Process"
+  etld1?: string; // eTLD+1 of an isolated content process, when known
+  pid: string;
+  processIndex: number;
+  tid: number | string;
+  cpuMs: number;
+  markerCount: number;
+  /** True for the thread(s) currently selected in the session. */
+  selected: boolean;
+};
+
+export type ThreadListResult = {
+  type: 'thread-list';
+  threads: ThreadListItem[];
+  /** Number of threads in the profile, before search/limit filtering. */
+  totalThreadCount: number;
+  /** Number of processes in the profile. */
+  processCount: number;
+  /** Number of threads dropped by `limit` after search filtering. */
+  hiddenByLimit: number;
+  sort: ThreadListSort;
+  searchQuery?: string;
+};
+
 export type ThreadInfoResult = {
   type: 'thread-info';
   threadHandle: string;

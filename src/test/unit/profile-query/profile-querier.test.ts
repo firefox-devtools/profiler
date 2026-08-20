@@ -18,13 +18,22 @@
 
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
 import {
+  addRawMarkersToThread,
   getProfileFromTextSamples,
   getCounterForThread,
   getCounterForThreadWithSamples,
   getProfileWithMarkers,
   getNetworkMarkers,
 } from '../../fixtures/profiles/processed-profile';
-import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
+import {
+  INSTANT,
+  INTERVAL_END,
+  INTERVAL_START,
+} from 'firefox-profiler/app-logic/constants';
+import {
+  getProfile,
+  getProfileRootRange,
+} from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
 
 describe('ProfileQuerier', function () {
@@ -753,6 +762,214 @@ describe('ProfileQuerier', function () {
       const zoomed = await querier.threadMarkers('t-0', { list: true });
       const listedNames = zoomed.flatMarkers!.map((m) => m.name);
       expect(listedNames).toEqual(['Beta']);
+    });
+  });
+
+  describe('threadList', function () {
+    // Three threads in two processes, with deliberately non-monotonic CPU so
+    // sorting is observable: t-0 idles, t-1 is the busiest, t-2 is in between.
+    function querierWithThreads() {
+      const { profile } = getProfileFromTextSamples(
+        'A  A  A',
+        'B  B  B',
+        'C  C  C'
+      );
+      profile.meta.sampleUnits = {
+        time: 'ms',
+        eventDelay: 'ms',
+        threadCPUDelta: 'µs',
+      };
+
+      const setup = [
+        {
+          name: 'GeckoMain',
+          processName: 'Parent Process',
+          pid: '111',
+          tid: 1,
+          // First delta is ignored (no preceding interval), so this is 1ms.
+          cpuDelta: [5000, 500, 500],
+          instantMarkers: 1,
+          // Threads with only instant markers can't tell a derived marker count
+          // apart from the raw marker table length, so the busiest thread gets a
+          // start/end pair: 2 raw rows that derive into 1 marker.
+          intervalPairs: 0,
+        },
+        {
+          name: 'Renderer',
+          processName: 'GPU Process',
+          pid: '222',
+          tid: 2,
+          cpuDelta: [0, 4000, 4000],
+          instantMarkers: 2,
+          intervalPairs: 1,
+        },
+        {
+          name: 'Compositor',
+          processName: 'Parent Process',
+          pid: '111',
+          tid: 3,
+          cpuDelta: [0, 1000, 1000],
+          instantMarkers: 2,
+          intervalPairs: 0,
+        },
+      ];
+
+      profile.threads.forEach((thread, index) => {
+        const { name, processName, pid, tid, cpuDelta } = setup[index];
+        const { instantMarkers, intervalPairs } = setup[index];
+        thread.name = name;
+        thread.processName = processName;
+        thread.pid = pid;
+        thread.tid = tid;
+        thread.samples.threadCPUDelta = cpuDelta;
+        addRawMarkersToThread(thread, profile.shared, [
+          ...Array.from({ length: instantMarkers }, (_, i) => ({
+            name: `Marker${index}-${i}`,
+            startTime: i + 1,
+            endTime: null,
+            phase: INSTANT,
+          })),
+          ...Array.from({ length: intervalPairs }, (_, i) => [
+            {
+              name: `Interval${index}-${i}`,
+              startTime: i + 1,
+              endTime: null,
+              phase: INTERVAL_START,
+            },
+            {
+              name: `Interval${index}-${i}`,
+              startTime: null,
+              endTime: i + 2,
+              phase: INTERVAL_END,
+            },
+          ]).flat(),
+        ]);
+      });
+
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('lists every thread as a flat table, busiest first by default', async function () {
+      const result = await querierWithThreads().threadList();
+
+      expect(result.type).toBe('thread-list');
+      expect(result.totalThreadCount).toBe(3);
+      expect(result.processCount).toBe(2);
+      expect(result.sort).toBe('cpu');
+      expect(result.hiddenByLimit).toBe(0);
+      // Sorted by CPU: t-1 (8ms) > t-2 (2ms) > t-0 (1ms).
+      expect(result.threads.map((t) => t.threadHandle)).toEqual([
+        't-1',
+        't-2',
+        't-0',
+      ]);
+
+      const [renderer] = result.threads;
+      expect(renderer.name).toBe('Renderer');
+      expect(renderer.processName).toBe('GPU Process');
+      expect(renderer.pid).toBe('222');
+      expect(renderer.tid).toBe(2);
+      expect(renderer.cpuMs).toBeCloseTo(8);
+      expect(renderer.markerCount).toBe(3);
+      // The default selection is the first thread, not the busiest one.
+      expect(result.threads.map((t) => t.selected)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+    });
+
+    it('supports the index, markers and name orderings', async function () {
+      const querier = querierWithThreads();
+
+      expect(
+        (await querier.threadList({ sort: 'index' })).threads.map(
+          (t) => t.threadHandle
+        )
+      ).toEqual(['t-0', 't-1', 't-2']);
+      expect(
+        (await querier.threadList({ sort: 'markers' })).threads.map(
+          (t) => t.markerCount
+        )
+      ).toEqual([3, 2, 1]);
+      // By process name first, then thread name.
+      expect(
+        (await querier.threadList({ sort: 'name' })).threads.map(
+          (t) => `${t.processName}/${t.name}`
+        )
+      ).toEqual([
+        'GPU Process/Renderer',
+        'Parent Process/Compositor',
+        'Parent Process/GeckoMain',
+      ]);
+    });
+
+    it('filters with a search string over name, process name, pid and tid', async function () {
+      const querier = querierWithThreads();
+
+      const byThreadName = await querier.threadList({
+        searchString: 'compositor',
+      });
+      expect(byThreadName.threads.map((t) => t.threadHandle)).toEqual(['t-2']);
+      expect(byThreadName.searchQuery).toBe('compositor');
+      // The unfiltered totals stay visible so the table says what it hid.
+      expect(byThreadName.totalThreadCount).toBe(3);
+
+      const byProcess = await querier.threadList({ searchString: 'Parent' });
+      expect(byProcess.threads.map((t) => t.threadHandle)).toEqual([
+        't-2',
+        't-0',
+      ]);
+
+      const byPid = await querier.threadList({ searchString: '222' });
+      expect(byPid.threads.map((t) => t.threadHandle)).toEqual(['t-1']);
+
+      const noMatch = await querier.threadList({ searchString: 'nonesuch' });
+      expect(noMatch.threads).toEqual([]);
+    });
+
+    it('applies --limit and reports how many rows it hid', async function () {
+      const querier = querierWithThreads();
+
+      const limited = await querier.threadList({ limit: 2 });
+      expect(limited.threads.map((t) => t.threadHandle)).toEqual([
+        't-1',
+        't-2',
+      ]);
+      expect(limited.hiddenByLimit).toBe(1);
+
+      // 0 means "no limit", like `thread network --limit 0`.
+      const unlimited = await querier.threadList({ limit: 0 });
+      expect(unlimited.threads).toHaveLength(3);
+      expect(unlimited.hiddenByLimit).toBe(0);
+    });
+
+    it('reports the same marker count as threadMarkers for the same thread', async function () {
+      const querier = querierWithThreads();
+
+      const list = await querier.threadList();
+      for (const item of list.threads) {
+        const markers = await querier.threadMarkers(item.threadHandle);
+        expect(item.markerCount).toBe(markers.totalMarkerCount);
+      }
+    });
+
+    it('counts derived markers, not raw marker table rows', async function () {
+      const querier = querierWithThreads();
+      const rawMarkerCounts = getProfile(querier._store.getState()).threads.map(
+        (thread) => thread.markers.length
+      );
+
+      const list = await querier.threadList();
+      const renderer = list.threads.find((t) => t.threadHandle === 't-1');
+
+      // t-1 carries 2 instant markers plus one start/end pair: 4 raw rows that
+      // derive into 3 markers. Counting `thread.markers.length` instead would
+      // report 4 and disagree with `thread markers`, which reports 3.
+      expect(rawMarkerCounts[1]).toBe(4);
+      expect(renderer!.markerCount).toBe(3);
+      expect(renderer!.markerCount).not.toBe(rawMarkerCounts[1]);
     });
   });
 });

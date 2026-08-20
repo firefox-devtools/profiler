@@ -9,12 +9,19 @@ import {
 import {
   getCategories,
   getDefaultCategory,
+  getProfile,
+  getThreadCPUTimeMs,
 } from 'firefox-profiler/selectors/profile';
+import { getProcessName } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
 import { computeThreadNetworkSummary } from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import type {
   ThreadInfoResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListResult,
+  ThreadListSort,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -40,6 +47,107 @@ import type { ThreadMap } from '../thread-map';
 import { getFunctionHandle } from '../function-map';
 import type { MarkerMap } from '../marker-map';
 import type { CallNodePath } from 'firefox-profiler/types';
+
+const threadNameSort = new Intl.Collator('en-US', { numeric: true });
+
+/**
+ * Collect the flat thread table shown by `thread list`.
+ *
+ * This is the inventory counterpart of `profile info`: one row per thread of the
+ * profile, rather than a per-process tree limited to the busiest processes.
+ * `cpuMs` comes from the same selector `profile info` uses, and `markerCount` is
+ * the derived marker count `thread markers` reports for that thread (start/end
+ * pairs merged, jank markers added), so a row's count matches what `thread
+ * markers --thread <handle>` then prints. Both cover the whole profile
+ * regardless of the current zoom, matching `profile info`.
+ */
+export function collectThreadList(
+  store: Store,
+  threadMap: ThreadMap,
+  processIndexMap: Map<string, number>,
+  options: ThreadListOptions = {}
+): ThreadListResult {
+  const state = store.getState();
+  const profile = getProfile(state);
+  const threadCPUTimeMs = getThreadCPUTimeMs(state);
+  const selectedThreadIndexes = getSelectedThreadIndexes(state);
+  const sort: ThreadListSort = options.sort ?? 'cpu';
+
+  const allThreads: ThreadListItem[] = profile.threads.map((thread, index) => {
+    const processIndex = processIndexMap.get(thread.pid);
+    if (processIndex === undefined) {
+      throw new Error(`Process index not found for pid ${thread.pid}`);
+    }
+    return {
+      threadHandle: threadMap.handleForThreadIndex(index),
+      threadIndex: index,
+      name: thread.name,
+      processName: getProcessName(thread),
+      etld1: thread['eTLD+1'],
+      pid: thread.pid,
+      processIndex,
+      tid: thread.tid,
+      cpuMs: threadCPUTimeMs ? threadCPUTimeMs[index] : 0,
+      markerCount: getThreadSelectors(new Set([index])).getFullMarkerList(state)
+        .length,
+      selected: selectedThreadIndexes.has(index),
+    };
+  });
+
+  const search = options.searchString;
+  const matching =
+    search !== undefined && search !== ''
+      ? allThreads.filter((item) => {
+          const query = search.toLowerCase();
+          return (
+            item.name.toLowerCase().includes(query) ||
+            item.processName.toLowerCase().includes(query) ||
+            (item.etld1 !== undefined &&
+              item.etld1.toLowerCase().includes(query)) ||
+            item.pid.includes(query) ||
+            String(item.tid).includes(query) ||
+            item.threadHandle === query
+          );
+        })
+      : allThreads;
+
+  // Sorts are stable in JS, so ties keep the profile's thread order.
+  const sorted = matching.slice();
+  switch (sort) {
+    case 'cpu':
+      sorted.sort((a, b) => b.cpuMs - a.cpuMs);
+      break;
+    case 'markers':
+      sorted.sort((a, b) => b.markerCount - a.markerCount);
+      break;
+    case 'name':
+      sorted.sort(
+        (a, b) =>
+          threadNameSort.compare(a.processName, b.processName) ||
+          threadNameSort.compare(a.name, b.name)
+      );
+      break;
+    case 'index':
+      sorted.sort((a, b) => a.threadIndex - b.threadIndex);
+      break;
+    default:
+      throw new Error(`Unknown thread list sort ${sort as string}`);
+  }
+
+  const limit = options.limit;
+  const threads =
+    limit !== undefined && limit > 0 ? sorted.slice(0, limit) : sorted;
+
+  return {
+    type: 'thread-list',
+    threads,
+    totalThreadCount: profile.threads.length,
+    processCount: new Set(profile.threads.map((t) => t.pid)).size,
+    hiddenByLimit: sorted.length - threads.length,
+    sort,
+    searchQuery: search,
+  };
+}
 
 /**
  * Collect thread info as structured data.
