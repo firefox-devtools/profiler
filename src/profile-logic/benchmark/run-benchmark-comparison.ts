@@ -49,6 +49,8 @@ import type {
   MatchedBucketKeys,
   ScoreComparison,
 } from './compare-benchmark-stats';
+import { computeProfileMeans } from './profile-means';
+import type { ProfileMeans } from './profile-means';
 import { runInSlices, yieldToBrowser } from './chunked-work';
 
 /** What a comparison is *of*, as opposed to what it found: carried through into
@@ -84,6 +86,15 @@ export type ComparisonScores = ComparisonSources & {
  */
 export type ComparisonProgress = {
   scores: ComparisonScores;
+  /**
+   * The loaded profiles that are *not* one of the two being compared, by their
+   * index in the list the reader gave, each measured but not tested. Empty
+   * whenever two profiles are loaded, which is the usual case.
+   *
+   * These are the extra mean columns. They are deliberately not comparisons: see
+   * profile-means.ts.
+   */
+  otherMeans: Map<number, ProfileMeans>;
   /**
    * The per-function comparisons behind each score row, keyed by that row's
    * label — `overallScore.label` for the geomean-normalised global view, and the
@@ -270,8 +281,37 @@ async function pause(signal: AbortSignal): Promise<void> {
 }
 
 /**
- * Compare the two profiles at `baseUrl` and `newUrl`, yielding a fuller snapshot
- * each time another part of the report exists.
+ * Extracted stats, keyed by the viewer URL of the profile they came from.
+ *
+ * The same reason as `profileCache`, one step further along: changing which pair
+ * is on screen re-runs the comparison, but nothing about a profile's own
+ * per-iteration weights depends on what it is being compared with, and
+ * re-deriving them is ~150ms per profile of markers and stacks. With three
+ * loaded, that is most of what switching pairs would otherwise cost.
+ */
+const statsCache = new Map<string, ProfileBenchmarkStats>();
+
+function extractStatsCached(
+  viewerUrl: string,
+  profile: Profile
+): ProfileBenchmarkStats {
+  const cached = statsCache.get(viewerUrl);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const stats = extractBenchmarkStatsFromProfile(profile);
+  statsCache.set(viewerUrl, stats);
+  return stats;
+}
+
+/**
+ * Compare two of the profiles at `urls`, yielding a fuller snapshot each time
+ * another part of the report exists.
+ *
+ * `pair` is the [base, new] pair to compare, as indices into `urls`. Any other
+ * profiles in the list are still loaded and measured — they are the extra mean
+ * columns, and the reader picked them for a reason — but nothing is tested
+ * against them. See profile-means.ts.
  *
  * Rejects with `signal`'s reason if it aborts — including part-way through a
  * bucket table, since finishing tables for a comparison the reader has already
@@ -279,36 +319,45 @@ async function pause(signal: AbortSignal): Promise<void> {
  * yielded stay valid; the consumer decides whether to keep showing them.
  */
 export async function* runBenchmarkComparison(
-  baseUrl: string,
-  newUrl: string,
+  urls: string[],
+  pair: [number, number],
   signal: AbortSignal,
   makeTableRunner: TableRunnerFactory = createInProcessTableRunner
 ): AsyncGenerator<ComparisonProgress, void, void> {
-  const [
-    { profile: baseProfile, viewerUrl: baseViewerUrl },
-    { profile: newProfile, viewerUrl: newViewerUrl },
-  ] = await Promise.all([
-    loadOneProfileCached(baseUrl),
-    loadOneProfileCached(newUrl),
-  ]);
+  const [baseIndex, newIndex] = pair;
+  const loaded = await Promise.all(urls.map(loadOneProfileCached));
   signal.throwIfAborted();
 
   // ~150ms per profile, in one pass each. Long enough to be felt as a hitch and
   // not long enough to be worth threading yield points through the marker and
-  // stack derivation it goes through; the two are at least separated, so neither
-  // is waiting on the other's task.
-  await pause(signal);
-  const baseStats = extractBenchmarkStatsFromProfile(baseProfile);
-  await pause(signal);
-  const newStats = extractBenchmarkStatsFromProfile(newProfile);
+  // stack derivation it goes through; a pause between them at least keeps any
+  // one of them from being two profiles long.
+  const stats: ProfileBenchmarkStats[] = [];
+  for (const { profile, viewerUrl } of loaded) {
+    await pause(signal);
+    stats.push(extractStatsCached(viewerUrl, profile));
+  }
   await pause(signal);
 
+  const others = new Map<number, ProfileBenchmarkStats>();
+  for (let i = 0; i < stats.length; i++) {
+    if (i !== baseIndex && i !== newIndex) {
+      others.set(i, stats[i]);
+    }
+  }
+
   yield* compareStatsProgressively(
-    baseStats,
-    newStats,
-    { baseProfile, newProfile, baseViewerUrl, newViewerUrl },
+    stats[baseIndex],
+    stats[newIndex],
+    {
+      baseProfile: loaded[baseIndex].profile,
+      newProfile: loaded[newIndex].profile,
+      baseViewerUrl: loaded[baseIndex].viewerUrl,
+      newViewerUrl: loaded[newIndex].viewerUrl,
+    },
     signal,
-    makeTableRunner
+    makeTableRunner,
+    others
   );
 }
 
@@ -325,14 +374,21 @@ export async function* compareStatsProgressively(
   newStats: ProfileBenchmarkStats,
   sources: ComparisonSources,
   signal: AbortSignal,
-  makeTableRunner: TableRunnerFactory = createInProcessTableRunner
+  makeTableRunner: TableRunnerFactory = createInProcessTableRunner,
+  /** Loaded but not compared: a mean column each, by list index. */
+  otherStats: Map<number, ProfileBenchmarkStats> = new Map()
 ): AsyncGenerator<ComparisonProgress, void, void> {
   const iterationCount = baseStats.suites[0]?.iterationCount ?? 1;
 
-  // Both profiles' global (across-suite) bucket weights are normalised with
+  // Every profile's global (across-suite) bucket weights are normalised with
   // one shared set of per-suite factors, so that the rank statistics compare
-  // like with like. See computeSharedSuiteFactors.
-  const sharedSuiteFactors = computeSharedSuiteFactors(baseStats, newStats);
+  // like with like -- and so that a profile that is only a column is on the same
+  // scale as the two that are a comparison. See computeSharedSuiteFactors.
+  const sharedSuiteFactors = computeSharedSuiteFactors(
+    baseStats,
+    newStats,
+    ...otherStats.values()
+  );
   const baseGlobalBuckets = computeGlobalBuckets(
     baseStats,
     sharedSuiteFactors,
@@ -376,6 +432,23 @@ export async function* compareStatsProgressively(
 
   const scores: ComparisonScores = { ...sources, overallScore, suiteScores };
 
+  // Cheap next to the score rows above -- no test is run against these, they are
+  // sums over arrays that already exist -- so they are ready in time for the
+  // first snapshot, and the extra columns fill in with the rest of the table
+  // rather than after it.
+  const otherMeans = new Map<number, ProfileMeans>();
+  for (const [index, stats] of otherStats) {
+    otherMeans.set(
+      index,
+      computeProfileMeans(
+        stats,
+        overallScore.label,
+        sharedSuiteFactors,
+        iterationCount
+      )
+    );
+  }
+
   // Tables are dispatched in the order the rows are listed, so the overall one —
   // both the first and the slowest, ~1s against ~130ms for a subtest, since it
   // pools every bucket in the profile — starts first. That is the right way round:
@@ -415,6 +488,7 @@ export async function* compareStatsProgressively(
   // rendering from, and it has to keep saying what it said.
   const snapshot = (): ComparisonProgress => ({
     scores,
+    otherMeans,
     bucketTables: new Map(tables),
     pendingLabels,
   });

@@ -85,19 +85,24 @@ function suiteTotalWeight(suite: SuiteStats): number {
  * delta by the tied-pair fraction — routinely 0.1 to 0.2. See
  * docs-developer/benchmark-auto-bucketing.md §3.1.
  *
- * The shared factor is the geometric mean of the two profiles' own factors,
- * i.e. normalisation by the geometric mean of the two suite totals. Suites
- * present in only one profile use that profile's total alone. Suites with no
- * weight at all are left out of the map; they have no buckets to contribute.
+ * The shared factor is the geometric mean of the profiles' own factors, i.e.
+ * normalisation by the geometric mean of their suite totals. Suites present in
+ * only some of them use those profiles' totals alone. Suites with no weight at
+ * all are left out of the map; they have no buckets to contribute.
+ *
+ * Takes any number of profiles, not just the two being compared. When three are
+ * loaded and only two are on screen, all three still have to be normalised by
+ * the same factors or their global means are not on one scale -- and the factors
+ * must not depend on which pair is selected, or the numbers would shift under
+ * the reader every time they changed the selection.
  */
 export function computeSharedSuiteFactors(
-  baseStats: ProfileBenchmarkStats,
-  newStats: ProfileBenchmarkStats
+  ...statsList: ProfileBenchmarkStats[]
 ): Map<string, number> {
   // Work in log space throughout: the product of every suite total overflows a
   // double once there are more than a few dozen suites.
   const logTotals = new Map<string, number[]>();
-  for (const stats of [baseStats, newStats]) {
+  for (const stats of statsList) {
     for (const suite of stats.suites) {
       const total = suiteTotalWeight(suite);
       if (!(total > 0) || !isFinite(total)) {
@@ -501,6 +506,24 @@ export type MatchedBucketKeys = {
  * name key, whether because the func has no usable location or because the stats
  * file predates `bucketKeys` entirely.
  */
+/**
+ * The string two buckets have to agree on to be the same bucket.
+ *
+ * A real key is a source location and is compared as it stands. A bucket with no
+ * key of its own falls back to its name, and names are matched
+ * case-insensitively — two spellings of a DOM entry point are one bucket.
+ *
+ * Exported because matching is no longer the only thing that has to reproduce
+ * this rule: with more than two profiles loaded, the ones outside the compared
+ * pair contribute a mean column each, and a mean has to land on the row for the
+ * bucket it actually belongs to. A row carries both strings, so
+ * `bucketMatchKey(row.key, row.bucketName)` recovers the same id the comparison
+ * matched on.
+ */
+export function bucketMatchKey(rawKey: string, name: string): string {
+  return rawKey === name ? name.toLowerCase() : rawKey;
+}
+
 export function matchBucketKeys(meta: BucketTableMetadata): MatchedBucketKeys {
   // Shared across both sides: that a base bucket and a new bucket land on the
   // same id is the entire point.
@@ -510,9 +533,10 @@ export function matchBucketKeys(meta: BucketTableMetadata): MatchedBucketKeys {
     const ids = new Int32Array(bucketNames.length);
     for (let b = 0; b < bucketNames.length; b++) {
       const fallback = `bucket#${b}`;
-      const rawKey = bucketKeys[b] ?? fallback;
-      const name = bucketNames[b] ?? fallback;
-      const key = rawKey === name ? name.toLowerCase() : rawKey;
+      const key = bucketMatchKey(
+        bucketKeys[b] ?? fallback,
+        bucketNames[b] ?? fallback
+      );
       let id = idPerKey.get(key);
       if (id === undefined) {
         id = idPerKey.size;
