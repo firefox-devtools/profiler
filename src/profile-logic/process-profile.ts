@@ -15,8 +15,9 @@ import {
   finishRawBalancedNativeAllocationsTableBuilder,
   finishRawJsAllocationsTableBuilder,
   finishRawUnbalancedNativeAllocationsTableBuilder,
+  finishRawMarkerTableBuilder,
   getEmptyExtensions,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
   getEmptyRawJsAllocationsTable,
   getEmptyRawUnbalancedNativeAllocationsTable,
   getRawMarkerTableBuilderFromExisting,
@@ -709,7 +710,7 @@ function _processMarkers(
   jsAllocations: RawJsAllocationsTable | null;
   nativeAllocations: RawNativeAllocationsTable | null;
 } {
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
   const jsAllocations = getEmptyRawJsAllocationsTable();
   const inProgressNativeAllocations =
     getEmptyRawUnbalancedNativeAllocationsTable();
@@ -833,7 +834,7 @@ function _processMarkers(
   }
 
   return {
-    markers: markers,
+    markers: finishRawMarkerTableBuilder(markers),
     jsAllocations:
       jsAllocations.length === 0
         ? null
@@ -2553,11 +2554,9 @@ export function processVisualMetrics(
   const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
     mainThread.markers
   );
-  mainThread.markers = mainThreadMarkers;
   const tabThreadMarkers = getRawMarkerTableBuilderFromExisting(
     tabThread.markers
   );
-  tabThread.markers = tabThreadMarkers;
 
   function maybeAddMetricMarker(
     markers: RawMarkerTableBuilder,
@@ -2593,12 +2592,12 @@ export function processVisualMetrics(
   if (stringTable.hasString('Navigation::Start')) {
     const navigationStartStrIdx =
       stringTable.indexForString('Navigation::Start');
-    const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
+    const navigationStartMarkerIdx = tabThreadMarkers.name.findIndex(
       (m) => m === navigationStartStrIdx
     );
     if (navigationStartMarkerIdx !== -1) {
       navigationStartTime =
-        tabThread.markers.startTime[navigationStartMarkerIdx];
+        tabThreadMarkers.startTime[navigationStartMarkerIdx];
     }
   }
 
@@ -2670,6 +2669,9 @@ export function processVisualMetrics(
       );
     }
   }
+
+  mainThread.markers = finishRawMarkerTableBuilder(mainThreadMarkers);
+  tabThread.markers = finishRawMarkerTableBuilder(tabThreadMarkers);
 }
 
 /**

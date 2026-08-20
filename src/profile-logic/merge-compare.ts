@@ -17,9 +17,10 @@ import {
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
   getRawSamplesTableBuilderWithEventDelay,
   getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
   getEmptySourceTable,
   type RawMarkerTableBuilder,
 } from './data-structures';
@@ -1269,7 +1270,7 @@ function getComparisonThread(
     tid: 'Diff between 1 and 2',
     isMainThread: true,
     samples: newSamples,
-    markers: getEmptyRawMarkerTable(),
+    markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
   };
 
   return mergedThread;
@@ -1440,7 +1441,7 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
 function mergeMarkers(threads: RawThread[]): RawMarkerTable {
   const newThreadId: Array<Tid | null> = [];
   const newMarkerTable: RawMarkerTableBuilder = {
-    ...getEmptyRawMarkerTable(),
+    ...getRawMarkerTableBuilder(),
     threadId: newThreadId,
   };
 
@@ -1461,7 +1462,7 @@ function mergeMarkers(threads: RawThread[]): RawMarkerTable {
     }
   });
 
-  return newMarkerTable;
+  return finishRawMarkerTableBuilder(newMarkerTable);
 }
 
 /**
@@ -1510,7 +1511,7 @@ function getThreadMarkersAndScreenshotMarkers(
     }
   }
 
-  return targetMarkerTable;
+  return finishRawMarkerTableBuilder(targetMarkerTable);
 }
 
 /**
