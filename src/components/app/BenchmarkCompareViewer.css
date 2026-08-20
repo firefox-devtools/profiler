@@ -129,8 +129,26 @@
   gap: 0.5em 0.75em;
 
   /* Names are short and the URLs are enormous, so give the URL column
-   * everything that is left rather than splitting the row evenly. */
-  grid-template-columns: minmax(6em, 12em) minmax(0, 1fr);
+   * everything that is left rather than splitting the row evenly. The third
+   * column is the remove button, which is one glyph wide and empty on the rows
+   * that cannot be removed. */
+  grid-template-columns: minmax(6em, 12em) minmax(0, 1fr) auto;
+}
+
+.benchmarkCompareForm__remove {
+  padding: 0 0.35em;
+  border: none;
+  background: none;
+  color: var(--internal-text-muted);
+  cursor: pointer;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+/* Back to the surrounding text colour, which is the one thing that reads as
+ * "active" in both themes without naming a colour. */
+.benchmarkCompareForm__remove:hover {
+  color: inherit;
 }
 
 .benchmarkCompareForm__heading {
@@ -163,6 +181,24 @@
 .benchmarkProfileLinks {
   margin: 0 0 0.4em;
   color: var(--internal-text-muted);
+}
+
+/* Which two of three-or-more loaded profiles this report is of. Sits directly
+ * under the list of them, at the same weight, because it is a caption on that
+ * list rather than a separate control. */
+.benchmarkComparingPair {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 0.4em;
+  color: var(--internal-text-muted);
+  gap: 0.35em;
+}
+
+.benchmarkComparingPair__select {
+  max-width: 14em;
+  cursor: pointer;
+  font: inherit;
 }
 
 .benchmarkProfileLinks__link {
@@ -211,6 +247,15 @@
   font-style: italic;
 }
 
+/* What the columns of a three-or-more-profile table do and do not claim. Sits
+ * between the filters and the table, in the reading position of a caption. */
+.benchmarkColumnsNote {
+  max-width: 70em;
+  margin: 0 0 0.75em;
+  color: var(--internal-text-muted);
+  font-size: 0.9em;
+}
+
 /* Filter controls: which bucket rows the expansions show. */
 
 .benchmarkFilters {
@@ -237,6 +282,26 @@
 
 .benchmarkFilter input[type='radio'] {
   margin: 0;
+}
+
+/* "or where [profile] is (faster) (slower)" — a sentence the reader completes,
+ * so its parts sit closer together than the group's own option spacing. At the
+ * group's 1em they would read as four separate controls, which is the reading
+ * this wording exists to avoid. */
+.benchmarkFilterClause {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25em 0.6em;
+}
+
+.benchmarkFilterClause__select {
+  max-width: 14em;
+  cursor: pointer;
+
+  /* The sentence is set at the filter row's 0.9em; a select left to the browser
+   * default would break the line it is a word in. */
+  font: inherit;
 }
 
 .benchmarkFilter__label {
@@ -508,17 +573,25 @@
  * proportional to its total sample count, so 1 sample takes up the same
  * pixel width on both sides. */
 
-/* The row's numbers as a sentence, above the flame graphs it introduces. Sized
- * up slightly from the table it sits under: the reader has stopped scanning and
+/* A row's numbers as a sentence, above what it introduces: the flame graphs of
+ * an expanded function, or the bucket table of an expanded subtest. Sized up
+ * slightly from the table it sits under: the reader has stopped scanning and
  * started reading by the time they get here. */
-.bucketCounterfactual {
+.benchmarkCounterfactual {
   padding: 0.25em 1em 0;
   margin: 0;
   color: var(--internal-text-muted);
   font-size: 1em;
 }
 
-.bucketCounterfactual em {
+/* Over a subtest's bucket table the enclosing cell has already indented the
+ * expansion, so the sentence keeps only the space that sets it off from the
+ * table below. */
+.benchmarkRow--expansion > td > .benchmarkCounterfactual {
+  padding: 0 0 0.5em;
+}
+
+.benchmarkCounterfactual em {
   font-style: normal;
   overflow-wrap: anywhere;
 }
