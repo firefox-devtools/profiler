@@ -67,6 +67,7 @@ import {
   resolveLogMarkerMessage,
 } from 'firefox-profiler/profile-logic/marker-data';
 import { formatFunctionNameWithLibrary } from '../function-list';
+import { getScreenshotData } from '../screenshot';
 import type {
   NetworkPayload,
   LogMarkerPayload,
@@ -1033,6 +1034,89 @@ export function collectMarkerStack(
 /**
  * Collect detailed marker information in structured format.
  */
+/**
+ * Maximum length of a stringified raw payload value before it is truncated.
+ * Screenshot data URLs run to tens of kilobytes, which would otherwise flood
+ * the terminal; the full value stays available via the dedicated
+ * `screenshot` field and the `marker screenshot` command.
+ */
+export const RAW_FIELD_MAX_LENGTH = 200;
+
+/**
+ * Stringify a raw payload value for display. Objects are JSON-encoded, and
+ * string-table indexes are resolved by the caller before we get here.
+ */
+function stringifyRawValue(value: unknown): string {
+  if (typeof value === 'string') {
+    return value;
+  }
+  if (
+    typeof value === 'number' ||
+    typeof value === 'boolean' ||
+    value === null
+  ) {
+    return String(value);
+  }
+  try {
+    return JSON.stringify(value) ?? String(value);
+  } catch {
+    // Cyclic or otherwise unserializable payloads.
+    return String(value);
+  }
+}
+
+/**
+ * Collect the raw keys of a marker payload, so payloads that no schema models
+ * are still visible in `marker info`.
+ *
+ * Keys already reported through `schemaFields` are skipped, as are structural
+ * keys (`type`, `cause`) that are surfaced elsewhere. String-table indexes are
+ * resolved to their strings, and long values are truncated.
+ */
+function collectRawPayloadFields(
+  data: Record<string, unknown>,
+  schemaFields: MarkerInfoResult['fields'],
+  stringTable: StringTable,
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
+): MarkerInfoResult['rawFields'] {
+  const reportedKeys = new Set((schemaFields ?? []).map((field) => field.key));
+  // `type` is shown as "Type:" and `cause` is rendered as a stack trace.
+  const skippedKeys = new Set(['type', 'cause']);
+
+  const stringIndexFields =
+    stringIndexMarkerFieldsByDataType.get(String(data.type)) ?? [];
+
+  const rawFields: NonNullable<MarkerInfoResult['rawFields']> = [];
+  for (const key of Object.keys(data)) {
+    if (reportedKeys.has(key) || skippedKeys.has(key)) {
+      continue;
+    }
+    const value = data[key];
+    if (value === undefined || value === null) {
+      continue;
+    }
+
+    // Resolve string-table indexes (e.g. CompositorScreenshot's `url`).
+    const resolved =
+      stringIndexFields.includes(key) && typeof value === 'number'
+        ? stringTable.getString(value)
+        : value;
+
+    const stringified = stringifyRawValue(resolved);
+    if (stringified.length > RAW_FIELD_MAX_LENGTH) {
+      rawFields.push({
+        key,
+        value: stringified.slice(0, RAW_FIELD_MAX_LENGTH),
+        truncated: true,
+      });
+    } else {
+      rawFields.push({ key, value: stringified });
+    }
+  }
+
+  return rawFields.length > 0 ? rawFields : undefined;
+}
+
 export function collectMarkerInfo(
   store: Store,
   markerMap: MarkerMap,
@@ -1071,6 +1155,7 @@ export function collectMarkerInfo(
 
   // Collect marker fields
   let fields: MarkerInfoResult['fields'];
+  let rawFields: MarkerInfoResult['rawFields'];
   let schemaInfo: MarkerInfoResult['schema'];
 
   if (marker.data) {
@@ -1100,11 +1185,26 @@ export function collectMarkerInfo(
       }
     }
 
+    // Always surface the raw payload keys. For marker types the schema does not
+    // model (such as CompositorScreenshot, which has no schema at all — #5303),
+    // this is the only way the payload is visible; without it `marker info`
+    // prints no fields and reads as "this marker has no payload".
+    rawFields = collectRawPayloadFields(
+      marker.data,
+      fields,
+      stringTable,
+      computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state))
+    );
+
     // Include schema description if available
     if (schema?.description) {
       schemaInfo = { description: schema.description };
     }
   }
+
+  // Decode CompositorScreenshot images so the data URL is reachable from
+  // `marker info --json` without a schema.
+  const screenshot = getScreenshotData(marker, stringTable) ?? undefined;
 
   // Collect stack trace if available (truncated to 20 frames)
   let stack: StackTraceData | undefined;
@@ -1148,6 +1248,8 @@ export function collectMarkerInfo(
     end: marker.end !== null ? marker.end - zeroAt : null,
     duration: marker.end !== null ? marker.end - marker.start : undefined,
     fields,
+    rawFields,
+    screenshot,
     schema: schemaInfo,
     stack,
   };
