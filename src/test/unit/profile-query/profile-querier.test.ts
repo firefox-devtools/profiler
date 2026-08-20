@@ -17,6 +17,7 @@
  */
 
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
+import { MAX_PROFILE_MARKERS_ROWS } from 'firefox-profiler/profile-query/formatters/marker-info';
 import {
   getProfileFromTextSamples,
   getCounterForThread,
@@ -753,6 +754,179 @@ describe('ProfileQuerier', function () {
       const zoomed = await querier.threadMarkers('t-0', { list: true });
       const listedNames = zoomed.flatMarkers!.map((m) => m.name);
       expect(listedNames).toEqual(['Beta']);
+    });
+  });
+
+  describe('profileMarkers', function () {
+    // Three threads. The searched marker ("Gamma") exists only on t-2, which is
+    // never the default selection — that is the "which process handled this?"
+    // case `thread markers` cannot answer without a per-thread shell loop.
+    function querierWithThreads() {
+      const profile = getProfileWithMarkers(
+        [['Alpha', 10, null]],
+        [['Beta', 20, null]],
+        [
+          ['Gamma', 30, 40],
+          ['Gamma', 50, null],
+        ]
+      );
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { querier: new ProfileQuerier(store, rootRange), rootRange };
+    }
+
+    it('finds markers on a thread that is not the selected one', async function () {
+      const { querier } = querierWithThreads();
+
+      // Sanity check: the default (selected) thread has no Gamma at all, which
+      // is why a cross-thread search is needed.
+      const selectedOnly = await querier.threadMarkers(undefined, {
+        searchString: 'Gamma',
+        list: true,
+      });
+      expect(selectedOnly.filteredMarkerCount).toBe(0);
+
+      const result = await querier.profileMarkers({ searchString: 'Gamma' });
+      expect(result.type).toBe('profile-markers');
+      expect(result.totalCount).toBe(2);
+      expect(result.searchedThreadCount).toBe(3);
+      expect(result.matchingThreadCount).toBe(1);
+      expect(result.markers.map((m) => m.name)).toEqual(['Gamma', 'Gamma']);
+      // Every row carries the thread it was found on — the added column.
+      expect(result.markers.map((m) => m.threadHandle)).toEqual(['t-2', 't-2']);
+      expect(result.byThread).toEqual([
+        expect.objectContaining({ threadHandle: 't-2', count: 2 }),
+      ]);
+    });
+
+    it('returns the same row fields as `thread markers --list`', async function () {
+      const { querier } = querierWithThreads();
+
+      const list = await querier.threadMarkers('t-2', {
+        searchString: 'Gamma',
+        list: true,
+      });
+      const cross = await querier.profileMarkers({ searchString: 'Gamma' });
+
+      expect(list.flatMarkers).toHaveLength(2);
+      // The shared FlatMarkerItem fields must agree row for row; the
+      // cross-thread result adds thread/process identity on top.
+      expect(
+        cross.markers.map(
+          ({ threadHandle, threadName, processName, pid, ...flat }) => flat
+        )
+      ).toEqual(list.flatMarkers);
+    });
+
+    it('aggregates matches across every thread and sorts chronologically', async function () {
+      const profile = getProfileWithMarkers(
+        [['Shared', 30, null]],
+        [['Shared', 10, null]],
+        [['Shared', 20, null]]
+      );
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const result = await querier.profileMarkers({ searchString: 'Shared' });
+      expect(result.totalCount).toBe(3);
+      expect(result.matchingThreadCount).toBe(3);
+      // Merged into one timeline regardless of which thread each came from.
+      expect(result.markers.map((m) => m.threadHandle)).toEqual([
+        't-1',
+        't-2',
+        't-0',
+      ]);
+      // Reported relative to zeroAt (the earliest marker, at 10ms).
+      expect(result.markers.map((m) => m.start)).toEqual([0, 10, 20]);
+    });
+
+    it('restricts the sweep with a thread handle', async function () {
+      const { querier } = querierWithThreads();
+
+      const result = await querier.profileMarkers({
+        searchString: 'Gamma',
+        thread: 't-0',
+      });
+      expect(result.searchedThreadCount).toBe(1);
+      expect(result.totalCount).toBe(0);
+      expect(result.markers).toEqual([]);
+    });
+
+    it('limits the rows returned but keeps the counts exact', async function () {
+      const { querier } = querierWithThreads();
+
+      const result = await querier.profileMarkers({
+        searchString: 'Gamma',
+        limit: 1,
+      });
+      expect(result.markers).toHaveLength(1);
+      // The per-thread breakdown still reports both matches, so the
+      // "which thread?" answer is never truncated by --limit.
+      expect(result.totalCount).toBe(2);
+      expect(result.byThread[0].count).toBe(2);
+    });
+
+    it('returns every match when no limit is given', async function () {
+      const { querier } = querierWithThreads();
+
+      // No default cap, matching `thread markers --list`: a filtered query
+      // answers in full rather than silently dropping matches.
+      const result = await querier.profileMarkers({ searchString: 'Gamma' });
+      expect(result.markers).toHaveLength(2);
+      expect(result.totalCount).toBe(2);
+      expect(result.maxRowsClamped).toBeUndefined();
+    });
+
+    it('does not report a clamp when no rows were dropped', async function () {
+      const { querier } = querierWithThreads();
+
+      // A limit beyond MAX_PROFILE_MARKERS_ROWS cannot be delivered (the reply
+      // would exceed V8's max string length), but this fixture has only 4
+      // markers, so nothing is actually lost and nothing is reported.
+      const result = await querier.profileMarkers({
+        limit: MAX_PROFILE_MARKERS_ROWS + 1,
+      });
+      expect(result.maxRowsClamped).toBeUndefined();
+      expect(result.totalCount).toBe(4);
+      expect(result.markers).toHaveLength(4);
+    });
+
+    it('leaves a limit within the maximum untouched', async function () {
+      const { querier } = querierWithThreads();
+
+      const result = await querier.profileMarkers({ limit: 2 });
+      expect(result.maxRowsClamped).toBeUndefined();
+      expect(result.markers).toHaveLength(2);
+    });
+
+    it('respects the committed (zoom) range', async function () {
+      const { querier } = querierWithThreads();
+
+      // Marker starts are absolute: 10 (t-0), 20 (t-1), 30 and 50 (t-2).
+      // Zoom past everything but the instant Gamma at 50ms.
+      const startName = querier._timestampManager.nameForTimestamp(45);
+      const endName = querier._timestampManager.nameForTimestamp(55);
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const result = await querier.profileMarkers({ searchString: 'Gamma' });
+      // Only the instant Gamma at 50ms is in view. Its reported start is
+      // relative to zeroAt (the earliest marker, at 10ms), so 40 rather than 50.
+      expect(result.totalCount).toBe(1);
+      expect(result.markers[0].start).toBe(40);
+    });
+
+    it('does not leak its search string into later queries', async function () {
+      const { querier } = querierWithThreads();
+
+      await querier.profileMarkers({ searchString: 'Gamma' });
+
+      // A follow-up unfiltered query must see every marker again.
+      const after = await querier.profileMarkers({});
+      expect(after.totalCount).toBe(4);
+      expect(after.matchingThreadCount).toBe(3);
     });
   });
 });

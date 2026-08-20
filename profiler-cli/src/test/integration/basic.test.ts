@@ -323,6 +323,26 @@ describe('profiler-cli basic functionality', () => {
     expect(output).toContain('--max-lines must be a positive integer');
   });
 
+  it('profile markers requires a filter, but --limit opts into browsing', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    // An unfiltered sweep would dump arbitrary rows in profile order, which
+    // answers no question; the error has to name the flags that do.
+    const bare = await cliFail(ctx, ['profile', 'markers']);
+    expect(bare.exitCode).not.toBe(0);
+    const output = String(bare.stdout || '') + String(bare.stderr || '');
+    expect(output).toContain('profile markers needs a filter');
+    expect(output).toContain('--search');
+
+    // A filter satisfies it...
+    const filtered = await cli(ctx, ['profile', 'markers', '--search', 'a']);
+    expect(filtered.exitCode).toBe(0);
+
+    // ...and so does an explicit --limit, the opt-in to unfiltered browsing.
+    const limited = await cli(ctx, ['profile', 'markers', '--limit', '5']);
+    expect(limited.exitCode).toBe(0);
+  });
+
   it('build hash mismatch stops the daemon before cleaning up the session', async () => {
     const loadResult = await cli(ctx, [
       'load',
