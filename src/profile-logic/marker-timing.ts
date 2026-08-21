@@ -8,11 +8,30 @@ import type {
   MarkerIndex,
   MarkerTiming,
   MarkerTimingAndBuckets,
+  MarkerSchemaByName,
 } from 'firefox-profiler/types';
+
+import { getSchemaFromMarker } from './marker-schema';
 
 // Arbitrarily set an upper limit for adding marker depths, avoiding very long
 // overlapping marker timings.
 const MAX_STACKING_DEPTH = 300;
+
+function _createEmptyTiming(
+  name: string,
+  bucket: string,
+  instantOnly: boolean
+): MarkerTiming {
+  return {
+    start: [],
+    end: [],
+    index: [],
+    name,
+    bucket,
+    instantOnly,
+    length: 0,
+  };
+}
 
 /**
  * This function computes the timing information for laying out the markers in the
@@ -86,13 +105,15 @@ export function getMarkerTiming(
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  categories: CategoryList | null
+  categories?: CategoryList,
+  markerSchemaByName?: MarkerSchemaByName
 ): MarkerTiming[] {
-  // Each marker type will have it's own timing information, later collapse these into
+  // Each marker type will have its own timing information, later collapse these into
   // a single array.
   const intervalMarkerTimingsMap: Map<string, MarkerTiming[]> = new Map();
   // Instant markers are on separate lines.
   const instantMarkerTimingsMap: Map<string, MarkerTiming> = new Map();
+  const stackBasedMarkerTimings: MarkerTiming[] = [];
 
   // Go through all of the markers.
   for (const markerIndex of markerIndexes) {
@@ -109,35 +130,41 @@ export function getMarkerTiming(
       markerTiming.length++;
     };
 
-    const bucketName = categories ? categories[marker.category].name : 'None';
+    const schema = markerSchemaByName
+      ? getSchemaFromMarker(markerSchemaByName, marker.data)
+      : null;
+    let isStackBased = schema !== null && schema.isStackBased === true;
+    if (marker.end === null) {
+      // XXXmstange let's see how we like this
+      isStackBased = true;
+    }
+
+    // eslint-disable-next-line no-nested-ternary
+    const bucketName = isStackBased
+      ? 'Stack'
+      : categories
+        ? categories[marker.category].name
+        : 'None';
 
     // We want to group all network requests in the same line. Indeed they all
     // have different names and they'd end up with one single request in each
     // line without this special handling.
-    const markerLineName =
-      marker.data && marker.data.type === 'Network'
+    // eslint-disable-next-line no-nested-ternary
+    const markerLineName = isStackBased
+      ? 'Stack'
+      : marker.data && marker.data.type === 'Network'
         ? 'Network Requests'
         : marker.name;
 
-    const emptyTiming = ({
-      instantOnly,
-    }: {
-      instantOnly: boolean;
-    }): MarkerTiming => ({
-      start: [],
-      end: [],
-      index: [],
-      name: markerLineName,
-      bucket: bucketName,
-      instantOnly,
-      length: 0,
-    });
-
-    if (marker.end === null) {
+    if (marker.end === null && !isStackBased) {
       // This is an instant marker.
       let instantMarkerTiming = instantMarkerTimingsMap.get(markerLineName);
       if (!instantMarkerTiming) {
-        instantMarkerTiming = emptyTiming({ instantOnly: true });
+        instantMarkerTiming = _createEmptyTiming(
+          markerLineName,
+          bucketName,
+          true
+        );
         instantMarkerTimingsMap.set(markerLineName, instantMarkerTiming);
       }
       addCurrentMarkerToMarkerTiming(instantMarkerTiming);
@@ -145,16 +172,18 @@ export function getMarkerTiming(
     }
 
     // This is an interval marker.
-    let markerTimingsForName = intervalMarkerTimingsMap.get(markerLineName);
-    if (markerTimingsForName === undefined) {
-      markerTimingsForName = [];
-      intervalMarkerTimingsMap.set(markerLineName, markerTimingsForName);
+    let timingRows = isStackBased
+      ? stackBasedMarkerTimings
+      : intervalMarkerTimingsMap.get(markerLineName);
+    if (timingRows === undefined) {
+      timingRows = [];
+      intervalMarkerTimingsMap.set(markerLineName, timingRows);
     }
 
     // Find the first row where the new marker fits.
     // Since the markers are sorted, look at the last added marker in this row. If
     // the new marker fits, go ahead and insert it.
-    const foundMarkerTiming = markerTimingsForName.find(
+    const foundMarkerTiming = timingRows.find(
       (markerTiming) =>
         markerTiming.end[markerTiming.length - 1] <= marker.start
     );
@@ -163,30 +192,34 @@ export function getMarkerTiming(
       addCurrentMarkerToMarkerTiming(foundMarkerTiming);
       continue;
     }
-
-    if (markerTimingsForName.length >= MAX_STACKING_DEPTH) {
+    if (timingRows.length >= MAX_STACKING_DEPTH) {
       // There are too many markers stacked around the same time already, let's
       // ignore this marker.
       continue;
     }
 
     // Otherwise, let's add a new row!
-    const newTiming = emptyTiming({ instantOnly: false });
+    const newTiming = _createEmptyTiming(markerLineName, bucketName, false);
     addCurrentMarkerToMarkerTiming(newTiming);
-    markerTimingsForName.push(newTiming);
+    timingRows.push(newTiming);
     continue;
   }
-
   // Flatten out the maps into a single array.
   // One item in this array is one line in the drawn canvas.
-  const allMarkerTimings = [...instantMarkerTimingsMap.values()].concat(
-    ...intervalMarkerTimingsMap.values()
-  );
+  const allMarkerTimings = [...instantMarkerTimingsMap.values()]
+    .concat(...intervalMarkerTimingsMap.values())
+    .concat(...stackBasedMarkerTimings);
 
   // Sort all the marker timings in place, first by the bucket, then by their names.
   allMarkerTimings.sort((a, b) => {
     if (a.bucket !== b.bucket) {
       // Sort by buckets first.
+      if (a.bucket === 'Stack') {
+        return -1;
+      }
+      if (b.bucket === 'Stack') {
+        return 1;
+      }
       // Show the 'Test' category first. Test markers are almost guaranteed to
       // be the most relevant when they exist.
       if (a.bucket === 'Test') {
@@ -286,16 +319,18 @@ export function getMarkerTiming(
  *  ]
  */
 export function getMarkerTimingAndBuckets(
-  getMarker: (param: MarkerIndex) => Marker,
+  getMarker: (marker: MarkerIndex) => Marker,
   markerIndexes: MarkerIndex[],
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
-  categories: CategoryList | null
+  categories?: CategoryList,
+  markerSchemaByName?: MarkerSchemaByName
 ): MarkerTimingAndBuckets {
   const allMarkerTimings = getMarkerTiming(
     getMarker,
     markerIndexes,
-    categories
+    categories,
+    markerSchemaByName
   );
 
   // Interleave the bucket names in between the marker timings.

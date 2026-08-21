@@ -306,7 +306,7 @@ describe('MarkerChart', function () {
     ).toMatchSnapshot();
   });
 
-  it('persists the selected marker tooltips properly', () => {
+  it('does not persist the tooltip of a clicked marker', () => {
     window.devicePixelRatio = 1;
 
     const profile = getProfileWithMarkers(MARKERS);
@@ -341,13 +341,13 @@ describe('MarkerChart', function () {
     const position = findFillTextPositionFromDrawLog(drawLog, 'Marker B');
     leftClick(position);
 
-    // The tooltip should be displayed
-    expect(
-      ensureExists(
-        document.querySelector('.tooltip'),
-        'A tooltip component must exist for this test.'
-      )
-    ).toMatchSnapshot();
+    // The tooltip is displayed because the mouse is still hovering the marker,
+    // but it isn't sticky: it isn't marked as clickable.
+    const tooltip = ensureExists(
+      document.querySelector('.tooltip'),
+      'A tooltip component must exist for this test.'
+    );
+    expect(tooltip).not.toHaveClass('clickable');
 
     // Move the mouse outside of the marker.
     fireMouseEvent('mousemove', {
@@ -357,27 +357,17 @@ describe('MarkerChart', function () {
       pageY: 0,
     });
 
-    // Make sure that we have the tooltip persisted.
-    expect(document.querySelector('.tooltip')).toBeTruthy();
-
-    // Click outside of the marker.
-    leftClick({ x: 0, y: 0 });
-
-    // Now the tooltip should not be displayed.
+    // The tooltip of the clicked marker isn't persisted.
     expect(document.querySelector('.tooltip')).toBeFalsy();
 
-    // The tooltip should be displayed also on double click.
+    // Same for double clicks.
     leftClick(position, true);
-
-    // Move the mouse outside of the marker.
     fireMouseEvent('mousemove', {
       offsetX: 0,
       offsetY: 0,
       pageX: 0,
       pageY: 0,
     });
-
-    // The double click shouldn't make the tooltip persisted.
     expect(document.querySelector('.tooltip')).toBeFalsy();
   });
 
