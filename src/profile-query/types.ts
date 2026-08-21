@@ -702,6 +702,26 @@ export type MarkerInfoResult = {
   stack?: StackTraceData;
 };
 
+/** Result of `marker info` with more than one handle. */
+export type MarkerInfoMultiResult = {
+  type: 'marker-info-multi';
+  /** Handles requested, ranges expanded, in requested order. */
+  requested: string[];
+  markers: MarkerInfoResult[];
+  errors: Array<{
+    markerHandle: string;
+    error: string;
+  }>;
+  /**
+   * Set when a range resolved into several threads, which means it ran past the
+   * end of the listing the user was reading.
+   */
+  rangeSpansThreadsWarning?: {
+    ranges: string[];
+    threadHandles: string[];
+  };
+};
+
 export type MarkerStackResult = {
   type: 'marker-stack';
   threadHandle: string;

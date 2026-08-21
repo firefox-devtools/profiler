@@ -755,4 +755,140 @@ describe('ProfileQuerier', function () {
       expect(listedNames).toEqual(['Beta']);
     });
   });
+
+  describe('markerInfoMulti', function () {
+    async function querierWithMarkerHandles() {
+      const profile = getProfileWithMarkers([
+        ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+        ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+        ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+        ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      const querier = new ProfileQuerier(store, rootRange);
+      // Listing the markers is what hands out the m-N handles.
+      const list = await querier.threadMarkers('t-0', { list: true });
+      return {
+        querier,
+        handles: list.flatMarkers!.map((m) => m.handle),
+      };
+    }
+
+    it('returns one record per handle, in the requested order', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([handles[2], handles[0]]);
+
+      expect(result.type).toBe('marker-info-multi');
+      expect(result.requested).toEqual([handles[2], handles[0]]);
+      expect(result.markers.map((m) => m.name)).toEqual(['Gamma', 'Alpha']);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('expands an inclusive range of handles', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([
+        `${handles[0]}..${handles[2]}`,
+      ]);
+
+      expect(result.requested).toEqual(handles.slice(0, 3));
+      expect(result.markers.map((m) => m.name)).toEqual([
+        'Alpha',
+        'Beta',
+        'Gamma',
+      ]);
+    });
+
+    it('reports an unknown handle per handle and still returns the others', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([
+        handles[0],
+        'm-9999',
+        handles[1],
+      ]);
+
+      expect(result.markers.map((m) => m.name)).toEqual(['Alpha', 'Beta']);
+      expect(result.errors).toEqual([
+        { markerHandle: 'm-9999', error: 'Unknown marker m-9999' },
+      ]);
+    });
+
+    it('rejects a malformed handle spec outright', async function () {
+      const { querier } = await querierWithMarkerHandles();
+
+      await expect(querier.markerInfoMulti(['not-a-handle'])).rejects.toThrow(
+        'Invalid marker handle not-a-handle'
+      );
+    });
+
+    describe('range provenance', function () {
+      // Handle numbering continues across listings, so a range running off the
+      // end of the first thread's listing resolves into the second thread's.
+      async function querierWithTwoListings() {
+        const profile = getProfileWithMarkers(
+          [
+            ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+            ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+          ],
+          [
+            ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+            ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+          ]
+        );
+        const store = storeWithProfile(profile);
+        const rootRange = getProfileRootRange(store.getState());
+        const querier = new ProfileQuerier(store, rootRange);
+        const first = await querier.threadMarkers('t-0', { list: true });
+        const second = await querier.threadMarkers('t-1', { list: true });
+        return {
+          querier,
+          firstHandles: first.flatMarkers!.map((m) => m.handle),
+          secondHandles: second.flatMarkers!.map((m) => m.handle),
+        };
+      }
+
+      it('warns when a range straddles two threads', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+        const spec = `${firstHandles[1]}..${secondHandles[0]}`;
+
+        const result = await querier.markerInfoMulti([spec]);
+
+        // Every handle resolves, so this would otherwise look like a success.
+        expect(result.errors).toEqual([]);
+        expect(result.rangeSpansThreadsWarning).toEqual({
+          ranges: [spec],
+          threadHandles: ['t-0', 't-1'],
+        });
+      });
+
+      it('does not warn for a range inside one thread', async function () {
+        const { querier, firstHandles } = await querierWithTwoListings();
+
+        const result = await querier.markerInfoMulti([
+          `${firstHandles[0]}..${firstHandles[1]}`,
+        ]);
+
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
+
+      it('does not warn for an explicit list of handles from two threads', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+
+        // Typing both handles out is a deliberate comparison, not an accident
+        // of numbering, so it must not be second-guessed.
+        const result = await querier.markerInfoMulti([
+          firstHandles[0],
+          secondHandles[0],
+        ]);
+
+        expect(result.markers).toHaveLength(2);
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
+    });
+  });
 });

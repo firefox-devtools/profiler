@@ -465,6 +465,9 @@ export class Daemon {
       case 'marker':
         switch (command.subcommand) {
           case 'info':
+            if (command.markers && command.markers.length > 0) {
+              return this.querier.markerInfoMulti(command.markers);
+            }
             if (!command.marker) {
               throw new Error('marker handle required for marker info');
             }

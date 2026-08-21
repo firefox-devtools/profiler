@@ -11,7 +11,7 @@ import { Option } from 'commander';
 import { collectStrings } from '../utils/parse';
 import { sendCommand } from '../client';
 import { formatOutput } from '../output';
-import type { ClientCommand } from '../protocol';
+import type { ClientCommand, CommandResult } from '../protocol';
 
 /**
  * Options shared by every command action via `addGlobalOptions`.
@@ -30,9 +30,10 @@ export async function runCommand(
   sessionDir: string,
   command: ClientCommand,
   opts: GlobalOptions
-): Promise<void> {
+): Promise<string | CommandResult> {
   const result = await sendCommand(sessionDir, command, opts.session);
   console.log(formatOutput(result, opts.json ?? false));
+  return result;
 }
 
 /**
