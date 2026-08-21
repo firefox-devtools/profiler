@@ -3,11 +3,23 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { RawThread } from 'firefox-profiler/types';
-import { getFriendlyThreadName } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  getProcessTypeLabel,
+} from 'firefox-profiler/profile-logic/profile-data';
 
-/** The display name of the process a thread belongs to. */
+/**
+ * The display name of the process a thread belongs to. Falls back to the
+ * friendly label for the process type, so that a process the back end did not
+ * name reads as "GPU Process" rather than the raw "gpu".
+ */
 export function getProcessName(thread: RawThread): string {
-  return thread.processName || thread.processType || 'unknown';
+  return (
+    thread.processName ||
+    getProcessTypeLabel(thread.processType) ||
+    thread.processType ||
+    'unknown'
+  );
 }
 
 /**
