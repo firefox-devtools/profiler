@@ -10,7 +10,7 @@
  *   profiler-cli profile info [--session <id>]         Print profile summary
  *   profiler-cli thread info [--thread <handle>]       Print thread information
  *   profiler-cli thread samples [--thread <handle>]    Show thread call tree and top functions
- *   profiler-cli stop [<id>] [--all]                   Stop the daemon
+ *   profiler-cli stop [<id>] [--all] [--force]         Stop the daemon
  *   profiler-cli session list                          List all running sessions
  *   profiler-cli session use <id>                      Switch the current session
  *
@@ -28,8 +28,18 @@ import { Command } from 'commander';
 import guideText from '../guide.txt';
 import schemasText from '../schemas.txt';
 import { startDaemon } from './daemon';
-import { startNewDaemon, stopDaemon, sendCommand } from './client';
-import { listSessions } from './session';
+import {
+  describeSessionForStop,
+  startNewDaemon,
+  stopDaemon,
+  sendCommand,
+} from './client';
+import {
+  getSessionOwner,
+  listSessions,
+  loadSessionMetadata,
+  ownsSession,
+} from './session';
 import { formatOutput } from './output';
 import { addGlobalOptions, runCommand } from './commands/shared';
 import { VERSION } from './constants';
@@ -148,13 +158,81 @@ Examples:
       .description(
         'Stop the current session, a specific session, or all with --all'
       )
-      .option('--all', 'Stop all running sessions')
+      .option('--all', 'Stop all running sessions you own')
+      .option(
+        '--force',
+        'Stop sessions owned by someone else (see PROFILER_CLI_SESSION_OWNER)'
+      )
+      .addHelpText(
+        'after',
+        `
+Session ownership:
+  "stop" refuses a session created by a different owner, naming the owner and
+  exiting 1; --force overrides.
+
+  Set PROFILER_CLI_SESSION_OWNER to a value unique to your shell, script, or
+  agent. Without it the owner is the parent process id, so a "stop" from a
+  different shell is refused -- set the variable in CI jobs that load and stop
+  in separate steps.
+
+  A pid owner is released once that process exits, since daemons outlive the
+  shell that started them. A named owner is never released. Sessions from
+  before owner tracking are stoppable by anyone.`
+      )
   ).action(async (idArg: string | undefined, opts) => {
+    const force = opts.force ?? false;
+
     if (opts.all) {
       const sessionIds = listSessions(SESSION_DIR);
+      const owner = getSessionOwner();
+
+      // Metadata is read once and kept, so what is announced below cannot
+      // drift from what is stopped.
+      const targets: Array<{ id: string; description: string }> = [];
+      const skipped: Array<{ id: string; description: string }> = [];
+      for (const id of sessionIds) {
+        const metadata = loadSessionMetadata(SESSION_DIR, id);
+        // Vanished metadata leaves no owner to check.
+        const entry = {
+          id,
+          description:
+            metadata === null ? id : describeSessionForStop(metadata),
+        };
+        if (metadata === null || force || ownsSession(metadata, owner)) {
+          targets.push(entry);
+        } else {
+          skipped.push(entry);
+        }
+      }
+
+      if (targets.length !== 0) {
+        console.log(`Stopping ${targets.length} session(s):`);
+        for (const { description } of targets) {
+          console.log(`  ${description}`);
+        }
+      }
+
+      if (skipped.length !== 0) {
+        console.log(
+          `Skipping ${skipped.length} session(s) owned by someone else (you are ${owner}); pass --force to stop them too:`
+        );
+        for (const { description } of skipped) {
+          console.log(`  ${description}`);
+        }
+      }
+
+      // Say which reason, so exit 0 cannot imply a clean machine.
+      if (targets.length === 0) {
+        console.log(
+          skipped.length === 0
+            ? 'No running sessions to stop.'
+            : `Stopped 0 sessions: all ${skipped.length} running session(s) are owned by someone else. Nothing was stopped; pass --force to stop them.`
+        );
+      }
+
       // Settled, so one session that refuses to stop does not hide the others.
       const results = await Promise.allSettled(
-        sessionIds.map((id: string) => stopDaemon(SESSION_DIR, id))
+        targets.map(({ id }) => stopDaemon(SESSION_DIR, id, { force }))
       );
       const failures = results.filter((r) => r.status === 'rejected');
       for (const failure of failures) {
@@ -164,12 +242,17 @@ Examples:
       }
       if (failures.length !== 0) {
         throw new Error(
-          `Could not stop ${failures.length} of ${sessionIds.length} sessions.`
+          `Could not stop ${failures.length} of ${targets.length} sessions.`
         );
       }
     } else {
       const sessionId = idArg ?? opts.session;
-      await stopDaemon(SESSION_DIR, sessionId);
+      await stopDaemon(SESSION_DIR, sessionId, {
+        force,
+        // Only a stop with no id picks its target from shared state, so only
+        // that one needs to say what it picked.
+        announce: sessionId === undefined,
+      });
     }
   });
 

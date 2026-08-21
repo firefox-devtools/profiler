@@ -36,6 +36,13 @@ import {
   readLogTail,
   writeStartupError,
   takeStartupError,
+  describeSessionOwner,
+  formatSessionAge,
+  getSessionAge,
+  getSessionOwner,
+  ownsSession,
+  readSessionOwner,
+  SESSION_OWNER_ENV_VAR,
 } from '../../session';
 import type { SessionMetadata } from '../../protocol';
 
@@ -411,6 +418,130 @@ describe('profiler-cli session management', function () {
     it('does not make startup errors look like sessions', function () {
       writeStartupError(testSessionDir, 'failed', 'could not bind');
       expect(listSessions(testSessionDir)).toEqual([]);
+    });
+  });
+
+  describe('session ownership', function () {
+    it('prefers the configured owner over the parent pid', function () {
+      expect(
+        getSessionOwner({ [SESSION_OWNER_ENV_VAR]: 'agent-L' }, 4242)
+      ).toBe('agent-L');
+      // Surrounding whitespace from a shell export must not make two callers
+      // that meant the same owner look like different ones.
+      expect(
+        getSessionOwner({ [SESSION_OWNER_ENV_VAR]: '  agent-L\n' }, 4242)
+      ).toBe('agent-L');
+    });
+
+    it('falls back to the parent pid when no owner is configured', function () {
+      expect(getSessionOwner({}, 4242)).toBe('pid:4242');
+      // An empty value is a variable that was exported but never set, not a
+      // request to be owned by "".
+      expect(getSessionOwner({ [SESSION_OWNER_ENV_VAR]: '' }, 4242)).toBe(
+        'pid:4242'
+      );
+    });
+
+    it('recognises only the recorded owner', function () {
+      expect(ownsSession({ owner: 'agent-L' }, 'agent-L')).toBe(true);
+      expect(ownsSession({ owner: 'agent-L' }, 'agent-M')).toBe(false);
+    });
+
+    it('treats a session with no recorded owner as anyone’s', function () {
+      // Sessions written by builds that predate owner tracking, which existing
+      // scripts must still be able to stop.
+      expect(ownsSession({}, 'agent-L')).toBe(true);
+      expect(describeSessionOwner({})).toBe('unknown');
+      expect(describeSessionOwner({ owner: 'agent-L' })).toBe('agent-L');
+    });
+
+    it('treats an unusable recorded owner as no owner at all', function () {
+      // JSON has no undefined, so a null owner is a value a metadata file can
+      // really hold. Comparing it by strict equality against a string would
+      // match nobody and lock the session away from every caller, which is the
+      // failure this ownership check exists to prevent, inverted.
+      for (const owner of [null, '', '   ', 1234, {}, []] as any[]) {
+        expect(readSessionOwner({ owner })).toBeNull();
+        expect(ownsSession({ owner }, 'agent-L')).toBe(true);
+        // Whatever is displayed must agree with what is enforced: a session
+        // that anyone may stop must not claim to belong to someone.
+        expect(describeSessionOwner({ owner })).toBe('unknown');
+      }
+    });
+
+    it('normalises the recorded owner the way the environment one is', function () {
+      expect(readSessionOwner({ owner: '  agent-L\n' })).toBe('agent-L');
+      // Both sides of the comparison get trimmed, so a stray newline in a
+      // metadata file cannot separate an owner from its own sessions.
+      expect(ownsSession({ owner: '  agent-L\n' }, 'agent-L')).toBe(true);
+    });
+
+    it('releases a pid owner whose process is provably gone', function () {
+      // The daemon is detached and outlives the shell that started it, so a
+      // pid: owner refers to a dead process for most of a long session's life.
+      // Refusing those forever would leave sessions nobody can ever reclaim.
+      expect(ownsSession({ owner: 'pid:999999' }, 'pid:4242')).toBe(true);
+      // Still refused to a different caller while that process is alive.
+      expect(ownsSession({ owner: `pid:${process.pid}` }, 'pid:4242')).toBe(
+        false
+      );
+    });
+
+    it('never releases a named owner, however its processes fare', function () {
+      // A name chosen via PROFILER_CLI_SESSION_OWNER is not tied to any
+      // process, so there is no death that could release it. Callers following
+      // the multi-agent convention keep the guard for their sessions' lifetime.
+      expect(ownsSession({ owner: 'agent-theirs' }, 'agent-L')).toBe(false);
+      // Owners that merely look pid-ish are names too, not pids to probe.
+      expect(ownsSession({ owner: 'pid:notanumber' }, 'agent-L')).toBe(false);
+      expect(ownsSession({ owner: 'pid:999999x' }, 'agent-L')).toBe(false);
+      expect(ownsSession({ owner: 'pid:0' }, 'agent-L')).toBe(false);
+      expect(ownsSession({ owner: 'pid:-1' }, 'agent-L')).toBe(false);
+    });
+
+    it('round-trips the owner through the metadata file', function () {
+      const metadata: SessionMetadata = {
+        id: 'owned',
+        socketPath: getSocketPath(testSessionDir, 'owned'),
+        logPath: getLogPath(testSessionDir, 'owned'),
+        pid: 12345,
+        profilePath: '/path/to/profile.json',
+        createdAt: '2026-08-17T10:00:00.000Z',
+        buildHash: TEST_BUILD_HASH,
+        owner: 'agent-L',
+      };
+
+      saveSessionMetadata(testSessionDir, metadata);
+
+      expect(loadSessionMetadata(testSessionDir, 'owned')?.owner).toBe(
+        'agent-L'
+      );
+    });
+  });
+
+  describe('session age', function () {
+    it('formats ages by the largest useful unit', function () {
+      expect(formatSessionAge(0)).toBe('0s');
+      expect(formatSessionAge(45_000)).toBe('45s');
+      expect(formatSessionAge(90_000)).toBe('1m 30s');
+      expect(formatSessionAge(3_900_000)).toBe('1h 5m');
+      expect(formatSessionAge(100_000_000)).toBe('1d 3h');
+    });
+
+    it('reports an unusable duration as unknown rather than guessing', function () {
+      expect(formatSessionAge(-1)).toBe('unknown');
+      expect(formatSessionAge(NaN)).toBe('unknown');
+    });
+
+    it('measures the age from createdAt', function () {
+      const now = Date.parse('2026-08-17T10:02:00.000Z');
+      expect(
+        getSessionAge({ createdAt: '2026-08-17T10:00:00.000Z' }, now)
+      ).toBe('2m 0s');
+    });
+
+    it('returns null for an unparseable createdAt', function () {
+      expect(getSessionAge({ createdAt: 'not a date' })).toBeNull();
     });
   });
 
