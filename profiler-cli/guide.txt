@@ -100,6 +100,9 @@ CORE WORKFLOW
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
     profiler-cli marker stack m-1234         Full stack trace at the time of a marker
+    profiler-cli screenshots --at 24.835 -o shots/    Each window on screen at t=24.835s
+    profiler-cli screenshots --range 11.2,11.4 -o shots/  All windows' frames in a range
+    profiler-cli marker screenshot m-1234 -o shot.jpg  Image from one CompositorScreenshot marker
     profiler-cli function info f-12          Function details (source location, library)
     profiler-cli function expand f-12        Show full untruncated function name
     profiler-cli function annotate f-12      Annotated source with per-line self/total timing

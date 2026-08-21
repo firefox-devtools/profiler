@@ -19,6 +19,9 @@ import type {
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerScreenshotResult,
+  ScreenshotsResult,
+  ScreenshotEntry,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -50,6 +53,7 @@ import type {
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
+import { screenshotFileExtension } from '../../src/profile-query/screenshot';
 import {
   formatTimestamp as formatDuration,
   formatBytes,
@@ -333,6 +337,19 @@ Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
 }
 
 /**
+ * The decoded byte length of a base64 string, without decoding it.
+ */
+export function decodedBase64ByteLength(base64: string): number {
+  let padding = 0;
+  if (base64.endsWith('==')) {
+    padding = 2;
+  } else if (base64.endsWith('=')) {
+    padding = 1;
+  }
+  return Math.max(0, Math.floor((base64.length * 3) / 4) - padding);
+}
+
+/**
  * Format a MarkerInfoResult as plain text.
  */
 export function formatMarkerInfoResult(
@@ -370,6 +387,36 @@ Marker ${result.markerHandle}: ${result.name}`;
     }
   }
 
+  // Raw payload keys, for marker types whose schema does not model every key
+  // (or that have no schema at all, e.g. CompositorScreenshot).
+  if (result.rawFields && result.rawFields.length > 0) {
+    const heading =
+      result.fields && result.fields.length > 0
+        ? '\nOther payload fields (no schema):\n'
+        : '\nFields (raw payload, no schema):\n';
+    output += heading;
+    for (const field of result.rawFields) {
+      const ellipsis = field.truncated ? '…' : '';
+      output += `  ${field.key}: ${field.value}${ellipsis}\n`;
+    }
+  }
+
+  // Screenshot image, if this marker carries one.
+  if (result.screenshot) {
+    const { windowWidth, windowHeight, mimeType, base64 } = result.screenshot;
+    output += '\nScreenshot:\n';
+    if (windowWidth !== undefined && windowHeight !== undefined) {
+      output += `  Window size: ${windowWidth}px × ${windowHeight}px\n`;
+    }
+    if (mimeType) {
+      output += `  Image type: ${mimeType}\n`;
+    }
+    if (base64) {
+      output += `  Image data: ${formatBytes(decodedBase64ByteLength(base64))} (full data URL in --json output)\n`;
+    }
+    output += `  Extract it with: profiler-cli marker screenshot ${result.markerHandle} -o shot.${screenshotFileExtension(result.screenshot)}\n`;
+  }
+
   // Schema description
   if (result.schema?.description) {
     output += '\nDescription:\n';
@@ -394,6 +441,119 @@ Marker ${result.markerHandle}: ${result.name}`;
   }
 
   return output;
+}
+
+/**
+ * Describe one screenshot on a single line, e.g.
+ * "m-11  t=1,421s  win 2  1280px × 1024px  18,4kB  image/jpeg".
+ *
+ * `--at` returns one row per window, so the window ID is what tells the rows
+ * apart; without it "which of these is the browser window?" is unanswerable.
+ */
+function formatScreenshotLine(
+  entry: ScreenshotEntry | MarkerScreenshotResult,
+  rootStart: number
+): string {
+  const { screenshot } = entry;
+  const parts = [
+    entry.markerHandle.padEnd(8),
+    `t=${formatDuration(entry.start - rootStart)}`.padEnd(14),
+  ];
+  if (screenshot.windowID !== undefined) {
+    parts.push(`win ${screenshot.windowID}`.padEnd(8));
+  }
+  if (
+    screenshot.windowWidth !== undefined &&
+    screenshot.windowHeight !== undefined
+  ) {
+    parts.push(
+      `${screenshot.windowWidth}px × ${screenshot.windowHeight}px`.padEnd(16)
+    );
+  }
+  if (screenshot.base64) {
+    parts.push(formatBytes(decodedBase64ByteLength(screenshot.base64)));
+  }
+  if (screenshot.mimeType) {
+    parts.push(screenshot.mimeType);
+  }
+  if ('isFallback' in entry && entry.isFallback) {
+    const staleBy = entry.staleByMs;
+    parts.push(
+      staleBy !== undefined
+        ? `(stale: ended ${formatDuration(staleBy)} earlier)`
+        : '(stale)'
+    );
+  }
+  return `  ${parts.join('  ')}`;
+}
+
+/**
+ * Format a MarkerScreenshotResult as plain text. The image itself is written to
+ * disk by the command, which appends its own "Wrote ..." line.
+ */
+export function formatMarkerScreenshotResult(
+  result: WithContext<MarkerScreenshotResult>
+): string {
+  const rootStart = result.context.rootRange.start;
+  const lines = [
+    formatContextHeader(result.context),
+    '',
+    `Screenshot from marker ${result.markerHandle} in thread ${result.threadHandle} (${result.friendlyThreadName}):`,
+    formatScreenshotLine(result, rootStart),
+  ];
+  return lines.join('\n');
+}
+
+/**
+ * Format a ScreenshotsResult as plain text.
+ */
+export function formatScreenshotsResult(
+  result: WithContext<ScreenshotsResult>
+): string {
+  const rootStart = result.context.rootRange.start;
+  const lines = [formatContextHeader(result.context), ''];
+
+  let query: string;
+  if (result.at !== undefined) {
+    query = `at t=${formatDuration(result.at - rootStart)}`;
+  } else if (result.range) {
+    query = `in range ${formatDuration(result.range.start - rootStart)} - ${formatDuration(result.range.end - rootStart)}`;
+  } else {
+    query = '';
+  }
+
+  if (result.screenshots.length === 0) {
+    lines.push(
+      `No screenshots ${query}. The profile has ${result.totalScreenshotCount} screenshot marker(s).`
+    );
+    if (result.totalScreenshotCount === 0) {
+      lines.push(
+        '',
+        'This profile was captured without the "screenshots" feature.'
+      );
+    }
+    return lines.join('\n');
+  }
+
+  lines.push(
+    `${result.screenshots.length} screenshot(s) ${query} (of ${result.totalScreenshotCount} in the profile)`,
+    ''
+  );
+  for (const entry of result.screenshots) {
+    lines.push(formatScreenshotLine(entry, rootStart));
+  }
+
+  const fallbackCount = result.screenshots.filter(
+    (entry) => entry.isFallback
+  ).length;
+  if (fallbackCount > 0) {
+    lines.push(
+      '',
+      `Note: ${fallbackCount} frame(s) marked stale did not span the requested time — they are`,
+      'the last frame each window painted before it, not what was on screen at that instant.'
+    );
+  }
+  return lines.join('\n');
 }
 
 /**

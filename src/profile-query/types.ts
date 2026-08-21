@@ -696,10 +696,149 @@ export type MarkerInfoResult = {
     value: any;
     formattedValue: string;
   }>;
+  /**
+   * Raw payload keys for marker types with no schema (or whose schema does not
+   * model every key). Without this, `marker info` prints no "Fields:" section at
+   * all for such markers, which reads as "this marker has no payload".
+   * String-table indexes are resolved to their strings, and long values (such as
+   * screenshot data URLs) are truncated — see `screenshot` for the full data.
+   */
+  rawFields?: Array<{
+    key: string;
+    /** Stringified value, truncated to `RAW_FIELD_MAX_LENGTH` characters. */
+    value: string;
+    /** True when `value` was truncated from a longer original. */
+    truncated?: boolean;
+  }>;
+  /**
+   * Present for `CompositorScreenshot` markers that carry an image. Gives the
+   * full `data:` URL so consumers can extract the image, e.g.
+   * `marker info m-N --json | jq -r .screenshot.url | sed 's/^.*base64,//' | base64 -d`.
+   */
+  screenshot?: ScreenshotData;
   schema?: {
     description?: string;
   };
   stack?: StackTraceData;
+};
+
+/**
+ * A long string replaced by a short stand-in, so a `--json` payload never
+ * carries a megabyte of base64. Same shape as the elision applied to
+ * `CompositorScreenshot.url` in `thread markers --list --json`.
+ */
+export type ElidedString = {
+  elided: true;
+  /** Length in characters of the original string. */
+  length: number;
+  /** First 64 characters of the original string. */
+  preview: string;
+};
+
+/**
+ * A decoded `CompositorScreenshot` payload. `url` is the full `data:` URL, with
+ * the string-table index already resolved.
+ *
+ * This is the in-process shape, carrying the real bytes. On the way out to
+ * `--json` the CLI converts it to `ElidedScreenshotData`.
+ */
+export type ScreenshotData = {
+  /** Full data URL, e.g. "data:image/jpeg;base64,..." */
+  url: string;
+  /** MIME type parsed out of the data URL, e.g. "image/jpeg". */
+  mimeType?: string;
+  /** Base64 payload of the data URL, i.e. everything after "base64,". */
+  base64?: string;
+  /** Original window dimensions in device pixels (the image is scaled down). */
+  windowWidth?: number;
+  windowHeight?: number;
+  /** Opaque identifier of the captured window. */
+  windowID?: string;
+};
+
+/**
+ * A `ScreenshotData` as it appears in `--json`: same keys, but the image bytes
+ * replaced by stand-ins. `--json` is meant to be piped into `jq`, and a single
+ * frame is tens of kilobytes of base64, so the bytes are never inlined. Get
+ * them as files with `-o`.
+ */
+export type ElidedScreenshotData = Omit<ScreenshotData, 'url' | 'base64'> & {
+  url: ElidedString;
+  base64?: ElidedString;
+};
+
+/** Result of `marker screenshot m-N`, used to write an image file. */
+export type MarkerScreenshotResult = {
+  type: 'marker-screenshot';
+  markerHandle: string;
+  threadHandle: string;
+  friendlyThreadName: string;
+  /** Marker start, absolute ms (same timebase as `MarkerInfoResult.start`). */
+  start: number;
+  end: number | null;
+  screenshot: ScreenshotData;
+};
+
+/** One screenshot in a `screenshots` query result. */
+export type ScreenshotEntry = {
+  markerHandle: string;
+  threadHandle: string;
+  friendlyThreadName: string;
+  /** Marker start, absolute ms. */
+  start: number;
+  end: number | null;
+  screenshot: ScreenshotData;
+  /**
+   * Set for `--at` when this frame does not span the requested instant: it is
+   * the window's latest *preceding* frame, i.e. the last thing that window
+   * painted, not literally what was on screen at that instant.
+   */
+  isFallback?: boolean;
+  /** For a fallback frame, how long before the instant its interval ended. */
+  staleByMs?: number;
+};
+
+/** Result of `screenshots --at T` / `screenshots --range A,B`. */
+export type ScreenshotsResult = {
+  type: 'screenshots';
+  /** The requested instant, absolute ms — set when `--at` was used. */
+  at?: number;
+  /** The requested range, absolute ms — set when `--range` was used. */
+  range?: { start: number; end: number };
+  /** Total screenshot markers considered across all threads. */
+  totalScreenshotCount: number;
+  screenshots: ScreenshotEntry[];
+};
+
+/**
+ * `marker screenshot --json` output: the result, with the image elided and the
+ * written file reported so the payload is machine-readable end to end.
+ */
+export type MarkerScreenshotJson = Omit<
+  MarkerScreenshotResult,
+  'screenshot'
+> & {
+  screenshot: ElidedScreenshotData;
+  /** Absolute path of the image written by `-o`. */
+  path: string;
+  /** Size on disk in bytes of the decoded image. */
+  byteLength: number;
+};
+
+/** One entry of `screenshots --json`, with the image elided. */
+export type ScreenshotEntryJson = Omit<ScreenshotEntry, 'screenshot'> & {
+  screenshot: ElidedScreenshotData;
+  /** Absolute path of the image written by `-o`; absent without `-o`. */
+  path?: string;
+  /** Size on disk in bytes of the decoded image; absent without `-o`. */
+  byteLength?: number;
+};
+
+/** `screenshots --json` output. */
+export type ScreenshotsJson = Omit<ScreenshotsResult, 'screenshots'> & {
+  screenshots: ScreenshotEntryJson[];
+  /** Absolute paths of every image written by `-o`, in result order. */
+  written: string[];
 };
 
 export type MarkerStackResult = {

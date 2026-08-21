@@ -474,11 +474,21 @@ export class Daemon {
               throw new Error('marker handle required for marker stack');
             }
             return this.querier.markerStack(command.marker);
+          case 'screenshot':
+            if (!command.marker) {
+              throw new Error('marker handle required for marker screenshot');
+            }
+            return this.querier.markerScreenshot(command.marker);
           case 'select':
             throw new Error('unimplemented');
           default:
             throw assertExhaustiveCheck(command);
         }
+      case 'screenshots':
+        return this.querier.screenshots({
+          at: command.at,
+          range: command.range,
+        });
       case 'counter':
         switch (command.subcommand) {
           case 'list':
