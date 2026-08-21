@@ -8,10 +8,54 @@ export function toInt32Array(
   return arr instanceof Int32Array ? arr : new Int32Array(arr);
 }
 
+export function toUint32Array(
+  arr: Array<number> | Uint32Array<ArrayBuffer>
+): Uint32Array<ArrayBuffer> {
+  return arr instanceof Uint32Array ? arr : new Uint32Array(arr);
+}
+
 export function toUint8Array(
   arr: Array<number> | Uint8Array<ArrayBuffer>
 ): Uint8Array<ArrayBuffer> {
   return arr instanceof Uint8Array ? arr : new Uint8Array(arr);
+}
+
+/**
+ * Convert a column of small non-negative integers into a Uint8Array or a
+ * Uint16Array. `needsSixteenBits` says whether 8 bits are enough to hold every
+ * value the column can legitimately contain; the caller knows this from the
+ * profile's category list.
+ *
+ * If the column is already a Uint8Array or a Uint16Array it is returned as-is,
+ * because both satisfy the return type and neither can hold a value that
+ * doesn't fit. This avoids a copy for profiles loaded from JsonSlabs files.
+ */
+export function toUint8OrUint16Array(
+  arr:
+    | Array<number>
+    | Uint8Array<ArrayBuffer>
+    | Uint16Array<ArrayBuffer>
+    | Int32Array<ArrayBuffer>,
+  needsSixteenBits: boolean
+): Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer> {
+  if (arr instanceof Uint8Array || arr instanceof Uint16Array) {
+    return arr;
+  }
+  return needsSixteenBits ? new Uint16Array(arr) : new Uint8Array(arr);
+}
+
+/**
+ * Whether every value in this column fits into 8 bits. Use this to pick a width
+ * in places which don't have access to the profile's category list, and can
+ * therefore not compute the bound from the data model.
+ */
+export function valuesFitInUint8(arr: ArrayLike<number>): boolean {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] > 255) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function toFloat64Array(

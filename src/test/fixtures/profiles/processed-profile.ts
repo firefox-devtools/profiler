@@ -41,7 +41,6 @@ import type {
   Thread,
   ThreadIndex,
   IndexIntoCategoryList,
-  IndexIntoLibs,
   IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
@@ -63,6 +62,7 @@ import type {
   MarkerSchema,
   MixedObject,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
@@ -588,7 +588,7 @@ export type ProfileWithDicts = {
  *  - [file:*] - The filename, affects funcTable.file
  *  - [line:*] - The line, affects frameTable.line
  *  - [address:*] - The frame address, affects frameTable.address
- *  - [inl:*] - The inline depth, affects frameTable.inlineDepth
+ *  - [inl:*] - The inline depth, affects the IsInlined bit of frameTable.flags
  *  - [sym:<name>:<hex_address>:<hex_size>] - The native symbol, affects frameTable.nativeSymbol (keyed on <name>)
 
 ```js
@@ -602,7 +602,7 @@ function getFrame(
   const funcIndex = frameTable.func[frameIndex];
   let s = stringTable.getString(funcTable.name[funcIndex]);
   const libIndex = frameTable.lib[frameIndex];
-  if (libIndex !== -1) {
+  if (libIndex !== null) {
     const libName = libs[libIndex].name;
     s += `[lib:${libName}]`;
   }
@@ -903,7 +903,7 @@ function _buildThreadFromTextOnlyStacks(
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
       let resourceIndex = -1;
-      let libIndex: IndexIntoLibs | -1 = -1;
+      let libIndex = null;
       if (libraryName !== null) {
         libIndex = globalDataCollector.indexForLib({
           arch: '',
@@ -940,15 +940,15 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
       const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
-      const address =
+      const parsedAddress =
         _findAddressFromFuncName(funcNameWithModifier) ??
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
 
-      let nativeSymbol = null;
+      let nativeSymbol: number | null = null;
       const nativeSymbolInfo =
         _findNativeSymbolNameFromFuncName(funcNameWithModifier);
       if (nativeSymbolInfo) {
-        if (libIndex === -1) {
+        if (libIndex === null) {
           throw new Error(
             `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`
           );
@@ -966,18 +966,51 @@ function _buildThreadFromTextOnlyStacks(
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
+      if (parsedAddress !== -1 && libIndex === null) {
+        throw new Error(
+          `An address has to be used together with [lib:], because the address is relative to the lib - missing lib in "${funcNameWithModifier}"`
+        );
+      }
+
+      let flags = 0;
+      if (inlineDepth > 0) {
+        flags |= FrameFlag.IsInlined;
+      }
+      if (parsedAddress !== -1) {
+        flags |= FrameFlag.HasAddress;
+      }
+      if (category !== null) {
+        flags |= FrameFlag.HasCategory;
+      }
+      if (nativeSymbol !== null) {
+        flags |= FrameFlag.HasNativeSymbol;
+      }
+      if (lineNumber !== null) {
+        flags |= FrameFlag.HasLine;
+      }
+      const address = parsedAddress === -1 ? 0 : parsedAddress;
+      // `lib` is gated by HasAddress, so a [lib:] without an address doesn't
+      // make it onto the frame. This matches the real pipeline, which only ever
+      // puts a lib on a frame whose address it managed to make lib-relative;
+      // pre-symbolicated "func (in libname)" frames get a resource instead.
+      const storedLib =
+        (flags & FrameFlag.HasAddress) !== 0 ? ensureExists(libIndex) : 0;
+      const storedCategory = category ?? 0;
+      const storedNativeSymbol = nativeSymbol ?? 0;
+      const storedLineNumber = lineNumber ?? 0;
+
       // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
-          category === frameTable.category[i] &&
-          lineNumber === frameTable.line[i] &&
+          flags === frameTable.flags[i] &&
+          storedCategory === frameTable.category[i] &&
+          storedLineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
-          inlineDepth === frameTable.inlineDepth[i] &&
-          nativeSymbol === frameTable.nativeSymbol[i] &&
-          libIndex === frameTable.lib[i]
+          storedNativeSymbol === frameTable.nativeSymbol[i] &&
+          storedLib === frameTable.lib[i]
         ) {
           frameIndex = i;
           break;
@@ -985,17 +1018,17 @@ function _buildThreadFromTextOnlyStacks(
       }
 
       if (frameIndex === undefined) {
+        frameTable.flags.push(flags);
         frameTable.func.push(funcIndex);
-        frameTable.lib.push(libIndex);
+        frameTable.lib.push(storedLib);
         frameTable.address.push(address);
-        frameTable.inlineDepth.push(inlineDepth);
-        frameTable.category.push(category);
+        frameTable.category.push(storedCategory);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
-        frameTable.nativeSymbol.push(nativeSymbol);
-        frameTable.line.push(lineNumber);
-        frameTable.column.push(null);
-        frameTable.originalLocation.push(null);
+        frameTable.nativeSymbol.push(storedNativeSymbol);
+        frameTable.line.push(storedLineNumber);
+        frameTable.column.push(0);
+        frameTable.originalLocation.push(0);
         frameIndex = frameTable.length++;
       }
 
@@ -2078,10 +2111,8 @@ export function addInnerWindowIdToStacks(
 
       // Clone this frame
       const newFrameIndex = frameTableBuilder.length++;
+      frameTableBuilder.flags.push(frameTable.flags[foundFrameIndex]);
       frameTableBuilder.address.push(frameTable.address[foundFrameIndex]);
-      frameTableBuilder.inlineDepth.push(
-        frameTable.inlineDepth[foundFrameIndex]
-      );
       frameTableBuilder.category.push(frameTable.category[foundFrameIndex]);
       frameTableBuilder.subcategory.push(
         frameTable.subcategory[foundFrameIndex]

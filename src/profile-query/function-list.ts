@@ -9,7 +9,7 @@ import type {
   FuncTable,
   ResourceTable,
 } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 import { getFunctionHandle } from './function-map';
 
 /**
@@ -27,9 +27,8 @@ export function getAnyLibForFunc(
     if (frameTable.func[frameIndex] !== funcIndex) {
       continue;
     }
-    const libIndex = frameTable.lib[frameIndex];
-    if (libIndex !== -1) {
-      return libs[libIndex];
+    if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0) {
+      return libs[frameTable.lib[frameIndex]];
     }
   }
   return undefined;

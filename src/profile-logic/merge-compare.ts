@@ -78,6 +78,7 @@ import type {
   ProfilerOverhead,
   ThreadIndex,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { translateTransformStack } from './transforms';
 
 /**
@@ -744,16 +745,6 @@ function _mapLib(
   return oldLibToNewLibPlusOne[libIndex] - 1;
 }
 
-function _mapFrameLib(
-  libIndex: IndexIntoLibs | -1,
-  oldLibToNewLibPlusOne: TranslationMapForLibs
-): IndexIntoLibs | -1 {
-  if (libIndex === -1) {
-    return -1;
-  }
-  return oldLibToNewLibPlusOne[libIndex] - 1;
-}
-
 function _mapString(
   stringIndex: IndexIntoStringTable,
   oldStringToNewStringPlusOne: TranslationMapForStrings
@@ -788,6 +779,13 @@ function _mapNullableOriginalLocation(
     : null;
 }
 
+function _mapOriginalLocation(
+  originalLocationIndex: IndexIntoSourceLocationTable,
+  oldOriginalLocationToNewPlusOne: TranslationMapForOriginalLocation
+): IndexIntoSourceLocationTable {
+  return oldOriginalLocationToNewPlusOne[originalLocationIndex] - 1;
+}
+
 function _mapFuncResource(
   resourceIndex: IndexIntoResourceTable | -1,
   oldResourceToNewResourcePlusOne: TranslationMapForResources
@@ -810,26 +808,6 @@ function _mapFrame(
   oldFrameToNewFramePlusOne: TranslationMapForFrames
 ): IndexIntoFrameTable {
   return oldFrameToNewFramePlusOne[frameIndex] - 1;
-}
-
-function _mapNullableNativeSymbol(
-  nativeSymbolIndex: IndexIntoLibs | null,
-  oldNativeSymbolToNewNativeSymbolPlusOne: TranslationMapForNativeSymbols
-): IndexIntoLibs | null {
-  if (nativeSymbolIndex === null) {
-    return null;
-  }
-  return oldNativeSymbolToNewNativeSymbolPlusOne[nativeSymbolIndex] - 1;
-}
-
-function _mapNullableCategory(
-  categoryIndex: IndexIntoCategoryList | null,
-  oldCategoryToNewCategoryPlusOne: TranslationMapForCategories
-): IndexIntoCategoryList | null {
-  if (categoryIndex === null) {
-    return null;
-  }
-  return oldCategoryToNewCategoryPlusOne[categoryIndex] - 1;
 }
 
 function _mapNullableStack(
@@ -1071,35 +1049,42 @@ function mergeFrameTables(
     const oldFrameToNewFramePlusOne = new Int32Array(frameTable.length);
 
     for (let i = 0; i < frameTable.length; i++) {
+      const flags = frameTable.flags[i];
       const func = _mapFunc(frameTable.func[i], oldFuncToNewFuncPlusOne);
-      const nativeSymbol = _mapNullableNativeSymbol(
-        frameTable.nativeSymbol[i],
-        oldNativeSymbolToNewNativeSymbolPlusOne
-      );
-      const category = _mapNullableCategory(
-        frameTable.category[i],
-        oldCategoryToNewCategoryPlusOne
-      );
+      const nativeSymbol =
+        (flags & FrameFlag.HasNativeSymbol) !== 0
+          ? oldNativeSymbolToNewNativeSymbolPlusOne[
+              frameTable.nativeSymbol[i]
+            ] - 1
+          : 0;
+      const category =
+        (flags & FrameFlag.HasCategory) !== 0
+          ? oldCategoryToNewCategoryPlusOne[frameTable.category[i]] - 1
+          : 0;
       // TODO issue #2151: Also adjust subcategories.
       const subcategory = frameTable.subcategory[i];
 
+      newFrameTable.flags.push(flags);
       newFrameTable.address.push(frameTable.address[i]);
-      newFrameTable.inlineDepth.push(frameTable.inlineDepth[i]);
       newFrameTable.category.push(category);
       newFrameTable.subcategory.push(subcategory);
       newFrameTable.nativeSymbol.push(nativeSymbol);
       newFrameTable.func.push(func);
       newFrameTable.lib.push(
-        _mapFrameLib(frameTable.lib[i], oldLibToNewLibPlusOne)
+        (flags & FrameFlag.HasAddress) !== 0
+          ? _mapLib(frameTable.lib[i], oldLibToNewLibPlusOne)
+          : 0
       );
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
       newFrameTable.originalLocation.push(
-        _mapNullableOriginalLocation(
-          frameTable.originalLocation[i],
-          oldOriginalLocationToNewPlusOne
-        )
+        (flags & FrameFlag.HasOriginalLocation) !== 0
+          ? _mapOriginalLocation(
+              frameTable.originalLocation[i],
+              oldOriginalLocationToNewPlusOne
+            )
+          : 0
       );
 
       oldFrameToNewFramePlusOne[i] = newFrameTable.length + 1;

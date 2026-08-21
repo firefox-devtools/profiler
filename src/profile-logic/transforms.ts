@@ -47,6 +47,7 @@ import type {
   CategoryList,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import {
@@ -1607,8 +1608,8 @@ export type BacktraceItem = {
   // library instead.
   // May also be empty.
   origin: string;
-  // The inline depth of this frame. Frames with inline depth > 0 are inlined.
-  inlineDepth: number;
+  // Whether this frame is an inline expansion of another function.
+  isInlined: boolean;
   stackIndex: IndexIntoStackTable;
 };
 
@@ -1642,7 +1643,7 @@ export function getBacktraceItemsForStack(
       category: stackTable.category[stackIndex],
       funcIndex: frameTable.func[frameIndex],
       frameIndex,
-      inlineDepth: frameTable.inlineDepth[frameIndex],
+      isInlined: (frameTable.flags[frameIndex] & FrameFlag.IsInlined) !== 0,
       stackIndex,
     });
   }
@@ -1652,7 +1653,7 @@ export function getBacktraceItemsForStack(
     funcMatchesImplementation(thread, funcIndex)
   );
   return path.map(
-    ({ category, funcIndex, frameIndex, inlineDepth, stackIndex }) => {
+    ({ category, funcIndex, frameIndex, isInlined, stackIndex }) => {
       return {
         funcName: stringTable.getString(funcTable.name[funcIndex]),
         category,
@@ -1667,7 +1668,7 @@ export function getBacktraceItemsForStack(
           sources,
           sourceLocationTable
         ),
-        inlineDepth,
+        isInlined,
         stackIndex,
       };
     }
