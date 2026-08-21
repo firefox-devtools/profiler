@@ -302,6 +302,7 @@ Home--instructions-content2 =
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } bu cihazda doğrudan profillenebilir.
     Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını cihazda doğrudan profilleme</a> sayfasını okuyabilirsiniz.
+Home--fenix-instructions-remotely = { -firefox-brand-name }’un bilgisayar sürümünü kullanarak da { -firefox-android-brand-name }’ta uzaktan profilleme yapabilirsiniz. Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını uzaktan profilleme</a> belgesine bakın.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
