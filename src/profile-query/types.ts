@@ -465,9 +465,12 @@ export type ThreadNetworkResult = {
   type: 'thread-network';
   threadHandle: string;
   friendlyThreadName: string;
+  // Completed (STATUS_STOP) only; use `totalCandidateCount` as a total.
   totalRequestCount: number;
   // Requests still in flight when the recording stopped.
   incompleteCount: number;
+  // Every record the filters ran against; `filteredRequestCount` is a subset.
+  totalCandidateCount: number;
   filteredRequestCount: number;
   // How the request list is ordered.
   sort: NetworkRequestSort;

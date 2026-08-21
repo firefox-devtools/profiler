@@ -1233,6 +1233,7 @@ export function collectThreadNetwork(
       totalRequestCount++;
     }
   }
+  const totalCandidateCount = records.length;
 
   // Wall-clock: interval union and peak concurrency over all records
   // intersecting the range, independent of the display filters below.
@@ -1358,6 +1359,7 @@ export function collectThreadNetwork(
     friendlyThreadName,
     totalRequestCount,
     incompleteCount,
+    totalCandidateCount,
     filteredRequestCount,
     sort,
     filters:

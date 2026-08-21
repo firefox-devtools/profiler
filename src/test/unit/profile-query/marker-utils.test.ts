@@ -1059,6 +1059,14 @@ describe('collectThreadNetwork', function () {
     expect(result.incompleteCount).toBe(0);
     // But both legs are listed, so the redirect is visible for drill-down.
     expect(result.requests).toHaveLength(2);
+    // The redirect leg is counted by neither of the two counters above, so the
+    // candidate set the filters run against is reported separately. Deriving it
+    // as totalRequestCount + incompleteCount would give 1 for a 2-row listing.
+    expect(result.totalCandidateCount).toBe(2);
+    expect(result.filteredRequestCount).toBe(2);
+    expect(result.totalCandidateCount).toBeGreaterThanOrEqual(
+      result.filteredRequestCount
+    );
     const redirectLeg = result.requests.find(
       (r) => r.status === 'STATUS_REDIRECT'
     );
