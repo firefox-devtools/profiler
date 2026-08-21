@@ -49,6 +49,9 @@ AppViewRouter--error-from-localhost-url-safari =
     bu tarayıcıda yerel makineden profilleri içe aktaramıyor. Lütfen
     bu sayfayı Safari yerine { -firefox-brand-name } veya Chrome’da açın.
     .title = Safari yerel profilleri içe aktaramıyor
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version = Bu profilde bu { -profiler-brand-name } sürümünün desteklemediği bir biçim kullanılıyor. Yeni { -profiler-brand-name } güncellemesi olup olmadığını denetlemek üzere sayfayı yenilemeyi deneyin.
 AppViewRouter--route-not-found--home =
     .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
