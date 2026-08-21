@@ -583,8 +583,7 @@ Name: ${result.name}\n`;
       }
     }
 
-    const etld1Suffix = process.etld1 ? ` [${process.etld1}]` : '';
-    output += `  p-${process.processIndex}: ${process.name}${etld1Suffix} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
+    output += `  p-${process.processIndex}: ${process.name} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
 
     for (const thread of process.threads) {
       output += `    ${thread.threadHandle}: ${thread.name} [tid ${thread.tid}] - ${thread.cpuMs.toFixed(3)}ms\n`;
@@ -804,13 +803,12 @@ function formatCounterStats(counter: CounterSummary): string {
   return `${stats} [${counter.rangeSampleCount} samples]`;
 }
 
-/** `p-N Process Name (etld+1)` identifying the owning process. */
+/** `p-N Process Name` identifying the owning process. */
 function formatCounterProcessName(counter: CounterSummary): string {
-  const etld1 = counter.etld1 ? ` (${counter.etld1})` : '';
-  return `p-${counter.processIndex} ${counter.processName}${etld1}`;
+  return `p-${counter.processIndex} ${counter.processName}`;
 }
 
-/** The ` [p-N Process Name (etld+1), pid X]` segment identifying the owning process. */
+/** The ` [p-N Process Name, pid X]` segment identifying the owning process. */
 function formatCounterProcess(counter: CounterSummary): string {
   return ` [${formatCounterProcessName(counter)}, pid ${counter.pid}]`;
 }

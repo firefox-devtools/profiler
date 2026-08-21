@@ -27,7 +27,7 @@ import {
 import { getSampleIndexRangeForSelection } from 'firefox-profiler/profile-logic/profile-data';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { getCounterHandle, parseCounterHandle } from '../counter-map';
-import { getProcessName } from '../process-thread-list';
+import { getFriendlyProcessName } from '../process-thread-list';
 import type {
   CounterIndex,
   CounterDisplayConfig,
@@ -221,7 +221,7 @@ export function collectCounterSummary(
     color: display.color,
     pid: counter.pid,
     processIndex,
-    processName: getProcessName(mainThread),
+    processName: getFriendlyProcessName(profile.threads, mainThread),
     etld1: mainThread['eTLD+1'],
     mainThreadIndex: counter.mainThreadIndex,
     mainThreadHandle: threadMap.handleForThreadIndex(counter.mainThreadIndex),

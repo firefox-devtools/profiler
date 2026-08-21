@@ -72,7 +72,7 @@ describe('formatCounterListResult', function () {
           category: 'Bandwidth',
           graphType: 'line-rate',
           processIndex: 3,
-          processName: 'Isolated Web Content',
+          processName: 'example.com',
           etld1: 'example.com',
           pid: '456',
           stats: [
@@ -95,7 +95,7 @@ describe('formatCounterListResult', function () {
     expect(output).toContain('memory range in graph: 27B');
     expect(output).toContain('[7 samples]');
     expect(output).toContain(
-      'c-1: Bandwidth (Bandwidth) [p-3 Isolated Web Content (example.com), pid 456]'
+      'c-1: Bandwidth (Bandwidth) [p-3 example.com, pid 456]'
     );
     expect(output).toContain('Data transferred in the visible range: 2KB');
   });

@@ -8,7 +8,10 @@ import {
   getRangeFilteredCombinedThreadActivitySlices,
 } from 'firefox-profiler/selectors/profile';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state';
-import { buildProcessThreadList, getProcessName } from '../process-thread-list';
+import {
+  buildProcessThreadList,
+  getFriendlyProcessName,
+} from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
 import { collectCounterSummary, getSortedCounterIndexes } from './counter-info';
 import { computeProfileNetworkSummary } from '../network-summary';
@@ -95,7 +98,10 @@ export function collectProfileInfo(
       (t) => t.pid === processItem.pid
     );
     if (threadFromProcess) {
-      processItem.name = getProcessName(threadFromProcess);
+      processItem.name = getFriendlyProcessName(
+        profile.threads,
+        threadFromProcess
+      );
       processItem.etld1 = threadFromProcess['eTLD+1'];
       processItem.startTime = threadFromProcess.processStartupTime;
       processItem.endTime = threadFromProcess.processShutdownTime;
