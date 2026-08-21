@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`formatProfileMetaResult renders a full Firefox recording grouped into sections 1`] = `
-"[Thread: t-0 (GeckoMain) | View: Full profile | Full: 3s]
+"[Thread: t-0 (GeckoMain, Parent Process) | View: Full profile | Full: 3s]
 
 Recording:
   Started: 2024-09-02T14:35:00.000Z
@@ -28,7 +28,7 @@ Platform:
 `;
 
 exports[`formatProfileMetaResult renders a sparse imported profile, skipping absent sections 1`] = `
-"[Thread: t-0 (GeckoMain) | View: Full profile | Full: 3s]
+"[Thread: t-0 (GeckoMain, Parent Process) | View: Full profile | Full: 3s]
 
 Recording:
   Sampling interval: 1ms
@@ -43,7 +43,7 @@ Import:
 `;
 
 exports[`formatProfileMetaResult renders extra importer sections as their own heading blocks 1`] = `
-"[Thread: t-0 (GeckoMain) | View: Full profile | Full: 3s]
+"[Thread: t-0 (GeckoMain, Parent Process) | View: Full profile | Full: 3s]
 
 Recording:
   Sampling interval: 1ms

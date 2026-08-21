@@ -755,4 +755,122 @@ describe('ProfileQuerier', function () {
       expect(listedNames).toEqual(['Beta']);
     });
   });
+
+  describe('session context', function () {
+    /**
+     * Two GeckoMain threads in two processes: t-0 in the parent process and t-1
+     * in the GPU process. Both threads are named "GeckoMain", so the process is
+     * the only thing that tells them apart.
+     */
+    function querierWithTwoProcesses() {
+      const profile = getProfileWithMarkers(
+        [['Parent marker', 10, null, { type: 'tracing', category: 'Test' }]],
+        [['GPU marker', 20, null, { type: 'tracing', category: 'Test' }]]
+      );
+      profile.threads[0].name = 'GeckoMain';
+      profile.threads[0].pid = '111';
+      profile.threads[0].processType = 'default';
+      profile.threads[1].name = 'GeckoMain';
+      profile.threads[1].pid = '222';
+      profile.threads[1].processType = 'gpu';
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return new ProfileQuerier(store, rootRange);
+    }
+
+    it('names the process of each thread in the context', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      const { context } = await querier.profileInfo();
+      expect(context.selectedThreadHandle).toBe('t-0');
+      // The thread name alone ("GeckoMain") does not say which process this is.
+      expect(context.selectedThreads).toEqual([
+        { threadIndex: 0, name: 'GeckoMain', processName: 'Parent Process' },
+      ]);
+    });
+
+    it('reports --thread alongside the untouched selection', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      const result = await querier.threadMarkers('t-1');
+      // The body reports t-1, so the result-scoped fields must too, while the
+      // selection stays on t-0 because `--thread` does not select anything.
+      expect(result.threadHandle).toBe('t-1');
+      expect(result.context.resultThreadHandle).toBe('t-1');
+      expect(result.context.resultThreads).toEqual([
+        { threadIndex: 1, name: 'GeckoMain', processName: 'GPU Process' },
+      ]);
+      expect(result.context.selectedThreadHandle).toBe('t-0');
+      expect(result.context.selectedThreads).toEqual([
+        { threadIndex: 0, name: 'GeckoMain', processName: 'Parent Process' },
+      ]);
+    });
+
+    it('reports the queried marker thread alongside the selection', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      // Find the handle of the marker living in the GPU process thread.
+      const markers = await querier.threadMarkers('t-1', { list: true });
+      const gpuMarker = markers.flatMarkers!.find(
+        (m) => m.name === 'GPU marker'
+      );
+      expect(gpuMarker).toBeDefined();
+
+      const info = await querier.markerInfo(gpuMarker!.handle);
+      expect(info.threadHandle).toBe('t-1');
+      expect(info.context.resultThreadHandle).toBe('t-1');
+      expect(info.context.resultThreads).toEqual([
+        { threadIndex: 1, name: 'GeckoMain', processName: 'GPU Process' },
+      ]);
+      expect(info.context.selectedThreadHandle).toBe('t-0');
+    });
+
+    it('leaves the result-scoped fields empty without --thread', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-1');
+
+      const { context } = await querier.threadMarkers();
+      expect(context.selectedThreadHandle).toBe('t-1');
+      expect(context.resultThreadHandle).toBeNull();
+      expect(context.resultThreads).toEqual([]);
+    });
+
+    it('leaves the result-scoped fields empty when --thread names the selected thread', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-1');
+
+      // Passing the thread that is already selected is not a divergence, so the
+      // header must not grow a redundant "Selected:" segment.
+      const { context } = await querier.threadMarkers('t-1');
+      expect(context.selectedThreadHandle).toBe('t-1');
+      expect(context.resultThreadHandle).toBeNull();
+      expect(context.resultThreads).toEqual([]);
+    });
+
+    it('reports "profile logs --thread" alongside the selection', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      const { context } = await querier.profileLogs({ thread: 't-1' });
+      expect(context.resultThreadHandle).toBe('t-1');
+      expect(context.resultThreads).toEqual([
+        { threadIndex: 1, name: 'GeckoMain', processName: 'GPU Process' },
+      ]);
+      expect(context.selectedThreadHandle).toBe('t-0');
+    });
+
+    it('reports the selected thread for "profile logs" across all threads', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      // Without --thread, "profile logs" spans every thread, so the selected
+      // thread stays the right thing to report.
+      const { context } = await querier.profileLogs();
+      expect(context.selectedThreadHandle).toBe('t-0');
+      expect(context.resultThreadHandle).toBeNull();
+    });
+  });
 });

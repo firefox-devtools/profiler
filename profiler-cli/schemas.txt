@@ -6,7 +6,9 @@ document the exact fields returned by each command.
 SessionContext (present on all command results):
   {
     selectedThreadHandle,
-    selectedThreads: [{ threadIndex, name }],
+    selectedThreads: [{ threadIndex, name, processName }],
+    resultThreadHandle: threadHandle | null,
+    resultThreads: [{ threadIndex, name, processName }],
     currentViewRange: { start, startName, end, endName } | null,
     rootRange: { start, end }
   }
@@ -230,7 +232,7 @@ profiler-cli status --json
   {
     type: "status",
     selectedThreadHandle,
-    selectedThreads: [{ threadIndex, name }],
+    selectedThreads: [{ threadIndex, name, processName }],
     viewRanges: [{ start, startName, end, endName }],
     rootRange: { start, end },
     filterStacks: [{ threadHandle, filters: FilterEntry[] }]

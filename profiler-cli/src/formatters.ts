@@ -77,6 +77,28 @@ const INLINE_LEGEND =
   '(inl?) = some calls were inlined by the compiler.';
 
 /**
+ * `GeckoMain, WebExtensions` — thread name then process, the process dropped
+ * when it merely repeats the thread name.
+ */
+function formatThreadAndProcess(thread: {
+  name: string;
+  processName?: string;
+}): string {
+  if (!thread.processName || thread.processName === thread.name) {
+    return thread.name;
+  }
+  return `${thread.name}, ${thread.processName}`;
+}
+
+/** `t-0,t-1 (GeckoMain, Parent Process; Renderer)` */
+function formatThreadList(
+  handle: string,
+  threads: Array<{ name: string; processName?: string }>
+): string {
+  return `${handle} (${threads.map(formatThreadAndProcess).join('; ')})`;
+}
+
+/**
  * Format a SessionContext as a compact header line.
  * Shows current thread selection, zoom range, and full profile duration.
  */
@@ -85,18 +107,25 @@ export function formatContextHeader(
   activeFilters?: FilterEntry[],
   ephemeralFilters?: SampleFilterSpec[]
 ): string {
-  // Thread info
+  // Thread info. The header leads with the thread this result is about, and
+  // only names the sticky selection separately when the two have diverged, so
+  // that a `--thread` query does not read as having changed the selection.
   let threadInfo = 'No thread selected';
-  if (context.selectedThreadHandle && context.selectedThreads.length > 0) {
-    if (context.selectedThreads.length === 1) {
-      const thread = context.selectedThreads[0];
-      threadInfo = `${context.selectedThreadHandle} (${thread.name})`;
-    } else {
-      const names = context.selectedThreads
-        .map((t: { name: string }) => t.name)
-        .join(', ');
-      threadInfo = `${context.selectedThreadHandle} (${names})`;
-    }
+  let selectedInfo = '';
+  if (context.resultThreadHandle && context.resultThreads.length > 0) {
+    threadInfo = formatThreadList(
+      context.resultThreadHandle,
+      context.resultThreads
+    );
+    selectedInfo = ` | Selected: ${context.selectedThreadHandle ?? 'none'}`;
+  } else if (
+    context.selectedThreadHandle &&
+    context.selectedThreads.length > 0
+  ) {
+    threadInfo = formatThreadList(
+      context.selectedThreadHandle,
+      context.selectedThreads
+    );
   }
 
   // View range info
@@ -115,7 +144,7 @@ export function formatContextHeader(
     (activeFilters?.length ?? 0) + (ephemeralFilters?.length ?? 0);
   const filterInfo =
     totalFilterCount > 0 ? ` | Filters: ${totalFilterCount}` : '';
-  return `[Thread: ${threadInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
+  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
 }
 
 /**
@@ -124,13 +153,10 @@ export function formatContextHeader(
 export function formatStatusResult(result: StatusResult): string {
   let threadInfo = 'No thread selected';
   if (result.selectedThreadHandle && result.selectedThreads.length > 0) {
-    if (result.selectedThreads.length === 1) {
-      const thread = result.selectedThreads[0];
-      threadInfo = `${result.selectedThreadHandle} (${thread.name})`;
-    } else {
-      const names = result.selectedThreads.map((t) => t.name).join(', ');
-      threadInfo = `${result.selectedThreadHandle} (${names})`;
-    }
+    threadInfo = formatThreadList(
+      result.selectedThreadHandle,
+      result.selectedThreads
+    );
   }
 
   let rangesInfo = 'Full profile';
@@ -2106,7 +2132,11 @@ export function formatThreadSelectResult(
   result: WithContext<ThreadSelectResult>
 ): string {
   const count = result.threadNames.length;
-  const names = result.threadNames.join(', ');
+  // Only the context carries process names, so fall back if it disagrees.
+  const names =
+    result.context.selectedThreads.length === count
+      ? result.context.selectedThreads.map(formatThreadAndProcess).join('; ')
+      : result.threadNames.join(', ');
   if (count === 1) {
     return `Selected thread: ${result.threadHandle} (${names})`;
   }
