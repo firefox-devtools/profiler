@@ -95,6 +95,7 @@ CORE WORKFLOW
     profiler-cli profile logs --search "connect"         Filter by substring in message
     profiler-cli profile logs --thread t-0               Restrict to a specific thread
     profiler-cli profile logs --limit 200                Show only the first 200 entries
+    profiler-cli profile logs --limit 0                  All entries (no limit)
 
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
@@ -343,6 +344,7 @@ COMMON ANALYSIS PATTERNS
     profiler-cli thread markers --search "Paint" --list | head -50
     profiler-cli thread markers --search "GC" --min-duration 5 --list
     profiler-cli thread markers --list --limit 100         First 100 markers in chronological order
+    profiler-cli thread markers --list --limit 0           Every matching marker (no limit; can be very long)
 
   Investigate a page load:
     profiler-cli thread page-load                    Overview: milestones, top resources, CPU categories, jank
