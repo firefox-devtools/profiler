@@ -36,8 +36,6 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
-import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
-
 import type {
   Profile,
   CheckedSharingOptions,
@@ -231,9 +229,8 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                     id="MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image"
                     attrs={{ title: true }}
                   >
-                    <img
+                    <span
                       className="publishPanelDataChoicesIndicator"
-                      src={WarningImage}
                       title="This profile contains private browsing data"
                     />
                   </Localized>
@@ -247,9 +244,8 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                     id="MenuButtons--publish--renderCheckbox-label-argument-values-warning-image"
                     attrs={{ title: true }}
                   >
-                    <img
+                    <span
                       className="publishPanelDataChoicesIndicator"
-                      src={WarningImage}
                       title="This profile contains function argument values recorded from the page, which may include personal data"
                     />
                   </Localized>
