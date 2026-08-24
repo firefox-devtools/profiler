@@ -137,6 +137,30 @@ describe('formatThreadMarkersResult flat list mode', function () {
     expect(output).toContain('✗');
   });
 
+  it('says how many markers were omitted and how to get them', function () {
+    const result = makeResult({
+      totalMarkerCount: 100,
+      filteredMarkerCount: 7183,
+      flatMarkers: [makeFlat({ handle: 'm-1' }), makeFlat({ handle: 'm-2' })],
+    });
+
+    const output = formatThreadMarkersResult(result);
+    expect(output).toContain('7181 more markers omitted');
+    expect(output).toContain('showing the first 2 of 7183');
+    expect(output).toContain('--limit 0');
+  });
+
+  it('does not claim truncation when the whole list is shown', function () {
+    const result = makeResult({
+      filteredMarkerCount: 2,
+      flatMarkers: [makeFlat({ handle: 'm-1' }), makeFlat({ handle: 'm-2' })],
+    });
+
+    const output = formatThreadMarkersResult(result);
+    expect(output).not.toContain('omitted');
+    expect(output).not.toContain('--limit 0');
+  });
+
   it('does not show aggregated By Name header in flat list mode', function () {
     const result = makeResult({
       filteredMarkerCount: 1,

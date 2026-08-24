@@ -7,7 +7,8 @@
  */
 
 import type { Command } from 'commander';
-import { addGlobalOptions, parseIntArg, runCommand } from './shared';
+import { parseLimitArg } from '../utils/parse';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerProfileCommand(
   program: Command,
@@ -69,7 +70,7 @@ export function registerProfileCommand(
         `Minimum log level: ${VALID_LOG_LEVELS.join(', ')}`
       )
       .option('--search <term>', 'Filter by substring in message')
-      .option('--limit <N>', 'Limit to first N entries')
+      .option('--limit <N>', 'Limit to first N entries (0 = no limit)')
   ).action(async (opts) => {
     if (opts.level !== undefined && !VALID_LOG_LEVELS.includes(opts.level)) {
       console.error(
@@ -78,10 +79,7 @@ export function registerProfileCommand(
       process.exit(1);
     }
 
-    let limit: number | undefined;
-    if (opts.limit !== undefined) {
-      limit = parseIntArg('--limit', opts.limit, 1);
-    }
+    const limit = parseLimitArg('--limit', opts.limit);
 
     const hasFilters =
       opts.thread !== undefined ||
