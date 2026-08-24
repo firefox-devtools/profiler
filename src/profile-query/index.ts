@@ -85,6 +85,7 @@ import {
   collectCounterList,
   collectCounterInfo,
 } from './formatters/counter-info';
+import { collectMarkerScreenshot, collectScreenshots } from './screenshot';
 import { parseTimeValue } from './time-range-parser';
 import { describeTransformGroup, pushSpecTransforms } from './filter-stack';
 import { functionAnnotate as computeFunctionAnnotate } from './function-annotate';
@@ -107,6 +108,8 @@ import type {
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerScreenshotResult,
+  ScreenshotsResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -1318,6 +1321,85 @@ export class ProfileQuerier {
       markerHandle
     );
     return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * Extract the screenshot image carried by a `CompositorScreenshot` marker.
+   */
+  async markerScreenshot(
+    markerHandle: string
+  ): Promise<WithContext<MarkerScreenshotResult>> {
+    const result = collectMarkerScreenshot(
+      this._store,
+      this._markerMap,
+      this._threadMap,
+      markerHandle
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * Find screenshots at an instant (`at`) or over a range, across all threads.
+   * Times are parsed like `zoom push` ranges: seconds ("2.7"), milliseconds
+   * ("2700ms"), percentages ("10%") or timestamp names ("ts-6").
+   */
+  async screenshots(options: {
+    at?: string;
+    range?: string;
+  }): Promise<WithContext<ScreenshotsResult>> {
+    const { at, range } = options;
+    if (at !== undefined && range !== undefined) {
+      throw new Error('Pass only one of --at and --range.');
+    }
+    if (at === undefined && range === undefined) {
+      throw new Error(
+        'Pass --at <time> or --range <start>,<end> (e.g. --at 11.287 or --range 11.2,11.4).'
+      );
+    }
+
+    let resolved: { at?: number; range?: { start: number; end: number } };
+    if (at !== undefined) {
+      resolved = { at: this._resolveTime(at) };
+    } else {
+      const parts = (range as string).split(',');
+      if (parts.length !== 2) {
+        throw new Error(
+          `Invalid range "${range}". Expected "<start>,<end>", e.g. "11.2,11.4".`
+        );
+      }
+      const start = this._resolveTime(parts[0].trim());
+      const end = this._resolveTime(parts[1].trim());
+      if (end < start) {
+        throw new Error(`Invalid range "${range}": end is before start.`);
+      }
+      resolved = { range: { start, end } };
+    }
+
+    const result = collectScreenshots(
+      this._store,
+      this._markerMap,
+      this._threadMap,
+      resolved
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * Resolve a time argument to an absolute timestamp in ms, accepting either a
+   * timestamp name ("ts-6") or a time value ("2.7", "2700ms", "10%").
+   */
+  _resolveTime(value: string): number {
+    const rootRange = getProfileRootRange(this._store.getState());
+    const parsed = parseTimeValue(value, rootRange);
+    if (parsed !== null) {
+      return parsed;
+    }
+    // parseTimeValue returns null for timestamp names ("ts-N").
+    const ts = this._timestampManager.timestampForName(value);
+    if (ts === null) {
+      throw new Error(`Unknown timestamp name: "${value}"`);
+    }
+    return ts;
   }
 
   async markerStack(

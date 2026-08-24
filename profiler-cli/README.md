@@ -44,6 +44,8 @@ profiler-cli thread network                # Show network requests with timing p
 profiler-cli thread page-load              # Show page load summary (navigation timing, resources, CPU, jank)
 profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
+profiler-cli marker screenshot <handle>    # Write a CompositorScreenshot marker's image to a file [-o path]
+profiler-cli screenshots                   # Write one image per window [--at 11.287 | --range 11.2,11.4] [-o dir/]
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
 profiler-cli function info <handle>        # Show detailed function information
 profiler-cli function annotate <handle>    # Show annotated source/assembly with timing data [--mode src|asm|all] [--context 2|file|N] [--symbol-server <url>]
