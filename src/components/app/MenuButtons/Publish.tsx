@@ -36,8 +36,6 @@ import explicitConnect, {
   type ConnectedProps,
 } from 'firefox-profiler/utils/connect';
 
-import WarningImage from 'firefox-profiler-res/img/svg/warning.svg';
-
 import type {
   Profile,
   CheckedSharingOptions,
@@ -227,32 +225,20 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
               ? this._renderCheckbox(
                   'includePrivateBrowsingData',
                   'MenuButtons--publish--renderCheckbox-label-private-browsing',
-                  <Localized
-                    id="MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image"
-                    attrs={{ title: true }}
-                  >
-                    <img
-                      className="publishPanelDataChoicesIndicator"
-                      src={WarningImage}
-                      title="This profile contains private browsing data"
-                    />
-                  </Localized>
+                  <WarningIndicator
+                    l10nId="MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image"
+                    title="This profile contains private browsing data"
+                  />
                 )
               : null}
             {profileHasJSTracingArgumentValues
               ? this._renderCheckbox(
                   'includeArgumentValues',
                   'MenuButtons--publish--renderCheckbox-label-argument-values',
-                  <Localized
-                    id="MenuButtons--publish--renderCheckbox-label-argument-values-warning-image"
-                    attrs={{ title: true }}
-                  >
-                    <img
-                      className="publishPanelDataChoicesIndicator"
-                      src={WarningImage}
-                      title="This profile contains function argument values recorded from the page, which may include personal data"
-                    />
-                  </Localized>
+                  <WarningIndicator
+                    l10nId="MenuButtons--publish--renderCheckbox-label-argument-values-warning-image"
+                    title="This profile contains function argument values recorded from the page, which may include personal data"
+                  />
                 )
               : null}
           </div>
@@ -447,6 +433,19 @@ type DownloadButtonProps = {
   readonly downloadFileName: string;
   readonly primary?: boolean;
 };
+
+type WarningIndicatorProps = {
+  readonly l10nId: string;
+  readonly title: string;
+};
+
+function WarningIndicator({ l10nId, title }: WarningIndicatorProps) {
+  return (
+    <Localized id={l10nId} attrs={{ title: true }}>
+      <span className="publishPanelDataChoicesIndicator" title={title} />
+    </Localized>
+  );
+}
 
 /**
  * The DownloadButton handles unpacking the compressed profile promise.
