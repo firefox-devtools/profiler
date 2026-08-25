@@ -38,6 +38,7 @@ import type {
   IndexIntoStackTable,
   GeckoSamples,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
   // These location strings are turned into the proper funcs.
@@ -177,6 +178,43 @@ describe('extract functions and resource from location strings', function () {
         ];
       })
     ).toMatchSnapshot();
+  });
+
+  it('has no address for an unsymbolicated location outside all mapped libraries', function () {
+    const testLocations = [
+      // Inside "No symbols library".
+      '0xc0ff33',
+      // Not inside any of the mapped libraries.
+      '0x7fffffffdead',
+      // Not parseable as an address at all.
+      '0xnonsense',
+    ];
+    const stringArray: string[] = [];
+    const stringTable = StringTable.withBackingArray(stringArray);
+    const indexes = testLocations.map((location) =>
+      stringTable.indexForString(location)
+    );
+
+    const { frameAddresses, frameLibs } =
+      extractFuncsAndResourcesFromFrameLocations(
+        indexes,
+        indexes.map(() => false),
+        stringArray,
+        libs,
+        new GlobalDataCollector(),
+        getEmptySourceTable()
+      );
+
+    expect(frameLibs[0]).not.toBeNull();
+    expect(frameAddresses[0]).toBe(0xff33);
+
+    // There is no library to be relative to, so there is no meaningful address.
+    // These must be null and not a -1 sentinel: a -1 would set the HasAddress
+    // flag and then land in the frame table's unsigned address column, where it
+    // would read back as 4294967295.
+    expect(frameLibs[1]).toBeNull();
+    expect(frameAddresses[1]).toBeNull();
+    expect(frameAddresses[2]).toBeNull();
   });
 });
 
@@ -467,7 +505,13 @@ describe('js allocation processing', function () {
     const addresses = [];
     let stack = stackIndex;
     while (stack !== null) {
-      addresses.push(shared.frameTable.address[shared.stackTable.frame[stack]]);
+      const frame = shared.stackTable.frame[stack];
+      const flags = shared.frameTable.flags[frame];
+      addresses.push(
+        (flags & FrameFlag.HasAddress) !== 0
+          ? shared.frameTable.address[frame]
+          : -1
+      );
       const offset = shared.stackTable.prefixOffset[stack];
       stack = offset === 0 ? null : stack - offset;
     }

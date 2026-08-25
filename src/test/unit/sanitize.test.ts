@@ -32,6 +32,7 @@ import {
 } from 'firefox-profiler/utils/base64';
 import { ValueSummaryReader } from 'devtools-reps';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { FrameFlag } from 'firefox-profiler/types';
 import type {
   MarkerSchemaByName,
   RawThread,
@@ -1661,16 +1662,22 @@ describe('sanitizePII', function () {
   });
 
   it('should compact the libs and translate the frameTable lib column', function () {
-    // Thread 0's frames are in libA, thread 1's are in libB, and thread 2's
-    // frames have no library at all (lib === -1).
+    // Thread 0's frame is in libA, thread 1's is in libB, and thread 2's frame
+    // has no library at all. A frame only carries a lib if it also has an
+    // address, since the two share the `HasAddress` flag.
     const { profile } = getProfileFromTextSamples(
-      `A[lib:libA.so]`,
-      `B[lib:libB.so]`,
+      `A[lib:libA.so][address:10]`,
+      `B[lib:libB.so][address:20]`,
       `Cjs`
     );
 
     expect(profile.libs.map((lib) => lib.name)).toEqual(['libA.so', 'libB.so']);
-    expect([...profile.shared.frameTable.lib]).toEqual([0, 1, -1]);
+    expect([...profile.shared.frameTable.lib]).toEqual([0, 1, 0]);
+    expect(
+      [...profile.shared.frameTable.flags].map(
+        (flags) => (flags & FrameFlag.HasAddress) !== 0
+      )
+    ).toEqual([true, true, false]);
 
     // Remove thread 0, which is the only user of libA.so.
     const { sanitizedProfile } = setup(
@@ -1678,10 +1685,15 @@ describe('sanitizePII', function () {
       profile
     );
 
-    // libA.so is gone, and the surviving frames point at the reindexed libB.so
-    // while the lib-less frame keeps its -1 sentinel.
+    // libA.so is gone, and the surviving libB.so frame points at the reindexed
+    // libB.so. The lib-less frame still has no lib, which is expressed by the
+    // missing `HasAddress` flag rather than by the value in the lib column.
+    const { frameTable } = sanitizedProfile.shared;
     expect(sanitizedProfile.libs.map((lib) => lib.name)).toEqual(['libB.so']);
-    expect([...sanitizedProfile.shared.frameTable.lib]).toEqual([0, -1]);
+    expect([...frameTable.lib]).toEqual([0, 0]);
+    expect(
+      [...frameTable.flags].map((flags) => (flags & FrameFlag.HasAddress) !== 0)
+    ).toEqual([true, false]);
   });
 
   it('always removes source contents even when no PII removal is requested', function () {
