@@ -149,7 +149,10 @@ export function computeThreadFromRawThread(
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
-  const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
+  const frameTable = computeFrameTableFromRawFrameTable(
+    shared.frameTable,
+    categories
+  );
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
     frameTable,

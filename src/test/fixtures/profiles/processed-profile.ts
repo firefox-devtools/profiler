@@ -41,7 +41,6 @@ import type {
   Thread,
   ThreadIndex,
   IndexIntoCategoryList,
-  IndexIntoLibs,
   IndexIntoStackTable,
   CategoryList,
   JsTracerTable,
@@ -63,6 +62,7 @@ import type {
   MarkerSchema,
   MixedObject,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
@@ -585,65 +585,68 @@ export type ProfileWithDicts = {
  * The following func and frame attributes are supported:
  *  - [cat:*] - The category name, affects frameTable.category
  *  - [lib:*] - The library name, affects frameTable.lib + funcTable.resource + resourceTable + libs
- *  - [file:*] - The filename, affects funcTable.file
+ *  - [file:*] - The filename, affects funcTable.source + sourceTable
  *  - [line:*] - The line, affects frameTable.line
  *  - [address:*] - The frame address, affects frameTable.address
- *  - [inl:*] - The inline depth, affects frameTable.inlineDepth
+ *  - [inl:*] - A non-zero value marks the frame as inlined, i.e. it sets the IsInlined bit of frameTable.flags
  *  - [sym:<name>:<hex_address>:<hex_size>] - The native symbol, affects frameTable.nativeSymbol (keyed on <name>)
 
 ```js
 // Execute the code below in the web console in the profiler to get a stack that's
 // ready to be pasted into getProfileFromTextSamples.
 
-function getFrame(
-  { stackTable, frameTable, funcTable, stringTable, resourceTable, nativeSymbols, libs },
-  frameIndex
-) {
+// See FrameFlag in src/types/profile.ts.
+const IsInlined = 1 << 0;
+const HasAddress = 1 << 1;
+const HasNativeSymbol = 1 << 3;
+const HasLine = 1 << 4;
+
+function getFrame(profile, thread, frameIndex) {
+  const { libs, shared } = profile;
+  const { stringArray, sources } = shared;
+  const { frameTable, funcTable, nativeSymbols } = thread;
+  const flags = frameTable.flags[frameIndex];
   const funcIndex = frameTable.func[frameIndex];
-  let s = stringTable.getString(funcTable.name[funcIndex]);
-  const libIndex = frameTable.lib[frameIndex];
-  if (libIndex !== -1) {
-    const libName = libs[libIndex].name;
-    s += `[lib:${libName}]`;
+  let s = stringArray[funcTable.name[funcIndex]];
+  if (flags & HasAddress) {
+    s += `[lib:${libs[frameTable.lib[frameIndex]].name}]`;
   }
-  const fileStringIndex = funcTable.fileName[funcIndex];
-  if (fileStringIndex !== null) {
-    s += `[file:${stringTable.getString(fileStringIndex)}]`;
+  const sourceIndex = funcTable.source[funcIndex];
+  if (sourceIndex !== null) {
+    s += `[file:${stringArray[sources.filename[sourceIndex]]}]`;
   }
-  const line = frameTable.line[frameIndex];
-  if (line !== null) {
-    s += `[line:${line}]`;
+  if (flags & HasLine) {
+    s += `[line:${frameTable.line[frameIndex]}]`;
   }
-  const address = frameTable.address[frameIndex];
-  if (address !== -1) {
-    s += `[address:${address.toString(16)}]`;
+  if (flags & HasAddress) {
+    s += `[address:${frameTable.address[frameIndex].toString(16)}]`;
   }
-  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
-  if (nativeSymbol !== null) {
-    const symName = stringTable.getString(nativeSymbols.name[nativeSymbol]);
+  if (flags & HasNativeSymbol) {
+    const nativeSymbol = frameTable.nativeSymbol[frameIndex];
+    const symName = stringArray[nativeSymbols.name[nativeSymbol]];
     const symAddrStr = nativeSymbols.address[nativeSymbol].toString(16);
     const functionSize = nativeSymbols.functionSize[nativeSymbol];
-    cost symSizeStr = functionSize !== null ? functionSize.toString(16) : '';
+    const symSizeStr = functionSize !== null ? functionSize.toString(16) : '';
     s += `[sym:${symName}:${symAddrStr}:${symSizeStr}]`;
   }
-  const inlineDepth = frameTable.inlineDepth[frameIndex];
-  if (inlineDepth !== 0) {
-    s += `[inl:${inlineDepth}]`;
+  if (flags & IsInlined) {
+    s += `[inl:1]`;
   }
   return s;
 }
 
-function getStack(thread, stackIndex) {
+function getStack(profile, thread, stackIndex) {
   const { stackTable } = thread;
   const stack = [];
-  while (stackIndex !== null) {
-    stack.unshift(getFrame(thread, stackTable.frame[stackIndex]));
+  // samples.stack can be null; stackTable.prefix uses -1 for roots.
+  while (stackIndex !== null && stackIndex !== -1) {
+    stack.unshift(getFrame(profile, thread, stackTable.frame[stackIndex]));
     stackIndex = stackTable.prefix[stackIndex];
   }
   return stack;
 }
 
-getStack(filteredThread, filteredThread.samples.stack[0])
+getStack(profile, filteredThread, filteredThread.samples.stack[0])
 ```
 */
 export function getProfileFromTextSamples(
@@ -903,7 +906,7 @@ function _buildThreadFromTextOnlyStacks(
       // Find the library name from the function name and create an entry if needed.
       const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
       let resourceIndex = -1;
-      let libIndex: IndexIntoLibs | -1 = -1;
+      let libIndex = null;
       if (libraryName !== null) {
         libIndex = globalDataCollector.indexForLib({
           arch: '',
@@ -940,15 +943,15 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
       const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
-      const address =
+      const parsedAddress =
         _findAddressFromFuncName(funcNameWithModifier) ??
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
 
-      let nativeSymbol = null;
+      let nativeSymbol: number | null = null;
       const nativeSymbolInfo =
         _findNativeSymbolNameFromFuncName(funcNameWithModifier);
       if (nativeSymbolInfo) {
-        if (libIndex === -1) {
+        if (libIndex === null) {
           throw new Error(
             `[sym:] has to be used together with [lib:] - missing lib in "${funcNameWithModifier}"`
           );
@@ -966,18 +969,51 @@ function _buildThreadFromTextOnlyStacks(
       const inlineDepth =
         _findInlineDepthFromFuncName(funcNameWithModifier) ?? 0;
 
+      if (parsedAddress !== -1 && libIndex === null) {
+        throw new Error(
+          `An address has to be used together with [lib:], because the address is relative to the lib - missing lib in "${funcNameWithModifier}"`
+        );
+      }
+
+      let flags = 0;
+      if (inlineDepth > 0) {
+        flags |= FrameFlag.IsInlined;
+      }
+      if (parsedAddress !== -1) {
+        flags |= FrameFlag.HasAddress;
+      }
+      if (category !== null) {
+        flags |= FrameFlag.HasCategory;
+      }
+      if (nativeSymbol !== null) {
+        flags |= FrameFlag.HasNativeSymbol;
+      }
+      if (lineNumber !== null) {
+        flags |= FrameFlag.HasLine;
+      }
+      const address = parsedAddress === -1 ? 0 : parsedAddress;
+      // `lib` is gated by HasAddress, so a [lib:] without an address doesn't
+      // make it onto the frame. This matches the real pipeline, which only ever
+      // puts a lib on a frame whose address it managed to make lib-relative;
+      // pre-symbolicated "func (in libname)" frames get a resource instead.
+      const storedLib =
+        (flags & FrameFlag.HasAddress) !== 0 ? ensureExists(libIndex) : 0;
+      const storedCategory = category ?? 0;
+      const storedNativeSymbol = nativeSymbol ?? 0;
+      const storedLineNumber = lineNumber ?? 0;
+
       // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
-          category === frameTable.category[i] &&
-          lineNumber === frameTable.line[i] &&
+          flags === frameTable.flags[i] &&
+          storedCategory === frameTable.category[i] &&
+          storedLineNumber === frameTable.line[i] &&
           address === frameTable.address[i] &&
-          inlineDepth === frameTable.inlineDepth[i] &&
-          nativeSymbol === frameTable.nativeSymbol[i] &&
-          libIndex === frameTable.lib[i]
+          storedNativeSymbol === frameTable.nativeSymbol[i] &&
+          storedLib === frameTable.lib[i]
         ) {
           frameIndex = i;
           break;
@@ -985,17 +1021,17 @@ function _buildThreadFromTextOnlyStacks(
       }
 
       if (frameIndex === undefined) {
+        frameTable.flags.push(flags);
         frameTable.func.push(funcIndex);
-        frameTable.lib.push(libIndex);
+        frameTable.lib.push(storedLib);
         frameTable.address.push(address);
-        frameTable.inlineDepth.push(inlineDepth);
-        frameTable.category.push(category);
+        frameTable.category.push(storedCategory);
         frameTable.subcategory.push(0);
         frameTable.innerWindowID.push(0);
-        frameTable.nativeSymbol.push(nativeSymbol);
-        frameTable.line.push(lineNumber);
-        frameTable.column.push(null);
-        frameTable.originalLocation.push(null);
+        frameTable.nativeSymbol.push(storedNativeSymbol);
+        frameTable.line.push(storedLineNumber);
+        frameTable.column.push(0);
+        frameTable.originalLocation.push(0);
         frameIndex = frameTable.length++;
       }
 
@@ -2078,10 +2114,8 @@ export function addInnerWindowIdToStacks(
 
       // Clone this frame
       const newFrameIndex = frameTableBuilder.length++;
+      frameTableBuilder.flags.push(frameTable.flags[foundFrameIndex]);
       frameTableBuilder.address.push(frameTable.address[foundFrameIndex]);
-      frameTableBuilder.inlineDepth.push(
-        frameTable.inlineDepth[foundFrameIndex]
-      );
       frameTableBuilder.category.push(frameTable.category[foundFrameIndex]);
       frameTableBuilder.subcategory.push(
         frameTable.subcategory[foundFrameIndex]

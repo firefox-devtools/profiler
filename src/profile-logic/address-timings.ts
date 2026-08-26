@@ -78,6 +78,7 @@ import type {
   Address,
   IndexIntoAddressSetTable,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
 
 /**
@@ -130,12 +131,17 @@ export function getStackAddressInfo(
       prefixStack !== -1 ? stackIndexToAddressSetIndex[prefixStack] : -1;
 
     const frame = stackTable.frame[stackIndex];
-    const nativeSymbolOfThisStack = frameTable.nativeSymbol[frame];
-    const matchesNativeSymbol = nativeSymbolOfThisStack === nativeSymbol;
+    const flags = frameTable.flags[frame];
+    const matchesNativeSymbol =
+      (flags & FrameFlag.HasNativeSymbol) !== 0 &&
+      frameTable.nativeSymbol[frame] === nativeSymbol;
     if (prefixAddressSet === -1 && !matchesNativeSymbol) {
       stackIndexToAddressSetIndex[stackIndex] = -1;
     } else {
-      const selfAddress = matchesNativeSymbol ? frameTable.address[frame] : -1;
+      const selfAddress =
+        matchesNativeSymbol && (flags & FrameFlag.HasAddress) !== 0
+          ? frameTable.address[frame]
+          : -1;
 
       stackIndexToAddressSetIndex[stackIndex] = builder.extend(
         prefixAddressSet !== -1 ? prefixAddressSet : null,
@@ -261,14 +267,18 @@ export function getTotalAddressTimingsForCallNode(
       continue;
     }
 
-    if (frameTable.nativeSymbol[callNodeFrame] !== nativeSymbol) {
+    const flags = frameTable.flags[callNodeFrame];
+    if (
+      (flags & FrameFlag.HasNativeSymbol) === 0 ||
+      frameTable.nativeSymbol[callNodeFrame] !== nativeSymbol
+    ) {
       continue;
     }
 
-    const address = frameTable.address[callNodeFrame];
-    if (address === -1) {
+    if ((flags & FrameFlag.HasAddress) === 0) {
       continue;
     }
+    const address = frameTable.address[callNodeFrame];
 
     const sampleWeight =
       samples.weight !== null ? samples.weight[sampleIndex] : 1;

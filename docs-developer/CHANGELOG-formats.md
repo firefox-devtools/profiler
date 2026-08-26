@@ -6,6 +6,61 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 71
+
+The frame table (`profile.shared.frameTable`) representation changed in such a way that all its columns can now be typed arrays when using [JsonSlabs](https://github.com/mstange/json-slabs/) profiles.
+
+What's different from the other tables is that the frame table uses flag bits rather than `-1` sentinels to express "null" values; the bits are stored in a separate `flags` column. There are `HasAddress`, `HasCategory` etc. flags for this purpose. This avoids having to reserve space for `-1` sentinels.
+
+Furthermore:
+
+- The `inlineDepth` column was removed. We were never actually looking at the depth of inlining, all we needed to know "was this frame an inlined function call", and that's now the `IsInlined` flag.
+- The `address` column is now a `Uint32Array` (when using typed arrays) rather than an `Int32Array`, so it now has space for relative addresses in 4GiB binaries (up from 2GiB). The `-1` sentinel is gone and replaced with the `HasAddress` flag.
+- The `address` and `lib` columns share the single `HasAddress` flag. An address is only ever meaningful relative to a library, and every frame from a native library needs an address.
+- `category` and `subcategory` use `Uint8Array` to save space. For profiles with more than 256 subcategories per category, `subcategory` can also be a `Uint16Array`.
+- The `innerWindowID` column is no longer nullable. It has no flag of its own because it already had a natural "no value" representation: `0`. Any `null` becomes `0`.
+
+Here are the flags:
+
+```ts
+export const enum FrameFlag {
+  // Set when this frame is one of the "inline" expansions of a native address.
+  IsInlined = 1 << 0,
+  // Set when `address` and `lib` are meaningful. These two columns are gated by
+  // a single flag because an address is only ever meaningful together with the
+  // library it is relative to.
+  HasAddress = 1 << 1,
+  // Set when `category` and `subcategory` are meaningful. Otherwise the
+  // stack nodes using this frame inherit their category/subcategory from their
+  // parent stack node (or from the default category, if there is no parent).
+  HasCategory = 1 << 2,
+  // Set when `nativeSymbol` is meaningful.
+  HasNativeSymbol = 1 << 3,
+  // Set when `line` is meaningful.
+  HasLine = 1 << 4,
+  // Set when `column` is meaningful.
+  HasColumn = 1 << 5,
+  // Set when `originalLocation` is meaningful.
+  HasOriginalLocation = 1 << 6,
+}
+```
+
+All columns can now be stored as typed arrays:
+
+- `flags` (`Uint8Array`)
+- `category` (`Uint8Array`)
+- `subcategory` (`Uint8Array` or `Uint16Array`)
+- `func` (`Int32Array`)
+- `lib` (`Int32Array`)
+- `address` (`Uint32Array`)
+- `nativeSymbol` (`Int32Array`)
+- `innerWindowID` (`Float64Array`)
+- `line` (`Int32Array`)
+- `column` (`Int32Array`)
+- `originalLocation` (`Int32Array`)
+
+As before, when using JSON rather than JSLB, these columns are JSON arrays of numbers. There shouldn't be any nulls; producers typically use 0 for empty values (and don't set the relevant `HasXYZ` flag).
+
 ### Version 70
 
 The `lib` column moved off the `resourceTable` and onto the `frameTable`. Previously a frame's library was reached indirectly, via `frame -> func -> resource -> lib`; now the frame points at its library directly, and `resourceTable` has no `lib` column at all. Frames with no library have their lib set to the `-1` sentinel.

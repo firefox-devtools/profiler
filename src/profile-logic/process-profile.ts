@@ -48,10 +48,13 @@ import {
 import {
   getFriendlyThreadName,
   nudgeReturnAddresses,
+  subcategoriesNeedSixteenBits,
 } from '../profile-logic/profile-data';
 import {
   toInt32Array,
   toUint8Array,
+  toUint32Array,
+  toUint8OrUint16Array,
   toFloat64Array,
   toFloat64ArraySetNullToZero,
 } from '../utils/typed-arrays';
@@ -114,12 +117,14 @@ import type {
   Pid,
   GeckoMarkerSchema,
   GeckoSourceTable,
+  CategoryList,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
   IndexIntoLibs,
   CounterDisplayConfig,
   RawProfileSharedData,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
 
@@ -330,7 +335,11 @@ function _extractUnsymbolicatedFunction(
   locationIndex: IndexIntoStringTable
 ): {
   funcIndex: IndexIntoFuncTable;
-  frameAddress: Address;
+  // null if the address didn't fall into any of the mapped libraries, or if it
+  // couldn't be parsed. There is no library to be relative to in that case, so
+  // there is no meaningful address to store and the frame gets no HasAddress
+  // flag.
+  frameAddress: Address | null;
   libIndex: IndexIntoLibs | null;
 } | null {
   if (!locationString.startsWith('0x')) {
@@ -340,7 +349,7 @@ function _extractUnsymbolicatedFunction(
 
   let resourceIndex = -1;
   let libIndex: IndexIntoLibs | null = null;
-  let addressRelativeToLib: Address = -1;
+  let addressRelativeToLib: Address | null = null;
 
   try {
     // The frame address, as observed in the profiled process. This address was
@@ -556,18 +565,40 @@ function _processFrameTable(
   const frameIndexOffset = sharedFrameTable.length;
   for (let i = 0; i < geckoFrameStruct.length; i++) {
     const newIndex = i + frameIndexOffset;
-    sharedFrameTable.address[newIndex] = frameAddresses[i] ?? -1;
-    sharedFrameTable.inlineDepth[newIndex] = 0;
-    sharedFrameTable.category[newIndex] = geckoFrameStruct.category[i];
-    sharedFrameTable.subcategory[newIndex] = geckoFrameStruct.subcategory[i];
+    const address = frameAddresses[i];
+    const lib = frameLibs[i];
+    const category = geckoFrameStruct.category[i];
+    const line = geckoFrameStruct.line[i];
+    const column = geckoFrameStruct.column[i];
+    let flags = 0;
+    // `_extractUnsymbolicatedFunction` only produces an address for frames whose
+    // address fell into a mapped library, so these two are always both present
+    // or both absent, and share the one flag.
+    if (address !== null && lib !== null) {
+      flags |= FrameFlag.HasAddress;
+    }
+    if (category !== null) {
+      flags |= FrameFlag.HasCategory;
+    }
+    if (line !== null) {
+      flags |= FrameFlag.HasLine;
+    }
+    if (column !== null) {
+      flags |= FrameFlag.HasColumn;
+    }
+    sharedFrameTable.flags[newIndex] = flags;
+    sharedFrameTable.address[newIndex] = address ?? 0;
+    sharedFrameTable.category[newIndex] = category ?? 0;
+    sharedFrameTable.subcategory[newIndex] =
+      geckoFrameStruct.subcategory[i] ?? 0;
     sharedFrameTable.func[newIndex] = frameFuncs[i];
-    sharedFrameTable.lib[newIndex] = frameLibs[i] ?? -1;
-    sharedFrameTable.nativeSymbol[newIndex] = null;
+    sharedFrameTable.lib[newIndex] = lib ?? 0;
+    sharedFrameTable.nativeSymbol[newIndex] = 0;
     sharedFrameTable.innerWindowID[newIndex] =
-      geckoFrameStruct.innerWindowID[i];
-    sharedFrameTable.line[newIndex] = geckoFrameStruct.line[i];
-    sharedFrameTable.column[newIndex] = geckoFrameStruct.column[i];
-    sharedFrameTable.originalLocation[newIndex] = null;
+      geckoFrameStruct.innerWindowID[i] ?? 0;
+    sharedFrameTable.line[newIndex] = line ?? 0;
+    sharedFrameTable.column[newIndex] = column ?? 0;
+    sharedFrameTable.originalLocation[newIndex] = 0;
   }
   sharedFrameTable.length += geckoFrameStruct.length;
   return frameIndexOffset;
@@ -2109,14 +2140,18 @@ export function serializeProfileToJsonString(profile: Profile): string {
 export function optimizeProfileForStorage(profile: Profile): Profile {
   return {
     ...profile,
-    shared: convertSharedTablesEligibleColumns(profile.shared),
+    shared: convertSharedTablesEligibleColumns(
+      profile.shared,
+      profile.meta.categories
+    ),
     threads: profile.threads.map(convertThreadEligibleColumns),
     counters: profile.counters?.map(convertCounterEligibleColumns),
   };
 }
 
 function convertSharedTablesEligibleColumns(
-  shared: RawProfileSharedData
+  shared: RawProfileSharedData,
+  categories: CategoryList | undefined
 ): RawProfileSharedData {
   const { stackTable, frameTable } = shared;
   return {
@@ -2127,11 +2162,21 @@ function convertSharedTablesEligibleColumns(
       length: stackTable.length,
     },
     frameTable: {
-      ...frameTable,
-      address: toInt32Array(frameTable.address),
-      inlineDepth: toUint8Array(frameTable.inlineDepth),
+      length: frameTable.length,
+      flags: toUint8Array(frameTable.flags),
+      address: toUint32Array(frameTable.address),
       func: toInt32Array(frameTable.func),
+      category: toUint8Array(frameTable.category),
+      subcategory: toUint8OrUint16Array(
+        frameTable.subcategory,
+        subcategoriesNeedSixteenBits(categories)
+      ),
       lib: toInt32Array(frameTable.lib),
+      nativeSymbol: toInt32Array(frameTable.nativeSymbol),
+      innerWindowID: toFloat64Array(frameTable.innerWindowID),
+      line: toInt32Array(frameTable.line),
+      column: toInt32Array(frameTable.column),
+      originalLocation: toInt32Array(frameTable.originalLocation),
     },
   };
 }
