@@ -1123,10 +1123,10 @@
   dependencies:
     "@marijn/find-cluster-break" "^1.0.0"
 
-"@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.43.7":
-  version "6.43.7"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.43.7.tgz#21fd71e9b395af6fe8282a6ef8624258ff508467"
-  integrity sha512-FZsExxkoxnAN+d9TgqXLg5g4A1oQwzX9WlkOT5i2PKkcW7xx3Bmu0vs90g6fo9Mpdsb/l96dnAraQ8932aO4/g==
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.43.9":
+  version "6.43.9"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.43.9.tgz#85c44ad1bc5fc930e5642e7313643dab7dc866a4"
+  integrity sha512-sTuUzTpPMFebRhg6dawChoKKgndIwfjmJgKVxBefPElcU2NwQ6AFroupk0SFqEerQyZOGRfDNnSN8Dw/lMAsXw==
   dependencies:
     "@codemirror/state" "^6.7.0"
     crelt "^1.0.6"
@@ -4627,10 +4627,10 @@ eslint-plugin-jest-formatting@^3.1.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-3.1.0.tgz#b26dd5a40f432b642dcc880021a771bb1c93dcd2"
   integrity sha512-XyysraZ1JSgGbLSDxjj5HzKKh0glgWf+7CkqxbTqb7zEhW7X2WHo5SBQ8cGhnszKN+2Lj3/oevBlHNbHezoc/A==
 
-eslint-plugin-jest@^29.16.0:
-  version "29.16.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-29.16.0.tgz#0810a9eb2753287f45485865942a22e740549d6a"
-  integrity sha512-0WFBxDHlT2ratGQfnFQEVIsgQJ5cfd+0IV8Kc6U3X2onB8ATLG23voD2Ch5G9fCkEpCPmCMuzW0tbS0kYb8biw==
+eslint-plugin-jest@^29.16.1:
+  version "29.16.1"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest/-/eslint-plugin-jest-29.16.1.tgz#ca686565cb25155edb687eb9cf640766f9f8834d"
+  integrity sha512-tfxOIsjzaBud+f74aLbBMRcnrztt5eCIgnAdeoGdnzMAQ4IdAa/s/p8Ls55mk9MC79N3j2jbv4Qetz6Hclbcfw==
   dependencies:
     "@typescript-eslint/utils" "^8.0.0"
 
@@ -4887,7 +4887,7 @@ fast-deep-equal@^3.1.1, fast-deep-equal@^3.1.3:
   resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
   integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
 
-fast-glob@^3.2.9, fast-glob@^3.3.2, fast-glob@^3.3.3:
+fast-glob@^3.2.9, fast-glob@^3.3.3:
   version "3.3.3"
   resolved "https://registry.yarnpkg.com/fast-glob/-/fast-glob-3.3.3.tgz#d06d585ce8dba90a16b0505c543c3ccfb3aeb818"
   integrity sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg==
@@ -7256,15 +7256,15 @@ lockfile-lint-api@^5.9.2:
     debug "^4.3.4"
     object-hash "^3.0.0"
 
-lockfile-lint@^5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/lockfile-lint/-/lockfile-lint-5.0.0.tgz#052a11c150e328bb5fb548b071ebcd2df70614bc"
-  integrity sha512-QcVIVITLZAhWYHU2wbNSOMgwc6EN4Y2sy6mjgS5aikYyRzgDIfotXUsCrm38En+3fZpc58Yu7DF9dNeT/goi1A==
+lockfile-lint@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/lockfile-lint/-/lockfile-lint-5.0.1.tgz#bc783bc890233d16818cb5b5ecb3faa763d44c51"
+  integrity sha512-Ukjf5yGBQwfl7L2niV3in7bU5wEww3+4Dkw89JGTzOuq18tzS7jaszl2oO7M6u+jcim080MfX5E4Gokt1KhRHQ==
   dependencies:
     cosmiconfig "^9.0.0"
     debug "^4.3.4"
-    fast-glob "^3.3.2"
     lockfile-lint-api "^5.9.2"
+    tinyglobby "^0.2.15"
     yargs "^17.7.2"
 
 lodash.camelcase@^4.3.0:
@@ -8606,17 +8606,17 @@ only@~0.0.2:
   resolved "https://registry.yarnpkg.com/only/-/only-0.0.2.tgz#2afde84d03e50b9a8edc444e30610a70295edfb4"
   integrity sha1-Kv3oTQPlC5qO3EROMGEKcCle37Q=
 
-open@^11.0.0:
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/open/-/open-11.0.0.tgz#897e6132f994d3554cbcf72e0df98f176a7e5f62"
-  integrity sha512-smsWv2LzFjP03xmvFoJ331ss6h+jixfA4UUV/Bsiyuu4YJPfN+FIQGOIiv4w9/+MoHkfkJ22UIaQWRVFRfH6Vw==
+open@^11.0.1:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/open/-/open-11.0.1.tgz#aabc32fa311acc8c0d7855938eb94583249c31bd"
+  integrity sha512-NzwMUB6C1D0+Kd+9iMS/H4k+Ck3cTX6Ckyfr/gAGlmvSE1LUQZnEZvWBi4PYmMwH/S5SMeTXnE+9uAz8uF+pWw==
   dependencies:
     default-browser "^5.4.0"
     define-lazy-prop "^3.0.0"
     is-in-ssh "^1.0.0"
     is-inside-container "^1.0.0"
-    powershell-utils "^0.1.0"
-    wsl-utils "^0.3.0"
+    powershell-utils "^0.2.0"
+    wsl-utils "^1.0.0"
 
 open@^7.4.2:
   version "7.4.2"
@@ -9060,6 +9060,11 @@ powershell-utils@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/powershell-utils/-/powershell-utils-0.1.0.tgz#5a42c9a824fb4f2f251ccb41aaae73314f5d6ac2"
   integrity sha512-dM0jVuXJPsDN6DvRpea484tCUaMiXWjuCn++HGTqUWzGDjv5tZkEZldAJ/UMlqRYGFrD/etByo4/xOuC/snX2A==
+
+powershell-utils@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/powershell-utils/-/powershell-utils-0.2.0.tgz#bb075dcadc1564f3bd80fddda4f0a481ccbdcf36"
+  integrity sha512-ZlsFlG7MtSFCoc5xreOvBAozCJ6Pf06opgJjh9ONEv418xpZSAzNjstD36C6+JwOnfSqOW/9uDkqKjezTdxZhw==
 
 prelude-ls@^1.2.1:
   version "1.2.1"
@@ -10121,10 +10126,10 @@ smob@^1.0.0:
   resolved "https://registry.yarnpkg.com/smob/-/smob-1.5.0.tgz#85d79a1403abf128d24d3ebc1cdc5e1a9548d3ab"
   integrity sha512-g6T+p7QO8npa+/hNx9ohv1E5pVCmWrVCUzUXJyLdMmftX6ER0oiWY/w9knEonLpnOp6b6FenKnMfR8gqwWdwig==
 
-smol-toml@^1.7.1:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/smol-toml/-/smol-toml-1.7.1.tgz#ba3e28d2e4348874a824fd8e1d73fec618cb763b"
-  integrity sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==
+smol-toml@^1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/smol-toml/-/smol-toml-1.8.0.tgz#dc5e0936825f1fef37bdf2c569081f709d8a009f"
+  integrity sha512-kCZr2V3ch9i00x8zXRhjUNVcjG9ijES5dDudkXvUVCT5QlJNQWElSJdZqyPemffHoLNUYwOcou0Fy+ojN0uHSQ==
 
 source-map-js@^1.2.1:
   version "1.2.1"
@@ -11845,10 +11850,10 @@ ws@^8.18.0:
   resolved "https://registry.yarnpkg.com/ws/-/ws-8.21.0.tgz#012e413fc07429945121b0c153158c4343086951"
   integrity sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==
 
-wsl-utils@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/wsl-utils/-/wsl-utils-0.3.0.tgz#197049b93b34b822703bf4ccde8256660651205f"
-  integrity sha512-3sFIGLiaDP7rTO4xh3g+b3AzhYDIUGGywE/WsmqzJWDxus5aJXVnPTNC/6L+r2WzrwXqVOdD262OaO+cEyPMSQ==
+wsl-utils@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/wsl-utils/-/wsl-utils-1.0.0.tgz#e113d9964e766657c53f5d570da1bbbdfee7f837"
+  integrity sha512-Hl0ZOAs672vg+06kfujwRhoS6/jehvULrlFkuF2dRu6pHgA8U06h3xqNIqNNU1LTXPcedxByAR4GS6pwQK0mgA==
   dependencies:
     is-wsl "^3.1.0"
     powershell-utils "^0.1.0"
