@@ -14,6 +14,8 @@ These markers are now stored as pairs of start and end markers instead of instan
 
 Two marker schema field formats were added to describe these markers: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL. Profiles containing `CompositorScreenshot` markers don't necessarily carry a schema for them, so the front end supplies one.
 
+A new marker schema display location, `timeline-screenshots`, was added. Markers in this location create Screenshot tracks and must carry a string or number `windowID` field.
+
 ### Version 71
 
 The frame table (`profile.shared.frameTable`) representation changed in such a way that all its columns can now be typed arrays when using [JsonSlabs](https://github.com/mstange/json-slabs/) profiles.

@@ -713,6 +713,13 @@ export function computeGlobalTracks(
   };
   const globalTracksByPid: Map<Pid, ProcessTrack> = new Map();
   let globalTracks: GlobalTrack[] = [];
+  const markerSchema = computeCombinedMarkerSchemaList(
+    profile.meta.markerSchema || []
+  );
+  const screenshotTimelineMarkerTypes = getMarkerTypesForDisplay(
+    markerSchema,
+    'timeline-screenshots'
+  );
 
   // Create the global tracks.
   for (
@@ -754,14 +761,18 @@ export function computeGlobalTracks(
       }
     }
 
-    // Check for screenshots. Their marker name carries the window ID, so match
-    // on the payload type instead. Windows must keep being added in the order
-    // their first screenshot was taken: shared URLs refer to global tracks by
-    // index, so a different order would change what an existing URL selects.
+    // Windows must keep being added in the order their first screenshot was
+    // taken: shared URLs refer to global tracks by index, so a different order
+    // would change what an existing URL selects.
     const ids: Set<string> = new Set();
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       const data = markers.data[markerIndex];
-      if (data === null || data.type !== 'CompositorScreenshot') {
+      if (
+        data === null ||
+        !screenshotTimelineMarkerTypes.has(data.type) ||
+        !('windowID' in data) ||
+        (typeof data.windowID !== 'string' && typeof data.windowID !== 'number')
+      ) {
         continue;
       }
       ids.add(String(data.windowID));

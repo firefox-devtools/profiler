@@ -101,7 +101,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     // A profile can contain these markers without carrying a schema for them,
     // so the front end defines one.
     name: 'CompositorScreenshot',
-    display: ['marker-chart', 'marker-table'],
+    display: ['marker-chart', 'marker-table', 'timeline-screenshots'],
     fields: [
       {
         key: 'url',

@@ -125,6 +125,8 @@ export type MarkerDisplayLocation =
   | 'timeline-fileio'
   // This adds markers to the Network track.
   | 'timeline-network'
+  // This adds markers to the Screenshots track.
+  | 'timeline-screenshots'
   // TODO - This is not supported yet.
   | 'stack-chart';
 
