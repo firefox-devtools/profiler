@@ -10,12 +10,16 @@ import {
   getMarkerStyle,
   getMarkerStyleColor,
 } from 'firefox-profiler/profile-logic/marker-styles';
+import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import { timeCode } from 'firefox-profiler/utils/time-code';
 import explicitConnect from 'firefox-profiler/utils/connect';
-import { getPreviewSelectionIsBeingModified } from 'firefox-profiler/selectors/profile';
+import {
+  getMarkerSchemaByName,
+  getPreviewSelectionIsBeingModified,
+} from 'firefox-profiler/selectors/profile';
 import { getThreadSelectorsFromThreadsKey } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { changeRightClickedMarker } from 'firefox-profiler/actions/profile-view';
@@ -29,6 +33,7 @@ import type {
   Marker,
   MarkerIndex,
   MarkerDisplayLocation,
+  MarkerSchemaByName,
   ThreadsKey,
 } from 'firefox-profiler/types';
 
@@ -53,6 +58,7 @@ type CanvasProps = {
   readonly height: CssPixels;
   readonly getMarker: (param: MarkerIndex) => Marker;
   readonly markerIndexes: MarkerIndex[];
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly hoveredMarker: Marker | null;
   readonly mouseDownMarker: Marker | null;
   readonly rightClickedMarker: Marker | null;
@@ -110,8 +116,15 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
   }
 
   drawCanvas(c: HTMLCanvasElement) {
-    const { rangeStart, rangeEnd, width, height, getMarker, markerIndexes } =
-      this.props;
+    const {
+      rangeStart,
+      rangeEnd,
+      width,
+      height,
+      getMarker,
+      markerIndexes,
+      markerSchemaByName,
+    } = this.props;
 
     if (height === 0 || width === 0) {
       // bail out early if the size isn't known yet.
@@ -155,7 +168,8 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
             MIN_MARKER_WIDTH / devicePixelRatio
           )
         : Number.MAX_SAFE_INTEGER;
-      const markerStyle = getMarkerStyle(marker);
+      const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
+      const markerStyle = getMarkerStyle(marker.name, markerSchema);
       ctx.fillStyle = getMarkerStyleColor(markerStyle.background);
       if (markerStyle.squareCorners) {
         ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
@@ -303,6 +317,7 @@ export type StateProps = {
   readonly additionalClassName?: string | null;
   readonly getMarker: (param: MarkerIndex) => Marker;
   readonly markerIndexes: MarkerIndex[];
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly isSelected: boolean;
   readonly isModifyingSelection: boolean;
   readonly testId: string;
@@ -333,8 +348,14 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
   _hitTest(e: React.MouseEvent<HTMLCanvasElement>): MarkerIndex | null {
     const c = e.currentTarget;
     const r = c.getBoundingClientRect();
-    const { width, rangeStart, rangeEnd, getMarker, markerIndexes } =
-      this.props;
+    const {
+      width,
+      rangeStart,
+      rangeEnd,
+      getMarker,
+      markerIndexes,
+      markerSchemaByName,
+    } = this.props;
     const x = e.pageX - r.left;
     const y = e.pageY - r.top;
     const rangeLength = rangeEnd - rangeStart;
@@ -355,7 +376,8 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
         continue;
       }
 
-      const markerStyle = getMarkerStyle(marker);
+      const markerSchema = getSchemaFromMarker(markerSchemaByName, marker.data);
+      const markerStyle = getMarkerStyle(marker.name, markerSchema);
 
       if (y >= markerStyle.top && y < markerStyle.top + markerStyle.height) {
         return markerIndex;
@@ -492,6 +514,7 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
             rangeEnd={this.props.rangeEnd}
             getMarker={this.props.getMarker}
             markerIndexes={this.props.markerIndexes}
+            markerSchemaByName={this.props.markerSchemaByName}
             hoveredMarker={hoveredMarker}
             mouseDownMarker={mouseDownMarker}
             rightClickedMarker={rightClickedMarker}
@@ -540,6 +563,7 @@ export const TimelineMarkersJank = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       // These don't use marker schema as they are derived.
       markerIndexes: selectors.getTimelineJankMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
@@ -570,6 +594,7 @@ export const TimelineMarkersOverview = explicitConnect<
         ? 'timelineMarkersGeckoMain'
         : null,
       getMarker: selectors.getMarkerGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerIndexes: selectors.getTimelineOverviewMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelectionIsBeingModified(state),
@@ -596,6 +621,7 @@ export const TimelineMarkersFileIo = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerIndexes: selectors.getTimelineFileIoMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelectionIsBeingModified(state),
@@ -622,6 +648,7 @@ export const TimelineMarkersMemory = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerIndexes: selectors.getTimelineMemoryMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelectionIsBeingModified(state),
@@ -649,6 +676,7 @@ export const TimelineMarkersIPC = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerIndexes: selectors.getTimelineIPCMarkerIndexes(state),
       isSelected: _getTimelineMarkersIsSelected(selectedThreads, threadsKey),
       isModifyingSelection: getPreviewSelectionIsBeingModified(state),
@@ -696,6 +724,7 @@ export const TimelineMarkersCounter = explicitConnect<
 
     return {
       getMarker: selectors.getMarkerGetter(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       markerIndexes:
         selectors.getTimelineMarkerIndexesBySchemaLocation(
           markerSchemaLocation

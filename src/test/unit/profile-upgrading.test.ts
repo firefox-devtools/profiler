@@ -7,6 +7,8 @@ import {
   serializeProfileToJsonString,
 } from '../../profile-logic/process-profile';
 import { upgradeGeckoProfileToCurrentVersion } from '../../profile-logic/gecko-profile-versioning';
+import { attemptToUpgradeProcessedProfileThroughMutation } from '../../profile-logic/processed-profile-versioning';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
@@ -133,6 +135,34 @@ describe('upgrading processed profiles', function () {
     await testProfileUpgrading(
       require('../fixtures/upgrades/processed-3.json')
     );
+  });
+
+  it('adds required marker styles while preserving existing styles', function () {
+    const existingStyle = {
+      top: 2,
+      height: 8,
+      background: 'pink',
+      squareCorners: true,
+      borderLeft: null,
+      borderRight: null,
+    };
+    const profile: any = {
+      meta: {
+        preprocessedProfileVersion: 71,
+        markerSchema: [
+          { name: 'GCMajor' },
+          { name: 'Custom', style: existingStyle },
+        ],
+      },
+      threads: [],
+    };
+
+    attemptToUpgradeProcessedProfileThroughMutation(profile, {});
+
+    expect(profile.meta.markerSchema[0].style).toEqual(
+      getMarkerSchemaStyleFallback('GCMajor')
+    );
+    expect(profile.meta.markerSchema[1].style).toBe(existingStyle);
   });
 });
 

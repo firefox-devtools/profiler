@@ -2,8 +2,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type { MarkerSchema } from 'firefox-profiler/types';
+import { getMarkerSchemaStyleFallback } from '../../../profile-logic/marker-styles';
 
-export const markerSchemaForTests: MarkerSchema[] = [
+const markerSchemasWithoutStyle: Array<Omit<MarkerSchema, 'style'>> = [
   {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
@@ -193,3 +194,15 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
 ];
+
+function getMarkerSchemaWithStyle(
+  schema: Omit<MarkerSchema, 'style'>
+): MarkerSchema {
+  return {
+    ...schema,
+    style: getMarkerSchemaStyleFallback(schema.name),
+  };
+}
+
+export const markerSchemaForTests: MarkerSchema[] =
+  markerSchemasWithoutStyle.map(getMarkerSchemaWithStyle);

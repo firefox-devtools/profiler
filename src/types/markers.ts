@@ -187,6 +187,8 @@ export type MarkerSchema = {
   // Not all listed fields have to be present on every marker (they're all optional).
   fields: MarkerSchemaField[];
 
+  style: MarkerSchemaStyle;
+
   // An optional description for markers of this type.
   // Will be displayed to the user.
   description?: string;
