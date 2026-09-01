@@ -132,6 +132,7 @@ import type {
   CounterDisplayConfig,
   RawProfileSharedData,
 } from 'firefox-profiler/types';
+import { getMarkerSchemaStyleFallback } from './marker-styles';
 import { FrameFlag } from 'firefox-profiler/types';
 import { decompress, isGzip } from 'firefox-profiler/utils/gz';
 import { jsonEncodeObjectWithTypedArraysAsRegularArrays } from 'firefox-profiler/utils/json-with-typed-arrays';
@@ -1752,6 +1753,7 @@ function _convertGeckoMarkerSchema(
     display,
     data,
     graphs,
+    style,
     colorField,
     isStackBased,
   } = markerSchema;
@@ -1798,6 +1800,7 @@ function _convertGeckoMarkerSchema(
     fields,
     description,
     graphs,
+    style: style ?? getMarkerSchemaStyleFallback(name),
     colorField,
     isStackBased,
   });
@@ -2734,6 +2737,7 @@ export function processVisualMetrics(
     // Add progress markers for every visual progress change for more fine grained information.
     const progressMarkerSchema: MarkerSchema = {
       name: 'VisualMetricProgress',
+      style: getMarkerSchemaStyleFallback('VisualMetricProgress'),
       tableLabel: '{marker.name} — {marker.data.percentage}',
       display: ['marker-chart', 'marker-table'],
       fields: [

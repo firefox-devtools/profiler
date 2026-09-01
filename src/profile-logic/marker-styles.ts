@@ -5,7 +5,7 @@
 import * as colors from 'photon-colors';
 
 import type {
-  Marker,
+  MarkerSchema,
   MarkerSchemaStyle,
   MarkerSchemaStyleColor,
 } from 'firefox-profiler/types';
@@ -33,19 +33,21 @@ const ccStyle = {
   background: '#ffc600',
 };
 
-export function getMarkerStyle(marker: Marker): MarkerSchemaStyle {
-  const { data, name } = marker;
-  if (name in markerStyles) {
-    return markerStyles[name];
-  }
-  if (data && data.type in markerStyles) {
-    return markerStyles[data.type];
-  }
-  return defaultStyle;
+export function getMarkerStyle(
+  markerName: string,
+  markerSchema: MarkerSchema | null
+): MarkerSchemaStyle {
+  return markerStyles[markerName] ?? markerSchema?.style ?? defaultStyle;
 }
 
 export function getMarkerStyleColor(color: MarkerSchemaStyleColor): string {
   return maybeLightDark(color);
+}
+
+export function getMarkerSchemaStyleFallback(
+  schemaName: string
+): MarkerSchemaStyle {
+  return markerStyles[schemaName] ?? defaultStyle;
 }
 
 const markerStyles: { readonly [styleName: string]: MarkerSchemaStyle } = {
