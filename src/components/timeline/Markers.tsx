@@ -8,6 +8,7 @@ import { InView } from 'react-intersection-observer';
 import {
   overlayFills,
   getMarkerStyle,
+  getMarkerStyleColor,
 } from 'firefox-profiler/profile-logic/marker-styles';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
@@ -155,7 +156,7 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
           )
         : Number.MAX_SAFE_INTEGER;
       const markerStyle = getMarkerStyle(marker);
-      ctx.fillStyle = markerStyle.getBackground();
+      ctx.fillStyle = getMarkerStyleColor(markerStyle.background);
       if (markerStyle.squareCorners) {
         ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
       } else {
@@ -168,12 +169,12 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
           1 / devicePixelRatio
         );
       }
-      if (markerStyle.hasBorderLeft()) {
-        ctx.fillStyle = markerStyle.getBorderLeft();
+      if (markerStyle.borderLeft !== null) {
+        ctx.fillStyle = getMarkerStyleColor(markerStyle.borderLeft);
         ctx.fillRect(pos, markerStyle.top, 1, markerStyle.height);
       }
-      if (markerStyle.hasBorderRight()) {
-        ctx.fillStyle = markerStyle.getBorderRight();
+      if (markerStyle.borderRight !== null) {
+        ctx.fillStyle = getMarkerStyleColor(markerStyle.borderRight);
         ctx.fillRect(
           pos + itemWidth - 1,
           markerStyle.top,

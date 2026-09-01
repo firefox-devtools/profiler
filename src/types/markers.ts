@@ -2,7 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
+import type {
+  Milliseconds,
+  Microseconds,
+  Seconds,
+  Bytes,
+  CssPixels,
+} from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type {
   IndexIntoStackTable,
@@ -133,6 +139,17 @@ export type MarkerSchemaPIICategory =
   | 'extension-id'
   | 'preference-value'
   | 'private-browsing';
+
+export type MarkerSchemaStyleColor = string | [string, string];
+
+export type MarkerSchemaStyle = {
+  top: CssPixels;
+  height: CssPixels;
+  background: MarkerSchemaStyleColor;
+  squareCorners: boolean;
+  borderLeft: MarkerSchemaStyleColor | null;
+  borderRight: MarkerSchemaStyleColor | null;
+};
 
 export type MarkerSchemaField = {
   // The property key of the marker data property that carries the field value.
