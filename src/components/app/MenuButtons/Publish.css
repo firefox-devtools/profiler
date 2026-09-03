@@ -57,6 +57,7 @@
   --internal-upload-percentage-foreground-color: var(--blue-60);
   --internal-upload-bar-background-color: var(--grey-40);
   --internal-upload-bar-inner-background-color: var(--blue-50);
+  --internal-warning-indicator-icon: url(../../../../res/img/svg/warning.svg);
 }
 
 :root.dark-mode {
@@ -80,6 +81,7 @@
     --internal-upload-percentage-foreground-color: var(--blue-60);
     --internal-upload-bar-background-color: var(--grey-40);
     --internal-upload-bar-inner-background-color: var(--blue-50);
+    --internal-warning-indicator-icon: url(../../../../res/img/svg/warning-light.svg);
   }
 }
 
@@ -115,7 +117,11 @@
 }
 
 .publishPanelDataChoicesIndicator {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
   margin-left: 8px;
+  background: var(--internal-warning-indicator-icon) center no-repeat;
   vertical-align: middle;
 }
 

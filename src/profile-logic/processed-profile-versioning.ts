@@ -3310,6 +3310,129 @@ const _upgraders: {
       }
     }
   },
+  [70]: (profile: any) => {
+    // The `lib` column moved off the resourceTable and onto the frameTable, so
+    // that resources and libraries can vary independently: multiple libs can
+    // now share one resource.
+    //
+    // Before: frame -> func -> resource -> lib
+    // After:  frame -> lib
+    // Frames with no library use the sentinel value -1.
+    const { frameTable, funcTable, resourceTable } = profile.shared;
+    const libForFunc = new Int32Array(funcTable.length).fill(-1);
+    for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+      const resourceIndex = funcTable.resource[funcIndex];
+      if (resourceIndex !== -1) {
+        libForFunc[funcIndex] = resourceTable.lib[resourceIndex] ?? -1;
+      }
+    }
+    const lib = new Array(frameTable.length).fill(-1);
+    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+      lib[frameIndex] = libForFunc[frameTable.func[frameIndex]];
+    }
+    frameTable.lib = lib;
+    delete resourceTable.lib;
+  },
+  [71]: (profile: any) => {
+    // The frame table representation changed:
+    //  - A new `flags` bitfield column was added (Uint8Array or plain array).
+    //  - The `inlineDepth` column was removed; the `IsInlined` flag carries
+    //    the boolean "was this frame an inlined call" information.
+    //  - The `category`, `subcategory`, `lib`, `nativeSymbol`, `line`,
+    //    `column` and `originalLocation` columns are no longer nullable
+    //    in-band. When the corresponding "Has..." flag is not set, the value
+    //    in the column is ignored and can be any placeholder (we write 0).
+    //  - The `address` column's `-1` sentinel was likewise replaced by the
+    //    `HasAddress` flag, so the column is now unsigned (`Uint32Array`).
+    //  - `address` and `lib` share the single `HasAddress` flag, because an
+    //    address is only meaningful relative to a library. A v70 profile could
+    //    have a lib without an address (the lib was derived from the func's
+    //    resource, which exists for frames that arrived pre-symbolicated as
+    //    "func (in libname)"). Those frames lose their frame-level lib here;
+    //    the library name is still reachable via the func's resource. An
+    //    address without a lib can't be symbolicated, so such frames lose
+    //    their address.
+    //  - `innerWindowID` is no longer nullable either, but it has no flag: it
+    //    already used `0` to mean "no innerWindowID", so `null` becomes `0`.
+
+    // A snapshot of the `FrameFlag` enum as of version 71. Don't refer to the
+    // current `FrameFlag` enum here; upgraders must keep working even if later
+    // versions renumber or remove flags.
+    const IsInlined = 1 << 0;
+    const HasAddress = 1 << 1;
+    const HasCategory = 1 << 2;
+    const HasNativeSymbol = 1 << 3;
+    const HasLine = 1 << 4;
+    const HasColumn = 1 << 5;
+    const HasOriginalLocation = 1 << 6;
+
+    const { frameTable } = profile.shared;
+    const {
+      inlineDepth,
+      address,
+      category,
+      subcategory,
+      lib,
+      nativeSymbol,
+      innerWindowID,
+      line,
+      column,
+      originalLocation,
+      length,
+    } = frameTable;
+    const flags = new Array<number>(length);
+    for (let i = 0; i < length; i++) {
+      let f = 0;
+      if (inlineDepth[i] > 0) {
+        f |= IsInlined;
+      }
+      if (address[i] !== -1 && lib[i] !== -1) {
+        f |= HasAddress;
+      } else {
+        address[i] = 0;
+        lib[i] = 0;
+      }
+      if (category[i] !== null) {
+        f |= HasCategory;
+      } else {
+        category[i] = 0;
+        // Ignored when HasCategory is unset, but v70 allowed it to be null.
+        subcategory[i] = 0;
+      }
+      if (nativeSymbol[i] !== null) {
+        f |= HasNativeSymbol;
+      } else {
+        nativeSymbol[i] = 0;
+      }
+      if (line[i] !== null) {
+        f |= HasLine;
+      } else {
+        line[i] = 0;
+      }
+      if (column[i] !== null) {
+        f |= HasColumn;
+      } else {
+        column[i] = 0;
+      }
+      if (originalLocation[i] !== null) {
+        f |= HasOriginalLocation;
+      } else {
+        originalLocation[i] = 0;
+      }
+      if (innerWindowID[i] === null) {
+        innerWindowID[i] = 0;
+      }
+      flags[i] = f;
+    }
+    frameTable.flags = flags;
+    delete frameTable.inlineDepth;
+    if (frameTable.address instanceof Int32Array) {
+      // Version 71 wants this column to be a Uint32Array.
+      // Reinterpret existing bits as u32. We already set all
+      // -1 to 0, and there shouldn't be any other negative values.
+      frameTable.address = new Uint32Array(frameTable.address);
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

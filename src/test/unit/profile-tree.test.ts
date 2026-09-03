@@ -21,7 +21,7 @@ import {
   filterRawThreadSamplesToRange,
   getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
@@ -697,7 +697,6 @@ describe('origin annotation', function () {
     shared.funcTable.source[funcIndex] = location
       ? addSourceToTable(shared.sources, stringTable.indexForString(location))
       : null;
-    shared.resourceTable.lib.push(-1);
     shared.resourceTable.name.push(stringTable.indexForString(name));
     shared.resourceTable.host.push(
       host ? stringTable.indexForString(host) : null
@@ -727,7 +726,7 @@ describe('origin annotation', function () {
     return getOriginAnnotationForFunc(
       funcNames.indexOf(funcName),
       null,
-      computeFrameTableFromRawFrameTable(shared.frameTable),
+      computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
       shared.funcTable,
       shared.resourceTable,
       stringTable,
@@ -775,6 +774,7 @@ describe('getOriginAnnotationForFunc with originalLocation', function () {
 
     // The text sample produces one frame referencing func 0. Give it a
     // compiled position so tier-3 fallback has something meaningful to surface.
+    shared.frameTable.flags[0] |= FrameFlag.HasLine | FrameFlag.HasColumn;
     shared.frameTable.line[0] = 5;
     shared.frameTable.column[0] = 10;
 
@@ -792,11 +792,17 @@ describe('getOriginAnnotationForFunc with originalLocation', function () {
     }
 
     function callOrigin(frameOriginalLocationIdx: number | null): string {
-      shared.frameTable.originalLocation[0] = frameOriginalLocationIdx;
+      if (frameOriginalLocationIdx === null) {
+        shared.frameTable.flags[0] &= ~FrameFlag.HasOriginalLocation;
+        shared.frameTable.originalLocation[0] = 0;
+      } else {
+        shared.frameTable.flags[0] |= FrameFlag.HasOriginalLocation;
+        shared.frameTable.originalLocation[0] = frameOriginalLocationIdx;
+      }
       return getOriginAnnotationForFunc(
         0,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         shared.resourceTable,
         stringTable,
@@ -854,6 +860,7 @@ describe('getOriginalPositionForFrame', function () {
     shared.funcTable.source[0] = bundleIndex;
     shared.funcTable.lineNumber[0] = 1;
     shared.funcTable.columnNumber[0] = 100;
+    shared.frameTable.flags[0] |= FrameFlag.HasLine | FrameFlag.HasColumn;
     shared.frameTable.line[0] = 5;
     shared.frameTable.column[0] = 10;
 
@@ -875,6 +882,7 @@ describe('getOriginalPositionForFrame', function () {
 
   it("returns the frame's source-mapped position when present (tier 1)", function () {
     const { shared, originalIndex, addOriginalLocationRow } = setup();
+    shared.frameTable.flags[0] |= FrameFlag.HasOriginalLocation;
     shared.frameTable.originalLocation[0] = addOriginalLocationRow(
       originalIndex,
       42,
@@ -884,7 +892,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -902,7 +910,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -915,7 +923,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -924,13 +932,14 @@ describe('getOriginalPositionForFrame', function () {
 
   it("falls back to the func's compiled line/column when the frame's are null", function () {
     const { shared, bundleIndex } = setup();
-    shared.frameTable.line[0] = null;
-    shared.frameTable.column[0] = null;
+    shared.frameTable.flags[0] &= ~(FrameFlag.HasLine | FrameFlag.HasColumn);
+    shared.frameTable.line[0] = 0;
+    shared.frameTable.column[0] = 0;
     expect(
       getOriginalPositionForFrame(
         0,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -948,7 +957,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         null,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         shared.sourceLocationTable
       )
@@ -967,7 +976,7 @@ describe('getOriginalPositionForFrame', function () {
       getOriginalPositionForFrame(
         0,
         0,
-        computeFrameTableFromRawFrameTable(shared.frameTable),
+        computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
         shared.funcTable,
         null
       )

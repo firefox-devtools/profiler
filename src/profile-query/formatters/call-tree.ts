@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-import type { IndexIntoCallNodeTable, Lib } from 'firefox-profiler/types';
+import type { IndexIntoCallNodeTable } from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
   CallTreeNode,
@@ -172,7 +172,6 @@ export type CallTreeCollectionOptions = {
  */
 export function collectCallTree(
   tree: CallTree,
-  libs: Lib[],
   options: CallTreeCollectionOptions = {}
 ): CallTreeNode {
   const maxNodes = options.maxNodes ?? 100;
@@ -244,7 +243,7 @@ export function collectCallTree(
     }
   }
 
-  return buildTreeStructure(tree, includedNodes, libs);
+  return buildTreeStructure(tree, includedNodes);
 }
 
 /**
@@ -252,8 +251,7 @@ export function collectCallTree(
  */
 function buildTreeStructure(
   tree: CallTree,
-  includedNodes: Set<IndexIntoCallNodeTable>,
-  libs: Lib[]
+  includedNodes: Set<IndexIntoCallNodeTable>
 ): CallTreeNode {
   // Get total sample count from the tree for percentage calculations
   const totalSampleCount = tree.getTotal();
@@ -299,8 +297,7 @@ function buildTreeStructure(
       // Format function name with library prefix
       const nameWithLibrary = formatFunctionNameWithLibrary(
         funcIndex,
-        tree._thread,
-        libs
+        tree._thread
       );
 
       const inlineStatus = inlineStatusForNode(tree, callNodeIndex);

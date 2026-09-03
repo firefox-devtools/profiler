@@ -67,11 +67,19 @@ CORE WORKFLOW
   Step 5: Analyze markers (browser events, timers, etc.)
     profiler-cli thread markers                          All markers with aggregated stats
     profiler-cli thread markers --category Layout        Filter by category
-    profiler-cli thread markers --search DOMEvent        Filter by name substring
+    profiler-cli thread markers --search DOMEvent        Filter by substring in name OR payload
+    profiler-cli thread markers --search name:DOMEvent   Narrow to one field ("field:value")
     profiler-cli thread markers --min-duration 10        Only markers >= 10ms
     profiler-cli thread markers --has-stack              Only markers with stack traces
     profiler-cli thread markers --list                   Flat chronological list (one row per marker)
     profiler-cli thread markers --search X --list        List all individual X markers with handles
+
+    --search on "thread markers": a bare term matches the marker name, category, payload
+    type AND all payload values; "field:value" narrows to one field; "-field:value"
+    excludes; comma separates (positives OR'd, then exclusions). "field" is the payload
+    key from "marker info --json" fields[].key, not the printed label. Caveat: "name" is
+    also a payload key on Text markers, so "name:" is not name-only. Details:
+    "thread markers --help".
 
     profiler-cli thread network                          Top 20 requests (slowest first) with timing phases
     profiler-cli thread network --sort start             Chronological order instead of slowest-first
@@ -87,6 +95,7 @@ CORE WORKFLOW
     profiler-cli profile logs --search "connect"         Filter by substring in message
     profiler-cli profile logs --thread t-0               Restrict to a specific thread
     profiler-cli profile logs --limit 200                Show only the first 200 entries
+    profiler-cli profile logs --limit 0                  All entries (no limit)
 
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
@@ -335,6 +344,7 @@ COMMON ANALYSIS PATTERNS
     profiler-cli thread markers --search "Paint" --list | head -50
     profiler-cli thread markers --search "GC" --min-duration 5 --list
     profiler-cli thread markers --list --limit 100         First 100 markers in chronological order
+    profiler-cli thread markers --list --limit 0           Every matching marker (no limit; can be very long)
 
   Investigate a page load:
     profiler-cli thread page-load                    Overview: milestones, top resources, CPU categories, jank
@@ -393,9 +403,10 @@ TIPS
   - Idle time alone is not a finding: only investigate idle during a period when the
     thread should be busy (e.g. inside a zoom on a jank marker), which may indicate
     lock contention or blocking on another thread
-  - --search has no OR operator. "|" and "\|" are literal characters that will match
-    nothing. "--search foo,bar" is AND (both must appear). To get OR behavior, run two
-    separate commands: once with "--search foo", once with "--search bar".
+  - On samples commands --search has no OR operator. "|" and "\|" are literal characters
+    that will match nothing. "--search foo,bar" is AND (both must appear). To get OR
+    behavior, run two separate commands: once with "--search foo", once with "--search
+    bar". ("thread markers" differs: comma is OR there.)
   - Try filters ephemerally first (as flags on thread commands) before committing
     with "filter push"
   - "filter push --during-marker --search X" is powerful for correlating CPU work

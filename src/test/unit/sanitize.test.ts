@@ -32,6 +32,7 @@ import {
 } from 'firefox-profiler/utils/base64';
 import { ValueSummaryReader } from 'devtools-reps';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { FrameFlag } from 'firefox-profiler/types';
 import type {
   MarkerSchemaByName,
   RawThread,
@@ -1658,6 +1659,41 @@ describe('sanitizePII', function () {
     expect(sanitizedProfile.shared.stringArray[filenameStringIndex]).toContain(
       'file2.js'
     );
+  });
+
+  it('should compact the libs and translate the frameTable lib column', function () {
+    // Thread 0's frame is in libA, thread 1's is in libB, and thread 2's frame
+    // has no library at all. A frame only carries a lib if it also has an
+    // address, since the two share the `HasAddress` flag.
+    const { profile } = getProfileFromTextSamples(
+      `A[lib:libA.so][address:10]`,
+      `B[lib:libB.so][address:20]`,
+      `Cjs`
+    );
+
+    expect(profile.libs.map((lib) => lib.name)).toEqual(['libA.so', 'libB.so']);
+    expect([...profile.shared.frameTable.lib]).toEqual([0, 1, 0]);
+    expect(
+      [...profile.shared.frameTable.flags].map(
+        (flags) => (flags & FrameFlag.HasAddress) !== 0
+      )
+    ).toEqual([true, true, false]);
+
+    // Remove thread 0, which is the only user of libA.so.
+    const { sanitizedProfile } = setup(
+      { shouldRemoveThreads: new Set([0]) },
+      profile
+    );
+
+    // libA.so is gone, and the surviving libB.so frame points at the reindexed
+    // libB.so. The lib-less frame still has no lib, which is expressed by the
+    // missing `HasAddress` flag rather than by the value in the lib column.
+    const { frameTable } = sanitizedProfile.shared;
+    expect(sanitizedProfile.libs.map((lib) => lib.name)).toEqual(['libB.so']);
+    expect([...frameTable.lib]).toEqual([0, 0]);
+    expect(
+      [...frameTable.flags].map((flags) => (flags & FrameFlag.HasAddress) !== 0)
+    ).toEqual([true, false]);
   });
 
   it('always removes source contents even when no PII removal is requested', function () {

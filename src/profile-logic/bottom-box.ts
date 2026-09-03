@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ResourceType } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
 import type {
   Thread,
@@ -37,14 +37,8 @@ export function getBottomBoxInfoForCallNode(
   thread: Thread,
   samples: SamplesLikeTable
 ): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    stringTable,
-    resourceTable,
-    nativeSymbols,
-  } = thread;
+  const { stackTable, frameTable, funcTable, stringTable, nativeSymbols } =
+    thread;
 
   const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
   const { source: sourceIndex, line: funcLine } = getOriginalPositionForFrame(
@@ -54,11 +48,6 @@ export function getBottomBoxInfoForCallNode(
     funcTable,
     thread.sourceLocationTable
   );
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
-      ? resourceTable.lib[resource]
-      : null;
   const callNodeFramePerStack = getCallNodeFramePerStack(
     callNodeIndex,
     callNodeInfo,
@@ -126,7 +115,6 @@ export function getBottomBoxInfoForCallNode(
   const hottestInstructionAddress = mapGetKeyWithMaxValue(addressTimings);
 
   return {
-    libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfosForCallNode,
     initialNativeSymbol:
@@ -148,14 +136,8 @@ export function getBottomBoxInfoForStackFrame(
   stackIndex: IndexIntoStackTable,
   thread: Thread
 ): BottomBoxInfo {
-  const {
-    stackTable,
-    frameTable,
-    funcTable,
-    resourceTable,
-    nativeSymbols,
-    stringTable,
-  } = thread;
+  const { stackTable, frameTable, funcTable, nativeSymbols, stringTable } =
+    thread;
 
   const frameIndex = stackTable.frame[stackIndex];
   const funcIndex = frameTable.func[frameIndex];
@@ -166,39 +148,31 @@ export function getBottomBoxInfoForStackFrame(
     funcTable,
     thread.sourceLocationTable
   );
-  const resource = funcTable.resource[funcIndex];
-  const libIndex =
-    resource !== -1 && resourceTable.type[resource] === ResourceType.Library
-      ? resourceTable.lib[resource]
-      : null;
-
   // Get native symbol for this frame
-  const nativeSymbol = frameTable.nativeSymbol[frameIndex];
-  const nativeSymbolInfos =
-    nativeSymbol !== null
-      ? [
-          getNativeSymbolInfo(
-            nativeSymbol,
-            nativeSymbols,
-            frameTable,
-            stringTable
-          ),
-        ]
-      : [];
+  const frameFlags = frameTable.flags[frameIndex];
+  const hasNativeSymbol = (frameFlags & FrameFlag.HasNativeSymbol) !== 0;
+  const nativeSymbolInfos = hasNativeSymbol
+    ? [
+        getNativeSymbolInfo(
+          frameTable.nativeSymbol[frameIndex],
+          nativeSymbols,
+          frameTable,
+          stringTable
+        ),
+      ]
+    : [];
 
-  const instructionAddress =
-    nativeSymbol !== null ? frameTable.address[frameIndex] : -1;
+  const hasAddress =
+    hasNativeSymbol && (frameFlags & FrameFlag.HasAddress) !== 0;
+  const instructionAddress = hasAddress ? frameTable.address[frameIndex] : null;
 
   return {
-    libIndex,
     sourceIndex,
     nativeSymbols: nativeSymbolInfos,
     initialNativeSymbol: 0,
     scrollToLineNumber: lineNumber ?? undefined,
     highlightedLineNumber: lineNumber,
-    scrollToInstructionAddress:
-      instructionAddress !== -1 ? instructionAddress : undefined,
-    highlightedInstructionAddress:
-      instructionAddress !== -1 ? instructionAddress : null,
+    scrollToInstructionAddress: instructionAddress ?? undefined,
+    highlightedInstructionAddress: instructionAddress,
   };
 }

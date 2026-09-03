@@ -565,7 +565,6 @@ export function stateFromLocation(
     toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree';
   const sourceView: SourceViewState = {
     scrollGeneration: 0,
-    libIndex: null,
     sourceIndex: null,
     highlightedLine: null,
   };

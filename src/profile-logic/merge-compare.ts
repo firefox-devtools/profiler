@@ -78,6 +78,7 @@ import type {
   ProfilerOverhead,
   ThreadIndex,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 import { translateTransformStack } from './transforms';
 
 /**
@@ -461,11 +462,7 @@ export function mergeSharedData(profiles: Profile[]): {
   const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
-  } = mergeResourceTables(
-    profiles,
-    translationMapsForStrings,
-    translationMapsForLibs
-  );
+  } = mergeResourceTables(profiles, translationMapsForStrings);
   const {
     nativeSymbols: newNativeSymbols,
     translationMaps: translationMapsForNativeSymbols,
@@ -490,7 +487,8 @@ export function mergeSharedData(profiles: Profile[]): {
     translationMapsForFuncs,
     translationMapsForNativeSymbols,
     translationMapsForOriginalLocation,
-    translationMapsForCategories
+    translationMapsForCategories,
+    translationMapsForLibs
   );
   const {
     stackTable: newStackTable,
@@ -721,7 +719,7 @@ function mergeLibs(libsPerProfile: Lib[][]): {
     const oldLibToNewLibPlusOne = new Int32Array(libs.length);
 
     libs.forEach((lib, i) => {
-      const insertedLibKey = [lib.name, lib.debugName].join('#');
+      const insertedLibKey = [lib.debugName, lib.breakpadId].join('#');
       const insertedLibIndex = mapOfInsertedLibs.get(insertedLibKey);
       if (insertedLibIndex !== undefined) {
         oldLibToNewLibPlusOne[i] = insertedLibIndex + 1;
@@ -745,13 +743,6 @@ function _mapLib(
   oldLibToNewLibPlusOne: TranslationMapForLibs
 ): IndexIntoLibs {
   return oldLibToNewLibPlusOne[libIndex] - 1;
-}
-
-function _mapNullableLib(
-  libIndex: IndexIntoLibs | null,
-  oldLibToNewLibPlusOne: TranslationMapForLibs
-): IndexIntoLibs | null {
-  return libIndex !== null ? oldLibToNewLibPlusOne[libIndex] - 1 : null;
 }
 
 function _mapString(
@@ -788,6 +779,13 @@ function _mapNullableOriginalLocation(
     : null;
 }
 
+function _mapOriginalLocation(
+  originalLocationIndex: IndexIntoSourceLocationTable,
+  oldOriginalLocationToNewPlusOne: TranslationMapForOriginalLocation
+): IndexIntoSourceLocationTable {
+  return oldOriginalLocationToNewPlusOne[originalLocationIndex] - 1;
+}
+
 function _mapFuncResource(
   resourceIndex: IndexIntoResourceTable | -1,
   oldResourceToNewResourcePlusOne: TranslationMapForResources
@@ -812,26 +810,6 @@ function _mapFrame(
   return oldFrameToNewFramePlusOne[frameIndex] - 1;
 }
 
-function _mapNullableNativeSymbol(
-  nativeSymbolIndex: IndexIntoLibs | null,
-  oldNativeSymbolToNewNativeSymbolPlusOne: TranslationMapForNativeSymbols
-): IndexIntoLibs | null {
-  if (nativeSymbolIndex === null) {
-    return null;
-  }
-  return oldNativeSymbolToNewNativeSymbolPlusOne[nativeSymbolIndex] - 1;
-}
-
-function _mapNullableCategory(
-  categoryIndex: IndexIntoCategoryList | null,
-  oldCategoryToNewCategoryPlusOne: TranslationMapForCategories
-): IndexIntoCategoryList | null {
-  if (categoryIndex === null) {
-    return null;
-  }
-  return oldCategoryToNewCategoryPlusOne[categoryIndex] - 1;
-}
-
 function _mapNullableStack(
   stackIndex: IndexIntoStackTable | null,
   oldStackToNewStackPlusOne: TranslationMapForStacks
@@ -846,8 +824,7 @@ function _mapNullableStack(
  */
 function mergeResourceTables(
   profiles: ReadonlyArray<Profile>,
-  translationMapsForStrings: TranslationMapForStrings[],
-  translationMapsForLibs: TranslationMapForLibs[]
+  translationMapsForStrings: TranslationMapForStrings[]
 ): {
   resourceTable: ResourceTable;
   translationMaps: TranslationMapForResources[];
@@ -857,7 +834,6 @@ function mergeResourceTables(
   const newResourceTable = getEmptyResourceTable();
 
   profiles.forEach((profile, profileIndex) => {
-    const oldLibToNewLibPlusOne = translationMapsForLibs[profileIndex];
     const oldStringToNewStringPlusOne = translationMapsForStrings[profileIndex];
     const { resourceTable } = profile.shared;
     const oldResourceToNewResourcePlusOne = new Int32Array(
@@ -865,10 +841,6 @@ function mergeResourceTables(
     );
 
     for (let i = 0; i < resourceTable.length; i++) {
-      const libIndex = _mapNullableLib(
-        resourceTable.lib[i],
-        oldLibToNewLibPlusOne
-      );
       const nameIndex = _mapString(
         resourceTable.name[i],
         oldStringToNewStringPlusOne
@@ -890,7 +862,6 @@ function mergeResourceTables(
       oldResourceToNewResourcePlusOne[i] = newResourceTable.length + 1;
       mapOfInsertedResources.set(resourceKey, newResourceTable.length);
 
-      newResourceTable.lib.push(libIndex);
       newResourceTable.name.push(nameIndex);
       newResourceTable.host.push(hostIndex);
       newResourceTable.type.push(type);
@@ -1059,7 +1030,8 @@ function mergeFrameTables(
   translationMapsForFuncs: TranslationMapForFuncs[],
   translationMapsForNativeSymbols: TranslationMapForNativeSymbols[],
   translationMapsForOriginalLocation: TranslationMapForOriginalLocation[],
-  translationMapsForCategories: TranslationMapForCategories[]
+  translationMapsForCategories: TranslationMapForCategories[],
+  translationMapsForLibs: TranslationMapForLibs[]
 ): { frameTable: RawFrameTable; translationMaps: TranslationMapForFrames[] } {
   const translationMaps: TranslationMapForFrames[] = [];
   const newFrameTable = getRawFrameTableBuilder();
@@ -1073,35 +1045,46 @@ function mergeFrameTables(
       translationMapsForOriginalLocation[profileIndex];
     const oldCategoryToNewCategoryPlusOne =
       translationMapsForCategories[profileIndex];
+    const oldLibToNewLibPlusOne = translationMapsForLibs[profileIndex];
     const oldFrameToNewFramePlusOne = new Int32Array(frameTable.length);
 
     for (let i = 0; i < frameTable.length; i++) {
+      const flags = frameTable.flags[i];
       const func = _mapFunc(frameTable.func[i], oldFuncToNewFuncPlusOne);
-      const nativeSymbol = _mapNullableNativeSymbol(
-        frameTable.nativeSymbol[i],
-        oldNativeSymbolToNewNativeSymbolPlusOne
-      );
-      const category = _mapNullableCategory(
-        frameTable.category[i],
-        oldCategoryToNewCategoryPlusOne
-      );
+      const nativeSymbol =
+        (flags & FrameFlag.HasNativeSymbol) !== 0
+          ? oldNativeSymbolToNewNativeSymbolPlusOne[
+              frameTable.nativeSymbol[i]
+            ] - 1
+          : 0;
+      const category =
+        (flags & FrameFlag.HasCategory) !== 0
+          ? oldCategoryToNewCategoryPlusOne[frameTable.category[i]] - 1
+          : 0;
       // TODO issue #2151: Also adjust subcategories.
       const subcategory = frameTable.subcategory[i];
 
+      newFrameTable.flags.push(flags);
       newFrameTable.address.push(frameTable.address[i]);
-      newFrameTable.inlineDepth.push(frameTable.inlineDepth[i]);
       newFrameTable.category.push(category);
       newFrameTable.subcategory.push(subcategory);
       newFrameTable.nativeSymbol.push(nativeSymbol);
       newFrameTable.func.push(func);
+      newFrameTable.lib.push(
+        (flags & FrameFlag.HasAddress) !== 0
+          ? _mapLib(frameTable.lib[i], oldLibToNewLibPlusOne)
+          : 0
+      );
       newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
       newFrameTable.line.push(frameTable.line[i]);
       newFrameTable.column.push(frameTable.column[i]);
       newFrameTable.originalLocation.push(
-        _mapNullableOriginalLocation(
-          frameTable.originalLocation[i],
-          oldOriginalLocationToNewPlusOne
-        )
+        (flags & FrameFlag.HasOriginalLocation) !== 0
+          ? _mapOriginalLocation(
+              frameTable.originalLocation[i],
+              oldOriginalLocationToNewPlusOne
+            )
+          : 0
       );
 
       oldFrameToNewFramePlusOne[i] = newFrameTable.length + 1;

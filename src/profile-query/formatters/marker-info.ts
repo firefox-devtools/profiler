@@ -13,6 +13,7 @@ import {
   getMarkerSchemaByName,
   getStringTable,
   getCommittedRange,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import {
   intervalUnionMs,
@@ -66,6 +67,7 @@ import {
   resolveLogMarkerMessage,
 } from 'firefox-profiler/profile-logic/marker-data';
 import { formatFunctionNameWithLibrary } from '../function-list';
+import { FrameFlag } from 'firefox-profiler/types';
 import type {
   NetworkPayload,
   LogMarkerPayload,
@@ -161,10 +163,25 @@ export function computeRateStats(markers: Marker[]): RateStats {
   }
 
   const sorted = [...markers].sort((a, b) => a.start - b.start);
-  const gaps: number[] = [];
 
+  // Accumulate the gap statistics in a single pass. Do not build an array of
+  // gaps and spread it into Math.min/Math.max: a spread passes one argument per
+  // element, which blows the stack ("Maximum call stack size exceeded") once a
+  // marker name has more than ~100k markers in it, as happens on the parent
+  // process main thread of a long profile.
+  let minGap = Infinity;
+  let maxGap = -Infinity;
+  let gapSum = 0;
+  const gapCount = sorted.length - 1;
   for (let i = 1; i < sorted.length; i++) {
-    gaps.push(sorted[i].start - sorted[i - 1].start);
+    const gap = sorted[i].start - sorted[i - 1].start;
+    if (gap < minGap) {
+      minGap = gap;
+    }
+    if (gap > maxGap) {
+      maxGap = gap;
+    }
+    gapSum += gap;
   }
 
   const timeRange = sorted[sorted.length - 1].start - sorted[0].start;
@@ -174,9 +191,9 @@ export function computeRateStats(markers: Marker[]): RateStats {
 
   return {
     markersPerSecond,
-    minGap: Math.min(...gaps),
-    avgGap: gaps.reduce((a, b) => a + b, 0) / gaps.length,
-    maxGap: Math.max(...gaps),
+    minGap,
+    avgGap: gapSum / gapCount,
+    maxGap,
   };
 }
 
@@ -707,6 +724,9 @@ export function collectThreadMarkers(
     const categories = getCategories(state);
     const markerSchemaByName = getMarkerSchemaByName(state);
     const stringTable = getStringTable(state);
+    // Usually non-zero (earliest sample or marker across all threads), so
+    // reporting a raw marker time leaks that offset.
+    const zeroAt = getZeroAt(state);
 
     // Get marker indexes scoped to the committed (zoom) range. When a search is
     // active we use the search-filtered set, which is itself built on top of the
@@ -774,7 +794,7 @@ export function collectThreadMarkers(
       );
 
       // Add markerIndex to topMarkers in groups
-      customGroups = addMarkerIndexToGroups(groups);
+      customGroups = addMarkerIndexToGroups(groups, zeroAt);
     }
 
     // Aggregate by type (with optional auto-grouping)
@@ -801,12 +821,12 @@ export function collectThreadMarkers(
       topMarkers: stats.topMarkers.map((m) => ({
         handle: m.handle,
         label: m.label,
-        start: m.start,
+        start: m.start - zeroAt,
         duration: m.duration,
         hasStack: m.hasStack,
       })),
       subGroups: stats.subGroups
-        ? addMarkerIndexToGroups(stats.subGroups)
+        ? addMarkerIndexToGroups(stats.subGroups, zeroAt)
         : undefined,
       subGroupKey: stats.subGroupKey,
     }));
@@ -864,7 +884,7 @@ export function collectThreadMarkers(
           handle,
           name: marker.name,
           label: label || marker.name,
-          start: marker.start,
+          start: marker.start - zeroAt,
           duration,
           hasStack,
           category: categoryName,
@@ -896,7 +916,10 @@ export function collectThreadMarkers(
 /**
  * Helper to add markerIndex to topMarkers in MarkerGroup arrays.
  */
-function addMarkerIndexToGroups(groups: MarkerGroup[]): MarkerGroupData[] {
+function addMarkerIndexToGroups(
+  groups: MarkerGroup[],
+  zeroAt: number
+): MarkerGroupData[] {
   return groups.map((group) => ({
     groupName: group.groupName,
     count: group.count,
@@ -906,12 +929,12 @@ function addMarkerIndexToGroups(groups: MarkerGroup[]): MarkerGroupData[] {
     topMarkers: group.topMarkers.map((m) => ({
       handle: m.handle,
       label: m.label,
-      start: m.start,
+      start: m.start - zeroAt,
       duration: m.duration,
       hasStack: m.hasStack,
     })),
     subGroups: group.subGroups
-      ? addMarkerIndexToGroups(group.subGroups)
+      ? addMarkerIndexToGroups(group.subGroups, zeroAt)
       : undefined,
   }));
 }
@@ -929,8 +952,7 @@ function collectStackTrace(
     return null;
   }
 
-  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
-    thread;
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
   const frames: StackTraceData['frames'] = [];
 
   let currentStackIndex: IndexIntoStackTable = stackIndex;
@@ -938,19 +960,11 @@ function collectStackTrace(
     const frameIndex = stackTable.frame[currentStackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const funcName = stringTable.getString(funcTable.name[funcIndex]);
-    const nameWithLibrary = formatFunctionNameWithLibrary(
-      funcIndex,
-      thread,
-      libs
-    );
+    const nameWithLibrary = formatFunctionNameWithLibrary(funcIndex, thread);
 
     let library: string | undefined;
-    const resourceIndex = funcTable.resource[funcIndex];
-    if (resourceIndex !== -1) {
-      const libIndex = resourceTable.lib[resourceIndex];
-      if (libIndex !== null && libs) {
-        library = libs[libIndex].name;
-      }
+    if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0 && libs) {
+      library = libs[frameTable.lib[frameIndex]].name;
     }
 
     frames.push({ name: funcName, nameWithLibrary, library });
@@ -996,7 +1010,13 @@ export function collectMarkerStack(
   let stack: StackTraceData | null = null;
   if (marker.data && 'cause' in marker.data && marker.data.cause) {
     const cause = marker.data.cause;
-    stack = collectStackTrace(cause.stack, thread, libs, cause.time);
+    const zeroAt = getZeroAt(state);
+    stack = collectStackTrace(
+      cause.stack,
+      thread,
+      libs,
+      cause.time !== undefined ? cause.time - zeroAt : undefined
+    );
   }
 
   return {
@@ -1036,6 +1056,7 @@ export function collectMarkerInfo(
   const markerSchemaByName = getMarkerSchemaByName(state);
   const stringTable = getStringTable(state);
   const threadHandleDisplay = threadMap.handleForThreadIndexes(threadIndexes);
+  const zeroAt = getZeroAt(state);
 
   // Get tooltip label
   const getTooltipLabel = getLabelGetter(
@@ -1093,7 +1114,12 @@ export function collectMarkerInfo(
     const thread = threadSelectors.getFilteredThread(state);
     const libs = profile.libs;
 
-    const fullStack = collectStackTrace(cause.stack, thread, libs, cause.time);
+    const fullStack = collectStackTrace(
+      cause.stack,
+      thread,
+      libs,
+      cause.time !== undefined ? cause.time - zeroAt : undefined
+    );
     if (fullStack && fullStack.frames.length > 0) {
       // Truncate to 20 frames
       const truncated = fullStack.frames.length > 20;
@@ -1118,8 +1144,8 @@ export function collectMarkerInfo(
       index: marker.category,
       name: categories[marker.category]?.name ?? 'Unknown',
     },
-    start: marker.start,
-    end: marker.end,
+    start: marker.start - zeroAt,
+    end: marker.end !== null ? marker.end - zeroAt : null,
     duration: marker.end !== null ? marker.end - marker.start : undefined,
     fields,
     schema: schemaInfo,
@@ -1207,6 +1233,7 @@ export function collectThreadNetwork(
       totalRequestCount++;
     }
   }
+  const totalCandidateCount = records.length;
 
   // Wall-clock: interval union and peak concurrency over all records
   // intersecting the range, independent of the display filters below.
@@ -1332,6 +1359,7 @@ export function collectThreadNetwork(
     friendlyThreadName,
     totalRequestCount,
     incompleteCount,
+    totalCandidateCount,
     filteredRequestCount,
     sort,
     filters:

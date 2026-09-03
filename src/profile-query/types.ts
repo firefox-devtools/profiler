@@ -20,7 +20,7 @@ import type {
 export type TopMarker = {
   handle: string;
   label: string;
-  start: number;
+  start: number; // Milliseconds since the profile start (`rootRange.start`)
   duration?: number;
   hasStack?: boolean;
 };
@@ -50,7 +50,7 @@ export type FlatMarkerItem = {
   handle: string;
   name: string;
   label: string; // Schema-derived table label (may equal name if no schema)
-  start: number; // Absolute milliseconds
+  start: number; // Milliseconds since the profile start (`rootRange.start`)
   duration?: number; // Milliseconds if interval marker
   hasStack: boolean;
   category: string;
@@ -122,6 +122,7 @@ export type SessionContext = {
     end: number;
     endName: string;
   } | null; // null if viewing full profile
+  // Deliberately NOT rebased: this is the origin the other times subtract.
   rootRange: {
     start: number;
     end: number;
@@ -183,6 +184,11 @@ export type FunctionInfoResult = {
     name: string;
     index: number;
   };
+  // The library of this function, if any.
+  // Note that, these days, funcs can be associated with multiple
+  // libraries, so this isn't the best representation anymore. In those
+  // cases this will be set to one of them, but it's arbitrary which one.
+  // See https://github.com/firefox-devtools/profiler/issues/6270
   library?: {
     name: string;
     path: string;
@@ -459,9 +465,12 @@ export type ThreadNetworkResult = {
   type: 'thread-network';
   threadHandle: string;
   friendlyThreadName: string;
+  // Completed (STATUS_STOP) only; use `totalCandidateCount` as a total.
   totalRequestCount: number;
   // Requests still in flight when the recording stopped.
   incompleteCount: number;
+  // Every record the filters ran against; `filteredRequestCount` is a subset.
+  totalCandidateCount: number;
   filteredRequestCount: number;
   // How the request list is ordered.
   sort: NetworkRequestSort;
@@ -681,7 +690,7 @@ export type MarkerInfoResult = {
     index: number;
     name: string;
   };
-  start: number;
+  start: number; // Ms since the profile start, as in `FlatMarkerItem`
   end: number | null;
   duration?: number;
   fields?: Array<{
@@ -707,7 +716,7 @@ export type MarkerStackResult = {
 };
 
 export type StackTraceData = {
-  capturedAt?: number;
+  capturedAt?: number; // Milliseconds since the profile start (`rootRange.start`)
   frames: FunctionDisplayInfo[];
   truncated: boolean;
 };
@@ -851,8 +860,9 @@ export type CounterInfoResult = CounterSummary & {
   type: 'counter-info';
   description: string;
   sampleCount: number; // total samples in the counter (whole profile)
-  rangeStart: number | null; // absolute time of first in-range sample
-  rangeEnd: number | null; // absolute time of last in-range sample
+  // First/last in-range sample, ms since the profile start.
+  rangeStart: number | null;
+  rangeEnd: number | null;
   overTime: CounterTimeBucket[]; // per-bucket values across the current view
 };
 

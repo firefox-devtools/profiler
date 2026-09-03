@@ -7,7 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { parseEphemeralFilters } from '../utils/parse';
+import { parseEphemeralFilters, parseLimitArg } from '../utils/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
@@ -187,7 +187,12 @@ export function registerThreadCommand(
       .command('markers')
       .description('List markers with aggregated statistics')
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-      .option('--search <term>', 'Filter by substring')
+      .option(
+        '--search <term>',
+        'Filter markers. A bare term matches the marker name, category, payload ' +
+          'type and payload field values; "field:value" narrows to one field, ' +
+          '"-field:value" excludes, comma separates terms (OR). See "search syntax" below'
+      )
       .option(
         '--category <name>',
         'Filter by category name (case-insensitive substring match)'
@@ -201,7 +206,7 @@ export function registerThreadCommand(
         'Filter by maximum duration in milliseconds'
       )
       .option('--has-stack', 'Show only markers with stack traces')
-      .option('--limit <N>', 'Limit the number of results shown')
+      .option('--limit <N>', 'Limit the number of results shown (0 = no limit)')
       .option(
         '--group-by <keys>',
         'Group by custom keys (e.g. "type,name" or "type,field:eventType")'
@@ -215,6 +220,30 @@ export function registerThreadCommand(
         'Number of top markers to include per group in JSON output (default: 5)'
       )
       .option('--list', 'Show a flat chronological list of individual markers')
+      .addHelpText(
+        'after',
+        `
+--search syntax (as on profiler.firefox.com's marker search box):
+
+  bare term      matches the marker name, category, payload type AND every
+                 payload field value -- so "--search FAIL" also hits messages
+                 containing "Failed"
+  field:value    narrows to one field
+  -field:value   excludes; a bare "-term" is NOT a negation, the "-" is literal
+  a,b            comma separates: positives OR'd, then exclusions applied
+
+  "field" is the payload key from "marker info <handle> --json" fields[].key, not
+  the label that "marker info" prints (Glean: "id:abi", not "metric:abi"). An
+  unrecognized field is not an error -- the term is just matched literally.
+
+  "name:" is not a name-only filter: "name" is also a payload key on Text and
+  TextStack markers, so it matches their detail text too.
+
+Examples:
+  profiler-cli thread markers --search "eventType:keydown"
+  profiler-cli thread markers --search "-name:CompositorScreenshot"
+  profiler-cli thread markers --search "name:DOMEvent,-eventType:keydown"`
+      )
   ).action(async (opts) => {
     let markerFilters: MarkerFilterOptions | undefined;
 
@@ -268,9 +297,7 @@ export function registerThreadCommand(
           'Error: --max-duration must be a positive number (in milliseconds)'
         );
       }
-      if (opts.limit !== undefined) {
-        markerFilters.limit = parseIntArg('--limit', opts.limit, 1);
-      }
+      markerFilters.limit = parseLimitArg('--limit', opts.limit);
       if (opts.topN !== undefined) {
         markerFilters.topN = parseIntArg('--top-n', opts.topN, 1);
       }
@@ -303,7 +330,7 @@ export function registerThreadCommand(
         '--max-duration <ms>',
         'Filter by maximum total request duration in milliseconds'
       )
-      .option('--limit <N>', 'Max requests to show (default: 20, 0 = show all)')
+      .option('--limit <N>', 'Max requests to show (default: 20, 0 = no limit)')
       .option(
         '--sort <order>',
         'Sort requests by "duration" (default, slowest first) or "start" (chronological)'
@@ -346,12 +373,7 @@ export function registerThreadCommand(
       );
     }
     if (opts.limit !== undefined) {
-      networkFilters.limit = parseIntArg(
-        '--limit',
-        opts.limit,
-        0,
-        'Error: --limit must be a non-negative integer (0 = show all)'
-      );
+      networkFilters.limit = parseLimitArg('--limit', opts.limit) ?? 0;
     } else {
       networkFilters.limit = 20;
     }
@@ -397,12 +419,10 @@ export function registerThreadCommand(
       );
     }
     if (opts.jankLimit !== undefined) {
-      pageLoadOptions.jankLimit = parseIntArg(
-        '--jank-limit',
-        opts.jankLimit,
-        0,
-        'Error: --jank-limit must be a non-negative integer (0 = show all)'
-      );
+      // `collectPageLoad` does `jankLimit ?? 10`, so forwarding `undefined`
+      // here would silently reinstate that default; 0 is its show-all sentinel.
+      pageLoadOptions.jankLimit =
+        parseLimitArg('--jank-limit', opts.jankLimit) ?? 0;
     }
 
     await runCommand(
@@ -429,7 +449,10 @@ export function registerThreadCommand(
           '--min-self <percent>',
           'Filter by minimum self time percentage'
         )
-        .option('--limit <N>', 'Limit the number of results shown')
+        .option(
+          '--limit <N>',
+          'Limit the number of results shown (0 = no limit)'
+        )
         .option('--include-idle', 'Include idle samples in percentages')
     )
   ).action(async (opts) => {
@@ -453,9 +476,7 @@ export function registerThreadCommand(
           'Error: --min-self must be a number between 0 and 100 (percentage)'
         );
       }
-      if (opts.limit !== undefined) {
-        functionFilters.limit = parseIntArg('--limit', opts.limit, 1);
-      }
+      functionFilters.limit = parseLimitArg('--limit', opts.limit);
     }
 
     const sampleFilters = parseEphemeralFilters(opts);
