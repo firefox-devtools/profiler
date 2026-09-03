@@ -25,6 +25,7 @@ import {
   getImplementationFilter,
   getZeroAt,
   getProfileTimelineUnit,
+  getSelectedTab,
 } from 'firefox-profiler/selectors';
 import {
   TimelineMarkersJank,
@@ -348,7 +349,9 @@ export const TimelineTrackThread = explicitConnect<
       hasFileIoMarkers:
         selectors.getTimelineFileIoMarkerIndexes(state).length !== 0,
       sampleRelations:
-        selectors.getSampleRelationsToSelectedNodeInFilteredThread(state),
+        getSelectedTab(state) === 'function-list'
+          ? selectors.getSampleRelationsForFunctionListTab(state)
+          : selectors.getSampleRelationsToSelectedNodeInFilteredThread(state),
       treeOrderSampleComparator:
         selectors.getTreeOrderComparatorInFilteredThread(state),
       selectedThreadIndexes,
