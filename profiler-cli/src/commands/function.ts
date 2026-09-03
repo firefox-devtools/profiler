@@ -7,7 +7,12 @@
  */
 
 import type { Command } from 'commander';
-import { addGlobalOptions, runCommand } from './shared';
+import {
+  addGlobalOptions,
+  addStrategyOption,
+  parseOptionalStrategyArg,
+  runCommand,
+} from './shared';
 
 export function registerFunctionCommand(
   program: Command,
@@ -43,27 +48,29 @@ export function registerFunctionCommand(
     );
   });
 
-  addGlobalOptions(
-    fn
-      .command('annotate [handle]')
-      .description(
-        'Show annotated source/assembly with timing data (e.g. f-123)'
-      )
-      .option('--function <handle>', 'Function handle')
-      .option(
-        '--mode <mode>',
-        'Annotation mode: src, asm, or all (default: src)',
-        'src'
-      )
-      .option(
-        '--symbol-server <url>',
-        'Symbol server URL for asm mode. Defaults to the ?symbolServer= value from the loaded URL, or the Mozilla symbol server.'
-      )
-      .option(
-        '--context <context>',
-        'Source context: number of lines around annotated lines, or "file" for the whole file (default: 2)',
-        '2'
-      )
+  addStrategyOption(
+    addGlobalOptions(
+      fn
+        .command('annotate [handle]')
+        .description(
+          'Show annotated source/assembly with timing data (e.g. f-123)'
+        )
+        .option('--function <handle>', 'Function handle')
+        .option(
+          '--mode <mode>',
+          'Annotation mode: src, asm, or all (default: src)',
+          'src'
+        )
+        .option(
+          '--symbol-server <url>',
+          'Symbol server URL for asm mode. Defaults to the ?symbolServer= value from the loaded URL, or the Mozilla symbol server.'
+        )
+        .option(
+          '--context <context>',
+          'Source context: number of lines around annotated lines, or "file" for the whole file (default: 2)',
+          '2'
+        )
+    )
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
     await runCommand(
@@ -75,6 +82,7 @@ export function registerFunctionCommand(
         annotateMode: opts.mode,
         symbolServerUrl: opts.symbolServer,
         annotateContext: opts.context,
+        strategy: parseOptionalStrategyArg(opts.strategy),
       },
       opts
     );

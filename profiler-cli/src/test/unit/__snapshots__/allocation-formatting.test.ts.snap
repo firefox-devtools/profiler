@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`functions formatting with an allocation strategy reports bytes rather than sample counts 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+
+Functions in thread t-0 (Empty) — 9 functions
+
+Data source: js-allocations
+
+Functions (by self bytes):
+  f-8. libI.so!I - self: 7B (46.7%), total: 7B (46.7%)
+  f-6. Gjs - self: 5B (33.3%), total: 12B (80.0%)
+  f-4. E - self: 3B (20.0%), total: 3B (20.0%)
+  f-0. A - self: 0B (0.0%), total: 15B (100.0%)
+  f-1. B - self: 0B (0.0%), total: 15B (100.0%)
+  f-5. Fjs - self: 0B (0.0%), total: 12B (80.0%)
+  f-7. jQuery.js!Hjs - self: 0B (0.0%), total: 7B (46.7%)
+  f-2. C - self: 0B (0.0%), total: 3B (20.0%)
+  f-3. D - self: 0B (0.0%), total: 3B (20.0%)
+
+Use --search <term>, --min-self <percent>, or --limit <N> (0 = no limit) to filter functions, or f-<N> handles to inspect individual functions."
+`;
+
+exports[`samples formatting with an allocation strategy reports bytes rather than sample counts 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+
+Thread: Empty
+
+Data source: js-allocations
+
+Top Functions (by total bytes):
+  (For a call tree starting from these functions, use: profiler-cli thread samples-top-down)
+
+  f-0. A - total: 15B (100.0%)
+  f-1. B - total: 15B (100.0%)
+  f-5. Fjs - total: 12B (80.0%)
+  f-6. Gjs - total: 12B (80.0%)
+  f-7. jQuery.js!Hjs - total: 7B (46.7%)
+  f-8. libI.so!I - total: 7B (46.7%)
+  f-2. C - total: 3B (20.0%)
+  f-3. D - total: 3B (20.0%)
+  f-4. E - total: 3B (20.0%)
+
+Top Functions (by self bytes):
+  (For a call tree showing what calls these functions, use: profiler-cli thread samples-bottom-up)
+
+  f-8. libI.so!I - self: 7B (46.7%)
+  f-6. Gjs - self: 5B (33.3%)
+  f-4. E - self: 3B (20.0%)
+  f-0. A - self: 0B (0.0%)
+  f-1. B - self: 0B (0.0%)
+  f-5. Fjs - self: 0B (0.0%)
+  f-7. jQuery.js!Hjs - self: 0B (0.0%)
+  f-2. C - self: 0B (0.0%)
+  f-3. D - self: 0B (0.0%)
+
+Heaviest stack (7B, 6 frames):
+  1. A - total: 15B (100.0%), self: 0B (0.0%)
+  2. B - total: 15B (100.0%), self: 0B (0.0%)
+  3. Fjs - total: 12B (80.0%), self: 0B (0.0%)
+  4. Gjs - total: 12B (80.0%), self: 5B (33.3%)
+  5. jQuery.js!Hjs - total: 7B (46.7%), self: 0B (0.0%)
+  6. libI.so!I - total: 7B (46.7%), self: 7B (46.7%)
+"
+`;
