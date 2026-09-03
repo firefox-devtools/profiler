@@ -1128,6 +1128,8 @@ export function getStackAndSampleSelectorsPerThread(
     getNonInvertedCallNodeInfo,
     getLowerWingCallNodeInfo,
     getUpperWingCallNodeInfo,
+    getPreviewFilteredCtssSampleUpperWingCallNodes:
+      _getPreviewFilteredCtssSampleIndexToUpperWingCallNodeIndex,
     getSourceViewStackLineInfo,
     getAssemblyViewNativeSymbolIndex,
     getAssemblyViewStackAddressInfo,
