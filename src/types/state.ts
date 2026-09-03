@@ -410,7 +410,15 @@ export type ProfileSpecificUrlState = {
   selectedFunctions: SelectedFunctionsPerThread;
   markerTableSort: SingleColumnSortState[] | null;
   functionListSort: SingleColumnSortState[] | null;
+  functionListSectionsOpen: FunctionListSectionsOpenState;
 };
+
+export type FunctionListSectionsOpenState = {
+  descendants: boolean;
+  ancestors: boolean;
+};
+
+export type FunctionListSectionName = keyof FunctionListSectionsOpenState;
 
 export type UrlState = {
   readonly dataSource: DataSource;
