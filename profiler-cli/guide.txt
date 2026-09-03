@@ -419,7 +419,9 @@ SCRIPTING
 
   When using profiler-cli in scripts or pipelines:
 
-  Always use a named session for isolation:
+  Always use a named session for isolation, and set PROFILER_CLI_SESSION_OWNER
+  so "stop" refuses sessions that are not yours:
+    export PROFILER_CLI_SESSION_OWNER=my-script
     profiler-cli load profile.json.gz --session my-analysis
     profiler-cli profile info --session my-analysis
     profiler-cli thread select t-0 --session my-analysis
@@ -453,11 +455,19 @@ SESSION MANAGEMENT
     profiler-cli session use <id>                           Switch the current session
     profiler-cli stop                                       Stop the current session
     profiler-cli stop <id>                                  Stop a specific session
-    profiler-cli stop --all                                 Stop all sessions
+    profiler-cli stop --all                                 Stop all sessions you own
+    profiler-cli stop <id> --force                          Stop a session owned by someone else
     profiler-cli load profile.json.gz --session my-session   Named session
     profiler-cli load profile.json.gz --symbol-server <url>  Override symbol server (else ?symbolServer= URL param or Mozilla default)
     profiler-cli thread info --session my-session            Query a specific session
 
+  Sessions in one directory are shared by every profiler-cli process, so each
+  records its creator and "stop" refuses sessions that are not yours (exit 1,
+  naming the owner); --force overrides. Set PROFILER_CLI_SESSION_OWNER to name
+  yourself, otherwise the owner is the parent process id -- so a "stop" from a
+  different live shell is refused. A pid owner is released once that process
+  exits, since detached daemons outlive the shell that started them; a named
+  owner is never released. See "profiler-cli stop --help".
 
 ERROR HANDLING
 
