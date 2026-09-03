@@ -14,7 +14,7 @@ import {
 } from './data-structures';
 import {
   CallNodeInfoNonInverted,
-  CallNodeInfoInverted,
+  LazyInvertedCallNodeInfo,
 } from './call-node-info';
 import { computeThreadCPUPercent } from './cpu';
 import {
@@ -118,7 +118,11 @@ import type {
   SampleCategoriesAndSubcategories,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import type {
+  CallNodeInfo,
+  CallNodeInfoInverted,
+  SuffixOrderIndex,
+} from './call-node-info';
 import {
   toFloat64Array,
   toInt32Array,
@@ -668,7 +672,7 @@ export function getInvertedCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number
 ): CallNodeInfoInverted {
-  return new CallNodeInfoInverted(
+  return new LazyInvertedCallNodeInfo(
     callNodeInfo.getCallNodeTable(),
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     defaultCategory,
