@@ -137,6 +137,8 @@ export const getCalleesView: Selector<FuncPanelViewType> = (state) =>
   getFuncPanelViews(state).callees;
 export const getCallersView: Selector<FuncPanelViewType> = (state) =>
   getFuncPanelViews(state).callers;
+export const getSelfTimeView: Selector<FuncPanelViewType> = (state) =>
+  getFuncPanelViews(state).selfTime;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>

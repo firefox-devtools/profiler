@@ -122,6 +122,7 @@ export const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState 
   {
     callees: true,
     callers: false,
+    selfTime: false,
   };
 
 // The default view for each function list panel. The URL omits the funcPanelViews
@@ -129,4 +130,5 @@ export const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState 
 export const FUNC_PANEL_VIEWS_DEFAULT: FuncPanelViewsState = {
   callees: 'flame-graph',
   callers: 'flame-graph',
+  selfTime: 'flame-graph',
 };

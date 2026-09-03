@@ -220,7 +220,7 @@ type CallTreeQuery = BaseQuery & {
   hideIdleSamples: null | undefined;
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
-  funcListSections?: string; // "callees,callers" — comma-separated open sections
+  funcListSections?: string; // "descendants,self" — comma-separated open sections
   funcPanelViews?: string; // "callees:call-tree,callers:call-tree" — non-default panel views
   selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
@@ -796,7 +796,11 @@ function convertColumnSortFromString(
 // comma-separated list of the open sections; the param is omitted when the
 // state matches the default (only "callees" open). The value "none" is
 // used as a sentinel for the all-closed case so the param is non-empty.
-const FUNC_PANEL_NAMES: ReadonlyArray<FuncPanelName> = ['callees', 'callers'];
+const FUNC_PANEL_NAMES: ReadonlyArray<FuncPanelName> = [
+  'callees',
+  'callers',
+  'selfTime',
+];
 
 function convertFunctionListSectionsOpenToString(
   state: FunctionListSectionsOpenState
@@ -820,22 +824,23 @@ function convertFunctionListSectionsOpenFromString(
   const result: FunctionListSectionsOpenState = {
     callees: false,
     callers: false,
+    selfTime: false,
   };
   if (raw === 'none' || raw === '') {
     return result;
   }
   for (const part of raw.split(',')) {
-    if (part === 'callees' || part === 'callers') {
+    if (part === 'callees' || part === 'callers' || part === 'selfTime') {
       result[part] = true;
     }
   }
   return result;
 }
 
-// Visualization choice for the callees and callers panels of the FunctionList
-// tab. The URL stores a comma-separated list of "panel:view" pairs for panels
-// whose view differs from the default (flame-graph), e.g. "callees:call-tree".
-// The param is omitted when all panels use the default.
+// Visualization choice for the callees, callers and self time panels of the
+// FunctionList tab. The URL stores a comma-separated list of "panel:view"
+// pairs for panels whose view differs from the default (flame-graph), e.g.
+// "callees:call-tree". The param is omitted when all panels use the default.
 function convertFuncPanelViewsToString(
   state: FuncPanelViewsState
 ): string | undefined {
@@ -858,7 +863,7 @@ function convertFuncPanelViewsFromString(
   for (const part of raw.split(',')) {
     const [panel, view] = part.split(':');
     if (
-      (panel === 'callees' || panel === 'callers') &&
+      (panel === 'callees' || panel === 'callers' || panel === 'selfTime') &&
       (view === 'flame-graph' || view === 'call-tree')
     ) {
       result[panel] = view;

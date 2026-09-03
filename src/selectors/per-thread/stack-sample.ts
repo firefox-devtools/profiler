@@ -11,6 +11,7 @@ import * as ProfileData from '../../profile-logic/profile-data';
 import * as StackTiming from '../../profile-logic/stack-timing';
 import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
+import * as Transforms from '../../profile-logic/transforms';
 import type { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
@@ -44,6 +45,8 @@ import type {
   CallNodeTableBitSet,
   IndexIntoFuncTable,
   IndexIntoStackTable,
+  SamplesLikeTable,
+  SampleCategoriesAndSubcategories,
   CallNodeArea,
 } from 'firefox-profiler/types';
 import type {
@@ -890,6 +893,165 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileData.computeCallersMaxDepthPlusOne
   );
 
+  // Self time panel: previewFiltered(focusSelf(rangeAndTransformFilteredThread,
+  //                                      selectedFunc, implFilter))
+  // This uses the thread BEFORE the implementation filter so that native frames
+  // that are "inside" the selected function's self time are visible even when
+  // the implementation filter is set to "JS only". Preview filtering is applied
+  // AFTER focusSelf so that dragging a selection only re-slices sample arrays
+  // instead of re-running the expensive focusSelf pass over the stack table.
+  const _getFocusedSelfTimeThread: Selector<Thread> = createSelector(
+    threadSelectors.getRangeAndTransformFilteredThread,
+    getSelectedFunctionIndex,
+    UrlState.getImplementationFilter,
+    (thread, funcIndex, implFilter) => {
+      if (funcIndex === null) {
+        return thread;
+      }
+      return Transforms.focusSelf(thread, funcIndex, implFilter);
+    }
+  );
+
+  const getSelfTimeThread: Selector<Thread> = createSelector(
+    _getFocusedSelfTimeThread,
+    ProfileSelectors.getPreviewSelection,
+    (thread, previewSelection): Thread => {
+      if (!previewSelection) {
+        return thread;
+      }
+      const { selectionStart, selectionEnd } = previewSelection;
+      return ProfileData.filterThreadSamplesToRange(
+        thread,
+        selectionStart,
+        selectionEnd
+      );
+    }
+  );
+
+  const _getSelfTimeCallNodeInfo: Selector<CallNodeInfo> = createSelector(
+    (state: State) => getSelfTimeThread(state).stackTable,
+    (state: State) => getSelfTimeThread(state).frameTable,
+    ProfileSelectors.getDefaultCategory,
+    ProfileData.getCallNodeInfo
+  );
+
+  const _getSelfTimeCtssSamples: Selector<SamplesLikeTable> = createSelector(
+    getSelfTimeThread,
+    threadSelectors.getCallTreeSummaryStrategy,
+    CallTree.extractSamplesLikeTable
+  );
+
+  const _getSelfTimeSampleIndexToCallNodeIndex: Selector<
+    Array<IndexIntoCallNodeTable | null>
+  > = createSelector(
+    (state: State) => _getSelfTimeCtssSamples(state).stack,
+    (state: State) =>
+      _getSelfTimeCallNodeInfo(state).getStackIndexToNonInvertedCallNodeIndex(),
+    ProfileData.getSampleIndexToCallNodeIndex
+  );
+
+  const _getSelfTimeCallNodeSelfAndSummary: Selector<CallNodeSelfAndSummary> =
+    createSelector(
+      _getSelfTimeCtssSamples,
+      _getSelfTimeSampleIndexToCallNodeIndex,
+      (state: State) =>
+        _getSelfTimeCallNodeInfo(state).getCallNodeTable().length,
+      getCallNodeSelfAndSummary,
+      (
+        samples,
+        sampleIndexToCallNodeIndex,
+        callNodeCount,
+        regularTreeSelfAndSummary
+      ) => {
+        const selfTimeSelfAndSummary = CallTree.computeCallNodeSelfAndSummary(
+          samples,
+          sampleIndexToCallNodeIndex,
+          callNodeCount
+        );
+        // Keep flameGraphWidthTotal as the self time panel's own total so the
+        // root fills the full flame graph width. Override rootTotalSummary with
+        // the regular tree's value so tooltips show percentages relative to all
+        // filtered samples.
+        return {
+          callNodeSelf: selfTimeSelfAndSummary.callNodeSelf,
+          flameGraphWidthTotal: selfTimeSelfAndSummary.rootTotalSummary,
+          rootTotalSummary: regularTreeSelfAndSummary.rootTotalSummary,
+        };
+      }
+    );
+
+  const _getSelfTimeCallTreeTimings: Selector<CallTree.CallTreeTimings> =
+    createSelector(
+      _getSelfTimeCallNodeInfo,
+      _getSelfTimeCallNodeSelfAndSummary,
+      CallTree.computeCallTreeTimings
+    );
+
+  const _getSelfTimeCallTreeTimingsNonInverted: Selector<CallTree.CallTreeTimingsNonInverted> =
+    createSelector(
+      _getSelfTimeCallNodeInfo,
+      _getSelfTimeCallNodeSelfAndSummary,
+      CallTree.computeCallTreeTimingsNonInverted
+    );
+
+  const getSelfTimeCallTree: Selector<CallTree.CallTree> = createSelector(
+    getSelfTimeThread,
+    _getSelfTimeCallNodeInfo,
+    ProfileSelectors.getCategories,
+    _getSelfTimeCtssSamples,
+    _getSelfTimeCallTreeTimings,
+    getWeightTypeForCallTree,
+    CallTree.getCallTree
+  );
+
+  const _getSelfTimeFlameGraphFuncComparator: Selector<FlameGraph.FlameGraphFuncComparator> =
+    createSelector(
+      (state: State) => getSelfTimeThread(state).funcTable,
+      (state: State) => getSelfTimeThread(state).resourceTable,
+      (state: State) => getSelfTimeThread(state).sources,
+      (state: State) => getSelfTimeThread(state).sourceLocationTable,
+      (state: State) => getSelfTimeThread(state).stringTable,
+      FlameGraph.makeFlameGraphFuncComparator
+    );
+
+  const _getSelfTimeFlameGraphRows: Selector<FlameGraph.FlameGraphRows> =
+    createSelector(
+      (state: State) => _getSelfTimeCallNodeInfo(state).getCallNodeTable(),
+      _getSelfTimeFlameGraphFuncComparator,
+      FlameGraph.computeFlameGraphRows
+    );
+
+  const getSelfTimeFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      _getSelfTimeFlameGraphRows,
+      (state: State) => _getSelfTimeCallNodeInfo(state).getCallNodeTable(),
+      _getSelfTimeCallTreeTimingsNonInverted,
+      FlameGraph.getFlameGraphTiming
+    );
+
+  const getSelfTimeCallNodeMaxDepthPlusOne: Selector<number> = createSelector(
+    (state: State) => _getSelfTimeCallNodeInfo(state).getCallNodeTable(),
+    (callNodeTable) => callNodeTable.maxDepth + 1
+  );
+
+  const getSelfTimeCallNodeInfo: Selector<CallNodeInfo> =
+    _getSelfTimeCallNodeInfo;
+
+  const getSelfTimeCtssSamples: Selector<SamplesLikeTable> =
+    _getSelfTimeCtssSamples;
+
+  const getSelfTimeCtssSampleCallNodes: Selector<
+    Array<IndexIntoCallNodeTable | null>
+  > = _getSelfTimeSampleIndexToCallNodeIndex;
+
+  const getSelfTimeCtssSampleCategoriesAndSubcategories: Selector<SampleCategoriesAndSubcategories> =
+    createSelector(
+      getSelfTimeThread,
+      _getSelfTimeCtssSamples,
+      ProfileSelectors.getDefaultCategory,
+      CallTree.computeUnfilteredCtssSampleCategoriesAndSubcategories
+    );
+
   const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
     createSelector(
       getRightClickedCallNodeInfo,
@@ -1019,6 +1181,14 @@ export function getStackAndSampleSelectorsPerThread(
     getCalleesFlameGraphTiming,
     getCallersFlameGraphTiming,
     getCallersFlameGraphMaxDepthPlusOne,
+    getSelfTimeThread,
+    getSelfTimeCallNodeInfo,
+    getSelfTimeCallTree,
+    getSelfTimeFlameGraphTiming,
+    getSelfTimeCallNodeMaxDepthPlusOne,
+    getSelfTimeCtssSamples,
+    getSelfTimeCtssSampleCallNodes,
+    getSelfTimeCtssSampleCategoriesAndSubcategories,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,

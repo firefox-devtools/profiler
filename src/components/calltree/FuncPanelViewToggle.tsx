@@ -8,6 +8,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCalleesView,
   getCallersView,
+  getSelfTimeView,
 } from 'firefox-profiler/selectors/url-state';
 import { changeFuncPanelView } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
@@ -146,6 +147,9 @@ export const FuncPanelViewToggle = explicitConnect<
         break;
       case 'callers':
         view = getCallersView(state);
+        break;
+      case 'selfTime':
+        view = getSelfTimeView(state);
         break;
       default:
         throw assertExhaustiveCheck(ownProps.panel, 'Unhandled panel.');

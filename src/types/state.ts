@@ -84,9 +84,13 @@ export type CallNodeArea =
   | 'CALLERS'
   | 'CALLEES';
 
+// The panels of the function list.
+export type FuncPanelName = 'callees' | 'callers' | 'selfTime';
+
 // Function-list panels with their own selected/expanded/right-clicked call
-// node path.
-export type FuncPanelName = 'callees' | 'callers';
+// node path. The self time panel has no such state of its own: it shares it
+// with the main tree.
+export type FuncPanelWithCallNodeArea = Exclude<FuncPanelName, 'selfTime'>;
 
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;

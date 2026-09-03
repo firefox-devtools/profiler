@@ -49,7 +49,7 @@ import type {
   SelectionContext,
   FuncPanelViewType,
   CallNodePath,
-  FuncPanelName,
+  FuncPanelWithCallNodeArea,
 } from 'firefox-profiler/types';
 import type { CallTree as CallTreeType } from 'firefox-profiler/profile-logic/call-tree';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
@@ -318,7 +318,7 @@ class FuncPanelCallTreeImpl extends PureComponent<Props> {
   }
 }
 
-function makeMapDispatchToProps(panel: FuncPanelName) {
+function makeMapDispatchToProps(panel: FuncPanelWithCallNodeArea) {
   return {
     changeSelectedCallNode: (
       threadsKey: ThreadsKey,

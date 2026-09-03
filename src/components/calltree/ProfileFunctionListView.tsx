@@ -6,6 +6,7 @@ import * as React from 'react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { FunctionList } from './FunctionList';
+import { SelfTimePanel } from './SelfTimePanel';
 import { CalleesCallTree, CallersCallTree } from './FuncPanelCallTree';
 import { DisclosureBox } from 'firefox-profiler/components/shared/DisclosureBox';
 import { FuncPanelViewToggle } from './FuncPanelViewToggle';
@@ -36,6 +37,9 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
   };
   _onCallersToggle = (isOpen: boolean) => {
     this.props.changeFunctionListSectionOpen('callers', isOpen);
+  };
+  _onSelfTimeToggle = (isOpen: boolean) => {
+    this.props.changeFunctionListSectionOpen('selfTime', isOpen);
   };
 
   override render() {
@@ -83,6 +87,19 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               }
             >
               <CallersCallTree />
+            </DisclosureBox>
+            <DisclosureBox
+              label="Self time"
+              isOpen={sectionsOpen.selfTime}
+              onToggle={this._onSelfTimeToggle}
+              headerActions={
+                <FuncPanelViewToggle
+                  panel="selfTime"
+                  flameGraphStartsAtBottom={true}
+                />
+              }
+            >
+              <SelfTimePanel />
             </DisclosureBox>
           </ResizableWithSplitter>
         </div>

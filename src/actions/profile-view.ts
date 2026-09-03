@@ -78,6 +78,7 @@ import type {
   IndexIntoFuncTable,
   CallNodeArea,
   FuncPanelName,
+  FuncPanelWithCallNodeArea,
   FuncPanelViewType,
 } from 'firefox-profiler/types';
 import {
@@ -135,13 +136,13 @@ export function changeSelectedCallNode(
   };
 }
 
-const FUNC_PANEL_AREAS: Record<FuncPanelName, CallNodeArea> = {
+const FUNC_PANEL_AREAS: Record<FuncPanelWithCallNodeArea, CallNodeArea> = {
   callees: 'CALLEES',
   callers: 'CALLERS',
 };
 
 export function changeFuncPanelSelectedCallNode(
-  panel: FuncPanelName,
+  panel: FuncPanelWithCallNodeArea,
   threadsKey: ThreadsKey,
   selectedCallNodePath: CallNodePath,
   context: SelectionContext = { source: 'auto' }
@@ -204,7 +205,7 @@ export function changeRightClickedFunctionIndex(
 }
 
 export function changeFuncPanelRightClickedCallNode(
-  panel: FuncPanelName,
+  panel: FuncPanelWithCallNodeArea,
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
 ): Action {
@@ -1654,7 +1655,7 @@ export function changeExpandedCallNodes(
 }
 
 export function changeFuncPanelExpandedCallNodes(
-  panel: FuncPanelName,
+  panel: FuncPanelWithCallNodeArea,
   threadsKey: ThreadsKey,
   expandedCallNodePaths: Array<CallNodePath>
 ): Action {

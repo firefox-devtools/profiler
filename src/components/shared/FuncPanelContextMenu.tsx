@@ -52,7 +52,7 @@ import './CallNodeContextMenu.css';
 // label, and l10n vars from the current right-clicked function.
 type MenuItemContext = {
   readonly funcIndex: IndexIntoFuncTable;
-  readonly callNodeTable: CallNodeTable;
+  readonly callNodeTables: ReadonlyArray<CallNodeTable>;
   readonly nameForResource: string | null;
 };
 
@@ -116,8 +116,8 @@ const MENU_ITEMS: ReadonlyArray<TransformMenuItem> = [
     icon: 'Collapse',
     l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
     content: () => 'Collapse recursion',
-    visible: ({ funcIndex, callNodeTable }) =>
-      funcHasRecursiveCall(callNodeTable, funcIndex),
+    visible: ({ funcIndex, callNodeTables }) =>
+      callNodeTables.some((t) => funcHasRecursiveCall(t, funcIndex)),
   },
   {
     transform: 'collapse-direct-recursion',
@@ -125,8 +125,8 @@ const MENU_ITEMS: ReadonlyArray<TransformMenuItem> = [
     icon: 'Collapse',
     l10nId: 'CallNodeContextMenu--transform-collapse-direct-recursion-only',
     content: () => 'Collapse direct recursion only',
-    visible: ({ funcIndex, callNodeTable }) =>
-      funcHasDirectRecursiveCall(callNodeTable, funcIndex),
+    visible: ({ funcIndex, callNodeTables }) =>
+      callNodeTables.some((t) => funcHasDirectRecursiveCall(t, funcIndex)),
   },
   {
     transform: 'drop-function',
@@ -141,7 +141,10 @@ type StateProps = {
   readonly thread: Thread | null;
   readonly threadsKey: ThreadsKey | null;
   readonly funcIndex: IndexIntoFuncTable | null;
-  readonly callNodeTable: CallNodeTable | null;
+  // Call node tables in which to check for recursion. Multiple tables are
+  // useful for the self time panel menu, where the focusSelf-filtered table may
+  // reveal recursion that the regular table hides.
+  readonly callNodeTables: ReadonlyArray<CallNodeTable>;
   readonly implementation: ImplementationFilter;
   readonly displaySearchfox: boolean;
 };
@@ -179,16 +182,10 @@ class FuncPanelContextMenuImpl extends PureComponent<Props> {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
     readonly funcIndex: IndexIntoFuncTable;
-    readonly callNodeTable: CallNodeTable;
   } {
-    const { thread, threadsKey, funcIndex, callNodeTable } = this.props;
-    if (
-      thread !== null &&
-      threadsKey !== null &&
-      funcIndex !== null &&
-      callNodeTable !== null
-    ) {
-      return { thread, threadsKey, funcIndex, callNodeTable };
+    const { thread, threadsKey, funcIndex } = this.props;
+    if (thread !== null && threadsKey !== null && funcIndex !== null) {
+      return { thread, threadsKey, funcIndex };
     }
     return null;
   }
@@ -378,7 +375,7 @@ class FuncPanelContextMenuImpl extends PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const { displaySearchfox } = this.props;
+    const { displaySearchfox, callNodeTables } = this.props;
     const info = this._getRightClickedInfo();
 
     if (info === null) {
@@ -390,7 +387,7 @@ class FuncPanelContextMenuImpl extends PureComponent<Props> {
 
     const ctx: MenuItemContext = {
       funcIndex: info.funcIndex,
-      callNodeTable: info.callNodeTable,
+      callNodeTables,
       nameForResource: this.getNameForSelectedResource(),
     };
 
@@ -447,8 +444,11 @@ const dispatchToProps: DispatchProps = {
   setContextMenuVisibility,
 };
 
-// Connected variant used by the function list: the right-clicked function
-// comes from the rightClickedFunction profile-view state.
+// Connected variant used by the function list and self time panel: the right-clicked
+// function comes from the rightClickedFunction profile-view state. Recursion
+// detection considers both the regular call node table and the self time panel's
+// call node table (where the focusSelf filter may surface recursion that the
+// regular table hides).
 export const FunctionListContextMenu = explicitConnect<
   {},
   StateProps,
@@ -463,7 +463,7 @@ export const FunctionListContextMenu = explicitConnect<
         thread: null,
         threadsKey: null,
         funcIndex: null,
-        callNodeTable: null,
+        callNodeTables: [],
         implementation: getImplementationFilter(state),
         displaySearchfox: getShouldDisplaySearchfox(state),
       };
@@ -472,12 +472,16 @@ export const FunctionListContextMenu = explicitConnect<
     const selectors = getThreadSelectorsFromThreadsKey(
       rightClickedFunction.threadsKey
     );
+    const callNodeTables: CallNodeTable[] = [
+      selectors.getCallNodeInfo(state).getCallNodeTable(),
+      selectors.getSelfTimeCallNodeInfo(state).getCallNodeTable(),
+    ];
+
     return {
       thread: selectors.getFilteredThread(state),
       threadsKey: rightClickedFunction.threadsKey,
       funcIndex: rightClickedFunction.functionIndex,
-      // Use the non-inverted call node table for recursion detection.
-      callNodeTable: selectors.getCallNodeInfo(state).getCallNodeTable(),
+      callNodeTables,
       implementation: getImplementationFilter(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
     };
@@ -489,7 +493,8 @@ export const FunctionListContextMenu = explicitConnect<
 });
 
 // Connected variant used by the callers panel: the right-clicked function comes
-// from a right-clicked call node in the CALLERS area.
+// from a right-clicked call node in the CALLERS area. Only the regular
+// call node table is consulted for recursion.
 export const CallersContextMenu = explicitConnect<
   {},
   StateProps,
@@ -506,7 +511,7 @@ export const CallersContextMenu = explicitConnect<
         thread: null,
         threadsKey: null,
         funcIndex: null,
-        callNodeTable: null,
+        callNodeTables: [],
         implementation: getImplementationFilter(state),
         displaySearchfox: getShouldDisplaySearchfox(state),
       };
@@ -515,12 +520,15 @@ export const CallersContextMenu = explicitConnect<
     const selectors = getThreadSelectorsFromThreadsKey(
       rightClickedCallNodeInfo.threadsKey
     );
+    const callNodeTables: CallNodeTable[] = [
+      selectors.getCallNodeInfo(state).getCallNodeTable(),
+    ];
+
     return {
       thread: selectors.getFilteredThread(state),
       threadsKey: rightClickedCallNodeInfo.threadsKey,
       funcIndex: selectors.getCallersRightClickedFuncIndex(state),
-      // Use the non-inverted call node table for recursion detection.
-      callNodeTable: selectors.getCallNodeInfo(state).getCallNodeTable(),
+      callNodeTables,
       implementation: getImplementationFilter(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
     };
