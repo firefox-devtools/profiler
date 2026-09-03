@@ -490,13 +490,13 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
 
   _getNodeTiming(nodeIndex: IndexIntoCallNodeTable): InvertedNodeTiming {
     const callNodeInfo = this._callNodeInfo;
-    const { callNodeSelf, totalPerRootFunc, hasChildrenPerRootFunc } =
+    const { callNodeSelf, totalPerRootNode, hasChildrenPerRootNode } =
       this._callTreeTimings;
 
     if (callNodeInfo.isRoot(nodeIndex)) {
       return {
-        total: totalPerRootFunc[nodeIndex],
-        hasChildren: hasChildrenPerRootFunc[nodeIndex] !== 0,
+        total: totalPerRootNode[nodeIndex],
+        hasChildren: hasChildrenPerRootNode[nodeIndex] !== 0,
       };
     }
 
@@ -545,7 +545,7 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
   }
 
   _getRootRowItems(): InvertedFlameGraphRowItem[] {
-    const { rootTotalSummary, sortedRoots, totalPerRootFunc } =
+    const { rootTotalSummary, sortedRoots, totalPerRootNode } =
       this._callTreeTimings;
     const abs = Math.abs;
 
@@ -563,7 +563,7 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
     let currentRootStart = 0;
     for (let i = 0; i < roots.length; i++) {
       const root = roots[i];
-      const totalRelative = abs(totalPerRootFunc[root] / rootTotalSummary);
+      const totalRelative = abs(totalPerRootNode[root] / rootTotalSummary);
       const start = currentRootStart;
       const end = start + totalRelative;
       if (totalRelative >= MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH) {
