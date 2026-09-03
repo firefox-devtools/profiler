@@ -581,8 +581,59 @@ type ChildrenInfo = {
 export type SuffixOrderIndex = number;
 
 /**
- * The CallNodeInfo implementation for the inverted tree, with additional
- * functionality for the inverted call tree.
+ * The interface for the inverted-mode call node info, which extends
+ * CallNodeInfo with the additional functionality that consumers of inverted
+ * call trees need (suffix order, root identification, function count).
+ *
+ * The only implementation so far is LazyInvertedCallNodeInfo, which has one
+ * root per func and materializes non-root nodes on demand. It is used for the
+ * regular "invert call stack" mode and the function list tab, where any func
+ * can be a displayed root. The interface deliberately does not assume that
+ * roots correspond one-to-one to funcs, so that implementations with a
+ * restricted set of roots can be added.
+ */
+export interface CallNodeInfoInverted extends CallNodeInfo {
+  // Get a mapping SuffixOrderIndex -> IndexIntoCallNodeTable.
+  // The contents may be mutated by the implementation as inverted nodes get
+  // materialized on demand. Callers should not hold on to this array across
+  // calls that may create new inverted nodes (getChildren, getCallNodeIndexFromPath).
+  getSuffixOrderedCallNodes(): Uint32Array;
+
+  // The inverse of getSuffixOrderedCallNodes: IndexIntoCallNodeTable -> SuffixOrderIndex.
+  // Same staleness caveat as above.
+  getSuffixOrderIndexes(): Uint32Array;
+
+  // The [start, exclusiveEnd] suffix order index range for this inverted node.
+  getSuffixOrderIndexRangeForCallNode(
+    nodeHandle: IndexIntoCallNodeTable
+  ): [SuffixOrderIndex, SuffixOrderIndex];
+
+  // The number of functions in the func table this CNI was built from.
+  // (Sizes per-func scratch buffers in callers; not directly tied to the
+  // number of inverted-tree roots — see getRootCount.)
+  getFuncCount(): number;
+
+  // The number of roots in the inverted tree. Root call node handles are
+  // 0..getRootCount()-1. For the full inverted tree this equals funcCount
+  // (one root per func).
+  getRootCount(): number;
+
+  // Returns the inverted root call node handle for `funcIndex`, or -1 if no
+  // root in this CNI corresponds to that function.
+  getRootNodeForFunc(
+    funcIndex: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | -1;
+
+  // True if the given node is a root of the inverted tree.
+  isRoot(nodeHandle: IndexIntoCallNodeTable): boolean;
+
+  // Materialize and return the children of this inverted node. Sorted by func.
+  getChildren(nodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[];
+}
+
+/**
+ * The lazy CallNodeInfoInverted implementation. It has one root per func and
+ * materializes non-root nodes on demand.
  *
  * # The Suffix Order
  *
@@ -902,7 +953,7 @@ export type SuffixOrderIndex = number;
  * deep nodes. They're not needed anymore. So _takeDeepNodesForInvertedNode
  * nulls out the stored deepNodes for an inverted node when it's called.
  */
-export class CallNodeInfoInverted implements CallNodeInfo {
+export class LazyInvertedCallNodeInfo implements CallNodeInfoInverted {
   // The non-inverted call node table.
   _callNodeTable: CallNodeTable;
 
@@ -1020,11 +1071,21 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return this._suffixOrderIndexes;
   }
 
-  // Get the number of functions. There is one root per function.
-  // So this is also the number of roots at the same time.
-  // The inverted call node index for a root is the same as the function index.
+  // Get the number of functions. There is one root per function in this
+  // (full inverted) CNI, so it also equals getRootCount().
+  // For roots, the inverted call node handle equals the function index.
   getFuncCount(): number {
     return this._rootCount;
+  }
+
+  getRootCount(): number {
+    return this._rootCount;
+  }
+
+  // For the full inverted tree, each func has its own root and the root
+  // handle equals the func index.
+  getRootNodeForFunc(funcIndex: IndexIntoFuncTable): InvertedCallNodeHandle {
+    return funcIndex;
   }
 
   // Returns whether the given node is a root node.
