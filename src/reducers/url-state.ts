@@ -6,7 +6,10 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries, objectMap } from '../utils/types';
 import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
-import { FUNCTION_LIST_SECTIONS_OPEN_DEFAULT } from '../app-logic/constants';
+import {
+  FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  WING_VIEWS_DEFAULT,
+} from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -27,6 +30,7 @@ import type {
   SelectedMarkersPerThread,
   SelectedFunctionsPerThread,
   FunctionListSectionsOpenState,
+  WingViewsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -230,6 +234,18 @@ const functionListSectionsOpen: Reducer<FunctionListSectionsOpenState> = (
   switch (action.type) {
     case 'CHANGE_FUNCTION_LIST_SECTION_OPEN':
       return { ...state, [action.section]: action.isOpen };
+    default:
+      return state;
+  }
+};
+
+const wingViews: Reducer<WingViewsState> = (
+  state = WING_VIEWS_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_WING_VIEW':
+      return { ...state, [action.wing]: action.view };
     default:
       return state;
   }
@@ -900,6 +916,7 @@ const profileSpecific = combineReducers({
   markerTableSort,
   functionListSort,
   functionListSectionsOpen,
+  wingViews,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading

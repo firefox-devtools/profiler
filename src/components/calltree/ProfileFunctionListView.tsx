@@ -8,6 +8,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { FunctionList } from './FunctionList';
 import { UpperWing, LowerWing } from './WingTreeView';
 import { DisclosureBox } from 'firefox-profiler/components/shared/DisclosureBox';
+import { WingViewToggle } from './WingViewToggle';
 import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
 import { TransformNavigator } from 'firefox-profiler/components/shared/TransformNavigator';
 import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
@@ -61,6 +62,7 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Descendants"
               isOpen={sectionsOpen.descendants}
               onToggle={this._onDescendantsToggle}
+              headerActions={<WingViewToggle wing="upper" />}
             >
               <UpperWing />
             </DisclosureBox>
@@ -68,6 +70,7 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Ancestors"
               isOpen={sectionsOpen.ancestors}
               onToggle={this._onAncestorsToggle}
+              headerActions={<WingViewToggle wing="lower" />}
             >
               <LowerWing />
             </DisclosureBox>
