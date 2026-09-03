@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
+  FILE_IO_TABLE_LABEL,
   formatFromMarkerSchema,
   parseLabel,
   markerSchemaFrontEndOnly,
@@ -173,6 +174,40 @@ describe('marker schema labels', function () {
   });
 
   describe('optional segments', function () {
+    const fileIoFields: MarkerSchema['fields'] = [
+      { key: 'operation', label: 'Operation', format: 'string' },
+      { key: 'source', label: 'Source', format: 'string' },
+      { key: 'filename', label: 'Filename', format: 'file-path' },
+    ];
+
+    it('formats FileIO labels without empty optional segments', function () {
+      const separator = '—';
+      expect(
+        [
+          {
+            operation: 'create/open',
+            source: 'PoisonIOInterposer',
+            filename: '/foo/bar',
+          },
+          { operation: 'create/open', source: '', filename: '/foo/bar' },
+          { operation: 'create/open', source: 'PoisonIOInterposer' },
+          { operation: 'create/open', source: '' },
+        ].map((payload) =>
+          applyLabel({
+            label: FILE_IO_TABLE_LABEL,
+            schemaFields: fileIoFields,
+            payload,
+          })
+        )
+      ).toEqual([
+        `(PoisonIOInterposer) create/open ${separator} /foo/bar`,
+        `create/open ${separator} /foo/bar`,
+        '(PoisonIOInterposer) create/open',
+        'create/open',
+      ]);
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
     it('omits a segment when any referenced payload value is absent', function () {
       expect(
         applyLabel({

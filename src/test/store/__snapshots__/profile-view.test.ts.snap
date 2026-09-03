@@ -140,6 +140,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "[[({marker.data.source}) ]]{marker.data.operation}[[ — {marker.data.filename}]]",
       },
       Object {
         "display": Array [
@@ -428,7 +429,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",

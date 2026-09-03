@@ -117,6 +117,18 @@ const OPTIONAL_SEGMENT_RE = /\[\[([\s\S]*?)\]\]/;
 const OPTIONAL_SEGMENT_PAYLOAD_KEY_RE =
   /\{\s*marker\.data\.([^.{}\s?]+)(?=\s*(?:\}|\?))/g;
 
+export const FILE_IO_TABLE_LABEL =
+  '[[({marker.data.source}) ]]{marker.data.operation}[[ — {marker.data.filename}]]';
+
+export function addFileIoTableLabel(schema: {
+  name: string;
+  tableLabel?: string;
+}): void {
+  if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+    schema.tableLabel = FILE_IO_TABLE_LABEL;
+  }
+}
+
 /**
  * Marker schema can create a dynamic tooltip label. For instance a schema with
  * a `tooltipLabel` field of "Event at {marker.data.url}" would create a label based
@@ -347,28 +359,7 @@ const fallbacks: Record<LabelKey, (marker: any) => string> = {
 
   chartLabel: (_marker) => '',
 
-  tableLabel: (marker: Marker) => {
-    let description = '';
-
-    if (marker.data) {
-      const data = marker.data;
-      switch (data.type) {
-        case 'FileIO':
-          if (data.source) {
-            description = `(${data.source}) `;
-          }
-          description += data.operation;
-          if (data.filename) {
-            description = data.operation
-              ? `${description} — ${data.filename}`
-              : data.filename;
-          }
-          break;
-        default:
-      }
-    }
-    return description;
-  },
+  tableLabel: (_marker) => '',
 
   copyLabel: (marker) => marker.name,
 };

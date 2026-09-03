@@ -58,7 +58,10 @@ import {
   toFloat64Array,
   toFloat64ArraySetNullToZero,
 } from '../utils/typed-arrays';
-import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
+import {
+  addFileIoTableLabel,
+  computeStringIndexMarkerFieldsByDataType,
+} from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type { StringTable } from '../utils/string-table';
@@ -1722,7 +1725,7 @@ function _convertGeckoMarkerSchema(
     description = staticFields[staticDescriptionFieldIndex].value;
   }
 
-  return {
+  const processedMarkerSchema = {
     name,
     tooltipLabel,
     tableLabel,
@@ -1734,6 +1737,8 @@ function _convertGeckoMarkerSchema(
     colorField,
     isStackBased,
   };
+  addFileIoTableLabel(processedMarkerSchema);
+  return processedMarkerSchema;
 }
 
 /**
