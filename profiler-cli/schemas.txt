@@ -217,7 +217,7 @@ profiler-cli thread network --json
     context: SessionContext
   }
 
-profiler-cli marker info --json
+profiler-cli marker info <handle> --json
   {
     type: "marker-info",
     threadHandle, friendlyThreadName, markerHandle, markerIndex, name,
@@ -225,6 +225,16 @@ profiler-cli marker info --json
     start, end, duration?,
     fields?: [{ key, label, value, formattedValue }],
     stack?: { frames: [{ name, nameWithLibrary }], truncated }
+  }
+
+profiler-cli marker info <handle>... --json
+  {
+    type: "marker-info-multi",
+    requested: [markerHandle],
+    markers: [MarkerInfoResult],
+    errors: [{ markerHandle, error }],
+    rangeSpansThreadsWarning?: { ranges: [spec], threadHandles: [threadHandle] },
+    context: SessionContext
   }
 
 profiler-cli status --json

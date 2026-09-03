@@ -62,7 +62,7 @@ import {
 } from 'firefox-profiler/profile-logic/source-map-matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
-import { MarkerMap } from './marker-map';
+import { MarkerMap, expandMarkerHandleSpecsDetailed } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
 import { collectProfileMeta } from './formatters/profile-meta';
@@ -107,6 +107,7 @@ import type {
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -1318,6 +1319,63 @@ export class ProfileQuerier {
       markerHandle
     );
     return { ...result, context: this._getContext() };
+  }
+
+  /**
+   * Show detailed information about several markers at once. A handle that does
+   * not resolve goes into `errors` rather than failing the whole query.
+   */
+  async markerInfoMulti(
+    markerHandleSpecs: string[]
+  ): Promise<WithContext<MarkerInfoMultiResult>> {
+    const { handles, ranges } =
+      expandMarkerHandleSpecsDetailed(markerHandleSpecs);
+    const markers: MarkerInfoResult[] = [];
+    const errors: MarkerInfoMultiResult['errors'] = [];
+
+    for (const markerHandle of handles) {
+      try {
+        markers.push(
+          await collectMarkerInfo(
+            this._store,
+            this._markerMap,
+            this._threadMap,
+            markerHandle
+          )
+        );
+      } catch (error) {
+        errors.push({
+          markerHandle,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    // Only ranges are checked: a typed-out list of handles from several threads
+    // is a deliberate comparison, not an accident of numbering.
+    let rangeSpansThreadsWarning:
+      | MarkerInfoMultiResult['rangeSpansThreadsWarning']
+      | undefined;
+    if (ranges.length > 0) {
+      const threadHandles: string[] = [];
+      for (const marker of markers) {
+        if (!threadHandles.includes(marker.threadHandle)) {
+          threadHandles.push(marker.threadHandle);
+        }
+      }
+      if (threadHandles.length > 1) {
+        rangeSpansThreadsWarning = { ranges, threadHandles };
+      }
+    }
+
+    return {
+      type: 'marker-info-multi',
+      requested: handles,
+      markers,
+      errors,
+      rangeSpansThreadsWarning,
+      context: this._getContext(),
+    };
   }
 
   async markerStack(

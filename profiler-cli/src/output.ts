@@ -18,6 +18,7 @@ import {
   formatThreadInfoResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
+  formatMarkerInfoMultiResult,
   formatProfileInfoResult,
   formatProfileMetaResult,
   formatThreadSamplesResult,
@@ -73,6 +74,8 @@ export function formatOutput(
       return formatMarkerStackResult(result);
     case 'marker-info':
       return formatMarkerInfoResult(result);
+    case 'marker-info-multi':
+      return formatMarkerInfoMultiResult(result);
     case 'profile-info':
       return formatProfileInfoResult(result);
     case 'profile-meta':

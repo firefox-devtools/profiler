@@ -99,6 +99,8 @@ CORE WORKFLOW
 
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
+    profiler-cli marker info m-1234 m-1240   Several markers in one call (one record per handle)
+    profiler-cli marker info m-1234..m-1240  Inclusive range of handles, e.g. consecutive list rows
     profiler-cli marker stack m-1234         Full stack trace at the time of a marker
     profiler-cli function info f-12          Function details (source location, library)
     profiler-cli function expand f-12        Show full untruncated function name

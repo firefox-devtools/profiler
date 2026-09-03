@@ -50,6 +50,7 @@ export type {
   RateStats,
   MarkerGroupData,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
@@ -81,6 +82,7 @@ import type {
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -164,6 +166,8 @@ export type ClientCommand =
       command: 'marker';
       subcommand: 'info' | 'select' | 'stack';
       marker?: string;
+      /** Set instead of `marker` for several handles, e.g. ["m-42", "m-50..m-53"]. */
+      markers?: string[];
     }
   | {
       command: 'counter';
@@ -222,6 +226,7 @@ export type CommandResult =
   | WithContext<ThreadInfoResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
+  | WithContext<MarkerInfoMultiResult>
   | WithContext<ProfileInfoResult>
   | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>
