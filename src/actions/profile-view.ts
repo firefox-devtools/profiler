@@ -1747,6 +1747,17 @@ export function changeFunctionListSort(
   };
 }
 
+export function changeFunctionListSectionOpen(
+  section: FuncPanelName,
+  isOpen: boolean
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
+    section,
+    isOpen,
+  };
+}
+
 export function changeNetworkSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_NETWORK_SEARCH_STRING',
