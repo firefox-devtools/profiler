@@ -23,7 +23,10 @@ import {
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import { FUNCTION_LIST_SECTIONS_OPEN_DEFAULT } from './constants';
+import {
+  FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  WING_VIEWS_DEFAULT,
+} from './constants';
 import type {
   UrlState,
   DataSource,
@@ -46,6 +49,8 @@ import type {
   SelectedFunctionsPerThread,
   FunctionListSectionsOpenState,
   FunctionListSectionName,
+  WingViewName,
+  WingViewsState,
 } from 'firefox-profiler/types';
 import { FuncFlag } from 'firefox-profiler/types';
 import {
@@ -207,6 +212,7 @@ type CallTreeQuery = BaseQuery & {
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
   funcListSections?: string; // "descendants,ancestors" — comma-separated open sections
+  wingViews?: string; // "upper:call-tree,lower:call-tree" — non-default wing views
   selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
@@ -259,6 +265,7 @@ type Query = BaseQuery & {
   // Function list specific
   functionListSort?: string;
   funcListSections?: string;
+  wingViews?: string;
   selectedFunc?: number;
 
   // Network specific
@@ -424,6 +431,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         );
         query.funcListSections = convertFunctionListSectionsOpenToString(
           urlState.profileSpecific.functionListSectionsOpen
+        );
+        query.wingViews = convertWingViewsToString(
+          urlState.profileSpecific.wingViews
         );
         const selectedFunc =
           selectedThreadsKey !== null
@@ -707,6 +717,7 @@ export function stateFromLocation(
       functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
         query.funcListSections
       ),
+      wingViews: convertWingViewsFromString(query.wingViews),
     },
   };
 }
@@ -835,6 +846,40 @@ function convertFunctionListSectionsOpenFromString(
   for (const part of raw.split(',')) {
     if (part === 'descendants' || part === 'ancestors') {
       result[part] = true;
+    }
+  }
+  return result;
+}
+
+// WingView visualization choice for the Descendants ("upper") and Ancestors
+// ("lower") wings of the FunctionList tab. The URL stores a comma-separated
+// list of "wing:view" pairs for wings whose view differs from the default
+// (flame-graph), e.g. "upper:call-tree". The param is omitted when all wings
+// use the default.
+const WING_VIEW_NAMES: ReadonlyArray<WingViewName> = ['upper', 'lower'];
+
+function convertWingViewsToString(state: WingViewsState): string | undefined {
+  const parts: string[] = [];
+  for (const wing of WING_VIEW_NAMES) {
+    if (state[wing] !== WING_VIEWS_DEFAULT[wing]) {
+      parts.push(`${wing}:${state[wing]}`);
+    }
+  }
+  return parts.length === 0 ? undefined : parts.join(',');
+}
+
+function convertWingViewsFromString(raw: string | null | void): WingViewsState {
+  const result: WingViewsState = { ...WING_VIEWS_DEFAULT };
+  if (raw === undefined || raw === null || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    const [wing, view] = part.split(':');
+    if (
+      (wing === 'upper' || wing === 'lower') &&
+      (view === 'flame-graph' || view === 'call-tree')
+    ) {
+      result[wing] = view;
     }
   }
   return result;

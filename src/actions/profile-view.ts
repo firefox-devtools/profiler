@@ -80,6 +80,8 @@ import type {
   CallNodeArea,
   WingName,
   FunctionListSectionName,
+  WingViewName,
+  WingViewType,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -1768,6 +1770,14 @@ export function changeFunctionListSectionOpen(
     type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
     section,
     isOpen,
+  };
+}
+
+export function changeWingView(wing: WingViewName, view: WingViewType): Action {
+  return {
+    type: 'CHANGE_WING_VIEW',
+    wing,
+    view,
   };
 }
 

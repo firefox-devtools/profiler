@@ -824,6 +824,63 @@ export function getStackAndSampleSelectorsPerThread(
       ? getFlameGraphTimingInverted(state)
       : getFlameGraphTimingNonInverted(state);
 
+  const _getUpperWingCallTreeTimingsNonInverted: Selector<CallTree.CallTreeTimingsNonInverted> =
+    createSelector(
+      getUpperWingCallNodeInfo,
+      getUpperWingCallNodeSelfAndSummary,
+      CallTree.computeCallTreeTimingsNonInverted
+    );
+
+  const getUpperWingFlameGraphRows: Selector<FlameGraph.FlameGraphRows> =
+    createSelector(
+      (state: State) => getUpperWingCallNodeInfo(state).getCallNodeTable(),
+      (state: State) =>
+        threadSelectors.getPreviewFilteredThread(state).funcTable,
+      (state: State) =>
+        threadSelectors.getPreviewFilteredThread(state).stringTable,
+      FlameGraph.computeFlameGraphRows
+    );
+
+  const getUpperWingFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      getUpperWingFlameGraphRows,
+      (state: State) => getUpperWingCallNodeInfo(state).getCallNodeTable(),
+      _getUpperWingCallTreeTimingsNonInverted,
+      FlameGraph.getFlameGraphTiming
+    );
+
+  // Lower wing flame graph: rendered top-down (icicle). The cells are
+  // InvertedCallNodeHandle values that map back to LowerWingCallNodeInfo.
+  // The returned object is stateful — it extends the lower-wing CNI and
+  // computes per-row timing on demand as the Canvas scrolls — so the selector
+  // is keyed only on inputs that change when the underlying tree must be
+  // rebuilt. Treat the object's mutations as invisible (no caller observes
+  // anything but `getRow(depth)` results, which are write-once / additive).
+  const getLowerWingFlameGraphTiming: Selector<FlameGraph.LowerWingFlameGraphTiming> =
+    createSelector(
+      getLowerWingCallNodeInfo,
+      getCallNodeSelfAndSummary,
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      (state: State) =>
+        threadSelectors.getPreviewFilteredThread(state).funcTable,
+      (state: State) =>
+        threadSelectors.getPreviewFilteredThread(state).stringTable,
+      FlameGraph.createLowerWingFlameGraphTiming
+    );
+
+  // The max depth equals the deepest entry point's non-inverted depth (an entry
+  // at non-inverted depth D contributes D ancestor steps above the inverted
+  // root). We can read this off the non-inverted call node table without
+  // building the lower-wing tree, so the scroll-area height is available before
+  // any rows are computed.
+  const getLowerWingFlameGraphMaxDepthPlusOne: Selector<number> =
+    createSelector(
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      ProfileData.computeLowerWingMaxDepthPlusOne
+    );
+
   const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
     createSelector(
       getRightClickedCallNodeInfo,
@@ -918,6 +975,8 @@ export function getStackAndSampleSelectorsPerThread(
     getNonInvertedCallNodeInfo,
     getLowerWingCallNodeInfo,
     getUpperWingCallNodeInfo,
+    getPreviewFilteredCtssSampleUpperWingCallNodes:
+      _getPreviewFilteredCtssSampleIndexToUpperWingCallNodeIndex,
     getSourceViewStackLineInfo,
     getAssemblyViewNativeSymbolIndex,
     getAssemblyViewStackAddressInfo,
@@ -948,6 +1007,9 @@ export function getStackAndSampleSelectorsPerThread(
     getFunctionListTimings,
     getLowerWingCallTree,
     getUpperWingCallTree,
+    getUpperWingFlameGraphTiming,
+    getLowerWingFlameGraphTiming,
+    getLowerWingFlameGraphMaxDepthPlusOne,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,

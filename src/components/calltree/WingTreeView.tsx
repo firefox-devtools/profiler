@@ -7,10 +7,20 @@ import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
+import {
+  UpperWingFlameGraph,
+  type UpperWingFlameGraphHandle,
+} from './UpperWingFlameGraph';
+import {
+  LowerWingFlameGraph,
+  type LowerWingFlameGraphHandle,
+} from './LowerWingFlameGraph';
 import { nameColumn, libColumn, treeColumnsForWeightType } from './columns';
 import {
   getSearchStringsAsRegExp,
   getSelectedThreadsKey,
+  getUpperWingView,
+  getLowerWingView,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getScrollToSelectionGeneration,
@@ -37,6 +47,7 @@ import type {
   WeightType,
   TableViewOptions,
   SelectionContext,
+  WingViewType,
   CallNodePath,
   WingName,
 } from 'firefox-profiler/types';
@@ -49,6 +60,7 @@ import './CallTree.css';
 
 // Structural interface satisfied by both wing flame graph components' ref
 // handles. Used so the shared impl can call focus() on either.
+type WingFlameGraphHandle = { focus(): void };
 
 type StateProps = {
   readonly threadsKey: ThreadsKey;
@@ -64,6 +76,7 @@ type StateProps = {
   readonly callNodeMaxDepthPlusOne: number;
   readonly weightType: WeightType;
   readonly tableViewOptions: TableViewOptions;
+  readonly view: WingViewType;
 };
 
 type DispatchProps = {
@@ -90,6 +103,9 @@ type DispatchProps = {
 // each wrapper below.
 type WingConfigProps = {
   readonly contextMenuId: string;
+  readonly renderFlameGraph: (
+    ref: React.RefObject<WingFlameGraphHandle | null>
+  ) => React.ReactNode;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps> & WingConfigProps;
@@ -99,6 +115,9 @@ class WingTreeViewImpl extends PureComponent<Props> {
   _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) => {
     this._treeView = treeView;
   };
+  _flameGraphRef: React.RefObject<WingFlameGraphHandle | null> =
+    React.createRef();
+
   override componentDidMount() {
     this.focus();
     this.maybeProcureInterestingInitialSelection();
@@ -122,6 +141,10 @@ class WingTreeViewImpl extends PureComponent<Props> {
   }
 
   focus() {
+    if (this.props.view === 'flame-graph') {
+      this._flameGraphRef.current?.focus();
+      return;
+    }
     if (this._treeView) {
       this._treeView.focus();
     }
@@ -287,7 +310,10 @@ class WingTreeViewImpl extends PureComponent<Props> {
   }
 
   override render() {
-    return this._renderCallTree();
+    if (this.props.view === 'call-tree') {
+      return this._renderCallTree();
+    }
+    return this.props.renderFlameGraph(this._flameGraphRef);
   }
 }
 
@@ -314,16 +340,36 @@ function makeMapDispatchToProps(wing: WingName) {
   };
 }
 
+const renderUpperWingFlameGraph = (
+  ref: React.RefObject<WingFlameGraphHandle | null>
+) => <UpperWingFlameGraph ref={ref as React.Ref<UpperWingFlameGraphHandle>} />;
+
+const renderLowerWingFlameGraph = (
+  ref: React.RefObject<WingFlameGraphHandle | null>
+) => <LowerWingFlameGraph ref={ref as React.Ref<LowerWingFlameGraphHandle>} />;
+
 function UpperWingComponent(
   props: ConnectedProps<{}, StateProps, DispatchProps>
 ) {
-  return <WingTreeViewImpl {...props} contextMenuId="CallNodeContextMenu" />;
+  return (
+    <WingTreeViewImpl
+      {...props}
+      contextMenuId="CallNodeContextMenu"
+      renderFlameGraph={renderUpperWingFlameGraph}
+    />
+  );
 }
 
 function LowerWingComponent(
   props: ConnectedProps<{}, StateProps, DispatchProps>
 ) {
-  return <WingTreeViewImpl {...props} contextMenuId="LowerWingContextMenu" />;
+  return (
+    <WingTreeViewImpl
+      {...props}
+      contextMenuId="LowerWingContextMenu"
+      renderFlameGraph={renderLowerWingFlameGraph}
+    />
+  );
 }
 
 export const UpperWing = explicitConnect<{}, StateProps, DispatchProps>({
@@ -348,6 +394,7 @@ export const UpperWing = explicitConnect<{}, StateProps, DispatchProps>({
       selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tableViewOptions: getCurrentTableViewOptions(state),
+    view: getUpperWingView(state),
   }),
   mapDispatchToProps: makeMapDispatchToProps('upper'),
   component: UpperWingComponent,
@@ -372,6 +419,7 @@ export const LowerWing = explicitConnect<{}, StateProps, DispatchProps>({
       selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tableViewOptions: getCurrentTableViewOptions(state),
+    view: getLowerWingView(state),
   }),
   mapDispatchToProps: makeMapDispatchToProps('lower'),
   component: LowerWingComponent,

@@ -34,6 +34,8 @@ import type {
   MarkerIndex,
   IndexIntoFuncTable,
   FunctionListSectionsOpenState,
+  WingViewsState,
+  WingViewType,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -129,6 +131,12 @@ export const getFunctionListSort: Selector<SingleColumnSortState[] | null> = (
 export const getFunctionListSectionsOpen: Selector<
   FunctionListSectionsOpenState
 > = (state) => getProfileSpecificState(state).functionListSectionsOpen;
+export const getWingViews: Selector<WingViewsState> = (state) =>
+  getProfileSpecificState(state).wingViews;
+export const getUpperWingView: Selector<WingViewType> = (state) =>
+  getWingViews(state).upper;
+export const getLowerWingView: Selector<WingViewType> = (state) =>
+  getWingViews(state).lower;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>

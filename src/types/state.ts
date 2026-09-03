@@ -411,6 +411,7 @@ export type ProfileSpecificUrlState = {
   markerTableSort: SingleColumnSortState[] | null;
   functionListSort: SingleColumnSortState[] | null;
   functionListSectionsOpen: FunctionListSectionsOpenState;
+  wingViews: WingViewsState;
 };
 
 export type FunctionListSectionsOpenState = {
@@ -419,6 +420,15 @@ export type FunctionListSectionsOpenState = {
 };
 
 export type FunctionListSectionName = keyof FunctionListSectionsOpenState;
+
+export type WingViewType = 'flame-graph' | 'call-tree';
+
+export type WingViewsState = {
+  upper: WingViewType;
+  lower: WingViewType;
+};
+
+export type WingViewName = keyof WingViewsState;
 
 export type UrlState = {
   readonly dataSource: DataSource;
