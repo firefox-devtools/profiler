@@ -172,6 +172,44 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  describe('optional segments', function () {
+    it('omits a segment when any referenced payload value is absent', function () {
+      expect(
+        applyLabel({
+          label: 'Values: [[{marker.data.first}/{marker.data.second}]]none',
+          schemaFields: [
+            { key: 'first', label: 'First', format: 'string' },
+            { key: 'second', label: 'Second', format: 'string' },
+          ],
+          payload: { first: 'one' },
+        })
+      ).toEqual('Values: none');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('treats zero as a present payload value', function () {
+      expect(
+        applyLabel({
+          label: '[[Count: {marker.data.count}]]',
+          schemaFields: [{ key: 'count', label: 'Count', format: 'integer' }],
+          payload: { count: 0 },
+        })
+      ).toEqual('Count: 0');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+
+    it('preserves double brackets without a payload reference', function () {
+      expect(
+        applyLabel({
+          label: 'Literal [[{marker.name}]]',
+          schemaFields: [],
+          payload: {},
+        })
+      ).toEqual('Literal [[TestDefinedMarker]]');
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
+  });
+
   describe('ternary expressions', function () {
     it('returns the truthy string when the field is truthy', function () {
       expect(
