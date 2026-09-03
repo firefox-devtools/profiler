@@ -26,6 +26,7 @@ import {
   getProfileViewOptions,
   getShouldDisplaySearchfox,
 } from 'firefox-profiler/selectors/profile';
+import { getRightClickedCallNodeInfo } from 'firefox-profiler/selectors/right-clicked-call-node';
 import { oneLine } from 'common-tags';
 
 import {
@@ -51,7 +52,7 @@ import './CallNodeContextMenu.css';
 // label, and l10n vars from the current right-clicked function.
 type MenuItemContext = {
   readonly funcIndex: IndexIntoFuncTable;
-  readonly callNodeTable: CallNodeTable;
+  readonly callNodeTables: ReadonlyArray<CallNodeTable>;
   readonly nameForResource: string | null;
 };
 
@@ -115,8 +116,8 @@ const MENU_ITEMS: ReadonlyArray<TransformMenuItem> = [
     icon: 'Collapse',
     l10nId: 'CallNodeContextMenu--transform-collapse-recursion',
     content: () => 'Collapse recursion',
-    visible: ({ funcIndex, callNodeTable }) =>
-      funcHasRecursiveCall(callNodeTable, funcIndex),
+    visible: ({ funcIndex, callNodeTables }) =>
+      callNodeTables.some((t) => funcHasRecursiveCall(t, funcIndex)),
   },
   {
     transform: 'collapse-direct-recursion',
@@ -124,8 +125,8 @@ const MENU_ITEMS: ReadonlyArray<TransformMenuItem> = [
     icon: 'Collapse',
     l10nId: 'CallNodeContextMenu--transform-collapse-direct-recursion-only',
     content: () => 'Collapse direct recursion only',
-    visible: ({ funcIndex, callNodeTable }) =>
-      funcHasDirectRecursiveCall(callNodeTable, funcIndex),
+    visible: ({ funcIndex, callNodeTables }) =>
+      callNodeTables.some((t) => funcHasDirectRecursiveCall(t, funcIndex)),
   },
   {
     transform: 'drop-function',
@@ -139,8 +140,11 @@ const MENU_ITEMS: ReadonlyArray<TransformMenuItem> = [
 type StateProps = {
   readonly thread: Thread | null;
   readonly threadsKey: ThreadsKey | null;
-  readonly rightClickedFunctionIndex: IndexIntoFuncTable | null;
-  readonly callNodeTable: CallNodeTable | null;
+  readonly funcIndex: IndexIntoFuncTable | null;
+  // Call node tables in which to check for recursion. Multiple tables are
+  // useful for the self wing menu, where the focusSelf-filtered table may
+  // reveal recursion that the regular table hides.
+  readonly callNodeTables: ReadonlyArray<CallNodeTable>;
   readonly implementation: ImplementationFilter;
   readonly displaySearchfox: boolean;
 };
@@ -151,9 +155,13 @@ type DispatchProps = {
   readonly setContextMenuVisibility: typeof setContextMenuVisibility;
 };
 
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
+// The DOM id is baked in by each connected variant below; the impl receives
+// it as a regular prop.
+type Props = ConnectedProps<{}, StateProps, DispatchProps> & {
+  readonly id: string;
+};
 
-class FunctionListContextMenuImpl extends PureComponent<Props> {
+class WingContextMenuImpl extends PureComponent<Props> {
   _hidingTimeout: NodeJS.Timeout | null = null;
 
   _onShow = () => {
@@ -174,22 +182,10 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
     readonly thread: Thread;
     readonly threadsKey: ThreadsKey;
     readonly funcIndex: IndexIntoFuncTable;
-    readonly callNodeTable: CallNodeTable;
   } {
-    const { thread, threadsKey, rightClickedFunctionIndex, callNodeTable } =
-      this.props;
-    if (
-      thread !== null &&
-      threadsKey !== null &&
-      rightClickedFunctionIndex !== null &&
-      callNodeTable !== null
-    ) {
-      return {
-        thread,
-        threadsKey,
-        funcIndex: rightClickedFunctionIndex,
-        callNodeTable,
-      };
+    const { thread, threadsKey, funcIndex } = this.props;
+    if (thread !== null && threadsKey !== null && funcIndex !== null) {
+      return { thread, threadsKey, funcIndex };
     }
     return null;
   }
@@ -322,7 +318,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
       case 'focus-category':
       case 'filter-samples':
         throw new Error(
-          `The transform "${type}" is not supported in the function list context menu.`
+          `The transform "${type}" is not supported in the wing context menu.`
         );
       default:
         assertExhaustiveCheck(type);
@@ -379,7 +375,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const { displaySearchfox } = this.props;
+    const { displaySearchfox, callNodeTables } = this.props;
     const info = this._getRightClickedInfo();
 
     if (info === null) {
@@ -391,7 +387,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
 
     const ctx: MenuItemContext = {
       funcIndex: info.funcIndex,
-      callNodeTable: info.callNodeTable,
+      callNodeTables,
       nameForResource: this.getNameForSelectedResource(),
     };
 
@@ -431,7 +427,7 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
 
     return (
       <ContextMenu
-        id="FunctionListContextMenu"
+        id={this.props.id}
         className="callNodeContextMenu"
         onShow={this._onShow}
         onHide={this._onHide}
@@ -442,6 +438,17 @@ class FunctionListContextMenuImpl extends PureComponent<Props> {
   }
 }
 
+const dispatchToProps: DispatchProps = {
+  addTransformToStack,
+  addCollapseResourceTransformToStack,
+  setContextMenuVisibility,
+};
+
+// Connected variant used by the function list and self wing: the right-clicked
+// function comes from the rightClickedFunction profile-view state. Recursion
+// detection considers both the regular call node table and the self wing's
+// call node table (where the focusSelf filter may surface recursion that the
+// regular table hides).
 export const FunctionListContextMenu = explicitConnect<
   {},
   StateProps,
@@ -451,35 +458,83 @@ export const FunctionListContextMenu = explicitConnect<
     const rightClickedFunction =
       getProfileViewOptions(state).rightClickedFunction;
 
-    let thread = null;
-    let threadsKey = null;
-    let rightClickedFunctionIndex = null;
-    let callNodeTable = null;
-
-    if (rightClickedFunction !== null) {
-      const selectors = getThreadSelectorsFromThreadsKey(
-        rightClickedFunction.threadsKey
-      );
-      thread = selectors.getFilteredThread(state);
-      threadsKey = rightClickedFunction.threadsKey;
-      rightClickedFunctionIndex = rightClickedFunction.functionIndex;
-      // Use the non-inverted call node table for recursion detection.
-      callNodeTable = selectors.getCallNodeInfo(state).getCallNodeTable();
+    if (rightClickedFunction === null) {
+      return {
+        thread: null,
+        threadsKey: null,
+        funcIndex: null,
+        callNodeTables: [],
+        implementation: getImplementationFilter(state),
+        displaySearchfox: getShouldDisplaySearchfox(state),
+      };
     }
 
+    const selectors = getThreadSelectorsFromThreadsKey(
+      rightClickedFunction.threadsKey
+    );
+    const callNodeTables: CallNodeTable[] = [
+      selectors.getCallNodeInfo(state).getCallNodeTable(),
+      selectors.getSelfWingCallNodeInfo(state).getCallNodeTable(),
+    ];
+
     return {
-      thread,
-      threadsKey,
-      rightClickedFunctionIndex,
-      callNodeTable,
+      thread: selectors.getFilteredThread(state),
+      threadsKey: rightClickedFunction.threadsKey,
+      funcIndex: rightClickedFunction.functionIndex,
+      callNodeTables,
       implementation: getImplementationFilter(state),
       displaySearchfox: getShouldDisplaySearchfox(state),
     };
   },
-  mapDispatchToProps: {
-    addTransformToStack,
-    addCollapseResourceTransformToStack,
-    setContextMenuVisibility,
+  mapDispatchToProps: dispatchToProps,
+  component: (props) => (
+    <WingContextMenuImpl {...props} id="FunctionListContextMenu" />
+  ),
+});
+
+// Connected variant used by the lower wing: the right-clicked function comes
+// from a right-clicked call node in the LOWER_WING area. Only the regular
+// call node table is consulted for recursion.
+export const LowerWingContextMenu = explicitConnect<
+  {},
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state: State) => {
+    const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
+
+    if (
+      rightClickedCallNodeInfo === null ||
+      rightClickedCallNodeInfo.area !== 'LOWER_WING'
+    ) {
+      return {
+        thread: null,
+        threadsKey: null,
+        funcIndex: null,
+        callNodeTables: [],
+        implementation: getImplementationFilter(state),
+        displaySearchfox: getShouldDisplaySearchfox(state),
+      };
+    }
+
+    const selectors = getThreadSelectorsFromThreadsKey(
+      rightClickedCallNodeInfo.threadsKey
+    );
+    const callNodeTables: CallNodeTable[] = [
+      selectors.getCallNodeInfo(state).getCallNodeTable(),
+    ];
+
+    return {
+      thread: selectors.getFilteredThread(state),
+      threadsKey: rightClickedCallNodeInfo.threadsKey,
+      funcIndex: selectors.getLowerWingRightClickedFuncIndex(state),
+      callNodeTables,
+      implementation: getImplementationFilter(state),
+      displaySearchfox: getShouldDisplaySearchfox(state),
+    };
   },
-  component: FunctionListContextMenuImpl,
+  mapDispatchToProps: dispatchToProps,
+  component: (props) => (
+    <WingContextMenuImpl {...props} id="LowerWingContextMenu" />
+  ),
 });
