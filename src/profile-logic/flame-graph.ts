@@ -52,6 +52,25 @@ export interface FlameGraphTiming {
   readonly rowCount: number;
   getRow(depth: number): FlameGraphTimingRow;
   getAllRowsForTesting(): FlameGraphTimingRow[];
+
+  // For a given node / "box", get the sample percentage (as a fraction of 1)
+  // that should be displayed in the tooltip for this node.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number;
+}
+
+// Returns the width of a box as a fraction of the full flame graph width.
+function _getBoxWidth(
+  flameGraphTiming: FlameGraphTiming,
+  depth: number,
+  indexInRow: number
+): number {
+  const row = flameGraphTiming.getRow(depth);
+  if (indexInRow < 0 || indexInRow >= row.length) {
+    throw new Error(
+      `Out-of-bounds call to getRatioOfRootTotalSummary: For depth ${depth}, ${indexInRow} is outside 0..${row.length}`
+    );
+  }
+  return row.end[indexInRow] - row.start[indexInRow];
 }
 
 class FlameGraphTimingNonInverted implements FlameGraphTiming {
@@ -104,8 +123,16 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
     return rows;
   }
 
+  // For a given node / "box", get the sample percentage (as a fraction of 1) that
+  // should be displayed in the tooltip for this node.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    const ratioOfFullWidth = _getBoxWidth(this, depth, indexInRow);
+    const total = ratioOfFullWidth * this._callTreeTimings.flameGraphWidthTotal;
+    return total / this._callTreeTimings.rootTotalSummary;
+  }
+
   _buildNextTimingRow(): void {
-    const { total, self, rootTotalSummary } = this._callTreeTimings;
+    const { total, self, flameGraphWidthTotal } = this._callTreeTimings;
     const { prefix } = this._callNodeTable;
 
     const depth = this._timingRows.length;
@@ -142,8 +169,8 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
       }
       startPerCallNode[nodeIndex] = currentStart;
 
-      const totalRelative = abs(totalVal / rootTotalSummary);
-      const selfRelativeVal = abs(self[nodeIndex] / rootTotalSummary);
+      const totalRelative = abs(totalVal / flameGraphWidthTotal);
+      const selfRelativeVal = abs(self[nodeIndex] / flameGraphWidthTotal);
 
       const currentEnd = currentStart + totalRelative;
       start.push(currentStart);
@@ -435,6 +462,14 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
     return rows;
   }
 
+  // For a given node / "box", get the sample percentage (as a fraction of 1) that
+  // should be displayed in the tooltip for this node. In the inverted flame
+  // graph, box widths are computed relative to rootTotalSummary, so the box
+  // width is already the ratio we want.
+  getRatioOfRootTotalSummary(depth: number, indexInRow: number): number {
+    return _getBoxWidth(this, depth, indexInRow);
+  }
+
   _compareCallNodesByFuncName = (
     a: IndexIntoCallNodeTable,
     b: IndexIntoCallNodeTable
@@ -457,13 +492,13 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
 
   _getNodeTiming(nodeIndex: IndexIntoCallNodeTable): InvertedNodeTiming {
     const callNodeInfo = this._callNodeInfo;
-    const { callNodeSelf, totalPerRootFunc, hasChildrenPerRootFunc } =
+    const { callNodeSelf, totalPerRootNode, hasChildrenPerRootNode } =
       this._callTreeTimings;
 
     if (callNodeInfo.isRoot(nodeIndex)) {
       return {
-        total: totalPerRootFunc[nodeIndex],
-        hasChildren: hasChildrenPerRootFunc[nodeIndex] !== 0,
+        total: totalPerRootNode[nodeIndex],
+        hasChildren: hasChildrenPerRootNode[nodeIndex] !== 0,
       };
     }
 
@@ -512,7 +547,7 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
   }
 
   _getRootRowItems(): InvertedFlameGraphRowItem[] {
-    const { rootTotalSummary, sortedRoots, totalPerRootFunc } =
+    const { rootTotalSummary, sortedRoots, totalPerRootNode } =
       this._callTreeTimings;
     const abs = Math.abs;
 
@@ -530,7 +565,7 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
     let currentRootStart = 0;
     for (let i = 0; i < roots.length; i++) {
       const root = roots[i];
-      const totalRelative = abs(totalPerRootFunc[root] / rootTotalSummary);
+      const totalRelative = abs(totalPerRootNode[root] / rootTotalSummary);
       const start = currentRootStart;
       const end = start + totalRelative;
       if (totalRelative >= MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH) {
