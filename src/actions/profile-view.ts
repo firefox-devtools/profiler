@@ -79,6 +79,7 @@ import type {
   IndexIntoFuncTable,
   CallNodeArea,
   WingName,
+  FunctionListSectionName,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -1756,6 +1757,17 @@ export function changeFunctionListSort(
   return {
     type: 'CHANGE_FUNCTION_LIST_SORT',
     sort,
+  };
+}
+
+export function changeFunctionListSectionOpen(
+  section: FunctionListSectionName,
+  isOpen: boolean
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
+    section,
+    isOpen,
   };
 }
 

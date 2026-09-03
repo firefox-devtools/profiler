@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import copy from 'copy-to-clipboard';
 
 import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
-import { FunctionListContextMenu } from '../../components/shared/FunctionListContextMenu';
+import { FunctionListContextMenu } from '../../components/shared/WingContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { fireFullClick } from '../fixtures/utils';

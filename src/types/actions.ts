@@ -48,6 +48,7 @@ import type {
   DecodedInstruction,
   ProfileEncodingResult,
   CallNodeArea,
+  FunctionListSectionName,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -583,6 +584,11 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_FUNCTION_LIST_SORT';
       readonly sort: SingleColumnSortState[] | null;
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN';
+      readonly section: FunctionListSectionName;
+      readonly isOpen: boolean;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';

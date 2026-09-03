@@ -23,6 +23,7 @@ import {
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
+import { FUNCTION_LIST_SECTIONS_OPEN_DEFAULT } from './constants';
 import type {
   UrlState,
   DataSource,
@@ -43,6 +44,8 @@ import type {
   MarkerIndex,
   SelectedMarkersPerThread,
   SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
+  FunctionListSectionName,
 } from 'firefox-profiler/types';
 import { FuncFlag } from 'firefox-profiler/types';
 import {
@@ -203,6 +206,7 @@ type CallTreeQuery = BaseQuery & {
   hideIdleSamples: null | undefined;
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
+  funcListSections?: string; // "descendants,ancestors" — comma-separated open sections
   selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
@@ -254,6 +258,7 @@ type Query = BaseQuery & {
 
   // Function list specific
   functionListSort?: string;
+  funcListSections?: string;
   selectedFunc?: number;
 
   // Network specific
@@ -416,6 +421,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       if (selectedTab === 'function-list') {
         query.functionListSort = convertFunctionListSortToString(
           urlState.profileSpecific.functionListSort
+        );
+        query.funcListSections = convertFunctionListSectionsOpenToString(
+          urlState.profileSpecific.functionListSectionsOpen
         );
         const selectedFunc =
           selectedThreadsKey !== null
@@ -696,6 +704,9 @@ export function stateFromLocation(
       functionListSort: convertFunctionListSortFromString(
         query.functionListSort
       ),
+      functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
+        query.funcListSections
+      ),
     },
   };
 }
@@ -784,6 +795,49 @@ function convertFunctionListSortFromString(
   }
   // URL is primary-first; internal storage is primary-last.
   return parsed.reverse();
+}
+
+// FunctionList section disclosure-box open/closed state. The URL stores a
+// comma-separated list of the open sections; the param is omitted when the
+// state matches the default (only "descendants" open). The value "none" is
+// used as a sentinel for the all-closed case so the param is non-empty.
+const FUNCTION_LIST_SECTION_NAMES: ReadonlyArray<FunctionListSectionName> = [
+  'descendants',
+  'ancestors',
+];
+
+function convertFunctionListSectionsOpenToString(
+  state: FunctionListSectionsOpenState
+): string | undefined {
+  const matchesDefault = FUNCTION_LIST_SECTION_NAMES.every(
+    (name) => state[name] === FUNCTION_LIST_SECTIONS_OPEN_DEFAULT[name]
+  );
+  if (matchesDefault) {
+    return undefined;
+  }
+  const open = FUNCTION_LIST_SECTION_NAMES.filter((name) => state[name]);
+  return open.length === 0 ? 'none' : open.join(',');
+}
+
+function convertFunctionListSectionsOpenFromString(
+  raw: string | null | void
+): FunctionListSectionsOpenState {
+  if (raw === undefined || raw === null) {
+    return { ...FUNCTION_LIST_SECTIONS_OPEN_DEFAULT };
+  }
+  const result: FunctionListSectionsOpenState = {
+    descendants: false,
+    ancestors: false,
+  };
+  if (raw === 'none' || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    if (part === 'descendants' || part === 'ancestors') {
+      result[part] = true;
+    }
+  }
+  return result;
 }
 
 function convertGlobalTrackOrderFromString(
