@@ -5,6 +5,9 @@
   "scripts": {
     "prepublishOnly": "node ../scripts/verify-profiler-cli-build.mjs"
   },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "main": "./dist/profiler-cli.js",
   "bin": {
     "profiler-cli": "dist/profiler-cli.js",
