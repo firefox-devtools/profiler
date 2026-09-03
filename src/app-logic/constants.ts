@@ -122,6 +122,7 @@ export const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState 
   {
     descendants: true,
     ancestors: false,
+    self: false,
   };
 
 // The default view for each function list wing. The URL omits the wingViews
@@ -129,4 +130,5 @@ export const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState 
 export const WING_VIEWS_DEFAULT: WingViewsState = {
   upper: 'flame-graph',
   lower: 'flame-graph',
+  self: 'flame-graph',
 };

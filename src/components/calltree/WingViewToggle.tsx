@@ -8,6 +8,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getUpperWingView,
   getLowerWingView,
+  getSelfWingView,
 } from 'firefox-profiler/selectors/url-state';
 import { changeWingView } from 'firefox-profiler/actions/profile-view';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
@@ -106,6 +107,9 @@ export const WingViewToggle = explicitConnect<
         break;
       case 'lower':
         view = getLowerWingView(state);
+        break;
+      case 'self':
+        view = getSelfWingView(state);
         break;
       default:
         throw assertExhaustiveCheck(ownProps.wing, 'Unhandled wing.');
