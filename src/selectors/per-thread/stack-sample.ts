@@ -1022,6 +1022,10 @@ export function getStackAndSampleSelectorsPerThread(
   const getSelfWingCtssSamples: Selector<SamplesLikeTable> =
     _getSelfWingCtssSamples;
 
+  const getSelfWingCtssSampleCallNodes: Selector<
+    Array<IndexIntoCallNodeTable | null>
+  > = _getSelfWingSampleIndexToCallNodeIndex;
+
   const getSelfWingCtssSampleCategoriesAndSubcategories: Selector<SampleCategoriesAndSubcategories> =
     createSelector(
       getSelfWingThread,
@@ -1163,6 +1167,7 @@ export function getStackAndSampleSelectorsPerThread(
     getSelfWingFlameGraphTiming,
     getSelfWingCallNodeMaxDepthPlusOne,
     getSelfWingCtssSamples,
+    getSelfWingCtssSampleCallNodes,
     getSelfWingCtssSampleCategoriesAndSubcategories,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
