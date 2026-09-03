@@ -1281,6 +1281,59 @@ export function getSampleRelationsToNode(
 }
 
 /**
+ * Go through the samples, and determine how each of them relates to the given
+ * function. A sample counts towards the function's total if the function is
+ * anywhere on its stack, and towards its self time if the stack ends in it.
+ * Unrelated samples are all marked as Before, since the function list has no
+ * tree order to follow.
+ */
+export function getSampleRelationsToFunction(
+  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  callNodeTable: CallNodeTable
+): SampleRelations {
+  if (selectedFunctionIndex === null) {
+    return _getSampleRelationsForNoNode(sampleCallNodes);
+  }
+
+  const sampleCount = sampleCallNodes.length;
+
+  // Go through each call node, and label it as containing the function or not.
+  // callNodeContainsFunc is a callNodeIndex => bool map, implemented as a U8 typed
+  // array for better performance. 0 means false, 1 means true.
+  const callNodeCount = callNodeTable.length;
+  const callNodeContainsFunc = new Uint8Array(callNodeCount);
+  for (let callNodeIndex = 0; callNodeIndex < callNodeCount; callNodeIndex++) {
+    const prefix = callNodeTable.prefix[callNodeIndex];
+    const funcIndex = callNodeTable.func[callNodeIndex];
+    if (
+      funcIndex === selectedFunctionIndex ||
+      // The parent of this stack contained the function.
+      (prefix !== -1 && callNodeContainsFunc[prefix] === 1)
+    ) {
+      callNodeContainsFunc[callNodeIndex] = 1;
+    }
+  }
+
+  const relations = new Uint8Array(sampleCount);
+  for (let sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++) {
+    let sampleRelation: SampleRelationToNode = SampleRelationToNode.FilteredOut;
+    const callNodeIndex = sampleCallNodes[sampleIndex];
+    if (callNodeIndex !== null) {
+      if (callNodeTable.func[callNodeIndex] === selectedFunctionIndex) {
+        sampleRelation = SampleRelationToNode.TotalAndSelf;
+      } else if (callNodeContainsFunc[callNodeIndex] === 1) {
+        sampleRelation = SampleRelationToNode.TotalButNotSelf;
+      } else {
+        sampleRelation = SampleRelationToNode.Before;
+      }
+    }
+    relations[sampleIndex] = sampleRelation;
+  }
+  return new SampleRelations(relations);
+}
+
+/**
  * This function returns the function index for a specific call node path. This
  * is the last element of this path, or the leaf element of the path.
  */
