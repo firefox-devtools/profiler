@@ -8,6 +8,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { FunctionList } from './FunctionList';
 import { CalleesCallTree, CallersCallTree } from './FuncPanelCallTree';
 import { DisclosureBox } from 'firefox-profiler/components/shared/DisclosureBox';
+import { FuncPanelViewToggle } from './FuncPanelViewToggle';
 import { StackSettings } from 'firefox-profiler/components/shared/StackSettings';
 import { TransformNavigator } from 'firefox-profiler/components/shared/TransformNavigator';
 import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
@@ -61,6 +62,12 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Callees"
               isOpen={sectionsOpen.callees}
               onToggle={this._onCalleesToggle}
+              headerActions={
+                <FuncPanelViewToggle
+                  panel="callees"
+                  flameGraphStartsAtBottom={true}
+                />
+              }
             >
               <CalleesCallTree />
             </DisclosureBox>
@@ -68,6 +75,12 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Callers"
               isOpen={sectionsOpen.callers}
               onToggle={this._onCallersToggle}
+              headerActions={
+                <FuncPanelViewToggle
+                  panel="callers"
+                  flameGraphStartsAtBottom={false}
+                />
+              }
             >
               <CallersCallTree />
             </DisclosureBox>

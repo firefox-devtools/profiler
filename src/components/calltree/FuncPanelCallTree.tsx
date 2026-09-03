@@ -7,10 +7,20 @@ import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { TreeView } from 'firefox-profiler/components/shared/TreeView';
 import { CallTreeEmptyReasons } from './CallTreeEmptyReasons';
+import {
+  CalleesFlameGraph,
+  type CalleesFlameGraphHandle,
+} from './CalleesFlameGraph';
+import {
+  CallersFlameGraph,
+  type CallersFlameGraphHandle,
+} from './CallersFlameGraph';
 import { nameColumn, libColumn, treeColumnsForWeightType } from './columns';
 import {
   getSearchStringsAsRegExp,
   getSelectedThreadsKey,
+  getCalleesView,
+  getCallersView,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getScrollToSelectionGeneration,
@@ -37,6 +47,7 @@ import type {
   WeightType,
   TableViewOptions,
   SelectionContext,
+  FuncPanelViewType,
   CallNodePath,
   FuncPanelName,
 } from 'firefox-profiler/types';
@@ -49,6 +60,7 @@ import './CallTree.css';
 
 // Structural interface satisfied by both panel flame graph components' ref
 // handles. Used so the shared impl can call focus() on either.
+type FuncPanelFlameGraphHandle = { focus(): void };
 
 type StateProps = {
   readonly threadsKey: ThreadsKey;
@@ -64,6 +76,7 @@ type StateProps = {
   readonly callNodeMaxDepthPlusOne: number;
   readonly weightType: WeightType;
   readonly tableViewOptions: TableViewOptions;
+  readonly view: FuncPanelViewType;
 };
 
 type DispatchProps = {
@@ -90,6 +103,9 @@ type DispatchProps = {
 // Injected by each wrapper below.
 type FuncPanelConfigProps = {
   readonly contextMenuId: string;
+  readonly renderFlameGraph: (
+    ref: React.RefObject<FuncPanelFlameGraphHandle | null>
+  ) => React.ReactNode;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps> &
@@ -100,6 +116,9 @@ class FuncPanelCallTreeImpl extends PureComponent<Props> {
   _takeTreeViewRef = (treeView: TreeView<CallNodeDisplayData> | null) => {
     this._treeView = treeView;
   };
+  _flameGraphRef: React.RefObject<FuncPanelFlameGraphHandle | null> =
+    React.createRef();
+
   override componentDidMount() {
     this.focus();
     this.maybeProcureInterestingInitialSelection();
@@ -123,6 +142,10 @@ class FuncPanelCallTreeImpl extends PureComponent<Props> {
   }
 
   focus() {
+    if (this.props.view === 'flame-graph') {
+      this._flameGraphRef.current?.focus();
+      return;
+    }
     if (this._treeView) {
       this._treeView.focus();
     }
@@ -288,7 +311,10 @@ class FuncPanelCallTreeImpl extends PureComponent<Props> {
   }
 
   override render() {
-    return this._renderCallTree();
+    if (this.props.view === 'call-tree') {
+      return this._renderCallTree();
+    }
+    return this.props.renderFlameGraph(this._flameGraphRef);
   }
 }
 
@@ -315,11 +341,23 @@ function makeMapDispatchToProps(panel: FuncPanelName) {
   };
 }
 
+const renderCalleesFlameGraph = (
+  ref: React.RefObject<FuncPanelFlameGraphHandle | null>
+) => <CalleesFlameGraph ref={ref as React.Ref<CalleesFlameGraphHandle>} />;
+
+const renderCallersFlameGraph = (
+  ref: React.RefObject<FuncPanelFlameGraphHandle | null>
+) => <CallersFlameGraph ref={ref as React.Ref<CallersFlameGraphHandle>} />;
+
 function CalleesComponent(
   props: ConnectedProps<{}, StateProps, DispatchProps>
 ) {
   return (
-    <FuncPanelCallTreeImpl {...props} contextMenuId="CallNodeContextMenu" />
+    <FuncPanelCallTreeImpl
+      {...props}
+      contextMenuId="CallNodeContextMenu"
+      renderFlameGraph={renderCalleesFlameGraph}
+    />
   );
 }
 
@@ -327,7 +365,11 @@ function CallersComponent(
   props: ConnectedProps<{}, StateProps, DispatchProps>
 ) {
   return (
-    <FuncPanelCallTreeImpl {...props} contextMenuId="CallersContextMenu" />
+    <FuncPanelCallTreeImpl
+      {...props}
+      contextMenuId="CallersContextMenu"
+      renderFlameGraph={renderCallersFlameGraph}
+    />
   );
 }
 
@@ -353,6 +395,7 @@ export const CalleesCallTree = explicitConnect<{}, StateProps, DispatchProps>({
       selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tableViewOptions: getCurrentTableViewOptions(state),
+    view: getCalleesView(state),
   }),
   mapDispatchToProps: makeMapDispatchToProps('callees'),
   component: CalleesComponent,
@@ -377,6 +420,7 @@ export const CallersCallTree = explicitConnect<{}, StateProps, DispatchProps>({
       selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     tableViewOptions: getCurrentTableViewOptions(state),
+    view: getCallersView(state),
   }),
   mapDispatchToProps: makeMapDispatchToProps('callers'),
   component: CallersComponent,

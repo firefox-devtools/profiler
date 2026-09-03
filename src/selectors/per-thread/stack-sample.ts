@@ -840,6 +840,56 @@ export function getStackAndSampleSelectorsPerThread(
       ? getFlameGraphTimingInverted(state)
       : getFlameGraphTimingNonInverted(state);
 
+  const _getCalleesCallTreeTimingsNonInverted: Selector<CallTree.CallTreeTimingsNonInverted> =
+    createSelector(
+      getCalleesCallNodeInfo,
+      getCalleesCallNodeSelfAndSummary,
+      CallTree.computeCallTreeTimingsNonInverted
+    );
+
+  const getCalleesFlameGraphRows: Selector<FlameGraph.FlameGraphRows> =
+    createSelector(
+      (state: State) => getCalleesCallNodeInfo(state).getCallNodeTable(),
+      _getFlameGraphFuncComparator,
+      FlameGraph.computeFlameGraphRows
+    );
+
+  const getCalleesFlameGraphTiming: Selector<FlameGraph.FlameGraphTiming> =
+    createSelector(
+      getCalleesFlameGraphRows,
+      (state: State) => getCalleesCallNodeInfo(state).getCallNodeTable(),
+      _getCalleesCallTreeTimingsNonInverted,
+      FlameGraph.getFlameGraphTiming
+    );
+
+  // Callers flame graph: rendered top-down (icicle). The cells are
+  // InvertedCallNodeHandle values that map back to CallersCallNodeInfo.
+  // The returned object is stateful — it extends the callers CNI and
+  // computes per-row timing on demand as the Canvas scrolls — so the selector
+  // is keyed only on inputs that change when the underlying tree must be
+  // rebuilt. Treat the object's mutations as invisible (no caller observes
+  // anything but `getRow(depth)` results, which are write-once / additive).
+  const getCallersFlameGraphTiming: Selector<FlameGraph.CallersFlameGraphTiming> =
+    createSelector(
+      getCallersCallNodeInfo,
+      getCallNodeSelfAndSummary,
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      _getFlameGraphFuncComparator,
+      FlameGraph.createCallersFlameGraphTiming
+    );
+
+  // The max depth equals the deepest entry point's non-inverted depth (an entry
+  // at non-inverted depth D contributes D ancestor steps above the inverted
+  // root). We can read this off the non-inverted call node table without
+  // building the callers tree, so the scroll-area height is available before
+  // any rows are computed.
+  const getCallersFlameGraphMaxDepthPlusOne: Selector<number> = createSelector(
+    _getCallNodeTable,
+    getSelectedFunctionIndex,
+    ProfileData.computeCallersMaxDepthPlusOne
+  );
+
   const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> =
     createSelector(
       getRightClickedCallNodeInfo,
@@ -934,6 +984,8 @@ export function getStackAndSampleSelectorsPerThread(
     getNonInvertedCallNodeInfo,
     getCallersCallNodeInfo,
     getCalleesCallNodeInfo,
+    getPreviewFilteredCtssSampleCalleesCallNodes:
+      _getPreviewFilteredCtssSampleIndexToCalleesCallNodeIndex,
     getSourceViewStackLineInfo,
     getAssemblyViewNativeSymbolIndex,
     getAssemblyViewStackAddressInfo,
@@ -964,6 +1016,9 @@ export function getStackAndSampleSelectorsPerThread(
     getFunctionListTimings,
     getCallersCallTree,
     getCalleesCallTree,
+    getCalleesFlameGraphTiming,
+    getCallersFlameGraphTiming,
+    getCallersFlameGraphMaxDepthPlusOne,
     getSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,

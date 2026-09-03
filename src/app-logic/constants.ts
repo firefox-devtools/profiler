@@ -5,6 +5,7 @@
 import type {
   MarkerPhase,
   FunctionListSectionsOpenState,
+  FuncPanelViewsState,
 } from 'firefox-profiler/types';
 
 // The current version of the Gecko profile format.
@@ -122,3 +123,10 @@ export const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState 
     callees: true,
     callers: false,
   };
+
+// The default view for each function list panel. The URL omits the funcPanelViews
+// param when all panels use their default view.
+export const FUNC_PANEL_VIEWS_DEFAULT: FuncPanelViewsState = {
+  callees: 'flame-graph',
+  callers: 'flame-graph',
+};

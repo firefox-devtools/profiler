@@ -411,9 +411,14 @@ export type ProfileSpecificUrlState = {
   markerTableSort: SingleColumnSortState[] | null;
   functionListSort: SingleColumnSortState[] | null;
   functionListSectionsOpen: FunctionListSectionsOpenState;
+  funcPanelViews: FuncPanelViewsState;
 };
 
 export type FunctionListSectionsOpenState = { [K in FuncPanelName]: boolean };
+
+export type FuncPanelViewType = 'flame-graph' | 'call-tree';
+
+export type FuncPanelViewsState = { [K in FuncPanelName]: FuncPanelViewType };
 
 export type UrlState = {
   readonly dataSource: DataSource;

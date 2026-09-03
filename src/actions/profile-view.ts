@@ -78,6 +78,7 @@ import type {
   IndexIntoFuncTable,
   CallNodeArea,
   FuncPanelName,
+  FuncPanelViewType,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -1755,6 +1756,17 @@ export function changeFunctionListSectionOpen(
     type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
     section,
     isOpen,
+  };
+}
+
+export function changeFuncPanelView(
+  panel: FuncPanelName,
+  view: FuncPanelViewType
+): Action {
+  return {
+    type: 'CHANGE_FUNC_PANEL_VIEW',
+    panel,
+    view,
   };
 }
 

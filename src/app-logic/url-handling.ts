@@ -23,7 +23,10 @@ import {
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
-import { FUNCTION_LIST_SECTIONS_OPEN_DEFAULT } from './constants';
+import {
+  FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  FUNC_PANEL_VIEWS_DEFAULT,
+} from './constants';
 import type {
   UrlState,
   DataSource,
@@ -46,6 +49,7 @@ import type {
   SelectedFunctionsPerThread,
   FunctionListSectionsOpenState,
   FuncPanelName,
+  FuncPanelViewsState,
 } from 'firefox-profiler/types';
 import { FuncFlag } from 'firefox-profiler/types';
 import {
@@ -217,6 +221,7 @@ type CallTreeQuery = BaseQuery & {
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
   funcListSections?: string; // "callees,callers" — comma-separated open sections
+  funcPanelViews?: string; // "callees:call-tree,callers:call-tree" — non-default panel views
   selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
@@ -269,6 +274,7 @@ type Query = BaseQuery & {
   // Function list specific
   functionListSort?: string;
   funcListSections?: string;
+  funcPanelViews?: string;
   selectedFunc?: number;
 
   // Network specific
@@ -434,6 +440,9 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         );
         query.funcListSections = convertFunctionListSectionsOpenToString(
           urlState.profileSpecific.functionListSectionsOpen
+        );
+        query.funcPanelViews = convertFuncPanelViewsToString(
+          urlState.profileSpecific.funcPanelViews
         );
         const selectedFunc =
           selectedThreadsKey !== null
@@ -736,6 +745,7 @@ export function stateFromLocation(
       functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
         query.funcListSections
       ),
+      funcPanelViews: convertFuncPanelViewsFromString(query.funcPanelViews),
     },
   };
 }
@@ -817,6 +827,41 @@ function convertFunctionListSectionsOpenFromString(
   for (const part of raw.split(',')) {
     if (part === 'callees' || part === 'callers') {
       result[part] = true;
+    }
+  }
+  return result;
+}
+
+// Visualization choice for the callees and callers panels of the FunctionList
+// tab. The URL stores a comma-separated list of "panel:view" pairs for panels
+// whose view differs from the default (flame-graph), e.g. "callees:call-tree".
+// The param is omitted when all panels use the default.
+function convertFuncPanelViewsToString(
+  state: FuncPanelViewsState
+): string | undefined {
+  const parts: string[] = [];
+  for (const panel of FUNC_PANEL_NAMES) {
+    if (state[panel] !== FUNC_PANEL_VIEWS_DEFAULT[panel]) {
+      parts.push(`${panel}:${state[panel]}`);
+    }
+  }
+  return parts.length === 0 ? undefined : parts.join(',');
+}
+
+function convertFuncPanelViewsFromString(
+  raw: string | null | void
+): FuncPanelViewsState {
+  const result: FuncPanelViewsState = { ...FUNC_PANEL_VIEWS_DEFAULT };
+  if (raw === undefined || raw === null || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    const [panel, view] = part.split(':');
+    if (
+      (panel === 'callees' || panel === 'callers') &&
+      (view === 'flame-graph' || view === 'call-tree')
+    ) {
+      result[panel] = view;
     }
   }
   return result;

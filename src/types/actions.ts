@@ -49,6 +49,7 @@ import type {
   ProfileEncodingResult,
   CallNodeArea,
   FuncPanelName,
+  FuncPanelViewType,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -589,6 +590,11 @@ type UrlStateAction =
       readonly type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN';
       readonly section: FuncPanelName;
       readonly isOpen: boolean;
+    }
+  | {
+      readonly type: 'CHANGE_FUNC_PANEL_VIEW';
+      readonly panel: FuncPanelName;
+      readonly view: FuncPanelViewType;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
