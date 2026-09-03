@@ -588,6 +588,7 @@ export type CallNodeDisplayData = Readonly<{
   totalPercent: string;
   self: string;
   selfWithUnit: string;
+  selfPercent: string;
   name: string;
   lib: string;
   isFrameLabel: boolean;
@@ -802,6 +803,12 @@ export type CallNodeSelfAndSummary = {
   // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number;
+  // The total used as the 100% reference for flame graph box widths.
+  // Usually equals rootTotalSummary, but for the upper wing it is set to the
+  // total of samples that contain the selected function, so that the root node
+  // fills the full flame graph width while percentages remain relative to all
+  // filtered samples.
+  flameGraphWidthTotal: number;
 };
 
 /**
