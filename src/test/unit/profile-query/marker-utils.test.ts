@@ -25,7 +25,10 @@ import type {
 } from '../../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../../fixtures/stores';
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import { getRawMarkerTableBuilderFromExisting } from 'firefox-profiler/profile-logic/data-structures';
+import {
+  getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
+} from 'firefox-profiler/profile-logic/data-structures';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
 
 import type { Marker } from 'firefox-profiler/types';
@@ -760,7 +763,6 @@ describe('collectMarkerStack', function () {
     );
     const markerNameIdx = stringTable.indexForString('TestMarker');
     const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
-    thread.markers = markers;
     markers.name.push(markerNameIdx);
     markers.startTime.push(1);
     markers.endTime.push(5);
@@ -772,6 +774,7 @@ describe('collectMarkerStack', function () {
       cause: { stack: stackIndex },
     });
     markers.length++;
+    thread.markers = finishRawMarkerTableBuilder(markers);
 
     const store = storeWithProfile(profile);
     const threadMap = new ThreadMap();
@@ -903,7 +906,6 @@ describe('marker time base', function () {
     );
     const markerNameIdx = stringTable.indexForString('TestMarker');
     const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
-    thread.markers = markers;
     markers.name.push(markerNameIdx);
     markers.startTime.push(ZERO_AT + 30);
     markers.endTime.push(ZERO_AT + 50);
@@ -915,6 +917,7 @@ describe('marker time base', function () {
       cause: { stack: stackIndex, time: ZERO_AT + 30 },
     });
     markers.length++;
+    thread.markers = finishRawMarkerTableBuilder(markers);
 
     const store = storeWithProfile(profile);
     const threadMap = new ThreadMap();

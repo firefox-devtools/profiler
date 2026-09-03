@@ -15,8 +15,9 @@ import {
   finishRawBalancedNativeAllocationsTableBuilder,
   finishRawJsAllocationsTableBuilder,
   finishRawUnbalancedNativeAllocationsTableBuilder,
+  finishRawMarkerTableBuilder,
   getEmptyExtensions,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
   getEmptyRawJsAllocationsTable,
   getEmptyRawUnbalancedNativeAllocationsTable,
   getRawMarkerTableBuilderFromExisting,
@@ -705,7 +706,7 @@ function _processMarkers(
   jsAllocations: RawJsAllocationsTable | null;
   nativeAllocations: RawNativeAllocationsTable | null;
 } {
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
   const jsAllocations = getEmptyRawJsAllocationsTable();
   const inProgressNativeAllocations =
     getEmptyRawUnbalancedNativeAllocationsTable();
@@ -829,7 +830,7 @@ function _processMarkers(
   }
 
   return {
-    markers: markers,
+    markers: finishRawMarkerTableBuilder(markers),
     jsAllocations:
       jsAllocations.length === 0
         ? null
@@ -2153,7 +2154,7 @@ function convertSharedTablesEligibleColumns(
   shared: RawProfileSharedData,
   categories: CategoryList | undefined
 ): RawProfileSharedData {
-  const { stackTable, frameTable } = shared;
+  const { stackTable, frameTable, nativeSymbols } = shared;
   return {
     ...shared,
     stackTable: {
@@ -2177,6 +2178,13 @@ function convertSharedTablesEligibleColumns(
       line: toInt32Array(frameTable.line),
       column: toInt32Array(frameTable.column),
       originalLocation: toInt32Array(frameTable.originalLocation),
+    },
+    nativeSymbols: {
+      libIndex: toInt32Array(nativeSymbols.libIndex),
+      address: toUint32Array(nativeSymbols.address),
+      name: toInt32Array(nativeSymbols.name),
+      functionSize: toInt32Array(nativeSymbols.functionSize),
+      length: nativeSymbols.length,
     },
   };
 }
@@ -2547,11 +2555,9 @@ export function processVisualMetrics(
   const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
     mainThread.markers
   );
-  mainThread.markers = mainThreadMarkers;
   const tabThreadMarkers = getRawMarkerTableBuilderFromExisting(
     tabThread.markers
   );
-  tabThread.markers = tabThreadMarkers;
 
   function maybeAddMetricMarker(
     markers: RawMarkerTableBuilder,
@@ -2587,12 +2593,12 @@ export function processVisualMetrics(
   if (stringTable.hasString('Navigation::Start')) {
     const navigationStartStrIdx =
       stringTable.indexForString('Navigation::Start');
-    const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
+    const navigationStartMarkerIdx = tabThreadMarkers.name.findIndex(
       (m) => m === navigationStartStrIdx
     );
     if (navigationStartMarkerIdx !== -1) {
       navigationStartTime =
-        tabThread.markers.startTime[navigationStartMarkerIdx];
+        tabThreadMarkers.startTime[navigationStartMarkerIdx];
     }
   }
 
@@ -2664,6 +2670,9 @@ export function processVisualMetrics(
       );
     }
   }
+
+  mainThread.markers = finishRawMarkerTableBuilder(mainThreadMarkers);
+  tabThread.markers = finishRawMarkerTableBuilder(tabThreadMarkers);
 }
 
 /**

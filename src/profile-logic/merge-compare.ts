@@ -10,16 +10,18 @@ import { adjustMarkerTimestamps } from './process-profile';
 import {
   getEmptyProfile,
   getEmptyResourceTable,
-  getEmptyNativeSymbolTable,
+  getRawNativeSymbolTableBuilder,
+  finishRawNativeSymbolTableBuilder,
   finishRawFrameTableBuilder,
   finishRawSamplesTableBuilder,
   getRawFrameTableBuilder,
   getEmptyFuncTable,
   getRawStackTableBuilder,
   finishRawStackTableBuilder,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
   getRawSamplesTableBuilderWithEventDelay,
   getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
   getEmptySourceTable,
   type RawMarkerTableBuilder,
 } from './data-structures';
@@ -56,7 +58,7 @@ import type {
   FuncTable,
   RawFrameTable,
   Lib,
-  NativeSymbolTable,
+  RawNativeSymbolTable,
   ResourceTable,
   RawSamplesTable,
   RawStackTable,
@@ -882,13 +884,13 @@ function mergeNativeSymbolTables(
   translationMapsForStrings: TranslationMapForStrings[],
   translationMapsForLibs: TranslationMapForLibs[]
 ): {
-  nativeSymbols: NativeSymbolTable;
+  nativeSymbols: RawNativeSymbolTable;
   translationMaps: TranslationMapForNativeSymbols[];
 } {
   const mapOfInsertedNativeSymbols: Map<string, IndexIntoNativeSymbolTable> =
     new Map();
   const translationMaps: TranslationMapForNativeSymbols[] = [];
-  const newNativeSymbols = getEmptyNativeSymbolTable();
+  const newNativeSymbols = getRawNativeSymbolTableBuilder();
 
   profiles.forEach((profile, profileIndex) => {
     const oldLibToNewLibPlusOne = translationMapsForLibs[profileIndex];
@@ -934,7 +936,10 @@ function mergeNativeSymbolTables(
     translationMaps.push(oldNativeSymbolToNewNativeSymbolPlusOne);
   });
 
-  return { nativeSymbols: newNativeSymbols, translationMaps };
+  return {
+    nativeSymbols: finishRawNativeSymbolTableBuilder(newNativeSymbols),
+    translationMaps,
+  };
 }
 
 /**
@@ -1269,7 +1274,7 @@ function getComparisonThread(
     tid: 'Diff between 1 and 2',
     isMainThread: true,
     samples: newSamples,
-    markers: getEmptyRawMarkerTable(),
+    markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
   };
 
   return mergedThread;
@@ -1440,7 +1445,7 @@ function combineSamplesForMerging(threads: RawThread[]): RawSamplesTable {
 function mergeMarkers(threads: RawThread[]): RawMarkerTable {
   const newThreadId: Array<Tid | null> = [];
   const newMarkerTable: RawMarkerTableBuilder = {
-    ...getEmptyRawMarkerTable(),
+    ...getRawMarkerTableBuilder(),
     threadId: newThreadId,
   };
 
@@ -1461,7 +1466,7 @@ function mergeMarkers(threads: RawThread[]): RawMarkerTable {
     }
   });
 
-  return newMarkerTable;
+  return finishRawMarkerTableBuilder(newMarkerTable);
 }
 
 /**
@@ -1510,7 +1515,7 @@ function getThreadMarkersAndScreenshotMarkers(
     }
   }
 
-  return targetMarkerTable;
+  return finishRawMarkerTableBuilder(targetMarkerTable);
 }
 
 /**

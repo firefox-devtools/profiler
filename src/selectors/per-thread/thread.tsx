@@ -201,8 +201,7 @@ export function getBasicThreadSelectorsPerThread(
     ProfileSelectors.getStackTable,
     ProfileSelectors.getFrameTable,
     ProfileSelectors.getFunctionsReservedFuncTable,
-    (state: State) =>
-      ProfileSelectors.getRawProfileSharedData(state).nativeSymbols,
+    ProfileSelectors.getNativeSymbolTable,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).resourceTable,
     ProfileSelectors.getStringTable,
