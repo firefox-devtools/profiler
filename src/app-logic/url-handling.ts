@@ -211,7 +211,7 @@ type CallTreeQuery = BaseQuery & {
   hideIdleSamples: null | undefined;
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
-  funcListSections?: string; // "descendants,ancestors" — comma-separated open sections
+  funcListSections?: string; // "descendants,self" — comma-separated open sections
   wingViews?: string; // "upper:call-tree,lower:call-tree" — non-default wing views
   selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
@@ -815,6 +815,7 @@ function convertFunctionListSortFromString(
 const FUNCTION_LIST_SECTION_NAMES: ReadonlyArray<FunctionListSectionName> = [
   'descendants',
   'ancestors',
+  'self',
 ];
 
 function convertFunctionListSectionsOpenToString(
@@ -839,24 +840,25 @@ function convertFunctionListSectionsOpenFromString(
   const result: FunctionListSectionsOpenState = {
     descendants: false,
     ancestors: false,
+    self: false,
   };
   if (raw === 'none' || raw === '') {
     return result;
   }
   for (const part of raw.split(',')) {
-    if (part === 'descendants' || part === 'ancestors') {
+    if (part === 'descendants' || part === 'ancestors' || part === 'self') {
       result[part] = true;
     }
   }
   return result;
 }
 
-// WingView visualization choice for the Descendants ("upper") and Ancestors
-// ("lower") wings of the FunctionList tab. The URL stores a comma-separated
-// list of "wing:view" pairs for wings whose view differs from the default
-// (flame-graph), e.g. "upper:call-tree". The param is omitted when all wings
-// use the default.
-const WING_VIEW_NAMES: ReadonlyArray<WingViewName> = ['upper', 'lower'];
+// WingView visualization choice for the Descendants ("upper"), Ancestors
+// ("lower"), and Self wings of the FunctionList tab. The URL stores a
+// comma-separated list of "wing:view" pairs for wings whose view differs from
+// the default (flame-graph), e.g. "upper:call-tree". The param is omitted
+// when all wings use the default.
+const WING_VIEW_NAMES: ReadonlyArray<WingViewName> = ['upper', 'lower', 'self'];
 
 function convertWingViewsToString(state: WingViewsState): string | undefined {
   const parts: string[] = [];
@@ -876,7 +878,7 @@ function convertWingViewsFromString(raw: string | null | void): WingViewsState {
   for (const part of raw.split(',')) {
     const [wing, view] = part.split(':');
     if (
-      (wing === 'upper' || wing === 'lower') &&
+      (wing === 'upper' || wing === 'lower' || wing === 'self') &&
       (view === 'flame-graph' || view === 'call-tree')
     ) {
       result[wing] = view;

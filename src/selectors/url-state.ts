@@ -137,6 +137,8 @@ export const getUpperWingView: Selector<WingViewType> = (state) =>
   getWingViews(state).upper;
 export const getLowerWingView: Selector<WingViewType> = (state) =>
   getWingViews(state).lower;
+export const getSelfWingView: Selector<WingViewType> = (state) =>
+  getWingViews(state).self;
 export const getNetworkSearchString: Selector<string> = (state) =>
   getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = (state) =>

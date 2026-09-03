@@ -6,6 +6,7 @@ import * as React from 'react';
 
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { FunctionList } from './FunctionList';
+import { SelfWing } from './SelfWing';
 import { UpperWing, LowerWing } from './WingTreeView';
 import { DisclosureBox } from 'firefox-profiler/components/shared/DisclosureBox';
 import { WingViewToggle } from './WingViewToggle';
@@ -36,6 +37,9 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
   };
   _onAncestorsToggle = (isOpen: boolean) => {
     this.props.changeFunctionListSectionOpen('ancestors', isOpen);
+  };
+  _onSelfToggle = (isOpen: boolean) => {
+    this.props.changeFunctionListSectionOpen('self', isOpen);
   };
 
   override render() {
@@ -73,6 +77,14 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               headerActions={<WingViewToggle wing="lower" />}
             >
               <LowerWing />
+            </DisclosureBox>
+            <DisclosureBox
+              label="Self"
+              isOpen={sectionsOpen.self}
+              onToggle={this._onSelfToggle}
+              headerActions={<WingViewToggle wing="self" />}
+            >
+              <SelfWing />
             </DisclosureBox>
           </ResizableWithSplitter>
         </div>

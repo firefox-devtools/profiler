@@ -84,8 +84,9 @@ export type CallNodeArea =
   | 'LOWER_WING'
   | 'UPPER_WING';
 
-// Function-list wings with their own selected/expanded/right-clicked call
-// node path.
+// State-bearing function-list wings: each has its own selected/expanded/
+// right-clicked call node path. The self wing has no such state of its own
+// (it shares it with the main tree).
 export type WingName = 'upper' | 'lower';
 
 export type RightClickedCallNode = {
@@ -417,6 +418,7 @@ export type ProfileSpecificUrlState = {
 export type FunctionListSectionsOpenState = {
   descendants: boolean;
   ancestors: boolean;
+  self: boolean;
 };
 
 export type FunctionListSectionName = keyof FunctionListSectionsOpenState;
@@ -426,6 +428,7 @@ export type WingViewType = 'flame-graph' | 'call-tree';
 export type WingViewsState = {
   upper: WingViewType;
   lower: WingViewType;
+  self: WingViewType;
 };
 
 export type WingViewName = keyof WingViewsState;
