@@ -519,17 +519,18 @@ describe('app/MenuButtons', function () {
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('keeps Download available but locks the options while uploading', async () => {
+    it('keeps Download available and editable while uploading', async () => {
       const { openPublishPanel, getPanelForm, openDownloadPanel } =
         setupForPublish();
       await openPublishPanel();
       fireEvent.submit(getPanelForm());
 
-      // The Download button stays in the toolbar while the upload is running.
+      // The Download button stays in the toolbar while the upload is running,
+      // and its options stay editable: they are independent of the upload's.
       await openDownloadPanel();
       expect(
         screen.getByRole('checkbox', { name: /Include hidden threads/ })
-      ).toBeDisabled();
+      ).toBeEnabled();
     });
   });
 

@@ -40,6 +40,7 @@ import type {
   ThreadIndex,
   CounterIndex,
   SanitizedProfileEncodingState,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -50,7 +51,7 @@ export const getCheckedSharingOptions: DangerousSelectorWithArguments<
   SharingMode
 > = (state, mode) => getPublishState(state).checkedSharingOptions[mode];
 
-export const getFilenameString: Selector<string> = createSelector(
+const getFilenameStem: Selector<string> = createSelector(
   getProfile,
   getProfileRootRange,
   (profile, rootRange) => {
@@ -68,10 +69,16 @@ export const getFilenameString: Selector<string> = createSelector(
     const min = pad(date.getMinutes());
     const dateString = `${year}-${month}-${day} ${hour}.${min}`;
 
-    // Return the final file name
-    return `${product} ${dateString} profile.json`;
+    return `${product} ${dateString} profile`;
   }
 );
+
+export function getDownloadFilename(
+  state: State,
+  format: PublishProfileFormat
+): string {
+  return `${getFilenameStem(state)}.${format}`;
+}
 
 const _makeGetRemoveProfileInformation = (mode: SharingMode) =>
   createSelector(
@@ -275,9 +282,19 @@ export const getSanitizedProfile: DangerousSelectorWithArguments<
   SharingMode
 > = (state, mode) => _sanitizedProfileSelectors[mode](state);
 
-export const getSanitizedProfileEncodingState: Selector<
-  SanitizedProfileEncodingState
-> = (state) => getPublishState(state).sanitizedProfileEncodingState;
+export const getSanitizedProfileEncodingStates: DangerousSelectorWithArguments<
+  Record<PublishProfileFormat, SanitizedProfileEncodingState>,
+  SharingMode
+> = (state, mode) =>
+  getPublishState(state).sanitizedProfileEncodingStates[mode];
+
+export function getSanitizedProfileEncodingState(
+  state: State,
+  mode: SharingMode,
+  format: PublishProfileFormat
+): SanitizedProfileEncodingState {
+  return getSanitizedProfileEncodingStates(state, mode)[format];
+}
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;

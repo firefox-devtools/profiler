@@ -237,9 +237,22 @@ export type SanitizedProfileEncodingState =
     }
   | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
 
+// The upload path always uses 'jslb'; 'json' is only used for the "Download
+// as JSON" option in the publish panel's split download button.
+export type PublishProfileFormat = 'jslb' | 'json';
+
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  // One encoding slot per (sharing mode, format) pair. The two modes have
+  // independent sharing options, so they sanitize to different profiles and
+  // must not share a slot: otherwise each mode's encoding clobbers the
+  // other's, and a panel could offer a blob that was encoded for the *other*
+  // mode's options. The formats are independent for the same reason: each is
+  // a separate serialization, offered by a different control.
+  readonly sanitizedProfileEncodingStates: Record<
+    SharingMode,
+    Record<PublishProfileFormat, SanitizedProfileEncodingState>
+  >;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
