@@ -113,11 +113,28 @@ export function getSchemaFromMarker(
 
 // Matches ternary expressions inside marker labels, ie {marker.data.field ? 'truthy' : 'falsy'}
 const TERNARY_RE = /^\s*([\w.]+)\s*\?\s*'([^']*)'\s*:\s*'([^']*)'\s*$/;
+const OPTIONAL_SEGMENT_RE = /\[\[([\s\S]*?)\]\]/;
+const OPTIONAL_SEGMENT_PAYLOAD_KEY_RE =
+  /\{\s*marker\.data\.([^.{}\s?]+)(?=\s*(?:\}|\?))/g;
+
+export const FILE_IO_TABLE_LABEL =
+  '[[({marker.data.source}) ]]{marker.data.operation}[[ — {marker.data.filename}]]';
+
+export function addFileIoTableLabel(schema: {
+  name: string;
+  tableLabel?: string;
+}): void {
+  if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+    schema.tableLabel = FILE_IO_TABLE_LABEL;
+  }
+}
 
 /**
  * Marker schema can create a dynamic tooltip label. For instance a schema with
  * a `tooltipLabel` field of "Event at {marker.data.url}" would create a label based
  * off of the "url" property in the payload.
+ * Segments wrapped in `[[` and `]]` are omitted when any payload field they
+ * reference is absent or empty.
  *
  * Note that this is only exported for unit tests.
  */
@@ -127,6 +144,47 @@ export function parseLabel(
   stringTable: StringTable,
   label: string
 ): (marker: Marker) => string {
+  const segments = label.split(OPTIONAL_SEGMENT_RE);
+  if (segments.length > 1) {
+    const computeSegments = segments.map((segment, index) => {
+      const computeSegment = parseLabel(
+        markerSchema,
+        categories,
+        stringTable,
+        segment
+      );
+      if (index % 2 === 0) {
+        return computeSegment;
+      }
+
+      const payloadKeys = Array.from(
+        segment.matchAll(OPTIONAL_SEGMENT_PAYLOAD_KEY_RE),
+        (match) => match[1]
+      );
+      if (payloadKeys.length === 0) {
+        return (marker: Marker) => `[[${computeSegment(marker)}]]`;
+      }
+
+      return (marker: Marker) => {
+        for (const payloadKey of payloadKeys) {
+          const value = (marker.data as any)?.[payloadKey];
+          if (value === undefined || value === null || value === '') {
+            return '';
+          }
+        }
+        return computeSegment(marker);
+      };
+    });
+
+    return (marker: Marker) => {
+      let result: string = '';
+      for (const computeSegment of computeSegments) {
+        result += computeSegment(marker);
+      }
+      return result;
+    };
+  }
+
   // Split the label on the "{key}" capture groups.
   // Each (zero-indexed) even entry will be a raw string label.
   // Each (zero-indexed) odd entry will be a key to the payload.
@@ -301,28 +359,7 @@ const fallbacks: Record<LabelKey, (marker: any) => string> = {
 
   chartLabel: (_marker) => '',
 
-  tableLabel: (marker: Marker) => {
-    let description = '';
-
-    if (marker.data) {
-      const data = marker.data;
-      switch (data.type) {
-        case 'FileIO':
-          if (data.source) {
-            description = `(${data.source}) `;
-          }
-          description += data.operation;
-          if (data.filename) {
-            description = data.operation
-              ? `${description} — ${data.filename}`
-              : data.filename;
-          }
-          break;
-        default:
-      }
-    }
-    return description;
-  },
+  tableLabel: (_marker) => '',
 
   copyLabel: (marker) => marker.name,
 };

@@ -19,6 +19,7 @@ import { StringTable } from '../utils/string-table';
 import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { ProfileVersionError } from './errors';
+import { addFileIoTableLabel } from './marker-schema';
 import type { Profile } from 'firefox-profiler/types';
 
 export type ProfileUpgradeInfo = {
@@ -3431,6 +3432,12 @@ const _upgraders: {
       // Reinterpret existing bits as u32. We already set all
       // -1 to 0, and there shouldn't be any other negative values.
       frameTable.address = new Uint32Array(frameTable.address);
+    }
+  },
+  [72]: (profile: any) => {
+    // Ensure FileIO marker schemas provide their schema-driven table label.
+    for (const schema of profile.meta.markerSchema ?? []) {
+      addFileIoTableLabel(schema);
     }
   },
   // If you add a new upgrader here, please document the change in
