@@ -64,7 +64,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType } from 'firefox-profiler/types';
+import { SelectedState, ResourceType, FrameFlag } from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -275,13 +275,13 @@ describe('process-profile', function () {
       expect(shared.frameTable.func[22]).toEqual(2);
       expect(shared.frameTable.func[24]).toEqual(1);
       expect(shared.frameTable.func[25]).toEqual(1);
-      expect(shared.frameTable.address[0]).toEqual(-1);
+      expect(shared.frameTable.flags[0] & FrameFlag.HasAddress).toBe(0);
       // The next two addresses were return addresses which were "nudged"
       // by one byte to point into the calling instruction.
       expect(shared.frameTable.address[1]).toEqual(0xf83);
       expect(shared.frameTable.address[2]).toEqual(0x1a44);
-      expect(shared.frameTable.address[3]).toEqual(-1);
-      expect(shared.frameTable.address[4]).toEqual(-1);
+      expect(shared.frameTable.flags[3] & FrameFlag.HasAddress).toBe(0);
+      expect(shared.frameTable.flags[4] & FrameFlag.HasAddress).toBe(0);
       expect(shared.frameTable.address[5]).toEqual(0x1bcd);
       expect(shared.frameTable.address[6]).toEqual(0x1bce);
       // Here are the non-nudged addresses for when they were sampled directly.
@@ -316,8 +316,11 @@ describe('process-profile', function () {
         const addresses = [];
         let stack = thread.samples.stack[sample];
         while (stack !== null) {
+          const frame = shared.stackTable.frame[stack];
           addresses.push(
-            shared.frameTable.address[shared.stackTable.frame[stack]]
+            (shared.frameTable.flags[frame] & FrameFlag.HasAddress) !== 0
+              ? shared.frameTable.address[frame]
+              : -1
           );
           const offset = shared.stackTable.prefixOffset[stack];
           stack = offset === 0 ? null : stack - offset;
@@ -336,9 +339,15 @@ describe('process-profile', function () {
       expect(shared.frameTable.length).toEqual(27);
       expect('nativeSymbol' in shared.frameTable).toBeTruthy();
       expect(shared.nativeSymbols.length).toEqual(0);
-      expect(
-        shared.frameTable.nativeSymbol.every((s) => s === null)
-      ).toBeTrue();
+      const flags = shared.frameTable.flags;
+      let allUnset = true;
+      for (let i = 0; i < shared.frameTable.length; i++) {
+        if ((flags[i] & FrameFlag.HasNativeSymbol) !== 0) {
+          allUnset = false;
+          break;
+        }
+      }
+      expect(allUnset).toBeTrue();
     });
 
     it('should create one resource per used library', function () {
@@ -1475,7 +1484,10 @@ describe('calculateFunctionSizeLowerBound', function () {
     const nativeSymbolIndex = nativeSymbolsDict.symSomeFunc;
 
     const functionSizeLowerBound = calculateFunctionSizeLowerBound(
-      computeFrameTableFromRawFrameTable(shared.frameTable),
+      computeFrameTableFromRawFrameTable(
+        shared.frameTable,
+        profile.meta.categories
+      ),
       0x1000,
       nativeSymbolIndex
     );
@@ -1769,7 +1781,10 @@ describe('getNativeSymbolInfo', function () {
     const { shared } = profile;
     const stringTable = StringTable.withBackingArray(shared.stringArray);
     const { symSomeFunc, symOtherFunc } = nativeSymbolsDictPerThread[0];
-    const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
+    const frameTable = computeFrameTableFromRawFrameTable(
+      shared.frameTable,
+      profile.meta.categories
+    );
 
     expect(
       getNativeSymbolInfo(

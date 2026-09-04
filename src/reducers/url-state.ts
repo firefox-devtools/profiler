@@ -628,7 +628,6 @@ const profileName: Reducer<string | null> = (state = null, action) => {
 const sourceView: Reducer<SourceViewState> = (
   state = {
     scrollGeneration: 0,
-    libIndex: null,
     sourceIndex: null,
     highlightedLine: null,
   },
@@ -641,7 +640,6 @@ const sourceView: Reducer<SourceViewState> = (
         scrollGeneration: shouldScroll
           ? state.scrollGeneration + 1
           : state.scrollGeneration,
-        libIndex: action.libIndex,
         sourceIndex: action.sourceIndex,
         scrollToLineNumber: action.scrollToLineNumber,
         highlightedLine: action.highlightedLineNumber,

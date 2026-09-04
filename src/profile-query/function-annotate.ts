@@ -6,7 +6,7 @@ import { getProfile } from 'firefox-profiler/selectors/profile';
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { parseFunctionHandle } from './function-map';
-import { getLibForFunc } from './function-list';
+import { getLibNameForFunc } from './function-list';
 import type { ThreadMap } from './thread-map';
 import {
   getStackLineInfo,
@@ -343,12 +343,12 @@ export async function functionAnnotate(
   const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
   const funcName = stringArray[funcTable.name[funcIndex]];
 
-  const libraryName = getLibForFunc(
+  const libraryName = getLibNameForFunc(
     funcIndex,
     funcTable,
     resourceTable,
-    profile.libs
-  )?.name;
+    stringArray
+  );
   const fullName = libraryName ? `${libraryName}!${funcName}` : funcName;
 
   const threadIndexes = getSelectedThreadIndexes(state);

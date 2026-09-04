@@ -209,6 +209,7 @@ profiler-cli thread network --json
     threadHandle, friendlyThreadName,
     totalRequestCount,
     incompleteCount,
+    totalCandidateCount,
     filteredRequestCount,
     sort: "duration" | "start",
     filters?: { searchString?, minDuration?, maxDuration?, limit? },

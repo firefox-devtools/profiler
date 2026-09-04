@@ -5,29 +5,55 @@
 import type {
   Thread,
   Lib,
+  RawFrameTable,
   FuncTable,
   ResourceTable,
 } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag } from 'firefox-profiler/types';
 import { getFunctionHandle } from './function-map';
 
 /**
  * Look up the Lib record for a function, or undefined if none is associated.
+ *
+ * For funcs which are shared across frames from multiple different libs, this
+ * will return the first match.
  */
-export function getLibForFunc(
+export function getAnyLibForFunc(
+  funcIndex: number,
+  frameTable: RawFrameTable,
+  libs: Lib[]
+): Lib | undefined {
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+    if (frameTable.func[frameIndex] !== funcIndex) {
+      continue;
+    }
+    if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0) {
+      return libs[frameTable.lib[frameIndex]];
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Look up the name of the library a function came from, or null if the function
+ * isn't native code. This is the name of the func's resource, which is cheap to
+ * get at; note that it names the library but does not identify a specific
+ * build, since several libs can share one resource.
+ */
+export function getLibNameForFunc(
   funcIndex: number,
   funcTable: FuncTable,
   resourceTable: ResourceTable,
-  libs: Lib[]
-): Lib | undefined {
+  stringArray: string[]
+): string | null {
   const resourceIndex = funcTable.resource[funcIndex];
-  if (resourceIndex === -1) {
-    return undefined;
+  if (
+    resourceIndex === -1 ||
+    resourceTable.type[resourceIndex] !== ResourceType.Library
+  ) {
+    return null;
   }
-  const libIndex = resourceTable.lib[resourceIndex];
-  if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
-    return libs[libIndex];
-  }
-  return undefined;
+  return stringArray[resourceTable.name[resourceIndex]];
 }
 
 export type FunctionData = {
@@ -351,22 +377,13 @@ export function truncateFunctionName(
  */
 export function formatFunctionNameWithLibrary(
   funcIndex: number,
-  thread: Thread,
-  libs: Lib[]
+  thread: Thread
 ): string {
   const funcName = thread.stringTable.getString(
     thread.funcTable.name[funcIndex]
   );
-  const lib = getLibForFunc(
-    funcIndex,
-    thread.funcTable,
-    thread.resourceTable,
-    libs
-  );
-  if (lib) {
-    return `${lib.name}!${funcName}`;
-  }
-  // Fall back to resource name if no library
+  // The func's resource carries the library name for native code, and the
+  // origin / URL for JS code.
   const resourceIndex = thread.funcTable.resource[funcIndex];
   if (resourceIndex !== -1) {
     const resourceName = thread.stringTable.getString(
@@ -393,18 +410,13 @@ export function extractFunctionData(
       selfRelative: number;
     };
   },
-  thread: Thread,
-  libs: Lib[]
+  thread: Thread
 ): FunctionData[] {
   const roots = tree.getRoots();
   return roots.map((nodeIndex) => {
     const data = tree.getNodeData(nodeIndex);
     // The node index IS the function index for function list trees
-    const formattedName = formatFunctionNameWithLibrary(
-      nodeIndex,
-      thread,
-      libs
-    );
+    const formattedName = formatFunctionNameWithLibrary(nodeIndex, thread);
     return {
       ...data,
       funcName: formattedName,

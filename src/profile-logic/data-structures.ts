@@ -6,6 +6,7 @@ import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../app-logic/constants';
+import { toUint8OrUint16Array, valuesFitInUint8 } from '../utils/typed-arrays';
 
 import type {
   RawProfileSharedData,
@@ -35,6 +36,7 @@ import type {
   IndexIntoSubcategoryListForCategory,
   IndexIntoNativeSymbolTable,
   IndexIntoSourceLocationTable,
+  IndexIntoLibs,
   InnerWindowID,
   Address,
   Bytes,
@@ -112,16 +114,17 @@ export type RawBalancedNativeAllocationsTableBuilder = {
 };
 
 export type RawFrameTableBuilder = {
-  address: Array<Address | -1>;
-  inlineDepth: number[];
-  category: (IndexIntoCategoryList | null)[];
-  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  flags: number[];
+  address: Address[];
+  category: IndexIntoCategoryList[];
+  subcategory: IndexIntoSubcategoryListForCategory[];
   func: IndexIntoFuncTable[];
-  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
-  innerWindowID: (InnerWindowID | null)[];
-  line: (number | null)[];
-  column: (number | null)[];
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  lib: IndexIntoLibs[];
+  nativeSymbol: IndexIntoNativeSymbolTable[];
+  innerWindowID: InnerWindowID[];
+  line: number[];
+  column: number[];
+  originalLocation: IndexIntoSourceLocationTable[];
   length: number;
 };
 
@@ -284,11 +287,12 @@ export function getRawFrameTableBuilder(): RawFrameTableBuilder {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    flags: [],
     address: [],
-    inlineDepth: [],
     category: [],
     subcategory: [],
     func: [],
+    lib: [],
     nativeSymbol: [],
     innerWindowID: [],
     line: [],
@@ -306,16 +310,17 @@ export function getRawFrameTableBuilderWithExistingContents(
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    flags: Array.from(frameTable.flags),
     address: Array.from(frameTable.address),
-    inlineDepth: Array.from(frameTable.inlineDepth),
-    category: frameTable.category.slice(),
-    subcategory: frameTable.subcategory.slice(),
+    category: Array.from(frameTable.category),
+    subcategory: Array.from(frameTable.subcategory),
     func: Array.from(frameTable.func),
-    nativeSymbol: frameTable.nativeSymbol.slice(),
-    innerWindowID: frameTable.innerWindowID.slice(),
-    line: frameTable.line.slice(),
-    column: frameTable.column.slice(),
-    originalLocation: frameTable.originalLocation.slice(),
+    lib: Array.from(frameTable.lib),
+    nativeSymbol: Array.from(frameTable.nativeSymbol),
+    innerWindowID: Array.from(frameTable.innerWindowID),
+    line: Array.from(frameTable.line),
+    column: Array.from(frameTable.column),
+    originalLocation: Array.from(frameTable.originalLocation),
     length: frameTable.length,
   };
 }
@@ -325,9 +330,25 @@ export function finishRawFrameTableBuilder(
 ): RawFrameTable {
   return {
     ...builder,
-    address: new Int32Array(builder.address),
-    inlineDepth: new Uint8Array(builder.inlineDepth),
+    flags: new Uint8Array(builder.flags),
+    address: new Uint32Array(builder.address),
+    // Category indexes are limited to 8 bits by the format.
+    category: new Uint8Array(builder.category),
+    // The profile's category list isn't available here, so derive the width
+    // from the values instead of from the largest subcategory count. This can
+    // only ever pick a narrower width than the category list would allow, so
+    // it can't overflow the derived stack table's subcategory column.
+    subcategory: toUint8OrUint16Array(
+      builder.subcategory,
+      !valuesFitInUint8(builder.subcategory)
+    ),
     func: new Int32Array(builder.func),
+    lib: new Int32Array(builder.lib),
+    nativeSymbol: new Int32Array(builder.nativeSymbol),
+    innerWindowID: new Float64Array(builder.innerWindowID),
+    line: new Int32Array(builder.line),
+    column: new Int32Array(builder.column),
+    originalLocation: new Int32Array(builder.originalLocation),
   };
 }
 
@@ -409,7 +430,6 @@ export function getEmptyResourceTable(): ResourceTable {
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    lib: [],
     name: [],
     host: [],
     type: [],
