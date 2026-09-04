@@ -31,6 +31,8 @@ const browserEnvConfig = {
   globals: {
     AVAILABLE_STAGING_LOCALES: null,
     SOURCE_MAP_WORKER_PATH: 'src/test/fixtures/source-map.worker.stub.js',
+    BENCHMARK_COMPARE_WORKER_PATH:
+      'src/test/fixtures/benchmark-compare.worker.stub.js',
   },
 
   snapshotFormat: {

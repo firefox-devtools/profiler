@@ -132,6 +132,8 @@ function getPathParts(urlState: UrlState): string[] {
         return ['compare'];
       }
       return ['compare', urlState.selectedTab];
+    case 'compare-benchmark':
+      return ['compare-benchmark'];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':
@@ -172,6 +174,7 @@ type BaseQuery = {
   file: string; // Path into a zip file.
   transforms: string;
   profiles: string[];
+  names: string[]; // Display names for `profiles`, e.g. ["Chrome", "Firefox"]
   profileName: string;
   symbolServer: string;
   view: string;
@@ -270,6 +273,17 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         return '';
       }
       break;
+    case 'compare-benchmark':
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      return queryString.stringify(
+        {
+          profiles: urlState.profilesToCompare,
+          names: urlState.profileNamesToCompare ?? undefined,
+        },
+        { arrayFormat: 'bracket' }
+      );
     case 'public':
     case 'local':
     case 'from-browser':
@@ -463,6 +477,7 @@ export function ensureIsValidDataSource(
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'compare-benchmark':
     case 'uploaded-recordings':
       return coercedDataSource;
     default:
@@ -601,6 +616,7 @@ export function stateFromLocation(
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     profilesToCompare: query.profiles || null,
+    profileNamesToCompare: query.names || null,
     selectedTab,
     pathInZipFile: query.file || null,
     profileName: query.profileName,

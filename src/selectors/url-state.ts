@@ -57,6 +57,8 @@ export const getProfileUrl: Selector<string> = (state) =>
   getUrlState(state).profileUrl;
 export const getProfilesToCompare: Selector<string[] | null> = (state) =>
   getUrlState(state).profilesToCompare;
+export const getProfileNamesToCompare: Selector<string[] | null> = (state) =>
+  getUrlState(state).profileNamesToCompare;
 export const getProfileNameFromUrl: Selector<string | null> = (state) =>
   getUrlState(state).profileName;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = (state) =>
