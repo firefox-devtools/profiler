@@ -3427,6 +3427,31 @@ export function getSampleIndexClosestToCenteredTime(
   return distanceToPrevious <= maxTimeDistance ? index - 1 : null;
 }
 
+/**
+ * The friendly label for a bare process type, for processes whose back end did
+ * not supply a `processName`. Returns null for a type we have no name for.
+ */
+export function getProcessTypeLabel(
+  processType: string | undefined
+): string | null {
+  switch (processType) {
+    case 'default':
+      return 'Parent Process';
+    case 'gpu':
+      return 'GPU Process';
+    case 'rdd':
+      return 'Remote Data Decoder';
+    case 'tab':
+      return 'Content Process';
+    case 'plugin':
+      return 'Plugin Process';
+    case 'socket':
+      return 'Socket Process';
+    default:
+      return null;
+  }
+}
+
 export function getFriendlyThreadName(
   threads: RawThread[],
   thread: RawThread
@@ -3451,33 +3476,12 @@ export function getFriendlyThreadName(
           return thread.name === 'GeckoMain' && thread.processName === label;
         });
       } else {
-        switch (thread.processType) {
-          case 'default':
-            label = 'Parent Process';
-            break;
-          case 'gpu':
-            label = 'GPU Process';
-            break;
-          case 'rdd':
-            label = 'Remote Data Decoder';
-            break;
-          case 'tab': {
-            label = 'Content Process';
-            homonymThreads = threads.filter((thread) => {
-              return (
-                thread.name === 'GeckoMain' && thread.processType === 'tab'
-              );
-            });
-            break;
-          }
-          case 'plugin':
-            label = 'Plugin Process';
-            break;
-          case 'socket':
-            label = 'Socket Process';
-            break;
-          default:
-          // should we throw here ?
+        // should we throw here if the process type is unknown?
+        label = getProcessTypeLabel(thread.processType) ?? undefined;
+        if (thread.processType === 'tab') {
+          homonymThreads = threads.filter((thread) => {
+            return thread.name === 'GeckoMain' && thread.processType === 'tab';
+          });
         }
       }
       break;

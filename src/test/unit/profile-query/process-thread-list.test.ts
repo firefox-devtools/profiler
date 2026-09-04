@@ -2,7 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { buildProcessThreadList } from 'firefox-profiler/profile-query/process-thread-list';
+import {
+  buildProcessThreadList,
+  getProcessName,
+} from 'firefox-profiler/profile-query/process-thread-list';
+import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 
 import type { ThreadInfo } from 'firefox-profiler/profile-query/process-thread-list';
 
@@ -432,5 +436,45 @@ describe('buildProcessThreadList', function () {
       combinedCpuMs: 150, // 50 + 40 + 30 + 20 + 10
       maxCpuMs: 50,
     });
+  });
+});
+
+/**
+ * `profile info` names processes with this, so it has to agree with the
+ * friendly names the thread banner shows. The back end omits `processName` for
+ * some process types, and those are the ones that used to read as a raw "gpu".
+ */
+describe('getProcessName', function () {
+  it('names a process that the back end did not name', function () {
+    expect(
+      getProcessName(getEmptyThread({ name: 'GeckoMain', processType: 'gpu' }))
+    ).toBe('GPU Process');
+    expect(
+      getProcessName(getEmptyThread({ name: 'GeckoMain', processType: 'rdd' }))
+    ).toBe('Remote Data Decoder');
+  });
+
+  it('prefers the name the back end supplied over the process type', function () {
+    // This is what keeps the vast majority of processes reading as before.
+    expect(
+      getProcessName(
+        getEmptyThread({
+          name: 'GeckoMain',
+          processType: 'gpu',
+          processName: 'WebExtensions',
+        })
+      )
+    ).toBe('WebExtensions');
+  });
+
+  it('falls back to the raw type, then to "unknown"', function () {
+    expect(
+      getProcessName(
+        getEmptyThread({ name: 'GeckoMain', processType: 'nonesuch' })
+      )
+    ).toBe('nonesuch');
+    expect(
+      getProcessName(getEmptyThread({ name: 'GeckoMain', processType: '' }))
+    ).toBe('unknown');
   });
 });
