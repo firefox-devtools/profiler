@@ -28,6 +28,7 @@ import type {
   Pid,
 } from 'firefox-profiler/types';
 import type { StringTable } from '../utils/string-table';
+import { getMarkerSchemaStyleFallback } from './marker-styles';
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
@@ -37,6 +38,7 @@ import type { StringTable } from '../utils/string-table';
 export const markerSchemaFrontEndOnly: MarkerSchema[] = [
   {
     name: 'Jank',
+    style: getMarkerSchemaStyleFallback('Jank'),
     display: ['marker-table', 'marker-chart'],
     tooltipLabel: 'Jank – event processing delay',
     tableLabel: 'Event processing delay',
@@ -51,6 +53,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
   // for IPC, the Gecko ones get overwritten by this definition.
   {
     name: 'IPC',
+    style: getMarkerSchemaStyleFallback('IPC'),
     tooltipLabel: 'IPC — {marker.data.niceDirection}',
     tableLabel: '{marker.data.messageType} — {marker.data.niceDirection}',
     chartLabel: '{marker.data.messageType}',
@@ -68,6 +71,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     // `display` property is used to decide where to display these markers, and
     // we need it to hide them from the marker chart.
     name: 'Network',
+    style: getMarkerSchemaStyleFallback('Network'),
     display: ['marker-table', 'marker-chart', 'timeline-network'],
     chartLabel: '{marker.data.URI}',
     fields: [

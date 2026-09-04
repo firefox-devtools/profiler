@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 72
+
+Marker schemas now include a `style` field that controls their appearance in timeline marker tracks. It specifies the marker's background, position, height, corner shape, and optional border colors. The upgrader derives styles for older profiles.
+
 ### Version 71
 
 The frame table (`profile.shared.frameTable`) representation changed in such a way that all its columns can now be typed arrays when using [JsonSlabs](https://github.com/mstange/json-slabs/) profiles.
