@@ -17,7 +17,7 @@ import { toggleOpenCategoryInSidebar } from 'firefox-profiler/actions/app';
 import { getSidebarOpenCategories } from 'firefox-profiler/selectors/app';
 import { getCategories } from 'firefox-profiler/selectors/profile';
 import { getFunctionName } from 'firefox-profiler/profile-logic/function-info';
-import { shouldDisplaySubcategoryInfoForCategory } from 'firefox-profiler/profile-logic/profile-data';
+import { sortCategoryBreakdown } from 'firefox-profiler/profile-logic/category-breakdown';
 import { CanSelectContent } from './CanSelectContent';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -108,91 +108,71 @@ class CategoryBreakdownImpl extends React.PureComponent<CategoryBreakdownAllProp
     const { breakdown, categoryList, number, sidebarOpenCategories, kind } =
       this.props;
 
-    const data = breakdown
-      .map((oneCategoryBreakdown, categoryIndex) => {
-        const category = categoryList[categoryIndex];
-        return {
-          categoryIndex,
-          category,
-          value: oneCategoryBreakdown.entireCategoryValue || 0,
-          subcategories: category.subcategories
-            .map((subcategoryName, subcategoryIndex) => ({
-              index: subcategoryIndex,
-              name: subcategoryName,
-              value:
-                oneCategoryBreakdown.subcategoryBreakdown[subcategoryIndex],
-            }))
-            // sort subcategories in descending order
-            .sort(({ value: valueA }, { value: valueB }) => valueB - valueA)
-            .filter(({ value }) => value),
-        };
-      })
-      // sort categories in descending order
-      .sort(({ value: valueA }, { value: valueB }) => valueB - valueA)
-      .filter(({ value }) => value);
-
-    // Values can be negative for diffing tracks, that's why we use the absolute
-    // value to compute the total time. Indeed even if all values average out,
-    // we want to display a sensible percentage.
-    const totalTime = data.reduce(
-      (accum, { value }) => accum + Math.abs(value),
-      0
-    );
+    const { categories } = sortCategoryBreakdown(breakdown, categoryList);
 
     return (
       <>
-        {data.map(({ category, value, subcategories, categoryIndex }) => {
-          const hasSubcategory =
-            shouldDisplaySubcategoryInfoForCategory(category);
-          const openCats = sidebarOpenCategories.get(kind);
-          const expanded =
-            openCats !== undefined && openCats.has(categoryIndex);
-          return (
-            <React.Fragment key={`category-${categoryIndex}`}>
-              <SidebarDetail
-                label={
-                  hasSubcategory ? (
-                    <button
-                      type="button"
-                      data-category-index={categoryIndex}
-                      onClick={this._toggleCategory}
-                      className={classNames({
-                        'sidebar-toggle': true,
-                        expanded,
-                      })}
-                    >
-                      {category.name}
-                    </button>
-                  ) : (
-                    category.name
-                  )
-                }
-                value={number(value)}
-                percentage={formatPercent(value / totalTime)}
-              />
+        {categories.map(
+          ({
+            category,
+            value,
+            ratio,
+            hasSubcategories,
+            subcategories,
+            categoryIndex,
+          }) => {
+            const openCats = sidebarOpenCategories.get(kind);
+            const expanded =
+              openCats !== undefined && openCats.has(categoryIndex);
+            return (
+              <React.Fragment key={`category-${categoryIndex}`}>
+                <SidebarDetail
+                  label={
+                    hasSubcategories ? (
+                      <button
+                        type="button"
+                        data-category-index={categoryIndex}
+                        onClick={this._toggleCategory}
+                        className={classNames({
+                          'sidebar-toggle': true,
+                          expanded,
+                        })}
+                      >
+                        {category.name}
+                      </button>
+                    ) : (
+                      category.name
+                    )
+                  }
+                  value={number(value)}
+                  percentage={formatPercent(ratio)}
+                />
 
-              {/* Draw a histogram bar, colored by the category. */}
-              <div className="sidebar-histogram-bar">
-                <div
-                  className={`sidebar-histogram-bar-color category-color-${category.color}`}
-                  style={{ width: ratioToCssPercent(value / totalTime) }}
-                ></div>
-              </div>
+                {/* Draw a histogram bar, colored by the category. */}
+                <div className="sidebar-histogram-bar">
+                  <div
+                    className={`sidebar-histogram-bar-color category-color-${category.color}`}
+                    style={{ width: ratioToCssPercent(ratio) }}
+                  ></div>
+                </div>
 
-              {hasSubcategory && expanded
-                ? subcategories.map(({ index, name, value }) => (
-                    <SidebarDetail
-                      key={`subcategory-${index}`}
-                      label={name}
-                      value={number(value)}
-                      percentage={formatPercent(value / totalTime)}
-                      indent={true}
-                    />
-                  ))
-                : null}
-            </React.Fragment>
-          );
-        })}
+                {hasSubcategories && expanded
+                  ? subcategories.map(
+                      ({ subcategoryIndex, name, value, ratio }) => (
+                        <SidebarDetail
+                          key={`subcategory-${subcategoryIndex}`}
+                          label={name}
+                          value={number(value)}
+                          percentage={formatPercent(ratio)}
+                          indent={true}
+                        />
+                      )
+                    )
+                  : null}
+              </React.Fragment>
+            );
+          }
+        )}
       </>
     );
   }

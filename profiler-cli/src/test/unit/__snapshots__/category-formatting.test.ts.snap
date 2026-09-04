@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`category breakdown formatting renders categories with their subcategories in thread samples 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+
+Thread: Test Thread
+
+──── Categories (100 running samples) ────
+
+  Layout      █████████████████                 60   60.0%
+    Reflow    █████████████                     45   45.0%
+    Other     ████                              15   15.0%
+  JavaScript  ███████████                       40   40.0%
+
+Top Functions (by total time):
+  (For a call tree starting from these functions, use: profiler-cli thread samples-top-down)
+
+  f-0. A - total: 100 (100.0%)
+
+Top Functions (by self time):
+  (For a call tree showing what calls these functions, use: profiler-cli thread samples-bottom-up)
+
+
+Heaviest stack (0.0 samples, 0 frames):
+  (empty)
+"
+`;
+
+exports[`category breakdown formatting renders the running and self breakdowns in function info 1`] = `
+"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+
+Function f-12:
+  Full name: libxul.so!nsBlockFrame::Reflow
+  Short name: nsBlockFrame::Reflow
+  Is JS: false
+  Relevant for JS: false
+
+──── Categories: running (100 samples, 50.0% of thread) ────
+
+  Layout      █████████████████                 60   60.0%
+    Reflow    █████████████                     45   45.0%
+    Other     ████                              15   15.0%
+  JavaScript  ███████████                       40   40.0%
+
+──── Categories: self (0 samples, 0.0% of thread) ────
+
+  No self samples for this function in the current view."
+`;

@@ -26,6 +26,7 @@ import {
   extractFunctionData,
   formatFunctionNameWithLibrary,
 } from '../function-list';
+import { collectThreadCategoryBreakdown } from './category-breakdown';
 import { collectCallTree, inlineStatusForNode } from './call-tree';
 import type { CallTreeCollectionOptions } from './call-tree';
 import {
@@ -237,6 +238,7 @@ export function collectThreadSamples(
     type: 'thread-samples',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    categoryBreakdown: collectThreadCategoryBreakdown(store, threadIndexes),
     topFunctionsByTotal,
     topFunctionsBySelf,
     heaviestStack,
