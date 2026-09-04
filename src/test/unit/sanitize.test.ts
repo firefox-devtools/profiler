@@ -15,6 +15,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/types';
 import {
+  computeCombinedMarkerSchemaList,
+  computeMarkerSchemaByName,
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
 } from '../../profile-logic/marker-data';
@@ -82,7 +84,7 @@ describe('sanitizePII', function () {
       }
     );
 
-    const markerSchemaByName: MarkerSchemaByName = {
+    const additionalMarkerSchemas: MarkerSchemaByName = {
       FileIO: {
         name: 'FileIO',
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
@@ -141,6 +143,12 @@ describe('sanitizePII', function () {
       },
       ...extraMarkerSchemas,
     };
+    const markerSchemaByName = computeMarkerSchemaByName(
+      computeCombinedMarkerSchemaList([
+        ...originalProfile.meta.markerSchema,
+        ...Object.values(additionalMarkerSchemas),
+      ])
+    );
 
     // Mirror what the `getTracedValuesBuffer` selector hands to `sanitizePII`
     // in the app, instead of pretending that no thread has a buffer.
@@ -627,56 +635,58 @@ describe('sanitizePII', function () {
   });
 
   it('should sanitize all the URLs inside network markers', function () {
-    const { sanitizedProfile } = setup({
-      shouldRemoveUrls: true,
-    });
+    const originalProfile = getProfileWithMarkers(
+      getNetworkMarkers({
+        uri: 'https://example.com',
+        payload: { RedirectURI: 'https://redirect.example.com' },
+      })
+    );
+    const originalMarkerData = originalProfile.threads[0].markers.data;
+    const { sanitizedProfile } = setup(
+      { shouldRemoveUrls: true },
+      originalProfile
+    );
 
-    const stringArray = sanitizedProfile.shared.stringArray;
-    for (const thread of sanitizedProfile.threads) {
-      for (let i = 0; i < thread.markers.length; i++) {
-        const currentMarker = thread.markers.data[i];
-        if (
-          currentMarker &&
-          currentMarker.type &&
-          currentMarker.type === 'Network'
-        ) {
-          /* eslint-disable jest/no-conditional-expect */
-          expect(currentMarker.URI).toBeFalsy();
-          expect(currentMarker.RedirectURI).toBeFalsy();
-          const stringIndex = thread.markers.name[i];
-          expect(stringArray[stringIndex].includes('http')).toBe(false);
-          /* eslint-enable */
-        }
-      }
-    }
+    const markers = sanitizedProfile.threads[0].markers;
+    expect(markers.data).toEqual(
+      originalMarkerData.map((data) =>
+        data ? { ...data, URI: '', RedirectURI: '' } : data
+      )
+    );
+    expect(
+      markers.name.map((name) => sanitizedProfile.shared.stringArray[name])
+    ).toEqual(['Load 0', 'Load 0']);
   });
 
-  it('should sanitize the URLs inside text markers', function () {
+  it('should sanitize URLs inside text markers without a marker schema', function () {
     const unsanitizedNameField =
       'onBeforeRequest https://profiler.firefox.com/ by extension';
     const sanitizedNameField = 'onBeforeRequest https://<URL> by extension';
+    const originalProfile = getProfileWithMarkers([
+      [
+        'Extension Suspend',
+        0,
+        1,
+        {
+          type: 'Text',
+          name: unsanitizedNameField,
+        },
+      ],
+    ]);
+    originalProfile.meta.markerSchema =
+      originalProfile.meta.markerSchema.filter(({ name }) => name !== 'Text');
     const { sanitizedProfile } = setup(
       {
         shouldRemoveUrls: true,
       },
-      getProfileWithMarkers([
-        [
-          'Extension Suspend',
-          0,
-          1,
-          {
-            type: 'Text',
-            name: unsanitizedNameField,
-          },
-        ],
-      ])
+      originalProfile
     );
 
     const marker = sanitizedProfile.threads[0].markers.data[0];
     if (!marker || marker.type !== 'Text') {
       throw new Error('Expected a Text marker');
     }
-    expect(marker.name).toBe(sanitizedNameField);
+    expect(marker).toEqual({ type: 'Text', name: sanitizedNameField });
   });
 
   it('should sanitize all the URLs inside string table', function () {
@@ -749,7 +759,7 @@ describe('sanitizePII', function () {
       if (!marker || marker.type !== 'Text') {
         throw new Error('Expected a Text marker');
       }
-      expect(marker.name).toBe(sanitizedNameField);
+      expect(marker).toEqual({ type: 'Text', name: sanitizedNameField });
     }
   });
 
@@ -779,7 +789,7 @@ describe('sanitizePII', function () {
     if (!marker || marker.type !== 'Text') {
       throw new Error('Expected a Text marker');
     }
-    expect(marker.name).toBe(sanitizedNameField);
+    expect(marker).toEqual({ type: 'Text', name: sanitizedNameField });
   });
 
   it('should not sanitize all the preference values inside preference read markers', function () {
@@ -810,7 +820,7 @@ describe('sanitizePII', function () {
     expect(thread.markers.length).toEqual(1);
 
     const marker = thread.markers.data[0];
-    // All the conditions have to be checked to make Flow happy.
+    // All the conditions have to be checked to satisfy the type checker.
     expect(
       marker &&
         marker.type &&
@@ -819,26 +829,28 @@ describe('sanitizePII', function () {
     ).toBeTruthy();
   });
 
-  it('should sanitize all the preference values inside preference read markers', function () {
+  it('should sanitize preference values without a marker schema', function () {
+    const preferenceMarker = {
+      type: 'PreferenceRead' as const,
+      prefAccessTime: 0,
+      prefName: 'preferenceName',
+      prefKind: 'preferenceKind',
+      prefType: 'preferenceType',
+      prefValue: 'preferenceValue',
+    };
+    const originalProfile = getProfileWithMarkers([
+      ['PreferenceRead', 0, 1, preferenceMarker],
+    ]);
+    originalProfile.meta.markerSchema =
+      originalProfile.meta.markerSchema.filter(
+        ({ name }) => name !== 'PreferenceRead'
+      );
     const { sanitizedProfile } = setup(
       {
         shouldRemovePreferenceValues: true,
+        shouldRemoveUrls: true,
       },
-      getProfileWithMarkers([
-        [
-          'PreferenceRead',
-          0,
-          1,
-          {
-            type: 'PreferenceRead',
-            prefAccessTime: 0,
-            prefName: 'preferenceName',
-            prefKind: 'preferenceKind',
-            prefType: 'preferenceType',
-            prefValue: 'preferenceValue',
-          },
-        ],
-      ])
+      originalProfile
     );
 
     expect(sanitizedProfile.threads.length).toEqual(1);
@@ -846,14 +858,10 @@ describe('sanitizePII', function () {
     const thread = sanitizedProfile.threads[0];
     expect(thread.markers.length).toEqual(1);
 
-    const marker = thread.markers.data[0];
-    // All the conditions have to be checked to make Flow happy.
-    expect(
-      marker &&
-        marker.type &&
-        marker.type === 'PreferenceRead' &&
-        marker.prefValue === ''
-    ).toBeTruthy();
+    expect(thread.markers.data[0]).toEqual({
+      ...preferenceMarker,
+      prefValue: '',
+    });
   });
 
   it('should not push any null values to marker values by mistake while filtering', function () {

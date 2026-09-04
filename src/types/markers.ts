@@ -128,6 +128,34 @@ export type MarkerGraph = {
   color?: GraphColor;
 };
 
+export type MarkerSchemaPII =
+  | {
+      condition: 'remove-urls';
+      action: 'remove-urls' | 'replace-with-empty' | 'truncate-at-colon';
+    }
+  | {
+      condition: 'remove-extensions';
+      action: 'remove-extension-id';
+    }
+  | {
+      condition: 'remove-preference-values';
+      action: 'replace-with-empty';
+    }
+  | {
+      condition: 'remove-private-browsing-data';
+      action: 'remove-marker';
+    };
+
+export type MarkerSchemaPIIField = {
+  key: string;
+  directives: MarkerSchemaPII[];
+};
+
+export type MarkerSchemaPIIConfig = {
+  fields: MarkerSchemaPIIField[];
+  markerName?: MarkerSchemaPII[];
+};
+
 export type MarkerSchemaField = {
   // The property key of the marker data property that carries the field value.
   key: string;
@@ -169,6 +197,9 @@ export type MarkerSchema = {
   // The fields that can be present on markers of this type.
   // Not all listed fields have to be present on every marker (they're all optional).
   fields: MarkerSchemaField[];
+
+  // Rules for removing PII from marker payload fields and the marker name.
+  pii?: MarkerSchemaPIIConfig;
 
   // An optional description for markers of this type.
   // Will be displayed to the user.

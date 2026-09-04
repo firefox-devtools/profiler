@@ -21,6 +21,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   MarkerSchemaField,
+  MarkerSchemaPIIConfig,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -28,6 +29,73 @@ import type {
   Pid,
 } from 'firefox-profiler/types';
 import type { StringTable } from '../utils/string-table';
+
+// These rules stay in the front-end so sanitization does not depend on the
+// Firefox version that recorded the profile.
+export const markerSchemaPII = new Map<string, MarkerSchemaPIIConfig>([
+  [
+    'Network',
+    {
+      fields: [
+        {
+          key: 'URI',
+          directives: [
+            { condition: 'remove-urls', action: 'replace-with-empty' },
+          ],
+        },
+        {
+          key: 'RedirectURI',
+          directives: [
+            { condition: 'remove-urls', action: 'replace-with-empty' },
+          ],
+        },
+        {
+          key: 'isPrivateBrowsing',
+          directives: [
+            {
+              condition: 'remove-private-browsing-data',
+              action: 'remove-marker',
+            },
+          ],
+        },
+      ],
+      markerName: [{ condition: 'remove-urls', action: 'truncate-at-colon' }],
+    },
+  ],
+  [
+    'Text',
+    {
+      fields: [
+        {
+          key: 'name',
+          directives: [
+            { condition: 'remove-urls', action: 'remove-urls' },
+            {
+              condition: 'remove-extensions',
+              action: 'remove-extension-id',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  [
+    'PreferenceRead',
+    {
+      fields: [
+        {
+          key: 'prefValue',
+          directives: [
+            {
+              condition: 'remove-preference-values',
+              action: 'replace-with-empty',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+]);
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
@@ -109,6 +177,24 @@ export function getSchemaFromMarker(
 ): MarkerSchema | null {
   const schemaName = markerData ? markerData.type : null;
   return schemaName ? (markerSchemaByName[schemaName] ?? null) : null;
+}
+
+/**
+ * Get a marker schema with front-end PII rules, including for profiles that do
+ * not provide a display schema for the marker type.
+ */
+export function getSchemaForSanitization(
+  markerSchemaByName: MarkerSchemaByName,
+  markerData: MarkerPayload
+): MarkerSchema | null {
+  const markerSchema = getSchemaFromMarker(markerSchemaByName, markerData);
+  const pii = markerSchemaPII.get(markerData.type) ?? markerSchema?.pii;
+  if (!pii || markerSchema?.pii === pii) {
+    return markerSchema;
+  }
+  return markerSchema
+    ? { ...markerSchema, pii }
+    : { name: markerData.type, display: [], fields: [], pii };
 }
 
 // Matches ternary expressions inside marker labels, ie {marker.data.field ? 'truthy' : 'falsy'}
