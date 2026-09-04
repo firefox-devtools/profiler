@@ -204,8 +204,10 @@ describe('timeline/TrackScreenshots', function () {
     const profile = getScreenshotTrackProfile();
     const { shared, threads } = profile;
     const [thread] = threads;
-    const markerIndexA = thread.markers.length - 3;
-    const markerIndexB = thread.markers.length - 2;
+    // Screenshots are stored as start / end pairs, so these are the start
+    // markers of the second to last and third to last screenshots.
+    const markerIndexA = thread.markers.length - 5;
+    const markerIndexB = thread.markers.length - 3;
     // We keep the last marker so that the profile's root range is correct.
 
     _setScreenshotMarkersToUnknown(thread, shared, markerIndexA, markerIndexB);
@@ -232,8 +234,9 @@ describe('timeline/TrackScreenshots', function () {
     const { shared, threads } = profile;
     const [thread] = threads;
 
+    // The start markers of the first two screenshots.
     const markerIndexA = 0;
-    const markerIndexB = 1;
+    const markerIndexB = 2;
 
     _setScreenshotMarkersToUnknown(thread, shared, markerIndexA, markerIndexB);
 
@@ -396,15 +399,11 @@ function _setScreenshotMarkersToUnknown(
   shared: RawProfileSharedData,
   ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
-  // Remove off the last few screenshot markers
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const unknownStringIndex = stringTable.indexForString('Unknown');
-  const screenshotStringIndex = stringTable.indexForString(
-    'CompositorScreenshot'
-  );
   for (const markerIndex of markerIndexes) {
     // Double check that we've actually got screenshot markers:
-    if (thread.markers.name[markerIndex] !== screenshotStringIndex) {
+    if (thread.markers.data[markerIndex]?.type !== 'CompositorScreenshot') {
       throw new Error('This is not a screenshot marker.');
     }
     thread.markers.name[markerIndex] = unknownStringIndex;

@@ -347,30 +347,36 @@
         ]
       },
       "markers": {
-        "length": 10,
+        "length": 13,
         "name": [
           4,
           5,
           10,
           10,
+          18,
           5,
           17,
           8,
           8,
           9,
-          14
+          18,
+          14,
+          19
         ],
         "time": [
           0,
           2,
           4,
           5,
+          6,
           8,
           8,
           9,
           10,
           11,
-          13
+          12,
+          13,
+          14
         ],
         "data": [
           {
@@ -395,6 +401,13 @@
             "category": "Paint",
             "interval": "end",
             "type": "tracing"
+          },
+          {
+            "type": "CompositorScreenshot",
+            "url": 20,
+            "windowID": "0x136888400",
+            "windowWidth": 1280,
+            "windowHeight": 1000
           },
           {
             "category": "Paint",
@@ -429,6 +442,13 @@
             "endTime": 12
           },
           {
+            "type": "CompositorScreenshot",
+            "url": 20,
+            "windowID": "0x136888400",
+            "windowWidth": 1280,
+            "windowHeight": 1000
+          },
+          {
             "type": "Network",
             "startTime": 3,
             "endTime": 13,
@@ -446,6 +466,10 @@
             "requestStart": 10,
             "responseStart": 11,
             "responseEnd": 12
+          },
+          {
+            "type": "CompositorScreenshot",
+            "windowID": "0x136888400"
           }
         ],
         "category": [
@@ -455,10 +479,13 @@
           4,
           4,
           4,
+          4,
           5,
           5,
           1,
-          7
+          4,
+          7,
+          4
         ]
       },
       "samples": {
@@ -527,7 +554,10 @@
         "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3",
         "DiskIO",
         "FileIO",
-        "TextureCacheFree"
+        "TextureCacheFree",
+        "CompositorScreenshot",
+        "CompositorScreenshotWindowDestroyed",
+        "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD"
       ],
       "pid": "Unknown Process 1"
     },

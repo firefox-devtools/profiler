@@ -1757,8 +1757,7 @@ describe('actions/receive-profile', function () {
             type: 'CompositorScreenshot',
             url: 0, // Some arbitrary string.
             windowID: '0',
-            windowWidth: 300,
-            windowHeight: 150,
+            windowSize: { width: 300, height: 150 },
           },
         ],
       ]);
@@ -1771,8 +1770,7 @@ describe('actions/receive-profile', function () {
             type: 'CompositorScreenshot',
             url: 0, // Some arbitrary string.
             windowID: '1',
-            windowWidth: 300,
-            windowHeight: 150,
+            windowSize: { width: 300, height: 150 },
           },
         ],
       ]);
