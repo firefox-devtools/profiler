@@ -35,7 +35,7 @@ profiler-cli profile meta                  # Print profile metadata (application
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
-profiler-cli thread samples                # Show hot functions list for current thread
+profiler-cli thread samples                # Show hot functions list and category breakdown for current thread
 profiler-cli thread samples-top-down       # Show top-down call tree (where CPU time is spent)
 profiler-cli thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
 profiler-cli thread markers                # List markers with aggregated statistics [--list for flat per-marker view]
@@ -45,7 +45,7 @@ profiler-cli thread page-load              # Show page load summary (navigation 
 profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
-profiler-cli function info <handle>        # Show detailed function information
+profiler-cli function info <handle>        # Show detailed function information and category breakdown
 profiler-cli function annotate <handle>    # Show annotated source/assembly with timing data [--mode src|asm|all] [--context 2|file|N] [--symbol-server <url>]
 profiler-cli zoom push <range>             # Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
 profiler-cli zoom pop                      # Pop the most recent zoom range

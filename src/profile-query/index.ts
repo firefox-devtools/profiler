@@ -73,6 +73,7 @@ import {
   collectThreadSamplesBottomUp,
   collectThreadFunctions,
 } from './formatters/thread-info';
+import { collectFunctionCategoryBreakdowns } from './formatters/category-breakdown';
 import {
   collectThreadMarkers,
   collectThreadNetwork,
@@ -1180,6 +1181,12 @@ export class ProfileQuerier {
       relevantForJS,
       resource,
       library,
+      categoryBreakdown: collectFunctionCategoryBreakdowns(
+        this._store,
+        this._threadMap,
+        getSelectedThreadIndexes(state),
+        funcIndex
+      ),
       context: this._getContext(),
     };
   }

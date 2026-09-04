@@ -18,6 +18,7 @@ import {
 
 import type {
   FilterStackResult,
+  FunctionInfoResult,
   ProfileMetaResult,
   SessionMetadata,
   StatusResult,
@@ -309,6 +310,40 @@ describe('profiler-cli basic functionality', () => {
     const statusResult = await cli(ctx, ['status', '--json']);
     const status = JSON.parse(statusResult.stdout) as StatusResult;
     expect(status.filterStacks).toHaveLength(0);
+  });
+
+  it('thread samples breaks the samples down by category', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const textResult = await cli(ctx, ['thread', 'samples']);
+    expect(textResult.stdout).toContain('──── Categories (');
+
+    const jsonResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      jsonResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    const breakdown = samples.categoryBreakdown;
+
+    expect(breakdown.categories.length).toBeGreaterThan(0);
+    const summed = breakdown.categories.reduce(
+      (accum, category) => accum + category.samples,
+      0
+    );
+    expect(summed).toBe(breakdown.totalSamples);
+  });
+
+  it('function info reports running and self breakdowns', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cli(ctx, ['function', 'info', 'f-5', '--json']);
+    const info = JSON.parse(result.stdout) as WithContext<FunctionInfoResult>;
+    const breakdowns = info.categoryBreakdown;
+
+    expect(breakdowns.threadHandle).toBe('t-2');
+    expect(breakdowns.running.samples).toBeGreaterThan(0);
+    expect(breakdowns.running.samples).toBeGreaterThanOrEqual(
+      breakdowns.self.samples
+    );
   });
 
   it('max-lines=0 is rejected instead of silently falling back to the default', async () => {
