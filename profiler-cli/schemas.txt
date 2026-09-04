@@ -188,8 +188,23 @@ profiler-cli thread markers --json
     }],
     byCategory: [{ categoryName, categoryIndex, count, percentage }],
     customGroups?: [ ...MarkerGroupData... ],
+    flatMarkers?: [FlatMarkerItem],   // only with --list; see below
     context: SessionContext
   }
+
+  Per-marker rows require --list, and arrive under "flatMarkers", not "markers";
+  without it only the aggregates above are returned.
+
+  FlatMarkerItem:
+    {
+      handle, name, label, duration?, hasStack, category,
+      start,              // absolute ms ("startTime" in thread-network)
+      markerType?,        // the payload's "type"
+      fields?: [{ key, label, value, formattedValue }],
+      data?,              // raw payload, minus "type" and "cause"; an image
+                          // blob becomes { elided: true, length, preview }
+      innerWindowID?
+    }
 
 profiler-cli thread functions --json
   {
