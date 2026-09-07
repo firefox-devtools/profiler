@@ -91,10 +91,7 @@ import {
 import { parseTimeValue } from './time-range-parser';
 import { describeTransformGroup, pushSpecTransforms } from './filter-stack';
 import { functionAnnotate as computeFunctionAnnotate } from './function-annotate';
-import {
-  getAvailableStrategies,
-  withCallTreeSummaryStrategy,
-} from './call-tree-strategy';
+import { withCallTreeSummaryStrategy } from './call-tree-strategy';
 import type {
   IndexIntoSourceTable,
   StartEndRange,
@@ -631,10 +628,9 @@ export class ProfileQuerier {
       type: 'strategy-select',
       threadHandle: this._threadMap.handleForThreadIndexes(threadIndexes),
       strategy,
-      availableStrategies: getAvailableStrategies(
-        this._store.getState(),
+      availableStrategies: getThreadSelectors(
         threadIndexes
-      ),
+      ).getAvailableCallTreeSummaryStrategies(this._store.getState()),
       context: this._getContext(),
     };
   }
@@ -1069,10 +1065,9 @@ export class ProfileQuerier {
     threadIndexes: Set<ThreadIndex>,
     strategy: CallTreeSummaryStrategy
   ): void {
-    const available = getAvailableStrategies(
-      this._store.getState(),
+    const available = getThreadSelectors(
       threadIndexes
-    );
+    ).getAvailableCallTreeSummaryStrategies(this._store.getState());
     if (!available.includes(strategy)) {
       const handle = this._threadMap.handleForThreadIndexes(threadIndexes);
       throw new Error(

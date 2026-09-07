@@ -7,7 +7,7 @@
  */
 
 import type { Command } from 'commander';
-import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-query/call-tree-strategy';
+import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
 import { addGlobalOptions, parseStrategyArg, runCommand } from './shared';
 
 export function registerStrategyCommand(

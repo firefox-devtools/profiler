@@ -11,7 +11,7 @@ import { Option } from 'commander';
 import { collectStrings } from '../utils/parse';
 import { sendCommand } from '../client';
 import { formatOutput } from '../output';
-import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-query/call-tree-strategy';
+import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
 import type { ClientCommand, CallTreeSummaryStrategy } from '../protocol';
 
 /**

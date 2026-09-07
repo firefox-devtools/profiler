@@ -9,7 +9,6 @@ import {
   collectThreadFunctions,
   collectThreadInfo,
 } from 'firefox-profiler/profile-query/formatters/thread-info';
-import { getAvailableStrategies } from 'firefox-profiler/profile-query/call-tree-strategy';
 import { ThreadMap } from 'firefox-profiler/profile-query/thread-map';
 import { MarkerMap } from 'firefox-profiler/profile-query/marker-map';
 import { TimestampManager } from 'firefox-profiler/profile-query/timestamps';
@@ -26,6 +25,7 @@ import {
   getProfileWithBalancedNativeAllocations,
 } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
 import { storeWithProfile } from 'firefox-profiler/test/fixtures/stores';
+import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { changeCallTreeSummaryStrategy } from 'firefox-profiler/actions/profile-view';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import type { CallTreeCollectionOptions } from 'firefox-profiler/profile-query/formatters/call-tree';
@@ -113,7 +113,9 @@ function bottomUpResult(profile: Profile, strategy: CallTreeSummaryStrategy) {
 
 function availableStrategiesFor(profile: Profile): CallTreeSummaryStrategy[] {
   const store = storeWithProfile(profile);
-  return getAvailableStrategies(store.getState(), new Set([0]));
+  return getThreadSelectors(0).getAvailableCallTreeSummaryStrategies(
+    store.getState()
+  );
 }
 
 describe('available strategies', function () {

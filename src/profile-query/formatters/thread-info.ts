@@ -35,7 +35,6 @@ import {
   computeCallNodeSelfAndSummary,
   extractSamplesLikeTable,
 } from 'firefox-profiler/profile-logic/call-tree';
-import { getAvailableStrategies } from '../call-tree-strategy';
 import {
   getInvertedCallNodeInfo,
   getSampleIndexToCallNodeIndex,
@@ -99,7 +98,8 @@ export function collectThreadInfo(
     markerCount: thread.markers.length,
     cpuActivity,
     networkActivity,
-    availableStrategies: getAvailableStrategies(state, threadIndexes),
+    availableStrategies:
+      threadSelectors.getAvailableCallTreeSummaryStrategies(state),
   };
 }
 
