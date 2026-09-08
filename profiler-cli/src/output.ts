@@ -29,6 +29,7 @@ import {
   formatProfileLogsResult,
   formatThreadPageLoadResult,
   formatThreadSelectResult,
+  formatStrategySelectResult,
   formatCounterListResult,
   formatCounterInfoResult,
   formatSourceMapSourcesResult,
@@ -95,6 +96,8 @@ export function formatOutput(
       return formatThreadPageLoadResult(result);
     case 'thread-select':
       return formatThreadSelectResult(result);
+    case 'strategy-select':
+      return formatStrategySelectResult(result);
     case 'counter-list':
       return formatCounterListResult(result);
     case 'counter-info':

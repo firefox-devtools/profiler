@@ -38,6 +38,7 @@ import { registerThreadCommand } from './commands/thread';
 import { registerMarkerCommand } from './commands/marker';
 import { registerFunctionCommand } from './commands/function';
 import { registerCounterCommand } from './commands/counter';
+import { registerStrategyCommand } from './commands/strategy';
 import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
 import { registerSourcemapCommand } from './commands/sourcemap';
@@ -194,6 +195,7 @@ Examples:
   registerMarkerCommand(program, SESSION_DIR);
   registerFunctionCommand(program, SESSION_DIR);
   registerCounterCommand(program, SESSION_DIR);
+  registerStrategyCommand(program, SESSION_DIR);
   registerZoomCommand(program, SESSION_DIR);
   registerFilterCommand(program, SESSION_DIR);
   registerSourcemapCommand(program, SESSION_DIR);

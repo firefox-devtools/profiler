@@ -8,9 +8,17 @@ SessionContext (present on all command results):
     selectedThreadHandle,
     selectedThreads: [{ threadIndex, name }],
     currentViewRange: { start, startName, end, endName } | null,
-    rootRange: { start, end }
+    rootRange: { start, end },
+    callTreeSummaryStrategy: CallTreeSummaryStrategy
   }
 
+CallTreeSummaryStrategy:
+  "timing" | "js-allocations" | "native-retained-allocations" |
+  "native-allocations" | "native-deallocations-memory" |
+  "native-deallocations-sites"
+
+WeightType:
+  "samples" | "tracing-ms" | "bytes"
 
 profiler-cli profile info --json
   {
@@ -105,6 +113,7 @@ profiler-cli thread info --json
     cpuActivity: [{ startTime, startTimeName, startTimeStr,
                     endTime, endTimeName, endTimeStr, cpuMs, depthLevel }] | null,
     networkActivity: ThreadNetworkSummary | null,
+    availableStrategies: [CallTreeSummaryStrategy],
     context: SessionContext
   }
 
@@ -121,6 +130,7 @@ profiler-cli thread samples --json
   {
     type: "thread-samples",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     topFunctionsBySelf:  [{ functionHandle, functionIndex, name, nameWithLibrary,
                              library?, selfSamples, selfPercentage,
                              totalSamples, totalPercentage }],
@@ -148,6 +158,7 @@ profiler-cli thread samples-top-down --json
   {
     type: "thread-samples-top-down",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     regularCallTree: CallTreeNode,
     activeFilters?, ephemeralFilters?,
     context: SessionContext
@@ -157,6 +168,7 @@ profiler-cli thread samples-bottom-up --json
   {
     type: "thread-samples-bottom-up",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     invertedCallTree: CallTreeNode | null,
     activeFilters?, ephemeralFilters?,
     context: SessionContext
@@ -195,6 +207,7 @@ profiler-cli thread functions --json
   {
     type: "thread-functions",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     totalFunctionCount, filteredFunctionCount,
     functions: [{ functionHandle, name, nameWithLibrary, library?,
                   selfSamples, selfPercentage, totalSamples, totalPercentage,
@@ -251,6 +264,15 @@ profiler-cli marker info --json
     stack?: { frames: [{ name, nameWithLibrary }], truncated }
   }
 
+profiler-cli strategy --json
+  {
+    type: "strategy-select",
+    threadHandle,
+    strategy: CallTreeSummaryStrategy,
+    availableStrategies: [CallTreeSummaryStrategy],
+    context: SessionContext
+  }
+
 profiler-cli status --json
   {
     type: "status",
@@ -258,7 +280,8 @@ profiler-cli status --json
     selectedThreads: [{ threadIndex, name }],
     viewRanges: [{ start, startName, end, endName }],
     rootRange: { start, end },
-    filterStacks: [{ threadHandle, filters: FilterEntry[] }]
+    filterStacks: [{ threadHandle, filters: FilterEntry[] }],
+    callTreeSummaryStrategy: CallTreeSummaryStrategy
   }
 
 profiler-cli sourcemap sources --json
