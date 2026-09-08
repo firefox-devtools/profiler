@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`functions formatting with an allocation strategy reports bytes rather than sample counts 1`] = `
-"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+"[Thread: t-0 (Test Thread, Parent Process) | View: Full profile | Full: 1s]
 
 Functions in thread t-0 (Empty) — 9 functions
 
@@ -22,7 +22,7 @@ Use --search <term>, --min-self <percent>, or --limit <N> (0 = no limit) to filt
 `;
 
 exports[`samples formatting with an allocation strategy reports bytes rather than sample counts 1`] = `
-"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+"[Thread: t-0 (Test Thread, Parent Process) | View: Full profile | Full: 1s]
 
 Thread: Empty
 

@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`category breakdown formatting renders categories with their subcategories in thread samples 1`] = `
-"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+"[Thread: t-0 (Test Thread, Parent Process) | View: Full profile | Full: 1s]
 
 Thread: Test Thread
 
@@ -27,7 +27,7 @@ Heaviest stack (0.0 samples, 0 frames):
 `;
 
 exports[`category breakdown formatting renders the running and self breakdowns in function info 1`] = `
-"[Thread: t-0 (Test Thread) | View: Full profile | Full: 1s]
+"[Thread: t-0 (Test Thread, Parent Process) | View: Full profile | Full: 1s]
 
 Function f-12:
   Full name: libxul.so!nsBlockFrame::Reflow

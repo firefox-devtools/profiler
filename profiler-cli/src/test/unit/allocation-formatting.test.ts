@@ -55,7 +55,11 @@ function threadMap(): ThreadMap {
 function mockContext(strategy: CallTreeSummaryStrategy): SessionContext {
   return {
     selectedThreadHandle: 't-0',
-    selectedThreads: [{ threadIndex: 0, name: 'Test Thread' }],
+    selectedThreads: [
+      { threadIndex: 0, name: 'Test Thread', processName: 'Parent Process' },
+    ],
+    resultThreadHandle: null,
+    resultThreads: [],
     currentViewRange: null,
     rootRange: { start: 0, end: 1000 },
     callTreeSummaryStrategy: strategy,
