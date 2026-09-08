@@ -1719,6 +1719,18 @@ export function toValidImplementationFilter(
   }
 }
 
+/**
+ * The order here is the order of the data source dropdown.
+ */
+export const CALL_TREE_SUMMARY_STRATEGIES: CallTreeSummaryStrategy[] = [
+  'timing',
+  'js-allocations',
+  'native-retained-allocations',
+  'native-allocations',
+  'native-deallocations-memory',
+  'native-deallocations-sites',
+];
+
 export function toValidCallTreeSummaryStrategy(
   strategy: string | undefined
 ): CallTreeSummaryStrategy {

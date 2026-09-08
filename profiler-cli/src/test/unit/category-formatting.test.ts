@@ -20,6 +20,7 @@ function createMockContext(): SessionContext {
     selectedThreads: [{ threadIndex: 0, name: 'Test Thread' }],
     currentViewRange: null,
     rootRange: { start: 0, end: 1000 },
+    callTreeSummaryStrategy: 'timing',
   };
 }
 
@@ -64,6 +65,8 @@ function makeSamplesResult(
     threadHandle: 't-0',
     friendlyThreadName: 'Test Thread',
     categoryBreakdown,
+    callTreeSummaryStrategy: 'timing',
+    weightType: 'samples',
     topFunctionsByTotal: [
       {
         functionHandle: 'f-0',

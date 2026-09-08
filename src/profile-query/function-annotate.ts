@@ -30,15 +30,18 @@ import type {
   Profile,
   IndexIntoFuncTable,
   IndexIntoNativeSymbolTable,
+  SamplesLikeTable,
   Thread,
 } from 'firefox-profiler/types';
 import type {
   FunctionAnnotateResult,
   AnnotateMode,
+  CallTreeSummaryStrategy,
   FunctionAsmAnnotation,
   SourceAnnotationResult,
   AsmAnnotationsResult,
 } from './types';
+import { withCallTreeSummaryStrategy } from './call-tree-strategy';
 import type { Store } from '../types/store';
 
 class NodeExternalCommunicationDelegate implements ExternalCommunicationDelegate {
@@ -71,6 +74,7 @@ async function fetchSourceAnnotation(
   functionHandle: string,
   mode: AnnotateMode,
   thread: Thread,
+  samples: SamplesLikeTable,
   profile: Profile,
   symbolServerUrl: string,
   archiveCache: Map<string, Promise<Uint8Array>>,
@@ -91,7 +95,6 @@ async function fetchSourceAnnotation(
     stackTable,
     frameTable,
     funcTable: threadFuncTable,
-    samples,
     sourceLocationTable,
   } = thread;
 
@@ -224,6 +227,7 @@ async function fetchAsmAnnotations(
   functionHandle: string,
   nativeSymbolsForFunc: Set<IndexIntoNativeSymbolTable>,
   thread: Thread,
+  samples: SamplesLikeTable,
   profile: Profile,
   symbolServerUrl: string
 ): Promise<AsmAnnotationsResult> {
@@ -235,12 +239,7 @@ async function fetchAsmAnnotations(
     );
   }
 
-  const {
-    stackTable,
-    frameTable,
-    funcTable: threadFuncTable,
-    samples,
-  } = thread;
+  const { stackTable, frameTable, funcTable: threadFuncTable } = thread;
   const nativeSymbolCount = nativeSymbolsForFunc.size;
 
   const results = await Promise.all(
@@ -334,7 +333,8 @@ export async function functionAnnotate(
   functionHandle: string,
   mode: AnnotateMode,
   symbolServerUrl: string,
-  contextOption: string
+  contextOption: string,
+  strategy?: CallTreeSummaryStrategy
 ): Promise<FunctionAnnotateResult> {
   const state = store.getState();
   const profile = getProfile(state);
@@ -352,20 +352,39 @@ export async function functionAnnotate(
   const fullName = libraryName ? `${libraryName}!${funcName}` : funcName;
 
   const threadIndexes = getSelectedThreadIndexes(state);
-  const threadSelectors = getThreadSelectors(threadIndexes);
-  const thread = threadSelectors.getFilteredThread(state);
-
-  const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
   const threadHandle = threadMap.handleForThreadIndexes(threadIndexes);
+
+  // Every strategy-dependent read happens in this synchronous block, so the
+  // strategy is restored before the fetches below start awaiting.
+  const {
+    thread,
+    ctssSamples,
+    weightType,
+    callTreeSummaryStrategy,
+    friendlyThreadName,
+    totalSelfSamples,
+    totalTotalSamples,
+  } = withCallTreeSummaryStrategy(store, strategy, () => {
+    const strategyState = store.getState();
+    const threadSelectors = getThreadSelectors(threadIndexes);
+    const { funcSelf, funcTotal } =
+      threadSelectors.getFunctionListTimings(strategyState);
+    return {
+      thread: threadSelectors.getFilteredThread(strategyState),
+      ctssSamples: threadSelectors.getFilteredCtssSamples(strategyState),
+      weightType: threadSelectors.getWeightTypeForCallTree(strategyState),
+      callTreeSummaryStrategy:
+        threadSelectors.getCallTreeSummaryStrategy(strategyState),
+      friendlyThreadName: threadSelectors.getFriendlyThreadName(strategyState),
+      totalSelfSamples: funcSelf[funcIndex],
+      totalTotalSamples: funcTotal[funcIndex],
+    };
+  });
 
   const nativeSymbolsForFunc = getNativeSymbolsForFunc(
     funcIndex,
     thread.frameTable
   );
-
-  const { funcSelf, funcTotal } = threadSelectors.getFunctionListTimings(state);
-  const totalSelfSamples = funcSelf[funcIndex];
-  const totalTotalSamples = funcTotal[funcIndex];
 
   const srcPromise: Promise<SourceAnnotationResult> =
     mode === 'src' || mode === 'all'
@@ -374,6 +393,7 @@ export async function functionAnnotate(
           functionHandle,
           mode,
           thread,
+          ctssSamples,
           profile,
           symbolServerUrl,
           archiveCache,
@@ -387,6 +407,7 @@ export async function functionAnnotate(
           functionHandle,
           nativeSymbolsForFunc,
           thread,
+          ctssSamples,
           profile,
           symbolServerUrl
         )
@@ -407,6 +428,8 @@ export async function functionAnnotate(
     friendlyThreadName,
     totalSelfSamples,
     totalTotalSamples,
+    callTreeSummaryStrategy,
+    weightType,
     mode,
     srcAnnotation,
     asmAnnotations,
