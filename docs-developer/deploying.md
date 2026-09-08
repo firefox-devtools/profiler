@@ -30,6 +30,21 @@ change outside `profiler-cli/` can still affect it. Processed or Gecko profile
 format version bumps, for example, only reach CLI users through a new release.
 When in doubt, publish. We are not running out of version numbers.
 
+The first four steps can be run interactively with:
+
+```
+yarn deploy-prod-e2e
+```
+
+The script checks the local environment, creates the l10n and CLI version pull
+requests, waits for their reviews and checks, creates the production pull
+request with generated release notes, and publishes the CLI after production is
+merged and you confirm that the Netlify deployment is live. It asks for
+confirmation before every commit, push, pull request change, merge, and npm
+publication. Enter the current CLI version at the version prompt to skip the
+version-bump pull request when resuming an interrupted deployment. Step 5 still
+needs to be completed manually.
+
 ## 1. Merge l10n into main
 
 Our localization process happens inside [Pontoon](https://pontoon.mozilla.org/projects/firefox-profiler/).
