@@ -10,6 +10,7 @@ export * from './publish';
 export * from './zipped-profiles';
 export * from './cpu';
 export * from './code';
+export * from './flow';
 
 import * as app from './app';
 import {
@@ -23,6 +24,7 @@ import * as publish from './publish';
 import * as zippedProfiles from './zipped-profiles';
 import * as cpu from './cpu';
 import * as code from './code';
+import * as flow from './flow';
 
 const _selectorsForConsole = {
   app,
@@ -35,6 +37,7 @@ const _selectorsForConsole = {
   selectedNode,
   cpu,
   code,
+  flow,
 };
 
 // Exports require explicit typing. Deduce the type with typeof.

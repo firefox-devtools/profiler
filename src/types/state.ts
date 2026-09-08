@@ -31,6 +31,7 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  IndexIntoFlowTable,
   ThreadsKey,
   NativeSymbolInfo,
 } from './profile-derived';
@@ -387,6 +388,7 @@ export type ProfileSpecificUrlState = {
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
   markerTableSort: SingleColumnSortState[] | null;
+  activeFlows: IndexIntoFlowTable[];
 };
 
 export type UrlState = {

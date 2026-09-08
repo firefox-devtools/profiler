@@ -12,7 +12,7 @@ import { LocalizedErrorBoundary } from './ErrorBoundary';
 import { ProfileCallTreeView } from 'firefox-profiler/components/calltree/ProfileCallTreeView';
 import { MarkerTable } from 'firefox-profiler/components/marker-table';
 import { StackChart } from 'firefox-profiler/components/stack-chart/';
-import { MarkerChart } from 'firefox-profiler/components/marker-chart/';
+import { MarkerChartTab } from 'firefox-profiler/components/marker-chart-tab/';
 import { NetworkChart } from 'firefox-profiler/components/network-chart/';
 import { FlameGraph } from 'firefox-profiler/components/flame-graph/';
 import { JsTracer } from 'firefox-profiler/components/js-tracer/';
@@ -124,7 +124,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
                 calltree: <ProfileCallTreeView />,
                 'flame-graph': <FlameGraph />,
                 'stack-chart': <StackChart />,
-                'marker-chart': <MarkerChart />,
+                'marker-chart': <MarkerChartTab />,
                 'marker-table': <MarkerTable />,
                 'network-chart': <NetworkChart />,
                 'js-tracer': <JsTracer />,
