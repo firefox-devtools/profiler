@@ -48,6 +48,7 @@ import {
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
 import { ThreadMap } from './thread-map';
+import { getFriendlyProcessName } from './process-thread-list';
 import { parseFunctionHandle } from './function-map';
 import { getSourceHandle, parseSourceHandle } from './source-handle';
 import {
@@ -101,6 +102,7 @@ import type {
 import type {
   StatusResult,
   SessionContext,
+  ContextThreadInfo,
   WithContext,
   FunctionExpandResult,
   FunctionInfoResult,
@@ -296,7 +298,10 @@ export class ProfileQuerier {
       this._markerMap,
       threadHandle
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   async threadSamples(
@@ -980,7 +985,7 @@ export class ProfileQuerier {
       activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
       ephemeralFilters:
         sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
-      context: this._getContext(strategy),
+      context: this._getContext(strategy, threadIndexes),
     };
   }
 
@@ -1076,23 +1081,32 @@ export class ProfileQuerier {
     }
   }
 
-  private _buildBaseStatus(state: ReturnType<Store['getState']>) {
+  /** Describe a set of threads for a context header: handle plus per-thread names. */
+  private _describeThreads(
+    state: ReturnType<Store['getState']>,
+    threadIndexes: Set<ThreadIndex>
+  ): { handle: string | null; threads: ContextThreadInfo[] } {
     const profile = getProfile(state);
+    const handle =
+      threadIndexes.size > 0
+        ? this._threadMap.handleForThreadIndexes(threadIndexes)
+        : null;
+    const threads = Array.from(threadIndexes).map((threadIndex) => ({
+      threadIndex,
+      name: profile.threads[threadIndex].name,
+      processName: getFriendlyProcessName(
+        profile.threads,
+        profile.threads[threadIndex]
+      ),
+    }));
+    return { handle, threads };
+  }
+
+  private _buildBaseStatus(state: ReturnType<Store['getState']>) {
     const rootRange = getProfileRootRange(state);
     const committedRanges = getAllCommittedRanges(state);
-    const selectedThreadIndexes = getSelectedThreadIndexes(state);
-
-    const selectedThreadHandle =
-      selectedThreadIndexes.size > 0
-        ? this._threadMap.handleForThreadIndexes(selectedThreadIndexes)
-        : null;
-
-    const selectedThreads = Array.from(selectedThreadIndexes).map(
-      (threadIndex) => ({
-        threadIndex,
-        name: profile.threads[threadIndex].name,
-      })
-    );
+    const { handle: selectedThreadHandle, threads: selectedThreads } =
+      this._describeThreads(state, getSelectedThreadIndexes(state));
 
     const zeroAt = rootRange.start;
     const viewRanges = committedRanges.map((range) => {
@@ -1123,16 +1137,32 @@ export class ProfileQuerier {
    * store has already been restored to the session value by then.
    */
   private _getContext(
-    effectiveStrategy?: CallTreeSummaryStrategy
+    effectiveStrategy?: CallTreeSummaryStrategy,
+    resultThreadIndexes?: Set<ThreadIndex>
   ): SessionContext {
     const state = this._store.getState();
     const { selectedThreadHandle, selectedThreads, viewRanges, rootRange } =
       this._buildBaseStatus(state);
     const currentViewRange =
       viewRanges.length > 0 ? viewRanges[viewRanges.length - 1] : null;
+
+    // The result-scoped fields only exist to record a divergence, so leave them
+    // empty when the command ran against the selection after all.
+    let resultThreadHandle: string | null = null;
+    let resultThreads: ContextThreadInfo[] = [];
+    if (resultThreadIndexes !== undefined) {
+      const described = this._describeThreads(state, resultThreadIndexes);
+      if (described.handle !== selectedThreadHandle) {
+        resultThreadHandle = described.handle;
+        resultThreads = described.threads;
+      }
+    }
+
     return {
       selectedThreadHandle,
       selectedThreads,
+      resultThreadHandle,
+      resultThreads,
       currentViewRange,
       rootRange,
       callTreeSummaryStrategy:
@@ -1148,6 +1178,17 @@ export class ProfileQuerier {
       return getLastSelectedCallTreeSummaryStrategy(state);
     }
     return getThreadSelectors(threadIndexes).getCallTreeSummaryStrategy(state);
+  }
+
+  private _getContextForThreadHandle(
+    threadHandle: string | undefined
+  ): SessionContext {
+    return this._getContext(
+      undefined,
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : undefined
+    );
   }
 
   /**
@@ -1293,7 +1334,10 @@ export class ProfileQuerier {
       threadHandle,
       filterOptions
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   /**
@@ -1316,7 +1360,10 @@ export class ProfileQuerier {
       threadHandle,
       filterOptions
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   /**
@@ -1334,7 +1381,10 @@ export class ProfileQuerier {
       threadHandle,
       options
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   /**
@@ -1355,7 +1405,10 @@ export class ProfileQuerier {
       this._threadMap,
       filterOptions
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(filterOptions.thread),
+    };
   }
 
   /**
@@ -1403,7 +1456,7 @@ export class ProfileQuerier {
       activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
       ephemeralFilters:
         sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
-      context: this._getContext(strategy),
+      context: this._getContext(strategy, threadIndexes),
     };
   }
 
@@ -1419,7 +1472,10 @@ export class ProfileQuerier {
       this._threadMap,
       markerHandle
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(result.threadHandle),
+    };
   }
 
   async markerStack(
@@ -1431,7 +1487,10 @@ export class ProfileQuerier {
       this._threadMap,
       markerHandle
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(result.threadHandle),
+    };
   }
 
   /**
