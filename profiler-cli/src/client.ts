@@ -15,6 +15,7 @@ import type {
   ClientMessage,
   ServerResponse,
   CommandResult,
+  SessionMetadata,
 } from './protocol';
 import {
   cleanupIfDaemonGone,
@@ -22,9 +23,14 @@ import {
   generateSessionId,
   getCurrentSessionId,
   getCurrentSocketPath,
+  describeSessionOwner,
   getLogPath,
   getLogSize,
+  getSessionAge,
+  getSessionOwner,
   getSocketPath,
+  ownsSession,
+  SESSION_OWNER_ENV_VAR,
   getStartupErrorPath,
   isDaemonReachable,
   loadSessionMetadata,
@@ -508,7 +514,13 @@ export async function startNewDaemon(
     {
       detached: true,
       stdio: 'ignore', // Don't pipe stdin/stdout/stderr
-      env: { ...process.env, PROFILER_CLI_SESSION_DIR: sessionDir }, // Pass sessionDir via env
+      env: {
+        ...process.env,
+        PROFILER_CLI_SESSION_DIR: sessionDir, // Pass sessionDir via env
+        // Resolved here, not in the daemon: the fallback is the parent pid, and
+        // the daemon's parent is this process, which is about to exit.
+        [SESSION_OWNER_ENV_VAR]: getSessionOwner(),
+      },
     }
   );
 
@@ -678,16 +690,53 @@ export async function startNewDaemon(
   );
 }
 
+/** One line describing a session about to be stopped: which, whose, how old. */
+export function describeSessionForStop(metadata: SessionMetadata): string {
+  const age = getSessionAge(metadata);
+  return [
+    `${metadata.id}`,
+    `owner ${describeSessionOwner(metadata)}`,
+    `daemon pid ${metadata.pid}`,
+    ...(age === null ? [] : [`age ${age}`]),
+  ].join(', ');
+}
+
+/** Thrown when `stop` is asked to stop somebody else's session. */
+export class SessionNotOwnedError extends Error {
+  readonly metadata: SessionMetadata;
+
+  constructor(metadata: SessionMetadata, owner: string) {
+    const recorded = describeSessionOwner(metadata);
+    // A refused pid owner is still running, so pointing at it beats telling the
+    // caller to adopt a live process's identity by guessing its number.
+    const advice = recorded.startsWith('pid:')
+      ? `The owning process (${recorded.slice('pid:'.length)}) still appears to be running. Pass --force to stop the session anyway.`
+      : `Pass --force to stop it anyway, or set ${SESSION_OWNER_ENV_VAR}=${recorded} if these sessions are yours.`;
+    super(
+      [
+        `Session ${metadata.id} belongs to ${recorded}, not to you (${owner}), so it was not stopped.`,
+        `  ${describeSessionForStop(metadata)}`,
+        advice,
+      ].join('\n')
+    );
+    this.name = 'SessionNotOwnedError';
+    this.metadata = metadata;
+  }
+}
+
 /**
  * Stop a running daemon.
  *
  * Only reports success once the daemon is known to be gone. One that merely
  * cannot be reached may still be running, and saying it stopped would leave
  * the user with a process no command can find.
+ *
+ * Refuses sessions created by a different owner unless `force` is set.
  */
 export async function stopDaemon(
   sessionDir: string,
-  sessionId?: string
+  sessionId?: string,
+  options: { force?: boolean; announce?: boolean } = {}
 ): Promise<void> {
   const resolvedSessionId = sessionId || getCurrentSessionId(sessionDir);
 
@@ -700,6 +749,15 @@ export async function stopDaemon(
     cleanupSession(sessionDir, resolvedSessionId);
     console.log(`Session ${resolvedSessionId} was not running.`);
     return;
+  }
+
+  const owner = getSessionOwner();
+  if (!options.force && !ownsSession(metadata, owner)) {
+    throw new SessionNotOwnedError(metadata, owner);
+  }
+
+  if (options.announce) {
+    console.log(`Stopping session ${describeSessionForStop(metadata)}`);
   }
 
   try {

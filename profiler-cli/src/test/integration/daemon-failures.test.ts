@@ -282,7 +282,9 @@ describe('session denied by policy', () => {
 
     const text = output(result);
     expect(text).toContain('Could not reach the following sessions');
-    expect(text).toContain(`${sessionId} [daemon pid: ${daemonPid}]`);
+    expect(text).toMatch(
+      new RegExp(`${sessionId} \\[owner: [^,]+, daemon pid: ${daemonPid}\\]`)
+    );
     expect(text).toContain('sandbox');
     // An unreachable daemon cannot be stopped through its own socket, so the
     // pid has to be enough to act on.

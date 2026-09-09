@@ -152,10 +152,12 @@ export async function cli(
   args: string[],
   options?: {
     timeout?: number;
+    /** Extra environment for this invocation, e.g. a session owner. */
+    env?: Record<string, string>;
   }
 ): Promise<CommandResult> {
   const result = await exec(process.execPath, [CLI_BIN, ...args], {
-    env: ctx.env,
+    env: { ...ctx.env, ...options?.env },
     timeout: options?.timeout ?? 30000,
   });
 
@@ -173,10 +175,14 @@ export async function cli(
  */
 export async function cliFail(
   ctx: CliTestContext,
-  args: string[]
+  args: string[],
+  options?: {
+    timeout?: number;
+    env?: Record<string, string>;
+  }
 ): Promise<CommandResult> {
   try {
-    await cli(ctx, args);
+    await cli(ctx, args, options);
     throw new Error('Expected command to fail but it succeeded');
   } catch (error) {
     if (error instanceof Error && error.message.includes('Expected command')) {

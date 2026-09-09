@@ -34,6 +34,139 @@ export function generateSessionId(): string {
   return Math.random().toString(36).substring(2, 15);
 }
 
+/** Names the owner of the sessions a process creates, and the ones it may stop. */
+export const SESSION_OWNER_ENV_VAR = 'PROFILER_CLI_SESSION_OWNER';
+
+/**
+ * Identify the caller for session ownership purposes.
+ *
+ * The parent pid is the fallback because separate `profiler-cli` invocations
+ * from one shell share a parent, giving them a common identity without any
+ * setup.
+ */
+export function getSessionOwner(
+  env: NodeJS.ProcessEnv = process.env,
+  parentPid: number = process.ppid
+): string {
+  const configured = env[SESSION_OWNER_ENV_VAR];
+  if (configured !== undefined && configured.trim() !== '') {
+    return configured.trim();
+  }
+  return `pid:${parentPid}`;
+}
+
+/**
+ * The owner recorded in a metadata file, or null when there is not a usable one.
+ *
+ * JSON has no `undefined`, so a `null` owner is a value these files really
+ * hold; comparing it by equality against a string would match nobody and lock
+ * the session away from every caller.
+ */
+export function readSessionOwner(
+  metadata: Pick<SessionMetadata, 'owner'>
+): string | null {
+  const recorded = metadata.owner;
+  if (typeof recorded !== 'string' || recorded.trim() === '') {
+    return null;
+  }
+  return recorded.trim();
+}
+
+/** The pid a `pid:<n>` owner refers to, or null for any other owner form. */
+function getOwnerPid(owner: string): number | null {
+  const match = /^pid:(\d+)$/.exec(owner);
+  if (match === null) {
+    return null;
+  }
+  const pid = Number(match[1]);
+  return Number.isSafeInteger(pid) && pid > 0 ? pid : null;
+}
+
+/**
+ * Whether a `pid:<n>` owner's process is *provably* gone.
+ *
+ * Only ESRCH proves it. EPERM means a process is there that we may not signal,
+ * which a sandbox also returns for processes we do own, and success means
+ * alive. Releasing a session on anything but ESRCH would hand it to other
+ * callers whenever the answer was merely unavailable.
+ */
+function isOwnerProcessGone(owner: string): boolean {
+  const pid = getOwnerPid(owner);
+  if (pid === null) {
+    return false;
+  }
+  try {
+    process.kill(pid, 0);
+    return false;
+  } catch (error) {
+    return getErrnoCode(error) === 'ESRCH';
+  }
+}
+
+/**
+ * Whether `owner` may stop a session recorded with this metadata.
+ *
+ * A session with no usable owner is stoppable by anyone, as sessions written
+ * before owner tracking are. So is one owned by a `pid:` that has exited: the
+ * daemon is detached and outlives the shell that started it, so nobody could
+ * ever present that pid again. Only `pid:` owners are released this way, so a
+ * name from PROFILER_CLI_SESSION_OWNER keeps the guard for the session's life.
+ */
+export function ownsSession(
+  metadata: Pick<SessionMetadata, 'owner'>,
+  owner: string
+): boolean {
+  const recorded = readSessionOwner(metadata);
+  if (recorded === null || recorded === owner) {
+    return true;
+  }
+  return isOwnerProcessGone(recorded);
+}
+
+/**
+ * Human-readable owner of a session, for listings and refusals.
+ *
+ * Says "unknown" for exactly the values ownsSession() treats as unowned, so a
+ * session is never described as someone's while being stoppable by anyone.
+ */
+export function describeSessionOwner(
+  metadata: Pick<SessionMetadata, 'owner'>
+): string {
+  return readSessionOwner(metadata) ?? 'unknown';
+}
+
+/** Format an elapsed duration compactly, for session ages in `session list`. */
+export function formatSessionAge(ageMs: number): string {
+  if (!Number.isFinite(ageMs) || ageMs < 0) {
+    return 'unknown';
+  }
+  const seconds = Math.floor(ageMs / 1000);
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) {
+    return `${minutes}m ${seconds % 60}s`;
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours}h ${minutes % 60}m`;
+  }
+  return `${Math.floor(hours / 24)}d ${hours % 24}h`;
+}
+
+/** Age of a session as of `now`, or null when its creation time is unusable. */
+export function getSessionAge(
+  metadata: Pick<SessionMetadata, 'createdAt'>,
+  now: number = Date.now()
+): string | null {
+  const createdAt = new Date(metadata.createdAt).getTime();
+  if (Number.isNaN(createdAt)) {
+    return null;
+  }
+  return formatSessionAge(now - createdAt);
+}
+
 /**
  * Get a stable namespace for a session directory.
  */
