@@ -1180,8 +1180,7 @@ describe('TooltipMarker', function () {
           type: 'CompositorScreenshot',
           url: screenshotUrlIndex,
           windowID: 'XXX',
-          windowWidth: 600,
-          windowHeight: 300,
+          windowSize: { width: 600, height: 300 },
         },
       ],
     ]);
@@ -1202,23 +1201,6 @@ describe('TooltipMarker', function () {
     );
 
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders the tooltip of CompositorScreenshotWindowDestroyed', () => {
-    setupWithPayload([
-      [
-        'CompositorScreenshotWindowDestroyed',
-        1,
-        2,
-        {
-          type: 'CompositorScreenshot',
-          windowID: 'XXX',
-          url: undefined,
-        },
-      ],
-    ]);
-
-    expect(document.body).toMatchSnapshot();
   });
 
   it('shows the source thread for markers from a merged thread', function () {
@@ -1300,8 +1282,7 @@ describe('TooltipMarker', function () {
             type: 'CompositorScreenshot',
             url: screenshotUrlIndex,
             windowID: 'XXX',
-            windowWidth: 600,
-            windowHeight: 300,
+            windowSize: { width: 600, height: 300 },
           },
         ],
       ]

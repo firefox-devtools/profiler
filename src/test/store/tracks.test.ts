@@ -345,6 +345,29 @@ describe('ordering and hiding', function () {
       ]);
     });
 
+    it('creates screenshot tracks from the schema display location', function () {
+      const customScreenshot = {
+        type: 'Url' as const,
+        url: '',
+        windowID: 42,
+      };
+      const profile = getProfileWithMarkers([
+        ['CustomScreenshot', 0, null, customScreenshot],
+      ]);
+      profile.meta.markerSchema.push({
+        name: 'Url',
+        display: ['marker-chart', 'timeline-screenshots'],
+        fields: [],
+      });
+
+      const { getState } = storeWithProfile(profile);
+      expect(ProfileViewSelectors.getGlobalTracks(getState())).toContainEqual({
+        type: 'screenshots',
+        id: '42',
+        threadIndex: 0,
+      });
+    });
+
     describe('sorting of track types to ensure proper URL backwards compatibility', function () {
       const stableIndexOrder = [
         'process',
