@@ -6,6 +6,19 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 72
+
+The columns of the native symbol table (`profile.shared.nativeSymbols`) can now optionally be stored as typed arrays, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
+The "function size not known" sentinel value has changed from `null` to `-1` in both representations (JSON and JSLB).
+
+The column types are as follows:
+
+- `libIndex` (`Int32Array`)
+- `address` (`Uint32Array`)
+- `name` (`Int32Array`)
+- `functionSize` (`Int32Array`)
+
 ### Version 71
 
 The frame table (`profile.shared.frameTable`) representation changed in such a way that all its columns can now be typed arrays when using [JsonSlabs](https://github.com/mstange/json-slabs/) profiles.

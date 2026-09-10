@@ -22,7 +22,6 @@ import type {
   RawMarkerTable,
   FuncTable,
   ResourceTable,
-  NativeSymbolTable,
   JsTracerTable,
   IndexIntoStackTable,
   WeightType,
@@ -303,6 +302,22 @@ export type FrameTable = {
   line: Int32Array<ArrayBuffer>;
   column: Int32Array<ArrayBuffer>;
   originalLocation: Int32Array<ArrayBuffer>;
+  length: number;
+};
+
+/**
+ * The `NativeSymbolTable` type of the derived thread.
+ *
+ * Differs from `RawNativeSymbolTable` in that all columns are always stored as
+ * typed arrays, and `functionSize` uses `-1` as the sentinel for "size unknown"
+ * (rather than `null`).
+ */
+export type NativeSymbolTable = {
+  libIndex: Int32Array<ArrayBuffer>;
+  address: Uint32Array<ArrayBuffer>;
+  name: Int32Array<ArrayBuffer>;
+  // `-1` means "size unknown".
+  functionSize: Int32Array<ArrayBuffer>;
   length: number;
 };
 

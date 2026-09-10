@@ -5,6 +5,7 @@
 import {
   getEmptyExtensions,
   getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
   shallowCloneFuncTable,
 } from './data-structures';
 import { computeCompactedProfile } from './profile-compacting';
@@ -693,7 +694,7 @@ function sanitizeThreadPII(
   }
 
   // Remove the old markerTable and replace it with the new updated one.
-  newThread.markers = markerTable;
+  newThread.markers = finishRawMarkerTableBuilder(markerTable);
 
   // Have we removed everything from this thread?
   if (isThreadNonEmpty(newThread) || !isThreadNonEmpty(thread)) {

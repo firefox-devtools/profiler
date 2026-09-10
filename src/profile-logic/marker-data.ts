@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
   getDefaultCategories,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
   type RawMarkerTableBuilder,
 } from './data-structures';
 import { getFriendlyThreadName, getTimeRangeForThread } from './profile-data';
@@ -1115,7 +1116,7 @@ export function filterRawMarkerTableToRange(
   rangeStart: number,
   rangeEnd: number
 ): RawMarkerTable {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newMarkerTable = getRawMarkerTableBuilder();
   if (markerTable.threadId) {
     newMarkerTable.threadId = [];
   }
@@ -1140,7 +1141,7 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.length++;
   }
 
-  return newMarkerTable;
+  return finishRawMarkerTableBuilder(newMarkerTable);
 }
 
 /**
@@ -1192,7 +1193,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   rawMarkerTable: RawMarkerTableBuilder;
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>;
 } {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newMarkerTable = getRawMarkerTableBuilder();
   const newThreadId: (Tid | null)[] = [];
   if (oldMarkerTable.threadId) {
     newMarkerTable.threadId = newThreadId;

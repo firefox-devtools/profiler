@@ -12,6 +12,7 @@ import { FrameFlag } from 'firefox-profiler/types';
 
 import {
   finishRawSamplesTableBuilder,
+  finishRawMarkerTableBuilder,
   getEmptyProfile,
   getEmptyThread,
   getRawSamplesTableBuilderWithEventDelay,
@@ -431,7 +432,6 @@ function getThreadInfo(
   nodeIdToStackId.set(undefined, null);
 
   const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
-  thread.markers = markers;
 
   const threadInfo: ThreadInfo = {
     thread,
@@ -851,6 +851,7 @@ async function processTracingEvents(
 
   for (const [thread, threadInfo] of threadInfoByThread) {
     thread.samples = finishRawSamplesTableBuilder(threadInfo.samples);
+    thread.markers = finishRawMarkerTableBuilder(threadInfo.markers);
   }
 
   return profile;

@@ -61,7 +61,10 @@ import {
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { getProfile } from '../selectors/profile';
-import { getRawMarkerTableBuilderFromExisting } from '../profile-logic/data-structures';
+import {
+  getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
+} from '../profile-logic/data-structures';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -1360,7 +1363,6 @@ describe('url upgrading', function () {
       const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
         mainThread.markers
       );
-      mainThread.markers = mainThreadMarkers;
       mainThreadMarkers.name.push(stringTable.indexForString('IPC'));
       mainThreadMarkers.phase.push(0);
       mainThreadMarkers.startTime.push(0);
@@ -1379,6 +1381,7 @@ describe('url upgrading', function () {
         sync: false,
       } as any);
       mainThreadMarkers.length++;
+      mainThread.markers = finishRawMarkerTableBuilder(mainThreadMarkers);
 
       const memoryCounter = getCounterForThread(mainThread, 0);
       memoryCounter.category = 'Memory';
