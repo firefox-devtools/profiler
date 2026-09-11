@@ -22,6 +22,7 @@ import {
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
+import { FILE_IO_TABLE_LABEL } from '../../profile-logic/marker-schema';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
@@ -1075,6 +1076,32 @@ describe('source table processing', function () {
 });
 
 describe('Marker schema conversion', function () {
+  function getConvertedFileIoTableLabel(tableLabel?: string) {
+    const geckoProfile = createGeckoProfile();
+    geckoProfile.meta.markerSchema.push({
+      name: 'FileIO',
+      tableLabel,
+      display: ['marker-chart', 'marker-table'],
+      data: [],
+    });
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const fileIoSchema = processedProfile.meta.markerSchema.find(
+      (schema) => schema.name === 'FileIO'
+    );
+
+    return fileIoSchema?.tableLabel;
+  }
+
+  it('adds the FileIO table label when Gecko does not provide one', function () {
+    expect(getConvertedFileIoTableLabel()).toBe(FILE_IO_TABLE_LABEL);
+  });
+
+  it('preserves a FileIO table label provided by Gecko', function () {
+    const geckoTableLabel = 'Custom FileIO label';
+    expect(getConvertedFileIoTableLabel(geckoTableLabel)).toBe(geckoTableLabel);
+  });
+
   it('should preserve optional marker schema properties', function () {
     const geckoProfile = createGeckoProfile();
 
