@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 72,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -7554,6 +7554,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "display": Array [
@@ -7866,7 +7867,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 72,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8981,6 +8982,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "display": Array [
@@ -9293,7 +9295,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 72,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10578,6 +10580,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "display": Array [
@@ -10890,7 +10893,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 72,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
