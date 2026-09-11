@@ -263,8 +263,7 @@ export function parseLabel(
           }
 
           const value = (marker.data as any)[payloadKey];
-          if (value === undefined || value === null) {
-            // This would return "undefined" or "null" otherwise.
+          if (value === undefined || value === null || value === '') {
             return '';
           }
           return format
