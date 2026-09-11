@@ -31,6 +31,7 @@ import {
 
 import { getTimeRangeForThread } from '../profile-data';
 import { GlobalDataCollector } from '../global-data-collector';
+import { getMarkerSchemaStyleFallback } from '../marker-styles';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -993,6 +994,7 @@ function extractMarkers(
   profile.meta.markerSchema = [
     {
       name: 'EventDispatch',
+      style: getMarkerSchemaStyleFallback('EventDispatch'),
       chartLabel: '{marker.data.type2}',
       tooltipLabel: '{marker.data.type2} - EventDispatch',
       tableLabel: '{marker.data.type2}',
@@ -1091,6 +1093,7 @@ function extractMarkers(
             // generates Source markers, ParseDeclarationOrFunctionDefinition markers,
             // and similar compiler events with file paths or location details.
             name: 'EventWithDetail',
+            style: getMarkerSchemaStyleFallback('EventWithDetail'),
             chartLabel: '{marker.data.detail}',
             tooltipLabel: '{marker.name}: {marker.data.detail}',
             tableLabel: '{marker.data.detail}',

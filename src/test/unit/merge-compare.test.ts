@@ -27,6 +27,7 @@ import {
   getThreadSelectors,
   selectedThreadSelectors,
 } from '../../selectors/per-thread';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 describe('mergeProfilesForDiffing function', function () {
   it('merges the various tables properly in the diffing profile', function () {
@@ -779,6 +780,7 @@ describe('mergeThreads function', function () {
     const { profile, stringTable } = getProfileFromTextSamples(`A`, `B`);
     profile.meta.markerSchema.push({
       name: 'testSchemaWithUniqueUrlField',
+      style: getMarkerSchemaStyleFallback('testSchemaWithUniqueUrlField'),
       display: [],
       fields: [{ key: 'fieldWithUniqueString', format: 'unique-string' }],
     });

@@ -37,6 +37,7 @@ import {
   triggerIntersectionObservers,
 } from '../fixtures/mocks/intersection-observer';
 import { triggerResizeObservers } from '../fixtures/mocks/resize-observer';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -62,6 +63,7 @@ function setup(
   const thread = profile.threads[threadIndex];
   profile.meta.markerSchema.push({
     name: 'Marker',
+    style: getMarkerSchemaStyleFallback('Marker'),
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
     fields: [
       { key: 'first', label: 'first', format: 'integer' },

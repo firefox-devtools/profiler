@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -7497,6 +7497,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": true,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7506,6 +7514,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 6,
+        },
       },
       Object {
         "display": Array [
@@ -7515,6 +7531,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 6,
+        },
       },
       Object {
         "display": Array [
@@ -7524,6 +7548,14 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "style": Object {
+          "background": "#ffc600",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": true,
+          "top": 0,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
@@ -7554,6 +7586,14 @@ Object {
           },
         ],
         "name": "FileIO",
+        "style": Object {
+          "background": "#0a84ff",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7573,6 +7613,17 @@ Object {
           },
         ],
         "name": "MediaSample",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7608,6 +7659,17 @@ Object {
           },
         ],
         "name": "Styles",
+        "style": Object {
+          "background": Array [
+            "#00feff",
+            "#008ea4",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -7637,6 +7699,17 @@ Object {
           },
         ],
         "name": "PreferenceRead",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "chartLabel": "{marker.data.name}",
@@ -7653,6 +7726,17 @@ Object {
           },
         ],
         "name": "UserTiming",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.data.name}",
         "tooltipLabel": "{marker.data.name}",
       },
@@ -7670,6 +7754,17 @@ Object {
           },
         ],
         "name": "Text",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
@@ -7689,6 +7784,17 @@ Object {
           },
         ],
         "name": "Log",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
@@ -7711,6 +7817,17 @@ Object {
           },
         ],
         "name": "DOMEvent",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
@@ -7728,6 +7845,17 @@ Object {
           },
         ],
         "name": "Paint",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7743,6 +7871,17 @@ Object {
           },
         ],
         "name": "Navigation",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7758,6 +7897,17 @@ Object {
           },
         ],
         "name": "Layout",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
@@ -7789,6 +7939,17 @@ Object {
           },
         ],
         "name": "IPC",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
@@ -7806,6 +7967,14 @@ Object {
           },
         ],
         "name": "RefreshDriverTick",
+        "style": Object {
+          "background": "rgba(237, 237, 240, 0.05)",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 18,
+          "squareCorners": true,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7814,6 +7983,17 @@ Object {
         ],
         "fields": Array [],
         "name": "Network",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -7829,12 +8009,23 @@ Object {
           },
         ],
         "name": "tracing",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
     ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8892,6 +9083,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": true,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -8901,6 +9100,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 6,
+        },
       },
       Object {
         "display": Array [
@@ -8910,6 +9117,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 6,
+        },
       },
       Object {
         "display": Array [
@@ -8919,6 +9134,14 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "style": Object {
+          "background": "#ffc600",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": true,
+          "top": 0,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
@@ -8949,6 +9172,14 @@ Object {
           },
         ],
         "name": "FileIO",
+        "style": Object {
+          "background": "#0a84ff",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -8968,6 +9199,17 @@ Object {
           },
         ],
         "name": "MediaSample",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -9003,6 +9245,17 @@ Object {
           },
         ],
         "name": "Styles",
+        "style": Object {
+          "background": Array [
+            "#00feff",
+            "#008ea4",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -9032,6 +9285,17 @@ Object {
           },
         ],
         "name": "PreferenceRead",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "chartLabel": "{marker.data.name}",
@@ -9048,6 +9312,17 @@ Object {
           },
         ],
         "name": "UserTiming",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.data.name}",
         "tooltipLabel": "{marker.data.name}",
       },
@@ -9065,6 +9340,17 @@ Object {
           },
         ],
         "name": "Text",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
@@ -9084,6 +9370,17 @@ Object {
           },
         ],
         "name": "Log",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
@@ -9106,6 +9403,17 @@ Object {
           },
         ],
         "name": "DOMEvent",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
@@ -9123,6 +9431,17 @@ Object {
           },
         ],
         "name": "Paint",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -9138,6 +9457,17 @@ Object {
           },
         ],
         "name": "Navigation",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -9153,6 +9483,17 @@ Object {
           },
         ],
         "name": "Layout",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
@@ -9184,6 +9525,17 @@ Object {
           },
         ],
         "name": "IPC",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
@@ -9201,6 +9553,14 @@ Object {
           },
         ],
         "name": "RefreshDriverTick",
+        "style": Object {
+          "background": "rgba(237, 237, 240, 0.05)",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 18,
+          "squareCorners": true,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -9209,6 +9569,17 @@ Object {
         ],
         "fields": Array [],
         "name": "Network",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -9224,12 +9595,23 @@ Object {
           },
         ],
         "name": "tracing",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
     ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10457,6 +10839,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": true,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10466,6 +10856,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 6,
+        },
       },
       Object {
         "display": Array [
@@ -10475,6 +10873,14 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "style": Object {
+          "background": "#ff9400",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 6,
+        },
       },
       Object {
         "display": Array [
@@ -10484,6 +10890,14 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "style": Object {
+          "background": "#ffc600",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": true,
+          "top": 0,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
@@ -10514,6 +10928,14 @@ Object {
           },
         ],
         "name": "FileIO",
+        "style": Object {
+          "background": "#0a84ff",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10533,6 +10955,17 @@ Object {
           },
         ],
         "name": "MediaSample",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10568,6 +11001,17 @@ Object {
           },
         ],
         "name": "Styles",
+        "style": Object {
+          "background": Array [
+            "#00feff",
+            "#008ea4",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -10597,6 +11041,17 @@ Object {
           },
         ],
         "name": "PreferenceRead",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "chartLabel": "{marker.data.name}",
@@ -10613,6 +11068,17 @@ Object {
           },
         ],
         "name": "UserTiming",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.data.name}",
         "tooltipLabel": "{marker.data.name}",
       },
@@ -10630,6 +11096,17 @@ Object {
           },
         ],
         "name": "Text",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.name} — {marker.data.name}",
       },
       Object {
@@ -10649,6 +11126,17 @@ Object {
           },
         ],
         "name": "Log",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "({marker.data.module}) {marker.data.name}",
       },
       Object {
@@ -10671,6 +11159,17 @@ Object {
           },
         ],
         "name": "DOMEvent",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.data.eventType}",
         "tooltipLabel": "{marker.data.eventType} — DOMEvent",
       },
@@ -10688,6 +11187,17 @@ Object {
           },
         ],
         "name": "Paint",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10703,6 +11213,17 @@ Object {
           },
         ],
         "name": "Navigation",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10718,6 +11239,17 @@ Object {
           },
         ],
         "name": "Layout",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "chartLabel": "{marker.data.messageType}",
@@ -10749,6 +11281,17 @@ Object {
           },
         ],
         "name": "IPC",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
         "tableLabel": "{marker.name} — {marker.data.messageType} — {marker.data.niceDirection}",
         "tooltipLabel": "IPC — {marker.data.niceDirection}",
       },
@@ -10766,6 +11309,14 @@ Object {
           },
         ],
         "name": "RefreshDriverTick",
+        "style": Object {
+          "background": "rgba(237, 237, 240, 0.05)",
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 18,
+          "squareCorners": true,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10774,6 +11325,17 @@ Object {
         ],
         "fields": Array [],
         "name": "Network",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
       Object {
         "display": Array [
@@ -10789,12 +11351,23 @@ Object {
           },
         ],
         "name": "tracing",
+        "style": Object {
+          "background": Array [
+            "black",
+            "#b1b1b3",
+          ],
+          "borderLeft": null,
+          "borderRight": null,
+          "height": 6,
+          "squareCorners": false,
+          "top": 0,
+        },
       },
     ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

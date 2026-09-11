@@ -20,6 +20,7 @@ import { timeCode } from '../utils/time-code';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import { ProfileVersionError } from './errors';
 import type { Profile } from 'firefox-profiler/types';
+import { getMarkerSchemaStyleFallback } from './marker-styles';
 
 export type ProfileUpgradeInfo = {
   v60?: ProfileV60UpgradeInfo;
@@ -3431,6 +3432,11 @@ const _upgraders: {
       // Reinterpret existing bits as u32. We already set all
       // -1 to 0, and there shouldn't be any other negative values.
       frameTable.address = new Uint32Array(frameTable.address);
+    }
+  },
+  [72]: (profile: any) => {
+    for (const schema of profile.meta.markerSchema) {
+      schema.style ??= getMarkerSchemaStyleFallback(schema.name);
     }
   },
   // If you add a new upgrader here, please document the change in

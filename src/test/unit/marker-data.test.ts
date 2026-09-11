@@ -36,6 +36,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { getEmptySharedData } from '../../profile-logic/data-structures';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 import type {
   IndexIntoRawMarkerTable,
@@ -1407,6 +1408,7 @@ describe('formatLogStatement', function () {
   function logSchema(messageFormat: MarkerFormatType): MarkerSchema {
     return {
       name: 'Log',
+      style: getMarkerSchemaStyleFallback('Log'),
       display: ['marker-chart', 'marker-table'],
       fields: [
         { key: 'level', label: 'Level', format: 'unique-string' },

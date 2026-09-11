@@ -1578,7 +1578,6 @@ const _upgraders: {
     // marker schema. This bump is only here so that older frontends, which read
     // these two fields directly, get updated.
   },
-
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

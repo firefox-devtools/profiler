@@ -19,6 +19,7 @@ import type {
   MarkerDisplayLocation,
   MarkerFormatType,
   MarkerGraph,
+  MarkerSchemaStyle,
 } from './markers';
 import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
 
@@ -395,6 +396,8 @@ export type GeckoMetaMarkerSchema = {
 
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>;
+
+  style?: MarkerSchemaStyle;
 
   // If present, specifies the key of a marker field that contains the marker's color.
   // The field should contain one of the GraphColor values.
