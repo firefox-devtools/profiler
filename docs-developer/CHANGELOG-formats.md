@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 72
+
+FileIO marker schemas now have a `tableLabel`.
+
 ### Version 71
 
 The frame table (`profile.shared.frameTable`) representation changed in such a way that all its columns can now be typed arrays when using [JsonSlabs](https://github.com/mstange/json-slabs/) profiles.

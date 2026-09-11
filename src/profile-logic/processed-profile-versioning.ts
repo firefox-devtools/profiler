@@ -3433,6 +3433,14 @@ const _upgraders: {
       frameTable.address = new Uint32Array(frameTable.address);
     }
   },
+  [72]: (profile: any) => {
+    for (const schema of profile.meta.markerSchema ?? []) {
+      if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+        schema.tableLabel =
+          "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
