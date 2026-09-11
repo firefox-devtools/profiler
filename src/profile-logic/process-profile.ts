@@ -58,7 +58,10 @@ import {
   toFloat64Array,
   toFloat64ArraySetNullToZero,
 } from '../utils/typed-arrays';
-import { computeStringIndexMarkerFieldsByDataType } from '../profile-logic/marker-schema';
+import {
+  addPIICategoriesToMarkerSchema,
+  computeStringIndexMarkerFieldsByDataType,
+} from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type { StringTable } from '../utils/string-table';
@@ -1722,7 +1725,7 @@ function _convertGeckoMarkerSchema(
     description = staticFields[staticDescriptionFieldIndex].value;
   }
 
-  return {
+  return addPIICategoriesToMarkerSchema({
     name,
     tooltipLabel,
     tableLabel,
@@ -1733,7 +1736,7 @@ function _convertGeckoMarkerSchema(
     graphs,
     colorField,
     isStackBased,
-  };
+  });
 }
 
 /**

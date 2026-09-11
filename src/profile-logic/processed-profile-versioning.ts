@@ -3433,6 +3433,48 @@ const _upgraders: {
       frameTable.address = new Uint32Array(frameTable.address);
     }
   },
+  [72]: (profile: any) => {
+    const piiCategoriesBySchemaName = new Map<string, Map<string, string[]>>([
+      [
+        'Network',
+        new Map([
+          ['URI', ['url']],
+          ['RedirectURI', ['url']],
+          ['isPrivateBrowsing', ['private-browsing']],
+        ]),
+      ],
+      ['Text', new Map([['name', ['url', 'extension-id']]])],
+      ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
+    ]);
+
+    for (const schema of profile.meta.markerSchema) {
+      const piiCategoriesByField = piiCategoriesBySchemaName.get(schema.name);
+      if (!piiCategoriesByField) {
+        continue;
+      }
+
+      for (const field of schema.fields) {
+        const containsPII = piiCategoriesByField.get(field.key);
+        if (containsPII && !field.containsPII) {
+          field.containsPII = containsPII;
+        }
+      }
+
+      const existingFieldKeys = new Set(
+        schema.fields.map((field: any) => field.key)
+      );
+      for (const [key, containsPII] of piiCategoriesByField) {
+        if (!existingFieldKeys.has(key)) {
+          schema.fields.push({
+            key,
+            format: 'string',
+            hidden: true,
+            containsPII,
+          });
+        }
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

@@ -217,6 +217,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -255,6 +258,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -428,7 +435,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",

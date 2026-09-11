@@ -1075,6 +1075,62 @@ describe('source table processing', function () {
 });
 
 describe('Marker schema conversion', function () {
+  it('should add PII categories to marker schema fields', function () {
+    const geckoProfile = createGeckoProfile();
+    geckoProfile.meta.markerSchema.push(
+      {
+        name: 'Network',
+        display: [],
+        data: [],
+      },
+      {
+        name: 'Text',
+        display: [],
+        data: [{ key: 'name', format: 'unique-string' }],
+      },
+      {
+        name: 'PreferenceRead',
+        display: [],
+        data: [{ key: 'prefValue', format: 'string' }],
+      }
+    );
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const schemasByName = Object.fromEntries(
+      processedProfile.meta.markerSchema.map((schema) => [schema.name, schema])
+    );
+
+    expect(schemasByName.Network.fields).toEqual([
+      { key: 'URI', format: 'string', hidden: true, containsPII: ['url'] },
+      {
+        key: 'RedirectURI',
+        format: 'string',
+        hidden: true,
+        containsPII: ['url'],
+      },
+      {
+        key: 'isPrivateBrowsing',
+        format: 'string',
+        hidden: true,
+        containsPII: ['private-browsing'],
+      },
+    ]);
+    expect(schemasByName.Text.fields).toEqual([
+      {
+        key: 'name',
+        format: 'unique-string',
+        containsPII: ['url', 'extension-id'],
+      },
+    ]);
+    expect(schemasByName.PreferenceRead.fields).toEqual([
+      {
+        key: 'prefValue',
+        format: 'string',
+        containsPII: ['preference-value'],
+      },
+    ]);
+  });
+
   it('should preserve optional marker schema properties', function () {
     const geckoProfile = createGeckoProfile();
 

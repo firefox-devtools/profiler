@@ -23,6 +23,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import {
   getSchemaFromMarker,
+  isStringIndexFormat,
   isStringIndexMarkerField,
   markerPayloadMatchesSearch,
   markerSchemaFrontEndOnly,
@@ -43,18 +44,18 @@ import type {
   IPCSharedData,
   IPCMarkerPayload,
   NetworkPayload,
-  PrefMarkerPayload,
-  TextMarkerPayload,
   StartEndRange,
   IndexedArray,
   DerivedMarkerInfo,
   MarkerSchema,
+  MarkerSchemaPIICategory,
   MarkerSchemaByName,
   MarkerDisplayLocation,
   Tid,
   LogMarkerPayload,
   ThreadIndex,
   Profile,
+  RemoveProfileInformation,
 } from 'firefox-profiler/types';
 
 /**
@@ -1456,132 +1457,152 @@ export function groupScreenshotsById(
   return idToScreenshotMarkers;
 }
 
-export function removeNetworkMarkerURLs(
-  payload: NetworkPayload
-): NetworkPayload {
-  return { ...payload, URI: '', RedirectURI: '' };
-}
-
-export function removePrefMarkerPreferenceValues(
-  payload: PrefMarkerPayload
-): PrefMarkerPayload {
-  return { ...payload, prefValue: '' };
-}
-
-/**
- * Apply a transformation to a Text marker's text. The schema tells us whether the
- * payload holds the text inline or as a string table index. In the latter case the
- * result is interned as a new string, as other markers and frames may share that
- * entry.
- */
-function _updateTextMarkerText(
-  payload: TextMarkerPayload,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
-  stringTable: StringTable,
-  transform: (text: string) => string
-): TextMarkerPayload {
-  // The casts below follow the storage layout the schema declares, which
-  // TypeScript can't verify from the payload type alone.
-  if (
-    !isStringIndexMarkerField(
-      stringIndexMarkerFieldsByDataType,
-      payload.type,
-      'name'
-    )
-  ) {
-    return { ...payload, name: transform(payload.name as string) };
-  }
-
-  const nameIndex = payload.name as IndexIntoStringTable;
-  if (!stringTable.hasIndex(nameIndex)) {
-    return payload;
-  }
-  const text = stringTable.getString(nameIndex);
-  const newText = transform(text);
-  if (newText === text) {
-    return payload;
-  }
-  return { ...payload, name: stringTable.indexForString(newText) };
-}
-
-/**
- * Sanitize Text marker's name property for potential URLs. Only for payloads
- * holding their text inline, as the string table is sanitized as a whole.
- */
-export function sanitizeTextMarker(
-  payload: TextMarkerPayload,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
-  stringTable: StringTable
-): TextMarkerPayload {
-  return _updateTextMarkerText(
-    payload,
-    stringIndexMarkerFieldsByDataType,
-    stringTable,
-    removeURLs
-  );
-}
-
-/**
- * Sanitize Extension Text marker's name property for potential add-on ids.
- */
-export function sanitizeExtensionTextMarker(
-  markerName: string,
-  payload: TextMarkerPayload,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
-  stringTable: StringTable
-): TextMarkerPayload {
+function _removeExtensionId(markerName: string, text: string): string {
   if (['ExtensionParent', 'ExtensionChild'].includes(markerName)) {
-    return _updateTextMarkerText(
-      payload,
-      stringIndexMarkerFieldsByDataType,
-      stringTable,
-      (text) => text.replace(/^.*, (api_(call|event): )/, '$1')
-    );
+    return text.replace(/^.*, (api_(call|event): )/, '$1');
   }
 
   if (markerName === 'Extension Suspend') {
-    return _updateTextMarkerText(
-      payload,
-      stringIndexMarkerFieldsByDataType,
-      stringTable,
-      (text) => text.replace(/ by .*$/, '')
-    );
+    return text.replace(/ by .*$/, '');
   }
 
-  return payload;
+  return text;
 }
 
-export function sanitizeFromMarkerSchema(
-  markerSchema: MarkerSchema,
-  markerPayload: MarkerPayload
+function _shouldSanitizePIICategory(
+  category: MarkerSchemaPIICategory,
+  PIIToBeRemoved: RemoveProfileInformation
+): boolean {
+  switch (category) {
+    case 'url':
+      return PIIToBeRemoved.shouldRemoveUrls;
+    case 'extension-id':
+      return PIIToBeRemoved.shouldRemoveExtensions;
+    case 'preference-value':
+      return PIIToBeRemoved.shouldRemovePreferenceValues;
+    case 'private-browsing':
+      return PIIToBeRemoved.shouldRemovePrivateBrowsingData;
+    default:
+      throw assertExhaustiveCheck(category);
+  }
+}
+
+function _updateMarkerPayloadField(
+  markerPayload: MarkerPayload,
+  key: string,
+  isStringIndex: boolean,
+  stringTable: StringTable,
+  transform: (text: string) => string
 ): MarkerPayload {
-  for (const { key, format } of markerSchema.fields) {
-    if (!(key in markerPayload)) {
-      continue;
+  const value = (markerPayload as any)[key];
+  if (!isStringIndex) {
+    return { ...markerPayload, [key]: transform(value) } as any;
+  }
+
+  const stringIndex = value as IndexIntoStringTable;
+  if (!stringTable.hasIndex(stringIndex)) {
+    return markerPayload;
+  }
+  const text = stringTable.getString(stringIndex);
+  const newText = transform(text);
+  if (newText === text) {
+    return markerPayload;
+  }
+  return {
+    ...markerPayload,
+    [key]: stringTable.indexForString(newText),
+  } as any;
+}
+
+/** Apply a marker schema's PII rules to its payload. */
+export function sanitizeMarkerFromSchema(
+  markerSchema: MarkerSchema,
+  markerName: string,
+  markerPayload: MarkerPayload,
+  stringTable: StringTable,
+  PIIToBeRemoved: RemoveProfileInformation
+): {
+  markerPayload: MarkerPayload;
+  shouldRemoveMarker: boolean;
+} {
+  let shouldRemoveMarker = false;
+
+  for (const { key, format, containsPII = [] } of markerSchema.fields) {
+    const hasField = key in markerPayload;
+
+    if (hasField) {
+      // The casts are needed because TypeScript cannot refine the payload union
+      // using a schema field that is only known at runtime.
+      if (PIIToBeRemoved.shouldRemoveUrls && format === 'url') {
+        markerPayload = {
+          ...markerPayload,
+          [key]: removeURLs((markerPayload as any)[key]),
+        } as any;
+      } else if (PIIToBeRemoved.shouldRemoveUrls && format === 'file-path') {
+        markerPayload = {
+          ...markerPayload,
+          [key]: removeFilePath((markerPayload as any)[key]),
+        } as any;
+      } else if (
+        PIIToBeRemoved.shouldRemoveUrls &&
+        format === 'sanitized-string'
+      ) {
+        markerPayload = {
+          ...markerPayload,
+          [key]: '<sanitized>',
+        } as any;
+      }
     }
 
-    // We're typing the result of the sanitization with `any` because Flow
-    // doesn't like much our enormous enum of non-exact objects that's used as
-    // MarkerPayload type, and this code is too generic for Flow in this context.
-    if (format === 'url') {
-      markerPayload = {
-        ...markerPayload,
-        [key]: removeURLs((markerPayload as any)[key]),
-      } as any;
-    } else if (format === 'file-path') {
-      markerPayload = {
-        ...markerPayload,
-        [key]: removeFilePath((markerPayload as any)[key]),
-      } as any;
-    } else if (format === 'sanitized-string') {
-      markerPayload = {
-        ...markerPayload,
-        [key]: '<sanitized>',
-      } as any;
+    const isStringIndex = isStringIndexFormat(format);
+    for (const category of containsPII) {
+      if (!_shouldSanitizePIICategory(category, PIIToBeRemoved)) {
+        continue;
+      }
+
+      switch (category) {
+        case 'url':
+          if (hasField) {
+            markerPayload = _updateMarkerPayloadField(
+              markerPayload,
+              key,
+              isStringIndex,
+              stringTable,
+              removeURLs
+            );
+          }
+          break;
+        case 'extension-id':
+          if (hasField) {
+            markerPayload = _updateMarkerPayloadField(
+              markerPayload,
+              key,
+              isStringIndex,
+              stringTable,
+              (text) => _removeExtensionId(markerName, text)
+            );
+          }
+          break;
+        case 'preference-value':
+          markerPayload = _updateMarkerPayloadField(
+            markerPayload,
+            key,
+            isStringIndex,
+            stringTable,
+            () => ''
+          );
+          break;
+        case 'private-browsing':
+          shouldRemoveMarker ||=
+            hasField && Boolean((markerPayload as any)[key]);
+          break;
+        default:
+          assertExhaustiveCheck(category);
+      }
     }
   }
 
-  return markerPayload;
+  return { markerPayload, shouldRemoveMarker };
 }
 
 /**
