@@ -13,9 +13,14 @@ import type {
 function createContext(): SessionContext {
   return {
     selectedThreadHandle: 't-0',
-    selectedThreads: [{ threadIndex: 0, name: 'GeckoMain' }],
+    selectedThreads: [
+      { threadIndex: 0, name: 'GeckoMain', processName: 'Parent Process' },
+    ],
+    resultThreadHandle: null,
+    resultThreads: [],
     currentViewRange: null,
     rootRange: { start: 0, end: 3000 },
+    callTreeSummaryStrategy: 'timing',
   };
 }
 

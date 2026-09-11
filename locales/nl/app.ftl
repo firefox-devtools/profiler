@@ -691,7 +691,7 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Geprofileerde duur:
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Verborgen threads opnemen
 MenuButtons--publish--renderCheckbox-label-include-other-tabs = De gegevens van andere tabbladen opnemen
 MenuButtons--publish--renderCheckbox-label-hidden-time = Verborgen tijdsbereik opnemen
-MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafdrukken opnemen
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafbeeldingen opnemen
 MenuButtons--publish--renderCheckbox-label-resource = Hulpbron-URL’s en -paden opnemen
 MenuButtons--publish--renderCheckbox-label-extension = Extensie-informatie opnemen
 MenuButtons--publish--renderCheckbox-label-preference = Voorkeurswaarden opnemen
@@ -894,7 +894,7 @@ TrackContextMenu--only-show-this-process = Alleen dit proces tonen
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Alleen ‘{ $trackName }’ tonen
-TrackContextMenu--hide-other-screenshots-tracks = Andere schermafdruktracks verbergen
+TrackContextMenu--hide-other-screenshots-tracks = Andere schermafbeeldingstracks verbergen
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.

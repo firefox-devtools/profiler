@@ -29,6 +29,14 @@ export type {
   ThreadSamplesBottomUpResult,
   CallTreeNode,
   CallTreeScoringStrategy,
+  CategoryBreakdown,
+  CategoryBreakdownEntry,
+  CategorySubBreakdownEntry,
+  FunctionCategoryBreakdown,
+  FunctionCategoryBreakdowns,
+  CallTreeSummaryStrategy,
+  WeightType,
+  StrategySelectResult,
   InlineStatus,
   ThreadMarkersResult,
   ThreadNetworkResult,
@@ -79,6 +87,8 @@ import type {
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
@@ -143,6 +153,7 @@ export type ClientCommand =
       thread?: string;
       includeIdle?: boolean;
       search?: string;
+      strategy?: CallTreeSummaryStrategy;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
       callTreeOptions?: CallTreeCollectionOptions;
@@ -179,6 +190,11 @@ export type ClientCommand =
       symbolServerUrl?: string;
       /** "file", "function", or a number of context lines (e.g. "2") */
       annotateContext?: string;
+      strategy?: CallTreeSummaryStrategy;
+    }
+  | {
+      command: 'strategy';
+      strategy: CallTreeSummaryStrategy;
     }
   | {
       command: 'zoom';
@@ -234,6 +250,7 @@ export type CommandResult =
   | WithContext<ProfileLogsResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
+  | WithContext<StrategySelectResult>
   | WithContext<CounterListResult>
   | WithContext<CounterInfoResult>
   | WithContext<SourceMapSourcesResult>

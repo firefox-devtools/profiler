@@ -49,6 +49,9 @@ AppViewRouter--error-from-localhost-url-safari =
     bu tarayıcıda yerel makineden profilleri içe aktaramıyor. Lütfen
     bu sayfayı Safari yerine { -firefox-brand-name } veya Chrome’da açın.
     .title = Safari yerel profilleri içe aktaramıyor
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version = Bu profilde bu { -profiler-brand-name } sürümünün desteklemediği bir biçim kullanılıyor. Yeni { -profiler-brand-name } güncellemesi olup olmadığını denetlemek üzere sayfayı yenilemeyi deneyin.
 AppViewRouter--route-not-found--home =
     .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
@@ -143,6 +146,8 @@ CallTree--samples-total = Toplam (örnekler)
         “Toplam” örnek sayısı, bu fonksiyonun yığın üzerinde görüldüğü her örneğin
         bir özetini içerir. Fonksiyonun gerçekten çalıştığı süre ile bu fonksiyondan
         çağrılan fonksiyonlarda geçirilen süre de buna dahildir.
+CallTree--bytes-total = Toplam Boyut (bayt)
+    .title = “Toplam boyut”, bu işlevin çağrı yığınında bulunduğu süre boyunca ayrılan veya serbest bırakılan tüm baytların özetini içerir. Buna hem işlevin gerçekten çalıştığı sıradaki baytlar hem de bu işlevden yapılan çağrılara ait baytlar dahildir.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -297,6 +302,7 @@ Home--instructions-content2 =
 Home--fenix-instructions-directly =
     { -firefox-android-brand-name } bu cihazda doğrudan profillenebilir.
     Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını cihazda doğrudan profilleme</a> sayfasını okuyabilirsiniz.
+Home--fenix-instructions-remotely = { -firefox-brand-name }’un bilgisayar sürümünü kullanarak da { -firefox-android-brand-name }’ta uzaktan profilleme yapabilirsiniz. Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını uzaktan profilleme</a> belgesine bakın.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.

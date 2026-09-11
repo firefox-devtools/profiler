@@ -34,9 +34,14 @@ import {
 function createMockContext(): SessionContext {
   return {
     selectedThreadHandle: 't-0',
-    selectedThreads: [{ threadIndex: 0, name: 'Test Thread' }],
+    selectedThreads: [
+      { threadIndex: 0, name: 'Test Thread', processName: 'Test Process' },
+    ],
+    resultThreadHandle: null,
+    resultThreads: [],
     currentViewRange: null,
     rootRange: { start: 0, end: 1000 },
+    callTreeSummaryStrategy: 'timing',
   };
 }
 
@@ -59,6 +64,8 @@ function buildTopDownResult(
     type: 'thread-samples-top-down',
     threadHandle: 't-0',
     friendlyThreadName: 'Test Thread',
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     regularCallTree,
     context: createMockContext(),
   };
@@ -126,6 +133,8 @@ function buildBottomUpResult(
     type: 'thread-samples-bottom-up',
     threadHandle: 't-0',
     friendlyThreadName: 'Test Thread',
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     invertedCallTree: collectedInvertedTree,
     context: createMockContext(),
   };

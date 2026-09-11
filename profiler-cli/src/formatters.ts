@@ -34,11 +34,15 @@ import type {
   ProfileNetworkSummary,
   MarkerGroupData,
   CallTreeNode,
+  CategoryBreakdown,
   InlineStatus,
   FilterEntry,
   SampleFilterSpec,
   ProfileLogsResult,
   ThreadSelectResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
+  WeightType,
   CounterSummary,
   CounterListResult,
   CounterInfoResult,
@@ -76,6 +80,122 @@ const INLINE_LEGEND =
   'Note: (inl) = inlined by the compiler into the nearest non-inlined ancestor above. ' +
   '(inl?) = some calls were inlined by the compiler.';
 
+const BAR_WIDTH = 28;
+
+/**
+ * Render aligned `label / bar / count / percentage` rows. `barRatio` is the
+ * fraction of the bar's full width to fill, which is not always the same as
+ * `percentage`; some tables scale their bars against the largest row instead.
+ */
+function formatBarRows(
+  rows: Array<{
+    label: string;
+    count: number;
+    percentage: number;
+    barRatio: number;
+  }>
+): string[] {
+  const maxLabelLen = Math.max(...rows.map((row) => row.label.length));
+
+  return rows.map((row) => {
+    const barLen = Math.round(row.barRatio * BAR_WIDTH);
+    const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
+    const label = row.label.padEnd(maxLabelLen);
+    const countStr = String(row.count).padStart(6);
+    const pctStr = row.percentage.toFixed(1).padStart(5);
+    return `  ${label}  ${bar}  ${countStr}  ${pctStr}%`;
+  });
+}
+
+/**
+ * Render a category breakdown as a `──── title ────` section, with each
+ * category followed by its non-empty subcategories, indented.
+ */
+function formatCategoryBreakdown(
+  title: string,
+  breakdown: CategoryBreakdown,
+  emptyMessage: string
+): string[] {
+  const lines = [`──── ${title} ────`, ''];
+
+  if (breakdown.categories.length === 0) {
+    lines.push(`  ${emptyMessage}`);
+    return lines;
+  }
+
+  const rows = breakdown.categories.flatMap((category) => [
+    {
+      label: category.name,
+      count: Math.round(category.samples),
+      percentage: category.percentage,
+      barRatio: Math.abs(category.samples) / breakdown.totalSamples,
+    },
+    ...category.subcategories.map((subcategory) => ({
+      label: `  ${subcategory.name}`,
+      count: Math.round(subcategory.samples),
+      percentage: subcategory.percentage,
+      barRatio: Math.abs(subcategory.samples) / breakdown.totalSamples,
+    })),
+  ]);
+
+  lines.push(...formatBarRows(rows));
+  return lines;
+}
+
+/**
+ * Format a call tree weight in the unit the current data source measures in.
+ */
+function formatWeight(value: number, weightType: WeightType): string {
+  switch (weightType) {
+    case 'bytes':
+      return value < 0 ? `-${formatBytes(-value)}` : formatBytes(value);
+    case 'tracing-ms':
+      return formatDuration(value);
+    case 'samples':
+      return String(Math.round(value));
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
+/**
+ * As formatWeight, but with a trailing unit word where the number alone would be
+ * ambiguous. formatBytes and formatDuration already embed their units.
+ */
+function formatWeightWithUnit(value: number, weightType: WeightType): string {
+  const formatted = formatWeight(value, weightType);
+  return weightType === 'samples' ? `${formatted} samples` : formatted;
+}
+
+/**
+ * The noun for a weight in headings like "Top Functions (by self bytes)".
+ */
+function weightHeadingNoun(weightType: WeightType): string {
+  return weightType === 'bytes' ? 'bytes' : 'time';
+}
+
+/**
+ * `GeckoMain, WebExtensions` — thread name then process, the process dropped
+ * when it merely repeats the thread name.
+ */
+function formatThreadAndProcess(thread: {
+  name: string;
+  processName?: string;
+}): string {
+  if (!thread.processName || thread.processName === thread.name) {
+    return thread.name;
+  }
+  return `${thread.name}, ${thread.processName}`;
+}
+
+/** `t-0,t-1 (GeckoMain, Parent Process; Renderer)` */
+function formatThreadList(
+  handle: string,
+  threads: Array<{ name: string; processName?: string }>
+): string {
+  return `${handle} (${threads.map(formatThreadAndProcess).join('; ')})`;
+}
+
 /**
  * Format a SessionContext as a compact header line.
  * Shows current thread selection, zoom range, and full profile duration.
@@ -85,18 +205,25 @@ export function formatContextHeader(
   activeFilters?: FilterEntry[],
   ephemeralFilters?: SampleFilterSpec[]
 ): string {
-  // Thread info
+  // Thread info. The header leads with the thread this result is about, and
+  // only names the sticky selection separately when the two have diverged, so
+  // that a `--thread` query does not read as having changed the selection.
   let threadInfo = 'No thread selected';
-  if (context.selectedThreadHandle && context.selectedThreads.length > 0) {
-    if (context.selectedThreads.length === 1) {
-      const thread = context.selectedThreads[0];
-      threadInfo = `${context.selectedThreadHandle} (${thread.name})`;
-    } else {
-      const names = context.selectedThreads
-        .map((t: { name: string }) => t.name)
-        .join(', ');
-      threadInfo = `${context.selectedThreadHandle} (${names})`;
-    }
+  let selectedInfo = '';
+  if (context.resultThreadHandle && context.resultThreads.length > 0) {
+    threadInfo = formatThreadList(
+      context.resultThreadHandle,
+      context.resultThreads
+    );
+    selectedInfo = ` | Selected: ${context.selectedThreadHandle ?? 'none'}`;
+  } else if (
+    context.selectedThreadHandle &&
+    context.selectedThreads.length > 0
+  ) {
+    threadInfo = formatThreadList(
+      context.selectedThreadHandle,
+      context.selectedThreads
+    );
   }
 
   // View range info
@@ -115,7 +242,7 @@ export function formatContextHeader(
     (activeFilters?.length ?? 0) + (ephemeralFilters?.length ?? 0);
   const filterInfo =
     totalFilterCount > 0 ? ` | Filters: ${totalFilterCount}` : '';
-  return `[Thread: ${threadInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
+  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
 }
 
 /**
@@ -124,13 +251,10 @@ export function formatContextHeader(
 export function formatStatusResult(result: StatusResult): string {
   let threadInfo = 'No thread selected';
   if (result.selectedThreadHandle && result.selectedThreads.length > 0) {
-    if (result.selectedThreads.length === 1) {
-      const thread = result.selectedThreads[0];
-      threadInfo = `${result.selectedThreadHandle} (${thread.name})`;
-    } else {
-      const names = result.selectedThreads.map((t) => t.name).join(', ');
-      threadInfo = `${result.selectedThreadHandle} (${names})`;
-    }
+    threadInfo = formatThreadList(
+      result.selectedThreadHandle,
+      result.selectedThreads
+    );
   }
 
   let rangesInfo = 'Full profile';
@@ -159,7 +283,8 @@ export function formatStatusResult(result: StatusResult): string {
   return `\
 Session Status:
   Selected thread: ${threadInfo}
-  View range: ${rangesInfo}${filterSection}`;
+  View range: ${rangesInfo}
+  Data source: ${result.callTreeSummaryStrategy}${filterSection}`;
 }
 
 /**
@@ -227,6 +352,28 @@ Function ${result.functionHandle}:
     }
   }
 
+  const { running, self, threadHandle, friendlyThreadName } =
+    result.categoryBreakdown;
+
+  if (running.samples === 0) {
+    output += `\n\n  No samples for this function on ${threadHandle} (${friendlyThreadName}) in the current view.`;
+  } else {
+    for (const [kind, breakdown] of [
+      ['running', running],
+      ['self', self],
+    ] as const) {
+      const count = Math.round(breakdown.samples);
+      const share = breakdown.percentageOfThread.toFixed(1);
+      output +=
+        '\n\n' +
+        formatCategoryBreakdown(
+          `Categories: ${kind} (${count} samples, ${share}% of thread)`,
+          breakdown,
+          `No ${kind} samples for this function in the current view.`
+        ).join('\n');
+    }
+  }
+
   return output;
 }
 
@@ -277,6 +424,7 @@ Created at: ${result.createdAtName}
 Ended at: ${endedAtStr}
 
 This thread contains ${result.sampleCount} samples and ${result.markerCount} markers.
+Data sources: ${result.availableStrategies.join(', ') || 'none'}
 
 CPU activity over time:`;
 
@@ -435,8 +583,7 @@ Name: ${result.name}\n`;
       }
     }
 
-    const etld1Suffix = process.etld1 ? ` [${process.etld1}]` : '';
-    output += `  p-${process.processIndex}: ${process.name}${etld1Suffix} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
+    output += `  p-${process.processIndex}: ${process.name} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
 
     for (const thread of process.threads) {
       output += `    ${thread.threadHandle}: ${thread.name} [tid ${thread.tid}] - ${thread.cpuMs.toFixed(3)}ms\n`;
@@ -656,13 +803,12 @@ function formatCounterStats(counter: CounterSummary): string {
   return `${stats} [${counter.rangeSampleCount} samples]`;
 }
 
-/** `p-N Process Name (etld+1)` identifying the owning process. */
+/** `p-N Process Name` identifying the owning process. */
 function formatCounterProcessName(counter: CounterSummary): string {
-  const etld1 = counter.etld1 ? ` (${counter.etld1})` : '';
-  return `p-${counter.processIndex} ${counter.processName}${etld1}`;
+  return `p-${counter.processIndex} ${counter.processName}`;
 }
 
-/** The ` [p-N Process Name (etld+1), pid X]` segment identifying the owning process. */
+/** The ` [p-N Process Name, pid X]` segment identifying the owning process. */
 function formatCounterProcess(counter: CounterSummary): string {
   return ` [${formatCounterProcessName(counter)}, pid ${counter.pid}]`;
 }
@@ -944,15 +1090,22 @@ function formatSamplesPreamble(result: {
   activeOnly?: boolean;
   search?: string;
   friendlyThreadName: string;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 }): string {
   const contextHeader = formatContextHeader(
     result.context,
     result.activeFilters,
     result.ephemeralFilters
   );
-  const activeOnlyNote = result.activeOnly
-    ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
-    : '';
+  const strategy = result.callTreeSummaryStrategy;
+  const isTiming = strategy === 'timing';
+  const dataSourceNote = isTiming ? '' : `Data source: ${strategy}\n\n`;
+  // Idle samples only exist in the timing table, so the note would be
+  // meaningless under an allocation strategy.
+  const activeOnlyNote =
+    result.activeOnly && isTiming
+      ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
+      : '';
   const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   const filtersParts: string[] = [
     ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
@@ -961,7 +1114,7 @@ function formatSamplesPreamble(result: {
   ];
   const filtersNote =
     filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
-  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
+  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${searchNote}${filtersNote}`;
 }
 
 /**
@@ -981,12 +1134,21 @@ export function formatThreadSamplesResult(
     return output;
   }
 
-  // Top functions by total time
-  output += 'Top Functions (by total time):\n';
+  output +=
+    formatCategoryBreakdown(
+      `Categories (${Math.round(result.categoryBreakdown.totalSamples)} running samples)`,
+      result.categoryBreakdown,
+      'No samples in the current view.'
+    ).join('\n') + '\n\n';
+
+  const { weightType } = result;
+  const weightNoun = weightHeadingNoun(weightType);
+
+  output += `Top Functions (by total ${weightNoun}):\n`;
   output +=
     '  (For a call tree starting from these functions, use: profiler-cli thread samples-top-down)\n\n';
   for (const func of result.topFunctionsByTotal) {
-    const totalCount = Math.round(func.totalSamples);
+    const totalCount = formatWeight(func.totalSamples, weightType);
     const totalPct = func.totalPercentage.toFixed(1);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
@@ -997,12 +1159,11 @@ export function formatThreadSamplesResult(
 
   output += '\n';
 
-  // Top functions by self time
-  output += 'Top Functions (by self time):\n';
+  output += `Top Functions (by self ${weightNoun}):\n`;
   output +=
     '  (For a call tree showing what calls these functions, use: profiler-cli thread samples-bottom-up)\n\n';
   for (const func of result.topFunctionsBySelf) {
-    const selfCount = Math.round(func.selfSamples);
+    const selfCount = formatWeight(func.selfSamples, weightType);
     const selfPct = func.selfPercentage.toFixed(1);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
@@ -1015,7 +1176,11 @@ export function formatThreadSamplesResult(
 
   // Heaviest stack
   const stack = result.heaviestStack;
-  output += `Heaviest stack (${stack.selfSamples.toFixed(1)} samples, ${stack.frameCount} frames):\n`;
+  const heaviestSelf =
+    weightType === 'samples'
+      ? `${stack.selfSamples.toFixed(1)} samples`
+      : formatWeight(stack.selfSamples, weightType);
+  output += `Heaviest stack (${heaviestSelf}, ${stack.frameCount} frames):\n`;
 
   if (stack.hasInlinedFrames) {
     output += `  ${INLINE_LEGEND}\n\n`;
@@ -1026,12 +1191,12 @@ export function formatThreadSamplesResult(
   } else if (stack.frameCount <= 200) {
     // Show all frames
     for (let i = 0; i < stack.frames.length; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
   } else {
     // Show first 100
     for (let i = 0; i < 100; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
 
     // Show placeholder for skipped frames
@@ -1040,7 +1205,7 @@ export function formatThreadSamplesResult(
 
     // Show last 100
     for (let i = stack.frameCount - 100; i < stack.frameCount; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
   }
 
@@ -1049,16 +1214,17 @@ export function formatThreadSamplesResult(
 
 function formatHeaviestStackFrame(
   frame: ThreadSamplesResult['heaviestStack']['frames'][number],
-  i: number
+  i: number,
+  weightType: WeightType
 ): string {
   const displayName = truncateFunctionName(
     frame.nameWithLibrary,
     FUNC_NAME_WIDTH
   );
   const inlineMark = inlineSuffix(frame.inlineStatus);
-  const totalCount = Math.round(frame.totalSamples);
+  const totalCount = formatWeight(frame.totalSamples, weightType);
   const totalPct = frame.totalPercentage.toFixed(1);
-  const selfCount = Math.round(frame.selfSamples);
+  const selfCount = formatWeight(frame.selfSamples, weightType);
   const selfPct = frame.selfPercentage.toFixed(1);
   return `  ${i + 1}. ${displayName}${inlineMark} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
 }
@@ -1328,7 +1494,14 @@ export function formatThreadFunctionsResult(
     `Functions in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredFunctionCount} functions${filterSuffix}\n`
   );
 
-  if (result.activeOnly) {
+  const { weightType } = result;
+  const isTiming = result.callTreeSummaryStrategy === 'timing';
+
+  if (!isTiming) {
+    lines.push(`Data source: ${result.callTreeSummaryStrategy}\n`);
+  }
+
+  if (result.activeOnly && isTiming) {
     lines.push(
       'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n'
     );
@@ -1375,11 +1548,10 @@ export function formatThreadFunctionsResult(
     lines.push(`Filters: ${filterParts.join(', ')}\n`);
   }
 
-  // List functions sorted by self time
-  lines.push('Functions (by self time):');
+  lines.push(`Functions (by self ${weightHeadingNoun(weightType)}):`);
   for (const func of result.functions) {
-    const selfCount = Math.round(func.selfSamples);
-    const totalCount = Math.round(func.totalSamples);
+    const selfCount = formatWeight(func.selfSamples, weightType);
+    const totalCount = formatWeight(func.totalSamples, weightType);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
       FUNC_NAME_WIDTH
@@ -1754,11 +1926,19 @@ export function formatFunctionAnnotateResult(
   out.push(contextHeader, '');
   out.push(`Function ${result.functionHandle}: ${result.name}`);
   out.push(`Thread: ${result.friendlyThreadName} (${result.threadHandle})`, '');
+  const { weightType } = result;
+  const weightNoun = weightHeadingNoun(weightType);
+  // Wider columns for byte sizes, which read as "123.4KB" rather than "1234".
+  const W_SELF = weightType === 'bytes' ? 9 : 6;
+  const W_TOTAL = weightType === 'bytes' ? 10 : 7;
   out.push(
-    `Self time: ${Math.round(result.totalSelfSamples)} samples, ` +
-      `Total time: ${Math.round(result.totalTotalSamples)} samples`
+    `Self ${weightNoun}: ${formatWeightWithUnit(result.totalSelfSamples, weightType)}, ` +
+      `Total ${weightNoun}: ${formatWeightWithUnit(result.totalTotalSamples, weightType)}`
   );
   out.push(`Mode: ${result.mode}`);
+  if (result.callTreeSummaryStrategy !== 'timing') {
+    out.push(`Data source: ${result.callTreeSummaryStrategy}`);
+  }
 
   for (const w of result.warnings) {
     out.push('', `Warning: ${w}`);
@@ -1771,14 +1951,12 @@ export function formatFunctionAnnotateResult(
       src.totalFileLines !== null ? ` (${src.totalFileLines} lines)` : '';
     out.push('', `Source file: ${src.filename}${fileSuffix}`);
     out.push(
-      `  ${Math.round(src.samplesWithLineInfo)} of ${Math.round(src.samplesWithFunction)} ` +
-        `samples have line number information`
+      `  ${formatWeight(src.samplesWithLineInfo, weightType)} of ` +
+        `${formatWeightWithUnit(src.samplesWithFunction, weightType)} have line number information`
     );
     out.push(`  Showing: ${src.contextMode}`, '');
 
     const W_LINE = 5;
-    const W_SELF = 6;
-    const W_TOTAL = 7;
 
     out.push(
       `${'Line'.padStart(W_LINE)}  ${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Source`
@@ -1794,12 +1972,12 @@ export function formatFunctionAnnotateResult(
       prevLine = line.lineNumber;
 
       const selfStr =
-        line.selfSamples > 0
-          ? String(Math.round(line.selfSamples)).padStart(W_SELF)
+        line.selfSamples !== 0
+          ? formatWeight(line.selfSamples, weightType).padStart(W_SELF)
           : ' '.repeat(W_SELF);
       const totalStr =
-        line.totalSamples > 0
-          ? String(Math.round(line.totalSamples)).padStart(W_TOTAL)
+        line.totalSamples !== 0
+          ? formatWeight(line.totalSamples, weightType).padStart(W_TOTAL)
           : ' '.repeat(W_TOTAL);
       const srcText = line.sourceText !== null ? `  ${line.sourceText}` : '';
       out.push(
@@ -1825,20 +2003,20 @@ export function formatFunctionAnnotateResult(
 
     out.push('');
     out.push(
-      `  ${'Address'.padEnd(18)}${'Self'.padStart(6)}  ${'Total'.padStart(7)}  Instruction`
+      `  ${'Address'.padEnd(18)}${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Instruction`
     );
     out.push('  ' + '─'.repeat(70));
 
     for (const instr of asm.instructions) {
       const addrStr = `0x${instr.address.toString(16)}`.padEnd(18);
       const selfStr =
-        instr.selfSamples > 0
-          ? String(Math.round(instr.selfSamples)).padStart(6)
-          : ' '.repeat(6);
+        instr.selfSamples !== 0
+          ? formatWeight(instr.selfSamples, weightType).padStart(W_SELF)
+          : ' '.repeat(W_SELF);
       const totalStr =
-        instr.totalSamples > 0
-          ? String(Math.round(instr.totalSamples)).padStart(7)
-          : ' '.repeat(7);
+        instr.totalSamples !== 0
+          ? formatWeight(instr.totalSamples, weightType).padStart(W_TOTAL)
+          : ' '.repeat(W_TOTAL);
       out.push(`  ${addrStr}${selfStr}  ${totalStr}  ${instr.decodedString}`);
     }
   }
@@ -2045,19 +2223,18 @@ export function formatThreadPageLoadResult(
   if (result.categories.length === 0) {
     lines.push('  No sample data available during page load.');
   } else {
-    const BAR_WIDTH = 28;
     const maxCount = result.categories[0].count;
-    const maxNameLen = Math.max(...result.categories.map((c) => c.name.length));
 
-    for (const cat of result.categories) {
-      const barLen =
-        maxCount > 0 ? Math.round((cat.count / maxCount) * BAR_WIDTH) : 0;
-      const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
-      const name = cat.name.padEnd(maxNameLen);
-      const countStr = String(cat.count).padStart(6);
-      const pctStr = cat.percentage.toFixed(1).padStart(5);
-      lines.push(`  ${name}  ${bar}  ${countStr}  ${pctStr}%`);
-    }
+    lines.push(
+      ...formatBarRows(
+        result.categories.map((cat) => ({
+          label: cat.name,
+          count: cat.count,
+          percentage: cat.percentage,
+          barRatio: maxCount > 0 ? cat.count / maxCount : 0,
+        }))
+      )
+    );
   }
 
   lines.push('');
@@ -2108,7 +2285,11 @@ export function formatThreadSelectResult(
   result: WithContext<ThreadSelectResult>
 ): string {
   const count = result.threadNames.length;
-  const names = result.threadNames.join(', ');
+  // Only the context carries process names, so fall back if it disagrees.
+  const names =
+    result.context.selectedThreads.length === count
+      ? result.context.selectedThreads.map(formatThreadAndProcess).join('; ')
+      : result.threadNames.join(', ');
   if (count === 1) {
     return `Selected thread: ${result.threadHandle} (${names})`;
   }
@@ -2184,4 +2365,16 @@ export function formatApplySourceMapResult(
     default:
       throw assertExhaustiveCheck(result);
   }
+}
+
+/**
+ * Format a StrategySelectResult as plain text.
+ */
+export function formatStrategySelectResult(
+  result: WithContext<StrategySelectResult>
+): string {
+  return (
+    `Data source: ${result.strategy}\n` +
+    `Available in ${result.threadHandle}: ${result.availableStrategies.join(', ')}`
+  );
 }

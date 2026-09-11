@@ -32,6 +32,7 @@ import {
   getSelectedThreadIndexes,
   getTransformStack,
   getCurrentSearchString,
+  getLastSelectedCallTreeSummaryStrategy,
   getProfileSpecificState,
   getSymbolServerUrl,
 } from 'firefox-profiler/selectors/url-state';
@@ -40,12 +41,14 @@ import {
   popCommittedRanges,
   changeSelectedThreads,
   changeCallTreeSearchString,
+  changeCallTreeSummaryStrategy,
   changeIncludeIdleSamples,
   popTransformsFromStackForThreads,
 } from '../actions/profile-view';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { TimestampManager } from './timestamps';
 import { ThreadMap } from './thread-map';
+import { getFriendlyProcessName } from './process-thread-list';
 import { parseFunctionHandle } from './function-map';
 import { getSourceHandle, parseSourceHandle } from './source-handle';
 import {
@@ -73,6 +76,7 @@ import {
   collectThreadSamplesBottomUp,
   collectThreadFunctions,
 } from './formatters/thread-info';
+import { collectFunctionCategoryBreakdowns } from './formatters/category-breakdown';
 import {
   collectThreadMarkers,
   collectThreadNetwork,
@@ -88,6 +92,7 @@ import {
 import { parseTimeValue } from './time-range-parser';
 import { describeTransformGroup, pushSpecTransforms } from './filter-stack';
 import { functionAnnotate as computeFunctionAnnotate } from './function-annotate';
+import { withCallTreeSummaryStrategy } from './call-tree-strategy';
 import type {
   IndexIntoSourceTable,
   StartEndRange,
@@ -97,6 +102,7 @@ import type {
 import type {
   StatusResult,
   SessionContext,
+  ContextThreadInfo,
   WithContext,
   FunctionExpandResult,
   FunctionInfoResult,
@@ -104,6 +110,8 @@ import type {
   AnnotateMode,
   ViewRangeResult,
   ThreadSelectResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
   ThreadInfoResult,
   MarkerStackResult,
   MarkerInfoResult,
@@ -290,20 +298,25 @@ export class ProfileQuerier {
       this._markerMap,
       threadHandle
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   async threadSamples(
     threadHandle?: string,
     includeIdle: boolean = false,
     search?: string,
-    sampleFilters?: SampleFilterSpec[]
+    sampleFilters?: SampleFilterSpec[],
+    strategy?: CallTreeSummaryStrategy
   ): Promise<WithContext<ThreadSamplesResult>> {
     return this._runWithSampleFilters(
       threadHandle,
       includeIdle,
       search,
       sampleFilters,
+      strategy,
       () => collectThreadSamples(this._store, this._threadMap, threadHandle)
     );
   }
@@ -313,13 +326,15 @@ export class ProfileQuerier {
     callTreeOptions?: CallTreeCollectionOptions,
     includeIdle: boolean = false,
     search?: string,
-    sampleFilters?: SampleFilterSpec[]
+    sampleFilters?: SampleFilterSpec[],
+    strategy?: CallTreeSummaryStrategy
   ): Promise<WithContext<ThreadSamplesTopDownResult>> {
     return this._runWithSampleFilters(
       threadHandle,
       includeIdle,
       search,
       sampleFilters,
+      strategy,
       () =>
         collectThreadSamplesTopDown(
           this._store,
@@ -335,13 +350,15 @@ export class ProfileQuerier {
     callTreeOptions?: CallTreeCollectionOptions,
     includeIdle: boolean = false,
     search?: string,
-    sampleFilters?: SampleFilterSpec[]
+    sampleFilters?: SampleFilterSpec[],
+    strategy?: CallTreeSummaryStrategy
   ): Promise<WithContext<ThreadSamplesBottomUpResult>> {
     return this._runWithSampleFilters(
       threadHandle,
       includeIdle,
       search,
       sampleFilters,
+      strategy,
       () =>
         collectThreadSamplesBottomUp(
           this._store,
@@ -597,6 +614,28 @@ export class ProfileQuerier {
       type: 'thread-select',
       threadHandle,
       threadNames,
+      context: this._getContext(),
+    };
+  }
+
+  /**
+   * Set the session's call tree summary strategy, i.e. which data source
+   * later commands summarize.
+   */
+  async strategySelect(
+    strategy: CallTreeSummaryStrategy
+  ): Promise<WithContext<StrategySelectResult>> {
+    const threadIndexes = getSelectedThreadIndexes(this._store.getState());
+    this._assertStrategyAvailable(threadIndexes, strategy);
+    this._store.dispatch(changeCallTreeSummaryStrategy(strategy));
+
+    return {
+      type: 'strategy-select',
+      threadHandle: this._threadMap.handleForThreadIndexes(threadIndexes),
+      strategy,
+      availableStrategies: getThreadSelectors(
+        threadIndexes
+      ).getAvailableCallTreeSummaryStrategies(this._store.getState()),
       context: this._getContext(),
     };
   }
@@ -896,7 +935,7 @@ export class ProfileQuerier {
   }
 
   /**
-   * Resolve thread indexes, apply idle/search/ephemeral-filter wrappers, collect,
+   * Resolve thread indexes, apply strategy/idle/search/ephemeral-filter wrappers, collect,
    * and attach common metadata. Shared by threadSamples, threadSamplesTopDown,
    * and threadSamplesBottomUp.
    */
@@ -905,6 +944,7 @@ export class ProfileQuerier {
     includeIdle: boolean,
     search: string | undefined,
     sampleFilters: SampleFilterSpec[] | undefined,
+    strategy: CallTreeSummaryStrategy | undefined,
     collect: () => T
   ): WithContext<
     T & {
@@ -925,10 +965,16 @@ export class ProfileQuerier {
     const withSearch = search
       ? () => this._withCallTreeSearch(search, withIdle)
       : withIdle;
-    const result =
+    const withFilters =
       sampleFilters && sampleFilters.length > 0
-        ? this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
-        : withSearch();
+        ? () =>
+            this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
+        : withSearch;
+    const result = this._withValidatedStrategy(
+      threadIndexes,
+      strategy,
+      withFilters
+    );
     const activeFilters = this._collectFilterEntries(
       getThreadsKey(threadIndexes)
     );
@@ -939,7 +985,7 @@ export class ProfileQuerier {
       activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
       ephemeralFilters:
         sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
-      context: this._getContext(),
+      context: this._getContext(strategy, threadIndexes),
     };
   }
 
@@ -1005,23 +1051,62 @@ export class ProfileQuerier {
     }
   }
 
-  private _buildBaseStatus(state: ReturnType<Store['getState']>) {
+  /**
+   * The per-thread `getCallTreeSummaryStrategy` selector silently falls back to
+   * timing, which would make timing output look like allocation output.
+   */
+  private _withValidatedStrategy<T>(
+    threadIndexes: Set<ThreadIndex>,
+    strategy: CallTreeSummaryStrategy | undefined,
+    fn: () => T
+  ): T {
+    if (strategy !== undefined) {
+      this._assertStrategyAvailable(threadIndexes, strategy);
+    }
+    return withCallTreeSummaryStrategy(this._store, strategy, fn);
+  }
+
+  private _assertStrategyAvailable(
+    threadIndexes: Set<ThreadIndex>,
+    strategy: CallTreeSummaryStrategy
+  ): void {
+    const available = getThreadSelectors(
+      threadIndexes
+    ).getAvailableCallTreeSummaryStrategies(this._store.getState());
+    if (!available.includes(strategy)) {
+      const handle = this._threadMap.handleForThreadIndexes(threadIndexes);
+      throw new Error(
+        `Strategy '${strategy}' has no data in ${handle}. Available: ${available.join(', ') || 'none'}`
+      );
+    }
+  }
+
+  /** Describe a set of threads for a context header: handle plus per-thread names. */
+  private _describeThreads(
+    state: ReturnType<Store['getState']>,
+    threadIndexes: Set<ThreadIndex>
+  ): { handle: string | null; threads: ContextThreadInfo[] } {
     const profile = getProfile(state);
+    const handle =
+      threadIndexes.size > 0
+        ? this._threadMap.handleForThreadIndexes(threadIndexes)
+        : null;
+    const threads = Array.from(threadIndexes).map((threadIndex) => ({
+      threadIndex,
+      name: profile.threads[threadIndex].name,
+      processName: getFriendlyProcessName(
+        profile.threads,
+        profile.threads[threadIndex]
+      ),
+    }));
+    return { handle, threads };
+  }
+
+  private _buildBaseStatus(state: ReturnType<Store['getState']>) {
     const rootRange = getProfileRootRange(state);
     const committedRanges = getAllCommittedRanges(state);
-    const selectedThreadIndexes = getSelectedThreadIndexes(state);
-
-    const selectedThreadHandle =
-      selectedThreadIndexes.size > 0
-        ? this._threadMap.handleForThreadIndexes(selectedThreadIndexes)
-        : null;
-
-    const selectedThreads = Array.from(selectedThreadIndexes).map(
-      (threadIndex) => ({
-        threadIndex,
-        name: profile.threads[threadIndex].name,
-      })
-    );
+    const { handle: selectedThreadHandle, threads: selectedThreads } =
+      this._describeThreads(state, getSelectedThreadIndexes(state));
 
     const zeroAt = rootRange.start;
     const viewRanges = committedRanges.map((range) => {
@@ -1047,19 +1132,63 @@ export class ProfileQuerier {
    * Get current session context for display in command outputs.
    * This is a lightweight version of getStatus() that includes only
    * the current view range (not the full stack).
+   *
+   * Commands given a one-shot --strategy pass it as `effectiveStrategy`: the
+   * store has already been restored to the session value by then.
    */
-  private _getContext(): SessionContext {
+  private _getContext(
+    effectiveStrategy?: CallTreeSummaryStrategy,
+    resultThreadIndexes?: Set<ThreadIndex>
+  ): SessionContext {
     const state = this._store.getState();
     const { selectedThreadHandle, selectedThreads, viewRanges, rootRange } =
       this._buildBaseStatus(state);
     const currentViewRange =
       viewRanges.length > 0 ? viewRanges[viewRanges.length - 1] : null;
+
+    // The result-scoped fields only exist to record a divergence, so leave them
+    // empty when the command ran against the selection after all.
+    let resultThreadHandle: string | null = null;
+    let resultThreads: ContextThreadInfo[] = [];
+    if (resultThreadIndexes !== undefined) {
+      const described = this._describeThreads(state, resultThreadIndexes);
+      if (described.handle !== selectedThreadHandle) {
+        resultThreadHandle = described.handle;
+        resultThreads = described.threads;
+      }
+    }
+
     return {
       selectedThreadHandle,
       selectedThreads,
+      resultThreadHandle,
+      resultThreads,
       currentViewRange,
       rootRange,
+      callTreeSummaryStrategy:
+        effectiveStrategy ?? this._getEffectiveStrategy(state),
     };
+  }
+
+  private _getEffectiveStrategy(
+    state: ReturnType<Store['getState']>
+  ): CallTreeSummaryStrategy {
+    const threadIndexes = getSelectedThreadIndexes(state);
+    if (threadIndexes.size === 0) {
+      return getLastSelectedCallTreeSummaryStrategy(state);
+    }
+    return getThreadSelectors(threadIndexes).getCallTreeSummaryStrategy(state);
+  }
+
+  private _getContextForThreadHandle(
+    threadHandle: string | undefined
+  ): SessionContext {
+    return this._getContext(
+      undefined,
+      threadHandle !== undefined
+        ? this._threadMap.threadIndexesForHandle(threadHandle)
+        : undefined
+    );
   }
 
   /**
@@ -1094,6 +1223,7 @@ export class ProfileQuerier {
       viewRanges,
       rootRange,
       filterStacks,
+      callTreeSummaryStrategy: this._getEffectiveStrategy(state),
     };
   }
 
@@ -1180,6 +1310,12 @@ export class ProfileQuerier {
       relevantForJS,
       resource,
       library,
+      categoryBreakdown: collectFunctionCategoryBreakdowns(
+        this._store,
+        this._threadMap,
+        getSelectedThreadIndexes(state),
+        funcIndex
+      ),
       context: this._getContext(),
     };
   }
@@ -1198,7 +1334,10 @@ export class ProfileQuerier {
       threadHandle,
       filterOptions
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   /**
@@ -1221,7 +1360,10 @@ export class ProfileQuerier {
       threadHandle,
       filterOptions
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   /**
@@ -1239,7 +1381,10 @@ export class ProfileQuerier {
       threadHandle,
       options
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(threadHandle),
+    };
   }
 
   /**
@@ -1260,18 +1405,22 @@ export class ProfileQuerier {
       this._threadMap,
       filterOptions
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(filterOptions.thread),
+    };
   }
 
   /**
-   * List all functions for a thread with their CPU percentages.
-   * Supports filtering by search string, minimum self time, and limit.
+   * List all functions for a thread with their weight percentages.
+   * Supports filtering by search string, minimum self weight, and limit.
    */
   async threadFunctions(
     threadHandle?: string,
     filterOptions?: FunctionFilterOptions,
     includeIdle: boolean = false,
-    sampleFilters?: SampleFilterSpec[]
+    sampleFilters?: SampleFilterSpec[],
+    strategy?: CallTreeSummaryStrategy
   ): Promise<WithContext<ThreadFunctionsResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes =
@@ -1288,10 +1437,16 @@ export class ProfileQuerier {
     const withIdle = includeIdle
       ? () => this._withIncludedIdle(collect)
       : collect;
-    const result =
+    const withFilters =
       sampleFilters && sampleFilters.length > 0
-        ? this._withEphemeralFilters(threadIndexes, sampleFilters, withIdle)
-        : withIdle();
+        ? () =>
+            this._withEphemeralFilters(threadIndexes, sampleFilters, withIdle)
+        : withIdle;
+    const result = this._withValidatedStrategy(
+      threadIndexes,
+      strategy,
+      withFilters
+    );
     const activeFilters = this._collectFilterEntries(
       getThreadsKey(threadIndexes)
     );
@@ -1301,7 +1456,7 @@ export class ProfileQuerier {
       activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
       ephemeralFilters:
         sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
-      context: this._getContext(),
+      context: this._getContext(strategy, threadIndexes),
     };
   }
 
@@ -1317,7 +1472,10 @@ export class ProfileQuerier {
       this._threadMap,
       markerHandle
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(result.threadHandle),
+    };
   }
 
   async markerStack(
@@ -1329,11 +1487,14 @@ export class ProfileQuerier {
       this._threadMap,
       markerHandle
     );
-    return { ...result, context: this._getContext() };
+    return {
+      ...result,
+      context: this._getContextForThreadHandle(result.threadHandle),
+    };
   }
 
   /**
-   * Annotate a function with per-line source or per-instruction assembly timing data.
+   * Annotate a function with per-line source or per-instruction assembly weights.
    *
    * If `symbolServerUrl` is omitted, falls back to the symbol server resolved
    * from the loaded profile's URL state (the ?symbolServer= query parameter,
@@ -1343,10 +1504,17 @@ export class ProfileQuerier {
     functionHandle: string,
     mode: AnnotateMode,
     symbolServerUrl: string | undefined,
-    contextOption: string = '2'
+    contextOption: string = '2',
+    strategy?: CallTreeSummaryStrategy
   ): Promise<WithContext<FunctionAnnotateResult>> {
     const resolvedSymbolServerUrl =
       symbolServerUrl ?? getSymbolServerUrl(this._store.getState());
+    if (strategy !== undefined) {
+      this._assertStrategyAvailable(
+        getSelectedThreadIndexes(this._store.getState()),
+        strategy
+      );
+    }
     const result = await computeFunctionAnnotate(
       this._store,
       this._threadMap,
@@ -1354,8 +1522,9 @@ export class ProfileQuerier {
       functionHandle,
       mode,
       resolvedSymbolServerUrl,
-      contextOption
+      contextOption,
+      strategy
     );
-    return { ...result, context: this._getContext() };
+    return { ...result, context: this._getContext(strategy) };
   }
 }

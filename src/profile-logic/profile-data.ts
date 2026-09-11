@@ -1186,6 +1186,39 @@ export type TimingsForPath = {
 };
 
 /**
+ * This is a small utility function to more easily add data to breakdowns.
+ */
+function accumulateSampleToTimings(
+  timings: {
+    breakdownByCategory: BreakdownByCategory | null;
+    value: number;
+  },
+  categories: CategoryList,
+  { sampleCategories, sampleSubcategories }: SampleCategoriesAndSubcategories,
+  sampleIndex: IndexIntoSamplesTable,
+  duration: Milliseconds
+): void {
+  // Step 1: increment the total value
+  timings.value += duration;
+
+  // step 2: find the category value for this stack.
+  const categoryIndex = sampleCategories[sampleIndex];
+  const subcategoryIndex = sampleSubcategories[sampleIndex];
+
+  // step 3: increment the right value in the category breakdown
+  if (timings.breakdownByCategory === null) {
+    timings.breakdownByCategory = categories.map((category) => ({
+      entireCategoryValue: 0,
+      subcategoryBreakdown: Array(category.subcategories.length).fill(0),
+    }));
+  }
+  timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
+  timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
+    subcategoryIndex
+  ] += duration;
+}
+
+/**
  * This function is the same as getTimingsForCallNodeIndex, but accepts a CallNodePath
  * instead of an IndexIntoCallNodeTable.
  */
@@ -1208,10 +1241,6 @@ export function getTimingsForPath(
 /**
  * This function returns the timings for a specific call node. The algorithm is
  * adjusted when the call tree is inverted.
- * Note that the unfilteredThread should be the original thread before any filtering
- * (by range or other) happens. Also sampleIndexOffset needs to be properly
- * specified and is the offset to be applied on thread's indexes to access
- * the same samples in unfilteredThread.
  */
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
@@ -1221,9 +1250,6 @@ export function getTimingsForCallNodeIndex(
   sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
 ): TimingsForPath {
   /* ------------ Variables definitions ------------*/
-
-  const { sampleCategories, sampleSubcategories } =
-    sampleCategoriesAndSubcategories;
 
   // This object holds the timings for the current call node path, specified by
   // needleNodeIndex.
@@ -1248,36 +1274,21 @@ export function getTimingsForCallNodeIndex(
    * We define functions here so that they have easy access to the variables and
    * the algorithm's parameters. */
 
-  /**
-   * This is a small utility function to more easily add data to breakdowns.
-   */
-  function accumulateDataToTimings(
+  const accumulateDataToTimings = (
     timings: {
       breakdownByCategory: BreakdownByCategory | null;
       value: number;
     },
     sampleIndex: IndexIntoSamplesTable,
     duration: Milliseconds
-  ): void {
-    // Step 1: increment the total value
-    timings.value += duration;
-
-    // step 2: find the category value for this stack.
-    const categoryIndex = sampleCategories[sampleIndex];
-    const subcategoryIndex = sampleSubcategories[sampleIndex];
-
-    // step 3: increment the right value in the category breakdown
-    if (timings.breakdownByCategory === null) {
-      timings.breakdownByCategory = categories.map((category) => ({
-        entireCategoryValue: 0,
-        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-      }));
-    }
-    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
-    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-      subcategoryIndex
-    ] += duration;
-  }
+  ): void =>
+    accumulateSampleToTimings(
+      timings,
+      categories,
+      sampleCategoriesAndSubcategories,
+      sampleIndex,
+      duration
+    );
   /* ------------- End of function definitions ------------- */
 
   /* ------------ Start of the algorithm itself ------------ */
@@ -1363,6 +1374,114 @@ export function getTimingsForCallNodeIndex(
   }
 
   return { forPath: pathTimings, rootTime };
+}
+
+/**
+ * Compute the total and the category breakdown over an entire set of samples,
+ * which no single call node covers when the call tree has multiple roots.
+ */
+export function getTimingsForAllSamples(
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
+): { value: Milliseconds; breakdownByCategory: BreakdownByCategory | null } {
+  const timings: {
+    value: Milliseconds;
+    breakdownByCategory: BreakdownByCategory | null;
+  } = { value: 0, breakdownByCategory: null };
+
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    if (samples.stack[sampleIndex] === null) {
+      continue;
+    }
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    accumulateSampleToTimings(
+      timings,
+      categories,
+      sampleCategoriesAndSubcategories,
+      sampleIndex,
+      weight
+    );
+  }
+
+  return timings;
+}
+
+export type TimingsForFunc = {
+  forFunc: ItemTimings;
+  rootTime: Milliseconds; // time for all the samples in the current tree
+};
+
+/**
+ * Compute the self and running timings, with their category breakdowns, for a
+ * function across all the call paths it appears in.
+ *
+ * A sample counts once towards the running time even if the function recurses
+ * in its stack, which matches how the function list computes its totals.
+ *
+ * `callNodeInfo` must be the non-inverted one.
+ */
+export function getTimingsForFuncIndex(
+  needleFuncIndex: IndexIntoFuncTable,
+  callNodeInfo: CallNodeInfo,
+  categories: CategoryList,
+  samples: SamplesLikeTable,
+  sampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories
+): TimingsForFunc {
+  const funcTimings: ItemTimings = {
+    selfTime: { value: 0, breakdownByCategory: null },
+    totalTime: { value: 0, breakdownByCategory: null },
+  };
+  let rootTime = 0;
+
+  const callNodeTable = callNodeInfo.getCallNodeTable();
+  const stackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+
+  // Whether the needle function is on the path from the root to each call node,
+  // inclusive. The call node table is ordered so that a node's prefix always
+  // has a smaller index, so a single forward pass is enough.
+  const funcIsOnPath = makeBitSet(callNodeTable.length);
+  for (let nodeIndex = 0; nodeIndex < callNodeTable.length; nodeIndex++) {
+    const prefix = callNodeTable.prefix[nodeIndex];
+    if (
+      callNodeTable.func[nodeIndex] === needleFuncIndex ||
+      (prefix !== -1 && checkBit(funcIsOnPath, prefix))
+    ) {
+      setBit(funcIsOnPath, nodeIndex);
+    }
+  }
+
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const thisStackIndex = samples.stack[sampleIndex];
+    if (thisStackIndex === null) {
+      continue;
+    }
+    const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
+    const weight = samples.weight ? samples.weight[sampleIndex] : 1;
+    rootTime += Math.abs(weight);
+
+    if (callNodeTable.func[thisNodeIndex] === needleFuncIndex) {
+      accumulateSampleToTimings(
+        funcTimings.selfTime,
+        categories,
+        sampleCategoriesAndSubcategories,
+        sampleIndex,
+        weight
+      );
+    }
+    if (checkBit(funcIsOnPath, thisNodeIndex)) {
+      accumulateSampleToTimings(
+        funcTimings.totalTime,
+        categories,
+        sampleCategoriesAndSubcategories,
+        sampleIndex,
+        weight
+      );
+    }
+  }
+
+  return { forFunc: funcTimings, rootTime };
 }
 
 /**
@@ -1599,6 +1718,18 @@ export function toValidImplementationFilter(
       return 'combined';
   }
 }
+
+/**
+ * The order here is the order of the data source dropdown.
+ */
+export const CALL_TREE_SUMMARY_STRATEGIES: CallTreeSummaryStrategy[] = [
+  'timing',
+  'js-allocations',
+  'native-retained-allocations',
+  'native-allocations',
+  'native-deallocations-memory',
+  'native-deallocations-sites',
+];
 
 export function toValidCallTreeSummaryStrategy(
   strategy: string | undefined
@@ -3308,6 +3439,31 @@ export function getSampleIndexClosestToCenteredTime(
   return distanceToPrevious <= maxTimeDistance ? index - 1 : null;
 }
 
+/**
+ * The friendly label for a bare process type, for processes whose back end did
+ * not supply a `processName`. Returns null for a type we have no name for.
+ */
+export function getProcessTypeLabel(
+  processType: string | undefined
+): string | null {
+  switch (processType) {
+    case 'default':
+      return 'Parent Process';
+    case 'gpu':
+      return 'GPU Process';
+    case 'rdd':
+      return 'Remote Data Decoder';
+    case 'tab':
+      return 'Content Process';
+    case 'plugin':
+      return 'Plugin Process';
+    case 'socket':
+      return 'Socket Process';
+    default:
+      return null;
+  }
+}
+
 export function getFriendlyThreadName(
   threads: RawThread[],
   thread: RawThread
@@ -3332,33 +3488,12 @@ export function getFriendlyThreadName(
           return thread.name === 'GeckoMain' && thread.processName === label;
         });
       } else {
-        switch (thread.processType) {
-          case 'default':
-            label = 'Parent Process';
-            break;
-          case 'gpu':
-            label = 'GPU Process';
-            break;
-          case 'rdd':
-            label = 'Remote Data Decoder';
-            break;
-          case 'tab': {
-            label = 'Content Process';
-            homonymThreads = threads.filter((thread) => {
-              return (
-                thread.name === 'GeckoMain' && thread.processType === 'tab'
-              );
-            });
-            break;
-          }
-          case 'plugin':
-            label = 'Plugin Process';
-            break;
-          case 'socket':
-            label = 'Socket Process';
-            break;
-          default:
-          // should we throw here ?
+        // should we throw here if the process type is unknown?
+        label = getProcessTypeLabel(thread.processType) ?? undefined;
+        if (thread.processType === 'tab') {
+          homonymThreads = threads.filter((thread) => {
+            return thread.name === 'GeckoMain' && thread.processType === 'tab';
+          });
         }
       }
       break;

@@ -9,11 +9,15 @@
 
 import type {
   Transform,
+  CallTreeSummaryStrategy,
   CounterGraphType,
   CounterTooltipDataSource,
   NetworkStatus,
   SampleUnits,
+  WeightType,
 } from 'firefox-profiler/types';
+
+export type { CallTreeSummaryStrategy, WeightType };
 
 // ===== Utility types =====
 
@@ -110,12 +114,28 @@ export type FilterStackResult = {
 // ===== Session Context =====
 // Context information included in all command results for persistent display
 
+/** A thread as named in the context header: its own name and its process'. */
+export type ContextThreadInfo = {
+  threadIndex: number;
+  name: string;
+  /** Name of the process owning the thread, e.g. "WebExtensions". */
+  processName: string;
+};
+
 export type SessionContext = {
-  selectedThreadHandle: string | null; // Combined handle like "t-0" or "t-0,t-1,t-2"
-  selectedThreads: Array<{
-    threadIndex: number;
-    name: string;
-  }>;
+  /**
+   * The sticky session selection, as set by `thread select`. Combined handle
+   * like "t-0" or "t-0,t-1,t-2". Unaffected by a command's `--thread`.
+   */
+  selectedThreadHandle: string | null;
+  selectedThreads: ContextThreadInfo[];
+  /**
+   * The thread this particular result is about, when it is not the selected
+   * one: a `--thread`-scoped command, or a marker looked up in another thread.
+   * Null when the result is about the selection.
+   */
+  resultThreadHandle: string | null;
+  resultThreads: ContextThreadInfo[];
   currentViewRange: {
     start: number;
     startName: string;
@@ -127,6 +147,7 @@ export type SessionContext = {
     start: number;
     end: number;
   };
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 };
 
 /**
@@ -139,10 +160,7 @@ export type WithContext<T> = T & { context: SessionContext };
 export type StatusResult = {
   type: 'status';
   selectedThreadHandle: string | null; // Combined handle like "t-0" or "t-0,t-1,t-2"
-  selectedThreads: Array<{
-    threadIndex: number;
-    name: string;
-  }>;
+  selectedThreads: ContextThreadInfo[];
   viewRanges: Array<{
     start: number;
     startName: string;
@@ -159,6 +177,43 @@ export type StatusResult = {
     threadHandle: string;
     filters: FilterEntry[];
   }>;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+};
+
+// ===== Category Breakdown =====
+
+export type CategorySubBreakdownEntry = {
+  name: string;
+  subcategoryIndex: number;
+  samples: number;
+  percentage: number; // Of the breakdown's totalSamples, like the parent category row
+};
+
+export type CategoryBreakdownEntry = {
+  name: string;
+  categoryIndex: number;
+  samples: number;
+  percentage: number;
+  subcategories: CategorySubBreakdownEntry[]; // Empty unless the category has more than one
+};
+
+/** Categories sorted descending, with the empty ones removed. */
+export type CategoryBreakdown = {
+  totalSamples: number; // Sum of the absolute category values, i.e. the percentage denominator
+  categories: CategoryBreakdownEntry[];
+};
+
+export type FunctionCategoryBreakdown = CategoryBreakdown & {
+  samples: number; // Signed, and unlike totalSamples only counts this function
+  percentageOfThread: number;
+};
+
+export type FunctionCategoryBreakdowns = {
+  threadHandle: string;
+  friendlyThreadName: string;
+  threadSamples: number;
+  running: FunctionCategoryBreakdown;
+  self: FunctionCategoryBreakdown;
 };
 
 // ===== Function Commands =====
@@ -196,6 +251,7 @@ export type FunctionInfoResult = {
     debugPath?: string;
     breakpadId?: string;
   };
+  categoryBreakdown: FunctionCategoryBreakdowns;
 };
 
 // ===== Function Annotate =====
@@ -256,6 +312,8 @@ export type FunctionAnnotateResult = {
   friendlyThreadName: string;
   totalSelfSamples: number;
   totalTotalSamples: number;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   mode: AnnotateMode;
   srcAnnotation: FunctionSourceAnnotation | null;
   asmAnnotations: FunctionAsmAnnotation[];
@@ -295,6 +353,13 @@ export type ThreadSelectResult = {
   threadNames: string[];
 };
 
+export type StrategySelectResult = {
+  type: 'strategy-select';
+  threadHandle: string;
+  strategy: CallTreeSummaryStrategy;
+  availableStrategies: CallTreeSummaryStrategy[];
+};
+
 export type ThreadInfoResult = {
   type: 'thread-info';
   threadHandle: string;
@@ -318,6 +383,7 @@ export type ThreadInfoResult = {
     depthLevel: number;
   }> | null;
   networkActivity: ThreadNetworkSummary | null;
+  availableStrategies: CallTreeSummaryStrategy[];
 };
 
 export type TopFunctionInfo = FunctionDisplayInfo & {
@@ -337,6 +403,9 @@ export type ThreadSamplesResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  categoryBreakdown: CategoryBreakdown;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {
@@ -371,6 +440,8 @@ export type ThreadSamplesTopDownResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   regularCallTree: CallTreeNode;
 };
 
@@ -382,6 +453,8 @@ export type ThreadSamplesBottomUpResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   invertedCallTree: CallTreeNode | null;
 };
 
@@ -654,6 +727,8 @@ export type ThreadFunctionsResult = {
   activeOnly?: boolean;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   totalFunctionCount: number;
   filteredFunctionCount: number;
   filters?: {
