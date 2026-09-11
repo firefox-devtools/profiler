@@ -132,6 +132,17 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  it('does not display empty strings in labels', function () {
+    expect(
+      applyLabel({
+        label: 'Value: "{marker.data.value}"',
+        schemaFields: [{ key: 'value', label: 'Value', format: 'string' }],
+        payload: { value: '' },
+      })
+    ).toEqual('Value: ""');
+    expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
   it('can look up various parts of the marker', function () {
     const text = applyLabel({
       label: [
@@ -297,6 +308,7 @@ describe('marker schema formatting', function () {
       ['file-path', null],
       ['file-path', undefined],
       ['sanitized-string', 'domain.name'],
+      ['string', ''],
       ['duration', 0],
       ['duration', 10],
       ['duration', 12.3456789],
@@ -392,6 +404,7 @@ describe('marker schema formatting', function () {
         "file-path - (empty)",
         "file-path - (empty)",
         "sanitized-string - domain.name",
+        "string - (empty)",
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
