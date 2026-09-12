@@ -21,6 +21,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   MarkerSchemaField,
+  MarkerSchemaPIICategory,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -29,12 +30,61 @@ import type {
 } from 'firefox-profiler/types';
 import type { StringTable } from '../utils/string-table';
 
+// Profiles recorded by Gecko versions without PII annotations use these defaults.
+const markerSchemaPIICategoriesBySchemaName = new Map<
+  string,
+  Map<string, MarkerSchemaPIICategory[]>
+>([
+  [
+    'Network',
+    new Map([
+      ['URI', ['url']],
+      ['RedirectURI', ['url']],
+      ['isPrivateBrowsing', ['private-browsing']],
+    ]),
+  ],
+  ['Text', new Map([['name', ['url', 'extension-id']]])],
+  ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
+]);
+
+export function addPIICategoriesToMarkerSchema(
+  markerSchema: MarkerSchema
+): MarkerSchema {
+  const piiCategoriesByField = markerSchemaPIICategoriesBySchemaName.get(
+    markerSchema.name
+  );
+  if (!piiCategoriesByField) {
+    return markerSchema;
+  }
+
+  const fields = markerSchema.fields.map((field) => {
+    const containsPII = piiCategoriesByField.get(field.key);
+    return containsPII && !field.containsPII
+      ? { ...field, containsPII }
+      : field;
+  });
+  const existingFieldKeys = new Set(fields.map(({ key }) => key));
+  for (const [key, containsPII] of piiCategoriesByField) {
+    if (!existingFieldKeys.has(key)) {
+      fields.push({ key, format: 'string', hidden: true, containsPII });
+    }
+  }
+
+  return { ...markerSchema, fields };
+}
+
+export function addPIICategoriesToMarkerSchemas(
+  markerSchemas: MarkerSchema[]
+): MarkerSchema[] {
+  return markerSchemas.map(addPIICategoriesToMarkerSchema);
+}
+
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
  * we may want to define schemas that are front-end only. This is the location
  * to do that. The schema will get merged in with the Gecko schema.
  */
-export const markerSchemaFrontEndOnly: MarkerSchema[] = [
+const markerSchemaFrontEndOnlyWithoutPII: MarkerSchema[] = [
   {
     name: 'Jank',
     display: ['marker-table', 'marker-chart'],
@@ -98,6 +148,10 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     ],
   },
 ];
+
+export const markerSchemaFrontEndOnly = addPIICategoriesToMarkerSchemas(
+  markerSchemaFrontEndOnlyWithoutPII
+);
 
 /**
  * This function takes the intended marker schema for a marker field, and applies

@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 72
+
+Marker schema fields can now include a `containsPII` array describing the categories of privacy-sensitive data they contain. Profile sanitization uses these categories instead of identifying privacy-sensitive fields from the marker type.
+
 ### Version 71
 
 The frame table (`profile.shared.frameTable`) representation changed in such a way that all its columns can now be typed arrays when using [JsonSlabs](https://github.com/mstange/json-slabs/) profiles.

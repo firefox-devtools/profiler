@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -7631,6 +7631,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -7664,6 +7667,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -7812,7 +7819,32 @@ Object {
           "marker-table",
           "timeline-network",
         ],
-        "fields": Array [],
+        "fields": Array [
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "URI",
+          },
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "RedirectURI",
+          },
+          Object {
+            "containsPII": Array [
+              "private-browsing",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "isPrivateBrowsing",
+          },
+        ],
         "name": "Network",
       },
       Object {
@@ -7834,7 +7866,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9026,6 +9058,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -9059,6 +9094,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -9207,7 +9246,32 @@ Object {
           "marker-table",
           "timeline-network",
         ],
-        "fields": Array [],
+        "fields": Array [
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "URI",
+          },
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "RedirectURI",
+          },
+          Object {
+            "containsPII": Array [
+              "private-browsing",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "isPrivateBrowsing",
+          },
+        ],
         "name": "Network",
       },
       Object {
@@ -9229,7 +9293,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10591,6 +10655,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -10624,6 +10691,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -10772,7 +10843,32 @@ Object {
           "marker-table",
           "timeline-network",
         ],
-        "fields": Array [],
+        "fields": Array [
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "URI",
+          },
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "RedirectURI",
+          },
+          Object {
+            "containsPII": Array [
+              "private-browsing",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "isPrivateBrowsing",
+          },
+        ],
         "name": "Network",
       },
       Object {
@@ -10794,7 +10890,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 72,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
