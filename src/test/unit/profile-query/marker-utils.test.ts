@@ -26,7 +26,7 @@ import type {
 import { storeWithProfile } from '../../fixtures/stores';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { getRawMarkerTableBuilderFromExisting } from 'firefox-profiler/profile-logic/data-structures';
-import { INTERVAL } from 'firefox-profiler/app-logic/constants';
+import { INSTANT, INTERVAL } from 'firefox-profiler/app-logic/constants';
 
 import type { Marker } from 'firefox-profiler/types';
 
@@ -726,6 +726,266 @@ describe('collectThreadMarkers list option', function () {
 
     expect(result.flatMarkers).toHaveLength(1);
     expect(result.flatMarkers![0].name).toBe('DOMEvent');
+  });
+
+  it('includes schema fields and raw payload data per marker', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      [
+        'DOMEvent',
+        0,
+        10,
+        {
+          type: 'DOMEvent',
+          eventType: 'keydown',
+          latency: 5,
+          innerWindowID: 1234,
+        },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.markerType).toBe('DOMEvent');
+
+    // `fields` carries both the raw value (comparable/matchable) and the
+    // schema-formatted rendering, exactly like `marker info --json`.
+    const eventType = m.fields!.find((f) => f.key === 'eventType');
+    expect(eventType).toEqual({
+      key: 'eventType',
+      label: expect.any(String),
+      value: 'keydown',
+      formattedValue: 'keydown',
+    });
+    const latency = m.fields!.find((f) => f.key === 'latency');
+    expect(latency!.value).toBe(5);
+    expect(typeof latency!.formattedValue).toBe('string');
+
+    // `data` is the raw payload, and `innerWindowID` is surfaced at the top
+    // level because it correlates a marker to a specific document load.
+    expect(m.data).toMatchObject({
+      eventType: 'keydown',
+      latency: 5,
+      innerWindowID: 1234,
+    });
+    expect(m.innerWindowID).toBe(1234);
+    // `type` is reported as `markerType` instead.
+    expect(m.data).not.toHaveProperty('type');
+  });
+
+  it('reports the same field values as marker info for the same marker', function () {
+    const { store, threadMap, markerMap, registerMarker } = setupWithMarkers([
+      ['DOMEvent', 0, 10, { type: 'DOMEvent', eventType: 'click', latency: 3 }],
+    ]);
+    const handle = registerMarker(0);
+
+    const listed = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+    const info = collectMarkerInfo(store, markerMap, threadMap, handle);
+
+    expect(listed.flatMarkers![0].fields).toEqual(info.fields);
+  });
+
+  it('omits `cause` from data but still reports hasStack', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      [
+        'DOMEvent',
+        0,
+        10,
+        {
+          type: 'DOMEvent',
+          eventType: 'click',
+          latency: 1,
+          cause: { time: 1, stack: 0 },
+        },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.hasStack).toBe(true);
+    expect(m.data).not.toHaveProperty('cause');
+  });
+
+  it('leaves fields/data/innerWindowID absent for markers with no payload beyond `type`', function () {
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      ['NoPayload', 0, 10],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.fields).toBeUndefined();
+    expect(m.data).toBeUndefined();
+    expect(m.innerWindowID).toBeUndefined();
+  });
+
+  /**
+   * Build a profile with one CompositorScreenshot marker whose `url` is a real
+   * index into the string table, rather than an already-resolved string.
+   *
+   * `getProfileWithMarkers` stores payload values verbatim, so passing a string
+   * for `url` would not exercise the string-table resolution at all.
+   */
+  function setupWithScreenshotMarker(url: string) {
+    const { profile } = getProfileFromTextSamples('someFunc');
+    const thread = profile.threads[0];
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    const urlIdx = stringTable.indexForString(url);
+    const markerNameIdx = stringTable.indexForString('CompositorScreenshot');
+    const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+    thread.markers = markers;
+    markers.name.push(markerNameIdx);
+    markers.startTime.push(1);
+    markers.endTime.push(null);
+    markers.phase.push(INSTANT);
+    markers.category.push(0);
+    markers.data.push({
+      type: 'CompositorScreenshot',
+      url: urlIdx,
+      windowID: '0x1',
+      windowWidth: 1280,
+      windowHeight: 951,
+    });
+    markers.length++;
+
+    const store = storeWithProfile(profile);
+    const threadMap = new ThreadMap();
+    const markerMap = new MarkerMap();
+    threadMap.handleForThreadIndex(0);
+    return { store, threadMap, markerMap, urlIdx };
+  }
+
+  it('resolves string-table indexes in data to their strings', function () {
+    // CompositorScreenshot's `url` holds an index into the string table. A bare
+    // index would be useless to a caller that only sees the JSON output.
+    // `url` is also an elided field, so resolution is observed through the
+    // stub's `preview`/`length`, which are computed from the resolved string --
+    // an unresolved index would be a number and never reach either.
+    const url = 'data:image/jpeg;base64,AAAA';
+    const { store, threadMap, markerMap, urlIdx } =
+      setupWithScreenshotMarker(url);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    // Guard against the fixture silently storing a string: if `url` were not an
+    // index, resolution would be a no-op and this test would prove nothing.
+    expect(typeof urlIdx).toBe('number');
+    expect(m.data!.url).toEqual({
+      elided: true,
+      length: url.length,
+      preview: url,
+    });
+    expect(m.data!.windowWidth).toBe(1280);
+  });
+
+  it('elides screenshot image blobs from data but keeps the key', function () {
+    // Screenshot data URLs run from ~2.8KB to tens of KB each. Inlining them on
+    // every row of a --list response is what turns a 27KB payload into 940KB.
+    // Note the length here is well under any plausible length cap: the field is
+    // elided by identity, not by size.
+    const url = `data:image/jpeg;base64,${'A'.repeat(600)}`;
+    const { store, threadMap, markerMap } = setupWithScreenshotMarker(url);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    const m = result.flatMarkers![0];
+    expect(m.data!.url).toEqual({
+      elided: true,
+      length: url.length,
+      preview: url.slice(0, 64),
+    });
+    // The small fields next to it must survive: for this marker type there is
+    // no schema, so `data` is the only route to the window dimensions.
+    expect(m.fields).toBeUndefined();
+    expect(m.data!.windowWidth).toBe(1280);
+    expect(m.data!.windowHeight).toBe(951);
+    // The whole row must stay small.
+    expect(JSON.stringify(m).length).toBeLessThan(1000);
+  });
+
+  it('keeps long values of fields that are not image blobs', function () {
+    // A real profile had a 2939-char `prefValue` only 84 chars away from a
+    // 2855-char screenshot data URL, so a length-based cap would either keep
+    // the blobs or drop this. Eliding by field identity keeps it.
+    const prefValue = 'x'.repeat(5000);
+    const { store, threadMap, markerMap } = setupWithMarkers([
+      [
+        'Preference Read',
+        0,
+        null,
+        {
+          type: 'PreferenceRead',
+          prefName: 'some.long.pref',
+          prefKind: 'User',
+          prefType: 'String',
+          prefValue,
+        },
+      ],
+    ]);
+
+    const result = collectThreadMarkers(
+      store,
+      threadMap,
+      markerMap,
+      undefined,
+      {
+        list: true,
+      }
+    );
+
+    expect(result.flatMarkers![0].data!.prefValue).toBe(prefValue);
   });
 });
 
