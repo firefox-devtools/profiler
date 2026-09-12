@@ -5,6 +5,7 @@ import { Provider } from 'react-redux';
 import { stripIndent } from 'common-tags';
 
 import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
+import { SourceCodeErrorOverlay } from 'firefox-profiler/components/app/BottomBox';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { viewProfile } from 'firefox-profiler/actions/receive-profile';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
@@ -236,5 +237,19 @@ describe('BottomBox', () => {
     ).toBeInTheDocument();
     expect(prevButton).toBeDisabled();
     expect(nextButton).toBeEnabled();
+  });
+});
+
+describe('SourceCodeErrorOverlay', () => {
+  const errors = [{ type: 'NO_KNOWN_CORS_URL' } as const];
+
+  it('shows the JS sources hint when the source has a valid id', () => {
+    render(<SourceCodeErrorOverlay errors={errors} hasValidId={true} />);
+    expect(screen.getByText(/JavaScript Sources/)).toBeInTheDocument();
+  });
+
+  it('does not show the JS sources hint when the source has no id', () => {
+    render(<SourceCodeErrorOverlay errors={errors} hasValidId={false} />);
+    expect(screen.queryByText(/JavaScript Sources/)).not.toBeInTheDocument();
   });
 });
