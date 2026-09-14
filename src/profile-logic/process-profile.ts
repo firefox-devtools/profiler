@@ -61,6 +61,7 @@ import {
 import {
   addPIICategoriesToMarkerSchema,
   computeStringIndexMarkerFieldsByDataType,
+  extensionMarkerSchemas,
 } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
@@ -102,8 +103,10 @@ import type {
   IndexIntoGeckoThreadStringTable,
   GCSliceMarkerPayload,
   GCMajorMarkerPayload,
+  ExtensionMarkerPayload,
   MarkerPayload,
   MarkerPayload_Gecko,
+  TextMarkerPayload,
   GCSliceData_Gecko,
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
@@ -788,16 +791,16 @@ function _processMarkers(
       }
     }
 
+    const markerName = stringArray[geckoMarkers.name[markerIndex]];
     const payload = _processMarkerPayload(
+      markerName,
       geckoPayload,
       stringArray,
       stringTable,
       stringIndexMarkerFieldsByDataType,
       stackIndexOffset
     );
-    const name = stringTable.indexForString(
-      stringArray[geckoMarkers.name[markerIndex]]
-    );
+    const name = stringTable.indexForString(markerName);
     const startTime = geckoMarkers.startTime[markerIndex];
     const endTime = geckoMarkers.endTime[markerIndex];
     const phase = geckoMarkers.phase[markerIndex];
@@ -851,11 +854,59 @@ function convertPhaseTimes(
   return phases;
 }
 
+function _getExtensionMarkerPayloadFields(
+  markerName: string,
+  text: string
+): Pick<ExtensionMarkerPayload, 'type' | 'name' | 'extensionId'> | null {
+  switch (markerName) {
+    case 'ExtensionParent':
+    case 'ExtensionChild': {
+      const match = /^(.*), (api_(?:call|event): [\s\S]*)$/.exec(text);
+      return match
+        ? {
+            type: markerName,
+            name: match[2],
+            extensionId: match[1],
+          }
+        : null;
+    }
+    case 'Extension Suspend': {
+      const match = / by .*$/.exec(text);
+      return match === null
+        ? null
+        : {
+            type: 'ExtensionSuspend',
+            name: text.slice(0, match.index),
+            extensionId: text.slice(match.index + ' by '.length),
+          };
+    }
+    default:
+      return null;
+  }
+}
+
+function _processExtensionTextMarkerPayload(
+  markerName: string,
+  payload: TextMarkerPayload,
+  stringArray: string[]
+): ExtensionMarkerPayload | null {
+  const text =
+    typeof payload.name === 'number' ? stringArray[payload.name] : payload.name;
+  const fields = _getExtensionMarkerPayloadFields(markerName, text);
+  if (!fields) {
+    return null;
+  }
+
+  const { type: _type, name: _name, ...otherFields } = payload;
+  return { ...otherFields, ...fields };
+}
+
 /**
- * Process just the marker payload. This converts stacks into causes, and augments
- * the GC information.
+ * Process just the marker payload. This converts stacks into causes, augments
+ * the GC information, and converts extension text markers into structured payloads.
  */
 function _processMarkerPayload(
+  markerName: string,
   geckoPayload: MarkerPayload_Gecko | null,
   stringArray: string[],
   stringTable: StringTable,
@@ -871,6 +922,17 @@ function _processMarkerPayload(
   //
   // Warning: This function converts the payload into an any type.
   const payload = _convertStackToCause(geckoPayload, stackIndexOffset);
+
+  if (payload.type === 'Text') {
+    const extensionPayload = _processExtensionTextMarkerPayload(
+      markerName,
+      payload,
+      stringArray
+    );
+    if (extensionPayload) {
+      return extensionPayload;
+    }
+  }
 
   switch (payload.type) {
     /*
@@ -1757,6 +1819,38 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
         names.add(markerSchema.name);
         combinedSchemas.push(_convertGeckoMarkerSchema(markerSchema));
       }
+    }
+  }
+
+  const usedExtensionSchemaNames = new Set<string>();
+  for (const profile of [geckoProfile, ...geckoProfile.processes]) {
+    for (const thread of profile.threads) {
+      const { markers, stringTable } = thread;
+      for (const marker of markers.data) {
+        const payload = marker[markers.schema.data];
+        if (!payload || payload.type !== 'Text') {
+          continue;
+        }
+        const markerName = stringTable[marker[markers.schema.name]];
+        const text =
+          typeof payload.name === 'number'
+            ? stringTable[payload.name]
+            : payload.name;
+        const fields = _getExtensionMarkerPayloadFields(markerName, text);
+        if (fields) {
+          usedExtensionSchemaNames.add(fields.type);
+        }
+      }
+    }
+  }
+
+  for (const markerSchema of extensionMarkerSchemas) {
+    if (
+      usedExtensionSchemaNames.has(markerSchema.name) &&
+      !names.has(markerSchema.name)
+    ) {
+      names.add(markerSchema.name);
+      combinedSchemas.push(markerSchema);
     }
   }
 

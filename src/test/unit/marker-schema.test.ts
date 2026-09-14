@@ -5,6 +5,7 @@
 import {
   formatFromMarkerSchema,
   parseLabel,
+  extensionMarkerSchemas,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
 import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
@@ -74,6 +75,57 @@ describe('marker schema labels', function () {
       })
     ).toEqual('Just text');
     expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
+  it('reconstructs extension marker text from structured fields', function () {
+    const extensionParentSchema = extensionMarkerSchemas.find(
+      ({ name }) => name === 'ExtensionParent'
+    );
+    const extensionSuspendSchema = extensionMarkerSchemas.find(
+      ({ name }) => name === 'ExtensionSuspend'
+    );
+    if (!extensionParentSchema || !extensionSuspendSchema) {
+      throw new Error('Expected extension marker schemas');
+    }
+
+    expect(
+      applyLabel({
+        schemaFields: extensionParentSchema.fields,
+        label: extensionParentSchema.tableLabel as string,
+        payload: {
+          extensionId: 'addon@example.com',
+          name: 'api_call: tabs.query',
+        },
+      })
+    ).toBe('addon@example.com, api_call: tabs.query');
+    expect(
+      applyLabel({
+        schemaFields: extensionParentSchema.fields,
+        label: extensionParentSchema.tableLabel as string,
+        payload: { name: 'api_call: tabs.query' },
+      })
+    ).toBe('api_call: tabs.query');
+    expect(
+      applyLabel({
+        schemaFields: extensionSuspendSchema.fields,
+        label: extensionSuspendSchema.tableLabel as string,
+        payload: {
+          extensionId: 'addon@example.com (chanId: 42)',
+          name: 'onBeforeRequest https://example.com',
+        },
+      })
+    ).toBe(
+      'onBeforeRequest https://example.com by addon@example.com (chanId: 42)'
+    );
+    expect(
+      applyLabel({
+        schemaFields: extensionSuspendSchema.fields,
+        label: extensionSuspendSchema.tableLabel as string,
+        payload: {
+          name: 'onBeforeRequest https://<URL>',
+        },
+      })
+    ).toBe('onBeforeRequest https://<URL>');
   });
 
   it('can parse a label with just a lookup value', function () {
