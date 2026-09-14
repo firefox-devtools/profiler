@@ -647,6 +647,14 @@ export type TextMarkerPayload = {
   innerWindowID?: number;
 };
 
+export type ExtensionMarkerPayload = {
+  type: 'ExtensionParent' | 'ExtensionChild' | 'ExtensionSuspend';
+  name: string;
+  extensionId?: string;
+  cause?: CauseBacktrace;
+  innerWindowID?: number;
+};
+
 // Any import from a Chrome profile
 export type ChromeEventPayload = {
   type: string;
@@ -872,6 +880,7 @@ export type MarkerPayload =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | ExtensionMarkerPayload
   | LogMarkerPayload
   | PaintProfilerMarkerTracing
   | CcMarkerTracing

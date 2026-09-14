@@ -480,10 +480,8 @@ function sanitizeThreadPII(
           currentMarker
         );
         if (markerSchema) {
-          const markerName = stringTable.getString(markerTable.name[i]);
           const sanitizedMarker = sanitizeMarkerFromSchema(
             markerSchema,
-            markerName,
             currentMarker,
             stringTable,
             PIIToBeRemoved

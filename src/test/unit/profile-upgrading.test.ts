@@ -136,7 +136,7 @@ describe('upgrading processed profiles', function () {
     );
   });
 
-  it('adds PII categories to marker schema fields', function () {
+  it('adds PII categories and structures extension markers', function () {
     const profile: any = {
       meta: {
         preprocessedProfileVersion: 71,
@@ -152,7 +152,32 @@ describe('upgrading processed profiles', function () {
           },
         ],
       },
-      threads: [],
+      shared: {
+        stringArray: [
+          'ExtensionParent',
+          'ExtensionChild',
+          'Extension Suspend',
+          'parent@example.com, api_call: tabs.query',
+          'child@example.com, api_event: runtime.onMessage',
+          'onBeforeRequest https://example.com by addon@example.com (chanId: 42)',
+        ],
+      },
+      threads: [
+        {
+          markers: {
+            length: 3,
+            name: [0, 1, 2],
+            data: [
+              { type: 'Text', name: 3 },
+              {
+                type: 'Text',
+                name: 'child@example.com, api_event: runtime.onMessage',
+              },
+              { type: 'Text', name: 5 },
+            ],
+          },
+        },
+      ],
     };
 
     attemptToUpgradeProcessedProfileThroughMutation(profile, {});
@@ -187,7 +212,7 @@ describe('upgrading processed profiles', function () {
           {
             key: 'name',
             format: 'unique-string',
-            containsPII: ['url', 'extension-id'],
+            containsPII: ['url'],
           },
         ],
       },
@@ -200,6 +225,89 @@ describe('upgrading processed profiles', function () {
             containsPII: ['preference-value'],
           },
         ],
+      },
+      {
+        name: 'ExtensionParent',
+        tableLabel:
+          "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+        chartLabel:
+          "{marker.name} — {marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'extensionId',
+            label: 'Extension ID',
+            format: 'string',
+            containsPII: ['extension-id'],
+          },
+          {
+            key: 'name',
+            label: 'Details',
+            format: 'string',
+            containsPII: ['url'],
+          },
+        ],
+      },
+      {
+        name: 'ExtensionChild',
+        tableLabel:
+          "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+        chartLabel:
+          "{marker.name} — {marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'extensionId',
+            label: 'Extension ID',
+            format: 'string',
+            containsPII: ['extension-id'],
+          },
+          {
+            key: 'name',
+            label: 'Details',
+            format: 'string',
+            containsPII: ['url'],
+          },
+        ],
+      },
+      {
+        name: 'ExtensionSuspend',
+        tableLabel:
+          "{marker.data.name}{marker.data.extensionId ? ' by ' : ''}{marker.data.extensionId}",
+        chartLabel:
+          "{marker.name} — {marker.data.name}{marker.data.extensionId ? ' by ' : ''}{marker.data.extensionId}",
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'name',
+            label: 'Details',
+            format: 'string',
+            containsPII: ['url'],
+          },
+          {
+            key: 'extensionId',
+            label: 'Extension ID',
+            format: 'string',
+            containsPII: ['extension-id'],
+          },
+        ],
+      },
+    ]);
+    expect(profile.threads[0].markers.data).toEqual([
+      {
+        type: 'ExtensionParent',
+        name: 'api_call: tabs.query',
+        extensionId: 'parent@example.com',
+      },
+      {
+        type: 'ExtensionChild',
+        name: 'api_event: runtime.onMessage',
+        extensionId: 'child@example.com',
+      },
+      {
+        type: 'ExtensionSuspend',
+        name: 'onBeforeRequest https://example.com',
+        extensionId: 'addon@example.com (chanId: 42)',
       },
     ]);
   });

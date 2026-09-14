@@ -43,7 +43,7 @@ const markerSchemaPIICategoriesBySchemaName = new Map<
       ['isPrivateBrowsing', ['private-browsing']],
     ]),
   ],
-  ['Text', new Map([['name', ['url', 'extension-id']]])],
+  ['Text', new Map([['name', ['url']]])],
   ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
 ]);
 
@@ -78,6 +78,64 @@ export function addPIICategoriesToMarkerSchemas(
 ): MarkerSchema[] {
   return markerSchemas.map(addPIICategoriesToMarkerSchema);
 }
+
+const extensionApiMarkerSchemaFields: MarkerSchemaField[] = [
+  {
+    key: 'extensionId',
+    label: 'Extension ID',
+    format: 'string',
+    containsPII: ['extension-id'],
+  },
+  {
+    key: 'name',
+    label: 'Details',
+    format: 'string',
+    containsPII: ['url'],
+  },
+];
+
+export const extensionMarkerSchemas: MarkerSchema[] = [
+  {
+    name: 'ExtensionParent',
+    tableLabel:
+      "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+    chartLabel:
+      "{marker.name} — {marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+    display: ['marker-chart', 'marker-table'],
+    fields: extensionApiMarkerSchemaFields,
+  },
+  {
+    name: 'ExtensionChild',
+    tableLabel:
+      "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+    chartLabel:
+      "{marker.name} — {marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+    display: ['marker-chart', 'marker-table'],
+    fields: extensionApiMarkerSchemaFields,
+  },
+  {
+    name: 'ExtensionSuspend',
+    tableLabel:
+      "{marker.data.name}{marker.data.extensionId ? ' by ' : ''}{marker.data.extensionId}",
+    chartLabel:
+      "{marker.name} — {marker.data.name}{marker.data.extensionId ? ' by ' : ''}{marker.data.extensionId}",
+    display: ['marker-chart', 'marker-table'],
+    fields: [
+      {
+        key: 'name',
+        label: 'Details',
+        format: 'string',
+        containsPII: ['url'],
+      },
+      {
+        key: 'extensionId',
+        label: 'Extension ID',
+        format: 'string',
+        containsPII: ['extension-id'],
+      },
+    ],
+  },
+];
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,

@@ -7669,7 +7669,6 @@ Object {
           Object {
             "containsPII": Array [
               "url",
-              "extension-id",
             ],
             "format": "string",
             "key": "name",
@@ -9096,7 +9095,6 @@ Object {
           Object {
             "containsPII": Array [
               "url",
-              "extension-id",
             ],
             "format": "string",
             "key": "name",
@@ -10693,7 +10691,6 @@ Object {
           Object {
             "containsPII": Array [
               "url",
-              "extension-id",
             ],
             "format": "string",
             "key": "name",

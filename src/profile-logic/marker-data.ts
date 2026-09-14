@@ -1457,18 +1457,6 @@ export function groupScreenshotsById(
   return idToScreenshotMarkers;
 }
 
-function _removeExtensionId(markerName: string, text: string): string {
-  if (['ExtensionParent', 'ExtensionChild'].includes(markerName)) {
-    return text.replace(/^.*, (api_(call|event): )/, '$1');
-  }
-
-  if (markerName === 'Extension Suspend') {
-    return text.replace(/ by .*$/, '');
-  }
-
-  return text;
-}
-
 function _shouldSanitizePIICategory(
   category: MarkerSchemaPIICategory,
   PIIToBeRemoved: RemoveProfileInformation
@@ -1517,7 +1505,6 @@ function _updateMarkerPayloadField(
 /** Apply a marker schema's PII rules to its payload. */
 export function sanitizeMarkerFromSchema(
   markerSchema: MarkerSchema,
-  markerName: string,
   markerPayload: MarkerPayload,
   stringTable: StringTable,
   PIIToBeRemoved: RemoveProfileInformation
@@ -1574,13 +1561,8 @@ export function sanitizeMarkerFromSchema(
           break;
         case 'extension-id':
           if (hasField) {
-            markerPayload = _updateMarkerPayloadField(
-              markerPayload,
-              key,
-              isStringIndex,
-              stringTable,
-              (text) => _removeExtensionId(markerName, text)
-            );
+            markerPayload = { ...markerPayload };
+            delete (markerPayload as any)[key];
           }
           break;
         case 'preference-value':
