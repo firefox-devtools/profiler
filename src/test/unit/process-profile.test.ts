@@ -15,6 +15,7 @@ import { computeTimeColumnForRawSamplesTable } from '../../profile-logic/profile
 import { StringTable } from '../../utils/string-table';
 import {
   createGeckoProfile,
+  createGeckoProfileWithMarkers,
   createGeckoCounter,
   createGeckoMarkerStack,
   createGeckoProfilerOverhead,
@@ -1129,7 +1130,7 @@ describe('Marker schema conversion', function () {
       {
         key: 'name',
         format: 'unique-string',
-        containsPII: ['url', 'extension-id'],
+        containsPII: ['url'],
       },
     ]);
     expect(schemasByName.PreferenceRead.fields).toEqual([
@@ -1165,6 +1166,83 @@ describe('Marker schema conversion', function () {
   it('preserves a FileIO table label provided by Gecko', function () {
     const geckoTableLabel = 'Custom FileIO label';
     expect(getConvertedFileIoTableLabel(geckoTableLabel)).toBe(geckoTableLabel);
+  });
+
+  it('should convert extension text markers to structured payloads', function () {
+    const extensionChildText = 'child@example.com, api_call: tabs.query';
+    const geckoProfile = createGeckoProfileWithMarkers([
+      {
+        name: 'ExtensionParent',
+        startTime: 0,
+        endTime: 1,
+        phase: 1,
+        data: {
+          type: 'Text',
+          name: 'parent@example.com, api_event: runtime.onMessage',
+        },
+      },
+      {
+        name: 'ExtensionChild',
+        startTime: 1,
+        endTime: 2,
+        phase: 1,
+        data: { type: 'Text', name: extensionChildText },
+      },
+      {
+        name: 'Extension Suspend',
+        startTime: 2,
+        endTime: 3,
+        phase: 1,
+        data: {
+          type: 'Text',
+          name: 'onBeforeRequest https://example.com by addon@example.com (chanId: 42)',
+        },
+      },
+    ]);
+    const geckoThread = geckoProfile.threads[0];
+    const extensionChildPayload = geckoThread.markers.data[1][5];
+    if (!extensionChildPayload || extensionChildPayload.type !== 'Text') {
+      throw new Error('Expected a Text marker');
+    }
+    extensionChildPayload.name =
+      geckoThread.stringTable.push(extensionChildText) - 1;
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    expect(processedProfile.threads[0].markers.data).toEqual([
+      {
+        type: 'ExtensionText',
+        name: 'api_event: runtime.onMessage',
+        extensionId: 'parent@example.com',
+      },
+      {
+        type: 'ExtensionText',
+        name: 'api_call: tabs.query',
+        extensionId: 'child@example.com',
+      },
+      {
+        type: 'ExtensionText',
+        name: 'onBeforeRequest https://example.com',
+        extensionId: 'addon@example.com (chanId: 42)',
+      },
+    ]);
+    const schemasByName = Object.fromEntries(
+      processedProfile.meta.markerSchema.map((schema) => [schema.name, schema])
+    );
+    expect(schemasByName.ExtensionText.fields).toEqual([
+      {
+        key: 'extensionId',
+        label: 'Extension ID',
+        format: 'string',
+        containsPII: ['extension-id'],
+      },
+      {
+        key: 'name',
+        label: 'Details',
+        format: 'string',
+        containsPII: ['url'],
+      },
+    ]);
   });
 
   it('should preserve optional marker schema properties', function () {

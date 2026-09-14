@@ -6,6 +6,7 @@ import {
   FILE_IO_TABLE_LABEL,
   formatFromMarkerSchema,
   parseLabel,
+  extensionTextMarkerSchema,
   markerSchemaFrontEndOnly,
 } from '../../profile-logic/marker-schema';
 import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
@@ -75,6 +76,31 @@ describe('marker schema labels', function () {
       })
     ).toEqual('Just text');
     expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
+  it('formats extension marker labels from structured fields', function () {
+    for (const label of [
+      extensionTextMarkerSchema.tableLabel,
+      extensionTextMarkerSchema.chartLabel,
+    ]) {
+      expect(
+        applyLabel({
+          schemaFields: extensionTextMarkerSchema.fields,
+          label: label as string,
+          payload: {
+            extensionId: 'addon@example.com',
+            name: 'api_call: tabs.query',
+          },
+        })
+      ).toBe('addon@example.com, api_call: tabs.query');
+      expect(
+        applyLabel({
+          schemaFields: extensionTextMarkerSchema.fields,
+          label: label as string,
+          payload: { name: 'api_call: tabs.query' },
+        })
+      ).toBe('api_call: tabs.query');
+    }
   });
 
   it('can parse a label with just a lookup value', function () {
