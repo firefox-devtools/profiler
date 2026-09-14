@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
+  FILE_IO_TABLE_LABEL,
   formatFromMarkerSchema,
   parseLabel,
   markerSchemaFrontEndOnly,
@@ -132,6 +133,17 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  it('does not display empty strings in labels', function () {
+    expect(
+      applyLabel({
+        label: 'Value: "{marker.data.value}"',
+        schemaFields: [{ key: 'value', label: 'Value', format: 'string' }],
+        payload: { value: '' },
+      })
+    ).toEqual('Value: ""');
+    expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
   it('can look up various parts of the marker', function () {
     const text = applyLabel({
       label: [
@@ -170,6 +182,41 @@ describe('marker schema labels', function () {
       })
     ).toEqual('IPC Message happened because of MouseDown Event');
     expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
+  describe('FileIO labels', function () {
+    const fileIoFields: MarkerSchema['fields'] = [
+      { key: 'operation', label: 'Operation', format: 'string' },
+      { key: 'source', label: 'Source', format: 'string' },
+      { key: 'filename', label: 'Filename', format: 'file-path' },
+    ];
+
+    it('formats labels for all source and filename combinations', function () {
+      expect(
+        [
+          {
+            operation: 'create/open',
+            source: 'PoisonIOInterposer',
+            filename: '/foo/bar',
+          },
+          { operation: 'create/open', source: '', filename: '/foo/bar' },
+          { operation: 'create/open', source: 'PoisonIOInterposer' },
+          { operation: 'create/open', source: '' },
+        ].map((payload) =>
+          applyLabel({
+            label: FILE_IO_TABLE_LABEL,
+            schemaFields: fileIoFields,
+            payload,
+          })
+        )
+      ).toEqual([
+        '(PoisonIOInterposer) create/open — /foo/bar',
+        'create/open — /foo/bar',
+        '(PoisonIOInterposer) create/open',
+        'create/open',
+      ]);
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('ternary expressions', function () {
@@ -297,6 +344,7 @@ describe('marker schema formatting', function () {
       ['file-path', null],
       ['file-path', undefined],
       ['sanitized-string', 'domain.name'],
+      ['string', ''],
       ['duration', 0],
       ['duration', 10],
       ['duration', 12.3456789],
@@ -392,6 +440,7 @@ describe('marker schema formatting', function () {
         "file-path - (empty)",
         "file-path - (empty)",
         "sanitized-string - domain.name",
+        "string - (empty)",
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
