@@ -68,3 +68,96 @@ export class MarkerMap {
     return markerId;
   }
 }
+
+/** Matches a single marker handle, e.g. "m-42". */
+const MARKER_HANDLE_RE = /^m-(\d+)$/;
+
+/** Matches an inclusive marker handle range, e.g. "m-42..m-45" or "m-42..45". */
+const MARKER_RANGE_RE = /^m-(\d+)\.\.(?:m-)?(\d+)$/;
+
+/** A range wider than this is rejected as a probable typo. */
+export const MAX_MARKER_RANGE_SIZE = 256;
+
+/**
+ * Expand marker handle specs ("m-42", "m-42..m-45", "m-1,m-3..m-5") into a flat
+ * list of handles, dropping duplicates. Ranges expand numerically, so one that
+ * overruns its listing resolves into unrelated markers rather than failing.
+ */
+export function expandMarkerHandleSpecs(specs: string[]): string[] {
+  return expandMarkerHandleSpecsDetailed(specs).handles;
+}
+
+/** A multi-element range spec, and the handles it expanded to. */
+export type MarkerHandleRange = {
+  spec: string;
+  handles: string[];
+};
+
+/**
+ * As `expandMarkerHandleSpecs`, but also reports which specs were multi-element
+ * ranges and what each one expanded to, so a caller can check a range's own
+ * markers rather than the whole result set.
+ */
+export function expandMarkerHandleSpecsDetailed(specs: string[]): {
+  handles: string[];
+  ranges: MarkerHandleRange[];
+} {
+  const handles: string[] = [];
+  const ranges: MarkerHandleRange[] = [];
+  const seen = new Set<string>();
+  const push = (handle: string) => {
+    if (!seen.has(handle)) {
+      seen.add(handle);
+      handles.push(handle);
+    }
+  };
+
+  for (const rawSpec of specs) {
+    for (const spec of rawSpec.split(',')) {
+      const trimmed = spec.trim();
+      if (trimmed === '') {
+        continue;
+      }
+
+      const range = MARKER_RANGE_RE.exec(trimmed);
+      if (range) {
+        const start = parseInt(range[1], 10);
+        const end = parseInt(range[2], 10);
+        if (end < start) {
+          throw new Error(
+            `Invalid marker range ${trimmed}: end m-${end} is before start m-${start}`
+          );
+        }
+        const size = end - start + 1;
+        if (size > MAX_MARKER_RANGE_SIZE) {
+          throw new Error(
+            `Marker range ${trimmed} covers ${size} handles, more than the ` +
+              `maximum of ${MAX_MARKER_RANGE_SIZE}. Narrow the range, or pass ` +
+              `the handles you want individually.`
+          );
+        }
+        const rangeHandles: string[] = [];
+        for (let id = start; id <= end; id++) {
+          const handle = `m-${id}`;
+          rangeHandles.push(handle);
+          push(handle);
+        }
+        if (end > start) {
+          ranges.push({ spec: trimmed, handles: rangeHandles });
+        }
+        continue;
+      }
+
+      if (MARKER_HANDLE_RE.test(trimmed)) {
+        push(trimmed);
+        continue;
+      }
+
+      throw new Error(
+        `Invalid marker handle ${trimmed}: expected a handle like m-42 or a range like m-42..m-45`
+      );
+    }
+  }
+
+  return { handles, ranges };
+}
