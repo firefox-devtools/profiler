@@ -358,11 +358,69 @@ Home--record-instructions =
     Ca să începi profilarea, dă clic pe butonul de profilare sau folosește
     comenzile rapide din tastatură. Pictograma e albastră când se înregistrează un profil.
     Dă clic pe <kbd>Captură</kbd> pentru încărcarea datelor în profiler.firefox.com.
+Home--instructions-content2 =
+    Înregistrarea de profiluri de performanță necesită <a>{ -firefox-brand-name } pentru desktop</a>.
+    Dar profilurile existente pot fi vizualizate în orice browser modern.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } poate fi profilat direct pe acest dispozitiv. Pentru
+    mai multe informații, citește <a>Profilare { -firefox-android-brand-name } direct pe dispozitiv</a>.
+Home--fenix-instructions-remotely =
+    Poți profila { -firefox-android-brand-name } și de la distanță din { -firefox-brand-name }
+    pentru desktop. Pentru mai multe informații, te rugăm să consulți documentația:
+    <a>Profilare { -firefox-android-brand-name } de la distanță</a>.
+Home--record-instructions-start-stop = Oprește și pornește profilarea
+Home--record-instructions-capture-load = Fă o captură de profil și încarcă-l
+Home--profiler-motto = Fă o captură cu un profil de performanță. Analizează-l. Partajează-l. Fă webul mai rapid.
+Home--additional-content-title = Încarcă profiluri existente
+Home--additional-content-content = Poți <strong>trage și plasa</strong> un fișier de profil aici ca să îl încarci sau:
+Home--compare-recordings-info = Poți și compara înregistrări. <a>Deschide interfața de comparații.</a>
+Home--your-recent-uploaded-recordings-title = Înregistrările tale încărcate recent
+Home--dark-mode-title = Mod întunecat
+# We replace the elements such as <perf> and <simpleperf> with links to the
+# documentation to use these tools.
+Home--load-files-from-other-tools2 =
+    { -profiler-brand-name } poate și importa profiluri din alte utilitare de profilare, cum ar fi
+    <perf>Linux perf</perf>, <simpleperf>Android SimplePerf</simpleperf>,
+    panoul de performanță Chrome, <androidstudio>Android Studio</androidstudio> sau
+    orice fișier care folosește <dhat>formatul dhat</dhat> sau <traceevent>formatul Google Trace Event
+    </traceevent>. <write>Află cum să-ți scrii
+    propriul importator</write>.
+Home--install-chrome-extension = Instalează extensia pentru Chrome
+Home--chrome-extension-instructions =
+    Folosește <a>{ -profiler-brand-name } extensia pentru Chrome</a>
+    ca să faci capturi cu profiluri de performanță în Chrome pe care să le analizezi în
+    { -profiler-brand-name }. Instalează extensia din Chrome Web Store.
+Home--chrome-extension-recording-instructions =
+    Odată instalată, folosește pictograma
+    de bară de instrumente a extensiei sau comenzile rapide ca să începi și să oprești profilarea. Poți și
+    să exporți profiluri pe care să le încarci aici pentru analiză detaliată.
+
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Introdu termenii filtrului (/)
+
+## JsTracerSettings
+## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
+
+JsTracerSettings--show-only-self-time = Afișează numai timpul propriu
+    .title = Afișează numai timpul petrecut într-un nod de apelare, ignorând copiii.
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
 
+# This string is used on the tooltip of the published profile links.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ListOfPublishedProfiles--published-profiles-link =
+    .title = Dă clic aici pentru încărcarea profilului { $smallProfileName }
+ListOfPublishedProfiles--published-profiles-delete-button-disabled = Șterge
+    .title = Profilul nu poate fi șters pentru că nu avem informațiile de autorizare.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nu a fost încărcat niciun profil încă!
 # This string is used below the 'Your recent uploaded recordings' list section.
 # Variables:
@@ -494,6 +552,20 @@ MenuButtons--metaInfo--symbolicate-profile = Simbolizează profilul
 MenuButtons--metaInfo--attempting-resymbolicate = Se încearcă resimbolizarea profilului
 MenuButtons--metaInfo--currently-symbolicating = Simbolizare profil în curs
 MenuButtons--metaInfo--source-maps = Hărți-sursă:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Aplică harta-sursă…
+    .title = Încarcă un fișier .map de pe disc pentru simbolizarea unui pachet JavaScript minificat, pentru recuperarea denumirilor inițiale ale funcțiilor și a locațiilor-sursă.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Alege cărui pachet i se aplică această hartă-sursă:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Aplică
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Anulează
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Surse inițiale rezolvate pentru { $filename }.
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
