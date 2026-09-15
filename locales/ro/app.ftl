@@ -151,6 +151,37 @@ CallNodeContextMenu--expand-all = Extinde tot
 # See: https://searchfox.org/
 CallNodeContextMenu--searchfox = Caută denumirea funcției pe Searchfox
 CallNodeContextMenu--copy-function-name = Copiază denumirea funcției
+CallNodeContextMenu--copy-script-url = Copiază URL-ul scriptului
+CallNodeContextMenu--copy-stack = Copiază stiva
+CallNodeContextMenu--show-the-function-in-devtools = Arată funcția în DevTools
+
+## CallTree
+## This is the component for Call Tree panel.
+
+CallTree--tracing-ms-total = Timp de execuție (ms)
+    .title =
+        Timpul „total” de execuție include un rezumat al tuturor timpilor în care
+        funcția a fost observată ca fiind în stivă. Include timpul când
+        funcția a rulat efectiv și timpul petrecut în apelanții din
+        această funcție.
+CallTree--tracing-ms-self = Proprii (ms)
+    .title =
+        Timpul „propriu” include numai timpul în care funcția era
+        la sfârșitul stivei. Dacă funcția a apelat alte funcții,
+        atunci timpul „celorlalte” funcții nu este inclus. Timpul „propriu” este util
+        pentru înțelegerea modului în care a fost petrecut timpul într-un program.
+CallTree--samples-total = Total (eșantioane)
+    .title =
+        Numărul „total” de eșantioane include un rezumat al fiecărui eșantion în care
+        funcția a fost observată ca fiind în stivă. Include timpul în care
+        funcția a rulat efectiv și timpul petrecut în apelanții din această
+        funcție.
+CallTree--samples-self = Propriu
+    .title =
+        Numărul de eșantioane „proprii” include numai eșantioanele în care funcția era
+        la sfârșitul stivei. Dacă funcția a apelat alte funcții,
+        atunci numărătorile „celorlalte” funcții nu sunt incluse. Numărătoarea „proprii” este utilă
+        pentru înțelegerea modului în care a fost petrecut timpul într-un program.
 
 ## Tab Bar for the bottom half of the analysis UI.
 
