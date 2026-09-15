@@ -476,8 +476,8 @@ MarkerTable--details = Детаљи
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Прикажи само обележиваче који одговарају тексту: „{ $filter }“
     .aria-label = Прикажи само обележиваче који одговарају тексту: „{ $filter }“
+    .title = Прикажи само обележиваче који одговарају тексту: „{ $filter }“
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -687,8 +687,8 @@ PanelSearch--search-field-hint = Да ли сте знали да можете �
 ProfileName--edit-profile-name-button =
     .title = Уреди назив профила
 ProfileName--edit-profile-name-input =
-    .title = Уреди назив профила
     .aria-label = Назив профила
+    .title = Уреди назив профила
 
 ## Profile Delete Button
 
@@ -768,8 +768,8 @@ ServiceWorkerManager--updated-while-not-ready =
     у потпуности учитана. Можда ћете приметити проблеме у раду.
 ServiceWorkerManager--new-version-is-ready = Ново издање програма је преузето и спремно за употребу.
 ServiceWorkerManager--hide-notice-button =
-    .title = Сакриј обавештење о поновном учитавању
     .aria-label = Сакриј обавештење о поновном учитавању
+    .title = Сакриј обавештење о поновном учитавању
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack

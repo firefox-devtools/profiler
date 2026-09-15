@@ -351,8 +351,8 @@ ServiceWorkerManager--pending-button = Snes syen ales asali
 ServiceWorkerManager--installed-button = Ales asali n usnas
 ServiceWorkerManager--new-version-is-ready = Lqem amaynut n usnas yettwasader, yewjed i useqqdec
 ServiceWorkerManager--hide-notice-button =
-    .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
     .aria-label = Ffer alɣu-a d-yulin i tikkelt-nniḍen
+    .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
