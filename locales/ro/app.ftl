@@ -271,6 +271,94 @@ CompareHome--form-label-profile2 = Profilul 2:
 CompareHome--submit-button =
     .value = Recuperează profilurile
 
+## DebugWarning
+## This is displayed at the top of the analysis page when the loaded profile is
+## a debug build of Firefox.
+
+DebugWarning--warning-message =
+    .message =
+        Profilul a fost înregistrat într-o versiune fără optimizări de lansare.
+        Este posibil ca observațiile de performanță să nu se aplice utilizatorilor versiunii finale.
+
+## Details
+## This is the bottom panel in the analysis UI. They are generic strings to be
+## used at the bottom part of the UI.
+
+Details--open-sidebar-button =
+    .title = Deschide bara laterală
+Details--close-sidebar-button =
+    .title = Închide bara laterală
+Details--error-boundary-message =
+    .message = O, nu! A apărut o eroare necunoscută în acest panou.
+
+## ErrorBoundary
+## This component is shown when an unexpected error is encountered in the application.
+## Note that the localization won't be always applied in this component.
+
+# This message will always be displayed after another context-specific message.
+ErrorBoundary--report-error-to-developers-description =
+    Te rugăm să raportezi dezvoltatorilor problema întâmpinată, inclusiv eroarea
+    completă, așa cum este afișată în consola web a instrumentelor pentru dezvoltatori.
+# This is used in a call to action button, displayed inside the error box.
+ErrorBoundary--report-error-on-github = Raportează eroarea pe GitHub
+
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
+
+SettingsMenu--button =
+    .title = Setări
+SettingsMenu--docs = Documentație
+SettingsMenu--legal = Mențiuni legale
+SettingsMenu--privacy = Confidențialitate
+SettingsMenu--cookies = Cookie-uri
+SettingsMenu--language-switcher =
+    .title = Schimbă limba
+
+## FullTimeline
+## The timeline component of the full view in the analysis UI at the top of the
+## page.
+
+# This string is used as the text of the track selection button.
+# Displays the ratio of visible tracks count to total tracks count in the timeline.
+# We have spans here to make the numbers bold.
+# Variables:
+#   $visibleTrackCount (Number) - Visible track count in the timeline
+#   $totalTrackCount (Number) - Total track count in the timeline
+FullTimeline--tracks-button = <span>{ $visibleTrackCount }</span> / <span>{ $totalTrackCount }</span> piste
+
+## Home page
+
+Home--upload-from-file-input-button = Încarcă un profil dintr-un fișier
+Home--upload-from-url-button = Încarcă un profil dintr-un URL
+Home--load-from-url-submit-button =
+    .value = Încarcă
+Home--documentation-button = Documentație
+Home--menu-button = Activează butonul de meniu { -profiler-brand-name }
+Home--menu-button-instructions =
+    Activează butonul de meniu al utilitarului de profilare ca să începi înregistrarea unui profil
+    de performanță în { -firefox-brand-name }, apoi îl analizezi și îl partajezi cu profiler.firefox.com.
+Home--profile-firefox-android-instructions =
+    Poți profila și { -firefox-android-brand-name }. Pentru mai
+    multe informații, vezi documentația:
+    <a>Profilare { -firefox-android-brand-name } direct pe dispozitiv</a>.
+# The word WebChannel should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ in the tooltip
+# of the "Enable Firefox Profiler menu button" button.
+Home--enable-button-unavailable =
+    .title = Instanța utilitarului de profilare nu a putut să se conecteze la WebChannel, deci nu poate activa butonul de meniu al utilitarului de profilare.
+# The word WebChannel, the pref name, and the string "about:config" should not be translated.
+# This message can be seen on https://main--perf-html.netlify.app/ .
+Home--web-channel-unavailable =
+    Instanța utilitarului de profilare nu a putut să se conecteze la WebChannel. De obicei, înseamnă că
+    rulează pe o gazdă diferită de cea care este specificată în preferințele
+    <code>devtools.performance.recording.ui-base-url</code>. Dacă vrei să faci capturi de
+    profiluri noi cu această instanță și să îi dai control de programare butonului de meniu din utilitarul de profilare,
+    poți merge în <code>about:config</code> și să schimbi preferințele.
+Home--record-instructions =
+    Ca să începi profilarea, dă clic pe butonul de profilare sau folosește
+    comenzile rapide din tastatură. Pictograma e albastră când se înregistrează un profil.
+    Dă clic pe <kbd>Captură</kbd> pentru încărcarea datelor în profiler.firefox.com.
+
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
 ## It's displayed both in the homepage and in the uploaded recordings page.
