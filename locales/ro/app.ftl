@@ -852,10 +852,105 @@ StackSettings--implementation-all-frames = Toate cadrele
     .title = Nu filtra cadrele stivei
 StackSettings--implementation-script = Script
     .title = Afișează numai cadrele stivei legate de execuția scriptului
+StackSettings--implementation-native2 = Nativ
+    .title = Afișează doar cadrele stivei pentru codul nativ
+# This label is displayed in the marker chart and marker table panels only.
+StackSettings--stack-implementation-label = Filtrează stivele:
+StackSettings--use-data-source-label = Sursă date:
+StackSettings--call-tree-strategy-timing = Temporizări
+    .title = Rezumă folosind stivele eșantionate de cod executat în timp
+StackSettings--call-tree-strategy-js-allocations = Alocări JavaScript
+    .title = Rezumă folosind octeți de JavaScript alocați (fără dealocări)
+StackSettings--call-tree-strategy-native-retained-allocations = Memorie reținută
+    .title = Rezumă folosind octeți de memorie alocați și niciodată eliberați în selecția curentă de previzualizare
+StackSettings--call-tree-native-allocations = Memorie alocată
+    .title = Rezumă folosind octeți de memorie alocată
+StackSettings--call-tree-strategy-native-deallocations-memory = Memorie dealocată
+    .title = Rezumă folosind octeți de memorie dealocată de către site-ul unde a fost alocată memoria
+StackSettings--call-tree-strategy-native-deallocations-sites = Site-uri de dealocare
+    .title = Rezumă folosind octeți de memorie dealocată de site-ul unde a fost dealocată memoria
+StackSettings--invert-call-stack = Inversează stiva de apelare
+    .title = Sortează după timpul petrecut într-un nod de apelare, ignorând copiii
+StackSettings--include-idle-samples = Include eșantioanele inactive
+    .title = Debifează pentru a ascunde eșantioanele a căror cadru-„frunză” este din categoria de inactive.
+StackSettings--show-user-timing = Afișează timpii utilizatorului
+StackSettings--use-stack-chart-same-widths = Folosește aceeași lățime pentru fiecare stivă
+StackSettings--panel-search =
+    .label = Filtrează stivele:
+    .title = Afișează numai stivele care conțin o funcție a cărei denumire corespunde acestui sub-șir
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbore de apelare
+TabBar--flame-graph-tab = Grafic în flăcări
+TabBar--stack-chart-tab = Grafic în stive
+TabBar--marker-chart-tab = Grafic de marcaje
+TabBar--marker-table-tab = Tabel de marcaje
+TabBar--network-tab = Rețea
+TabBar--js-tracer-tab = Trasor JS
+
+## TabSelectorMenu
+## This component is a context menu that's opened when you click on the root
+## range at the top left corner for profiler analysis view. It's used to switch
+## between tabs that were captured in the profile.
+
+TabSelectorMenu--all-tabs-and-windows = Toate filele și ferestrele
+
+## TrackContextMenu
+## This is used as a context menu for timeline to organize the tracks in the
+## analysis UI.
+
+TrackContextMenu--only-show-this-process = Afișează doar acest proces
+# This is used as the context menu item to show only the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to isolate.
+TrackContextMenu--only-show-track = Afișează doar „{ $trackName }”
+TrackContextMenu--hide-other-screenshots-tracks = Ascunde alte piste de capturi de ecran
+# This is used as the context menu item to hide the given track.
+# Variables:
+#   $trackName (String) - Name of the selected track to hide.
+TrackContextMenu--hide-track = Ascunde „{ $trackName }”
+TrackContextMenu--show-all-tracks = Afișează toate pistele
+TrackContextMenu--show-local-tracks-in-process = Afișează toate pistele din acest proces
+# This is used as the context menu item to hide all tracks of the selected track's type.
+# Variables:
+#   $type (String) - Name of the type of selected track to hide.
+TrackContextMenu--hide-all-tracks-by-selected-track-type = Ascunde toate pistele de tipul „{ $type }”
+# This is used in the tracks context menu as a button to show all the tracks
+# that match the search filter.
+TrackContextMenu--show-all-matching-tracks = Afișează toate pistele corespondente
+# This is used in the tracks context menu as a button to hide all the tracks
+# that match the search filter.
+TrackContextMenu--hide-all-matching-tracks = Ascunde toate pistele corespondente
+# This is used in the tracks context menu when the search filter doesn't match
+# any track.
+# Variables:
+#   $searchFilter (String) - The search filter string that user enters.
+TrackContextMenu--no-results-found = Nu s-a găsit niciun rezultat pentru „<span>{ $searchFilter }</span>”
+# This button appears when hovering a track name and is displayed as an X icon.
+TrackNameButton--hide-track =
+    .title = Ascunde pista
+# This button appears when hovering a global track name and is displayed as an X icon.
+TrackNameButton--hide-process =
+    .title = Ascunde procesul
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = memorie relativă în acest moment
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = interval de memorie în grafic
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = alocări și dealocări de la eșantionul anterior
 
 ## TrackProcessCPUGraph
 ## This is used to show the CPU usage of a process over time in the timeline.
