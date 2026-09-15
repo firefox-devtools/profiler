@@ -666,6 +666,296 @@ ProfileDeleteButton--delete-button =
     .label = Șterge
     .title = Dă clic aici pentru ștergerea profilului { $smallProfileName }
 
+## Profile Delete Panel
+## This panel is displayed when the user clicks on the Profile Delete Button,
+## it's a confirmation dialog.
+
+# This string is used when there's an error while deleting a profile. The link
+# will show the error message when hovering.
+ProfileDeletePanel--delete-error = A apărut o eroare la ștergerea profilului. <a>Treci cu mouse-ul pe deasupra ca să afli mai multe.</a>
+# This is the title of the dialog
+# Variables:
+#   $profileName (string) - Some string that identifies the profile
+ProfileDeletePanel--dialog-title = Șterge { $profileName }
+ProfileDeletePanel--dialog-confirmation-question =
+    Sigur vrei să ștergi datele încărcate pentru acest profil? Linkurile
+    partajate anterior nu vor mai funcționa.
+ProfileDeletePanel--dialog-cancel-button =
+    .value = Anulează
+ProfileDeletePanel--dialog-delete-button =
+    .value = Șterge
+# This is used inside the Delete button after the user has clicked it, as a cheap
+# progress indicator.
+ProfileDeletePanel--dialog-deleting-button =
+    .value = Se șterge…
+# This message is displayed when a profile has been successfully deleted.
+ProfileDeletePanel--message-success = Datele încărcate au fost șterse cu succes.
+
+## ProfileFilterNavigator
+## This is used at the top of the profile analysis UI.
+
+# This string is used on the top left side of the profile analysis UI as the
+# "Full Range" button. In the profiler UI, it's possible to zoom in to a time
+# range. This button reverts it back to the full range. It also includes the
+# duration of the full range.
+# Variables:
+#   $fullRangeDuration (String) - The duration of the full profile data.
+ProfileFilterNavigator--full-range-with-duration = Interval complet ({ $fullRangeDuration })
+
+## Profile Loader Animation
+
+ProfileLoaderAnimation--loading-from-post-message = Se importă și se procesează profilul…
+ProfileLoaderAnimation--loading-unpublished = Se importă profilul direct din { -firefox-brand-name }…
+ProfileLoaderAnimation--loading-from-file = Se citește fișierul și se procesează profilul…
+ProfileLoaderAnimation--loading-local = Nu este încă implementat.
+ProfileLoaderAnimation--loading-public = Se descarcă și se procesează profilul…
+ProfileLoaderAnimation--loading-from-url = Se descarcă și se procesează profilul…
+
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbore de apelare
+
+## TrackPower
+## This is used to show the power used by the CPU and other chips in a computer,
+## graphed over time.
+## It's not always displayed in the UI, but an example can be found at
+## https://share.firefox.dev/3a1fiT7.
+## For the strings in this group, the carbon dioxide equivalent is computed from
+## the used energy, using the carbon dioxide equivalent for electricity
+## consumption. The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-kilowatt = { $value } kW
+    .label = Putere
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-watt = { $value } W
+    .label = Putere
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-milliwatt = { $value } mW
+    .label = Putere
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } μW
+    .label = Putere
+# This is used in the tooltip when the power value uses the kilowatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-kilowatt = { $value } kW
+    .label = Putere medie în selecția curentă
+# This is used in the tooltip when the power value uses the watt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-watt = { $value } W
+    .label = Putere medie în selecția curentă
+# This is used in the tooltip when the instant power value uses the milliwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Putere medie în selecția curentă
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
+    .label = Putere medie în selecția curentă
+# This is used in the tooltip when the energy used in the current range uses the
+# kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-range-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energie utilizată în intervalul vizibil
+# This is used in the tooltip when the energy used in the current range uses the
+# watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-range-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Energie utilizată în intervalul vizibil
+# This is used in the tooltip when the energy used in the current range uses the
+# milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Energie utilizată în intervalul vizibil
+# This is used in the tooltip when the energy used in the current range uses the
+# microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-range-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Energie utilizată în intervalul vizibil
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the kilowatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (kilograms)
+TrackPower--tooltip-energy-carbon-used-in-preview-kilowatthour = { $value } kWh ({ $carbonValue } kg CO₂e)
+    .label = Energie utilizată în selecția curentă
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the watt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (grams)
+TrackPower--tooltip-energy-carbon-used-in-preview-watthour = { $value } Wh ({ $carbonValue } g CO₂e)
+    .label = Energie utilizată în selecția curentă
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the milliwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-milliwatthour = { $value } mWh ({ $carbonValue } mg CO₂e)
+    .label = Energie utilizată în selecția curentă
+# This is used in the tooltip when the energy used in the current preview
+# selection uses the microwatt-hour unit.
+# Variables:
+#   $value (String) - the energy value for this range
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value (milligrams)
+TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } µWh ({ $carbonValue } mg CO₂e)
+    .label = Energie utilizată în selecția curentă
+
+## TrackBandwidth
+## This is used to show how much data was transfered over time.
+## For the strings in this group, the carbon dioxide equivalent is estimated
+## from the amount of data transfered.
+## The carbon dioxide equivalent represents the equivalent amount
+## of CO₂ to achieve the same level of global warming potential.
+
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the value for the data transfer speed.
+#                     Will contain the unit (eg. B, KB, MB)
+TrackBandwidthGraph--speed = { $value } pe secundă
+    .label = Viteză de transfer pentru acest eșantion
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - how many read or write operations were performed since the previous sample
+TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
+    .label = operații de citire/scriere de la eșantionul anterior
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data until the hovered time.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--cumulative-bandwidth-at-this-time = { $value } ({ $carbonValue } g CO₂e)
+    .label = Date transferate până la acest moment
+# This is used in the tooltip of the bandwidth track.
+# Variables:
+#   $value (String) - the total of transfered data during the visible time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-graph = { $value } ({ $carbonValue } g CO₂e)
+    .label = Date transferate în intervalul vizibil
+# This is used in the tooltip of the bandwidth track when a range is selected.
+# Variables:
+#   $value (String) - the total of transfered data during the selected time range.
+#                     Will contain the unit (eg. B, KB, MB)
+#   $carbonValue (string) - the carbon dioxide equivalent (CO₂e) value in grams
+TrackBandwidthGraph--total-bandwidth-in-range = { $value } ({ $carbonValue } g CO₂e)
+    .label = Date transferate în selecția curentă
+
+## TrackSearchField
+## The component that is used for the search input in the track context menu.
+
+TrackSearchField--search-input =
+    .placeholder = Introdu termenii de filtrare
+    .title = Afișează numai pistele care corespund unui anumit text
+
+## TransformNavigator
+## Navigator for the applied transforms in the Call Tree, Flame Graph, and Stack
+## Chart components.
+## These messages are displayed above the table / graph once the user selects to
+## apply a specific transformation function to a node in the call tree. It's the
+## name of the function, followed by the node's name.
+## To learn more about them, visit:
+## https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=transforms
+
+# Root item in the transform navigator.
+# "Complete" is an adjective here, not a verb.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the current thread. E.g.: Web Content.
+TransformNavigator--complete = Completează „{ $item }”
+# "Collapse resource" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the resource that collapsed. E.g.: libxul.so.
+TransformNavigator--collapse-resource = Restrânge: { $item }
+# "Focus subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-subtree = Nod de focalizare: { $item }
+# "Focus function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-function = Focalizare: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Focalizare pe proprii: { $item }
+# "Focus category" transform. The word "Focus" has the meaning of an adjective here.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
+# Variables:
+#   $item (String) - Name of the category that transform applied to.
+TransformNavigator--focus-category = Categorie de focalizare: { $item }
+# "Merge call node" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-call-node = Îmbină nodul: { $item }
+# "Merge function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=merge
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--merge-function = Îmbină: { $item }
+# "Drop function" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=drop
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--drop-function = Ignoră: { $item }
+# "Collapse recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-recursion = Restrânge recursivitatea: { $item }
+# "Collapse direct recursion" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-direct-recursion-only = Restrânge numai recursivitatea directă: { $item }
+# "Collapse function subtree" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=collapse
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--collapse-function-subtree = Restrânge sub-arborele: { $item }
+# "Drop samples outside of markers matching ..." transform.
+# Variables:
+#   $item (String) - Search filter of the markers that transform will apply to.
+TransformNavigator--drop-samples-outside-of-markers-matching = Ignoră eșantioanele din afara marcajelor care corespund: „{ $item }”
+
+## "Bottom box" - a view which contains the source view and the assembly view,
+## at the bottom of the profiler UI
+##
+## Some of these string IDs still start with SourceView, even though the strings
+## are used for both the source view and the assembly view.
+
+# Displayed while a view in the bottom box is waiting for code to load from
+# the network.
+# Variables:
+#   $host (String) - The "host" part of the URL, e.g. hg.mozilla.org
+SourceView--loading-url = Se așteaptă { $host }…
+# Displayed while a view in the bottom box is waiting for code to load from
+# the browser.
+SourceView--loading-browser-connection = Se așteaptă { -firefox-brand-name }…
