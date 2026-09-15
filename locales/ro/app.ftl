@@ -624,6 +624,56 @@ MenuButtons--metaInfo--logical-cpu =
        *[other] { $logicalCPUs } de nuclee fizice
     }
 MenuButtons--metaInfo--profiling-started = Înregistrarea a început la:
+MenuButtons--metaInfo--profiling-session = Durată înregistrare:
+MenuButtons--metaInfo--main-process-started = Proces principal început la:
+MenuButtons--metaInfo--main-process-ended = Proces principal terminat la:
+MenuButtons--metaInfo--file-name = Denumire fișier:
+MenuButtons--metaInfo--file-size = Mărime fișier:
+MenuButtons--metaInfo--interval = Interval:
+MenuButtons--metaInfo--buffer-capacity = Capacitate memorie-tampon:
+MenuButtons--metaInfo--buffer-duration = Durată memorie-tampon:
+# Buffer Duration in Seconds in Meta Info Panel
+# Variable:
+#   $configurationDuration (Number) - Configuration Duration in Seconds
+MenuButtons--metaInfo--buffer-duration-seconds =
+    { $configurationDuration ->
+        [one] { $configurationDuration } secundă
+        [few] { $configurationDuration } secunde
+       *[other] { $configurationDuration } de secunde
+    }
+# Adjective refers to the buffer duration
+MenuButtons--metaInfo--buffer-duration-unlimited = Nelimitat
+MenuButtons--metaInfo--application = Aplicație
+MenuButtons--metaInfo--name-and-version = Denumire și versiune:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Timp de activitate:
+MenuButtons--metaInfo--update-channel = Canal de actualizare:
+MenuButtons--metaInfo--build-id = ID versiune:
+MenuButtons--metaInfo--build-type = Tip versiune:
+MenuButtons--metaInfo--arguments = Argumente:
+
+## Strings refer to specific types of builds, and should be kept in English.
+
+MenuButtons--metaInfo--build-type-debug = Depanează
+MenuButtons--metaInfo--build-type-opt = Opt
+
+##
+
+MenuButtons--metaInfo--platform = Platformă
+MenuButtons--metaInfo--device = Dispozitiv:
+# OS means Operating System. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--os = SO:
+# ABI means Application Binary Interface. This describes the platform a profile was captured on.
+MenuButtons--metaInfo--abi = ABI:
+MenuButtons--metaInfo--visual-metrics = Metrici vizuale
+MenuButtons--metaInfo--speed-index = Indice de viteză:
+# “Perceptual” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--perceptual-speed-index = Indice de viteză perceptivă:
+# “Contentful” is the name of an index provided by sitespeed.io, and should be kept in English.
+MenuButtons--metaInfo--contentful-speed-Index = Indice de viteză conținut complet:
+MenuButtons--metaInfo-renderRowOfList-label-features = Funcționalități:
+MenuButtons--metaInfo-renderRowOfList-label-threads-filter = Filtru de fire:
+MenuButtons--metaInfo-renderRowOfList-label-extensions = Extensii:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
@@ -634,6 +684,10 @@ MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
     .title = Timp pentru eșantionarea tutor firelor.
+MenuButtons--metaOverheadStatistics-statkeys-cleaning = Curățare
+    .title = Timp de eliminare a datelor expirate.
+MenuButtons--metaOverheadStatistics-statkeys-counter = Contor
+    .title = Timp de adunare a tuturor contoarelor.
 MenuButtons--metaOverheadStatistics-statkeys-interval = Interval
     .title = Interval observat între două eșantioane.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Blocaje
@@ -762,10 +816,54 @@ ProfileLoaderAnimation--loading-from-file = Se citește fișierul și se procese
 ProfileLoaderAnimation--loading-local = Nu este încă implementat.
 ProfileLoaderAnimation--loading-public = Se descarcă și se procesează profilul…
 ProfileLoaderAnimation--loading-from-url = Se descarcă și se procesează profilul…
+ProfileLoaderAnimation--loading-compare = Se citesc și se procesează profilurile…
+ProfileLoaderAnimation--loading-view-not-found = Vizualizarea nu a fost găsită
+
+## ProfileRootMessage
+
+ProfileRootMessage--title = { -profiler-brand-name }
+ProfileRootMessage--additional = Înapoi la pagina de start
+
+## Root
+
+Root--error-boundary-message =
+    .message = O, nu! A apărut o eroare necunoscută în profiler.firefox.com.
+
+## ServiceWorkerManager
+## This is the component responsible for handling the service worker installation
+## and update. It appears at the top of the UI.
+
+ServiceWorkerManager--applying-button = Aplicare în curs…
+ServiceWorkerManager--pending-button = Aplică și reîncarcă
+ServiceWorkerManager--installed-button = Reîncarcă aplicația
+ServiceWorkerManager--updated-while-not-ready =
+    A fost aplicată o versiune nouă a aplicației înainte ca această pagină
+    să se fi încărcat complet. Este posibil să observi defecțiuni.
+ServiceWorkerManager--new-version-is-ready = A fost descărcată o versiune nouă a aplicației și este gata de utilizare.
+ServiceWorkerManager--hide-notice-button =
+    .aria-label = Ascunde notificarea de reîncărcare
+    .title = Ascunde notificarea de reîncărcare
+
+## StackSettings
+## This is the settings component that is used in Call Tree, Flame Graph and Stack
+## Chart panels. It's used to switch between different views of the stack.
+
+StackSettings--implementation-all-frames = Toate cadrele
+    .title = Nu filtra cadrele stivei
+StackSettings--implementation-script = Script
+    .title = Afișează numai cadrele stivei legate de execuția scriptului
 
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbore de apelare
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -1071,3 +1169,57 @@ SourceView--local-symbol-server-api-error-when-obtaining-source = API-ul de simb
 # Variables:
 #   $apiErrorMessage (String) - The raw internal error message from the API, not localized
 SourceView--browser-api-malformed-response-when-obtaining-source = API-ul de simbolizare al browserului a dat un răspuns format greșit: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-malformed-response-when-obtaining-source = API-ul de simbolizare al serverului local de simboluri a dat un răspuns format greșit: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a file could not be found in
+# an archive file (.tar.gz) which was downloaded from crates.io.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $pathInArchive (String) - The raw path of the member file which was not found in the archive.
+SourceView--not-in-archive-error-when-obtaining-source = Fișierul { $pathInArchive } nu a fost găsit în arhiva de la { $url }.
+# Displayed below SourceView--cannot-obtain-source, if the file format of an
+# "archive" file was not recognized. The only supported archive formats at the
+# moment are .tar and .tar.gz, because that's what crates.io uses for .crates files.
+# Variables:
+#   $url (String) - The URL from which the "archive" file was downloaded.
+#   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
+SourceView--archive-parsing-error-when-obtaining-source = Arhiva de la { $url } nu a putut fi analizată sintactic: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Browserul nu a putut obține fișierul-sursă pentru { $url } cu identificatorul sourceUuid { $sourceUuid }: { $errorMessage }.
+
+## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the assembly view, while the assembly view is hidden.
+# Assembly refers to the low-level programming language.
+AssemblyView--show-button =
+    .title = Afișează vizualizarea de asamblare
+# The toggle button for the assembly view, while the assembly view is shown.
+# Assembly refers to the low-level programming language.
+AssemblyView--hide-button =
+    .title = Ascunde vizualizarea de asamblare
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Înapoi
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Înainte
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } din { $total }
+
+## UploadedRecordingsHome
+## This is the page that displays all the profiles that user has uploaded.
+## See: https://profiler.firefox.com/uploaded-recordings/
+
+UploadedRecordingsHome--title = Înregistrări încărcate
