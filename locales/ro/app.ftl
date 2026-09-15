@@ -316,6 +316,109 @@ MarkerContextMenu--select-the-receiver-thread = Selectează firul destinatarului
 #   $threadName (String) - Name of the thread that will be selected.
 MarkerContextMenu--select-the-sender-thread = Selectează firul expeditorului „<strong>{ $threadName }</strong>”
 
+## MarkerFiltersContextMenu
+## This is the menu when filter icon is clicked in Marker Chart and Marker Table
+## panels.
+
+# This string is used on the marker filters menu item when clicked on the filter icon.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Abandonează eșantioanele din afara marcajelor corelate cu „<strong>{ $filter }</strong>”
+
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Copiază tabelul de marcaje ca text simplu
+MarkerCopyTableContextMenu--copy-table-as-markdown = Copiază tabelul de marcaje ca Markdown
+
+## MarkerSettings
+## This is used in all panels related to markers.
+
+MarkerSettings--panel-search =
+    .label = Filtrează marcajele:
+    .title = Afișează numai marcaje care se potrivesc cu o anumită denumire
+MarkerSettings--marker-filters =
+    .title = Filtre de marcaje
+MarkerSettings--copy-table =
+    .title = Copiază tabelul ca text
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Numărul de rânduri depășește limita: { $rows } > { $maxRows }. Numai primele { $maxRows } (de) rânduri vor fi copiate.
+
+## MarkerSidebar
+## This is the sidebar component that is used in Marker Table panel.
+
+MarkerSidebar--select-a-marker = Selectează un marcaj pentru afișarea informațiilor despre el.
+
+## MarkerTable
+## This is the component for Marker Table panel.
+
+MarkerTable--start = Pornește
+MarkerTable--duration = Durată
+MarkerTable--name = Denumire
+MarkerTable--details = Detalii
+
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .aria-label = Afișează numai marcaje care corespund: „{ $filter }”
+    .title = Afișează numai marcaje care corespund: „{ $filter }”
+
+## MenuButtons
+## These strings are used for the buttons at the top of the profile viewer.
+
+MenuButtons--index--metaInfo-button =
+    .label = Informații profil
+MenuButtons--index--full-view = Vizualizare completă
+MenuButtons--index--cancel-upload = Anulează încărcarea
+MenuButtons--index--download =
+    .label = Descarcă…
+MenuButtons--index--share =
+    .label = Partajează…
+MenuButtons--index--reshare =
+    .label = Repartajează…
+MenuButtons--index--share-error-uploading =
+    .label = Eroare la încărcare
+MenuButtons--index--revert = Revino la profilul inițial
+MenuButtons--permalink--button =
+    .label = Permalink
+
+## MetaInfo panel
+## These strings are used in the panel containing the meta information about
+## the current profile.
+
+MenuButtons--index--profile-info-uploaded-label = Încărcat:
+MenuButtons--index--profile-info-uploaded-actions = Șterge
+MenuButtons--index--metaInfo-subtitle = Informații profil
+MenuButtons--metaInfo--symbols = Simboluri:
+MenuButtons--metaInfo--profile-symbolicated = Profilul este simbolizat
+MenuButtons--metaInfo--profile-not-symbolicated = Profilul nu este simbolizat
+MenuButtons--metaInfo--resymbolicate-profile = Resimbolizează profilul
+MenuButtons--metaInfo--symbolicate-profile = Simbolizează profilul
+MenuButtons--metaInfo--attempting-resymbolicate = Se încearcă resimbolizarea profilului
+MenuButtons--metaInfo--currently-symbolicating = Simbolizare profil în curs
+MenuButtons--metaInfo--source-maps = Hărți-sursă:
+
+## Overhead refers to the additional resources used to run the profiler.
+## These strings are displayed at the bottom of the "Profile Info" panel.
+
+MenuButtons--metaOverheadStatistics-subtitle = Overhead { -profiler-brand-short-name }
+MenuButtons--metaOverheadStatistics-mean = Medie
+MenuButtons--metaOverheadStatistics-max = Max
+MenuButtons--metaOverheadStatistics-min = Min
+MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
+    .title = Timp pentru eșantionarea tutor firelor.
+MenuButtons--metaOverheadStatistics-overhead-duration = Durate overhead:
+MenuButtons--metaOverheadStatistics-overhead-percentage = Procentaj overhead:
+
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbore de apelare
