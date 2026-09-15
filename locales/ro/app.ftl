@@ -182,6 +182,139 @@ CallTree--samples-self = Propriu
         la sfârșitul stivei. Dacă funcția a apelat alte funcții,
         atunci numărătorile „celorlalte” funcții nu sunt incluse. Numărătoarea „proprii” este utilă
         pentru înțelegerea modului în care a fost petrecut timpul într-un program.
+CallTree--bytes-total = Mărime totală (octeți)
+    .title =
+        „Mărimea totală” include un rezumat al tuturor octeților alocați sau
+        dealocați în timp ce funcția a fost observată ca fiind în stivă.
+        Include atât octeți când funcția rula efectiv, cât și
+        octeți ai apelanților de la această funcție.
+CallTree--bytes-self = Proprii (octeți)
+    .title =
+        Octeții „proprii” includ octeții alocați sau dealocați când
+        funcția era la sfârșitul stivei. Dacă funcția a apelat
+        alte funcții, atunci octeții „celorlalte” funcții nu sunt incluși.
+        Octeții „proprii” sunt utili pentru înțelegerea modului în care a fost de fapt
+        alocată și dealocată memoria în program.
+
+## Call tree "badges" (icons) with tooltips
+##
+## These inlining badges are displayed in the call tree in front of some
+## functions for native code (C / C++ / Rust). They're a small "inl" icon with
+## a tooltip.
+
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was sometimes inlined.
+CallTree--divergent-inlining-badge =
+    .title = Unele apeluri către { $calledFunction } ai fost încorporate de compilator.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (încorporate)
+    .title = Apelurile către { $calledFunction } au fost încorporate în { $outerFunction } de către compilator.
+
+## CallTreeSidebar
+## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+
+CallTreeSidebar--select-a-node = Selectează un nod pentru afișarea informațiilor despre el.
+CallTreeSidebar--call-node-details = Detalii nod de apelare
+
+## CallTreeSidebar timing information
+##
+## Firefox Profiler stops the execution of the program every 1ms to record the
+## stack. Only thing we know for sure is the stack at that point of time when
+## the stack is taken. We try to estimate the time spent in each function and
+## translate it to a duration. That's why we use the "traced" word here.
+## There is actually no difference between "Traced running time" and "Running
+## time" in the context of the profiler. We use "Traced" to emphasize that this
+## is an estimation where we have more space in the UI.
+##
+## "Self time" is the time spent in the function itself, excluding the time spent
+## in the functions it called. "Running time" is the time spent in the function
+## itself, including the time spent in the functions it called.
+
+CallTreeSidebar--traced-running-time =
+    .label = Timp de execuție urmărit
+CallTreeSidebar--traced-self-time =
+    .label = Timp propriu urmărit
+CallTreeSidebar--running-time =
+    .label = Timp de execuție
+CallTreeSidebar--self-time =
+    .label = Timp propriu
+CallTreeSidebar--running-samples =
+    .label = Eșantioane de execuție
+CallTreeSidebar--self-samples =
+    .label = Eșantioane proprii
+CallTreeSidebar--running-size =
+    .label = Mărime de execuție
+CallTreeSidebar--self-size =
+    .label = Mărime proprie
+CallTreeSidebar--categories = Categorii
+CallTreeSidebar--implementation = Implementare
+CallTreeSidebar--running-milliseconds = Milisecunde de execuție
+CallTreeSidebar--running-sample-count = Număr eșantioane de execuție
+CallTreeSidebar--running-bytes = Octeți de execuție
+CallTreeSidebar--self-milliseconds = Milisecunde proprii
+CallTreeSidebar--self-sample-count = Număr eșantioane proprii
+CallTreeSidebar--self-bytes = Octeți proprii
+
+## CompareHome
+## This is used in the page to compare two profiles.
+## See: https://profiler.firefox.com/compare/
+
+CompareHome--instruction-title = Introdu URL-urile profilurilor pe care vrei să le compari
+CompareHome--instruction-content =
+    Instrumentul va extrage datele din pista și intervalul selectate pentru 
+    fiecare profil și le va pune în același ecran de vizualizare pentru ușurință la 
+    comparare.
+CompareHome--form-label-profile1 = Profilul 1:
+CompareHome--form-label-profile2 = Profilul 2:
+CompareHome--submit-button =
+    .value = Recuperează profilurile
+
+## ListOfPublishedProfiles
+## This is the component that displays all the profiles the user has uploaded.
+## It's displayed both in the homepage and in the uploaded recordings page.
+
+ListOfPublishedProfiles--uploaded-profile-information-list-empty = Nu a fost încărcat niciun profil încă!
+# This string is used below the 'Your recent uploaded recordings' list section.
+# Variables:
+#   $profilesRestCount (Number) - Remaining numbers of the uploaded profiles which are not listed under 'Your recent uploaded recordings'.
+ListOfPublishedProfiles--uploaded-profile-information-label = Vezi și gestionezi toate înregistrările (încă { $profilesRestCount })
+# Depending on the number of uploaded profiles, the message is different.
+# Variables:
+#   $uploadedProfileCount (Number) - Total numbers of the uploaded profiles.
+ListOfPublishedProfiles--uploaded-profile-information-list =
+    { $uploadedProfileCount ->
+        [one] Gestionează înregistrarea
+       *[other] Gestionează înregistrările
+    }
+
+## MarkerContextMenu
+## This is used as a context menu for the Marker Chart, Marker Table and Network
+## panels.
+
+MarkerContextMenu--set-selection-from-duration = Setează selecția de la durata marcajului
+MarkerContextMenu--start-selection-here = Începe selecția de aici
+MarkerContextMenu--end-selection-here = Termină selecția aici
+MarkerContextMenu--start-selection-at-marker-start = Începe selecția la <strong>începutul</strong> marcajului
+MarkerContextMenu--start-selection-at-marker-end = Începe selecția la <strong>sfârșitul</strong> marcajului
+MarkerContextMenu--end-selection-at-marker-start = Termină selecția la <strong>începutul</strong> marcajului
+MarkerContextMenu--end-selection-at-marker-end = Termină selecția la <strong>sfârșitul</strong> marcajului
+MarkerContextMenu--copy-description = Copiază descrierea
+MarkerContextMenu--copy-call-stack = Copiază stiva de apeluri
+MarkerContextMenu--copy-url = Copiază URL-ul
+MarkerContextMenu--copy-page-url = Copiază URL-ul paginii
+MarkerContextMenu--copy-as-json = Copiază ca JSON
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-receiver-thread = Selectează firul destinatarului „<strong>{ $threadName }</strong>”
+# This string is used on the marker context menu item when right clicked on an
+# IPC marker.
+# Variables:
+#   $threadName (String) - Name of the thread that will be selected.
+MarkerContextMenu--select-the-sender-thread = Selectează firul expeditorului „<strong>{ $threadName }</strong>”
 
 ## Tab Bar for the bottom half of the analysis UI.
 
