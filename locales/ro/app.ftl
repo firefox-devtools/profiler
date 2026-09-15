@@ -572,6 +572,58 @@ MenuButtons--metaInfo--source-map-success = Surse inițiale rezolvate pentru { $
 MenuButtons--metaInfo--source-map-no-match = Fără poziții în stivă în { $filename } care să corespundă acestei hărți-sursă.
 MenuButtons--metaInfo--source-map-error-invalid = Fișierul selectat nu este o hartă-sursă validă.
 MenuButtons--metaInfo--source-map-error-no-eligible = Profilul nu are niciun pachet JS cu URL-uri ale hărții-sursă.
+MenuButtons--metaInfo--source-map-error-failed = Nu s-a putut aplica această hartă-sursă la profil.
+MenuButtons--metaInfo--cpu-model = Model CPU:
+MenuButtons--metaInfo--cpu-cores = Nuclee CPU:
+MenuButtons--metaInfo--main-memory = Memorie principală:
+MenuButtons--index--show-moreInfo-button = Afișează mai multe
+MenuButtons--index--hide-moreInfo-button = Arată mai puțin
+# This string is used when we have the information about both physical and
+# logical CPU cores.
+# Variable:
+#   $physicalCPUs (Number), $logicalCPUs (Number) - Number of Physical and Logical CPU Cores
+MenuButtons--metaInfo--physical-and-logical-cpu =
+    { $physicalCPUs ->
+        [one]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } nucleu fizic, { $logicalCPUs } nucleu logic
+                [few] { $physicalCPUs } nucleu fizic, { $logicalCPUs } nuclee logice
+               *[other] { $physicalCPUs } nucleu fizic, { $logicalCPUs } de nuclee logice
+            }
+        [few]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } nuclee fizice, { $logicalCPUs } nucleu logic
+                [few] { $physicalCPUs } nuclee fizice, { $logicalCPUs } nuclee logice
+               *[other] { $physicalCPUs } nuclee fizice, { $logicalCPUs } de nuclee logice
+            }
+       *[other]
+            { $logicalCPUs ->
+                [one] { $physicalCPUs } de nuclee fizice, { $logicalCPUs } nucleu logic
+                [few] { $physicalCPUs } de nuclee fizice, { $logicalCPUs } nuclee logice
+               *[other] { $physicalCPUs } de nuclee fizice, { $logicalCPUs } de nuclee logice
+            }
+    }
+# This string is used when we only have the information about the number of
+# physical CPU cores.
+# Variable:
+#   $physicalCPUs (Number) - Number of Physical CPU Cores
+MenuButtons--metaInfo--physical-cpu =
+    { $physicalCPUs ->
+        [one] { $physicalCPUs } nucleu fizic
+        [few] { $physicalCPUs } nuclee fizice
+       *[other] { $physicalCPUs } de nuclee fizice
+    }
+# This string is used when we only have the information only the number of
+# logical CPU cores.
+# Variable:
+#   $logicalCPUs (Number) - Number of logical CPU Cores
+MenuButtons--metaInfo--logical-cpu =
+    { $logicalCPUs ->
+        [one] { $logicalCPUs } nucleu fizic
+        [few] { $logicalCPUs } nuclee fizice
+       *[other] { $logicalCPUs } de nuclee fizice
+    }
+MenuButtons--metaInfo--profiling-started = Înregistrarea a început la:
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
@@ -959,3 +1011,63 @@ SourceView--loading-url = Se așteaptă { $host }…
 # Displayed while a view in the bottom box is waiting for code to load from
 # the browser.
 SourceView--loading-browser-connection = Se așteaptă { -firefox-brand-name }…
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+BottomBox--source-code-not-available-title = Cod-sursă indisponibil
+# Displayed whenever the source view was not able to get the source code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+SourceView--source-not-available-text = Vezi <a>tichetul nr. #3741</a> pentru scenariile cu suport și îmbunătățirile planificate.
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Assembly refers to the low-level programming language.
+BottomBox--assembly-code-not-available-title = Cod de asamblare indisponibil
+# Displayed whenever the assembly view was not able to get the assembly code for
+# a file.
+# Elements:
+#   <a>link text</a> - A link to the github issue about supported scenarios.
+BottomBox--assembly-code-not-available-text = Vezi <a>tichetul nr. #4520</a> pentru scenariile cu suport și îmbunătățirile planificate.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Ieși din modul de ecran complet
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Ecran complet
+SourceView--close-button =
+    .title = Închide vizualizarea sursei
+
+## Code loading errors
+## These are displayed both in the source view and in the assembly view.
+## The string IDs here currently all start with SourceView for historical reasons.
+
+# Displayed below SourceView--cannot-obtain-source, if the profiler does not
+# know which URL to request source code from.
+SourceView--no-known-cors-url = Nu există URL-uri accesibile cu origine încrucișată cunoscute pentru acest fișier.
+# Displayed below SourceView--cannot-obtain-source, if there was a network error
+# when fetching the source code for a file.
+# Variables:
+#   $url (String) - The URL which we tried to get the source code from
+#   $networkErrorMessage (String) - The raw internal error message that was encountered by the network request, not localized
+SourceView--network-error-when-obtaining-source = A apărut o eroare de rețea la recuperarea URL-ului { $url }: { $networkErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser could not
+# be queried for source code using the symbolication API.
+# Variables:
+#   $browserConnectionErrorMessage (String) - The raw internal error message, not localized
+SourceView--browser-connection-error-when-obtaining-source = Imposibil de interogat API-ul de simbolizare al browserului: { $browserConnectionErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-error-when-obtaining-source = API-ul de simbolizare al browserului a dat o eroare: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a symbol server which is
+# running locally was queried for source code using the symbolication API, and
+# this query returned an error.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--local-symbol-server-api-error-when-obtaining-source = API-ul de simbolizare al serverului local de simboluri a dat o eroare: { $apiErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if the browser was queried
+# for source code using the symbolication API, and this query returned a malformed response.
+# Variables:
+#   $apiErrorMessage (String) - The raw internal error message from the API, not localized
+SourceView--browser-api-malformed-response-when-obtaining-source = API-ul de simbolizare al browserului a dat un răspuns format greșit: { $apiErrorMessage }
