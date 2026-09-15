@@ -566,6 +566,12 @@ MenuButtons--metaInfo--source-map-cancel = Anulează
 # Variable:
 #   $filename (String) - The bundle source the source map was applied to.
 MenuButtons--metaInfo--source-map-success = Surse inițiale rezolvate pentru { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Fără poziții în stivă în { $filename } care să corespundă acestei hărți-sursă.
+MenuButtons--metaInfo--source-map-error-invalid = Fișierul selectat nu este o hartă-sursă validă.
+MenuButtons--metaInfo--source-map-error-no-eligible = Profilul nu are niciun pachet JS cu URL-uri ale hărții-sursă.
 
 ## Overhead refers to the additional resources used to run the profiler.
 ## These strings are displayed at the bottom of the "Profile Info" panel.
@@ -576,8 +582,89 @@ MenuButtons--metaOverheadStatistics-max = Max
 MenuButtons--metaOverheadStatistics-min = Min
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Overhead
     .title = Timp pentru eșantionarea tutor firelor.
+MenuButtons--metaOverheadStatistics-statkeys-interval = Interval
+    .title = Interval observat între două eșantioane.
+MenuButtons--metaOverheadStatistics-statkeys-lockings = Blocaje
+    .title = Timp pentru achiziția blocajului înainte de eșantionare.
 MenuButtons--metaOverheadStatistics-overhead-duration = Durate overhead:
 MenuButtons--metaOverheadStatistics-overhead-percentage = Procentaj overhead:
+MenuButtons--metaOverheadStatistics-profiled-duration = Durată profilată:
+
+## Publish panel
+## These strings are used in the publishing panel.
+
+MenuButtons--publish--renderCheckbox-label-hidden-threads = Include firele ascunse
+MenuButtons--publish--renderCheckbox-label-include-other-tabs = Include datele din celelalte file
+MenuButtons--publish--renderCheckbox-label-hidden-time = Include intervalul ascuns de timp
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Include capturile de ecran
+MenuButtons--publish--renderCheckbox-label-resource = Include URL-urile și căile resurselor
+MenuButtons--publish--renderCheckbox-label-extension = Include informațiile despre extensii
+MenuButtons--publish--renderCheckbox-label-preference = Include valorile despre preferințe
+MenuButtons--publish--renderCheckbox-label-private-browsing = Include datele din ferestrele de navigare privată
+MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
+    .title = Profilul conține date de navigare privată
+MenuButtons--publish--renderCheckbox-label-argument-values = Include valorile argumentelor funcțiilor de urmărire a execuției JavaScript
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Profilul conține valori ale argumentelor funcțiilor înregistrate din pagină, care pot include date cu caracter personal
+MenuButtons--publish--share-performance-profile = Partajează profilul de performanță
+MenuButtons--publish--reshare-performance-profile = Repartajează profilul de performanță
+MenuButtons--publish--download-performance-profile = Descarcă profilul de performanță
+MenuButtons--publish--info-description = Încarcă profilul și fă-l accesibil oricui are linkul.
+MenuButtons--publish--download-info-description = Salvează profilul ca fișier pe calculator.
+MenuButtons--publish--info-description-default = Datele tale cu caracter personal sunt eliminate implicit.
+MenuButtons--publish--info-description-firefox-nightly2 = Profilul este din { -firefox-nightly-brand-name }. Deci, implicit, include majoritatea informațiilor.
+MenuButtons--publish--include-additional-data = Include date suplimentare care pot fi identificabile
+MenuButtons--publish--button-upload = Încarcă
+MenuButtons--publish--upload-title = Se încarcă profilul…
+MenuButtons--publish--cancel-upload = Anulează încărcarea
+MenuButtons--publish--message-something-went-wrong = O, nu! Ceva nu a mers la încărcarea profilului.
+MenuButtons--publish--message-try-again = Încearcă din nou
+MenuButtons--publish--download = Descarcă
+MenuButtons--publish--compressing = Compresie în curs…
+MenuButtons--publish--error-while-compressing = Eroare la comprimare. Încearcă să debifezi unele casete de verificare pentru reducerea dimensiunii profilului.
+
+## NetworkSettings
+## This is used in the network chart.
+
+NetworkSettings--panel-search =
+    .label = Filtrează rețelele:
+    .title = Afișează numai cereri în rețea care se potrivesc cu o anumită denumire
+
+## Timestamp formatting primitive
+
+# This displays a date in a shorter rendering, depending on the proximity of the
+# date from the current date. You can look in src/utils/l10n-ftl-functions.js
+# for more information.
+# This is especially used in the list of published profiles panel.
+# There shouldn't need to change this in translations, but having it makes the
+# date pass through Fluent to be properly localized.
+# The function SHORTDATE is specific to the profiler. It changes the rendering
+# depending on the proximity of the date from the current date.
+# Variables:
+#   $date (Date) - The date to display in a shorter way
+NumberFormat--short-date = { SHORTDATE($date) }
+
+## PanelSearch
+## The component that is used for all the search input hints in the application.
+
+PanelSearch--search-field-hint = Știai că poți folosi virgula (,) ca să cauți folosind mai mulți termeni?
+
+## Profile Name Button
+
+ProfileName--edit-profile-name-button =
+    .title = Editează denumirea profilului
+ProfileName--edit-profile-name-input =
+    .aria-label = Numele profilului
+    .title = Editează denumirea profilului
+
+## Profile Delete Button
+
+# This string is used on the tooltip of the published profile links delete button in uploaded recordings page.
+# Variables:
+#   $smallProfileName (String) - Shortened name for the published Profile.
+ProfileDeleteButton--delete-button =
+    .label = Șterge
+    .title = Dă clic aici pentru ștergerea profilului { $smallProfileName }
 
 ## Tab Bar for the bottom half of the analysis UI.
 
