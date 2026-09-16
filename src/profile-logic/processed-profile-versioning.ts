@@ -3433,6 +3433,56 @@ const _upgraders: {
       frameTable.address = new Uint32Array(frameTable.address);
     }
   },
+  [72]: (profile: any) => {
+    const piiCategoriesBySchemaName = new Map<string, Map<string, string[]>>([
+      [
+        'Network',
+        new Map([
+          ['URI', ['url']],
+          ['RedirectURI', ['url']],
+          ['isPrivateBrowsing', ['private-browsing']],
+        ]),
+      ],
+      ['Text', new Map([['name', ['url', 'extension-id']]])],
+      ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
+    ]);
+
+    for (const schema of profile.meta.markerSchema) {
+      const piiCategoriesByField = piiCategoriesBySchemaName.get(schema.name);
+      if (!piiCategoriesByField) {
+        continue;
+      }
+
+      for (const field of schema.fields) {
+        const containsPII = piiCategoriesByField.get(field.key);
+        if (containsPII && !field.containsPII) {
+          field.containsPII = containsPII;
+        }
+      }
+
+      const existingFieldKeys = new Set(
+        schema.fields.map((field: any) => field.key)
+      );
+      for (const [key, containsPII] of piiCategoriesByField) {
+        if (!existingFieldKeys.has(key)) {
+          schema.fields.push({
+            key,
+            format: 'string',
+            hidden: true,
+            containsPII,
+          });
+        }
+      }
+    }
+  },
+  [73]: (profile: any) => {
+    for (const schema of profile.meta.markerSchema ?? []) {
+      if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+        schema.tableLabel =
+          "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

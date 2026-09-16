@@ -6,7 +6,11 @@ import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../app-logic/constants';
-import { toUint8OrUint16Array, valuesFitInUint8 } from '../utils/typed-arrays';
+import {
+  toFloat64ArraySetNullToZero,
+  toUint8OrUint16Array,
+  valuesFitInUint8,
+} from '../utils/typed-arrays';
 
 import type {
   RawProfileSharedData,
@@ -208,6 +212,22 @@ export function finishRawSamplesTableBuilder(
   };
 }
 
+export function getRawMarkerTableBuilder(): RawMarkerTableBuilder {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: [],
+    name: [],
+    startTime: [],
+    endTime: [],
+    phase: [],
+    category: [],
+    length: 0,
+  };
+}
+
 export function getRawMarkerTableBuilderFromExisting(
   markerTable: RawMarkerTable
 ): RawMarkerTableBuilder {
@@ -228,6 +248,19 @@ export function getRawMarkerTableBuilderFromExisting(
     builder.threadId = markerTable.threadId.slice();
   }
   return builder;
+}
+
+export function finishRawMarkerTableBuilder(
+  builder: RawMarkerTableBuilder
+): RawMarkerTable {
+  return {
+    ...builder,
+    // The nulls in these columns become zeros. This is fine: whether a marker's
+    // start / end time is meaningful is determined by its phase, and the times
+    // which are not used are allowed to be arbitrary values.
+    startTime: toFloat64ArraySetNullToZero(builder.startTime),
+    endTime: toFloat64ArraySetNullToZero(builder.endTime),
+  };
 }
 
 export function getRawStackTableBuilderWithExistingContents(
@@ -451,22 +484,6 @@ export function getEmptyNativeSymbolTable(): NativeSymbolTable {
   };
 }
 
-export function getEmptyRawMarkerTable(): RawMarkerTableBuilder {
-  // Important!
-  // If modifying this structure, please update all callers of this function to ensure
-  // that they are pushing on correctly to the data structure. These pushes may not
-  // be caught by the type system.
-  return {
-    data: [],
-    name: [],
-    startTime: [],
-    endTime: [],
-    phase: [],
-    category: [],
-    length: 0,
-  };
-}
-
 export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
@@ -625,7 +642,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     samples: finishRawSamplesTableBuilder(
       getRawSamplesTableBuilderWithEventDelay()
     ),
-    markers: getEmptyRawMarkerTable(),
+    markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
   };
 
   return {

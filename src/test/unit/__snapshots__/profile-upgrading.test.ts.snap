@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -3589,11 +3589,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3653,11 +3653,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3699,11 +3699,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3745,11 +3745,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3794,11 +3794,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3840,11 +3840,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "gdbus",
       "pausedRanges": Array [],
@@ -3901,11 +3901,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3947,11 +3947,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -3993,11 +3993,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4039,11 +4039,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4085,11 +4085,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4131,11 +4131,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4177,11 +4177,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4223,11 +4223,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4269,11 +4269,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "firefox",
       "pausedRanges": Array [],
@@ -4315,11 +4315,11 @@ Object {
       "markers": Object {
         "category": Array [],
         "data": Array [],
-        "endTime": Array [],
+        "endTime": Float64Array [],
         "length": 0,
         "name": Array [],
         "phase": Array [],
-        "startTime": Array [],
+        "startTime": Float64Array [],
       },
       "name": "FS Broker 5906",
       "pausedRanges": Array [],
@@ -7554,6 +7554,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "display": Array [
@@ -7631,6 +7632,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -7664,6 +7668,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -7812,7 +7820,32 @@ Object {
           "marker-table",
           "timeline-network",
         ],
-        "fields": Array [],
+        "fields": Array [
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "URI",
+          },
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "RedirectURI",
+          },
+          Object {
+            "containsPII": Array [
+              "private-browsing",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "isPrivateBrowsing",
+          },
+        ],
         "name": "Network",
       },
       Object {
@@ -7834,7 +7867,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8949,6 +8982,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "display": Array [
@@ -9026,6 +9060,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -9059,6 +9096,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -9207,7 +9248,32 @@ Object {
           "marker-table",
           "timeline-network",
         ],
-        "fields": Array [],
+        "fields": Array [
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "URI",
+          },
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "RedirectURI",
+          },
+          Object {
+            "containsPII": Array [
+              "private-browsing",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "isPrivateBrowsing",
+          },
+        ],
         "name": "Network",
       },
       Object {
@@ -9229,7 +9295,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10514,6 +10580,7 @@ Object {
           },
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "display": Array [
@@ -10591,6 +10658,9 @@ Object {
             "label": "Type",
           },
           Object {
+            "containsPII": Array [
+              "preference-value",
+            ],
             "format": "string",
             "key": "prefValue",
             "label": "Value",
@@ -10624,6 +10694,10 @@ Object {
         ],
         "fields": Array [
           Object {
+            "containsPII": Array [
+              "url",
+              "extension-id",
+            ],
             "format": "string",
             "key": "name",
             "label": "Details",
@@ -10772,7 +10846,32 @@ Object {
           "marker-table",
           "timeline-network",
         ],
-        "fields": Array [],
+        "fields": Array [
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "URI",
+          },
+          Object {
+            "containsPII": Array [
+              "url",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "RedirectURI",
+          },
+          Object {
+            "containsPII": Array [
+              "private-browsing",
+            ],
+            "format": "string",
+            "hidden": true,
+            "key": "isPrivateBrowsing",
+          },
+        ],
         "name": "Network",
       },
       Object {
@@ -10794,7 +10893,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 71,
+    "preprocessedProfileVersion": 73,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

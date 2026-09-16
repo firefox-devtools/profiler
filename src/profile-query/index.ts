@@ -71,6 +71,7 @@ import { collectProfileInfo } from './formatters/profile-info';
 import { collectProfileMeta } from './formatters/profile-meta';
 import {
   collectThreadInfo,
+  collectThreadList,
   collectThreadSamples,
   collectThreadSamplesTopDown,
   collectThreadSamplesBottomUp,
@@ -113,6 +114,8 @@ import type {
   StrategySelectResult,
   CallTreeSummaryStrategy,
   ThreadInfoResult,
+  ThreadListOptions,
+  ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
@@ -284,6 +287,18 @@ export class ProfileQuerier {
       this._processIndexMap,
       this._timestampManager,
       counterHandle
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  async threadList(
+    options?: ThreadListOptions
+  ): Promise<WithContext<ThreadListResult>> {
+    const result = collectThreadList(
+      this._store,
+      this._threadMap,
+      this._processIndexMap,
+      options
     );
     return { ...result, context: this._getContext() };
   }

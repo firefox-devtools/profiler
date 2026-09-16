@@ -16,6 +16,7 @@ import {
   formatViewRangeResult,
   formatFilterStackResult,
   formatThreadInfoResult,
+  formatThreadListResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
   formatProfileInfoResult,
@@ -70,6 +71,8 @@ export function formatOutput(
       return formatViewRangeResult(result);
     case 'thread-info':
       return formatThreadInfoResult(result);
+    case 'thread-list':
+      return formatThreadListResult(result);
     case 'marker-stack':
       return formatMarkerStackResult(result);
     case 'marker-info':

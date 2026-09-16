@@ -22,6 +22,7 @@ import {
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
+import { FILE_IO_TABLE_LABEL } from '../../profile-logic/marker-schema';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
@@ -1075,6 +1076,88 @@ describe('source table processing', function () {
 });
 
 describe('Marker schema conversion', function () {
+  it('should add PII categories to marker schema fields', function () {
+    const geckoProfile = createGeckoProfile();
+    geckoProfile.meta.markerSchema.push(
+      {
+        name: 'Network',
+        display: [],
+        data: [],
+      },
+      {
+        name: 'Text',
+        display: [],
+        data: [{ key: 'name', format: 'unique-string' }],
+      },
+      {
+        name: 'PreferenceRead',
+        display: [],
+        data: [{ key: 'prefValue', format: 'string' }],
+      }
+    );
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const schemasByName = Object.fromEntries(
+      processedProfile.meta.markerSchema.map((schema) => [schema.name, schema])
+    );
+
+    expect(schemasByName.Network.fields).toEqual([
+      { key: 'URI', format: 'string', hidden: true, containsPII: ['url'] },
+      {
+        key: 'RedirectURI',
+        format: 'string',
+        hidden: true,
+        containsPII: ['url'],
+      },
+      {
+        key: 'isPrivateBrowsing',
+        format: 'string',
+        hidden: true,
+        containsPII: ['private-browsing'],
+      },
+    ]);
+    expect(schemasByName.Text.fields).toEqual([
+      {
+        key: 'name',
+        format: 'unique-string',
+        containsPII: ['url', 'extension-id'],
+      },
+    ]);
+    expect(schemasByName.PreferenceRead.fields).toEqual([
+      {
+        key: 'prefValue',
+        format: 'string',
+        containsPII: ['preference-value'],
+      },
+    ]);
+  });
+
+  function getConvertedFileIoTableLabel(tableLabel?: string) {
+    const geckoProfile = createGeckoProfile();
+    geckoProfile.meta.markerSchema.push({
+      name: 'FileIO',
+      tableLabel,
+      display: ['marker-chart', 'marker-table'],
+      data: [],
+    });
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const fileIoSchema = processedProfile.meta.markerSchema.find(
+      (schema) => schema.name === 'FileIO'
+    );
+
+    return fileIoSchema?.tableLabel;
+  }
+
+  it('adds the FileIO table label when Gecko does not provide one', function () {
+    expect(getConvertedFileIoTableLabel()).toBe(FILE_IO_TABLE_LABEL);
+  });
+
+  it('preserves a FileIO table label provided by Gecko', function () {
+    const geckoTableLabel = 'Custom FileIO label';
+    expect(getConvertedFileIoTableLabel(geckoTableLabel)).toBe(geckoTableLabel);
+  });
+
   it('should preserve optional marker schema properties', function () {
     const geckoProfile = createGeckoProfile();
 
