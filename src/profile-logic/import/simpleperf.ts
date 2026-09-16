@@ -34,7 +34,8 @@ import {
   type RawSamplesTableBuilder,
   getRawMarkerTableBuilder,
   finishRawMarkerTableBuilder,
-  getEmptyNativeSymbolTable,
+  getRawNativeSymbolTableBuilder,
+  finishRawNativeSymbolTableBuilder,
   getEmptySourceTable,
   getEmptySourceLocationTable,
 } from 'firefox-profiler/profile-logic/data-structures';
@@ -240,7 +241,9 @@ class FirefoxSharedData {
       frameTable: this.frameTable.toJson(),
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
-      nativeSymbols: getEmptyNativeSymbolTable(),
+      nativeSymbols: finishRawNativeSymbolTableBuilder(
+        getRawNativeSymbolTableBuilder()
+      ),
       sources: getEmptySourceTable(),
       stringArray: this.stringArray,
       sourceLocationTable: getEmptySourceLocationTable(),
