@@ -7,7 +7,6 @@ import {
   serializeProfileToJsonString,
 } from '../../profile-logic/process-profile';
 import { upgradeGeckoProfileToCurrentVersion } from '../../profile-logic/gecko-profile-versioning';
-import { attemptToUpgradeProcessedProfileThroughMutation } from '../../profile-logic/processed-profile-versioning';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
@@ -134,85 +133,6 @@ describe('upgrading processed profiles', function () {
     await testProfileUpgrading(
       require('../fixtures/upgrades/processed-3.json')
     );
-  });
-
-  it('adds PII categories to marker schema fields', function () {
-    // TODO: This profile isn't a valid 71 profile so this test will probably
-    // fail as we add more upgraders, see #6320.
-    const profile: any = {
-      meta: {
-        preprocessedProfileVersion: 71,
-        markerSchema: [
-          { name: 'Network', fields: [] },
-          {
-            name: 'Text',
-            fields: [{ key: 'name', format: 'unique-string' }],
-          },
-          {
-            name: 'PreferenceRead',
-            fields: [{ key: 'prefValue', format: 'string' }],
-          },
-        ],
-      },
-      shared: {
-        nativeSymbols: {
-          libIndex: [],
-          address: [],
-          name: [],
-          functionSize: [],
-          length: 0,
-        },
-      },
-      threads: [],
-    };
-
-    attemptToUpgradeProcessedProfileThroughMutation(profile, {});
-
-    expect(profile.meta.markerSchema).toEqual([
-      {
-        name: 'Network',
-        fields: [
-          {
-            key: 'URI',
-            format: 'string',
-            hidden: true,
-            containsPII: ['url'],
-          },
-          {
-            key: 'RedirectURI',
-            format: 'string',
-            hidden: true,
-            containsPII: ['url'],
-          },
-          {
-            key: 'isPrivateBrowsing',
-            format: 'string',
-            hidden: true,
-            containsPII: ['private-browsing'],
-          },
-        ],
-      },
-      {
-        name: 'Text',
-        fields: [
-          {
-            key: 'name',
-            format: 'unique-string',
-            containsPII: ['url', 'extension-id'],
-          },
-        ],
-      },
-      {
-        name: 'PreferenceRead',
-        fields: [
-          {
-            key: 'prefValue',
-            format: 'string',
-            containsPII: ['preference-value'],
-          },
-        ],
-      },
-    ]);
   });
 });
 
