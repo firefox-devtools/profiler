@@ -636,7 +636,9 @@ describe('mergeThreads function', function () {
     // New marker table doesn't have to be sorted. Because we sort it while we
     // are getting it from selector anyway.
     expect(markerStartTimes).toEqual([2, 3, 6, 1, 3, 8]);
-    expect(markerEndTimes).toEqual([null, 5, 7, null, 4, 9]);
+    // The end times of instant markers are meaningless; they're stored as zero
+    // in the Float64Array end time column.
+    expect(markerEndTimes).toEqual([0, 5, 7, 0, 4, 9]);
     expect(markerThreadIds).toEqual([0, 0, 0, 1, 1, 1]);
   });
 
