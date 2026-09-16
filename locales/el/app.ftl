@@ -564,7 +564,7 @@ MenuButtons--metaInfo--source-map-success = Οι αρχικές πηγές επ�
 # Shown after symbolication finished but no stack positions matched the map.
 # Variable:
 #   $filename (String) - The bundle source the source map was applied to.
-MenuButtons--metaInfo--source-map-no-match = Καμία καταχώρηση στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
+MenuButtons--metaInfo--source-map-no-match = Καμία θέση στοίβας στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
 MenuButtons--metaInfo--source-map-error-invalid = Το επιλεγμένο αρχείο δεν είναι συμβατή πηγή χάρτη.
 MenuButtons--metaInfo--source-map-error-no-eligible = Αυτό το προφίλ δεν έχει πακέτα JS με URL χαρτών πηγής.
 MenuButtons--metaInfo--source-map-error-failed = Δεν ήταν δυνατή η εφαρμογή αυτού του χάρτη πηγής στο προφίλ.
