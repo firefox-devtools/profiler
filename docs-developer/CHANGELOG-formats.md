@@ -2,7 +2,7 @@
 
 This file documents all changes in the profiler gecko and processed formats.
 
-Note that this is not an exhaustive list. Processed profile format upgraders can be found in [processed-profile-versioning.jt](../src/profile-logic/processed-profile-versioning.ts) and gecko profile format upgraders can be found in [gecko-profile-versioning.jt](../src/profile-logic/gecko-profile-versioning.ts). Please refer to them for older upgraders or for exact implementations.
+Note that this is not an exhaustive list. Processed profile format upgraders can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts) and gecko profile format upgraders can be found in [gecko-profile-versioning.ts](../src/profile-logic/gecko-profile-versioning.ts). Please refer to them for older upgraders or for exact implementations.
 
 ## Processed profile format
 
