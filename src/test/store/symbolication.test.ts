@@ -25,7 +25,10 @@ import {
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
-import { getEmptyRawMarkerTable } from '../../profile-logic/data-structures';
+import {
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
+} from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,
@@ -650,7 +653,7 @@ function _createUnsymbolicatedProfile() {
     },
   };
 
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
   const markerIndex = markers.length++;
   markers.data[markerIndex] = markerData;
   markers.name[markerIndex] = stringTable.indexForString('MarkerWithStack');
@@ -659,7 +662,7 @@ function _createUnsymbolicatedProfile() {
   markers.phase[markerIndex] = INTERVAL;
   markers.category[markerIndex] = 0;
 
-  thread.markers = markers;
+  thread.markers = finishRawMarkerTableBuilder(markers);
 
   return profile;
 }

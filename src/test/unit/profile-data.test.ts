@@ -23,6 +23,7 @@ import {
   findAddressProofForFile,
   calculateFunctionSizeLowerBound,
   computeFrameTableFromRawFrameTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   getNativeSymbolsForCallNode,
   getNativeSymbolInfo,
   computeTimeColumnForRawSamplesTable,
@@ -1785,14 +1786,12 @@ describe('getNativeSymbolInfo', function () {
       shared.frameTable,
       profile.meta.categories
     );
+    const nativeSymbols = computeNativeSymbolTableFromRawNativeSymbolTable(
+      shared.nativeSymbols
+    );
 
     expect(
-      getNativeSymbolInfo(
-        symSomeFunc,
-        shared.nativeSymbols,
-        frameTable,
-        stringTable
-      )
+      getNativeSymbolInfo(symSomeFunc, nativeSymbols, frameTable, stringTable)
     ).toEqual({
       name: 'symSomeFunc',
       address: 0x1000,
@@ -1801,12 +1800,7 @@ describe('getNativeSymbolInfo', function () {
       libIndex: profile.libs.findIndex((l) => l.name === 'XUL'),
     });
     expect(
-      getNativeSymbolInfo(
-        symOtherFunc,
-        shared.nativeSymbols,
-        frameTable,
-        stringTable
-      )
+      getNativeSymbolInfo(symOtherFunc, nativeSymbols, frameTable, stringTable)
     ).toEqual({
       name: 'symOtherFunc',
       address: 0x2000,
