@@ -133,6 +133,9 @@ SESSION STATE
   "profiler-cli permalink" prints a profiler.firefox.com URL of the current
   view (thread, zoom, filters). Requires a profile loaded from a URL; publishing
   from the CLI is not supported yet. "--short" returns a share.firefox.dev link.
+  Add "--permalink" (or "--short-permalink") to any query to link to exactly
+  what it showed, including ephemeral --thread, --search, and filter flags:
+    profiler-cli thread markers --search DOMEvent --permalink
 
 
 HANDLE SYSTEM

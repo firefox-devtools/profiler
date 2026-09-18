@@ -38,6 +38,7 @@ import {
 import { storeWithProfile } from '../../fixtures/stores';
 import { profilePublished } from 'firefox-profiler/actions/publish';
 import { triggerLoadingFromUrl } from 'firefox-profiler/actions/receive-profile';
+import { changeIncludeIdleSamples } from 'firefox-profiler/actions/profile-view';
 
 describe('ProfileQuerier', function () {
   describe('pushViewRange', function () {
@@ -805,6 +806,61 @@ describe('ProfileQuerier', function () {
       expect(url.searchParams.get('range')).toBe('5000m20000');
       expect(url.searchParams.get('transforms')).toBe('mf-0');
       expect(url.searchParams.get('profileName')).toBe('my profile');
+    });
+
+    it('layers ephemeral view settings on top of the session state', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(profilePublished('abc123', 'my profile', null));
+      // The CLI loader excludes idle samples by default, unlike the web.
+      store.dispatch(changeIncludeIdleSamples(false));
+
+      const result = await querier.permalink({
+        tab: 'calltree',
+        callTreeSearch: 'A',
+        includeIdle: true,
+        invertCallstack: true,
+        sampleFilters: [{ type: 'merge', funcIndexes: [1] }],
+      });
+      const url = new URL(result.url);
+      expect(url.searchParams.get('search')).toBe('A');
+      expect(url.searchParams.has('hideIdleSamples')).toBe(false);
+      expect(url.searchParams.has('invertCallstack')).toBe(true);
+      expect(url.searchParams.get('transforms')).toBe('mf-1');
+
+      // None of it leaks into the session.
+      const status = await querier.getStatus();
+      expect(status.filterStacks).toEqual([]);
+      const plain = new URL((await querier.permalink()).url);
+      expect(plain.searchParams.get('search')).toBeNull();
+      expect(plain.searchParams.has('hideIdleSamples')).toBe(true);
+      expect(plain.searchParams.has('invertCallstack')).toBe(false);
+    });
+
+    it('links to a marker view with the marker selected in its thread', async function () {
+      const profile = getProfileWithMarkers(
+        [['Parent marker', 10, null, { type: 'tracing', category: 'Test' }]],
+        [['GPU marker', 20, null, { type: 'tracing', category: 'Test' }]]
+      );
+      const store = storeWithProfile(profile);
+      store.dispatch(profilePublished('abc123', 'p', null));
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      await querier.threadSelect('t-0');
+      const markers = await querier.threadMarkers('t-1', { list: true });
+      const handle = markers.flatMarkers![0].handle;
+
+      const result = await querier.permalink({
+        tab: 'marker-table',
+        markerHandle: handle,
+        markerSearch: 'GPU',
+      });
+      const url = new URL(result.url);
+      expect(url.pathname).toBe('/public/abc123/marker-table/');
+      expect(url.searchParams.get('thread')).toBe('1');
+      expect(url.searchParams.get('marker')).toBe('0');
+      expect(url.searchParams.get('markerSearch')).toBe('GPU');
     });
 
     it('supports from-url profiles', async function () {

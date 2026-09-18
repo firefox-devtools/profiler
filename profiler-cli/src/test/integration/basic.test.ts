@@ -82,6 +82,22 @@ describe('profiler-cli basic functionality', () => {
     expect(output).toContain('Publishing from profiler-cli is not supported');
   });
 
+  it('--permalink reports why no link is available without failing the command', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const text = await cli(ctx, ['profile', 'info', '--permalink']);
+    expect(text.stdout).toContain('Permalink unavailable:');
+    expect(text.stdout).toContain(
+      'Publishing from profiler-cli is not supported'
+    );
+
+    const json = await cli(ctx, ['profile', 'info', '--permalink', '--json']);
+    const parsed = JSON.parse(json.stdout);
+    expect(parsed.type).toBe('profile-info');
+    expect(parsed.permalink).toBeNull();
+    expect(parsed.permalinkError).toContain('not supported yet');
+  });
+
   it('profile info works after load', async () => {
     await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 

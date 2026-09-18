@@ -100,6 +100,8 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
 | `--to <src-N>`         | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
 | `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
+| `--permalink`          | Also print a profiler.firefox.com URL for the view the command shows (published profiles only)                                                           |
+| `--short-permalink`    | Like `--permalink`, shortened through share.firefox.dev                                                                                                  |
 
 ## Sample Filter Flags
 

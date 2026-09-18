@@ -7,7 +7,7 @@
  */
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import type { CommandResult } from './protocol';
+import type { CommandResult, PermalinkOutcome } from './protocol';
 import {
   formatStatusResult,
   formatPermalinkResult,
@@ -45,15 +45,34 @@ import {
  */
 export function formatOutput(
   result: string | CommandResult,
-  jsonFlag: boolean
+  jsonFlag: boolean,
+  permalink?: PermalinkOutcome
 ): string {
   if (jsonFlag) {
-    if (typeof result === 'string') {
-      return JSON.stringify({ type: 'text', result }, null, 2);
+    const object =
+      typeof result === 'string' ? { type: 'text', result } : result;
+    if (permalink === undefined) {
+      return JSON.stringify(object, null, 2);
     }
-    return JSON.stringify(result, null, 2);
+    const withPermalink =
+      'error' in permalink
+        ? { ...object, permalink: null, permalinkError: permalink.error }
+        : { ...object, permalink: formatPermalinkResult(permalink) };
+    return JSON.stringify(withPermalink, null, 2);
   }
 
+  const text = formatText(result);
+  if (permalink === undefined) {
+    return text;
+  }
+  const permalinkLine =
+    'error' in permalink
+      ? `Permalink unavailable: ${permalink.error}`
+      : `Permalink: ${formatPermalinkResult(permalink)}`;
+  return `${text}\n\n${permalinkLine}`;
+}
+
+function formatText(result: string | CommandResult): string {
   if (typeof result === 'string') {
     return result;
   }
