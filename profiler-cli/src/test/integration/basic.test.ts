@@ -73,6 +73,15 @@ describe('profiler-cli basic functionality', () => {
     expect(files).toContain('current.txt');
   });
 
+  it('permalink refuses a profile loaded from a local file', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, ['permalink']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('Publishing from profiler-cli is not supported');
+  });
+
   it('profile info works after load', async () => {
     await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 

@@ -155,6 +155,16 @@ export type SessionContext = {
  */
 export type WithContext<T> = T & { context: SessionContext };
 
+// ===== Permalink Command =====
+
+export type PermalinkResult = {
+  type: 'permalink';
+  /** Full profiler.firefox.com URL encoding the current session view. */
+  url: string;
+  /** share.firefox.dev URL, only when shortening was requested. */
+  shortUrl: string | null;
+};
+
 // ===== Status Command =====
 
 export type StatusResult = {

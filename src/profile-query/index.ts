@@ -35,7 +35,11 @@ import {
   getLastSelectedCallTreeSummaryStrategy,
   getProfileSpecificState,
   getSymbolServerUrl,
+  getDataSource,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
+import { urlFromState } from 'firefox-profiler/app-logic/url-handling';
+import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import {
   commitRange,
   popCommittedRanges,
@@ -102,6 +106,7 @@ import type {
 } from 'firefox-profiler/types';
 import type {
   StatusResult,
+  PermalinkResult,
   SessionContext,
   ContextThreadInfo,
   WithContext,
@@ -153,6 +158,8 @@ function toSourceEntry(source: EligibleSource): SourceEntry {
     sourceMap: toSourceMapLocation(source.sourceMapURL),
   };
 }
+
+const PROFILER_FRONTEND_ORIGIN = 'https://profiler.firefox.com';
 
 export class ProfileQuerier {
   _store: Store;
@@ -1240,6 +1247,29 @@ export class ProfileQuerier {
       filterStacks,
       callTreeSummaryStrategy: this._getEffectiveStrategy(state),
     };
+  }
+
+  /**
+   * Build a profiler.firefox.com URL for the current session view: selected
+   * threads, committed zoom ranges, transforms, strategy, and so on. Only
+   * profiles that are already reachable by URL can be linked to. Local files
+   * would need publishing first, which the CLI does not support yet.
+   */
+  async permalink(shorten: boolean = false): Promise<PermalinkResult> {
+    const state = this._store.getState();
+    const dataSource = getDataSource(state);
+    if (dataSource !== 'public' && dataSource !== 'from-url') {
+      throw new Error(
+        'This profile is not reachable by URL, so there is no link to share. ' +
+          'Publishing from profiler-cli is not supported yet: upload the profile ' +
+          'from profiler.firefox.com, then load the resulting URL with ' +
+          '"profiler-cli load <url>".'
+      );
+    }
+
+    const url = PROFILER_FRONTEND_ORIGIN + urlFromState(getUrlState(state));
+    const shortUrl = shorten ? await shortenUrl(url) : null;
+    return { type: 'permalink', url, shortUrl };
   }
 
   /**
