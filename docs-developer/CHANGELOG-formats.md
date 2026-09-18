@@ -2,9 +2,22 @@
 
 This file documents all changes in the profiler gecko and processed formats.
 
-Note that this is not an exhaustive list. Processed profile format upgraders can be found in [processed-profile-versioning.jt](../src/profile-logic/processed-profile-versioning.ts) and gecko profile format upgraders can be found in [gecko-profile-versioning.jt](../src/profile-logic/gecko-profile-versioning.ts). Please refer to them for older upgraders or for exact implementations.
+Note that this is not an exhaustive list. Processed profile format upgraders can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts) and gecko profile format upgraders can be found in [gecko-profile-versioning.ts](../src/profile-logic/gecko-profile-versioning.ts). Please refer to them for older upgraders or for exact implementations.
 
 ## Processed profile format
+
+### Version 74
+
+The columns of the native symbol table (`profile.shared.nativeSymbols`) can now optionally be stored as typed arrays, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
+
+The "function size not known" sentinel value has changed from `null` to `-1` in both representations (JSON and JSLB).
+
+The column types are as follows:
+
+- `libIndex` (`Int32Array`)
+- `address` (`Uint32Array`)
+- `name` (`Int32Array`)
+- `functionSize` (`Int32Array`)
 
 ### Version 73
 

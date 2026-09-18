@@ -10,7 +10,8 @@ import { adjustMarkerTimestamps } from './process-profile';
 import {
   getEmptyProfile,
   getEmptyResourceTable,
-  getEmptyNativeSymbolTable,
+  getRawNativeSymbolTableBuilder,
+  finishRawNativeSymbolTableBuilder,
   finishRawFrameTableBuilder,
   finishRawSamplesTableBuilder,
   getRawFrameTableBuilder,
@@ -57,7 +58,7 @@ import type {
   FuncTable,
   RawFrameTable,
   Lib,
-  NativeSymbolTable,
+  RawNativeSymbolTable,
   ResourceTable,
   RawSamplesTable,
   RawStackTable,
@@ -883,13 +884,13 @@ function mergeNativeSymbolTables(
   translationMapsForStrings: TranslationMapForStrings[],
   translationMapsForLibs: TranslationMapForLibs[]
 ): {
-  nativeSymbols: NativeSymbolTable;
+  nativeSymbols: RawNativeSymbolTable;
   translationMaps: TranslationMapForNativeSymbols[];
 } {
   const mapOfInsertedNativeSymbols: Map<string, IndexIntoNativeSymbolTable> =
     new Map();
   const translationMaps: TranslationMapForNativeSymbols[] = [];
-  const newNativeSymbols = getEmptyNativeSymbolTable();
+  const newNativeSymbols = getRawNativeSymbolTableBuilder();
 
   profiles.forEach((profile, profileIndex) => {
     const oldLibToNewLibPlusOne = translationMapsForLibs[profileIndex];
@@ -935,7 +936,10 @@ function mergeNativeSymbolTables(
     translationMaps.push(oldNativeSymbolToNewNativeSymbolPlusOne);
   });
 
-  return { nativeSymbols: newNativeSymbols, translationMaps };
+  return {
+    nativeSymbols: finishRawNativeSymbolTableBuilder(newNativeSymbols),
+    translationMaps,
+  };
 }
 
 /**

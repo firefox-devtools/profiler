@@ -21,6 +21,7 @@ import {
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
   computeFrameTableFromRawFrameTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   reserveFunctionsForCollapsedResources,
   computeSamplesTableFromRawSamplesTable,
 } from '../profile-logic/profile-data';
@@ -43,6 +44,7 @@ import type {
   RawProfileSharedData,
   StackTable,
   FrameTable,
+  NativeSymbolTable,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -283,6 +285,11 @@ export const getFrameTable: Selector<FrameTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).frameTable,
   getCategories,
   computeFrameTableFromRawFrameTable
+);
+
+export const getNativeSymbolTable: Selector<NativeSymbolTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).nativeSymbols,
+  computeNativeSymbolTableFromRawNativeSymbolTable
 );
 
 export const getStackTable: Selector<StackTable> = createSelector(
