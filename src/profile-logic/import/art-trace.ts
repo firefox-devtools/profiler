@@ -346,14 +346,28 @@ function parseMethods(reader: ByteReader) {
   return { methods, lineAfterMethods: line };
 }
 
+// The smallest possible version 3 record: u16 tid, u32 method id and action,
+// u32 timestamp. Records using the dual clock are 4 bytes larger, which is
+// checked in parseRecord once the clock is known.
+const MIN_V3_RECORD_SIZE = 10;
+
 function parseRecordSize(reader: ByteReader, version: number) {
   switch (version) {
     case 1:
       return 9;
     case 2:
       return 10;
-    default:
-      return reader.getU16();
+    default: {
+      // This value comes from the file, so it must be validated. A record size
+      // that is too small would make the record loops never reach EOF.
+      const recordSize = reader.getU16();
+      if (recordSize < MIN_V3_RECORD_SIZE) {
+        throw new Error(
+          `Invalid trace format: record size ${recordSize} is smaller than the minimum of ${MIN_V3_RECORD_SIZE}.`
+        );
+      }
+      return recordSize;
+    }
   }
 }
 
@@ -389,6 +403,12 @@ function parseRecord(
       break;
   }
 
+  const bytesRead = reader.curPos() - recordStart;
+  if (bytesRead > recordSize) {
+    throw new Error(
+      `Invalid trace format: record size ${recordSize} is smaller than the ${bytesRead} bytes needed for the "${clock}" clock.`
+    );
+  }
   reader.setCurPos(recordStart + recordSize);
 
   return {
