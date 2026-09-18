@@ -10,6 +10,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type { CommandResult } from './protocol';
 import {
   formatStatusResult,
+  formatPermalinkResult,
   formatFunctionExpandResult,
   formatFunctionInfoResult,
   formatFunctionAnnotateResult,
@@ -60,6 +61,8 @@ export function formatOutput(
   switch (result.type) {
     case 'status':
       return formatStatusResult(result);
+    case 'permalink':
+      return formatPermalinkResult(result);
     case 'filter-stack':
       return formatFilterStackResult(result);
     case 'function-expand':

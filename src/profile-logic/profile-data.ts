@@ -11,7 +11,6 @@ import {
   finishRawStackTableBuilder,
   getEmptyCallNodeTable,
   getRawFrameTableBuilderWithExistingContents,
-  shallowCloneFuncTable,
 } from './data-structures';
 import {
   CallNodeInfoNonInverted,
@@ -58,7 +57,9 @@ import type {
   RawFrameTable,
   FrameTable,
   FuncTable,
+  RawFuncTable,
   NativeSymbolTable,
+  RawNativeSymbolTable,
   ResourceTable,
   CategoryList,
   IndexIntoCategoryList,
@@ -109,7 +110,12 @@ import type {
   SampleCategoriesAndSubcategories,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType, FrameFlag } from 'firefox-profiler/types';
+import {
+  SelectedState,
+  ResourceType,
+  FrameFlag,
+  FuncFlag,
+} from 'firefox-profiler/types';
 import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
 import {
   toFloat64Array,
@@ -1780,8 +1786,9 @@ export function computeTransformOutputForImplementationFilter(
         stackTable,
         frameTable,
         (funcIndex) => {
+          const funcFlags = funcTable.flags[funcIndex];
           // Return quickly if this is a JS frame.
-          if (funcTable.isJS[funcIndex]) {
+          if ((funcFlags & FuncFlag.IsJS) !== 0) {
             return false;
           }
           // Regular C++ functions are associated with a resource that describes the
@@ -1792,7 +1799,7 @@ export function computeTransformOutputForImplementationFilter(
             funcTable.name[funcIndex]
           );
           const isProbablyJitCode =
-            funcTable.resource[funcIndex] === -1 &&
+            (funcFlags & FuncFlag.HasResource) === 0 &&
             locationString.startsWith('0x');
           return !isProbablyJitCode;
         }
@@ -1803,7 +1810,9 @@ export function computeTransformOutputForImplementationFilter(
         frameTable,
         (funcIndex) => {
           return (
-            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
+            (funcTable.flags[funcIndex] &
+              (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+            0
           );
         }
       );
@@ -2027,8 +2036,9 @@ export function computeFuncMatchesSearchString(
       return true;
     }
 
-    const sourceIndex = funcTable.source[func];
-    if (sourceIndex !== null) {
+    const funcFlags = funcTable.flags[func];
+    if ((funcFlags & FuncFlag.HasSource) !== 0) {
+      const sourceIndex = funcTable.source[func];
       const urlIndex = sources.filename[sourceIndex];
       const fileNameString = stringTable.getString(urlIndex);
       if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
@@ -2036,8 +2046,8 @@ export function computeFuncMatchesSearchString(
       }
     }
 
-    const resourceIndex = funcTable.resource[func];
-    if (resourceIndex !== -1) {
+    if ((funcFlags & FuncFlag.HasResource) !== 0) {
+      const resourceIndex = funcTable.resource[func];
       const resourceNameIndex = resourceTable.name[resourceIndex];
       const resourceNameString = stringTable.getString(resourceNameIndex);
       if (resourceNameString.toLowerCase().includes(lowercaseSearchString)) {
@@ -3608,36 +3618,49 @@ export function getOriginalPositionForFrame(
     };
   }
 
-  if (sourceLocationTable !== null) {
+  const funcFlags = funcTable.flags[funcIndex];
+  if (
+    sourceLocationTable !== null &&
+    (funcFlags & FuncFlag.HasOriginalLocation) !== 0
+  ) {
     const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
-    if (funcOriginalLocationIdx !== null) {
-      return {
-        source: sourceLocationTable.source[funcOriginalLocationIdx],
-        line: sourceLocationTable.line[funcOriginalLocationIdx],
-        column: sourceLocationTable.column[funcOriginalLocationIdx],
-      };
-    }
+    return {
+      source: sourceLocationTable.source[funcOriginalLocationIdx],
+      line: sourceLocationTable.line[funcOriginalLocationIdx],
+      column: sourceLocationTable.column[funcOriginalLocationIdx],
+    };
   }
+
+  const funcSource =
+    (funcFlags & FuncFlag.HasSource) !== 0 ? funcTable.source[funcIndex] : null;
+  const funcLine =
+    (funcFlags & FuncFlag.HasLine) !== 0
+      ? funcTable.lineNumber[funcIndex]
+      : null;
+  const funcColumn =
+    (funcFlags & FuncFlag.HasColumn) !== 0
+      ? funcTable.columnNumber[funcIndex]
+      : null;
 
   if (frameIndex !== null) {
     const frameFlags = frameTable.flags[frameIndex];
     return {
-      source: funcTable.source[funcIndex],
+      source: funcSource,
       line:
         (frameFlags & FrameFlag.HasLine) !== 0
           ? frameTable.line[frameIndex]
-          : funcTable.lineNumber[funcIndex],
+          : funcLine,
       column:
         (frameFlags & FrameFlag.HasColumn) !== 0
           ? frameTable.column[frameIndex]
-          : funcTable.columnNumber[funcIndex],
+          : funcColumn,
     };
   }
 
   return {
-    source: funcTable.source[funcIndex],
-    line: funcTable.lineNumber[funcIndex],
-    column: funcTable.columnNumber[funcIndex],
+    source: funcSource,
+    line: funcLine,
+    column: funcColumn,
   };
 }
 
@@ -3658,8 +3681,8 @@ export function getOriginAnnotationForFunc(
 ): string {
   let resourceType = null;
   let origin = null;
-  const resourceIndex = funcTable.resource[funcIndex];
-  if (resourceIndex !== -1) {
+  if ((funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0) {
+    const resourceIndex = funcTable.resource[funcIndex];
     resourceType = resourceTable.type[resourceIndex];
     const resourceNameIndex = resourceTable.name[resourceIndex];
     origin = stringTable.getString(resourceNameIndex);
@@ -3725,10 +3748,41 @@ export function getOriginAnnotationForFunc(
  * These are used by the "collapse resource" transform.
  */
 export function reserveFunctionsForCollapsedResources(
-  originalFuncTable: FuncTable,
+  originalFuncTable: RawFuncTable,
   resourceTable: ResourceTable
 ): FuncTableWithReservedFunctions {
-  const funcTable = shallowCloneFuncTable(originalFuncTable);
+  // We reserve exactly one func per resource, so we know the final length up
+  // front. Allocate the derived columns at that length and copy the original
+  // contents into them, instead of going through a RawFuncTableBuilder; the
+  // latter would copy the entire funcTable twice, once into plain arrays and
+  // once back into typed arrays.
+  const originalLength = originalFuncTable.length;
+  const length = originalLength + resourceTable.length;
+  const flags = new Uint8Array(length);
+  const name = new Int32Array(length);
+  const resource = new Int32Array(length);
+  const source = new Int32Array(length);
+  const lineNumber = new Int32Array(length);
+  const columnNumber = new Int32Array(length);
+  const originalLocation = new Int32Array(length);
+  flags.set(originalFuncTable.flags);
+  name.set(originalFuncTable.name);
+  resource.set(originalFuncTable.resource);
+  source.set(originalFuncTable.source);
+  lineNumber.set(originalFuncTable.lineNumber);
+  columnNumber.set(originalFuncTable.columnNumber);
+  originalLocation.set(originalFuncTable.originalLocation);
+  const funcTable = {
+    flags,
+    name,
+    resource,
+    source,
+    lineNumber,
+    columnNumber,
+    originalLocation,
+    length,
+  };
+
   const reservedFunctionsForResources = new Map<
     IndexIntoResourceTable,
     IndexIntoFuncTable
@@ -3745,24 +3799,19 @@ export function reserveFunctionsForCollapsedResources(
     resourceIndex++
   ) {
     const resourceType = resourceTable.type[resourceIndex];
-    const name = resourceTable.name[resourceIndex];
     const isJS = jsResourceTypes.includes(resourceType);
-    const funcIndex = funcTable.length;
-    funcTable.isJS.push(isJS);
-    funcTable.relevantForJS.push(isJS);
-    funcTable.name.push(name);
-    funcTable.resource.push(resourceIndex);
-    funcTable.source.push(null);
-    funcTable.lineNumber.push(null);
-    funcTable.columnNumber.push(null);
-    funcTable.originalLocation.push(null);
-    funcTable.length++;
+    const funcIndex = originalLength + resourceIndex;
+    // The source, lineNumber, columnNumber and originalLocation columns keep
+    // the zero they were allocated with; the corresponding flags are unset, so
+    // those values are ignored.
+    flags[funcIndex] = isJS
+      ? FuncFlag.HasResource | FuncFlag.IsJS | FuncFlag.RelevantForJS
+      : FuncFlag.HasResource;
+    name[funcIndex] = resourceTable.name[resourceIndex];
+    resource[funcIndex] = resourceIndex;
     reservedFunctionsForResources.set(resourceIndex, funcIndex);
   }
-  return {
-    funcTable,
-    reservedFunctionsForResources,
-  };
+  return { funcTable, reservedFunctionsForResources };
 }
 
 /**
@@ -4596,7 +4645,20 @@ export function findAddressProofForFile(
 ): AddressProof | null {
   const { libs } = profile;
   const { frameTable, funcTable } = profile.shared;
-  const func = funcTable.source.indexOf(sourceIndex);
+  // Scan for the func manually rather than using `funcTable.source.indexOf`:
+  // the `source` column only carries a meaningful value for funcs which have
+  // the `HasSource` flag set, and holds an arbitrary value (usually zero) for
+  // all other funcs. An `indexOf` would happily match one of those.
+  let func = -1;
+  for (let i = 0; i < funcTable.length; i++) {
+    if (
+      (funcTable.flags[i] & FuncFlag.HasSource) !== 0 &&
+      funcTable.source[i] === sourceIndex
+    ) {
+      func = i;
+      break;
+    }
+  }
   if (func === -1) {
     return null;
   }
@@ -4751,20 +4813,22 @@ export function getNativeSymbolInfo(
   frameTable: FrameTable,
   stringTable: StringTable
 ): NativeSymbolInfo {
-  const functionSizeOrNull = nativeSymbols.functionSize[nativeSymbol];
-  const functionSize =
-    functionSizeOrNull ??
-    calculateFunctionSizeLowerBound(
-      frameTable,
-      nativeSymbols.address[nativeSymbol],
-      nativeSymbol
-    );
+  // `-1` is the sentinel for "size unknown" in the derived table.
+  const rawFunctionSize = nativeSymbols.functionSize[nativeSymbol];
+  const functionSizeIsKnown = rawFunctionSize !== -1;
+  const functionSize = functionSizeIsKnown
+    ? rawFunctionSize
+    : calculateFunctionSizeLowerBound(
+        frameTable,
+        nativeSymbols.address[nativeSymbol],
+        nativeSymbol
+      );
   return {
     libIndex: nativeSymbols.libIndex[nativeSymbol],
     address: nativeSymbols.address[nativeSymbol],
     name: stringTable.getString(nativeSymbols.name[nativeSymbol]),
     functionSize,
-    functionSizeIsKnown: functionSizeOrNull !== null,
+    functionSizeIsKnown,
   };
 }
 
@@ -4929,6 +4993,31 @@ export function computeFrameTableFromRawFrameTable(
     column: toInt32Array(rawFrameTable.column),
     originalLocation: toInt32Array(rawFrameTable.originalLocation),
     length: rawFrameTable.length,
+  };
+}
+
+export function computeNativeSymbolTableFromRawNativeSymbolTable(
+  raw: RawNativeSymbolTable
+): NativeSymbolTable {
+  return {
+    libIndex: toInt32Array(raw.libIndex),
+    address: toUint32Array(raw.address),
+    name: toInt32Array(raw.name),
+    functionSize: toInt32Array(raw.functionSize),
+    length: raw.length,
+  };
+}
+
+export function computeFuncTableFromRawFuncTable(raw: RawFuncTable): FuncTable {
+  return {
+    flags: toUint8Array(raw.flags),
+    name: toInt32Array(raw.name),
+    resource: toInt32Array(raw.resource),
+    source: toInt32Array(raw.source),
+    lineNumber: toInt32Array(raw.lineNumber),
+    columnNumber: toInt32Array(raw.columnNumber),
+    originalLocation: toInt32Array(raw.originalLocation),
+    length: raw.length,
   };
 }
 

@@ -19,6 +19,8 @@ import {
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
   computeFrameTableFromRawFrameTable,
+  computeFuncTableFromRawFuncTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   computeSamplesTableFromRawSamplesTable,
   computeJsAllocationsTableFromRawJsAllocationsTable,
   computeNativeAllocationsTableFromRawNativeAllocationsTable,
@@ -153,6 +155,10 @@ export function computeThreadFromRawThread(
     shared.frameTable,
     categories
   );
+  const funcTable = computeFuncTableFromRawFuncTable(shared.funcTable);
+  const nativeSymbols = computeNativeSymbolTableFromRawNativeSymbolTable(
+    shared.nativeSymbols
+  );
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
     frameTable,
@@ -184,8 +190,8 @@ export function computeThreadFromRawThread(
     samples,
     stackTable,
     frameTable,
-    shared.funcTable,
-    shared.nativeSymbols,
+    funcTable,
+    nativeSymbols,
     shared.resourceTable,
     stringTable,
     shared.sources,

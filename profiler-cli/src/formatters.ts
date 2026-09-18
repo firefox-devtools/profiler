@@ -9,6 +9,7 @@
 
 import type {
   StatusResult,
+  PermalinkResult,
   SessionContext,
   WithContext,
   FunctionExpandResult,
@@ -287,6 +288,13 @@ Session Status:
   Selected thread: ${threadInfo}
   View range: ${rangesInfo}
   Data source: ${result.callTreeSummaryStrategy}${filterSection}`;
+}
+
+/**
+ * Format a PermalinkResult as plain text: just the URL, so it can be piped.
+ */
+export function formatPermalinkResult(result: PermalinkResult): string {
+  return result.shortUrl ?? result.url;
 }
 
 /**

@@ -35,7 +35,11 @@ import {
   getLastSelectedCallTreeSummaryStrategy,
   getProfileSpecificState,
   getSymbolServerUrl,
+  getDataSource,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
+import { urlFromState } from 'firefox-profiler/app-logic/url-handling';
+import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import {
   commitRange,
   popCommittedRanges,
@@ -103,6 +107,7 @@ import type {
 } from 'firefox-profiler/types';
 import type {
   StatusResult,
+  PermalinkResult,
   SessionContext,
   ContextThreadInfo,
   WithContext,
@@ -144,7 +149,11 @@ import type {
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
-import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getThreadsKey,
+  computeFuncTableFromRawFuncTable,
+} from 'firefox-profiler/profile-logic/profile-data';
+import { FuncFlag } from 'firefox-profiler/types';
 import type { Store } from '../types/store';
 
 function toSourceEntry(source: EligibleSource): SourceEntry {
@@ -155,6 +164,8 @@ function toSourceEntry(source: EligibleSource): SourceEntry {
     sourceMap: toSourceMapLocation(source.sourceMapURL),
   };
 }
+
+const PROFILER_FRONTEND_ORIGIN = 'https://profiler.firefox.com';
 
 export class ProfileQuerier {
   _store: Store;
@@ -1245,6 +1256,29 @@ export class ProfileQuerier {
   }
 
   /**
+   * Build a profiler.firefox.com URL for the current session view: selected
+   * threads, committed zoom ranges, transforms, strategy, and so on. Only
+   * profiles that are already reachable by URL can be linked to. Local files
+   * would need publishing first, which the CLI does not support yet.
+   */
+  async permalink(shorten: boolean = false): Promise<PermalinkResult> {
+    const state = this._store.getState();
+    const dataSource = getDataSource(state);
+    if (dataSource !== 'public' && dataSource !== 'from-url') {
+      throw new Error(
+        'This profile is not reachable by URL, so there is no link to share. ' +
+          'Publishing from profiler-cli is not supported yet: upload the profile ' +
+          'from profiler.firefox.com, then load the resulting URL with ' +
+          '"profiler-cli load <url>".'
+      );
+    }
+
+    const url = PROFILER_FRONTEND_ORIGIN + urlFromState(getUrlState(state));
+    const shortUrl = shorten ? await shortenUrl(url) : null;
+    return { type: 'permalink', url, shortUrl };
+  }
+
+  /**
    * Expand a function handle to show the full untruncated name.
    */
   async functionExpand(
@@ -1252,7 +1286,10 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionExpandResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
-    const { funcTable, resourceTable, stringArray } = profile.shared;
+    const { resourceTable, stringArray } = profile.shared;
+    const funcTable = computeFuncTableFromRawFuncTable(
+      profile.shared.funcTable
+    );
 
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
@@ -1281,19 +1318,24 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionInfoResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
-    const { funcTable, resourceTable, stringArray } = profile.shared;
+    const { resourceTable, stringArray } = profile.shared;
+    const funcTable = computeFuncTableFromRawFuncTable(
+      profile.shared.funcTable
+    );
 
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
     const funcName = stringArray[funcTable.name[funcIndex]];
-    const resourceIndex = funcTable.resource[funcIndex];
-    const isJS = funcTable.isJS[funcIndex];
-    const relevantForJS = funcTable.relevantForJS[funcIndex];
+    const funcFlags = funcTable.flags[funcIndex];
+    const isJS = (funcFlags & FuncFlag.IsJS) !== 0;
+    const relevantForJS = (funcFlags & FuncFlag.RelevantForJS) !== 0;
+    const hasResource = (funcFlags & FuncFlag.HasResource) !== 0;
 
     let resource: FunctionInfoResult['resource'];
     let library: FunctionInfoResult['library'];
 
-    if (resourceIndex !== -1) {
+    if (hasResource) {
+      const resourceIndex = funcTable.resource[funcIndex];
       resource = {
         name: stringArray[resourceTable.name[resourceIndex]],
         index: resourceIndex,

@@ -536,6 +536,8 @@ export class Daemon {
           default:
             throw assertExhaustiveCheck(command);
         }
+      case 'permalink':
+        return this.querier.permalink(command.short ?? false);
       case 'strategy':
         return this.querier.strategySelect(command.strategy);
       case 'zoom':

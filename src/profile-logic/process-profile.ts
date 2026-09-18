@@ -15,8 +15,9 @@ import {
   finishRawBalancedNativeAllocationsTableBuilder,
   finishRawJsAllocationsTableBuilder,
   finishRawUnbalancedNativeAllocationsTableBuilder,
+  finishRawMarkerTableBuilder,
   getEmptyExtensions,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
   getEmptyRawJsAllocationsTable,
   getEmptyRawUnbalancedNativeAllocationsTable,
   getRawMarkerTableBuilderFromExisting,
@@ -48,6 +49,7 @@ import {
 import {
   getFriendlyThreadName,
   nudgeReturnAddresses,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   subcategoriesNeedSixteenBits,
 } from '../profile-logic/profile-data';
 import {
@@ -709,7 +711,7 @@ function _processMarkers(
   jsAllocations: RawJsAllocationsTable | null;
   nativeAllocations: RawNativeAllocationsTable | null;
 } {
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
   const jsAllocations = getEmptyRawJsAllocationsTable();
   const inProgressNativeAllocations =
     getEmptyRawUnbalancedNativeAllocationsTable();
@@ -833,7 +835,7 @@ function _processMarkers(
   }
 
   return {
-    markers: markers,
+    markers: finishRawMarkerTableBuilder(markers),
     jsAllocations:
       jsAllocations.length === 0
         ? null
@@ -2159,7 +2161,7 @@ function convertSharedTablesEligibleColumns(
   shared: RawProfileSharedData,
   categories: CategoryList | undefined
 ): RawProfileSharedData {
-  const { stackTable, frameTable } = shared;
+  const { stackTable, frameTable, funcTable, nativeSymbols } = shared;
   return {
     ...shared,
     stackTable: {
@@ -2184,6 +2186,18 @@ function convertSharedTablesEligibleColumns(
       column: toInt32Array(frameTable.column),
       originalLocation: toInt32Array(frameTable.originalLocation),
     },
+    funcTable: {
+      length: funcTable.length,
+      flags: toUint8Array(funcTable.flags),
+      name: toInt32Array(funcTable.name),
+      resource: toInt32Array(funcTable.resource),
+      source: toInt32Array(funcTable.source),
+      lineNumber: toInt32Array(funcTable.lineNumber),
+      columnNumber: toInt32Array(funcTable.columnNumber),
+      originalLocation: toInt32Array(funcTable.originalLocation),
+    },
+    nativeSymbols:
+      computeNativeSymbolTableFromRawNativeSymbolTable(nativeSymbols),
   };
 }
 
@@ -2553,11 +2567,9 @@ export function processVisualMetrics(
   const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
     mainThread.markers
   );
-  mainThread.markers = mainThreadMarkers;
   const tabThreadMarkers = getRawMarkerTableBuilderFromExisting(
     tabThread.markers
   );
-  tabThread.markers = tabThreadMarkers;
 
   function maybeAddMetricMarker(
     markers: RawMarkerTableBuilder,
@@ -2593,12 +2605,12 @@ export function processVisualMetrics(
   if (stringTable.hasString('Navigation::Start')) {
     const navigationStartStrIdx =
       stringTable.indexForString('Navigation::Start');
-    const navigationStartMarkerIdx = tabThread.markers.name.findIndex(
+    const navigationStartMarkerIdx = tabThreadMarkers.name.findIndex(
       (m) => m === navigationStartStrIdx
     );
     if (navigationStartMarkerIdx !== -1) {
       navigationStartTime =
-        tabThread.markers.startTime[navigationStartMarkerIdx];
+        tabThreadMarkers.startTime[navigationStartMarkerIdx];
     }
   }
 
@@ -2670,6 +2682,9 @@ export function processVisualMetrics(
       );
     }
   }
+
+  mainThread.markers = finishRawMarkerTableBuilder(mainThreadMarkers);
+  tabThread.markers = finishRawMarkerTableBuilder(tabThreadMarkers);
 }
 
 /**

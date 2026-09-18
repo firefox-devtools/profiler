@@ -59,6 +59,7 @@ profiler-cli filter clear                  # Remove all filters for current thre
 profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
 profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
+profiler-cli permalink                     # Print a profiler.firefox.com URL for the current view [--short]
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
 profiler-cli stop --all                    # Stop all sessions
