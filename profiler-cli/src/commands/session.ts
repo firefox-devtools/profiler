@@ -12,9 +12,13 @@ import { wasExplicit } from './shared';
 import {
   cleanupIfDaemonGone,
   cleanupSession,
+  describeSessionOwner,
   getCurrentSessionId,
+  getSessionAge,
+  getSessionOwner,
   listSessions,
   loadSessionMetadata,
+  ownsSession,
   setCurrentSession,
   validateSession,
 } from '../session';
@@ -35,7 +39,7 @@ export function registerSessionCommand(
 
   session
     .command('list', { isDefault: true })
-    .description('List all running daemon sessions')
+    .description('List all running daemon sessions, with their owner and age')
     .action(async () => {
       const sessionIds = listSessions(sessionDir);
       let numCleaned = 0;
@@ -90,12 +94,15 @@ export function registerSessionCommand(
       );
 
       const currentSessionId = getCurrentSessionId(sessionDir);
+      const owner = getSessionOwner();
       console.log(`Found ${runningSessionMetadata.length} running sessions:`);
       for (const metadata of runningSessionMetadata) {
         const isCurrent = metadata.id === currentSessionId;
         const marker = isCurrent ? '* ' : '  ';
+        const age = getSessionAge(metadata);
+        const mine = ownsSession(metadata, owner) ? ' (yours)' : '';
         console.log(
-          `${marker}${metadata.id}, created at ${metadata.createdAt} [daemon pid: ${metadata.pid}]`
+          `${marker}${metadata.id}, created at ${metadata.createdAt}${age === null ? '' : ` (${age} ago)`} [owner: ${describeSessionOwner(metadata)}${mine}, daemon pid: ${metadata.pid}]`
         );
       }
 
@@ -106,7 +113,7 @@ export function registerSessionCommand(
         );
         for (const { metadata, error } of unreachableSessions) {
           console.log(
-            `  ${metadata.id} [daemon pid: ${metadata.pid}]: ${toErrorMessage(error)}`
+            `  ${metadata.id} [owner: ${describeSessionOwner(metadata)}, daemon pid: ${metadata.pid}]: ${toErrorMessage(error)}`
           );
         }
         if (unreachableSessions.some(({ error }) => isPermissionErrno(error))) {
@@ -124,7 +131,9 @@ export function registerSessionCommand(
 
   session
     .command('use <id>')
-    .description('Switch the current session')
+    .description(
+      'Switch the current session (shared with every caller of this session directory)'
+    )
     .action(async (sessionId: string) => {
       const metadata = await validateSession(sessionDir, sessionId);
       if (metadata === null) {
@@ -135,5 +144,16 @@ export function registerSessionCommand(
       }
       setCurrentSession(sessionDir, sessionId);
       console.log(`Switched to session ${sessionId}`);
+      // Switching this pointer also redirects other callers' unqualified
+      // commands, so warn rather than doing it silently.
+      const owner = getSessionOwner();
+      if (!ownsSession(metadata, owner)) {
+        console.log(
+          `Note: session ${sessionId} is owned by ${describeSessionOwner(metadata)}, not you (${owner}).`
+        );
+      }
+      console.log(
+        'Note: the current session is shared state for this session directory. Pass --session <id> instead to avoid affecting other callers.'
+      );
     });
 }
