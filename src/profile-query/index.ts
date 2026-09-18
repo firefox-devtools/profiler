@@ -147,7 +147,11 @@ import type {
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
-import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getThreadsKey,
+  computeFuncTableFromRawFuncTable,
+} from 'firefox-profiler/profile-logic/profile-data';
+import { FuncFlag } from 'firefox-profiler/types';
 import type { Store } from '../types/store';
 
 function toSourceEntry(source: EligibleSource): SourceEntry {
@@ -1280,7 +1284,10 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionExpandResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
-    const { funcTable, resourceTable, stringArray } = profile.shared;
+    const { resourceTable, stringArray } = profile.shared;
+    const funcTable = computeFuncTableFromRawFuncTable(
+      profile.shared.funcTable
+    );
 
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
@@ -1309,19 +1316,24 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionInfoResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
-    const { funcTable, resourceTable, stringArray } = profile.shared;
+    const { resourceTable, stringArray } = profile.shared;
+    const funcTable = computeFuncTableFromRawFuncTable(
+      profile.shared.funcTable
+    );
 
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
     const funcName = stringArray[funcTable.name[funcIndex]];
-    const resourceIndex = funcTable.resource[funcIndex];
-    const isJS = funcTable.isJS[funcIndex];
-    const relevantForJS = funcTable.relevantForJS[funcIndex];
+    const funcFlags = funcTable.flags[funcIndex];
+    const isJS = (funcFlags & FuncFlag.IsJS) !== 0;
+    const relevantForJS = (funcFlags & FuncFlag.RelevantForJS) !== 0;
+    const hasResource = (funcFlags & FuncFlag.HasResource) !== 0;
 
     let resource: FunctionInfoResult['resource'];
     let library: FunctionInfoResult['library'];
 
-    if (resourceIndex !== -1) {
+    if (hasResource) {
+      const resourceIndex = funcTable.resource[funcIndex];
       resource = {
         name: stringArray[resourceTable.name[resourceIndex]],
         index: resourceIndex,

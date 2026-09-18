@@ -27,6 +27,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoSubcategoryListForCategory,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 import type {
   TimingsForPath,
@@ -424,9 +425,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     }
 
     let resource = null;
-    const resourceIndex = thread.funcTable.resource[funcIndex];
-
-    if (resourceIndex !== -1) {
+    const hasResource =
+      (thread.funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0;
+    if (hasResource) {
+      const resourceIndex = thread.funcTable.resource[funcIndex];
       const resourceNameIndex = thread.resourceTable.name[resourceIndex];
       // Because of our use of Grid Layout, all our elements need to be direct
       // children of the grid parent. That's why we use arrays here, to add
@@ -519,9 +521,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         stackTypeLabel = 'JavaScript';
         break;
       case 'unsymbolicated':
-        stackTypeLabel = thread.funcTable.isJS[funcIndex]
-          ? 'Unsymbolicated native'
-          : 'Unsymbolicated or generated JIT instructions';
+        stackTypeLabel =
+          (thread.funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0
+            ? 'Unsymbolicated native'
+            : 'Unsymbolicated or generated JIT instructions';
         break;
       default:
         throw new Error(`Unknown stack type case "${stackType}".`);

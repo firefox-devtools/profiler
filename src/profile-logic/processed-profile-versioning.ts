@@ -3510,6 +3510,85 @@ const _upgraders: {
       }
     }
   },
+  [75]: (profile: any) => {
+    // The func table representation changed, mirroring the v71 frame table
+    // change:
+    //  - A new `flags` bitfield column was added (Uint8Array or plain array).
+    //  - The `isJS` and `relevantForJS` boolean columns were removed; the
+    //    IsJS / RelevantForJS flag bits carry the same information.
+    //  - The `resource`, `source`, `lineNumber`, `columnNumber`, and
+    //    `originalLocation` columns are no longer nullable in-band. When the
+    //    corresponding "Has..." flag is not set, the value in the column is
+    //    ignored and can be any placeholder (we write 0).
+    //  - All columns may now optionally be stored as typed arrays
+    //    (Int32Array for the non-flags columns).
+
+    // A snapshot of the `FuncFlag` enum as of version 75. Don't refer to the
+    // current `FuncFlag` enum here; upgraders must keep working even if later
+    // versions renumber or remove flags.
+    const IsJS = 1 << 0;
+    const RelevantForJS = 1 << 1;
+    const HasResource = 1 << 2;
+    const HasSource = 1 << 3;
+    const HasLine = 1 << 4;
+    const HasColumn = 1 << 5;
+    const HasOriginalLocation = 1 << 6;
+
+    const { funcTable } = profile.shared;
+    const {
+      isJS,
+      relevantForJS,
+      resource,
+      source,
+      lineNumber,
+      columnNumber,
+      originalLocation,
+      length,
+    } = funcTable;
+    const flags = new Array<number>(length);
+    for (let i = 0; i < length; i++) {
+      let f = 0;
+      if (isJS[i]) {
+        f |= IsJS;
+      }
+      if (relevantForJS[i]) {
+        f |= RelevantForJS;
+      }
+      if (
+        resource[i] !== -1 &&
+        resource[i] !== null &&
+        resource[i] !== undefined
+      ) {
+        f |= HasResource;
+      } else {
+        resource[i] = 0;
+      }
+      if (source[i] !== null && source[i] !== undefined) {
+        f |= HasSource;
+      } else {
+        source[i] = 0;
+      }
+      if (lineNumber[i] !== null && lineNumber[i] !== undefined) {
+        f |= HasLine;
+      } else {
+        lineNumber[i] = 0;
+      }
+      if (columnNumber[i] !== null && columnNumber[i] !== undefined) {
+        f |= HasColumn;
+      } else {
+        columnNumber[i] = 0;
+      }
+      if (originalLocation[i] !== null && originalLocation[i] !== undefined) {
+        f |= HasOriginalLocation;
+      } else {
+        originalLocation[i] = 0;
+      }
+      flags[i] = f;
+    }
+    funcTable.flags = flags;
+    delete funcTable.isJS;
+    delete funcTable.relevantForJS;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

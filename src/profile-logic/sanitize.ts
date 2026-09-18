@@ -6,7 +6,8 @@ import {
   getEmptyExtensions,
   getRawMarkerTableBuilderFromExisting,
   finishRawMarkerTableBuilder,
-  shallowCloneFuncTable,
+  getRawFuncTableBuilderWithExistingContents,
+  finishRawFuncTableBuilder,
 } from './data-structures';
 import { computeCompactedProfile } from './profile-compacting';
 import { StringTable } from '../utils/string-table';
@@ -37,7 +38,7 @@ import type {
   IndexIntoResourceTable,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
   readonly profile: Profile;
@@ -186,8 +187,8 @@ export function sanitizePII(
     if (sanitizedFuncIndexesToFrameIndex.size) {
       const resourcesToBeSanitized = new Set<IndexIntoResourceTable>();
 
-      const newFuncTable = (newShared.funcTable =
-        shallowCloneFuncTable(funcTable));
+      const newFuncTable =
+        getRawFuncTableBuilderWithExistingContents(funcTable);
       const newFrameTable = (newShared.frameTable = {
         ...frameTable,
         flags: Array.from(frameTable.flags),
@@ -208,13 +209,16 @@ export function sanitizePII(
           const name = stringTable.indexForString(
             `<Func #${sanitizedFuncIndex}>`
           );
+          // Preserve IsJS/RelevantForJS from the original; strip everything else.
+          const oldFlags = funcTable.flags[funcIndex];
+          const preservedMask = FuncFlag.IsJS | FuncFlag.RelevantForJS;
+          newFuncTable.flags.push(oldFlags & preservedMask);
           newFuncTable.name.push(name);
-          newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
-          newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
-          newFuncTable.resource.push(-1);
-          newFuncTable.source.push(null);
-          newFuncTable.lineNumber.push(null);
-          newFuncTable.columnNumber.push(null);
+          newFuncTable.resource.push(0);
+          newFuncTable.source.push(0);
+          newFuncTable.lineNumber.push(0);
+          newFuncTable.columnNumber.push(0);
+          newFuncTable.originalLocation.push(0);
           newFuncTable.length++;
 
           frameIndexes.forEach(
@@ -227,13 +231,22 @@ export function sanitizePII(
           const name = stringTable.indexForString(`<Func #${funcIndex}>`);
           newFuncTable.name[funcIndex] = name;
 
-          newFuncTable.source[funcIndex] = null;
-          if (newFuncTable.resource[funcIndex] >= 0) {
+          const clearMask = ~(
+            FuncFlag.HasResource |
+            FuncFlag.HasSource |
+            FuncFlag.HasLine |
+            FuncFlag.HasColumn |
+            FuncFlag.HasOriginalLocation
+          );
+          if ((newFuncTable.flags[funcIndex] & FuncFlag.HasResource) !== 0) {
             resourcesToBeSanitized.add(newFuncTable.resource[funcIndex]);
           }
-          newFuncTable.resource[funcIndex] = -1;
-          newFuncTable.lineNumber[funcIndex] = null;
-          newFuncTable.columnNumber[funcIndex] = null;
+          newFuncTable.flags[funcIndex] &= clearMask;
+          newFuncTable.resource[funcIndex] = 0;
+          newFuncTable.source[funcIndex] = 0;
+          newFuncTable.lineNumber[funcIndex] = 0;
+          newFuncTable.columnNumber[funcIndex] = 0;
+          newFuncTable.originalLocation[funcIndex] = 0;
         }
 
         // In both cases, nullify some information in all frames.
@@ -253,9 +266,12 @@ export function sanitizePII(
           name: resourceTable.name.slice(),
           host: resourceTable.host.slice(),
         });
-        const remainingResources = new Set<IndexIntoResourceTable>(
-          newFuncTable.resource
-        );
+        const remainingResources = new Set<IndexIntoResourceTable>();
+        for (let i = 0; i < newFuncTable.length; i++) {
+          if ((newFuncTable.flags[i] & FuncFlag.HasResource) !== 0) {
+            remainingResources.add(newFuncTable.resource[i]);
+          }
+        }
         for (const resourceIndex of resourcesToBeSanitized) {
           if (!remainingResources.has(resourceIndex)) {
             // This resource was used only by sanitized functions. Sanitize it
@@ -268,6 +284,8 @@ export function sanitizePII(
           }
         }
       }
+
+      newShared.funcTable = finishRawFuncTableBuilder(newFuncTable);
     }
 
     // First we'll loop the stack table and populate a typed array with a value

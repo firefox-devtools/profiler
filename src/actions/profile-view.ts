@@ -47,6 +47,7 @@ import {
   getTrackReferenceFromThreadIndex,
 } from 'firefox-profiler/profile-logic/tracks';
 
+import { FuncFlag } from 'firefox-profiler/types';
 import type {
   PreviewSelection,
   ImplementationFilter,
@@ -2096,11 +2097,14 @@ export function handleCallNodeTransformShortcut(
         break;
       case 'C': {
         const { funcTable } = unfilteredThread;
-        const resourceIndex = funcTable.resource[funcIndex];
+        if ((funcTable.flags[funcIndex] & FuncFlag.HasResource) === 0) {
+          // This func has no resource, so there is nothing to collapse.
+          return;
+        }
         dispatch(
           addCollapseResourceTransformToStack(
             threadsKey,
-            resourceIndex,
+            funcTable.resource[funcIndex],
             implementation
           )
         );

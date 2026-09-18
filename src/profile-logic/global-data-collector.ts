@@ -5,11 +5,12 @@
 import { StringTable } from '../utils/string-table';
 import {
   finishRawFrameTableBuilder,
+  finishRawFuncTableBuilder,
   finishRawNativeSymbolTableBuilder,
   finishRawStackTableBuilder,
   getRawFrameTableBuilder,
+  getRawFuncTableBuilder,
   getRawNativeSymbolTableBuilder,
-  getEmptyFuncTable,
   getEmptyResourceTable,
   getEmptySourceTable,
   getEmptySourceLocationTable,
@@ -24,7 +25,6 @@ import type {
   IndexIntoSourceTable,
   RawProfileSharedData,
   SourceTable,
-  FuncTable,
   ResourceTable,
   IndexIntoResourceTable,
   IndexIntoFuncTable,
@@ -33,9 +33,10 @@ import type {
   Address,
   Bytes,
 } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FuncFlag } from 'firefox-profiler/types';
 import type {
   RawFrameTableBuilder,
+  RawFuncTableBuilder,
   RawNativeSymbolTableBuilder,
   RawStackTableBuilder,
 } from './data-structures';
@@ -56,7 +57,7 @@ export class GlobalDataCollector {
   _sources: SourceTable = getEmptySourceTable();
   _frameTable: RawFrameTableBuilder = getRawFrameTableBuilder();
   _stackTableBuilder: RawStackTableBuilder = getRawStackTableBuilder();
-  _funcTable: FuncTable = getEmptyFuncTable();
+  _funcTable: RawFuncTableBuilder = getRawFuncTableBuilder();
   _resourceTable: ResourceTable = getEmptyResourceTable();
   _nativeSymbols: RawNativeSymbolTableBuilder =
     getRawNativeSymbolTableBuilder();
@@ -105,15 +106,33 @@ export class GlobalDataCollector {
     const funcKey = `${name}-${isJS}-${relevantForJS}-${resource}-${source}-${lineNumber}-${columnNumber}`;
     let funcIndex = this._funcKeyToFuncIndex.get(funcKey);
     if (funcIndex === undefined) {
+      let flags = 0;
+      if (isJS) {
+        flags |= FuncFlag.IsJS;
+      }
+      if (relevantForJS) {
+        flags |= FuncFlag.RelevantForJS;
+      }
+      if (resource !== -1) {
+        flags |= FuncFlag.HasResource;
+      }
+      if (source !== null) {
+        flags |= FuncFlag.HasSource;
+      }
+      if (lineNumber !== null) {
+        flags |= FuncFlag.HasLine;
+      }
+      if (columnNumber !== null) {
+        flags |= FuncFlag.HasColumn;
+      }
       funcIndex = this._funcTable.length++;
+      this._funcTable.flags[funcIndex] = flags;
       this._funcTable.name[funcIndex] = name;
-      this._funcTable.isJS[funcIndex] = isJS;
-      this._funcTable.relevantForJS[funcIndex] = relevantForJS;
-      this._funcTable.resource[funcIndex] = resource;
-      this._funcTable.source[funcIndex] = source;
-      this._funcTable.lineNumber[funcIndex] = lineNumber;
-      this._funcTable.columnNumber[funcIndex] = columnNumber;
-      this._funcTable.originalLocation[funcIndex] = null;
+      this._funcTable.resource[funcIndex] = resource === -1 ? 0 : resource;
+      this._funcTable.source[funcIndex] = source ?? 0;
+      this._funcTable.lineNumber[funcIndex] = lineNumber ?? 0;
+      this._funcTable.columnNumber[funcIndex] = columnNumber ?? 0;
+      this._funcTable.originalLocation[funcIndex] = 0;
       this._funcKeyToFuncIndex.set(funcKey, funcIndex);
     }
     return funcIndex;
@@ -299,7 +318,7 @@ export class GlobalDataCollector {
     const shared: RawProfileSharedData = {
       stackTable: finishRawStackTableBuilder(this._stackTableBuilder),
       frameTable: finishRawFrameTableBuilder(this._frameTable),
-      funcTable: this._funcTable,
+      funcTable: finishRawFuncTableBuilder(this._funcTable),
       resourceTable: this._resourceTable,
       nativeSymbols: finishRawNativeSymbolTableBuilder(this._nativeSymbols),
       stringArray: this._stringArray,

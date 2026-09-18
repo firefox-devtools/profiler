@@ -10,6 +10,7 @@
 // placeholders in the profile's funcTable.
 
 import type { Profile } from 'firefox-profiler/types/profile';
+import { FuncFlag } from 'firefox-profiler/types/profile';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
 export interface WasmSymbolicationSpec {
@@ -190,8 +191,11 @@ export function applyWasmSymbolication(
     let updated = 0;
     let missingNames = 0;
     for (let f = 0; f < funcTable.length; f++) {
+      if ((funcTable.flags[f] & FuncFlag.HasSource) === 0) {
+        continue;
+      }
       const sourceIdx = funcTable.source[f];
-      if (sourceIdx === null || !sourceIndexSet.has(sourceIdx)) {
+      if (!sourceIndexSet.has(sourceIdx)) {
         continue;
       }
       const oldName = stringArray[funcTable.name[f]];

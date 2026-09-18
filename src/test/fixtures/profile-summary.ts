@@ -8,9 +8,9 @@ import type {
   IndexIntoStackTable,
   RawStackTable,
   RawFrameTable,
-  FuncTable,
+  RawFuncTable,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 /**
  * Walks a raw profile and asserts a set of structural invariants. Throws
@@ -82,14 +82,13 @@ export function assertProfileIntegrity(profile: Profile): void {
         `funcTable.name[${fn}] = ${name} is not a valid integer index in [0, ${stringCount})`
       );
     }
-    const res = funcTable.resource[fn];
-    if (
-      !Number.isInteger(res) ||
-      (res !== -1 && (res < 0 || res >= resourceTable.length))
-    ) {
-      throw new Error(
-        `funcTable.resource[${fn}] = ${res} is not a valid integer index in [0, ${resourceTable.length}) or -1`
-      );
+    if ((funcTable.flags[fn] & FuncFlag.HasResource) !== 0) {
+      const res = funcTable.resource[fn];
+      if (!Number.isInteger(res) || res < 0 || res >= resourceTable.length) {
+        throw new Error(
+          `funcTable.resource[${fn}] = ${res} is not a valid integer index in [0, ${resourceTable.length})`
+        );
+      }
     }
   }
 
@@ -459,7 +458,7 @@ function renderStackPath(
   stack: IndexIntoStackTable | null,
   stackTable: RawStackTable,
   frameTable: RawFrameTable,
-  funcTable: FuncTable,
+  funcTable: RawFuncTable,
   stringArray: string[]
 ): string {
   if (stack === null) {

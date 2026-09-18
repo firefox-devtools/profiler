@@ -39,7 +39,7 @@ import type {
   IndexIntoStackTable,
   GeckoSamples,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
   // These location strings are turned into the proper funcs.
@@ -133,17 +133,26 @@ describe('extract functions and resource from location strings', function () {
         const locationName = locations[locationIndex];
 
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
-        const resourceIndex = funcTable.resource[funcIndex];
-        const isJS = funcTable.isJS[funcIndex];
-        const sourceIndex = funcTable.source[funcIndex];
-        const fileNameIndex =
-          sourceIndex !== null ? sources.filename[sourceIndex] : null;
+        const funcFlags = funcTable.flags[funcIndex];
+        const hasResource = (funcFlags & FuncFlag.HasResource) !== 0;
+        const resourceIndex = hasResource ? funcTable.resource[funcIndex] : -1;
+        const isJS = (funcFlags & FuncFlag.IsJS) !== 0;
+        const hasSource = (funcFlags & FuncFlag.HasSource) !== 0;
+        const fileNameIndex = hasSource
+          ? sources.filename[funcTable.source[funcIndex]]
+          : null;
         const fileName =
           fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
-        const lineNumber = funcTable.lineNumber[funcIndex];
-        const columnNumber = funcTable.columnNumber[funcIndex];
+        const lineNumber =
+          (funcFlags & FuncFlag.HasLine) !== 0
+            ? funcTable.lineNumber[funcIndex]
+            : null;
+        const columnNumber =
+          (funcFlags & FuncFlag.HasColumn) !== 0
+            ? funcTable.columnNumber[funcIndex]
+            : null;
         let resourceName, host, resourceType;
-        if (resourceIndex === -1) {
+        if (!hasResource) {
           resourceName = null;
           host = null;
           resourceType = null;

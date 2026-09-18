@@ -6,6 +6,28 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 75
+
+The func table (`profile.shared.funcTable`) representation changed, mirroring the v71 frame table change:
+
+- A new `flags` bitfield column was added. It can be stored as a plain array of numbers or as a `Uint8Array` (for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files). The bits are:
+  - `1 << 0` — `IsJS`: this func is a JavaScript function.
+  - `1 << 1` — `RelevantForJS`: this func should be treated as "relevant for JS" (e.g. DOM API label funcs).
+  - `1 << 2` — `HasResource`: `resource[i]` is meaningful.
+  - `1 << 3` — `HasSource`: `source[i]` is meaningful.
+  - `1 << 4` — `HasLine`: `lineNumber[i]` is meaningful.
+  - `1 << 5` — `HasColumn`: `columnNumber[i]` is meaningful.
+  - `1 << 6` — `HasOriginalLocation`: `originalLocation[i]` is meaningful.
+- The `isJS` and `relevantForJS` boolean columns were removed; the `IsJS` and `RelevantForJS` flag bits carry that information.
+- The `resource`, `source`, `lineNumber`, `columnNumber`, and `originalLocation` columns are no longer nullable in-band. Each may still be stored as a plain array, but the values are always numbers, and when the corresponding "Has..." flag is unset, the value in the column is ignored (producers typically write `0`).
+- The following columns can now optionally be stored as typed arrays:
+  - `name` (`Int32Array`)
+  - `resource` (`Int32Array`)
+  - `source` (`Int32Array`)
+  - `lineNumber` (`Int32Array`)
+  - `columnNumber` (`Int32Array`)
+  - `originalLocation` (`Int32Array`)
+
 ### Version 74
 
 The columns of the native symbol table (`profile.shared.nativeSymbols`) can now optionally be stored as typed arrays, for profiles loaded from [JsonSlabs](https://github.com/mstange/json-slabs/) files (.jslb, .jslb.gz). Regular JS / JSON arrays are still accepted.
