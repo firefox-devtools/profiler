@@ -6,7 +6,11 @@ import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../app-logic/constants';
-import { toUint8OrUint16Array, valuesFitInUint8 } from '../utils/typed-arrays';
+import {
+  toFloat64ArraySetNullToZero,
+  toUint8OrUint16Array,
+  valuesFitInUint8,
+} from '../utils/typed-arrays';
 
 import type {
   RawProfileSharedData,
@@ -20,7 +24,7 @@ import type {
   FuncTable,
   RawMarkerTable,
   ResourceTable,
-  NativeSymbolTable,
+  RawNativeSymbolTable,
   Profile,
   ExtensionTable,
   CategoryList,
@@ -30,13 +34,13 @@ import type {
   SourceLocationTable,
   IndexIntoFrameTable,
   IndexIntoFuncTable,
+  IndexIntoLibs,
   IndexIntoStackTable,
   IndexIntoStringTable,
   IndexIntoCategoryList,
   IndexIntoSubcategoryListForCategory,
   IndexIntoNativeSymbolTable,
   IndexIntoSourceLocationTable,
-  IndexIntoLibs,
   InnerWindowID,
   Address,
   Bytes,
@@ -208,6 +212,22 @@ export function finishRawSamplesTableBuilder(
   };
 }
 
+export function getRawMarkerTableBuilder(): RawMarkerTableBuilder {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: [],
+    name: [],
+    startTime: [],
+    endTime: [],
+    phase: [],
+    category: [],
+    length: 0,
+  };
+}
+
 export function getRawMarkerTableBuilderFromExisting(
   markerTable: RawMarkerTable
 ): RawMarkerTableBuilder {
@@ -228,6 +248,19 @@ export function getRawMarkerTableBuilderFromExisting(
     builder.threadId = markerTable.threadId.slice();
   }
   return builder;
+}
+
+export function finishRawMarkerTableBuilder(
+  builder: RawMarkerTableBuilder
+): RawMarkerTable {
+  return {
+    ...builder,
+    // The nulls in these columns become zeros. This is fine: whether a marker's
+    // start / end time is meaningful is determined by its phase, and the times
+    // which are not used are allowed to be arbitrary values.
+    startTime: toFloat64ArraySetNullToZero(builder.startTime),
+    endTime: toFloat64ArraySetNullToZero(builder.endTime),
+  };
 }
 
 export function getRawStackTableBuilderWithExistingContents(
@@ -408,36 +441,15 @@ export function shallowCloneSourceLocationTable(
   };
 }
 
-export function shallowCloneNativeSymbolTable(
-  nativeSymbols: NativeSymbolTable
-): NativeSymbolTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    libIndex: nativeSymbols.libIndex.slice(),
-    address: nativeSymbols.address.slice(),
-    name: nativeSymbols.name.slice(),
-    functionSize: nativeSymbols.functionSize.slice(),
-    length: nativeSymbols.length,
-  };
-}
+export type RawNativeSymbolTableBuilder = {
+  libIndex: IndexIntoLibs[];
+  address: Address[];
+  name: IndexIntoStringTable[];
+  functionSize: Array<Bytes | -1>;
+  length: number;
+};
 
-export function getEmptyResourceTable(): ResourceTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    name: [],
-    host: [],
-    type: [],
-    length: 0,
-  };
-}
-
-export function getEmptyNativeSymbolTable(): NativeSymbolTable {
+export function getRawNativeSymbolTableBuilder(): RawNativeSymbolTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -451,18 +463,44 @@ export function getEmptyNativeSymbolTable(): NativeSymbolTable {
   };
 }
 
-export function getEmptyRawMarkerTable(): RawMarkerTableBuilder {
-  // Important!
-  // If modifying this structure, please update all callers of this function to ensure
-  // that they are pushing on correctly to the data structure. These pushes may not
-  // be caught by the type system.
+export function getRawNativeSymbolTableBuilderWithExistingContents(
+  nativeSymbols: RawNativeSymbolTable
+): RawNativeSymbolTableBuilder {
   return {
-    data: [],
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    libIndex: Array.from(nativeSymbols.libIndex),
+    address: Array.from(nativeSymbols.address),
+    name: Array.from(nativeSymbols.name),
+    functionSize: Array.from(nativeSymbols.functionSize),
+    length: nativeSymbols.length,
+  };
+}
+
+export function finishRawNativeSymbolTableBuilder(
+  builder: RawNativeSymbolTableBuilder
+): RawNativeSymbolTable {
+  return {
+    libIndex: new Int32Array(builder.libIndex),
+    // Uint32Array, like frameTable.address, so that the two can be compared.
+    address: new Uint32Array(builder.address),
+    name: new Int32Array(builder.name),
+    functionSize: new Int32Array(builder.functionSize),
+    length: builder.length,
+  };
+}
+
+export function getEmptyResourceTable(): ResourceTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
     name: [],
-    startTime: [],
-    endTime: [],
-    phase: [],
-    category: [],
+    host: [],
+    type: [],
     length: 0,
   };
 }
@@ -625,7 +663,7 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     samples: finishRawSamplesTableBuilder(
       getRawSamplesTableBuilderWithEventDelay()
     ),
-    markers: getEmptyRawMarkerTable(),
+    markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
   };
 
   return {
@@ -640,7 +678,9 @@ export function getEmptySharedData(): RawProfileSharedData {
     frameTable: finishRawFrameTableBuilder(getRawFrameTableBuilder()),
     funcTable: getEmptyFuncTable(),
     resourceTable: getEmptyResourceTable(),
-    nativeSymbols: getEmptyNativeSymbolTable(),
+    nativeSymbols: finishRawNativeSymbolTableBuilder(
+      getRawNativeSymbolTableBuilder()
+    ),
     sources: getEmptySourceTable(),
     stringArray: [],
     sourceLocationTable: getEmptySourceLocationTable(),
