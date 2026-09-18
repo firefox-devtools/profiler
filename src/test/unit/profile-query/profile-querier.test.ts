@@ -35,6 +35,8 @@ import {
   getProfileRootRange,
 } from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
+import { profilePublished } from 'firefox-profiler/actions/publish';
+import { triggerLoadingFromUrl } from 'firefox-profiler/actions/receive-profile';
 
 describe('ProfileQuerier', function () {
   describe('pushViewRange', function () {
@@ -762,6 +764,58 @@ describe('ProfileQuerier', function () {
       const zoomed = await querier.threadMarkers('t-0', { list: true });
       const listedNames = zoomed.flatMarkers!.map((m) => m.name);
       expect(listedNames).toEqual(['Beta']);
+    });
+  });
+
+  describe('permalink', function () {
+    function querierWithSamples() {
+      const { profile } = getProfileFromTextSamples(`
+        0   10  20
+        A   A   A
+        B   B   B
+        C   D   E
+      `);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { store, querier: new ProfileQuerier(store, rootRange) };
+    }
+
+    it('rejects profiles that are not reachable by URL', async function () {
+      const { querier } = querierWithSamples();
+      await expect(querier.permalink()).rejects.toThrow(
+        'Publishing from profiler-cli is not supported yet'
+      );
+    });
+
+    it('builds a public URL that carries the session state', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(profilePublished('abc123', 'my profile', null));
+      await querier.threadSelect('t-0');
+      await querier.pushViewRange('5,25');
+      querier.filterPush({ type: 'merge', funcIndexes: [0] });
+
+      const result = await querier.permalink();
+      expect(result.shortUrl).toBeNull();
+      const url = new URL(result.url);
+      expect(url.origin).toBe('https://profiler.firefox.com');
+      expect(url.pathname).toBe('/public/abc123/calltree/');
+      expect(url.searchParams.get('thread')).toBe('0');
+      // Zoom ranges are given in seconds and serialized as start + duration in ms.
+      expect(url.searchParams.get('range')).toBe('5000m20000');
+      expect(url.searchParams.get('transforms')).toBe('mf-0');
+      expect(url.searchParams.get('profileName')).toBe('my profile');
+    });
+
+    it('supports from-url profiles', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(
+        triggerLoadingFromUrl('https://example.com/profiles/p.json.gz')
+      );
+
+      const result = await querier.permalink();
+      expect(result.url).toStartWith(
+        'https://profiler.firefox.com/from-url/https%3A%2F%2Fexample.com%2Fprofiles%2Fp.json.gz/calltree/'
+      );
     });
   });
 

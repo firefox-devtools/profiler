@@ -96,6 +96,7 @@ Examples:
   profiler-cli sourcemap sources
   profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
+  profiler-cli permalink
   profiler-cli stop --all`
     );
 
@@ -141,6 +142,22 @@ Examples:
       )
   ).action(async (opts) => {
     await runCommand(SESSION_DIR, { command: 'status' }, opts);
+  });
+
+  // profiler-cli permalink
+  addGlobalOptions(
+    program
+      .command('permalink')
+      .description(
+        'Print a profiler.firefox.com URL for the current view of an already published profile'
+      )
+      .option('--short', 'Shorten the URL through share.firefox.dev')
+  ).action(async (opts) => {
+    await runCommand(
+      SESSION_DIR,
+      { command: 'permalink', short: opts.short ?? false },
+      opts
+    );
   });
 
   // profiler-cli stop [id]

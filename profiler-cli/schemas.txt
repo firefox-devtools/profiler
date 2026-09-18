@@ -297,6 +297,13 @@ profiler-cli status --json
     callTreeSummaryStrategy: CallTreeSummaryStrategy
   }
 
+profiler-cli permalink --json
+  {
+    type: "permalink",
+    url,
+    shortUrl: string | null
+  }
+
 profiler-cli sourcemap sources --json
   {
     type: "sourcemap-sources",

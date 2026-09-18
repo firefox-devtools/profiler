@@ -129,6 +129,10 @@ SESSION STATE
 
   Use "profiler-cli status" to inspect all session state at any time.
 
+  "profiler-cli permalink" prints a profiler.firefox.com URL of the current
+  view (thread, zoom, filters). Requires a profile loaded from a URL; publishing
+  from the CLI is not supported yet. "--short" returns a share.firefox.dev link.
+
 
 HANDLE SYSTEM
 
