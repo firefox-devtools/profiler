@@ -26,12 +26,13 @@ CORE WORKFLOW
     profiler-cli load profile.json.gz --session run-a    Recommended for scripting or concurrent work
 
   Step 2: Explore the profile
-    profiler-cli profile info          Overview: processes, threads, time range, CPU activity
-    profiler-cli profile info --all    Show all processes and threads (not just top 5)
+    profiler-cli profile info                      Overview: processes, threads, time range, CPU activity
+    profiler-cli profile info --all                Show all processes and threads (not just top 5)
     profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
-    profiler-cli thread list           Flat table of every thread: handle, name, process, pid, CPU, markers
-    profiler-cli profile meta          Metadata: application, platform, and recording settings
-    profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
+    profiler-cli thread list                       Flat table of every thread: handle, name, process, pid, CPU, markers
+    profiler-cli profile meta                      Metadata: application, platform, and recording settings
+    profiler-cli profile logs                      Print all Log markers in MOZ_LOG format (across all threads)
+    profiler-cli profile markers --search X        Find which thread/process has marker X (across all threads)
 
     See the "Network activity" section in "profile info": if requests are in
     flight for much of the profile while threads are idle, the bottleneck may be
