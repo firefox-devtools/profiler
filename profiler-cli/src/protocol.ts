@@ -18,6 +18,7 @@ export type {
   SessionContext,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
@@ -67,6 +68,9 @@ export type {
   ProfileInfoResult,
   ProfileMetaResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileMarkerItem,
+  ProfileMarkersThreadBreakdown,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -85,6 +89,7 @@ import type {
   SampleFilterSpec,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
@@ -109,6 +114,7 @@ import type {
   ThreadPageLoadResult,
   FilterStackResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
@@ -132,6 +138,11 @@ export type ClientCommand =
   | {
       command: 'profile';
       subcommand: 'meta';
+    }
+  | {
+      command: 'profile';
+      subcommand: 'markers';
+      markerFilters?: MarkerFilterOptions & { thread?: string };
     }
   | {
       command: 'profile';
@@ -224,7 +235,8 @@ export type ClientCommand =
       /** `src-N` handle of the target source; skips auto-matching when set. */
       to?: string;
     }
-  | { command: 'status' };
+  | { command: 'status' }
+  | { command: 'permalink'; short?: boolean };
 
 export type ServerResponse =
   | { type: 'success'; result: string | CommandResult }
@@ -239,6 +251,7 @@ export type ServerResponse =
  */
 export type CommandResult =
   | StatusResult
+  | PermalinkResult
   | WithContext<FunctionExpandResult>
   | WithContext<FunctionInfoResult>
   | ViewRangeResult
@@ -257,6 +270,7 @@ export type CommandResult =
   | WithContext<ThreadNetworkResult>
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
+  | WithContext<ProfileMarkersResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
   | WithContext<StrategySelectResult>

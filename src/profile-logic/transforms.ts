@@ -47,7 +47,7 @@ import type {
   CategoryList,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import {
@@ -717,7 +717,10 @@ function _collapseResourceInCallNodePath(
     callNodePath
       // Map any collapsed functions into the collapsedFuncIndex
       .map((pathFuncIndex) => {
-        return funcTable.resource[pathFuncIndex] === resourceIndex
+        const hasResource =
+          (funcTable.flags[pathFuncIndex] & FuncFlag.HasResource) !== 0;
+        return hasResource &&
+          funcTable.resource[pathFuncIndex] === resourceIndex
           ? collapsedFuncIndex
           : pathFuncIndex;
       })
@@ -990,8 +993,10 @@ export function collapseResource(
   const newFrameTableFuncCol = frameTable.func.slice();
   for (let i = 0; i < frameTable.length; i++) {
     const funcIndex = frameTable.func[i];
-    const resourceIndex = funcTable.resource[funcIndex];
-    if (resourceIndex === resourceIndexToCollapse) {
+    if (
+      (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0 &&
+      funcTable.resource[funcIndex] === resourceIndexToCollapse
+    ) {
       newFrameTableFuncCol[i] = collapsedFuncIndex;
     }
   }
@@ -1200,8 +1205,9 @@ const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
   cpp: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
     const { funcTable, stringTable } = thread;
+    const funcFlags = funcTable.flags[funcIndex];
     // Return quickly if this is a JS frame.
-    if (thread.funcTable.isJS[funcIndex]) {
+    if ((funcFlags & FuncFlag.IsJS) !== 0) {
       return false;
     }
 
@@ -1211,13 +1217,15 @@ const FUNC_MATCHES = {
     // frames are not associated with a shared library and thus have no resource
     const locationString = stringTable.getString(funcTable.name[funcIndex]);
     const isProbablyJitCode =
-      funcTable.resource[funcIndex] === -1 && locationString.startsWith('0x');
+      (funcFlags & FuncFlag.HasResource) === 0 &&
+      locationString.startsWith('0x');
     return !isProbablyJitCode;
   },
   js: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
     return (
-      thread.funcTable.isJS[funcIndex] ||
-      thread.funcTable.relevantForJS[funcIndex]
+      (thread.funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
     );
   },
 };
@@ -1657,7 +1665,7 @@ export function getBacktraceItemsForStack(
       return {
         funcName: stringTable.getString(funcTable.name[funcIndex]),
         category,
-        isFrameLabel: funcTable.resource[funcIndex] === -1,
+        isFrameLabel: (funcTable.flags[funcIndex] & FuncFlag.HasResource) === 0,
         origin: getOriginAnnotationForFunc(
           funcIndex,
           frameIndex,

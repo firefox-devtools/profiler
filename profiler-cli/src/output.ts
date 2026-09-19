@@ -10,6 +10,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type { CommandResult } from './protocol';
 import {
   formatStatusResult,
+  formatPermalinkResult,
   formatFunctionExpandResult,
   formatFunctionInfoResult,
   formatFunctionAnnotateResult,
@@ -28,6 +29,7 @@ import {
   formatThreadFunctionsResult,
   formatThreadNetworkResult,
   formatProfileLogsResult,
+  formatProfileMarkersResult,
   formatThreadPageLoadResult,
   formatThreadSelectResult,
   formatStrategySelectResult,
@@ -59,6 +61,8 @@ export function formatOutput(
   switch (result.type) {
     case 'status':
       return formatStatusResult(result);
+    case 'permalink':
+      return formatPermalinkResult(result);
     case 'filter-stack':
       return formatFilterStackResult(result);
     case 'function-expand':
@@ -95,6 +99,8 @@ export function formatOutput(
       return formatThreadNetworkResult(result);
     case 'profile-logs':
       return formatProfileLogsResult(result);
+    case 'profile-markers':
+      return formatProfileMarkersResult(result);
     case 'thread-page-load':
       return formatThreadPageLoadResult(result);
     case 'thread-select':

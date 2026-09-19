@@ -21,6 +21,7 @@ import {
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
   computeFrameTableFromRawFrameTable,
+  computeFuncTableFromRawFuncTable,
   computeNativeSymbolTableFromRawNativeSymbolTable,
   reserveFunctionsForCollapsedResources,
   computeSamplesTableFromRawSamplesTable,
@@ -290,6 +291,11 @@ export const getFrameTable: Selector<FrameTable> = createSelector(
 export const getNativeSymbolTable: Selector<NativeSymbolTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).nativeSymbols,
   computeNativeSymbolTableFromRawNativeSymbolTable
+);
+
+export const getFuncTable: Selector<FuncTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).funcTable,
+  computeFuncTableFromRawFuncTable
 );
 
 export const getStackTable: Selector<StackTable> = createSelector(

@@ -32,6 +32,7 @@ import {
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
 import { getThreadsWithMarkersMatchingSearchFilter } from 'firefox-profiler/profile-logic/marker-data';
+import { FuncFlag } from 'firefox-profiler/types/profile';
 import type {
   Profile,
   RawThread,
@@ -124,8 +125,8 @@ export function collectFuncNames(profile: Profile): string[] {
   const result: string[] = [];
   for (let i = 0; i < funcTable.length; i++) {
     let name = stringArray[funcTable.name[i]];
-    const sourceIndex = funcTable.source[i];
-    if (sourceIndex !== null) {
+    if ((funcTable.flags[i] & FuncFlag.HasSource) !== 0) {
+      const sourceIndex = funcTable.source[i];
       const filename = stringArray[sources.filename[sourceIndex]];
       name += ` (${filename})`;
     }

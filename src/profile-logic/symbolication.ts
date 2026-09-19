@@ -4,14 +4,16 @@
 import {
   getRawStackTableBuilder,
   finishRawFrameTableBuilder,
+  finishRawFuncTableBuilder,
   finishRawStackTableBuilder,
-  shallowCloneFuncTable,
+  getRawFuncTableBuilderWithExistingContents,
   finishRawNativeSymbolTableBuilder,
   getRawNativeSymbolTableBuilderWithExistingContents,
   getRawFrameTableBuilderWithExistingContents,
 } from './data-structures';
 import type {
   RawFrameTableBuilder,
+  RawFuncTableBuilder,
   RawNativeSymbolTableBuilder,
 } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
@@ -21,7 +23,6 @@ import type {
   RawProfileSharedData,
   RawThread,
   RawStackTable,
-  FuncTable,
   SourceTable,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
@@ -34,7 +35,7 @@ import type {
   CallNodePath,
   Lib,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
   AbstractSymbolStore,
   AddressResult,
@@ -243,7 +244,7 @@ export type FuncToFuncsMap = Map<IndexIntoFuncTable, IndexIntoFuncTable[]>;
 // These are created once per batch and mutated in place by each step.
 type SymbolicationTables = {
   frameTable: RawFrameTableBuilder;
-  funcTable: FuncTable;
+  funcTable: RawFuncTableBuilder;
   nativeSymbols: RawNativeSymbolTableBuilder;
   sources: SourceTable;
   // Maps a filename string index to the index of the native (id === null)
@@ -350,11 +351,11 @@ function getSymbolicationInfo(
       funcsByLib.set(libIndex, funcs);
     }
     funcs.add(funcIndex);
-    if (!resourceForLib.has(libIndex)) {
-      const resourceIndex = funcTable.resource[funcIndex];
-      if (resourceIndex !== -1) {
-        resourceForLib.set(libIndex, resourceIndex);
-      }
+    if (
+      !resourceForLib.has(libIndex) &&
+      (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0
+    ) {
+      resourceForLib.set(libIndex, funcTable.resource[funcIndex]);
     }
   }
 
@@ -546,7 +547,9 @@ export function applySymbolicationSteps(
   const frameTable = getRawFrameTableBuilderWithExistingContents(
     oldShared.frameTable
   );
-  const funcTable = shallowCloneFuncTable(oldShared.funcTable);
+  const funcTable = getRawFuncTableBuilderWithExistingContents(
+    oldShared.funcTable
+  );
   const nativeSymbols = getRawNativeSymbolTableBuilderWithExistingContents(
     oldShared.nativeSymbols
   );
@@ -583,7 +586,7 @@ export function applySymbolicationSteps(
   let shared: RawProfileSharedData = {
     ...oldShared,
     frameTable: finishRawFrameTableBuilder(frameTable),
-    funcTable,
+    funcTable: finishRawFuncTableBuilder(funcTable),
     nativeSymbols: finishRawNativeSymbolTableBuilder(nativeSymbols),
   };
 
@@ -838,8 +841,8 @@ function _partiallyApplySymbolicationStep(
     if (addressResult === undefined) {
       const symbolName = nativeSymbols.name[nativeSymbolIndex];
       let fileNameIndex = null;
-      const sourceIndex = funcTable.source[oldFunc];
-      if (sourceIndex !== null) {
+      if ((funcTable.flags[oldFunc] & FuncFlag.HasSource) !== 0) {
+        const sourceIndex = funcTable.source[oldFunc];
         fileNameIndex = sources.filename[sourceIndex];
       }
       addressResult = {
@@ -885,18 +888,31 @@ function _partiallyApplySymbolicationStep(
       let funcIndex = funcKeyToFuncMap.get(funcKey);
       if (funcIndex === undefined) {
         funcIndex = availableFuncIter.next().value;
+        const preservedFlagsMask = FuncFlag.IsJS | FuncFlag.RelevantForJS;
         if (funcIndex === undefined) {
           // Need a new func.
           funcIndex = funcTable.length;
-          funcTable.isJS[funcIndex] = funcTable.isJS[oldFunc];
-          funcTable.relevantForJS[funcIndex] = funcTable.relevantForJS[oldFunc];
+          funcTable.flags[funcIndex] =
+            (funcTable.flags[oldFunc] & preservedFlagsMask) |
+            FuncFlag.HasResource;
           funcTable.resource[funcIndex] = resourceIndex;
-          funcTable.source[funcIndex] = null;
-          funcTable.lineNumber[funcIndex] = null;
-          funcTable.columnNumber[funcIndex] = null;
-          funcTable.originalLocation[funcIndex] = null;
+          funcTable.source[funcIndex] = 0;
+          funcTable.lineNumber[funcIndex] = 0;
+          funcTable.columnNumber[funcIndex] = 0;
+          funcTable.originalLocation[funcIndex] = 0;
           // The name field will be filled below.
           funcTable.length++;
+        } else {
+          // Reuse an existing func slot: preserve IsJS/RelevantForJS, set
+          // HasResource, and clear the other flag bits since we're overwriting
+          // the source/line/column/originalLocation columns below.
+          funcTable.flags[funcIndex] =
+            (funcTable.flags[funcIndex] & preservedFlagsMask) |
+            FuncFlag.HasResource;
+          funcTable.resource[funcIndex] = resourceIndex;
+          funcTable.lineNumber[funcIndex] = 0;
+          funcTable.columnNumber[funcIndex] = 0;
+          funcTable.originalLocation[funcIndex] = 0;
         }
         funcTable.name[funcIndex] = functionStringIndex;
         // Store filename in sources table if we have one
@@ -916,8 +932,10 @@ function _partiallyApplySymbolicationStep(
             sourceIndexForNativeFilename.set(fileNameStringIndex, sourceIndex);
           }
           funcTable.source[funcIndex] = sourceIndex;
+          funcTable.flags[funcIndex] |= FuncFlag.HasSource;
         } else {
-          funcTable.source[funcIndex] = null;
+          funcTable.source[funcIndex] = 0;
+          funcTable.flags[funcIndex] &= ~FuncFlag.HasSource;
         }
         funcKeyToFuncMap.set(funcKey, funcIndex);
       }

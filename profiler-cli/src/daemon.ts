@@ -402,6 +402,8 @@ export class Daemon {
             throw new Error('unimplemented');
           case 'logs':
             return this.querier.profileLogs(command.logFilters);
+          case 'markers':
+            return this.querier.profileMarkers(command.markerFilters);
           default:
             throw assertExhaustiveCheck(command);
         }
@@ -534,6 +536,8 @@ export class Daemon {
           default:
             throw assertExhaustiveCheck(command);
         }
+      case 'permalink':
+        return this.querier.permalink(command.short ?? false);
       case 'strategy':
         return this.querier.strategySelect(command.strategy);
       case 'zoom':

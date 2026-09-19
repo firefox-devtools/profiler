@@ -6,8 +6,10 @@ import {
   getRawMarkerTableBuilder,
   finishRawMarkerTableBuilder,
   finishRawFrameTableBuilder,
+  finishRawFuncTableBuilder,
   finishRawSamplesTableBuilder,
   finishRawStackTableBuilder,
+  getRawFuncTableBuilderWithExistingContents,
   getRawStackTableBuilderWithExistingContents,
   getRawFrameTableBuilderWithExistingContents,
   type RawSamplesTableBuilder,
@@ -27,7 +29,7 @@ import type {
   JsTracerTiming,
   Microseconds,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 // See the function below for more information.
 type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
@@ -45,13 +47,16 @@ function getScriptLocationToFuncIndex({
 }: RawProfileSharedData): ScriptLocationToFuncIndex {
   const scriptLocationToFuncIndex: ScriptLocationToFuncIndex = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-    if (!funcTable.isJS[funcIndex]) {
+    const funcFlags = funcTable.flags[funcIndex];
+    if ((funcFlags & FuncFlag.IsJS) === 0) {
       continue;
     }
-    const line = funcTable.lineNumber[funcIndex];
-    const column = funcTable.columnNumber[funcIndex];
-    const sourceIndex = funcTable.source[funcIndex];
-    if (column !== null && line !== null && sourceIndex !== null) {
+    const requiredFlags =
+      FuncFlag.HasLine | FuncFlag.HasColumn | FuncFlag.HasSource;
+    if ((funcFlags & requiredFlags) === requiredFlags) {
+      const line = funcTable.lineNumber[funcIndex];
+      const column = funcTable.columnNumber[funcIndex];
+      const sourceIndex = funcTable.source[funcIndex];
       const urlIndex = sources.filename[sourceIndex];
       const fileName = stringArray[urlIndex];
       const key = `${fileName}:${line}:${column}`;
@@ -520,7 +525,9 @@ export function convertJsTracerToThreadWithoutSamples(
     samples,
   };
 
-  const { funcTable } = shared;
+  const funcTable = getRawFuncTableBuilderWithExistingContents(
+    shared.funcTable
+  );
   const frameTable = getRawFrameTableBuilderWithExistingContents(
     shared.frameTable
   );
@@ -578,14 +585,13 @@ export function convertJsTracerToThreadWithoutSamples(
       if (generatedFuncIndex === undefined) {
         // Create a new function only if the event string is different.
         funcIndex = funcTable.length++;
+        funcTable.flags.push(FuncFlag.RelevantForJS);
         funcTable.name.push(eventStringIndex);
-        funcTable.isJS.push(false);
-        funcTable.resource.push(-1);
-        funcTable.relevantForJS.push(true);
-        funcTable.source.push(null);
-        funcTable.lineNumber.push(null);
-        funcTable.columnNumber.push(null);
-        funcTable.originalLocation.push(null);
+        funcTable.resource.push(0);
+        funcTable.source.push(0);
+        funcTable.lineNumber.push(0);
+        funcTable.columnNumber.push(0);
+        funcTable.originalLocation.push(0);
 
         funcMap.set(eventStringIndex, funcIndex);
       } else {
@@ -643,9 +649,10 @@ export function convertJsTracerToThreadWithoutSamples(
     unmatchedEventEnds[unmatchedIndex] = end;
   }
 
-  // Write the augmented stackTable and frameTable back to the shared data.
+  // Write the augmented stackTable, frameTable and funcTable back to the shared data.
   shared.stackTable = finishRawStackTableBuilder(stackTable);
   shared.frameTable = finishRawFrameTableBuilder(frameTable);
+  shared.funcTable = finishRawFuncTableBuilder(funcTable);
   thread.samples = finishRawSamplesTableBuilder(samples);
   thread.markers = finishRawMarkerTableBuilder(markers);
 

@@ -2161,7 +2161,7 @@ function convertSharedTablesEligibleColumns(
   shared: RawProfileSharedData,
   categories: CategoryList | undefined
 ): RawProfileSharedData {
-  const { stackTable, frameTable, nativeSymbols } = shared;
+  const { stackTable, frameTable, funcTable, nativeSymbols } = shared;
   return {
     ...shared,
     stackTable: {
@@ -2185,6 +2185,16 @@ function convertSharedTablesEligibleColumns(
       line: toInt32Array(frameTable.line),
       column: toInt32Array(frameTable.column),
       originalLocation: toInt32Array(frameTable.originalLocation),
+    },
+    funcTable: {
+      length: funcTable.length,
+      flags: toUint8Array(funcTable.flags),
+      name: toInt32Array(funcTable.name),
+      resource: toInt32Array(funcTable.resource),
+      source: toInt32Array(funcTable.source),
+      lineNumber: toInt32Array(funcTable.lineNumber),
+      columnNumber: toInt32Array(funcTable.columnNumber),
+      originalLocation: toInt32Array(funcTable.originalLocation),
     },
     nativeSymbols:
       computeNativeSymbolTableFromRawNativeSymbolTable(nativeSymbols),

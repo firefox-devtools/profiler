@@ -33,6 +33,7 @@ profiler-cli load <PATH>                   # Start daemon and load profile (file
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
 profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
+profiler-cli profile markers               # Search markers across all threads [--search] [--thread] [--category] [--min-duration] [--max-duration] [--has-stack] [--limit]
 profiler-cli thread list                   # List all threads as a flat table [--sort] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
@@ -58,6 +59,7 @@ profiler-cli filter clear                  # Remove all filters for current thre
 profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
 profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
+profiler-cli permalink                     # Print a profiler.firefox.com URL for the current view [--short]
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
 profiler-cli stop --all                    # Stop all sessions

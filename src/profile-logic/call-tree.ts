@@ -29,7 +29,7 @@ import type {
   SampleCategoriesAndSubcategories,
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FuncFlag } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
@@ -522,9 +522,14 @@ export class CallTree {
       const subcategoryIndex =
         this._callNodeInfo.subcategoryForNode(callNodeIndex);
       const badge = this._getInliningBadge(callNodeIndex, funcName);
-      const resourceIndex = this._thread.funcTable.resource[funcIndex];
-      const resourceType = this._thread.resourceTable.type[resourceIndex];
-      const isFrameLabel = resourceIndex === -1;
+      const funcFlags = this._thread.funcTable.flags[funcIndex];
+      const isFrameLabel = (funcFlags & FuncFlag.HasResource) === 0;
+      const resourceIndex = isFrameLabel
+        ? -1
+        : this._thread.funcTable.resource[funcIndex];
+      const resourceType = isFrameLabel
+        ? -1
+        : this._thread.resourceTable.type[resourceIndex];
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
