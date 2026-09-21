@@ -81,7 +81,6 @@ describe('mergeProfilesForDiffing function', function () {
         libName = mergedLibs[libIndex].name;
       }
 
-      /* eslint-disable jest/no-conditional-expect */
       switch (funcName) {
         case 'A':
           expect(libName).toBeOneOf(['libA', 'libB']);
@@ -97,7 +96,6 @@ describe('mergeProfilesForDiffing function', function () {
           break;
         default:
       }
-      /* eslint-enable */
     }
   });
 

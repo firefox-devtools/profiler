@@ -166,7 +166,7 @@ describe('FlameGraph', function () {
     const valueElement = ensureExists(resourceLabel.nextSibling);
 
     // See https://github.com/testing-library/jest-dom/issues/306
-    // eslint-disable-next-line jest-dom/prefer-to-have-text-content
+    // oxlint-disable-next-line jest-dom/prefer-to-have-text-content
     expect(valueElement.textContent).toBe('libxul.so');
     // But also do a good old snapshot.
     expect(tooltip).toMatchSnapshot();

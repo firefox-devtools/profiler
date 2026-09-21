@@ -244,7 +244,7 @@ export class AppLocalizationProvider extends React.PureComponent<
   };
 
   // Used by the global togglePseudoStrategy function for console access
-  // eslint-disable-next-line react/no-unused-class-component-methods
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   togglePseudoStrategy = (pseudoStrategy: PseudoStrategy) => {
     this.setState({ pseudoStrategy });
   };
