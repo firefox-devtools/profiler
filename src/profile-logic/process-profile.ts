@@ -2587,7 +2587,7 @@ export async function unserializeProfileOfArbitraryFormat(
       profileUrl
     );
     if (processedChromeProfile) {
-      return processedChromeProfile;
+      return await processedChromeProfile;
     }
 
     const processedDhat = attemptToConvertDhat(json);
