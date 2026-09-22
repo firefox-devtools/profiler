@@ -626,8 +626,8 @@ PanelSearch--search-field-hint = Чи знаєте ви, що для пошук�
 ProfileName--edit-profile-name-button =
     .title = Змінити назву профілю
 ProfileName--edit-profile-name-input =
-    .title = Змінити назву профілю
     .aria-label = Назва профілю
+    .title = Змінити назву профілю
 
 ## Profile Delete Button
 
@@ -707,8 +707,8 @@ ServiceWorkerManager--updated-while-not-ready =
     завантаження цієї сторінки. Ви можете зіткнутися з несправностями.
 ServiceWorkerManager--new-version-is-ready = Нова версія застосунку завантажена та готова до використання.
 ServiceWorkerManager--hide-notice-button =
-    .title = Сховати сповіщення про перезавантаження
     .aria-label = Сховати сповіщення про перезавантаження
+    .title = Сховати сповіщення про перезавантаження
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
