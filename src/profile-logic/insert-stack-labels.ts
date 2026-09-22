@@ -9,11 +9,12 @@ import type {
   Profile,
   Category,
 } from '../types/profile';
-import { FrameFlag } from '../types/profile';
+import { FrameFlag, FuncFlag } from '../types/profile';
 import {
   finishRawFrameTableBuilder,
+  finishRawFuncTableBuilder,
   getRawFrameTableBuilderWithExistingContents,
-  shallowCloneFuncTable,
+  getRawFuncTableBuilderWithExistingContents,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { updateRawThreadStacks } from 'firefox-profiler/profile-logic/profile-data';
@@ -108,7 +109,7 @@ export function insertStackLabels(
     stringArray,
   } = profile.shared;
   const frameTable = getRawFrameTableBuilderWithExistingContents(oldFrameTable);
-  const funcTable = shallowCloneFuncTable(oldFuncTable);
+  const funcTable = getRawFuncTableBuilderWithExistingContents(oldFuncTable);
   const stringTable = StringTable.withBackingArray(stringArray);
 
   const rootLabelName = 'Root (unaccounted / catch-all)';
@@ -124,14 +125,13 @@ export function insertStackLabels(
   for (let i = 0; i < allLabelNames.length; i++) {
     const labelName = allLabelNames[i];
     const funcIndex = funcTable.length++;
+    funcTable.flags[funcIndex] = FuncFlag.RelevantForJS;
     funcTable.name[funcIndex] = stringTable.indexForString(labelName);
-    funcTable.resource[funcIndex] = -1;
-    funcTable.source[funcIndex] = null;
-    funcTable.lineNumber[funcIndex] = null;
-    funcTable.columnNumber[funcIndex] = null;
-    funcTable.originalLocation[funcIndex] = null;
-    funcTable.isJS[funcIndex] = false;
-    funcTable.relevantForJS[funcIndex] = true;
+    funcTable.resource[funcIndex] = 0;
+    funcTable.source[funcIndex] = 0;
+    funcTable.lineNumber[funcIndex] = 0;
+    funcTable.columnNumber[funcIndex] = 0;
+    funcTable.originalLocation[funcIndex] = 0;
 
     const frameIndex = frameTable.length++;
     frameTable.flags[frameIndex] = FrameFlag.HasCategory;
@@ -154,8 +154,8 @@ export function insertStackLabels(
 
     // Include the filename (in brackets), if present. This allows matchers
     // like `onStateChange (chrome://browser/content/tabbrowser/`
-    const sourceIndex = funcTable.source[funcIndex];
-    if (sourceIndex !== null) {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) !== 0) {
+      const sourceIndex = funcTable.source[funcIndex];
       const filenameString = stringArray[sources.filename[sourceIndex]];
       nameString += ` (${filenameString})`;
     }
@@ -215,8 +215,9 @@ export function insertStackLabels(
       inheritedLabelFrameIndexAtStack[stackIndex] = labelFrameIndex;
       stacksToInsertCount++;
     } else if (
-      funcTable.isJS[funcIndex] ||
-      funcTable.relevantForJS[funcIndex]
+      (funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
     ) {
       labelFrameIndexToInsertAtStack[stackIndex] = null;
       inheritedLabelFrameIndexAtStack[stackIndex] = null;
@@ -281,7 +282,7 @@ export function insertStackLabels(
     ...profile.shared,
     stackTable,
     frameTable: finishRawFrameTableBuilder(frameTable),
-    funcTable,
+    funcTable: finishRawFuncTableBuilder(funcTable),
   };
   const newThreads = updateRawThreadStacks(profile.threads, (oldStack) =>
     oldStack !== null ? oldStackToNewStackPlusOne[oldStack] - 1 : null

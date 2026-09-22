@@ -14,7 +14,7 @@ import type {
   IndexIntoLineSetTable,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
 
 /**
@@ -68,21 +68,28 @@ export function getStackLineInfo(
     // column entirely, and defer the line lookup until we know the source
     // matches.
     const frameFlags = frameTable.flags[frame];
+    const funcFlags = funcTable.flags[func];
     const frameHasOriginalLocation =
       (frameFlags & FrameFlag.HasOriginalLocation) !== 0;
+    const funcHasOriginalLocation =
+      (funcFlags & FuncFlag.HasOriginalLocation) !== 0;
     const frameOriginalLocationIdx = frameHasOriginalLocation
       ? frameTable.originalLocation[frame]
       : -1;
-    const funcOriginalLocationIdx = funcTable.originalLocation[func];
+    const funcOriginalLocationIdx = funcHasOriginalLocation
+      ? funcTable.originalLocation[func]
+      : -1;
     let sourceIndexOfThisStack;
     if (frameHasOriginalLocation) {
       sourceIndexOfThisStack =
         sourceLocationTable.source[frameOriginalLocationIdx];
-    } else if (funcOriginalLocationIdx !== null) {
+    } else if (funcHasOriginalLocation) {
       sourceIndexOfThisStack =
         sourceLocationTable.source[funcOriginalLocationIdx];
-    } else {
+    } else if ((funcFlags & FuncFlag.HasSource) !== 0) {
       sourceIndexOfThisStack = funcTable.source[func];
+    } else {
+      sourceIndexOfThisStack = -1;
     }
 
     const matchesSource = sourceIndexOfThisStack === sourceViewSourceIndex;
@@ -93,11 +100,11 @@ export function getStackLineInfo(
       if (matchesSource) {
         if (frameHasOriginalLocation) {
           selfLineOrNull = sourceLocationTable.line[frameOriginalLocationIdx];
-        } else if (funcOriginalLocationIdx !== null) {
+        } else if (funcHasOriginalLocation) {
           selfLineOrNull = sourceLocationTable.line[funcOriginalLocationIdx];
         } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
           selfLineOrNull = frameTable.line[frame];
-        } else {
+        } else if ((funcFlags & FuncFlag.HasLine) !== 0) {
           selfLineOrNull = funcTable.lineNumber[func];
         }
       }
@@ -224,19 +231,20 @@ export function getTotalLineTimingsForCallNode(
     // the per-sample object allocation.
     const funcIndex = frameTable.func[callNodeFrame];
     const frameFlags = frameTable.flags[callNodeFrame];
+    const funcFlags = funcTable.flags[funcIndex];
     let frameLine: number | null;
     if ((frameFlags & FrameFlag.HasOriginalLocation) !== 0) {
       frameLine =
         sourceLocationTable.line[frameTable.originalLocation[callNodeFrame]];
+    } else if ((funcFlags & FuncFlag.HasOriginalLocation) !== 0) {
+      frameLine =
+        sourceLocationTable.line[funcTable.originalLocation[funcIndex]];
+    } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
+      frameLine = frameTable.line[callNodeFrame];
+    } else if ((funcFlags & FuncFlag.HasLine) !== 0) {
+      frameLine = funcTable.lineNumber[funcIndex];
     } else {
-      const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
-      if (funcOriginalLocationIdx !== null) {
-        frameLine = sourceLocationTable.line[funcOriginalLocationIdx];
-      } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
-        frameLine = frameTable.line[callNodeFrame];
-      } else {
-        frameLine = funcTable.lineNumber[funcIndex];
-      }
+      frameLine = null;
     }
     const line = frameLine !== null ? frameLine : funcLine;
     if (line === null) {

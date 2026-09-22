@@ -3,10 +3,46 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { RawThread } from 'firefox-profiler/types';
+import {
+  getFriendlyThreadName,
+  getProcessTypeLabel,
+} from 'firefox-profiler/profile-logic/profile-data';
 
-/** The display name of the process a thread belongs to. */
+/**
+ * The name a process reports for itself, for a process with no GeckoMain thread
+ * to carry a friendly label. An isolated content process is named after the
+ * site it hosts; otherwise this falls back to the label for the bare process
+ * type, so a process reads as "GPU Process" rather than the raw "gpu".
+ *
+ * Prefer `getFriendlyProcessName`, which is what every output uses.
+ */
 export function getProcessName(thread: RawThread): string {
-  return thread.processName || thread.processType || 'unknown';
+  return (
+    thread['eTLD+1'] ||
+    thread.processName ||
+    getProcessTypeLabel(thread.processType) ||
+    thread.processType ||
+    'unknown'
+  );
+}
+
+/**
+ * The front end's label for a thread's process ("Parent Process", "GPU
+ * Process", an eTLD+1). Only a process' GeckoMain thread carries that label, so
+ * we ask that thread; processes without one fall back to `getProcessName`.
+ */
+export function getFriendlyProcessName(
+  threads: RawThread[],
+  thread: RawThread
+): string {
+  const mainThread = threads.find(
+    (candidate) =>
+      candidate.pid === thread.pid && candidate.name === 'GeckoMain'
+  );
+  if (mainThread === undefined) {
+    return getProcessName(thread);
+  }
+  return getFriendlyThreadName(threads, mainThread);
 }
 
 export type ThreadInfo = {

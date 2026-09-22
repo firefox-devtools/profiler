@@ -11,15 +11,26 @@ import { parseEphemeralFilters, parseLimitArg } from '../utils/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
+  addStrategyOption,
   parseIntArg,
   parseFloatArg,
+  parseOptionalStrategyArg,
   runCommand,
 } from './shared';
 import type {
   CallTreeScoringStrategy,
   MarkerFilterOptions,
   FunctionFilterOptions,
+  ThreadListOptions,
+  ThreadListSort,
 } from '../protocol';
+
+const VALID_THREAD_LIST_SORTS: ThreadListSort[] = [
+  'cpu',
+  'index',
+  'markers',
+  'name',
+];
 
 const VALID_SCORING_STRATEGIES: CallTreeScoringStrategy[] = [
   'exponential-0.95',
@@ -32,15 +43,17 @@ const VALID_SCORING_STRATEGIES: CallTreeScoringStrategy[] = [
 ];
 
 function addSamplesOptions(cmd: Command): Command {
-  return addSampleFilterOptions(
-    addGlobalOptions(cmd)
-      .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-      .option('--include-idle', 'Include idle samples in percentages')
-      .option(
-        '--search <term>',
-        'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
-      )
-      .option('--limit <N>', 'Limit the number of results shown')
+  return addStrategyOption(
+    addSampleFilterOptions(
+      addGlobalOptions(cmd)
+        .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+        .option('--include-idle', 'Include idle samples in percentages')
+        .option(
+          '--search <term>',
+          'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
+        )
+        .option('--limit <N>', 'Limit the number of results shown')
+    )
   );
 }
 
@@ -48,7 +61,7 @@ function addCallTreeOptions(cmd: Command): Command {
   return addSamplesOptions(cmd)
     .option('--max-lines <N>', 'Maximum nodes in call tree (default: 100)')
     .option(
-      '--scoring <strategy>',
+      '--scoring <name>',
       `Call tree scoring strategy: ${VALID_SCORING_STRATEGIES.join(', ')}`
     );
 }
@@ -81,11 +94,85 @@ function parseCallTreeOptions(opts: {
   return result;
 }
 
+/** Add the flags and action of `thread list` to its command. */
+function addThreadListCommand(cmd: Command, sessionDir: string): Command {
+  return addGlobalOptions(
+    cmd
+      .description(
+        'List all threads as a flat table (handle, name, process, pid, CPU, markers)'
+      )
+      .option(
+        '--sort <order>',
+        `Sort by: ${VALID_THREAD_LIST_SORTS.join(', ')} (default: cpu)`
+      )
+      .option(
+        '--search <term>',
+        'Filter by thread name, process name, eTLD+1, pid or tid'
+      )
+      .option('--limit <N>', 'Show at most N threads (default: all, 0 = all)')
+      .addHelpText(
+        'after',
+        `
+Columns: thread handle, thread name, owning process (with its eTLD+1 when known),
+pid, CPU time, and marker count. "*" marks the currently selected thread.
+
+CPU time and marker count always cover the whole profile, never the current zoom,
+so the table stays a stable inventory to navigate from. This means a row's marker
+count can exceed what "thread markers --thread <handle>" reports, since that
+command follows the committed range.
+
+All threads are listed by default; pass --limit to shorten the table.
+
+Examples:
+  profiler-cli thread list                     All threads, busiest first
+  profiler-cli thread list --sort markers      By marker count instead of CPU
+  profiler-cli thread list --sort name         By process name, then thread name
+  profiler-cli thread list --search Compositor Only matching threads
+  profiler-cli thread list --limit 10          First 10 rows only
+
+Use "profile info" instead when you want threads grouped under their process, with
+process lifetimes, counters, and CPU activity over time.`
+      )
+  ).action(async (opts) => {
+    const threadListOptions: ThreadListOptions = {};
+
+    if (opts.sort !== undefined) {
+      if (!(VALID_THREAD_LIST_SORTS as string[]).includes(opts.sort)) {
+        console.error(
+          `Error: --sort must be one of: ${VALID_THREAD_LIST_SORTS.join(', ')}`
+        );
+        process.exit(1);
+      }
+      threadListOptions.sort = opts.sort as ThreadListSort;
+    }
+    if (opts.search !== undefined) {
+      threadListOptions.searchString = opts.search;
+    }
+    if (opts.limit !== undefined) {
+      threadListOptions.limit = parseIntArg(
+        '--limit',
+        opts.limit,
+        0,
+        'Error: --limit must be a non-negative integer (0 = show all)'
+      );
+    }
+
+    await runCommand(
+      sessionDir,
+      { command: 'thread', subcommand: 'list', threadListOptions },
+      opts
+    );
+  });
+}
+
 export function registerThreadCommand(
   program: Command,
   sessionDir: string
 ): void {
   const thread = program.command('thread').description('Thread-level commands');
+
+  // thread list
+  addThreadListCommand(thread.command('list'), sessionDir);
 
   // thread info
   addGlobalOptions(
@@ -131,6 +218,7 @@ export function registerThreadCommand(
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
       opts
@@ -152,6 +240,7 @@ export function registerThreadCommand(
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
@@ -174,6 +263,7 @@ export function registerThreadCommand(
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
@@ -438,22 +528,24 @@ Examples:
   });
 
   // thread functions
-  addSampleFilterOptions(
-    addGlobalOptions(
-      thread
-        .command('functions')
-        .description('List all functions with CPU percentages')
-        .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-        .option('--search <term>', 'Filter by substring')
-        .option(
-          '--min-self <percent>',
-          'Filter by minimum self time percentage'
-        )
-        .option(
-          '--limit <N>',
-          'Limit the number of results shown (0 = no limit)'
-        )
-        .option('--include-idle', 'Include idle samples in percentages')
+  addStrategyOption(
+    addSampleFilterOptions(
+      addGlobalOptions(
+        thread
+          .command('functions')
+          .description('List all functions with CPU percentages')
+          .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+          .option('--search <term>', 'Filter by substring')
+          .option(
+            '--min-self <percent>',
+            'Filter by minimum self time percentage'
+          )
+          .option(
+            '--limit <N>',
+            'Limit the number of results shown (0 = no limit)'
+          )
+          .option('--include-idle', 'Include idle samples in percentages')
+      )
     )
   ).action(async (opts) => {
     let functionFilters: FunctionFilterOptions | undefined;
@@ -488,6 +580,7 @@ Examples:
         subcommand: 'functions',
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         functionFilters,
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },

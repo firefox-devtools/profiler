@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { processGeckoProfile } from '../../profile-logic/process-profile';
+import { attemptToUpgradeProcessedProfileThroughMutation } from '../../profile-logic/processed-profile-versioning';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import {
@@ -15,9 +16,15 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/types';
 import {
+  computeCombinedMarkerSchemaList,
+  computeMarkerSchemaByName,
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
 } from '../../profile-logic/marker-data';
+import {
+  addPIICategoriesToMarkerSchema,
+  extensionTextMarkerSchema,
+} from '../../profile-logic/marker-schema';
 import {
   getTimeRangeForThread,
   computeTimeColumnForRawSamplesTable,
@@ -35,11 +42,27 @@ import { StringTable } from 'firefox-profiler/utils/string-table';
 import { FrameFlag } from 'firefox-profiler/types';
 import type {
   MarkerSchemaByName,
+  Profile,
   RawThread,
   RemoveProfileInformation,
 } from 'firefox-profiler/types';
 
 describe('sanitizePII', function () {
+  function upgradeProfileWithoutPIIAnnotations(profile: Profile): Profile {
+    profile.meta.preprocessedProfileVersion = 71;
+    profile.meta.markerSchema = profile.meta.markerSchema.map((schema) => ({
+      ...schema,
+      fields: schema.fields.map((field) => {
+        const fieldWithoutPII = { ...field };
+        delete fieldWithoutPII.containsPII;
+        return fieldWithoutPII;
+      }),
+    }));
+    return ensureExists(
+      attemptToUpgradeProcessedProfileThroughMutation(profile, {})
+    );
+  }
+
   function setup(
     piiConfig: Partial<RemoveProfileInformation>,
     originalProfile = processGeckoProfile(createGeckoProfile()),
@@ -82,7 +105,7 @@ describe('sanitizePII', function () {
       }
     );
 
-    const markerSchemaByName: MarkerSchemaByName = {
+    const additionalMarkerSchemas: MarkerSchemaByName = {
       FileIO: {
         name: 'FileIO',
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
@@ -141,6 +164,12 @@ describe('sanitizePII', function () {
       },
       ...extraMarkerSchemas,
     };
+    const markerSchemaByName = computeMarkerSchemaByName(
+      computeCombinedMarkerSchemaList([
+        ...originalProfile.meta.markerSchema,
+        ...Object.values(additionalMarkerSchemas),
+      ])
+    );
 
     // Mirror what the `getTracedValuesBuffer` selector hands to `sanitizePII`
     // in the app, instead of pretending that no thread has a buffer.
@@ -167,12 +196,16 @@ describe('sanitizePII', function () {
   // Mirrors what Firefox emits now: the schema declares `name` as a unique
   // string, so the payload holds a string table index.
   const uniqueStringTextSchema: MarkerSchemaByName = {
-    Text: {
+    Text: addPIICategoriesToMarkerSchema({
       name: 'Text',
       tableLabel: '{marker.name} — {marker.data.name}',
       display: ['marker-chart', 'marker-table'],
       fields: [{ key: 'name', label: 'Details', format: 'unique-string' }],
-    },
+    }),
+  };
+
+  const extensionTextMarkerSchemaByName: MarkerSchemaByName = {
+    ExtensionText: extensionTextMarkerSchema,
   };
 
   function setupWithUniqueStringTextMarkers(
@@ -222,76 +255,66 @@ describe('sanitizePII', function () {
     expect(
       setupWithUniqueStringTextMarkers({ shouldRemoveUrls: true }, [
         [
-          'Extension Suspend',
+          'Text marker',
           'onBeforeRequest https://profiler.firefox.com/ by extension',
         ],
       ])
     ).toEqual(['onBeforeRequest https://<URL> by extension']);
   });
 
-  it('should sanitize extension ids inside text markers holding a unique string', function () {
-    expect(
-      setupWithUniqueStringTextMarkers({ shouldRemoveExtensions: true }, [
-        [
-          'ExtensionParent',
-          'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener',
-        ],
-        [
-          'ExtensionChild',
-          'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener',
-        ],
-      ])
-    ).toEqual([
-      'api_call: runtime.onUpdateAvailable.addListener',
-      'api_call: runtime.onUpdateAvailable.addListener',
-    ]);
-  });
-
-  it('should sanitize both URLs and extension ids inside text markers holding a unique string', function () {
-    expect(
-      setupWithUniqueStringTextMarkers(
-        { shouldRemoveUrls: true, shouldRemoveExtensions: true },
-        [
-          [
-            'Extension Suspend',
-            'onBeforeRequest https://profiler.firefox.com/ by extension',
-          ],
-        ]
-      )
-    ).toEqual(['onBeforeRequest https://<URL>']);
-  });
-
-  it('should not alter other strings when sanitizing a shared text marker string', function () {
-    // The string table is shared, so the sanitized text has to be interned as a
-    // new string instead of replacing an entry others may point to.
-    const text =
-      'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener';
+  it('should not alter other references to a sanitized unique string', function () {
+    const extensionId = 'formautofill@mozilla.org';
     const profile = getProfileWithMarkers([
-      ['ExtensionParent', 0, 1, { type: 'Text', name: text }],
-      ['SomeOtherMarker', 0, 1, { type: 'Text', name: text }],
+      [
+        'ExtensionParent',
+        0,
+        1,
+        {
+          type: 'ExtensionText',
+          name: 'api_call: runtime.onUpdateAvailable.addListener',
+          extensionId,
+        },
+      ],
+      ['SomeOtherMarker', 0, 1, { type: 'Text', name: extensionId }],
     ]);
-    profile.meta.markerSchema = [uniqueStringTextSchema.Text];
+    const markerSchemaByName: MarkerSchemaByName = {
+      ExtensionText: {
+        name: 'ExtensionText',
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'extensionId',
+            format: 'unique-string',
+            containsPII: ['extension-id'],
+          },
+        ],
+      },
+      Text: uniqueStringTextSchema.Text,
+    };
+    profile.meta.markerSchema = Object.values(markerSchemaByName);
     const stringTable = StringTable.withBackingArray(
       profile.shared.stringArray
     );
-    const textIndex = stringTable.indexForString(text);
+    const extensionIdIndex = stringTable.indexForString(extensionId);
     profile.threads[0].markers.data = [
-      { type: 'Text', name: textIndex },
-      { type: 'Text', name: textIndex },
+      {
+        type: 'ExtensionText',
+        name: 'api_call: runtime.onUpdateAvailable.addListener',
+        extensionId: extensionIdIndex,
+      } as any,
+      { type: 'Text', name: extensionIdIndex },
     ];
 
     const { sanitizedProfile } = setup(
       { shouldRemoveExtensions: true },
       profile,
-      uniqueStringTextSchema
+      markerSchemaByName
     );
 
     const { stringArray } = sanitizedProfile.shared;
-    const [sanitized, untouched] = sanitizedProfile.threads[0].markers.data.map(
-      (data) => stringArray[(data as any).name]
-    );
-    expect(sanitized).toBe('api_call: runtime.onUpdateAvailable.addListener');
-    expect(untouched).toBe(text);
+    const [sanitized, untouched] = sanitizedProfile.threads[0].markers.data;
+    expect((sanitized as any).extensionId).toBeUndefined();
+    expect(stringArray[(untouched as any).name]).toBe(extensionId);
   });
 
   it('should sanitize the threads if they are provided', function () {
@@ -627,56 +650,64 @@ describe('sanitizePII', function () {
   });
 
   it('should sanitize all the URLs inside network markers', function () {
-    const { sanitizedProfile } = setup({
-      shouldRemoveUrls: true,
-    });
+    const originalProfile = getProfileWithMarkers(
+      getNetworkMarkers({
+        uri: 'https://example.com',
+        payload: { RedirectURI: 'https://redirect.example.com' },
+      })
+    );
+    const originalMarkerData = originalProfile.threads[0].markers.data;
+    const { sanitizedProfile } = setup(
+      { shouldRemoveUrls: true },
+      originalProfile
+    );
 
-    const stringArray = sanitizedProfile.shared.stringArray;
-    for (const thread of sanitizedProfile.threads) {
-      for (let i = 0; i < thread.markers.length; i++) {
-        const currentMarker = thread.markers.data[i];
-        if (
-          currentMarker &&
-          currentMarker.type &&
-          currentMarker.type === 'Network'
-        ) {
-          /* eslint-disable jest/no-conditional-expect */
-          expect(currentMarker.URI).toBeFalsy();
-          expect(currentMarker.RedirectURI).toBeFalsy();
-          const stringIndex = thread.markers.name[i];
-          expect(stringArray[stringIndex].includes('http')).toBe(false);
-          /* eslint-enable */
-        }
-      }
-    }
+    const markers = sanitizedProfile.threads[0].markers;
+    expect(markers.data[0]).toEqual({
+      ...originalMarkerData[0],
+      URI: 'https://<URL>',
+    });
+    expect(markers.data[1]).toEqual({
+      ...originalMarkerData[1],
+      URI: 'https://<URL>',
+      RedirectURI: 'https://<URL>',
+    });
+    expect(
+      markers.name.map((name) => sanitizedProfile.shared.stringArray[name])
+    ).toEqual(['Load 0: https://<URL>', 'Load 0: https://<URL>']);
   });
 
-  it('should sanitize the URLs inside text markers', function () {
+  it('should sanitize URLs after upgrading an extension text marker', function () {
     const unsanitizedNameField =
       'onBeforeRequest https://profiler.firefox.com/ by extension';
-    const sanitizedNameField = 'onBeforeRequest https://<URL> by extension';
+    const originalProfile = getProfileWithMarkers([
+      [
+        'Extension Suspend',
+        0,
+        1,
+        {
+          type: 'Text',
+          name: unsanitizedNameField,
+        },
+      ],
+    ]);
+    upgradeProfileWithoutPIIAnnotations(originalProfile);
     const { sanitizedProfile } = setup(
       {
         shouldRemoveUrls: true,
       },
-      getProfileWithMarkers([
-        [
-          'Extension Suspend',
-          0,
-          1,
-          {
-            type: 'Text',
-            name: unsanitizedNameField,
-          },
-        ],
-      ])
+      originalProfile
     );
 
     const marker = sanitizedProfile.threads[0].markers.data[0];
-    if (!marker || marker.type !== 'Text') {
-      throw new Error('Expected a Text marker');
+    if (!marker || marker.type !== 'ExtensionText') {
+      throw new Error('Expected an ExtensionText marker');
     }
-    expect(marker.name).toBe(sanitizedNameField);
+    expect(marker).toEqual({
+      type: 'ExtensionText',
+      name: 'onBeforeRequest https://<URL>',
+      extensionId: 'extension',
+    });
   });
 
   it('should sanitize all the URLs inside string table', function () {
@@ -713,14 +744,11 @@ describe('sanitizePII', function () {
     }
   });
 
-  it('should sanitize extension ids inside text markers', function () {
-    const unsanitizedNameField =
-      'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener';
-    const sanitizedNameField =
-      'api_call: runtime.onUpdateAvailable.addListener';
+  it('should sanitize PII inside structured extension markers', function () {
     const { sanitizedProfile } = setup(
       {
         shouldRemoveExtensions: true,
+        shouldRemoveUrls: true,
       },
       getProfileWithMarkers([
         [
@@ -728,8 +756,9 @@ describe('sanitizePII', function () {
           0,
           1,
           {
-            type: 'Text',
-            name: unsanitizedNameField,
+            type: 'ExtensionText',
+            name: 'api_call: tabs.open https://example.com/',
+            extensionId: 'formautofill@mozilla.org',
           },
         ],
         [
@@ -737,26 +766,28 @@ describe('sanitizePII', function () {
           0,
           1,
           {
-            type: 'Text',
-            name: unsanitizedNameField,
+            type: 'ExtensionText',
+            name: 'api_call: tabs.open https://example.com/',
+            extensionId: 'formautofill@mozilla.org',
           },
         ],
-      ])
+      ]),
+      extensionTextMarkerSchemaByName
     );
 
     const markers = sanitizedProfile.threads[0].markers;
     for (const marker of [markers.data[0], markers.data[1]]) {
-      if (!marker || marker.type !== 'Text') {
-        throw new Error('Expected a Text marker');
+      if (!marker || marker.type !== 'ExtensionText') {
+        throw new Error('Expected an extension marker');
       }
-      expect(marker.name).toBe(sanitizedNameField);
+      expect(marker).toEqual({
+        type: 'ExtensionText',
+        name: 'api_call: tabs.open https://<URL>',
+      });
     }
   });
 
   it('should sanitize both URLs and extension ids inside Extension Suspend markers', function () {
-    const unsanitizedNameField =
-      'onBeforeRequest https://profiler.firefox.com/ by extension';
-    const sanitizedNameField = 'onBeforeRequest https://<URL>';
     const { sanitizedProfile } = setup(
       {
         shouldRemoveUrls: true,
@@ -768,18 +799,23 @@ describe('sanitizePII', function () {
           0,
           1,
           {
-            type: 'Text',
-            name: unsanitizedNameField,
+            type: 'ExtensionText',
+            name: 'onBeforeRequest https://profiler.firefox.com/',
+            extensionId: 'extension',
           },
         ],
-      ])
+      ]),
+      extensionTextMarkerSchemaByName
     );
 
     const marker = sanitizedProfile.threads[0].markers.data[0];
-    if (!marker || marker.type !== 'Text') {
-      throw new Error('Expected a Text marker');
+    if (!marker || marker.type !== 'ExtensionText') {
+      throw new Error('Expected an ExtensionText marker');
     }
-    expect(marker.name).toBe(sanitizedNameField);
+    expect(marker).toEqual({
+      type: 'ExtensionText',
+      name: 'onBeforeRequest https://<URL>',
+    });
   });
 
   it('should not sanitize all the preference values inside preference read markers', function () {
@@ -810,7 +846,7 @@ describe('sanitizePII', function () {
     expect(thread.markers.length).toEqual(1);
 
     const marker = thread.markers.data[0];
-    // All the conditions have to be checked to make Flow happy.
+    // All the conditions have to be checked to satisfy the type checker.
     expect(
       marker &&
         marker.type &&
@@ -819,26 +855,25 @@ describe('sanitizePII', function () {
     ).toBeTruthy();
   });
 
-  it('should sanitize all the preference values inside preference read markers', function () {
+  it('should sanitize preference values after upgrading an old processed profile', function () {
+    const preferenceMarker = {
+      type: 'PreferenceRead' as const,
+      prefAccessTime: 0,
+      prefName: 'preferenceName',
+      prefKind: 'preferenceKind',
+      prefType: 'preferenceType',
+      prefValue: 'preferenceValue',
+    };
+    const originalProfile = getProfileWithMarkers([
+      ['PreferenceRead', 0, 1, preferenceMarker],
+    ]);
+    upgradeProfileWithoutPIIAnnotations(originalProfile);
     const { sanitizedProfile } = setup(
       {
         shouldRemovePreferenceValues: true,
+        shouldRemoveUrls: true,
       },
-      getProfileWithMarkers([
-        [
-          'PreferenceRead',
-          0,
-          1,
-          {
-            type: 'PreferenceRead',
-            prefAccessTime: 0,
-            prefName: 'preferenceName',
-            prefKind: 'preferenceKind',
-            prefType: 'preferenceType',
-            prefValue: 'preferenceValue',
-          },
-        ],
-      ])
+      originalProfile
     );
 
     expect(sanitizedProfile.threads.length).toEqual(1);
@@ -846,14 +881,10 @@ describe('sanitizePII', function () {
     const thread = sanitizedProfile.threads[0];
     expect(thread.markers.length).toEqual(1);
 
-    const marker = thread.markers.data[0];
-    // All the conditions have to be checked to make Flow happy.
-    expect(
-      marker &&
-        marker.type &&
-        marker.type === 'PreferenceRead' &&
-        marker.prefValue === ''
-    ).toBeTruthy();
+    expect(thread.markers.data[0]).toEqual({
+      ...preferenceMarker,
+      prefValue: '',
+    });
   });
 
   it('should not push any null values to marker values by mistake while filtering', function () {

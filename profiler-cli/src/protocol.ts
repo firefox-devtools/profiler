@@ -18,17 +18,30 @@ export type {
   SessionContext,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  ThreadListResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListSort,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   CallTreeNode,
   CallTreeScoringStrategy,
+  CategoryBreakdown,
+  CategoryBreakdownEntry,
+  CategorySubBreakdownEntry,
+  FunctionCategoryBreakdown,
+  FunctionCategoryBreakdowns,
+  CallTreeSummaryStrategy,
+  WeightType,
+  StrategySelectResult,
   InlineStatus,
   ThreadMarkersResult,
   ThreadNetworkResult,
@@ -55,6 +68,9 @@ export type {
   ProfileInfoResult,
   ProfileMetaResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileMarkerItem,
+  ProfileMarkersThreadBreakdown,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -73,12 +89,17 @@ import type {
   SampleFilterSpec,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
+  ThreadListResult,
+  ThreadListOptions,
   MarkerStackResult,
   MarkerInfoResult,
   ProfileInfoResult,
@@ -93,6 +114,7 @@ import type {
   ThreadPageLoadResult,
   FilterStackResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
@@ -119,6 +141,11 @@ export type ClientCommand =
     }
   | {
       command: 'profile';
+      subcommand: 'markers';
+      markerFilters?: MarkerFilterOptions & { thread?: string };
+    }
+  | {
+      command: 'profile';
       subcommand: 'logs';
       logFilters?: {
         thread?: string;
@@ -132,6 +159,7 @@ export type ClientCommand =
       command: 'thread';
       subcommand:
         | 'info'
+        | 'list'
         | 'select'
         | 'samples'
         | 'samples-top-down'
@@ -143,8 +171,10 @@ export type ClientCommand =
       thread?: string;
       includeIdle?: boolean;
       search?: string;
+      strategy?: CallTreeSummaryStrategy;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
+      threadListOptions?: ThreadListOptions;
       callTreeOptions?: CallTreeCollectionOptions;
       networkFilters?: {
         searchString?: string;
@@ -179,6 +209,11 @@ export type ClientCommand =
       symbolServerUrl?: string;
       /** "file", "function", or a number of context lines (e.g. "2") */
       annotateContext?: string;
+      strategy?: CallTreeSummaryStrategy;
+    }
+  | {
+      command: 'strategy';
+      strategy: CallTreeSummaryStrategy;
     }
   | {
       command: 'zoom';
@@ -200,7 +235,8 @@ export type ClientCommand =
       /** `src-N` handle of the target source; skips auto-matching when set. */
       to?: string;
     }
-  | { command: 'status' };
+  | { command: 'status' }
+  | { command: 'permalink'; short?: boolean };
 
 export type ServerResponse =
   | { type: 'success'; result: string | CommandResult }
@@ -215,11 +251,13 @@ export type ServerResponse =
  */
 export type CommandResult =
   | StatusResult
+  | PermalinkResult
   | WithContext<FunctionExpandResult>
   | WithContext<FunctionInfoResult>
   | ViewRangeResult
   | FilterStackResult
   | WithContext<ThreadInfoResult>
+  | WithContext<ThreadListResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
   | WithContext<ProfileInfoResult>
@@ -232,8 +270,10 @@ export type CommandResult =
   | WithContext<ThreadNetworkResult>
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
+  | WithContext<ProfileMarkersResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
+  | WithContext<StrategySelectResult>
   | WithContext<CounterListResult>
   | WithContext<CounterInfoResult>
   | WithContext<SourceMapSourcesResult>

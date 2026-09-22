@@ -419,8 +419,8 @@ MarkerTable--details = 詳細資訊
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = 只顯示符合「{ $filter }」的標記
     .aria-label = 只顯示符合「{ $filter }」的標記
+    .title = 只顯示符合「{ $filter }」的標記
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -644,8 +644,8 @@ PanelSearch--search-field-hint = 您知道可以使用半形逗號（,）搜尋�
 ProfileName--edit-profile-name-button =
     .title = 編輯效能檢測檔名稱
 ProfileName--edit-profile-name-input =
-    .title = 編輯效能檢測檔名稱
     .aria-label = 效能檢測檔名稱
+    .title = 編輯效能檢測檔名稱
 
 ## Profile Delete Button
 
@@ -724,8 +724,8 @@ ServiceWorkerManager--updated-while-not-ready =
     您可能會遇到某些不正常的部分。
 ServiceWorkerManager--new-version-is-ready = 已下載新版本的應用程式，準備好可以使用。
 ServiceWorkerManager--hide-notice-button =
-    .title = 隱藏重新載入通知
     .aria-label = 隱藏重新載入通知
+    .title = 隱藏重新載入通知
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack

@@ -128,6 +128,12 @@ export type MarkerGraph = {
   color?: GraphColor;
 };
 
+export type MarkerSchemaPIICategory =
+  | 'url'
+  | 'extension-id'
+  | 'preference-value'
+  | 'private-browsing';
+
 export type MarkerSchemaField = {
   // The property key of the marker data property that carries the field value.
   key: string;
@@ -144,6 +150,8 @@ export type MarkerSchemaField = {
   // of fields in the tooltip or in the sidebar. Such fields can still be
   // used inside labels and their values are matched when searching.
   hidden?: boolean;
+
+  containsPII?: MarkerSchemaPIICategory[];
 };
 
 export type MarkerSchema = {
@@ -639,6 +647,14 @@ export type TextMarkerPayload = {
   innerWindowID?: number;
 };
 
+export type ExtensionTextMarkerPayload = {
+  type: 'ExtensionText';
+  name: string;
+  extensionId?: string;
+  cause?: CauseBacktrace;
+  innerWindowID?: number;
+};
+
 // Any import from a Chrome profile
 export type ChromeEventPayload = {
   type: string;
@@ -864,6 +880,7 @@ export type MarkerPayload =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | ExtensionTextMarkerPayload
   | LogMarkerPayload
   | PaintProfilerMarkerTracing
   | CcMarkerTracing

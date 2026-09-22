@@ -201,8 +201,7 @@ export function getBasicThreadSelectorsPerThread(
     ProfileSelectors.getStackTable,
     ProfileSelectors.getFrameTable,
     ProfileSelectors.getFunctionsReservedFuncTable,
-    (state: State) =>
-      ProfileSelectors.getRawProfileSharedData(state).nativeSymbols,
+    ProfileSelectors.getNativeSymbolTable,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).resourceTable,
     ProfileSelectors.getStringTable,
@@ -396,6 +395,44 @@ export function getBasicThreadSelectorsPerThread(
   };
 
   /**
+   * Retained memory and deallocated memory need to pair each deallocation with its
+   * allocation, which is only possible when the allocations carry memory addresses.
+   */
+  const getAvailableCallTreeSummaryStrategies: Selector<
+    CallTreeSummaryStrategy[]
+  > = createSelector(
+    getHasUsefulTimingSamples,
+    getHasUsefulJsAllocations,
+    getHasUsefulNativeAllocations,
+    getCanShowRetainedMemory,
+    (
+      hasUsefulTimingSamples,
+      hasUsefulJsAllocations,
+      hasUsefulNativeAllocations,
+      canShowRetainedMemory
+    ) =>
+      ProfileData.CALL_TREE_SUMMARY_STRATEGIES.filter((strategy) => {
+        switch (strategy) {
+          case 'timing':
+            return hasUsefulTimingSamples;
+          case 'js-allocations':
+            return hasUsefulJsAllocations;
+          case 'native-allocations':
+          case 'native-deallocations-sites':
+            return hasUsefulNativeAllocations;
+          case 'native-retained-allocations':
+          case 'native-deallocations-memory':
+            return canShowRetainedMemory;
+          default:
+            throw assertExhaustiveCheck(
+              strategy,
+              'Unhandled call tree summary strategy.'
+            );
+        }
+      })
+  );
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -475,6 +512,7 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulJsAllocations,
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
+    getAvailableCallTreeSummaryStrategies,
     getProcessedEventDelays,
     getCallTreeSummaryStrategy,
   };
@@ -707,6 +745,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,
+    getPreviewFilteredCtssSampleIndexOffsets,
     getPreviewFilteredCtssSampleCategoriesAndSubcategories,
     getHasFilteredCtssSamples,
     getHasPreviewFilteredCtssSamples,

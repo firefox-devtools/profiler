@@ -20,9 +20,7 @@ import type {
   ProcessType,
   PausedRange,
   RawMarkerTable,
-  FuncTable,
   ResourceTable,
-  NativeSymbolTable,
   JsTracerTable,
   IndexIntoStackTable,
   WeightType,
@@ -303,6 +301,43 @@ export type FrameTable = {
   line: Int32Array<ArrayBuffer>;
   column: Int32Array<ArrayBuffer>;
   originalLocation: Int32Array<ArrayBuffer>;
+  length: number;
+};
+
+/**
+ * The `FuncTable` type of the derived thread.
+ *
+ * Differs from `RawFuncTable` in that all columns are always stored as typed
+ * arrays. In `RawFuncTable`, these columns may be either regular arrays or
+ * typed arrays, since regular arrays are convenient during construction.
+ *
+ * See the comment on `RawFuncTable` for the semantics of the `flags` column
+ * and how it relates to the other columns.
+ */
+export type FuncTable = {
+  flags: Uint8Array<ArrayBuffer>;
+  name: Int32Array<ArrayBuffer>;
+  resource: Int32Array<ArrayBuffer>;
+  source: Int32Array<ArrayBuffer>;
+  lineNumber: Int32Array<ArrayBuffer>;
+  columnNumber: Int32Array<ArrayBuffer>;
+  originalLocation: Int32Array<ArrayBuffer>;
+  length: number;
+};
+
+/**
+ * The `NativeSymbolTable` type of the derived thread.
+ *
+ * Differs from `RawNativeSymbolTable` in that all columns are always stored as
+ * typed arrays, and `functionSize` uses `-1` as the sentinel for "size unknown"
+ * (rather than `null`).
+ */
+export type NativeSymbolTable = {
+  libIndex: Int32Array<ArrayBuffer>;
+  address: Uint32Array<ArrayBuffer>;
+  name: Int32Array<ArrayBuffer>;
+  // `-1` means "size unknown".
+  functionSize: Int32Array<ArrayBuffer>;
   length: number;
 };
 
@@ -752,22 +787,62 @@ export type RemoveProfileInformation = {
 };
 
 /**
- * This const enum is used to decide how to highlight and stripe areas in the
- * timeline.
+ * The activity graph draws one fill per category per bucket. Every sample
+ * contributes to exactly one bucket. This is only about how a sample is
+ * *drawn*: unlike SampleRelationToNode, it makes no distinction between a
+ * node's self samples and its non-self samples, because both are drawn with
+ * the selection highlight fill.
  */
-export const enum SelectedState {
-  // Samples can be filtered through various operations, like searching, or
-  // call tree transforms.
-  FilteredOutByTransform,
-  // This sample is selected because either the tip or an ancestor call node matches
-  // the currently selected call node.
-  Selected,
-  // This call node is not selected, and the stacks are ordered before the selected
-  // call node as sorted by the getTreeOrderComparator.
-  UnselectedOrderedBeforeSelected,
-  // This call node is not selected, and the stacks are ordered after the selected
-  // call node as sorted by the getTreeOrderComparator.
-  UnselectedOrderedAfterSelected,
+export const enum FillBucket {
+  FilteredOutByTransform = 0,
+  Selected = 1,
+  UnselectedOrderedBeforeSelected = 2,
+  UnselectedOrderedAfterSelected = 3,
+}
+
+// The bit in a SampleRelationToNode which says that the sample's stack *ends*
+// at the node, rather than just passing through it. It is deliberately above
+// the bits used by FillBucket, so that a relation's fill bucket can be
+// recovered with a single mask - see SampleRelations.fillBucket.
+const SELF_FLAG = 1 << 2;
+
+// Masks a SampleRelationToNode down to its FillBucket.
+export const FILL_BUCKET_MASK = 3;
+
+/**
+ * Describes how a sample relates to one particular call node. Usually that node
+ * is the selected call node, but the same relation is useful for other nodes,
+ * too, e.g. for the hovered node in the flame graph.
+ *
+ * "Total" means that the sample's stack runs through the node, so the sample
+ * counts towards the node's total time. "AndSelf" additionally means that the
+ * sample's stack *ends* at the node, so it also counts towards the node's self
+ * time. Keeping those two apart lets the sidebar and the flame graph tooltip
+ * compute their timings from the same array that the activity graph uses to
+ * decide how to highlight and stripe its areas.
+ *
+ * "Before" and "After" describe samples which are unrelated to the node, and
+ * order them relative to it as sorted by getTreeOrderComparator. The activity
+ * graph relies on that ordering so that samples from the same subtree clump
+ * together in the graph.
+ *
+ * Every member is written as its FillBucket, optionally with SELF_FLAG on top.
+ * That is what makes SampleRelations.fillBucket a single mask rather than a
+ * table lookup, so keep new members in that form.
+ */
+export const enum SampleRelationToNode {
+  // The sample was filtered out, e.g. by a search or by a call tree transform.
+  FilteredOut = FillBucket.FilteredOutByTransform,
+  // The sample's stack runs through the node but does not end at it, so the
+  // sample counts towards the node's total time but not its self time.
+  TotalButNotSelf = FillBucket.Selected,
+  // The sample's stack ends at the node, so the sample counts towards both the
+  // node's total time and its self time.
+  TotalAndSelf = FillBucket.Selected | SELF_FLAG,
+  // The sample is unrelated to the node, and ordered before it.
+  Before = FillBucket.UnselectedOrderedBeforeSelected,
+  // The sample is unrelated to the node, and ordered after it.
+  After = FillBucket.UnselectedOrderedAfterSelected,
 }
 
 /**

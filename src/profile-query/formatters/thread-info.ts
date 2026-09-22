@@ -9,12 +9,20 @@ import {
 import {
   getCategories,
   getDefaultCategory,
+  getProfile,
+  getThreadCPUTimeMs,
 } from 'firefox-profiler/selectors/profile';
+import { getProcessName } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
 import { computeThreadNetworkSummary } from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
   ThreadInfoResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListResult,
+  ThreadListSort,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -26,12 +34,14 @@ import {
   extractFunctionData,
   formatFunctionNameWithLibrary,
 } from '../function-list';
+import { collectThreadCategoryBreakdown } from './category-breakdown';
 import { collectCallTree, inlineStatusForNode } from './call-tree';
 import type { CallTreeCollectionOptions } from './call-tree';
 import {
   computeCallTreeTimings,
   getCallTree,
   computeCallNodeSelfAndSummary,
+  extractSamplesLikeTable,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getInvertedCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
 import type { Store } from '../../types/store';
@@ -40,6 +50,106 @@ import type { ThreadMap } from '../thread-map';
 import { getFunctionHandle } from '../function-map';
 import type { MarkerMap } from '../marker-map';
 import type { CallNodePath } from 'firefox-profiler/types';
+
+const threadNameSort = new Intl.Collator('en-US', { numeric: true });
+
+/**
+ * Collect the flat thread table shown by `thread list`.
+ *
+ * This is the inventory counterpart of `profile info`: one row per thread of the
+ * profile, rather than a per-process tree limited to the busiest processes.
+ * `cpuMs` comes from the same selector `profile info` uses, and `markerCount` is
+ * the derived marker count `thread markers` reports for that thread (start/end
+ * pairs merged, jank markers added), so a row's count matches what `thread
+ * markers --thread <handle>` then prints. Both cover the whole profile
+ * regardless of the current zoom, matching `profile info`.
+ */
+export function collectThreadList(
+  store: Store,
+  threadMap: ThreadMap,
+  processIndexMap: Map<string, number>,
+  options: ThreadListOptions = {}
+): ThreadListResult {
+  const state = store.getState();
+  const profile = getProfile(state);
+  const threadCPUTimeMs = getThreadCPUTimeMs(state);
+  const selectedThreadIndexes = getSelectedThreadIndexes(state);
+  const sort: ThreadListSort = options.sort ?? 'cpu';
+
+  const allThreads: ThreadListItem[] = profile.threads.map((thread, index) => {
+    const processIndex = processIndexMap.get(thread.pid);
+    if (processIndex === undefined) {
+      throw new Error(`Process index not found for pid ${thread.pid}`);
+    }
+    return {
+      threadHandle: threadMap.handleForThreadIndex(index),
+      threadIndex: index,
+      name: thread.name,
+      processName: getProcessName(thread),
+      etld1: thread['eTLD+1'],
+      pid: thread.pid,
+      processIndex,
+      tid: thread.tid,
+      cpuMs: threadCPUTimeMs ? threadCPUTimeMs[index] : 0,
+      markerCount: getThreadSelectors(index).getFullMarkerList(state).length,
+      selected: selectedThreadIndexes.has(index),
+    };
+  });
+
+  const search = options.searchString;
+  const matching =
+    search !== undefined && search !== ''
+      ? allThreads.filter((item) => {
+          const query = search.toLowerCase();
+          return (
+            item.name.toLowerCase().includes(query) ||
+            item.processName.toLowerCase().includes(query) ||
+            (item.etld1 !== undefined &&
+              item.etld1.toLowerCase().includes(query)) ||
+            item.pid.includes(query) ||
+            String(item.tid).includes(query) ||
+            item.threadHandle === query
+          );
+        })
+      : allThreads;
+
+  // Sorts are stable in JS, so ties keep the profile's thread order.
+  const sorted = matching.slice();
+  switch (sort) {
+    case 'cpu':
+      sorted.sort((a, b) => b.cpuMs - a.cpuMs);
+      break;
+    case 'markers':
+      sorted.sort((a, b) => b.markerCount - a.markerCount);
+      break;
+    case 'name':
+      sorted.sort(
+        (a, b) =>
+          threadNameSort.compare(a.processName, b.processName) ||
+          threadNameSort.compare(a.name, b.name)
+      );
+      break;
+    case 'index':
+      sorted.sort((a, b) => a.threadIndex - b.threadIndex);
+      break;
+    default:
+      throw assertExhaustiveCheck(sort, 'thread list sort');
+  }
+
+  const limit = options.limit;
+  const threads =
+    limit !== undefined && limit > 0 ? sorted.slice(0, limit) : sorted;
+
+  return {
+    type: 'thread-list',
+    threads,
+    totalThreadCount: profile.threads.length,
+    processCount: new Set(profile.threads.map((t) => t.pid)).size,
+    hiddenByLimit: sorted.length - threads.length,
+    sort,
+    searchQuery: search,
+  };
+}
 
 /**
  * Collect thread info as structured data.
@@ -93,6 +203,8 @@ export function collectThreadInfo(
     markerCount: thread.markers.length,
     cpuActivity,
     networkActivity,
+    availableStrategies:
+      threadSelectors.getAvailableCallTreeSummaryStrategies(state),
   };
 }
 
@@ -124,13 +236,13 @@ export function collectThreadSamples(
   // Sort by total and take top 50
   const sortedByTotal = functions
     .slice()
-    .sort((a, b) => b.total - a.total)
+    .sort((a, b) => Math.abs(b.total) - Math.abs(a.total))
     .slice(0, 50);
 
   // Sort by self and take top 50
   const sortedBySelf = functions
     .slice()
-    .sort((a, b) => b.self - a.self)
+    .sort((a, b) => Math.abs(b.self) - Math.abs(a.self))
     .slice(0, 50);
 
   // Convert top functions to structured format
@@ -172,7 +284,7 @@ export function collectThreadSamples(
 
   if (roots.length > 0) {
     let heaviestPath: CallNodePath = [];
-    let maxSelfSamples = Number.NEGATIVE_INFINITY;
+    let maxAbsSelfSamples = -1;
 
     for (const root of roots) {
       const candidatePath = callTree._internal.findHeaviestPathInSubtree(root);
@@ -183,10 +295,12 @@ export function collectThreadSamples(
         continue;
       }
 
-      const candidateSelfSamples = callTree.getNodeData(leafNodeIndex).self;
-      if (candidateSelfSamples > maxSelfSamples) {
+      const candidateSelfSamples = Math.abs(
+        callTree.getNodeData(leafNodeIndex).self
+      );
+      if (candidateSelfSamples > maxAbsSelfSamples) {
         heaviestPath = candidatePath;
-        maxSelfSamples = candidateSelfSamples;
+        maxAbsSelfSamples = candidateSelfSamples;
       }
     }
 
@@ -237,6 +351,9 @@ export function collectThreadSamples(
     type: 'thread-samples',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    categoryBreakdown: collectThreadCategoryBreakdown(store, threadIndexes),
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     topFunctionsByTotal,
     topFunctionsBySelf,
     heaviestStack,
@@ -271,9 +388,7 @@ export function collectThreadSamplesBottomUp(
 
   const samples = threadSelectors.getPreviewFilteredCtssSamples(state);
   const sampleIndexToCallNodeIndex =
-    threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-      state
-    );
+    threadSelectors.getPreviewFilteredCtssSampleCallNodes(state);
 
   const callNodeSelfAndSummary = computeCallNodeSelfAndSummary(
     samples,
@@ -307,6 +422,8 @@ export function collectThreadSamplesBottomUp(
     type: 'thread-samples-bottom-up',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType,
     invertedCallTree,
   };
 }
@@ -338,13 +455,15 @@ export function collectThreadSamplesTopDown(
     type: 'thread-samples-top-down',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     regularCallTree,
   };
 }
 
 /**
  * Collect thread functions data in structured format.
- * Lists all functions with their CPU percentages, supporting search and filtering.
+ * Lists all functions with their weight percentages, supporting search and filtering.
  */
 export function collectThreadFunctions(
   store: Store,
@@ -377,16 +496,19 @@ export function collectThreadFunctions(
   // We can compute this from any function in allFunctions that has a non-zero totalRelative
   // Formula: fullTotalSamples = total / totalRelative
   // But since totalRelative is based on current view, we need the UNzoomed totalRelative
-  // Simpler approach: The raw thread has all samples - count them directly
+  // Simpler approach: The unzoomed strategy table has all samples - count them directly
   let fullProfileTotalSamples: number | null = null;
   if (isZoomed) {
-    // Use the same weighting as the call tree: sum weights, exclude null-stack samples
-    const rawThread = threadSelectors.getRawThread(state);
-    const { weight, stack } = rawThread.samples;
+    // Use the same weighting as the call tree: sum absolute weights, exclude null-stack samples
+    const unzoomedSamples = extractSamplesLikeTable(
+      threadSelectors.getThread(state),
+      threadSelectors.getCallTreeSummaryStrategy(state)
+    );
+    const { weight, stack } = unzoomedSamples;
     let total = 0;
-    for (let i = 0; i < rawThread.samples.length; i++) {
+    for (let i = 0; i < unzoomedSamples.length; i++) {
       if (stack[i] !== null) {
-        total += weight ? (weight[i] ?? 1) : 1;
+        total += weight ? Math.abs(weight[i] ?? 1) : 1;
       }
     }
     fullProfileTotalSamples = total;
@@ -403,16 +525,14 @@ export function collectThreadFunctions(
     );
   }
 
-  // Filter by minimum self time percentage
   if (filterOptions?.minSelf !== undefined) {
     const minSelfFraction = filterOptions.minSelf / 100;
     filteredFunctions = filteredFunctions.filter(
-      (func) => func.selfRelative >= minSelfFraction
+      (func) => Math.abs(func.selfRelative) >= minSelfFraction
     );
   }
 
-  // Sort by self time (descending)
-  filteredFunctions.sort((a, b) => b.self - a.self);
+  filteredFunctions.sort((a, b) => Math.abs(b.self) - Math.abs(a.self));
 
   // Apply limit
   const limit = filterOptions?.limit ?? filteredFunctions.length;
@@ -460,6 +580,8 @@ export function collectThreadFunctions(
     type: 'thread-functions',
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     totalFunctionCount,
     filteredFunctionCount: filteredFunctions.length,
     filters: filterOptions

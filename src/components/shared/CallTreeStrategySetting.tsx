@@ -27,10 +27,7 @@ type OwnProps = {
 
 type StateProps = {
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
-  readonly hasUsefulTimingSamples: boolean;
-  readonly hasUsefulJsAllocations: boolean;
-  readonly hasUsefulNativeAllocations: boolean;
-  readonly canShowRetainedMemory: boolean;
+  readonly availableCallTreeSummaryStrategies: CallTreeSummaryStrategy[];
 };
 
 type DispatchProps = {
@@ -39,36 +36,30 @@ type DispatchProps = {
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
+const STRATEGY_L10N_IDS: Record<CallTreeSummaryStrategy, string> = {
+  timing: 'StackSettings--call-tree-strategy-timing',
+  'js-allocations': 'StackSettings--call-tree-strategy-js-allocations',
+  'native-retained-allocations':
+    'StackSettings--call-tree-strategy-native-retained-allocations',
+  'native-allocations': 'StackSettings--call-tree-native-allocations',
+  'native-deallocations-memory':
+    'StackSettings--call-tree-strategy-native-deallocations-memory',
+  'native-deallocations-sites':
+    'StackSettings--call-tree-strategy-native-deallocations-sites',
+};
+
 class CallTreeStrategySettingImpl extends PureComponent<Props> {
   _onCallTreeSummaryStrategyChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     this.props.changeCallTreeSummaryStrategy(
-      // This function is here to satisfy Flow that we are getting a valid
-      // implementation filter.
       toValidCallTreeSummaryStrategy(e.currentTarget.value)
     );
   };
 
-  _renderCallTreeStrategyOption(
-    labelL10nId: string,
-    strategy: CallTreeSummaryStrategy
-  ) {
-    return (
-      <Localized id={labelL10nId} attrs={{ title: true }}>
-        <option key={strategy} value={strategy}></option>
-      </Localized>
-    );
-  }
-
   override render() {
-    const {
-      hasUsefulTimingSamples,
-      hasUsefulJsAllocations,
-      hasUsefulNativeAllocations,
-      canShowRetainedMemory,
-      callTreeSummaryStrategy,
-    } = this.props;
+    const { availableCallTreeSummaryStrategies, callTreeSummaryStrategy } =
+      this.props;
 
     return (
       <>
@@ -79,42 +70,15 @@ class CallTreeStrategySettingImpl extends PureComponent<Props> {
             onChange={this._onCallTreeSummaryStrategyChange}
             value={callTreeSummaryStrategy}
           >
-            {hasUsefulTimingSamples
-              ? this._renderCallTreeStrategyOption(
-                  'StackSettings--call-tree-strategy-timing',
-                  'timing'
-                )
-              : null}
-            {hasUsefulJsAllocations
-              ? this._renderCallTreeStrategyOption(
-                  'StackSettings--call-tree-strategy-js-allocations',
-                  'js-allocations'
-                )
-              : null}
-            {canShowRetainedMemory
-              ? this._renderCallTreeStrategyOption(
-                  'StackSettings--call-tree-strategy-native-retained-allocations',
-                  'native-retained-allocations'
-                )
-              : null}
-            {hasUsefulNativeAllocations
-              ? this._renderCallTreeStrategyOption(
-                  'StackSettings--call-tree-native-allocations',
-                  'native-allocations'
-                )
-              : null}
-            {canShowRetainedMemory
-              ? this._renderCallTreeStrategyOption(
-                  'StackSettings--call-tree-strategy-native-deallocations-memory',
-                  'native-deallocations-memory'
-                )
-              : null}
-            {hasUsefulNativeAllocations
-              ? this._renderCallTreeStrategyOption(
-                  'StackSettings--call-tree-strategy-native-deallocations-sites',
-                  'native-deallocations-sites'
-                )
-              : null}
+            {availableCallTreeSummaryStrategies.map((strategy) => (
+              <Localized
+                id={STRATEGY_L10N_IDS[strategy]}
+                attrs={{ title: true }}
+                key={strategy}
+              >
+                <option value={strategy}></option>
+              </Localized>
+            ))}
           </select>
         </label>
       </>
@@ -128,14 +92,8 @@ export const CallTreeStrategySetting = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state) => ({
-    hasUsefulTimingSamples:
-      selectedThreadSelectors.getHasUsefulTimingSamples(state),
-    hasUsefulJsAllocations:
-      selectedThreadSelectors.getHasUsefulJsAllocations(state),
-    hasUsefulNativeAllocations:
-      selectedThreadSelectors.getHasUsefulNativeAllocations(state),
-    canShowRetainedMemory:
-      selectedThreadSelectors.getCanShowRetainedMemory(state),
+    availableCallTreeSummaryStrategies:
+      selectedThreadSelectors.getAvailableCallTreeSummaryStrategies(state),
     callTreeSummaryStrategy:
       selectedThreadSelectors.getCallTreeSummaryStrategy(state),
   }),

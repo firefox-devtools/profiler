@@ -398,36 +398,69 @@ export type RawFrameTable = {
  * were created upfront to become orphaned, as the frames that originally referred
  * to them get reassigned to the canonical func for their actual function.
  */
-export type FuncTable = {
-  // The function name.
-  name: Array<IndexIntoStringTable>;
+/**
+ * Bit flags for the `flags` column of the RawFuncTable / FuncTable.
+ * Each flag indicates whether the corresponding column carries a meaningful
+ * value for that func; when a flag bit is unset, the value in the associated
+ * column is ignored.
+ */
+export const FuncFlag = {
+  // Set when this func is a JavaScript function.
+  IsJS: 1 << 0,
+  // Set when this func should be treated as "relevant for JS" (e.g. DOM API
+  // label funcs). Non-JavaScript functions can be marked as "relevant for JS"
+  // so that they show up in JavaScript stack views. IsJS implies RelevantForJS
+  // in practice but the bit is stored explicitly.
+  RelevantForJS: 1 << 1,
+  // Set when `resource` is meaningful (i.e. this func has an associated
+  // resource, not the sentinel).
+  HasResource: 1 << 2,
+  // Set when `source` is meaningful (this func has an associated source file).
+  HasSource: 1 << 3,
+  // Set when `lineNumber` is meaningful.
+  HasLine: 1 << 4,
+  // Set when `columnNumber` is meaningful.
+  HasColumn: 1 << 5,
+  // Set when `originalLocation` is meaningful.
+  HasOriginalLocation: 1 << 6,
+} as const;
 
-  // isJS and relevantForJS describe the function type. Non-JavaScript functions
-  // can be marked as "relevant for JS" so that for example DOM API label functions
-  // will show up in any JavaScript stack views.
-  // It may be worth combining these two fields into one:
-  // https://github.com/firefox-devtools/profiler/issues/2543
-  isJS: Array<boolean>;
-  relevantForJS: Array<boolean>;
+export type FuncFlags = number;
+
+export type RawFuncTable = {
+  // A bitfield with one bit per optional column, drawn from `FuncFlag`.
+  // For each row, the flag bit tells you whether the value in the
+  // corresponding column is meaningful. When a bit is unset, the value in the
+  // corresponding column has no meaning; producers can store any value there
+  // (typically 0) and consumers must ignore it.
+  flags: number[] | Uint8Array<ArrayBuffer>;
+
+  // The function name.
+  name: Array<IndexIntoStringTable> | Int32Array<ArrayBuffer>;
 
   // The resource describes "Which bag of code did this function come from?".
   // For JS functions, the resource is of type addon, webhost, otherhost, or url.
   // For native functions, the resource is of type library.
-  // For labels and for other unidentified functions, we set the resource to -1.
-  resource: Array<IndexIntoResourceTable | -1>;
+  // Only meaningful when `HasResource` is set in `flags`.
+  resource: Array<IndexIntoResourceTable> | Int32Array<ArrayBuffer>;
 
   // These are non-null for JS functions only. The line and column describe the
   // location of the *start* of the JS function. As for the information about which
   // which lines / columns inside the function were actually hit during execution,
   // that information is stored in the frameTable, not in the funcTable.
-  source: Array<IndexIntoSourceTable | null>;
-  lineNumber: Array<number | null>;
-  columnNumber: Array<number | null>;
+  // Only meaningful when `HasSource` is set.
+  source: Array<IndexIntoSourceTable> | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasLine` is set.
+  lineNumber: Array<number> | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasColumn` is set.
+  columnNumber: Array<number> | Int32Array<ArrayBuffer>;
 
-  // Index into the sourceLocationTable, or null if not source-mapped.
-  // Points to the original source file, line, and column for this function's
-  // definition.
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  // Index into the sourceLocationTable, pointing at the original source file,
+  // line, and column for this function's definition. Only meaningful when
+  // `HasOriginalLocation` is set.
+  originalLocation:
+    | Array<IndexIntoSourceLocationTable>
+    | Int32Array<ArrayBuffer>;
 
   length: number;
 };
@@ -441,16 +474,19 @@ export type FuncTable = {
  * considered a "symbol table" - normally, a "symbol table" is something that
  * contains *all* symbols of a given library. But this table only contains a
  * subset of those symbols, and mixes symbols from multiple libraries.
+ *
+ * Each column may be stored as a regular array or as a typed array.
  */
-export type NativeSymbolTable = {
+export type RawNativeSymbolTable = {
   // The library that this native symbol is in.
-  libIndex: Array<IndexIntoLibs>;
+  libIndex: Array<IndexIntoLibs> | Int32Array<ArrayBuffer>;
   // The library-relative offset of this symbol.
-  address: Array<Address>;
+  address: Array<Address> | Uint32Array<ArrayBuffer>;
   // The symbol name, demangled.
-  name: Array<IndexIntoStringTable>;
-  // The size of the function's machine code (if known), in bytes.
-  functionSize: Array<Bytes | null>;
+  name: Array<IndexIntoStringTable> | Int32Array<ArrayBuffer>;
+  // The size of the function's machine code, in bytes.
+  // The sentinel `-1` means "size unknown".
+  functionSize: Array<Bytes | -1> | Int32Array<ArrayBuffer>;
 
   length: number;
 };
@@ -1150,9 +1186,9 @@ export type SourceLocationTable = {
 export type RawProfileSharedData = {
   stackTable: RawStackTable;
   frameTable: RawFrameTable;
-  funcTable: FuncTable;
+  funcTable: RawFuncTable;
   resourceTable: ResourceTable;
-  nativeSymbols: NativeSymbolTable;
+  nativeSymbols: RawNativeSymbolTable;
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringArray: string[];

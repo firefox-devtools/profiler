@@ -18,15 +18,22 @@ import {
 
 import type {
   FilterStackResult,
+  FunctionInfoResult,
   ProfileMetaResult,
   SessionMetadata,
   StatusResult,
+  StrategySelectResult,
+  ThreadInfoResult,
+  ThreadListResult,
   ThreadMarkersResult,
   ThreadNetworkResult,
   ThreadPageLoadResult,
   ThreadSamplesResult,
   WithContext,
 } from '../../protocol';
+
+/** A DHAT heap profile, i.e. native allocations with no timing samples. */
+const ALLOCATION_PROFILE = 'src/test/fixtures/upgrades/dhat.json.gz';
 
 describe('profiler-cli basic functionality', () => {
   let ctx: CliTestContext;
@@ -64,6 +71,15 @@ describe('profiler-cli basic functionality', () => {
     ];
     expect(files).toEqual(expect.arrayContaining(expectedFiles));
     expect(files).toContain('current.txt');
+  });
+
+  it('permalink refuses a profile loaded from a local file', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, ['permalink']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('Publishing from profiler-cli is not supported');
   });
 
   it('profile info works after load', async () => {
@@ -105,6 +121,33 @@ describe('profiler-cli basic functionality', () => {
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Selected thread');
     expect(result.stdout).toContain('t-0');
+  });
+
+  it('thread list prints a flat table', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const list = await cli(ctx, ['thread', 'list']);
+    expect(list.exitCode).toBe(0);
+    expect(list.stdout).toContain('HANDLE');
+    expect(list.stdout).toContain('MARKERS');
+    expect(list.stdout).toContain('t-0');
+
+    const json = await cli(ctx, ['thread', 'list', '--json']);
+    const result = JSON.parse(json.stdout) as WithContext<ThreadListResult>;
+    expect(result.type).toBe('thread-list');
+    expect(result.threads.length).toBe(result.totalThreadCount);
+    expect(result.sort).toBe('cpu');
+    expect(result.threads[0].threadHandle).toBe('t-0');
+    expect(typeof result.threads[0].markerCount).toBe('number');
+  });
+
+  it('thread list rejects an unknown --sort', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, ['thread', 'list', '--sort', 'bogus']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('--sort must be one of');
   });
 
   it('stop cleans up session', async () => {
@@ -311,6 +354,40 @@ describe('profiler-cli basic functionality', () => {
     expect(status.filterStacks).toHaveLength(0);
   });
 
+  it('thread samples breaks the samples down by category', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const textResult = await cli(ctx, ['thread', 'samples']);
+    expect(textResult.stdout).toContain('──── Categories (');
+
+    const jsonResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      jsonResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    const breakdown = samples.categoryBreakdown;
+
+    expect(breakdown.categories.length).toBeGreaterThan(0);
+    const summed = breakdown.categories.reduce(
+      (accum, category) => accum + category.samples,
+      0
+    );
+    expect(summed).toBe(breakdown.totalSamples);
+  });
+
+  it('function info reports running and self breakdowns', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cli(ctx, ['function', 'info', 'f-5', '--json']);
+    const info = JSON.parse(result.stdout) as WithContext<FunctionInfoResult>;
+    const breakdowns = info.categoryBreakdown;
+
+    expect(breakdowns.threadHandle).toBe('t-2');
+    expect(breakdowns.running.samples).toBeGreaterThan(0);
+    expect(breakdowns.running.samples).toBeGreaterThanOrEqual(
+      breakdowns.self.samples
+    );
+  });
+
   it('max-lines=0 is rejected instead of silently falling back to the default', async () => {
     await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
@@ -463,6 +540,128 @@ describe('profiler-cli basic functionality', () => {
     expect(result.stdout).toContain('more markers omitted');
     expect(result.stdout).toContain('showing the first 1 of 3');
     expect(result.stdout).toContain('--limit 0');
+  });
+
+  it('an unknown --strategy is rejected with the list of valid ones', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, [
+      'thread',
+      'samples',
+      '--strategy',
+      'bogus',
+    ]);
+
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('--strategy must be one of:');
+    expect(output).toContain('native-retained-allocations');
+  });
+
+  it('a strategy with no data in the thread is an error, not a fallback to timing', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, [
+      'thread',
+      'samples',
+      '--strategy',
+      'js-allocations',
+    ]);
+
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain("Strategy 'js-allocations' has no data");
+    expect(output).toContain('Available: timing');
+  });
+
+  it('an allocation profile reports bytes and lists its available strategies', async () => {
+    await cli(ctx, ['load', ALLOCATION_PROFILE]);
+
+    const infoResult = await cli(ctx, ['thread', 'info', '--json']);
+    const info = JSON.parse(infoResult.stdout) as WithContext<ThreadInfoResult>;
+    expect(info.availableStrategies).toEqual([
+      'native-allocations',
+      'native-deallocations-sites',
+    ]);
+
+    const samplesResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.weightType).toBe('bytes');
+    // The thread has no timing samples, so the call tree falls forward to
+    // native allocations even though the session setting is still timing.
+    expect(samples.callTreeSummaryStrategy).toBe('native-allocations');
+    expect(samples.context.callTreeSummaryStrategy).toBe('native-allocations');
+  });
+
+  it('an ephemeral --strategy does not persist into session state', async () => {
+    await cli(ctx, ['load', ALLOCATION_PROFILE]);
+
+    const samplesResult = await cli(ctx, [
+      'thread',
+      'samples',
+      '--json',
+      '--strategy',
+      'native-deallocations-sites',
+    ]);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.callTreeSummaryStrategy).toBe('native-deallocations-sites');
+
+    const statusResult = await cli(ctx, ['status', '--json']);
+    const status = JSON.parse(statusResult.stdout) as StatusResult;
+    expect(status.callTreeSummaryStrategy).toBe('native-allocations');
+  });
+
+  it('the strategy command persists across commands', async () => {
+    await cli(ctx, ['load', ALLOCATION_PROFILE]);
+
+    const selectResult = await cli(ctx, [
+      'strategy',
+      'native-deallocations-sites',
+      '--json',
+    ]);
+    const selected = JSON.parse(
+      selectResult.stdout
+    ) as WithContext<StrategySelectResult>;
+    expect(selected.type).toBe('strategy-select');
+    expect(selected.strategy).toBe('native-deallocations-sites');
+    expect(selected.availableStrategies).toEqual([
+      'native-allocations',
+      'native-deallocations-sites',
+    ]);
+
+    const statusResult = await cli(ctx, ['status', '--json']);
+    const status = JSON.parse(statusResult.stdout) as StatusResult;
+    expect(status.callTreeSummaryStrategy).toBe('native-deallocations-sites');
+
+    const samplesResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.callTreeSummaryStrategy).toBe('native-deallocations-sites');
+  });
+
+  it('profile markers requires a filter, but --limit opts into browsing', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    // An unfiltered sweep would dump arbitrary rows in profile order, which
+    // answers no question; the error has to name the flags that do.
+    const bare = await cliFail(ctx, ['profile', 'markers']);
+    expect(bare.exitCode).not.toBe(0);
+    const output = String(bare.stdout || '') + String(bare.stderr || '');
+    expect(output).toContain('profile markers needs a filter');
+    expect(output).toContain('--search');
+
+    // A filter satisfies it...
+    const filtered = await cli(ctx, ['profile', 'markers', '--search', 'a']);
+    expect(filtered.exitCode).toBe(0);
+
+    // ...and so does an explicit --limit, the opt-in to unfiltered browsing.
+    const limited = await cli(ctx, ['profile', 'markers', '--limit', '5']);
+    expect(limited.exitCode).toBe(0);
   });
 
   it('build hash mismatch stops the daemon before cleaning up the session', async () => {

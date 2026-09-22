@@ -5,24 +5,18 @@
 import {
   getEmptyExtensions,
   getRawMarkerTableBuilderFromExisting,
-  shallowCloneFuncTable,
+  finishRawMarkerTableBuilder,
+  getRawFuncTableBuilderWithExistingContents,
+  finishRawFuncTableBuilder,
 } from './data-structures';
 import { computeCompactedProfile } from './profile-compacting';
 import { StringTable } from '../utils/string-table';
 import { removeURLs } from '../utils/string';
 import {
-  removeNetworkMarkerURLs,
-  removePrefMarkerPreferenceValues,
   filterRawMarkerTableToRangeWithMarkersToDelete,
-  sanitizeExtensionTextMarker,
-  sanitizeTextMarker,
-  sanitizeFromMarkerSchema,
+  sanitizeMarkerFromSchema,
 } from './marker-data';
-import {
-  computeStringIndexMarkerFieldsByDataType,
-  getSchemaFromMarker,
-  isStringIndexMarkerField,
-} from './marker-schema';
+import { getSchemaFromMarker } from './marker-schema';
 import {
   filterRawThreadSamplesToRange,
   filterCounterSamplesToRange,
@@ -44,7 +38,7 @@ import type {
   IndexIntoResourceTable,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 export type SanitizeProfileResult = {
   readonly profile: Profile;
@@ -146,11 +140,6 @@ export function sanitizePII(
     stringArray,
   };
 
-  // Precompute the payload fields that hold string table indexes, so that the
-  // marker loop below doesn't have to walk the schema fields for every marker.
-  const stringIndexMarkerFieldsByDataType =
-    computeStringIndexMarkerFieldsByDataType(Object.values(markerSchemaByName));
-
   let stackFlags: Uint8Array | null = null;
 
   if (windowIdFromPrivateBrowsing.size > 0) {
@@ -198,8 +187,8 @@ export function sanitizePII(
     if (sanitizedFuncIndexesToFrameIndex.size) {
       const resourcesToBeSanitized = new Set<IndexIntoResourceTable>();
 
-      const newFuncTable = (newShared.funcTable =
-        shallowCloneFuncTable(funcTable));
+      const newFuncTable =
+        getRawFuncTableBuilderWithExistingContents(funcTable);
       const newFrameTable = (newShared.frameTable = {
         ...frameTable,
         flags: Array.from(frameTable.flags),
@@ -220,13 +209,16 @@ export function sanitizePII(
           const name = stringTable.indexForString(
             `<Func #${sanitizedFuncIndex}>`
           );
+          // Preserve IsJS/RelevantForJS from the original; strip everything else.
+          const oldFlags = funcTable.flags[funcIndex];
+          const preservedMask = FuncFlag.IsJS | FuncFlag.RelevantForJS;
+          newFuncTable.flags.push(oldFlags & preservedMask);
           newFuncTable.name.push(name);
-          newFuncTable.isJS.push(funcTable.isJS[funcIndex]);
-          newFuncTable.relevantForJS.push(funcTable.isJS[funcIndex]);
-          newFuncTable.resource.push(-1);
-          newFuncTable.source.push(null);
-          newFuncTable.lineNumber.push(null);
-          newFuncTable.columnNumber.push(null);
+          newFuncTable.resource.push(0);
+          newFuncTable.source.push(0);
+          newFuncTable.lineNumber.push(0);
+          newFuncTable.columnNumber.push(0);
+          newFuncTable.originalLocation.push(0);
           newFuncTable.length++;
 
           frameIndexes.forEach(
@@ -239,13 +231,22 @@ export function sanitizePII(
           const name = stringTable.indexForString(`<Func #${funcIndex}>`);
           newFuncTable.name[funcIndex] = name;
 
-          newFuncTable.source[funcIndex] = null;
-          if (newFuncTable.resource[funcIndex] >= 0) {
+          const clearMask = ~(
+            FuncFlag.HasResource |
+            FuncFlag.HasSource |
+            FuncFlag.HasLine |
+            FuncFlag.HasColumn |
+            FuncFlag.HasOriginalLocation
+          );
+          if ((newFuncTable.flags[funcIndex] & FuncFlag.HasResource) !== 0) {
             resourcesToBeSanitized.add(newFuncTable.resource[funcIndex]);
           }
-          newFuncTable.resource[funcIndex] = -1;
-          newFuncTable.lineNumber[funcIndex] = null;
-          newFuncTable.columnNumber[funcIndex] = null;
+          newFuncTable.flags[funcIndex] &= clearMask;
+          newFuncTable.resource[funcIndex] = 0;
+          newFuncTable.source[funcIndex] = 0;
+          newFuncTable.lineNumber[funcIndex] = 0;
+          newFuncTable.columnNumber[funcIndex] = 0;
+          newFuncTable.originalLocation[funcIndex] = 0;
         }
 
         // In both cases, nullify some information in all frames.
@@ -265,9 +266,12 @@ export function sanitizePII(
           name: resourceTable.name.slice(),
           host: resourceTable.host.slice(),
         });
-        const remainingResources = new Set<IndexIntoResourceTable>(
-          newFuncTable.resource
-        );
+        const remainingResources = new Set<IndexIntoResourceTable>();
+        for (let i = 0; i < newFuncTable.length; i++) {
+          if ((newFuncTable.flags[i] & FuncFlag.HasResource) !== 0) {
+            remainingResources.add(newFuncTable.resource[i]);
+          }
+        }
         for (const resourceIndex of resourcesToBeSanitized) {
           if (!remainingResources.has(resourceIndex)) {
             // This resource was used only by sanitized functions. Sanitize it
@@ -280,6 +284,8 @@ export function sanitizePII(
           }
         }
       }
+
+      newShared.funcTable = finishRawFuncTableBuilder(newFuncTable);
     }
 
     // First we'll loop the stack table and populate a typed array with a value
@@ -338,7 +344,6 @@ export function sanitizePII(
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
         markerSchemaByName,
-        stringIndexMarkerFieldsByDataType,
         stackFlags
       );
 
@@ -454,7 +459,6 @@ function sanitizeThreadPII(
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
   markerSchemaByName: MarkerSchemaByName,
-  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
   stackFlags: Uint8Array | null
 ): RawThread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
@@ -489,75 +493,23 @@ function sanitizeThreadPII(
     for (let i = 0; i < markerTable.length; i++) {
       let currentMarker = markerTable.data[i];
 
-      // Remove the all the preference values, if the user wants that.
-      if (
-        PIIToBeRemoved.shouldRemovePreferenceValues &&
-        currentMarker &&
-        currentMarker.type === 'PreferenceRead'
-      ) {
-        // Remove the preference value field from the marker payload.
-        markerTable.data[i] = removePrefMarkerPreferenceValues(currentMarker);
-      }
-
-      if (currentMarker && PIIToBeRemoved.shouldRemoveUrls) {
-        // Use the schema to find some properties that need to be sanitized.
+      if (currentMarker) {
         const markerSchema = getSchemaFromMarker(
           markerSchemaByName,
           currentMarker
         );
         if (markerSchema) {
-          currentMarker = markerTable.data[i] = sanitizeFromMarkerSchema(
+          const sanitizedMarker = sanitizeMarkerFromSchema(
             markerSchema,
-            currentMarker
-          );
-        }
-
-        // Remove the network URLs if user wants to remove them.
-        if (currentMarker.type === 'Network') {
-          // Remove the URI fields from marker payload.
-          markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);
-
-          // Strip the URL from the marker name
-          const requestStr = stringTable.getString(markerTable.name[i]);
-          const sanitizedRequestStr = requestStr.replace(/:.*/, '');
-          markerTable.name[i] = stringTable.indexForString(sanitizedRequestStr);
-        }
-
-        if (
-          currentMarker.type === 'Text' &&
-          !isStringIndexMarkerField(
-            stringIndexMarkerFieldsByDataType,
-            'Text',
-            'name'
-          )
-        ) {
-          // Sanitize all the name fields of text markers in case they contain URLs.
-          // Newer profiles hold the text in the string table, sanitized above.
-          markerTable.data[i] = sanitizeTextMarker(
             currentMarker,
-            stringIndexMarkerFieldsByDataType,
-            stringTable
+            stringTable,
+            PIIToBeRemoved
           );
-          // Re-assign the value of currentMarker as the marker may be
-          // sanitized again to remove extension ids.
-          currentMarker = markerTable.data[i];
+          currentMarker = markerTable.data[i] = sanitizedMarker.markerPayload;
+          if (sanitizedMarker.shouldRemoveMarker) {
+            markersToDelete.add(i);
+          }
         }
-      }
-
-      if (
-        PIIToBeRemoved.shouldRemoveExtensions &&
-        currentMarker &&
-        currentMarker.type === 'Text'
-      ) {
-        const markerName = stringTable.getString(markerTable.name[i]);
-        // Sanitize extension ids out of known extension markers. Unlike URLs,
-        // these aren't removed from the string table as a whole.
-        markerTable.data[i] = sanitizeExtensionTextMarker(
-          markerName,
-          currentMarker,
-          stringIndexMarkerFieldsByDataType,
-          stringTable
-        );
       }
 
       // Remove the screenshots if the current thread index is in the
@@ -571,15 +523,6 @@ function sanitizeThreadPII(
       }
 
       if (PIIToBeRemoved.shouldRemovePrivateBrowsingData) {
-        if (
-          currentMarker &&
-          currentMarker.type === 'Network' &&
-          currentMarker.isPrivateBrowsing
-        ) {
-          // Remove network requests coming from private browsing sessions
-          markersToDelete.add(i);
-        }
-
         if (
           currentMarker &&
           'innerWindowID' in currentMarker &&
@@ -693,7 +636,7 @@ function sanitizeThreadPII(
   }
 
   // Remove the old markerTable and replace it with the new updated one.
-  newThread.markers = markerTable;
+  newThread.markers = finishRawMarkerTableBuilder(markerTable);
 
   // Have we removed everything from this thread?
   if (isThreadNonEmpty(newThread) || !isThreadNonEmpty(thread)) {

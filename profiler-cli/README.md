@@ -30,12 +30,15 @@ Run `profiler-cli --help` for the full options reference.
 
 ```bash
 profiler-cli load <PATH>                   # Start daemon and load profile (file or http/https URL)
+profiler-cli load <PATH> --with-samply     # Same, but serve the file via "samply load" and symbolicate with its symbol server
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
 profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
+profiler-cli profile markers               # Search markers across all threads [--search] [--thread] [--category] [--min-duration] [--max-duration] [--has-stack] [--limit]
+profiler-cli thread list                   # List all threads as a flat table [--sort] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
-profiler-cli thread samples                # Show hot functions list for current thread
+profiler-cli thread samples                # Show hot functions list and category breakdown for current thread
 profiler-cli thread samples-top-down       # Show top-down call tree (where CPU time is spent)
 profiler-cli thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
 profiler-cli thread markers                # List markers with aggregated statistics [--list for flat per-marker view]
@@ -45,7 +48,7 @@ profiler-cli thread page-load              # Show page load summary (navigation 
 profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
-profiler-cli function info <handle>        # Show detailed function information
+profiler-cli function info <handle>        # Show detailed function information and category breakdown
 profiler-cli function annotate <handle>    # Show annotated source/assembly with timing data [--mode src|asm|all] [--context 2|file|N] [--symbol-server <url>]
 profiler-cli zoom push <range>             # Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
 profiler-cli zoom pop                      # Pop the most recent zoom range
@@ -57,12 +60,32 @@ profiler-cli filter clear                  # Remove all filters for current thre
 profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
 profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
+profiler-cli permalink                     # Print a profiler.firefox.com URL for the current view [--short]
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
 profiler-cli stop --all                    # Stop all sessions
 profiler-cli session list                  # List all running daemon sessions (* marks current)
 profiler-cli session use <id>              # Switch the current session
 ```
+
+### Symbolicating with samply
+
+Some profiles are not symbolicated yet when they are saved, for example those
+recorded with `samply record --save-only`, and symbolication as well as the
+assembly view then need a symbol server that can see the local binaries.
+`--with-samply` runs `samply load` in the background for the lifetime of the
+session to provide that server:
+
+```bash
+samply record --save-only -o profile.json ./my-program
+profiler-cli load profile.json --with-samply
+profiler-cli function annotate f-12 --mode asm
+```
+
+samply is resolved from `PROFILER_CLI_SAMPLY_PATH` if set, then `PATH`, then
+`$MOZBUILD_STATE_PATH/samply` (default `~/.mozbuild/samply`), where
+`./mach bootstrap` installs it. The samply process is stopped together with the
+session.
 
 ### Multiple sessions
 

@@ -6,11 +6,21 @@ document the exact fields returned by each command.
 SessionContext (present on all command results):
   {
     selectedThreadHandle,
-    selectedThreads: [{ threadIndex, name }],
+    selectedThreads: [{ threadIndex, name, processName }],
+    resultThreadHandle: threadHandle | null,
+    resultThreads: [{ threadIndex, name, processName }],
     currentViewRange: { start, startName, end, endName } | null,
-    rootRange: { start, end }
+    rootRange: { start, end },
+    callTreeSummaryStrategy: CallTreeSummaryStrategy
   }
 
+CallTreeSummaryStrategy:
+  "timing" | "js-allocations" | "native-retained-allocations" |
+  "native-allocations" | "native-deallocations-memory" |
+  "native-deallocations-sites"
+
+WeightType:
+  "samples" | "tracing-ms" | "bytes"
 
 profiler-cli profile info --json
   {
@@ -95,6 +105,17 @@ profiler-cli counter info --json
     context: SessionContext
   }
 
+profiler-cli thread list --json
+  {
+    type: "thread-list",
+    threads: [{ threadHandle, threadIndex, name, processName, etld1?,
+                pid, processIndex, tid, cpuMs, markerCount, selected }],
+    totalThreadCount, processCount, hiddenByLimit,
+    sort: "cpu" | "index" | "markers" | "name",
+    searchQuery?,
+    context: SessionContext
+  }
+
 profiler-cli thread info --json
   {
     type: "thread-info",
@@ -105,6 +126,7 @@ profiler-cli thread info --json
     cpuActivity: [{ startTime, startTimeName, startTimeStr,
                     endTime, endTimeName, endTimeStr, cpuMs, depthLevel }] | null,
     networkActivity: ThreadNetworkSummary | null,
+    availableStrategies: [CallTreeSummaryStrategy],
     context: SessionContext
   }
 
@@ -121,6 +143,7 @@ profiler-cli thread samples --json
   {
     type: "thread-samples",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     topFunctionsBySelf:  [{ functionHandle, functionIndex, name, nameWithLibrary,
                              library?, selfSamples, selfPercentage,
                              totalSamples, totalPercentage }],
@@ -130,14 +153,25 @@ profiler-cli thread samples --json
       frames: [{ name, nameWithLibrary, library?,
                  selfSamples, selfPercentage, totalSamples, totalPercentage }]
     },
+    categoryBreakdown: CategoryBreakdown,
     activeFilters?, ephemeralFilters?,
     context: SessionContext
+  }
+
+CategoryBreakdown:
+  {
+    totalSamples,
+    categories: [{
+      name, categoryIndex, samples, percentage,
+      subcategories: [{ name, subcategoryIndex, samples, percentage }]
+    }]
   }
 
 profiler-cli thread samples-top-down --json
   {
     type: "thread-samples-top-down",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     regularCallTree: CallTreeNode,
     activeFilters?, ephemeralFilters?,
     context: SessionContext
@@ -147,6 +181,7 @@ profiler-cli thread samples-bottom-up --json
   {
     type: "thread-samples-bottom-up",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     invertedCallTree: CallTreeNode | null,
     activeFilters?, ephemeralFilters?,
     context: SessionContext
@@ -178,13 +213,31 @@ profiler-cli thread markers --json
     }],
     byCategory: [{ categoryName, categoryIndex, count, percentage }],
     customGroups?: [ ...MarkerGroupData... ],
+    flatMarkers?: [FlatMarkerItem],   // only with --list; see below
     context: SessionContext
   }
+
+  Per-marker rows require --list, and arrive under "flatMarkers", not "markers";
+  without it only the aggregates above are returned.
+
+  FlatMarkerItem:
+    {
+      handle, name, label, duration?, hasStack, category,
+      start,              // ms since profile start
+      markerType?,        // the payload's "type"
+      fields?: [{ key, label, value, formattedValue }],
+                          // "value" is the payload value with string-table
+                          // indexes resolved to strings, so it always agrees
+                          // with "data" for the same key
+      data?               // raw payload, minus "type" and "cause"; an image
+                          // blob becomes { elided: true, length, preview }
+    }
 
 profiler-cli thread functions --json
   {
     type: "thread-functions",
     threadHandle, friendlyThreadName, activeOnly?,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy, weightType: WeightType,
     totalFunctionCount, filteredFunctionCount,
     functions: [{ functionHandle, name, nameWithLibrary, library?,
                   selfSamples, selfPercentage, totalSamples, totalPercentage,
@@ -217,6 +270,20 @@ profiler-cli thread network --json
     context: SessionContext
   }
 
+profiler-cli function info --json
+  {
+    type: "function-info",
+    functionHandle, funcIndex, name, fullName, isJS, relevantForJS,
+    resource?: { name, index },
+    library?: { name, path, debugName?, debugPath?, breakpadId? },
+    categoryBreakdown: {
+      threadHandle, friendlyThreadName, threadSamples,
+      running: CategoryBreakdown & { samples, percentageOfThread },
+      self:    CategoryBreakdown & { samples, percentageOfThread }
+    },
+    context: SessionContext
+  }
+
 profiler-cli marker info --json
   {
     type: "marker-info",
@@ -224,17 +291,37 @@ profiler-cli marker info --json
     category: { index, name },
     start, end, duration?,
     fields?: [{ key, label, value, formattedValue }],
+                          // as in FlatMarkerItem above: unique-string,
+                          // flow-id and terminating-flow-id fields report
+                          // "value" as the resolved string, not the index
     stack?: { frames: [{ name, nameWithLibrary }], truncated }
+  }
+
+profiler-cli strategy --json
+  {
+    type: "strategy-select",
+    threadHandle,
+    strategy: CallTreeSummaryStrategy,
+    availableStrategies: [CallTreeSummaryStrategy],
+    context: SessionContext
   }
 
 profiler-cli status --json
   {
     type: "status",
     selectedThreadHandle,
-    selectedThreads: [{ threadIndex, name }],
+    selectedThreads: [{ threadIndex, name, processName }],
     viewRanges: [{ start, startName, end, endName }],
     rootRange: { start, end },
-    filterStacks: [{ threadHandle, filters: FilterEntry[] }]
+    filterStacks: [{ threadHandle, filters: FilterEntry[] }],
+    callTreeSummaryStrategy: CallTreeSummaryStrategy
+  }
+
+profiler-cli permalink --json
+  {
+    type: "permalink",
+    url,
+    shortUrl: string | null
   }
 
 profiler-cli sourcemap sources --json

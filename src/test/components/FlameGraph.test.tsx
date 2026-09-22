@@ -48,6 +48,7 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
@@ -356,6 +357,8 @@ function setupFlameGraph() {
     funcTable.lineNumber[funcIndex] = funcIndex + 10;
     funcTable.columnNumber[funcIndex] = funcIndex + 100;
     funcTable.source[funcIndex] = defaultSourceIndex;
+    funcTable.flags[funcIndex] |=
+      FuncFlag.HasLine | FuncFlag.HasColumn | FuncFlag.HasSource;
   }
 
   funcTable.source[funcNamesDict.B] = bSourceIndex;

@@ -3433,6 +3433,243 @@ const _upgraders: {
       frameTable.address = new Uint32Array(frameTable.address);
     }
   },
+  [72]: (profile: any) => {
+    const extensionTextMarkerSchema = {
+      name: 'ExtensionText',
+      tableLabel:
+        "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+      chartLabel:
+        "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+      display: ['marker-chart', 'marker-table'],
+      fields: [
+        {
+          key: 'extensionId',
+          label: 'Extension ID',
+          format: 'string',
+          containsPII: ['extension-id'],
+        },
+        {
+          key: 'name',
+          label: 'Details',
+          format: 'string',
+          containsPII: ['url'],
+        },
+      ],
+    };
+
+    let isExtensionTextMarkerSchemaUsed = false;
+    const stringArray = profile.shared.stringArray;
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        const payload = markers.data[markerIndex];
+        if (!payload || payload.type !== 'Text') {
+          continue;
+        }
+
+        const markerName = stringArray[markers.name[markerIndex]];
+        const text =
+          typeof payload.name === 'number'
+            ? stringArray[payload.name]
+            : payload.name;
+        if (typeof text !== 'string') {
+          continue;
+        }
+
+        if (
+          markerName === 'ExtensionParent' ||
+          markerName === 'ExtensionChild'
+        ) {
+          const match = /^(.*), (api_(?:call|event): [\s\S]*)$/.exec(text);
+          if (match) {
+            markers.data[markerIndex] = {
+              ...payload,
+              type: 'ExtensionText',
+              name: match[2],
+              extensionId: match[1],
+            };
+            isExtensionTextMarkerSchemaUsed = true;
+          }
+        } else if (markerName === 'Extension Suspend') {
+          const match = / by .*$/.exec(text);
+          if (match) {
+            markers.data[markerIndex] = {
+              ...payload,
+              type: 'ExtensionText',
+              name: text.slice(0, match.index),
+              extensionId: text.slice(match.index + ' by '.length),
+            };
+            isExtensionTextMarkerSchemaUsed = true;
+          }
+        }
+      }
+    }
+
+    const schemaNames = new Set(
+      profile.meta.markerSchema.map((schema: any) => schema.name)
+    );
+    if (
+      isExtensionTextMarkerSchemaUsed &&
+      !schemaNames.has(extensionTextMarkerSchema.name)
+    ) {
+      profile.meta.markerSchema.push(extensionTextMarkerSchema);
+    }
+
+    const piiCategoriesBySchemaName = new Map<string, Map<string, string[]>>([
+      [
+        'Network',
+        new Map([
+          ['URI', ['url']],
+          ['RedirectURI', ['url']],
+          ['isPrivateBrowsing', ['private-browsing']],
+        ]),
+      ],
+      ['Text', new Map([['name', ['url']]])],
+      ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
+    ]);
+
+    for (const schema of profile.meta.markerSchema) {
+      const piiCategoriesByField = piiCategoriesBySchemaName.get(schema.name);
+      if (!piiCategoriesByField) {
+        continue;
+      }
+
+      for (const field of schema.fields) {
+        const containsPII = piiCategoriesByField.get(field.key);
+        if (containsPII && !field.containsPII) {
+          field.containsPII = containsPII;
+        }
+      }
+
+      const existingFieldKeys = new Set(
+        schema.fields.map((field: any) => field.key)
+      );
+      for (const [key, containsPII] of piiCategoriesByField) {
+        if (!existingFieldKeys.has(key)) {
+          schema.fields.push({
+            key,
+            format: 'string',
+            hidden: true,
+            containsPII,
+          });
+        }
+      }
+    }
+  },
+  [73]: (profile: any) => {
+    for (const schema of profile.meta.markerSchema ?? []) {
+      if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+        schema.tableLabel =
+          "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
+      }
+    }
+  },
+  [74]: (profile: any) => {
+    // The columns of the native symbol table (`profile.shared.nativeSymbols`)
+    // can now optionally be stored as typed arrays:
+    //  - `libIndex` (`Int32Array`)
+    //  - `address` (`Int32Array`)
+    //  - `name` (`Int32Array`)
+    //  - `functionSize` (`Int32Array`).
+    //
+    // Regular JS / JSON arrays are still accepted.
+    //
+    // For `functionSize`, the sentinel for "size unknown" is now `-1`.
+    //
+    // This upgrader also removes any `null` values in the `address` column;
+    // the `address` column never allowed null according to the type, but the
+    // upgrader for version 36 inserted null in some cases, so we fix it here.
+    const { nativeSymbols } = profile.shared;
+    for (let i = 0; i < nativeSymbols.length; i++) {
+      // null -> -1 for functionSize:
+      if (nativeSymbols.functionSize[i] === null) {
+        nativeSymbols.functionSize[i] = -1;
+      }
+      // null -> 0 for address (null was never valid but the 36 upgrader used it)
+      if (nativeSymbols.address[i] === null) {
+        nativeSymbols.address[i] = 0;
+      }
+    }
+  },
+  [75]: (profile: any) => {
+    // The func table representation changed, mirroring the v71 frame table
+    // change:
+    //  - A new `flags` bitfield column was added (Uint8Array or plain array).
+    //  - The `isJS` and `relevantForJS` boolean columns were removed; the
+    //    IsJS / RelevantForJS flag bits carry the same information.
+    //  - The `resource`, `source`, `lineNumber`, `columnNumber`, and
+    //    `originalLocation` columns are no longer nullable in-band. When the
+    //    corresponding "Has..." flag is not set, the value in the column is
+    //    ignored and can be any placeholder (we write 0).
+    //  - All columns may now optionally be stored as typed arrays
+    //    (Int32Array for the non-flags columns).
+
+    // A snapshot of the `FuncFlag` enum as of version 75. Don't refer to the
+    // current `FuncFlag` enum here; upgraders must keep working even if later
+    // versions renumber or remove flags.
+    const IsJS = 1 << 0;
+    const RelevantForJS = 1 << 1;
+    const HasResource = 1 << 2;
+    const HasSource = 1 << 3;
+    const HasLine = 1 << 4;
+    const HasColumn = 1 << 5;
+    const HasOriginalLocation = 1 << 6;
+
+    const { funcTable } = profile.shared;
+    const {
+      isJS,
+      relevantForJS,
+      resource,
+      source,
+      lineNumber,
+      columnNumber,
+      originalLocation,
+      length,
+    } = funcTable;
+    const flags = new Array<number>(length);
+    for (let i = 0; i < length; i++) {
+      let f = 0;
+      if (isJS[i]) {
+        f |= IsJS;
+      }
+      if (relevantForJS[i]) {
+        f |= RelevantForJS;
+      }
+      if (
+        resource[i] !== -1 &&
+        resource[i] !== null &&
+        resource[i] !== undefined
+      ) {
+        f |= HasResource;
+      } else {
+        resource[i] = 0;
+      }
+      if (source[i] !== null && source[i] !== undefined) {
+        f |= HasSource;
+      } else {
+        source[i] = 0;
+      }
+      if (lineNumber[i] !== null && lineNumber[i] !== undefined) {
+        f |= HasLine;
+      } else {
+        lineNumber[i] = 0;
+      }
+      if (columnNumber[i] !== null && columnNumber[i] !== undefined) {
+        f |= HasColumn;
+      } else {
+        columnNumber[i] = 0;
+      }
+      if (originalLocation[i] !== null && originalLocation[i] !== undefined) {
+        f |= HasOriginalLocation;
+      } else {
+        originalLocation[i] = 0;
+      }
+      flags[i] = f;
+    }
+    funcTable.flags = flags;
+    delete funcTable.isJS;
+    delete funcTable.relevantForJS;
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

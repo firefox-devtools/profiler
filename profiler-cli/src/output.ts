@@ -10,12 +10,14 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type { CommandResult } from './protocol';
 import {
   formatStatusResult,
+  formatPermalinkResult,
   formatFunctionExpandResult,
   formatFunctionInfoResult,
   formatFunctionAnnotateResult,
   formatViewRangeResult,
   formatFilterStackResult,
   formatThreadInfoResult,
+  formatThreadListResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
   formatProfileInfoResult,
@@ -27,8 +29,10 @@ import {
   formatThreadFunctionsResult,
   formatThreadNetworkResult,
   formatProfileLogsResult,
+  formatProfileMarkersResult,
   formatThreadPageLoadResult,
   formatThreadSelectResult,
+  formatStrategySelectResult,
   formatCounterListResult,
   formatCounterInfoResult,
   formatSourceMapSourcesResult,
@@ -57,6 +61,8 @@ export function formatOutput(
   switch (result.type) {
     case 'status':
       return formatStatusResult(result);
+    case 'permalink':
+      return formatPermalinkResult(result);
     case 'filter-stack':
       return formatFilterStackResult(result);
     case 'function-expand':
@@ -69,6 +75,8 @@ export function formatOutput(
       return formatViewRangeResult(result);
     case 'thread-info':
       return formatThreadInfoResult(result);
+    case 'thread-list':
+      return formatThreadListResult(result);
     case 'marker-stack':
       return formatMarkerStackResult(result);
     case 'marker-info':
@@ -91,10 +99,14 @@ export function formatOutput(
       return formatThreadNetworkResult(result);
     case 'profile-logs':
       return formatProfileLogsResult(result);
+    case 'profile-markers':
+      return formatProfileMarkersResult(result);
     case 'thread-page-load':
       return formatThreadPageLoadResult(result);
     case 'thread-select':
       return formatThreadSelectResult(result);
+    case 'strategy-select':
+      return formatStrategySelectResult(result);
     case 'counter-list':
       return formatCounterListResult(result);
     case 'counter-info':

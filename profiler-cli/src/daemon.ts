@@ -9,6 +9,7 @@
 
 import * as net from 'net';
 import * as fs from 'fs';
+import type * as child_process from 'child_process';
 import { ProfileQuerier } from '../../src/profile-query';
 import type { LoadPhase } from '../../src/profile-query/loader';
 import { ProfileVersionError } from 'firefox-profiler/profile-logic/errors';
@@ -37,6 +38,7 @@ import {
 } from './diagnostics';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { BUILD_HASH, PACKAGE_NAME } from './constants';
+import { startSamplyServer } from './samply';
 
 /**
  * Exit code used when the daemon dies before it is able to serve requests. The
@@ -74,6 +76,8 @@ export class Daemon {
   private logStream: fs.WriteStream | null = null;
   private profilePath: string;
   private symbolServerUrl?: string;
+  private withSamply: boolean;
+  private samplyProcess: child_process.ChildProcess | null = null;
   private loadPhase: LoadPhase = 'fetching';
   private profileLoadError: string | null = null;
   private isListening: boolean = false;
@@ -83,12 +87,14 @@ export class Daemon {
     sessionDir: string,
     profilePath: string,
     sessionId?: string,
-    symbolServerUrl?: string
+    symbolServerUrl?: string,
+    withSamply: boolean = false
   ) {
     this.sessionDir = sessionDir;
     this.profilePath = profilePath;
     this.sessionId = sessionId || generateSessionId();
     this.symbolServerUrl = symbolServerUrl;
+    this.withSamply = withSamply;
     this.socketPath = getSocketPath(sessionDir, this.sessionId);
     this.logPath = getLogPath(sessionDir, this.sessionId);
 
@@ -135,6 +141,7 @@ export class Daemon {
    * discarded.
    */
   private reportFatalError(message: string): never {
+    this.stopSamply();
     if (!this.hasPublishedMetadata) {
       writeStartupError(this.sessionDir, this.sessionId, message);
     }
@@ -247,9 +254,37 @@ export class Daemon {
   private async loadProfileAsync(): Promise<void> {
     this.loadPhase = 'fetching';
     try {
+      let loadInput = this.profilePath;
+      if (this.withSamply) {
+        console.log('Starting samply server...');
+        const samply = startSamplyServer(this.profilePath);
+        // Tracked before it is ready, so a shutdown while samply is still
+        // starting up takes it down too.
+        this.samplyProcess = samply.child;
+        let samplyReady = false;
+        samply.child.on('exit', (code, signal) => {
+          // stopSamply clears samplyProcess before the exit fires, and a
+          // startup failure is already reported through the ready rejection.
+          // A clean exit after the URL was printed means samply handed the
+          // server off to a background process.
+          const unexpected =
+            this.samplyProcess !== null && samplyReady && code !== 0;
+          this.samplyProcess = null;
+          if (unexpected) {
+            console.warn(
+              `samply exited (${signal !== null ? `signal ${signal}` : `exit code ${code}`}). Symbol lookups will fail from now on.`
+            );
+          }
+        });
+        console.log(`Using samply at ${samply.binaryPath}`);
+        loadInput = await samply.ready;
+        samplyReady = true;
+        console.log(`samply server ready: ${loadInput}`);
+      }
+
       console.log('Loading profile...');
       const skipSymbolication = process.env.PROFILER_CLI_NO_SYMBOLICATE === '1';
-      this.querier = await ProfileQuerier.load(this.profilePath, {
+      this.querier = await ProfileQuerier.load(loadInput, {
         explicitSymbolServerUrl: this.symbolServerUrl,
         skipSymbolication,
         onPhaseChange: (phase) => {
@@ -264,6 +299,9 @@ export class Daemon {
     } catch (error) {
       console.error(`Failed to load profile: ${error}`);
       this.profileLoadError = formatProfileLoadError(error);
+      // The daemon stays up to report the error, but samply has nothing left
+      // to serve.
+      this.stopSamply();
     }
   }
 
@@ -402,6 +440,8 @@ export class Daemon {
             throw new Error('unimplemented');
           case 'logs':
             return this.querier.profileLogs(command.logFilters);
+          case 'markers':
+            return this.querier.profileMarkers(command.markerFilters);
           default:
             throw assertExhaustiveCheck(command);
         }
@@ -409,6 +449,8 @@ export class Daemon {
         switch (command.subcommand) {
           case 'info':
             return this.querier.threadInfo(command.thread);
+          case 'list':
+            return this.querier.threadList(command.threadListOptions);
           case 'select':
             if (!command.thread) {
               throw new Error('thread handle required for thread select');
@@ -419,7 +461,8 @@ export class Daemon {
               command.thread,
               command.includeIdle,
               command.search,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'samples-top-down':
             return this.querier.threadSamplesTopDown(
@@ -427,7 +470,8 @@ export class Daemon {
               command.callTreeOptions,
               command.includeIdle,
               command.search,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'samples-bottom-up':
             return this.querier.threadSamplesBottomUp(
@@ -435,7 +479,8 @@ export class Daemon {
               command.callTreeOptions,
               command.includeIdle,
               command.search,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'markers':
             return this.querier.threadMarkers(
@@ -447,7 +492,8 @@ export class Daemon {
               command.thread,
               command.functionFilters,
               command.includeIdle,
-              command.sampleFilters
+              command.sampleFilters,
+              command.strategy
             );
           case 'network':
             return this.querier.threadNetwork(
@@ -522,11 +568,16 @@ export class Daemon {
               command.function,
               command.annotateMode ?? 'src',
               command.symbolServerUrl,
-              command.annotateContext ?? '2'
+              command.annotateContext ?? '2',
+              command.strategy
             );
           default:
             throw assertExhaustiveCheck(command);
         }
+      case 'permalink':
+        return this.querier.permalink(command.short ?? false);
+      case 'strategy':
+        return this.querier.strategySelect(command.strategy);
       case 'zoom':
         switch (command.subcommand) {
           case 'push':
@@ -583,6 +634,8 @@ export class Daemon {
       this.server.close();
     }
 
+    this.stopSamply();
+
     cleanupSession(this.sessionDir, this.sessionId);
 
     if (this.logStream) {
@@ -591,6 +644,13 @@ export class Daemon {
 
     console.log('Daemon stopped');
     process.exit(0);
+  }
+
+  private stopSamply(): void {
+    if (this.samplyProcess) {
+      this.samplyProcess.kill();
+      this.samplyProcess = null;
+    }
   }
 }
 
@@ -601,13 +661,15 @@ export async function startDaemon(
   sessionDir: string,
   profilePath: string,
   sessionId?: string,
-  symbolServerUrl?: string
+  symbolServerUrl?: string,
+  withSamply: boolean = false
 ): Promise<void> {
   const daemon = new Daemon(
     sessionDir,
     profilePath,
     sessionId,
-    symbolServerUrl
+    symbolServerUrl,
+    withSamply
   );
   await daemon.start();
 }

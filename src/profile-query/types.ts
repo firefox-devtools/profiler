@@ -9,11 +9,15 @@
 
 import type {
   Transform,
+  CallTreeSummaryStrategy,
   CounterGraphType,
   CounterTooltipDataSource,
   NetworkStatus,
   SampleUnits,
+  WeightType,
 } from 'firefox-profiler/types';
+
+export type { CallTreeSummaryStrategy, WeightType };
 
 // ===== Utility types =====
 
@@ -46,6 +50,14 @@ export type MarkerFilterOptions = {
   list?: boolean; // Return a flat chronological list of all individual markers
 };
 
+/** A marker payload field, as shown by `marker info`. */
+export type MarkerFieldValue = {
+  key: string;
+  label: string;
+  value: any; // Payload value, with string-table indexes resolved to strings
+  formattedValue: string; // Rendered per the schema's `format`
+};
+
 export type FlatMarkerItem = {
   handle: string;
   name: string;
@@ -54,6 +66,9 @@ export type FlatMarkerItem = {
   duration?: number; // Milliseconds if interval marker
   hasStack: boolean;
   category: string;
+  markerType?: string; // The payload's `type`, i.e. the marker schema name
+  fields?: MarkerFieldValue[]; // As `marker info --json` reports them
+  data?: { [key: string]: any }; // Raw payload, minus `type` and `cause`
 };
 
 export type FunctionFilterOptions = {
@@ -110,12 +125,28 @@ export type FilterStackResult = {
 // ===== Session Context =====
 // Context information included in all command results for persistent display
 
+/** A thread as named in the context header: its own name and its process'. */
+export type ContextThreadInfo = {
+  threadIndex: number;
+  name: string;
+  /** Name of the process owning the thread, e.g. "WebExtensions". */
+  processName: string;
+};
+
 export type SessionContext = {
-  selectedThreadHandle: string | null; // Combined handle like "t-0" or "t-0,t-1,t-2"
-  selectedThreads: Array<{
-    threadIndex: number;
-    name: string;
-  }>;
+  /**
+   * The sticky session selection, as set by `thread select`. Combined handle
+   * like "t-0" or "t-0,t-1,t-2". Unaffected by a command's `--thread`.
+   */
+  selectedThreadHandle: string | null;
+  selectedThreads: ContextThreadInfo[];
+  /**
+   * The thread this particular result is about, when it is not the selected
+   * one: a `--thread`-scoped command, or a marker looked up in another thread.
+   * Null when the result is about the selection.
+   */
+  resultThreadHandle: string | null;
+  resultThreads: ContextThreadInfo[];
   currentViewRange: {
     start: number;
     startName: string;
@@ -127,6 +158,7 @@ export type SessionContext = {
     start: number;
     end: number;
   };
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 };
 
 /**
@@ -134,15 +166,22 @@ export type SessionContext = {
  */
 export type WithContext<T> = T & { context: SessionContext };
 
+// ===== Permalink Command =====
+
+export type PermalinkResult = {
+  type: 'permalink';
+  /** Full profiler.firefox.com URL encoding the current session view. */
+  url: string;
+  /** share.firefox.dev URL, only when shortening was requested. */
+  shortUrl: string | null;
+};
+
 // ===== Status Command =====
 
 export type StatusResult = {
   type: 'status';
   selectedThreadHandle: string | null; // Combined handle like "t-0" or "t-0,t-1,t-2"
-  selectedThreads: Array<{
-    threadIndex: number;
-    name: string;
-  }>;
+  selectedThreads: ContextThreadInfo[];
   viewRanges: Array<{
     start: number;
     startName: string;
@@ -159,6 +198,43 @@ export type StatusResult = {
     threadHandle: string;
     filters: FilterEntry[];
   }>;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+};
+
+// ===== Category Breakdown =====
+
+export type CategorySubBreakdownEntry = {
+  name: string;
+  subcategoryIndex: number;
+  samples: number;
+  percentage: number; // Of the breakdown's totalSamples, like the parent category row
+};
+
+export type CategoryBreakdownEntry = {
+  name: string;
+  categoryIndex: number;
+  samples: number;
+  percentage: number;
+  subcategories: CategorySubBreakdownEntry[]; // Empty unless the category has more than one
+};
+
+/** Categories sorted descending, with the empty ones removed. */
+export type CategoryBreakdown = {
+  totalSamples: number; // Sum of the absolute category values, i.e. the percentage denominator
+  categories: CategoryBreakdownEntry[];
+};
+
+export type FunctionCategoryBreakdown = CategoryBreakdown & {
+  samples: number; // Signed, and unlike totalSamples only counts this function
+  percentageOfThread: number;
+};
+
+export type FunctionCategoryBreakdowns = {
+  threadHandle: string;
+  friendlyThreadName: string;
+  threadSamples: number;
+  running: FunctionCategoryBreakdown;
+  self: FunctionCategoryBreakdown;
 };
 
 // ===== Function Commands =====
@@ -196,6 +272,7 @@ export type FunctionInfoResult = {
     debugPath?: string;
     breakpadId?: string;
   };
+  categoryBreakdown: FunctionCategoryBreakdowns;
 };
 
 // ===== Function Annotate =====
@@ -256,6 +333,8 @@ export type FunctionAnnotateResult = {
   friendlyThreadName: string;
   totalSelfSamples: number;
   totalTotalSamples: number;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   mode: AnnotateMode;
   srcAnnotation: FunctionSourceAnnotation | null;
   asmAnnotations: FunctionAsmAnnotation[];
@@ -295,6 +374,57 @@ export type ThreadSelectResult = {
   threadNames: string[];
 };
 
+export type StrategySelectResult = {
+  type: 'strategy-select';
+  threadHandle: string;
+  strategy: CallTreeSummaryStrategy;
+  availableStrategies: CallTreeSummaryStrategy[];
+};
+
+/** How `thread list` orders its rows. */
+export type ThreadListSort = 'cpu' | 'index' | 'markers' | 'name';
+
+export type ThreadListOptions = {
+  /** Ordering of the rows. Defaults to 'cpu' (busiest thread first). */
+  sort?: ThreadListSort;
+  /** Keep only threads whose name, process name, pid or tid matches. */
+  searchString?: string;
+  /** Show at most this many rows. Omitted or 0 means "no limit". */
+  limit?: number;
+};
+
+/**
+ * One row of the flat `thread list` table. `cpuMs` and `markerCount` cover the
+ * whole profile (not the current zoom range), matching `profile info`.
+ */
+export type ThreadListItem = {
+  threadHandle: string; // e.g. "t-0"
+  threadIndex: number;
+  name: string; // raw thread name, e.g. "GeckoMain"
+  processName: string; // e.g. "Parent Process"
+  etld1?: string; // eTLD+1 of an isolated content process, when known
+  pid: string;
+  processIndex: number;
+  tid: number | string;
+  cpuMs: number;
+  markerCount: number;
+  /** True for the thread(s) currently selected in the session. */
+  selected: boolean;
+};
+
+export type ThreadListResult = {
+  type: 'thread-list';
+  threads: ThreadListItem[];
+  /** Number of threads in the profile, before search/limit filtering. */
+  totalThreadCount: number;
+  /** Number of processes in the profile. */
+  processCount: number;
+  /** Number of threads dropped by `limit` after search filtering. */
+  hiddenByLimit: number;
+  sort: ThreadListSort;
+  searchQuery?: string;
+};
+
 export type ThreadInfoResult = {
   type: 'thread-info';
   threadHandle: string;
@@ -318,6 +448,7 @@ export type ThreadInfoResult = {
     depthLevel: number;
   }> | null;
   networkActivity: ThreadNetworkSummary | null;
+  availableStrategies: CallTreeSummaryStrategy[];
 };
 
 export type TopFunctionInfo = FunctionDisplayInfo & {
@@ -337,6 +468,9 @@ export type ThreadSamplesResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  categoryBreakdown: CategoryBreakdown;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
   heaviestStack: {
@@ -371,6 +505,8 @@ export type ThreadSamplesTopDownResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   regularCallTree: CallTreeNode;
 };
 
@@ -382,6 +518,8 @@ export type ThreadSamplesBottomUpResult = {
   search?: string;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   invertedCallTree: CallTreeNode | null;
 };
 
@@ -634,6 +772,47 @@ export type MarkerGroupData = {
   subGroups?: MarkerGroupData[];
 };
 
+/** One row of `profile markers`: a `thread markers --list` row plus its thread. */
+export type ProfileMarkerItem = FlatMarkerItem & {
+  threadHandle: string;
+  threadName: string; // Friendly thread name, e.g. "GPU Process"
+  processName: string;
+  pid: string;
+};
+
+/** Per-thread match count for a cross-thread marker search. */
+export type ProfileMarkersThreadBreakdown = {
+  threadHandle: string;
+  threadName: string;
+  processName: string;
+  pid: string;
+  count: number;
+};
+
+/**
+ * Cross-thread marker search: one chronological list gathered from every
+ * thread, plus a per-thread breakdown.
+ */
+export type ProfileMarkersResult = {
+  type: 'profile-markers';
+  markers: ProfileMarkerItem[]; // Chronological, after limit
+  totalCount: number; // Matches across all searched threads, before limit
+  searchedThreadCount: number;
+  matchingThreadCount: number;
+  byThread: ProfileMarkersThreadBreakdown[]; // Sorted by count, descending
+  // Set when rows were dropped at the hard row ceiling.
+  maxRowsClamped?: number;
+  filters?: {
+    thread?: string;
+    searchString?: string;
+    category?: string;
+    minDuration?: number;
+    maxDuration?: number;
+    hasStack?: boolean;
+    limit?: number;
+  };
+};
+
 export type ProfileLogsResult = {
   type: 'profile-logs';
   entries: string[];
@@ -654,6 +833,8 @@ export type ThreadFunctionsResult = {
   activeOnly?: boolean;
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  weightType: WeightType;
   totalFunctionCount: number;
   filteredFunctionCount: number;
   filters?: {
@@ -693,12 +874,7 @@ export type MarkerInfoResult = {
   start: number; // Ms since the profile start, as in `FlatMarkerItem`
   end: number | null;
   duration?: number;
-  fields?: Array<{
-    key: string;
-    label: string;
-    value: any;
-    formattedValue: string;
-  }>;
+  fields?: MarkerFieldValue[];
   schema?: {
     description?: string;
   };

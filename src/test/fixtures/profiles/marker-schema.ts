@@ -2,8 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type { MarkerSchema } from 'firefox-profiler/types';
+import {
+  addPIICategoriesToMarkerSchemas,
+  FILE_IO_TABLE_LABEL,
+} from 'firefox-profiler/profile-logic/marker-schema';
 
-export const markerSchemaForTests: MarkerSchema[] = [
+const markerSchemaForTestsWithoutPII: MarkerSchema[] = [
   {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
@@ -27,6 +31,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
   },
   {
     name: 'FileIO',
+    tableLabel: FILE_IO_TABLE_LABEL,
     display: ['marker-chart', 'marker-table'],
     fields: [
       {
@@ -193,3 +198,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
 ];
+
+export const markerSchemaForTests = addPIICategoriesToMarkerSchemas(
+  markerSchemaForTestsWithoutPII
+);

@@ -42,21 +42,22 @@ function computeInclusionScore(
   depth: number,
   strategy: CallTreeScoringStrategy
 ): number {
+  const weight = Math.abs(totalPercentage);
   switch (strategy) {
     case 'exponential-0.95':
-      return totalPercentage * Math.pow(0.95, depth);
+      return weight * Math.pow(0.95, depth);
     case 'exponential-0.9':
-      return totalPercentage * Math.pow(0.9, depth);
+      return weight * Math.pow(0.9, depth);
     case 'exponential-0.8':
-      return totalPercentage * Math.pow(0.8, depth);
+      return weight * Math.pow(0.8, depth);
     case 'harmonic-0.1':
-      return totalPercentage / (1 + 0.1 * depth);
+      return weight / (1 + 0.1 * depth);
     case 'harmonic-0.5':
-      return totalPercentage / (1 + 0.5 * depth);
+      return weight / (1 + 0.5 * depth);
     case 'harmonic-1.0':
-      return totalPercentage / (1 + depth);
+      return weight / (1 + depth);
     case 'percentage-only':
-      return totalPercentage;
+      return weight;
     default:
       throw assertExhaustiveCheck(strategy);
   }
@@ -333,7 +334,9 @@ function buildTreeStructure(
       for (const childIdx of elidedChildren) {
         const childData = tree.getNodeData(childIdx);
         combinedSamples += childData.total;
-        maxSamples = Math.max(maxSamples, childData.total);
+        if (Math.abs(childData.total) > Math.abs(maxSamples)) {
+          maxSamples = childData.total;
+        }
       }
 
       const combinedRelative = combinedSamples / totalSampleCount;
