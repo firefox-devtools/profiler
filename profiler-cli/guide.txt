@@ -489,6 +489,7 @@ SESSION MANAGEMENT
     profiler-cli stop --all                                 Stop all sessions
     profiler-cli load profile.json.gz --session my-session   Named session
     profiler-cli load profile.json.gz --symbol-server <url>  Override symbol server (else ?symbolServer= URL param or Mozilla default)
+    profiler-cli load profile.json --with-samply             Serve the file via "samply load" and symbolicate with its symbol server
     profiler-cli thread info --session my-session            Query a specific session
 
 
