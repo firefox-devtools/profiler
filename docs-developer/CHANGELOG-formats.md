@@ -47,7 +47,7 @@ FileIO marker schemas now have a `tableLabel`.
 
 ### Version 72
 
-Marker schema fields can now include a `containsPII` array describing the categories of privacy-sensitive data they contain. Profile sanitization uses these categories instead of identifying privacy-sensitive fields from the marker type.
+Marker schema fields can now include a `containsPII` array describing the categories of privacy-sensitive data they contain. Profile sanitization uses these categories instead of identifying privacy-sensitive fields from the marker type. Extension-related text markers are converted to structured payloads so their extension IDs can be annotated separately.
 
 ### Version 71
 

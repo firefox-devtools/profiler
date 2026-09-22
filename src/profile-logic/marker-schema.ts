@@ -43,7 +43,7 @@ const markerSchemaPIICategoriesBySchemaName = new Map<
       ['isPrivateBrowsing', ['private-browsing']],
     ]),
   ],
-  ['Text', new Map([['name', ['url', 'extension-id']]])],
+  ['Text', new Map([['name', ['url']]])],
   ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
 ]);
 
@@ -78,6 +78,29 @@ export function addPIICategoriesToMarkerSchemas(
 ): MarkerSchema[] {
   return markerSchemas.map(addPIICategoriesToMarkerSchema);
 }
+
+export const extensionTextMarkerSchema: MarkerSchema = {
+  name: 'ExtensionText',
+  tableLabel:
+    "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+  chartLabel:
+    "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+  display: ['marker-chart', 'marker-table'],
+  fields: [
+    {
+      key: 'extensionId',
+      label: 'Extension ID',
+      format: 'string',
+      containsPII: ['extension-id'],
+    },
+    {
+      key: 'name',
+      label: 'Details',
+      format: 'string',
+      containsPII: ['url'],
+    },
+  ],
+};
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,

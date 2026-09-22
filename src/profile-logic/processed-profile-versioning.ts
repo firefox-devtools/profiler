@@ -3434,6 +3434,87 @@ const _upgraders: {
     }
   },
   [72]: (profile: any) => {
+    const extensionTextMarkerSchema = {
+      name: 'ExtensionText',
+      tableLabel:
+        "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+      chartLabel:
+        "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+      display: ['marker-chart', 'marker-table'],
+      fields: [
+        {
+          key: 'extensionId',
+          label: 'Extension ID',
+          format: 'string',
+          containsPII: ['extension-id'],
+        },
+        {
+          key: 'name',
+          label: 'Details',
+          format: 'string',
+          containsPII: ['url'],
+        },
+      ],
+    };
+
+    let isExtensionTextMarkerSchemaUsed = false;
+    const stringArray = profile.shared.stringArray;
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        const payload = markers.data[markerIndex];
+        if (!payload || payload.type !== 'Text') {
+          continue;
+        }
+
+        const markerName = stringArray[markers.name[markerIndex]];
+        const text =
+          typeof payload.name === 'number'
+            ? stringArray[payload.name]
+            : payload.name;
+        if (typeof text !== 'string') {
+          continue;
+        }
+
+        if (
+          markerName === 'ExtensionParent' ||
+          markerName === 'ExtensionChild'
+        ) {
+          const match = /^(.*), (api_(?:call|event): [\s\S]*)$/.exec(text);
+          if (match) {
+            markers.data[markerIndex] = {
+              ...payload,
+              type: 'ExtensionText',
+              name: match[2],
+              extensionId: match[1],
+            };
+            isExtensionTextMarkerSchemaUsed = true;
+          }
+        } else if (markerName === 'Extension Suspend') {
+          const match = / by .*$/.exec(text);
+          if (match) {
+            markers.data[markerIndex] = {
+              ...payload,
+              type: 'ExtensionText',
+              name: text.slice(0, match.index),
+              extensionId: text.slice(match.index + ' by '.length),
+            };
+            isExtensionTextMarkerSchemaUsed = true;
+          }
+        }
+      }
+    }
+
+    const schemaNames = new Set(
+      profile.meta.markerSchema.map((schema: any) => schema.name)
+    );
+    if (
+      isExtensionTextMarkerSchemaUsed &&
+      !schemaNames.has(extensionTextMarkerSchema.name)
+    ) {
+      profile.meta.markerSchema.push(extensionTextMarkerSchema);
+    }
+
     const piiCategoriesBySchemaName = new Map<string, Map<string, string[]>>([
       [
         'Network',
@@ -3443,7 +3524,7 @@ const _upgraders: {
           ['isPrivateBrowsing', ['private-browsing']],
         ]),
       ],
-      ['Text', new Map([['name', ['url', 'extension-id']]])],
+      ['Text', new Map([['name', ['url']]])],
       ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
     ]);
 
