@@ -126,7 +126,7 @@ Examples:
       opts.symbolServer
     );
     console.log(`Session started: ${sessionId}`);
-    const status = await sendCommand(
+    const { result: status } = await sendCommand(
       SESSION_DIR,
       { command: 'status' },
       sessionId

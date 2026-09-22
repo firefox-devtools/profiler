@@ -14,6 +14,13 @@ SessionContext (present on all command results):
     callTreeSummaryStrategy: CallTreeSummaryStrategy
   }
 
+PermalinkFields (merged into any command result when --permalink or
+--short-permalink is passed):
+  {
+    permalink: string | null,
+    permalinkError?: string
+  }
+
 CallTreeSummaryStrategy:
   "timing" | "js-allocations" | "native-retained-allocations" |
   "native-allocations" | "native-deallocations-memory" |

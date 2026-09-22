@@ -69,7 +69,7 @@ import {
 } from 'firefox-profiler/profile-logic/source-map-matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
-import { MarkerMap } from './marker-map';
+import { MarkerMap, type MarkerId } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
 import { collectProfileMeta } from './formatters/profile-meta';
@@ -104,10 +104,12 @@ import type {
   StartEndRange,
   ThreadIndex,
   ThreadsKey,
+  UrlState,
 } from 'firefox-profiler/types';
 import type {
   StatusResult,
   PermalinkResult,
+  PermalinkView,
   SessionContext,
   ContextThreadInfo,
   WithContext,
@@ -828,10 +830,7 @@ export class ProfileQuerier {
    * single entry.
    */
   filterPush(spec: SampleFilterSpec, threadHandle?: string): FilterStackResult {
-    const threadIndexes =
-      threadHandle !== undefined
-        ? this._threadMap.threadIndexesForHandle(threadHandle)
-        : getSelectedThreadIndexes(this._store.getState());
+    const threadIndexes = this._resolveThreadIndexes(threadHandle);
     const threadsKey = getThreadsKey(threadIndexes);
     const actualHandle =
       threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
@@ -865,10 +864,7 @@ export class ProfileQuerier {
    * undo as a single entry because that's how they were shown.
    */
   filterPop(count: number = 1, threadHandle?: string): FilterStackResult {
-    const threadIndexes =
-      threadHandle !== undefined
-        ? this._threadMap.threadIndexesForHandle(threadHandle)
-        : getSelectedThreadIndexes(this._store.getState());
+    const threadIndexes = this._resolveThreadIndexes(threadHandle);
     const threadsKey = getThreadsKey(threadIndexes);
     const actualHandle =
       threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
@@ -917,10 +913,7 @@ export class ProfileQuerier {
    * Clear all transforms from the thread's transform stack.
    */
   filterClear(threadHandle?: string): FilterStackResult {
-    const threadIndexes =
-      threadHandle !== undefined
-        ? this._threadMap.threadIndexesForHandle(threadHandle)
-        : getSelectedThreadIndexes(this._store.getState());
+    const threadIndexes = this._resolveThreadIndexes(threadHandle);
     const threadsKey = getThreadsKey(threadIndexes);
     const actualHandle =
       threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
@@ -947,10 +940,7 @@ export class ProfileQuerier {
    * List the thread's full Redux transform stack as filter entries.
    */
   filterList(threadHandle?: string): FilterStackResult {
-    const threadIndexes =
-      threadHandle !== undefined
-        ? this._threadMap.threadIndexesForHandle(threadHandle)
-        : getSelectedThreadIndexes(this._store.getState());
+    const threadIndexes = this._resolveThreadIndexes(threadHandle);
     const threadsKey = getThreadsKey(threadIndexes);
     const actualHandle =
       threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
@@ -983,25 +973,11 @@ export class ProfileQuerier {
     }
   > {
     const activeOnly = !includeIdle;
-    const threadIndexes =
-      threadHandle !== undefined
-        ? this._threadMap.threadIndexesForHandle(threadHandle)
-        : getSelectedThreadIndexes(this._store.getState());
-    const withIdle = includeIdle
-      ? () => this._withIncludedIdle(collect)
-      : collect;
-    const withSearch = search
-      ? () => this._withCallTreeSearch(search, withIdle)
-      : withIdle;
-    const withFilters =
-      sampleFilters && sampleFilters.length > 0
-        ? () =>
-            this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
-        : withSearch;
-    const result = this._withValidatedStrategy(
+    const threadIndexes = this._resolveThreadIndexes(threadHandle);
+    const result = this._withEphemeralView(
       threadIndexes,
-      strategy,
-      withFilters
+      { includeIdle, callTreeSearch: search, sampleFilters, strategy },
+      collect
     );
     const activeFilters = this._collectFilterEntries(
       getThreadsKey(threadIndexes)
@@ -1015,6 +991,39 @@ export class ProfileQuerier {
         sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
       context: this._getContext(strategy, threadIndexes),
     };
+  }
+
+  /**
+   * Compose the idle/search/ephemeral-filter/strategy wrappers around fn(), in
+   * the order the sample queries use. Also used to snapshot the URL state for
+   * permalinks so the link agrees with the query output.
+   */
+  private _withEphemeralView<T>(
+    threadIndexes: Set<ThreadIndex>,
+    view: Pick<
+      PermalinkView,
+      'includeIdle' | 'callTreeSearch' | 'sampleFilters' | 'strategy'
+    >,
+    fn: () => T
+  ): T {
+    const { includeIdle, callTreeSearch, sampleFilters, strategy } = view;
+    const withIdle = includeIdle ? () => this._withIncludedIdle(fn) : fn;
+    const withSearch = callTreeSearch
+      ? () => this._withCallTreeSearch(callTreeSearch, withIdle)
+      : withIdle;
+    const withFilters =
+      sampleFilters && sampleFilters.length > 0
+        ? () =>
+            this._withEphemeralFilters(threadIndexes, sampleFilters, withSearch)
+        : withSearch;
+    return this._withValidatedStrategy(threadIndexes, strategy, withFilters);
+  }
+
+  /** A thread handle if given, otherwise the session's selected threads. */
+  private _resolveThreadIndexes(threadHandle?: string): Set<ThreadIndex> {
+    return threadHandle !== undefined
+      ? this._threadMap.threadIndexesForHandle(threadHandle)
+      : getSelectedThreadIndexes(this._store.getState());
   }
 
   /**
@@ -1256,14 +1265,17 @@ export class ProfileQuerier {
   }
 
   /**
-   * Build a profiler.firefox.com URL for the current session view: selected
-   * threads, committed zoom ranges, transforms, strategy, and so on. Only
-   * profiles that are already reachable by URL can be linked to. Local files
-   * would need publishing first, which the CLI does not support yet.
+   * Build a profiler.firefox.com URL for the current session view (selected
+   * threads, committed zoom ranges, transforms, strategy), with `view` layered
+   * on top for the ephemeral settings of a single query. Only profiles that are
+   * already reachable by URL can be linked to. Local files would need
+   * publishing first, which the CLI does not support yet.
    */
-  async permalink(shorten: boolean = false): Promise<PermalinkResult> {
-    const state = this._store.getState();
-    const dataSource = getDataSource(state);
+  async permalink(
+    view: PermalinkView = {},
+    shorten: boolean = false
+  ): Promise<PermalinkResult> {
+    const dataSource = getDataSource(this._store.getState());
     if (dataSource !== 'public' && dataSource !== 'from-url') {
       throw new Error(
         'This profile is not reachable by URL, so there is no link to share. ' +
@@ -1273,9 +1285,56 @@ export class ProfileQuerier {
       );
     }
 
-    const url = PROFILER_FRONTEND_ORIGIN + urlFromState(getUrlState(state));
+    const urlState = this._urlStateForView(view);
+    const url = PROFILER_FRONTEND_ORIGIN + urlFromState(urlState);
     const shortUrl = shorten ? await shortenUrl(url) : null;
     return { type: 'permalink', url, shortUrl };
+  }
+
+  /**
+   * Snapshot the URL state with `view` applied. Settings that already have
+   * Redux round-trips (idle, call tree search, ephemeral filters, strategy) are
+   * applied through those wrappers so the snapshot is taken inside them, then
+   * reverted. The rest is patched onto the copy directly.
+   */
+  private _urlStateForView(view: PermalinkView): UrlState {
+    const marker: MarkerId | null =
+      view.markerHandle !== undefined
+        ? this._markerMap.markerForHandle(view.markerHandle)
+        : null;
+    const threadIndexes =
+      view.threadHandle === undefined && marker !== null
+        ? marker.threadIndexes
+        : this._resolveThreadIndexes(view.threadHandle);
+
+    const base = this._withEphemeralView(threadIndexes, view, () =>
+      getUrlState(this._store.getState())
+    );
+
+    const profileSpecific = {
+      ...base.profileSpecific,
+      selectedThreads: threadIndexes,
+    };
+    if (view.markerSearch !== undefined) {
+      profileSpecific.markersSearchString = view.markerSearch;
+    }
+    if (view.networkSearch !== undefined) {
+      profileSpecific.networkSearchString = view.networkSearch;
+    }
+    if (view.invertCallstack !== undefined) {
+      profileSpecific.invertCallTree = view.invertCallstack;
+    }
+    if (marker !== null) {
+      profileSpecific.selectedMarkers = {
+        ...profileSpecific.selectedMarkers,
+        [marker.threadsKey]: marker.markerIndex,
+      };
+    }
+    return {
+      ...base,
+      selectedTab: view.tab ?? base.selectedTab,
+      profileSpecific,
+    };
   }
 
   /**
@@ -1499,10 +1558,7 @@ export class ProfileQuerier {
     strategy?: CallTreeSummaryStrategy
   ): Promise<WithContext<ThreadFunctionsResult>> {
     const activeOnly = !includeIdle;
-    const threadIndexes =
-      threadHandle !== undefined
-        ? this._threadMap.threadIndexesForHandle(threadHandle)
-        : getSelectedThreadIndexes(this._store.getState());
+    const threadIndexes = this._resolveThreadIndexes(threadHandle);
     const collect = () =>
       collectThreadFunctions(
         this._store,
@@ -1510,18 +1566,10 @@ export class ProfileQuerier {
         threadHandle,
         filterOptions
       );
-    const withIdle = includeIdle
-      ? () => this._withIncludedIdle(collect)
-      : collect;
-    const withFilters =
-      sampleFilters && sampleFilters.length > 0
-        ? () =>
-            this._withEphemeralFilters(threadIndexes, sampleFilters, withIdle)
-        : withIdle;
-    const result = this._withValidatedStrategy(
+    const result = this._withEphemeralView(
       threadIndexes,
-      strategy,
-      withFilters
+      { includeIdle, sampleFilters, strategy },
+      collect
     );
     const activeFilters = this._collectFilterEntries(
       getThreadsKey(threadIndexes)

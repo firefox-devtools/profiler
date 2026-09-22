@@ -19,6 +19,7 @@ export type {
   WithContext,
   StatusResult,
   PermalinkResult,
+  PermalinkView,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
@@ -124,7 +125,12 @@ import type {
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
 export type ClientMessage =
-  | { type: 'command'; command: ClientCommand }
+  | {
+      type: 'command';
+      command: ClientCommand;
+      /** Also build a profiler.firefox.com URL for the view this command shows. */
+      permalink?: PermalinkFormat;
+    }
   | { type: 'shutdown' }
   | { type: 'status' };
 
@@ -238,8 +244,21 @@ export type ClientCommand =
   | { command: 'status' }
   | { command: 'permalink'; short?: boolean };
 
+/** `short` goes through the share.firefox.dev shortener. */
+export type PermalinkFormat = 'long' | 'short';
+
+/**
+ * Outcome of a `--permalink` request. The link is best effort: a failure to
+ * build it (e.g. an unpublished local file) must not fail the command itself.
+ */
+export type PermalinkOutcome = PermalinkResult | { error: string };
+
 export type ServerResponse =
-  | { type: 'success'; result: string | CommandResult }
+  | {
+      type: 'success';
+      result: string | CommandResult;
+      permalink?: PermalinkOutcome;
+    }
   | { type: 'error'; error: string }
   | { type: 'loading' }
   | { type: 'symbolicating' }
