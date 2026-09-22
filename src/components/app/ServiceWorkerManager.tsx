@@ -244,6 +244,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   override componentDidMount() {
     if (
       process.env.NODE_ENV === 'production' &&
+      process.env.ENABLE_SERVICE_WORKER !== 'false' &&
       // Do not install the service worker for l10n branch so localizers can see
       // the changes easily with a single refresh. This variable is added by
       // esbuild's define option.

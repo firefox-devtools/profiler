@@ -84,6 +84,9 @@ export const mainBundleConfig = {
     // In dev, the worker is not hashed so the path is predictable.
     // In production, build.mjs overrides this after building the worker first.
     SOURCE_MAP_WORKER_PATH: JSON.stringify('/source-map.worker.js'),
+    'process.env.ENABLE_SERVICE_WORKER': JSON.stringify(
+      process.env.ENABLE_SERVICE_WORKER || 'true'
+    ),
   },
   external: ['zlib'],
   plugins: [
@@ -118,10 +121,10 @@ export const mainBundleConfig = {
 // Source map worker bundle configuration.
 // Built as a standalone IIFE so that npm dependencies (lezer, source-map) are
 // bundled into a single file that can be loaded as a Web Worker without needing
-// ES module support. In production the output filename includes a content hash
-// (e.g. source-map-ABCD1234.worker.js). The path is then injected into the main
-// bundle via the SOURCE_MAP_WORKER_PATH define. In dev there is no hash since the
-// dev server always serves fresh content and the define can't be updated mid-watch.
+// ES module support. Watched builds use a stable filename because the main
+// bundle's SOURCE_MAP_WORKER_PATH define can't be updated when only the worker
+// changes. The one-off production build overrides this with a content hash and
+// injects the resulting path into the main bundle.
 export const sourceMapWorkerConfig = {
   ...baseConfig,
   entryPoints: ['src/profile-logic/source-maps/source-map.worker.ts'],
@@ -131,7 +134,7 @@ export const sourceMapWorkerConfig = {
   target: browserslistToEsbuild(),
   sourcemap: true,
   splitting: false,
-  entryNames: isProduction ? '[name]-[hash]' : '[name]',
+  entryNames: '[name]',
   metafile: true,
   plugins: [wasmLoader()],
 };
