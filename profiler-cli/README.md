@@ -30,6 +30,7 @@ Run `profiler-cli --help` for the full options reference.
 
 ```bash
 profiler-cli load <PATH>                   # Start daemon and load profile (file or http/https URL)
+profiler-cli load <PATH> --with-samply     # Same, but serve the file via "samply load" and symbolicate with its symbol server
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
 profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
@@ -66,6 +67,25 @@ profiler-cli stop --all                    # Stop all sessions
 profiler-cli session list                  # List all running daemon sessions (* marks current)
 profiler-cli session use <id>              # Switch the current session
 ```
+
+### Symbolicating with samply
+
+Some profiles are not symbolicated yet when they are saved, for example those
+recorded with `samply record --save-only`, and symbolication as well as the
+assembly view then need a symbol server that can see the local binaries.
+`--with-samply` runs `samply load` in the background for the lifetime of the
+session to provide that server:
+
+```bash
+samply record --save-only -o profile.json ./my-program
+profiler-cli load profile.json --with-samply
+profiler-cli function annotate f-12 --mode asm
+```
+
+samply is resolved from `PROFILER_CLI_SAMPLY_PATH` if set, then `PATH`, then
+`$MOZBUILD_STATE_PATH/samply` (default `~/.mozbuild/samply`), where
+`./mach bootstrap` installs it. The samply process is stopped together with the
+session.
 
 ### Multiple sessions
 
