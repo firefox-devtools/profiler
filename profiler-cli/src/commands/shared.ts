@@ -12,7 +12,11 @@ import { collectStrings } from '../utils/parse';
 import { sendCommand } from '../client';
 import { formatOutput } from '../output';
 import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
-import type { ClientCommand, CallTreeSummaryStrategy } from '../protocol';
+import type {
+  ClientCommand,
+  CallTreeSummaryStrategy,
+  CommandResult,
+} from '../protocol';
 
 /**
  * Options shared by every command action via `addGlobalOptions`.
@@ -31,9 +35,10 @@ export async function runCommand(
   sessionDir: string,
   command: ClientCommand,
   opts: GlobalOptions
-): Promise<void> {
+): Promise<string | CommandResult> {
   const result = await sendCommand(sessionDir, command, opts.session);
   console.log(formatOutput(result, opts.json ?? false));
+  return result;
 }
 
 /**
