@@ -27,7 +27,7 @@ import type {
   CssPixels,
   ImplementationFilter,
 } from 'firefox-profiler/types';
-import { SelectedState } from 'firefox-profiler/types';
+import type { SampleRelations } from 'firefox-profiler/profile-logic/profile-data';
 import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 import { lightDark } from 'firefox-profiler/utils/dark-mode';
 
@@ -38,7 +38,7 @@ export type HoveredPixelState = {
 type Props = {
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: Uint8Array;
+  readonly sampleRelations: SampleRelations;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -62,7 +62,7 @@ type State = {
 type CanvasProps = {
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: Uint8Array;
+  readonly sampleRelations: SampleRelations;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -137,7 +137,7 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       interval,
       rangeStart,
       rangeEnd,
-      sampleSelectedStates,
+      sampleRelations,
       categories,
       width,
       height,
@@ -187,14 +187,13 @@ class ThreadSampleGraphCanvas extends React.PureComponent<CanvasProps> {
       if (sampleTime < nextMinTime) {
         continue;
       }
-      const state = sampleSelectedStates[i] as SelectedState;
-      if (state === SelectedState.FilteredOutByTransform) {
+      if (sampleRelations.isFilteredOut(i)) {
         continue;
       }
       const xPos =
         (sampleTime - rangeStart) * xPixelsPerMs - drawnSampleWidth / 2;
       let samplesBucket;
-      if (state === SelectedState.Selected) {
+      if (sampleRelations.contributesToTotal(i)) {
         samplesBucket = highlightedSamples;
       } else {
         const categoryIndex = thread.samples.category[i];
@@ -343,7 +342,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
       interval,
       rangeStart,
       rangeEnd,
-      sampleSelectedStates,
+      sampleRelations,
       width,
       height,
       zeroAt,
@@ -365,7 +364,7 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
           thread={thread}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
-          sampleSelectedStates={sampleSelectedStates}
+          sampleRelations={sampleRelations}
           categories={categories}
           width={width}
           height={height}

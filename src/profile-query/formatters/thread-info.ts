@@ -43,10 +43,7 @@ import {
   computeCallNodeSelfAndSummary,
   extractSamplesLikeTable,
 } from 'firefox-profiler/profile-logic/call-tree';
-import {
-  getInvertedCallNodeInfo,
-  getSampleIndexToCallNodeIndex,
-} from 'firefox-profiler/profile-logic/profile-data';
+import { getInvertedCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
 import type { Store } from '../../types/store';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
@@ -390,10 +387,8 @@ export function collectThreadSamplesBottomUp(
   const weightType = threadSelectors.getWeightTypeForCallTree(state);
 
   const samples = threadSelectors.getPreviewFilteredCtssSamples(state);
-  const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
-    samples.stack,
-    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
-  );
+  const sampleIndexToCallNodeIndex =
+    threadSelectors.getPreviewFilteredCtssSampleCallNodes(state);
 
   const callNodeSelfAndSummary = computeCallNodeSelfAndSummary(
     samples,

@@ -24,6 +24,7 @@ import type {
   Milliseconds,
   CssPixels,
 } from 'firefox-profiler/types';
+import type { SampleRelations } from 'firefox-profiler/profile-logic/profile-data';
 import type {
   ActivityFillGraphQuerier,
   CpuRatioInTimeRange,
@@ -43,7 +44,7 @@ export type Props = {
     sampleIndex: IndexIntoSamplesTable | null
   ) => void;
   readonly categories: CategoryList;
-  readonly sampleSelectedStates: Uint8Array;
+  readonly sampleRelations: SampleRelations;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
@@ -131,7 +132,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      sampleSelectedStates,
+      sampleRelations,
       treeOrderSampleComparator,
       implementationFilter,
       width,
@@ -158,7 +159,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           sampleIndexOffset={sampleIndexOffset}
-          sampleSelectedStates={sampleSelectedStates}
+          sampleRelations={sampleRelations}
           treeOrderSampleComparator={treeOrderSampleComparator}
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}
