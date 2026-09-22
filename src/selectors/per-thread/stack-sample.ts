@@ -369,6 +369,19 @@ export function getStackAndSampleSelectorsPerThread(
         )
     );
 
+  const getPreviewFilteredCtssSampleRelationsToSelectedFunction: Selector<SampleRelations> =
+    createSelector(
+      getPreviewFilteredCtssSampleCallNodes,
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      (sampleCallNodes, callNodeTable, selectedFunctionIndex) =>
+        ProfileData.getSampleRelationsToFunction(
+          sampleCallNodes,
+          selectedFunctionIndex,
+          callNodeTable
+        )
+    );
+
   const getTreeOrderComparatorInFilteredThread: Selector<
     (
       sampleIndexA: IndexIntoSamplesTable,
@@ -705,6 +718,7 @@ export function getStackAndSampleSelectorsPerThread(
     getSampleRelationsForFunctionListTab,
     getPreviewFilteredCtssSampleCallNodes,
     getPreviewFilteredCtssSampleRelations,
+    getPreviewFilteredCtssSampleRelationsToSelectedFunction,
     getSelectedCallNodeIsInvertedRoot,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,

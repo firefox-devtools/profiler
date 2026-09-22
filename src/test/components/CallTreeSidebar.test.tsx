@@ -4,9 +4,13 @@
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
-import { CallTreeSidebar } from '../../components/sidebar/CallTreeSidebar';
+import {
+  CallTreeSidebar,
+  FunctionListSidebar,
+} from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
+  changeSelectedFunctionIndex,
   changeInvertCallstack,
 } from '../../actions/profile-view';
 
@@ -14,7 +18,11 @@ import { storeWithProfile } from '../fixtures/stores';
 import type { FuncNamesDict } from '../fixtures/profiles/processed-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import type { CallNodePath, Profile } from 'firefox-profiler/types';
+import type {
+  CallNodePath,
+  IndexIntoFuncTable,
+  Profile,
+} from 'firefox-profiler/types';
 import { ensureExists } from '../../utils/types';
 import { fireFullClick } from '../fixtures/utils';
 
@@ -202,5 +210,106 @@ describe('CallTreeSidebar', function () {
 
     expect(getAllByText('FakeSubCategoryC')[0]).toBeInTheDocument();
     expect(getAllByText('FakeSubCategoryC')[1]).toBeInTheDocument();
+  });
+});
+
+describe('FunctionListSidebar', function () {
+  function setup(textSamples: string) {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
+    const store = storeWithProfile(profile);
+
+    const selectFunction = (funcIndex: IndexIntoFuncTable) => {
+      act(() => {
+        store.dispatch(changeSelectedFunctionIndex(0, funcIndex));
+      });
+    };
+
+    const renderResult = render(
+      <Provider store={store}>
+        <FunctionListSidebar />
+      </Provider>
+    );
+
+    return { ...renderResult, funcNamesDict, selectFunction };
+  }
+
+  // Returns the [label, percentage, value] triples of the sidebar details.
+  function getDetails(container: HTMLElement): string[][] {
+    return Array.from(container.querySelectorAll('.sidebar-label')).map(
+      (label) => [
+        label.textContent ?? '',
+        label.nextElementSibling?.textContent ?? '',
+        label.nextElementSibling?.nextElementSibling?.textContent ?? '',
+      ]
+    );
+  }
+
+  const textSamples = `
+    A    A    A              A
+    B    B    B              B
+    Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
+    D    F    I[cat:Idle]
+    Ejs  Ejs
+  `;
+
+  it('asks to select a function when none is selected', () => {
+    const { getByText } = setup(textSamples);
+    expect(
+      getByText('Select a function to display information about it.')
+    ).toBeInTheDocument();
+  });
+
+  it('displays the timings of the selected function', () => {
+    const {
+      container,
+      getByText,
+      selectFunction,
+      funcNamesDict: { B, Ejs, H },
+    } = setup(textSamples);
+
+    selectFunction(B);
+    expect(getByText('Function details')).toBeInTheDocument();
+    expect(container.querySelector('h2.sidebar-title')).toHaveAttribute(
+      'title',
+      'B\n(click to select)'
+    );
+    expect(getDetails(container).slice(0, 2)).toEqual([
+      ['Running samples', '100%', '4'],
+      ['Self samples', '—', '—'],
+    ]);
+
+    selectFunction(Ejs);
+    expect(getDetails(container).slice(0, 2)).toEqual([
+      ['Running samples', '50%', '2'],
+      ['Self samples', '50%', '2'],
+    ]);
+
+    selectFunction(H);
+    expect(getDetails(container).slice(0, 2)).toEqual([
+      ['Running samples', '50%', '2'],
+      ['Self samples', '25%', '1'],
+    ]);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('counts recursive functions only once per sample', () => {
+    const {
+      container,
+      selectFunction,
+      funcNamesDict: { A },
+    } = setup(`
+      A  A  B
+      B  A
+      A
+    `);
+
+    selectFunction(A);
+    expect(getDetails(container).slice(0, 2)).toEqual([
+      ['Running samples', '67%', '2'],
+      ['Self samples', '67%', '2'],
+    ]);
   });
 });
