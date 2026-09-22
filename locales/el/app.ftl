@@ -510,8 +510,8 @@ MarkerTable--details = Λεπτομέρειες
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
     .aria-label = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
+    .title = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -564,7 +564,7 @@ MenuButtons--metaInfo--source-map-success = Οι αρχικές πηγές επ�
 # Shown after symbolication finished but no stack positions matched the map.
 # Variable:
 #   $filename (String) - The bundle source the source map was applied to.
-MenuButtons--metaInfo--source-map-no-match = Καμία καταχώρηση στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
+MenuButtons--metaInfo--source-map-no-match = Καμία θέση στοίβας στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
 MenuButtons--metaInfo--source-map-error-invalid = Το επιλεγμένο αρχείο δεν είναι συμβατή πηγή χάρτη.
 MenuButtons--metaInfo--source-map-error-no-eligible = Αυτό το προφίλ δεν έχει πακέτα JS με URL χαρτών πηγής.
 MenuButtons--metaInfo--source-map-error-failed = Δεν ήταν δυνατή η εφαρμογή αυτού του χάρτη πηγής στο προφίλ.
@@ -744,8 +744,8 @@ PanelSearch--search-field-hint = Ξέρατε ότι μπορείτε να χρ�
 ProfileName--edit-profile-name-button =
     .title = Επεξεργασία ονόματος προφίλ
 ProfileName--edit-profile-name-input =
-    .title = Επεξεργασία ονόματος προφίλ
     .aria-label = Όνομα προφίλ
+    .title = Επεξεργασία ονόματος προφίλ
 
 ## Profile Delete Button
 
@@ -825,8 +825,8 @@ ServiceWorkerManager--updated-while-not-ready =
     αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
 ServiceWorkerManager--hide-notice-button =
-    .title = Απόκρυψη σημείωσης επαναφόρτωσης
     .aria-label = Απόκρυψη σημείωσης επαναφόρτωσης
+    .title = Απόκρυψη σημείωσης επαναφόρτωσης
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
