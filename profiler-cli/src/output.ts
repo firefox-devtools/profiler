@@ -38,6 +38,7 @@ import {
   formatCounterInfoResult,
   formatSourceMapSourcesResult,
   formatApplySourceMapResult,
+  formatProfileSaveResult,
 } from './formatters';
 
 /**
@@ -104,6 +105,8 @@ export function formatOutput(
       return formatProfileLogsResult(result);
     case 'profile-markers':
       return formatProfileMarkersResult(result);
+    case 'profile-save':
+      return formatProfileSaveResult(result);
     case 'thread-page-load':
       return formatThreadPageLoadResult(result);
     case 'thread-select':

@@ -10,15 +10,10 @@ import {
 } from 'commander';
 import { parse as parseToml } from 'smol-toml';
 
-import {
-  optimizeProfileForStorage,
-  serializeProfileToJsonSlabsFile,
-  serializeProfileToJsonString,
-  unserializeProfileOfArbitraryFormat,
-} from 'firefox-profiler/profile-logic/process-profile';
+import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
 import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
-import { compress } from 'firefox-profiler/utils/gz';
 import { insertStackLabels } from 'firefox-profiler/profile-logic/insert-stack-labels';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
@@ -202,26 +197,6 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
   }
 }
 
-async function encodeProfileWithFilename(
-  profile: Profile,
-  filename: string
-): Promise<Uint8Array> {
-  if (filename.endsWith('.jslb') || filename.endsWith('.jslb.gz')) {
-    const bytes = serializeProfileToJsonSlabsFile(
-      optimizeProfileForStorage(profile)
-    );
-    if (filename.endsWith('.jslb.gz')) {
-      return compress(bytes);
-    }
-    return bytes;
-  }
-  const s = serializeProfileToJsonString(profile);
-  if (filename.endsWith('.gz')) {
-    return compress(s);
-  }
-  return new TextEncoder().encode(s);
-}
-
 export async function run(options: CliOptions) {
   let profile = await loadProfile(options.input);
 
@@ -329,7 +304,7 @@ export async function run(options: CliOptions) {
 
   const outputFilename = options.output;
   console.log(`Saving profile to ${outputFilename}`);
-  const bytes = await encodeProfileWithFilename(
+  const { bytes } = await encodeProfileForFilename(
     compactedProfile,
     outputFilename
   );
