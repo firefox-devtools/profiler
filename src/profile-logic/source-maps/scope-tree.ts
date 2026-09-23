@@ -23,7 +23,7 @@
  *
  * So we reconstruct that information by parsing the compiled JS
  * ourselves. The shapes we recognize and the fields we record for each
- * are catalogued below, and the resolver in source-map-symbolication.ts
+ * are catalogued below, and the resolver in symbolication.ts
  * consumes them.
  *
  * The TC39 source-map scopes proposal (ecma426, stage 3) would encode
@@ -45,7 +45,7 @@
  *
  * Each scope carries `nameMappingLocations` (character offsets to probe
  * via exact source-map lookups) plus, for inferred scopes, extra fields
- * the resolver in source-map-symbolication.ts uses to recover the
+ * the resolver in symbolication.ts uses to recover the
  * original name.
  *
  * ## Shapes recognized
@@ -82,7 +82,7 @@
 
 import { parser as lezerJsParser } from '@lezer/javascript';
 
-import { bisectionRightByKey } from '../utils/bisect';
+import { bisectionRightByKey } from 'firefox-profiler/utils/bisect';
 
 // Derive SyntaxNode from the parser to avoid version conflicts with nested
 // @lezer/common copies in node_modules (they have incompatible private fields).

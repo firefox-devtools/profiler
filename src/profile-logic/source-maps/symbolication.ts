@@ -14,7 +14,7 @@
  *
  * The shapes the scope tree recognizes (self-named, direct assignment,
  * wrap-pattern, computed-member) are catalogued at the top of
- * `source-map-scope-tree.ts`. This file is the resolver: it consumes those
+ * `scope-tree.ts`. This file is the resolver: it consumes those
  * scopes and produces final function names.
  *
  * ## Function name resolution
@@ -53,7 +53,7 @@
  * function's identity on its own. We mirror that:
  *
  * (Here `() => {}` stands in for any anonymous function or arrow function.
- * `wrap(...)` is any call/new expression that the source-map-scope-tree
+ * `wrap(...)` is any call/new expression that the scope-tree
  * treats as a "transparent wrapper". See its docs for the recognized shapes.)
  *
  *   var foo = () => {}           // -> foo             (bare named, no chain)
@@ -72,23 +72,23 @@ import {
   getRawFrameTableBuilderWithExistingContents,
   getRawFuncTableBuilderWithExistingContents,
   shallowCloneSourceLocationTable,
-} from './data-structures';
-import { StringTable } from '../utils/string-table';
+} from 'firefox-profiler/profile-logic/data-structures';
+import { StringTable } from 'firefox-profiler/utils/string-table';
 import {
   parseJsScopeTree,
   findInnermostFunctionScope,
   dialectForFilename,
-} from './source-map-scope-tree';
+} from './scope-tree';
 import {
   buildLineOffsets,
   offsetToLineCol,
   lineColToOffset,
-} from '../utils/line-offsets';
-import { serializeNonymousName } from './nonymous';
-import { SourceMapStore } from './source-map-store';
+} from 'firefox-profiler/utils/line-offsets';
+import { serializeNonymousName } from 'firefox-profiler/profile-logic/nonymous';
+import { SourceMapStore } from './store';
 
-import type { NonymousSegment } from './nonymous';
-import type { FunctionScope } from './source-map-scope-tree';
+import type { NonymousSegment } from 'firefox-profiler/profile-logic/nonymous';
+import type { FunctionScope } from './scope-tree';
 import type {
   IndexIntoSourceTable,
   IndexIntoFuncTable,
@@ -98,17 +98,17 @@ import type {
   RawProfileSharedData,
   SourceLocationTable,
   SourceTable,
-} from '../types';
-import { FrameFlag, FuncFlag } from '../types';
+} from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type { NullableMappedPosition } from 'source-map';
-import type { SourceMapConsumer } from './source-map-store';
+import type { SourceMapConsumer } from './store';
 import type {
   FrameResolution,
   FuncResolution,
   SourceMapSymbolicationResponse,
   WorkerInput,
   WorkerOutput,
-} from './source-map-worker-types';
+} from './worker-types';
 
 const INT32_MAX = 0x7fffffff;
 

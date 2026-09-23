@@ -66,7 +66,7 @@ import {
 import {
   basename,
   type EligibleSource,
-} from 'firefox-profiler/profile-logic/source-map-matching';
+} from 'firefox-profiler/profile-logic/source-maps/matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
 import {

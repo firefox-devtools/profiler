@@ -6,7 +6,7 @@ import {
   parseJsScopeTree,
   findInnermostFunctionScope,
   dialectForFilename,
-} from '../../profile-logic/source-map-scope-tree';
+} from '../../profile-logic/source-maps/scope-tree';
 
 describe('parseJsScopeTree', () => {
   it('returns an empty array for empty source', () => {
