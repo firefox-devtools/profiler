@@ -33,6 +33,8 @@ CORE WORKFLOW
     profiler-cli profile meta                      Metadata: application, platform, and recording settings
     profiler-cli profile logs                      Print all Log markers in MOZ_LOG format (across all threads)
     profiler-cli profile markers --search X        Find which thread/process has marker X (across all threads)
+    profiler-cli profile save out.json.gz          Save the loaded profile, like the web app's Download button
+                                                   (.json, .json.gz, .jslb, .jslb.gz, or a directory) [--force]
 
     See the "Network activity" section in "profile info": if requests are in
     flight for much of the profile while threads are idle, the bottleneck may be

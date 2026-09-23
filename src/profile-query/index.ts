@@ -68,6 +68,14 @@ import {
   type EligibleSource,
 } from 'firefox-profiler/profile-logic/source-maps/matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
+import {
+  getFilenameString,
+  getCheckedSharingOptions,
+  getSanitizedProfile,
+} from 'firefox-profiler/selectors/publish';
+import { updateSharingOption } from 'firefox-profiler/actions/publish';
+import * as path from 'path';
 import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
 import { MarkerMap, expandMarkerHandleSpecsDetailed } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
@@ -147,6 +155,7 @@ import type {
   SampleFilterSpec,
   FilterStackResult,
   FilterEntry,
+  ProfileSaveResult,
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
@@ -679,6 +688,74 @@ export class ProfileQuerier {
     return {
       type: 'sourcemap-sources',
       sources,
+      context: this._getContext(),
+    };
+  }
+
+  /**
+   * Write the loaded profile to `absPath`, matching the web app's Download
+   * button with every sharing option checked (only embedded source contents
+   * are removed). A directory target gets a file named like the web download.
+   */
+  async saveProfile(
+    absPath: string,
+    force: boolean
+  ): Promise<WithContext<ProfileSaveResult>> {
+    // Same pipeline as the web app's Download button with every sharing
+    // option checked.
+    const options = getCheckedSharingOptions(
+      this._store.getState(),
+      'download'
+    );
+    for (const slug of Object.keys(options) as Array<keyof typeof options>) {
+      if (!options[slug]) {
+        this._store.dispatch(updateSharingOption('download', slug, true));
+      }
+    }
+    const state = this._store.getState();
+    const profile = getSanitizedProfile(state, 'download').profile;
+
+    const wantsDirectory = absPath.endsWith('/') || absPath.endsWith(path.sep);
+    const targetStat = fs.statSync(absPath, { throwIfNoEntry: false });
+
+    let outPath = absPath;
+    if (targetStat?.isDirectory()) {
+      outPath = path.join(absPath, `${getFilenameString(state)}.gz`);
+    } else if (wantsDirectory) {
+      throw new Error(`Directory not found: ${absPath}`);
+    } else if (!fs.statSync(path.dirname(absPath), { throwIfNoEntry: false })) {
+      throw new Error(`Directory not found: ${path.dirname(absPath)}`);
+    }
+
+    const alreadyExistsError = () =>
+      new Error(`${outPath} already exists. Pass --force to overwrite it.`);
+
+    // Cheap early check so a large profile isn't encoded just to fail below.
+    // The 'wx' flag makes the real check atomic with the write.
+    if (!force && fs.statSync(outPath, { throwIfNoEntry: false })) {
+      throw alreadyExistsError();
+    }
+
+    const { bytes, format } = await encodeProfileForFilename(profile, outPath);
+
+    try {
+      fs.writeFileSync(outPath, bytes, { flag: force ? 'w' : 'wx' });
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === 'EEXIST') {
+        throw alreadyExistsError();
+      }
+      throw new Error(
+        `Could not write profile to ${outPath}: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
+    }
+
+    return {
+      type: 'profile-save',
+      path: outPath,
+      format,
+      bytes: bytes.byteLength,
       context: this._getContext(),
     };
   }
