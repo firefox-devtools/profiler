@@ -86,7 +86,7 @@ function _languageExtForPath(path: string | null): LanguageSupport | [] {
 
 // Adjustments to make a CodeMirror editor work as a non-editable code viewer.
 const codeViewerExtension = [
-  // Make the editor non-editable.
+  EditorState.readOnly.of(true),
   EditorView.editable.of(false),
   // Allow tabbing to the view (to an element *inside* the scroller so that the
   // up / down keys trigger scrolling), and take focus on mousedown.
