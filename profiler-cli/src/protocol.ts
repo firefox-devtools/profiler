@@ -72,6 +72,7 @@ export type {
   ProfileMarkersResult,
   ProfileMarkerItem,
   ProfileMarkersThreadBreakdown,
+  ProfileSaveResult,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -117,6 +118,7 @@ import type {
   FilterStackResult,
   ProfileLogsResult,
   ProfileMarkersResult,
+  ProfileSaveResult,
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
@@ -156,6 +158,13 @@ export type ClientCommand =
         search?: string;
         limit?: number;
       };
+    }
+  | {
+      command: 'profile';
+      subcommand: 'save';
+      /** Absolute destination file or directory (resolved client-side). */
+      path: string;
+      force: boolean;
     }
   | {
       command: 'thread';
@@ -277,6 +286,7 @@ export type CommandResult =
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
   | WithContext<ProfileMarkersResult>
+  | WithContext<ProfileSaveResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
   | WithContext<StrategySelectResult>

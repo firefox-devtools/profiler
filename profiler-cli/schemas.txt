@@ -343,6 +343,15 @@ profiler-cli sourcemap sources --json
 
   SourceMapLocation = { kind: "url", url } | { kind: "inline", mediaType: string | null, byteLength }
 
+profiler-cli profile save <path> --json
+  {
+    type: "profile-save",
+    path,
+    format: "json" | "json-gz" | "jslb" | "jslb-gz",
+    bytes,
+    context: SessionContext
+  }
+
 profiler-cli sourcemap apply <path> --json
   {
     type: "sourcemap-applied" | "sourcemap-unchanged" | "sourcemap-ambiguous" | "sourcemap-error",

@@ -54,6 +54,7 @@ import type {
   SourceMapLocation,
   SourceMapSourcesResult,
   ApplySourceMapResult,
+  ProfileSaveResult,
 } from './protocol';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
@@ -2609,4 +2610,19 @@ export function formatStrategySelectResult(
     `Data source: ${result.strategy}\n` +
     `Available in ${result.threadHandle}: ${result.availableStrategies.join(', ')}`
   );
+}
+
+/**
+ * Format a ProfileSaveResult as plain text.
+ */
+export function formatProfileSaveResult(
+  result: WithContext<ProfileSaveResult>
+): string {
+  const FORMAT_NAMES: Record<ProfileSaveResult['format'], string> = {
+    json: 'JSON',
+    'json-gz': 'gzipped JSON',
+    jslb: 'JSON slabs',
+    'jslb-gz': 'gzipped JSON slabs',
+  };
+  return `Saved profile to ${result.path} (${FORMAT_NAMES[result.format]}, ${formatBytes(result.bytes)}).`;
 }
