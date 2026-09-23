@@ -1392,16 +1392,10 @@ export function collectMarkerInfo(
   const threadHandleDisplay = threadMap.handleForThreadIndexes(threadIndexes);
   const zeroAt = getZeroAt(state);
 
-  // Get tooltip label
-  const getTooltipLabel = getLabelGetter(
-    (mi: MarkerIndex) => fullMarkerList[mi],
-    getProfile(state).meta.markerSchema,
-    markerSchemaByName,
-    categories,
-    stringTable,
-    'tooltipLabel'
-  );
-  const tooltipLabel = getTooltipLabel(markerIndex);
+  // The memoized selector, not a bare getLabelGetter: this runs once per
+  // marker, and building the getter parses every schema in the profile.
+  const tooltipLabel =
+    threadSelectors.getMarkerTooltipLabelGetter(state)(markerIndex);
 
   // Collect marker fields
   const fields = collectMarkerFields(

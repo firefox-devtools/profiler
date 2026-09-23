@@ -284,7 +284,7 @@ profiler-cli function info --json
     context: SessionContext
   }
 
-profiler-cli marker info --json
+profiler-cli marker info <handle> --json
   {
     type: "marker-info",
     threadHandle, friendlyThreadName, markerHandle, markerIndex, name,
@@ -303,6 +303,16 @@ profiler-cli strategy --json
     threadHandle,
     strategy: CallTreeSummaryStrategy,
     availableStrategies: [CallTreeSummaryStrategy],
+    context: SessionContext
+  }
+
+profiler-cli marker info <handle>... --json
+  {
+    type: "marker-info-multi",
+    requested: [markerHandle],
+    markers: [MarkerInfoResult],
+    errors: [{ markerHandle, error }],
+    rangeSpansThreadsWarning?: { ranges: [spec], threadHandles: [threadHandle] },
     context: SessionContext
   }
 

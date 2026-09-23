@@ -37,6 +37,7 @@ import {
   toErrorMessage,
 } from './diagnostics';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { expandMarkerHandleSpecs } from 'firefox-profiler/profile-query/marker-map';
 import { BUILD_HASH, PACKAGE_NAME } from './constants';
 import { startSamplyServer } from './samply';
 
@@ -510,11 +511,20 @@ export class Daemon {
         }
       case 'marker':
         switch (command.subcommand) {
-          case 'info':
-            if (!command.marker) {
+          case 'info': {
+            // Expand once here, so the single/multi result shape follows what
+            // the specs actually resolve to: every spelling of one marker
+            // ("m-1", "m-1,", "m-1..m-1") returns the single-marker shape.
+            const specs = command.markers ?? [];
+            const handles = expandMarkerHandleSpecs(specs);
+            if (handles.length === 0) {
               throw new Error('marker handle required for marker info');
             }
-            return this.querier.markerInfo(command.marker);
+            if (handles.length === 1) {
+              return this.querier.markerInfo(handles[0]);
+            }
+            return this.querier.markerInfoMulti(specs);
+          }
           case 'stack':
             if (!command.marker) {
               throw new Error('marker handle required for marker stack');
