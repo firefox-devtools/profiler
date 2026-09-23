@@ -4,12 +4,12 @@
 
 import * as path from 'path';
 import { pathToFileURL } from 'url';
-import { runSourceMapSymbolicationCore } from 'firefox-profiler/profile-logic/source-map-symbolication';
+import { runSourceMapSymbolicationCore } from 'firefox-profiler/profile-logic/source-maps/symbolication';
 
 import type {
   WorkerInput,
   WorkerOutput,
-} from 'firefox-profiler/profile-logic/source-map-worker-types';
+} from 'firefox-profiler/profile-logic/source-maps/worker-types';
 import type { SourceMapLocation } from './types';
 
 const DATA_URL_PREFIX = 'data:';

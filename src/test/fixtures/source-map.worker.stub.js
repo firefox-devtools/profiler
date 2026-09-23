@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// Test-only stub for src/profile-logic/source-map.worker.ts. The real worker
+// Test-only stub for src/profile-logic/source-maps/source-map.worker.ts. The real worker
 // bundles npm dependencies (lezer, source-map) into an IIFE via esbuild, so it
 // can't be loaded directly from source by the node-worker fixture. Tests that
 // actually exercise the worker's logic should mock the

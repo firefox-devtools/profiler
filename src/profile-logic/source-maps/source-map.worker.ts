@@ -13,8 +13,8 @@
  * that npm dependencies are bundled into the worker output file.
  */
 
-import { runSourceMapSymbolicationCore } from './source-map-symbolication';
-import type { WorkerInput, WorkerOutput } from './source-map-worker-types';
+import { runSourceMapSymbolicationCore } from './symbolication';
+import type { WorkerInput, WorkerOutput } from './worker-types';
 
 // Override the `self` type: in the browser this file runs as a DedicatedWorker,
 // but TypeScript's DOM lib types `self` as `Window & typeof globalThis`.

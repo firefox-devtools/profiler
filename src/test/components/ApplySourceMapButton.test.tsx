@@ -11,7 +11,7 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 import { storeWithProfile } from '../fixtures/stores';
 
 import type { Profile } from 'firefox-profiler/types';
-import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
+import type { EligibleSource } from 'firefox-profiler/profile-logic/source-maps/matching';
 
 // Keep the rest of the module real (receive-profile imports
 // doSourceMapSymbolication from here), but stub the action creator so we can
