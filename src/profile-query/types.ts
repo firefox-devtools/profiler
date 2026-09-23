@@ -7,6 +7,7 @@
  * These types are used by both profile-query (the library) and profiler-cli.
  */
 
+import type { ProfileFileFormat } from 'firefox-profiler/profile-logic/profile-file-encoding';
 import type {
   Transform,
   CallTreeSummaryStrategy,
@@ -1211,6 +1212,16 @@ export type SourceEntry = {
 export type SourceMapSourcesResult = {
   type: 'sourcemap-sources';
   sources: SourceEntry[];
+};
+
+/**
+ * Outcome of `profile save`: where the profile was written and how big it is.
+ */
+export type ProfileSaveResult = {
+  type: 'profile-save';
+  path: string;
+  format: ProfileFileFormat;
+  bytes: number;
 };
 
 /**
