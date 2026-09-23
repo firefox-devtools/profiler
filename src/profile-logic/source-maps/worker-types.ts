@@ -8,7 +8,7 @@ import type {
   IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 import type { RawSourceMap } from 'source-map';
-import type { SourceMapSymbolicationInput } from './source-map-symbolication';
+import type { SourceMapSymbolicationInput } from './symbolication';
 
 /**
  * Data sent from the main thread to the source map symbolication worker.
