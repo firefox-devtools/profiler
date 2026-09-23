@@ -43,7 +43,7 @@ const markerSchemaPIICategoriesBySchemaName = new Map<
       ['isPrivateBrowsing', ['private-browsing']],
     ]),
   ],
-  ['Text', new Map([['name', ['url', 'extension-id']]])],
+  ['Text', new Map([['name', ['url']]])],
   ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
 ]);
 
@@ -78,6 +78,29 @@ export function addPIICategoriesToMarkerSchemas(
 ): MarkerSchema[] {
   return markerSchemas.map(addPIICategoriesToMarkerSchema);
 }
+
+export const extensionTextMarkerSchema: MarkerSchema = {
+  name: 'ExtensionText',
+  tableLabel:
+    "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+  chartLabel:
+    "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+  display: ['marker-chart', 'marker-table'],
+  fields: [
+    {
+      key: 'extensionId',
+      label: 'Extension ID',
+      format: 'string',
+      containsPII: ['extension-id'],
+    },
+    {
+      key: 'name',
+      label: 'Details',
+      format: 'string',
+      containsPII: ['url'],
+    },
+  ],
+};
 
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
@@ -167,6 +190,18 @@ export function getSchemaFromMarker(
 
 // Matches ternary expressions inside marker labels, ie {marker.data.field ? 'truthy' : 'falsy'}
 const TERNARY_RE = /^\s*([\w.]+)\s*\?\s*'([^']*)'\s*:\s*'([^']*)'\s*$/;
+
+export const FILE_IO_TABLE_LABEL =
+  "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
+
+export function addFileIoTableLabel(schema: {
+  name: string;
+  tableLabel?: string;
+}): void {
+  if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+    schema.tableLabel = FILE_IO_TABLE_LABEL;
+  }
+}
 
 /**
  * Marker schema can create a dynamic tooltip label. For instance a schema with
@@ -317,8 +352,7 @@ export function parseLabel(
           }
 
           const value = (marker.data as any)[payloadKey];
-          if (value === undefined || value === null) {
-            // This would return "undefined" or "null" otherwise.
+          if (value === undefined || value === null || value === '') {
             return '';
           }
           return format
@@ -347,36 +381,13 @@ export function parseLabel(
 
 type LabelKey = 'tooltipLabel' | 'tableLabel' | 'chartLabel' | 'copyLabel';
 
-// If no label making rule, these functions provide the fallbacks for how
-// to label things. It also allows for a place to do some custom handling
-// in the cases where the marker schema is not enough.
+// If no label making rule, these functions provide the fallbacks for how to label things.
 const fallbacks: Record<LabelKey, (marker: any) => string> = {
   tooltipLabel: (marker) => marker.name,
 
   chartLabel: (_marker) => '',
 
-  tableLabel: (marker: Marker) => {
-    let description = '';
-
-    if (marker.data) {
-      const data = marker.data;
-      switch (data.type) {
-        case 'FileIO':
-          if (data.source) {
-            description = `(${data.source}) `;
-          }
-          description += data.operation;
-          if (data.filename) {
-            description = data.operation
-              ? `${description} — ${data.filename}`
-              : data.filename;
-          }
-          break;
-        default:
-      }
-    }
-    return description;
-  },
+  tableLabel: (_marker) => '',
 
   copyLabel: (marker) => marker.name,
 };

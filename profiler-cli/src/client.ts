@@ -396,11 +396,23 @@ export async function startNewDaemon(
   sessionDir: string,
   profilePath: string,
   sessionId?: string,
-  symbolServerUrl?: string
+  symbolServerUrl?: string,
+  withSamply: boolean = false
 ): Promise<string> {
   // Check if this is a URL
   const isUrl =
     profilePath.startsWith('http://') || profilePath.startsWith('https://');
+
+  if (withSamply && isUrl) {
+    throw new Error(
+      '--with-samply needs a local profile file, since samply serves it from disk.'
+    );
+  }
+  if (withSamply && symbolServerUrl) {
+    throw new Error(
+      '--with-samply and --symbol-server cannot be combined: samply provides the symbol server.'
+    );
+  }
 
   // Resolve the absolute path (only for file paths, not URLs)
   const absolutePath = isUrl ? profilePath : path.resolve(profilePath);
@@ -500,6 +512,9 @@ export async function startNewDaemon(
   if (symbolServerUrl) {
     daemonArgs.push('--symbol-server', symbolServerUrl);
   }
+  if (withSamply) {
+    daemonArgs.push('--with-samply');
+  }
 
   // Spawn the daemon process (detached from parent)
   const child = child_process.spawn(
@@ -528,7 +543,7 @@ export async function startNewDaemon(
     daemonStartupState.spawnError = err;
   });
 
-  const foregroundCommand = `${process.execPath} ${scriptPath} --daemon ${absolutePath} --session ${targetSessionId}`;
+  const foregroundCommand = `${process.execPath} ${scriptPath} --daemon ${absolutePath} --session ${targetSessionId}${withSamply ? ' --with-samply' : ''}`;
 
   const daemonExitedError = (earlyExit: DaemonEarlyExit, what: string) =>
     new Error(

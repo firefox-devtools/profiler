@@ -6,7 +6,7 @@ import type {
   CategoryList,
   CategoryColor,
   RawFrameTable,
-  FuncTable,
+  RawFuncTable,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
   IndexIntoFuncTable,
@@ -19,9 +19,10 @@ import type {
   RawThread,
   RawStackTable,
 } from 'firefox-profiler/types/profile';
-import { FrameFlag } from 'firefox-profiler/types/profile';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types/profile';
 import {
-  getEmptyFuncTable,
+  getRawFuncTableBuilder,
+  finishRawFuncTableBuilder,
   getEmptyResourceTable,
   getRawFrameTableBuilder,
   getRawStackTableBuilder,
@@ -29,11 +30,14 @@ import {
   finishRawSamplesTableBuilder,
   finishRawStackTableBuilder,
   type RawFrameTableBuilder,
+  type RawFuncTableBuilder,
   type RawStackTableBuilder,
   getRawSamplesTableBuilder,
   type RawSamplesTableBuilder,
-  getEmptyRawMarkerTable,
-  getEmptyNativeSymbolTable,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
+  getRawNativeSymbolTableBuilder,
+  finishRawNativeSymbolTableBuilder,
   getEmptySourceTable,
   getEmptySourceLocationTable,
 } from 'firefox-profiler/profile-logic/data-structures';
@@ -115,15 +119,15 @@ class FirefoxResourceTable {
 class FirefoxFuncTable {
   strings: StringTable;
 
-  funcTable: FuncTable = getEmptyFuncTable();
+  funcTable: RawFuncTableBuilder = getRawFuncTableBuilder();
   funcMap: Map<string, IndexIntoFuncTable> = new Map();
 
   constructor(strings: StringTable) {
     this.strings = strings;
   }
 
-  toJson(): FuncTable {
-    return this.funcTable;
+  toJson(): RawFuncTable {
+    return finishRawFuncTableBuilder(this.funcTable);
   }
 
   findOrAddFunc(name: string, resourceIndex: number): IndexIntoFuncTable {
@@ -133,14 +137,14 @@ class FirefoxFuncTable {
 
     let funcIndex = this.funcMap.get(mapKey);
     if (!funcIndex) {
+      // Non-JS, native function with an associated resource.
+      this.funcTable.flags.push(FuncFlag.HasResource);
       this.funcTable.name.push(nameIndex);
-      this.funcTable.isJS.push(false);
-      this.funcTable.relevantForJS.push(false);
       this.funcTable.resource.push(resourceIndex);
-      this.funcTable.source.push(null);
-      this.funcTable.lineNumber.push(null);
-      this.funcTable.columnNumber.push(null);
-      this.funcTable.originalLocation.push(null);
+      this.funcTable.source.push(0);
+      this.funcTable.lineNumber.push(0);
+      this.funcTable.columnNumber.push(0);
+      this.funcTable.originalLocation.push(0);
 
       funcIndex = this.funcTable.length++;
       this.funcMap.set(mapKey, funcIndex);
@@ -239,7 +243,9 @@ class FirefoxSharedData {
       frameTable: this.frameTable.toJson(),
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
-      nativeSymbols: getEmptyNativeSymbolTable(),
+      nativeSymbols: finishRawNativeSymbolTableBuilder(
+        getRawNativeSymbolTableBuilder()
+      ),
       sources: getEmptySourceTable(),
       stringArray: this.stringArray,
       sourceLocationTable: getEmptySourceLocationTable(),
@@ -292,7 +298,7 @@ class FirefoxThread {
       pid: this.pid.toString(),
       tid: this.tid,
       samples: finishRawSamplesTableBuilder(this.sampleTable),
-      markers: getEmptyRawMarkerTable(),
+      markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
     };
   }
 

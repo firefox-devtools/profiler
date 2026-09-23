@@ -14,14 +14,14 @@ import type {
   IndexIntoStackTable,
   RawStackTable,
   RawFrameTable,
-  FuncTable,
+  RawFuncTable,
   ResourceTable,
-  NativeSymbolTable,
+  RawNativeSymbolTable,
   Lib,
   SourceTable,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -79,10 +79,6 @@ type ColumnDescription<TCol> =
             | { type: 'NO_REF' }
         :
             | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
-            | {
-                type: 'INDEX_REF_OR_NEG_ONE';
-                referencedTable: TableCompactionState;
-              }
             | { type: 'NO_REF' });
 
 type TableDescription<T> = {
@@ -118,10 +114,6 @@ const ColDesc = {
   }),
   indexRefOrNull: (referencedTable: TableCompactionState) => ({
     type: 'INDEX_REF_OR_NULL' as const,
-    referencedTable,
-  }),
-  indexRefOrNegOne: (referencedTable: TableCompactionState) => ({
-    type: 'INDEX_REF_OR_NEG_ONE' as const,
     referencedTable,
   }),
   selfPrefixOffset: () => ({ type: 'SELF_RELATIVE_PARENT' as const }),
@@ -231,15 +223,20 @@ export function computeCompactedProfile(
       FrameFlag.HasOriginalLocation
     ),
   };
-  const funcTableDesc: TableDescription<FuncTable> = {
-    name: ColDesc.indexRef(tcs.stringArray),
-    isJS: ColDesc.noRef(),
-    relevantForJS: ColDesc.noRef(),
-    resource: ColDesc.indexRefOrNegOne(tcs.resourceTable),
-    source: ColDesc.indexRefOrNull(tcs.sources),
+  const funcTableDesc: TableDescription<RawFuncTable> = {
+    flags: ColDesc.noRef(),
+    name: ColDesc.indexRefInt32(tcs.stringArray),
+    resource: ColDesc.indexRefInt32GatedByFlag(
+      tcs.resourceTable,
+      FuncFlag.HasResource
+    ),
+    source: ColDesc.indexRefInt32GatedByFlag(tcs.sources, FuncFlag.HasSource),
     lineNumber: ColDesc.noRef(),
     columnNumber: ColDesc.noRef(),
-    originalLocation: ColDesc.indexRefOrNull(tcs.sourceLocationTable),
+    originalLocation: ColDesc.indexRefInt32GatedByFlag(
+      tcs.sourceLocationTable,
+      FuncFlag.HasOriginalLocation
+    ),
   };
   const sourceLocationTableDesc: TableDescription<SourceLocationTable> = {
     source: ColDesc.indexRef(tcs.sources),
@@ -251,11 +248,11 @@ export function computeCompactedProfile(
     host: ColDesc.indexRefOrNull(tcs.stringArray),
     type: ColDesc.noRef(),
   };
-  const nativeSymbolsDesc: TableDescription<NativeSymbolTable> = {
-    libIndex: ColDesc.indexRef(tcs.libs),
-    address: ColDesc.noRef(),
-    name: ColDesc.indexRef(tcs.stringArray),
-    functionSize: ColDesc.noRef(),
+  const nativeSymbolsDesc: TableDescription<RawNativeSymbolTable> = {
+    libIndex: ColDesc.indexRefInt32(tcs.libs),
+    address: ColDesc.noRefTyped(Uint32Array),
+    name: ColDesc.indexRefInt32(tcs.stringArray),
+    functionSize: ColDesc.noRefTyped(Int32Array),
   };
   const sourcesDesc: TableDescription<SourceTable> = {
     id: ColDesc.noRef(),
@@ -417,13 +414,6 @@ function _markTableAndComputeTranslation<T>(
         break;
       case 'SELF_RELATIVE_PARENT':
         break; // already handled in the first pass
-      case 'INDEX_REF_OR_NEG_ONE':
-        markColumnWithNegOneableFields(
-          col,
-          markBuffer,
-          desc.referencedTable.markBuffer
-        );
-        break;
       case 'NO_REF':
       case 'NO_REF_TYPED':
         break;
@@ -477,21 +467,6 @@ function markSelfColumnPrefixOffset(
       const offset = col[i];
       if (offset !== 0) {
         setBit(markBuf, i - offset);
-      }
-    }
-  }
-}
-
-function markColumnWithNegOneableFields(
-  col: Array<number | -1>,
-  shouldMark: BitSet,
-  markBuf: BitSet
-) {
-  for (let i = 0; i < col.length; i++) {
-    if (checkBit(shouldMark, i)) {
-      const val = col[i];
-      if (val !== -1) {
-        setBit(markBuf, val);
       }
     }
   }
@@ -634,14 +609,6 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
-      case 'INDEX_REF_OR_NEG_ONE':
-        result[key] = _compactColIndexOrNegOne(
-          oldCol,
-          markBuffer,
-          desc.referencedTable.oldIndexToNewIndexPlusOne,
-          newLength
-        );
-        break;
       case 'NO_REF':
         result[key] = _compactColCopy(oldCol, markBuffer, newLength);
         break;
@@ -757,23 +724,6 @@ function _compactColIndexOrNull(
       const val = oldCol[i];
       newCol[newIndex++] =
         val !== null ? oldIndexToNewIndexPlusOne[val] - 1 : null;
-    }
-  }
-  return newCol;
-}
-
-function _compactColIndexOrNegOne(
-  oldCol: (number | -1)[],
-  markBuffer: BitSet,
-  oldIndexToNewIndexPlusOne: Int32Array,
-  newLength: number
-): (number | -1)[] {
-  const newCol: (number | -1)[] = new Array(newLength);
-  let newIndex = 0;
-  for (let i = 0; i < oldCol.length; i++) {
-    if (checkBit(markBuffer, i)) {
-      const val = oldCol[i];
-      newCol[newIndex++] = val !== -1 ? oldIndexToNewIndexPlusOne[val] - 1 : -1;
     }
   }
   return newCol;

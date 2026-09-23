@@ -105,6 +105,17 @@ profiler-cli counter info --json
     context: SessionContext
   }
 
+profiler-cli thread list --json
+  {
+    type: "thread-list",
+    threads: [{ threadHandle, threadIndex, name, processName, etld1?,
+                pid, processIndex, tid, cpuMs, markerCount, selected }],
+    totalThreadCount, processCount, hiddenByLimit,
+    sort: "cpu" | "index" | "markers" | "name",
+    searchQuery?,
+    context: SessionContext
+  }
+
 profiler-cli thread info --json
   {
     type: "thread-info",
@@ -202,8 +213,25 @@ profiler-cli thread markers --json
     }],
     byCategory: [{ categoryName, categoryIndex, count, percentage }],
     customGroups?: [ ...MarkerGroupData... ],
+    flatMarkers?: [FlatMarkerItem],   // only with --list; see below
     context: SessionContext
   }
+
+  Per-marker rows require --list, and arrive under "flatMarkers", not "markers";
+  without it only the aggregates above are returned.
+
+  FlatMarkerItem:
+    {
+      handle, name, label, duration?, hasStack, category,
+      start,              // ms since profile start
+      markerType?,        // the payload's "type"
+      fields?: [{ key, label, value, formattedValue }],
+                          // "value" is the payload value with string-table
+                          // indexes resolved to strings, so it always agrees
+                          // with "data" for the same key
+      data?               // raw payload, minus "type" and "cause"; an image
+                          // blob becomes { elided: true, length, preview }
+    }
 
 profiler-cli thread functions --json
   {
@@ -256,13 +284,16 @@ profiler-cli function info --json
     context: SessionContext
   }
 
-profiler-cli marker info --json
+profiler-cli marker info <handle> --json
   {
     type: "marker-info",
     threadHandle, friendlyThreadName, markerHandle, markerIndex, name,
     category: { index, name },
     start, end, duration?,
     fields?: [{ key, label, value, formattedValue }],
+                          // as in FlatMarkerItem above: unique-string,
+                          // flow-id and terminating-flow-id fields report
+                          // "value" as the resolved string, not the index
     stack?: { frames: [{ name, nameWithLibrary }], truncated }
   }
 
@@ -272,6 +303,16 @@ profiler-cli strategy --json
     threadHandle,
     strategy: CallTreeSummaryStrategy,
     availableStrategies: [CallTreeSummaryStrategy],
+    context: SessionContext
+  }
+
+profiler-cli marker info <handle>... --json
+  {
+    type: "marker-info-multi",
+    requested: [markerHandle],
+    markers: [MarkerInfoResult],
+    errors: [{ markerHandle, error }],
+    rangeSpansThreadsWarning?: { ranges: [spec], threadHandles: [threadHandle] },
     context: SessionContext
   }
 
@@ -286,6 +327,13 @@ profiler-cli status --json
     callTreeSummaryStrategy: CallTreeSummaryStrategy
   }
 
+profiler-cli permalink --json
+  {
+    type: "permalink",
+    url,
+    shortUrl: string | null
+  }
+
 profiler-cli sourcemap sources --json
   {
     type: "sourcemap-sources",
@@ -294,6 +342,15 @@ profiler-cli sourcemap sources --json
   }
 
   SourceMapLocation = { kind: "url", url } | { kind: "inline", mediaType: string | null, byteLength }
+
+profiler-cli profile save <path> --json
+  {
+    type: "profile-save",
+    path,
+    format: "json" | "json-gz" | "jslb" | "jslb-gz",
+    bytes,
+    context: SessionContext
+  }
 
 profiler-cli sourcemap apply <path> --json
   {

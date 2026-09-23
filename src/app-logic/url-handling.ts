@@ -43,6 +43,7 @@ import type {
   MarkerIndex,
   SelectedMarkersPerThread,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import {
   decodeUintArrayFromUrlComponent,
   encodeUintArrayForUrlComponent,
@@ -339,7 +340,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.sameWidths = urlState.profileSpecific.stackChartSameWidths
         ? null
         : undefined;
-    /* fallsthrough */
+    /* falls through */
     case 'flame-graph':
     case 'calltree': {
       query = baseQuery as CallTreeQueryShape;
@@ -1719,7 +1720,7 @@ function getStackIndexFromVersion3JSCallNodePath(
     const prefix = offset === 0 ? null : stackIndex - offset;
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    const isJS = funcTable.isJS[funcIndex];
+    const isJS = (funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0;
     // We know that at this point stack table is sorted and the following
     // condition holds:
     // assert(prefix === null || prefix < stackIndex);
@@ -1762,7 +1763,11 @@ function getVersion4JSCallNodePathFromStackIndex(
   while (nextStackIndex !== null) {
     const frameIndex: IndexIntoFrameTable = stackTable.frame[nextStackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
+    if (
+      (funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
+    ) {
       callNodePath.unshift(funcIndex);
     }
     const offset: number = stackTable.prefixOffset[nextStackIndex];

@@ -32,6 +32,7 @@ import type {
   ThreadsKey,
   State,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 import type { TimingsForPath } from '../../profile-logic/profile-data';
 
@@ -217,7 +218,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
       }
 
       const funcIndex = ProfileData.getLeafFuncIndex(selectedPath);
-      return funcTable.isJS[funcIndex];
+      return (funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0;
     }
   );
 
@@ -254,12 +255,12 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   );
 
   const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
-    selectedThreadSelectors.getSelectedCallNodePath,
-    selectedThreadSelectors.getCallNodeInfo,
     ProfileSelectors.getCategories,
     selectedThreadSelectors.getPreviewFilteredCtssSamples,
     selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories,
-    ProfileData.getTimingsForPath
+    selectedThreadSelectors.getPreviewFilteredCtssSampleRelations,
+    selectedThreadSelectors.getSelectedCallNodeIsInvertedRoot,
+    ProfileData.getCallNodeTimings
   );
 
   return {

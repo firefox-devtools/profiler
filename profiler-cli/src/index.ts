@@ -7,6 +7,7 @@
  *
  * Usage:
  *   profiler-cli load <PATH> [--session <id>]          Start a new daemon and load a profile
+ *   profiler-cli load <PATH> --with-samply             Same, symbolicating through "samply load"
  *   profiler-cli profile info [--session <id>]         Print profile summary
  *   profiler-cli thread info [--thread <handle>]       Print thread information
  *   profiler-cli thread samples [--thread <handle>]    Show thread call tree and top functions
@@ -63,11 +64,18 @@ async function main(): Promise<void> {
     const symbolServerIdx = rawArgs.indexOf('--symbol-server');
     const symbolServerUrl =
       symbolServerIdx !== -1 ? rawArgs[symbolServerIdx + 1] : undefined;
+    const withSamply = rawArgs.includes('--with-samply');
     if (!profilePath) {
       console.error('Error: Profile path required for daemon mode');
       process.exit(1);
     }
-    await startDaemon(SESSION_DIR, profilePath, sessionId, symbolServerUrl);
+    await startDaemon(
+      SESSION_DIR,
+      profilePath,
+      sessionId,
+      symbolServerUrl,
+      withSamply
+    );
     return;
   }
 
@@ -83,11 +91,14 @@ async function main(): Promise<void> {
       `
 Examples:
   profiler-cli load profile.json.gz
+  profiler-cli load profile.json --with-samply
   profiler-cli profile info
+  profiler-cli thread list
   profiler-cli thread info
   profiler-cli thread samples
   profiler-cli thread functions --search GC --min-self 1
   profiler-cli thread markers --search DOMEvent --category Graphics
+  profiler-cli profile markers --search CompositorScreenshot
   profiler-cli counter list
   profiler-cli counter info c-0
   profiler-cli zoom push 2.7,3.1
@@ -95,6 +106,7 @@ Examples:
   profiler-cli sourcemap sources
   profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
+  profiler-cli permalink
   profiler-cli stop --all`
     );
 
@@ -114,13 +126,18 @@ Examples:
         '--symbol-server <url>',
         'Symbol server URL for symbolication (overrides URL param and default Mozilla server)'
       )
+      .option(
+        '--with-samply',
+        'Serve the profile through "samply load" and use its symbol server for the lifetime of the session (samply from PROFILER_CLI_SAMPLY_PATH, PATH, or ~/.mozbuild/samply)'
+      )
   ).action(async (profilePath: string, opts) => {
     console.log(`Loading profile from ${profilePath}...`);
     const sessionId = await startNewDaemon(
       SESSION_DIR,
       profilePath,
       opts.session,
-      opts.symbolServer
+      opts.symbolServer,
+      opts.withSamply ?? false
     );
     console.log(`Session started: ${sessionId}`);
     const status = await sendCommand(
@@ -140,6 +157,22 @@ Examples:
       )
   ).action(async (opts) => {
     await runCommand(SESSION_DIR, { command: 'status' }, opts);
+  });
+
+  // profiler-cli permalink
+  addGlobalOptions(
+    program
+      .command('permalink')
+      .description(
+        'Print a profiler.firefox.com URL for the current view of an already published profile'
+      )
+      .option('--short', 'Shorten the URL through share.firefox.dev')
+  ).action(async (opts) => {
+    await runCommand(
+      SESSION_DIR,
+      { command: 'permalink', short: opts.short ?? false },
+      opts
+    );
   });
 
   // profiler-cli stop [id]

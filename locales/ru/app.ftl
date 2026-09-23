@@ -505,8 +505,8 @@ MarkerTable--details = Подробности
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Показать только подходящие маркеры: «{ $filter }»
     .aria-label = Показать только подходящие маркеры: «{ $filter }»
+    .title = Показать только подходящие маркеры: «{ $filter }»
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -750,8 +750,8 @@ PanelSearch--search-field-hint = Знаете ли вы, что можно ис�
 ProfileName--edit-profile-name-button =
     .title = Изменить имя профиля
 ProfileName--edit-profile-name-input =
-    .title = Изменить имя профиля
     .aria-label = Имя профиля
+    .title = Изменить имя профиля
 
 ## Profile Delete Button
 
@@ -831,8 +831,8 @@ ServiceWorkerManager--updated-while-not-ready =
     версия приложения. Вы можете столкнуться с неисправностями.
 ServiceWorkerManager--new-version-is-ready = Новая версия приложения скачана и готова к использованию.
 ServiceWorkerManager--hide-notice-button =
-    .title = Скрыть уведомление о перезагрузке
     .aria-label = Скрыть уведомление о перезагрузке
+    .title = Скрыть уведомление о перезагрузке
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack

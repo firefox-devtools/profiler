@@ -47,6 +47,7 @@ import {
   getTrackReferenceFromThreadIndex,
 } from 'firefox-profiler/profile-logic/tracks';
 
+import { FuncFlag } from 'firefox-profiler/types';
 import type {
   PreviewSelection,
   ImplementationFilter,
@@ -157,9 +158,7 @@ export function selectSelfCallNode(
   return (dispatch, getState) => {
     const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
     const sampleCallNodes =
-      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-        getState()
-      );
+      threadSelectors.getSampleCallNodesForFilteredThread(getState());
 
     if (
       sampleIndex === null ||
@@ -2096,11 +2095,14 @@ export function handleCallNodeTransformShortcut(
         break;
       case 'C': {
         const { funcTable } = unfilteredThread;
-        const resourceIndex = funcTable.resource[funcIndex];
+        if ((funcTable.flags[funcIndex] & FuncFlag.HasResource) === 0) {
+          // This func has no resource, so there is nothing to collapse.
+          return;
+        }
         dispatch(
           addCollapseResourceTransformToStack(
             threadsKey,
-            resourceIndex,
+            funcTable.resource[funcIndex],
             implementation
           )
         );

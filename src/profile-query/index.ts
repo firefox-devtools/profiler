@@ -35,7 +35,11 @@ import {
   getLastSelectedCallTreeSummaryStrategy,
   getProfileSpecificState,
   getSymbolServerUrl,
+  getDataSource,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
+import { urlFromState } from 'firefox-profiler/app-logic/url-handling';
+import { shortenUrl } from 'firefox-profiler/utils/shorten-url';
 import {
   commitRange,
   popCommittedRanges,
@@ -64,13 +68,22 @@ import {
   type EligibleSource,
 } from 'firefox-profiler/profile-logic/source-map-matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
+import {
+  getFilenameString,
+  getCheckedSharingOptions,
+  getSanitizedProfile,
+} from 'firefox-profiler/selectors/publish';
+import { updateSharingOption } from 'firefox-profiler/actions/publish';
+import * as path from 'path';
 import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
-import { MarkerMap } from './marker-map';
+import { MarkerMap, expandMarkerHandleSpecsDetailed } from './marker-map';
 import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
 import { collectProfileMeta } from './formatters/profile-meta';
 import {
   collectThreadInfo,
+  collectThreadList,
   collectThreadSamples,
   collectThreadSamplesTopDown,
   collectThreadSamplesBottomUp,
@@ -83,6 +96,7 @@ import {
   collectMarkerStack,
   collectMarkerInfo,
   collectProfileLogs,
+  collectProfileMarkers,
 } from './formatters/marker-info';
 import { collectThreadPageLoad } from './formatters/page-load';
 import {
@@ -101,6 +115,7 @@ import type {
 } from 'firefox-profiler/types';
 import type {
   StatusResult,
+  PermalinkResult,
   SessionContext,
   ContextThreadInfo,
   WithContext,
@@ -113,8 +128,11 @@ import type {
   StrategySelectResult,
   CallTreeSummaryStrategy,
   ThreadInfoResult,
+  ThreadListOptions,
+  ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -126,6 +144,7 @@ import type {
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
   CounterListResult,
   CounterInfoResult,
   SourceMapSourcesResult,
@@ -136,10 +155,15 @@ import type {
   SampleFilterSpec,
   FilterStackResult,
   FilterEntry,
+  ProfileSaveResult,
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
-import { getThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
+import {
+  getThreadsKey,
+  computeFuncTableFromRawFuncTable,
+} from 'firefox-profiler/profile-logic/profile-data';
+import { FuncFlag } from 'firefox-profiler/types';
 import type { Store } from '../types/store';
 
 function toSourceEntry(source: EligibleSource): SourceEntry {
@@ -150,6 +174,8 @@ function toSourceEntry(source: EligibleSource): SourceEntry {
     sourceMap: toSourceMapLocation(source.sourceMapURL),
   };
 }
+
+const PROFILER_FRONTEND_ORIGIN = 'https://profiler.firefox.com';
 
 export class ProfileQuerier {
   _store: Store;
@@ -284,6 +310,18 @@ export class ProfileQuerier {
       this._processIndexMap,
       this._timestampManager,
       counterHandle
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  async threadList(
+    options?: ThreadListOptions
+  ): Promise<WithContext<ThreadListResult>> {
+    const result = collectThreadList(
+      this._store,
+      this._threadMap,
+      this._processIndexMap,
+      options
     );
     return { ...result, context: this._getContext() };
   }
@@ -650,6 +688,74 @@ export class ProfileQuerier {
     return {
       type: 'sourcemap-sources',
       sources,
+      context: this._getContext(),
+    };
+  }
+
+  /**
+   * Write the loaded profile to `absPath`, matching the web app's Download
+   * button with every sharing option checked (only embedded source contents
+   * are removed). A directory target gets a file named like the web download.
+   */
+  async saveProfile(
+    absPath: string,
+    force: boolean
+  ): Promise<WithContext<ProfileSaveResult>> {
+    // Same pipeline as the web app's Download button with every sharing
+    // option checked.
+    const options = getCheckedSharingOptions(
+      this._store.getState(),
+      'download'
+    );
+    for (const slug of Object.keys(options) as Array<keyof typeof options>) {
+      if (!options[slug]) {
+        this._store.dispatch(updateSharingOption('download', slug, true));
+      }
+    }
+    const state = this._store.getState();
+    const profile = getSanitizedProfile(state, 'download').profile;
+
+    const wantsDirectory = absPath.endsWith('/') || absPath.endsWith(path.sep);
+    const targetStat = fs.statSync(absPath, { throwIfNoEntry: false });
+
+    let outPath = absPath;
+    if (targetStat?.isDirectory()) {
+      outPath = path.join(absPath, `${getFilenameString(state)}.gz`);
+    } else if (wantsDirectory) {
+      throw new Error(`Directory not found: ${absPath}`);
+    } else if (!fs.statSync(path.dirname(absPath), { throwIfNoEntry: false })) {
+      throw new Error(`Directory not found: ${path.dirname(absPath)}`);
+    }
+
+    const alreadyExistsError = () =>
+      new Error(`${outPath} already exists. Pass --force to overwrite it.`);
+
+    // Cheap early check so a large profile isn't encoded just to fail below.
+    // The 'wx' flag makes the real check atomic with the write.
+    if (!force && fs.statSync(outPath, { throwIfNoEntry: false })) {
+      throw alreadyExistsError();
+    }
+
+    const { bytes, format } = await encodeProfileForFilename(profile, outPath);
+
+    try {
+      fs.writeFileSync(outPath, bytes, { flag: force ? 'w' : 'wx' });
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === 'EEXIST') {
+        throw alreadyExistsError();
+      }
+      throw new Error(
+        `Could not write profile to ${outPath}: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      );
+    }
+
+    return {
+      type: 'profile-save',
+      path: outPath,
+      format,
+      bytes: bytes.byteLength,
       context: this._getContext(),
     };
   }
@@ -1228,6 +1334,29 @@ export class ProfileQuerier {
   }
 
   /**
+   * Build a profiler.firefox.com URL for the current session view: selected
+   * threads, committed zoom ranges, transforms, strategy, and so on. Only
+   * profiles that are already reachable by URL can be linked to. Local files
+   * would need publishing first, which the CLI does not support yet.
+   */
+  async permalink(shorten: boolean = false): Promise<PermalinkResult> {
+    const state = this._store.getState();
+    const dataSource = getDataSource(state);
+    if (dataSource !== 'public' && dataSource !== 'from-url') {
+      throw new Error(
+        'This profile is not reachable by URL, so there is no link to share. ' +
+          'Publishing from profiler-cli is not supported yet: upload the profile ' +
+          'from profiler.firefox.com, then load the resulting URL with ' +
+          '"profiler-cli load <url>".'
+      );
+    }
+
+    const url = PROFILER_FRONTEND_ORIGIN + urlFromState(getUrlState(state));
+    const shortUrl = shorten ? await shortenUrl(url) : null;
+    return { type: 'permalink', url, shortUrl };
+  }
+
+  /**
    * Expand a function handle to show the full untruncated name.
    */
   async functionExpand(
@@ -1235,7 +1364,10 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionExpandResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
-    const { funcTable, resourceTable, stringArray } = profile.shared;
+    const { resourceTable, stringArray } = profile.shared;
+    const funcTable = computeFuncTableFromRawFuncTable(
+      profile.shared.funcTable
+    );
 
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
@@ -1264,19 +1396,24 @@ export class ProfileQuerier {
   ): Promise<WithContext<FunctionInfoResult>> {
     const state = this._store.getState();
     const profile = getProfile(state);
-    const { funcTable, resourceTable, stringArray } = profile.shared;
+    const { resourceTable, stringArray } = profile.shared;
+    const funcTable = computeFuncTableFromRawFuncTable(
+      profile.shared.funcTable
+    );
 
     // Look up the function
     const funcIndex = parseFunctionHandle(functionHandle, funcTable.length);
     const funcName = stringArray[funcTable.name[funcIndex]];
-    const resourceIndex = funcTable.resource[funcIndex];
-    const isJS = funcTable.isJS[funcIndex];
-    const relevantForJS = funcTable.relevantForJS[funcIndex];
+    const funcFlags = funcTable.flags[funcIndex];
+    const isJS = (funcFlags & FuncFlag.IsJS) !== 0;
+    const relevantForJS = (funcFlags & FuncFlag.RelevantForJS) !== 0;
+    const hasResource = (funcFlags & FuncFlag.HasResource) !== 0;
 
     let resource: FunctionInfoResult['resource'];
     let library: FunctionInfoResult['library'];
 
-    if (resourceIndex !== -1) {
+    if (hasResource) {
+      const resourceIndex = funcTable.resource[funcIndex];
       resource = {
         name: stringArray[resourceTable.name[resourceIndex]],
         index: resourceIndex,
@@ -1412,6 +1549,23 @@ export class ProfileQuerier {
   }
 
   /**
+   * Search markers across every thread at once: the same rows as
+   * `threadMarkers` in `--list` mode, plus the thread each match was found on
+   * and a per-thread match count.
+   */
+  async profileMarkers(
+    filterOptions: MarkerFilterOptions & { thread?: string } = {}
+  ): Promise<WithContext<ProfileMarkersResult>> {
+    const result = collectProfileMarkers(
+      this._store,
+      this._threadMap,
+      this._markerMap,
+      filterOptions
+    );
+    return { ...result, context: this._getContext() };
+  }
+
+  /**
    * List all functions for a thread with their weight percentages.
    * Supports filtering by search string, minimum self weight, and limit.
    */
@@ -1475,6 +1629,85 @@ export class ProfileQuerier {
     return {
       ...result,
       context: this._getContextForThreadHandle(result.threadHandle),
+    };
+  }
+
+  /**
+   * Show detailed information about several markers at once. A handle that does
+   * not resolve goes into `errors` rather than failing the whole query.
+   */
+  async markerInfoMulti(
+    markerHandleSpecs: string[]
+  ): Promise<WithContext<MarkerInfoMultiResult>> {
+    const { handles, ranges } =
+      expandMarkerHandleSpecsDetailed(markerHandleSpecs);
+    const markers: MarkerInfoResult[] = [];
+    const errors: MarkerInfoMultiResult['errors'] = [];
+
+    for (const markerHandle of handles) {
+      try {
+        markers.push(
+          await collectMarkerInfo(
+            this._store,
+            this._markerMap,
+            this._threadMap,
+            markerHandle
+          )
+        );
+      } catch (error) {
+        errors.push({
+          markerHandle,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    }
+
+    // Only ranges are checked: a typed-out list of handles from several threads
+    // is a deliberate comparison, not an accident of numbering. Each range is
+    // judged on the markers it expanded to, so an unrelated handle elsewhere in
+    // the command cannot make a single-thread range look like it spans threads.
+    const threadHandleFor = new Map(
+      markers.map((marker) => [marker.markerHandle, marker.threadHandle])
+    );
+    let rangeSpansThreadsWarning:
+      | MarkerInfoMultiResult['rangeSpansThreadsWarning']
+      | undefined;
+    const spanningRanges: string[] = [];
+    const spanningThreadHandles: string[] = [];
+    for (const range of ranges) {
+      const threadHandles: string[] = [];
+      for (const handle of range.handles) {
+        const threadHandle = threadHandleFor.get(handle);
+        if (
+          threadHandle !== undefined &&
+          !threadHandles.includes(threadHandle)
+        ) {
+          threadHandles.push(threadHandle);
+        }
+      }
+      if (threadHandles.length > 1) {
+        spanningRanges.push(range.spec);
+        for (const threadHandle of threadHandles) {
+          if (!spanningThreadHandles.includes(threadHandle)) {
+            spanningThreadHandles.push(threadHandle);
+          }
+        }
+      }
+    }
+    if (spanningRanges.length > 0) {
+      rangeSpansThreadsWarning = {
+        ranges: spanningRanges,
+        threadHandles: spanningThreadHandles,
+      };
+    }
+
+    return {
+      type: 'marker-info-multi',
+      requested: handles,
+      markers,
+      errors,
+      rangeSpansThreadsWarning,
+      context: this._getContext(),
     };
   }
 

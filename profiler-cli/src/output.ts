@@ -10,14 +10,17 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type { CommandResult } from './protocol';
 import {
   formatStatusResult,
+  formatPermalinkResult,
   formatFunctionExpandResult,
   formatFunctionInfoResult,
   formatFunctionAnnotateResult,
   formatViewRangeResult,
   formatFilterStackResult,
   formatThreadInfoResult,
+  formatThreadListResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
+  formatMarkerInfoMultiResult,
   formatProfileInfoResult,
   formatProfileMetaResult,
   formatThreadSamplesResult,
@@ -27,6 +30,7 @@ import {
   formatThreadFunctionsResult,
   formatThreadNetworkResult,
   formatProfileLogsResult,
+  formatProfileMarkersResult,
   formatThreadPageLoadResult,
   formatThreadSelectResult,
   formatStrategySelectResult,
@@ -34,6 +38,7 @@ import {
   formatCounterInfoResult,
   formatSourceMapSourcesResult,
   formatApplySourceMapResult,
+  formatProfileSaveResult,
 } from './formatters';
 
 /**
@@ -58,6 +63,8 @@ export function formatOutput(
   switch (result.type) {
     case 'status':
       return formatStatusResult(result);
+    case 'permalink':
+      return formatPermalinkResult(result);
     case 'filter-stack':
       return formatFilterStackResult(result);
     case 'function-expand':
@@ -70,10 +77,14 @@ export function formatOutput(
       return formatViewRangeResult(result);
     case 'thread-info':
       return formatThreadInfoResult(result);
+    case 'thread-list':
+      return formatThreadListResult(result);
     case 'marker-stack':
       return formatMarkerStackResult(result);
     case 'marker-info':
       return formatMarkerInfoResult(result);
+    case 'marker-info-multi':
+      return formatMarkerInfoMultiResult(result);
     case 'profile-info':
       return formatProfileInfoResult(result);
     case 'profile-meta':
@@ -92,6 +103,10 @@ export function formatOutput(
       return formatThreadNetworkResult(result);
     case 'profile-logs':
       return formatProfileLogsResult(result);
+    case 'profile-markers':
+      return formatProfileMarkersResult(result);
+    case 'profile-save':
+      return formatProfileSaveResult(result);
     case 'thread-page-load':
       return formatThreadPageLoadResult(result);
     case 'thread-select':

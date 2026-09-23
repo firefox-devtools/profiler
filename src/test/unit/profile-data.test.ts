@@ -18,11 +18,13 @@ import {
   getSampleIndexClosestToStartTime,
   getSampleIndexToCallNodeIndex,
   getTreeOrderComparator,
-  getSampleSelectedStates,
+  getSampleRelationsToNode,
+  SampleRelations,
   extractProfileFilterPageData,
   findAddressProofForFile,
   calculateFunctionSizeLowerBound,
   computeFrameTableFromRawFrameTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   getNativeSymbolsForCallNode,
   getNativeSymbolInfo,
   computeTimeColumnForRawSamplesTable,
@@ -64,7 +66,13 @@ import type {
   IndexIntoCategoryList,
   IndexIntoNativeSymbolTable,
 } from 'firefox-profiler/types';
-import { SelectedState, ResourceType, FrameFlag } from 'firefox-profiler/types';
+import {
+  SampleRelationToNode,
+  FillBucket,
+  ResourceType,
+  FrameFlag,
+  FuncFlag,
+} from 'firefox-profiler/types';
 
 describe('string-table', function () {
   const u = StringTable.withBackingArray(['foo', 'bar', 'baz']);
@@ -289,7 +297,8 @@ describe('process-profile', function () {
       expect(shared.frameTable.address[22]).toEqual(0x1a45);
       expect(shared.frameTable.address[24]).toEqual(0xf84);
       expect(shared.frameTable.address[25]).toEqual(0xf84);
-      const funcTableNames = shared.funcTable.name.map(
+      const funcTableNames = Array.from(
+        shared.funcTable.name,
         (nameIndex) => shared.stringArray[nameIndex]
       );
       expect(funcTableNames[0]).toEqual('(root)');
@@ -894,7 +903,7 @@ describe('filter-by-implementation', function () {
     }
     const frameIndex = filteredThread.stackTable.frame[stackIndex];
     const funcIndex = filteredThread.frameTable.func[frameIndex];
-    return filteredThread.funcTable.isJS[funcIndex];
+    return (filteredThread.funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0;
   }
 
   it('will return the same thread if filtering to "all"', function () {
@@ -1007,7 +1016,57 @@ describe('funcHasDirectRecursiveCall and funcHasRecursiveCall', function () {
   });
 });
 
-describe('getSampleSelectedStates', function () {
+describe('SampleRelations', function () {
+  // SampleRelations.fillBucket recovers a relation's fill bucket with a single
+  // mask rather than a lookup table, which only works as long as every
+  // SampleRelationToNode is laid out as its FillBucket plus flag bits above
+  // it. Pin that layout down here, so that adding a relation which breaks it
+  // fails loudly instead of silently drawing samples into the wrong fill.
+  const expectedBuckets: Array<[SampleRelationToNode, FillBucket]> = [
+    [SampleRelationToNode.FilteredOut, FillBucket.FilteredOutByTransform],
+    [SampleRelationToNode.TotalButNotSelf, FillBucket.Selected],
+    [SampleRelationToNode.TotalAndSelf, FillBucket.Selected],
+    [SampleRelationToNode.Before, FillBucket.UnselectedOrderedBeforeSelected],
+    [SampleRelationToNode.After, FillBucket.UnselectedOrderedAfterSelected],
+  ];
+
+  const relations = new SampleRelations(
+    new Uint8Array(expectedBuckets.map(([relation]) => relation))
+  );
+
+  it('maps every relation to the right fill bucket', function () {
+    expect(expectedBuckets.map((_, i) => relations.fillBucket(i))).toEqual(
+      expectedBuckets.map(([, bucket]) => bucket)
+    );
+  });
+
+  it('round-trips every relation through get', function () {
+    expect(relations.toArrayForTesting()).toEqual(
+      expectedBuckets.map(([relation]) => relation)
+    );
+    expect(expectedBuckets.map((_, i) => relations.get(i))).toEqual(
+      expectedBuckets.map(([relation]) => relation)
+    );
+  });
+
+  it('treats only FilteredOut as filtered out', function () {
+    expect(expectedBuckets.map((_, i) => relations.isFilteredOut(i))).toEqual([
+      true,
+      false,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  it('counts both self and non-self samples towards the total', function () {
+    expect(
+      expectedBuckets.map((_, i) => relations.contributesToTotal(i))
+    ).toEqual([false, true, true, false, false]);
+  });
+});
+
+describe('getSampleRelationsToNode', function () {
   function setup(textSamples: string) {
     const {
       derivedThreads,
@@ -1057,44 +1116,56 @@ describe('getSampleSelectedStates', function () {
 
     it('determines the selection status of all the samples', function () {
       expect(
-        Array.from(getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_B))
+        getSampleRelationsToNode(
+          callNodeInfo,
+          sampleCallNodes,
+          A_B
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
       ]);
       expect(
-        Array.from(getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_D))
+        getSampleRelationsToNode(
+          callNodeInfo,
+          sampleCallNodes,
+          A_D
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.Selected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.TotalAndSelf,
       ]);
       expect(
-        Array.from(
-          getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_B_F)
-        )
+        getSampleRelationsToNode(
+          callNodeInfo,
+          sampleCallNodes,
+          A_B_F
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalAndSelf,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
       ]);
       expect(
-        Array.from(
-          getSampleSelectedStates(callNodeInfo, sampleCallNodes, A_D_E)
-        )
+        getSampleRelationsToNode(
+          callNodeInfo,
+          sampleCallNodes,
+          A_D_E
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalAndSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.Before,
       ]);
     });
 
@@ -1157,47 +1228,53 @@ describe('getSampleSelectedStates', function () {
       // Test B <- A <- ...
       // Only samples 2 and 6 have stacks ending in ... -> A -> B
       expect(
-        Array.from(
-          getSampleSelectedStates(callNodeInfoInverted, sampleCallNodes, inBA)
-        )
+        getSampleRelationsToNode(
+          callNodeInfoInverted,
+          sampleCallNodes,
+          inBA
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalButNotSelf,
       ]);
       // Test C <- B <- A <- ...
       // Only sample 5 has a stack ending in ... -> A -> B -> C
       expect(
-        Array.from(
-          getSampleSelectedStates(callNodeInfoInverted, sampleCallNodes, inCBA)
-        )
+        getSampleRelationsToNode(
+          callNodeInfoInverted,
+          sampleCallNodes,
+          inCBA
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalButNotSelf,
+        SampleRelationToNode.Before,
       ]);
       // Test B <- ...
       // Only samples 2 and 6 have stacks ending in ... -> B
       expect(
-        Array.from(
-          getSampleSelectedStates(callNodeInfoInverted, sampleCallNodes, inB)
-        )
+        getSampleRelationsToNode(
+          callNodeInfoInverted,
+          sampleCallNodes,
+          inB
+        ).toArrayForTesting()
       ).toEqual([
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.Selected,
-        SelectedState.UnselectedOrderedBeforeSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.UnselectedOrderedAfterSelected,
-        SelectedState.Selected,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.TotalAndSelf,
+        SampleRelationToNode.Before,
+        SampleRelationToNode.After,
+        SampleRelationToNode.After,
+        SampleRelationToNode.TotalAndSelf,
       ]);
     });
 
@@ -1785,14 +1862,12 @@ describe('getNativeSymbolInfo', function () {
       shared.frameTable,
       profile.meta.categories
     );
+    const nativeSymbols = computeNativeSymbolTableFromRawNativeSymbolTable(
+      shared.nativeSymbols
+    );
 
     expect(
-      getNativeSymbolInfo(
-        symSomeFunc,
-        shared.nativeSymbols,
-        frameTable,
-        stringTable
-      )
+      getNativeSymbolInfo(symSomeFunc, nativeSymbols, frameTable, stringTable)
     ).toEqual({
       name: 'symSomeFunc',
       address: 0x1000,
@@ -1801,12 +1876,7 @@ describe('getNativeSymbolInfo', function () {
       libIndex: profile.libs.findIndex((l) => l.name === 'XUL'),
     });
     expect(
-      getNativeSymbolInfo(
-        symOtherFunc,
-        shared.nativeSymbols,
-        frameTable,
-        stringTable
-      )
+      getNativeSymbolInfo(symOtherFunc, nativeSymbols, frameTable, stringTable)
     ).toEqual({
       name: 'symOtherFunc',
       address: 0x2000,

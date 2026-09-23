@@ -44,6 +44,7 @@ import type {
   IndexIntoSourceTable,
   BottomBoxInfo,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import getNiceProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
@@ -61,7 +62,10 @@ import {
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { getProfile } from '../selectors/profile';
-import { getRawMarkerTableBuilderFromExisting } from '../profile-logic/data-structures';
+import {
+  getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
+} from '../profile-logic/data-structures';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -912,9 +916,8 @@ describe('url upgrading', function () {
         G.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.DrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.DrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['B.js'],
@@ -964,9 +967,8 @@ describe('url upgrading', function () {
         E.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.BrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.BrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['C.js'],
@@ -1015,9 +1017,8 @@ describe('url upgrading', function () {
         F.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.BrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.BrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['D.js'],
@@ -1065,9 +1066,8 @@ describe('url upgrading', function () {
         G.js            E.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.CrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.CrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['B.js'],
@@ -1115,9 +1115,8 @@ describe('url upgrading', function () {
         G.js            E.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.BrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.BrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['C.js'],
@@ -1360,7 +1359,6 @@ describe('url upgrading', function () {
       const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
         mainThread.markers
       );
-      mainThread.markers = mainThreadMarkers;
       mainThreadMarkers.name.push(stringTable.indexForString('IPC'));
       mainThreadMarkers.phase.push(0);
       mainThreadMarkers.startTime.push(0);
@@ -1379,6 +1377,7 @@ describe('url upgrading', function () {
         sync: false,
       } as any);
       mainThreadMarkers.length++;
+      mainThread.markers = finishRawMarkerTableBuilder(mainThreadMarkers);
 
       const memoryCounter = getCounterForThread(mainThread, 0);
       memoryCounter.category = 'Memory';

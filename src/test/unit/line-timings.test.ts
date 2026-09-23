@@ -20,7 +20,7 @@ import type {
   IndexIntoCategoryList,
   LineNumber,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 describe('getStackLineInfo', function () {
   it('computes results for all stacks', function () {
@@ -144,6 +144,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     // Set funcTable.lineNumber to a value for the func of that frame
     const func = frameTable.func[leafFrame];
     funcTable.lineNumber[func] = 35;
+    funcTable.flags[func] |= FuncFlag.HasLine;
 
     const fileStringIndex = stringTable.indexForString('file.js');
     const fileSourceIndex = thread.sources.filename.indexOf(fileStringIndex);
@@ -202,6 +203,8 @@ describe('getLineTimings for getStackLineInfo', function () {
     sourceLocationTable.length += 2;
     funcTable.originalLocation[funcAIndex] = funcAOriginalLocationIdx;
     funcTable.originalLocation[funcBIndex] = funcBOriginalLocationIdx;
+    funcTable.flags[funcAIndex] |= FuncFlag.HasOriginalLocation;
+    funcTable.flags[funcBIndex] |= FuncFlag.HasOriginalLocation;
 
     const stackLineInfo = getStackLineInfo(
       stackTable,
@@ -394,6 +397,7 @@ describe('getTotalLineTimingsForCallNode', function () {
     // Set funcTable.lineNumber to a value for the func of that frame
     const func = frameTable.func[leafFrame];
     funcTable.lineNumber[func] = 35;
+    funcTable.flags[func] |= FuncFlag.HasLine;
 
     // Compute the line timings for the child call node.
     // The fallback should use funcTable.lineNumber[func] = 35

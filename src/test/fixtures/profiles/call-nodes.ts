@@ -43,14 +43,13 @@ export default function getProfile(): Profile {
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
-    name: funcNames,
-    isJS: Array(funcNames.length).fill(false),
-    resource: Array(funcNames.length).fill(-1),
-    relevantForJS: Array(funcNames.length).fill(false),
-    source: Array(funcNames.length).fill(null),
-    lineNumber: Array(funcNames.length).fill(null),
-    columnNumber: Array(funcNames.length).fill(null),
-    originalLocation: Array(funcNames.length).fill(null),
+    flags: new Uint8Array(funcNames.length),
+    name: new Int32Array(funcNames),
+    resource: new Int32Array(funcNames.length),
+    source: new Int32Array(funcNames.length),
+    lineNumber: new Int32Array(funcNames.length),
+    columnNumber: new Int32Array(funcNames.length),
+    originalLocation: new Int32Array(funcNames.length),
     length: funcNames.length,
   };
 

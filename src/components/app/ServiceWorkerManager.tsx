@@ -229,7 +229,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         if (isLocalURL(profileUrl)) {
           return false;
         }
-      // otherwise, fall through.
+      // falls through
       case 'public':
       case 'compare':
       case 'local':

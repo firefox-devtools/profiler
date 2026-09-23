@@ -18,12 +18,17 @@ export type {
   SessionContext,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  ThreadListResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListSort,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -58,11 +63,16 @@ export type {
   RateStats,
   MarkerGroupData,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
   ProfileMetaResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileMarkerItem,
+  ProfileMarkersThreadBreakdown,
+  ProfileSaveResult,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -81,6 +91,7 @@ import type {
   SampleFilterSpec,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
@@ -89,8 +100,11 @@ import type {
   ThreadInfoResult,
   StrategySelectResult,
   CallTreeSummaryStrategy,
+  ThreadListResult,
+  ThreadListOptions,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -103,6 +117,8 @@ import type {
   ThreadPageLoadResult,
   FilterStackResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileSaveResult,
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
@@ -129,6 +145,11 @@ export type ClientCommand =
     }
   | {
       command: 'profile';
+      subcommand: 'markers';
+      markerFilters?: MarkerFilterOptions & { thread?: string };
+    }
+  | {
+      command: 'profile';
       subcommand: 'logs';
       logFilters?: {
         thread?: string;
@@ -139,9 +160,17 @@ export type ClientCommand =
       };
     }
   | {
+      command: 'profile';
+      subcommand: 'save';
+      /** Absolute destination file or directory (resolved client-side). */
+      path: string;
+      force: boolean;
+    }
+  | {
       command: 'thread';
       subcommand:
         | 'info'
+        | 'list'
         | 'select'
         | 'samples'
         | 'samples-top-down'
@@ -156,6 +185,7 @@ export type ClientCommand =
       strategy?: CallTreeSummaryStrategy;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
+      threadListOptions?: ThreadListOptions;
       callTreeOptions?: CallTreeCollectionOptions;
       networkFilters?: {
         searchString?: string;
@@ -174,7 +204,10 @@ export type ClientCommand =
   | {
       command: 'marker';
       subcommand: 'info' | 'select' | 'stack';
+      /** Single handle, for `stack`. */
       marker?: string;
+      /** Handle specs for `info`, e.g. ["m-42", "m-50..m-53"]. */
+      markers?: string[];
     }
   | {
       command: 'counter';
@@ -216,7 +249,8 @@ export type ClientCommand =
       /** `src-N` handle of the target source; skips auto-matching when set. */
       to?: string;
     }
-  | { command: 'status' };
+  | { command: 'status' }
+  | { command: 'permalink'; short?: boolean };
 
 export type ServerResponse =
   | { type: 'success'; result: string | CommandResult }
@@ -231,13 +265,16 @@ export type ServerResponse =
  */
 export type CommandResult =
   | StatusResult
+  | PermalinkResult
   | WithContext<FunctionExpandResult>
   | WithContext<FunctionInfoResult>
   | ViewRangeResult
   | FilterStackResult
   | WithContext<ThreadInfoResult>
+  | WithContext<ThreadListResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
+  | WithContext<MarkerInfoMultiResult>
   | WithContext<ProfileInfoResult>
   | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>
@@ -248,6 +285,8 @@ export type CommandResult =
   | WithContext<ThreadNetworkResult>
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
+  | WithContext<ProfileMarkersResult>
+  | WithContext<ProfileSaveResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
   | WithContext<StrategySelectResult>

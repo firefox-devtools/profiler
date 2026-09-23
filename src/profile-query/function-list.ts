@@ -9,7 +9,7 @@ import type {
   FuncTable,
   ResourceTable,
 } from 'firefox-profiler/types';
-import { ResourceType, FrameFlag } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import { getFunctionHandle } from './function-map';
 
 /**
@@ -46,11 +46,11 @@ export function getLibNameForFunc(
   resourceTable: ResourceTable,
   stringArray: string[]
 ): string | null {
+  if ((funcTable.flags[funcIndex] & FuncFlag.HasResource) === 0) {
+    return null;
+  }
   const resourceIndex = funcTable.resource[funcIndex];
-  if (
-    resourceIndex === -1 ||
-    resourceTable.type[resourceIndex] !== ResourceType.Library
-  ) {
+  if (resourceTable.type[resourceIndex] !== ResourceType.Library) {
     return null;
   }
   return stringArray[resourceTable.name[resourceIndex]];
@@ -384,8 +384,8 @@ export function formatFunctionNameWithLibrary(
   );
   // The func's resource carries the library name for native code, and the
   // origin / URL for JS code.
-  const resourceIndex = thread.funcTable.resource[funcIndex];
-  if (resourceIndex !== -1) {
+  if ((thread.funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0) {
+    const resourceIndex = thread.funcTable.resource[funcIndex];
     const resourceName = thread.stringTable.getString(
       thread.resourceTable.name[resourceIndex]
     );

@@ -7,6 +7,7 @@
  * These types are used by both profile-query (the library) and profiler-cli.
  */
 
+import type { ProfileFileFormat } from 'firefox-profiler/profile-logic/profile-file-encoding';
 import type {
   Transform,
   CallTreeSummaryStrategy,
@@ -50,6 +51,14 @@ export type MarkerFilterOptions = {
   list?: boolean; // Return a flat chronological list of all individual markers
 };
 
+/** A marker payload field, as shown by `marker info`. */
+export type MarkerFieldValue = {
+  key: string;
+  label: string;
+  value: any; // Payload value, with string-table indexes resolved to strings
+  formattedValue: string; // Rendered per the schema's `format`
+};
+
 export type FlatMarkerItem = {
   handle: string;
   name: string;
@@ -58,6 +67,9 @@ export type FlatMarkerItem = {
   duration?: number; // Milliseconds if interval marker
   hasStack: boolean;
   category: string;
+  markerType?: string; // The payload's `type`, i.e. the marker schema name
+  fields?: MarkerFieldValue[]; // As `marker info --json` reports them
+  data?: { [key: string]: any }; // Raw payload, minus `type` and `cause`
 };
 
 export type FunctionFilterOptions = {
@@ -154,6 +166,16 @@ export type SessionContext = {
  * Wrapper type that adds session context to any result type.
  */
 export type WithContext<T> = T & { context: SessionContext };
+
+// ===== Permalink Command =====
+
+export type PermalinkResult = {
+  type: 'permalink';
+  /** Full profiler.firefox.com URL encoding the current session view. */
+  url: string;
+  /** share.firefox.dev URL, only when shortening was requested. */
+  shortUrl: string | null;
+};
 
 // ===== Status Command =====
 
@@ -358,6 +380,50 @@ export type StrategySelectResult = {
   threadHandle: string;
   strategy: CallTreeSummaryStrategy;
   availableStrategies: CallTreeSummaryStrategy[];
+};
+
+/** How `thread list` orders its rows. */
+export type ThreadListSort = 'cpu' | 'index' | 'markers' | 'name';
+
+export type ThreadListOptions = {
+  /** Ordering of the rows. Defaults to 'cpu' (busiest thread first). */
+  sort?: ThreadListSort;
+  /** Keep only threads whose name, process name, pid or tid matches. */
+  searchString?: string;
+  /** Show at most this many rows. Omitted or 0 means "no limit". */
+  limit?: number;
+};
+
+/**
+ * One row of the flat `thread list` table. `cpuMs` and `markerCount` cover the
+ * whole profile (not the current zoom range), matching `profile info`.
+ */
+export type ThreadListItem = {
+  threadHandle: string; // e.g. "t-0"
+  threadIndex: number;
+  name: string; // raw thread name, e.g. "GeckoMain"
+  processName: string; // e.g. "Parent Process"
+  etld1?: string; // eTLD+1 of an isolated content process, when known
+  pid: string;
+  processIndex: number;
+  tid: number | string;
+  cpuMs: number;
+  markerCount: number;
+  /** True for the thread(s) currently selected in the session. */
+  selected: boolean;
+};
+
+export type ThreadListResult = {
+  type: 'thread-list';
+  threads: ThreadListItem[];
+  /** Number of threads in the profile, before search/limit filtering. */
+  totalThreadCount: number;
+  /** Number of processes in the profile. */
+  processCount: number;
+  /** Number of threads dropped by `limit` after search filtering. */
+  hiddenByLimit: number;
+  sort: ThreadListSort;
+  searchQuery?: string;
 };
 
 export type ThreadInfoResult = {
@@ -707,6 +773,47 @@ export type MarkerGroupData = {
   subGroups?: MarkerGroupData[];
 };
 
+/** One row of `profile markers`: a `thread markers --list` row plus its thread. */
+export type ProfileMarkerItem = FlatMarkerItem & {
+  threadHandle: string;
+  threadName: string; // Friendly thread name, e.g. "GPU Process"
+  processName: string;
+  pid: string;
+};
+
+/** Per-thread match count for a cross-thread marker search. */
+export type ProfileMarkersThreadBreakdown = {
+  threadHandle: string;
+  threadName: string;
+  processName: string;
+  pid: string;
+  count: number;
+};
+
+/**
+ * Cross-thread marker search: one chronological list gathered from every
+ * thread, plus a per-thread breakdown.
+ */
+export type ProfileMarkersResult = {
+  type: 'profile-markers';
+  markers: ProfileMarkerItem[]; // Chronological, after limit
+  totalCount: number; // Matches across all searched threads, before limit
+  searchedThreadCount: number;
+  matchingThreadCount: number;
+  byThread: ProfileMarkersThreadBreakdown[]; // Sorted by count, descending
+  // Set when rows were dropped at the hard row ceiling.
+  maxRowsClamped?: number;
+  filters?: {
+    thread?: string;
+    searchString?: string;
+    category?: string;
+    minDuration?: number;
+    maxDuration?: number;
+    hasStack?: boolean;
+    limit?: number;
+  };
+};
+
 export type ProfileLogsResult = {
   type: 'profile-logs';
   entries: string[];
@@ -768,16 +875,31 @@ export type MarkerInfoResult = {
   start: number; // Ms since the profile start, as in `FlatMarkerItem`
   end: number | null;
   duration?: number;
-  fields?: Array<{
-    key: string;
-    label: string;
-    value: any;
-    formattedValue: string;
-  }>;
+  fields?: MarkerFieldValue[];
   schema?: {
     description?: string;
   };
   stack?: StackTraceData;
+};
+
+/** Result of `marker info` with more than one handle. */
+export type MarkerInfoMultiResult = {
+  type: 'marker-info-multi';
+  /** Handles requested, ranges expanded, in requested order. */
+  requested: string[];
+  markers: MarkerInfoResult[];
+  errors: Array<{
+    markerHandle: string;
+    error: string;
+  }>;
+  /**
+   * Set when a range resolved into several threads, which means it ran past the
+   * end of the listing the user was reading.
+   */
+  rangeSpansThreadsWarning?: {
+    ranges: string[];
+    threadHandles: string[];
+  };
 };
 
 export type MarkerStackResult = {
@@ -1090,6 +1212,16 @@ export type SourceEntry = {
 export type SourceMapSourcesResult = {
   type: 'sourcemap-sources';
   sources: SourceEntry[];
+};
+
+/**
+ * Outcome of `profile save`: where the profile was written and how big it is.
+ */
+export type ProfileSaveResult = {
+  type: 'profile-save';
+  path: string;
+  format: ProfileFileFormat;
+  bytes: number;
 };
 
 /**

@@ -15,6 +15,7 @@ import { computeTimeColumnForRawSamplesTable } from '../../profile-logic/profile
 import { StringTable } from '../../utils/string-table';
 import {
   createGeckoProfile,
+  createGeckoProfileWithMarkers,
   createGeckoCounter,
   createGeckoMarkerStack,
   createGeckoProfilerOverhead,
@@ -22,6 +23,7 @@ import {
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
+import { FILE_IO_TABLE_LABEL } from '../../profile-logic/marker-schema';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
@@ -38,7 +40,7 @@ import type {
   IndexIntoStackTable,
   GeckoSamples,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 describe('extract functions and resource from location strings', function () {
   // These location strings are turned into the proper funcs.
@@ -132,17 +134,26 @@ describe('extract functions and resource from location strings', function () {
         const locationName = locations[locationIndex];
 
         const funcName = stringTable.getString(funcTable.name[funcIndex]);
-        const resourceIndex = funcTable.resource[funcIndex];
-        const isJS = funcTable.isJS[funcIndex];
-        const sourceIndex = funcTable.source[funcIndex];
-        const fileNameIndex =
-          sourceIndex !== null ? sources.filename[sourceIndex] : null;
+        const funcFlags = funcTable.flags[funcIndex];
+        const hasResource = (funcFlags & FuncFlag.HasResource) !== 0;
+        const resourceIndex = hasResource ? funcTable.resource[funcIndex] : -1;
+        const isJS = (funcFlags & FuncFlag.IsJS) !== 0;
+        const hasSource = (funcFlags & FuncFlag.HasSource) !== 0;
+        const fileNameIndex = hasSource
+          ? sources.filename[funcTable.source[funcIndex]]
+          : null;
         const fileName =
           fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
-        const lineNumber = funcTable.lineNumber[funcIndex];
-        const columnNumber = funcTable.columnNumber[funcIndex];
+        const lineNumber =
+          (funcFlags & FuncFlag.HasLine) !== 0
+            ? funcTable.lineNumber[funcIndex]
+            : null;
+        const columnNumber =
+          (funcFlags & FuncFlag.HasColumn) !== 0
+            ? funcTable.columnNumber[funcIndex]
+            : null;
         let resourceName, host, resourceType;
-        if (resourceIndex === -1) {
+        if (!hasResource) {
           resourceName = null;
           host = null;
           resourceType = null;
@@ -1119,7 +1130,7 @@ describe('Marker schema conversion', function () {
       {
         key: 'name',
         format: 'unique-string',
-        containsPII: ['url', 'extension-id'],
+        containsPII: ['url'],
       },
     ]);
     expect(schemasByName.PreferenceRead.fields).toEqual([
@@ -1127,6 +1138,109 @@ describe('Marker schema conversion', function () {
         key: 'prefValue',
         format: 'string',
         containsPII: ['preference-value'],
+      },
+    ]);
+  });
+
+  function getConvertedFileIoTableLabel(tableLabel?: string) {
+    const geckoProfile = createGeckoProfile();
+    geckoProfile.meta.markerSchema.push({
+      name: 'FileIO',
+      tableLabel,
+      display: ['marker-chart', 'marker-table'],
+      data: [],
+    });
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+    const fileIoSchema = processedProfile.meta.markerSchema.find(
+      (schema) => schema.name === 'FileIO'
+    );
+
+    return fileIoSchema?.tableLabel;
+  }
+
+  it('adds the FileIO table label when Gecko does not provide one', function () {
+    expect(getConvertedFileIoTableLabel()).toBe(FILE_IO_TABLE_LABEL);
+  });
+
+  it('preserves a FileIO table label provided by Gecko', function () {
+    const geckoTableLabel = 'Custom FileIO label';
+    expect(getConvertedFileIoTableLabel(geckoTableLabel)).toBe(geckoTableLabel);
+  });
+
+  it('should convert extension text markers to structured payloads', function () {
+    const extensionChildText = 'child@example.com, api_call: tabs.query';
+    const geckoProfile = createGeckoProfileWithMarkers([
+      {
+        name: 'ExtensionParent',
+        startTime: 0,
+        endTime: 1,
+        phase: 1,
+        data: {
+          type: 'Text',
+          name: 'parent@example.com, api_event: runtime.onMessage',
+        },
+      },
+      {
+        name: 'ExtensionChild',
+        startTime: 1,
+        endTime: 2,
+        phase: 1,
+        data: { type: 'Text', name: extensionChildText },
+      },
+      {
+        name: 'Extension Suspend',
+        startTime: 2,
+        endTime: 3,
+        phase: 1,
+        data: {
+          type: 'Text',
+          name: 'onBeforeRequest https://example.com by addon@example.com (chanId: 42)',
+        },
+      },
+    ]);
+    const geckoThread = geckoProfile.threads[0];
+    const extensionChildPayload = geckoThread.markers.data[1][5];
+    if (!extensionChildPayload || extensionChildPayload.type !== 'Text') {
+      throw new Error('Expected a Text marker');
+    }
+    extensionChildPayload.name =
+      geckoThread.stringTable.push(extensionChildText) - 1;
+
+    const processedProfile = processGeckoProfile(geckoProfile);
+
+    expect(processedProfile.threads[0].markers.data).toEqual([
+      {
+        type: 'ExtensionText',
+        name: 'api_event: runtime.onMessage',
+        extensionId: 'parent@example.com',
+      },
+      {
+        type: 'ExtensionText',
+        name: 'api_call: tabs.query',
+        extensionId: 'child@example.com',
+      },
+      {
+        type: 'ExtensionText',
+        name: 'onBeforeRequest https://example.com',
+        extensionId: 'addon@example.com (chanId: 42)',
+      },
+    ]);
+    const schemasByName = Object.fromEntries(
+      processedProfile.meta.markerSchema.map((schema) => [schema.name, schema])
+    );
+    expect(schemasByName.ExtensionText.fields).toEqual([
+      {
+        key: 'extensionId',
+        label: 'Extension ID',
+        format: 'string',
+        containsPII: ['extension-id'],
+      },
+      {
+        key: 'name',
+        label: 'Details',
+        format: 'string',
+        containsPII: ['url'],
       },
     ]);
   });

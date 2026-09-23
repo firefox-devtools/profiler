@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
   getDefaultCategories,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
   type RawMarkerTableBuilder,
 } from './data-structures';
 import { getFriendlyThreadName, getTimeRangeForThread } from './profile-data';
@@ -406,7 +407,8 @@ export function correlateIPCMarkers(
       switch (phase) {
         case 'endpoint':
         // We don't have a 'phase' field in the older profiles, in that case
-        // their phase is 'endpoint'. (fallthrough)
+        // their phase is 'endpoint'.
+        // falls through
         case undefined:
           return 0;
         case 'transferStart':
@@ -422,7 +424,8 @@ export function correlateIPCMarkers(
           return 3;
         case 'endpoint':
         // We don't have a 'phase' field in the older profiles, in that case
-        // their phase is 'endpoint'. (fallthrough)
+        // their phase is 'endpoint'.
+        // falls through
         case undefined:
           return 4;
         case 'transferStart':
@@ -1116,7 +1119,7 @@ export function filterRawMarkerTableToRange(
   rangeStart: number,
   rangeEnd: number
 ): RawMarkerTable {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newMarkerTable = getRawMarkerTableBuilder();
   if (markerTable.threadId) {
     newMarkerTable.threadId = [];
   }
@@ -1141,7 +1144,7 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.length++;
   }
 
-  return newMarkerTable;
+  return finishRawMarkerTableBuilder(newMarkerTable);
 }
 
 /**
@@ -1193,7 +1196,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   rawMarkerTable: RawMarkerTableBuilder;
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>;
 } {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newMarkerTable = getRawMarkerTableBuilder();
   const newThreadId: (Tid | null)[] = [];
   if (oldMarkerTable.threadId) {
     newMarkerTable.threadId = newThreadId;
@@ -1457,18 +1460,6 @@ export function groupScreenshotsById(
   return idToScreenshotMarkers;
 }
 
-function _removeExtensionId(markerName: string, text: string): string {
-  if (['ExtensionParent', 'ExtensionChild'].includes(markerName)) {
-    return text.replace(/^.*, (api_(call|event): )/, '$1');
-  }
-
-  if (markerName === 'Extension Suspend') {
-    return text.replace(/ by .*$/, '');
-  }
-
-  return text;
-}
-
 function _shouldSanitizePIICategory(
   category: MarkerSchemaPIICategory,
   PIIToBeRemoved: RemoveProfileInformation
@@ -1517,7 +1508,6 @@ function _updateMarkerPayloadField(
 /** Apply a marker schema's PII rules to its payload. */
 export function sanitizeMarkerFromSchema(
   markerSchema: MarkerSchema,
-  markerName: string,
   markerPayload: MarkerPayload,
   stringTable: StringTable,
   PIIToBeRemoved: RemoveProfileInformation
@@ -1574,13 +1564,8 @@ export function sanitizeMarkerFromSchema(
           break;
         case 'extension-id':
           if (hasField) {
-            markerPayload = _updateMarkerPayloadField(
-              markerPayload,
-              key,
-              isStringIndex,
-              stringTable,
-              (text) => _removeExtensionId(markerName, text)
-            );
+            markerPayload = { ...markerPayload };
+            delete (markerPayload as any)[key];
           }
           break;
         case 'preference-value':

@@ -26,11 +26,15 @@ CORE WORKFLOW
     profiler-cli load profile.json.gz --session run-a    Recommended for scripting or concurrent work
 
   Step 2: Explore the profile
-    profiler-cli profile info          Overview: processes, threads, time range, CPU activity
-    profiler-cli profile info --all    Show all processes and threads (not just top 5)
+    profiler-cli profile info                      Overview: processes, threads, time range, CPU activity
+    profiler-cli profile info --all                Show all processes and threads (not just top 5)
     profiler-cli profile info --search GeckoMain   Filter by process/thread name, pid, or tid
-    profiler-cli profile meta          Metadata: application, platform, and recording settings
-    profiler-cli profile logs          Print all Log markers in MOZ_LOG format (across all threads)
+    profiler-cli thread list                       Flat table of every thread: handle, name, process, pid, CPU, markers
+    profiler-cli profile meta                      Metadata: application, platform, and recording settings
+    profiler-cli profile logs                      Print all Log markers in MOZ_LOG format (across all threads)
+    profiler-cli profile markers --search X        Find which thread/process has marker X (across all threads)
+    profiler-cli profile save out.json.gz          Save the loaded profile, like the web app's Download button
+                                                   (.json, .json.gz, .jslb, .jslb.gz, or a directory) [--force]
 
     See the "Network activity" section in "profile info": if requests are in
     flight for much of the profile while threads are idle, the bottleneck may be
@@ -102,6 +106,8 @@ CORE WORKFLOW
 
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
+    profiler-cli marker info m-1234 m-1240   Several markers in one call (one record per handle)
+    profiler-cli marker info m-1234..m-1240  Inclusive range of handles, e.g. consecutive list rows
     profiler-cli marker stack m-1234         Full stack trace at the time of a marker
     profiler-cli function info f-12          Function details (source location, library)
     profiler-cli function expand f-12        Show full untruncated function name
@@ -128,11 +134,15 @@ SESSION STATE
 
   Use "profiler-cli status" to inspect all session state at any time.
 
+  "profiler-cli permalink" prints a profiler.firefox.com URL of the current
+  view (thread, zoom, filters). Requires a profile loaded from a URL; publishing
+  from the CLI is not supported yet. "--short" returns a share.firefox.dev link.
+
 
 HANDLE SYSTEM
 
   Handles are short IDs shown in command output that reference specific items:
-    t-0, t-1   Thread handles (from "profile info")
+    t-0, t-1   Thread handles (from "thread list" or "profile info")
     m-1234     Marker handles (from "thread markers")
     f-12       Function handles (from "thread samples", "thread functions")
     c-0, c-1   Counter handles (from "counter list" or "profile info")
@@ -143,7 +153,8 @@ HANDLE SYSTEM
 
     Handle   Populated by      Stable across sessions?
     ──────────────────────────────────────────────────────────────────────────
-    t-N      profile info      Yes, if the same profile is loaded
+    t-N      thread list,      Yes, if the same profile is loaded
+             profile info
     m-N      thread markers    No -- rebuilt each time the daemon starts
     f-N      thread samples,   Yes -- direct index into the profile's function
              thread functions  table; same profile always yields the same f-N
@@ -482,6 +493,7 @@ SESSION MANAGEMENT
     profiler-cli stop --all                                 Stop all sessions
     profiler-cli load profile.json.gz --session my-session   Named session
     profiler-cli load profile.json.gz --symbol-server <url>  Override symbol server (else ?symbolServer= URL param or Mozilla default)
+    profiler-cli load profile.json --with-samply             Serve the file via "samply load" and symbolicate with its symbol server
     profiler-cli thread info --session my-session            Query a specific session
 
 

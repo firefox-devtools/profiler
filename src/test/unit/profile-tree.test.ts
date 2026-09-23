@@ -14,6 +14,7 @@ import {
 import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
 import {
   computeFrameTableFromRawFrameTable,
+  computeFuncTableFromRawFuncTable,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
   getOriginAnnotationForFunc,
@@ -21,7 +22,7 @@ import {
   filterRawThreadSamplesToRange,
   getSampleIndexToCallNodeIndex,
 } from '../../profile-logic/profile-data';
-import { ResourceType, FrameFlag } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import {
   callTreeFromProfile,
   functionListTreeFromProfile,
@@ -694,9 +695,14 @@ describe('origin annotation', function () {
     const resourceIndex = shared.resourceTable.length;
     const funcIndex = funcNames.indexOf(funcName);
     shared.funcTable.resource[funcIndex] = resourceIndex;
-    shared.funcTable.source[funcIndex] = location
-      ? addSourceToTable(shared.sources, stringTable.indexForString(location))
-      : null;
+    shared.funcTable.flags[funcIndex] |= FuncFlag.HasResource;
+    if (location) {
+      shared.funcTable.source[funcIndex] = addSourceToTable(
+        shared.sources,
+        stringTable.indexForString(location)
+      );
+      shared.funcTable.flags[funcIndex] |= FuncFlag.HasSource;
+    }
     shared.resourceTable.name.push(stringTable.indexForString(name));
     shared.resourceTable.host.push(
       host ? stringTable.indexForString(host) : null
@@ -727,7 +733,7 @@ describe('origin annotation', function () {
       funcNames.indexOf(funcName),
       null,
       computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-      shared.funcTable,
+      computeFuncTableFromRawFuncTable(shared.funcTable),
       shared.resourceTable,
       stringTable,
       shared.sources
@@ -771,6 +777,8 @@ describe('getOriginAnnotationForFunc with originalLocation', function () {
     shared.funcTable.source[0] = bundleIndex;
     shared.funcTable.lineNumber[0] = 1;
     shared.funcTable.columnNumber[0] = 100;
+    shared.funcTable.flags[0] |=
+      FuncFlag.HasSource | FuncFlag.HasLine | FuncFlag.HasColumn;
 
     // The text sample produces one frame referencing func 0. Give it a
     // compiled position so tier-3 fallback has something meaningful to surface.
@@ -803,7 +811,7 @@ describe('getOriginAnnotationForFunc with originalLocation', function () {
         0,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         shared.resourceTable,
         stringTable,
         shared.sources,
@@ -834,6 +842,7 @@ describe('getOriginAnnotationForFunc with originalLocation', function () {
       10,
       4
     );
+    shared.funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
     expect(callOrigin(null)).toEqual('http://example.com/original.ts:10:4');
   });
 
@@ -860,6 +869,8 @@ describe('getOriginalPositionForFrame', function () {
     shared.funcTable.source[0] = bundleIndex;
     shared.funcTable.lineNumber[0] = 1;
     shared.funcTable.columnNumber[0] = 100;
+    shared.funcTable.flags[0] |=
+      FuncFlag.HasSource | FuncFlag.HasLine | FuncFlag.HasColumn;
     shared.frameTable.flags[0] |= FrameFlag.HasLine | FrameFlag.HasColumn;
     shared.frameTable.line[0] = 5;
     shared.frameTable.column[0] = 10;
@@ -893,7 +904,7 @@ describe('getOriginalPositionForFrame', function () {
         0,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         shared.sourceLocationTable
       )
     ).toEqual({ source: originalIndex, line: 42, column: 7 });
@@ -906,12 +917,13 @@ describe('getOriginalPositionForFrame', function () {
       10,
       4
     );
+    shared.funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
     expect(
       getOriginalPositionForFrame(
         0,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         shared.sourceLocationTable
       )
     ).toEqual({ source: originalIndex, line: 10, column: 4 });
@@ -924,7 +936,7 @@ describe('getOriginalPositionForFrame', function () {
         0,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         shared.sourceLocationTable
       )
     ).toEqual({ source: bundleIndex, line: 5, column: 10 });
@@ -940,7 +952,7 @@ describe('getOriginalPositionForFrame', function () {
         0,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         shared.sourceLocationTable
       )
     ).toEqual({ source: bundleIndex, line: 1, column: 100 });
@@ -953,12 +965,13 @@ describe('getOriginalPositionForFrame', function () {
       10,
       4
     );
+    shared.funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
     expect(
       getOriginalPositionForFrame(
         null,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         shared.sourceLocationTable
       )
     ).toEqual({ source: originalIndex, line: 10, column: 4 });
@@ -972,12 +985,13 @@ describe('getOriginalPositionForFrame', function () {
       10,
       4
     );
+    shared.funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
     expect(
       getOriginalPositionForFrame(
         0,
         0,
         computeFrameTableFromRawFrameTable(shared.frameTable, undefined),
-        shared.funcTable,
+        computeFuncTableFromRawFuncTable(shared.funcTable),
         null
       )
     ).toEqual({ source: bundleIndex, line: 5, column: 10 });

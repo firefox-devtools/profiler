@@ -9,6 +9,7 @@
 
 import type {
   StatusResult,
+  PermalinkResult,
   SessionContext,
   WithContext,
   FunctionExpandResult,
@@ -17,8 +18,10 @@ import type {
   ViewRangeResult,
   FilterStackResult,
   ThreadInfoResult,
+  ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -39,6 +42,7 @@ import type {
   FilterEntry,
   SampleFilterSpec,
   ProfileLogsResult,
+  ProfileMarkersResult,
   ThreadSelectResult,
   StrategySelectResult,
   CallTreeSummaryStrategy,
@@ -50,6 +54,7 @@ import type {
   SourceMapLocation,
   SourceMapSourcesResult,
   ApplySourceMapResult,
+  ProfileSaveResult,
 } from './protocol';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
@@ -288,6 +293,13 @@ Session Status:
 }
 
 /**
+ * Format a PermalinkResult as plain text: just the URL, so it can be piped.
+ */
+export function formatPermalinkResult(result: PermalinkResult): string {
+  return result.shortUrl ?? result.url;
+}
+
+/**
  * Format a FilterStackResult as plain text.
  */
 export function formatFilterStackResult(result: FilterStackResult): string {
@@ -487,9 +499,64 @@ export function formatMarkerInfoResult(
   result: WithContext<MarkerInfoResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
-  let output = `${contextHeader}
+  return `${contextHeader}\n\n${formatMarkerInfoBody(result)}`;
+}
 
-Marker ${result.markerHandle}: ${result.name}`;
+/**
+ * Format several marker info records as plain text, one per requested handle
+ * under a single context header. Handles that did not resolve are reported in
+ * place.
+ */
+export function formatMarkerInfoMultiResult(
+  result: WithContext<MarkerInfoMultiResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const total = result.markers.length + result.errors.length;
+  const records: string[] = [];
+
+  // Walk the requested handles, so failed lookups keep their place in the order.
+  const byHandle = new Map(result.markers.map((m) => [m.markerHandle, m]));
+  const errorsByHandle = new Map(
+    result.errors.map((e) => [e.markerHandle, e.error])
+  );
+  let position = 0;
+  for (const markerHandle of result.requested) {
+    position++;
+    const prefix = `[${position}/${total}] `;
+    const marker = byHandle.get(markerHandle);
+    if (marker) {
+      records.push(prefix + formatMarkerInfoBody(marker).trimEnd());
+      continue;
+    }
+    const error = errorsByHandle.get(markerHandle);
+    if (error !== undefined) {
+      records.push(`${prefix}Marker ${markerHandle}: error: ${error}`);
+    }
+  }
+
+  let output = `${contextHeader}\n\n${records.join('\n\n----------\n\n')}`;
+  if (result.errors.length > 0) {
+    const verb = result.errors.length === 1 ? 'was' : 'were';
+    output += `\n\n${result.errors.length} of ${total} requested markers ${verb} not found.`;
+  }
+  const spread = result.rangeSpansThreadsWarning;
+  if (spread) {
+    const rangeList = spread.ranges.join(', ');
+    const threadList = spread.threadHandles.join(', ');
+    output +=
+      `\n\nWarning: the range ${rangeList} covers markers in more than one thread ` +
+      `(${threadList}). Handle ranges are numeric, so a range that runs past the end of ` +
+      `the listing you were reading picks up unrelated markers. Re-run the listing and ` +
+      `check the handles.`;
+  }
+  return output;
+}
+
+/**
+ * Format one marker info record, below the context header.
+ */
+function formatMarkerInfoBody(result: MarkerInfoResult): string {
+  let output = `Marker ${result.markerHandle}: ${result.name}`;
   if (result.tooltipLabel) {
     output += ` - ${result.tooltipLabel}`;
   }
@@ -541,6 +608,83 @@ Marker ${result.markerHandle}: ${result.name}`;
     }
   }
 
+  return output;
+}
+
+/**
+ * Format a ThreadListResult as an aligned plain-text table.
+ *
+ * Unlike `profile info`, which nests threads under their process and only shows
+ * the busiest ones, this is one row per thread so a whole profile's thread
+ * inventory can be grepped. The selected thread is flagged with `*`.
+ */
+export function formatThreadListResult(
+  result: WithContext<ThreadListResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const threadCount = result.totalThreadCount;
+  const processCount = result.processCount;
+  const summary =
+    `${threadCount} thread${threadCount === 1 ? '' : 's'} across ` +
+    `${processCount} process${processCount === 1 ? '' : 'es'}`;
+
+  if (result.threads.length === 0) {
+    const reason =
+      result.searchQuery !== undefined
+        ? `No threads match '${result.searchQuery}' (${summary}).`
+        : 'No threads in this profile.';
+    return `${contextHeader}\n\n${reason}`;
+  }
+
+  const rows = result.threads.map((thread) => ({
+    marker: thread.selected ? '*' : ' ',
+    handle: thread.threadHandle,
+    name: thread.name,
+    process: thread.etld1
+      ? `${thread.processName} (${thread.etld1})`
+      : thread.processName,
+    pid: thread.pid,
+    cpu: `${thread.cpuMs.toFixed(3)}ms`,
+    markers: thread.markerCount.toLocaleString('en-US'),
+  }));
+
+  const width = (
+    header: string,
+    pick: (row: (typeof rows)[number]) => string
+  ): number => Math.max(header.length, ...rows.map((row) => pick(row).length));
+
+  const wHandle = width('HANDLE', (r) => r.handle);
+  const wName = width('NAME', (r) => r.name);
+  const wProcess = width('PROCESS', (r) => r.process);
+  const wPid = width('PID', (r) => r.pid);
+  const wCpu = width('CPU', (r) => r.cpu);
+  const wMarkers = width('MARKERS', (r) => r.markers);
+
+  const lines = [
+    `  ${'HANDLE'.padEnd(wHandle)}  ${'NAME'.padEnd(wName)}  ${'PROCESS'.padEnd(wProcess)}  ${'PID'.padStart(wPid)}  ${'CPU'.padStart(wCpu)}  ${'MARKERS'.padStart(wMarkers)}`,
+  ];
+  for (const row of rows) {
+    lines.push(
+      `${row.marker} ${row.handle.padEnd(wHandle)}  ${row.name.padEnd(wName)}  ${row.process.padEnd(wProcess)}  ${row.pid.padStart(wPid)}  ${row.cpu.padStart(wCpu)}  ${row.markers.padStart(wMarkers)}`
+    );
+  }
+
+  const shown =
+    result.threads.length === result.totalThreadCount
+      ? `Threads (${summary})`
+      : `Threads (${result.threads.length} of ${summary})`;
+  const heading = `${shown}, sorted by ${result.sort}${
+    result.searchQuery !== undefined ? `, matching '${result.searchQuery}'` : ''
+  }:`;
+
+  let output = `${contextHeader}\n\n${heading}\n${lines.join('\n')}\n`;
+  if (result.hiddenByLimit > 0) {
+    output +=
+      `  + ${result.hiddenByLimit} more ` +
+      `thread${result.hiddenByLimit === 1 ? '' : 's'} ` +
+      `(use --limit 0 to see all)\n`;
+  }
+  output += '\n* = currently selected thread\n';
   return output;
 }
 
@@ -2079,6 +2223,95 @@ export function formatProfileLogsResult(
   return lines.join('\n');
 }
 
+/** How many threads the "Matches by thread" breakdown lists before truncating. */
+const PROFILE_MARKERS_THREADS_SHOWN = 10;
+
+/**
+ * Format a ProfileMarkersResult as plain text: `thread markers --list` rows
+ * prefixed with their thread, followed by a per-thread breakdown.
+ */
+export function formatProfileMarkersResult(
+  result: WithContext<ProfileMarkersResult>
+): string {
+  const lines: string[] = [formatContextHeader(result.context), ''];
+
+  const isFiltered = result.filters !== undefined;
+  // `--limit` on its own truncates the rows but selects nothing, so the set
+  // below is every marker in the profile rather than a set of matches.
+  const { limit, ...selectingFilters } = result.filters ?? {};
+  const isSelected = Object.values(selectingFilters).some(
+    (v) => v !== undefined
+  );
+  const shown = result.markers.length;
+  const total = result.totalCount;
+
+  if (total === 0) {
+    lines.push(
+      isFiltered
+        ? `No markers match the specified filters (searched ${result.searchedThreadCount} threads).`
+        : 'No markers found in this profile.'
+    );
+    return lines.join('\n');
+  }
+
+  const threadSuffix = `across ${result.matchingThreadCount} of ${result.searchedThreadCount} threads`;
+  if (shown < total) {
+    lines.push(`Showing ${shown} of ${total} markers ${threadSuffix}`);
+  } else {
+    lines.push(`${total} markers ${threadSuffix}`);
+  }
+  lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
+
+  for (const m of result.markers) {
+    const stackIndicator = m.hasStack ? '✓' : '✗';
+    const startStr = `t=${formatDuration(m.start)}`;
+    const durationStr =
+      m.duration !== undefined ? formatDuration(m.duration) : 'instant';
+    const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
+    lines.push(
+      `  ${m.threadHandle.padEnd(6)}  ${m.handle.padEnd(8)}  ${m.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
+    );
+  }
+
+  // With a single matching thread the breakdown only repeats the thread
+  // handle already on every row, so it is left out.
+  if (result.byThread.length > 1) {
+    // Nothing was "matched" unless something selected these markers, so an
+    // unfiltered browse gets a plain heading. Say "exact counts" whenever rows
+    // were capped: the counts are computed over every marker in the set, not
+    // over the rows above.
+    const heading = isSelected ? 'Matches by thread' : 'Markers by thread';
+    lines.push(
+      '',
+      shown < total ? `${heading} (exact counts):` : `${heading}:`
+    );
+    for (const t of result.byThread.slice(0, PROFILE_MARKERS_THREADS_SHOWN)) {
+      const who = `${t.threadName} (${t.processName}, pid ${t.pid})`;
+      lines.push(
+        `  ${t.threadHandle.padEnd(6)}  ${who.padEnd(50)}  ${t.count}`
+      );
+    }
+    const omitted = result.byThread.length - PROFILE_MARKERS_THREADS_SHOWN;
+    if (omitted > 0) {
+      lines.push(
+        `  ... and ${omitted} more ${omitted === 1 ? 'thread' : 'threads'}; --json lists them all`
+      );
+    }
+  }
+
+  lines.push('');
+  if (result.maxRowsClamped !== undefined) {
+    lines.push(
+      `Rows were capped at ${result.maxRowsClamped}, the most this command can return; the counts above are exact. Narrow with --search/--thread.`
+    );
+  }
+  lines.push(
+    'Use --thread <handle> to restrict the sweep, or "marker info m-<N>" to inspect one marker.'
+  );
+
+  return lines.join('\n');
+}
+
 export function formatThreadPageLoadResult(
   result: WithContext<ThreadPageLoadResult>
 ): string {
@@ -2377,4 +2610,19 @@ export function formatStrategySelectResult(
     `Data source: ${result.strategy}\n` +
     `Available in ${result.threadHandle}: ${result.availableStrategies.join(', ')}`
   );
+}
+
+/**
+ * Format a ProfileSaveResult as plain text.
+ */
+export function formatProfileSaveResult(
+  result: WithContext<ProfileSaveResult>
+): string {
+  const FORMAT_NAMES: Record<ProfileSaveResult['format'], string> = {
+    json: 'JSON',
+    'json-gz': 'gzipped JSON',
+    jslb: 'JSON slabs',
+    'jslb-gz': 'gzipped JSON slabs',
+  };
+  return `Saved profile to ${result.path} (${FORMAT_NAMES[result.format]}, ${formatBytes(result.bytes)}).`;
 }

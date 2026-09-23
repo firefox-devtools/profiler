@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
-import memoize from 'memoize-immutable';
+import memoize from 'memoize-one';
 import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
@@ -17,9 +17,11 @@ import {
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 import { TooltipCallNode } from 'firefox-profiler/components/tooltip/CallNode';
-import { getTimingsForCallNodeIndex } from 'firefox-profiler/profile-logic/profile-data';
 import { getSelfAndTotalForCallNode } from 'firefox-profiler/profile-logic/call-tree';
-import MixedTupleMap from 'mixedtuplemap';
+import {
+  getCallNodeTimings,
+  getSampleRelationsToNode,
+} from 'firefox-profiler/profile-logic/profile-data';
 
 import type {
   Thread,
@@ -75,6 +77,7 @@ export type OwnProps = {
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
+  readonly ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
 };
@@ -352,10 +355,33 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
     }
   };
 
-  // Properly memoize this derived information for the Tooltip component.
-  _getTimingsForCallNodeIndex = memoize(getTimingsForCallNodeIndex, {
-    cache: new MixedTupleMap(),
-  });
+  _getCallNodeTimings = memoize(
+    (
+      categories: CategoryList,
+      ctssSamples: SamplesLikeTable,
+      ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories,
+      callNodeInfo: CallNodeInfo,
+      ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+      callNodeIndex: IndexIntoCallNodeTable
+    ) => {
+      const callNodeInfoInverted = callNodeInfo.asInverted();
+      const isInvertedRoot =
+        callNodeInfoInverted !== null &&
+        callNodeInfoInverted.isRoot(callNodeIndex);
+      const sampleRelations = getSampleRelationsToNode(
+        callNodeInfo,
+        ctssSampleCallNodes,
+        callNodeIndex
+      );
+      return getCallNodeTimings(
+        categories,
+        ctssSamples,
+        ctssSampleCategoriesAndSubcategories,
+        sampleRelations,
+        isInvertedRoot
+      );
+    }
+  );
 
   _getHoveredStackInfo = ({
     depth,
@@ -374,6 +400,7 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
       weightType,
       ctssSamples,
       ctssSampleCategoriesAndSubcategories,
+      ctssSampleCallNodes,
       tracedTiming,
       displayStackType,
     } = this.props;
@@ -431,12 +458,13 @@ class FlameGraphCanvasImpl extends React.PureComponent<Props> {
         callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
           shouldComputeTimings
-            ? this._getTimingsForCallNodeIndex(
-                callNodeIndex,
-                callNodeInfo,
+            ? this._getCallNodeTimings(
                 categories,
                 ctssSamples,
-                ctssSampleCategoriesAndSubcategories
+                ctssSampleCategoriesAndSubcategories,
+                callNodeInfo,
+                ctssSampleCallNodes,
+                callNodeIndex
               )
             : undefined
         }
