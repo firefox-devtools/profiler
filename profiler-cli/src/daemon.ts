@@ -441,6 +441,8 @@ export class Daemon {
             throw new Error('unimplemented');
           case 'logs':
             return this.querier.profileLogs(command.logFilters);
+          case 'save':
+            return this.querier.saveProfile(command.path, command.force);
           case 'markers':
             return this.querier.profileMarkers(command.markerFilters);
           default:

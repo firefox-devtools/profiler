@@ -340,7 +340,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       query.sameWidths = urlState.profileSpecific.stackChartSameWidths
         ? null
         : undefined;
-    /* fallsthrough */
+    /* falls through */
     case 'flame-graph':
     case 'calltree': {
       query = baseQuery as CallTreeQueryShape;

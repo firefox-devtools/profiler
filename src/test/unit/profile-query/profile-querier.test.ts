@@ -16,6 +16,9 @@
  * process-thread-list.test.ts.
  */
 
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
 import { MAX_PROFILE_MARKERS_ROWS } from 'firefox-profiler/profile-query/formatters/marker-info';
 import {
@@ -765,6 +768,47 @@ describe('ProfileQuerier', function () {
       const zoomed = await querier.threadMarkers('t-0', { list: true });
       const listedNames = zoomed.flatMarkers!.map((m) => m.name);
       expect(listedNames).toEqual(['Beta']);
+    });
+  });
+
+  describe('saveProfile', function () {
+    it('strips embedded source contents like the web download', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+      `);
+      const { stringArray } = profile.shared;
+      profile.shared.sources = {
+        length: 1,
+        id: [null],
+        filename: [stringArray.push('app.js') - 1],
+        startLine: [1],
+        startColumn: [1],
+        sourceMapURL: [null],
+        content: ['console.log("secret");'],
+      };
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'profiler-save-'));
+      try {
+        const outPath = path.join(dir, 'out.json');
+        const result = await querier.saveProfile(outPath, false);
+        expect(result.format).toBe('json');
+
+        const saved = JSON.parse(fs.readFileSync(outPath, 'utf-8'));
+        expect(saved.shared.sources.content).toEqual([null]);
+        expect(saved.shared.sources.length).toBe(1);
+        // The in-memory profile is untouched.
+        expect(getProfile(store.getState()).shared.sources.content).toEqual([
+          'console.log("secret");',
+        ]);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
     });
   });
 

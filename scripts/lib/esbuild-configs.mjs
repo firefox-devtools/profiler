@@ -124,7 +124,7 @@ export const mainBundleConfig = {
 // dev server always serves fresh content and the define can't be updated mid-watch.
 export const sourceMapWorkerConfig = {
   ...baseConfig,
-  entryPoints: ['src/profile-logic/source-map.worker.ts'],
+  entryPoints: ['src/profile-logic/source-maps/source-map.worker.ts'],
   outdir: 'dist',
   format: 'iife',
   platform: 'browser',

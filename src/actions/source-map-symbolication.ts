@@ -3,22 +3,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { getRawProfileSharedData } from 'firefox-profiler/selectors';
-import { applySourceMapSymbolicationResponse } from 'firefox-profiler/profile-logic/source-map-symbolication';
+import { applySourceMapSymbolicationResponse } from 'firefox-profiler/profile-logic/source-maps/symbolication';
 import {
   getSourcesWithSourceMapURL,
   parseSourceMapFileContents,
   matchSourceMapToSource,
-} from 'firefox-profiler/profile-logic/source-map-matching';
+} from 'firefox-profiler/profile-logic/source-maps/matching';
 
 import type {
   WorkerInput,
   WorkerOutput,
-} from 'firefox-profiler/profile-logic/source-map-worker-types';
+} from 'firefox-profiler/profile-logic/source-maps/worker-types';
 import type { IndexIntoSourceTable, ThunkAction } from 'firefox-profiler/types';
 import type {
   EligibleSource,
   SourceMapAmbiguityReason,
-} from 'firefox-profiler/profile-logic/source-map-matching';
+} from 'firefox-profiler/profile-logic/source-maps/matching';
 import type { RawSourceMap } from 'source-map';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -226,7 +226,7 @@ export function applySourceMapFile(
  * input, so no defensive cloning is needed here.
  *
  *   const { runSourceMapSymbolicationCore } = await import(
- *     'firefox-profiler/profile-logic/source-map-symbolication'
+ *     'firefox-profiler/profile-logic/source-maps/symbolication'
  *   );
  *   const wasmUrl = new URL('/mappings.wasm', window.location.href).href;
  *   return runSourceMapSymbolicationCore(input, wasmUrl);
