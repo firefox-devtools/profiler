@@ -56,6 +56,7 @@ import type {
   MarkerSchemaByName,
   MarkerIndex,
   MarkerFormatType,
+  MarkerPayload,
   InnerWindowID,
   Page,
   Pid,
@@ -294,7 +295,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                 value,
                 thread.stringTable,
                 threadIdToNameMap,
-                processIdToNameMap
+                processIdToNameMap,
+                data
               )}
             </TooltipDetail>
           );
@@ -587,7 +589,7 @@ const URL_REGEXP = /^(https?:\/\/)\S+$/;
 
 /**
  * This function may return structured markup for some types suchs as table,
- * list, or urls. For other types this falls back to formatFromMarkerSchema
+ * list, urls, or images. For other types this falls back to formatFromMarkerSchema
  * above.
  */
 export function renderMarkerFieldValue(
@@ -596,7 +598,9 @@ export function renderMarkerFieldValue(
   value: any,
   stringTable: StringTable,
   threadIdToNameMap?: Map<Tid, string>,
-  processIdToNameMap?: Map<Pid, string>
+  processIdToNameMap?: Map<Pid, string>,
+  // The payload the value comes from, for formats that refer to a sibling field.
+  payload?: MarkerPayload | null
 ): React.ReactElement | string {
   if (value === undefined || value === null) {
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
@@ -653,7 +657,8 @@ export function renderMarkerFieldValue(
                             cell,
                             stringTable,
                             threadIdToNameMap,
-                            processIdToNameMap
+                            processIdToNameMap,
+                            payload
                           )}
                         </td>
                       );
@@ -663,6 +668,26 @@ export function renderMarkerFieldValue(
               })}
             </tbody>
           </table>
+        );
+      }
+      case 'screenshot-data-url': {
+        const size = (payload as any)?.[format.sizeFieldForAspectRatio];
+        return (
+          <img
+            className="tooltipScreenshotImg"
+            src={stringTable.getString(value)}
+            style={
+              size
+                ? computeScreenshotSize(
+                    { windowWidth: size.width, windowHeight: size.height },
+                    MAXIMUM_IMAGE_SIZE
+                  )
+                : {
+                    maxWidth: MAXIMUM_IMAGE_SIZE,
+                    maxHeight: MAXIMUM_IMAGE_SIZE,
+                  }
+            }
+          />
         );
       }
       default:

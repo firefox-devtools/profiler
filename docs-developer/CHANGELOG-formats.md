@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 76
+
+Two marker schema field formats were added: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL.
+
 ### Version 75
 
 The func table (`profile.shared.funcTable`) representation changed, mirroring the v71 frame table change:

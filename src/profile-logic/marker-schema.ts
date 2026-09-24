@@ -631,9 +631,12 @@ export function formatFromMarkerSchema(
         rows.push(...cellRows);
         return rows.map((row) => `(${row.join(', ')})`).join(',');
       }
+      case 'screenshot-data-url':
+        // Don't expand a base64-encoded image into text output.
+        return '(screenshot)';
       default:
         throw new Error(
-          `Unknown format type ${JSON.stringify(format.type as never)}`
+          `Unknown format type ${JSON.stringify(format as never)}`
         );
     }
   }
@@ -686,6 +689,8 @@ export function formatFromMarkerSchema(
           formatFromMarkerSchema(markerType, 'string', v, stringTable)
         )
         .join(', ');
+    case 'screenshot-size':
+      return `${value.width}px × ${value.height}px`;
     default:
       console.warn(
         `A marker schema of type "${markerType}" had an unknown format ${JSON.stringify(
@@ -719,7 +724,16 @@ export function markerPayloadMatchesSearch(
       continue;
     }
 
-    if (isStringIndexFormat(payloadField.format)) {
+    const { format } = payloadField;
+    if (typeof format === 'object' && format.type === 'screenshot-data-url') {
+      // Searching a base64-encoded image isn't useful.
+      continue;
+    }
+    if (format === 'screenshot-size') {
+      value = formatFromMarkerSchema(data.type, format, value, stringTable);
+    }
+
+    if (isStringIndexFormat(format)) {
       if (typeof value !== 'number') {
         console.warn(
           `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
@@ -750,6 +764,9 @@ export function markerPayloadMatchesSearch(
 export function isStringIndexFormat(
   format: MarkerFormatType | undefined
 ): boolean {
+  if (typeof format === 'object') {
+    return format.type === 'screenshot-data-url';
+  }
   return (
     format === 'unique-string' ||
     format === 'flow-id' ||
