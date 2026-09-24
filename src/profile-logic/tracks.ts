@@ -552,7 +552,7 @@ function _trackIdentityKey(
     case 'process':
       return `process:${track.pid}`;
     case 'screenshots':
-      return `screenshots:${track.id}`;
+      return `screenshots:${track.markerName}`;
     case 'visual-progress':
     case 'perceptual-visual-progress':
     case 'contentful-visual-progress':
@@ -605,7 +605,7 @@ function _trackIdentityKey(
 /**
  * Map each old TrackIndex to its new TrackIndex when both old and new track
  * lists describe the same profile across a sanitization step. Tracks are
- * matched by stable identity (pid, screenshot id, threadIndex, counterIndex,
+ * matched by stable identity (pid, screenshot marker name, threadIndex, counterIndex,
  * visual-progress singleton, or marker schema name plus marker name string);
  * old-side thread, counter, and string-table indexes are normalized through
  * the supplied translation maps before comparison. Tracks with no match in
@@ -714,6 +714,13 @@ export function computeGlobalTracks(
   };
   const globalTracksByPid: Map<Pid, ProcessTrack> = new Map();
   let globalTracks: GlobalTrack[] = [];
+  const markerSchema = computeCombinedMarkerSchemaList(
+    profile.meta.markerSchema || []
+  );
+  const screenshotTimelineMarkerTypes = getMarkerTypesForDisplay(
+    markerSchema,
+    'timeline-screenshots'
+  );
 
   // Create the global tracks.
   for (
@@ -758,20 +765,20 @@ export function computeGlobalTracks(
     // Windows must keep being added in the order their first screenshot was taken:
     // shared URLs refer to global tracks by index,
     // so a different order would change what an existing URL selects.
-    const ids: Set<string> = new Set();
+    const markerNames: Set<string> = new Set();
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       const data = markers.data[markerIndex];
       if (
         markers.phase[markerIndex] === INTERVAL_END ||
         data === null ||
-        data.type !== 'CompositorScreenshot'
+        !screenshotTimelineMarkerTypes.has(data.type)
       ) {
         continue;
       }
-      ids.add(data.windowID);
+      markerNames.add(profile.shared.stringArray[markers.name[markerIndex]]);
     }
-    for (const id of ids) {
-      globalTracks.push({ type: 'screenshots', id, threadIndex });
+    for (const markerName of markerNames) {
+      globalTracks.push({ type: 'screenshots', markerName, threadIndex });
     }
   }
 

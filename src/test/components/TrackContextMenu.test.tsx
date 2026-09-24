@@ -35,6 +35,7 @@ import {
 import {
   getScreenshotTrackProfile,
   getNetworkTrackProfile,
+  addCompositorScreenshotSchemaIfNeeded,
   addIPCMarkerPairToThreads,
   getThreadWithRawMarkers,
   getScreenshotMarkersForWindowId,
@@ -1242,6 +1243,7 @@ describe('timeline/TrackContextMenu', function () {
         ),
         tid: profile.threads.length,
       });
+      addCompositorScreenshotSchemaIfNeeded(profile);
 
       const { store } = setup(profile);
 

@@ -454,7 +454,7 @@ describe('Derive markers from Gecko phase markers', function () {
     expect(profile.meta.markerSchema).toContainEqual(
       expect.objectContaining({
         name: 'CompositorScreenshot',
-        display: expect.arrayContaining(['marker-chart']),
+        display: expect.arrayContaining(['timeline-screenshots']),
       })
     );
 
