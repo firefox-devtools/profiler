@@ -8,7 +8,9 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ### Version 76
 
-Two marker schema field formats were added: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL.
+The `CompositorScreenshot` marker payload's `windowWidth` and `windowHeight` fields were replaced with a single `windowSize` field of the form `{ width, height }`. The `windowID` field is now always a string.
+
+Two marker schema field formats were added to describe these markers: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL.
 
 ### Version 75
 

@@ -384,8 +384,7 @@ describe('mergeProfilesForDiffing function', function () {
             type: 'CompositorScreenshot',
             url: stringTableB.indexForString(screenshotUrl),
             windowID: '0',
-            windowWidth: 300,
-            windowHeight: 150,
+            windowSize: { width: 300, height: 150 },
           },
         ],
       ]
@@ -791,8 +790,7 @@ describe('mergeThreads function', function () {
           type: 'CompositorScreenshot',
           url: screenshot1UrlIndex,
           windowID: 'XXX',
-          windowWidth: 300,
-          windowHeight: 600,
+          windowSize: { width: 300, height: 600 },
         },
       ],
     ]);
@@ -806,8 +804,7 @@ describe('mergeThreads function', function () {
           type: 'CompositorScreenshot',
           url: screenshot2UrlIndex,
           windowID: 'YYY',
-          windowWidth: 300,
-          windowHeight: 600,
+          windowSize: { width: 300, height: 600 },
         },
       ],
     ]);

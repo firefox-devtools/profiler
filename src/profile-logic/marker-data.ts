@@ -618,7 +618,7 @@ export function deriveMarkersFromRawMarkerTable(
     return {
       ...startData,
       ...endData,
-    };
+    } as MarkerPayload;
   }
 
   // We don't add a screenshot marker as we find it, because to know its
@@ -1645,10 +1645,10 @@ export function filterMarkerByDisplayLocation(
  * Compute the Screenshot image's thumbnail size.
  */
 export function computeScreenshotSize(
-  payload: { windowWidth: number; windowHeight: number },
+  windowSize: { width: number; height: number },
   maximumSize: number
 ): { readonly width: number; readonly height: number } {
-  const { windowWidth, windowHeight } = payload;
+  const { width: windowWidth, height: windowHeight } = windowSize;
 
   // Coefficient should be according to bigger side.
   const coefficient =
