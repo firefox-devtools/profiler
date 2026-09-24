@@ -354,63 +354,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           );
           break;
         }
-        case 'CompositorScreenshot': {
-          if (data.url !== undefined && data.windowSize !== undefined) {
-            const { width, height } = computeScreenshotSize(
-              data.windowSize,
-              MAXIMUM_IMAGE_SIZE
-            );
-            details.push(
-              <TooltipDetail label="Image" key="CompositorScreenshot-image">
-                <img
-                  className="tooltipScreenshotImg"
-                  src={thread.stringTable.getString(data.url)}
-                  style={{
-                    width,
-                    height,
-                  }}
-                />
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Window Size"
-                key="CompositorScreenshot-window size"
-              >
-                <>
-                  {data.windowSize.width}px × {data.windowSize.height}px
-                </>
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Description"
-                key="CompositorScreenshot-description"
-              >
-                This marker spans the time between each composite of a window
-                and shows the window contents during that time.
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Window ID"
-                key="CompositorScreenshot-window id"
-              >
-                {data.windowID}
-              </TooltipDetail>
-            );
-          } else if (marker.name === 'CompositorScreenshotWindowDestroyed') {
-            details.push(
-              <TooltipDetail
-                label="Description"
-                key="CompositorScreenshot-description"
-              >
-                This marker shows the moment a window has been destroyed.
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Window ID"
-                key="CompositorScreenshot-window id"
-              >
-                {data.windowID}
-              </TooltipDetail>
-            );
-          }
-          break;
-        }
         default:
         // Do nothing
       }

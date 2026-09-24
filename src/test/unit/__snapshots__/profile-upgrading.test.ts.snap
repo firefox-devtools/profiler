@@ -10792,6 +10792,34 @@ Object {
         ],
         "name": "tracing",
       },
+      Object {
+        "description": "This marker spans the time between each composite of a window and shows the window contents during that time.",
+        "display": Array [
+          "marker-chart",
+          "marker-table",
+        ],
+        "fields": Array [
+          Object {
+            "format": Object {
+              "sizeFieldForAspectRatio": "windowSize",
+              "type": "screenshot-data-url",
+            },
+            "key": "url",
+            "label": "Image",
+          },
+          Object {
+            "format": "screenshot-size",
+            "key": "windowSize",
+            "label": "Window Size",
+          },
+          Object {
+            "format": "string",
+            "key": "windowID",
+            "label": "Window ID",
+          },
+        ],
+        "name": "CompositorScreenshot",
+      },
     ],
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",

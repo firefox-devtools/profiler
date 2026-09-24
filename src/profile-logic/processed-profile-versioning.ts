@@ -3673,6 +3673,7 @@ const _upgraders: {
   [76]: (profile: any) => {
     // The CompositorScreenshot marker payload's `windowWidth` and
     // `windowHeight` fields were replaced with a single `windowSize` field.
+    let hasCompositorScreenshots = false;
     for (const thread of profile.threads) {
       const { markers } = thread;
       for (let i = 0; i < markers.length; i++) {
@@ -3681,6 +3682,7 @@ const _upgraders: {
           continue;
         }
         const { windowWidth, windowHeight } = data;
+        hasCompositorScreenshots = true;
         data.windowID = String(data.windowID);
         if (windowWidth !== undefined && windowHeight !== undefined) {
           data.windowSize = { width: windowWidth, height: windowHeight };
@@ -3688,6 +3690,34 @@ const _upgraders: {
         delete data.windowWidth;
         delete data.windowHeight;
       }
+    }
+
+    profile.meta.markerSchema = profile.meta.markerSchema.filter(
+      ({ name }: any) => name !== 'CompositorScreenshot'
+    );
+    if (hasCompositorScreenshots) {
+      profile.meta.markerSchema.push({
+        name: 'CompositorScreenshot',
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'url',
+            label: 'Image',
+            format: {
+              type: 'screenshot-data-url',
+              sizeFieldForAspectRatio: 'windowSize',
+            },
+          },
+          {
+            key: 'windowSize',
+            label: 'Window Size',
+            format: 'screenshot-size',
+          },
+          { key: 'windowID', label: 'Window ID', format: 'string' },
+        ],
+        description:
+          'This marker spans the time between each composite of a window and shows the window contents during that time.',
+      });
     }
   },
   // If you add a new upgrader here, please document the change in
