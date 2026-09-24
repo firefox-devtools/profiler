@@ -86,7 +86,14 @@ export type MarkerFormatType =
   | 'pid'
   | 'tid'
   | 'list'
-  | { type: 'table'; columns: TableColumnFormat[] };
+  // The size of a window in pixels, as a { width, height } object.
+  // "Label: 1280px × 1000px"
+  | 'screenshot-size'
+  | { type: 'table'; columns: TableColumnFormat[] }
+  // An image data URL, stored as an index into the profile's string table.
+  // It is rendered at the aspect ratio of the 'screenshot-size' field named by
+  // `sizeFieldForAspectRatio`.
+  | { type: 'screenshot-data-url'; sizeFieldForAspectRatio: string };
 
 type TableColumnFormat = {
   // type for formatting, default is string
