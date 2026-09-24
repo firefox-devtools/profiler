@@ -367,6 +367,62 @@ describe('mergeProfilesForDiffing function', function () {
     ]);
   });
 
+  it('keeps the screenshot markers of a profile when the other profile has none', function () {
+    const { profile: profileA } = getProfileFromTextSamples('A  B  C');
+    const { profile: profileB, stringTable: stringTableB } =
+      getProfileFromTextSamples('D');
+    const screenshotUrl = 'Screenshot Url';
+    addMarkersToThreadWithCorrespondingSamples(
+      profileB.threads[0],
+      profileB.shared,
+      [
+        [
+          'CompositorScreenshot 0',
+          1,
+          2,
+          {
+            type: 'CompositorScreenshot',
+            url: stringTableB.indexForString(screenshotUrl),
+            windowID: '0',
+            windowWidth: 300,
+            windowHeight: 150,
+          },
+        ],
+      ]
+    );
+    profileB.meta.markerSchema.push({
+      name: 'CompositorScreenshot',
+      display: ['marker-chart', 'marker-table'],
+      fields: [{ key: 'url', label: 'Image', format: 'unique-string' }],
+    });
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA, profileB],
+      [profileState, profileState]
+    );
+
+    expect(mergedProfile.meta.markerSchema.map(({ name }) => name)).toContain(
+      'CompositorScreenshot'
+    );
+
+    const mergedStringTable = StringTable.withBackingArray(
+      mergedProfile.shared.stringArray
+    );
+    const screenshotData = ensureExists(
+      mergedProfile.threads[1].markers.data.find(
+        (data) => data !== null && data.type === 'CompositorScreenshot'
+      )
+    );
+    expect(
+      mergedStringTable.getString(ensureExists((screenshotData as any).url))
+    ).toBe(screenshotUrl);
+  });
+
   it('should preserve transforms and produce matching call trees', () => {
     /**
      * This test verifies that when profiles are merged with transforms applied:
