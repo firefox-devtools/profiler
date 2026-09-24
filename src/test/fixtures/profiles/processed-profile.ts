@@ -420,7 +420,40 @@ export function getProfileWithMarkers(
     ...getThreadWithMarkers(profile.shared, testDefinedMarkers),
     tid: i,
   }));
+  addCompositorScreenshotSchemaIfNeeded(profile);
   return profile;
+}
+
+export const compositorScreenshotMarkerSchema: MarkerSchema = {
+  name: 'CompositorScreenshot',
+  display: ['marker-chart', 'marker-table'],
+  fields: [
+    {
+      key: 'url',
+      label: 'Image',
+      format: {
+        type: 'screenshot-data-url',
+        sizeFieldForAspectRatio: 'windowSize',
+      },
+    },
+    { key: 'windowSize', label: 'Window Size', format: 'screenshot-size' },
+    { key: 'windowID', label: 'Window ID', format: 'string' },
+  ],
+  description:
+    'This marker spans the time between each composite of a window and shows the window contents during that time.',
+};
+
+export function addCompositorScreenshotSchemaIfNeeded(profile: Profile): void {
+  if (
+    profile.threads.some((thread) =>
+      thread.markers.data.some((data) => data?.type === 'CompositorScreenshot')
+    )
+  ) {
+    profile.meta.markerSchema = [
+      ...profile.meta.markerSchema,
+      compositorScreenshotMarkerSchema,
+    ];
+  }
 }
 
 /**

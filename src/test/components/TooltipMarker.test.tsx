@@ -12,6 +12,7 @@ import {
 import { TooltipMarker } from '../../components/tooltip/Marker';
 import { storeWithProfile } from '../fixtures/stores';
 import {
+  addCompositorScreenshotSchemaIfNeeded,
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
   getNetworkMarkers,
@@ -1184,6 +1185,7 @@ describe('TooltipMarker', function () {
         },
       ],
     ]);
+    addCompositorScreenshotSchemaIfNeeded(profile);
 
     const store = storeWithProfile(profile);
     const { getState } = store;

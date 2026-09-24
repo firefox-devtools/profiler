@@ -8,6 +8,7 @@ import {
   extensionTextMarkerSchema,
   markerSchemaFrontEndOnly,
   isStringIndexFormat,
+  computeStringIndexMarkerFieldsByDataType,
 } from '../../profile-logic/marker-schema';
 import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
 import type {
@@ -18,7 +19,10 @@ import type {
 import { getDefaultCategories } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  compositorScreenshotMarkerSchema,
+} from '../fixtures/profiles/processed-profile';
 import {
   FILE_IO_TABLE_LABEL,
   markerSchemaForTests,
@@ -624,6 +628,14 @@ describe('computeStringIndexMarkerFieldsByDataType', function () {
         sizeFieldForAspectRatio: 'windowSize',
       })
     ).toBe(true);
+  });
+
+  it('finds screenshot data URLs in the screenshot marker schema', function () {
+    expect(
+      computeStringIndexMarkerFieldsByDataType([
+        compositorScreenshotMarkerSchema,
+      ])
+    ).toEqual(new Map([['CompositorScreenshot', ['url']]]));
   });
 });
 

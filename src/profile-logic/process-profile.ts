@@ -66,6 +66,7 @@ import {
   extensionTextMarkerSchema,
 } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
+import { compositorScreenshotMarkerSchema } from './process-screenshot-markers';
 
 import type { StringTable } from '../utils/string-table';
 import type {
@@ -1819,14 +1820,17 @@ function _convertGeckoMarkerSchema(
  * primary list that is stored on the processed profile's meta object.
  */
 function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
-  const combinedSchemas: MarkerSchema[] = geckoProfile.meta.markerSchema.map(
-    _convertGeckoMarkerSchema
-  );
+  const combinedSchemas: MarkerSchema[] = geckoProfile.meta.markerSchema
+    .filter(({ name }) => name !== 'CompositorScreenshot')
+    .map(_convertGeckoMarkerSchema);
   const names: Set<string> = new Set(combinedSchemas.map(({ name }) => name));
 
   for (const subprocess of geckoProfile.processes) {
     for (const markerSchema of subprocess.meta.markerSchema) {
-      if (!names.has(markerSchema.name)) {
+      if (
+        markerSchema.name !== 'CompositorScreenshot' &&
+        !names.has(markerSchema.name)
+      ) {
         names.add(markerSchema.name);
         combinedSchemas.push(_convertGeckoMarkerSchema(markerSchema));
       }
@@ -1861,7 +1865,6 @@ function processMarkerSchema(geckoProfile: GeckoProfile): MarkerSchema[] {
   ) {
     combinedSchemas.push(extensionTextMarkerSchema);
   }
-
   return combinedSchemas;
 }
 
@@ -2021,7 +2024,10 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   const markerSchema = processMarkerSchema(geckoProfile);
   const stringIndexMarkerFieldsByDataType =
-    computeStringIndexMarkerFieldsByDataType(markerSchema);
+    computeStringIndexMarkerFieldsByDataType([
+      ...markerSchema,
+      compositorScreenshotMarkerSchema,
+    ]);
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
@@ -2031,15 +2037,29 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
 
   globalDataCollector.addExtensionOrigins(extensions);
 
-  for (const thread of geckoProfile.threads) {
-    threads.push(
-      _processThread(
-        thread,
-        geckoProfile,
-        stringIndexMarkerFieldsByDataType,
-        globalDataCollector
-      )
+  let hasCompositorScreenshots = false;
+  const processThread = (
+    thread: GeckoThread,
+    processProfile: GeckoProfile | GeckoSubprocessProfile
+  ): RawThread => {
+    const newThread = _processThread(
+      thread,
+      processProfile,
+      stringIndexMarkerFieldsByDataType,
+      globalDataCollector
     );
+    if (
+      newThread.markers.data.some(
+        (data) => data?.type === 'CompositorScreenshot'
+      )
+    ) {
+      hasCompositorScreenshots = true;
+    }
+    return newThread;
+  };
+
+  for (const thread of geckoProfile.threads) {
+    threads.push(processThread(thread, geckoProfile));
   }
   const counters: RawCounter[] = _processCounters(geckoProfile, threads, 0);
   const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
@@ -2050,12 +2070,7 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     for (const thread of subprocessProfile.threads) {
-      const newThread: RawThread = _processThread(
-        thread,
-        subprocessProfile,
-        stringIndexMarkerFieldsByDataType,
-        globalDataCollector
-      );
+      const newThread = processThread(thread, subprocessProfile);
       newThread.samples = adjustTableTimeDeltas(
         newThread.samples,
         adjustTimestampsBy
@@ -2100,6 +2115,10 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
     nullableProfilerOverhead.push(
       _processProfilerOverhead(subprocessProfile, threads, adjustTimestampsBy)
     );
+  }
+
+  if (hasCompositorScreenshots) {
+    markerSchema.push(compositorScreenshotMarkerSchema);
   }
 
   let pages = [...(geckoProfile.pages || [])];
