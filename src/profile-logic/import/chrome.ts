@@ -31,7 +31,10 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import { getTimeRangeForThread } from '../profile-data';
-import { compositorScreenshotMarkerSchema } from '../process-screenshot-markers';
+import {
+  compositorScreenshotMarkerSchema,
+  convertScreenshotMarkersToStartEnd,
+} from '../process-screenshot-markers';
 import { GlobalDataCollector } from '../global-data-collector';
 
 // Chrome Tracing Event Spec:
@@ -854,10 +857,13 @@ async function processTracingEvents(
   for (const [thread, threadInfo] of threadInfoByThread) {
     thread.samples = finishRawSamplesTableBuilder(threadInfo.samples);
     thread.markers = finishRawMarkerTableBuilder(threadInfo.markers);
-    if (
-      thread.markers.data.some((data) => data?.type === 'CompositorScreenshot')
-    ) {
+    const markers = convertScreenshotMarkersToStartEnd(
+      thread.markers,
+      stringTable
+    );
+    if (markers !== null) {
       hasScreenshots = true;
+      thread.markers = markers;
     }
   }
   if (hasScreenshots) {

@@ -1994,74 +1994,6 @@ exports[`TooltipMarker renders properly redirect network markers without additio
 </div>
 `;
 
-exports[`TooltipMarker renders the tooltip of CompositorScreenshotWindowDestroyed 1`] = `
-<body>
-  <div>
-    <div
-      class="tooltipMarker propClass"
-    >
-      <div
-        class="tooltipHeader"
-      >
-        <div
-          class="tooltipOneLine"
-        >
-          <div
-            class="tooltipTiming"
-          >
-            1ms
-          </div>
-          <div
-            class="tooltipTitle"
-          >
-            <span
-              class="tooltipTitleText"
-            >
-              CompositorScreenshotWindowDestroyed
-            </span>
-            <button
-              aria-label="Only show markers matching: “⁨CompositorScreenshotWindowDestroyed⁩”"
-              class="tooltipTitleFilterButton"
-              title="Only show markers matching: “⁨CompositorScreenshotWindowDestroyed⁩”"
-              type="button"
-            />
-          </div>
-        </div>
-      </div>
-      <div
-        class="tooltipDetails"
-      >
-        <div
-          class="tooltipLabel"
-        >
-          Description
-          :
-        </div>
-        <div
-          class="tooltipDetailsDescription"
-        >
-          This marker spans the time between each composite of a window and shows the window contents during that time.
-        </div>
-        <div
-          class="tooltipLabel"
-        >
-          Window ID
-          :
-        </div>
-        XXX
-        <div
-          class="tooltipLabel"
-        >
-          Track
-          :
-        </div>
-        Empty
-      </div>
-    </div>
-  </div>
-</body>
-`;
-
 exports[`TooltipMarker renders tooltips for various markers: Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662-10 1`] = `
 <div
   class="tooltipMarker propClass"
@@ -5171,7 +5103,7 @@ exports[`TooltipMarker shows image of CompositorScreenshot markers 1`] = `
       <div
         class="tooltipTiming"
       >
-        2ms
+        1ms
       </div>
       <div
         class="tooltipTitle"

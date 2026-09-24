@@ -10,6 +10,8 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 The `CompositorScreenshot` marker payload's `windowWidth` and `windowHeight` fields were replaced with a single `windowSize` field of the form `{ width, height }`. The `windowID` field is now always a string.
 
+These markers are now stored as pairs of start and end markers instead of instant markers. The window ID is part of the marker name (`CompositorScreenshot <windowID>`), so starts and ends are matched by name like any other marker pair. The `CompositorScreenshotWindowDestroyed` marker is gone: it is now the end marker of that window's last screenshot. The last screenshot of a window that is never destroyed has no end marker, and is extended to the end of the thread.
+
 Two marker schema field formats were added to describe these markers: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL.
 
 ### Version 75
