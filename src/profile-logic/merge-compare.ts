@@ -124,9 +124,20 @@ export function mergeProfilesForDiffing(
       (resultProfile.meta as any)[key] = value;
     }
   }
-  // Ensure it has a copy of the marker schema and categories, even though these could
+  // Combine the marker schemas of all profiles, so that markers coming from
+  // any of them keep being understood.
+  const markerSchemaNames = new Set<string>();
+  resultProfile.meta.markerSchema = [];
+  for (const profile of profiles) {
+    for (const schema of profile.meta.markerSchema) {
+      if (!markerSchemaNames.has(schema.name)) {
+        markerSchemaNames.add(schema.name);
+        resultProfile.meta.markerSchema.push(schema);
+      }
+    }
+  }
+  // Ensure it has a copy of the categories, even though these could
   // be different between the two profiles.
-  resultProfile.meta.markerSchema = profiles[0].meta.markerSchema;
   resultProfile.meta.categories = profiles[0].meta.categories;
 
   resultProfile.meta.interval = Math.min(
