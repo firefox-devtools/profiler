@@ -1022,8 +1022,7 @@ describe('collectThreadMarkers list option', function () {
       type: 'CompositorScreenshot',
       url: urlIdx,
       windowID: '0x1',
-      windowWidth: 1280,
-      windowHeight: 951,
+      windowSize: { width: 1280, height: 951 },
     });
     markers.length++;
 
@@ -1059,7 +1058,7 @@ describe('collectThreadMarkers list option', function () {
       length: url.length,
       preview: url,
     });
-    expect(m.data!.windowWidth).toBe(1280);
+    expect(m.data!.windowSize).toEqual({ width: 1280, height: 951 });
   });
 
   it('elides screenshot image blobs from data but keeps the key', function () {
@@ -1089,8 +1088,7 @@ describe('collectThreadMarkers list option', function () {
     // The small fields next to it must survive: for this marker type there is
     // no schema, so `data` is the only route to the window dimensions.
     expect(m.fields).toBeUndefined();
-    expect(m.data!.windowWidth).toBe(1280);
-    expect(m.data!.windowHeight).toBe(951);
+    expect(m.data!.windowSize).toEqual({ width: 1280, height: 951 });
     // The whole row must stay small.
     expect(JSON.stringify(m).length).toBeLessThan(1000);
   });

@@ -244,19 +244,17 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       return null;
     }
 
-    if (payload.url === undefined) {
+    const { url, windowSize } = payload;
+    if (url === undefined || windowSize === undefined) {
       return null;
     }
-
-    const { url } = payload;
 
     const maximumHoverSize = isMakingPreviewSelection
       ? MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE
       : MAXIMUM_HOVER_SIZE;
 
-    // Type guard: payload.url !== undefined means it has windowWidth and windowHeight
     const { width: hoverWidth, height: hoverHeight } = computeScreenshotSize(
-      payload as { windowWidth: number; windowHeight: number },
+      windowSize,
       maximumHoverSize
     );
 
@@ -354,18 +352,12 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
       // Coerce the payload into a screenshot one.
       const payload: ScreenshotPayload = screenshots[screenshotIndex]
         .data as any;
-      if (payload.url === undefined) {
+      const { url: urlStringIndex, windowSize } = payload;
+      if (urlStringIndex === undefined || windowSize === undefined) {
         continue;
       }
-      const {
-        url: urlStringIndex,
-        windowWidth,
-        windowHeight,
-      } = payload as ScreenshotPayload & {
-        windowWidth: number;
-        windowHeight: number;
-      };
-      const scaledImageWidth = (trackHeight * windowWidth) / windowHeight;
+      const scaledImageWidth =
+        (trackHeight * windowSize.width) / windowSize.height;
       images.push(
         <div
           className="timelineTrackScreenshotImgContainer"
@@ -378,7 +370,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
           {/* The following image is centered and cropped by the outer container. */}
           <img
             className="timelineTrackScreenshotImg"
-            src={thread.stringTable.getString(urlStringIndex as number)}
+            src={thread.stringTable.getString(urlStringIndex)}
             style={{
               width: scaledImageWidth,
               height: trackHeight,

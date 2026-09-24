@@ -325,12 +325,69 @@ describe('Derive markers from Gecko phase markers', function () {
     ]);
   });
 
+  it.each([0, 42, '42', '0xAAAAAAAAA'])(
+    'normalizes screenshot window ID %p to a string',
+    (windowID) => {
+      const screenshot = {
+        type: 'CompositorScreenshot' as const,
+        windowID,
+        url: 16,
+        windowWidth: 1280,
+        windowHeight: 1000,
+      };
+      const { profile, markers } = setupWithTestDefinedMarkers([
+        {
+          name: 'CompositorScreenshot',
+          startTime: 1,
+          endTime: null,
+          phase: INSTANT,
+          data: screenshot,
+        },
+        {
+          name: 'CompositorScreenshot',
+          startTime: 2,
+          endTime: null,
+          phase: INSTANT,
+          data: { ...screenshot, windowID: String(windowID) },
+        },
+        {
+          name: 'CompositorScreenshotWindowDestroyed',
+          startTime: 3,
+          endTime: null,
+          phase: INSTANT,
+          data: { type: 'CompositorScreenshot', windowID },
+        },
+      ]);
+
+      expect(profile.threads[0].markers.data).toEqual(
+        Array(3).fill(
+          expect.objectContaining({
+            type: 'CompositorScreenshot',
+            windowID: String(windowID),
+          })
+        )
+      );
+      expect(markers.slice(0, 2)).toEqual(
+        [1, 2].map((start) =>
+          expect.objectContaining({
+            name: 'CompositorScreenshot',
+            start,
+            end: start + 1,
+            data: expect.objectContaining({
+              windowID: String(windowID),
+              windowSize: { width: 1280, height: 1000 },
+            }),
+          })
+        )
+      );
+    }
+  );
+
   it('has special handling for CompositorScreenshot', function () {
     const basePayload = {
       type: 'CompositorScreenshot' as const,
       url: 16,
-      windowWidth: 1280,
-      windowHeight: 1000,
+      windowSize: { width: 1280, height: 1000 },
     };
     const payloadsForWindowA: ScreenshotPayload[] = [
       {
@@ -339,7 +396,7 @@ describe('Derive markers from Gecko phase markers', function () {
       },
       {
         ...basePayload,
-        windowWidth: 500,
+        windowSize: { width: 500, height: 1000 },
         windowID: '0xAAAAAAAAA',
       },
     ];
@@ -812,8 +869,7 @@ describe('deriveMarkersFromRawMarkerTable', function () {
         type: 'CompositorScreenshot',
         url: expect.anything(),
         windowID: '0x136888400',
-        windowWidth: 1280,
-        windowHeight: 1000,
+        windowSize: { width: 1280, height: 1000 },
       },
       name: 'CompositorScreenshot',
       start: 25,
