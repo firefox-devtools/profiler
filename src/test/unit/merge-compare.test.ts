@@ -11,6 +11,7 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  addCompositorScreenshotSchemaIfNeeded,
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
@@ -389,11 +390,7 @@ describe('mergeProfilesForDiffing function', function () {
         ],
       ]
     );
-    profileB.meta.markerSchema.push({
-      name: 'CompositorScreenshot',
-      display: ['marker-chart', 'marker-table'],
-      fields: [{ key: 'url', label: 'Image', format: 'unique-string' }],
-    });
+    addCompositorScreenshotSchemaIfNeeded(profileB);
 
     const profileState = stateFromLocation({
       pathname: '/public/fakehash1/',

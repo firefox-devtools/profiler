@@ -31,6 +31,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import { getTimeRangeForThread } from '../profile-data';
+import { compositorScreenshotMarkerSchema } from '../process-screenshot-markers';
 import { GlobalDataCollector } from '../global-data-collector';
 
 // Chrome Tracing Event Spec:
@@ -849,9 +850,18 @@ async function processTracingEvents(
   const { shared } = globalDataCollector.finish();
   profile.shared = shared;
 
+  let hasScreenshots = false;
   for (const [thread, threadInfo] of threadInfoByThread) {
     thread.samples = finishRawSamplesTableBuilder(threadInfo.samples);
     thread.markers = finishRawMarkerTableBuilder(threadInfo.markers);
+    if (
+      thread.markers.data.some((data) => data?.type === 'CompositorScreenshot')
+    ) {
+      hasScreenshots = true;
+    }
+  }
+  if (hasScreenshots) {
+    profile.meta.markerSchema.push(compositorScreenshotMarkerSchema);
   }
 
   return profile;
@@ -897,6 +907,8 @@ async function extractScreenshots(
     markers.data.push({
       type: 'CompositorScreenshot',
       url: stringTable.indexForString(urlString),
+      // Chrome's Screenshot events don't say which window they belong to, so
+      // they all share one made-up window ID.
       windowID: 'id',
       windowSize: { width: size.width, height: size.height },
     });

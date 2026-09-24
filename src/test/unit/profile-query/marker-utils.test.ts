@@ -23,6 +23,7 @@ import {
   getProfileWithMarkers,
   getProfileFromTextSamples,
   getNetworkMarkers,
+  compositorScreenshotMarkerSchema,
 } from '../../fixtures/profiles/processed-profile';
 import type {
   NetworkMarkersOptions,
@@ -998,13 +999,14 @@ describe('collectThreadMarkers list option', function () {
    * Build a profile with one CompositorScreenshot marker whose `url` is a real
    * index into the string table, rather than an already-resolved string.
    *
-   * Index resolution is driven by the marker schema: only fields the schema
-   * declares as unique-string are looked up. `markerSchemaForTests` has no
-   * CompositorScreenshot entry, so `url` reaches the output as the raw index
-   * and the elision path sees it unresolved.
+   * The screenshot schema identifies `url` as a string-table index holding image data.
    */
   function setupWithScreenshotMarker(url: string) {
     const { profile } = getProfileFromTextSamples('someFunc');
+    profile.meta.markerSchema = [
+      ...profile.meta.markerSchema,
+      compositorScreenshotMarkerSchema,
+    ];
     const thread = profile.threads[0];
     const stringTable = StringTable.withBackingArray(
       profile.shared.stringArray
@@ -1012,7 +1014,6 @@ describe('collectThreadMarkers list option', function () {
     const urlIdx = stringTable.indexForString(url);
     const markerNameIdx = stringTable.indexForString('CompositorScreenshot');
     const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
-    thread.markers = markers;
     markers.name.push(markerNameIdx);
     markers.startTime.push(1);
     markers.endTime.push(null);
@@ -1025,6 +1026,7 @@ describe('collectThreadMarkers list option', function () {
       windowSize: { width: 1280, height: 951 },
     });
     markers.length++;
+    thread.markers = finishRawMarkerTableBuilder(markers);
 
     const store = storeWithProfile(profile);
     const threadMap = new ThreadMap();
@@ -1085,9 +1087,13 @@ describe('collectThreadMarkers list option', function () {
       length: url.length,
       preview: url.slice(0, 64),
     });
-    // The small fields next to it must survive: for this marker type there is
-    // no schema, so `data` is the only route to the window dimensions.
-    expect(m.fields).toBeUndefined();
+    expect(m.fields!.find(({ key }) => key === 'url')!.value).toEqual(
+      m.data!.url
+    );
+    expect(m.fields!.find(({ key }) => key === 'windowSize')!.value).toEqual({
+      width: 1280,
+      height: 951,
+    });
     expect(m.data!.windowSize).toEqual({ width: 1280, height: 951 });
     // The whole row must stay small.
     expect(JSON.stringify(m).length).toBeLessThan(1000);
