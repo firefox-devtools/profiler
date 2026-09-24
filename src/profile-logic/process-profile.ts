@@ -67,7 +67,10 @@ import {
   extensionTextMarkerSchema,
 } from '../profile-logic/marker-schema';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
-import { compositorScreenshotMarkerSchema } from './process-screenshot-markers';
+import {
+  compositorScreenshotMarkerSchema,
+  convertScreenshotMarkersToStartEnd,
+} from './process-screenshot-markers';
 
 import type { StringTable } from '../utils/string-table';
 import type {
@@ -2051,12 +2054,13 @@ export function processGeckoProfile(geckoProfile: GeckoProfile): Profile {
       stringIndexMarkerFieldsByDataType,
       globalDataCollector
     );
-    if (
-      newThread.markers.data.some(
-        (data) => data?.type === 'CompositorScreenshot'
-      )
-    ) {
+    const markers = convertScreenshotMarkersToStartEnd(
+      newThread.markers,
+      globalDataCollector.getStringTable()
+    );
+    if (markers !== null) {
       hasCompositorScreenshots = true;
+      newThread.markers = markers;
     }
     return newThread;
   };

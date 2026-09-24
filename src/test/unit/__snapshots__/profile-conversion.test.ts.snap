@@ -2318,17 +2318,17 @@ Object {
       "nativeSymbols": 0,
       "resources": 1,
       "stacks": 26,
-      "strings": 82,
+      "strings": 83,
     },
     "threads": Array [
       Object {
         "isMainThread": true,
         "jsAllocationCount": 0,
-        "markerCount": 483,
+        "markerCount": 512,
         "markerNamesTop": Array [
           "MessageLoop::RunTask (376)",
           "BrowserCrApplication::sendEvent (74)",
-          "CompositorScreenshot (30)",
+          "CompositorScreenshot id (59)",
           "LatencyInfo.Flow (2)",
           "TracingStartedInBrowser (1)",
         ],
@@ -2711,17 +2711,17 @@ Object {
       "nativeSymbols": 0,
       "resources": 1,
       "stacks": 26,
-      "strings": 82,
+      "strings": 83,
     },
     "threads": Array [
       Object {
         "isMainThread": true,
         "jsAllocationCount": 0,
-        "markerCount": 483,
+        "markerCount": 512,
         "markerNamesTop": Array [
           "MessageLoop::RunTask (376)",
           "BrowserCrApplication::sendEvent (74)",
-          "CompositorScreenshot (30)",
+          "CompositorScreenshot id (59)",
           "LatencyInfo.Flow (2)",
           "TracingStartedInBrowser (1)",
         ],
