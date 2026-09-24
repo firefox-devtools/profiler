@@ -1370,28 +1370,6 @@ export function getColorClassNameForMimeType(
   }
 }
 
-export function groupScreenshotsById(
-  getMarker: (markerIndex: MarkerIndex) => Marker,
-  markerIndexes: MarkerIndex[]
-): Map<string, Marker[]> {
-  const idToScreenshotMarkers = new Map<string, Marker[]>();
-  for (const markerIndex of markerIndexes) {
-    const marker = getMarker(markerIndex);
-    const { data } = marker;
-    if (data && data.type === 'CompositorScreenshot') {
-      let markers = idToScreenshotMarkers.get(data.windowID);
-      if (markers === undefined) {
-        markers = [];
-        idToScreenshotMarkers.set(data.windowID, markers);
-      }
-
-      markers.push(marker);
-    }
-  }
-
-  return idToScreenshotMarkers;
-}
-
 function _shouldSanitizePIICategory(
   category: MarkerSchemaPIICategory,
   PIIToBeRemoved: RemoveProfileInformation

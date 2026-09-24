@@ -10797,6 +10797,7 @@ Object {
         "display": Array [
           "marker-chart",
           "marker-table",
+          "timeline-screenshots",
         ],
         "fields": Array [
           Object {

@@ -454,7 +454,7 @@ export function getProfileWithRawMarkers(
 
 export const compositorScreenshotMarkerSchema: MarkerSchema = {
   name: 'CompositorScreenshot',
-  display: ['marker-chart', 'marker-table'],
+  display: ['marker-chart', 'marker-table', 'timeline-screenshots'],
   fields: [
     {
       key: 'url',
