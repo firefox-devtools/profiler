@@ -380,8 +380,7 @@ export function makeCompositorScreenshot(
       type: 'CompositorScreenshot',
       url: 0,
       windowID: '',
-      windowWidth: 100,
-      windowHeight: 100,
+      windowSize: { width: 100, height: 100 },
     },
   };
 }
@@ -1390,8 +1389,7 @@ export function getScreenshotMarkersForWindowId(
         type: 'CompositorScreenshot',
         url: 0, // Some arbitrary string.
         windowID,
-        windowWidth: 300,
-        windowHeight: 150,
+        windowSize: { width: 300, height: 150 },
       },
     ]);
 }
@@ -1408,7 +1406,6 @@ export function getScreenshotTrackProfile() {
       {
         type: 'CompositorScreenshot',
         windowID: '1',
-        url: undefined,
       },
     ],
   ]);

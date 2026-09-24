@@ -355,13 +355,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
           break;
         }
         case 'CompositorScreenshot': {
-          if (
-            data.url !== undefined &&
-            'windowWidth' in data &&
-            'windowHeight' in data
-          ) {
+          if (data.url !== undefined && data.windowSize !== undefined) {
             const { width, height } = computeScreenshotSize(
-              data,
+              data.windowSize,
               MAXIMUM_IMAGE_SIZE
             );
             details.push(
@@ -380,7 +376,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                 key="CompositorScreenshot-window size"
               >
                 <>
-                  {data.windowWidth}px × {data.windowHeight}px
+                  {data.windowSize.width}px × {data.windowSize.height}px
                 </>
               </TooltipDetail>,
               <TooltipDetail
@@ -678,10 +674,7 @@ export function renderMarkerFieldValue(
             src={stringTable.getString(value)}
             style={
               size
-                ? computeScreenshotSize(
-                    { windowWidth: size.width, windowHeight: size.height },
-                    MAXIMUM_IMAGE_SIZE
-                  )
+                ? computeScreenshotSize(size, MAXIMUM_IMAGE_SIZE)
                 : {
                     maxWidth: MAXIMUM_IMAGE_SIZE,
                     maxHeight: MAXIMUM_IMAGE_SIZE,
