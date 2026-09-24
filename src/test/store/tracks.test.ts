@@ -7,8 +7,11 @@ import {
   getNetworkTrackProfile,
   addIPCMarkerPairToThreads,
   getProfileWithMarkers,
+  getProfileWithRawMarkers,
   getProfileFromTextSamples,
   getProfileWithThreadCPUDelta,
+  makeCompositorScreenshot,
+  makeCompositorScreenshotEnd,
 } from '../fixtures/profiles/processed-profile';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
@@ -343,6 +346,55 @@ describe('ordering and hiding', function () {
         'show [process]',
         '  - show [thread Empty] SELECTED',
       ]);
+    });
+
+    it('keeps screenshot track indexes stable when there are unmatched end markers', function () {
+      const profile = getProfileWithRawMarkers([
+        makeCompositorScreenshotEnd(0, '0'),
+        makeCompositorScreenshotEnd(1, '2'),
+        makeCompositorScreenshot(2, '1'),
+        makeCompositorScreenshot(3, '2'),
+        makeCompositorScreenshotEnd(4, '1'),
+        makeCompositorScreenshotEnd(5, '2'),
+      ]);
+      const { getState } = storeWithProfile(profile);
+
+      expect(ProfileViewSelectors.getGlobalTracks(getState())).toEqual([
+        expect.objectContaining({ type: 'process' }),
+        {
+          type: 'screenshots',
+          markerName: 'CompositorScreenshot 1',
+          threadIndex: 0,
+        },
+        {
+          type: 'screenshots',
+          markerName: 'CompositorScreenshot 2',
+          threadIndex: 0,
+        },
+      ]);
+    });
+
+    it('creates screenshot tracks from the schema display location', function () {
+      const customScreenshot = {
+        type: 'Url' as const,
+        url: '',
+        windowID: 42,
+      };
+      const profile = getProfileWithMarkers([
+        ['CustomScreenshot', 0, null, customScreenshot],
+      ]);
+      profile.meta.markerSchema.push({
+        name: 'Url',
+        display: ['marker-chart', 'timeline-screenshots'],
+        fields: [],
+      });
+
+      const { getState } = storeWithProfile(profile);
+      expect(ProfileViewSelectors.getGlobalTracks(getState())).toContainEqual({
+        type: 'screenshots',
+        markerName: 'CustomScreenshot',
+        threadIndex: 0,
+      });
     });
 
     describe('sorting of track types to ensure proper URL backwards compatibility', function () {

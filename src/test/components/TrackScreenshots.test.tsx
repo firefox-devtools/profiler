@@ -79,6 +79,93 @@ describe('timeline/TrackScreenshots', function () {
     expect(size).toEqual({ width: 350, height: 175 });
   });
 
+  it('renders screenshot fields identified by the schema', () => {
+    const profile = getScreenshotTrackProfile();
+    const { markers } = profile.threads[0];
+    const firstPayload = markers.data[0];
+    if (firstPayload?.type !== 'CompositorScreenshot') {
+      throw new Error('Expected a screenshot marker.');
+    }
+    const imageUrl = profile.shared.stringArray[ensureExists(firstPayload.url)];
+    markers.data = markers.data.map((payload) => {
+      if (payload?.type !== 'CompositorScreenshot') {
+        return payload;
+      }
+      return {
+        type: 'NoPayloadUserData' as const,
+        ...(payload.url !== undefined && { image: payload.url }),
+        ...(payload.windowSize !== undefined && {
+          dimensions: { width: 100, height: 200 },
+        }),
+      };
+    });
+    profile.meta.markerSchema = [
+      {
+        name: 'NoPayloadUserData',
+        display: ['timeline-screenshots'],
+        fields: [
+          { key: 'dimensions', format: 'screenshot-size' },
+          {
+            key: 'image',
+            format: {
+              type: 'screenshot-data-url',
+              sizeFieldForAspectRatio: 'dimensions',
+            },
+          },
+        ],
+      },
+    ];
+
+    const { container, moveMouseAndGetImageSize, screenshotHover } =
+      setup(profile);
+    const thumbnail = ensureExists(
+      container.querySelector('.timelineTrackScreenshotImg')
+    );
+    expect(thumbnail).toHaveAttribute('src', imageUrl);
+    expect(thumbnail).toHaveStyle({
+      width: `${FULL_TRACK_SCREENSHOT_HEIGHT / 2}px`,
+      height: `${FULL_TRACK_SCREENSHOT_HEIGHT}px`,
+    });
+    expect(moveMouseAndGetImageSize(LEFT)).toEqual({
+      width: 175,
+      height: 350,
+    });
+    expect(screenshotHover().querySelector('img')).toHaveAttribute(
+      'src',
+      imageUrl
+    );
+  });
+
+  it.each(['url', 'windowSize'] as const)(
+    'does not render images without %s',
+    (field) => {
+      const profile = getScreenshotTrackProfile();
+      for (const payload of profile.threads[0].markers.data) {
+        if (payload?.type === 'CompositorScreenshot') {
+          delete payload[field];
+        }
+      }
+
+      const { container, moveMouse, screenshotHover } = setup(profile);
+      expect(container.querySelector('img')).toBeNull();
+      moveMouse(LEFT);
+      expect(screenshotHover).toThrow();
+    }
+  );
+
+  it('does not render images without a screenshot image field in the schema', () => {
+    const profile = getScreenshotTrackProfile();
+    profile.meta.markerSchema = profile.meta.markerSchema.map((schema) => ({
+      ...schema,
+      fields: [],
+    }));
+
+    const { container, moveMouse, screenshotHover } = setup(profile);
+    expect(container.querySelector('img')).toBeNull();
+    moveMouse(LEFT);
+    expect(screenshotHover).toThrow();
+  });
+
   it('sets a preview selection when clicking with the mouse', () => {
     const { selectionOverlay, screenshotClick, getState } = setup(
       undefined,
@@ -287,7 +374,12 @@ describe('timeline/TrackScreenshots', function () {
 
 function setup(
   profile: Profile = getScreenshotTrackProfile(),
-  component = <TimelineTrackScreenshots threadIndex={0} windowId="0" />
+  component = (
+    <TimelineTrackScreenshots
+      threadIndex={0}
+      markerName="CompositorScreenshot 0"
+    />
+  )
 ) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;

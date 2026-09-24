@@ -139,9 +139,12 @@ class GlobalTrackComponent extends PureComponent<Props> {
         );
       }
       case 'screenshots': {
-        const { threadIndex, id } = globalTrack;
+        const { threadIndex, markerName } = globalTrack;
         return (
-          <TimelineTrackScreenshots threadIndex={threadIndex} windowId={id} />
+          <TimelineTrackScreenshots
+            threadIndex={threadIndex}
+            markerName={markerName}
+          />
         );
       }
       case 'visual-progress': {

@@ -14,6 +14,8 @@ These markers are now stored as pairs of start and end markers instead of instan
 
 Two marker schema field formats were added to describe these markers: `screenshot-size`, whose value is a `{ width, height }` object, and `screenshot-data-url`, an object format `{ type: "screenshot-data-url", sizeFieldForAspectRatio }` whose value is a string table index holding an image data URL.
 
+A new marker schema display location, `timeline-screenshots`, was added. Markers in this location create Screenshot tracks and are grouped by marker name. Markers for the same window must use the same name, and markers for different windows must use different names.
+
 ### Version 75
 
 The func table (`profile.shared.funcTable`) representation changed, mirroring the v71 frame table change:

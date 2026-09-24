@@ -1750,7 +1750,7 @@ describe('actions/receive-profile', function () {
       //Get profiles with one screenshot track
       const profile1 = getProfileWithMarkers([
         [
-          'CompositorScreenshot',
+          'CompositorScreenshot 0',
           0,
           null,
           {
@@ -1763,7 +1763,7 @@ describe('actions/receive-profile', function () {
       ]);
       const profile2 = getProfileWithMarkers([
         [
-          'CompositorScreenshot',
+          'CompositorScreenshot 1',
           0,
           null,
           {
@@ -1788,6 +1788,42 @@ describe('actions/receive-profile', function () {
       store.dispatch(viewProfile(resultProfile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [screenshots]',
+        'show [screenshots]',
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
+
+    it('includes the screenshot track when only one profile has screenshot markers', async function () {
+      const store = blankStore();
+      const profile1 = getProfileWithMarkers([]);
+      const profile2 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot 1',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '1',
+            windowSize: { width: 300, height: 150 },
+          },
+        ],
+      ]);
+      const { resultProfile } = await setup(
+        {
+          profile1: profile1,
+          profile2: profile2,
+        },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        }
+      );
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
         'show [screenshots]',
         'show [thread Empty default] SELECTED',
         'show [thread Empty default]',

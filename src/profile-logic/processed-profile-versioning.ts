@@ -3779,7 +3779,7 @@ const _upgraders: {
     if (hasCompositorScreenshots) {
       profile.meta.markerSchema.push({
         name: 'CompositorScreenshot',
-        display: ['marker-chart', 'marker-table'],
+        display: ['marker-chart', 'marker-table', 'timeline-screenshots'],
         fields: [
           {
             key: 'url',

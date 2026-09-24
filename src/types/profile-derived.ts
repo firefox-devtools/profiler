@@ -733,7 +733,7 @@ export type GlobalTrack =
     }
   | {
       readonly type: 'screenshots';
-      readonly id: string;
+      readonly markerName: string;
       readonly threadIndex: ThreadIndex;
     }
   | { readonly type: 'visual-progress' }
