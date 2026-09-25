@@ -461,6 +461,9 @@ SCRIPTING
     profiler-cli profile info --session my-analysis
     profiler-cli thread select t-0 --session my-analysis
 
+  The --session option can also appear before the command:
+    profiler-cli --session my-analysis profile info
+
   Always use --json for reliable output parsing. Plain text output is for human
   reading and may change; the JSON schema is stable.
 

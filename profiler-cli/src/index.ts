@@ -32,7 +32,11 @@ import { startDaemon } from './daemon';
 import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
 import { formatOutput } from './output';
-import { addGlobalOptions, runCommand } from './commands/shared';
+import {
+  addGlobalOptions,
+  addSessionOption,
+  runCommand,
+} from './commands/shared';
 import { VERSION } from './constants';
 import { registerProfileCommand } from './commands/profile';
 import { registerThreadCommand } from './commands/thread';
@@ -79,7 +83,12 @@ async function main(): Promise<void> {
     return;
   }
 
-  const program = new Command();
+  const program = addSessionOption(new Command());
+  program.hook('preAction', (rootCommand, actionCommand) => {
+    if (actionCommand.opts().session === undefined) {
+      actionCommand.setOptionValue('session', rootCommand.opts().session);
+    }
+  });
   program
     .name('profiler-cli')
     .description('Profiler CLI — query Firefox profiles from the terminal')
