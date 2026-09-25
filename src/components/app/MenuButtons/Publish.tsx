@@ -20,15 +20,17 @@ import {
 import {
   getAbortFunction,
   getCheckedSharingOptions,
-  getFilenameString,
+  getDownloadFilename,
   getUploadPhase,
   getUploadProgress,
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
-  getSanitizedProfileEncodingState,
+  getSanitizedProfileEncodingStates,
 } from 'firefox-profiler/selectors/publish';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
+import { ContextMenu } from 'firefox-profiler/components/shared/ContextMenu';
+import { MenuItem, showMenu } from '@firefox-devtools/react-contextmenu';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
@@ -43,6 +45,7 @@ import type {
   StartEndRange,
   UploadPhase,
   SanitizedProfileEncodingState,
+  PublishProfileFormat,
 } from 'firefox-profiler/types';
 
 import './Publish.css';
@@ -60,8 +63,12 @@ type StateProps = {
   readonly profileContainsPrivateBrowsingInformation: boolean;
   readonly profileHasJSTracingArgumentValues: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
-  readonly downloadFileName: string;
+  readonly sanitizedProfileEncodingStates: Record<
+    PublishProfileFormat,
+    SanitizedProfileEncodingState
+  >;
+  readonly jslbDownloadFileName: string;
+  readonly jsonDownloadFileName: string;
   readonly uploadPhase: UploadPhase;
   readonly uploadProgress: number;
   readonly uploadProgressString: string;
@@ -81,8 +88,12 @@ type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   override componentDidMount(): void {
-    this.props.encodeSanitizedProfile(this.props.mode);
+    this._refreshEncoding('jslb');
   }
+
+  _refreshEncoding = (format: PublishProfileFormat) => {
+    this.props.encodeSanitizedProfile(this.props.mode, format);
+  };
 
   _onCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const sharingOption = e.target.name as keyof CheckedSharingOptions;
@@ -92,7 +103,16 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       e.target.checked
     );
 
-    this.props.encodeSanitizedProfile(this.props.mode);
+    this._refreshEncoding('jslb');
+    // Only keep the JSON encoding fresh if it has already been requested at
+    // least once (i.e. the user has opened the download dropdown).
+    if (this.props.sanitizedProfileEncodingStates.json.phase !== 'INITIAL') {
+      this._refreshEncoding('json');
+    }
+  };
+
+  _onJsonDropdownOpen = () => {
+    this._refreshEncoding('json');
   };
 
   _renderCheckbox(
@@ -100,9 +120,13 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     labelL10nId: string,
     additionalContent?: React.ReactNode
   ) {
-    const { checkedSharingOptions, uploadPhase } = this.props;
+    const { checkedSharingOptions, uploadPhase, mode } = this.props;
+    // Only the panel whose upload is in flight needs to freeze its options.
+    // The two modes have independent options, so an upload started from Share
+    // is no reason to stop someone adjusting what they save to disk.
     const isUploading =
-      uploadPhase === 'uploading' || uploadPhase === 'compressing';
+      mode === 'upload' &&
+      (uploadPhase === 'uploading' || uploadPhase === 'compressing');
     return (
       <label className="photon-label publishPanelDataChoicesLabel">
         <input
@@ -121,17 +145,43 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     );
   }
 
-  _onSubmit = () => {
+  _onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // Without this, submitting the form navigates to the current URL and
+    // reloads the whole app. Today that is masked by attemptToPublish
+    // dispatching synchronously, which unmounts the form before the browser
+    // gets to the default action -- don't rely on that.
+    event.preventDefault();
+    if (this.props.mode === 'download') {
+      // The download panel has no submit button; there is nothing to publish.
+      return;
+    }
     this.props.attemptToPublish();
   };
+
+  _renderDownloadButton(primary: boolean) {
+    const {
+      sanitizedProfileEncodingStates,
+      jslbDownloadFileName,
+      jsonDownloadFileName,
+    } = this.props;
+    return (
+      <DownloadSplitButton
+        primary={primary}
+        jslbEncodingState={sanitizedProfileEncodingStates.jslb}
+        jsonEncodingState={sanitizedProfileEncodingStates.json}
+        jslbDownloadFileName={jslbDownloadFileName}
+        jsonDownloadFileName={jsonDownloadFileName}
+        onJsonDropdownOpen={this._onJsonDropdownOpen}
+      />
+    );
+  }
 
   _renderPublishPanel() {
     const {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
       profileHasJSTracingArgumentValues,
-      sanitizedProfileEncodingState,
-      downloadFileName,
+      sanitizedProfileEncodingStates,
       shouldSanitizeByDefault,
       isRepublish,
       mode,
@@ -164,7 +214,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       <div data-testid="PublishPanel-container">
         <form
           className="publishPanelContent photon-body-10"
-          onSubmit={isDownload ? undefined : this._onSubmit}
+          onSubmit={this._onSubmit}
         >
           <h1 className="publishPanelTitle photon-title-30">{title}</h1>
           <p className="publishPanelInfoDescription">
@@ -242,7 +292,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                 )
               : null}
           </div>
-          {sanitizedProfileEncodingState.phase === 'ERROR' ? (
+          {sanitizedProfileEncodingStates.jslb.phase === 'ERROR' ? (
             <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
               <div className="photon-message-bar-inner-text">
                 <Localized id="MenuButtons--publish--error-while-compressing">
@@ -254,26 +304,22 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           ) : null}
           <div className="publishPanelButtons">
             {isDownload ? (
-              <DownloadButton
-                primary
-                downloadFileName={downloadFileName}
-                sanitizedProfileEncodingState={sanitizedProfileEncodingState}
-              />
+              this._renderDownloadButton(true)
             ) : (
               <button
                 type="submit"
                 className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
-                disabled={sanitizedProfileEncodingState.phase === 'ERROR'}
+                disabled={sanitizedProfileEncodingStates.jslb.phase === 'ERROR'}
               >
                 <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
                 <Localized id="MenuButtons--publish--button-upload">
                   Upload
                 </Localized>{' '}
-                {sanitizedProfileEncodingState.phase === 'DONE' ? (
+                {sanitizedProfileEncodingStates.jslb.phase === 'DONE' ? (
                   <span className="menuButtonsDownloadSize">
                     (
                     {prettyBytes(
-                      sanitizedProfileEncodingState.profileData.size
+                      sanitizedProfileEncodingStates.jslb.profileData.size
                     )}
                     )
                   </span>
@@ -287,13 +333,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   }
 
   _renderUploadPanel() {
-    const {
-      uploadProgress,
-      uploadProgressString,
-      abortFunction,
-      downloadFileName,
-      sanitizedProfileEncodingState,
-    } = this.props;
+    const { uploadProgress, uploadProgressString, abortFunction } = this.props;
 
     return (
       <div
@@ -317,10 +357,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           </div>
         </div>
         <div className="publishPanelButtons">
-          <DownloadButton
-            downloadFileName={downloadFileName}
-            sanitizedProfileEncodingState={sanitizedProfileEncodingState}
-          />
+          {this._renderDownloadButton(false)}
           <button
             type="button"
             className="photon-button photon-button-default publishPanelButton publishPanelButtonsCancelUpload"
@@ -410,8 +447,12 @@ export const PublishPanel = explicitConnect<
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
     checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
-    downloadFileName: getFilenameString(state),
-    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
+    jslbDownloadFileName: getDownloadFilename(state, 'jslb'),
+    jsonDownloadFileName: getDownloadFilename(state, 'json'),
+    sanitizedProfileEncodingStates: getSanitizedProfileEncodingStates(
+      state,
+      ownProps.mode
+    ),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
@@ -428,8 +469,130 @@ export const PublishPanel = explicitConnect<
   component: PublishPanelImpl,
 });
 
-type DownloadButtonProps = {
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+const DOWNLOAD_FORMAT_MENU_ID = 'PublishDownloadFormatContextMenu';
+// react-contextmenu positions the menu with its top-left at `position`. To
+// right-anchor to the toggle button we subtract an estimated menu width; the
+// actual width is pinned to this value via CSS.
+const DOWNLOAD_FORMAT_MENU_WIDTH_PX = 220;
+
+type DownloadSplitButtonProps = {
+  readonly primary: boolean;
+  readonly jslbEncodingState: SanitizedProfileEncodingState;
+  readonly jsonEncodingState: SanitizedProfileEncodingState;
+  readonly jslbDownloadFileName: string;
+  readonly jsonDownloadFileName: string;
+  readonly onJsonDropdownOpen: () => void;
+};
+
+type DownloadSplitButtonState = {
+  readonly isMenuVisible: boolean;
+  // react-contextmenu hides the menu on mousedown even if it's already
+  // visible. We track visibility at mousedown time so that clicking the
+  // toggle button while the menu is open results in a net "close" rather
+  // than a hide-then-reshow.
+  readonly wasMenuVisibleOnMouseDown: boolean;
+};
+
+/**
+ * Split button: the main body downloads the profile as JSLB, and the arrow
+ * on the right opens a dropdown menu with alternate download formats.
+ * The dropdown uses the same react-contextmenu-based menu style as the
+ * marker chart's filter/copy buttons.
+ */
+class DownloadSplitButton extends React.PureComponent<
+  DownloadSplitButtonProps,
+  DownloadSplitButtonState
+> {
+  override state: DownloadSplitButtonState = {
+    isMenuVisible: false,
+    wasMenuVisibleOnMouseDown: false,
+  };
+
+  _onToggleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (this.state.wasMenuVisibleOnMouseDown) {
+      // The menu was already open on mousedown, so react-contextmenu has
+      // already hidden it. Don't reopen it.
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    // Right-anchor the menu: its top-right sits at the toggle button's
+    // bottom-right, so it grows leftwards into the panel.
+    showMenu({
+      data: null,
+      id: DOWNLOAD_FORMAT_MENU_ID,
+      position: {
+        x: rect.right - DOWNLOAD_FORMAT_MENU_WIDTH_PX,
+        y: rect.bottom,
+      },
+      target: event.target,
+    });
+  };
+
+  _onToggleMouseDown = () => {
+    this.setState((state) => ({
+      wasMenuVisibleOnMouseDown: state.isMenuVisible,
+    }));
+  };
+
+  _onMenuShow = () => {
+    this.setState({ isMenuVisible: true });
+    // Defer the JSON encoding so the menu can paint first. The serializer
+    // is synchronous and can take a while on large profiles; running it on
+    // the current task would delay the menu's first paint.
+    setTimeout(this.props.onJsonDropdownOpen, 0);
+  };
+
+  _onMenuHide = () => {
+    this.setState({ isMenuVisible: false });
+  };
+
+  override render() {
+    const {
+      primary,
+      jslbEncodingState,
+      jsonEncodingState,
+      jslbDownloadFileName,
+      jsonDownloadFileName,
+    } = this.props;
+    const { isMenuVisible } = this.state;
+
+    return (
+      <div className="publishPanelSplitButton">
+        <DownloadPrimary
+          primary={primary}
+          encodingState={jslbEncodingState}
+          downloadFileName={jslbDownloadFileName}
+        />
+        <button
+          type="button"
+          className={classNames(
+            'photon-button',
+            'publishPanelSplitButtonToggleButton',
+            {
+              'publishPanelSplitButtonToggleButton--open': isMenuVisible,
+            }
+          )}
+          title="Other download formats"
+          aria-haspopup="menu"
+          aria-expanded={isMenuVisible}
+          onClick={this._onToggleClick}
+          onMouseDown={this._onToggleMouseDown}
+        />
+        <DownloadFormatContextMenu
+          menuId={DOWNLOAD_FORMAT_MENU_ID}
+          onShow={this._onMenuShow}
+          onHide={this._onMenuHide}
+          jsonEncodingState={jsonEncodingState}
+          jsonDownloadFileName={jsonDownloadFileName}
+        />
+      </div>
+    );
+  }
+}
+
+type DownloadPrimaryProps = {
+  readonly encodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
   readonly primary?: boolean;
 };
@@ -448,20 +611,19 @@ function WarningIndicator({ l10nId, title }: WarningIndicatorProps) {
 }
 
 /**
- * The DownloadButton handles unpacking the compressed profile promise.
+ * The primary (left) part of the split button. Downloads the profile as JSLB.
  */
-class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
+class DownloadPrimary extends React.PureComponent<DownloadPrimaryProps> {
   override render() {
-    const { sanitizedProfileEncodingState, downloadFileName, primary } =
-      this.props;
+    const { encodingState, downloadFileName, primary } = this.props;
     const className = classNames(
-      'photon-button publishPanelButton publishPanelButtonsDownload',
+      'photon-button publishPanelButton publishPanelSplitButtonMain publishPanelButtonsDownload',
       { 'photon-button-primary publishPanelButtonsDownloadPrimary': primary }
     );
 
-    switch (sanitizedProfileEncodingState.phase) {
+    switch (encodingState.phase) {
       case 'DONE': {
-        const { profileData } = sanitizedProfileEncodingState;
+        const { profileData } = encodingState;
         return (
           <BlobUrlLink
             blob={profileData}
@@ -497,7 +659,103 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
         );
       }
       default:
-        throw assertExhaustiveCheck(sanitizedProfileEncodingState);
+        throw assertExhaustiveCheck(encodingState);
     }
+  }
+}
+
+type DownloadFormatContextMenuProps = {
+  readonly menuId: string;
+  readonly onShow: () => void;
+  readonly onHide: () => void;
+  readonly jsonEncodingState: SanitizedProfileEncodingState;
+  readonly jsonDownloadFileName: string;
+};
+
+/**
+ * Trigger a file download for a Blob without needing a persistent
+ * BlobUrlLink anchor. Used from a react-contextmenu MenuItem's onClick,
+ * where we can't wrap the item in an <a download>.
+ */
+function _triggerBlobDownload(blob: Blob, downloadFileName: string): void {
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = downloadFileName;
+  anchor.style.display = 'none';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+  // Revoke asynchronously so Safari has a chance to start the download.
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+/**
+ * The dropdown menu for alternative download formats, rendered as a
+ * react-contextmenu (the same menu style used next to the marker chart
+ * search field).
+ */
+class DownloadFormatContextMenu extends React.PureComponent<DownloadFormatContextMenuProps> {
+  _onDownloadJson = () => {
+    const { jsonEncodingState, jsonDownloadFileName } = this.props;
+    if (jsonEncodingState.phase !== 'DONE') {
+      return;
+    }
+    _triggerBlobDownload(
+      jsonEncodingState.profileData,
+      `${jsonDownloadFileName}.gz`
+    );
+  };
+
+  _renderJsonMenuItemLabel() {
+    const { jsonEncodingState } = this.props;
+    switch (jsonEncodingState.phase) {
+      case 'DONE':
+        return (
+          <>
+            <Localized id="MenuButtons--publish--download-json">
+              Download as JSON
+            </Localized>
+            {` (${prettyBytes(jsonEncodingState.profileData.size)})`}
+          </>
+        );
+      case 'ERROR':
+        return (
+          <Localized id="MenuButtons--publish--download-json-error">
+            Error preparing JSON download
+          </Localized>
+        );
+      case 'INITIAL':
+      case 'ENCODING':
+        return (
+          <Localized id="MenuButtons--publish--compressing">
+            Compressing…
+          </Localized>
+        );
+      default:
+        throw assertExhaustiveCheck(jsonEncodingState);
+    }
+  }
+
+  override render() {
+    const { menuId, onShow, onHide, jsonEncodingState } = this.props;
+    const jsonReady = jsonEncodingState.phase === 'DONE';
+
+    return (
+      <ContextMenu
+        id={menuId}
+        className="publishPanelDownloadFormatContextMenu"
+        onShow={onShow}
+        onHide={onHide}
+      >
+        <MenuItem
+          onClick={this._onDownloadJson}
+          disabled={!jsonReady}
+          preventClose={!jsonReady}
+        >
+          {this._renderJsonMenuItemLabel()}
+        </MenuItem>
+      </ContextMenu>
+    );
   }
 }
