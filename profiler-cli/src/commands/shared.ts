@@ -134,15 +134,20 @@ export function wasExplicit(parent: string, subcommand: string): boolean {
 }
 
 /**
+ * Add the --session option to a command.
+ */
+export function addSessionOption(cmd: Command): Command {
+  return cmd.option(
+    '--session <id>',
+    'Use a specific session (default: current session)'
+  );
+}
+
+/**
  * Add --session and --json options to a command.
  */
 export function addGlobalOptions(cmd: Command): Command {
-  return cmd
-    .option(
-      '--session <id>',
-      'Use a specific session (default: current session)'
-    )
-    .option('--json', 'Output results as JSON');
+  return addSessionOption(cmd).option('--json', 'Output results as JSON');
 }
 
 /**
