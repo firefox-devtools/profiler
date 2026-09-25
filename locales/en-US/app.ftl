@@ -576,8 +576,8 @@ MenuButtons--index--metaInfo-button =
 
 MenuButtons--index--full-view = Full View
 MenuButtons--index--cancel-upload = Cancel Upload
-MenuButtons--index--download =
-    .label = Download…
+MenuButtons--index--save =
+    .label = Save…
 
 MenuButtons--index--share =
     .label = Share…
@@ -763,7 +763,8 @@ MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
     .title = This profile contains function argument values recorded from the page, which may include personal data
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
-MenuButtons--publish--download-performance-profile = Download Performance Profile
+MenuButtons--publish--save-performance-profile = Save Performance Profile
+MenuButtons--publish--persistence-description = Profiles are not saved automatically. To keep a profile, save it to your computer or upload it using Share.
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
 MenuButtons--publish--download-info-description = Save this profile as a file on your computer.
 MenuButtons--publish--info-description-default = By default, your personal data is removed.
@@ -774,7 +775,7 @@ MenuButtons--publish--upload-title = Uploading profile…
 MenuButtons--publish--cancel-upload = Cancel Upload
 MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong when uploading the profile.
 MenuButtons--publish--message-try-again = Try again
-MenuButtons--publish--download = Download
+MenuButtons--publish--save = Save
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
 

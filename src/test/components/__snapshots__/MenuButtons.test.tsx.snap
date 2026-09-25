@@ -1814,7 +1814,7 @@ exports[`app/MenuButtons <Publish> can publish and revert 1`] = `
         class="buttonWithPanelButton menuButtonsButton menuButtonsDownloadButton menuButtonsButton-hasIcon"
         type="button"
       >
-        Download…
+        Save…
       </button>
     </div>
     <div
@@ -1887,6 +1887,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for a compression error 
     >
       Share Performance Profile
     </h1>
+    <p
+      class="publishPanelInfoDescription"
+    >
+      Profiles are not saved automatically. To keep a profile, save it to your computer or upload it using Share.
+    </p>
     <p
       class="publishPanelInfoDescription"
     >
@@ -2040,7 +2045,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       class="buttonWithPanelButton menuButtonsButton menuButtonsDownloadButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Download…
+      Save…
     </button>
   </div>
   <div
@@ -2088,7 +2093,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
       class="buttonWithPanelButton menuButtonsButton menuButtonsDownloadButton menuButtonsButton-hasIcon"
       type="button"
     >
-      Download…
+      Save…
     </button>
   </div>
   <div
@@ -2136,8 +2141,13 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
     <h1
       class="publishPanelTitle photon-title-30"
     >
-      Download Performance Profile
+      Save Performance Profile
     </h1>
+    <p
+      class="publishPanelInfoDescription"
+    >
+      Profiles are not saved automatically. To keep a profile, save it to your computer or upload it using Share.
+    </p>
     <p
       class="publishPanelInfoDescription"
     >
@@ -2225,7 +2235,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the menu buttons and
         <span
           class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
         />
-        Download
+        Save
          
         <span
           class="menuButtonsDownloadSize"
@@ -2250,8 +2260,13 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <h1
       class="publishPanelTitle photon-title-30"
     >
-      Download Performance Profile
+      Save Performance Profile
     </h1>
+    <p
+      class="publishPanelInfoDescription"
+    >
+      Profiles are not saved automatically. To keep a profile, save it to your computer or upload it using Share.
+    </p>
     <p
       class="publishPanelInfoDescription"
     >
@@ -2344,7 +2359,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         <span
           class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
         />
-        Download
+        Save
          
         <span
           class="menuButtonsDownloadSize"
@@ -2369,8 +2384,13 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <h1
       class="publishPanelTitle photon-title-30"
     >
-      Download Performance Profile
+      Save Performance Profile
     </h1>
+    <p
+      class="publishPanelInfoDescription"
+    >
+      Profiles are not saved automatically. To keep a profile, save it to your computer or upload it using Share.
+    </p>
     <p
       class="publishPanelInfoDescription"
     >
@@ -2458,7 +2478,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         <span
           class="publishPanelButtonsSvg publishPanelButtonsSvgDownload"
         />
-        Download
+        Save
          
         <span
           class="menuButtonsDownloadSize"
@@ -2485,6 +2505,11 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened share pan
     >
       Share Performance Profile
     </h1>
+    <p
+      class="publishPanelInfoDescription"
+    >
+      Profiles are not saved automatically. To keep a profile, save it to your computer or upload it using Share.
+    </p>
     <p
       class="publishPanelInfoDescription"
     >
