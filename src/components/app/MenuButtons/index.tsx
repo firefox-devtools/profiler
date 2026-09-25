@@ -263,7 +263,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
     return (
       <>
-        <Localized id="MenuButtons--index--download" attrs={{ label: true }}>
+        <Localized id="MenuButtons--index--save" attrs={{ label: true }}>
           <ButtonWithPanel
             buttonClassName="menuButtonsButton menuButtonsDownloadButton menuButtonsButton-hasIcon"
             panelClassName="publishPanelPanel"

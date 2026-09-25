@@ -142,8 +142,8 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     let title;
     if (isDownload) {
       title = (
-        <Localized id="MenuButtons--publish--download-performance-profile">
-          Download Performance Profile
+        <Localized id="MenuButtons--publish--save-performance-profile">
+          Save Performance Profile
         </Localized>
       );
     } else if (isRepublish) {
@@ -167,6 +167,12 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           onSubmit={isDownload ? undefined : this._onSubmit}
         >
           <h1 className="publishPanelTitle photon-title-30">{title}</h1>
+          <Localized id="MenuButtons--publish--persistence-description">
+            <p className="publishPanelInfoDescription">
+              Profiles are not saved automatically. To keep a profile, save it
+              to your computer or upload it using Share.
+            </p>
+          </Localized>
           <p className="publishPanelInfoDescription">
             {isDownload ? (
               <Localized id="MenuButtons--publish--download-info-description">
@@ -469,7 +475,7 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
             className={className}
           >
             <span className="publishPanelButtonsSvg publishPanelButtonsSvgDownload" />
-            <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
+            <Localized id="MenuButtons--publish--save">Save</Localized>{' '}
             <span className="menuButtonsDownloadSize">
               ({prettyBytes(profileData.size)})
             </span>
@@ -479,7 +485,7 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
       case 'ERROR': {
         return (
           <button type="button" className={className} disabled>
-            <Localized id="MenuButtons--publish--download">Download</Localized>
+            <Localized id="MenuButtons--publish--save">Save</Localized>
           </button>
         );
       }
