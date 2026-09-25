@@ -245,6 +245,24 @@ export class SymbolStore {
         );
         return false;
       }
+      // Skip pseudo-modules such as [vdso], [vsyscall], [heap], [stack] and
+      // [anon:...]. These are kernel- or allocator-provided mappings with no
+      // symbol files, so requesting them is always pointless. Worse, the
+      // Mozilla symbolication server rejects the entire batched request with an
+      // HTTP 400 ("invalid debug_filename") when any job's module name contains
+      // brackets, which would prevent every other library in the same chunk
+      // (e.g. libxul) from being symbolicated.
+      if (debugName.startsWith('[')) {
+        errorCb(
+          request,
+          new SymbolsNotFoundError(
+            `Cannot symbolicate pseudo-library ${debugName}`,
+            request.lib,
+            new Error('Pseudo-library without symbols')
+          )
+        );
+        return false;
+      }
       return true;
     });
 
