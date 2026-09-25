@@ -838,11 +838,15 @@ describe('visualMetrics processing', function () {
         (name) => shared.stringArray[name] === metricProgressMarkerName
       );
 
+      // eslint-plugin-jest only applies this rule inside a test callback;
+      // oxlint also applies it to helpers like this one.
+      /* oxlint-disable jest/no-conditional-expect */
       if (hasProgressMarker) {
         expect(metricProgressMarker).toBeTruthy();
       } else {
         expect(metricProgressMarker).toBeFalsy();
       }
+      /* oxlint-enable jest/no-conditional-expect */
 
       // Check the visual metric change markers.
       const metricChangeMarkerName = `${name} Change`;

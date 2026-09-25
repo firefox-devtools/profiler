@@ -108,7 +108,7 @@ export class FlameGraph
   };
 
   /* This method is called from ConnectedFlameGraph. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   focus = () => {
     if (this._viewport) {
       this._viewport.focus();

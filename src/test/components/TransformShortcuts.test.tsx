@@ -186,9 +186,7 @@ const pressKeyBuilder = (className: string) => (options: KeyPressOptions) => {
   fireFullKeyPress(div, options);
 };
 
-/* eslint-disable jest/no-standalone-expect */
-// Disable the jest/no-standalone-expect rule because eslint doesn't know that
-// these expectations will run in a test block later.
+// These expectations run inside a test block later, not at this point.
 // These actions will be used to generate use cases for each of the supported panels.
 const actions = {
   'a selected node': (
@@ -249,7 +247,6 @@ const actions = {
     ).not.toBeNull();
   },
 };
-/* eslint-enable jest/no-standalone-expect */
 
 autoMockCanvasContext();
 

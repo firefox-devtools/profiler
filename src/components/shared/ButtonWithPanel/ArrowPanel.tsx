@@ -36,7 +36,7 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
   /* These 2 methods are called from other components.
   /* See https://github.com/firefox-devtools/profiler/issues/1888 and
    * https://github.com/firefox-devtools/profiler/issues/1641 */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   open() {
     if (this.state.open) {
       return;
@@ -45,7 +45,7 @@ export class ArrowPanel extends React.PureComponent<Props, State> {
     this.setState({ open: true });
   }
 
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   close() {
     this.setState((state) => {
       if (!state.open) {

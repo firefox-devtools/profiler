@@ -585,10 +585,9 @@ describe('app/MenuButtons', function () {
         screen.getByText(/Buffer capacity/).nextSibling
       );
 
-      /* This rule needs to be disabled because `renderedCapacity` is a text
-       * code, and this triggers
+      /* `renderedCapacity` is a text code, so toHaveTextContent would hit
        * https://github.com/testing-library/jest-dom/issues/306 */
-      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      // oxlint-disable-next-line jest-dom/prefer-to-have-text-content
       expect(renderedCapacity.textContent).toBe('1GB');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
@@ -606,10 +605,9 @@ describe('app/MenuButtons', function () {
         screen.getByText(/Device:/).nextSibling
       );
 
-      /* This rule needs to be disabled because `renderedDevice` is a text
-       * code, and this triggers
+      /* `renderedDevice` is a text code, so toHaveTextContent would hit
        * https://github.com/testing-library/jest-dom/issues/306 */
-      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      // oxlint-disable-next-line jest-dom/prefer-to-have-text-content
       expect(renderedDevice.textContent).toBe('Android Device');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
