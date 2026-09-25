@@ -8,6 +8,8 @@ import {
   parseLabel,
   extensionTextMarkerSchema,
   markerSchemaFrontEndOnly,
+  isStringIndexFormat,
+  computeStringIndexMarkerFieldsByDataType,
 } from '../../profile-logic/marker-schema';
 import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
 import type {
@@ -18,7 +20,10 @@ import type {
 import { getDefaultCategories } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  compositorScreenshotMarkerSchema,
+} from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
 import { StringTable } from '../../utils/string-table';
 
@@ -591,8 +596,17 @@ describe('marker schema formatting', function () {
       ],
       ['list', []],
       ['list', ['a', 'b']],
+      ['screenshot-size', { width: 1280, height: 1000 }],
+      // Without a payload there's no size field to look up,
+      // so the image falls back to a maximum size.
+      [
+        { type: 'screenshot-data-url', sizeFieldForAspectRatio: 'windowSize' },
+        0,
+      ],
     ];
-    const stringTable = StringTable.withBackingArray([]);
+    const stringTable = StringTable.withBackingArray([
+      'data:image/jpeg;base64,AAAA',
+    ]);
     expect(
       entries.map(([format, value]: [MarkerFormatType, any]): string[][] => [
         format,
@@ -601,6 +615,25 @@ describe('marker schema formatting', function () {
         formatFromMarkerSchema('none', format, value, stringTable),
       ])
     ).toMatchSnapshot();
+  });
+});
+
+describe('computeStringIndexMarkerFieldsByDataType', function () {
+  it('treats the screenshot data URL as a string index', function () {
+    expect(
+      isStringIndexFormat({
+        type: 'screenshot-data-url',
+        sizeFieldForAspectRatio: 'windowSize',
+      })
+    ).toBe(true);
+  });
+
+  it('finds screenshot data URLs in the screenshot marker schema', function () {
+    expect(
+      computeStringIndexMarkerFieldsByDataType([
+        compositorScreenshotMarkerSchema,
+      ])
+    ).toEqual(new Map([['CompositorScreenshot', ['url']]]));
   });
 });
 

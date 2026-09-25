@@ -2067,22 +2067,26 @@ describe('actions/ProfileView', function () {
     });
   });
 
-  describe('getRangeFilteredScreenshotsById', function () {
+  describe('getRangeFilteredScreenshotsByName', function () {
     it('can extract some screenshot markers', function () {
       const profile = getScreenshotTrackProfile();
       const { getState } = storeWithProfile(profile);
-      const screenshotMarkersById =
-        selectedThreadSelectors.getRangeFilteredScreenshotsById(getState());
-      const keys = [...screenshotMarkersById.keys()];
+      const screenshotMarkersByName =
+        selectedThreadSelectors.getRangeFilteredScreenshotsByName(getState());
+      const keys = [...screenshotMarkersByName.keys()];
       expect(keys.length).toEqual(3);
 
-      const screenshots = screenshotMarkersById.get('0');
+      const screenshots = screenshotMarkersByName.get('CompositorScreenshot 0');
       expect(screenshots?.length).toEqual(5);
       for (const screenshot of screenshots ?? []) {
-        expect(screenshot.name).toEqual('CompositorScreenshot');
+        expect(screenshot.name).toEqual('CompositorScreenshot 0');
       }
-      expect(screenshotMarkersById.get('1')?.length).toEqual(6);
-      expect(screenshotMarkersById.get('2')?.length).toEqual(10);
+      expect(
+        screenshotMarkersByName.get('CompositorScreenshot 1')?.length
+      ).toEqual(5);
+      expect(
+        screenshotMarkersByName.get('CompositorScreenshot 2')?.length
+      ).toEqual(10);
     });
 
     it('filters screenshots within a range selection', function () {
@@ -2090,15 +2094,15 @@ describe('actions/ProfileView', function () {
       const [{ markers }] = profile.threads;
       const { dispatch, getState } = storeWithProfile(profile);
 
-      // Double check that there are 21 markers in the test data, and commit a
+      // Double check that there are 38 raw markers in the test data, and commit a
       // subsection of that range.
-      expect(markers.length).toBe(21);
+      expect(markers.length).toBe(38);
       dispatch(ProfileView.commitRange(3.1, 7.5));
 
       // Get out the markers.
-      const screenshotMarkersById =
-        selectedThreadSelectors.getRangeFilteredScreenshotsById(getState());
-      const screenshots = screenshotMarkersById.get('2');
+      const screenshotMarkersByName =
+        selectedThreadSelectors.getRangeFilteredScreenshotsByName(getState());
+      const screenshots = screenshotMarkersByName.get('CompositorScreenshot 2');
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }

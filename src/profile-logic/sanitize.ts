@@ -15,6 +15,7 @@ import { removeURLs } from '../utils/string';
 import {
   filterRawMarkerTableToRangeWithMarkersToDelete,
   sanitizeMarkerFromSchema,
+  getMarkerTypesForDisplay,
 } from './marker-data';
 import { getSchemaFromMarker } from './marker-schema';
 import {
@@ -139,6 +140,11 @@ export function sanitizePII(
     ...unconditionallySanitizedShared,
     stringArray,
   };
+
+  const screenshotMarkerTypes = getMarkerTypesForDisplay(
+    Object.values(markerSchemaByName),
+    'timeline-screenshots'
+  );
 
   let stackFlags: Uint8Array | null = null;
 
@@ -344,6 +350,7 @@ export function sanitizePII(
         PIIToBeRemoved,
         windowIdFromPrivateBrowsing,
         markerSchemaByName,
+        screenshotMarkerTypes,
         stackFlags
       );
 
@@ -459,6 +466,7 @@ function sanitizeThreadPII(
   PIIToBeRemoved: RemoveProfileInformation,
   windowIdFromPrivateBrowsing: Set<InnerWindowID>,
   markerSchemaByName: MarkerSchemaByName,
+  screenshotMarkerTypes: Set<string>,
   stackFlags: Uint8Array | null
 ): RawThread | null {
   if (PIIToBeRemoved.shouldRemoveThreads.has(threadIndex)) {
@@ -517,7 +525,7 @@ function sanitizeThreadPII(
       if (
         PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.has(threadIndex) &&
         currentMarker &&
-        currentMarker.type === 'CompositorScreenshot'
+        screenshotMarkerTypes.has(currentMarker.type)
       ) {
         markersToDelete.add(i);
       }
