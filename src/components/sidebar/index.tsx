@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type * as React from 'react';
 
-import { CallTreeSidebar } from './CallTreeSidebar';
+import { CallTreeSidebar, FunctionListSidebar } from './CallTreeSidebar';
 import { MarkerSidebar } from './MarkerSidebar';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
@@ -15,6 +15,7 @@ export function selectSidebar(
 ): React.ComponentType<{}> | null {
   return {
     calltree: CallTreeSidebar,
+    'function-list': FunctionListSidebar,
     'flame-graph': CallTreeSidebar,
     'stack-chart': null,
     'marker-chart': null,

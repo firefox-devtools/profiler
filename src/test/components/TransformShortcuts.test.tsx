@@ -11,6 +11,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
+  changeSelectedFunctionIndex,
+  changeRightClickedFunctionIndex,
 } from '../../actions/profile-view';
 import { FlameGraph } from '../../components/flame-graph';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
@@ -18,6 +20,7 @@ import { ensureExists, objectEntries } from '../../utils/types';
 import { fireFullKeyPress } from '../fixtures/utils';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { ProfileCallTreeView } from '../../components/calltree/ProfileCallTreeView';
+import { ProfileFunctionListView } from '../../components/calltree/ProfileFunctionListView';
 import { StackChart } from 'firefox-profiler/components/stack-chart';
 import type {
   Transform,
@@ -186,6 +189,104 @@ const pressKeyBuilder = (className: string) => (options: KeyPressOptions) => {
   fireFullKeyPress(div, options);
 };
 
+function testFunctionTransformKeyboardShortcuts(
+  setup: () => {
+    getTransform: () => null | Transform;
+    pressKey: (options: KeyPressOptions) => void;
+    expectedFuncIndex: IndexIntoFuncTable;
+    expectedResourceIndex: IndexIntoResourceTable;
+  }
+) {
+  describe('function shortcuts', () => {
+    it('handles focus-function', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'f' });
+      expect(getTransform()).toEqual({
+        type: 'focus-function',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('handles focus-self', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'S' });
+      expect(getTransform()).toMatchObject({
+        type: 'focus-self',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('handles merge function', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'm' });
+      expect(getTransform()).toEqual({
+        type: 'merge-function',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('handles drop function', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'd' });
+      expect(getTransform()).toEqual({
+        type: 'drop-function',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('handles collapse resource', () => {
+      const { pressKey, getTransform, expectedResourceIndex } = setup();
+      pressKey({ key: 'C' });
+      expect(getTransform()).toMatchObject({
+        type: 'collapse-resource',
+        resourceIndex: expectedResourceIndex,
+      });
+    });
+
+    it('handles collapse recursion', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'r' });
+      expect(getTransform()).toMatchObject({
+        type: 'collapse-recursion',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('handles collapse direct recursion', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'R' });
+      expect(getTransform()).toMatchObject({
+        type: 'collapse-direct-recursion',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('handles collapse function subtree', () => {
+      const { pressKey, getTransform, expectedFuncIndex } = setup();
+      pressKey({ key: 'c' });
+      expect(getTransform()).toEqual({
+        type: 'collapse-function-subtree',
+        funcIndex: expectedFuncIndex,
+      });
+    });
+
+    it('does not handle call-node-specific shortcuts', () => {
+      const { pressKey, getTransform } = setup();
+      pressKey({ key: 'F' }); // focus-subtree
+      pressKey({ key: 'M' }); // merge-call-node
+      pressKey({ key: 'g' }); // focus-category
+      expect(getTransform()).toBeNull();
+    });
+
+    it('ignores shortcuts with modifiers', () => {
+      const { pressKey, getTransform } = setup();
+      pressKey({ key: 'c', ctrlKey: true });
+      pressKey({ key: 'c', metaKey: true });
+      expect(getTransform()).toBeNull();
+    });
+  }); // end describe('function shortcuts')
+}
+
 /* eslint-disable jest/no-standalone-expect */
 // Disable the jest/no-standalone-expect rule because eslint doesn't know that
 // these expectations will run in a test block later.
@@ -321,6 +422,81 @@ describe('stack chart transform shortcuts', () => {
           expectedFuncIndex: B,
           expectedResourceIndex: 0,
           expectedCategory: 0,
+        };
+      });
+    });
+  }
+});
+
+/* eslint-disable jest/no-standalone-expect */
+const functionListActions = {
+  'a selected function': (
+    { dispatch, getState }: Store,
+    { B }: FuncNamesDict
+  ) => {
+    act(() => {
+      dispatch(changeSelectedFunctionIndex(0, B));
+    });
+    expect(
+      selectedThreadSelectors.getSelectedFunctionIndex(getState())
+    ).not.toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedFunctionIndex(getState())
+    ).toBeNull();
+  },
+  'a right-clicked function': (
+    { dispatch, getState }: Store,
+    { B }: FuncNamesDict
+  ) => {
+    act(() => {
+      dispatch(changeSelectedFunctionIndex(0, null));
+    });
+    act(() => {
+      dispatch(changeRightClickedFunctionIndex(0, B));
+    });
+    expect(
+      selectedThreadSelectors.getSelectedFunctionIndex(getState())
+    ).toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedFunctionIndex(getState())
+    ).not.toBeNull();
+  },
+  'both a selected and a right-clicked function': (
+    { dispatch, getState }: Store,
+    { A, B }: FuncNamesDict
+  ) => {
+    act(() => {
+      dispatch(changeSelectedFunctionIndex(0, A));
+    });
+    act(() => {
+      dispatch(changeRightClickedFunctionIndex(0, B));
+    });
+    expect(
+      selectedThreadSelectors.getSelectedFunctionIndex(getState())
+    ).not.toBeNull();
+    expect(
+      selectedThreadSelectors.getRightClickedFunctionIndex(getState())
+    ).not.toBeNull();
+  },
+};
+/* eslint-enable jest/no-standalone-expect */
+
+describe('function list transform shortcuts', () => {
+  for (const [name, action] of objectEntries(functionListActions)) {
+    describe(`with ${name}`, () => {
+      testFunctionTransformKeyboardShortcuts(() => {
+        const { store, funcNames, getTransform } = setupStore(
+          <ProfileFunctionListView />
+        );
+
+        const { B } = funcNames;
+        action(store, funcNames);
+
+        return {
+          getTransform,
+          pressKey: pressKeyBuilder('treeViewBody'),
+          expectedFuncIndex: B,
+          expectedResourceIndex: 0,
         };
       });
     });

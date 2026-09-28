@@ -581,8 +581,60 @@ type ChildrenInfo = {
 export type SuffixOrderIndex = number;
 
 /**
- * The CallNodeInfo implementation for the inverted tree, with additional
- * functionality for the inverted call tree.
+ * The interface for the inverted-mode call node info, which extends
+ * CallNodeInfo with the additional functionality that consumers of inverted
+ * call trees need (suffix order, root identification, function count).
+ *
+ * Two implementations exist:
+ *  - LazyInvertedCallNodeInfo, which has one root per func and materializes
+ *    non-root nodes on demand. Used for the regular "invert call stack" mode
+ *    and the function list tab, where any func can be a displayed root.
+ *  - LowerWingCallNodeInfo, which is built eagerly from the entry points of
+ *    a single selected function. Used for the lower wing.
+ */
+export interface CallNodeInfoInverted extends CallNodeInfo {
+  // Get a mapping SuffixOrderIndex -> IndexIntoCallNodeTable.
+  // The contents may be mutated by the implementation as inverted nodes get
+  // materialized on demand. Callers should not hold on to this array across
+  // calls that may create new inverted nodes (getChildren, getCallNodeIndexFromPath).
+  getSuffixOrderedCallNodes(): Uint32Array;
+
+  // The inverse of getSuffixOrderedCallNodes: IndexIntoCallNodeTable -> SuffixOrderIndex.
+  // Same staleness caveat as above.
+  getSuffixOrderIndexes(): Uint32Array;
+
+  // The [start, exclusiveEnd] suffix order index range for this inverted node.
+  getSuffixOrderIndexRangeForCallNode(
+    nodeHandle: IndexIntoCallNodeTable
+  ): [SuffixOrderIndex, SuffixOrderIndex];
+
+  // The number of functions in the func table this CNI was built from.
+  // (Sizes per-func scratch buffers in callers; not directly tied to the
+  // number of inverted-tree roots — see getRootCount.)
+  getFuncCount(): number;
+
+  // The number of roots in the inverted tree. Root call node handles are
+  // 0..getRootCount()-1. For the full inverted tree this equals funcCount
+  // (one root per func); for a lower-wing CNI it is 1.
+  getRootCount(): number;
+
+  // Returns the inverted root call node handle for `funcIndex`, or -1 if no
+  // root in this CNI corresponds to that function (e.g. a lower-wing CNI only
+  // has a root for its selected func).
+  getRootNodeForFunc(
+    funcIndex: IndexIntoFuncTable
+  ): IndexIntoCallNodeTable | -1;
+
+  // True if the given node is a root of the inverted tree.
+  isRoot(nodeHandle: IndexIntoCallNodeTable): boolean;
+
+  // Materialize and return the children of this inverted node. Sorted by func.
+  getChildren(nodeIndex: IndexIntoCallNodeTable): IndexIntoCallNodeTable[];
+}
+
+/**
+ * The lazy CallNodeInfoInverted implementation. It has one root per func and
+ * materializes non-root nodes on demand.
  *
  * # The Suffix Order
  *
@@ -902,7 +954,7 @@ export type SuffixOrderIndex = number;
  * deep nodes. They're not needed anymore. So _takeDeepNodesForInvertedNode
  * nulls out the stored deepNodes for an inverted node when it's called.
  */
-export class CallNodeInfoInverted implements CallNodeInfo {
+export class LazyInvertedCallNodeInfo implements CallNodeInfoInverted {
   // The non-inverted call node table.
   _callNodeTable: CallNodeTable;
 
@@ -1020,11 +1072,21 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     return this._suffixOrderIndexes;
   }
 
-  // Get the number of functions. There is one root per function.
-  // So this is also the number of roots at the same time.
-  // The inverted call node index for a root is the same as the function index.
+  // Get the number of functions. There is one root per function in this
+  // (full inverted) CNI, so it also equals getRootCount().
+  // For roots, the inverted call node handle equals the function index.
   getFuncCount(): number {
     return this._rootCount;
+  }
+
+  getRootCount(): number {
+    return this._rootCount;
+  }
+
+  // For the full inverted tree, each func has its own root and the root
+  // handle equals the func index.
+  getRootNodeForFunc(funcIndex: IndexIntoFuncTable): InvertedCallNodeHandle {
+    return funcIndex;
   }
 
   // Returns whether the given node is a root node.
@@ -1716,3 +1778,679 @@ export class CallNodeInfoInverted implements CallNodeInfo {
     ];
   }
 }
+
+// The lower wing's inverted call node table. Index 0 is the selected-func
+// root; indices 1..length-1 are non-root nodes. The public InvertedCallNodeHandle
+// IS the table index (no translation): handle 0 is the root, handles
+// 1..length-1 are non-roots.
+//
+// Layout note: rows are appended in BFS-by-inverted-depth order, with each
+// parent's children emitted contiguously, sorted by func index. Index 0 is the
+// root (depth 0); indices 1..length-1 have monotonically non-decreasing depth.
+//
+// The columns are plain `number[]` (not typed arrays). The CNI grows them by
+// `push()` as the BFS extends; `getLowerWingTableUpToDepth(k)` returns a
+// snapshot object that aliases the same backing arrays (no copy). Consumers
+// must iterate `[0, length)` only — entries beyond `length` may be appended
+// later as the BFS expands further, and `children[i]` for `i >= _nextK` is the
+// shared empty placeholder.
+export type LowerWingTable = {
+  prefix: number[]; // -> InvertedCallNodeHandle
+  func: number[]; // -> IndexIntoFuncTable
+  category: number[];
+  subcategory: number[];
+  innerWindowID: number[];
+  sourceFramesInlinedIntoSymbol: number[];
+  depth: number[];
+  suffixOrderIndexRangeStart: number[];
+  suffixOrderIndexRangeEnd: number[];
+  children: Array<InvertedCallNodeHandle[]>; // Sorted by func
+  length: number;
+};
+
+/**
+ * Lazy, depth-incremental CallNodeInfoInverted for the lower wing.
+ *
+ * Mirrors LazyInvertedCallNodeInfo's role but only for the single selected
+ * function: the lower wing's "root" is the inverted node for `selectedFuncIndex`,
+ * and every other logical root is empty. Construction is cheap: only Pass 1
+ * (entry-point collection) runs upfront. The rest of the BFS is resumable and
+ * runs on demand via `getLowerWingTableUpToDepth(k)` or any accessor that needs
+ * to read a node's children.
+ *
+ * Why lazy:
+ *  - For deeply-nested selections (e.g. an allocator called from everywhere),
+ *    the full inverted subtree can have thousands of rows. The flame graph
+ *    only renders the rows currently in the viewport, so building deeper than
+ *    necessary is wasted work.
+ *
+ * Handle scheme:
+ *  - There is exactly one root, with handle === 0. Its func is `selectedFuncIndex`
+ *    (or 0 when no selection — the row is then a placeholder with no children).
+ *  - Non-root handles are 1..length-1 and equal their table index. Handles
+ *    other than 0 only exist after the BFS has expanded to materialize them.
+ *  - `getRootNodeForFunc(f)` returns 0 iff f === selectedFuncIndex, else -1.
+ *  - `getSuffixOrderedCallNodes()` and `getSuffixOrderIndexes()` are kept in
+ *    sync as the BFS refines partitions.
+ */
+export class LowerWingCallNodeInfo implements CallNodeInfoInverted {
+  _callNodeTable: CallNodeTable;
+  _stackIndexToNonInvertedCallNodeIndex: Int32Array;
+  _defaultCategory: IndexIntoCategoryList;
+  // Number of functions in the originating func table. Used to size per-func
+  // scratch buffers in `_extendToDepth`; unrelated to the number of roots
+  // (which is always 1 — see getRootCount).
+  _funcCount: number;
+  _selectedFuncIndex: IndexIntoFuncTable | null;
+
+  // Suffix-ordered entry points: maps suffix order index -> non-inverted call
+  // node index. Length === number of entry points. Permuted in-place as the
+  // BFS refines partitions, so consumers that hold the reference across an
+  // extension see updated positions. The set of entries in any node's
+  // [soStart, soEnd) range stays invariant.
+  _selfNodes: Uint32Array;
+
+  // Inverse mapping: non-inverted call node -> suffix order index. Length ===
+  // non-inverted call node count. Non-entry-point nodes get 0xFFFFFFFF. Kept
+  // in sync with _selfNodes during every partition step.
+  _suffixOrderIndexes: Uint32Array;
+
+  // Per-suffix-position "deep" cursor advanced by the BFS. `_deepNodes[i]` is
+  // the non-inverted ancestor of `_selfNodes[i]` at the inverted depth that
+  // has currently been expanded for that suffix-order slot — i.e. how far up
+  // the original (non-inverted) call chain we've walked for that entry. The
+  // BFS steps it via `prefixCol[deepNodes[i]]` once per row. -1 marks an
+  // entry whose chain bottomed out (no more callers to expand).
+  _deepNodes: Int32Array;
+
+  // Column-store of the growing inverted call node table. Index 0 is the
+  // selected-func root; indices 1..length-1 are non-roots. `_tChildren`
+  // always has the same length as the other columns — entries for not-yet-
+  // processed nodes hold the shared empty placeholder, so the snapshot is
+  // safe to index at any valid table index.
+  _tPrefix: number[];
+  _tFunc: number[];
+  _tCategory: number[];
+  _tSubcategory: number[];
+  _tInnerWindowID: number[];
+  _tInlinedInto: number[];
+  _tDepth: number[];
+  _tSoStart: number[];
+  _tSoEnd: number[];
+  _tChildren: Array<InvertedCallNodeHandle[]>;
+
+  // BFS cursor. Nodes with table index < _nextK have been "processed" (their
+  // children at depth+1 have been emitted and `_tChildren[idx]` is final).
+  // Nodes with index >= _nextK exist in the table but their children entries
+  // still hold the placeholder.
+  _nextK: number;
+
+  // Pre-allocated scratch buffers reused across every BFS iteration inside
+  // `_extendToDepth`. None of these carry state across iterations — each
+  // iteration writes the slice it needs before reading it back.
+  _scratchSelf: Uint32Array;
+  _scratchDeep: Int32Array;
+  _countPerFunc: Int32Array;
+  _funcToChildIdx: Int32Array;
+  _startPerChild: Uint32Array;
+  _writePerChild: Uint32Array;
+
+  // Cached snapshot wrapper. Reused as long as the table length hasn't grown
+  // since it was built.
+  _cachedTable: LowerWingTable | null;
+  _cachedTableLength: number;
+
+  constructor(
+    callNodeTable: CallNodeTable,
+    stackIndexToNonInvertedCallNodeIndex: Int32Array,
+    defaultCategory: IndexIntoCategoryList,
+    funcCount: number,
+    selectedFuncIndex: IndexIntoFuncTable | null
+  ) {
+    this._callNodeTable = callNodeTable;
+    this._stackIndexToNonInvertedCallNodeIndex =
+      stackIndexToNonInvertedCallNodeIndex;
+    this._defaultCategory = defaultCategory;
+    this._funcCount = funcCount;
+    this._selectedFuncIndex = selectedFuncIndex;
+
+    // Pass 1: collect root-most non-inverted nodes whose func is the selected
+    // one. The subtree skip-ahead prevents nested re-entries from being
+    // counted twice (an `f` called by `f` only contributes once).
+    const callNodeCount = callNodeTable.length;
+    const funcCol = callNodeTable.func;
+    const entries: number[] = [];
+    if (selectedFuncIndex !== null) {
+      const subtreeEndCol = callNodeTable.subtreeRangeEnd;
+      for (let i = 0; i < callNodeCount; i++) {
+        if (funcCol[i] !== selectedFuncIndex) {
+          continue;
+        }
+        entries.push(i);
+        i = subtreeEndCol[i] - 1;
+      }
+    }
+
+    const N = entries.length;
+    this._selfNodes = new Uint32Array(N);
+    this._deepNodes = new Int32Array(N);
+    this._suffixOrderIndexes = new Uint32Array(callNodeCount);
+    this._suffixOrderIndexes.fill(0xffffffff);
+
+    // Resolve root attributes. With entries, scan them for category/subcategory/
+    // inlined conflicts (same rule as a non-root). Without entries, fall back
+    // to the same defaults the old `_emptyLowerWingTree` used so accessor
+    // results don't change for empty trees.
+    let rootCategory: number;
+    let rootSubcategory: number;
+    let rootInnerWindowID: number;
+    let rootInlined: number;
+    let rootFunc: number;
+    if (N === 0) {
+      rootCategory = defaultCategory;
+      rootSubcategory = 0;
+      rootInnerWindowID = 0;
+      rootInlined = -2;
+      rootFunc = selectedFuncIndex ?? 0;
+    } else {
+      const categoryCol = callNodeTable.category;
+      const subcategoryCol = callNodeTable.subcategory;
+      const innerWindowIDCol = callNodeTable.innerWindowID;
+      const inlinedCol = callNodeTable.sourceFramesInlinedIntoSymbol;
+      const e0 = entries[0];
+      rootCategory = categoryCol[e0];
+      rootSubcategory = subcategoryCol[e0];
+      rootInnerWindowID = innerWindowIDCol[e0];
+      rootInlined = inlinedCol[e0];
+      this._selfNodes[0] = e0;
+      this._deepNodes[0] = e0;
+      this._suffixOrderIndexes[e0] = 0;
+      for (let k = 1; k < N; k++) {
+        const e = entries[k];
+        this._selfNodes[k] = e;
+        this._deepNodes[k] = e;
+        this._suffixOrderIndexes[e] = k;
+        if (categoryCol[e] !== rootCategory) {
+          rootCategory = defaultCategory;
+          rootSubcategory = 0;
+        } else if (subcategoryCol[e] !== rootSubcategory) {
+          rootSubcategory = 0;
+        }
+        if (inlinedCol[e] !== rootInlined) {
+          rootInlined = -1;
+        }
+      }
+      rootFunc = selectedFuncIndex as number;
+    }
+
+    // Seed the table with the root row. `_tChildren[0]` starts as the empty
+    // placeholder and gets overwritten by `_processNode(0)` when the root is
+    // expanded.
+    this._tPrefix = [-1];
+    this._tFunc = [rootFunc];
+    this._tCategory = [rootCategory];
+    this._tSubcategory = [rootSubcategory];
+    this._tInnerWindowID = [rootInnerWindowID];
+    this._tInlinedInto = [rootInlined];
+    this._tDepth = [0];
+    this._tSoStart = [0];
+    this._tSoEnd = [N];
+    this._tChildren = [EMPTY_LOWER_WING_CHILDREN];
+
+    this._scratchSelf = new Uint32Array(N);
+    this._scratchDeep = new Int32Array(N);
+    this._countPerFunc = new Int32Array(funcCount);
+    this._funcToChildIdx = new Int32Array(funcCount);
+    this._startPerChild = new Uint32Array(funcCount);
+    this._writePerChild = new Uint32Array(funcCount);
+
+    this._nextK = 0;
+    this._cachedTable = null;
+    this._cachedTableLength = -1;
+  }
+
+  isInverted(): boolean {
+    return true;
+  }
+
+  asInverted(): CallNodeInfoInverted | null {
+    return this;
+  }
+
+  getCallNodeTable(): CallNodeTable {
+    return this._callNodeTable;
+  }
+
+  getStackIndexToNonInvertedCallNodeIndex(): Int32Array {
+    return this._stackIndexToNonInvertedCallNodeIndex;
+  }
+
+  getSuffixOrderedCallNodes(): Uint32Array {
+    return this._selfNodes;
+  }
+
+  getSuffixOrderIndexes(): Uint32Array {
+    return this._suffixOrderIndexes;
+  }
+
+  getFuncCount(): number {
+    return this._funcCount;
+  }
+
+  getRootCount(): number {
+    return 1;
+  }
+
+  // Only the selected func has a root in this CNI. Other funcs return -1.
+  getRootNodeForFunc(
+    funcIndex: IndexIntoFuncTable
+  ): InvertedCallNodeHandle | -1 {
+    return funcIndex === this._selectedFuncIndex ? 0 : -1;
+  }
+
+  isRoot(nodeHandle: InvertedCallNodeHandle): boolean {
+    return nodeHandle === 0;
+  }
+
+  getSuffixOrderIndexRangeForCallNode(
+    nodeHandle: InvertedCallNodeHandle
+  ): [SuffixOrderIndex, SuffixOrderIndex] {
+    return [this._tSoStart[nodeHandle], this._tSoEnd[nodeHandle]];
+  }
+
+  getChildren(nodeIndex: InvertedCallNodeHandle): InvertedCallNodeHandle[] {
+    // Extend the BFS far enough for this node to have its children
+    // materialized (depth 0 for the root, depth d for a node at depth d).
+    this._extendToDepth(this._tDepth[nodeIndex]);
+    return this._tChildren[nodeIndex];
+  }
+
+  getCallNodePathFromIndex(
+    callNodeHandle: InvertedCallNodeHandle | null
+  ): CallNodePath {
+    if (callNodeHandle === null || callNodeHandle === -1) {
+      return [];
+    }
+    const callNodePath: number[] = [];
+    let current = callNodeHandle;
+    while (current !== 0) {
+      callNodePath.push(this._tFunc[current]);
+      current = this._tPrefix[current];
+    }
+    callNodePath.push(this._tFunc[0]);
+    callNodePath.reverse();
+    return callNodePath;
+  }
+
+  getCallNodeIndexFromPath(
+    callNodePath: CallNodePath
+  ): InvertedCallNodeHandle | null {
+    if (callNodePath.length === 0) {
+      return null;
+    }
+    // The only root in this CNI is for the selected func. Any path that doesn't
+    // start there has no match.
+    if (callNodePath[0] !== this._selectedFuncIndex) {
+      return null;
+    }
+    let handle: InvertedCallNodeHandle = 0;
+    for (let i = 1; i < callNodePath.length; i++) {
+      const next = this.getCallNodeIndexFromParentAndFunc(
+        handle,
+        callNodePath[i]
+      );
+      if (next === null) {
+        return null;
+      }
+      handle = next;
+    }
+    return handle;
+  }
+
+  getCallNodeIndexFromParentAndFunc(
+    parent: InvertedCallNodeHandle | -1,
+    func: IndexIntoFuncTable
+  ): InvertedCallNodeHandle | null {
+    if (parent === -1) {
+      return this.getRootNodeForFunc(func) === -1 ? null : 0;
+    }
+    const children = this.getChildren(parent);
+    // Children are sorted by func; bisect to find a match.
+    const index = bisectionRightByKey(children, func, (node) =>
+      this.funcForNode(node)
+    );
+    if (index === 0) {
+      return null;
+    }
+    const candidate = children[index - 1];
+    return this.funcForNode(candidate) === func ? candidate : null;
+  }
+
+  prefixForNode(
+    callNodeHandle: InvertedCallNodeHandle
+  ): InvertedCallNodeHandle | -1 {
+    return this._tPrefix[callNodeHandle];
+  }
+
+  funcForNode(callNodeHandle: InvertedCallNodeHandle): IndexIntoFuncTable {
+    return this._tFunc[callNodeHandle];
+  }
+
+  categoryForNode(
+    callNodeHandle: InvertedCallNodeHandle
+  ): IndexIntoCategoryList {
+    return this._tCategory[callNodeHandle];
+  }
+
+  subcategoryForNode(
+    callNodeHandle: InvertedCallNodeHandle
+  ): IndexIntoSubcategoryListForCategory {
+    return this._tSubcategory[callNodeHandle];
+  }
+
+  innerWindowIDForNode(
+    callNodeHandle: InvertedCallNodeHandle
+  ): IndexIntoCategoryList {
+    return this._tInnerWindowID[callNodeHandle];
+  }
+
+  depthForNode(callNodeHandle: InvertedCallNodeHandle): number {
+    return this._tDepth[callNodeHandle];
+  }
+
+  sourceFramesInlinedIntoSymbolForNode(
+    callNodeHandle: InvertedCallNodeHandle
+  ): IndexIntoNativeSymbolTable | -1 | -2 {
+    return this._tInlinedInto[callNodeHandle] as
+      | IndexIntoNativeSymbolTable
+      | -1
+      | -2;
+  }
+
+  // Returns a snapshot of the lower-wing inverted call node table, fully
+  // expanded. Kept for callers (and tests) that want the whole tree at once;
+  // new code should prefer `getLowerWingTableUpToDepth(k)`.
+  getLowerWingTable(): LowerWingTable {
+    return this.getLowerWingTableUpToDepth(Infinity);
+  }
+
+  // Returns a snapshot of the lower-wing inverted call node table containing
+  // at least every node with inverted depth <= `targetDepth`. The snapshot may
+  // also include nodes at `targetDepth + 1` (children emitted when the deepest
+  // requested level is processed) — callers must iterate up to `length`.
+  //
+  // Nodes whose `children` array is the shared `EMPTY_LOWER_WING_CHILDREN`
+  // placeholder are those that haven't been processed yet. They sit at
+  // `targetDepth + 1` (or are true leaves whose entry chains bottomed out).
+  // Calling `getLowerWingTableUpToDepth(k')` for any k' >= their depth will
+  // expand them on the next call.
+  getLowerWingTableUpToDepth(targetDepth: number): LowerWingTable {
+    this._extendToDepth(targetDepth);
+    return this._getSnapshotTable();
+  }
+
+  getSelectedFuncIndex(): IndexIntoFuncTable | null {
+    return this._selectedFuncIndex;
+  }
+
+  // Run the BFS while the next queued node sits at depth <= `targetDepth`.
+  // Nodes at depth `targetDepth + 1` may be added to the table by the final
+  // iteration but are not themselves processed (their `_tChildren[idx]` keeps
+  // the placeholder).
+  //
+  // The body that processes a single node (Pass 1 — bucket-count entries by
+  // their next ancestor's func; Pass 2 — scatter entries into scratch and
+  // copy back; Pass 3 — emit one child row per distinct func) is inlined here
+  // so all the `this.*` column references and scratch buffers are hoisted to
+  // locals once per BFS run rather than once per processed node. The local
+  // references stay valid across the loop because each column is a JS array
+  // grown in place via `push()` — the backing array identity doesn't change.
+  _extendToDepth(targetDepth: number): void {
+    const tPrefix = this._tPrefix;
+    const tFunc = this._tFunc;
+    const tCategory = this._tCategory;
+    const tSubcategory = this._tSubcategory;
+    const tInnerWindowID = this._tInnerWindowID;
+    const tInlinedInto = this._tInlinedInto;
+    const tDepth = this._tDepth;
+    const tSoStart = this._tSoStart;
+    const tSoEnd = this._tSoEnd;
+    const tChildren = this._tChildren;
+
+    const selfNodes = this._selfNodes;
+    const deepNodes = this._deepNodes;
+    const suffixOrderIndexes = this._suffixOrderIndexes;
+    const callNodeTable = this._callNodeTable;
+    const funcCol = callNodeTable.func;
+    const prefixCol = callNodeTable.prefix;
+    const categoryCol = callNodeTable.category;
+    const subcategoryCol = callNodeTable.subcategory;
+    const innerWindowIDCol = callNodeTable.innerWindowID;
+    const inlinedCol = callNodeTable.sourceFramesInlinedIntoSymbol;
+    const countPerFunc = this._countPerFunc;
+    const funcToChildIdx = this._funcToChildIdx;
+    const startPerChild = this._startPerChild;
+    const writePerChild = this._writePerChild;
+    const scratchSelf = this._scratchSelf;
+    const scratchDeep = this._scratchDeep;
+    const defaultCategory = this._defaultCategory;
+
+    // Scratch list of distinct funcs seen in Pass 1 of the current node.
+    // Cleared at the top of each iteration.
+    const childFuncs: number[] = [];
+
+    let k = this._nextK;
+    while (k < tFunc.length) {
+      if (tDepth[k] > targetDepth) {
+        break;
+      }
+
+      const parentSuffixStart = tSoStart[k];
+      const parentSuffixEnd = tSoEnd[k];
+      const parentDepth = tDepth[k];
+      // Public handle === table index.
+      const parentHandle = k;
+
+      // Pass 1: walk each entry's deepNode one step up, bucket-counting by
+      // the new deepNode's func. Entries whose chain bottoms out are tallied
+      // as leaves and stay at the parent.
+      childFuncs.length = 0;
+      let leafCount = 0;
+      for (let i = parentSuffixStart; i < parentSuffixEnd; i++) {
+        const newDeep = prefixCol[deepNodes[i]];
+        if (newDeep === -1) {
+          leafCount++;
+          continue;
+        }
+        const f = funcCol[newDeep];
+        if (countPerFunc[f] === 0) {
+          childFuncs.push(f);
+        }
+        countPerFunc[f]++;
+      }
+
+      const childCount = childFuncs.length;
+      if (childCount === 0) {
+        // No children — leave the placeholder we seeded at child-emit time
+        // (or for the root in the constructor) in place.
+        k++;
+        continue;
+      }
+
+      childFuncs.sort((a, b) => a - b);
+
+      // Compute each child's absolute [start, end) range, leaves first then
+      // per-func partitions in sorted order.
+      let cursor = parentSuffixStart + leafCount;
+      for (let c = 0; c < childCount; c++) {
+        const f = childFuncs[c];
+        funcToChildIdx[f] = c + 1; // 1-based; 0 means "unset"
+        startPerChild[c] = cursor;
+        writePerChild[c] = cursor;
+        cursor += countPerFunc[f];
+        countPerFunc[f] = 0;
+      }
+
+      // Pass 2: scatter (self, deep) pairs into scratch, then copy back —
+      // updating `_suffixOrderIndexes` so the inverse mapping stays in sync.
+      let leafWrite = parentSuffixStart;
+      for (let i = parentSuffixStart; i < parentSuffixEnd; i++) {
+        const self = selfNodes[i];
+        const newDeep = prefixCol[deepNodes[i]];
+        let writeAt;
+        let storeDeep;
+        if (newDeep === -1) {
+          writeAt = leafWrite++;
+          storeDeep = -1;
+        } else {
+          const c = funcToChildIdx[funcCol[newDeep]] - 1;
+          writeAt = writePerChild[c]++;
+          storeDeep = newDeep;
+        }
+        const local = writeAt - parentSuffixStart;
+        scratchSelf[local] = self;
+        scratchDeep[local] = storeDeep;
+      }
+      const len = parentSuffixEnd - parentSuffixStart;
+      for (let i = 0; i < len; i++) {
+        const pos = parentSuffixStart + i;
+        const ns = scratchSelf[i];
+        selfNodes[pos] = ns;
+        deepNodes[pos] = scratchDeep[i];
+        suffixOrderIndexes[ns] = pos;
+      }
+
+      for (let i = 0; i < childCount; i++) {
+        funcToChildIdx[childFuncs[i]] = 0;
+      }
+
+      // Pass 3: emit one child row per distinct func. Each child gets a
+      // placeholder `_tChildren` slot so column lengths stay aligned; the
+      // placeholder is overwritten when the child is itself processed.
+      const childHandles: InvertedCallNodeHandle[] = new Array(childCount);
+      const childDepth = parentDepth + 1;
+      for (let c = 0; c < childCount; c++) {
+        const f = childFuncs[c];
+        const start = startPerChild[c];
+        const end = writePerChild[c];
+        const first = deepNodes[start];
+        let category = categoryCol[first];
+        let subcategory = subcategoryCol[first];
+        const innerWindowID = innerWindowIDCol[first];
+        let inlined = inlinedCol[first];
+        for (let j = start + 1; j < end; j++) {
+          const dn = deepNodes[j];
+          if (categoryCol[dn] !== category) {
+            category = defaultCategory;
+            subcategory = 0;
+          } else if (subcategoryCol[dn] !== subcategory) {
+            subcategory = 0;
+          }
+          if (inlinedCol[dn] !== inlined) {
+            inlined = -1;
+          }
+        }
+
+        // Public handle === table index, which is the slot the child row is
+        // about to be pushed into.
+        const newHandle = tPrefix.length;
+        tPrefix.push(parentHandle);
+        tFunc.push(f);
+        tCategory.push(category);
+        tSubcategory.push(subcategory);
+        tInnerWindowID.push(innerWindowID);
+        tInlinedInto.push(inlined);
+        tDepth.push(childDepth);
+        tSoStart.push(start);
+        tSoEnd.push(end);
+        tChildren.push(EMPTY_LOWER_WING_CHILDREN);
+
+        childHandles[c] = newHandle;
+      }
+      tChildren[k] = childHandles;
+
+      k++;
+    }
+    this._nextK = k;
+  }
+
+  // Return a snapshot view of the current table. The column fields alias the
+  // CNI's live backing arrays directly — no copy, no typed-array conversion.
+  // The arrays only grow by `push()` and `_tChildren[k]` is overwritten in
+  // place from the placeholder to the node's real children when the node is
+  // processed; in both cases the prefix `[0, length)` observed at snapshot
+  // time stays stable, so consumers iterating that prefix see consistent
+  // data even if the BFS extends further.
+  //
+  // The wrapper object itself is cached and reused as long as `length` hasn't
+  // grown since the last call — this keeps `===` identity stable for selector
+  // memoization downstream.
+  _getSnapshotTable(): LowerWingTable {
+    const length = this._tFunc.length;
+    if (this._cachedTable !== null && this._cachedTableLength === length) {
+      return this._cachedTable;
+    }
+    const table: LowerWingTable = {
+      prefix: this._tPrefix,
+      func: this._tFunc,
+      category: this._tCategory,
+      subcategory: this._tSubcategory,
+      innerWindowID: this._tInnerWindowID,
+      sourceFramesInlinedIntoSymbol: this._tInlinedInto,
+      depth: this._tDepth,
+      suffixOrderIndexRangeStart: this._tSoStart,
+      suffixOrderIndexRangeEnd: this._tSoEnd,
+      children: this._tChildren,
+      length,
+    };
+    this._cachedTable = table;
+    this._cachedTableLength = length;
+    return table;
+  }
+}
+
+/**
+ * Compute the number of rows in the lower-wing flame graph for `selectedFuncIndex`
+ * without building the lower-wing tree.
+ *
+ * The lower-wing max inverted depth equals the maximum non-inverted depth across
+ * all entry points (root-most non-inverted call nodes whose func is the selected
+ * one): an entry at non-inverted depth D contributes D ancestor steps above the
+ * inverted root, giving a final inverted depth of D. We add 1 to match the
+ * "depth-plus-one" row-count convention.
+ *
+ * Entry-point collection mirrors the skip-ahead in `_buildLowerWingTree` (Pass 1)
+ * so nested re-entries aren't double-counted. Returns 1 when there is no
+ * selection or no entry points — matching the empty-tree fallback in
+ * `_emptyLowerWingTree`, which has a length-1 root row at depth 0.
+ */
+export function computeLowerWingMaxDepthPlusOne(
+  callNodeTable: CallNodeTable,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): number {
+  if (selectedFuncIndex === null) {
+    return 1;
+  }
+  const funcCol = callNodeTable.func;
+  const subtreeEndCol = callNodeTable.subtreeRangeEnd;
+  const depthCol = callNodeTable.depth;
+  const callNodeCount = callNodeTable.length;
+  let maxDepth = 0;
+  let found = false;
+  for (let i = 0; i < callNodeCount; i++) {
+    if (funcCol[i] !== selectedFuncIndex) {
+      continue;
+    }
+    found = true;
+    const d = depthCol[i];
+    if (d > maxDepth) {
+      maxDepth = d;
+    }
+    i = subtreeEndCol[i] - 1;
+  }
+  return found ? maxDepth + 1 : 1;
+}
+
+// Shared empty children array for unused roots. Returned by reference; callers
+// must not mutate.
+const EMPTY_LOWER_WING_CHILDREN: InvertedCallNodeHandle[] = [];

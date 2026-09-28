@@ -11,6 +11,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
+  selectedFunctionSelectors,
 } from 'firefox-profiler/selectors/per-thread';
 import { getSelectedThreadsKey } from 'firefox-profiler/selectors/url-state';
 import { toggleOpenCategoryInSidebar } from 'firefox-profiler/actions/app';
@@ -25,6 +26,7 @@ import type {
   ThreadsKey,
   CategoryList,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
   SelfAndTotal,
   WeightType,
   IndexIntoCategoryList,
@@ -193,7 +195,13 @@ export const CategoryBreakdown = explicitConnect<
 });
 
 type StateProps = {
-  readonly selectedNodeIndex: IndexIntoCallNodeTable | null;
+  // Whether the sidebar describes a call node (call tree, flame graph) or a
+  // function (function list).
+  readonly selectionKind: 'call-node' | 'function';
+  readonly selectedNodeIndex:
+    | IndexIntoCallNodeTable
+    | IndexIntoFuncTable
+    | null;
   readonly selectedThreadsKey: ThreadsKey;
   readonly name: string;
   readonly lib: string;
@@ -268,6 +276,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
 
   override render() {
     const {
+      selectionKind,
       selectedNodeIndex,
       name,
       lib,
@@ -284,7 +293,13 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
     if (selectedNodeIndex === null) {
       return (
         <div className="sidebar sidebar-calltree">
-          <Localized id="CallTreeSidebar--select-a-node">
+          <Localized
+            id={
+              selectionKind === 'function'
+                ? 'CallTreeSidebar--select-a-function'
+                : 'CallTreeSidebar--select-a-node'
+            }
+          >
             <div className="sidebar-contents-wrapper">
               Select a node to display some information about it.
             </div>
@@ -323,9 +338,15 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
             ) : null}
           </header>
           <h4 className="sidebar-title3">
-            <Localized id="CallTreeSidebar--call-node-details">
-              <div>Call node details</div>
-            </Localized>
+            {selectionKind === 'function' ? (
+              <Localized id="CallTreeSidebar--function-details">
+                <div>Function details</div>
+              </Localized>
+            ) : (
+              <Localized id="CallTreeSidebar--call-node-details">
+                <div>Call node details</div>
+              </Localized>
+            )}
           </h4>
           {selectedNodeTracedSelfAndTotal ? (
             <Localized
@@ -421,6 +442,7 @@ class CallTreeSidebarImpl extends React.PureComponent<Props> {
 
 export const CallTreeSidebar = explicitConnect<{}, StateProps, {}>({
   mapStateToProps: (state) => ({
+    selectionKind: 'call-node',
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     selectedThreadsKey: getSelectedThreadsKey(state),
     name: getFunctionName(selectedNodeSelectors.getName(state)),
@@ -430,6 +452,21 @@ export const CallTreeSidebar = explicitConnect<{}, StateProps, {}>({
     weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
     selectedNodeTracedSelfAndTotal:
       selectedThreadSelectors.getTracedSelfAndTotalForSelectedCallNode(state),
+  }),
+  component: CallTreeSidebarImpl,
+});
+
+export const FunctionListSidebar = explicitConnect<{}, StateProps, {}>({
+  mapStateToProps: (state) => ({
+    selectionKind: 'function',
+    selectedNodeIndex: selectedThreadSelectors.getSelectedFunctionIndex(state),
+    selectedThreadsKey: getSelectedThreadsKey(state),
+    name: getFunctionName(selectedFunctionSelectors.getName(state)),
+    lib: selectedFunctionSelectors.getLib(state),
+    timings: selectedFunctionSelectors.getTimingsForSidebar(state),
+    categoryList: getCategories(state),
+    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
+    selectedNodeTracedSelfAndTotal: null,
   }),
   component: CallTreeSidebarImpl,
 });
