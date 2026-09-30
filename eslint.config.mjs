@@ -2,7 +2,6 @@ import { defineConfig } from 'eslint/config';
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import tsParser from '@typescript-eslint/parser';
-import babelPlugin from '@babel/eslint-plugin';
 import reactPlugin from 'eslint-plugin-react';
 import importPlugin from 'eslint-plugin-import';
 import jestPlugin from 'eslint-plugin-jest';
@@ -56,7 +55,6 @@ export default defineConfig(
       },
     },
     plugins: {
-      '@babel': babelPlugin,
       import: importPlugin,
     },
     settings: {
@@ -122,9 +120,7 @@ export default defineConfig(
       'no-extra-bind': 'error',
       'no-extra-label': 'error',
       'no-implied-eval': 'error',
-      // We use the version from the babel plugin so that `this` in a function
-      // class property doesn't give a false positive.
-      '@babel/no-invalid-this': 'error',
+      'no-invalid-this': 'error',
       'no-return-await': 'error',
       'no-self-compare': 'error',
       'no-throw-literal': 'error',
