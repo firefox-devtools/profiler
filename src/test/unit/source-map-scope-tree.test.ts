@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import { stripIndent } from 'common-tags';
 import {
   parseJsScopeTree,
   findInnermostFunctionScope,
@@ -151,6 +152,23 @@ describe('parseJsScopeTree', () => {
     const src = 'const o = { a, b }';
     const scopes = parseJsScopeTree(src);
     expect(scopes).toHaveLength(0);
+  });
+
+  it('handles shorthand destructuring defaults', () => {
+    const src = stripIndent`
+      class V {
+        with(o) {
+          const { a = 1, b = 2 } = o;
+          return a;
+        }
+        toString() {}
+      }
+    `;
+    const scopes = parseJsScopeTree(src);
+    expect(scopes.map((s) => s.astName)).toEqual(['with', 'toString']);
+
+    const withFn = scopes[0];
+    expect(withFn.end).toBe(src.indexOf('  toString') - 1);
   });
 
   it('creates no scope for an empty computed method', () => {
