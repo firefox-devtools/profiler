@@ -1,45 +1,24 @@
 {
   "presets": [
-    [
-      "@babel/preset-env",
-      {
-        // Allow `@babel/preset-env` to import polyfills from core-js as needed.
-        "useBuiltIns": "usage",
-        // Help `@babel/preset-env` make use of the correct core-js polyfills.
-        "corejs": "3.9",
-        // Perform transforms closest to targets defined in `.browserslistrc`.
-        "bugfixes": true
-      }
-    ],
+    "@babel/preset-env",
     [
       "@babel/preset-react",
       {
-        // When spreading props, use inline object with spread elements
-        // directly instead of Babel's `extend` helper or `Object.assign`.
-        "useSpread": true,
         // Automatically import 'react' into .tsx files.
         "runtime": "automatic"
       }
     ],
-    [
-      "@babel/preset-typescript",
-      {
-        "isTSX": true,
-        "allExtensions": true
-      }
-    ]
+    "@babel/preset-typescript"
   ],
   "plugins": [
-    // Though `@babel/plugin-transform-class-properties` is already included
-    // in `@babel/preset-env`, we include it specifically to be able to set
-    // `loose` mode on it, without enabling it for all the plugins included
-    // in `@babel/preset-env`.
+    // Class fields are native in our Node test target, so `@babel/preset-env`
+    // doesn't transform them. We still transform them explicitly to be able to
+    // use `loose` mode.
     [
       "@babel/plugin-transform-class-properties",
       {
-        // Without `loose`, the transformation uses `Object.defineProperty` which
-        // obeys the spec more, but we get a bundle that's 8kB larger. That was the
-        // default in babel v6.
+        // With `loose`, fields are assigned instead of being defined with
+        // `Object.defineProperty`.
         "loose": true
       }
     ],
