@@ -8,6 +8,7 @@
  */
 
 import type { ProfileFileFormat } from 'firefox-profiler/profile-logic/profile-file-encoding';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   Transform,
   CallTreeSummaryStrategy,
@@ -175,6 +176,25 @@ export type PermalinkResult = {
   url: string;
   /** share.firefox.dev URL, only when shortening was requested. */
   shortUrl: string | null;
+};
+
+/**
+ * Ephemeral view settings layered on top of the session state when building a
+ * permalink, so a link can reproduce what a single query showed. Every field is
+ * optional and falls back to the session state.
+ */
+export type PermalinkView = {
+  threadHandle?: string;
+  /** Selects this marker in the URL and picks its thread. */
+  markerHandle?: string;
+  tab?: TabSlug;
+  callTreeSearch?: string;
+  markerSearch?: string;
+  networkSearch?: string;
+  includeIdle?: boolean;
+  invertCallstack?: boolean;
+  strategy?: CallTreeSummaryStrategy;
+  sampleFilters?: SampleFilterSpec[];
 };
 
 // ===== Status Command =====
