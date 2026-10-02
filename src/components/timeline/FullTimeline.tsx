@@ -30,6 +30,7 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
+  selectAllVisibleTracks,
   changeRightClickedTrack,
 } from 'firefox-profiler/actions/profile-view';
 
@@ -63,6 +64,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly changeGlobalTrackOrder: typeof changeGlobalTrackOrder;
+  readonly selectAllVisibleTracks: typeof selectAllVisibleTracks;
   readonly changeRightClickedTrack: typeof changeRightClickedTrack;
 };
 
@@ -133,6 +135,25 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
     this.setState({ initialSelected: el });
   };
 
+  _onKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
+    const target = event.target;
+    if (
+      event.defaultPrevented ||
+      event.nativeEvent.isComposing ||
+      !(event.ctrlKey || event.metaKey) ||
+      event.altKey ||
+      event.shiftKey ||
+      event.key.toLowerCase() !== 'a' ||
+      (target instanceof HTMLElement &&
+        (target.matches('input, textarea, select') || target.isContentEditable))
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    this.props.selectAllVisibleTracks();
+  };
+
   override render() {
     const {
       globalTracks,
@@ -180,6 +201,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
               orient="vertical"
               onChangeOrder={changeGlobalTrackOrder}
               innerElementRef={innerElementRef}
+              onKeyDown={this._onKeyDown}
             >
               {globalTracks.map((_globalTrack, trackIndex) => (
                 <TimelineGlobalTrack
@@ -214,6 +236,7 @@ export const FullTimeline = explicitConnect<
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
+    selectAllVisibleTracks,
     changeRightClickedTrack,
   },
   component: withSize(FullTimelineImpl),
