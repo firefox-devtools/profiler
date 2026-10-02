@@ -55,6 +55,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getCounterForThread,
+  addTabInformationToProfile,
 } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import {
@@ -2160,33 +2161,46 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
 });
 
 describe('tab selector', function () {
-  function setup() {
-    const store = _getStoreWithURL();
-    return store;
+  function getProfileWithTabs() {
+    const profile = getProfileWithNiceTracks();
+    const {
+      firstTabTabID,
+      secondTabTabID,
+      parentInnerWindowIDsWithChildren,
+      secondTabInnerWindowIDs,
+    } = addTabInformationToProfile(profile);
+    // Thread 0 belongs to the first tab and thread 1 to the second tab.
+    profile.threads[0].usedInnerWindowIDs = [parentInnerWindowIDsWithChildren];
+    profile.threads[1].usedInnerWindowIDs = [secondTabInnerWindowIDs[0]];
+    return { profile, firstTabTabID, secondTabTabID };
+  }
+
+  function setup(search = '') {
+    const { profile, firstTabTabID, secondTabTabID } = getProfileWithTabs();
+    const store = _getStoreWithURL({ search }, profile);
+    return { ...store, firstTabTabID, secondTabTabID };
   }
 
   it('can serialize the tabFilter properly', function () {
-    const { dispatch, getState } = setup();
+    const { dispatch, getState, firstTabTabID, secondTabTabID } = setup();
 
     // Change the tab filter.
-    let tabID = 123;
-    dispatch(changeTabFilter(tabID));
+    dispatch(changeTabFilter(firstTabTabID));
 
     // Check if the state update happened properly.
-    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(firstTabTabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toBe(true);
 
     // Check if the URL update happened properly.
     let queryString = getQueryStringFromState(getState());
-    expect(queryString).toContain(`tabID=${tabID}`);
+    expect(queryString).toContain(`tabID=${firstTabTabID}`);
 
     // Change it again and check.
-    tabID = 321;
-    dispatch(changeTabFilter(tabID));
-    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    dispatch(changeTabFilter(secondTabTabID));
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(secondTabTabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toBe(true);
     queryString = getQueryStringFromState(getState());
-    expect(queryString).toContain(`tabID=${tabID}`);
+    expect(queryString).toContain(`tabID=${secondTabTabID}`);
   });
 
   it('null value does not appear in the url', function () {
@@ -2206,10 +2220,10 @@ describe('tab selector', function () {
   });
 
   it('can unserialize the tabFilter from URLs', () => {
-    const tabID = 123;
-    const { getState } = _getStoreWithURL({ search: `?tabID=${tabID}` });
+    const { secondTabTabID } = getProfileWithTabs();
+    const { getState } = setup(`?tabID=${secondTabTabID}`);
 
-    expect(urlStateSelectors.getTabFilter(getState())).toEqual(tabID);
+    expect(urlStateSelectors.getTabFilter(getState())).toEqual(secondTabTabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toEqual(true);
   });
 });
