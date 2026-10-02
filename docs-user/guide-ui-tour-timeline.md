@@ -8,6 +8,8 @@ Get to know Firefox Profiler UI a bit better with a tour that highlights various
 
 The Firefox Profiler visualizes multi-threaded profiles. Each thread gets a row in the timeline. Clicking on the name of the thread selects the thread for the selected panel below the timeline. Threads can be hidden and shown by right clicking the thread name.
 
+With a track name focused, press Ctrl+A (Command+A on macOS) to select all visible threads. Hidden threads remain unselected.
+
 ## Creating a range selection
 
 [A video highlighting a range selection in the timeline.](images/ui-tour-selection.webm ':include :type=video controls width=100%')
