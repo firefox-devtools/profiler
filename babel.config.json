@@ -10,36 +10,19 @@
     ],
     "@babel/preset-typescript"
   ],
+  // With `setPublicClassFields`, fields are assigned instead of being defined
+  // with `Object.defineProperty`.
+  "assumptions": {
+    "setPublicClassFields": true,
+    "privateFieldsAsProperties": true
+  },
   "plugins": [
     // Class fields are native in our Node test target, so `@babel/preset-env`
-    // doesn't transform them. We still transform them explicitly to be able to
-    // use `loose` mode.
-    [
-      "@babel/plugin-transform-class-properties",
-      {
-        // With `loose`, fields are assigned instead of being defined with
-        // `Object.defineProperty`.
-        "loose": true
-      }
-    ],
-    [
-      "@babel/plugin-transform-private-methods",
-      {
-        // Like `plugin-transform-class-properties`, `loose` option is being used
-        // inside of this plugin as well. These plugins must have the same value,
-        // therefore it's set to true here.
-        "loose": true
-      }
-    ],
-    [
-      "@babel/plugin-transform-private-property-in-object",
-      {
-        // Like `plugin-transform-class-properties`, `loose` option is being used
-        // inside of this plugin as well. These plugins must have the same value,
-        // therefore it's set to true here.
-        "loose": true
-      }
-    ],
+    // doesn't transform them. We still transform them explicitly so that the
+    // assumptions above apply to them.
+    "@babel/plugin-transform-class-properties",
+    "@babel/plugin-transform-private-methods",
+    "@babel/plugin-transform-private-property-in-object",
     [
       "module-resolver",
       {
