@@ -159,6 +159,11 @@ CallTree--bytes-total = Toplam Boyut (bayt)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Bazı { $calledFunction } çağrıları derleyici tarafından satır içine dönüştürüldü.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (satır içi)
+    .title = { $calledFunction } çağrılarına derleyici tarafından { $outerFunction } çağrıları dahil edildi.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -762,6 +767,14 @@ StackSettings--implementation-native2 = Yerel
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
+StackSettings--call-tree-strategy-js-allocations = JavaScript atamaları
+    .title = Atanan JavaScript baytını kullanarak özetle (atamaları kaldırma)
+StackSettings--call-tree-native-allocations = Ayrılan bellek
+    .title = Ayrılan belleğin baytlarını kullanarak özetle
+StackSettings--invert-call-stack = Çağrı yığınını tersine çevir
+    .title = Bir çağrı düğümünde geçen süreye göre sırala, düğümün altlarını yok say.
+StackSettings--include-idle-samples = Boşta olan örnekleri dahil et
+    .title = Yaprak çerçevesi Boşta kategorisinde olan örnekleri gizlemek için işareti kaldırın.
 StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
 StackSettings--use-stack-chart-same-widths = Her yığın için aynı genişliği kullan
 StackSettings--panel-search =
