@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
+import path from 'path';
 import {
   Command,
   CommanderError,
@@ -9,6 +10,7 @@ import {
   Option,
 } from 'commander';
 import { parse as parseToml } from 'smol-toml';
+import * as v from 'valibot';
 
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
@@ -43,6 +45,11 @@ import {
   mergeNonOverlappingThreadsByName,
   remapCountersAndProfilerOverhead,
 } from 'firefox-profiler/profile-logic/merge-compare';
+import {
+  embedJsSources,
+  type SourceReader,
+} from 'firefox-profiler/profile-logic/embed-js-sources';
+import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/source-map';
 
 /**
  * A CLI tool for editing profiles.
@@ -67,6 +74,9 @@ import {
  *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
  *     --only-keep-threads-with-markers-matching '-async,-sync' \
  *     --merge-non-overlapping-threads-by-name
+ *
+ *   node node-tools-dist/profiler-edit.js -i speedometer.json.gz -o out.json.gz \
+ *     --map-source-paths mapping.json
  */
 
 export type ProfileSource =
@@ -90,6 +100,7 @@ export interface CliOptions {
   output: string;
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
+  mapSourcePaths?: string;
   insertLabelFrames?: string;
   onlyKeepThreadsWithMarkersMatching?: string;
   mergeNonOverlappingThreadsByName?: boolean;
@@ -108,6 +119,132 @@ export function loadWasmSymbolicationSpecs(
       label: spec.unstrippedWasmPath,
     };
   });
+}
+
+/**
+ * One entry of a --map-source-paths file. A file whose URL starts with
+ * `urlPrefix` is read from `localPath`, at the path that follows the prefix in
+ * the URL.
+ */
+export type SourcePathMapping = {
+  // Always ends with a slash.
+  urlPrefix: string;
+  // Absolute path of the directory that `urlPrefix` was served from.
+  localPath: string;
+};
+
+const SourcePathMappingFileSchema = v.object({
+  mappings: v.array(
+    v.object({
+      urlPrefix: v.pipe(
+        v.string(),
+        v.url(),
+        v.transform((urlPrefix) => {
+          const href = new URL(urlPrefix).href;
+          // Without the trailing slash, "/Speedometer3" would also match
+          // "/Speedometer3-other/".
+          return href.endsWith('/') ? href : href + '/';
+        })
+      ),
+      localPath: v.pipe(v.string(), v.nonEmpty('Expected a non-empty path')),
+    })
+  ),
+});
+
+/**
+ * Parse the contents of a --map-source-paths file, which looks like this:
+ *
+ * {
+ *   "mappings": [
+ *     { "urlPrefix": "http://127.0.0.1:62763/", "localPath": "/path/to/dir" },
+ *     { "urlPrefix": "http://127.0.0.1:62763/other/", "localPath": "/other" }
+ *   ]
+ * }
+ *
+ * Relative local paths are resolved against `baseDir`.
+ */
+export function parseSourcePathMappings(
+  jsonText: string,
+  baseDir: string
+): SourcePathMapping[] {
+  const result = v.safeParse(SourcePathMappingFileSchema, JSON.parse(jsonText));
+  if (!result.success) {
+    throw new Error(
+      `Invalid source path mapping file:\n${v.summarize(result.issues)}`
+    );
+  }
+  return result.output.mappings.map(({ urlPrefix, localPath }) => ({
+    urlPrefix,
+    localPath: path.resolve(baseDir, localPath),
+  }));
+}
+
+/**
+ * Find the mapping that covers this URL, and the decoded path of the file
+ * relative to the mapping's root.
+ */
+function resolveMappedPath(
+  mappings: SourcePathMapping[],
+  url: string
+): { mapping: SourcePathMapping; relativePath: string } | null {
+  let normalizedUrl: string;
+  try {
+    // This also resolves "." and ".." segments, so that the remaining path
+    // can't leave the mapped directory.
+    const parsedUrl = new URL(url);
+    parsedUrl.search = '';
+    parsedUrl.hash = '';
+    normalizedUrl = parsedUrl.href;
+  } catch {
+    return null;
+  }
+  for (const mapping of mappings) {
+    if (!normalizedUrl.startsWith(mapping.urlPrefix)) {
+      continue;
+    }
+    try {
+      return {
+        mapping,
+        relativePath: decodeURIComponent(
+          normalizedUrl.slice(mapping.urlPrefix.length)
+        ),
+      };
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Read the files that the mappings cover from the local disk. URLs that no
+ * mapping covers resolve to null.
+ */
+export function createSourceReader(
+  mappings: SourcePathMapping[]
+): SourceReader {
+  // The most specific prefix wins, whatever the order in the file.
+  const sortedMappings = mappings
+    .slice()
+    .sort((a, b) => b.urlPrefix.length - a.urlPrefix.length);
+  return async (url) => {
+    const resolved = resolveMappedPath(sortedMappings, url);
+    if (resolved === null) {
+      return null;
+    }
+    const { mapping, relativePath } = resolved;
+    const filePath = path.resolve(mapping.localPath, relativePath);
+    // Profiles come from web content, so never read outside the mapped
+    // directory, even if the URL decoded to a ".." path.
+    if (!filePath.startsWith(mapping.localPath + path.sep)) {
+      return null;
+    }
+    try {
+      return await fs.promises.readFile(filePath, 'utf8');
+    } catch {
+      return null;
+    }
+  };
 }
 
 /**
@@ -252,6 +389,19 @@ export async function run(options: CliOptions) {
     loadWasmSymbolicationSpecs(options.symbolicateWasm)
   );
 
+  if (options.mapSourcePaths !== undefined) {
+    console.log('Embedding sources from mapped paths...');
+    const mappings = parseSourcePathMappings(
+      fs.readFileSync(options.mapSourcePaths, 'utf8'),
+      path.dirname(options.mapSourcePaths)
+    );
+    await embedJsSources(
+      profile,
+      createSourceReader(mappings),
+      runSourceMapSymbolicationNode
+    );
+  }
+
   if (options.insertLabelFrames !== undefined) {
     console.log('Inserting label frames...');
     const tomlText = fs.readFileSync(options.insertLabelFrames, 'utf8');
@@ -368,6 +518,10 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         .argParser(collectWasm)
         .default([] as WasmSymbolicationCliSpec[])
     )
+    .option(
+      '--map-source-paths <path>',
+      'JSON file mapping JS source URLs to local directories, to embed the sources and apply their source maps'
+    )
     .option('--insert-label-frames <path>', 'TOML file with label definitions')
     .option(
       '--only-keep-threads-with-markers-matching <search>',
@@ -428,6 +582,10 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
         ? opts.symbolicateWithServer
         : undefined,
     symbolicateWasm: opts.symbolicateWasm,
+    mapSourcePaths:
+      typeof opts.mapSourcePaths === 'string' && opts.mapSourcePaths !== ''
+        ? opts.mapSourcePaths
+        : undefined,
     insertLabelFrames:
       typeof opts.insertLabelFrames === 'string' &&
       opts.insertLabelFrames !== ''
