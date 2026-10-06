@@ -308,7 +308,7 @@ function canonicalizeJsLocations(profile: Profile): Profile {
 
   let canonicalized = 0;
   for (let i = 0; i < funcTable.length; i++) {
-    if (!funcTable.isJS[i]) {
+    if ((funcTable.flags[i] & FuncFlag.IsJS) === 0) {
       continue;
     }
     const name = stringArray[funcTable.name[i]];
@@ -338,6 +338,8 @@ function canonicalizeJsLocations(profile: Profile): Profile {
     funcTable.source[i] = sourceIndex;
     funcTable.lineNumber[i] = line;
     funcTable.columnNumber[i] = col;
+    funcTable.flags[i] |=
+      FuncFlag.HasSource | FuncFlag.HasLine | FuncFlag.HasColumn;
     canonicalized++;
   }
 
