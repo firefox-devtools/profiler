@@ -27,7 +27,9 @@ const FIXTURE = 'src/test/fixtures/upgrades/processed-1.json';
 describe('marker info with several handles', () => {
   let ctx: CliTestContext;
 
-  beforeEach(async () => {
+  // Every test here only reads from the session, so they can share one daemon
+  // instead of paying for a profile load each.
+  beforeAll(async () => {
     ctx = await createTestContext();
     await cli(ctx, ['load', FIXTURE]);
     // Listing the markers is what mints the m-N handles. The fixture thread has
@@ -35,7 +37,7 @@ describe('marker info with several handles', () => {
     await cli(ctx, ['thread', 'markers', '--list']);
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await cleanupTestContext(ctx);
   });
 

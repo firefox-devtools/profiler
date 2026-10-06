@@ -50,7 +50,7 @@
     "start-photon": "node scripts/run-photon-dev-server.mjs",
     "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_PROJECTS=browser jest",
     "test-node": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_ENVIRONMENT=node jest",
-    "test-all": "run-p --max-parallel 4 ts license-check lint test test-alex test-lockfile && yarn test-cli",
+    "test-all": "run-p --max-parallel 4 test-cli test ts lint license-check test-alex test-lockfile",
     "test-build-coverage": "yarn test --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
