@@ -317,6 +317,10 @@ Older versions are not documented in this changelog but can be found in [process
 
 ## Gecko profile format
 
+### Version 37
+
+FileIO marker schemas now have a `tableLabel`.
+
 ### Version 36
 
 The `Text` marker's `name` field and the `Log` marker's `message` field are now unique strings, so their payloads hold a string table index instead of the text itself. Both marker schemas declare this with the `unique-string` field format.

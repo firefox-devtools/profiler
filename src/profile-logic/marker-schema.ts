@@ -191,18 +191,6 @@ export function getSchemaFromMarker(
 // Matches ternary expressions inside marker labels, ie {marker.data.field ? 'truthy' : 'falsy'}
 const TERNARY_RE = /^\s*([\w.]+)\s*\?\s*'([^']*)'\s*:\s*'([^']*)'\s*$/;
 
-export const FILE_IO_TABLE_LABEL =
-  "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
-
-export function addFileIoTableLabel(schema: {
-  name: string;
-  tableLabel?: string;
-}): void {
-  if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
-    schema.tableLabel = FILE_IO_TABLE_LABEL;
-  }
-}
-
 /**
  * Marker schema can create a dynamic tooltip label. For instance a schema with
  * a `tooltipLabel` field of "Event at {marker.data.url}" would create a label based

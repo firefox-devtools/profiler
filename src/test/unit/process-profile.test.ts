@@ -23,7 +23,6 @@ import {
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
-import { FILE_IO_TABLE_LABEL } from '../../profile-logic/marker-schema';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
@@ -1142,9 +1141,10 @@ describe('Marker schema conversion', function () {
     ]);
   });
 
-  function getConvertedFileIoTableLabel(tableLabel?: string) {
+  it('preserves FileIO label metadata when processing and saving a profile', async function () {
+    const tableLabel = 'Custom FileIO label';
     const geckoProfile = createGeckoProfile();
-    geckoProfile.meta.markerSchema.push({
+    geckoProfile.processes[0].meta.markerSchema.push({
       name: 'FileIO',
       tableLabel,
       display: ['marker-chart', 'marker-table'],
@@ -1155,17 +1155,14 @@ describe('Marker schema conversion', function () {
     const fileIoSchema = processedProfile.meta.markerSchema.find(
       (schema) => schema.name === 'FileIO'
     );
+    expect(fileIoSchema?.tableLabel).toBe(tableLabel);
 
-    return fileIoSchema?.tableLabel;
-  }
-
-  it('adds the FileIO table label when Gecko does not provide one', function () {
-    expect(getConvertedFileIoTableLabel()).toBe(FILE_IO_TABLE_LABEL);
-  });
-
-  it('preserves a FileIO table label provided by Gecko', function () {
-    const geckoTableLabel = 'Custom FileIO label';
-    expect(getConvertedFileIoTableLabel(geckoTableLabel)).toBe(geckoTableLabel);
+    const reloadedProfile = await unserializeProfileOfArbitraryFormat(
+      serializeProfileToJsonString(processedProfile)
+    );
+    expect(reloadedProfile.meta.markerSchema).toEqual(
+      processedProfile.meta.markerSchema
+    );
   });
 
   it('should convert extension text markers to structured payloads', function () {
