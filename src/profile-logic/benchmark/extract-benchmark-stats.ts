@@ -31,6 +31,7 @@ import {
   getTimeRangeForThread,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { FuncFlag } from 'firefox-profiler/types/profile';
 
 import type {
   IndexIntoFuncTable,
@@ -118,7 +119,11 @@ function computeJsOnlySampleBuckets(
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
+    if (
+      (funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
+    ) {
       stackIndexToJsOnlyFuncIndex[stackIndex] = funcIndex;
     } else {
       const prefixOffset = stackTable.prefixOffset[stackIndex];
@@ -225,15 +230,18 @@ export function extractBenchmarkStatsFromProfile(
   // motivation (function names diverge across engines for the same source
   // location).
   const bucketKeys = bucketFuncs.map((funcIndex, b) => {
-    if (sharedFuncTable.isJS[funcIndex]) {
+    const flags = sharedFuncTable.flags[funcIndex];
+    const required =
+      FuncFlag.IsJS |
+      FuncFlag.HasSource |
+      FuncFlag.HasLine |
+      FuncFlag.HasColumn;
+    if ((flags & required) === required) {
       const sourceIndex = sharedFuncTable.source[funcIndex];
       const line = sharedFuncTable.lineNumber[funcIndex];
       const col = sharedFuncTable.columnNumber[funcIndex];
-      if (sourceIndex !== null && line !== null && col !== null) {
-        const filename =
-          shared.stringArray[sharedSources.filename[sourceIndex]];
-        return `${filename}:${line}:${col}`;
-      }
+      const filename = shared.stringArray[sharedSources.filename[sourceIndex]];
+      return `${filename}:${line}:${col}`;
     }
     return bucketNames[b];
   });

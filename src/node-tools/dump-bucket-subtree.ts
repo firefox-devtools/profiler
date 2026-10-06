@@ -22,6 +22,7 @@ import {
   getTimeRangeForThread,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { FuncFlag } from 'firefox-profiler/types/profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
 
 /**
@@ -67,7 +68,9 @@ async function extract(
     const prefixOffset = stackTable.prefixOffset[s];
     const parent = prefixOffset !== 0 ? s - prefixOffset : -1;
     const isRelevant =
-      funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex];
+      (funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0;
     if (isRelevant) {
       stackToJsFunc[s] = funcIndex;
       stackPathKey[s] = '';

@@ -16,6 +16,7 @@
 
 import {
   computeFrameTableFromRawFrameTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   computeStackTableFromRawStackTable,
   computeSamplesTableFromRawSamplesTable,
   reserveFunctionsForCollapsedResources,
@@ -48,6 +49,7 @@ import type {
   Profile,
   IndexIntoFuncTable,
   IndexIntoCategoryList,
+  IndexIntoCallNodeTable,
   CategoryList,
   StartEndRange,
   WeightType,
@@ -66,6 +68,7 @@ export type BucketFlameGraphData = {
   maxStackDepthPlusOne: number;
   ctssSamples: SamplesLikeTable;
   ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
+  ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>;
   weightType: WeightType;
   categories: CategoryList;
   defaultCategory: IndexIntoCategoryList;
@@ -106,7 +109,10 @@ export function buildDerivedThread(
   const stringTable = StringTable.withBackingArray(
     shared.stringArray as string[]
   );
-  const frameTable = computeFrameTableFromRawFrameTable(shared.frameTable);
+  const frameTable = computeFrameTableFromRawFrameTable(
+    shared.frameTable,
+    categories
+  );
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
     frameTable,
@@ -134,7 +140,7 @@ export function buildDerivedThread(
     stackTable,
     frameTable,
     funcTable,
-    shared.nativeSymbols,
+    computeNativeSymbolTableFromRawNativeSymbolTable(shared.nativeSymbols),
     shared.resourceTable,
     stringTable,
     shared.sources,
@@ -249,6 +255,7 @@ export function computeBucketFlameGraphData(
     maxStackDepthPlusOne: callNodeInfo.getCallNodeTable().maxDepth + 1,
     ctssSamples,
     ctssSampleCategoriesAndSubcategories,
+    ctssSampleCallNodes: sampleIndexToCallNodeIndex,
     weightType,
     categories,
     defaultCategory,

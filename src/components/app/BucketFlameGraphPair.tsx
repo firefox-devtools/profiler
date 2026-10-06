@@ -155,6 +155,7 @@ function BucketFlameGraphSide({
             ctssSampleCategoriesAndSubcategories={
               data.ctssSampleCategoriesAndSubcategories
             }
+            ctssSampleCallNodes={data.ctssSampleCallNodes}
             tracedTiming={null}
             displayStackType={false}
             contextMenuId="BucketFlameGraphContextMenu"

@@ -49,6 +49,7 @@ import {
   getTimeRangeForThread,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
+import { FuncFlag } from 'firefox-profiler/types/profile';
 import { compress } from 'firefox-profiler/utils/gz';
 
 type ProfileSource =
@@ -115,7 +116,11 @@ function computeJsOnlySampleBuckets(
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
-    if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
+    if (
+      (funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
+    ) {
       stackIndexToJsOnlyFuncIndex[stackIndex] = funcIndex;
     } else {
       const prefixOffset = stackTable.prefixOffset[stackIndex];
