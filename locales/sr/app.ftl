@@ -652,7 +652,6 @@ MenuButtons--publish--upload-title = Отпремање профила…
 MenuButtons--publish--cancel-upload = Откажи отпремање
 MenuButtons--publish--message-something-went-wrong = Ух, нешто је пошло по злу при отпремању профила.
 MenuButtons--publish--message-try-again = Покушајте поново
-MenuButtons--publish--download = Преузми
 MenuButtons--publish--compressing = Сажимање…
 MenuButtons--publish--error-while-compressing = Грешка при сажимању, покушајте да одзначите неке од поља како бисте смањили величину профила.
 

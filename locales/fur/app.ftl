@@ -597,7 +597,6 @@ MenuButtons--publish--upload-title = Daûr a cjariâ in rêt il profîl…
 MenuButtons--publish--cancel-upload = Anule cjariament in rêt
 MenuButtons--publish--message-something-went-wrong = Orpo, alc al è lât strucj dilunc il cjariament in rêt dal profîl.
 MenuButtons--publish--message-try-again = Torne prove
-MenuButtons--publish--download = Discjame
 MenuButtons--publish--compressing = Daûr a comprimi…
 MenuButtons--publish--error-while-compressing = Erôr dilunc la compression, prove a deselezionâ cualchi casele di control par ridusi lis dimensions dal profîl.
 

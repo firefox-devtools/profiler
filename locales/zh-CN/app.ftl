@@ -570,7 +570,6 @@ MenuButtons--publish--upload-title = 正在上传分析记录…
 MenuButtons--publish--cancel-upload = 取消上传
 MenuButtons--publish--message-something-went-wrong = 啊哦，上传分析记录时出了点问题。
 MenuButtons--publish--message-try-again = 再试一次
-MenuButtons--publish--download = 下载
 MenuButtons--publish--compressing = 正在压缩…
 MenuButtons--publish--error-while-compressing = 压缩时出错，请尝试取消选中某些复选框以减小配置文件大小。
 

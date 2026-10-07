@@ -571,7 +571,6 @@ MenuButtons--publish--upload-title = Enviando profile…
 MenuButtons--publish--cancel-upload = Cancelar envio
 MenuButtons--publish--message-something-went-wrong = Ops, algo deu errado ao enviar o profile.
 MenuButtons--publish--message-try-again = Tentar novamente
-MenuButtons--publish--download = Baixar
 MenuButtons--publish--compressing = Compactando…
 MenuButtons--publish--error-while-compressing = Erro ao compactar, experimente desmarcar algumas opções para reduzir o tamanho do profile.
 
