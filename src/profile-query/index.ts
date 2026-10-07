@@ -572,7 +572,7 @@ export class ProfileQuerier {
 
     // Pop the last committed range (index = length - 1)
     const poppedIndex = committedRanges.length - 1;
-    this._store.dispatch(popCommittedRanges(poppedIndex));
+    this._store.dispatch(popCommittedRanges(poppedIndex, false));
 
     const poppedRange = committedRanges[poppedIndex];
 
@@ -628,7 +628,7 @@ export class ProfileQuerier {
     }
 
     // Pop all committed ranges (index 0 pops from the first one)
-    this._store.dispatch(popCommittedRanges(0));
+    this._store.dispatch(popCommittedRanges(0, false));
 
     const rootRange = getProfileRootRange(state);
     const startName = this._timestampManager.nameForTimestamp(rootRange.start);
