@@ -19,6 +19,7 @@ import type {
   ServerResponse,
   SessionMetadata,
   CommandResult,
+  PermalinkOutcome,
 } from './protocol';
 import {
   generateSessionId,
@@ -40,6 +41,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { expandMarkerHandleSpecs } from 'firefox-profiler/profile-query/marker-map';
 import { BUILD_HASH, PACKAGE_NAME } from './constants';
 import { startSamplyServer } from './samply';
+import { permalinkViewForCommand } from './permalink-view';
 
 /**
  * Exit code used when the daemon dies before it is able to serve requests. The
@@ -408,9 +410,16 @@ export class Daemon {
         }
 
         const result = await this.processCommand(message.command);
+        if (!message.permalink) {
+          return { type: 'success', result };
+        }
         return {
           type: 'success',
           result,
+          permalink: await this.buildPermalink(
+            message.command,
+            message.permalink === 'short'
+          ),
         };
       }
 
@@ -420,6 +429,23 @@ export class Daemon {
           error: `Unknown message type: ${(message as any).type}`,
         };
       }
+    }
+  }
+
+  private async buildPermalink(
+    command: ClientCommand,
+    short: boolean
+  ): Promise<PermalinkOutcome> {
+    if (!this.querier) {
+      throw new Error('Profile not loaded');
+    }
+    try {
+      return await this.querier.permalink(
+        permalinkViewForCommand(command),
+        short
+      );
+    } catch (error) {
+      return { error: toErrorMessage(error) };
     }
   }
 
@@ -587,7 +613,7 @@ export class Daemon {
             throw assertExhaustiveCheck(command);
         }
       case 'permalink':
-        return this.querier.permalink(command.short ?? false);
+        return this.querier.permalink({}, command.short ?? false);
       case 'strategy':
         return this.querier.strategySelect(command.strategy);
       case 'zoom':
