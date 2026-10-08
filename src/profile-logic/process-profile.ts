@@ -62,7 +62,6 @@ import {
 } from '../utils/typed-arrays';
 import {
   addPIICategoriesToMarkerSchema,
-  addFileIoTableLabel,
   computeStringIndexMarkerFieldsByDataType,
   extensionTextMarkerSchema,
 } from '../profile-logic/marker-schema';
@@ -1790,7 +1789,7 @@ function _convertGeckoMarkerSchema(
     description = staticFields[staticDescriptionFieldIndex].value;
   }
 
-  const processedMarkerSchema = addPIICategoriesToMarkerSchema({
+  return addPIICategoriesToMarkerSchema({
     name,
     tooltipLabel,
     tableLabel,
@@ -1802,8 +1801,6 @@ function _convertGeckoMarkerSchema(
     colorField,
     isStackBased,
   });
-  addFileIoTableLabel(processedMarkerSchema);
-  return processedMarkerSchema;
 }
 
 /**

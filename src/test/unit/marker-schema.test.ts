@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
-  FILE_IO_TABLE_LABEL,
   formatFromMarkerSchema,
   parseLabel,
   extensionTextMarkerSchema,
@@ -19,7 +18,10 @@ import { getDefaultCategories } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
+import {
+  FILE_IO_TABLE_LABEL,
+  markerSchemaForTests,
+} from '../fixtures/profiles/marker-schema';
 import { StringTable } from '../../utils/string-table';
 
 /**
