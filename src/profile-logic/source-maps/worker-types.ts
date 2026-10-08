@@ -68,3 +68,11 @@ export type WorkerOutput =
   | { type: 'success'; response: SourceMapSymbolicationResponse }
   | { type: 'no-op' }
   | { type: 'error'; message: string };
+
+/**
+ * Runs the source map symbolication core and returns its output. The browser
+ * default (`_runSourceMapWorker`) offloads to a Web Worker; other environments
+ * (for example, profiler-cli node daemon) inject a runner that calls
+ * `runSourceMapSymbolicationCore` directly.
+ */
+export type SourceMapRunner = (input: WorkerInput) => Promise<WorkerOutput>;

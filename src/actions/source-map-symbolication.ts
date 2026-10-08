@@ -11,6 +11,7 @@ import {
 } from 'firefox-profiler/profile-logic/source-maps/matching';
 
 import type {
+  SourceMapRunner,
   WorkerInput,
   WorkerOutput,
 } from 'firefox-profiler/profile-logic/source-maps/worker-types';
@@ -37,14 +38,6 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
  * name resolution.
  */
 export type SourceMapSymbolicationResult = 'applied' | 'no-match' | 'error';
-
-/**
- * Runs the source map symbolication core and returns its output. The browser
- * default (`_runSourceMapWorker`) offloads to a Web Worker; other environments
- * (for example, profiler-cli node daemon) inject a runner that calls
- * `runSourceMapSymbolicationCore` directly.
- */
-export type SourceMapRunner = (input: WorkerInput) => Promise<WorkerOutput>;
 
 export function doSourceMapSymbolication(
   resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>,
