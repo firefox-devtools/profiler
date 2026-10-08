@@ -704,6 +704,7 @@ MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
 MenuButtons--publish--share-performance-profile = Prestatieprofiel delen
 MenuButtons--publish--reshare-performance-profile = Prestatieprofiel opnieuw delen
 MenuButtons--publish--save-performance-profile = Prestatieprofiel opslaan
+MenuButtons--publish--local-profile-description = Dit profiel is niet geüpload en zal verloren gaan wanneer u dit tabblad sluit. Sla het op op uw computer of upload het met Delen om het te behouden.
 MenuButtons--publish--info-description = Upload uw profiel en maak het met de koppeling toegankelijk voor iedereen.
 MenuButtons--publish--download-info-description = Dit profiel als een bestand op uw computer opslaan.
 MenuButtons--publish--info-description-default = Standaard worden uw persoonlijke gegevens verwijderd.
