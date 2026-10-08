@@ -794,7 +794,7 @@ export class TreeView<
   );
 
   /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   scrollSelectionIntoView() {
     const { selectedNodeId, tree } = this.props;
     const list = this._list; // this temp variable so that flow knows that it's non-null later
@@ -1112,7 +1112,7 @@ export class TreeView<
   };
 
   /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   focus() {
     if (this._list) {
       this._list.focus();
