@@ -143,9 +143,8 @@ describe('ProfileQuerier', function () {
       const popResult = await querier.popViewRange();
       expect(popResult.message).toContain('Popped view range');
 
-      // Samples should be back to baseline (or at least different from ranged)
       const afterPopSamples = await querier.threadSamples();
-      expect(afterPopSamples).not.toBe(rangedSamples);
+      expect(afterPopSamples).toEqual(baselineSamples);
     });
 
     it('shows non-empty output after pushing a range with samples', async function () {
@@ -227,6 +226,109 @@ describe('ProfileQuerier', function () {
       const hasD = rangedFunctions2.includes('D');
       const hasE = rangedFunctions2.includes('E');
       expect(hasD || hasE).toBe(true);
+    });
+  });
+
+  describe('view range query results', function () {
+    let querier: ProfileQuerier;
+
+    beforeEach(function () {
+      const { profile } = getProfileFromTextSamples(`
+        1000  1010  1020
+        A     A     A
+        B     B     B
+        C     D     E
+      `);
+      const store = storeWithProfile(profile);
+      querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+    });
+
+    async function collectQueries(search?: string) {
+      return {
+        samples: await querier.threadSamples('t-0', true, search),
+        functions: await querier.threadFunctions(
+          't-0',
+          { searchString: search },
+          true
+        ),
+        topDown: await querier.threadSamplesTopDown(
+          't-0',
+          undefined,
+          true,
+          search
+        ),
+        bottomUp: await querier.threadSamplesBottomUp(
+          't-0',
+          undefined,
+          true,
+          search
+        ),
+      };
+    }
+
+    it.each(['pop', 'clear'] as const)(
+      '%s restores full-profile query results and searches',
+      async function (action) {
+        const baseline = await collectQueries();
+        const baselineSearch = await collectQueries('C');
+        expect(baselineSearch.functions.functions.map((f) => f.name)).toEqual([
+          'C',
+        ]);
+        expect(baselineSearch.samples.topFunctionsBySelf).toContainEqual(
+          expect.objectContaining({ name: 'C', selfSamples: 1 })
+        );
+        expect(baselineSearch.topDown.regularCallTree.totalSamples).toBe(1);
+        expect(baselineSearch.bottomUp.invertedCallTree?.totalSamples).toBe(1);
+
+        await querier.pushViewRange('5ms,21ms');
+        const narrowed = await collectQueries();
+        expect(narrowed.samples.topFunctionsBySelf).not.toContainEqual(
+          expect.objectContaining({ name: 'C' })
+        );
+        const narrowedSearch = await collectQueries('C');
+        expect(narrowedSearch.samples.topFunctionsByTotal).toEqual([]);
+        expect(narrowedSearch.functions.functions).toEqual([]);
+        expect(narrowedSearch.topDown.regularCallTree.children).toEqual([]);
+        expect(narrowedSearch.bottomUp.invertedCallTree?.children).toEqual([]);
+
+        if (action === 'pop') {
+          await querier.popViewRange();
+        } else {
+          await querier.clearViewRange();
+        }
+        expect((await querier.getStatus()).viewRanges).toEqual([]);
+        expect(await collectQueries()).toEqual(baseline);
+        expect(await collectQueries('C')).toEqual(baselineSearch);
+
+        await querier.pushViewRange('0ms,15ms');
+        await querier.popViewRange();
+        expect(await collectQueries()).toEqual(baseline);
+        expect(await collectQueries('C')).toEqual(baselineSearch);
+      }
+    );
+
+    it('pop restores the preceding zoom and clear restores the full profile', async function () {
+      const baseline = await collectQueries();
+      await querier.pushViewRange('0ms,15ms');
+      const outer = await collectQueries();
+      const outerSearch = await collectQueries('C');
+
+      await querier.pushViewRange('5ms,15ms');
+      await collectQueries();
+      await collectQueries('C');
+      await querier.popViewRange();
+      expect((await querier.getStatus()).viewRanges).toHaveLength(1);
+      expect(await collectQueries()).toEqual(outer);
+      expect(await collectQueries('C')).toEqual(outerSearch);
+
+      await querier.pushViewRange('5ms,15ms');
+      await collectQueries();
+      await querier.clearViewRange();
+      expect((await querier.getStatus()).viewRanges).toEqual([]);
+      expect(await collectQueries()).toEqual(baseline);
     });
   });
 

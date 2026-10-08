@@ -1801,15 +1801,17 @@ export function commitRange(start: number, end: number): Action {
 }
 
 export function popCommittedRanges(
-  firstPoppedFilterIndex: number
+  firstPoppedFilterIndex: number,
+  shouldSetPreviewSelection: boolean = true
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     dispatch({
       type: 'POP_COMMITTED_RANGES',
       firstPoppedFilterIndex,
-      // If the clicked range is not the last one, make the current committed
-      // range the new preview selection, otherwise clear the selection.
+      // If shouldSetPreviewSelection is true and the clicked range is not the last one,
+      // make the current committed range the new preview selection, otherwise clear the selection.
       committedRange:
+        shouldSetPreviewSelection &&
         getAllCommittedRanges(getState()).length !== firstPoppedFilterIndex &&
         getCommittedRange(getState()),
     });
