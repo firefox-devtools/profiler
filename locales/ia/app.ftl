@@ -511,6 +511,8 @@ MenuButtons--index--metaInfo-button =
     .label = Informationes de profilo
 MenuButtons--index--full-view = Vista complete
 MenuButtons--index--cancel-upload = Cancellar le incargamento
+MenuButtons--index--save =
+    .label = Salvar…
 MenuButtons--index--share =
     .label = Condivider…
 MenuButtons--index--reshare =
@@ -697,6 +699,7 @@ MenuButtons--publish--upload-title = Incargamento del profilo…
 MenuButtons--publish--cancel-upload = Cancellar incargamento
 MenuButtons--publish--message-something-went-wrong = Guai, un error se ha producite durante le incargamento del profilo.
 MenuButtons--publish--message-try-again = Retentar
+MenuButtons--publish--save = Salvar
 MenuButtons--publish--compressing = Comprimente…
 MenuButtons--publish--error-while-compressing = Error comprimente, tenta dismarcar ulle quadratos de selection pro reducer le dimension del profilo.
 
