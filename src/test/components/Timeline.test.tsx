@@ -11,6 +11,7 @@ import {
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
+import { changeSelectedTab } from 'firefox-profiler/actions/app';
 import {
   computeTimeColumnForRawSamplesTable,
   filterRawThreadSamplesToRange,
@@ -20,10 +21,16 @@ import {
   getRightClickedTrack,
   getMouseTimePosition,
   getLocalTracksByPid,
+  getSelectedThreadIndexes,
+  getSelectedTab,
 } from 'firefox-profiler/selectors';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { ensureExists } from 'firefox-profiler/utils/types';
-import { showLocalTrack } from 'firefox-profiler/actions/profile-view';
+import {
+  showLocalTrack,
+  hideLocalTrack,
+  hideGlobalTrack,
+} from 'firefox-profiler/actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -105,6 +112,97 @@ describe('Timeline multiple thread selection', function () {
 
     return { ...renderResult, ...store, showAllIPCTracks };
   }
+
+  it.each([{ ctrlKey: true }, { metaKey: true }])(
+    'selects visible threads from a focused timeline track with %j',
+    (modifier) => {
+      const { getState, getByRole } = setup();
+      const button = getByRole('button', { name: 'DOM Worker' });
+      const selectedTab = getSelectedTab(getState());
+      const event = new KeyboardEvent('keydown', {
+        key: 'a',
+        ...modifier,
+        bubbles: true,
+        cancelable: true,
+      });
+      fireEvent(button, event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(getSelectedThreadIndexes(getState())).toEqual(
+        new Set([0, 1, 2, 3])
+      );
+      expect(getSelectedTab(getState())).toBe(selectedTab);
+    }
+  );
+
+  it('returns from the network chart to the last thread panel', () => {
+    const { getState, dispatch, getByRole } = setup();
+    act(() => {
+      dispatch(changeSelectedTab('marker-table'));
+      dispatch(changeSelectedTab('network-chart'));
+    });
+    fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
+      key: 'a',
+      metaKey: true,
+    });
+    expect(getSelectedThreadIndexes(getState())).toEqual(new Set([0, 1, 2, 3]));
+    expect(getSelectedTab(getState())).toBe('marker-table');
+  });
+
+  it('does not select hidden processes or local threads', () => {
+    const { getState, dispatch, getByRole } = setup();
+    act(() => {
+      dispatch(hideGlobalTrack(0));
+      dispatch(hideLocalTrack('222', 1));
+    });
+    fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
+      key: 'a',
+      ctrlKey: true,
+    });
+    expect(getSelectedThreadIndexes(getState())).toEqual(new Set([1, 2]));
+  });
+
+  it.each([
+    { key: 'a' },
+    { key: 'a', ctrlKey: true, altKey: true },
+    { key: 'a', metaKey: true, shiftKey: true },
+    { key: 'a', ctrlKey: true, isComposing: true },
+  ])('leaves other keyboard input unchanged: %j', (options) => {
+    const { getState, getByRole } = setup();
+    const selected = getSelectedThreadIndexes(getState());
+    const event = new KeyboardEvent('keydown', {
+      ...options,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(getByRole('button', { name: 'DOM Worker' }), event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(getSelectedThreadIndexes(getState())).toBe(selected);
+  });
+
+  it('does not handle select-all outside the timeline or in a text input', () => {
+    const { getState, container } = setup();
+    const selected = getSelectedThreadIndexes(getState());
+    const input = document.createElement('input');
+    container.querySelector('.timelineThreadList')!.appendChild(input);
+    const inputEvent = new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(input, inputEvent);
+    const outsideEvent = new KeyboardEvent('keydown', {
+      key: 'a',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(document.body, outsideEvent);
+    expect(inputEvent.defaultPrevented).toBe(false);
+    expect(outsideEvent.defaultPrevented).toBe(false);
+    expect(getSelectedThreadIndexes(getState())).toBe(selected);
+    input.remove();
+  });
 
   it('can toggle select multiple threads', function () {
     const { getState, getByRole } = setup();
