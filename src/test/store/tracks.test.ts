@@ -33,6 +33,7 @@ import {
   isolateProcessMainThread,
 } from '../../actions/profile-view';
 import type { MarkerSchema } from 'firefox-profiler/types';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 describe('ordering and hiding', function () {
   function init(profile = getProfileWithNiceTracks()) {
@@ -137,6 +138,7 @@ describe('ordering and hiding', function () {
     const extraMarkerSchemas: MarkerSchema[] = [
       {
         name: 'Marker',
+        style: getMarkerSchemaStyleFallback('Marker'),
         display: ['marker-chart', 'marker-table', 'timeline-memory'],
         fields: [{ key: 'first', label: 'first', format: 'integer' }],
         graphs: [
@@ -148,6 +150,7 @@ describe('ordering and hiding', function () {
       },
       {
         name: 'NoGraphMarker',
+        style: getMarkerSchemaStyleFallback('NoGraphMarker'),
         display: ['marker-chart', 'marker-table'],
         fields: [{ key: 'first', label: 'first', format: 'integer' }],
         // An empty array should behave just as if the property isn't present.

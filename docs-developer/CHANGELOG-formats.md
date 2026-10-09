@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 76
+
+Marker schemas now include a `style` field that controls their appearance in timeline marker tracks. It specifies the marker's background, position, height, corner shape, and optional border colors. The upgrader derives styles for older profiles.
+
 ### Version 75
 
 The func table (`profile.shared.funcTable`) representation changed, mirroring the v71 frame table change:

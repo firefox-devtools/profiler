@@ -3670,6 +3670,177 @@ const _upgraders: {
     delete funcTable.isJS;
     delete funcTable.relevantForJS;
   },
+  [76]: (profile: any) => {
+    // Keep these styles independent of the current timeline style definitions.
+    const defaultStyle = {
+      top: 0,
+      height: 6,
+      background: ['black', '#b1b1b3'],
+      squareCorners: false,
+      borderLeft: null,
+      borderRight: null,
+    };
+    const gcStyle = {
+      ...defaultStyle,
+      top: 6,
+      background: '#ff9400',
+    };
+    const ccStyle = {
+      ...gcStyle,
+      background: '#ffc600',
+    };
+    const markerStyles: { [name: string]: object } = {
+      RefreshDriverTick: {
+        ...defaultStyle,
+        background: 'rgba(237, 237, 240, 0.05)',
+        height: 18,
+        squareCorners: true,
+      },
+      RD: {
+        ...defaultStyle,
+        background: 'rgba(237, 237, 240, 0.05)',
+        height: 18,
+        squareCorners: true,
+      },
+      Scripts: {
+        ...defaultStyle,
+        background: '#a44900',
+        top: 6,
+      },
+      'requestAnimationFrame callbacks': {
+        ...defaultStyle,
+        background: '#a44900',
+        top: 6,
+      },
+      Styles: {
+        ...defaultStyle,
+        background: ['#00feff', '#008ea4'],
+        top: 7,
+      },
+      FireScrollEvent: {
+        ...defaultStyle,
+        background: '#a44900',
+        top: 7,
+      },
+      Reflow: {
+        ...defaultStyle,
+        background: '#0a84ff',
+        top: 7,
+      },
+      DispatchSynthMouseMove: {
+        ...defaultStyle,
+        background: '#a44900',
+        top: 8,
+      },
+      DisplayList: {
+        ...defaultStyle,
+        background: '#9400ff',
+        top: 9,
+      },
+      LayerBuilding: {
+        ...defaultStyle,
+        background: '#ff9400',
+        top: 9,
+      },
+      Rasterize: {
+        ...defaultStyle,
+        background: ['#30e60b', '#12bc00'],
+        top: 10,
+      },
+      ForwardTransaction: {
+        ...defaultStyle,
+        background: '#a4000f',
+        top: 11,
+      },
+      NotifyDidPaint: {
+        ...defaultStyle,
+        background: '#b1b1b3',
+        top: 12,
+      },
+      LayerTransaction: {
+        ...defaultStyle,
+        background: '#a4000f',
+      },
+      Composite: {
+        ...defaultStyle,
+        background: '#0a84ff',
+      },
+      Vsync: {
+        ...defaultStyle,
+        background: 'rgb(255, 128, 0)',
+      },
+      LayerContentGPU: {
+        ...defaultStyle,
+        background: 'rgba(0,200,0,0.5)',
+      },
+      LayerCompositorGPU: {
+        ...defaultStyle,
+        background: 'rgba(0,200,0,0.5)',
+      },
+      LayerOther: {
+        ...defaultStyle,
+        background: 'rgb(200,0,0)',
+      },
+      Jank: {
+        ...defaultStyle,
+        background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 40%)'],
+        borderLeft: ['#ff0039', '#a4000f'],
+        borderRight: ['#ff0039', '#a4000f'],
+        squareCorners: true,
+      },
+      'BHR-detected hang': {
+        ...defaultStyle,
+        background: ['hsl(347, 100%, 60%)', 'hsl(347, 75%, 40%)'],
+        borderLeft: ['#ff0039', '#a4000f'],
+        borderRight: ['#ff0039', '#a4000f'],
+        squareCorners: true,
+      },
+      GCMajor: {
+        ...gcStyle,
+        squareCorners: true,
+        top: 0,
+      },
+      GCSlice: gcStyle,
+      GCMinor: gcStyle,
+      'GC Interrupt': gcStyle,
+      CC: {
+        ...ccStyle,
+        squareCorners: true,
+        top: 0,
+      },
+      CCSlice: ccStyle,
+      ForgetSkippable: ccStyle,
+      IdleCCSlice: ccStyle,
+      IdleForgetSkippable: ccStyle,
+      FileIO: {
+        ...defaultStyle,
+        background: '#0a84ff',
+      },
+      IPCOut: {
+        ...defaultStyle,
+        background: '#0a84ff',
+        top: 2,
+      },
+      SyncIPCOut: {
+        ...defaultStyle,
+        background: '#003eaa',
+        top: 6,
+      },
+      IPCIn: {
+        ...defaultStyle,
+        background: '#ad3bff',
+        top: 13,
+      },
+      SyncIPCIn: {
+        ...defaultStyle,
+        background: '#6200a4',
+        top: 17,
+      },
+    };
+    for (const schema of profile.meta.markerSchema) {
+      schema.style ??= markerStyles[schema.name] ?? defaultStyle;
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

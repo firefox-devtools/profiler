@@ -32,6 +32,7 @@ import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockIntersectionObserver } from '../fixtures/mocks/intersection-observer';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 describe('timeline/GlobalTrack', function () {
   autoMockCanvasContext();
@@ -272,6 +273,7 @@ describe('timeline/GlobalTrack', function () {
     profile.meta.markerSchema = [
       {
         name: 'task',
+        style: getMarkerSchemaStyleFallback('task'),
         display: ['timeline-overview'],
         fields: [],
       },

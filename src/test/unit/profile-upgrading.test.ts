@@ -8,11 +8,12 @@ import {
 } from '../../profile-logic/process-profile';
 import { upgradeGeckoProfileToCurrentVersion } from '../../profile-logic/gecko-profile-versioning';
 import { attemptToUpgradeProcessedProfileThroughMutation } from '../../profile-logic/processed-profile-versioning';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../../app-logic/constants';
-import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
+import type { MarkerSchema } from 'firefox-profiler/types';
 
 /* eslint-disable jest/expect-expect */
 // testProfileUpgrading is an assertion, although eslint doesn't realize it. Disable
@@ -100,6 +101,12 @@ describe('upgrading gecko profiles', function () {
 });
 
 describe('upgrading processed profiles', function () {
+  function getVersion71Profile() {
+    return JSON.parse(
+      JSON.stringify(require('../fixtures/upgrades/processed-4.json'))
+    );
+  }
+
   async function testProfileUpgrading(profile: any) {
     const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
     expect(upgradedProfile.meta.preprocessedProfileVersion).toEqual(
@@ -138,36 +145,39 @@ describe('upgrading processed profiles', function () {
   });
 
   it('adds PII categories and structures extension markers', function () {
-    const profile = getProfileWithMarkers([
-      [
-        'ExtensionParent',
-        0,
-        1,
+    const profile = getVersion71Profile();
+    const markerNames = [
+      'ExtensionParent',
+      'ExtensionChild',
+      'Extension Suspend',
+    ];
+    const name = markerNames.map((markerName) => {
+      const index = profile.shared.stringArray.length;
+      profile.shared.stringArray.push(markerName);
+      return index;
+    });
+    profile.threads[0].markers = {
+      length: 3,
+      name,
+      startTime: [0, 1, 2],
+      endTime: [1, 2, 3],
+      phase: [1, 1, 1],
+      category: [1, 1, 1],
+      data: [
         {
           type: 'Text',
           name: 'parent@example.com, api_call: tabs.query',
         },
-      ],
-      [
-        'ExtensionChild',
-        1,
-        2,
         {
           type: 'Text',
           name: 'child@example.com, api_event: runtime.onMessage',
         },
-      ],
-      [
-        'Extension Suspend',
-        2,
-        3,
         {
           type: 'Text',
           name: 'onBeforeRequest https://example.com by addon@example.com (chanId: 42)',
         },
       ],
-    ]);
-    profile.meta.preprocessedProfileVersion = 71;
+    };
     profile.meta.markerSchema = [
       { name: 'Network', display: [], fields: [] },
       {
@@ -184,7 +194,11 @@ describe('upgrading processed profiles', function () {
 
     attemptToUpgradeProcessedProfileThroughMutation(profile, {});
 
-    expect(profile.meta.markerSchema).toEqual([
+    expect(
+      profile.meta.markerSchema.map(
+        ({ style, ...schema }: MarkerSchema) => schema
+      )
+    ).toEqual([
       {
         name: 'Network',
         display: [],
@@ -271,6 +285,29 @@ describe('upgrading processed profiles', function () {
         extensionId: 'addon@example.com (chanId: 42)',
       },
     ]);
+  });
+
+  it('adds required marker styles while preserving existing styles', function () {
+    const existingStyle = {
+      top: 2,
+      height: 8,
+      background: 'pink',
+      squareCorners: true,
+      borderLeft: null,
+      borderRight: null,
+    };
+    const profile = getVersion71Profile();
+    profile.meta.markerSchema = [
+      { name: 'GCMajor', display: [], fields: [] },
+      { name: 'Custom', display: [], fields: [], style: existingStyle },
+    ];
+
+    attemptToUpgradeProcessedProfileThroughMutation(profile, {});
+
+    expect(profile.meta.markerSchema[0].style).toEqual(
+      getMarkerSchemaStyleFallback('GCMajor')
+    );
+    expect(profile.meta.markerSchema[1].style).toBe(existingStyle);
   });
 });
 

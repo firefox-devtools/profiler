@@ -23,6 +23,7 @@ import {
   getVisualMetrics,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/types';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 import type {
   JsAllocationPayload_Gecko,
   NativeAllocationPayload_Gecko,
@@ -1278,6 +1279,19 @@ describe('Marker schema conversion', function () {
           { key: 'color', label: 'Color', format: 'string' },
         ],
         colorField: 'color',
+      },
+      {
+        name: 'TestMarkerWithStyle',
+        display: ['timeline-overview'],
+        data: [],
+        style: {
+          top: 2,
+          height: 8,
+          background: ['blue', 'lightblue'],
+          squareCorners: true,
+          borderLeft: 'navy',
+          borderRight: null,
+        },
       }
     );
 
@@ -1295,6 +1309,9 @@ describe('Marker schema conversion', function () {
     expect(schemaMinimal?.colorField).toBeUndefined();
     expect(schemaMinimal?.graphs).toBeUndefined();
     expect(schemaMinimal?.isStackBased).toBeUndefined();
+    expect(schemaMinimal?.style).toEqual(
+      getMarkerSchemaStyleFallback('TestMarkerMinimal')
+    );
 
     // Test labels are preserved
     const schemaWithLabels = processedProfile.meta.markerSchema.find(
@@ -1320,5 +1337,17 @@ describe('Marker schema conversion', function () {
     );
     expect(schemaWithColor).toBeDefined();
     expect(schemaWithColor?.colorField).toBe('color');
+
+    const schemaWithStyle = processedProfile.meta.markerSchema.find(
+      (s) => s.name === 'TestMarkerWithStyle'
+    );
+    expect(schemaWithStyle?.style).toEqual({
+      top: 2,
+      height: 8,
+      background: ['blue', 'lightblue'],
+      squareCorners: true,
+      borderLeft: 'navy',
+      borderRight: null,
+    });
   });
 });
