@@ -550,14 +550,29 @@ export function getMarkerSelectorsPerThread(
     MarkerTimingLogic.getMarkerTiming
   );
 
+  const getRangeFilteredScreenshotMarkerIndexes =
+    getTimelineMarkerIndexesBySchemaLocation('timeline-screenshots');
+
   /**
-   * This groups screenshot markers by their window ID.
+   * This groups screenshot markers by their name.
    */
-  const getRangeFilteredScreenshotsById: Selector<Map<string, Marker[]>> =
+  const getRangeFilteredScreenshotsByName: Selector<Map<string, Marker[]>> =
     createSelector(
       getMarkerGetter,
-      getCommittedRangeFilteredMarkerIndexes,
-      MarkerData.groupScreenshotsById
+      getRangeFilteredScreenshotMarkerIndexes,
+      (getMarker, markerIndexes) => {
+        const screenshotsByName = new Map<string, Marker[]>();
+        for (const markerIndex of markerIndexes) {
+          const marker = getMarker(markerIndex);
+          let screenshots = screenshotsByName.get(marker.name);
+          if (screenshots === undefined) {
+            screenshots = [];
+            screenshotsByName.set(marker.name, screenshots);
+          }
+          screenshots.push(marker);
+        }
+        return screenshotsByName;
+      }
     );
 
   /**
@@ -797,7 +812,7 @@ export function getMarkerSelectorsPerThread(
     getTimelineIPCMarkerIndexes,
     getTimelineMarkerIndexesBySchemaLocation,
     getNetworkTrackTiming,
-    getRangeFilteredScreenshotsById,
+    getRangeFilteredScreenshotsByName,
     getSearchFilteredMarkerIndexes,
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,

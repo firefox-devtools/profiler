@@ -42,6 +42,7 @@ import type {
   Lib,
   IndexIntoStackTable,
   MarkerSchemaByName,
+  MarkerFormatType,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
@@ -891,6 +892,7 @@ export function collectThreadMarkers(
         const label = getMarkerLabel(markerIndex);
         const data = collectMarkerData(
           marker,
+          markerSchemaByName,
           stringIndexFieldsByDataType,
           stringTable
         );
@@ -1068,6 +1070,7 @@ export function collectProfileMarkers(
           ),
           data: collectMarkerData(
             marker,
+            markerSchemaByName,
             stringIndexFieldsByDataType,
             stringTable
           ),
@@ -1306,7 +1309,7 @@ function collectMarkerFields(
       fields.push({
         key: field.key,
         label: field.label || field.key,
-        value,
+        value: truncateScreenshotDataUrl(value, field.format),
         formattedValue,
       });
     }
@@ -1315,21 +1318,33 @@ function collectMarkerFields(
   return fields;
 }
 
-// Image blobs, elided from `data` because `--list` repeats them on every row.
-// Keyed by field, not by size: a 2855-char screenshot data URL sits *below* a
-// legitimate 2939-char `prefValue`, so no byte cap separates the two.
-const ELIDED_PAYLOAD_FIELDS: ReadonlyMap<string, ReadonlySet<string>> = new Map(
-  [['CompositorScreenshot', new Set(['url'])]]
-);
-
 export type ElidedDataValue = {
   elided: true;
   length: number;
   preview: string;
 };
 
+function truncateScreenshotDataUrl(
+  resolvedValue: unknown,
+  format: MarkerFormatType | undefined
+): unknown {
+  if (
+    typeof format === 'object' &&
+    format.type === 'screenshot-data-url' &&
+    typeof resolvedValue === 'string'
+  ) {
+    return {
+      elided: true,
+      length: resolvedValue.length,
+      preview: resolvedValue.slice(0, 64),
+    } satisfies ElidedDataValue;
+  }
+  return resolvedValue;
+}
+
 function collectMarkerData(
   marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
   stringIndexFieldsByDataType: Map<string, string[]>,
   stringTable: StringTable
 ): { [key: string]: any } | undefined {
@@ -1339,7 +1354,7 @@ function collectMarkerData(
   }
 
   const stringIndexFields = stringIndexFieldsByDataType.get(payload.type);
-  const elidedFields = ELIDED_PAYLOAD_FIELDS.get(payload.type);
+  const schema = markerSchemaByName[payload.type];
   const data: { [key: string]: any } = {};
   for (const [key, value] of Object.entries(payload)) {
     if (OMITTED_PAYLOAD_KEYS.has(key) || value === undefined) {
@@ -1349,15 +1364,10 @@ function collectMarkerData(
       stringIndexFields?.includes(key) && typeof value === 'number'
         ? stringTable.getString(value, '(empty)')
         : value;
-    if (elidedFields?.has(key) && typeof resolved === 'string') {
-      data[key] = {
-        elided: true,
-        length: resolved.length,
-        preview: resolved.slice(0, 64),
-      } satisfies ElidedDataValue;
-    } else {
-      data[key] = resolved;
-    }
+    data[key] = truncateScreenshotDataUrl(
+      resolved,
+      schema?.fields.find((field) => field.key === key)?.format
+    );
   }
 
   // A payload of only `type` yields no keys here; report nothing.

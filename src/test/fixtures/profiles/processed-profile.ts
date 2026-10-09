@@ -372,17 +372,30 @@ export function makeIntervalMarker(
  * A utility to make TestDefinedRawMarker
  */
 export function makeCompositorScreenshot(
-  startTime: Milliseconds
+  startTime: Milliseconds,
+  windowID: string = '0'
 ): TestDefinedRawMarker {
   return {
-    ...makeInstantMarker('CompositorScreenshot', startTime),
+    ...makeStartMarker(`CompositorScreenshot ${windowID}`, startTime),
     data: {
       type: 'CompositorScreenshot',
       url: 0,
-      windowID: '',
-      windowWidth: 100,
-      windowHeight: 100,
+      windowID,
+      windowSize: { width: 300, height: 150 },
     },
+  };
+}
+
+/**
+ * A utility to make TestDefinedRawMarker
+ */
+export function makeCompositorScreenshotEnd(
+  endTime: Milliseconds,
+  windowID: string = '0'
+): TestDefinedRawMarker {
+  return {
+    ...makeEndMarker(`CompositorScreenshot ${windowID}`, endTime),
+    data: { type: 'CompositorScreenshot', windowID },
   };
 }
 
@@ -421,7 +434,54 @@ export function getProfileWithMarkers(
     ...getThreadWithMarkers(profile.shared, testDefinedMarkers),
     tid: i,
   }));
+  addCompositorScreenshotSchemaIfNeeded(profile);
   return profile;
+}
+
+export function getProfileWithRawMarkers(
+  ...markersPerThread: TestDefinedRawMarker[][]
+): Profile {
+  const profile = getEmptyProfile();
+  profile.meta.markerSchema = markerSchemaForTests;
+
+  profile.threads = markersPerThread.map((markers, i) => ({
+    ...getThreadWithRawMarkers(profile.shared, markers),
+    tid: i,
+  }));
+  addCompositorScreenshotSchemaIfNeeded(profile);
+  return profile;
+}
+
+export const compositorScreenshotMarkerSchema: MarkerSchema = {
+  name: 'CompositorScreenshot',
+  display: ['marker-chart', 'marker-table', 'timeline-screenshots'],
+  fields: [
+    {
+      key: 'url',
+      label: 'Image',
+      format: {
+        type: 'screenshot-data-url',
+        sizeFieldForAspectRatio: 'windowSize',
+      },
+    },
+    { key: 'windowSize', label: 'Window Size', format: 'screenshot-size' },
+    { key: 'windowID', label: 'Window ID', format: 'string' },
+  ],
+  description:
+    'This marker spans the time between each composite of a window and shows the window contents during that time.',
+};
+
+export function addCompositorScreenshotSchemaIfNeeded(profile: Profile): void {
+  if (
+    profile.threads.some((thread) =>
+      thread.markers.data.some((data) => data?.type === 'CompositorScreenshot')
+    )
+  ) {
+    profile.meta.markerSchema = [
+      ...profile.meta.markerSchema,
+      compositorScreenshotMarkerSchema,
+    ];
+  }
 }
 
 /**
@@ -1376,41 +1436,34 @@ export function getIPCTrackProfile() {
   return getProfileWithMarkers(arrayOfIPCMarkers);
 }
 
+/**
+ * One screenshot per millisecond, starting at 0.
+ * Each one ends where the next one starts;
+ * the last one is left open unless `destroyTime` is given.
+ */
 export function getScreenshotMarkersForWindowId(
   windowID: string,
-  count: number
-): TestDefinedMarker[] {
-  return Array(count)
-    .fill(undefined)
-    .map((_, i) => [
-      'CompositorScreenshot',
-      i,
-      null,
-      {
-        type: 'CompositorScreenshot',
-        url: 0, // Some arbitrary string.
-        windowID,
-        windowWidth: 300,
-        windowHeight: 150,
-      },
-    ]);
+  count: number,
+  destroyTime: Milliseconds | null = null
+): TestDefinedRawMarker[] {
+  const markers: TestDefinedRawMarker[] = [];
+  for (let i = 0; i < count; i++) {
+    if (i > 0) {
+      markers.push(makeCompositorScreenshotEnd(i, windowID));
+    }
+    markers.push(makeCompositorScreenshot(i, windowID));
+  }
+  if (destroyTime !== null) {
+    markers.push(makeCompositorScreenshotEnd(destroyTime, windowID));
+  }
+  return markers;
 }
 
 export function getScreenshotTrackProfile() {
-  return getProfileWithMarkers([
+  return getProfileWithRawMarkers([
     ...getScreenshotMarkersForWindowId('0', 5), // This window isn't closed, so we should repeat the last screenshot
-    ...getScreenshotMarkersForWindowId('1', 5), // This window is closed after screenshot 6.
+    ...getScreenshotMarkersForWindowId('1', 5, 6), // This window is closed after screenshot 6.
     ...getScreenshotMarkersForWindowId('2', 10), // This window isn't closed and define the profile length
-    [
-      'CompositorScreenshotWindowDestroyed',
-      6,
-      null,
-      {
-        type: 'CompositorScreenshot',
-        windowID: '1',
-        url: undefined,
-      },
-    ],
   ]);
 }
 

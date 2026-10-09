@@ -6,6 +6,7 @@ import { PureComponent } from 'react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import {
   getCommittedRange,
+  getMarkerSchemaByName,
   getPreviewSelectionIsBeingModified,
 } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -16,10 +17,13 @@ import {
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { createPortal } from 'react-dom';
 import { computeScreenshotSize } from 'firefox-profiler/profile-logic/marker-data';
+import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
 
 import type {
-  ScreenshotPayload,
+  IndexIntoStringTable,
+  MarkerPayload,
+  MarkerSchemaByName,
   ThreadIndex,
   Thread,
   Marker,
@@ -33,10 +37,11 @@ import './TrackScreenshots.css';
 
 type OwnProps = {
   readonly threadIndex: ThreadIndex;
-  readonly windowId: string;
+  readonly markerName: string;
 };
 type StateProps = {
   readonly thread: Thread;
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
   readonly screenshots: Marker[];
@@ -127,6 +132,7 @@ class Screenshots extends PureComponent<Props, State> {
     const {
       screenshots,
       thread,
+      markerSchemaByName,
       isMakingPreviewSelection,
       width,
       rangeStart,
@@ -134,12 +140,12 @@ class Screenshots extends PureComponent<Props, State> {
     } = this.props;
 
     const { pageX, offsetX, containerTop } = this.state;
-    let payload: ScreenshotPayload | null = null;
+    let payload: MarkerPayload | null = null;
 
     if (offsetX !== null) {
       const screenshotIndex = this.findScreenshotAtMouse(offsetX);
       if (screenshotIndex !== null) {
-        payload = screenshots[screenshotIndex].data as any;
+        payload = screenshots[screenshotIndex].data;
       }
     }
 
@@ -153,6 +159,7 @@ class Screenshots extends PureComponent<Props, State> {
       >
         <ScreenshotStrip
           thread={thread}
+          markerSchemaByName={markerSchemaByName}
           width={width}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -162,6 +169,7 @@ class Screenshots extends PureComponent<Props, State> {
         {payload ? (
           <HoverPreview
             thread={thread}
+            markerSchemaByName={markerSchemaByName}
             isMakingPreviewSelection={isMakingPreviewSelection}
             width={width}
             pageX={pageX}
@@ -186,13 +194,14 @@ export const TimelineTrackScreenshots = explicitConnect<
   DispatchProps
 >({
   mapStateToProps: (state, ownProps) => {
-    const { threadIndex, windowId } = ownProps;
+    const { threadIndex, markerName } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
     const { start, end } = getCommittedRange(state);
     return {
       thread: selectors.getRangeFilteredThread(state),
+      markerSchemaByName: getMarkerSchemaByName(state),
       screenshots:
-        selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
+        selectors.getRangeFilteredScreenshotsByName(state).get(markerName) ||
         EMPTY_SCREENSHOTS_TRACK,
       threadName: selectors.getFriendlyThreadName(state),
       rangeStart: start,
@@ -208,6 +217,7 @@ export const TimelineTrackScreenshots = explicitConnect<
 
 type HoverPreviewProps = {
   readonly thread: Thread;
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
   readonly isMakingPreviewSelection: boolean;
@@ -216,8 +226,31 @@ type HoverPreviewProps = {
   readonly containerTop: null | number;
   readonly width: number;
   readonly trackHeight: number;
-  readonly payload: ScreenshotPayload;
+  readonly payload: MarkerPayload;
 };
+
+function getScreenshotImageData(
+  payload: MarkerPayload | null,
+  markerSchemaByName: MarkerSchemaByName
+): {
+  url: IndexIntoStringTable;
+  size: { width: number; height: number };
+} | null {
+  const schema = getSchemaFromMarker(markerSchemaByName, payload);
+  if (!payload || !schema) {
+    return null;
+  }
+  for (const { key, format } of schema.fields) {
+    if (typeof format === 'object' && format.type === 'screenshot-data-url') {
+      const url = (payload as any)[key] as IndexIntoStringTable | undefined;
+      const size = (payload as any)[format.sizeFieldForAspectRatio] as
+        | { width: number; height: number }
+        | undefined;
+      return url === undefined || size === undefined ? null : { url, size };
+    }
+  }
+  return null;
+}
 
 const MAXIMUM_HOVER_SIZE = 350;
 const MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE = 100;
@@ -231,6 +264,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
   override render() {
     const {
       thread,
+      markerSchemaByName,
       isMakingPreviewSelection,
       width,
       pageX,
@@ -244,19 +278,18 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       return null;
     }
 
-    if (payload.url === undefined) {
+    const imageData = getScreenshotImageData(payload, markerSchemaByName);
+    if (imageData === null) {
       return null;
     }
-
-    const { url } = payload;
+    const { url, size } = imageData;
 
     const maximumHoverSize = isMakingPreviewSelection
       ? MAXIMUM_HOVER_SIZE_WHEN_SELECTING_RANGE
       : MAXIMUM_HOVER_SIZE;
 
-    // Type guard: payload.url !== undefined means it has windowWidth and windowHeight
     const { width: hoverWidth, height: hoverHeight } = computeScreenshotSize(
-      payload as { windowWidth: number; windowHeight: number },
+      size,
       maximumHoverSize
     );
 
@@ -304,6 +337,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
 
 type ScreenshotStripProps = {
   readonly thread: Thread;
+  readonly markerSchemaByName: MarkerSchemaByName;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
   readonly screenshots: Marker[];
@@ -315,6 +349,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
   override render() {
     const {
       thread,
+      markerSchemaByName,
       width: outerContainerWidth,
       rangeStart,
       rangeEnd,
@@ -351,21 +386,15 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
           break;
         }
       }
-      // Coerce the payload into a screenshot one.
-      const payload: ScreenshotPayload = screenshots[screenshotIndex]
-        .data as any;
-      if (payload.url === undefined) {
+      const imageData = getScreenshotImageData(
+        screenshots[screenshotIndex].data,
+        markerSchemaByName
+      );
+      if (imageData === null) {
         continue;
       }
-      const {
-        url: urlStringIndex,
-        windowWidth,
-        windowHeight,
-      } = payload as ScreenshotPayload & {
-        windowWidth: number;
-        windowHeight: number;
-      };
-      const scaledImageWidth = (trackHeight * windowWidth) / windowHeight;
+      const { url, size } = imageData;
+      const scaledImageWidth = (trackHeight * size.width) / size.height;
       images.push(
         <div
           className="timelineTrackScreenshotImgContainer"
@@ -378,7 +407,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
           {/* The following image is centered and cropped by the outer container. */}
           <img
             className="timelineTrackScreenshotImg"
-            src={thread.stringTable.getString(urlStringIndex as number)}
+            src={thread.stringTable.getString(url)}
             style={{
               width: scaledImageWidth,
               height: trackHeight,

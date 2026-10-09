@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type {
-  ScreenshotPayload,
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -29,9 +28,9 @@ import {
   getMarkerTypesForDisplay,
 } from './marker-data';
 import { intersectSets, subtractSets } from '../utils/set';
-import { StringTable } from '../utils/string-table';
 import { splitSearchString, stringsToRegExp } from '../utils/string';
 import { ensureExists, assertExhaustiveCheck } from '../utils/types';
+import { INTERVAL_END } from '../app-logic/constants';
 
 export type TracksWithOrder = {
   readonly globalTracks: GlobalTrack[];
@@ -553,7 +552,7 @@ function _trackIdentityKey(
     case 'process':
       return `process:${track.pid}`;
     case 'screenshots':
-      return `screenshots:${track.id}`;
+      return `screenshots:${track.markerName}`;
     case 'visual-progress':
     case 'perceptual-visual-progress':
     case 'contentful-visual-progress':
@@ -606,7 +605,7 @@ function _trackIdentityKey(
 /**
  * Map each old TrackIndex to its new TrackIndex when both old and new track
  * lists describe the same profile across a sanitization step. Tracks are
- * matched by stable identity (pid, screenshot id, threadIndex, counterIndex,
+ * matched by stable identity (pid, screenshot marker name, threadIndex, counterIndex,
  * visual-progress singleton, or marker schema name plus marker name string);
  * old-side thread, counter, and string-table indexes are normalized through
  * the supplied translation maps before comparison. Tracks with no match in
@@ -715,14 +714,15 @@ export function computeGlobalTracks(
   };
   const globalTracksByPid: Map<Pid, ProcessTrack> = new Map();
   let globalTracks: GlobalTrack[] = [];
+  const markerSchema = computeCombinedMarkerSchemaList(
+    profile.meta.markerSchema || []
+  );
+  const screenshotTimelineMarkerTypes = getMarkerTypesForDisplay(
+    markerSchema,
+    'timeline-screenshots'
+  );
 
   // Create the global tracks.
-  const { stringArray } = profile.shared;
-  const stringTable = StringTable.withBackingArray(stringArray);
-  const screenshotNameIndex = stringTable.hasString('CompositorScreenshot')
-    ? stringTable.indexForString('CompositorScreenshot')
-    : null;
-
   for (
     let threadIndex = 0;
     threadIndex < profile.threads.length;
@@ -762,20 +762,23 @@ export function computeGlobalTracks(
       }
     }
 
-    // Check for screenshots.
-    const ids: Set<string> = new Set();
-    if (screenshotNameIndex !== null) {
-      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-        if (markers.name[markerIndex] === screenshotNameIndex) {
-          // Coerce the payload to a screenshot one. Don't do a runtime check that
-          // this is correct.
-          const data = markers.data[markerIndex] as ScreenshotPayload;
-          ids.add(data.windowID);
-        }
+    // Windows must keep being added in the order their first screenshot was taken:
+    // shared URLs refer to global tracks by index,
+    // so a different order would change what an existing URL selects.
+    const markerNames: Set<string> = new Set();
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      const data = markers.data[markerIndex];
+      if (
+        markers.phase[markerIndex] === INTERVAL_END ||
+        data === null ||
+        !screenshotTimelineMarkerTypes.has(data.type)
+      ) {
+        continue;
       }
-      for (const id of ids) {
-        globalTracks.push({ type: 'screenshots', id, threadIndex });
-      }
+      markerNames.add(profile.shared.stringArray[markers.name[markerIndex]]);
+    }
+    for (const markerName of markerNames) {
+      globalTracks.push({ type: 'screenshots', markerName, threadIndex });
     }
   }
 

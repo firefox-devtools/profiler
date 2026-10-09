@@ -179,12 +179,15 @@ Array [
     "data": Object {
       "type": "CompositorScreenshot",
       "url": 21,
-      "windowHeight": 1000,
       "windowID": "0x136888400",
-      "windowWidth": 1280,
+      "windowSize": Object {
+        "height": 1000,
+        "width": 1280,
+      },
     },
     "end": 25,
-    "name": "CompositorScreenshot",
+    "incomplete": true,
+    "name": "CompositorScreenshot 0x136888400",
     "start": 25,
     "threadId": null,
   },

@@ -3670,6 +3670,137 @@ const _upgraders: {
     delete funcTable.isJS;
     delete funcTable.relevantForJS;
   },
+  [76]: (profile: any) => {
+    // The CompositorScreenshot marker payload's `windowWidth` and
+    // `windowHeight` fields were replaced with a single `windowSize` field, and
+    // these markers are now stored as start / end marker pairs whose name
+    // carries the window ID, instead of instant markers.
+    // The CompositorScreenshotWindowDestroyed marker becomes the end marker of
+    // that window's last screenshot.
+    const INTERVAL_START = 2;
+    const INTERVAL_END = 3;
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+
+    let hasCompositorScreenshots = false;
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      if (
+        !markers.data.some((data: any) => data?.type === 'CompositorScreenshot')
+      ) {
+        continue;
+      }
+      hasCompositorScreenshots = true;
+
+      const newMarkers: any = {
+        data: [],
+        name: [],
+        startTime: [],
+        endTime: [],
+        phase: [],
+        category: [],
+        length: 0,
+      };
+      const hasThreadId = Boolean(markers.threadId);
+      if (hasThreadId) {
+        newMarkers.threadId = [];
+      }
+
+      const push = (
+        name: number,
+        startTime: number | null,
+        endTime: number | null,
+        phase: number,
+        sourceIndex: number,
+        data: any
+      ) => {
+        newMarkers.name.push(name);
+        newMarkers.startTime.push(startTime);
+        newMarkers.endTime.push(endTime);
+        newMarkers.phase.push(phase);
+        newMarkers.category.push(markers.category[sourceIndex]);
+        newMarkers.data.push(data);
+        if (hasThreadId) {
+          newMarkers.threadId.push(markers.threadId[sourceIndex]);
+        }
+        newMarkers.length++;
+      };
+
+      const openWindows = new Set();
+      for (let i = 0; i < markers.length; i++) {
+        const data = markers.data[i];
+        if (!data || data.type !== 'CompositorScreenshot') {
+          push(
+            markers.name[i],
+            markers.startTime[i],
+            markers.endTime[i],
+            markers.phase[i],
+            i,
+            data
+          );
+          continue;
+        }
+
+        const windowID = String(data.windowID);
+        const time = markers.startTime[i];
+        const name = stringTable.indexForString(
+          `CompositorScreenshot ${windowID}`
+        );
+        const isWindowDestroyed =
+          stringTable.getString(markers.name[i]) ===
+          'CompositorScreenshotWindowDestroyed';
+        if (openWindows.delete(windowID) || isWindowDestroyed) {
+          push(name, null, time, INTERVAL_END, i, {
+            type: 'CompositorScreenshot',
+            windowID,
+          });
+        }
+        if (isWindowDestroyed) {
+          continue;
+        }
+
+        const { windowWidth, windowHeight, ...startData } = data;
+        startData.windowID = windowID;
+        if (windowWidth !== undefined && windowHeight !== undefined) {
+          startData.windowSize = { width: windowWidth, height: windowHeight };
+        }
+
+        push(name, time, null, INTERVAL_START, i, startData);
+        openWindows.add(windowID);
+      }
+
+      thread.markers = newMarkers;
+    }
+
+    profile.meta.markerSchema = profile.meta.markerSchema.filter(
+      ({ name }: any) => name !== 'CompositorScreenshot'
+    );
+    if (hasCompositorScreenshots) {
+      profile.meta.markerSchema.push({
+        name: 'CompositorScreenshot',
+        display: ['marker-chart', 'marker-table', 'timeline-screenshots'],
+        fields: [
+          {
+            key: 'url',
+            label: 'Image',
+            format: {
+              type: 'screenshot-data-url',
+              sizeFieldForAspectRatio: 'windowSize',
+            },
+          },
+          {
+            key: 'windowSize',
+            label: 'Window Size',
+            format: 'screenshot-size',
+          },
+          { key: 'windowID', label: 'Window ID', format: 'string' },
+        ],
+        description:
+          'This marker spans the time between each composite of a window and shows the window contents during that time.',
+      });
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

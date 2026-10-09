@@ -278,6 +278,33 @@ Array [
     </ul>,
     "a, b",
   ],
+  Array [
+    "screenshot-size",
+    Object {
+      "height": 1000,
+      "width": 1280,
+    },
+    "1280px × 1000px",
+    "1280px × 1000px",
+  ],
+  Array [
+    Object {
+      "sizeFieldForAspectRatio": "windowSize",
+      "type": "screenshot-data-url",
+    },
+    0,
+    <img
+      className="tooltipScreenshotImg"
+      src="data:image/jpeg;base64,AAAA"
+      style={
+        Object {
+          "maxHeight": 350,
+          "maxWidth": 350,
+        }
+      }
+    />,
+    "(screenshot)",
+  ],
 ]
 `;
 
