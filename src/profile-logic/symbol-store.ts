@@ -27,35 +27,56 @@ export type LibSymbolicationResponse =
       error: Error;
     };
 
-export type AddressResult = {
-  // The name of the outer function that this address belongs to.
+// Information about the function that a frame was in, and about the position
+// inside that function. This is used both for the outer function at a
+// looked-up address (see AddressResult) and for the functions that were inlined
+// into it.
+// All fields other than `name` are optional because the information may not be
+// known by the symbolication source, or because the symbolication method does
+// not expose it.
+export type AddressInlineFrame = {
+  // The name of the function that this frame was in.
   name: string;
+  // The path of the file that contains the source code of this frame's function.
+  file?: string;
+  // The line number that contains the source code which generated the
+  // instructions at the address.
+  line?: number;
+  // The column number inside `line` for the source code which generated the
+  // instructions at the address.
+  column?: number;
+  // The line number at which this frame's function starts.
+  functionStartLine?: number;
+  // The column number (inside functionStartLine) at which this frame's function
+  // starts.
+  functionStartColumn?: number;
+  // Whether this frame's function is a "script" function, e.g. JavaScript,
+  // as opposed to a native frame, e.g. C++ or a JS engine internal frame like
+  // a trampoline or a builtin.
+  // If this property is not set, we will keep the script-ness of the frame as
+  // it was before symbolication.
+  isScript?: boolean;
+};
+
+export type AddressResult = AddressInlineFrame & {
   // The address (relative to the library) where the function that
   // contains this address starts, i.e. the address of the function symbol.
   symbolAddress: number;
-  // The path of the file that contains the source code of the outer function that contains
-  // this address.
-  // Optional because the information may not be known by the symbolication source, or because
-  // the symbolication method does not expose it.
-  file?: string;
-  // The line number that contains the source code of the outer function that generated the
-  // instructions at the address, optional.
-  // Optional because the information may not be known by the symbolication source, or because
-  // the symbolication method does not expose it.
-  line?: number;
+  // The raw name of the symbol at symbolAddress, if it differs from `name`.
+  // `name` is the function name from the debug information, which can be a
+  // "nicer" name than the symbol name: For native code, the debug info can
+  // contain the source-level function name whereas the symbol name is the
+  // (demangled) linkage name, and for JIT frames the symbol name can contain
+  // the JIT tier and the script location, e.g. "Ion: doWork (app.js:42:10)",
+  // whereas `name` is just "doWork".
+  symbolName?: string;
   // An optional inline callstack, ordered from inside to outside.
-  // addressResult.name calls addressResult.inlines[inlines.length - 1].function, which
-  // calls addressResult.inlines[inlines.length - 2].function etc.
+  // addressResult.name calls addressResult.inlines[inlines.length - 1].name, which
+  // calls addressResult.inlines[inlines.length - 2].name etc.
   inlines?: Array<AddressInlineFrame>;
   // An optional size, in bytes, of the machine code of the outer function that
   // this address belongs to.
   functionSize?: number;
-};
-
-export type AddressInlineFrame = {
-  name: string;
-  file?: string;
-  line?: number;
 };
 
 export interface SymbolProvider {
