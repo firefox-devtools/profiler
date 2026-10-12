@@ -97,7 +97,9 @@ export function registerFilterCommand(
   addGlobalOptions(
     filter
       .command('clear')
-      .description('Remove all filters for current thread')
+      .description(
+        'Remove current thread filters and the session call tree search'
+      )
       .option('--thread <handle>', 'Thread handle')
   ).action(async (opts) => {
     await runCommand(

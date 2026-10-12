@@ -57,7 +57,7 @@ profiler-cli zoom clear                    # Clear all zoom ranges (return to fu
 profiler-cli filter push <filter-flag>     # Push a sticky sample filter (see filter flags below)
 profiler-cli filter pop [N]                # Pop the last N filters (default: 1)
 profiler-cli filter list                   # List active filters for current thread
-profiler-cli filter clear                  # Remove all filters for current thread
+profiler-cli filter clear                  # Remove current thread filters and session call tree search
 profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
 profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
