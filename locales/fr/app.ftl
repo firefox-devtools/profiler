@@ -837,7 +837,7 @@ TrackMemoryGraph--memory-range-in-graph2 = { $value }
 # Variables:
 #   $value (String) - count of allocations and deallocations since the previous sample
 TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
-    .label = allocations et désallocations depuis l‘échantillon précédent
+    .label = allocations et désallocations depuis l’échantillon précédent
 
 ## TrackProcessCPUGraph
 ## This is used to show the CPU usage of a process over time in the timeline.
