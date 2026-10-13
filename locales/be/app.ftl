@@ -634,7 +634,6 @@ MenuButtons--publish--upload-title = Запампоўванне профілю�
 MenuButtons--publish--cancel-upload = Скасаваць запампоўку
 MenuButtons--publish--message-something-went-wrong = Ой, нешта пайшло не так падчас загрузкі профілю.
 MenuButtons--publish--message-try-again = Паспрабаваць зноў
-MenuButtons--publish--download = Спампаваць
 MenuButtons--publish--compressing = Сцісканне…
 MenuButtons--publish--error-while-compressing = Памылка пры сцісканні, паспрабуйце зняць некаторыя птушкі, каб паменшыць памер профілю.
 

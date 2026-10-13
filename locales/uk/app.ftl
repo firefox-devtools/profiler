@@ -591,7 +591,6 @@ MenuButtons--publish--upload-title = Вивантаження профілю…
 MenuButtons--publish--cancel-upload = Скасувати вивантаження
 MenuButtons--publish--message-something-went-wrong = Йой, під час вивантаження профілю сталася якась халепа.
 MenuButtons--publish--message-try-again = Повторити спробу
-MenuButtons--publish--download = Завантажити
 MenuButtons--publish--compressing = Стиснення…
 MenuButtons--publish--error-while-compressing = Помилка під час стиснення, спробуйте прибрати прапорці біля деяких полів, щоб зменшити розмір профілю.
 
