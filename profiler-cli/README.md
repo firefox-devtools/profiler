@@ -35,6 +35,7 @@ profiler-cli profile info                  # Print profile summary [--all] [--se
 profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
 profiler-cli profile markers               # Search markers across all threads [--search] [--thread] [--category] [--min-duration] [--max-duration] [--has-stack] [--limit]
+profiler-cli profile save <path>           # Save the loaded profile to a file or directory [--force]
 profiler-cli thread list                   # List all threads as a flat table [--sort] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
@@ -45,7 +46,7 @@ profiler-cli thread markers                # List markers with aggregated statis
 profiler-cli thread functions              # List all functions with CPU percentages
 profiler-cli thread network                # Show network requests with timing phases [--search] [--min-duration] [--max-duration] [--limit] [--sort]
 profiler-cli thread page-load              # Show page load summary (navigation timing, resources, CPU, jank)
-profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
+profiler-cli marker info <handle>...       # Show detailed marker information; accepts several handles and ranges (e.g., m-1234, m-1234..m-1240)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
 profiler-cli function info <handle>        # Show detailed function information and category breakdown
@@ -120,6 +121,8 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
 | `--to <src-N>`         | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
 | `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
+| `--permalink`          | Also print a profiler.firefox.com URL for the view the command shows (published profiles only)                                                           |
+| `--short-permalink`    | Like `--permalink`, shortened through share.firefox.dev                                                                                                  |
 
 ## Sample Filter Flags
 

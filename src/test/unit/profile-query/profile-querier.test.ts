@@ -16,6 +16,9 @@
  * process-thread-list.test.ts.
  */
 
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
 import { MAX_PROFILE_MARKERS_ROWS } from 'firefox-profiler/profile-query/formatters/marker-info';
 import {
@@ -38,6 +41,7 @@ import {
 import { storeWithProfile } from '../../fixtures/stores';
 import { profilePublished } from 'firefox-profiler/actions/publish';
 import { triggerLoadingFromUrl } from 'firefox-profiler/actions/receive-profile';
+import { changeIncludeIdleSamples } from 'firefox-profiler/actions/profile-view';
 
 describe('ProfileQuerier', function () {
   describe('pushViewRange', function () {
@@ -139,9 +143,8 @@ describe('ProfileQuerier', function () {
       const popResult = await querier.popViewRange();
       expect(popResult.message).toContain('Popped view range');
 
-      // Samples should be back to baseline (or at least different from ranged)
       const afterPopSamples = await querier.threadSamples();
-      expect(afterPopSamples).not.toBe(rangedSamples);
+      expect(afterPopSamples).toEqual(baselineSamples);
     });
 
     it('shows non-empty output after pushing a range with samples', async function () {
@@ -223,6 +226,109 @@ describe('ProfileQuerier', function () {
       const hasD = rangedFunctions2.includes('D');
       const hasE = rangedFunctions2.includes('E');
       expect(hasD || hasE).toBe(true);
+    });
+  });
+
+  describe('view range query results', function () {
+    let querier: ProfileQuerier;
+
+    beforeEach(function () {
+      const { profile } = getProfileFromTextSamples(`
+        1000  1010  1020
+        A     A     A
+        B     B     B
+        C     D     E
+      `);
+      const store = storeWithProfile(profile);
+      querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+    });
+
+    async function collectQueries(search?: string) {
+      return {
+        samples: await querier.threadSamples('t-0', true, search),
+        functions: await querier.threadFunctions(
+          't-0',
+          { searchString: search },
+          true
+        ),
+        topDown: await querier.threadSamplesTopDown(
+          't-0',
+          undefined,
+          true,
+          search
+        ),
+        bottomUp: await querier.threadSamplesBottomUp(
+          't-0',
+          undefined,
+          true,
+          search
+        ),
+      };
+    }
+
+    it.each(['pop', 'clear'] as const)(
+      '%s restores full-profile query results and searches',
+      async function (action) {
+        const baseline = await collectQueries();
+        const baselineSearch = await collectQueries('C');
+        expect(baselineSearch.functions.functions.map((f) => f.name)).toEqual([
+          'C',
+        ]);
+        expect(baselineSearch.samples.topFunctionsBySelf).toContainEqual(
+          expect.objectContaining({ name: 'C', selfSamples: 1 })
+        );
+        expect(baselineSearch.topDown.regularCallTree.totalSamples).toBe(1);
+        expect(baselineSearch.bottomUp.invertedCallTree?.totalSamples).toBe(1);
+
+        await querier.pushViewRange('5ms,21ms');
+        const narrowed = await collectQueries();
+        expect(narrowed.samples.topFunctionsBySelf).not.toContainEqual(
+          expect.objectContaining({ name: 'C' })
+        );
+        const narrowedSearch = await collectQueries('C');
+        expect(narrowedSearch.samples.topFunctionsByTotal).toEqual([]);
+        expect(narrowedSearch.functions.functions).toEqual([]);
+        expect(narrowedSearch.topDown.regularCallTree.children).toEqual([]);
+        expect(narrowedSearch.bottomUp.invertedCallTree?.children).toEqual([]);
+
+        if (action === 'pop') {
+          await querier.popViewRange();
+        } else {
+          await querier.clearViewRange();
+        }
+        expect((await querier.getStatus()).viewRanges).toEqual([]);
+        expect(await collectQueries()).toEqual(baseline);
+        expect(await collectQueries('C')).toEqual(baselineSearch);
+
+        await querier.pushViewRange('0ms,15ms');
+        await querier.popViewRange();
+        expect(await collectQueries()).toEqual(baseline);
+        expect(await collectQueries('C')).toEqual(baselineSearch);
+      }
+    );
+
+    it('pop restores the preceding zoom and clear restores the full profile', async function () {
+      const baseline = await collectQueries();
+      await querier.pushViewRange('0ms,15ms');
+      const outer = await collectQueries();
+      const outerSearch = await collectQueries('C');
+
+      await querier.pushViewRange('5ms,15ms');
+      await collectQueries();
+      await collectQueries('C');
+      await querier.popViewRange();
+      expect((await querier.getStatus()).viewRanges).toHaveLength(1);
+      expect(await collectQueries()).toEqual(outer);
+      expect(await collectQueries('C')).toEqual(outerSearch);
+
+      await querier.pushViewRange('5ms,15ms');
+      await collectQueries();
+      await querier.clearViewRange();
+      expect((await querier.getStatus()).viewRanges).toEqual([]);
+      expect(await collectQueries()).toEqual(baseline);
     });
   });
 
@@ -768,6 +874,47 @@ describe('ProfileQuerier', function () {
     });
   });
 
+  describe('saveProfile', function () {
+    it('strips embedded source contents like the web download', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+      `);
+      const { stringArray } = profile.shared;
+      profile.shared.sources = {
+        length: 1,
+        id: [null],
+        filename: [stringArray.push('app.js') - 1],
+        startLine: [1],
+        startColumn: [1],
+        sourceMapURL: [null],
+        content: ['console.log("secret");'],
+      };
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'profiler-save-'));
+      try {
+        const outPath = path.join(dir, 'out.json');
+        const result = await querier.saveProfile(outPath, false);
+        expect(result.format).toBe('json');
+
+        const saved = JSON.parse(fs.readFileSync(outPath, 'utf-8'));
+        expect(saved.shared.sources.content).toEqual([null]);
+        expect(saved.shared.sources.length).toBe(1);
+        // The in-memory profile is untouched.
+        expect(getProfile(store.getState()).shared.sources.content).toEqual([
+          'console.log("secret");',
+        ]);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+
   describe('permalink', function () {
     function querierWithSamples() {
       const { profile } = getProfileFromTextSamples(`
@@ -805,6 +952,61 @@ describe('ProfileQuerier', function () {
       expect(url.searchParams.get('range')).toBe('5000m20000');
       expect(url.searchParams.get('transforms')).toBe('mf-0');
       expect(url.searchParams.get('profileName')).toBe('my profile');
+    });
+
+    it('layers ephemeral view settings on top of the session state', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(profilePublished('abc123', 'my profile', null));
+      // The CLI loader excludes idle samples by default, unlike the web.
+      store.dispatch(changeIncludeIdleSamples(false));
+
+      const result = await querier.permalink({
+        tab: 'calltree',
+        callTreeSearch: 'A',
+        includeIdle: true,
+        invertCallstack: true,
+        sampleFilters: [{ type: 'merge', funcIndexes: [1] }],
+      });
+      const url = new URL(result.url);
+      expect(url.searchParams.get('search')).toBe('A');
+      expect(url.searchParams.has('hideIdleSamples')).toBe(false);
+      expect(url.searchParams.has('invertCallstack')).toBe(true);
+      expect(url.searchParams.get('transforms')).toBe('mf-1');
+
+      // None of it leaks into the session.
+      const status = await querier.getStatus();
+      expect(status.filterStacks).toEqual([]);
+      const plain = new URL((await querier.permalink()).url);
+      expect(plain.searchParams.get('search')).toBeNull();
+      expect(plain.searchParams.has('hideIdleSamples')).toBe(true);
+      expect(plain.searchParams.has('invertCallstack')).toBe(false);
+    });
+
+    it('links to a marker view with the marker selected in its thread', async function () {
+      const profile = getProfileWithMarkers(
+        [['Parent marker', 10, null, { type: 'tracing', category: 'Test' }]],
+        [['GPU marker', 20, null, { type: 'tracing', category: 'Test' }]]
+      );
+      const store = storeWithProfile(profile);
+      store.dispatch(profilePublished('abc123', 'p', null));
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      await querier.threadSelect('t-0');
+      const markers = await querier.threadMarkers('t-1', { list: true });
+      const handle = markers.flatMarkers![0].handle;
+
+      const result = await querier.permalink({
+        tab: 'marker-table',
+        markerHandle: handle,
+        markerSearch: 'GPU',
+      });
+      const url = new URL(result.url);
+      expect(url.pathname).toBe('/public/abc123/marker-table/');
+      expect(url.searchParams.get('thread')).toBe('1');
+      expect(url.searchParams.get('marker')).toBe('0');
+      expect(url.searchParams.get('markerSearch')).toBe('GPU');
     });
 
     it('supports from-url profiles', async function () {
@@ -1316,6 +1518,158 @@ describe('ProfileQuerier', function () {
       const after = await querier.profileMarkers({});
       expect(after.totalCount).toBe(4);
       expect(after.matchingThreadCount).toBe(3);
+    });
+  });
+
+  describe('markerInfoMulti', function () {
+    async function querierWithMarkerHandles() {
+      const profile = getProfileWithMarkers([
+        ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+        ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+        ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+        ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      const querier = new ProfileQuerier(store, rootRange);
+      // Listing the markers is what hands out the m-N handles.
+      const list = await querier.threadMarkers('t-0', { list: true });
+      return {
+        querier,
+        handles: list.flatMarkers!.map((m) => m.handle),
+      };
+    }
+
+    it('returns one record per handle, in the requested order', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([handles[2], handles[0]]);
+
+      expect(result.type).toBe('marker-info-multi');
+      expect(result.requested).toEqual([handles[2], handles[0]]);
+      expect(result.markers.map((m) => m.name)).toEqual(['Gamma', 'Alpha']);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('expands an inclusive range of handles', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([
+        `${handles[0]}..${handles[2]}`,
+      ]);
+
+      expect(result.requested).toEqual(handles.slice(0, 3));
+      expect(result.markers.map((m) => m.name)).toEqual([
+        'Alpha',
+        'Beta',
+        'Gamma',
+      ]);
+    });
+
+    it('reports an unknown handle per handle and still returns the others', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([
+        handles[0],
+        'm-9999',
+        handles[1],
+      ]);
+
+      expect(result.markers.map((m) => m.name)).toEqual(['Alpha', 'Beta']);
+      expect(result.errors).toEqual([
+        { markerHandle: 'm-9999', error: 'Unknown marker m-9999' },
+      ]);
+    });
+
+    it('rejects a malformed handle spec outright', async function () {
+      const { querier } = await querierWithMarkerHandles();
+
+      await expect(querier.markerInfoMulti(['not-a-handle'])).rejects.toThrow(
+        'Invalid marker handle not-a-handle'
+      );
+    });
+
+    describe('range provenance', function () {
+      // Handle numbering continues across listings, so a range running off the
+      // end of the first thread's listing resolves into the second thread's.
+      async function querierWithTwoListings() {
+        const profile = getProfileWithMarkers(
+          [
+            ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+            ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+          ],
+          [
+            ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+            ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+          ]
+        );
+        const store = storeWithProfile(profile);
+        const rootRange = getProfileRootRange(store.getState());
+        const querier = new ProfileQuerier(store, rootRange);
+        const first = await querier.threadMarkers('t-0', { list: true });
+        const second = await querier.threadMarkers('t-1', { list: true });
+        return {
+          querier,
+          firstHandles: first.flatMarkers!.map((m) => m.handle),
+          secondHandles: second.flatMarkers!.map((m) => m.handle),
+        };
+      }
+
+      it('warns when a range straddles two threads', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+        const spec = `${firstHandles[1]}..${secondHandles[0]}`;
+
+        const result = await querier.markerInfoMulti([spec]);
+
+        // Every handle resolves, so this would otherwise look like a success.
+        expect(result.errors).toEqual([]);
+        expect(result.rangeSpansThreadsWarning).toEqual({
+          ranges: [spec],
+          threadHandles: ['t-0', 't-1'],
+        });
+      });
+
+      it('does not warn for a range inside one thread', async function () {
+        const { querier, firstHandles } = await querierWithTwoListings();
+
+        const result = await querier.markerInfoMulti([
+          `${firstHandles[0]}..${firstHandles[1]}`,
+        ]);
+
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
+
+      it('does not warn when a single-thread range sits next to a handle on another thread', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+
+        // The range is entirely within t-0; only the extra bare handle is on
+        // t-1. Judging the warning on every resolved marker rather than on the
+        // range's own markers made this warn about a range that never spanned
+        // anything.
+        const spec = `${firstHandles[0]}..${firstHandles[1]}`;
+        const result = await querier.markerInfoMulti([spec, secondHandles[0]]);
+
+        expect(result.errors).toEqual([]);
+        expect(result.markers).toHaveLength(3);
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
+
+      it('does not warn for an explicit list of handles from two threads', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+
+        // Typing both handles out is a deliberate comparison, not an accident
+        // of numbering, so it must not be second-guessed.
+        const result = await querier.markerInfoMulti([
+          firstHandles[0],
+          secondHandles[0],
+        ]);
+
+        expect(result.markers).toHaveLength(2);
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
     });
   });
 });

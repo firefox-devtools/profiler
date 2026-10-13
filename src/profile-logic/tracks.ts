@@ -860,7 +860,8 @@ function filterGlobalTracksByTab(
       // Always include the screenshots.
       case 'screenshots':
       // Also always add the visual progress tracks without looking at the tab
-      // filter. (fallthrough)
+      // filter.
+      // falls through
       case 'visual-progress':
       case 'perceptual-visual-progress':
       case 'contentful-visual-progress':
@@ -1971,7 +1972,8 @@ function _isLocalTrackVisible(
     case 'network':
     case 'counter':
     // 'event-delay' track is experimental, and it should be visible by default
-    // whenever it is included in a profile. (fallthrough)
+    // whenever it is included in a profile.
+    // falls through
     case 'event-delay':
       // Keep non-thread local tracks visible.
       return true;

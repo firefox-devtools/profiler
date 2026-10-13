@@ -92,7 +92,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
               <Localized
                 key={key}
                 id="SourceView--browser-api-malformed-response-when-obtaining-source"
-                vars={{ errorMessage }}
+                vars={{ apiErrorMessage: errorMessage }}
               >
                 <li>{`The browser’s symbolication API returned a malformed response: ${errorMessage}`}</li>
               </Localized>
@@ -104,7 +104,7 @@ export function CodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
               <Localized
                 key={key}
                 id="SourceView--local-symbol-server-api-malformed-response-when-obtaining-source"
-                vars={{ errorMessage }}
+                vars={{ apiErrorMessage: errorMessage }}
               >
                 <li>{`The local symbol server’s symbolication API returned a malformed response: ${errorMessage}`}</li>
               </Localized>

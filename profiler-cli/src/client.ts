@@ -15,6 +15,8 @@ import type {
   ClientMessage,
   ServerResponse,
   CommandResult,
+  PermalinkOutcome,
+  PermalinkFormat,
 } from './protocol';
 import {
   cleanupIfDaemonGone,
@@ -245,10 +247,27 @@ export async function sendMessage(
   message: ClientMessage,
   sessionId?: string
 ): Promise<string | CommandResult> {
+  const { result } = await sendMessageDetailed(sessionDir, message, sessionId);
+  return result;
+}
+
+export type CommandOutcome = {
+  result: string | CommandResult;
+  permalink?: PermalinkOutcome;
+};
+
+/**
+ * As `sendMessage`, but keeps the extra fields of a success response.
+ */
+export async function sendMessageDetailed(
+  sessionDir: string,
+  message: ClientMessage,
+  sessionId?: string
+): Promise<CommandOutcome> {
   const response = await sendRawMessage(sessionDir, message, sessionId);
 
   if (response.type === 'success') {
-    return response.result;
+    return { result: response.result, permalink: response.permalink };
   } else if (response.type === 'error') {
     throw new Error(response.error);
   } else {
@@ -273,9 +292,14 @@ async function sendStatusMessage(
 export async function sendCommand(
   sessionDir: string,
   command: ClientCommand,
-  sessionId?: string
-): Promise<string | CommandResult> {
-  return sendMessage(sessionDir, { type: 'command', command }, sessionId);
+  sessionId?: string,
+  options: { permalink?: PermalinkFormat } = {}
+): Promise<CommandOutcome> {
+  return sendMessageDetailed(
+    sessionDir,
+    { type: 'command', command, permalink: options.permalink },
+    sessionId
+  );
 }
 
 function hasProxyEnvVar(): boolean {

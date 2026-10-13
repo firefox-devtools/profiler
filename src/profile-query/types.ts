@@ -7,6 +7,8 @@
  * These types are used by both profile-query (the library) and profiler-cli.
  */
 
+import type { ProfileFileFormat } from 'firefox-profiler/profile-logic/profile-file-encoding';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   Transform,
   CallTreeSummaryStrategy,
@@ -174,6 +176,25 @@ export type PermalinkResult = {
   url: string;
   /** share.firefox.dev URL, only when shortening was requested. */
   shortUrl: string | null;
+};
+
+/**
+ * Ephemeral view settings layered on top of the session state when building a
+ * permalink, so a link can reproduce what a single query showed. Every field is
+ * optional and falls back to the session state.
+ */
+export type PermalinkView = {
+  threadHandle?: string;
+  /** Selects this marker in the URL and picks its thread. */
+  markerHandle?: string;
+  tab?: TabSlug;
+  callTreeSearch?: string;
+  markerSearch?: string;
+  networkSearch?: string;
+  includeIdle?: boolean;
+  invertCallstack?: boolean;
+  strategy?: CallTreeSummaryStrategy;
+  sampleFilters?: SampleFilterSpec[];
 };
 
 // ===== Status Command =====
@@ -881,6 +902,26 @@ export type MarkerInfoResult = {
   stack?: StackTraceData;
 };
 
+/** Result of `marker info` with more than one handle. */
+export type MarkerInfoMultiResult = {
+  type: 'marker-info-multi';
+  /** Handles requested, ranges expanded, in requested order. */
+  requested: string[];
+  markers: MarkerInfoResult[];
+  errors: Array<{
+    markerHandle: string;
+    error: string;
+  }>;
+  /**
+   * Set when a range resolved into several threads, which means it ran past the
+   * end of the listing the user was reading.
+   */
+  rangeSpansThreadsWarning?: {
+    ranges: string[];
+    threadHandles: string[];
+  };
+};
+
 export type MarkerStackResult = {
   type: 'marker-stack';
   threadHandle: string;
@@ -1191,6 +1232,16 @@ export type SourceEntry = {
 export type SourceMapSourcesResult = {
   type: 'sourcemap-sources';
   sources: SourceEntry[];
+};
+
+/**
+ * Outcome of `profile save`: where the profile was written and how big it is.
+ */
+export type ProfileSaveResult = {
+  type: 'profile-save';
+  path: string;
+  format: ProfileFileFormat;
+  bytes: number;
 };
 
 /**

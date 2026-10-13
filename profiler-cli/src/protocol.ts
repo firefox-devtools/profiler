@@ -19,6 +19,7 @@ export type {
   WithContext,
   StatusResult,
   PermalinkResult,
+  PermalinkView,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
@@ -63,6 +64,7 @@ export type {
   RateStats,
   MarkerGroupData,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
@@ -71,6 +73,7 @@ export type {
   ProfileMarkersResult,
   ProfileMarkerItem,
   ProfileMarkersThreadBreakdown,
+  ProfileSaveResult,
   ThreadSelectResult,
   CounterSummary,
   CounterListResult,
@@ -102,6 +105,7 @@ import type {
   ThreadListOptions,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -115,6 +119,7 @@ import type {
   FilterStackResult,
   ProfileLogsResult,
   ProfileMarkersResult,
+  ProfileSaveResult,
   ThreadSelectResult,
   CounterListResult,
   CounterInfoResult,
@@ -124,7 +129,12 @@ import type {
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
 export type ClientMessage =
-  | { type: 'command'; command: ClientCommand }
+  | {
+      type: 'command';
+      command: ClientCommand;
+      /** Also build a profiler.firefox.com URL for the view this command shows. */
+      permalink?: PermalinkFormat;
+    }
   | { type: 'shutdown' }
   | { type: 'status' };
 
@@ -154,6 +164,13 @@ export type ClientCommand =
         search?: string;
         limit?: number;
       };
+    }
+  | {
+      command: 'profile';
+      subcommand: 'save';
+      /** Absolute destination file or directory (resolved client-side). */
+      path: string;
+      force: boolean;
     }
   | {
       command: 'thread';
@@ -193,7 +210,10 @@ export type ClientCommand =
   | {
       command: 'marker';
       subcommand: 'info' | 'select' | 'stack';
+      /** Single handle, for `stack`. */
       marker?: string;
+      /** Handle specs for `info`, e.g. ["m-42", "m-50..m-53"]. */
+      markers?: string[];
     }
   | {
       command: 'counter';
@@ -238,8 +258,21 @@ export type ClientCommand =
   | { command: 'status' }
   | { command: 'permalink'; short?: boolean };
 
+/** `short` goes through the share.firefox.dev shortener. */
+export type PermalinkFormat = 'long' | 'short';
+
+/**
+ * Outcome of a `--permalink` request. The link is best effort: a failure to
+ * build it (e.g. an unpublished local file) must not fail the command itself.
+ */
+export type PermalinkOutcome = PermalinkResult | { error: string };
+
 export type ServerResponse =
-  | { type: 'success'; result: string | CommandResult }
+  | {
+      type: 'success';
+      result: string | CommandResult;
+      permalink?: PermalinkOutcome;
+    }
   | { type: 'error'; error: string }
   | { type: 'loading' }
   | { type: 'symbolicating' }
@@ -260,6 +293,7 @@ export type CommandResult =
   | WithContext<ThreadListResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
+  | WithContext<MarkerInfoMultiResult>
   | WithContext<ProfileInfoResult>
   | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>
@@ -271,6 +305,7 @@ export type CommandResult =
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
   | WithContext<ProfileMarkersResult>
+  | WithContext<ProfileSaveResult>
   | WithContext<ThreadPageLoadResult>
   | WithContext<ThreadSelectResult>
   | WithContext<StrategySelectResult>

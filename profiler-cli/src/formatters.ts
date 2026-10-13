@@ -21,6 +21,7 @@ import type {
   ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
   ProfileMetaResult,
   ThreadSamplesResult,
@@ -53,6 +54,7 @@ import type {
   SourceMapLocation,
   SourceMapSourcesResult,
   ApplySourceMapResult,
+  ProfileSaveResult,
 } from './protocol';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
@@ -497,9 +499,64 @@ export function formatMarkerInfoResult(
   result: WithContext<MarkerInfoResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
-  let output = `${contextHeader}
+  return `${contextHeader}\n\n${formatMarkerInfoBody(result)}`;
+}
 
-Marker ${result.markerHandle}: ${result.name}`;
+/**
+ * Format several marker info records as plain text, one per requested handle
+ * under a single context header. Handles that did not resolve are reported in
+ * place.
+ */
+export function formatMarkerInfoMultiResult(
+  result: WithContext<MarkerInfoMultiResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const total = result.markers.length + result.errors.length;
+  const records: string[] = [];
+
+  // Walk the requested handles, so failed lookups keep their place in the order.
+  const byHandle = new Map(result.markers.map((m) => [m.markerHandle, m]));
+  const errorsByHandle = new Map(
+    result.errors.map((e) => [e.markerHandle, e.error])
+  );
+  let position = 0;
+  for (const markerHandle of result.requested) {
+    position++;
+    const prefix = `[${position}/${total}] `;
+    const marker = byHandle.get(markerHandle);
+    if (marker) {
+      records.push(prefix + formatMarkerInfoBody(marker).trimEnd());
+      continue;
+    }
+    const error = errorsByHandle.get(markerHandle);
+    if (error !== undefined) {
+      records.push(`${prefix}Marker ${markerHandle}: error: ${error}`);
+    }
+  }
+
+  let output = `${contextHeader}\n\n${records.join('\n\n----------\n\n')}`;
+  if (result.errors.length > 0) {
+    const verb = result.errors.length === 1 ? 'was' : 'were';
+    output += `\n\n${result.errors.length} of ${total} requested markers ${verb} not found.`;
+  }
+  const spread = result.rangeSpansThreadsWarning;
+  if (spread) {
+    const rangeList = spread.ranges.join(', ');
+    const threadList = spread.threadHandles.join(', ');
+    output +=
+      `\n\nWarning: the range ${rangeList} covers markers in more than one thread ` +
+      `(${threadList}). Handle ranges are numeric, so a range that runs past the end of ` +
+      `the listing you were reading picks up unrelated markers. Re-run the listing and ` +
+      `check the handles.`;
+  }
+  return output;
+}
+
+/**
+ * Format one marker info record, below the context header.
+ */
+function formatMarkerInfoBody(result: MarkerInfoResult): string {
+  let output = `Marker ${result.markerHandle}: ${result.name}`;
   if (result.tooltipLabel) {
     output += ` - ${result.tooltipLabel}`;
   }
@@ -2553,4 +2610,19 @@ export function formatStrategySelectResult(
     `Data source: ${result.strategy}\n` +
     `Available in ${result.threadHandle}: ${result.availableStrategies.join(', ')}`
   );
+}
+
+/**
+ * Format a ProfileSaveResult as plain text.
+ */
+export function formatProfileSaveResult(
+  result: WithContext<ProfileSaveResult>
+): string {
+  const FORMAT_NAMES: Record<ProfileSaveResult['format'], string> = {
+    json: 'JSON',
+    'json-gz': 'gzipped JSON',
+    jslb: 'JSON slabs',
+    'jslb-gz': 'gzipped JSON slabs',
+  };
+  return `Saved profile to ${result.path} (${FORMAT_NAMES[result.format]}, ${formatBytes(result.bytes)}).`;
 }

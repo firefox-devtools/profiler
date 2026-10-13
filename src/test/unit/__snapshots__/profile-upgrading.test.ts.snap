@@ -53,7 +53,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 36,
+    "version": 37,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -4441,6 +4441,7 @@ Object {
           "marker-table",
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "data": Array [
@@ -4726,7 +4727,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 36,
+    "version": 37,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -5917,6 +5918,7 @@ Object {
           "marker-table",
         ],
         "name": "FileIO",
+        "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
       },
       Object {
         "data": Array [
@@ -6202,7 +6204,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 36,
+    "version": 37,
   },
   "pages": Array [
     Object {

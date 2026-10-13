@@ -36,8 +36,8 @@ import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-struct
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
-import { getSourcesWithSourceMapURL } from '../profile-logic/source-map-matching';
-import type { EligibleSource } from '../profile-logic/source-map-matching';
+import { getSourcesWithSourceMapURL } from '../profile-logic/source-maps/matching';
+import type { EligibleSource } from '../profile-logic/source-maps/matching';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {

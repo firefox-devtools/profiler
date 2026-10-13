@@ -9,7 +9,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import type { Command } from 'commander';
-import { addGlobalOptions, runCommand } from './shared';
+import { addGlobalOptions, runCommand, permalinkFormat } from './shared';
 import { sendCommand } from '../client';
 import { formatOutput } from '../output';
 
@@ -53,7 +53,7 @@ export function registerSourcemapCommand(
       return;
     }
 
-    const result = await sendCommand(
+    const { result, permalink } = await sendCommand(
       sessionDir,
       {
         command: 'sourcemap',
@@ -61,9 +61,10 @@ export function registerSourcemapCommand(
         path: absolutePath,
         to: opts.to,
       },
-      opts.session
+      opts.session,
+      { permalink: permalinkFormat(opts) }
     );
-    console.log(formatOutput(result, opts.json ?? false));
+    console.log(formatOutput(result, opts.json ?? false, permalink));
 
     // `ambiguous` (needs disambiguation) and `error` are failures, so exit
     // non-zero and let scripts branch on them. `applied` / `unchanged` exit 0.

@@ -407,7 +407,8 @@ export function correlateIPCMarkers(
       switch (phase) {
         case 'endpoint':
         // We don't have a 'phase' field in the older profiles, in that case
-        // their phase is 'endpoint'. (fallthrough)
+        // their phase is 'endpoint'.
+        // falls through
         case undefined:
           return 0;
         case 'transferStart':
@@ -423,7 +424,8 @@ export function correlateIPCMarkers(
           return 3;
         case 'endpoint':
         // We don't have a 'phase' field in the older profiles, in that case
-        // their phase is 'endpoint'. (fallthrough)
+        // their phase is 'endpoint'.
+        // falls through
         case undefined:
           return 4;
         case 'transferStart':

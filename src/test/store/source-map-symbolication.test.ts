@@ -20,7 +20,7 @@
 
 import { SourceMapGenerator } from 'source-map';
 
-import { runSourceMapSymbolicationCore } from '../../profile-logic/source-map-symbolication';
+import { runSourceMapSymbolicationCore } from '../../profile-logic/source-maps/symbolication';
 import { loadProfile } from '../../actions/receive-profile';
 import { applySourceMapFile } from '../../actions/source-map-symbolication';
 import {
@@ -39,7 +39,7 @@ import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
   WorkerInput,
   WorkerOutput,
-} from '../../profile-logic/source-map-worker-types';
+} from '../../profile-logic/source-maps/worker-types';
 import type { RawSourceMap } from 'source-map';
 
 // Original source file. Indentation and blank lines matter: the mappings

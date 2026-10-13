@@ -159,6 +159,11 @@ CallTree--bytes-total = Toplam Boyut (bayt)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Bazı { $calledFunction } çağrıları derleyici tarafından satır içine dönüştürüldü.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (satır içi)
+    .title = { $calledFunction } çağrılarına derleyici tarafından { $outerFunction } çağrıları dahil edildi.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -451,8 +456,6 @@ MenuButtons--index--metaInfo-button =
     .label = Profil Bilgileri
 MenuButtons--index--full-view = Tam Görünüm
 MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
-MenuButtons--index--download =
-    .label = İndir…
 MenuButtons--index--share =
     .label = Paylaş…
 MenuButtons--index--reshare =
@@ -619,7 +622,6 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Bu profil gizli gezinti verileri içeriyor
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
 MenuButtons--publish--reshare-performance-profile = Performans Profilini Yeniden Paylaş
-MenuButtons--publish--download-performance-profile = Performans Profilini İndir
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
 MenuButtons--publish--download-info-description = Bu profili bilgisayarınıza dosya olarak kaydedin.
 MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
@@ -630,7 +632,6 @@ MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
 MenuButtons--publish--message-something-went-wrong = Profil yüklenirken bir hata oluştu.
 MenuButtons--publish--message-try-again = Yeniden dene
-MenuButtons--publish--download = İndir
 MenuButtons--publish--compressing = Sıkıştırılıyor…
 MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata oluştu. Profil boyutunu küçültmek için bazı onay kutularının işaretini kaldırmayı deneyin.
 
@@ -762,6 +763,14 @@ StackSettings--implementation-native2 = Yerel
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
+StackSettings--call-tree-strategy-js-allocations = JavaScript atamaları
+    .title = Atanan JavaScript baytını kullanarak özetle (atamaları kaldırma)
+StackSettings--call-tree-native-allocations = Ayrılan bellek
+    .title = Ayrılan belleğin baytlarını kullanarak özetle
+StackSettings--invert-call-stack = Çağrı yığınını tersine çevir
+    .title = Bir çağrı düğümünde geçen süreye göre sırala, düğümün altlarını yok say.
+StackSettings--include-idle-samples = Boşta olan örnekleri dahil et
+    .title = Yaprak çerçevesi Boşta kategorisinde olan örnekleri gizlemek için işareti kaldırın.
 StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
 StackSettings--use-stack-chart-same-widths = Her yığın için aynı genişliği kullan
 StackSettings--panel-search =

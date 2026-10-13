@@ -263,10 +263,10 @@ describe('app/MenuButtons', function () {
         fireFullClick(getPublishButton());
         await screen.findByText(/^(Share|Re-share) Performance Profile$/);
       };
-      // The Download button opens the same panel but with the Download CTA.
+      // The Save button opens the same panel but with the Save CTA.
       const openDownloadPanel = async () => {
-        fireFullClick(screen.getByText('Download…'));
-        await screen.findByText('Download Performance Profile');
+        fireFullClick(screen.getByText('Save…'));
+        await screen.findByText('Save Performance Profile');
       };
 
       return {
@@ -320,7 +320,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createSimpleProfile('nightly');
       const { getPanel, openDownloadPanel } = setupForPublish(profile);
       await openDownloadPanel();
-      await screen.findByRole('link', { name: /Download/ });
+      await screen.findByRole('link', { name: /Save/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -328,7 +328,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createSimpleProfile('release');
       const { getPanel, openDownloadPanel } = setupForPublish(profile);
       await openDownloadPanel();
-      await screen.findByRole('link', { name: /Download/ });
+      await screen.findByRole('link', { name: /Save/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -346,8 +346,38 @@ describe('app/MenuButtons', function () {
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
       await openDownloadPanel();
-      await screen.findByRole('link', { name: /Download/ });
+      await screen.findByRole('link', { name: /Save/ });
       expect(getPanel()).toMatchSnapshot();
+    });
+
+    describe.each(['save', 'share'] as const)('%s panel', (panel) => {
+      it.each([
+        ['/from-browser', true],
+        ['/from-post-message', true],
+        ['/unpublished', true],
+        ['/from-file', false],
+        ['/from-url/https%3A%2F%2Fexample.com%2Fprofile.json', false],
+        ['/from-url/http%3A%2F%2Flocalhost%2Fprofile.json', false],
+        ['/public/VALID_HASH', false],
+      ] as const)(
+        'shows the in-memory notice for %s: %s',
+        async (pathname, shouldShowNotice) => {
+          const { dispatch, openDownloadPanel, openPublishPanel } =
+            setupForPublish();
+          act(() => {
+            dispatch(
+              updateUrlState(
+                stateFromLocation({ pathname, search: '', hash: '' })
+              )
+            );
+          });
+          await (panel === 'save' ? openDownloadPanel() : openPublishPanel());
+          const notice = screen.queryByText(
+            /This profile hasn’t been uploaded and will be lost when you close this tab/
+          );
+          expect(notice !== null).toBe(shouldShowNotice);
+        }
+      );
     });
 
     it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', async () => {
@@ -519,13 +549,13 @@ describe('app/MenuButtons', function () {
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('keeps Download available but locks the options while uploading', async () => {
+    it('keeps Save available but locks the options while uploading', async () => {
       const { openPublishPanel, getPanelForm, openDownloadPanel } =
         setupForPublish();
       await openPublishPanel();
       fireEvent.submit(getPanelForm());
 
-      // The Download button stays in the toolbar while the upload is running.
+      // The Save button stays in the toolbar while the upload is running.
       await openDownloadPanel();
       expect(
         screen.getByRole('checkbox', { name: /Include hidden threads/ })

@@ -251,6 +251,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
       uploadPhase === 'uploading' || uploadPhase === 'compressing';
     const uploadedStatus = this._getUploadedStatus(dataSource, profileUrl);
     const isRepublish = uploadedStatus === 'uploaded';
+    const isProfileOnlyInMemory =
+      dataSource === 'from-browser' ||
+      dataSource === 'from-post-message' ||
+      dataSource === 'unpublished';
     const isError = uploadPhase === 'error';
 
     let shareLabelId = 'MenuButtons--index--share';
@@ -263,13 +267,18 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
 
     return (
       <>
-        <Localized id="MenuButtons--index--download" attrs={{ label: true }}>
+        <Localized id="MenuButtons--index--save" attrs={{ label: true }}>
           <ButtonWithPanel
             buttonClassName="menuButtonsButton menuButtonsDownloadButton menuButtonsButton-hasIcon"
             panelClassName="publishPanelPanel"
             // The value for the label following will be replaced
             label=""
-            panelContent={<PublishPanel mode="download" />}
+            panelContent={
+              <PublishPanel
+                mode="download"
+                isProfileOnlyInMemory={isProfileOnlyInMemory}
+              />
+            }
           />
         </Localized>
         {isUploading ? (
@@ -295,7 +304,11 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
               // The value for the label following will be replaced
               label=""
               panelContent={
-                <PublishPanel mode="upload" isRepublish={isRepublish} />
+                <PublishPanel
+                  mode="upload"
+                  isRepublish={isRepublish}
+                  isProfileOnlyInMemory={isProfileOnlyInMemory}
+                />
               }
             />
           </Localized>

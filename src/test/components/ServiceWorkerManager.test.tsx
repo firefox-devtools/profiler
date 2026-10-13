@@ -61,6 +61,7 @@ describe('app/ServiceWorkerManager', () => {
 
   afterEach(() => {
     process.env.NODE_ENV = 'development';
+    delete process.env.ENABLE_SERVICE_WORKER;
 
     Object.defineProperty(window, 'location', nativeLocation);
     nativeLocation = null;
@@ -167,6 +168,14 @@ describe('app/ServiceWorkerManager', () => {
   }
 
   it('does not register a service worker in the development environment', () => {
+    setup();
+    expect(Workbox).not.toHaveBeenCalled();
+  });
+
+  it('does not register a service worker in a local production build', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.ENABLE_SERVICE_WORKER = 'false';
+
     setup();
     expect(Workbox).not.toHaveBeenCalled();
   });

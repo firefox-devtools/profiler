@@ -12,7 +12,12 @@ import { collectStrings } from '../utils/parse';
 import { sendCommand } from '../client';
 import { formatOutput } from '../output';
 import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
-import type { ClientCommand, CallTreeSummaryStrategy } from '../protocol';
+import type {
+  ClientCommand,
+  CallTreeSummaryStrategy,
+  CommandResult,
+  PermalinkFormat,
+} from '../protocol';
 
 /**
  * Options shared by every command action via `addGlobalOptions`.
@@ -20,7 +25,22 @@ import type { ClientCommand, CallTreeSummaryStrategy } from '../protocol';
 export type GlobalOptions = {
   session?: string;
   json?: boolean;
+  permalink?: boolean;
+  shortPermalink?: boolean;
 };
+
+/** Which permalink, if any, the global flags ask for. */
+export function permalinkFormat(
+  opts: GlobalOptions
+): PermalinkFormat | undefined {
+  if (opts.shortPermalink) {
+    return 'short';
+  }
+  if (opts.permalink) {
+    return 'long';
+  }
+  return undefined;
+}
 
 /**
  * Send a command to the daemon and print the formatted result. Centralizes the
@@ -31,9 +51,15 @@ export async function runCommand(
   sessionDir: string,
   command: ClientCommand,
   opts: GlobalOptions
-): Promise<void> {
-  const result = await sendCommand(sessionDir, command, opts.session);
-  console.log(formatOutput(result, opts.json ?? false));
+): Promise<string | CommandResult> {
+  const { result, permalink } = await sendCommand(
+    sessionDir,
+    command,
+    opts.session,
+    { permalink: permalinkFormat(opts) }
+  );
+  console.log(formatOutput(result, opts.json ?? false, permalink));
+  return result;
 }
 
 /**
@@ -129,15 +155,29 @@ export function wasExplicit(parent: string, subcommand: string): boolean {
 }
 
 /**
+ * Add the --session option to a command.
+ */
+export function addSessionOption(cmd: Command): Command {
+  return cmd.option(
+    '--session <id>',
+    'Use a specific session (default: current session)'
+  );
+}
+
+/**
  * Add --session and --json options to a command.
  */
 export function addGlobalOptions(cmd: Command): Command {
-  return cmd
+  return addSessionOption(cmd)
+    .option('--json', 'Output results as JSON')
     .option(
-      '--session <id>',
-      'Use a specific session (default: current session)'
+      '--permalink',
+      'Also print a profiler.firefox.com URL for the view this command shows'
     )
-    .option('--json', 'Output results as JSON');
+    .option(
+      '--short-permalink',
+      'Like --permalink, but shortened through share.firefox.dev'
+    );
 }
 
 /**

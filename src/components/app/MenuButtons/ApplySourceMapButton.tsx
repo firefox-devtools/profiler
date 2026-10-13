@@ -19,8 +19,8 @@ import type {
   IndexIntoSourceTable,
   SourceMapSymbolicationStatus,
 } from 'firefox-profiler/types';
-import { basename } from 'firefox-profiler/profile-logic/source-map-matching';
-import type { EligibleSource } from 'firefox-profiler/profile-logic/source-map-matching';
+import { basename } from 'firefox-profiler/profile-logic/source-maps/matching';
+import type { EligibleSource } from 'firefox-profiler/profile-logic/source-maps/matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 type OwnProps = Readonly<{

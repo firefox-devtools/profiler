@@ -6,6 +6,7 @@
  * `profiler-cli profile` command.
  */
 
+import * as path from 'path';
 import type { Command } from 'commander';
 import type { MarkerFilterOptions } from '../protocol';
 import { parseLimitArg } from '../utils/parse';
@@ -147,6 +148,32 @@ export function registerProfileCommand(
         subcommand: 'markers',
         markerFilters:
           Object.keys(markerFilters).length > 0 ? markerFilters : undefined,
+      },
+      opts
+    );
+  });
+
+  addGlobalOptions(
+    profile
+      .command('save <path>')
+      .description(
+        "Save the loaded profile like the web app's Download button. Format follows the extension (.json, .json.gz, .jslb, .jslb.gz). A directory target gets a .json.gz named after the profile."
+      )
+      .option('--force', 'Overwrite the file if it already exists')
+  ).action(async (outPath: string, opts) => {
+    // Resolved here: the daemon runs with a different cwd. A trailing slash is
+    // kept so the daemon knows a directory was meant.
+    let absPath = path.resolve(outPath);
+    if (outPath.endsWith('/') || outPath.endsWith(path.sep)) {
+      absPath += path.sep;
+    }
+    await runCommand(
+      sessionDir,
+      {
+        command: 'profile',
+        subcommand: 'save',
+        path: absPath,
+        force: opts.force ?? false,
       },
       opts
     );

@@ -1968,6 +1968,26 @@ describe('actions/ProfileView', function () {
       });
     });
 
+    it.each([0, 2])(
+      'pops committed ranges from index %s without setting a preview selection',
+      function (firstPoppedFilterIndex) {
+        const { getState, dispatch } = setupStore();
+        dispatch(
+          ProfileView.updatePreviewSelection({
+            isModifying: false,
+            selectionStart: 1,
+            selectionEnd: 9,
+          })
+        );
+
+        dispatch(ProfileView.popCommittedRanges(firstPoppedFilterIndex, false));
+        expect(
+          UrlStateSelectors.getAllCommittedRanges(getState())
+        ).toHaveLength(firstPoppedFilterIndex);
+        expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
+      }
+    );
+
     it('unsets the selection when popping the current committed range', function () {
       const { getState, dispatch } = setupStore();
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([

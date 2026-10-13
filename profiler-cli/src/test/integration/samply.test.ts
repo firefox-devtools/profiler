@@ -7,7 +7,7 @@
  * startSamplyServer in-process, then the real CLI and daemon end to end.
  */
 
-import { readdirSync, readFileSync } from 'fs';
+import { existsSync, readdirSync, readFileSync } from 'fs';
 import { mkdtemp, readFile, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { delimiter, join } from 'path';
@@ -150,6 +150,11 @@ describeFakeSamply('load --with-samply', () => {
   }
 
   async function readSamplyPid(fake: FakeSamply): Promise<number> {
+    // A samply that is still starting may not have written its pid yet.
+    await waitFor(
+      () =>
+        existsSync(fake.pidFile) && readFileSync(fake.pidFile, 'utf-8') !== ''
+    );
     return parseInt(await readFile(fake.pidFile, 'utf-8'), 10);
   }
 
@@ -277,10 +282,10 @@ describeFakeSamply('load --with-samply', () => {
     const fake = await fakeSamplyOnPath('hang');
     // The daemon gives samply 15s, so the client gives up first and the
     // daemon is left waiting on samply.
-    ctx.env.PROFILER_CLI_LOAD_TIMEOUT_MS = '2000';
+    ctx.env.PROFILER_CLI_LOAD_TIMEOUT_MS = '100';
 
     const result = await cliFail(ctx, ['load', PROFILE, '--with-samply']);
-    expect(result.stderr).toMatch(/Profile load timeout after 2000ms/);
+    expect(result.stderr).toMatch(/Profile load timeout after 100ms/);
     const samplyPid = await readSamplyPid(fake);
     expect(isAlive(samplyPid)).toBe(true);
 

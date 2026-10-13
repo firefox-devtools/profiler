@@ -51,6 +51,7 @@ import { Localized } from '@fluent/react';
 type OwnProps = {
   readonly mode: SharingMode;
   readonly isRepublish?: boolean;
+  readonly isProfileOnlyInMemory: boolean;
 };
 
 type StateProps = {
@@ -134,6 +135,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       downloadFileName,
       shouldSanitizeByDefault,
       isRepublish,
+      isProfileOnlyInMemory,
       mode,
     } = this.props;
 
@@ -142,8 +144,8 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     let title;
     if (isDownload) {
       title = (
-        <Localized id="MenuButtons--publish--download-performance-profile">
-          Download Performance Profile
+        <Localized id="MenuButtons--publish--save-performance-profile">
+          Save Performance Profile
         </Localized>
       );
     } else if (isRepublish) {
@@ -167,6 +169,15 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
           onSubmit={isDownload ? undefined : this._onSubmit}
         >
           <h1 className="publishPanelTitle photon-title-30">{title}</h1>
+          {isProfileOnlyInMemory ? (
+            <Localized id="MenuButtons--publish--local-profile-description">
+              <p className="publishPanelInfoDescription">
+                This profile hasn’t been uploaded and will be lost when you
+                close this tab. To keep it, either save it to your computer or
+                upload it using Share.
+              </p>
+            </Localized>
+          ) : null}
           <p className="publishPanelInfoDescription">
             {isDownload ? (
               <Localized id="MenuButtons--publish--download-info-description">
@@ -469,7 +480,7 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
             className={className}
           >
             <span className="publishPanelButtonsSvg publishPanelButtonsSvgDownload" />
-            <Localized id="MenuButtons--publish--download">Download</Localized>{' '}
+            <Localized id="MenuButtons--publish--save">Save</Localized>{' '}
             <span className="menuButtonsDownloadSize">
               ({prettyBytes(profileData.size)})
             </span>
@@ -479,7 +490,7 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
       case 'ERROR': {
         return (
           <button type="button" className={className} disabled>
-            <Localized id="MenuButtons--publish--download">Download</Localized>
+            <Localized id="MenuButtons--publish--save">Save</Localized>
           </button>
         );
       }

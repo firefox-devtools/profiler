@@ -19,6 +19,7 @@ import type {
   ServerResponse,
   SessionMetadata,
   CommandResult,
+  PermalinkOutcome,
 } from './protocol';
 import {
   generateSessionId,
@@ -37,8 +38,10 @@ import {
   toErrorMessage,
 } from './diagnostics';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { expandMarkerHandleSpecs } from 'firefox-profiler/profile-query/marker-map';
 import { BUILD_HASH, PACKAGE_NAME } from './constants';
 import { startSamplyServer } from './samply';
+import { permalinkViewForCommand } from './permalink-view';
 
 /**
  * Exit code used when the daemon dies before it is able to serve requests. The
@@ -407,9 +410,16 @@ export class Daemon {
         }
 
         const result = await this.processCommand(message.command);
+        if (!message.permalink) {
+          return { type: 'success', result };
+        }
         return {
           type: 'success',
           result,
+          permalink: await this.buildPermalink(
+            message.command,
+            message.permalink === 'short'
+          ),
         };
       }
 
@@ -419,6 +429,23 @@ export class Daemon {
           error: `Unknown message type: ${(message as any).type}`,
         };
       }
+    }
+  }
+
+  private async buildPermalink(
+    command: ClientCommand,
+    short: boolean
+  ): Promise<PermalinkOutcome> {
+    if (!this.querier) {
+      throw new Error('Profile not loaded');
+    }
+    try {
+      return await this.querier.permalink(
+        permalinkViewForCommand(command),
+        short
+      );
+    } catch (error) {
+      return { error: toErrorMessage(error) };
     }
   }
 
@@ -440,6 +467,8 @@ export class Daemon {
             throw new Error('unimplemented');
           case 'logs':
             return this.querier.profileLogs(command.logFilters);
+          case 'save':
+            return this.querier.saveProfile(command.path, command.force);
           case 'markers':
             return this.querier.profileMarkers(command.markerFilters);
           default:
@@ -510,11 +539,20 @@ export class Daemon {
         }
       case 'marker':
         switch (command.subcommand) {
-          case 'info':
-            if (!command.marker) {
+          case 'info': {
+            // Expand once here, so the single/multi result shape follows what
+            // the specs actually resolve to: every spelling of one marker
+            // ("m-1", "m-1,", "m-1..m-1") returns the single-marker shape.
+            const specs = command.markers ?? [];
+            const handles = expandMarkerHandleSpecs(specs);
+            if (handles.length === 0) {
               throw new Error('marker handle required for marker info');
             }
-            return this.querier.markerInfo(command.marker);
+            if (handles.length === 1) {
+              return this.querier.markerInfo(handles[0]);
+            }
+            return this.querier.markerInfoMulti(specs);
+          }
           case 'stack':
             if (!command.marker) {
               throw new Error('marker handle required for marker stack');
@@ -575,7 +613,7 @@ export class Daemon {
             throw assertExhaustiveCheck(command);
         }
       case 'permalink':
-        return this.querier.permalink(command.short ?? false);
+        return this.querier.permalink({}, command.short ?? false);
       case 'strategy':
         return this.querier.strategySelect(command.strategy);
       case 'zoom':

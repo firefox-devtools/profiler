@@ -688,7 +688,6 @@ MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
     .title = This profile contains function argument values recorded from the page, which may include personal data
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
-MenuButtons--publish--download-performance-profile = Download Performance Profile
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
 MenuButtons--publish--download-info-description = Save this profile as a file on your computer.
 MenuButtons--publish--info-description-default = By default, your personal data is removed.
@@ -699,7 +698,6 @@ MenuButtons--publish--upload-title = Uploading profile…
 MenuButtons--publish--cancel-upload = Cancel Upload
 MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong when uploading the profile.
 MenuButtons--publish--message-try-again = Try again
-MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
 

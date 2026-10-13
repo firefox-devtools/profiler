@@ -274,7 +274,6 @@ MenuButtons--publish--button-upload = Sali
 MenuButtons--publish--upload-title = Asali n umaɣnu…
 MenuButtons--publish--cancel-upload = Sefsex asali
 MenuButtons--publish--message-try-again = Ɛreḍ tikelt-nniḍen
-MenuButtons--publish--download = Sader
 MenuButtons--publish--compressing = Tussda…
 
 ## Timestamp formatting primitive

@@ -33,6 +33,8 @@ CORE WORKFLOW
     profiler-cli profile meta                      Metadata: application, platform, and recording settings
     profiler-cli profile logs                      Print all Log markers in MOZ_LOG format (across all threads)
     profiler-cli profile markers --search X        Find which thread/process has marker X (across all threads)
+    profiler-cli profile save out.json.gz          Save the loaded profile, like the web app's Download button
+                                                   (.json, .json.gz, .jslb, .jslb.gz, or a directory) [--force]
 
     See the "Network activity" section in "profile info": if requests are in
     flight for much of the profile while threads are idle, the bottleneck may be
@@ -104,6 +106,8 @@ CORE WORKFLOW
 
   Step 6: Drill into specifics
     profiler-cli marker info m-1234          Full details for a marker (from handles in marker list)
+    profiler-cli marker info m-1234 m-1240   Several markers in one call (one record per handle)
+    profiler-cli marker info m-1234..m-1240  Inclusive range of handles, e.g. consecutive list rows
     profiler-cli marker stack m-1234         Full stack trace at the time of a marker
     profiler-cli function info f-12          Function details (source location, library)
     profiler-cli function expand f-12        Show full untruncated function name
@@ -133,6 +137,9 @@ SESSION STATE
   "profiler-cli permalink" prints a profiler.firefox.com URL of the current
   view (thread, zoom, filters). Requires a profile loaded from a URL; publishing
   from the CLI is not supported yet. "--short" returns a share.firefox.dev link.
+  Add "--permalink" (or "--short-permalink") to any query to link to exactly
+  what it showed, including ephemeral --thread, --search, and filter flags:
+    profiler-cli thread markers --search DOMEvent --permalink
 
 
 HANDLE SYSTEM

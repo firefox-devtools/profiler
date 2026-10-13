@@ -58,6 +58,60 @@ describe('profiler-cli multiple concurrent sessions', () => {
     await cli(ctx, ['stop', '--session', session2]);
   });
 
+  it('accepts --session before, between, and after subcommands', async () => {
+    const loaded = await cli(ctx, [
+      '--session',
+      'target-session',
+      'load',
+      'src/test/fixtures/upgrades/processed-1.json',
+    ]);
+    expect(loaded.stdout).toContain('Session started: target-session');
+
+    await cli(ctx, [
+      'load',
+      'src/test/fixtures/upgrades/processed-2.json',
+      '--session',
+      'current-session',
+    ]);
+
+    const expected = await cli(ctx, [
+      'profile',
+      'info',
+      '--session',
+      'target-session',
+      '--json',
+    ]);
+    for (const args of [
+      ['--session', 'target-session', 'profile', 'info'],
+      ['profile', '--session', 'target-session', 'info'],
+      ['--session=target-session', 'profile', 'info'],
+      [
+        '--session',
+        'missing-session',
+        'profile',
+        'info',
+        '--session',
+        'target-session',
+      ],
+    ]) {
+      const result = await cli(ctx, [...args, '--json']);
+      expect(JSON.parse(result.stdout)).toEqual(JSON.parse(expected.stdout));
+    }
+
+    const missing = await cliFail(ctx, [
+      '--session',
+      'missing-session',
+      'profile',
+      'info',
+    ]);
+    expect(missing.stderr).toContain('missing-session');
+
+    await cli(ctx, ['--session', 'target-session', 'stop']);
+    const sessions = await cli(ctx, ['session', 'list']);
+    expect(sessions.stdout).not.toContain('target-session');
+    expect(sessions.stdout).toContain('current-session');
+  });
+
   it('session list shows running sessions and marks the current one', async () => {
     // Start two sessions
     await cli(ctx, [

@@ -6,7 +6,7 @@ import {
   getSourcesWithSourceMapURL,
   parseSourceMapFileContents,
   matchSourceMapToSource,
-} from '../../profile-logic/source-map-matching';
+} from '../../profile-logic/source-maps/matching';
 
 import type { SourceTable } from 'firefox-profiler/types';
 import type { RawSourceMap } from 'source-map';

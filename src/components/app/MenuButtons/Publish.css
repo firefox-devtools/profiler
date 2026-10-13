@@ -56,7 +56,6 @@
   --internal-download-icon: url(../../../../res/img/svg/download.svg);
   --internal-upload-percentage-foreground-color: var(--blue-60);
   --internal-upload-bar-background-color: var(--grey-40);
-  --internal-upload-bar-inner-background-color: var(--blue-50);
   --internal-warning-indicator-icon: url(../../../../res/img/svg/warning.svg);
 }
 
@@ -80,7 +79,6 @@
     --internal-download-icon: url(../../../../res/img/svg/download-light.svg);
     --internal-upload-percentage-foreground-color: var(--blue-60);
     --internal-upload-bar-background-color: var(--grey-40);
-    --internal-upload-bar-inner-background-color: var(--blue-50);
     --internal-warning-indicator-icon: url(../../../../res/img/svg/warning-light.svg);
   }
 }
@@ -203,7 +201,10 @@
   background-color: var(--internal-upload-bar-background-color);
 }
 
+/* This is also used for the top bar progress, outside of the publish panel. */
 .publishPanelUploadBarInner {
+  --internal-upload-bar-inner-background-color: var(--blue-50);
+
   position: absolute;
   top: 0;
   height: 3px;

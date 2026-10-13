@@ -6,6 +6,7 @@ on:
       - main
       - production
   pull_request:
+  merge_group:
 
 jobs:
   lint:
