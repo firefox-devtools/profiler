@@ -57,11 +57,10 @@ export type SourceMapSymbolicationStatus =
   | 'INACTIVE'
   | 'FETCHING'
   | 'SYMBOLICATING';
+
 export type ThreadViewOptions = {
-  readonly selectedNonInvertedCallNodePath: CallNodePath;
-  readonly selectedInvertedCallNodePath: CallNodePath;
-  readonly expandedNonInvertedCallNodePaths: PathSet;
-  readonly expandedInvertedCallNodePaths: PathSet;
+  readonly selectedCallNodePaths: Record<CallNodeArea, CallNodePath>;
+  readonly expandedCallNodePaths: Record<CallNodeArea, PathSet>;
   readonly selectedNetworkMarker: MarkerIndex | null;
   // Track the number of transforms to detect when they change via browser
   // navigation. This helps us know when to reset paths that may be invalid
@@ -79,8 +78,11 @@ export type TableViewOptions = {
 
 export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 
+export type CallNodeArea = 'NON_INVERTED_TREE' | 'INVERTED_TREE';
+
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
+  readonly area: CallNodeArea;
   readonly callNodePath: CallNodePath;
 };
 

@@ -125,7 +125,7 @@ export function changeSelectedCallNode(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_SELECTED_CALL_NODE',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       selectedCallNodePath,
       optionalExpandedToCallNodePath,
       threadsKey,
@@ -168,11 +168,15 @@ export function changeSelectedFunctionIndex(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
-): Action {
-  return {
-    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
-    threadsKey,
-    callNodePath,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      threadsKey,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
+      callNodePath,
+    });
   };
 }
 
@@ -1617,7 +1621,7 @@ export function changeExpandedCallNodes(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_EXPANDED_CALL_NODES',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       threadsKey,
       expandedCallNodePaths,
     });
