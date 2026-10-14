@@ -36,6 +36,7 @@ import {
   getLocalTrackOrderByPid,
   getInvertCallstack,
   getHash,
+  getFunctionListSort,
 } from 'firefox-profiler/selectors/url-state';
 import {
   assertExhaustiveCheck,
@@ -88,7 +89,11 @@ import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
-import { findCallNodePathToSelectAfterTransform } from '../profile-logic/transform-selection';
+import { ColumnSortState } from '../components/shared/TreeView';
+import {
+  findCallNodePathToSelectAfterTransform,
+  findFunctionToSelectAfterTransform,
+} from '../profile-logic/transform-selection';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -1978,6 +1983,51 @@ function _prepareCallTreeSelectionUpdate(
   };
 }
 
+/**
+ * The function list equivalent of _prepareCallTreeSelectionUpdate. The selected
+ * function is part of the URL, so we update it with a plain action instead of
+ * changeSelectedFunctionIndex, which would replace the current history entry
+ * before the UrlManager can push the entry for the transform.
+ */
+function _prepareFunctionListSelectionUpdate(
+  threadsKey: ThreadsKey,
+  transform: Transform
+): ThunkAction<() => void> {
+  return (dispatch, getState) => {
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const oldState = getState();
+    const oldSelectedFunc = threadSelectors.getSelectedFunctionIndex(oldState);
+    if (oldSelectedFunc === null) {
+      return () => {};
+    }
+    const oldTransformedThread =
+      threadSelectors.getRangeAndTransformFilteredThread(oldState);
+    // The transform doesn't change the sort, so we use it for both lists.
+    const sort = getFunctionListSort(oldState);
+    const sortState = sort === null ? null : new ColumnSortState(sort);
+    const oldRows = threadSelectors
+      .getFunctionListTree(oldState)
+      .getRoots(sortState);
+
+    return () => {
+      const newState = getState();
+      const newSelectedFunc = findFunctionToSelectAfterTransform(
+        transform,
+        oldTransformedThread,
+        oldSelectedFunc,
+        oldRows,
+        threadSelectors.getFunctionListTree(newState).getRoots(sortState)
+      );
+      dispatch({
+        type: 'CHANGE_SELECTED_FUNCTION',
+        threadsKey,
+        selectedFunctionIndex: newSelectedFunc,
+        context: { source: 'auto' },
+      });
+    };
+  };
+}
+
 export function addTransformToStack(
   threadsKey: ThreadsKey,
   transform: Transform
@@ -1992,6 +2042,10 @@ export function addTransformToStack(
       threadsKey,
       transform
     )(dispatch, getState);
+    const updateFunctionListSelection = _prepareFunctionListSelectionUpdate(
+      threadsKey,
+      transform
+    )(dispatch, getState);
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
@@ -2000,6 +2054,7 @@ export function addTransformToStack(
       callNodeInfo,
     });
     updateCallTreeSelection();
+    updateFunctionListSelection();
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'profile',

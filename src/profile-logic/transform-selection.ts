@@ -7,11 +7,15 @@
 // this file pick a replacement selection that is "visually close" to the old
 // one: preferably the node that moves into the old node's position.
 
-import { applyTransformToCallNodePath } from './transforms';
+import {
+  applyTransformToCallNodePath,
+  applyTransformToFuncIndex,
+} from './transforms';
 
 import type {
   CallNodePath,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
   Thread,
   Transform,
 } from 'firefox-profiler/types';
@@ -153,4 +157,43 @@ export function findCallNodePathToSelectAfterTransform(
   return newAncestor === -1
     ? []
     : newCallNodeInfo.getCallNodePathFromIndex(newAncestor);
+}
+
+/**
+ * Pick the function that should be selected in the function list after a
+ * transform has been applied. This keeps the selected function if it
+ * survives. Otherwise, it picks the function that is now in the selected
+ * function's row, or the last function if the list got shorter. This lets
+ * users drop functions one after the other without moving the selection.
+ * Returns null if there is no suitable function.
+ *
+ * We pick by position rather than by picking the old neighbor of the selected
+ * function. The transform changes the totals of other functions too, and the
+ * list is re-sorted. Functions that shared stacks with the removed function
+ * lose the most samples, so the old neighbor can end up far down the list.
+ *
+ * oldRows and newRows are the functions in the order in which they're
+ * displayed, before and after the transform.
+ */
+export function findFunctionToSelectAfterTransform(
+  transform: Transform,
+  oldTransformedThread: Thread,
+  oldSelectedFunc: IndexIntoFuncTable,
+  oldRows: IndexIntoFuncTable[],
+  newRows: IndexIntoFuncTable[]
+): IndexIntoFuncTable | null {
+  const selectedFunc = applyTransformToFuncIndex(
+    oldSelectedFunc,
+    transform,
+    oldTransformedThread
+  );
+  if (selectedFunc !== null && newRows.includes(selectedFunc)) {
+    return selectedFunc;
+  }
+
+  const selectedRow = oldRows.indexOf(oldSelectedFunc);
+  if (selectedRow === -1 || newRows.length === 0) {
+    return null;
+  }
+  return newRows[Math.min(selectedRow, newRows.length - 1)];
 }
