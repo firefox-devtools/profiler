@@ -39,6 +39,10 @@
   opacity: 0.55;
 }
 
+.wingViewToggleIcon-flipped {
+  transform: scaleY(-1);
+}
+
 .wingViewToggleButton.selected svg {
   opacity: 1;
 }
