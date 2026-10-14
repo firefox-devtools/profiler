@@ -617,11 +617,8 @@ export function applyTransformToCallNodePath(
     case 'filter-samples':
       // There's nothing to update in the call node path. But this call node path
       // could disappear if we filtered out all the samples with this path.
-      // This is also the case for drop-function transform. We need to have a
-      // generic mechanism for: if the selected call node (after the transformation
-      // has been applied to the call path) is not present in the call tree, run
-      // some generic code that finds a close-by call node which is present.
-      // See: https://github.com/firefox-devtools/profiler/issues/4618
+      // findCallNodePathToSelectAfterTransform handles this case by picking a
+      // nearby call node which is present.
       return callNodePath;
     default:
       throw assertExhaustiveCheck(transform);

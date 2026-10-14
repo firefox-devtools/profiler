@@ -88,6 +88,7 @@ import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
+import { findCallNodePathToSelectAfterTransform } from '../profile-logic/transform-selection';
 import { intersectSets } from 'firefox-profiler/utils/set';
 
 /**
@@ -1932,6 +1933,51 @@ export function popCommittedRanges(
   };
 }
 
+/**
+ * The ADD_TRANSFORM_TO_STACK reducers keep the selected call node if it
+ * survives the transform, but they can't pick a replacement if it doesn't,
+ * because they don't have access to the transformed call tree. This thunk
+ * captures the information about the old selection that is needed to pick a
+ * replacement, and returns a function that updates the selection once the
+ * transform has been applied.
+ *
+ * See findCallNodePathToSelectAfterTransform for how we pick the replacement.
+ * We use the same rule in all tabs, because the selection is shared between
+ * the call tree, the flame graph and the stack chart.
+ */
+function _prepareCallTreeSelectionUpdate(
+  threadsKey: ThreadsKey,
+  transform: Transform
+): ThunkAction<() => void> {
+  return (dispatch, getState) => {
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const oldState = getState();
+    const oldSelectedCallNodeIndex =
+      threadSelectors.getSelectedCallNodeIndex(oldState);
+    if (oldSelectedCallNodeIndex === null) {
+      return () => {};
+    }
+    const oldTransformedThread =
+      threadSelectors.getRangeAndTransformFilteredThread(oldState);
+    const oldCallNodeInfo = threadSelectors.getCallNodeInfo(oldState);
+    const oldTree = threadSelectors.getCallTree(oldState);
+
+    return () => {
+      const newState = getState();
+      const newPath = findCallNodePathToSelectAfterTransform(
+        transform,
+        oldTransformedThread,
+        oldCallNodeInfo,
+        oldTree,
+        oldSelectedCallNodeIndex,
+        threadSelectors.getCallNodeInfo(newState),
+        threadSelectors.getCallTree(newState)
+      );
+      dispatch(changeSelectedCallNode(threadsKey, newPath));
+    };
+  };
+}
+
 export function addTransformToStack(
   threadsKey: ThreadsKey,
   transform: Transform
@@ -1942,6 +1988,10 @@ export function addTransformToStack(
       threadSelectors.getRangeAndTransformFilteredThread(getState());
 
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const updateCallTreeSelection = _prepareCallTreeSelectionUpdate(
+      threadsKey,
+      transform
+    )(dispatch, getState);
     dispatch({
       type: 'ADD_TRANSFORM_TO_STACK',
       threadsKey,
@@ -1949,6 +1999,7 @@ export function addTransformToStack(
       transformedThread,
       callNodeInfo,
     });
+    updateCallTreeSelection();
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'profile',
