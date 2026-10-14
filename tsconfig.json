@@ -29,6 +29,7 @@
 
     // Module Resolution
     "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
     "typeRoots": ["node_modules/@types", "src/types/@types"],
     "paths": {
       "firefox-profiler/*": ["./src/*"],
@@ -42,6 +43,8 @@
     "src/**/*.ts",
     "src/**/*.tsx",
     "profiler-cli/**/*.ts",
+    "bin/deploy-prod.mts",
+    "bin/deploy-prod.test.mts",
     "__mocks__/**/*.ts"
   ],
   "exclude": ["node_modules", "dist"]

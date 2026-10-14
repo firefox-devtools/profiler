@@ -41,6 +41,9 @@ jobs:
         # See https://github.com/facebook/jest/issues/11956
         run: yarn test --coverage --logHeapUsage -w=4 --workerIdleMemoryLimit=1.5G
 
+      - name: Run deployment script tests
+        run: yarn test-deploy-prod
+
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v5
