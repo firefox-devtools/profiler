@@ -20,6 +20,9 @@ import './WingViewToggle.css';
 
 type OwnProps = {
   readonly wing: WingViewName;
+  // This needs to match the startsAtBottom prop of the wing's flame graph, so
+  // that the icon has the same orientation as the flame graph it switches to.
+  readonly flameGraphStartsAtBottom: boolean;
 };
 
 type StateProps = {
@@ -32,6 +35,60 @@ type DispatchProps = {
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
+/**
+ * A flame graph with a root box that spans the full width, and children that
+ * get narrower with increasing depth. Sibling boxes are separated by a 1px gap.
+ * When startsAtBottom is false, the icon is flipped vertically, so that the
+ * root is at the top, like an icicle graph.
+ */
+function FlameGraphIcon({ startsAtBottom }: { startsAtBottom: boolean }) {
+  return (
+    <svg
+      className={startsAtBottom ? undefined : 'wingViewToggleIcon-flipped'}
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <rect x="0" y="10" width="12" height="2" />
+      <rect x="0" y="7" width="7" height="2" />
+      <rect x="8" y="7" width="4" height="2" />
+      <rect x="0" y="4" width="4" height="2" />
+      <rect x="5" y="4" width="2" height="2" />
+      <rect x="8" y="4" width="3" height="2" />
+      <rect x="0" y="1" width="3" height="2" />
+    </svg>
+  );
+}
+
+/**
+ * Rows of a tree view, drawn as thin lines so that the icon doesn't look like
+ * the boxes of the flame graph icon. The indentation shows the depth of each
+ * node, and the twisty triangles show whether a node is expanded.
+ */
+function CallTreeIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {/* Twisties: two expanded nodes, a leaf without one, a collapsed node */}
+      <path d="M0 0.5h3l-1.5 2z" />
+      <path d="M2 3.5h3l-1.5 2z" />
+      <path d="M3 9v3l2-1.5z" />
+      {/* Row labels */}
+      <rect x="4" y="1" width="7" height="1" />
+      <rect x="6" y="4" width="6" height="1" />
+      <rect x="8" y="7" width="4" height="1" />
+      <rect x="6" y="10" width="5" height="1" />
+    </svg>
+  );
+}
+
 class WingViewToggleImpl extends React.PureComponent<Props> {
   _onFlameGraphClick = (event: React.MouseEvent) => {
     event.stopPropagation();
@@ -43,7 +100,7 @@ class WingViewToggleImpl extends React.PureComponent<Props> {
   };
 
   override render() {
-    const { view } = this.props;
+    const { view, flameGraphStartsAtBottom } = this.props;
     return (
       <div className="wingViewToggle" role="group">
         <button
@@ -55,18 +112,7 @@ class WingViewToggleImpl extends React.PureComponent<Props> {
           aria-pressed={view === 'flame-graph'}
           title="Show flame graph"
         >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <rect x="1" y="1" width="10" height="2" />
-            <rect x="2" y="4" width="6" height="2" />
-            <rect x="3" y="7" width="3" height="2" />
-            <rect x="4" y="10" width="2" height="1" />
-          </svg>
+          <FlameGraphIcon startsAtBottom={flameGraphStartsAtBottom} />
         </button>
         <button
           type="button"
@@ -77,17 +123,7 @@ class WingViewToggleImpl extends React.PureComponent<Props> {
           aria-pressed={view === 'call-tree'}
           title="Show call tree"
         >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 12 12"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <rect x="0" y="1" width="3" height="2" />
-            <rect x="3" y="5" width="3" height="2" />
-            <rect x="6" y="9" width="3" height="2" />
-          </svg>
+          <CallTreeIcon />
         </button>
       </div>
     );

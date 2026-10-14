@@ -66,7 +66,9 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Descendants"
               isOpen={sectionsOpen.descendants}
               onToggle={this._onDescendantsToggle}
-              headerActions={<WingViewToggle wing="upper" />}
+              headerActions={
+                <WingViewToggle wing="upper" flameGraphStartsAtBottom={true} />
+              }
             >
               <UpperWing />
             </DisclosureBox>
@@ -74,7 +76,9 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Ancestors"
               isOpen={sectionsOpen.ancestors}
               onToggle={this._onAncestorsToggle}
-              headerActions={<WingViewToggle wing="lower" />}
+              headerActions={
+                <WingViewToggle wing="lower" flameGraphStartsAtBottom={false} />
+              }
             >
               <LowerWing />
             </DisclosureBox>
@@ -82,7 +86,9 @@ class ProfileFunctionListViewImpl extends React.PureComponent<Props> {
               label="Self"
               isOpen={sectionsOpen.self}
               onToggle={this._onSelfToggle}
-              headerActions={<WingViewToggle wing="self" />}
+              headerActions={
+                <WingViewToggle wing="self" flameGraphStartsAtBottom={true} />
+              }
             >
               <SelfWing />
             </DisclosureBox>
