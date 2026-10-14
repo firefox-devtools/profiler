@@ -233,8 +233,8 @@ export function getStackAndSampleSelectorsPerThread(
     UrlState.getInvertCallstack,
     (threadViewOptions, invertCallStack): CallNodePath =>
       invertCallStack
-        ? threadViewOptions.selectedInvertedCallNodePath
-        : threadViewOptions.selectedNonInvertedCallNodePath
+        ? threadViewOptions.selectedCallNodePaths.INVERTED_TREE
+        : threadViewOptions.selectedCallNodePaths.NON_INVERTED_TREE
   );
 
   const getSelectedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> =
@@ -251,8 +251,8 @@ export function getStackAndSampleSelectorsPerThread(
     UrlState.getInvertCallstack,
     (threadViewOptions, invertCallStack) =>
       invertCallStack
-        ? threadViewOptions.expandedInvertedCallNodePaths
-        : threadViewOptions.expandedNonInvertedCallNodePaths
+        ? threadViewOptions.expandedCallNodePaths.INVERTED_TREE
+        : threadViewOptions.expandedCallNodePaths.NON_INVERTED_TREE
   );
 
   const getExpandedCallNodeIndexes: Selector<
@@ -690,9 +690,14 @@ export function getStackAndSampleSelectorsPerThread(
           rightClickedCallNodeInfo !== null &&
           threadsKey === rightClickedCallNodeInfo.threadsKey
         ) {
-          return callNodeInfo.getCallNodeIndexFromPath(
-            rightClickedCallNodeInfo.callNodePath
-          );
+          const expectedArea = callNodeInfo.isInverted()
+            ? 'INVERTED_TREE'
+            : 'NON_INVERTED_TREE';
+          if (rightClickedCallNodeInfo.area === expectedArea) {
+            return callNodeInfo.getCallNodeIndexFromPath(
+              rightClickedCallNodeInfo.callNodePath
+            );
+          }
         }
 
         return null;

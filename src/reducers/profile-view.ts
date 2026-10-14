@@ -31,6 +31,7 @@ import type {
   Milliseconds,
   TableViewOptions,
   RightClickedFunction,
+  CallNodeArea,
 } from 'firefox-profiler/types';
 import {
   applyFuncSubstitutionToFunc,
@@ -185,11 +186,21 @@ const sourceMapSymbolicationStatus: Reducer<SourceMapSymbolicationStatus> = (
   }
 };
 
+const _emptySelectedCallNodePaths: Record<CallNodeArea, CallNodePath> = {
+  NON_INVERTED_TREE: [],
+  INVERTED_TREE: [],
+};
+
+function _emptyExpandedCallNodePaths(): Record<CallNodeArea, PathSet> {
+  return {
+    NON_INVERTED_TREE: new PathSet(),
+    INVERTED_TREE: new PathSet(),
+  };
+}
+
 export const defaultThreadViewOptions: ThreadViewOptions = {
-  selectedNonInvertedCallNodePath: [],
-  selectedInvertedCallNodePath: [],
-  expandedNonInvertedCallNodePaths: new PathSet(),
-  expandedInvertedCallNodePaths: new PathSet(),
+  selectedCallNodePaths: _emptySelectedCallNodePaths,
+  expandedCallNodePaths: _emptyExpandedCallNodePaths(),
   selectedNetworkMarker: null,
   lastSeenTransformCount: 0,
 };
@@ -231,24 +242,29 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       const newState = objectMap(state, (threadViewOptions) => {
         return {
           ...threadViewOptions,
-          selectedNonInvertedCallNodePath: applyFuncSubstitutionToCallPath(
-            oldFuncToNewFuncsMap,
-            threadViewOptions.selectedNonInvertedCallNodePath
-          ),
-          selectedInvertedCallNodePath: applyFuncSubstitutionToCallPath(
-            oldFuncToNewFuncsMap,
-            threadViewOptions.selectedInvertedCallNodePath
-          ),
-          expandedNonInvertedCallNodePaths:
-            applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+          selectedCallNodePaths: {
+            ...threadViewOptions.selectedCallNodePaths,
+            NON_INVERTED_TREE: applyFuncSubstitutionToCallPath(
               oldFuncToNewFuncsMap,
-              threadViewOptions.expandedNonInvertedCallNodePaths
+              threadViewOptions.selectedCallNodePaths.NON_INVERTED_TREE
             ),
-          expandedInvertedCallNodePaths:
-            applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+            INVERTED_TREE: applyFuncSubstitutionToCallPath(
               oldFuncToNewFuncsMap,
-              threadViewOptions.expandedInvertedCallNodePaths
+              threadViewOptions.selectedCallNodePaths.INVERTED_TREE
             ),
+          },
+          expandedCallNodePaths: {
+            ...threadViewOptions.expandedCallNodePaths,
+            NON_INVERTED_TREE:
+              applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+                oldFuncToNewFuncsMap,
+                threadViewOptions.expandedCallNodePaths.NON_INVERTED_TREE
+              ),
+            INVERTED_TREE: applyFuncSubstitutionToPathSetAndIncludeNewAncestors(
+              oldFuncToNewFuncsMap,
+              threadViewOptions.expandedCallNodePaths.INVERTED_TREE
+            ),
+          },
         };
       });
 
@@ -256,17 +272,15 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
     }
     case 'CHANGE_SELECTED_CALL_NODE': {
       const {
-        isInverted,
+        area,
         selectedCallNodePath,
         threadsKey,
         optionalExpandedToCallNodePath,
       } = action;
 
       const threadState = _getThreadViewOptions(state, threadsKey);
-
-      const previousSelectedCallNodePath = isInverted
-        ? threadState.selectedInvertedCallNodePath
-        : threadState.selectedNonInvertedCallNodePath;
+      const previousSelectedCallNodePath =
+        threadState.selectedCallNodePaths[area];
 
       // If the selected node doesn't actually change, let's return the previous
       // state to avoid rerenders.
@@ -277,9 +291,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         return state;
       }
 
-      let expandedCallNodePaths = isInverted
-        ? threadState.expandedInvertedCallNodePaths
-        : threadState.expandedNonInvertedCallNodePaths;
+      let expandedCallNodePaths = threadState.expandedCallNodePaths[area];
       const expandToNode = optionalExpandedToCallNodePath
         ? optionalExpandedToCallNodePath
         : selectedCallNodePath;
@@ -303,19 +315,16 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         );
       }
 
-      return _updateThreadViewOptions(
-        state,
-        threadsKey,
-        isInverted
-          ? {
-              selectedInvertedCallNodePath: selectedCallNodePath,
-              expandedInvertedCallNodePaths: expandedCallNodePaths,
-            }
-          : {
-              selectedNonInvertedCallNodePath: selectedCallNodePath,
-              expandedNonInvertedCallNodePaths: expandedCallNodePaths,
-            }
-      );
+      return _updateThreadViewOptions(state, threadsKey, {
+        selectedCallNodePaths: {
+          ...threadState.selectedCallNodePaths,
+          [area]: selectedCallNodePath,
+        },
+        expandedCallNodePaths: {
+          ...threadState.expandedCallNodePaths,
+          [area]: expandedCallNodePaths,
+        },
+      });
     }
     case 'CHANGE_INVERT_CALLSTACK': {
       const {
@@ -335,32 +344,34 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
             expandedCallNodePaths.add(newSelectedCallNodePath.slice(0, i));
           }
 
-          return invertCallstack
-            ? {
-                ...viewOptions,
-                selectedInvertedCallNodePath: newSelectedCallNodePath,
-                expandedInvertedCallNodePaths: expandedCallNodePaths,
-              }
-            : {
-                ...viewOptions,
-                selectedNonInvertedCallNodePath: newSelectedCallNodePath,
-                expandedNonInvertedCallNodePaths: expandedCallNodePaths,
-              };
+          const area: CallNodeArea = invertCallstack
+            ? 'INVERTED_TREE'
+            : 'NON_INVERTED_TREE';
+          return {
+            ...viewOptions,
+            selectedCallNodePaths: {
+              ...viewOptions.selectedCallNodePaths,
+              [area]: newSelectedCallNodePath,
+            },
+            expandedCallNodePaths: {
+              ...viewOptions.expandedCallNodePaths,
+              [area]: expandedCallNodePaths,
+            },
+          };
         }
         return viewOptions;
       });
     }
     case 'CHANGE_EXPANDED_CALL_NODES': {
-      const { threadsKey, isInverted } = action;
+      const { threadsKey, area } = action;
       const expandedCallNodePaths = new PathSet(action.expandedCallNodePaths);
-
-      return _updateThreadViewOptions(
-        state,
-        threadsKey,
-        isInverted
-          ? { expandedInvertedCallNodePaths: expandedCallNodePaths }
-          : { expandedNonInvertedCallNodePaths: expandedCallNodePaths }
-      );
+      const threadState = _getThreadViewOptions(state, threadsKey);
+      return _updateThreadViewOptions(state, threadsKey, {
+        expandedCallNodePaths: {
+          ...threadState.expandedCallNodePaths,
+          [area]: expandedCallNodePaths,
+        },
+      });
     }
     case 'CHANGE_SELECTED_NETWORK_MARKER': {
       const { threadsKey, selectedNetworkMarker } = action;
@@ -396,27 +407,28 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       };
 
       const threadViewOptions = _getThreadViewOptions(state, threadsKey);
-      const selectedNonInvertedCallNodePath = getFilteredPath(
-        threadViewOptions.selectedNonInvertedCallNodePath
-      );
-      const selectedInvertedCallNodePath = getFilteredPath(
-        threadViewOptions.selectedInvertedCallNodePath
-      );
-      const expandedNonInvertedCallNodePaths = getFilteredPathSet(
-        threadViewOptions.expandedNonInvertedCallNodePaths
-      );
-      const expandedInvertedCallNodePaths = getFilteredPathSet(
-        threadViewOptions.expandedInvertedCallNodePaths
-      );
-
       const lastSeenTransformCount =
         threadViewOptions.lastSeenTransformCount + 1;
 
       return _updateThreadViewOptions(state, threadsKey, {
-        selectedNonInvertedCallNodePath,
-        selectedInvertedCallNodePath,
-        expandedNonInvertedCallNodePaths,
-        expandedInvertedCallNodePaths,
+        selectedCallNodePaths: {
+          ...threadViewOptions.selectedCallNodePaths,
+          NON_INVERTED_TREE: getFilteredPath(
+            threadViewOptions.selectedCallNodePaths.NON_INVERTED_TREE
+          ),
+          INVERTED_TREE: getFilteredPath(
+            threadViewOptions.selectedCallNodePaths.INVERTED_TREE
+          ),
+        },
+        expandedCallNodePaths: {
+          ...threadViewOptions.expandedCallNodePaths,
+          NON_INVERTED_TREE: getFilteredPathSet(
+            threadViewOptions.expandedCallNodePaths.NON_INVERTED_TREE
+          ),
+          INVERTED_TREE: getFilteredPathSet(
+            threadViewOptions.expandedCallNodePaths.INVERTED_TREE
+          ),
+        },
         lastSeenTransformCount,
       });
     }
@@ -424,11 +436,18 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       // Simply reset the stored paths until this bug is fixed:
       // https://github.com/firefox-devtools/profiler/issues/882
       const { threadsKey } = action;
+      const threadState = _getThreadViewOptions(state, threadsKey);
       return _updateThreadViewOptions(state, threadsKey, {
-        selectedNonInvertedCallNodePath: [],
-        selectedInvertedCallNodePath: [],
-        expandedNonInvertedCallNodePaths: new PathSet(),
-        expandedInvertedCallNodePaths: new PathSet(),
+        selectedCallNodePaths: {
+          ...threadState.selectedCallNodePaths,
+          NON_INVERTED_TREE: [],
+          INVERTED_TREE: [],
+        },
+        expandedCallNodePaths: {
+          ...threadState.expandedCallNodePaths,
+          NON_INVERTED_TREE: new PathSet(),
+          INVERTED_TREE: new PathSet(),
+        },
         lastSeenTransformCount: 0,
       });
     }
@@ -451,10 +470,16 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
         if (newTransformCount < oldTransformCount) {
           return {
             ...viewOptions,
-            selectedNonInvertedCallNodePath: [],
-            selectedInvertedCallNodePath: [],
-            expandedNonInvertedCallNodePaths: new PathSet(),
-            expandedInvertedCallNodePaths: new PathSet(),
+            selectedCallNodePaths: {
+              ...viewOptions.selectedCallNodePaths,
+              NON_INVERTED_TREE: [],
+              INVERTED_TREE: [],
+            },
+            expandedCallNodePaths: {
+              ...viewOptions.expandedCallNodePaths,
+              NON_INVERTED_TREE: new PathSet(),
+              INVERTED_TREE: new PathSet(),
+            },
             lastSeenTransformCount: newTransformCount,
           };
         }
@@ -519,23 +544,25 @@ const viewOptionsPerThread: Reducer<ThreadViewOptionsPerThreads> = (
       };
 
       const selectedNonInvertedCallNodePath = getUpdatedPath(
-        viewOptions.selectedNonInvertedCallNodePath
+        viewOptions.selectedCallNodePaths.NON_INVERTED_TREE
       );
       const selectedInvertedCallNodePath = getUpdatedPath(
-        viewOptions.selectedInvertedCallNodePath
-      );
-      const expandedNonInvertedCallNodePaths = getAncestorPathSet(
-        selectedNonInvertedCallNodePath
-      );
-      const expandedInvertedCallNodePaths = getAncestorPathSet(
-        selectedInvertedCallNodePath
+        viewOptions.selectedCallNodePaths.INVERTED_TREE
       );
 
       return _updateThreadViewOptions(state, threadsKey, {
-        selectedNonInvertedCallNodePath,
-        selectedInvertedCallNodePath,
-        expandedNonInvertedCallNodePaths,
-        expandedInvertedCallNodePaths,
+        selectedCallNodePaths: {
+          ...viewOptions.selectedCallNodePaths,
+          NON_INVERTED_TREE: selectedNonInvertedCallNodePath,
+          INVERTED_TREE: selectedInvertedCallNodePath,
+        },
+        expandedCallNodePaths: {
+          ...viewOptions.expandedCallNodePaths,
+          NON_INVERTED_TREE: getAncestorPathSet(
+            selectedNonInvertedCallNodePath
+          ),
+          INVERTED_TREE: getAncestorPathSet(selectedInvertedCallNodePath),
+        },
       });
     }
     default:
@@ -761,6 +788,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
       if (action.callNodePath !== null) {
         return {
           threadsKey: action.threadsKey,
+          area: action.area,
           callNodePath: action.callNodePath,
         };
       }
