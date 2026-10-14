@@ -23,11 +23,13 @@ import {
   changeInvertCallstack,
   changeImplementationFilter,
   changeSelectedCallNode,
+  changeSelectedFunctionIndex,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import * as AppActions from '../../actions/app';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import type { Transform } from 'firefox-profiler/types';
 
 describe('"focus-subtree" transform', function () {
   describe('on a call tree', function () {
@@ -2805,6 +2807,67 @@ describe('selecting a neighbor when the selected call node disappears', function
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [P]
     );
+  });
+});
+
+describe('selecting a neighbor when the selected function disappears', function () {
+  function setup() {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A  A  A  A  A  A
+      X  X  X  X  X  X  C  C  D  D
+      Y  Y  Y  Y           E  F  Y
+    `);
+    const store = storeWithProfile(profile);
+    const nameForFunc = (func: number | null) =>
+      Object.keys(funcNames).find((name) => funcNames[name] === func);
+    const getRowNames = () =>
+      selectedThreadSelectors
+        .getFunctionListTree(store.getState())
+        .getRoots()
+        .map(nameForFunc);
+    const getSelectedName = () =>
+      nameForFunc(
+        selectedThreadSelectors.getSelectedFunctionIndex(store.getState())
+      );
+    const selectAndApply = (name: string, transform: Transform) => {
+      store.dispatch(changeSelectedFunctionIndex(0, funcNames[name]));
+      store.dispatch(addTransformToStack(0, transform));
+    };
+    expect(getRowNames()).toEqual(['A', 'X', 'Y', 'C', 'D', 'E', 'F']);
+    return { funcNames, getRowNames, getSelectedName, selectAndApply };
+  }
+
+  it('keeps the selected function if it survives', function () {
+    const { funcNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('D', { type: 'drop-function', funcIndex: funcNames.C });
+    expect(getSelectedName()).toBe('D');
+  });
+
+  it('selects the function that moves into the row of the dropped function', function () {
+    const { funcNames, getRowNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('X', { type: 'drop-function', funcIndex: funcNames.X });
+    // Y was below X, but most of its samples were dropped along with X, so it
+    // moved down the list. C took the place of X.
+    expect(getRowNames()).toEqual(['A', 'C', 'D', 'Y', 'E', 'F']);
+    expect(getSelectedName()).toBe('C');
+  });
+
+  it('selects the function that moves into the row of the merged function', function () {
+    const { funcNames, getRowNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('X', { type: 'merge-function', funcIndex: funcNames.X });
+    expect(getRowNames()).toEqual(['A', 'Y', 'C', 'D', 'E', 'F']);
+    expect(getSelectedName()).toBe('Y');
+  });
+
+  it('selects the last function when the last function is dropped', function () {
+    const { funcNames, getRowNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('F', { type: 'drop-function', funcIndex: funcNames.F });
+    const rows = getRowNames();
+    expect(rows).not.toContain('F');
+    expect(getSelectedName()).toBe(rows[rows.length - 1]);
   });
 });
 
