@@ -707,6 +707,10 @@ function _probeExactName(
  *   identifier. For renamed params (`profile` -> `e`), the GLB lookup there
  *   returns the parameter name. Skip funcOffset and probe
  *   `nameMappingLocations` only.
+ *
+ * Class constructors:
+ *   Some minifiers (terser) name the mapping at funcOffset `constructor`.
+ *   Skip funcOffset and probe the class name in `nameMappingLocations` only.
  */
 function _resolveCompiledName(
   scope: FunctionScope,

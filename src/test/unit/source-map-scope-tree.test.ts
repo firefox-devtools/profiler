@@ -148,6 +148,63 @@ describe('parseJsScopeTree', () => {
     expect(src[fn.nameMappingLocations[0]]).toBe('#');
   });
 
+  it('names a class constructor after its class', () => {
+    const src = 'class Foo extends Bar { constructor(x) {} foo() {} }';
+    const [ctor, method] = parseJsScopeTree(src);
+    expect(ctor.astName).toBe('Foo');
+    expect(ctor.lhsText).toBeNull();
+    expect(ctor.kind).toBe('constructor');
+    expect(src.slice(ctor.start, ctor.end)).toBe('constructor(x) {}');
+    expect(ctor.nameMappingLocations).toHaveLength(1);
+    expect(src[ctor.nameMappingLocations[0]]).toBe('F');
+    expect(method.astName).toBe('foo');
+  });
+
+  it('prefers a class expression own name over the assignment target', () => {
+    const [ctor] = parseJsScopeTree('var x = class Foo { constructor() {} }');
+    expect(ctor.astName).toBe('Foo');
+    expect(ctor.lhsText).toBeNull();
+  });
+
+  it('infers the constructor name of an anonymous class from its assignment target', () => {
+    const src = 'var Foo = class { constructor() {} }';
+    const [ctor] = parseJsScopeTree(src);
+    expect(ctor.astName).toBeNull();
+    expect(ctor.lhsText).toBe('Foo');
+    expect(src[ctor.nameMappingLocations[0]]).toBe('F');
+
+    const [memberCtor] = parseJsScopeTree(
+      'obj[key] = class { constructor() {} }'
+    );
+    expect(memberCtor.lhsText).toBe('obj[key]');
+    expect(memberCtor.computedKeyLoc).not.toBeNull();
+  });
+
+  it('keeps `constructor` for classes without any name', () => {
+    expect(parseJsScopeTree('f(class { constructor() {} })')[0].astName).toBe(
+      'constructor'
+    );
+    const [wrapped] = parseJsScopeTree(
+      'var x = wrap(class { constructor() {} })'
+    );
+    expect(wrapped.astName).toBe('constructor');
+    expect(wrapped.lhsText).toBeNull();
+  });
+
+  it('does not treat a static `constructor` method as the constructor', () => {
+    const [method] = parseJsScopeTree('class Foo { static constructor() {} }');
+    expect(method.astName).toBe('constructor');
+  });
+
+  it('nests functions inside a class constructor under the constructor scope', () => {
+    const [ctor] = parseJsScopeTree(
+      'class Foo { constructor() { this.f = () => {}; } }'
+    );
+    expect(ctor.astName).toBe('Foo');
+    expect(ctor.children).toHaveLength(1);
+    expect(ctor.children[0].lhsText).toBe('this.f');
+  });
+
   it('does not create a scope for a shorthand property', () => {
     const src = 'const o = { a, b }';
     const scopes = parseJsScopeTree(src);

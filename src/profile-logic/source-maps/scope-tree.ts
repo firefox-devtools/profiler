@@ -56,11 +56,13 @@
  *   const x = function bar() {}        // bar's astName = "bar"
  *   class C { foo() {} }               // astName = "foo"
  *   { foo: () => {} }                  // astName = "foo"
+ *   class C { constructor() {} }       // constructor's astName = "C"
  *
  * Inferred from a direct assignment target:
  *
  *   var x = () => {}                   // probe at `x`, lhsText = "x"
  *   obj.foo = function() {}            // probe at `foo`, lhsText = "obj.foo"
+ *   var C = class { constructor() {} } // probe at `C`, lhsText = "C"
  *
  * Inferred through a transparent wrapper (sets `contributesTo`, which the
  * resolver maps to the Nonymous `<` suffix):
@@ -98,7 +100,8 @@ export type FunctionScope = {
   // Fallback name derived from the AST (the compiled identifier, e.g. `foo`).
   // null for anonymous functions and arrow functions.
   astName: string | null;
-  kind: 'function' | 'arrow';
+  // 'constructor' is a class constructor named after its class.
+  kind: 'function' | 'arrow' | 'constructor';
   // True when the function's inferred name came through a wrapping
   // `call(...)` / `new C(...)`, i.e. the function "contributes to" the
   // assignment target rather than being it. Emits the Nonymous `<` suffix
@@ -383,6 +386,17 @@ function _processInitExpr(
       }
       return;
     }
+    case 'ClassExpression':
+      // `var Foo = class {}` names the class (and its constructor) `Foo`.
+      // Through a wrapper (`var x = wrap(class {})`) the LHS isn't the
+      // class's name, so don't infer it.
+      _processClass(
+        initNode,
+        text,
+        parentChildren,
+        throughWrapper ? null : lhs
+      );
+      return;
     case 'TaggedTemplateExpression': {
       // `` tag`${() => {}}` `` behaves like `tag(["..."], () => {})`: interpolated
       // expressions contribute to the assignment target via the tag call.
@@ -536,6 +550,10 @@ function _processNode(
       }
       return;
     }
+    case 'ClassDeclaration':
+    case 'ClassExpression':
+      _processClass(node, text, parentChildren, null);
+      return;
     case 'FunctionDeclaration':
     case 'FunctionExpression': {
       const nameNode = node.getChild('VariableDefinition');
@@ -617,6 +635,89 @@ function _pushMethodScope(
   };
   parentChildren.push(scope);
   _walkChildren(funcNode, text, scope.children);
+}
+
+/**
+ * Where a class's name comes from: either its own identifier
+ * (`class Foo {}`, `astName` set) or an assignment target it was inferred
+ * from (`var Foo = class {}`, `lhsText` set).
+ */
+type ClassNameContext = LhsContext & { astName: string | null };
+
+/**
+ * Create and push a FunctionScope for a class constructor, named after its
+ * class. The class name position is the only probe: the constructor's own
+ * positions can only resolve to `constructor` (terser names the mapping at
+ * the `(` after the key).
+ */
+function _pushConstructorScope(
+  node: SyntaxNode,
+  text: string,
+  parentChildren: FunctionScope[],
+  className: ClassNameContext
+): void {
+  const scope: FunctionScope = {
+    start: node.from,
+    end: node.to,
+    nameMappingLocations: [className.identifierLoc],
+    astName: className.astName,
+    kind: 'constructor',
+    contributesTo: false,
+    computedKeyLoc: className.computedKeyLoc,
+    lhsText: className.lhsText,
+    children: [],
+  };
+  parentChildren.push(scope);
+  _walkChildren(node, text, scope.children);
+}
+
+function _isClassConstructor(node: SyntaxNode, text: string): boolean {
+  if (node.name !== 'MethodDeclaration' || node.getChild('static')) {
+    return false;
+  }
+  const key = node.getChild('PropertyDefinition');
+  return key !== null && text.slice(key.from, key.to) === 'constructor';
+}
+
+/**
+ * Walk a ClassDeclaration / ClassExpression. `lhs` is the assignment target
+ * the class was directly assigned to, if any. It's only used when the class
+ * has no name of its own. Anonymous classes without an assignment target
+ * keep `constructor` as the constructor's name.
+ */
+function _processClass(
+  node: SyntaxNode,
+  text: string,
+  parentChildren: FunctionScope[],
+  lhs: LhsContext | null
+): void {
+  const nameNode = node.getChild('VariableDefinition');
+  let className: ClassNameContext | null = null;
+  if (nameNode) {
+    className = {
+      identifierLoc: nameNode.from,
+      computedKeyLoc: null,
+      lhsText: null,
+      astName: text.slice(nameNode.from, nameNode.to),
+    };
+  } else if (lhs) {
+    className = { ...lhs, astName: null };
+  }
+
+  for (let child = node.firstChild; child; child = child.nextSibling) {
+    if (child.name !== 'ClassBody') {
+      // The `extends` expression may contain functions.
+      _processNode(child, text, parentChildren);
+      continue;
+    }
+    for (let member = child.firstChild; member; member = member.nextSibling) {
+      if (className && _isClassConstructor(member, text)) {
+        _pushConstructorScope(member, text, parentChildren, className);
+      } else {
+        _processNode(member, text, parentChildren);
+      }
+    }
+  }
 }
 
 function _walkChildren(
