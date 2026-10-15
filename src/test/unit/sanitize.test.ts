@@ -13,6 +13,7 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   addInnerWindowIdToStacks,
   getNetworkMarkers,
+  compositorScreenshotMarkerSchema,
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/types';
 import {
@@ -162,6 +163,7 @@ describe('sanitizePII', function () {
           },
         ],
       },
+      CompositorScreenshot: compositorScreenshotMarkerSchema,
       ...extraMarkerSchemas,
     };
     const markerSchemaByName = computeMarkerSchemaByName(
@@ -576,6 +578,28 @@ describe('sanitizePII', function () {
       }
       expect(screenshotMarkerFound).toEqual(false);
     }
+  });
+
+  it('should sanitize the screenshots of any marker type shown in a screenshot track', function () {
+    const profile = getProfileWithMarkers([
+      ['MyScreenshot', 0, 1, { type: 'MyScreenshot', url: 0 } as any],
+      ['Other', 0, 1],
+    ]);
+    const { sanitizedProfile } = setup(
+      { shouldRemoveThreadsWithScreenshots: new Set([0]) },
+      profile,
+      {
+        MyScreenshot: {
+          name: 'MyScreenshot',
+          display: ['marker-chart', 'timeline-screenshots'],
+          fields: [],
+        },
+      }
+    );
+
+    const { markers } = sanitizedProfile.threads[0];
+    expect(markers.length).toBe(1);
+    expect(sanitizedProfile.shared.stringArray[markers.name[0]]).toBe('Other');
   });
 
   it('should sanitize the pages information', function () {

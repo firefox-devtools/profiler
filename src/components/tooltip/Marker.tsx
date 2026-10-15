@@ -56,6 +56,7 @@ import type {
   MarkerSchemaByName,
   MarkerIndex,
   MarkerFormatType,
+  MarkerPayload,
   InnerWindowID,
   Page,
   Pid,
@@ -294,7 +295,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
                 value,
                 thread.stringTable,
                 threadIdToNameMap,
-                processIdToNameMap
+                processIdToNameMap,
+                data
               )}
             </TooltipDetail>
           );
@@ -350,67 +352,6 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
               {_maybeFormatDuration(data.recvEndTime, data.endTime)}
             </TooltipDetail>
           );
-          break;
-        }
-        case 'CompositorScreenshot': {
-          if (
-            data.url !== undefined &&
-            'windowWidth' in data &&
-            'windowHeight' in data
-          ) {
-            const { width, height } = computeScreenshotSize(
-              data,
-              MAXIMUM_IMAGE_SIZE
-            );
-            details.push(
-              <TooltipDetail label="Image" key="CompositorScreenshot-image">
-                <img
-                  className="tooltipScreenshotImg"
-                  src={thread.stringTable.getString(data.url)}
-                  style={{
-                    width,
-                    height,
-                  }}
-                />
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Window Size"
-                key="CompositorScreenshot-window size"
-              >
-                <>
-                  {data.windowWidth}px × {data.windowHeight}px
-                </>
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Description"
-                key="CompositorScreenshot-description"
-              >
-                This marker spans the time between each composite of a window
-                and shows the window contents during that time.
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Window ID"
-                key="CompositorScreenshot-window id"
-              >
-                {data.windowID}
-              </TooltipDetail>
-            );
-          } else if (marker.name === 'CompositorScreenshotWindowDestroyed') {
-            details.push(
-              <TooltipDetail
-                label="Description"
-                key="CompositorScreenshot-description"
-              >
-                This marker shows the moment a window has been destroyed.
-              </TooltipDetail>,
-              <TooltipDetail
-                label="Window ID"
-                key="CompositorScreenshot-window id"
-              >
-                {data.windowID}
-              </TooltipDetail>
-            );
-          }
           break;
         }
         default:
@@ -587,7 +528,7 @@ const URL_REGEXP = /^(https?:\/\/)\S+$/;
 
 /**
  * This function may return structured markup for some types suchs as table,
- * list, or urls. For other types this falls back to formatFromMarkerSchema
+ * list, urls, or images. For other types this falls back to formatFromMarkerSchema
  * above.
  */
 export function renderMarkerFieldValue(
@@ -596,7 +537,9 @@ export function renderMarkerFieldValue(
   value: any,
   stringTable: StringTable,
   threadIdToNameMap?: Map<Tid, string>,
-  processIdToNameMap?: Map<Pid, string>
+  processIdToNameMap?: Map<Pid, string>,
+  // The payload the value comes from, for formats that refer to a sibling field.
+  payload?: MarkerPayload | null
 ): React.ReactElement | string {
   if (value === undefined || value === null) {
     console.warn(`Formatting ${value} for ${JSON.stringify(markerType)}`);
@@ -653,7 +596,8 @@ export function renderMarkerFieldValue(
                             cell,
                             stringTable,
                             threadIdToNameMap,
-                            processIdToNameMap
+                            processIdToNameMap,
+                            payload
                           )}
                         </td>
                       );
@@ -663,6 +607,23 @@ export function renderMarkerFieldValue(
               })}
             </tbody>
           </table>
+        );
+      }
+      case 'screenshot-data-url': {
+        const size = (payload as any)?.[format.sizeFieldForAspectRatio];
+        return (
+          <img
+            className="tooltipScreenshotImg"
+            src={stringTable.getString(value)}
+            style={
+              size
+                ? computeScreenshotSize(size, MAXIMUM_IMAGE_SIZE)
+                : {
+                    maxWidth: MAXIMUM_IMAGE_SIZE,
+                    maxHeight: MAXIMUM_IMAGE_SIZE,
+                  }
+            }
+          />
         );
       }
       default:

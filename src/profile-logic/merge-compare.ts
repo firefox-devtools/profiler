@@ -37,6 +37,7 @@ import {
   filterRawMarkerTableToRange,
   deriveMarkersFromRawMarkerTable,
   correlateIPCMarkers,
+  getMarkerTypesForDisplay,
 } from './marker-data';
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
 import { ensureExists, getFirstItemFromSet } from '../utils/types';
@@ -124,9 +125,20 @@ export function mergeProfilesForDiffing(
       (resultProfile.meta as any)[key] = value;
     }
   }
-  // Ensure it has a copy of the marker schema and categories, even though these could
+  // Combine the marker schemas of all profiles, so that markers coming from
+  // any of them keep being understood.
+  const markerSchemaNames = new Set<string>();
+  resultProfile.meta.markerSchema = [];
+  for (const profile of profiles) {
+    for (const schema of profile.meta.markerSchema) {
+      if (!markerSchemaNames.has(schema.name)) {
+        markerSchemaNames.add(schema.name);
+        resultProfile.meta.markerSchema.push(schema);
+      }
+    }
+  }
+  // Ensure it has a copy of the categories, even though these could
   // be different between the two profiles.
-  resultProfile.meta.markerSchema = profiles[0].meta.markerSchema;
   resultProfile.meta.categories = profiles[0].meta.categories;
 
   resultProfile.meta.interval = Math.min(
@@ -136,6 +148,10 @@ export function mergeProfilesForDiffing(
   // Precompute marker fields that need adjusting.
   const stringIndexMarkerFieldsByDataType =
     computeStringIndexMarkerFieldsByDataType(resultProfile.meta.markerSchema);
+  const screenshotMarkerTypes = getMarkerTypesForDisplay(
+    resultProfile.meta.markerSchema,
+    'timeline-screenshots'
+  );
 
   // If all profiles have an unknown symbolication status, we keep this unknown
   // status for the combined profile. Otherwise, we mark the combined profile
@@ -191,6 +207,14 @@ export function mergeProfilesForDiffing(
     }
     let thread = { ...profile.threads[selectedThreadIndex] };
 
+    // Make sure that screenshot markers make it into the merged profile, even
+    // if they're not on the selected thread.
+    thread.markers = getThreadMarkersAndScreenshotMarkers(
+      profile.threads,
+      profile.threads[selectedThreadIndex],
+      screenshotMarkerTypes
+    );
+
     transformStacks[i] = translateTransformStack(
       profileSpecific.transforms[selectedThreadIndex] ?? [],
       translationMaps
@@ -212,13 +236,6 @@ export function mergeProfilesForDiffing(
 
     [thread] = updateRawThreadStacks([thread], (stackIndex) =>
       _mapNullableStack(stackIndex, oldStackToNewStackPlusOne)
-    );
-
-    // Make sure that screenshot markers make it into the merged profile, even
-    // if they're not on the selected thread.
-    thread.markers = getThreadMarkersAndScreenshotMarkers(
-      profile.threads,
-      thread
     );
 
     // We filter the profile using the range from the state for this profile.
@@ -1468,13 +1485,14 @@ function mergeMarkers(threads: RawThread[]): RawMarkerTable {
 
 /**
  * Returns a RawMarkerTable which contains all the markers from targetThread,
- * as well as any CompositorScreenshot markers found on any other threads.
+ * as well as any screenshot markers found on any other threads.
  *
  * `targetThread` is expected to be one of the threads in `threads`.
  */
 function getThreadMarkersAndScreenshotMarkers(
   threads: RawThread[],
-  targetThread: RawThread
+  targetThread: RawThread,
+  screenshotMarkerTypes: Set<string>
 ): RawMarkerTable {
   const targetMarkerTable = getRawMarkerTableBuilderFromExisting(
     targetThread.markers
@@ -1492,7 +1510,7 @@ function getThreadMarkersAndScreenshotMarkers(
 
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
       const data = markers.data[markerIndex];
-      if (data === null || data.type !== 'CompositorScreenshot') {
+      if (data === null || !screenshotMarkerTypes.has(data.type)) {
         continue;
       }
       targetMarkerTable.data.push(data);

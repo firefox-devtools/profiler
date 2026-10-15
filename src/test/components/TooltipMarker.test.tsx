@@ -12,6 +12,7 @@ import {
 import { TooltipMarker } from '../../components/tooltip/Marker';
 import { storeWithProfile } from '../fixtures/stores';
 import {
+  addCompositorScreenshotSchemaIfNeeded,
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
   getNetworkMarkers,
@@ -1180,11 +1181,11 @@ describe('TooltipMarker', function () {
           type: 'CompositorScreenshot',
           url: screenshotUrlIndex,
           windowID: 'XXX',
-          windowWidth: 600,
-          windowHeight: 300,
+          windowSize: { width: 600, height: 300 },
         },
       ],
     ]);
+    addCompositorScreenshotSchemaIfNeeded(profile);
 
     const store = storeWithProfile(profile);
     const { getState } = store;
@@ -1202,23 +1203,6 @@ describe('TooltipMarker', function () {
     );
 
     expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders the tooltip of CompositorScreenshotWindowDestroyed', () => {
-    setupWithPayload([
-      [
-        'CompositorScreenshotWindowDestroyed',
-        1,
-        2,
-        {
-          type: 'CompositorScreenshot',
-          windowID: 'XXX',
-          url: undefined,
-        },
-      ],
-    ]);
-
-    expect(document.body).toMatchSnapshot();
   });
 
   it('shows the source thread for markers from a merged thread', function () {
@@ -1300,8 +1284,7 @@ describe('TooltipMarker', function () {
             type: 'CompositorScreenshot',
             url: screenshotUrlIndex,
             windowID: 'XXX',
-            windowWidth: 600,
-            windowHeight: 300,
+            windowSize: { width: 600, height: 300 },
           },
         ],
       ]
