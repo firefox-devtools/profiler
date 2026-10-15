@@ -23,6 +23,7 @@ import {
   markerSchemaForTests,
 } from '../fixtures/profiles/marker-schema';
 import { StringTable } from '../../utils/string-table';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 /**
  * Generally, higher level type of testing is preferred to detailed unit tests of
@@ -51,6 +52,7 @@ describe('marker schema labels', function () {
 
     const schema = {
       name: 'TestDefinedMarker',
+      style: getMarkerSchemaStyleFallback('TestDefinedMarker'),
       display: [],
       fields: schemaFields,
     };

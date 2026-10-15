@@ -51,6 +51,7 @@ import {
 } from '../fixtures/utils';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 
 import type { CssPixels, Profile } from 'firefox-profiler/types';
 
@@ -807,6 +808,7 @@ describe('MarkerChart', function () {
       profile.meta.markerSchema = [
         {
           name: 'Test',
+          style: getMarkerSchemaStyleFallback('Test'),
           display: ['marker-chart', 'marker-table'],
           fields: [
             { key: 'status', label: 'Status', format: 'string' },
