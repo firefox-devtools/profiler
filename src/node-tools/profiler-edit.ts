@@ -46,6 +46,7 @@ import {
   remapCountersAndProfilerOverhead,
 } from 'firefox-profiler/profile-logic/merge-compare';
 import {
+  attachSourcesFromFuncNames,
   embedJsSources,
   type SourceReader,
 } from 'firefox-profiler/profile-logic/embed-js-sources';
@@ -77,6 +78,9 @@ import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/so
  *
  *   node node-tools-dist/profiler-edit.js -i speedometer.json.gz -o out.json.gz \
  *     --map-source-paths mapping.json
+ *
+ *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json.gz \
+ *     --js-sources-from-func-names --map-source-paths mapping.json
  */
 
 export type ProfileSource =
@@ -101,6 +105,7 @@ export interface CliOptions {
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
   mapSourcePaths?: string;
+  jsSourcesFromFuncNames?: boolean;
   insertLabelFrames?: string;
   onlyKeepThreadsWithMarkersMatching?: string;
   mergeNonOverlappingThreadsByName?: boolean;
@@ -389,6 +394,11 @@ export async function run(options: CliOptions) {
     loadWasmSymbolicationSpecs(options.symbolicateWasm)
   );
 
+  if (options.jsSourcesFromFuncNames) {
+    console.log('Finding the sources of JS functions in their names...');
+    attachSourcesFromFuncNames(profile);
+  }
+
   if (options.mapSourcePaths !== undefined) {
     console.log('Embedding sources from mapped paths...');
     const mappings = parseSourcePathMappings(
@@ -522,6 +532,10 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       '--map-source-paths <path>',
       'JSON file mapping JS source URLs to local directories, to embed the sources and apply their source maps'
     )
+    .option(
+      '--js-sources-from-func-names',
+      'Give JS functions the source in their name, like "foo (url:line:column)", if no JS function has a source'
+    )
     .option('--insert-label-frames <path>', 'TOML file with label definitions')
     .option(
       '--only-keep-threads-with-markers-matching <search>',
@@ -586,6 +600,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       typeof opts.mapSourcePaths === 'string' && opts.mapSourcePaths !== ''
         ? opts.mapSourcePaths
         : undefined,
+    jsSourcesFromFuncNames: opts.jsSourcesFromFuncNames === true,
     insertLabelFrames:
       typeof opts.insertLabelFrames === 'string' &&
       opts.insertLabelFrames !== ''
