@@ -3,7 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { SourceMapGenerator } from 'source-map';
 
-import { embedJsSources } from '../../profile-logic/embed-js-sources';
+import {
+  attachSourcesFromFuncNames,
+  embedJsSources,
+} from '../../profile-logic/embed-js-sources';
 import type { SourceReader } from '../../profile-logic/embed-js-sources';
 import { runSourceMapSymbolicationNode } from '../../profile-query/source-map';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -161,5 +164,78 @@ describe('embedJsSources', function () {
       runSourceMapSymbolicationNode
     );
     expect(profile.shared.sources.content[0]).toBe(null);
+  });
+
+  it('finds the sources of JS funcs in their names', async function () {
+    const { profile } = getProfileFromTextSamples('Ajs');
+    const { funcTable, stringArray } = profile.shared;
+    funcTable.flags[0] &= ~FuncFlag.HasSource;
+    stringArray[funcTable.name[0]] = `a (${BUNDLE_URL}:1:10)`;
+    attachSourcesFromFuncNames(profile);
+    await embedJsSources(
+      profile,
+      makeReader({ [BUNDLE_URL]: BUNDLE_SOURCE }),
+      runSourceMapSymbolicationNode
+    );
+    const { sources } = profile.shared;
+    const newFuncTable = profile.shared.funcTable;
+    expect(newFuncTable.flags[0] & FuncFlag.HasSource).toBeTruthy();
+    expect(profile.shared.stringArray[newFuncTable.name[0]]).toBe('a');
+    expect(newFuncTable.lineNumber[0]).toBe(1);
+    expect(newFuncTable.columnNumber[0]).toBe(10);
+    const sourceIndex = newFuncTable.source[0];
+    expect(profile.shared.stringArray[sources.filename[sourceIndex]]).toBe(
+      BUNDLE_URL
+    );
+    expect(sources.content[sourceIndex]).toBe(BUNDLE_SOURCE);
+  });
+
+  it('uses one source for the funcs with the same URL', function () {
+    const { profile } = getProfileFromTextSamples(`
+      Ajs
+      Bjs
+    `);
+    const { funcTable, stringArray } = profile.shared;
+    funcTable.flags[0] &= ~FuncFlag.HasSource;
+    funcTable.flags[1] &= ~FuncFlag.HasSource;
+    stringArray[funcTable.name[0]] = `a (${BUNDLE_URL}:1:10)`;
+    stringArray[funcTable.name[1]] = `b (${BUNDLE_URL}:1:20)`;
+    attachSourcesFromFuncNames(profile);
+    const newFuncTable = profile.shared.funcTable;
+    expect(newFuncTable.flags[1] & FuncFlag.HasSource).toBeTruthy();
+    expect(newFuncTable.source[1]).toBe(newFuncTable.source[0]);
+  });
+
+  it('names the functions without a name after their file', function () {
+    const { profile } = getProfileFromTextSamples('Ajs');
+    const { funcTable, stringArray } = profile.shared;
+    funcTable.flags[0] &= ~FuncFlag.HasSource;
+    stringArray[funcTable.name[0]] = `* (${BUNDLE_URL}:1:1)`;
+    attachSourcesFromFuncNames(profile);
+    const newFuncTable = profile.shared.funcTable;
+    expect(profile.shared.stringArray[newFuncTable.name[0]]).toBe(
+      `(root scope) ${BUNDLE_URL}`
+    );
+  });
+
+  it('leaves the JS funcs that already have a source alone', function () {
+    const { profile } = getProfileFromTextSamples(`Ajs[file:${BUNDLE_URL}]`);
+    const { funcTable, stringArray } = profile.shared;
+    const name = 'a (http://127.0.0.1:62763/other.js:1:10)';
+    stringArray[funcTable.name[0]] = name;
+    const sourceIndex = funcTable.source[0];
+    attachSourcesFromFuncNames(profile);
+    const newFuncTable = profile.shared.funcTable;
+    expect(profile.shared.stringArray[newFuncTable.name[0]]).toBe(name);
+    expect(newFuncTable.source[0]).toBe(sourceIndex);
+  });
+
+  it('ignores the names of non-JS funcs', function () {
+    const { profile } = getProfileFromTextSamples('A');
+    const { funcTable, stringArray } = profile.shared;
+    stringArray[funcTable.name[0]] = `Interpreter: a (${BUNDLE_URL}:1:10)`;
+    attachSourcesFromFuncNames(profile);
+    expect(profile.shared.funcTable.flags[0] & FuncFlag.HasSource).toBe(0);
+    expect(profile.shared.sources.length).toBe(0);
   });
 });
