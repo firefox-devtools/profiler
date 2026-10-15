@@ -209,6 +209,11 @@ export class KeyboardShortcut extends React.PureComponent<Props, State> {
           <div className="appKeyboardShortcutsColumn">
             <h2>Timeline</h2>
             <Shortcut
+              label="Select all visible threads"
+              shortcut="ctrl,a"
+              macShortcut="cmd,a"
+            />
+            <Shortcut
               label="Select multiple threads"
               shortcut="ctrl,click"
               macShortcut="cmd,click"

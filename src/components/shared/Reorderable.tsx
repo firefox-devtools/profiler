@@ -28,6 +28,7 @@ type Props = {
   // If present, this will be attached to the container added for these
   // children. As a reminder, the container will use the tagName defined above.
   innerElementRef?: React.Ref<any>;
+  onKeyDown?: React.KeyboardEventHandler<HTMLElement>;
 };
 
 type State = {
@@ -241,7 +242,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
   }
 
   override render() {
-    const { className, order, innerElementRef } = this.props;
+    const { className, order, innerElementRef, onKeyDown } = this.props;
     const children = React.Children.toArray(this.props.children);
     const orderedChildren = order.map((childIndex) => children[childIndex]);
     const TagName = this.props.tagName;
@@ -252,6 +253,7 @@ export class Reorderable extends React.PureComponent<Props, State> {
         <TagName
           className={className}
           onMouseDown={this._onMouseDown}
+          onKeyDown={onKeyDown}
           ref={innerElementRef}
         >
           {orderedChildren}
@@ -268,7 +270,11 @@ export class Reorderable extends React.PureComponent<Props, State> {
     } = this.state;
 
     return (
-      <TagName className={className} ref={innerElementRef}>
+      <TagName
+        className={className}
+        ref={innerElementRef}
+        onKeyDown={onKeyDown}
+      >
         {orderedChildren.map((child, childIndex) => {
           const style: React.CSSProperties = {
             transition: '200ms ease-in-out transform',

@@ -32,6 +32,8 @@ import {
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenLocalTracks,
+  getHiddenLocalTracksByPid,
+  getLocalTrackOrderByPid,
   getInvertCallstack,
   getHash,
 } from 'firefox-profiler/selectors/url-state';
@@ -43,6 +45,7 @@ import {
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
 import {
+  getVisibleThreads,
   getTrackReferenceFromTid,
   getTrackReferenceFromThreadIndex,
 } from 'firefox-profiler/profile-logic/tracks';
@@ -656,6 +659,48 @@ export function selectTrackWithModifiers(
     } else {
       dispatch(setOneTrackSelection(clickedTrackInformation, selectedTab));
     }
+  };
+}
+
+/** Select all visible thread tracks without changing which tracks are shown. */
+export function selectAllVisibleTracks(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const state = getState();
+    const selectedThreadIndexes = new Set(
+      getVisibleThreads(
+        {
+          globalTracks: getGlobalTracks(state),
+          globalTrackOrder: getGlobalTrackOrder(state),
+          localTracksByPid: getLocalTracksByPid(state),
+          localTrackOrderByPid: getLocalTrackOrderByPid(state),
+        },
+        {
+          hiddenGlobalTracks: getHiddenGlobalTracks(state),
+          hiddenLocalTracksByPid: getHiddenLocalTracksByPid(state),
+        }
+      )
+    );
+    if (selectedThreadIndexes.size === 0) {
+      return;
+    }
+
+    let selectedTab = getSelectedTab(state);
+    if (selectedTab === 'network-chart') {
+      selectedTab = getLastVisibleThreadTabSlug(state);
+    }
+    const visibleTabs = getThreadSelectors(selectedThreadIndexes).getUsefulTabs(
+      state
+    );
+    if (!visibleTabs.includes(selectedTab)) {
+      selectedTab = visibleTabs[0];
+    }
+
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndexes,
+      selectedTab,
+      lastNonShiftClickInformation: null,
+    });
   };
 }
 
