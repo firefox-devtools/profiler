@@ -143,7 +143,7 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
       !(event.ctrlKey || event.metaKey) ||
       event.altKey ||
       event.shiftKey ||
-      event.key.toLowerCase() !== 'a' ||
+      event.code !== 'KeyA' ||
       (target instanceof HTMLElement &&
         (target.matches('input, textarea, select') || target.isContentEditable))
     ) {

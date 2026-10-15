@@ -113,15 +113,20 @@ describe('Timeline multiple thread selection', function () {
     return { ...renderResult, ...store, showAllIPCTracks };
   }
 
-  it.each([{ ctrlKey: true }, { metaKey: true }])(
+  it.each([
+    { key: 'a', ctrlKey: true },
+    { key: 'a', metaKey: true },
+    { key: 'ф', ctrlKey: true },
+    { key: 'ф', metaKey: true },
+  ])(
     'selects visible threads from a focused timeline track with %j',
-    (modifier) => {
+    (options) => {
       const { getState, getByRole } = setup();
       const button = getByRole('button', { name: 'DOM Worker' });
       const selectedTab = getSelectedTab(getState());
       const event = new KeyboardEvent('keydown', {
-        key: 'a',
-        ...modifier,
+        code: 'KeyA',
+        ...options,
         bubbles: true,
         cancelable: true,
       });
@@ -142,6 +147,7 @@ describe('Timeline multiple thread selection', function () {
     });
     fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
       key: 'a',
+      code: 'KeyA',
       metaKey: true,
     });
     expect(getSelectedThreadIndexes(getState())).toEqual(new Set([0, 1, 2, 3]));
@@ -156,6 +162,7 @@ describe('Timeline multiple thread selection', function () {
     });
     fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
       key: 'a',
+      code: 'KeyA',
       ctrlKey: true,
     });
     expect(getSelectedThreadIndexes(getState())).toEqual(new Set([1, 2]));
@@ -166,10 +173,12 @@ describe('Timeline multiple thread selection', function () {
     { key: 'a', ctrlKey: true, altKey: true },
     { key: 'a', metaKey: true, shiftKey: true },
     { key: 'a', ctrlKey: true, isComposing: true },
+    { key: 'a', code: 'KeyQ', ctrlKey: true },
   ])('leaves other keyboard input unchanged: %j', (options) => {
     const { getState, getByRole } = setup();
     const selected = getSelectedThreadIndexes(getState());
     const event = new KeyboardEvent('keydown', {
+      code: 'KeyA',
       ...options,
       bubbles: true,
       cancelable: true,
@@ -186,6 +195,7 @@ describe('Timeline multiple thread selection', function () {
     container.querySelector('.timelineThreadList')!.appendChild(input);
     const inputEvent = new KeyboardEvent('keydown', {
       key: 'a',
+      code: 'KeyA',
       ctrlKey: true,
       bubbles: true,
       cancelable: true,
@@ -193,6 +203,7 @@ describe('Timeline multiple thread selection', function () {
     fireEvent(input, inputEvent);
     const outsideEvent = new KeyboardEvent('keydown', {
       key: 'a',
+      code: 'KeyA',
       metaKey: true,
       bubbles: true,
       cancelable: true,
