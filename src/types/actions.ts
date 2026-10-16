@@ -38,6 +38,7 @@ import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   UrlState,
+  BenchmarkBucketFilter,
   UploadState,
   State,
   UploadedProfileInformation,
@@ -574,6 +575,10 @@ type UrlStateAction =
       readonly searchString: string;
     }
   | { readonly type: 'CHANGE_PROFILES_TO_COMPARE'; readonly profiles: string[] }
+  | {
+      readonly type: 'CHANGE_BENCHMARK_BUCKET_FILTER';
+      readonly filter: BenchmarkBucketFilter;
+    }
   | {
       readonly type: 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK';
       readonly profiles: string[];

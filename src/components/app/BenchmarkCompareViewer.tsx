@@ -25,10 +25,14 @@ import {
 } from './BenchmarkProfileNames';
 import type { BenchmarkProfileNames } from './BenchmarkProfileNames';
 import {
+  getBenchmarkBucketFilter,
   getProfileNamesToCompare,
   getProfilesToCompare,
 } from 'firefox-profiler/selectors/url-state';
-import { changeProfilesToCompareBenchmark } from 'firefox-profiler/actions/app';
+import {
+  changeBenchmarkBucketFilter,
+  changeProfilesToCompareBenchmark,
+} from 'firefox-profiler/actions/app';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { runBenchmarkComparison } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
 import {
@@ -52,7 +56,13 @@ import type {
 } from 'firefox-profiler/profile-logic/benchmark/compare-benchmark-stats';
 import { pValueToConfidence } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
 import type { ConfidenceRating } from 'firefox-profiler/profile-logic/benchmark/perf-compare-stats';
-import type { Profile } from 'firefox-profiler/types';
+import type {
+  Profile,
+  BenchmarkBucketFilter,
+  BenchmarkBucketFilterMode as BucketFilterMode,
+  BenchmarkBucketShow as BucketShow,
+  BenchmarkBucketComparand as BucketComparand,
+} from 'firefox-profiler/types';
 import { BucketFlameGraphPair } from './BucketFlameGraphPair';
 import {
   makeBucketProfileBundle,
@@ -107,8 +117,6 @@ const MIN_SCORE_IMPACT = 0.0001;
  */
 const SIGNIFICANCE_Q = 0.05;
 
-type BucketFilterMode = 'movers' | 'significant' | 'none';
-
 const BUCKET_FILTER_MODES: Array<{
   mode: BucketFilterMode;
   label: string;
@@ -136,59 +144,9 @@ const BUCKET_FILTER_MODES: Array<{
   },
 ];
 
-const DEFAULT_BUCKET_FILTER_MODE: BucketFilterMode = 'movers';
-
-/**
- * Which buckets to list: all of them, or only the ones on one side of the
- * comparison.
- *
- * A mixed list is the right default when you are asking "what did my patch do",
- * because the answer includes both. It is the wrong shape for the other question
- * this view now serves — "where is Firefox losing to Chrome" — where the wins and
- * the losses are separate pieces of work and interleaving them by size means
- * scanning past half the table to read either one. The old comparison report
- * built a separate list per direction for exactly this reason.
- *
- * The choice is a sentence with two slots — which profile, then which direction
- * — rather than one list naming the slower side. With two profiles the two forms
- * select the same three subsets, so the difference is entirely one of reading: a
- * list of "Firefox is slower" / "Chrome is slower" contains the answer to "where
- * is Firefox faster" but never says the word, and a reader looking at an
- * unfamiliar report does not reliably make the substitution. Observed, on a
- * Firefox-vs-Chrome comparison: they asked how to show where Firefox was faster
- * and did not recognise "Chrome is slower" as it. Naming a side once and then
- * saying faster or slower about it costs one more control and answers the
- * question as asked.
- *
- * The profile slot is the *subject* of that sentence and is deliberately not
- * called the reference: `base` is the reference, meaning the side every Δ in the
- * table is measured against, and picking a subject here does not touch a single
- * number. The two would collide the moment a third profile makes the reference a
- * control of its own.
- */
-type BucketShow = 'all' | 'faster' | 'slower';
-
-/**
- * What the subject is being compared with: another profile by its position in
- * the loaded list, or whichever of the others is quickest on the row in hand.
- *
- * The aggregate is the point of loading a third profile. "Firefox is slower than
- * Chrome" is a question about Chrome; "Firefox is slower than the best of the
- * others" is the question a browser engineer actually has, because its answer
- * comes with an existence proof -- somebody does this faster, so it can be done
- * faster. It is also why the comparand is a slot rather than the options being
- * written out one per phrasing: "the best of the others" is not an ordered pair,
- * so there is no ready-made sentence for it.
- *
- * With two profiles loaded, 'best' *is* the other profile, so the slot has one
- * distinct value and is not shown.
- */
-type BucketComparand = number | 'best';
-
-const DEFAULT_BUCKET_SHOW: BucketShow = 'all';
-
-/** What the reader picked in the filter controls. Carried as one object because
- * every level of the table needs all of it, and because the badge count and the
+/** What the reader picked in the filter controls, with the URL's defaults
+ * resolved against the profiles on screen. Carried as one object because every
+ * level of the table needs all of it, and because the badge count and the
  * expansion have to be computed from exactly the same choices. */
 type BucketFilter = {
   mode: BucketFilterMode;
@@ -198,6 +156,32 @@ type BucketFilter = {
   comparand: BucketComparand;
   show: BucketShow;
 };
+
+/**
+ * The URL's filter, made to fit the profiles on screen.
+ *
+ * With no subject named, it is the new side of the compared pair, because every
+ * Δ and every verdict in the table is already said about it, so the rows and
+ * the control that filters them start out talking about the same profile. An
+ * index the URL names but the list does not have is treated as unnamed, rather
+ * than filtering on a profile that is not there.
+ */
+function resolveBucketFilter(
+  urlFilter: BenchmarkBucketFilter,
+  profileCount: number,
+  newIndex: number
+): BucketFilter {
+  const { subject: urlSubject, comparand: urlComparand } = urlFilter;
+  const subject =
+    urlSubject !== null && urlSubject < profileCount ? urlSubject : newIndex;
+  const comparand =
+    urlComparand !== 'best' &&
+    urlComparand < profileCount &&
+    urlComparand !== subject
+      ? urlComparand
+      : 'best';
+  return { mode: urlFilter.mode, show: urlFilter.show, subject, comparand };
+}
 
 /**
  * A profile's mean for one row, whether or not it is one of the compared two.
@@ -1504,23 +1488,25 @@ function ComparisonResults({
 
   const names = useBenchmarkProfileNames();
   const profileCount = allNames.length;
-  const [filter, setFilter] = useState<BucketFilter>({
-    mode: DEFAULT_BUCKET_FILTER_MODE,
-    // The new side of the compared pair, because every Δ and every verdict in
-    // the table is already said about it, so the rows and the control that
-    // filters them start out talking about the same profile. And against the
-    // best of the others, which with two loaded is just the other one.
-    subject: newIndex,
-    comparand: 'best',
-    show: DEFAULT_BUCKET_SHOW,
-  });
+  const dispatch = useDispatch();
+  const urlFilter = useSelector(getBenchmarkBucketFilter);
+  const filter = useMemo(
+    () => resolveBucketFilter(urlFilter, profileCount, newIndex),
+    [urlFilter, profileCount, newIndex]
+  );
+  const changeFilter = useCallback(
+    (change: Partial<BenchmarkBucketFilter>) => {
+      dispatch(changeBenchmarkBucketFilter({ ...urlFilter, ...change }));
+    },
+    [dispatch, urlFilter]
+  );
 
   const handleFilterModeChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
       const mode = e.currentTarget.value as BucketFilterMode;
-      setFilter((prev) => ({ ...prev, mode }));
+      changeFilter({ mode });
     },
-    []
+    [changeFilter]
   );
   // Changing the subject re-says the same thing about the other side, so the
   // direction flips with it and the listed rows do not move. Naming a subset a
@@ -1533,33 +1519,35 @@ function ComparisonResults({
   const handleSubjectChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       const subject = Number(e.currentTarget.value);
-      setFilter((prev) => ({
-        ...prev,
+      changeFilter({
         subject,
         // A subject cannot be compared with itself. Falling back to the
         // aggregate rather than to some other profile avoids picking one on the
         // reader's behalf.
-        comparand: prev.comparand === subject ? 'best' : prev.comparand,
+        comparand: filter.comparand === subject ? 'best' : filter.comparand,
         show:
-          soleComparandIndex(prev, profileCount) === subject
-            ? oppositeShow(prev.show)
-            : prev.show,
-      }));
+          soleComparandIndex(filter, profileCount) === subject
+            ? oppositeShow(filter.show)
+            : filter.show,
+      });
     },
-    [profileCount]
+    [changeFilter, filter, profileCount]
   );
   const handleComparandChange = useCallback(
     (e: ChangeEvent<HTMLSelectElement>) => {
       const raw = e.currentTarget.value;
       const comparand: BucketComparand = raw === 'best' ? 'best' : Number(raw);
-      setFilter((prev) => ({ ...prev, comparand }));
+      changeFilter({ comparand });
     },
-    []
+    [changeFilter]
   );
-  const handleShowChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const show = e.currentTarget.value as BucketShow;
-    setFilter((prev) => ({ ...prev, show }));
-  }, []);
+  const handleShowChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const show = e.currentTarget.value as BucketShow;
+      changeFilter({ show });
+    },
+    [changeFilter]
+  );
 
   return (
     <div className="benchmarkResults">
