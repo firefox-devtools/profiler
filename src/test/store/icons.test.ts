@@ -37,6 +37,7 @@ describe('actions/icons', function () {
       totalPercent: '0',
       self: '0',
       selfWithUnit: '0 ms',
+      selfPercent: '0',
       name: 'icon',
       lib: 'icon',
       isFrameLabel: false,

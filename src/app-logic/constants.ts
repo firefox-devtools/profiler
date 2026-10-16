@@ -2,7 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { MarkerPhase } from 'firefox-profiler/types';
+import type {
+  MarkerPhase,
+  FunctionListSectionsOpenState,
+  WingViewsState,
+} from 'firefox-profiler/types';
 
 // The current version of the Gecko profile format.
 // Please don't forget to update the gecko profile format changelog in
@@ -111,3 +115,20 @@ export const INSTANT: MarkerPhase = 0;
 export const INTERVAL: MarkerPhase = 1;
 export const INTERVAL_START: MarkerPhase = 2;
 export const INTERVAL_END: MarkerPhase = 3;
+
+// The default open/closed state of the function list's sections. The URL
+// omits the funcListSections param when the state matches this default.
+export const FUNCTION_LIST_SECTIONS_OPEN_DEFAULT: FunctionListSectionsOpenState =
+  {
+    descendants: true,
+    ancestors: false,
+    self: false,
+  };
+
+// The default view for each function list wing. The URL omits the wingViews
+// param when all wings use their default view.
+export const WING_VIEWS_DEFAULT: WingViewsState = {
+  upper: 'flame-graph',
+  lower: 'flame-graph',
+  self: 'flame-graph',
+};
