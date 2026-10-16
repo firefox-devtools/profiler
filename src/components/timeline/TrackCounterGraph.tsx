@@ -39,6 +39,9 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './TrackCounter.css';
 
+// Match the radius of .timelineTrackCounterGraphDot.
+const COUNTER_DOT_RADIUS = 3;
+
 /**
  * When adding properties to these props, please consider the comment above `TrackCounterCanvas`.
  */
@@ -92,8 +95,9 @@ class TrackCounterCanvas extends React.PureComponent<CanvasProps> {
     const deviceWidth = width * devicePixelRatio;
     const deviceHeight = height * devicePixelRatio;
     const deviceLineWidth = lineWidth * devicePixelRatio;
-    const deviceLineHalfWidth = deviceLineWidth * 0.5;
-    const innerDeviceHeight = deviceHeight - deviceLineWidth;
+    const deviceVerticalPadding =
+      Math.max(COUNTER_DOT_RADIUS, lineWidth / 2) * devicePixelRatio;
+    const innerDeviceHeight = deviceHeight - deviceVerticalPadding * 2;
     const rangeLength = rangeEnd - rangeStart;
     const millisecondWidth = deviceWidth / rangeLength;
     const intervalWidth = interval * millisecondWidth;
@@ -111,7 +115,7 @@ class TrackCounterCanvas extends React.PureComponent<CanvasProps> {
 
     // Take the sample information, and convert it into chart coordinates. Use a slightly
     // smaller space than the deviceHeight, so that the stroke will be fully visible
-    // both at the top and bottom of the chart.
+    // along with its hover dot at the top and bottom of the chart.
     const [sampleStart, sampleEnd] = counterSampleRange;
 
     {
@@ -145,14 +149,13 @@ class TrackCounterCanvas extends React.PureComponent<CanvasProps> {
             // Create a path for the top of the chart. This is the line that will have
             // a stroke applied to it.
             x = (samples.time[i] - rangeStart) * millisecondWidth;
-            // Add on half the stroke's line width so that it won't be cut off the edge
-            // of the graph.
+            // Leave room for the hover dot at both vertical extremes.
             const unitGraphCount =
               (accumulatedCounts[i] - minCount) / countRange;
             y =
               innerDeviceHeight -
               innerDeviceHeight * unitGraphCount +
-              deviceLineHalfWidth;
+              deviceVerticalPadding;
             if (i === sampleStart) {
               // This is the first iteration, only move the line, do not draw it. Also
               // remember this first X, as the bottom of the graph will need to connect
@@ -193,15 +196,14 @@ class TrackCounterCanvas extends React.PureComponent<CanvasProps> {
           const getY = (rawY: number) => {
             if (!rawY) {
               // Make the 0 values invisible so that 'almost 0' is noticeable.
-              return deviceHeight + deviceLineHalfWidth;
+              return deviceHeight + deviceLineWidth / 2;
             }
             const unitGraphCount = rawY / countRangePerMs;
             return (
               innerDeviceHeight -
               innerDeviceHeight * unitGraphCount +
-              // Add on half the stroke's line width so that it won't be cut off the edge
-              // of the graph.
-              deviceLineHalfWidth
+              // Leave room for the hover dot at both vertical extremes.
+              deviceVerticalPadding
             );
           };
 
@@ -557,7 +559,8 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
     }
 
     const left = (width * (sampleTime - rangeStart)) / rangeLength;
-    const innerTrackHeight = graphHeight - lineWidth / 2;
+    const verticalPadding = Math.max(COUNTER_DOT_RADIUS, lineWidth / 2);
+    const innerTrackHeight = graphHeight - verticalPadding * 2;
     let top;
 
     switch (display.graphType) {
@@ -566,7 +569,9 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
         const unitSampleCount =
           (accumulatedCounts[counterIndex] - minCount) / countRange;
         top =
-          innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
+          innerTrackHeight -
+          unitSampleCount * innerTrackHeight +
+          verticalPadding;
         break;
       }
       case 'line-rate': {
@@ -579,7 +584,9 @@ class TrackCounterGraphImpl extends React.PureComponent<Props, State> {
           sampleTimeDeltaInMs /
           maxCounterSampleCountPerMs;
         top =
-          innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
+          innerTrackHeight -
+          unitSampleCount * innerTrackHeight +
+          verticalPadding;
         break;
       }
       default:
