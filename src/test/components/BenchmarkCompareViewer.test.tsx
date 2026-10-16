@@ -12,6 +12,8 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { BenchmarkCompareViewer } from '../../components/app/BenchmarkCompareViewer';
 import { changeProfilesToCompareBenchmark } from '../../actions/app';
+import { getProfilesToCompare } from '../../selectors/url-state';
+import { uploadComparedProfiles } from '../../profile-logic/benchmark/upload-compared-profiles';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import type { ProfileBenchmarkStats } from '../../profile-logic/benchmark/extract-benchmark-stats';
 import type {
@@ -67,6 +69,17 @@ jest.mock(
       },
     };
   }
+);
+
+/** The upload talks to the server, so only its result is made up here. */
+jest.mock(
+  'firefox-profiler/profile-logic/benchmark/upload-compared-profiles',
+  () => ({
+    ...jest.requireActual(
+      'firefox-profiler/profile-logic/benchmark/upload-compared-profiles'
+    ),
+    uploadComparedProfiles: jest.fn(),
+  })
 );
 
 /**
@@ -210,19 +223,20 @@ describe('app/BenchmarkCompareViewer', () => {
     comparedPairs.length = 0;
   });
 
-  function setup(count: number = 2) {
+  function setup(count: number = 2, urls: string[] = URLS) {
     const store = blankStore();
     store.dispatch(
       changeProfilesToCompareBenchmark(
-        URLS.slice(0, count),
+        urls.slice(0, count),
         ['Chrome', 'Firefox', 'Safari'].slice(0, count)
       )
     );
-    return render(
+    const renderResult = render(
       <Provider store={store}>
         <BenchmarkCompareViewer />
       </Provider>
     );
+    return { ...renderResult, store };
   }
 
   it('links both profiles from the header, and fills the table in row by row', async () => {
@@ -457,5 +471,51 @@ describe('app/BenchmarkCompareViewer', () => {
     expect(gamma.querySelector('.benchmarkDisclosure')).toBeNull();
     expect(gamma).not.toHaveClass('benchmarkRow--suite-expandable');
     expect(gamma.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  it('offers no upload when every profile is already uploaded', async () => {
+    setup();
+    await screen.findByText('Overall (geomean-normalised)');
+    expect(screen.queryByText('Upload profiles')).not.toBeInTheDocument();
+  });
+
+  it('uploads the profiles and points the page at the uploaded copies', async () => {
+    const fromUrl = (name: string) =>
+      'https://profiler.firefox.com/from-url/' +
+      encodeURIComponent(`https://example.com/${name}.json.gz`) +
+      '/';
+    const { store } = setup(2, [fromUrl('base'), fromUrl('new')]);
+    await screen.findByText('Overall (geomean-normalised)');
+
+    let finishUpload: (urls: string[]) => void = () => {};
+    jest
+      .mocked(uploadComparedProfiles)
+      .mockImplementation((_urls, _names, onProgress) => {
+        onProgress({ index: 1, count: 2, fraction: 0.5 });
+        return new Promise((resolve) => {
+          finishUpload = resolve;
+        });
+      });
+    fireEvent.click(screen.getByText('Upload profiles'));
+    expect(uploadComparedProfiles).toHaveBeenCalledWith(
+      [fromUrl('base'), fromUrl('new')],
+      ['Chrome', 'Firefox'],
+      expect.any(Function)
+    );
+    expect(
+      screen.getByText('Uploading profile 2 of 2: 50%')
+    ).toBeInTheDocument();
+
+    finishUpload(URLS.slice(0, 2));
+    expect(
+      await screen.findByText(/The profiles are uploaded/)
+    ).toBeInTheDocument();
+    expect(getProfilesToCompare(store.getState())).toEqual(URLS.slice(0, 2));
+    expect(
+      [...document.querySelectorAll('.benchmarkProfileLinks a')].map((a) =>
+        a.getAttribute('href')
+      )
+    ).toEqual(URLS.slice(0, 2));
+    expect(screen.queryByText('Upload profiles')).not.toBeInTheDocument();
   });
 });

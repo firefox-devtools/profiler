@@ -205,6 +205,19 @@
   font-weight: bold;
 }
 
+.benchmarkUpload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 0.4em;
+  color: var(--internal-text-muted);
+  gap: 0.5em;
+}
+
+.benchmarkUpload__error {
+  color: var(--red-60);
+}
+
 .benchmarkComparing > summary {
   cursor: pointer;
   user-select: none;
