@@ -10,9 +10,10 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useRef,
 } from 'react';
 import type { ChangeEvent, MouseEvent } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { AppHeader } from './AppHeader';
 import { BenchmarkCompareForm } from './BenchmarkCompareForm';
@@ -27,7 +28,14 @@ import {
   getProfileNamesToCompare,
   getProfilesToCompare,
 } from 'firefox-profiler/selectors/url-state';
+import { changeProfilesToCompareBenchmark } from 'firefox-profiler/actions/app';
+import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { runBenchmarkComparison } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
+import {
+  isPublicProfileUrl,
+  uploadComparedProfiles,
+} from 'firefox-profiler/profile-logic/benchmark/upload-compared-profiles';
+import type { UploadProgress } from 'firefox-profiler/profile-logic/benchmark/upload-compared-profiles';
 import type { ComparisonProgress } from 'firefox-profiler/profile-logic/benchmark/run-benchmark-comparison';
 import type { ProfileMeans } from 'firefox-profiler/profile-logic/benchmark/profile-means';
 import { createBenchmarkTableWorkerPool } from 'firefox-profiler/profile-logic/benchmark/benchmark-compare-worker-pool';
@@ -1758,6 +1766,129 @@ function ProfileLink({ name, url }: { name: string; url: string }) {
   );
 }
 
+type UploadState =
+  | { phase: 'idle' }
+  /** `progress` is null until the first profile has been compressed. */
+  | { phase: 'uploading'; progress: UploadProgress | null }
+  | { phase: 'error'; error: string }
+  /** `urlKey` is the profile list the upload produced. The confirmation is only
+   * shown while that list is still the one on the page. */
+  | { phase: 'done'; urlKey: string };
+
+/**
+ * A button that uploads the compared profiles and points the page at the
+ * uploaded copies.
+ *
+ * Links to this page usually name Taskcluster artifacts, which expire, and the
+ * comparison stops working when they do. Uploaded profiles do not expire. There
+ * are no sharing options: the copies are uploaded exactly as loaded, so that
+ * the report computed from them is the report on screen.
+ */
+function UploadProfiles({
+  urls,
+  names,
+  isLoaded,
+}: {
+  urls: string[];
+  names: string[];
+  /** Whether the profiles have finished loading. The upload sends the copies
+   * already in memory, so there is nothing to upload before then. */
+  isLoaded: boolean;
+}) {
+  const dispatch = useDispatch();
+  const [upload, setUpload] = useState<UploadState>({ phase: 'idle' });
+  const urlKey = urls.join('\n');
+
+  // The list on the page now, read when an upload finishes. If the reader has
+  // changed the profiles in the meantime, the uploaded URLs belong to a list
+  // that is no longer shown, and must not replace the new one.
+  const currentUrlKey = useRef(urlKey);
+  useEffect(() => {
+    currentUrlKey.current = urlKey;
+  }, [urlKey]);
+
+  const handleClick = useCallback(async () => {
+    const startedUrlKey = urlKey;
+    setUpload({ phase: 'uploading', progress: null });
+    try {
+      const newUrls = await uploadComparedProfiles(urls, names, (progress) =>
+        setUpload({ phase: 'uploading', progress })
+      );
+      if (currentUrlKey.current !== startedUrlKey) {
+        setUpload({ phase: 'idle' });
+        return;
+      }
+      // Replace rather than push: the page shows the same comparison as
+      // before, and the entry it replaces is the one that will expire.
+      withHistoryReplaceStateSync(() => {
+        dispatch(changeProfilesToCompareBenchmark(newUrls, names));
+      });
+      setUpload({ phase: 'done', urlKey: newUrls.join('\n') });
+    } catch (err) {
+      setUpload({
+        phase: 'error',
+        error: String((err as Error)?.message ?? err),
+      });
+    }
+  }, [dispatch, urlKey, urls, names]);
+
+  switch (upload.phase) {
+    case 'uploading': {
+      const { progress } = upload;
+      return (
+        <p className="benchmarkUpload" role="status">
+          {progress === null
+            ? 'Preparing the upload…'
+            : `Uploading profile ${progress.index + 1} of ${progress.count}: ` +
+              `${Math.round(progress.fraction * 100)}%`}
+        </p>
+      );
+    }
+    case 'done':
+      if (upload.urlKey === urlKey) {
+        return (
+          <p className="benchmarkUpload" role="status">
+            The profiles are uploaded. The links above and the address of this
+            page now point to the uploaded copies.
+          </p>
+        );
+      }
+      break;
+    case 'idle':
+    case 'error':
+      break;
+    default:
+      throw new Error(
+        `Unhandled upload phase ${(upload as UploadState).phase}`
+      );
+  }
+
+  if (!isLoaded || urls.every(isPublicProfileUrl)) {
+    return null;
+  }
+  return (
+    <p className="benchmarkUpload">
+      <button
+        type="button"
+        className="photon-button photon-button-default photon-button-micro"
+        title={
+          'Upload the profiles without removing any information from them. ' +
+          'Uploaded profiles do not expire, so a link to this comparison ' +
+          'keeps working. Anyone with the link can see the profiles.'
+        }
+        onClick={handleClick}
+      >
+        Upload profiles
+      </button>
+      {upload.phase === 'error' ? (
+        <span className="benchmarkUpload__error">
+          The upload failed: {upload.error}
+        </span>
+      ) : null}
+    </p>
+  );
+}
+
 export function BenchmarkCompareViewer() {
   const profilesToCompare = useSelector(getProfilesToCompare);
   const profileNamesToCompare = useSelector(getProfileNamesToCompare);
@@ -1911,6 +2042,11 @@ export function BenchmarkCompareViewer() {
                 </Fragment>
               ))}
             </p>
+            <UploadProfiles
+              urls={urls}
+              names={allNames}
+              isLoaded={state.phase === 'results'}
+            />
             {/* One report is of one pair, so with more than two loaded there has
              * to be somewhere to say which. Both sides are selectable rather
              * than just the second: which profile the percentages are measured
