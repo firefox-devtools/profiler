@@ -63,6 +63,8 @@ type State = {
   hoveredPixelState: null | HoveredPixelState;
   mouseX: CssPixels;
   mouseY: CssPixels;
+  // The thread that the hovered state was computed for.
+  previousThread: Thread | null;
 };
 
 class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
@@ -72,7 +74,22 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
+    previousThread: null,
   };
+
+  /**
+   * The hovered sample index refers to the thread that was rendered when the
+   * mouse last moved, so invalidate it when that thread changes.
+   */
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.rangeFilteredThread !== state.previousThread) {
+      return {
+        previousThread: props.rangeFilteredThread,
+        hoveredPixelState: null,
+      };
+    }
+    return null;
+  }
 
   _onMouseLeave = () => {
     this.setState({ hoveredPixelState: null });

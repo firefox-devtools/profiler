@@ -3,11 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { Provider } from 'react-redux';
 
-import { render } from 'firefox-profiler/test/fixtures/testing-library';
+import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
 import { fireEvent } from '@testing-library/react';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { ensureExists } from 'firefox-profiler/utils/types';
 import { TimelineTrackThread } from 'firefox-profiler/components/timeline/TrackThread';
+import { commitRange } from 'firefox-profiler/actions/profile-view';
 import type { DrawOperation } from '../fixtures/mocks/canvas-context';
 import {
   autoMockCanvasContext,
@@ -232,6 +233,46 @@ describe('SampleGraph', function () {
           'A tooltip component must exist for this test.'
         )
       ).toMatchSnapshot();
+    });
+
+    it('does not show the tooltip anymore when the committed range changes while a sample is hovered', function () {
+      const { hoverSampleGraph, dispatch } = setup();
+
+      // Hover the last sample: the full call node at this sample is
+      //  A -> B -> C -> F -> G
+      hoverSampleGraph(7);
+      expect(document.querySelector('.tooltip')).toBeTruthy();
+
+      // Commit a range that only keeps the first samples. The hovered sample
+      // index doesn't refer to any sample of the range-filtered thread anymore.
+      act(() => {
+        dispatch(commitRange(0, 2));
+      });
+
+      // The tooltip should be hidden instead of crashing with a
+      // "Cannot read properties of undefined" error.
+      expect(document.querySelector('.tooltip')).toBeFalsy();
+    });
+
+    it('does not keep showing a tooltip for another sample when the committed range changes', function () {
+      const { hoverSampleGraph, dispatch, getState } = setup();
+
+      // Hover the sample at 3ms.
+      hoverSampleGraph(3);
+      expect(document.querySelector('.tooltip')).toBeTruthy();
+
+      // Commit a range that starts later, so that the samples are re-indexed.
+      // The stored index is still in range for the new thread, so this is not
+      // the crash case: without invalidation the tooltip stays and shows a
+      // sample that isn't under the cursor anymore.
+      act(() => {
+        dispatch(commitRange(2, 20));
+      });
+
+      expect(
+        selectedThreadSelectors.getFilteredThread(getState()).samples.length
+      ).toBeGreaterThan(3);
+      expect(document.querySelector('.tooltip')).toBeFalsy();
     });
 
     it('does not show a tooltip when outside of a sample is hovered', function () {

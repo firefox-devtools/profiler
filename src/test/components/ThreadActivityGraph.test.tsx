@@ -10,6 +10,7 @@ import type {
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
+import { fireEvent } from '@testing-library/react';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType, getSelectedTab } from '../../selectors/url-state';
 import { getLastVisibleThreadTabSlug } from '../../selectors/app';
@@ -28,7 +29,12 @@ import {
 } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { fireFullClick } from '../fixtures/utils';
+import {
+  fireFullClick,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   autoMockElementSize,
@@ -66,6 +72,8 @@ describe('ThreadActivityGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   autoMockIntersectionObserver();
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
 
   function setup(profile: Profile = getSamplesProfile()) {
     const store = storeWithProfile(profile);
@@ -109,6 +117,22 @@ describe('ThreadActivityGraph', function () {
       });
     }
 
+    // Hover a sample of the activity graph.
+    function hoverActivityGraph(
+      index: IndexIntoSamplesTable,
+      graphHeightPercentage: number
+    ) {
+      fireEvent(
+        activityGraphCanvas,
+        getMouseEvent('mousemove', {
+          pageX: getSamplesPixelPosition(index),
+          pageY: GRAPH_HEIGHT * graphHeightPercentage,
+          offsetX: getSamplesPixelPosition(index),
+          offsetY: GRAPH_HEIGHT * graphHeightPercentage,
+        })
+      );
+    }
+
     // This function gets the selected call node path as a list of function names.
     function getCallNodePath() {
       return selectedThreadSelectors
@@ -134,6 +158,7 @@ describe('ThreadActivityGraph', function () {
       threadIndex,
       activityGraphCanvas,
       clickActivityGraph,
+      hoverActivityGraph,
       getCallNodePath,
       getContextDrawCalls,
     };
@@ -260,6 +285,46 @@ describe('ThreadActivityGraph', function () {
     // If there are CPU values, it should be automatically defaulted to this view.
     expect(getTimelineType(getState())).toBe('cpu-category');
     expect(flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('does not show the tooltip anymore when the committed range changes while a sample is hovered', function () {
+    const { dispatch, hoverActivityGraph } = setup();
+
+    // Hover a late sample, so the tooltip holds a late index.
+    hoverActivityGraph(6, 0.2);
+    expect(document.querySelector('.tooltip')).toBeTruthy();
+
+    // Commit a range that only keeps the first samples. The hovered sample
+    // index doesn't refer to any sample of the range-filtered thread anymore.
+    act(() => {
+      dispatch(commitRange(0, 5));
+    });
+
+    // The tooltip should be hidden instead of crashing with a
+    // "Cannot read properties of undefined" error.
+    expect(document.querySelector('.tooltip')).toBeFalsy();
+  });
+
+  it('does not keep showing a tooltip for another sample when the committed range changes', function () {
+    const { dispatch, getState, hoverActivityGraph } = setup();
+
+    // Hover a sample from the first half, so that the stored index is still in
+    // range for the shorter thread below.
+    hoverActivityGraph(3, 0.2);
+    expect(document.querySelector('.tooltip')).toBeTruthy();
+
+    // Commit a range that starts later, so that the samples are re-indexed.
+    // The stored index is still in range for the new thread, so this is not
+    // the crash case: without invalidation the tooltip stays and shows a
+    // sample that isn't under the cursor anymore.
+    act(() => {
+      dispatch(commitRange(2, 20));
+    });
+
+    expect(
+      selectedThreadSelectors.getRangeFilteredThread(getState()).samples.length
+    ).toBeGreaterThan(3);
+    expect(document.querySelector('.tooltip')).toBeFalsy();
   });
 
   it('selects the full call node path when clicked', function () {
