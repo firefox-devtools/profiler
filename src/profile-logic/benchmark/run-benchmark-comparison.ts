@@ -225,7 +225,7 @@ export function createInProcessTableRunner(
  * profile here; entries are never evicted, which is fine for a page whose whole
  * job is comparing two of them.
  */
-type LoadedProfile = {
+export type LoadedProfile = {
   profile: Profile;
   /** The URL after any shortlink expansion. This is the URL that actually
    * points at a viewable profile in profiler.firefox.com; it's what deep
@@ -235,7 +235,7 @@ type LoadedProfile = {
 
 const profileCache = new Map<string, Promise<LoadedProfile>>();
 
-function loadOneProfileCached(inputUrl: string): Promise<LoadedProfile> {
+export function loadOneProfileCached(inputUrl: string): Promise<LoadedProfile> {
   const cached = profileCache.get(inputUrl);
   if (cached !== undefined) {
     return cached;
@@ -302,6 +302,27 @@ function extractStatsCached(
   const stats = extractBenchmarkStatsFromProfile(profile);
   statsCache.set(viewerUrl, stats);
   return stats;
+}
+
+/**
+ * Record that `newUrl` points at a profile that is already loaded, so that
+ * switching the page over to it re-downloads nothing.
+ *
+ * This is for uploading: the uploaded copy is the profile already in memory,
+ * and its stats are the ones already extracted.
+ */
+export function rememberRelocatedProfile(
+  newUrl: string,
+  loaded: LoadedProfile
+): void {
+  profileCache.set(
+    newUrl,
+    Promise.resolve({ profile: loaded.profile, viewerUrl: newUrl })
+  );
+  const stats = statsCache.get(loaded.viewerUrl);
+  if (stats !== undefined) {
+    statsCache.set(newUrl, stats);
+  }
 }
 
 /**
