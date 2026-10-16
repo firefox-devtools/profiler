@@ -6,6 +6,7 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/types';
 import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
+import { DEFAULT_BENCHMARK_BUCKET_FILTER } from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -18,6 +19,7 @@ import type {
   CallTreeSummaryStrategy,
   TimelineType,
   UrlState,
+  BenchmarkBucketFilter,
   Reducer,
   SourceViewState,
   AssemblyViewState,
@@ -104,6 +106,18 @@ const profileNamesToCompare: Reducer<string[] | null> = (
   switch (action.type) {
     case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
       return action.profileNames;
+    default:
+      return state;
+  }
+};
+
+const benchmarkBucketFilter: Reducer<BenchmarkBucketFilter> = (
+  state = DEFAULT_BENCHMARK_BUCKET_FILTER,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_BENCHMARK_BUCKET_FILTER':
+      return action.filter;
     default:
       return state;
   }
@@ -878,6 +892,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     profileUrl,
     profilesToCompare,
     profileNamesToCompare,
+    benchmarkBucketFilter,
     selectedTab,
     pathInZipFile,
     profileSpecific,
