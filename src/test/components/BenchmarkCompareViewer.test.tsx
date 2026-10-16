@@ -12,7 +12,10 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { BenchmarkCompareViewer } from '../../components/app/BenchmarkCompareViewer';
 import { changeProfilesToCompareBenchmark } from '../../actions/app';
-import { getProfilesToCompare } from '../../selectors/url-state';
+import {
+  getBenchmarkBucketFilter,
+  getProfilesToCompare,
+} from '../../selectors/url-state';
 import { uploadComparedProfiles } from '../../profile-logic/benchmark/upload-compared-profiles';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import type { ProfileBenchmarkStats } from '../../profile-logic/benchmark/extract-benchmark-stats';
@@ -451,6 +454,29 @@ describe('app/BenchmarkCompareViewer', () => {
     expect(listed()).toEqual(['betaFunc']);
     fireEvent.click(screen.getByLabelText('Chrome is slower'));
     expect(listed()).toEqual(['gammaFunc']);
+  });
+
+  it('keeps the direction filter in the URL state', async () => {
+    const { store } = setup();
+    await screen.findByText('Overall (geomean-normalised)');
+
+    fireEvent.click(screen.getByLabelText('Firefox is slower'));
+    expect(getBenchmarkBucketFilter(store.getState())).toEqual({
+      mode: 'movers',
+      // Not pinned to an index until the reader picks one, so the subject goes
+      // on following the compared pair.
+      subject: null,
+      comparand: 'best',
+      show: 'slower',
+    });
+
+    fireEvent.change(screen.getByLabelText('Profile the direction is about'), {
+      target: { value: '0' },
+    });
+    expect(getBenchmarkBucketFilter(store.getState())).toMatchObject({
+      subject: 0,
+      show: 'faster',
+    });
   });
 
   it('gives a subtest the new profile did not run no arrow at all', async () => {

@@ -46,6 +46,7 @@ import type {
   Action,
   ThunkAction,
   UrlState,
+  BenchmarkBucketFilter,
   UploadedProfileInformation,
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
@@ -87,6 +88,12 @@ export function changeProfilesToCompareBenchmark(
     profiles,
     profileNames,
   };
+}
+
+export function changeBenchmarkBucketFilter(
+  filter: BenchmarkBucketFilter
+): Action {
+  return { type: 'CHANGE_BENCHMARK_BUCKET_FILTER', filter };
 }
 
 export function startFetchingProfiles(): Action {

@@ -389,6 +389,74 @@ export type ProfileSpecificUrlState = {
   markerTableSort: SingleColumnSortState[] | null;
 };
 
+/**
+ * Which buckets the benchmark comparison lists, by how they relate to the
+ * overall score. See BUCKET_FILTER_MODES in BenchmarkCompareViewer.tsx.
+ */
+export type BenchmarkBucketFilterMode = 'movers' | 'significant' | 'none';
+
+/**
+ * Which buckets to list: all of them, or only the ones on one side of the
+ * comparison.
+ *
+ * A mixed list is the right default when you are asking "what did my patch do",
+ * because the answer includes both. It is the wrong shape for the other question
+ * this view now serves — "where is Firefox losing to Chrome" — where the wins and
+ * the losses are separate pieces of work and interleaving them by size means
+ * scanning past half the table to read either one. The old comparison report
+ * built a separate list per direction for exactly this reason.
+ *
+ * The choice is a sentence with two slots — which profile, then which direction
+ * — rather than one list naming the slower side. With two profiles the two forms
+ * select the same three subsets, so the difference is entirely one of reading: a
+ * list of "Firefox is slower" / "Chrome is slower" contains the answer to "where
+ * is Firefox faster" but never says the word, and a reader looking at an
+ * unfamiliar report does not reliably make the substitution. Observed, on a
+ * Firefox-vs-Chrome comparison: they asked how to show where Firefox was faster
+ * and did not recognise "Chrome is slower" as it. Naming a side once and then
+ * saying faster or slower about it costs one more control and answers the
+ * question as asked.
+ *
+ * The profile slot is the *subject* of that sentence and is deliberately not
+ * called the reference: `base` is the reference, meaning the side every Δ in the
+ * table is measured against, and picking a subject here does not touch a single
+ * number. The two would collide the moment a third profile makes the reference a
+ * control of its own.
+ */
+export type BenchmarkBucketShow = 'all' | 'faster' | 'slower';
+
+/**
+ * What the subject is being compared with: another profile by its position in
+ * the loaded list, or whichever of the others is quickest on the row in hand.
+ *
+ * The aggregate is the point of loading a third profile. "Firefox is slower than
+ * Chrome" is a question about Chrome; "Firefox is slower than the best of the
+ * others" is the question a browser engineer actually has, because its answer
+ * comes with an existence proof -- somebody does this faster, so it can be done
+ * faster. It is also why the comparand is a slot rather than the options being
+ * written out one per phrasing: "the best of the others" is not an ordered pair,
+ * so there is no ready-made sentence for it.
+ *
+ * With two profiles loaded, 'best' *is* the other profile, so the slot has one
+ * distinct value and is not shown.
+ */
+export type BenchmarkBucketComparand = number | 'best';
+
+/**
+ * The benchmark comparison's bucket filter, as the URL carries it.
+ *
+ * Profiles are referred to by their position in `profilesToCompare`. A null
+ * `subject` means the new side of whichever pair is being compared, which is
+ * where the filter starts out: the pair is not in the URL, so a fixed index
+ * would not follow it.
+ */
+export type BenchmarkBucketFilter = {
+  readonly mode: BenchmarkBucketFilterMode;
+  readonly subject: number | null;
+  readonly comparand: BenchmarkBucketComparand;
+  readonly show: BenchmarkBucketShow;
+};
+
 export type UrlState = {
   readonly dataSource: DataSource;
   // This is used for the "public" dataSource".
@@ -401,6 +469,8 @@ export type UrlState = {
   // dataSource. Null when the URL doesn't name them, in which case the
   // benchmark view falls back to DEFAULT_BENCHMARK_PROFILE_NAMES.
   readonly profileNamesToCompare: string[] | null;
+  // Used by the "compare-benchmark" dataSource.
+  readonly benchmarkBucketFilter: BenchmarkBucketFilter;
   readonly selectedTab: TabSlug;
   readonly pathInZipFile: string | null;
   readonly profileName: string | null;
