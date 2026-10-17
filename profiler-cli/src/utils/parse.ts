@@ -7,7 +7,7 @@
  */
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import type { SampleFilterSpec } from '../protocol';
+import type { ImplementationFilter, SampleFilterSpec } from '../protocol';
 
 /**
  * Accumulator for Commander repeated options (--flag a --flag b -> ['a', 'b']).
@@ -30,6 +30,25 @@ export function parseFuncList(value: string): number[] {
     }
     return parseInt(m[1], 10);
   });
+}
+
+/**
+ * Parse a `--focus-self` value: a function handle with an optional
+ * implementation suffix, e.g. "f-12" or "f-12:js".
+ */
+export function parseFocusSelf(value: string): SampleFilterSpec {
+  const m = /^f-(\d+)(?::(combined|js|cpp))?$/.exec(value.trim());
+  if (!m) {
+    console.error(
+      `Error: invalid --focus-self value "${value.trim()}" (expected f-<N>, f-<N>:js or f-<N>:cpp)`
+    );
+    process.exit(1);
+  }
+  return {
+    type: 'focus-self',
+    funcIndex: parseInt(m[1], 10),
+    implementation: (m[2] ?? 'combined') as ImplementationFilter,
+  };
 }
 
 /**
@@ -61,6 +80,7 @@ export interface EphemeralFilterOpts {
   excludesFunction?: string[];
   merge?: string[];
   rootAt?: string[];
+  focusSelf?: string[];
   includesFunction?: string[];
   includesPrefix?: string[];
   includesSuffix?: string[];
@@ -92,6 +112,9 @@ export function parseEphemeralFilters(
       process.exit(1);
     }
     specs.push({ type: 'root-at', funcIndex: indexes[0] });
+  }
+  for (const v of opts.focusSelf ?? []) {
+    specs.push(parseFocusSelf(v));
   }
   for (const v of opts.includesFunction ?? []) {
     specs.push({ type: 'includes-function', funcIndexes: parseFuncList(v) });
@@ -136,6 +159,7 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
     'excludesFunction',
     'merge',
     'rootAt',
+    'focusSelf',
     'includesFunction',
     'includesPrefix',
     'includesSuffix',
@@ -153,6 +177,7 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
       '--excludes-function',
       '--merge',
       '--root-at',
+      '--focus-self',
       '--includes-function',
       '--includes-prefix',
       '--includes-suffix',
@@ -186,6 +211,8 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
         }
         return { type: 'root-at', funcIndex: indexes[0] };
       }
+      case 'focusSelf':
+        return parseFocusSelf(value);
       case 'includesFunction':
         return { type: 'includes-function', funcIndexes: parseFuncList(value) };
       case 'includesPrefix':

@@ -134,6 +134,7 @@ These work ephemerally on `thread samples` / `thread functions`, and as persiste
 | `--excludes-function <f-N>`        | Drop samples containing this function                              |
 | `--merge <f-N,...>`                | Remove functions from stacks (collapse them out)                   |
 | `--root-at <f-N>`                  | Re-root stacks at this function                                    |
+| `--focus-self <f-N[:js\|:cpp]>`    | Keep only this function's self time; `:js` uses JS-only self time  |
 | `--includes-function <f-N,...>`    | Keep only samples containing any of these functions                |
 | `--includes-prefix <f-N,...>`      | Keep only samples whose stack starts with this root-first sequence |
 | `--includes-suffix <f-N>`          | Keep only samples whose leaf frame is this function                |
