@@ -27,7 +27,8 @@ import {
 
 export function registerSessionCommand(
   program: Command,
-  sessionDir: string
+  sessionDir: string,
+  onSessionSwitched?: (sessionId: string) => void
 ): void {
   const session = program
     .command('session')
@@ -131,6 +132,7 @@ export function registerSessionCommand(
         throw new Error(await explainUnreachableSession(sessionDir, sessionId));
       }
       setCurrentSession(sessionDir, sessionId);
+      onSessionSwitched?.(sessionId);
       console.log(`Switched to session ${sessionId}`);
     });
 }
