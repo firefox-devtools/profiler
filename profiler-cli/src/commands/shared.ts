@@ -139,16 +139,16 @@ export function addStrategyOption(cmd: Command): Command {
 }
 
 /**
- * Returns true if the given subcommand was explicitly typed by the user.
- * Used to decide whether to print a "other subcommands" hint after a default action.
+ * Returns true if the user typed the name of `cmd`, false if it ran as the
+ * default subcommand of its parent. Used to decide whether to print an "other
+ * subcommands" hint after a default action.
  *
- * e.g. `profiler-cli session`       -> wasExplicit('session', 'list') === false
- *      `profiler-cli session list`  -> wasExplicit('session', 'list') === true
+ * e.g. `profiler-cli session`       -> false for the `list` command
+ *      `profiler-cli session list`  -> true for the `list` command
  */
-export function wasExplicit(parent: string, subcommand: string): boolean {
-  const args = process.argv;
-  const idx = args.lastIndexOf(parent);
-  return idx !== -1 && args[idx + 1] === subcommand;
+export function wasExplicit(cmd: Command): boolean {
+  // The parent records its operands before dispatching to the subcommand.
+  return cmd.parent?.args[0] === cmd.name();
 }
 
 /**
