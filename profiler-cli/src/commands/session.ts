@@ -36,7 +36,7 @@ export function registerSessionCommand(
   session
     .command('list', { isDefault: true })
     .description('List all running daemon sessions')
-    .action(async () => {
+    .action(async (_opts, cmd: Command) => {
       const sessionIds = listSessions(sessionDir);
       let numCleaned = 0;
       const runningSessionMetadata = [];
@@ -117,7 +117,7 @@ export function registerSessionCommand(
         );
       }
 
-      if (!wasExplicit('session', 'list')) {
+      if (!wasExplicit(cmd)) {
         console.log('\nOther subcommands: profiler-cli session use <id>');
       }
     });

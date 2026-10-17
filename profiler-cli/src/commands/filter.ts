@@ -80,14 +80,14 @@ export function registerFilterCommand(
       .command('list', { isDefault: true })
       .description('List active filters for current thread')
       .option('--thread <handle>', 'Thread handle')
-  ).action(async (opts) => {
+  ).action(async (opts, cmd: Command) => {
     await runCommand(
       sessionDir,
       { command: 'filter', subcommand: 'list', thread: opts.thread },
       opts
     );
 
-    if (!wasExplicit('filter', 'list')) {
+    if (!wasExplicit(cmd)) {
       console.log(
         '\nOther subcommands: profiler-cli filter <push|pop|clear> [options]'
       );
