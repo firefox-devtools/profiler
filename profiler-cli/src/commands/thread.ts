@@ -84,10 +84,9 @@ function parseCallTreeOptions(opts: {
   }
   if (opts.scoring !== undefined) {
     if (!(VALID_SCORING_STRATEGIES as string[]).includes(opts.scoring)) {
-      console.error(
-        `Error: --scoring must be one of: ${VALID_SCORING_STRATEGIES.join(', ')}`
+      throw new Error(
+        `--scoring must be one of: ${VALID_SCORING_STRATEGIES.join(', ')}`
       );
-      process.exit(1);
     }
     result.scoringStrategy = opts.scoring as CallTreeScoringStrategy;
   }
@@ -138,10 +137,9 @@ process lifetimes, counters, and CPU activity over time.`
 
     if (opts.sort !== undefined) {
       if (!(VALID_THREAD_LIST_SORTS as string[]).includes(opts.sort)) {
-        console.error(
-          `Error: --sort must be one of: ${VALID_THREAD_LIST_SORTS.join(', ')}`
+        throw new Error(
+          `--sort must be one of: ${VALID_THREAD_LIST_SORTS.join(', ')}`
         );
-        process.exit(1);
       }
       threadListOptions.sort = opts.sort as ThreadListSort;
     }
@@ -153,7 +151,7 @@ process lifetimes, counters, and CPU activity over time.`
         '--limit',
         opts.limit,
         0,
-        'Error: --limit must be a non-negative integer (0 = show all)'
+        '--limit must be a non-negative integer (0 = show all)'
       );
     }
 
@@ -375,7 +373,7 @@ Examples:
           opts.minDuration,
           0,
           Infinity,
-          'Error: --min-duration must be a positive number (in milliseconds)'
+          '--min-duration must be a positive number (in milliseconds)'
         );
       }
       if (opts.maxDuration !== undefined) {
@@ -384,7 +382,7 @@ Examples:
           opts.maxDuration,
           0,
           Infinity,
-          'Error: --max-duration must be a positive number (in milliseconds)'
+          '--max-duration must be a positive number (in milliseconds)'
         );
       }
       markerFilters.limit = parseLimitArg('--limit', opts.limit);
@@ -439,8 +437,7 @@ Examples:
     }
     if (opts.sort !== undefined) {
       if (opts.sort !== 'start' && opts.sort !== 'duration') {
-        console.error('Error: --sort must be "start" or "duration"');
-        process.exit(1);
+        throw new Error('--sort must be "start" or "duration"');
       }
       networkFilters.sort = opts.sort;
     }
@@ -450,7 +447,7 @@ Examples:
         opts.minDuration,
         0,
         Infinity,
-        'Error: --min-duration must be a positive number (in milliseconds)'
+        '--min-duration must be a positive number (in milliseconds)'
       );
     }
     if (opts.maxDuration !== undefined) {
@@ -459,7 +456,7 @@ Examples:
         opts.maxDuration,
         0,
         Infinity,
-        'Error: --max-duration must be a positive number (in milliseconds)'
+        '--max-duration must be a positive number (in milliseconds)'
       );
     }
     if (opts.limit !== undefined) {
@@ -505,7 +502,7 @@ Examples:
         '--navigation',
         opts.navigation,
         1,
-        'Error: --navigation must be a positive integer (1-based index)'
+        '--navigation must be a positive integer (1-based index)'
       );
     }
     if (opts.jankLimit !== undefined) {
@@ -565,7 +562,7 @@ Examples:
           opts.minSelf,
           0,
           100,
-          'Error: --min-self must be a number between 0 and 100 (percentage)'
+          '--min-self must be a number between 0 and 100 (percentage)'
         );
       }
       functionFilters.limit = parseLimitArg('--limit', opts.limit);

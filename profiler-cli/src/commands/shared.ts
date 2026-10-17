@@ -63,7 +63,7 @@ export async function runCommand(
 }
 
 /**
- * Parse a string as an integer and exit with an error if it is not a valid
+ * Parse a string as an integer and throw an error if it is not a valid
  * integer >= min. Pass a custom `msg` to override the default error message.
  */
 export function parseIntArg(
@@ -74,17 +74,16 @@ export function parseIntArg(
 ): number {
   const v = parseInt(value, 10);
   if (isNaN(v) || v < min) {
-    console.error(
+    throw new Error(
       msg ??
-        `Error: ${flagName} must be a ${min <= 0 ? 'non-negative' : 'positive'} integer`
+        `${flagName} must be a ${min <= 0 ? 'non-negative' : 'positive'} integer`
     );
-    process.exit(1);
   }
   return v;
 }
 
 /**
- * Parse a string as a float in [min, max] and exit with an error on failure.
+ * Parse a string as a float in [min, max] and throw an error on failure.
  */
 export function parseFloatArg(
   flagName: string,
@@ -95,27 +94,25 @@ export function parseFloatArg(
 ): number {
   const v = parseFloat(value);
   if (isNaN(v) || v < min || v > max) {
-    console.error(
+    throw new Error(
       msg ??
-        `Error: ${flagName} must be a number between ${min} and ${max === Infinity ? '∞' : max}`
+        `${flagName} must be a number between ${min} and ${max === Infinity ? '∞' : max}`
     );
-    process.exit(1);
   }
   return v;
 }
 
 /**
- * Parse a strategy name and exit with an error if it is not a valid strategy.
+ * Parse a strategy name and throw an error if it is not a valid strategy.
  */
 export function parseStrategyArg(
   flagName: string,
   value: string
 ): CallTreeSummaryStrategy {
   if (!(CALL_TREE_SUMMARY_STRATEGIES as string[]).includes(value)) {
-    console.error(
-      `Error: ${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
+    throw new Error(
+      `${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
     );
-    process.exit(1);
   }
   return value as CallTreeSummaryStrategy;
 }
