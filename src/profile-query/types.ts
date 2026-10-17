@@ -91,6 +91,11 @@ export type SampleFilterSpec =
   | { type: 'excludes-function'; funcIndexes: number[] }
   | { type: 'merge'; funcIndexes: number[] }
   | { type: 'root-at'; funcIndex: number }
+  | {
+      type: 'focus-self';
+      funcIndex: number;
+      implementation: ImplementationFilter;
+    }
   | { type: 'during-marker'; searchString: string }
   // Phase 2: Extended filter-samples transforms
   | { type: 'includes-function'; funcIndexes: number[] }

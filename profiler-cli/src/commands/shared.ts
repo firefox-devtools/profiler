@@ -243,6 +243,14 @@ export function addSampleFilterOptions(cmd: Command): Command {
     )
     .addOption(
       new Option(
+        '--focus-self <f-N[:js|:cpp]>',
+        'Keep only samples where this function is the leaf, rooted at it. With ":js", the leaf check ignores native frames, so the tree shows the native code that makes up the function\'s JS self time'
+      )
+        .argParser(collectStrings)
+        .default([])
+    )
+    .addOption(
+      new Option(
         '--includes-function <f-N,...>',
         'Keep only samples whose stack contains any of these functions'
       )

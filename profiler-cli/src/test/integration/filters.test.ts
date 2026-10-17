@@ -169,6 +169,22 @@ describe('profiler-cli filters and sample breakdowns', () => {
     );
   });
 
+  it('filter push supports --focus-self with an implementation suffix', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+    await cli(ctx, ['thread', 'select', 't-0']);
+
+    await cli(ctx, ['filter', 'push', '--focus-self', 'f-1:js']);
+
+    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
+    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
+
+    expect(filterList.filters).toHaveLength(1);
+    expect(filterList.filters[0].transforms).toEqual([
+      { type: 'focus-self', funcIndex: 1, implementation: 'js' },
+    ]);
+    expect(filterList.filters[0].description).toBe('focus-self: f-1 (js)');
+  });
+
   it('--implementation applies to one command and is reported', async () => {
     await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
