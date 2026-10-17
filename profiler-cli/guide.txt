@@ -15,6 +15,9 @@ QUICK START
   profiler-cli uses a daemon model: "profiler-cli load" starts a background daemon that
   persists your selected thread, zoom ranges, and filter stacks. Stop it with "profiler-cli stop".
 
+  For manual use, "profiler-cli -i load profile.json.gz" opens a prompt where you type
+  commands without the "profiler-cli" prefix. Exiting the prompt stops the session it loaded.
+
   The rest of this guide covers filtering, zooming, markers, and advanced analysis.
 
 
