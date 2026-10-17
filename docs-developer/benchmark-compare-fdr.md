@@ -217,6 +217,48 @@ For comparison, the alternative the floor problem seemed to demand — escalatin
 `PERMUTATION_COUNT` to ~136000 for the top buckets — is ~70× a full pass _per
 bucket_.
 
+## Comparing with the fastest of several profiles
+
+With three or more profiles loaded, the view can compare one of them, the
+subject, with "the fastest of the others": each row is measured against
+whichever other profile is quickest on that row. The code is in
+[best-of-others.ts](../src/profile-logic/benchmark/best-of-others.ts).
+
+It runs one ordinary pairwise comparison per other profile, with every table
+corrected exactly as above, and then combines the results row by row:
+
+- If someone is faster than the subject, the row shows the largest gap that is
+  significant, or the largest gap if none is.
+- If the subject is faster than everyone, the row shows the gap to the closest
+  competitor, and only counts as significant if the subject is significantly
+  faster than every other profile.
+
+A row with m comparisons behind it has m chances to clear the bar, and a row
+reported via any one of them can be false in that one. So each comparison is
+held to `alpha / m` (Bonferroni across the m comparisons). The row's q is
+written as `m × q` of the comparison shown, or `m ×` the weakest of them for a
+"faster than everyone" row, so `q ≤ 0.05` is still the test. The pairwise
+tables are run with `familyWiseAlpha = 0.05 / m`, so that the MDEs are re-based
+on the stricter bar too.
+
+A bucket that a pairwise table leaves out is one that neither of its two
+profiles spent time in. It takes part in the combination as a comparison of
+zero with zero, not as a missing comparison.
+
+**Checked on a real profile.** One Speedometer 3 profile (20 runs × 10
+iterations) was split by whole runs into three groups of 6 runs. The groups are
+the same build on the same machine, so anything reported is noise. Over 16 such
+splits of two different profiles, across all 21 tables:
+
+| rule                                        | rows reported |
+| ------------------------------------------- | ------------- |
+| fastest of the others, as implemented       | 13            |
+| naive: any pairwise q ≤ 0.05                | 34            |
+| one ordinary pairwise comparison, for scale | 17            |
+
+None of the 13 were "faster than everyone" rows. The `alpha / m` bar keeps the
+false-row rate at or below what a single pairwise comparison already has.
+
 ## What the numbers look like
 
 Measured on the two reference pairs below, `--top` output from the CLI.

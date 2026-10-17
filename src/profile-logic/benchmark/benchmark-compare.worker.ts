@@ -39,8 +39,9 @@ interface WorkerScope {
 }
 const scope = self as unknown as WorkerScope;
 
-/** The bucket matching from the `init` message, kept for every job after it. */
-let keys: MatchedBucketKeys | null = null;
+/** The bucket matching from the `init` message, one per pair, kept for every
+ * job after it. */
+let keys: MatchedBucketKeys[] | null = null;
 
 scope.onmessage = (e: MessageEvent<WorkerInput>) => {
   const message = e.data;
@@ -52,11 +53,16 @@ scope.onmessage = (e: MessageEvent<WorkerInput>) => {
     if (keys === null) {
       throw new Error('A benchmark compare job arrived before the metadata.');
     }
-    const { requestId, iterationCount, shardIndex, shardCount } = message;
+    const { requestId, pairIndex, iterationCount, shardIndex, shardCount } =
+      message;
+    const pairKeys = keys[pairIndex];
+    if (pairKeys === undefined) {
+      throw new Error(`A benchmark compare job named an unknown pair.`);
+    }
     const shard = runToCompletion(
       computeBucketTableShardInSlices(
         {
-          keys,
+          keys: pairKeys,
           baseBuckets: unpackBuckets(message.base, iterationCount),
           newBuckets: unpackBuckets(message.new, iterationCount),
           iterationCount,

@@ -91,10 +91,10 @@ function suiteTotalWeight(suite: SuiteStats): number {
  * all are left out of the map; they have no buckets to contribute.
  *
  * Takes any number of profiles, not just the two being compared. When three are
- * loaded and only two are on screen, all three still have to be normalised by
- * the same factors or their global means are not on one scale -- and the factors
- * must not depend on which pair is selected, or the numbers would shift under
- * the reader every time they changed the selection.
+ * loaded, all three have to be normalised by the same factors or their global
+ * means are not on one scale -- and the factors must not depend on which
+ * comparison is selected, or the numbers would shift under the reader every time
+ * they changed the selection.
  */
 export function computeSharedSuiteFactors(
   ...statsList: ProfileBenchmarkStats[]
@@ -684,13 +684,14 @@ export function compareBucketsOf(
  */
 export function* compareBucketsInSlices(
   input: BucketTableInput,
-  meta: BucketTableMetadata
+  meta: BucketTableMetadata,
+  familyWiseAlpha: number = 0.05
 ): SlicedWork<BucketComparison[]> {
   const shard = yield* computeBucketTableShardInSlices(input, {
     index: 0,
     count: 1,
   });
-  return combineBucketTableShards([shard], meta);
+  return combineBucketTableShards([shard], meta, familyWiseAlpha);
 }
 
 /** One profile's bucket metadata: what a table needs to know about a side
@@ -929,10 +930,15 @@ function resolveBucketTableRows(
  * this can sit on the main thread even when the shards ran in workers. Which is
  * also where `meta` has to be read: it is the one part of a comparison that is
  * never sent anywhere.
+ *
+ * `familyWiseAlpha` is the bar the rows' MDEs are re-based on. It is below 0.05
+ * when this table is one of several comparisons of the same subject; see
+ * best-of-others.ts.
  */
 export function combineBucketTableShards(
   shards: ReadonlyArray<BucketTableShard>,
-  meta: BucketTableMetadata
+  meta: BucketTableMetadata,
+  familyWiseAlpha: number = 0.05
 ): BucketComparison[] {
   let rows: BucketTableRow[] | null = null;
   const families: FamilyPartialCorrection[] = [];
@@ -959,7 +965,7 @@ export function combineBucketTableShards(
   if (uncalibratable) {
     return resolveBucketTableRows(rows, meta);
   }
-  const correction = combineFamilyPartials(families);
+  const correction = combineFamilyPartials(families, familyWiseAlpha);
   if (correction !== null) {
     applyFamilyCorrection(rows, correction);
   }

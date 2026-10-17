@@ -6,17 +6,17 @@
  * What a profile spends, per score row and per bucket, without comparing it to
  * anything.
  *
- * A report is of one pair: every Δ, MDE, q and verdict in it is two-sample, and
- * that stays true however many profiles are loaded. But a third profile still has
- * a column of its own, and the question that motivated loading it — "where is
- * Firefox behind *both* of the others" — is answered by comparing means, not by
- * another round of statistics. Means are what extraction already produces, so
- * this is a few passes over arrays rather than the seconds a comparison costs:
- * the price of a third column is one extraction, not one comparison.
+ * Every loaded profile has a mean column. The two sides of a comparison with a
+ * single comparand can be read off its rows; every other profile's column comes
+ * from here. Against the fastest of the others that is every profile but the
+ * subject, since a row's base side can be any of them. Means are what extraction
+ * already produces, so this is a few passes over arrays rather than the seconds
+ * a comparison costs.
  *
- * What it deliberately does *not* produce is significance. A row that is 2% ahead
- * of a profile this module measured has no q-value against it, because no test
- * was run — the viewer says so above the table, in `benchmarkColumnsNote`.
+ * What it deliberately does *not* produce is significance. With a single
+ * comparand, a row that is 2% ahead of a profile this module measured has no
+ * q-value against it, because no test was run — the viewer says so above the
+ * table, in `benchmarkColumnsNote`.
  */
 
 import {

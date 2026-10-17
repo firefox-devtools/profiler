@@ -79,9 +79,9 @@ export function unpackBuckets(
 }
 
 /**
- * Which of the two profiles' buckets are the same bucket, sent once per worker
- * rather than once per job: it is the same answer for every table, and every table
- * needs all of it.
+ * Which of the two profiles' buckets are the same bucket, for each pair in the
+ * comparison, sent once per worker rather than once per job: it is the same
+ * answer for every table of a pair, and every such table needs all of it.
  *
  * Three `Int32Array`s, which is all that is left of this message now that
  * `matchBucketKeys` resolves the key strings away on the main thread. It used to be
@@ -91,7 +91,8 @@ export function unpackBuckets(
  */
 export type WorkerInit = {
   type: 'init';
-  keys: MatchedBucketKeys;
+  /** One per pair, indexed like `TableRunnerSetup.pairs`. */
+  keys: MatchedBucketKeys[];
 };
 
 /** One shard of one table. `shardCount` is how many of these the pool split this
@@ -99,6 +100,8 @@ export type WorkerInit = {
 export type WorkerJob = {
   type: 'job';
   requestId: number;
+  /** Which entry of the `init` message's `keys` this table's two sides use. */
+  pairIndex: number;
   base: PackedBuckets;
   new: PackedBuckets;
   iterationCount: number;

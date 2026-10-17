@@ -185,6 +185,7 @@ export function createTableWorkerPool(
       const message: WorkerInput = {
         type: 'job',
         requestId: shard.requestId,
+        pairIndex: table.job.pairIndex,
         base: table.packed.base,
         new: table.packed.new,
         iterationCount: table.job.iterationCount,
@@ -219,7 +220,8 @@ export function createTableWorkerPool(
         try {
           const comparisons = combineBucketTableShards(
             table.shards,
-            setup.meta
+            setup.pairs[table.job.pairIndex].meta,
+            table.job.familyWiseAlpha
           );
           settle(table, () => table.resolve(comparisons));
         } catch (err) {
@@ -247,10 +249,13 @@ export function createTableWorkerPool(
       );
     };
     workers.push(entry);
-    // Once per worker rather than once per job: the same answer for every table,
-    // and every table needs all of it. Three Int32Arrays; `setup.meta`, which is
-    // where the strings are, stays here.
-    const init: WorkerInput = { type: 'init', keys: setup.keys };
+    // Once per worker rather than once per job: the same answer for every table
+    // of a pair, and every such table needs all of it. Three Int32Arrays per
+    // pair; the pairs' `meta`, which is where the strings are, stays here.
+    const init: WorkerInput = {
+      type: 'init',
+      keys: setup.pairs.map((pair) => pair.keys),
+    };
     worker.postMessage(init);
   }
 

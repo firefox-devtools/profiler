@@ -61,14 +61,17 @@ function makePair() {
   };
 }
 
-const SOURCES = {
-  baseViewerUrl: 'https://profiler.firefox.com/public/base/',
-  newViewerUrl: 'https://profiler.firefox.com/public/new/',
-  // Only carried through to the snapshots, for the flame graphs that a test
-  // never opens.
-  baseProfile: {} as Profile,
-  newProfile: {} as Profile,
-};
+/** Only carried through to the snapshots, for the flame graphs that a test
+ * never opens. */
+function sourcesFor(count: number) {
+  return {
+    profiles: Array.from({ length: count }, () => ({}) as Profile),
+    viewerUrls: Array.from(
+      { length: count },
+      (_, i) => `https://profiler.firefox.com/public/${i}/`
+    ),
+  };
+}
 
 async function collect(
   options: { signal?: AbortSignal; makeRunner?: TableRunnerFactory } = {}
@@ -76,15 +79,30 @@ async function collect(
   const { baseStats, newStats } = makePair();
   const snapshots = [];
   for await (const progress of compareStatsProgressively(
-    baseStats,
-    newStats,
-    SOURCES,
+    [baseStats, newStats],
+    1,
+    0,
+    sourcesFor(2),
     options.signal ?? new AbortController().signal,
     options.makeRunner
   )) {
     snapshots.push(progress);
   }
   return snapshots;
+}
+
+/** A runner that records every job it is given. */
+function recordingRunner(jobs: BucketTableJob[]): TableRunnerFactory {
+  return (setup) => {
+    const inProcess = createInProcessTableRunner(setup);
+    return {
+      run: (job) => {
+        jobs.push(job);
+        return inProcess.run(job);
+      },
+      dispose: inProcess.dispose,
+    };
+  };
 }
 
 describe('compareStatsProgressively', function () {
@@ -173,18 +191,7 @@ describe('compareStatsProgressively', function () {
 
   it('asks for the global table to be spread over every thread, and no other', async function () {
     const jobs: BucketTableJob[] = [];
-    await collect({
-      makeRunner: (setup) => {
-        const inProcess = createInProcessTableRunner(setup);
-        return {
-          run: (job) => {
-            jobs.push(job);
-            return inProcess.run(job);
-          },
-          dispose: inProcess.dispose,
-        };
-      },
-    });
+    await collect({ makeRunner: recordingRunner(jobs) });
     // The global table is ~1s against ~130ms for a subtest, so it is the whole
     // critical path once the subtests have a thread each.
     expect(jobs.map((job) => [job.label, job.splitAcrossThreads])).toEqual([
@@ -217,9 +224,10 @@ describe('compareStatsProgressively', function () {
     const controller = new AbortController();
     const { baseStats, newStats } = makePair();
     const iterator = compareStatsProgressively(
-      baseStats,
-      newStats,
-      SOURCES,
+      [baseStats, newStats],
+      1,
+      0,
+      sourcesFor(2),
       controller.signal,
       (setup) => {
         const inProcess = createInProcessTableRunner(setup);
@@ -266,9 +274,10 @@ describe('compareStatsProgressively', function () {
     await expect(
       (async () => {
         for await (const progress of compareStatsProgressively(
-          baseStats,
-          newStats,
-          SOURCES,
+          [baseStats, newStats],
+          1,
+          0,
+          sourcesFor(2),
           controller.signal
         )) {
           seen.push(progress);
@@ -277,5 +286,98 @@ describe('compareStatsProgressively', function () {
       })()
     ).rejects.toThrow('the reader moved on');
     expect(seen).toHaveLength(1);
+  });
+
+  describe('against the fastest of the others', function () {
+    /** The pair, plus a third profile that is quicker than the base at Beta and
+     * slower at Alpha, and did not run Gamma either. */
+    function makeThree() {
+      const { baseStats, newStats } = makePair();
+      const bucketNames = ['alphaFunc', 'betaFunc', 'gammaFunc'];
+      const suite = (name: string, bucket: number, scale: number) => ({
+        suiteName: name,
+        buckets: [[bucket, WEIGHTS.map((w) => w * scale)]] as Array<
+          [number, number[]]
+        >,
+      });
+      const thirdStats = makeStats(bucketNames, [
+        suite('Beta', 1, 0.5),
+        suite('Alpha', 0, 3),
+      ]);
+      return [baseStats, newStats, thirdStats];
+    }
+
+    async function collectBest(
+      makeRunner?: TableRunnerFactory
+    ): Promise<ComparisonProgress[]> {
+      const snapshots = [];
+      for await (const progress of compareStatsProgressively(
+        makeThree(),
+        1,
+        'best',
+        sourcesFor(3),
+        new AbortController().signal,
+        makeRunner
+      )) {
+        snapshots.push(progress);
+      }
+      return snapshots;
+    }
+
+    it('compares the subject with every other profile, at a stricter bar', async function () {
+      const jobs: BucketTableJob[] = [];
+      await collectBest(recordingRunner(jobs));
+      expect(
+        jobs.map((job) => [job.label, job.pairIndex, job.familyWiseAlpha])
+      ).toEqual([
+        ['Overall (geomean-normalised)', 0, 0.025],
+        ['Overall (geomean-normalised)', 1, 0.025],
+        ['Alpha', 0, 0.025],
+        ['Alpha', 1, 0.025],
+        ['Beta', 0, 0.025],
+        ['Beta', 1, 0.025],
+      ]);
+    });
+
+    it('shows a row once every comparison behind it is in', async function () {
+      const snapshots = await collectBest();
+      expect(snapshots.map((s) => s.bucketTables.size)).toEqual([0, 1, 2, 3]);
+    });
+
+    it('measures each row against whichever other profile is fastest there', async function () {
+      const snapshots = await collectBest();
+      const last = snapshots[snapshots.length - 1];
+      const comparandOf = (label: string) =>
+        last.scores.suiteScores.find((row) => row.label === label)?.comparand;
+      expect(comparandOf('Alpha')).toBe(0);
+      expect(comparandOf('Beta')).toBe(2);
+      // The subject did not run Gamma, so there is nothing to say about it.
+      expect(comparandOf('Gamma')).toBeUndefined();
+      expect(last.bucketTables.get('Beta')?.[0].comparand).toBe(2);
+      // Every other profile can be a row's base side, so every one of them has
+      // its means measured.
+      expect([...last.otherMeans.keys()]).toEqual([0, 2]);
+    });
+
+    it('keeps a single comparand when one is named', async function () {
+      const snapshots = [];
+      for await (const progress of compareStatsProgressively(
+        makeThree(),
+        1,
+        2,
+        sourcesFor(3),
+        new AbortController().signal
+      )) {
+        snapshots.push(progress);
+      }
+      const last = snapshots[snapshots.length - 1];
+      expect(
+        last.scores.suiteScores.map((row) => [row.label, row.comparand])
+      ).toEqual([
+        ['Alpha', 2],
+        ['Beta', 2],
+      ]);
+      expect([...last.otherMeans.keys()]).toEqual([0]);
+    });
   });
 });

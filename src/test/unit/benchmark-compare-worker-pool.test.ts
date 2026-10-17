@@ -195,6 +195,8 @@ function makeJob(
 ): BucketTableJob {
   return {
     label,
+    pairIndex: 0,
+    familyWiseAlpha: 0.05,
     baseBuckets: buckets.baseBuckets,
     newBuckets: buckets.newBuckets,
     iterationCount: FIXTURE.iterationCount,
@@ -205,8 +207,7 @@ function makeJob(
 function makePool(workerCount: number, jobCount: number = 1) {
   const controller = new AbortController();
   const setup: TableRunnerSetup = {
-    keys: FIXTURE.keys,
-    meta: FIXTURE.meta,
+    pairs: [{ keys: FIXTURE.keys, meta: FIXTURE.meta }],
     jobCount,
     signal: controller.signal,
   };
@@ -243,6 +244,7 @@ describe('the benchmark compare worker', function () {
         data: {
           type: 'job',
           requestId: 7,
+          pairIndex: 0,
           base: empty,
           new: empty,
           iterationCount: 4,
@@ -275,7 +277,7 @@ describe('createTableWorkerPool', function () {
       // The same answer for every table, and every table needs all of it: once
       // each, not once per table.
       expect(worker.inits).toHaveLength(1);
-      expect(worker.inits[0].keys).toBe(FIXTURE.keys);
+      expect(worker.inits[0].keys).toEqual([FIXTURE.keys]);
       expect(worker.pending).toHaveLength(0);
     }
   });

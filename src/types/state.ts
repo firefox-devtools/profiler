@@ -417,11 +417,10 @@ export type BenchmarkBucketFilterMode = 'movers' | 'significant' | 'none';
  * saying faster or slower about it costs one more control and answers the
  * question as asked.
  *
- * The profile slot is the *subject* of that sentence and is deliberately not
- * called the reference: `base` is the reference, meaning the side every Δ in the
- * table is measured against, and picking a subject here does not touch a single
- * number. The two would collide the moment a third profile makes the reference a
- * control of its own.
+ * The profile slot is the *subject* of that sentence, and the subject is also
+ * what the whole report is about: every row is the subject measured against the
+ * comparand. So picking a subject recomputes the report, and with two profiles
+ * it swaps the two sides.
  */
 export type BenchmarkBucketShow = 'all' | 'faster' | 'slower';
 
@@ -430,12 +429,13 @@ export type BenchmarkBucketShow = 'all' | 'faster' | 'slower';
  * the loaded list, or whichever of the others is quickest on the row in hand.
  *
  * The aggregate is the point of loading a third profile. "Firefox is slower than
- * Chrome" is a question about Chrome; "Firefox is slower than the best of the
+ * Chrome" is a question about Chrome; "Firefox is slower than the fastest of the
  * others" is the question a browser engineer actually has, because its answer
  * comes with an existence proof -- somebody does this faster, so it can be done
  * faster. It is also why the comparand is a slot rather than the options being
- * written out one per phrasing: "the best of the others" is not an ordered pair,
- * so there is no ready-made sentence for it.
+ * written out one per phrasing: "the fastest of the others" is not an ordered
+ * pair, so there is no ready-made sentence for it. How such a row is computed
+ * is in best-of-others.ts.
  *
  * With two profiles loaded, 'best' *is* the other profile, so the slot has one
  * distinct value and is not shown.
@@ -443,12 +443,12 @@ export type BenchmarkBucketShow = 'all' | 'faster' | 'slower';
 export type BenchmarkBucketComparand = number | 'best';
 
 /**
- * The benchmark comparison's bucket filter, as the URL carries it.
+ * What the benchmark comparison compares, and which of its buckets it lists, as
+ * the URL carries it.
  *
  * Profiles are referred to by their position in `profilesToCompare`. A null
- * `subject` means the new side of whichever pair is being compared, which is
- * where the filter starts out: the pair is not in the URL, so a fixed index
- * would not follow it.
+ * `subject` means the second profile, which is the new side when two profiles
+ * are a before and an after.
  */
 export type BenchmarkBucketFilter = {
   readonly mode: BenchmarkBucketFilterMode;

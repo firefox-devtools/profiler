@@ -186,7 +186,7 @@
 /* Which two of three-or-more loaded profiles this report is of. Sits directly
  * under the list of them, at the same weight, because it is a caption on that
  * list rather than a separate control. */
-.benchmarkComparingPair {
+.benchmarkComparison {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -195,7 +195,7 @@
   gap: 0.35em;
 }
 
-.benchmarkComparingPair__select {
+.benchmarkComparison__select {
   max-width: 14em;
   cursor: pointer;
   font: inherit;
@@ -363,6 +363,14 @@
 .benchmarkCell--number {
   font-variant-numeric: tabular-nums;
   text-align: right;
+}
+
+/* Against the fastest of the others, the mean the row's Δ is measured against.
+ * An underline rather than a colour, because colour already means confidence in
+ * the Δ% cells next to it. */
+.benchmarkCell--comparand {
+  text-decoration: underline dotted;
+  text-underline-offset: 0.2em;
 }
 
 .benchmarkCell--colFixed {
