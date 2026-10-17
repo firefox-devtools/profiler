@@ -970,6 +970,60 @@ describe('ProfileQuerier', function () {
       expect(combined.implementation).toBe('combined');
       expect(collectTreeNames(combined.regularCallTree)).toContain('Y');
     });
+
+    it('focus-self with the JS implementation shows the native code of the JS self time', async function () {
+      const { querier, funcNames } = querierWithJsAndNative();
+
+      const result = await querier.threadSamplesTopDown(
+        undefined,
+        undefined,
+        false,
+        undefined,
+        [
+          {
+            type: 'focus-self',
+            funcIndex: funcNames['X.js'],
+            implementation: 'js',
+          },
+        ]
+      );
+
+      const root = result.regularCallTree;
+      const rootNames = (root.children ?? []).map((child) => child.name);
+      expect(rootNames).toEqual(['X.js']);
+      const xChildren = root.children![0].children ?? [];
+      expect(xChildren.map((child) => child.name).sort()).toEqual([
+        'W',
+        'Y',
+        'Z',
+      ]);
+      expect(collectTreeNames(root)).not.toContain('A.js');
+    });
+
+    it('carries the implementation and focus-self into permalinks', async function () {
+      const { store, querier, funcNames } = querierWithJsAndNative();
+      store.dispatch(profilePublished('abc123', 'my profile', null));
+
+      const result = await querier.permalink({
+        tab: 'calltree',
+        implementation: 'js',
+        sampleFilters: [
+          {
+            type: 'focus-self',
+            funcIndex: funcNames['X.js'],
+            implementation: 'js',
+          },
+        ],
+      });
+      const url = new URL(result.url);
+      expect(url.searchParams.get('implementation')).toBe('js');
+      expect(url.searchParams.get('transforms')).toBe(
+        `ffs-js-${funcNames['X.js']}`
+      );
+
+      const plain = new URL((await querier.permalink()).url);
+      expect(plain.searchParams.has('implementation')).toBe(false);
+    });
   });
 
   describe('permalink', function () {
