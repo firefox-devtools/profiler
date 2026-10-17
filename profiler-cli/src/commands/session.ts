@@ -128,10 +128,7 @@ export function registerSessionCommand(
     .action(async (sessionId: string) => {
       const metadata = await validateSession(sessionDir, sessionId);
       if (metadata === null) {
-        console.error(
-          `Error: ${await explainUnreachableSession(sessionDir, sessionId)}`
-        );
-        process.exit(1);
+        throw new Error(await explainUnreachableSession(sessionDir, sessionId));
       }
       setCurrentSession(sessionDir, sessionId);
       console.log(`Switched to session ${sessionId}`);

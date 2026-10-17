@@ -66,7 +66,7 @@ export function registerFilterCommand(
       'count',
       String(raw),
       1,
-      'Error: count must be a positive integer'
+      'count must be a positive integer'
     );
     await runCommand(
       sessionDir,
