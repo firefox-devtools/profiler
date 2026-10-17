@@ -69,6 +69,12 @@ const dumpBucketSubtreeConfig = {
   outfile: 'node-tools-dist/dump-bucket-subtree.js',
 };
 
+const bucketNativeTreeConfig = {
+  ...nodeBaseConfig,
+  entryPoints: ['src/node-tools/bucket-native-tree.ts'],
+  outfile: 'node-tools-dist/bucket-native-tree.js',
+};
+
 async function build() {
   await esbuild.build(profilerEditConfig);
   console.log('✅ profiler-edit build completed');
@@ -80,6 +86,8 @@ async function build() {
   console.log('✅ compare-benchmark-stats build completed');
   await esbuild.build(dumpBucketSubtreeConfig);
   console.log('✅ dump-bucket-subtree build completed');
+  await esbuild.build(bucketNativeTreeConfig);
+  console.log('✅ bucket-native-tree build completed');
 }
 
 build().catch(console.error);
