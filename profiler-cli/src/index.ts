@@ -121,9 +121,9 @@ Examples:
 
   // Unknown commands
   program.on('command:*', (operands: string[]) => {
-    console.error(`Error: Unknown command '${operands[0]}'\n`);
-    program.outputHelp();
-    process.exit(1);
+    throw new Error(
+      `Unknown command '${operands[0]}'. Run "profiler-cli --help" for a list of commands.`
+    );
   });
 
   // profiler-cli load <path>
