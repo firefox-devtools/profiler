@@ -78,6 +78,7 @@ class ProfileLoaderImpl extends PureComponent<Props> {
       case 'from-post-message':
       case 'uploaded-recordings':
       case 'unpublished':
+      case 'compare-benchmark':
       case 'none':
         // nothing to do
         /* istanbul ignore next */

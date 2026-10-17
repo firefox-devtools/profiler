@@ -24,7 +24,12 @@ import {
   changeSelectedMarker,
   changeMarkerTableSort,
 } from '../actions/profile-view';
-import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
+import {
+  changeSelectedTab,
+  changeProfilesToCompare,
+  changeProfilesToCompareBenchmark,
+  changeBenchmarkBucketFilter,
+} from '../actions/app';
 import {
   stateFromLocation,
   getQueryStringFromUrlState,
@@ -1756,6 +1761,71 @@ describe('compare', function () {
       urlStateSelectors.getUrlState(store.getState())
     );
     expect(newResultingUrl).toMatch('/flame-graph/');
+  });
+});
+
+describe('compare-benchmark', function () {
+  const url1 = 'http://fake-url.com/hash/1';
+  const url2 = 'http://fake-url.com/hash/2';
+  const url3 = 'http://fake-url.com/hash/3';
+
+  function getStoreWithProfiles() {
+    const store = _getStoreWithURL(
+      { pathname: '/compare-benchmark/' },
+      /* no profile */ null
+    );
+    store.dispatch(
+      changeProfilesToCompareBenchmark(
+        [url1, url2, url3],
+        ['Chrome', 'Firefox', 'Safari']
+      )
+    );
+    return store;
+  }
+
+  it('leaves an unfiltered comparison out of the URL', function () {
+    const store = getStoreWithProfiles();
+    const url = urlFromState(urlStateSelectors.getUrlState(store.getState()));
+    expect(url).not.toMatch('show=');
+    expect(url).not.toMatch('buckets=');
+    expect(url).not.toMatch('subject=');
+    expect(url).not.toMatch('than=');
+  });
+
+  it('round-trips the bucket filter through the URL', function () {
+    const store = getStoreWithProfiles();
+    const filter = {
+      mode: 'significant',
+      subject: 1,
+      comparand: 2,
+      show: 'faster',
+    } as const;
+    store.dispatch(changeBenchmarkBucketFilter(filter));
+    const url = urlFromState(urlStateSelectors.getUrlState(store.getState()));
+    expect(url).toMatch('show=faster');
+
+    const newUrlState = stateFromLocation(
+      new URL(url, 'https://profiler.firefox.com')
+    );
+    expect(newUrlState.benchmarkBucketFilter).toEqual(filter);
+  });
+
+  it('falls back to the defaults for values it does not recognise', function () {
+    const store = _getStoreWithURL(
+      {
+        pathname: '/compare-benchmark/',
+        search: '?show=sideways&buckets=all&subject=-1&than=best',
+      },
+      /* no profile */ null
+    );
+    expect(
+      urlStateSelectors.getBenchmarkBucketFilter(store.getState())
+    ).toEqual({
+      mode: 'movers',
+      subject: null,
+      comparand: 'best',
+      show: 'all',
+    });
   });
 });
 
