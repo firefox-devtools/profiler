@@ -7,7 +7,7 @@ import type {
   IndexIntoFrameTable,
   IndexIntoSourceTable,
 } from 'firefox-profiler/types';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from './store';
 import type { SourceMapSymbolicationInput } from './symbolication';
 
 /**
@@ -15,7 +15,7 @@ import type { SourceMapSymbolicationInput } from './symbolication';
  * All values are structured-cloned (copied) across the thread boundary.
  */
 export type WorkerInput = SourceMapSymbolicationInput & {
-  resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>;
+  resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap>;
   // Compiled source texts keyed by bundle source index.
   compiledSources: Map<IndexIntoSourceTable, string>;
 };
