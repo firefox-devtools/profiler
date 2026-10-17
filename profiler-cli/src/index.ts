@@ -83,6 +83,18 @@ async function main(): Promise<void> {
     return;
   }
 
+  try {
+    await createProgram().parseAsync(process.argv);
+  } catch (error) {
+    console.error(`Error: ${error instanceof Error ? error.message : error}`);
+    process.exit(1);
+  }
+}
+
+/**
+ * Build the commander program with all commands registered.
+ */
+function createProgram(): Command {
   const program = addSessionOption(new Command());
   program.hook('preAction', (rootCommand, actionCommand) => {
     if (actionCommand.opts().session === undefined) {
@@ -243,12 +255,7 @@ Examples:
   registerSourcemapCommand(program, SESSION_DIR);
   registerSessionCommand(program, SESSION_DIR);
 
-  try {
-    await program.parseAsync(process.argv);
-  } catch (error) {
-    console.error(`Error: ${error instanceof Error ? error.message : error}`);
-    process.exit(1);
-  }
+  return program;
 }
 
 main().catch((error) => {
