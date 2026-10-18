@@ -27,7 +27,6 @@ import type {
   SourceTable,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
-  IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoSourceTable,
   IndexIntoStringTable,
@@ -45,6 +44,7 @@ import type {
 } from './symbol-store';
 import { PathSet } from '../utils/path';
 import { StringTable } from '../utils/string-table';
+import { ResourceTableBuilder } from './resource-table-builder';
 import { updateRawThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
@@ -218,9 +218,9 @@ export type SymbolicationStepCallback = (
 ) => void;
 
 type ProfileLibSymbolicationInfo = {
-  // The resource to give to funcs which are newly created for this lib, or -1
-  // if this lib's frames have no resource. Multiple libs can share a resource.
-  resourceIndex: IndexIntoResourceTable | -1;
+  // The name of this lib. Native funcs which are newly created for this lib get
+  // the library resource with this name. Multiple libs can share a resource.
+  libName: string;
   // The libIndex for this lib in this thread.
   libIndex: IndexIntoLibs;
   // The set of funcs for this lib in this thread.
@@ -251,6 +251,7 @@ type SymbolicationTables = {
   frameTable: RawFrameTableBuilder;
   funcTable: RawFuncTableBuilder;
   nativeSymbols: RawNativeSymbolTableBuilder;
+  resources: ResourceTableBuilder;
   sources: SourceTable;
   // Maps a filename string index to the index of the native (id === null)
   // source entry for that filename, so that we don't have to scan the sources
@@ -342,9 +343,8 @@ function getSymbolicationInfo(
   }
 
   // Pass over the funcs: assign each func to the library that gets to recycle
-  // it, and remember one resource per library for the funcs we create later.
+  // it.
   const funcsByLib = new Map<IndexIntoLibs, Set<IndexIntoFuncTable>>();
-  const resourceForLib = new Map<IndexIntoLibs, IndexIntoResourceTable>();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     const libIndex = libForFunc[funcIndex];
     if (libIndex < 0) {
@@ -356,12 +356,6 @@ function getSymbolicationInfo(
       funcsByLib.set(libIndex, funcs);
     }
     funcs.add(funcIndex);
-    if (
-      !resourceForLib.has(libIndex) &&
-      (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0
-    ) {
-      resourceForLib.set(libIndex, funcTable.resource[funcIndex]);
-    }
   }
 
   // Pass over the native symbols: group them by library.
@@ -393,7 +387,7 @@ function getSymbolicationInfo(
     const libKey = `${lib.debugName}/${lib.breakpadId}`;
     map.set(libKey, {
       libIndex,
-      resourceIndex: resourceForLib.get(libIndex) ?? -1,
+      libName: lib.name,
       allFuncsForThisLib: funcsByLib.get(libIndex) ?? new Set(),
       allNativeSymbolsForThisLib: nativeSymbolsByLib.get(libIndex) ?? new Set(),
       allFramesForThisLib: frames,
@@ -580,11 +574,16 @@ export function applySymbolicationSteps(
       sourceIndexForNativeFilename.set(sources.filename[i], i);
     }
   }
+  const resources = new ResourceTableBuilder(
+    stringTable,
+    oldShared.resourceTable
+  );
   const tables: SymbolicationTables = {
     oldFuncTable: oldShared.funcTable,
     frameTable,
     funcTable,
     nativeSymbols,
+    resources,
     sources,
     sourceIndexForNativeFilename,
     stringTable,
@@ -606,6 +605,7 @@ export function applySymbolicationSteps(
     funcTable: finishRawFuncTableBuilder(funcTable),
     nativeSymbols: finishRawNativeSymbolTableBuilder(nativeSymbols),
     sources,
+    resourceTable: resources.finish(),
   };
 
   const newStackInfo = _computeStackTableWithAddedExpansionStacks(
@@ -680,18 +680,22 @@ function _partiallyApplySymbolicationStep(
     frameTable,
     funcTable,
     nativeSymbols,
+    resources,
     sources,
     sourceIndexForNativeFilename,
     stringTable,
   } = tables;
   const { libSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
   const {
-    resourceIndex,
+    libName,
     allFramesForThisLib,
     allFuncsForThisLib,
     allNativeSymbolsForThisLib,
     libIndex,
   } = libSymbolicationInfo;
+  const libResourceIndex = resources.indexForLibResourceByName(
+    stringTable.indexForString(libName)
+  );
 
   const availableFuncs: Set<IndexIntoFuncTable> = new Set(allFuncsForThisLib);
   const availableNativeSymbols: Set<IndexIntoFuncTable> = new Set(
@@ -953,7 +957,7 @@ function _partiallyApplySymbolicationStep(
         }
         funcTable.flags[funcIndex] = funcFlags;
         funcTable.name[funcIndex] = functionStringIndex;
-        funcTable.resource[funcIndex] = resourceIndex;
+        funcTable.resource[funcIndex] = libResourceIndex;
         funcTable.lineNumber[funcIndex] = funcStartLine ?? 0;
         funcTable.columnNumber[funcIndex] = funcStartColumn ?? 0;
         funcTable.originalLocation[funcIndex] = 0;
