@@ -10,7 +10,11 @@ import {
   formatJsCode,
   formatJsCodeIncrementally,
 } from '../../profile-logic/js-format/formatter';
-import { applyFormatEdits } from '../../profile-logic/js-format/formatted-source';
+import {
+  applyFormatEdits,
+  createSourceViewFormatting,
+} from '../../profile-logic/js-format/formatted-source';
+import { getFormatDialectForPath } from '../../profile-logic/js-format/dialect';
 import { parserForDialect } from '../../profile-logic/source-maps/scope-tree';
 import type { JsDialect } from '../../profile-logic/js-format/dialect';
 
@@ -263,5 +267,33 @@ describe('applyFormatEdits', function () {
     const formatted = applyFormatEdits(code, edits.slice(0, 3));
     expect(formatted.lines).toEqual(['a();', 'b();c();d()']);
     expect(formatted.getFormattedLine(1, 12)).toBe(2);
+  });
+});
+
+describe('createSourceViewFormatting', function () {
+  it('accepts positions that are relative to the start of the file', function () {
+    // An inline script which starts at line 10, column 9 of the HTML page.
+    const code = 'a();b();\nc()';
+    const formatting = createSourceViewFormatting(
+      code,
+      { edits: formatJsCode(code, ''), isDone: true },
+      10,
+      9
+    );
+    expect(formatting.lines).toEqual(['a();', 'b();', 'c()']);
+    expect(formatting.mapPositionToLine(10, 9)).toBe(1);
+    expect(formatting.mapPositionToLine(10, 13)).toBe(2);
+    expect(formatting.mapPositionToLine(11, 1)).toBe(3);
+  });
+});
+
+describe('getFormatDialectForPath', function () {
+  it('returns the dialect for JS files, and null for other files', function () {
+    expect(getFormatDialectForPath('https://example.com/bundle.js')).toBe('');
+    expect(getFormatDialectForPath('https://example.com/')).toBe('');
+    expect(getFormatDialectForPath('src/app.tsx')).toBe('ts jsx');
+    expect(getFormatDialectForPath('src/main.cpp')).toBeNull();
+    expect(getFormatDialectForPath('src/lib.rs')).toBeNull();
+    expect(getFormatDialectForPath('iongraph.json')).toBeNull();
   });
 });

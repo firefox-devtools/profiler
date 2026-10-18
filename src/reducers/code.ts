@@ -8,6 +8,7 @@ import type {
   AssemblyCodeStatus,
   CodeState,
   IndexIntoSourceTable,
+  SourceFormattingStatus,
 } from 'firefox-profiler/types';
 import { combineReducers } from 'redux';
 
@@ -107,9 +108,59 @@ const assemblyCodeCache: Reducer<Map<string, AssemblyCodeStatus>> = (
   }
 };
 
+const sourceFormattingCache: Reducer<
+  Map<IndexIntoSourceTable, SourceFormattingStatus>
+> = (state = new Map(), action) => {
+  switch (action.type) {
+    case 'SOURCE_FORMATTING_BEGIN': {
+      const newState = new Map(state);
+      newState.set(action.sourceIndex, {
+        edits: new Int32Array(0),
+        isDone: false,
+      });
+      return newState;
+    }
+    case 'SOURCE_FORMATTING_PROGRESS': {
+      const { sourceIndex, edits, isDone } = action;
+      const oldStatus = state.get(sourceIndex);
+      if (oldStatus === undefined) {
+        return state;
+      }
+      // Append the new edits to the edits of the earlier steps.
+      const oldEdits = oldStatus.edits;
+      let newEdits = edits;
+      if (oldEdits.length !== 0) {
+        newEdits = new Int32Array(oldEdits.length + edits.length);
+        newEdits.set(oldEdits);
+        newEdits.set(edits, oldEdits.length);
+      }
+      const newState = new Map(state);
+      newState.set(sourceIndex, { edits: newEdits, isDone });
+      return newState;
+    }
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      if (!action.translationMaps) {
+        return state;
+      }
+      const { oldSourceToNewSourcePlusOne } = action.translationMaps;
+      const newState = new Map();
+      for (const [sourceIndex, status] of state) {
+        const newSourceIndexPlusOne = oldSourceToNewSourcePlusOne[sourceIndex];
+        if (newSourceIndexPlusOne !== 0) {
+          newState.set(newSourceIndexPlusOne - 1, status);
+        }
+      }
+      return newState;
+    }
+    default:
+      return state;
+  }
+};
+
 const code: Reducer<CodeState> = combineReducers({
   sourceCodeCache,
   assemblyCodeCache,
+  sourceFormattingCache,
 });
 
 export default code;

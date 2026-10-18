@@ -649,6 +649,7 @@ export type ProfileWithDicts = {
  *  - [lib:*] - The library name, affects frameTable.lib + funcTable.resource + resourceTable + libs
  *  - [file:*] - The filename, affects funcTable.source + sourceTable
  *  - [line:*] - The line, affects frameTable.line
+ *  - [col:*] - The column, affects frameTable.column
  *  - [address:*] - The frame address, affects frameTable.address
  *  - [inl:*] - A non-zero value marks the frame as inlined, i.e. it sets the IsInlined bit of frameTable.flags
  *  - [sym:<name>:<hex_address>:<hex_size>] - The native symbol, affects frameTable.nativeSymbol (keyed on <name>)
@@ -901,6 +902,17 @@ function _findLineNumberFromFuncName(
   return null;
 }
 
+function _findColumnNumberFromFuncName(
+  funcNameWithModifier: string
+): number | null {
+  const findColumnNumberResult = /\[col:([0-9]+)\]/.exec(funcNameWithModifier);
+  if (findColumnNumberResult) {
+    return +findColumnNumberResult[1];
+  }
+
+  return null;
+}
+
 function _findAddressFromFuncName(
   funcNameWithModifier: string
 ): Address | null {
@@ -1005,6 +1017,7 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
       const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
+      const columnNumber = _findColumnNumberFromFuncName(funcNameWithModifier);
       const parsedAddress =
         _findAddressFromFuncName(funcNameWithModifier) ??
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
@@ -1053,6 +1066,9 @@ function _buildThreadFromTextOnlyStacks(
       if (lineNumber !== null) {
         flags |= FrameFlag.HasLine;
       }
+      if (columnNumber !== null) {
+        flags |= FrameFlag.HasColumn;
+      }
       const address = parsedAddress === -1 ? 0 : parsedAddress;
       // `lib` is gated by HasAddress, so a [lib:] without an address doesn't
       // make it onto the frame. This matches the real pipeline, which only ever
@@ -1063,6 +1079,7 @@ function _buildThreadFromTextOnlyStacks(
       const storedCategory = category ?? 0;
       const storedNativeSymbol = nativeSymbol ?? 0;
       const storedLineNumber = lineNumber ?? 0;
+      const storedColumnNumber = columnNumber ?? 0;
 
       // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
@@ -1073,6 +1090,7 @@ function _buildThreadFromTextOnlyStacks(
           flags === frameTable.flags[i] &&
           storedCategory === frameTable.category[i] &&
           storedLineNumber === frameTable.line[i] &&
+          storedColumnNumber === frameTable.column[i] &&
           address === frameTable.address[i] &&
           storedNativeSymbol === frameTable.nativeSymbol[i] &&
           storedLib === frameTable.lib[i]
@@ -1092,7 +1110,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.innerWindowID.push(0);
         frameTable.nativeSymbol.push(storedNativeSymbol);
         frameTable.line.push(storedLineNumber);
-        frameTable.column.push(0);
+        frameTable.column.push(storedColumnNumber);
         frameTable.originalLocation.push(0);
         frameIndex = frameTable.length++;
       }

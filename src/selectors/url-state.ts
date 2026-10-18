@@ -82,6 +82,14 @@ export const getSourceViewScrollToLineNumber: Selector<number | undefined> = (
 ) => getProfileSpecificState(state).sourceView.scrollToLineNumber;
 export const getSourceViewHighlightedLine: Selector<number | null> = (state) =>
   getProfileSpecificState(state).sourceView.highlightedLine;
+export const getSourceViewScrollToColumnNumber: Selector<number | undefined> = (
+  state
+) => getProfileSpecificState(state).sourceView.scrollToColumnNumber;
+export const getSourceViewHighlightedColumn: Selector<number | null> = (
+  state
+) => getProfileSpecificState(state).sourceView.highlightedColumn;
+export const getSourceViewIsPrettyPrinted: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).sourceView.isPrettyPrinted;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (
