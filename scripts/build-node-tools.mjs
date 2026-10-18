@@ -75,6 +75,12 @@ const bucketNativeTreeConfig = {
   outfile: 'node-tools-dist/bucket-native-tree.js',
 };
 
+const extractFunctionSourceConfig = {
+  ...nodeBaseConfig,
+  entryPoints: ['src/node-tools/extract-function-source.ts'],
+  outfile: 'node-tools-dist/extract-function-source.js',
+};
+
 async function build() {
   await esbuild.build(profilerEditConfig);
   console.log('✅ profiler-edit build completed');
@@ -88,6 +94,8 @@ async function build() {
   console.log('✅ dump-bucket-subtree build completed');
   await esbuild.build(bucketNativeTreeConfig);
   console.log('✅ bucket-native-tree build completed');
+  await esbuild.build(extractFunctionSourceConfig);
+  console.log('✅ extract-function-source build completed');
 }
 
 build().catch(console.error);
