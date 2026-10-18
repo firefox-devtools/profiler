@@ -55,6 +55,13 @@ CORE WORKFLOW
     Use --strategy to summarize allocated bytes instead of CPU time on profiles with
     allocation tracking. See DATA SOURCES below.
 
+    Use --implementation js to keep only JS frames (plus the few native frames
+    marked as relevant for JS). Native frames are merged into their JS callers,
+    so a JS function's self time includes the native code it called. This is
+    the profiler's "JavaScript" call tree. --implementation cpp keeps native
+    frames only. The default is combined (all frames).
+      profiler-cli thread samples-bottom-up --implementation js   JS self time
+
     Use --search to focus the call tree on paths containing a specific function:
     profiler-cli thread samples-top-down --search GC
     profiler-cli thread samples-bottom-up --search "JS::Compile"

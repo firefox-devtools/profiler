@@ -70,6 +70,7 @@ function makeSamplesResult(
     friendlyThreadName: 'Test Thread',
     categoryBreakdown,
     callTreeSummaryStrategy: 'timing',
+    implementation: 'combined',
     weightType: 'samples',
     topFunctionsByTotal: [
       {

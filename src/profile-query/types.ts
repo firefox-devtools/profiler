@@ -12,6 +12,7 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   Transform,
   CallTreeSummaryStrategy,
+  ImplementationFilter,
   CounterGraphType,
   CounterTooltipDataSource,
   NetworkStatus,
@@ -19,7 +20,7 @@ import type {
   WeightType,
 } from 'firefox-profiler/types';
 
-export type { CallTreeSummaryStrategy, WeightType };
+export type { CallTreeSummaryStrategy, ImplementationFilter, WeightType };
 
 // ===== Utility types =====
 
@@ -196,6 +197,7 @@ export type PermalinkView = {
   includeIdle?: boolean;
   invertCallstack?: boolean;
   strategy?: CallTreeSummaryStrategy;
+  implementation?: ImplementationFilter;
   sampleFilters?: SampleFilterSpec[];
 };
 
@@ -501,6 +503,8 @@ export type ThreadSamplesResult = {
   ephemeralFilters?: SampleFilterSpec[];
   categoryBreakdown: CategoryBreakdown;
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  /** Which frames the call tree keeps: all, JS only, or native only. */
+  implementation: ImplementationFilter;
   weightType: WeightType;
   topFunctionsByTotal: TopFunctionInfo[];
   topFunctionsBySelf: TopFunctionInfo[];
@@ -537,6 +541,8 @@ export type ThreadSamplesTopDownResult = {
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  /** Which frames the call tree keeps: all, JS only, or native only. */
+  implementation: ImplementationFilter;
   weightType: WeightType;
   regularCallTree: CallTreeNode;
 };
@@ -550,6 +556,8 @@ export type ThreadSamplesBottomUpResult = {
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  /** Which frames the call tree keeps: all, JS only, or native only. */
+  implementation: ImplementationFilter;
   weightType: WeightType;
   invertedCallTree: CallTreeNode | null;
 };
@@ -865,6 +873,8 @@ export type ThreadFunctionsResult = {
   activeFilters?: FilterEntry[];
   ephemeralFilters?: SampleFilterSpec[];
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  /** Which frames the call tree keeps: all, JS only, or native only. */
+  implementation: ImplementationFilter;
   weightType: WeightType;
   totalFunctionCount: number;
   filteredFunctionCount: number;
