@@ -8,6 +8,7 @@ import explicitConnect from 'firefox-profiler/utils/connect';
 import { ResizableWithSplitter } from 'firefox-profiler/components/shared/ResizableWithSplitter';
 import { DetailsContainer } from './DetailsContainer';
 import { SourceCodeFetcher } from './SourceCodeFetcher';
+import { SourceFormatter } from './SourceFormatter';
 import { AssemblyCodeFetcher } from './AssemblyCodeFetcher';
 import { BottomBox } from './BottomBox';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
@@ -140,6 +141,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <DebugWarning />
           <CurrentProfileUploadedInformationLoader />
           <SourceCodeFetcher />
+          <SourceFormatter />
           <AssemblyCodeFetcher />
         </div>
       </KeyboardShortcut>

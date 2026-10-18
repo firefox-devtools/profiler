@@ -10,6 +10,7 @@ import { AssemblyView } from '../shared/AssemblyView';
 import { FullscreenToggleButton } from './FullscreenToggleButton';
 import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { PrettyPrintToggleButton } from './PrettyPrintToggleButton';
 import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
@@ -18,6 +19,9 @@ import {
   getSourceViewScrollGeneration,
   getSourceViewScrollToLineNumber,
   getSourceViewHighlightedLine,
+  getSourceViewScrollToColumnNumber,
+  getSourceViewHighlightedColumn,
+  getSourceViewIsPrettyPrinted,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -28,13 +32,17 @@ import {
 import {
   closeBottomBox,
   toggleBottomBoxFullscreen,
+  setSourceViewPrettyPrint,
 } from 'firefox-profiler/actions/profile-view';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
   getAssemblyViewCode,
+  getSourceViewFormatDialect,
+  getSourceViewFormatting,
 } from 'firefox-profiler/selectors/code';
+import type { SourceViewFormatting } from 'firefox-profiler/profile-logic/js-format/formatted-source';
 import {
   getSourceViewFile,
   getSourceViewStartLine,
@@ -64,7 +72,12 @@ type StateProps = {
   readonly sourceViewScrollGeneration: number;
   readonly sourceViewScrollToLineNumber?: number;
   readonly sourceViewHighlightedLine: number | null;
+  readonly sourceViewScrollToColumnNumber?: number;
+  readonly sourceViewHighlightedColumn: number | null;
   readonly sourceViewStartLine: number;
+  readonly sourceViewCanPrettyPrint: boolean;
+  readonly sourceViewIsPrettyPrinted: boolean;
+  readonly sourceViewFormatting: SourceViewFormatting | null;
   readonly globalLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
@@ -78,9 +91,53 @@ type StateProps = {
 type DispatchProps = {
   readonly closeBottomBox: typeof closeBottomBox;
   readonly toggleBottomBoxFullscreen: typeof toggleBottomBoxFullscreen;
+  readonly setSourceViewPrettyPrint: typeof setSourceViewPrettyPrint;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
+
+type DisplayedLines = {
+  formattedLines: string[] | null;
+  startLine: number;
+  scrollToLineNumber?: number;
+  highlightedLine: number | null;
+};
+
+/**
+ * The line numbers in the state refer to the code as it is. If the code is
+ * pretty-printed, convert them to the lines of the formatted code. The
+ * formatted code starts at line 1, even for inline scripts.
+ */
+function _getDisplayedLines(
+  formatting: SourceViewFormatting | null,
+  startLine: number,
+  scrollToLineNumber: number | undefined,
+  scrollToColumnNumber: number | undefined,
+  highlightedLine: number | null,
+  highlightedColumn: number | null
+): DisplayedLines {
+  if (formatting === null) {
+    return {
+      formattedLines: null,
+      startLine,
+      scrollToLineNumber,
+      highlightedLine,
+    };
+  }
+  const { lines, mapPositionToLine } = formatting;
+  return {
+    formattedLines: lines,
+    startLine: 1,
+    scrollToLineNumber:
+      scrollToLineNumber !== undefined
+        ? mapPositionToLine(scrollToLineNumber, scrollToColumnNumber ?? null)
+        : undefined,
+    highlightedLine:
+      highlightedLine !== null
+        ? mapPositionToLine(highlightedLine, highlightedColumn)
+        : null,
+  };
+}
 
 export function SourceCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
   return (
@@ -174,6 +231,10 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     }
   };
 
+  _onChangeSourceViewPrettyPrint = (isPrettyPrinted: boolean) => {
+    this.props.setSourceViewPrettyPrint(isPrettyPrinted);
+  };
+
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
     // Close the fullscreen if we're closing the bottom box
@@ -191,7 +252,12 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewScrollGeneration,
       sourceViewScrollToLineNumber,
       sourceViewHighlightedLine,
+      sourceViewScrollToColumnNumber,
+      sourceViewHighlightedColumn,
       sourceViewStartLine,
+      sourceViewCanPrettyPrint,
+      sourceViewIsPrettyPrinted,
+      sourceViewFormatting,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
       assemblyViewScrollToInstructionAddress,
@@ -215,6 +281,14 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
     const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
     const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
+    const sourceViewLines = _getDisplayedLines(
+      sourceViewFormatting,
+      sourceViewStartLine,
+      sourceViewScrollToLineNumber,
+      sourceViewScrollToColumnNumber,
+      sourceViewHighlightedLine,
+      sourceViewHighlightedColumn
+    );
 
     // The bottom box has one or more side-by-side panes.
     // At the moment it always has either one or two panes:
@@ -252,7 +326,15 @@ class BottomBoxImpl extends React.PureComponent<Props> {
         <div className="bottom-box-pane">
           <div className="bottom-box-bar">
             <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
-            {assemblyViewIsOpen ? null : trailingHeaderButtons}
+            <div className="bottom-box-header-buttons">
+              {displaySourceView && sourceViewCanPrettyPrint ? (
+                <PrettyPrintToggleButton
+                  isPrettyPrinted={sourceViewIsPrettyPrinted}
+                  onChange={this._onChangeSourceViewPrettyPrint}
+                />
+              ) : null}
+              {assemblyViewIsOpen ? null : trailingHeaderButtons}
+            </div>
           </div>
           <div className="bottom-sourceview-wrapper">
             {displayIonGraph ? (
@@ -265,11 +347,12 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               <SourceView
                 timings={globalLineTimings}
                 sourceCode={sourceCode}
+                formattedLines={sourceViewLines.formattedLines}
                 filePath={path}
                 scrollGeneration={sourceViewScrollGeneration}
-                scrollToLineNumber={sourceViewScrollToLineNumber}
-                highlightedLine={sourceViewHighlightedLine}
-                startLine={sourceViewStartLine}
+                scrollToLineNumber={sourceViewLines.scrollToLineNumber}
+                highlightedLine={sourceViewLines.highlightedLine}
+                startLine={sourceViewLines.startLine}
                 ref={this._sourceView}
               />
             ) : null}
@@ -346,7 +429,12 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
     sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
     sourceViewHighlightedLine: getSourceViewHighlightedLine(state),
+    sourceViewScrollToColumnNumber: getSourceViewScrollToColumnNumber(state),
+    sourceViewHighlightedColumn: getSourceViewHighlightedColumn(state),
     sourceViewStartLine: getSourceViewStartLine(state),
+    sourceViewCanPrettyPrint: getSourceViewFormatDialect(state) !== null,
+    sourceViewIsPrettyPrinted: getSourceViewIsPrettyPrinted(state),
+    sourceViewFormatting: getSourceViewFormatting(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:
@@ -361,6 +449,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     closeBottomBox,
     toggleBottomBoxFullscreen,
+    setSourceViewPrettyPrint,
   },
   component: BottomBoxImpl,
 });

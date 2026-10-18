@@ -946,6 +946,11 @@ export type BottomBoxInfo = {
   // a stack frame in a marker stack.
   highlightedLineNumber: number | null;
   highlightedInstructionAddress: number | null;
+  // Optional column numbers for the lines above. These are used to find the
+  // right line when the source is pretty-printed, because minified code often
+  // has very long lines.
+  scrollToColumnNumber?: number;
+  highlightedColumnNumber?: number;
 };
 
 /**

@@ -22,7 +22,10 @@ import {
   getTotalNativeSymbolTimingsForCallNode,
 } from './profile-data';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
-import { getTotalLineTimingsForCallNode } from './line-timings';
+import {
+  getTotalLineTimingsForCallNode,
+  getHottestColumnForLineInCallNode,
+} from './line-timings';
 import { getTotalAddressTimingsForCallNode } from './address-timings';
 
 /**
@@ -108,6 +111,17 @@ export function getBottomBoxInfoForCallNode(
     thread.sourceLocationTable
   );
   const hottestLine = mapGetKeyWithMaxValue(lineTimings);
+  const hottestColumn =
+    hottestLine !== undefined
+      ? getHottestColumnForLineInCallNode(
+          samples,
+          callNodeFramePerStack,
+          frameTable,
+          funcTable,
+          hottestLine,
+          thread.sourceLocationTable
+        )
+      : undefined;
   const addressTimings = getTotalAddressTimingsForCallNode(
     samples,
     callNodeFramePerStack,
@@ -124,6 +138,7 @@ export function getBottomBoxInfoForCallNode(
         ? nativeSymbolsForCallNodeArr.indexOf(initialNativeSymbol)
         : null,
     scrollToLineNumber: hottestLine,
+    scrollToColumnNumber: hottestColumn,
     scrollToInstructionAddress: hottestInstructionAddress,
     highlightedLineNumber: null,
     highlightedInstructionAddress: null,
@@ -143,7 +158,11 @@ export function getBottomBoxInfoForStackFrame(
 
   const frameIndex = stackTable.frame[stackIndex];
   const funcIndex = frameTable.func[frameIndex];
-  const { source: sourceIndex, line: lineNumber } = getOriginalPositionForFrame(
+  const {
+    source: sourceIndex,
+    line: lineNumber,
+    column: columnNumber,
+  } = getOriginalPositionForFrame(
     frameIndex,
     funcIndex,
     frameTable,
@@ -173,7 +192,9 @@ export function getBottomBoxInfoForStackFrame(
     nativeSymbols: nativeSymbolInfos,
     initialNativeSymbol: 0,
     scrollToLineNumber: lineNumber ?? undefined,
+    scrollToColumnNumber: columnNumber ?? undefined,
     highlightedLineNumber: lineNumber,
+    highlightedColumnNumber: columnNumber ?? undefined,
     scrollToInstructionAddress: instructionAddress ?? undefined,
     highlightedInstructionAddress: instructionAddress,
   };

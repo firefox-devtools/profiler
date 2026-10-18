@@ -1171,3 +1171,10 @@ export const getSourceViewStartLine: Selector<number> = createSelector(
   (sources, sourceIndex) =>
     sourceIndex !== null ? sources.startLine[sourceIndex] : 1
 );
+
+export const getSourceViewStartColumn: Selector<number> = createSelector(
+  getSourceTable,
+  UrlState.getSourceViewSourceIndex,
+  (sources, sourceIndex) =>
+    sourceIndex !== null ? sources.startColumn[sourceIndex] : 1
+);

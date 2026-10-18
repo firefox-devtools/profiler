@@ -14,6 +14,7 @@ import * as CallTree from '../../profile-logic/call-tree';
 import type { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
+import { getSourceViewFormatting } from '../code';
 import {
   getStackLineInfo,
   getLineTimings,
@@ -158,9 +159,11 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       threadSelectors.getFilteredThread,
       UrlState.getSourceViewSourceIndex,
+      getSourceViewFormatting,
       (
         { stackTable, frameTable, funcTable, sourceLocationTable }: Thread,
-        sourceIndex
+        sourceIndex,
+        formatting
       ): StackLineInfo | null => {
         if (sourceIndex === null) {
           return null;
@@ -170,7 +173,8 @@ export function getStackAndSampleSelectorsPerThread(
           frameTable,
           funcTable,
           sourceIndex,
-          sourceLocationTable
+          sourceLocationTable,
+          formatting !== null ? formatting.mapPositionToLine : null
         );
       }
     );

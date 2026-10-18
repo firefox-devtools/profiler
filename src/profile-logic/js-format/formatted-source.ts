@@ -6,10 +6,13 @@
  * Applies format edits on the main thread. The formatted code is never built
  * as one string: it's built as an array of lines, and most lines are slices
  * of the original code. JS engines can usually represent such slices without
- * copying the characters.
+ * copying the characters. The source view passes the lines to CodeMirror,
+ * which stores them in a tree of lines.
  */
 
 import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import type { PositionToLineMapper } from 'firefox-profiler/profile-logic/line-timings';
+import type { SourceFormattingStatus } from 'firefox-profiler/types';
 import type { FormatEdits } from './types';
 import {
   FORMAT_INDENT,
@@ -177,6 +180,43 @@ export function applyFormatEdits(
         offset = Math.min(offset + Math.max(column - 1, 0), lineEnd);
       }
       return 1 + bisectionRight(formattedLineStarts, offset);
+    },
+  };
+}
+
+/**
+ * What the source view needs to show pretty-printed code.
+ */
+export type SourceViewFormatting = {
+  // The lines of the formatted code.
+  readonly lines: string[];
+  // False while the format worker is busy. Then only the start of the code is
+  // formatted.
+  readonly isDone: boolean;
+  // Maps a line and column from the profile to the line in the formatted
+  // code. Unlike FormattedSource.getFormattedLine, this accepts the line and
+  // column numbers from the profile, which are relative to the start of the
+  // file, not to the start of the source. This matters for inline scripts.
+  readonly mapPositionToLine: PositionToLineMapper;
+};
+
+export function createSourceViewFormatting(
+  code: string,
+  status: SourceFormattingStatus,
+  startLine: number,
+  startColumn: number
+): SourceViewFormatting {
+  const formattedSource = applyFormatEdits(code, status.edits);
+  return {
+    lines: formattedSource.lines,
+    isDone: status.isDone,
+    mapPositionToLine: (line, column) => {
+      const relativeLine = line - startLine + 1;
+      const relativeColumn =
+        column !== null && relativeLine === 1
+          ? column - startColumn + 1
+          : column;
+      return formattedSource.getFormattedLine(relativeLine, relativeColumn);
     },
   };
 }
