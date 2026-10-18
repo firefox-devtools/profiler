@@ -832,6 +832,7 @@ describe('symbolication', function () {
           const { threads, shared } = applySymbolicationSteps(
             symbolicatedProfile.threads,
             symbolicatedProfile.shared,
+            symbolicatedProfile.meta.extensions,
             [symbolicationStepInfo]
           );
           symbolicatedProfile.threads = threads;

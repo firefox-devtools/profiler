@@ -59,22 +59,13 @@ export function registerMarkerCommand(
     // The expansion is also what gets sent on, so spellings that normalise to
     // one handle (`m-2..m-2`, `m-2,`) work rather than failing as unknown.
     if (typeof markerHandle === 'string') {
-      let expanded: string[];
-      try {
-        expanded = expandMarkerHandleSpecs([markerHandle]);
-      } catch (error) {
-        console.error(
-          `Error: ${error instanceof Error ? error.message : String(error)}`
-        );
-        process.exit(1);
-      }
+      const expanded = expandMarkerHandleSpecs([markerHandle]);
       if (expanded.length !== 1) {
-        console.error(
+        throw new Error(
           expanded.length === 0
-            ? `Error: marker stack requires a marker handle.`
-            : `Error: marker stack takes a single handle; ranges and lists are only supported by 'marker info'.`
+            ? `marker stack requires a marker handle.`
+            : `marker stack takes a single handle; ranges and lists are only supported by 'marker info'.`
         );
-        process.exit(1);
       }
       markerHandle = expanded[0];
     }
