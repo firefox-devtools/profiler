@@ -38,3 +38,35 @@ export function dialectForFilename(filename: string): JsDialect {
   }
   return 'jsx';
 }
+
+const NON_JS_EXTENSIONS = [
+  '.rs',
+  '.c',
+  '.cc',
+  '.cpp',
+  '.cxx',
+  '.h',
+  '.hpp',
+  '.m',
+  '.mm',
+  '.json',
+  // Svelte and Vue components contain JS, but they can't be pretty-printed,
+  // because the formatter replaces the text between JS tokens, and in a
+  // component, that text includes the markup.
+  '.svelte',
+  '.vue',
+];
+
+/**
+ * Returns the dialect to use for formatting the source at this path, or null
+ * if the source isn't JavaScript. Like the syntax highlighting in the source
+ * view, this treats unknown file types as JavaScript, because inline scripts
+ * share the page URL and don't have a .js extension.
+ */
+export function getFormatDialectForPath(path: string): JsDialect | null {
+  const lower = path.toLowerCase();
+  if (NON_JS_EXTENSIONS.some((extension) => lower.endsWith(extension))) {
+    return null;
+  }
+  return dialectForFilename(lower);
+}

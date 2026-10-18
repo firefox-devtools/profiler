@@ -85,6 +85,7 @@
   margin: 0;
 }
 
+.bottom-box-header-buttons,
 .bottom-box-header-trailing-buttons {
   display: flex;
   height: 100%;
@@ -104,6 +105,16 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: 16px 16px;
+}
+
+.bottom-pretty-print-button {
+  min-width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0 4px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: bold;
 }
 
 .bottom-prev-button,
