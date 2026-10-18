@@ -490,7 +490,8 @@ export class Daemon {
               command.includeIdle,
               command.search,
               command.sampleFilters,
-              command.strategy
+              command.strategy,
+              command.implementation
             );
           case 'samples-top-down':
             return this.querier.threadSamplesTopDown(
@@ -499,7 +500,8 @@ export class Daemon {
               command.includeIdle,
               command.search,
               command.sampleFilters,
-              command.strategy
+              command.strategy,
+              command.implementation
             );
           case 'samples-bottom-up':
             return this.querier.threadSamplesBottomUp(
@@ -508,7 +510,8 @@ export class Daemon {
               command.includeIdle,
               command.search,
               command.sampleFilters,
-              command.strategy
+              command.strategy,
+              command.implementation
             );
           case 'markers':
             return this.querier.threadMarkers(
@@ -521,7 +524,8 @@ export class Daemon {
               command.functionFilters,
               command.includeIdle,
               command.sampleFilters,
-              command.strategy
+              command.strategy,
+              command.implementation
             );
           case 'network':
             return this.querier.threadNetwork(
