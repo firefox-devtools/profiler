@@ -27,7 +27,6 @@ import type {
   SourceTable,
   IndexIntoFuncTable,
   IndexIntoFrameTable,
-  IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
   IndexIntoSourceTable,
   IndexIntoStringTable,
@@ -35,6 +34,7 @@ import type {
   Address,
   CallNodePath,
   Lib,
+  ExtensionTable,
 } from 'firefox-profiler/types';
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
@@ -45,6 +45,7 @@ import type {
 } from './symbol-store';
 import { PathSet } from '../utils/path';
 import { StringTable } from '../utils/string-table';
+import { ResourceTableBuilder } from './resource-table-builder';
 import { updateRawThreadStacks } from './profile-data';
 
 // Contains functions to symbolicate a profile.
@@ -131,7 +132,8 @@ import { updateRawThreadStacks } from './profile-data';
  *  - The func's resource field is set to a resource of type "library" with the
  *    name of the library. Multiple libraries with the same name can exist and
  *    they will share the same resource, for example in a merged profile from
- *    two different builds of the same library.
+ *    two different builds of the same library. Symbolication later gives
+ *    script functions (e.g. JIT code) a resource based on their file's URL.
  *  - All frames start out with their nativeSymbol field set to null.
  *  - All return addresses are adjusted by subtracting one byte, to point into
  *    the call instruction. See nudgeReturnAddresses for details.
@@ -218,9 +220,10 @@ export type SymbolicationStepCallback = (
 ) => void;
 
 type ProfileLibSymbolicationInfo = {
-  // The resource to give to funcs which are newly created for this lib, or -1
-  // if this lib's frames have no resource. Multiple libs can share a resource.
-  resourceIndex: IndexIntoResourceTable | -1;
+  // The name of this lib. Native funcs which are newly created for this lib get
+  // the library resource with this name. Multiple libs can share a resource.
+  // Script funcs get a resource based on their file's URL instead.
+  libName: string;
   // The libIndex for this lib in this thread.
   libIndex: IndexIntoLibs;
   // The set of funcs for this lib in this thread.
@@ -251,6 +254,7 @@ type SymbolicationTables = {
   frameTable: RawFrameTableBuilder;
   funcTable: RawFuncTableBuilder;
   nativeSymbols: RawNativeSymbolTableBuilder;
+  resources: ResourceTableBuilder;
   sources: SourceTable;
   // Maps a filename string index to the index of the native (id === null)
   // source entry for that filename, so that we don't have to scan the sources
@@ -342,9 +346,8 @@ function getSymbolicationInfo(
   }
 
   // Pass over the funcs: assign each func to the library that gets to recycle
-  // it, and remember one resource per library for the funcs we create later.
+  // it.
   const funcsByLib = new Map<IndexIntoLibs, Set<IndexIntoFuncTable>>();
-  const resourceForLib = new Map<IndexIntoLibs, IndexIntoResourceTable>();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
     const libIndex = libForFunc[funcIndex];
     if (libIndex < 0) {
@@ -356,12 +359,6 @@ function getSymbolicationInfo(
       funcsByLib.set(libIndex, funcs);
     }
     funcs.add(funcIndex);
-    if (
-      !resourceForLib.has(libIndex) &&
-      (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0
-    ) {
-      resourceForLib.set(libIndex, funcTable.resource[funcIndex]);
-    }
   }
 
   // Pass over the native symbols: group them by library.
@@ -393,7 +390,7 @@ function getSymbolicationInfo(
     const libKey = `${lib.debugName}/${lib.breakpadId}`;
     map.set(libKey, {
       libIndex,
-      resourceIndex: resourceForLib.get(libIndex) ?? -1,
+      libName: lib.name,
       allFuncsForThisLib: funcsByLib.get(libIndex) ?? new Set(),
       allNativeSymbolsForThisLib: nativeSymbolsByLib.get(libIndex) ?? new Set(),
       allFramesForThisLib: frames,
@@ -530,6 +527,7 @@ function _computeStackTableWithAddedExpansionStacks(
 export function applySymbolicationSteps(
   oldThreads: RawThread[],
   oldShared: RawProfileSharedData,
+  extensions: ExtensionTable | undefined,
   symbolicationSteps: SymbolicationStepInfo[]
 ): {
   threads: RawThread[];
@@ -558,8 +556,19 @@ export function applySymbolicationSteps(
   const nativeSymbols = getRawNativeSymbolTableBuilderWithExistingContents(
     oldShared.nativeSymbols
   );
-  const { sources, stringArray } = oldShared;
-  const stringTable = StringTable.withBackingArray(stringArray);
+  const oldSources = oldShared.sources;
+  const sources: SourceTable = {
+    length: oldSources.length,
+    id: oldSources.id.slice(),
+    filename: oldSources.filename.slice(),
+    startLine: oldSources.startLine.slice(),
+    startColumn: oldSources.startColumn.slice(),
+    sourceMapURL: oldSources.sourceMapURL.slice(),
+    content: oldSources.content.slice(),
+  };
+  // Appending to the string array in place is fine, because existing string
+  // indexes stay valid.
+  const stringTable = StringTable.withBackingArray(oldShared.stringArray);
   const sourceIndexForNativeFilename = new Map<
     IndexIntoStringTable,
     IndexIntoSourceTable
@@ -569,11 +578,20 @@ export function applySymbolicationSteps(
       sourceIndexForNativeFilename.set(sources.filename[i], i);
     }
   }
+  const resources = new ResourceTableBuilder(
+    stringTable,
+    oldShared.resourceTable
+  );
+  if (extensions !== undefined) {
+    // Make sure that script funcs at add-on URLs get the add-on resource.
+    resources.addExtensionOrigins(extensions);
+  }
   const tables: SymbolicationTables = {
     oldFuncTable: oldShared.funcTable,
     frameTable,
     funcTable,
     nativeSymbols,
+    resources,
     sources,
     sourceIndexForNativeFilename,
     stringTable,
@@ -594,6 +612,8 @@ export function applySymbolicationSteps(
     frameTable: finishRawFrameTableBuilder(frameTable),
     funcTable: finishRawFuncTableBuilder(funcTable),
     nativeSymbols: finishRawNativeSymbolTableBuilder(nativeSymbols),
+    sources,
+    resourceTable: resources.finish(),
   };
 
   const newStackInfo = _computeStackTableWithAddedExpansionStacks(
@@ -668,18 +688,22 @@ function _partiallyApplySymbolicationStep(
     frameTable,
     funcTable,
     nativeSymbols,
+    resources,
     sources,
     sourceIndexForNativeFilename,
     stringTable,
   } = tables;
   const { libSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
   const {
-    resourceIndex,
+    libName,
     allFramesForThisLib,
     allFuncsForThisLib,
     allNativeSymbolsForThisLib,
     libIndex,
   } = libSymbolicationInfo;
+  const libResourceIndex = resources.indexForLibResourceByName(
+    stringTable.indexForString(libName)
+  );
 
   const availableFuncs: Set<IndexIntoFuncTable> = new Set(allFuncsForThisLib);
   const availableNativeSymbols: Set<IndexIntoFuncTable> = new Set(
@@ -941,7 +965,11 @@ function _partiallyApplySymbolicationStep(
         }
         funcTable.flags[funcIndex] = funcFlags;
         funcTable.name[funcIndex] = functionStringIndex;
-        funcTable.resource[funcIndex] = resourceIndex;
+        // Script funcs get the same resource as JS funcs in a Gecko profile.
+        funcTable.resource[funcIndex] =
+          isJS && frameInfo.file !== undefined
+            ? resources.indexForURIResource(frameInfo.file)
+            : libResourceIndex;
         funcTable.lineNumber[funcIndex] = funcStartLine ?? 0;
         funcTable.columnNumber[funcIndex] = funcStartColumn ?? 0;
         funcTable.originalLocation[funcIndex] = 0;

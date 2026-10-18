@@ -11,11 +11,11 @@ import {
   getRawFrameTableBuilder,
   getRawFuncTableBuilder,
   getRawNativeSymbolTableBuilder,
-  getEmptyResourceTable,
   getEmptySourceTable,
   getEmptySourceLocationTable,
   getRawStackTableBuilder,
 } from './data-structures';
+import { ResourceTableBuilder } from './resource-table-builder';
 
 import type {
   Lib,
@@ -25,7 +25,6 @@ import type {
   IndexIntoSourceTable,
   RawProfileSharedData,
   SourceTable,
-  ResourceTable,
   IndexIntoResourceTable,
   IndexIntoFuncTable,
   ExtensionTable,
@@ -33,7 +32,7 @@ import type {
   Address,
   Bytes,
 } from 'firefox-profiler/types';
-import { ResourceType, FuncFlag } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import type {
   RawFrameTableBuilder,
   RawFuncTableBuilder,
@@ -58,15 +57,14 @@ export class GlobalDataCollector {
   _frameTable: RawFrameTableBuilder = getRawFrameTableBuilder();
   _stackTableBuilder: RawStackTableBuilder = getRawStackTableBuilder();
   _funcTable: RawFuncTableBuilder = getRawFuncTableBuilder();
-  _resourceTable: ResourceTable = getEmptyResourceTable();
+  _resources: ResourceTableBuilder = new ResourceTableBuilder(
+    this._stringTable
+  );
   _nativeSymbols: RawNativeSymbolTableBuilder =
     getRawNativeSymbolTableBuilder();
   _funcKeyToFuncIndex: Map<string, IndexIntoFuncTable> = new Map();
   _nativeSymbolKeyToNativeSymbolIndex: Map<string, IndexIntoNativeSymbolTable> =
     new Map();
-  _libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable> =
-    new Map();
-  _originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
   _idToSourceIndex: Map<string, IndexIntoSourceTable> = new Map();
   _filenameToSourceIndex: Map<IndexIntoStringTable, IndexIntoSourceTable> =
     new Map();
@@ -181,98 +179,22 @@ export class GlobalDataCollector {
     return index;
   }
 
-  // Prepopulate resourceTable and this._originToResourceIndex so that future calls
-  // to indexForURIResource will return an add-on resource for add-on URI origins.
+  // Prepopulate the resource table so that future calls to indexForURIResource
+  // will return an add-on resource for add-on URI origins.
   addExtensionOrigins(extensions: ExtensionTable): void {
-    const resourceTable = this._resourceTable;
-    for (let i = 0; i < extensions.length; i++) {
-      const origin = new URL(extensions.baseURL[i]).origin;
-
-      let resourceIndex = this._originToResourceIndex.get(origin);
-      if (resourceIndex === undefined) {
-        resourceIndex = resourceTable.length++;
-        this._originToResourceIndex.set(origin, resourceIndex);
-
-        const quotedName = JSON.stringify(extensions.name[i]);
-        const name = `Extension ${quotedName} (ID: ${extensions.id[i]})`;
-
-        const idIndex = this._stringTable.indexForString(extensions.id[i]);
-
-        resourceTable.name[resourceIndex] =
-          this._stringTable.indexForString(name);
-        resourceTable.host[resourceIndex] = idIndex;
-        resourceTable.type[resourceIndex] = ResourceType.Addon;
-      }
-    }
+    this._resources.addExtensionOrigins(extensions);
   }
 
   // Returns the resource index for a "url" or "webhost" resource which is created
   // on demand based on the script URI.
-  indexForURIResource(scriptURI: string) {
-    // Figure out the origin and host.
-    let origin;
-    let host;
-    try {
-      const url = new URL(scriptURI);
-      if (
-        !(
-          url.protocol === 'http:' ||
-          url.protocol === 'https:' ||
-          url.protocol === 'moz-extension:'
-        )
-      ) {
-        throw new Error('not a webhost or extension protocol');
-      }
-      origin = url.origin;
-      host = url.host;
-    } catch (_e) {
-      origin = scriptURI;
-      host = null;
-    }
-
-    let resourceIndex = this._originToResourceIndex.get(origin);
-    if (resourceIndex !== undefined) {
-      return resourceIndex;
-    }
-
-    const resourceTable = this._resourceTable;
-
-    resourceIndex = resourceTable.length++;
-    this._originToResourceIndex.set(origin, resourceIndex);
-    if (host) {
-      // This is a webhost URL.
-      resourceTable.name[resourceIndex] =
-        this._stringTable.indexForString(origin);
-      resourceTable.host[resourceIndex] =
-        this._stringTable.indexForString(host);
-      resourceTable.type[resourceIndex] = ResourceType.Webhost;
-    } else {
-      // This is a URL, but it doesn't point to something on the web, e.g. a
-      // chrome url.
-      resourceTable.name[resourceIndex] =
-        this._stringTable.indexForString(scriptURI);
-      resourceTable.host[resourceIndex] = null;
-      resourceTable.type[resourceIndex] = ResourceType.Url;
-    }
-    return resourceIndex;
+  indexForURIResource(scriptURI: string): IndexIntoResourceTable {
+    return this._resources.indexForURIResource(scriptURI);
   }
 
   indexForLibResourceByName(
     libNameStringIndex: IndexIntoStringTable
   ): IndexIntoResourceTable {
-    let resourceIndex = this._libNameToResourceIndex.get(libNameStringIndex);
-    if (resourceIndex !== undefined) {
-      return resourceIndex;
-    }
-
-    const resourceTable = this._resourceTable;
-
-    resourceIndex = this._resourceTable.length++;
-    this._libNameToResourceIndex.set(libNameStringIndex, resourceIndex);
-    resourceTable.name[resourceIndex] = libNameStringIndex;
-    resourceTable.host[resourceIndex] = null;
-    resourceTable.type[resourceIndex] = ResourceType.Library;
-    return resourceIndex;
+    return this._resources.indexForLibResourceByName(libNameStringIndex);
   }
 
   indexForLibResourceByLib(libIndex: IndexIntoLibs): IndexIntoResourceTable {
@@ -319,7 +241,7 @@ export class GlobalDataCollector {
       stackTable: finishRawStackTableBuilder(this._stackTableBuilder),
       frameTable: finishRawFrameTableBuilder(this._frameTable),
       funcTable: finishRawFuncTableBuilder(this._funcTable),
-      resourceTable: this._resourceTable,
+      resourceTable: this._resources.finish(),
       nativeSymbols: finishRawNativeSymbolTableBuilder(this._nativeSymbols),
       stringArray: this._stringArray,
       sources: this._sources,
