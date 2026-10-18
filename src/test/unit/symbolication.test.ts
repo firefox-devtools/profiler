@@ -57,6 +57,40 @@ describe('applySymbolicationSteps', () => {
     }
   });
 
+  it('does not mutate the sources table of the input', () => {
+    const { profile } = getProfileFromTextSamples(`
+      first[lib:libxul.so][address:a]
+    `);
+    const oldSources = profile.shared.sources;
+    const oldSourcesCopy = JSON.parse(JSON.stringify(oldSources));
+    const { shared } = applySymbolicationSteps(
+      profile.threads,
+      profile.shared,
+      [
+        {
+          libSymbolicationInfo: {
+            resourceIndex: 0,
+            libIndex: 0,
+            allFuncsForThisLib: new Set([0]),
+            allNativeSymbolsForThisLib: new Set(),
+            allFramesForThisLib: [0],
+            frameAddresses: [0xa],
+          },
+          resultsForLib: new Map([
+            [0xa, { name: 'first', symbolAddress: 0, file: 'first.cpp' }],
+          ]),
+        },
+      ]
+    );
+
+    expect(oldSources).toEqual(oldSourcesCopy);
+    expect(shared.sources).not.toBe(oldSources);
+    expect(shared.sources.length).toBe(oldSources.length + 1);
+    expect(shared.stringArray[shared.sources.filename[oldSources.length]]).toBe(
+      'first.cpp'
+    );
+  });
+
   it('keeps the function display name when re-symbolication omits an address', () => {
     const { profile } = getProfileFromTextSamples(`
       first[lib:jit.dump][address:a]
