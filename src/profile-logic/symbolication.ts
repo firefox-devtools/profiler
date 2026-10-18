@@ -558,8 +558,20 @@ export function applySymbolicationSteps(
   const nativeSymbols = getRawNativeSymbolTableBuilderWithExistingContents(
     oldShared.nativeSymbols
   );
-  const { sources, stringArray } = oldShared;
-  const stringTable = StringTable.withBackingArray(stringArray);
+  const oldSources = oldShared.sources;
+  const sources: SourceTable = {
+    length: oldSources.length,
+    id: oldSources.id.slice(),
+    filename: oldSources.filename.slice(),
+    startLine: oldSources.startLine.slice(),
+    startColumn: oldSources.startColumn.slice(),
+    sourceMapURL: oldSources.sourceMapURL.slice(),
+    content: oldSources.content.slice(),
+    generatedSource: oldSources.generatedSource.slice(),
+  };
+  // Appending to the string array in place is fine, because existing string
+  // indexes stay valid.
+  const stringTable = StringTable.withBackingArray(oldShared.stringArray);
   const sourceIndexForNativeFilename = new Map<
     IndexIntoStringTable,
     IndexIntoSourceTable
@@ -596,6 +608,7 @@ export function applySymbolicationSteps(
     frameTable: finishRawFrameTableBuilder(frameTable),
     funcTable: finishRawFuncTableBuilder(funcTable),
     nativeSymbols: finishRawNativeSymbolTableBuilder(nativeSymbols),
+    sources,
   };
 
   const newStackInfo = _computeStackTableWithAddedExpansionStacks(
