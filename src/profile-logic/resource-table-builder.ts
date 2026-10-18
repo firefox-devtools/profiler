@@ -15,7 +15,8 @@ import type { StringTable } from '../utils/string-table';
 
 /**
  * ResourceTableBuilder de-duplicates resources while a resource table is being
- * built.
+ * built. It can start out empty, during profile processing, or with the
+ * contents of an existing resource table, for example during symbolication.
  */
 export class ResourceTableBuilder {
   _resourceTable: ResourceTable;
@@ -24,9 +25,42 @@ export class ResourceTableBuilder {
     new Map();
   _originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
 
-  constructor(stringTable: StringTable) {
+  constructor(stringTable: StringTable, existingResources?: ResourceTable) {
     this._stringTable = stringTable;
-    this._resourceTable = getEmptyResourceTable();
+    if (existingResources === undefined) {
+      this._resourceTable = getEmptyResourceTable();
+      return;
+    }
+
+    // Copy the existing table so that the original is not mutated.
+    this._resourceTable = {
+      length: existingResources.length,
+      name: existingResources.name.slice(),
+      host: existingResources.host.slice(),
+      type: existingResources.type.slice(),
+    };
+    for (let i = 0; i < existingResources.length; i++) {
+      const name = existingResources.name[i];
+      switch (existingResources.type[i]) {
+        case ResourceType.Library:
+          if (!this._libNameToResourceIndex.has(name)) {
+            this._libNameToResourceIndex.set(name, i);
+          }
+          break;
+        case ResourceType.Webhost:
+        case ResourceType.Url: {
+          // The name of a webhost resource is its origin. The name of a url
+          // resource is its URI, which indexForURIResource uses as its origin.
+          const origin = stringTable.getString(name);
+          if (!this._originToResourceIndex.has(origin)) {
+            this._originToResourceIndex.set(origin, i);
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    }
   }
 
   // Prepopulate the resource table and this._originToResourceIndex so that

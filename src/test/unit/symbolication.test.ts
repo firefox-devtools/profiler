@@ -4,7 +4,7 @@
 
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { applySymbolicationSteps } from '../../profile-logic/symbolication';
-import { FuncFlag } from 'firefox-profiler/types';
+import { FuncFlag, ResourceType } from 'firefox-profiler/types';
 
 describe('applySymbolicationSteps', () => {
   it('uses original script flags when inline expansion recycles function slots', () => {
@@ -17,7 +17,7 @@ describe('applySymbolicationSteps', () => {
       [
         {
           libSymbolicationInfo: {
-            resourceIndex: 0,
+            libName: 'jit.dump',
             libIndex: 0,
             allFuncsForThisLib: new Set([0, 1]),
             allNativeSymbolsForThisLib: new Set(),
@@ -69,7 +69,7 @@ describe('applySymbolicationSteps', () => {
       [
         {
           libSymbolicationInfo: {
-            resourceIndex: 0,
+            libName: 'libxul.so',
             libIndex: 0,
             allFuncsForThisLib: new Set([0]),
             allNativeSymbolsForThisLib: new Set(),
@@ -96,7 +96,7 @@ describe('applySymbolicationSteps', () => {
       first[lib:jit.dump][address:a]
     `);
     const libSymbolicationInfo = {
-      resourceIndex: 0,
+      libName: 'jit.dump',
       libIndex: 0,
       allFuncsForThisLib: new Set([0]),
       allNativeSymbolsForThisLib: new Set<number>(),
@@ -149,5 +149,48 @@ describe('applySymbolicationSteps', () => {
     expect(
       shared.stringArray[shared.sources.filename[shared.funcTable.source[func]]]
     ).toBe('app.js');
+  });
+
+  it('gives new native funcs the library resource for the lib name', () => {
+    const { profile } = getProfileFromTextSamples(`
+      first[lib:jit.dump][address:a]
+    `);
+    const oldResources = profile.shared.resourceTable;
+    // Make the existing func use a resource that isn't the library resource,
+    // so that we can check that the library resource is found by name rather
+    // than taken from the existing funcs.
+    const otherResource = oldResources.length;
+    profile.shared.resourceTable = {
+      length: oldResources.length + 1,
+      name: [...oldResources.name, profile.shared.stringArray.length],
+      host: [...oldResources.host, null],
+      type: [...oldResources.type, ResourceType.Url],
+    };
+    profile.shared.stringArray.push('https://example.com/app.js');
+    profile.shared.funcTable.resource[0] = otherResource;
+
+    const { shared } = applySymbolicationSteps(
+      profile.threads,
+      profile.shared,
+      [
+        {
+          libSymbolicationInfo: {
+            libName: 'jit.dump',
+            libIndex: 0,
+            allFuncsForThisLib: new Set([0]),
+            allNativeSymbolsForThisLib: new Set(),
+            allFramesForThisLib: [0],
+            frameAddresses: [0xa],
+          },
+          resultsForLib: new Map([[0xa, { name: 'first', symbolAddress: 0 }]]),
+        },
+      ]
+    );
+
+    const { resourceTable, stringArray } = shared;
+    const resource = shared.funcTable.resource[shared.frameTable.func[0]];
+    expect(resourceTable.length).toBe(profile.shared.resourceTable.length);
+    expect(resourceTable.type[resource]).toBe(ResourceType.Library);
+    expect(stringArray[resourceTable.name[resource]]).toBe('jit.dump');
   });
 });
