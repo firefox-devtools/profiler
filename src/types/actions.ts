@@ -39,6 +39,7 @@ import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   UrlState,
+  BenchmarkBucketFilter,
   UploadState,
   State,
   UploadedProfileInformation,
@@ -87,6 +88,9 @@ export type DataSource =
   // This is used when comparing two profiles. The displayed profile is a
   // comparison profile created from two input profiles.
   | 'compare'
+  // This is used for the benchmark comparison page at /compare-benchmark/.
+  // It loads two benchmark profiles and shows statistical comparison tables.
+  | 'compare-benchmark'
   // This is a page which displays a list of profiles that were uploaded from
   // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
@@ -593,6 +597,19 @@ type UrlStateAction =
       readonly searchString: string;
     }
   | { readonly type: 'CHANGE_PROFILES_TO_COMPARE'; readonly profiles: string[] }
+  | {
+      readonly type: 'CHANGE_BENCHMARK_BUCKET_FILTER';
+      readonly filter: BenchmarkBucketFilter;
+    }
+  | {
+      readonly type: 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK';
+      readonly profiles: string[];
+      /** Display names for the two profiles, parallel to `profiles`. The
+       * comparison is not necessarily before-patch vs after-patch: it can just
+       * as well be Chrome vs Firefox or Release vs Nightly, and the whole
+       * report is worded in terms of these. */
+      readonly profileNames: string[];
+    }
   | {
       readonly type: 'CHANGE_PROFILE_NAME';
       readonly profileName: string | null;
