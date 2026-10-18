@@ -33,6 +33,7 @@ import {
   getTransformStack,
   getCurrentSearchString,
   getLastSelectedCallTreeSummaryStrategy,
+  getImplementationFilter,
   getProfileSpecificState,
   getSymbolServerUrl,
   getDataSource,
@@ -47,6 +48,7 @@ import {
   changeCallTreeSearchString,
   changeCallTreeSummaryStrategy,
   changeIncludeIdleSamples,
+  changeImplementationFilter,
   popTransformsFromStackForThreads,
 } from '../actions/profile-view';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
@@ -133,6 +135,7 @@ import type {
   ThreadSelectResult,
   StrategySelectResult,
   CallTreeSummaryStrategy,
+  ImplementationFilter,
   ThreadInfoResult,
   ThreadListOptions,
   ThreadListResult,
@@ -193,6 +196,7 @@ type EphemeralViewOptions = {
   callTreeSearch?: string;
   sampleFilters?: SampleFilterSpec[];
   strategy?: CallTreeSummaryStrategy;
+  implementation?: ImplementationFilter;
 };
 
 export class ProfileQuerier {
@@ -365,7 +369,8 @@ export class ProfileQuerier {
     includeIdle: boolean = false,
     search?: string,
     sampleFilters?: SampleFilterSpec[],
-    strategy?: CallTreeSummaryStrategy
+    strategy?: CallTreeSummaryStrategy,
+    implementation?: ImplementationFilter
   ): Promise<WithContext<ThreadSamplesResult>> {
     return this._runWithSampleFilters(
       threadHandle,
@@ -373,6 +378,7 @@ export class ProfileQuerier {
       search,
       sampleFilters,
       strategy,
+      implementation,
       () => collectThreadSamples(this._store, this._threadMap, threadHandle)
     );
   }
@@ -383,7 +389,8 @@ export class ProfileQuerier {
     includeIdle: boolean = false,
     search?: string,
     sampleFilters?: SampleFilterSpec[],
-    strategy?: CallTreeSummaryStrategy
+    strategy?: CallTreeSummaryStrategy,
+    implementation?: ImplementationFilter
   ): Promise<WithContext<ThreadSamplesTopDownResult>> {
     return this._runWithSampleFilters(
       threadHandle,
@@ -391,6 +398,7 @@ export class ProfileQuerier {
       search,
       sampleFilters,
       strategy,
+      implementation,
       () =>
         collectThreadSamplesTopDown(
           this._store,
@@ -407,7 +415,8 @@ export class ProfileQuerier {
     includeIdle: boolean = false,
     search?: string,
     sampleFilters?: SampleFilterSpec[],
-    strategy?: CallTreeSummaryStrategy
+    strategy?: CallTreeSummaryStrategy,
+    implementation?: ImplementationFilter
   ): Promise<WithContext<ThreadSamplesBottomUpResult>> {
     return this._runWithSampleFilters(
       threadHandle,
@@ -415,6 +424,7 @@ export class ProfileQuerier {
       search,
       sampleFilters,
       strategy,
+      implementation,
       () =>
         collectThreadSamplesBottomUp(
           this._store,
@@ -1057,6 +1067,7 @@ export class ProfileQuerier {
     search: string | undefined,
     sampleFilters: SampleFilterSpec[] | undefined,
     strategy: CallTreeSummaryStrategy | undefined,
+    implementation: ImplementationFilter | undefined,
     collect: () => T
   ): WithContext<
     T & {
@@ -1070,7 +1081,13 @@ export class ProfileQuerier {
     const threadIndexes = this._resolveThreadIndexes(threadHandle);
     const result = this._withEphemeralView(
       threadIndexes,
-      { includeIdle, callTreeSearch: search, sampleFilters, strategy },
+      {
+        includeIdle,
+        callTreeSearch: search,
+        sampleFilters,
+        strategy,
+        implementation,
+      },
       collect
     );
     const activeFilters = this._collectFilterEntries(
@@ -1102,11 +1119,14 @@ export class ProfileQuerier {
       callTreeSearch,
       sampleFilters = [],
       strategy,
+      implementation,
     } = options;
     return this._withValidatedStrategy(threadIndexes, strategy, () =>
       this._withEphemeralFilters(threadIndexes, sampleFilters, () =>
-        this._withCallTreeSearch(callTreeSearch, () =>
-          this._withIncludedIdle(includeIdle, fn)
+        this._withImplementationFilter(implementation, () =>
+          this._withCallTreeSearch(callTreeSearch, () =>
+            this._withIncludedIdle(includeIdle, fn)
+          )
         )
       )
     );
@@ -1167,6 +1187,26 @@ export class ProfileQuerier {
       return fn();
     } finally {
       this._store.dispatch(changeIncludeIdleSamples(previous));
+    }
+  }
+
+  /**
+   * Set the implementation filter (combined, js or cpp) around a computation,
+   * then restore the previous value. A missing value leaves it unchanged.
+   */
+  private _withImplementationFilter<T>(
+    implementation: ImplementationFilter | undefined,
+    fn: () => T
+  ): T {
+    const previous = getImplementationFilter(this._store.getState());
+    if (implementation === undefined || implementation === previous) {
+      return fn();
+    }
+    this._store.dispatch(changeImplementationFilter(implementation));
+    try {
+      return fn();
+    } finally {
+      this._store.dispatch(changeImplementationFilter(previous));
     }
   }
 
@@ -1395,9 +1435,10 @@ export class ProfileQuerier {
 
   /**
    * Snapshot the URL state with `view` applied. Settings that already have
-   * Redux round-trips (idle, call tree search, ephemeral filters, strategy) are
-   * applied through those wrappers so the snapshot is taken inside them, then
-   * reverted. The rest is patched onto the copy directly.
+   * Redux round-trips (idle, call tree search, ephemeral filters, strategy,
+   * implementation) are applied through those wrappers so the snapshot is
+   * taken inside them, then reverted. The rest is patched onto the copy
+   * directly.
    */
   private _urlStateForView(view: PermalinkView): UrlState {
     const marker: MarkerId | null =
@@ -1657,7 +1698,8 @@ export class ProfileQuerier {
     filterOptions?: FunctionFilterOptions,
     includeIdle: boolean = false,
     sampleFilters?: SampleFilterSpec[],
-    strategy?: CallTreeSummaryStrategy
+    strategy?: CallTreeSummaryStrategy,
+    implementation?: ImplementationFilter
   ): Promise<WithContext<ThreadFunctionsResult>> {
     const activeOnly = !includeIdle;
     const threadIndexes = this._resolveThreadIndexes(threadHandle);
@@ -1670,7 +1712,7 @@ export class ProfileQuerier {
       );
     const result = this._withEphemeralView(
       threadIndexes,
-      { includeIdle, sampleFilters, strategy },
+      { includeIdle, sampleFilters, strategy, implementation },
       collect
     );
     const activeFilters = this._collectFilterEntries(

@@ -169,6 +169,24 @@ describe('profiler-cli filters and sample breakdowns', () => {
     );
   });
 
+  it('--implementation applies to one command and is reported', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const jsResult = await cli(ctx, [
+      'thread',
+      'samples',
+      '--implementation',
+      'js',
+    ]);
+    expect(jsResult.stdout).toContain('Implementation: js');
+
+    const samplesResult = await cli(ctx, ['thread', 'samples', '--json']);
+    const samples = JSON.parse(
+      samplesResult.stdout
+    ) as WithContext<ThreadSamplesResult>;
+    expect(samples.implementation).toBe('combined');
+  });
+
   it('ephemeral sample filters do not persist into session state', async () => {
     await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
