@@ -487,12 +487,17 @@ export function bulkProcessSymbolicationSteps(
   symbolicationSteps: SymbolicationStepInfo[]
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const { threads, shared } = getProfile(getState());
+    const { threads, shared, meta } = getProfile(getState());
     const {
       threads: symbolicatedThreads,
       shared: symbolicatedShared,
       oldFuncToNewFuncsMap,
-    } = applySymbolicationSteps(threads, shared, symbolicationSteps);
+    } = applySymbolicationSteps(
+      threads,
+      shared,
+      meta.extensions,
+      symbolicationSteps
+    );
     dispatch({
       type: 'BULK_SYMBOLICATION',
       oldFuncToNewFuncsMap,
