@@ -53,6 +53,10 @@ export type PositionToLineMapper = (
  * If there is recursion, and the same line is present in multiple frames in the
  * same stack, the line is only counted once - the lines are stored in a set.
  *
+ * If sourceLocationTable is null, source-mapped frames are attributed to their
+ * generated (compiled) position rather than to their original position. This
+ * is used to compute the timings for the generated code of a bundle.
+ *
  * If mapPositionToLine is given, it maps each line and column to the line
  * which is used in the result. This is used when the source view shows
  * pretty-printed code. The column is null if it's unknown.
@@ -62,7 +66,7 @@ export function getStackLineInfo(
   frameTable: FrameTable,
   funcTable: FuncTable,
   sourceViewSourceIndex: IndexIntoSourceTable,
-  sourceLocationTable: SourceLocationTable,
+  sourceLocationTable: SourceLocationTable | null,
   mapPositionToLine: PositionToLineMapper | null = null
 ): StackLineInfo {
   const builder = new SetCollectionBuilder<number>();
@@ -83,8 +87,10 @@ export function getStackLineInfo(
     const frameFlags = frameTable.flags[frame];
     const funcFlags = funcTable.flags[func];
     const frameHasOriginalLocation =
+      sourceLocationTable !== null &&
       (frameFlags & FrameFlag.HasOriginalLocation) !== 0;
     const funcHasOriginalLocation =
+      sourceLocationTable !== null &&
       (funcFlags & FuncFlag.HasOriginalLocation) !== 0;
     const frameOriginalLocationIdx = frameHasOriginalLocation
       ? frameTable.originalLocation[frame]
@@ -231,13 +237,15 @@ export function getLineTimings(
 // along with the total of the sample weights per line.
 // callNodeFramePerStack needs to be a mapping from stackIndex to the
 // corresponding frame in the call node of interest.
+// If sourceLocationTable is null, the generated (compiled) lines are used for
+// source-mapped frames, like in getStackLineInfo.
 export function getTotalLineTimingsForCallNode(
   samples: SamplesLikeTable,
   callNodeFramePerStack: Int32Array,
   frameTable: FrameTable,
   funcTable: FuncTable,
   funcLine: LineNumber | null,
-  sourceLocationTable: SourceLocationTable
+  sourceLocationTable: SourceLocationTable | null
 ): Map<LineNumber, number> {
   const totalPerLine = new Map<LineNumber, number>();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
@@ -258,10 +266,16 @@ export function getTotalLineTimingsForCallNode(
     const frameFlags = frameTable.flags[callNodeFrame];
     const funcFlags = funcTable.flags[funcIndex];
     let frameLine: number | null;
-    if ((frameFlags & FrameFlag.HasOriginalLocation) !== 0) {
+    if (
+      sourceLocationTable !== null &&
+      (frameFlags & FrameFlag.HasOriginalLocation) !== 0
+    ) {
       frameLine =
         sourceLocationTable.line[frameTable.originalLocation[callNodeFrame]];
-    } else if ((funcFlags & FuncFlag.HasOriginalLocation) !== 0) {
+    } else if (
+      sourceLocationTable !== null &&
+      (funcFlags & FuncFlag.HasOriginalLocation) !== 0
+    ) {
       frameLine =
         sourceLocationTable.line[funcTable.originalLocation[funcIndex]];
     } else if ((frameFlags & FrameFlag.HasLine) !== 0) {

@@ -14,7 +14,10 @@ import * as CallTree from '../../profile-logic/call-tree';
 import type { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
-import { getSourceViewFormatting } from '../code';
+import {
+  getSourceViewFormatting,
+  getGeneratedSourceViewFormatting,
+} from '../code';
 import {
   getStackLineInfo,
   getLineTimings,
@@ -175,6 +178,33 @@ export function getStackAndSampleSelectorsPerThread(
           funcTable,
           sourceIndex,
           sourceLocationTable,
+          formatting !== null ? formatting.mapPositionToLine : null
+        );
+      }
+    );
+
+  // Like getSourceViewStackLineInfo, but for the generated code of a
+  // source-mapped function. Passing null for the sourceLocationTable makes
+  // getStackLineInfo use the generated positions of the frames.
+  const getGeneratedSourceViewStackLineInfo: Selector<StackLineInfo | null> =
+    createSelector(
+      threadSelectors.getFilteredThread,
+      UrlState.getGeneratedSourceViewSourceIndex,
+      getGeneratedSourceViewFormatting,
+      (
+        { stackTable, frameTable, funcTable }: Thread,
+        sourceIndex,
+        formatting
+      ): StackLineInfo | null => {
+        if (sourceIndex === null) {
+          return null;
+        }
+        return getStackLineInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          sourceIndex,
+          null,
           formatting !== null ? formatting.mapPositionToLine : null
         );
       }
@@ -551,6 +581,13 @@ export function getStackAndSampleSelectorsPerThread(
     getLineTimings
   );
 
+  const getGeneratedSourceViewLineTimings: Selector<LineTimings> =
+    createSelector(
+      getGeneratedSourceViewStackLineInfo,
+      threadSelectors.getPreviewFilteredCtssSamples,
+      getLineTimings
+    );
+
   const getAssemblyViewAddressTimings: Selector<AddressTimings> =
     createSelector(
       getAssemblyViewStackAddressInfo,
@@ -746,6 +783,7 @@ export function getStackAndSampleSelectorsPerThread(
     getFunctionListTree,
     getFunctionListTimings,
     getSourceViewLineTimings,
+    getGeneratedSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
     getTracedTimingNonInverted,
