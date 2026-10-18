@@ -377,6 +377,7 @@ export async function run(options: CliOptions) {
     const { shared, threads } = applySymbolicationSteps(
       profile.threads,
       profile.shared,
+      profile.meta.extensions,
       symbolicationSteps
     );
     profile.shared = shared;

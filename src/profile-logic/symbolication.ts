@@ -34,6 +34,7 @@ import type {
   Address,
   CallNodePath,
   Lib,
+  ExtensionTable,
 } from 'firefox-profiler/types';
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
@@ -131,7 +132,8 @@ import { updateRawThreadStacks } from './profile-data';
  *  - The func's resource field is set to a resource of type "library" with the
  *    name of the library. Multiple libraries with the same name can exist and
  *    they will share the same resource, for example in a merged profile from
- *    two different builds of the same library.
+ *    two different builds of the same library. Symbolication later gives
+ *    script functions (e.g. JIT code) a resource based on their file's URL.
  *  - All frames start out with their nativeSymbol field set to null.
  *  - All return addresses are adjusted by subtracting one byte, to point into
  *    the call instruction. See nudgeReturnAddresses for details.
@@ -220,6 +222,7 @@ export type SymbolicationStepCallback = (
 type ProfileLibSymbolicationInfo = {
   // The name of this lib. Native funcs which are newly created for this lib get
   // the library resource with this name. Multiple libs can share a resource.
+  // Script funcs get a resource based on their file's URL instead.
   libName: string;
   // The libIndex for this lib in this thread.
   libIndex: IndexIntoLibs;
@@ -524,6 +527,7 @@ function _computeStackTableWithAddedExpansionStacks(
 export function applySymbolicationSteps(
   oldThreads: RawThread[],
   oldShared: RawProfileSharedData,
+  extensions: ExtensionTable | undefined,
   symbolicationSteps: SymbolicationStepInfo[]
 ): {
   threads: RawThread[];
@@ -578,6 +582,10 @@ export function applySymbolicationSteps(
     stringTable,
     oldShared.resourceTable
   );
+  if (extensions !== undefined) {
+    // Make sure that script funcs at add-on URLs get the add-on resource.
+    resources.addExtensionOrigins(extensions);
+  }
   const tables: SymbolicationTables = {
     oldFuncTable: oldShared.funcTable,
     frameTable,
@@ -957,7 +965,11 @@ function _partiallyApplySymbolicationStep(
         }
         funcTable.flags[funcIndex] = funcFlags;
         funcTable.name[funcIndex] = functionStringIndex;
-        funcTable.resource[funcIndex] = libResourceIndex;
+        // Script funcs get the same resource as JS funcs in a Gecko profile.
+        funcTable.resource[funcIndex] =
+          isJS && frameInfo.file !== undefined
+            ? resources.indexForURIResource(frameInfo.file)
+            : libResourceIndex;
         funcTable.lineNumber[funcIndex] = funcStartLine ?? 0;
         funcTable.columnNumber[funcIndex] = funcStartColumn ?? 0;
         funcTable.originalLocation[funcIndex] = 0;
