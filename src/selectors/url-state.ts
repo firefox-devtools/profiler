@@ -90,6 +90,42 @@ export const getSourceViewHighlightedColumn: Selector<number | null> = (
 ) => getProfileSpecificState(state).sourceView.highlightedColumn;
 export const getSourceViewIsPrettyPrinted: Selector<boolean> = (state) =>
   getProfileSpecificState(state).sourceView.isPrettyPrinted;
+export const getGeneratedSourceViewIsOpen: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.isOpen;
+// True if the current function was source-mapped, so that there is generated
+// code to show. This is independent of whether the panel is open.
+export const getIsGeneratedSourceViewAvailable: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.sourceIndex !== null;
+// The source index of the generated code that is displayed in the generated
+// source view. Null if the panel is closed or if there is nothing to show.
+export const getGeneratedSourceViewSourceIndex: Selector<
+  IndexIntoSourceTable | null
+> = (state) => {
+  const { isOpen, sourceIndex } =
+    getProfileSpecificState(state).generatedSourceView;
+  return isOpen ? sourceIndex : null;
+};
+export const getGeneratedSourceViewScrollGeneration: Selector<number> = (
+  state
+) => getProfileSpecificState(state).generatedSourceView.scrollGeneration;
+export const getGeneratedSourceViewScrollToLineNumber: Selector<
+  number | undefined
+> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.scrollToLineNumber;
+export const getGeneratedSourceViewHighlightedLine: Selector<number | null> = (
+  state
+) => getProfileSpecificState(state).generatedSourceView.highlightedLine;
+export const getGeneratedSourceViewScrollToColumnNumber: Selector<
+  number | undefined
+> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.scrollToColumnNumber;
+export const getGeneratedSourceViewHighlightedColumn: Selector<
+  number | null
+> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.highlightedColumn;
+export const getGeneratedSourceViewIsPrettyPrinted: Selector<boolean> = (
+  state
+) => getProfileSpecificState(state).generatedSourceView.isPrettyPrinted;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (

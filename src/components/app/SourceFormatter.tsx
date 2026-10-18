@@ -4,13 +4,18 @@
 
 import React from 'react';
 
-import { getSourceViewFormattingRequest } from 'firefox-profiler/selectors/code';
+import {
+  getSourceViewFormattingRequest,
+  getGeneratedSourceViewFormattingRequest,
+} from 'firefox-profiler/selectors/code';
 import type { SourceFormattingRequest } from 'firefox-profiler/selectors/code';
 import { startFormattingSource } from 'firefox-profiler/actions/code';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
+// Like the SourceCodeFetcher, the same component starts the formatting for the
+// source view and for the generated source view.
 type StateProps = {
   readonly formattingRequest: SourceFormattingRequest | null;
 };
@@ -49,6 +54,18 @@ class SourceFormatterImpl extends React.PureComponent<Props> {
 export const SourceFormatter = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
     formattingRequest: getSourceViewFormattingRequest(state),
+  }),
+  mapDispatchToProps: { startFormattingSource },
+  component: SourceFormatterImpl,
+});
+
+export const GeneratedSourceFormatter = explicitConnect<
+  {},
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state) => ({
+    formattingRequest: getGeneratedSourceViewFormattingRequest(state),
   }),
   mapDispatchToProps: { startFormattingSource },
   component: SourceFormatterImpl,
