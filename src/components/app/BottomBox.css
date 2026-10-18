@@ -22,6 +22,7 @@
   --internal-sourceview-background-color: var(--grey-20);
   --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
   --internal-assembly-icon: url(../../../res/img/svg/asm-icon.svg);
+  --internal-generated-code-icon: url(../../../res/img/svg/generated-code-icon.svg);
   --internal-fullscreen-icon: url(../../../res/img/svg/fullscreen.svg);
   --internal-fullscreen-exit-icon: url(../../../res/img/svg/fullscreen-exit.svg);
 
@@ -94,6 +95,7 @@
 
 .bottom-close-button,
 .bottom-assembly-button,
+.bottom-generated-source-button,
 .bottom-fullscreen-hide-button,
 .bottom-fullscreen-show-button,
 .bottom-prev-button,
@@ -122,6 +124,10 @@
 
 .bottom-assembly-button {
   background-image: var(--internal-assembly-icon);
+}
+
+.bottom-generated-source-button {
+  background-image: var(--internal-generated-code-icon);
 }
 
 .bottom-fullscreen-show-button {
@@ -204,6 +210,7 @@
     --internal-sourceview-background-color: var(--grey-80);
     --internal-close-icon: url(../../../res/img/svg/close-light.svg);
     --internal-assembly-icon: url(../../../res/img/svg/asm-icon-light.svg);
+    --internal-generated-code-icon: url(../../../res/img/svg/generated-code-icon-light.svg);
     --internal-fullscreen-icon: url(../../../res/img/svg/fullscreen-light.svg);
     --internal-fullscreen-exit-icon: url(../../../res/img/svg/fullscreen-exit-light.svg);
   }

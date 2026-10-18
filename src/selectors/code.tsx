@@ -6,11 +6,13 @@ import type {
   AssemblyCodeStatus,
   IndexIntoSourceTable,
   Lib,
+  Profile,
   SourceCodeStatus,
   Selector,
 } from 'firefox-profiler/types';
 import {
   getSourceViewSourceIndex,
+  getGeneratedSourceViewSourceIndex,
   getAssemblyViewNativeSymbol,
 } from './url-state';
 import { getProfileOrNull } from './profile';
@@ -19,23 +21,37 @@ export const getSourceCodeCache: Selector<
   Map<IndexIntoSourceTable, SourceCodeStatus>
 > = (state) => state.code.sourceCodeCache;
 
+function _getCodeForSource(
+  sourceCodeCache: Map<IndexIntoSourceTable, SourceCodeStatus>,
+  sourceIndex: IndexIntoSourceTable | null,
+  profile: Profile | null
+): SourceCodeStatus | void {
+  if (sourceIndex === null) {
+    return undefined;
+  }
+  // Prefer source content stored in the profile (from source map sourcesContent),
+  // so the source view works offline and when sharing profiles.
+  const inlineCode = profile?.shared.sources.content[sourceIndex];
+  if (inlineCode !== null && inlineCode !== undefined) {
+    return { type: 'AVAILABLE', code: inlineCode };
+  }
+  return sourceCodeCache.get(sourceIndex);
+}
+
 export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(
     getSourceCodeCache,
     getSourceViewSourceIndex,
     getProfileOrNull,
-    (sourceCodeCache, sourceIndex, profile) => {
-      if (sourceIndex === null) {
-        return undefined;
-      }
-      // Prefer source content stored in the profile (from source map sourcesContent),
-      // so the source view works offline and when sharing profiles.
-      const inlineCode = profile?.shared.sources.content[sourceIndex];
-      if (inlineCode !== null && inlineCode !== undefined) {
-        return { type: 'AVAILABLE', code: inlineCode };
-      }
-      return sourceCodeCache.get(sourceIndex);
-    }
+    _getCodeForSource
+  );
+
+export const getGeneratedSourceViewCode: Selector<SourceCodeStatus | void> =
+  createSelector(
+    getSourceCodeCache,
+    getGeneratedSourceViewSourceIndex,
+    getProfileOrNull,
+    _getCodeForSource
   );
 
 export const getAssemblyCodeCache: Selector<Map<string, AssemblyCodeStatus>> = (

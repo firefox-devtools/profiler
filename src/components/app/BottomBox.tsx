@@ -10,6 +10,7 @@ import { AssemblyView } from '../shared/AssemblyView';
 import { FullscreenToggleButton } from './FullscreenToggleButton';
 import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { GeneratedSourceViewToggleButton } from './GeneratedSourceViewToggleButton';
 import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
@@ -18,6 +19,9 @@ import {
   getSourceViewScrollGeneration,
   getSourceViewScrollToLineNumber,
   getSourceViewHighlightedLine,
+  getGeneratedSourceViewScrollGeneration,
+  getGeneratedSourceViewScrollToLineNumber,
+  getGeneratedSourceViewHighlightedLine,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -33,11 +37,14 @@ import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
+  getGeneratedSourceViewCode,
   getAssemblyViewCode,
 } from 'firefox-profiler/selectors/code';
 import {
   getSourceViewFile,
   getSourceViewStartLine,
+  getGeneratedSourceViewFile,
+  getGeneratedSourceViewStartLine,
 } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
@@ -66,6 +73,13 @@ type StateProps = {
   readonly sourceViewHighlightedLine: number | null;
   readonly sourceViewStartLine: number;
   readonly globalLineTimings: LineTimings;
+  readonly generatedSourceViewFile: string | null;
+  readonly generatedSourceViewCode: SourceCodeStatus | void;
+  readonly generatedSourceViewScrollGeneration: number;
+  readonly generatedSourceViewScrollToLineNumber?: number;
+  readonly generatedSourceViewHighlightedLine: number | null;
+  readonly generatedSourceViewStartLine: number;
+  readonly generatedLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
   readonly assemblyViewCode: AssemblyCodeStatus | void;
@@ -158,6 +172,7 @@ export function AssemblyCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
 
 class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
+  _generatedSourceView = React.createRef<SourceView>();
   _assemblyView = React.createRef<AssemblyView>();
 
   override componentDidMount() {
@@ -192,6 +207,13 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewScrollToLineNumber,
       sourceViewHighlightedLine,
       sourceViewStartLine,
+      generatedSourceViewFile,
+      generatedSourceViewCode,
+      generatedSourceViewScrollGeneration,
+      generatedSourceViewScrollToLineNumber,
+      generatedSourceViewHighlightedLine,
+      generatedSourceViewStartLine,
+      generatedLineTimings,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
       assemblyViewScrollToInstructionAddress,
@@ -215,16 +237,30 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
     const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
     const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
+    const generatedSourceCode =
+      generatedSourceViewCode && generatedSourceViewCode.type === 'AVAILABLE'
+        ? generatedSourceViewCode.code
+        : '';
+    const generatedPath =
+      generatedSourceViewFile !== null
+        ? parseFileNameFromSymbolication(generatedSourceViewFile).path
+        : null;
+    // generatedSourceViewFile is only non-null if the generated source view
+    // is open and the current function is source-mapped.
+    const displayGeneratedSourceView = generatedPath !== null;
 
-    // The bottom box has one or more side-by-side panes.
-    // At the moment it always has either one or two panes:
-    //  - It always has the source view pane
-    //  - It also has the assembly view pane, if the assembly view is open.
+    // The bottom box has one or more side-by-side panes:
+    //  - It always has the source view pane.
+    //  - It has the generated source view pane, if the generated source view
+    //    is open and the function is source-mapped. This pane shows the code
+    //    that the browser runs, for example a minified JS bundle.
+    //  - It has the assembly view pane, if the assembly view is open.
 
     // These trailing header buttons go into the bottom-box-bar of the last pane.
     const trailingHeaderButtons = (
       <div className="bottom-box-header-trailing-buttons">
         {assemblyViewIsOpen ? <AssemblyViewNativeSymbolNavigator /> : null}
+        <GeneratedSourceViewToggleButton />
         <AssemblyViewToggleButton />
         <FullscreenToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
@@ -252,7 +288,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
         <div className="bottom-box-pane">
           <div className="bottom-box-bar">
             <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
-            {assemblyViewIsOpen ? null : trailingHeaderButtons}
+            {assemblyViewIsOpen || displayGeneratedSourceView
+              ? null
+              : trailingHeaderButtons}
           </div>
           <div className="bottom-sourceview-wrapper">
             {displayIonGraph ? (
@@ -283,12 +321,57 @@ class BottomBoxImpl extends React.PureComponent<Props> {
           </div>
         </div>
 
+        {displayGeneratedSourceView ? (
+          <ResizableWithSplitter
+            splitterPosition="start"
+            controlledProperty="width"
+            percent={true}
+            initialSize={assemblyViewIsOpen ? '33%' : '50%'}
+          >
+            <div className="bottom-box-pane">
+              <div className="bottom-box-bar">
+                <Localized
+                  id="GeneratedSourceView--title"
+                  vars={{ path: generatedPath }}
+                >
+                  <h3 className="bottom-box-title">
+                    {`Generated: ${generatedPath}`}
+                  </h3>
+                </Localized>
+                {assemblyViewIsOpen ? null : trailingHeaderButtons}
+              </div>
+              <div className="bottom-sourceview-wrapper">
+                <SourceView
+                  timings={generatedLineTimings}
+                  sourceCode={generatedSourceCode}
+                  filePath={generatedPath}
+                  scrollGeneration={generatedSourceViewScrollGeneration}
+                  scrollToLineNumber={generatedSourceViewScrollToLineNumber}
+                  highlightedLine={generatedSourceViewHighlightedLine}
+                  startLine={generatedSourceViewStartLine}
+                  ref={this._generatedSourceView}
+                />
+                {generatedSourceViewCode !== undefined &&
+                generatedSourceViewCode.type === 'LOADING' ? (
+                  <CodeLoadingOverlay source={generatedSourceViewCode.source} />
+                ) : null}
+                {generatedSourceViewCode !== undefined &&
+                generatedSourceViewCode.type === 'ERROR' ? (
+                  <SourceCodeErrorOverlay
+                    errors={generatedSourceViewCode.errors}
+                  />
+                ) : null}
+              </div>
+            </div>
+          </ResizableWithSplitter>
+        ) : null}
+
         {assemblyViewIsOpen ? (
           <ResizableWithSplitter
             splitterPosition="start"
             controlledProperty="width"
             percent={true}
-            initialSize="50%"
+            initialSize={displayGeneratedSourceView ? '33%' : '50%'}
           >
             <div className="bottom-box-pane">
               <div className="bottom-box-bar">
@@ -347,6 +430,17 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
     sourceViewHighlightedLine: getSourceViewHighlightedLine(state),
     sourceViewStartLine: getSourceViewStartLine(state),
+    generatedSourceViewFile: getGeneratedSourceViewFile(state),
+    generatedSourceViewCode: getGeneratedSourceViewCode(state),
+    generatedLineTimings:
+      selectedThreadSelectors.getGeneratedSourceViewLineTimings(state),
+    generatedSourceViewScrollGeneration:
+      getGeneratedSourceViewScrollGeneration(state),
+    generatedSourceViewScrollToLineNumber:
+      getGeneratedSourceViewScrollToLineNumber(state),
+    generatedSourceViewHighlightedLine:
+      getGeneratedSourceViewHighlightedLine(state),
+    generatedSourceViewStartLine: getGeneratedSourceViewStartLine(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:

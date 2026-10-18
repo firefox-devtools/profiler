@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addFakeSourceMapToProfile,
+} from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ProfileSelectors from '../../selectors/profile';
@@ -15,6 +18,7 @@ import {
   openAssemblyView,
   closeAssemblyView,
   closeBottomBox,
+  openGeneratedSourceView,
 } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/types';
@@ -355,9 +359,11 @@ describe('bottom box', function () {
     dispatch(
       updateBottomBoxContentsAndMaybeOpen('calltree', {
         sourceIndex: null,
+        generatedSourceIndex: null,
         nativeSymbols: [],
         initialNativeSymbol: 0,
         highlightedLineNumber: null,
+        highlightedGeneratedLineNumber: null,
         highlightedInstructionAddress: null,
       })
     );
@@ -371,4 +377,148 @@ describe('bottom box', function () {
   //
   // - A test with multiple threads: Open the assembly view for a symbol, switch
   //   to a different thread, check timings
+});
+
+describe('generated source view', function () {
+  // The JS functions in bundle.js are source-mapped to original.ts. Each
+  // compiled line N is mapped to the original line 10 * N.
+  function setup() {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:bundle.js][line:1]  A[file:bundle.js][line:1]  A[file:bundle.js][line:1]  C[file:other.js][line:5]
+      B[file:bundle.js][line:2]  B[file:bundle.js][line:3]  B[file:bundle.js][line:3]
+    `);
+    const { compiledSourceIndex: bundleSourceIndex, originalSourceIndex } =
+      addFakeSourceMapToProfile(profile, 'bundle.js', 'original.ts');
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    const funcNamesDict = funcNamesDictPerThread[0];
+    const openBottomBoxForCallNode = (callNodePath: number[]) => {
+      const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+      const callNodeIndex = ensureExists(
+        callNodeInfo.getCallNodeIndexFromPath(callNodePath)
+      );
+      const bottomBoxInfo = getBottomBoxInfoForCallNode(
+        callNodeIndex,
+        callNodeInfo,
+        selectedThreadSelectors.getFilteredThread(getState()),
+        selectedThreadSelectors.getPreviewFilteredCtssSamples(getState())
+      );
+      dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+      return bottomBoxInfo;
+    };
+
+    return {
+      dispatch,
+      getState,
+      funcNamesDict,
+      bundleSourceIndex,
+      originalSourceIndex,
+      openBottomBoxForCallNode,
+    };
+  }
+
+  it('computes the original and generated positions for a source-mapped call node', function () {
+    const {
+      funcNamesDict: { A, B },
+      bundleSourceIndex,
+      originalSourceIndex,
+      openBottomBoxForCallNode,
+    } = setup();
+    const bottomBoxInfo = openBottomBoxForCallNode([A, B]);
+    expect(bottomBoxInfo.sourceIndex).toBe(originalSourceIndex);
+    expect(bottomBoxInfo.generatedSourceIndex).toBe(bundleSourceIndex);
+    // Line 3 in the bundle is hit twice, line 2 once.
+    expect(bottomBoxInfo.scrollToLineNumber).toBe(30);
+    expect(bottomBoxInfo.scrollToGeneratedLineNumber).toBe(3);
+  });
+
+  it('only shows the generated code once the view is opened', function () {
+    const {
+      dispatch,
+      getState,
+      funcNamesDict: { A, B },
+      bundleSourceIndex,
+      originalSourceIndex,
+      openBottomBoxForCallNode,
+    } = setup();
+    openBottomBoxForCallNode([A, B]);
+    expect(UrlStateSelectors.getSourceViewSourceIndex(getState())).toBe(
+      originalSourceIndex
+    );
+    expect(
+      UrlStateSelectors.getIsGeneratedSourceViewAvailable(getState())
+    ).toBeTrue();
+    expect(
+      UrlStateSelectors.getGeneratedSourceViewSourceIndex(getState())
+    ).toBeNull();
+
+    dispatch(openGeneratedSourceView());
+    expect(
+      UrlStateSelectors.getGeneratedSourceViewSourceIndex(getState())
+    ).toBe(bundleSourceIndex);
+    expect(ProfileSelectors.getGeneratedSourceViewFile(getState())).toBe(
+      'bundle.js'
+    );
+    expect(
+      UrlStateSelectors.getGeneratedSourceViewScrollToLineNumber(getState())
+    ).toBe(3);
+
+    // The source view uses the original lines, the generated source view the
+    // compiled lines.
+    expect(
+      selectedThreadSelectors.getSourceViewLineTimings(getState())
+    ).toEqual({
+      totalLineHits: new Map([
+        [10, 3],
+        [20, 1],
+        [30, 2],
+      ]),
+      selfLineHits: new Map([
+        [20, 1],
+        [30, 2],
+      ]),
+    });
+    expect(
+      selectedThreadSelectors.getGeneratedSourceViewLineTimings(getState())
+    ).toEqual({
+      totalLineHits: new Map([
+        [1, 3],
+        [2, 1],
+        [3, 2],
+      ]),
+      selfLineHits: new Map([
+        [2, 1],
+        [3, 2],
+      ]),
+    });
+  });
+
+  it('hides the generated code for functions without a source map, but stays open', function () {
+    const {
+      dispatch,
+      getState,
+      funcNamesDict: { A, C },
+      bundleSourceIndex,
+      openBottomBoxForCallNode,
+    } = setup();
+    openBottomBoxForCallNode([A]);
+    dispatch(openGeneratedSourceView());
+
+    openBottomBoxForCallNode([C]);
+    expect(
+      UrlStateSelectors.getIsGeneratedSourceViewAvailable(getState())
+    ).toBeFalse();
+    expect(
+      UrlStateSelectors.getGeneratedSourceViewSourceIndex(getState())
+    ).toBeNull();
+    expect(
+      UrlStateSelectors.getGeneratedSourceViewIsOpen(getState())
+    ).toBeTrue();
+
+    // Going back to a source-mapped function shows the generated code again.
+    openBottomBoxForCallNode([A]);
+    expect(
+      UrlStateSelectors.getGeneratedSourceViewSourceIndex(getState())
+    ).toBe(bundleSourceIndex);
+  });
 });

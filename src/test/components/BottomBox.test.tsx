@@ -16,7 +16,10 @@ import {
   within,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
-import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addFakeSourceMapToProfile,
+} from 'firefox-profiler/test/fixtures/profiles/processed-profile';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 
@@ -236,5 +239,101 @@ describe('BottomBox', () => {
     ).toBeInTheDocument();
     expect(prevButton).toBeDisabled();
     expect(nextButton).toBeEnabled();
+  });
+
+  it('does not offer the generated code for functions without a source map', () => {
+    const { sourceView } = setup();
+    // The profile from setup() has no source maps, so there is no toggle
+    // button for the generated code.
+    const frameElement = screen.getByRole('treeitem', { name: /^A/ });
+    fireFullClick(frameElement);
+    fireFullClick(frameElement, { detail: 2 });
+    expect(sourceView()).toBeInTheDocument();
+    expect(
+      document.querySelector('.bottom-generated-source-button')
+    ).not.toBeInTheDocument();
+  });
+});
+
+describe('BottomBox with source maps', () => {
+  autoMockDomRect();
+  afterEach(() => {
+    // @ts-expect-error see the BottomBox tests above
+    delete Range.prototype.getClientRects;
+  });
+
+  function setup() {
+    // @codemirror/view uses getClientRects when scrolling.
+    // @ts-expect-error TS2322: Type '() => DOMRect[]' is not assignable to type '() => DOMRectList'.
+    Range.prototype.getClientRects = () => {
+      return [new DOMRect(0, 0, 1024, 768)];
+    };
+
+    const { profile } = getProfileFromTextSamples(`
+      A[file:bundle.js][line:1]
+      B[file:bundle.js][line:2]
+    `);
+    addFakeSourceMapToProfile(
+      profile,
+      'bundle.js',
+      'original.ts',
+      'function a(){b()}\nfunction b(){}',
+      'original code'
+    );
+
+    const store = blankStore();
+    store.dispatch(
+      updateUrlState(
+        stateFromLocation({
+          pathname: '/from-browser',
+          search: '',
+          hash: '',
+        })
+      )
+    );
+    store.dispatch(viewProfile(profile));
+    render(
+      <Provider store={store}>
+        <ProfileViewer />
+      </Provider>
+    );
+
+    return {
+      sourceViews: () => Array.from(document.querySelectorAll('.sourceView')),
+      toggleButton: () =>
+        document.querySelector(
+          '.bottom-generated-source-button'
+        ) as HTMLElement | null,
+    };
+  }
+
+  it('shows the generated code next to the original code when toggled', async () => {
+    const { sourceViews, toggleButton } = setup();
+
+    const frameElement = screen.getByRole('treeitem', { name: /^B/ });
+    fireFullClick(frameElement);
+    fireFullClick(frameElement, { detail: 2 });
+    expect(sourceViews()).toHaveLength(1);
+    expect(screen.getByText('original.ts')).toBeInTheDocument();
+
+    fireFullClick(ensureExists(toggleButton()));
+    expect(sourceViews()).toHaveLength(2);
+    expect(
+      screen.getByText('Generated: \u2068bundle.js\u2069')
+    ).toBeInTheDocument();
+
+    const [originalView, generatedView] = sourceViews();
+    const originalContent = await within(
+      originalView as HTMLElement
+    ).findByRole('textbox');
+    await within(originalContent).findAllByText(/original/);
+    const generatedContent = await within(
+      generatedView as HTMLElement
+    ).findByRole('textbox');
+    await within(generatedContent).findAllByText(/function/);
+    expect(generatedContent).toHaveTextContent(/b\(\)\{\}/);
+
+    fireFullClick(ensureExists(toggleButton()));
+    expect(sourceViews()).toHaveLength(1);
   });
 });

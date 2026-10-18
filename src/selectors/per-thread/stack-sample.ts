@@ -175,6 +175,30 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  // Like getSourceViewStackLineInfo, but for the generated code of a
+  // source-mapped function. Passing null for the sourceLocationTable makes
+  // getStackLineInfo use the generated positions of the frames.
+  const getGeneratedSourceViewStackLineInfo: Selector<StackLineInfo | null> =
+    createSelector(
+      threadSelectors.getFilteredThread,
+      UrlState.getGeneratedSourceViewSourceIndex,
+      (
+        { stackTable, frameTable, funcTable }: Thread,
+        sourceIndex
+      ): StackLineInfo | null => {
+        if (sourceIndex === null) {
+          return null;
+        }
+        return getStackLineInfo(
+          stackTable,
+          frameTable,
+          funcTable,
+          sourceIndex,
+          null
+        );
+      }
+    );
+
   // Converts the global NativeSymbolInfo into an index into selectedFilteredThread.nativeSymbols.
   const getAssemblyViewNativeSymbolIndex: Selector<IndexIntoNativeSymbolTable | null> =
     createSelector(
@@ -505,6 +529,13 @@ export function getStackAndSampleSelectorsPerThread(
     getLineTimings
   );
 
+  const getGeneratedSourceViewLineTimings: Selector<LineTimings> =
+    createSelector(
+      getGeneratedSourceViewStackLineInfo,
+      threadSelectors.getPreviewFilteredCtssSamples,
+      getLineTimings
+    );
+
   const getAssemblyViewAddressTimings: Selector<AddressTimings> =
     createSelector(
       getAssemblyViewStackAddressInfo,
@@ -671,6 +702,7 @@ export function getStackAndSampleSelectorsPerThread(
     getFunctionListTree,
     getFunctionListTimings,
     getSourceViewLineTimings,
+    getGeneratedSourceViewLineTimings,
     getAssemblyViewAddressTimings,
     getTracedTiming,
     getTracedTimingNonInverted,

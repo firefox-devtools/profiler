@@ -3690,6 +3690,22 @@ export function getOriginalPositionForFrame(
 }
 
 /**
+ * Returns the source with the generated (compiled) code for a source-mapped
+ * function, for example the JS bundle. Returns null if the function has no
+ * original location, i.e. if it wasn't source-mapped.
+ */
+export function getGeneratedSourceForFunc(
+  funcIndex: IndexIntoFuncTable,
+  funcTable: FuncTable
+): IndexIntoSourceTable | null {
+  const funcFlags = funcTable.flags[funcIndex];
+  return (funcFlags & FuncFlag.HasOriginalLocation) !== 0 &&
+    (funcFlags & FuncFlag.HasSource) !== 0
+    ? funcTable.source[funcIndex]
+    : null;
+}
+
+/**
  * This function returns the source origin for a function. This can be:
  * - a filename (javascript or object file or c++ source file)
  * - a URL (if the source is a website)

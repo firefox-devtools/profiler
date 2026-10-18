@@ -1951,11 +1951,14 @@ export function updateBottomBoxContentsAndMaybeOpen(
 ): Action {
   const {
     sourceIndex,
+    generatedSourceIndex,
     nativeSymbols,
     initialNativeSymbol,
     scrollToLineNumber,
+    scrollToGeneratedLineNumber,
     scrollToInstructionAddress,
     highlightedLineNumber,
+    highlightedGeneratedLineNumber,
     highlightedInstructionAddress,
   } = bottomBoxInfo;
 
@@ -1971,15 +1974,30 @@ export function updateBottomBoxContentsAndMaybeOpen(
   return {
     type: 'UPDATE_BOTTOM_BOX',
     sourceIndex,
+    generatedSourceIndex,
     nativeSymbols,
     currentNativeSymbol: initialNativeSymbol,
     currentTab,
     shouldOpenBottomBox,
     shouldOpenAssemblyView,
     scrollToLineNumber,
+    scrollToGeneratedLineNumber,
     scrollToInstructionAddress,
     highlightedLineNumber,
+    highlightedGeneratedLineNumber,
     highlightedInstructionAddress,
+  };
+}
+
+export function openGeneratedSourceView(): Action {
+  return {
+    type: 'OPEN_GENERATED_SOURCE_VIEW',
+  };
+}
+
+export function closeGeneratedSourceView(): Action {
+  return {
+    type: 'CLOSE_GENERATED_SOURCE_VIEW',
   };
 }
 

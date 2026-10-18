@@ -21,6 +21,7 @@ import type {
   Reducer,
   SourceViewState,
   AssemblyViewState,
+  GeneratedSourceViewState,
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
@@ -663,6 +664,49 @@ const sourceView: Reducer<SourceViewState> = (
   }
 };
 
+const generatedSourceView: Reducer<GeneratedSourceViewState> = (
+  state = {
+    isOpen: false,
+    scrollGeneration: 0,
+    sourceIndex: null,
+    highlightedLine: null,
+  },
+  action
+) => {
+  switch (action.type) {
+    case 'UPDATE_BOTTOM_BOX': {
+      const shouldScroll = action.scrollToGeneratedLineNumber !== undefined;
+      return {
+        isOpen: state.isOpen,
+        scrollGeneration: shouldScroll
+          ? state.scrollGeneration + 1
+          : state.scrollGeneration,
+        sourceIndex: action.generatedSourceIndex,
+        scrollToLineNumber: action.scrollToGeneratedLineNumber,
+        highlightedLine: action.highlightedGeneratedLineNumber,
+      };
+    }
+    case 'OPEN_GENERATED_SOURCE_VIEW':
+      return { ...state, isOpen: true };
+    case 'CLOSE_GENERATED_SOURCE_VIEW':
+      return { ...state, isOpen: false };
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      if (!action.translationMaps || state.sourceIndex === null) {
+        return state;
+      }
+      const newSourceIndexPlusOne =
+        action.translationMaps.oldSourceToNewSourcePlusOne[state.sourceIndex];
+      return {
+        ...state,
+        sourceIndex:
+          newSourceIndexPlusOne !== 0 ? newSourceIndexPlusOne - 1 : null,
+      };
+    }
+    default:
+      return state;
+  }
+};
+
 const assemblyView: Reducer<AssemblyViewState> = (
   state = {
     isOpen: false,
@@ -804,6 +848,7 @@ const profileSpecific = combineReducers({
   networkSearchString,
   transforms,
   sourceView,
+  generatedSourceView,
   assemblyView,
   isBottomBoxOpenPerPanel,
   isBottomBoxFullscreen,

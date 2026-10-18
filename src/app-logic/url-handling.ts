@@ -37,6 +37,7 @@ import type {
   TimelineType,
   SourceViewState,
   AssemblyViewState,
+  GeneratedSourceViewState,
   NativeSymbolInfo,
   Transform,
   IndexIntoFrameTable,
@@ -179,6 +180,7 @@ type BaseQuery = {
   implementation: string;
   timelineType: string;
   sourceViewIndex: number;
+  generatedSourceViewIndex: number;
   assemblyView: string;
 };
 
@@ -224,6 +226,7 @@ type Query = BaseQuery & {
   ctSummary?: string;
   transforms?: string;
   sourceViewIndex?: number;
+  generatedSourceViewIndex?: number;
   assemblyView?: string;
   bottomFullscreen?: boolean;
 
@@ -373,6 +376,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
       const {
         sourceView,
+        generatedSourceView,
         assemblyView,
         isBottomBoxOpenPerPanel,
         isBottomBoxFullscreen,
@@ -381,6 +385,12 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       if (isBottomBoxOpenPerPanel[selectedTab]) {
         if (sourceView.sourceIndex !== null) {
           query.sourceViewIndex = sourceView.sourceIndex;
+        }
+        if (
+          generatedSourceView.isOpen &&
+          generatedSourceView.sourceIndex !== null
+        ) {
+          query.generatedSourceViewIndex = generatedSourceView.sourceIndex;
         }
         if (assemblyView.isOpen && assemblyView.currentNativeSymbol !== null) {
           const { currentNativeSymbol, nativeSymbols } = assemblyView;
@@ -569,6 +579,12 @@ export function stateFromLocation(
     sourceIndex: null,
     highlightedLine: null,
   };
+  const generatedSourceView: GeneratedSourceViewState = {
+    isOpen: false,
+    scrollGeneration: 0,
+    sourceIndex: null,
+    highlightedLine: null,
+  };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
     scrollGeneration: 0,
@@ -580,6 +596,11 @@ export function stateFromLocation(
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceViewIndex !== undefined) {
     sourceView.sourceIndex = Number(query.sourceViewIndex);
+    isBottomBoxOpenPerPanel[selectedTab] = true;
+  }
+  if (query.generatedSourceViewIndex !== undefined) {
+    generatedSourceView.sourceIndex = Number(query.generatedSourceViewIndex);
+    generatedSourceView.isOpen = true;
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
   if (query.assemblyView) {
@@ -623,6 +644,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceView,
+      generatedSourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
       isBottomBoxFullscreen: query.bottomFullscreen || false,

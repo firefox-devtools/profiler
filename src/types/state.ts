@@ -266,6 +266,22 @@ export type SourceViewState = {
   highlightedLine: number | null;
 };
 
+export type GeneratedSourceViewState = {
+  // Whether the generated source view panel is open within the bottom box.
+  // This can be true even if the bottom box itself is closed, or if the current
+  // function has no source map. The panel is only displayed if sourceIndex is
+  // non-null.
+  isOpen: boolean;
+  scrollGeneration: number;
+  // Optional line number to scroll to in the generated source view.
+  scrollToLineNumber?: number;
+  // Index into the source table for the generated (compiled) code, for example
+  // a JS bundle. Null if the current function isn't source-mapped.
+  sourceIndex: IndexIntoSourceTable | null;
+  // The line number of the highlighted line in the generated source view.
+  highlightedLine: number | null;
+};
+
 export type AssemblyViewState = {
   // Whether the assembly view panel is open within the bottom box. This can be
   // true even if the bottom box itself is closed.
@@ -373,6 +389,7 @@ export type ProfileSpecificUrlState = {
   transforms: TransformStacksPerThread;
   timelineType: TimelineType;
   sourceView: SourceViewState;
+  generatedSourceView: GeneratedSourceViewState;
   assemblyView: AssemblyViewState;
   isBottomBoxOpenPerPanel: IsOpenPerPanelState;
   isBottomBoxFullscreen: boolean;

@@ -36,6 +36,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import type {
+  IndexIntoSourceTable,
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -63,7 +64,7 @@ import type {
   MarkerSchema,
   MixedObject,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
@@ -2256,4 +2257,67 @@ export function addCpuUsageValues(
     threadCPUDelta: threadCPUDeltaUnit,
   };
   profile.threads[0].samples.threadCPUDelta = threadCPUDelta;
+}
+
+/**
+ * Simulate source map symbolication: map the funcs and frames in
+ * `compiledFile` to a new source `originalFile`. Each compiled line N becomes
+ * the original line `10 * N`, and each func starts at original line 1. The
+ * compiled code can be supplied as `compiledCode`, so that the profile
+ * contains it like a profile with embedded JS sources.
+ */
+export function addFakeSourceMapToProfile(
+  profile: Profile,
+  compiledFile: string,
+  originalFile: string,
+  compiledCode: string | null = null,
+  originalCode: string | null = null
+): {
+  compiledSourceIndex: IndexIntoSourceTable;
+  originalSourceIndex: IndexIntoSourceTable;
+} {
+  const { sources, frameTable, funcTable, sourceLocationTable } =
+    profile.shared;
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const compiledSourceIndex = sources.filename.indexOf(
+    stringTable.indexForString(compiledFile)
+  );
+  if (compiledSourceIndex === -1) {
+    throw new Error(`The profile has no source for ${compiledFile}.`);
+  }
+  sources.content[compiledSourceIndex] = compiledCode;
+  const originalSourceIndex = sources.length;
+  sources.id.push(null);
+  sources.filename.push(stringTable.indexForString(originalFile));
+  sources.startLine.push(1);
+  sources.startColumn.push(1);
+  sources.sourceMapURL.push(null);
+  sources.content.push(originalCode);
+  sources.length++;
+
+  const addOriginalLocation = (line: number) => {
+    sourceLocationTable.source.push(originalSourceIndex);
+    sourceLocationTable.line.push(line);
+    sourceLocationTable.column.push(1);
+    return sourceLocationTable.length++;
+  };
+  for (let func = 0; func < funcTable.length; func++) {
+    if (funcTable.source[func] === compiledSourceIndex) {
+      funcTable.originalLocation[func] = addOriginalLocation(1);
+      funcTable.flags[func] |= FuncFlag.HasOriginalLocation;
+    }
+  }
+  for (let frame = 0; frame < frameTable.length; frame++) {
+    const func = frameTable.func[frame];
+    if (
+      funcTable.source[func] === compiledSourceIndex &&
+      (frameTable.flags[frame] & FrameFlag.HasLine) !== 0
+    ) {
+      frameTable.originalLocation[frame] = addOriginalLocation(
+        10 * frameTable.line[frame]
+      );
+      frameTable.flags[frame] |= FrameFlag.HasOriginalLocation;
+    }
+  }
+  return { compiledSourceIndex, originalSourceIndex };
 }
