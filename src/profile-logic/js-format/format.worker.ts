@@ -6,7 +6,7 @@
  * Web Worker entry point for formatting JS source code.
  *
  * Receives a FormatWorkerInput and posts a FormatWorkerOutput message after
- * each formatting step. The edits are transferred, not copied. The worker
+ * each formatting step, or a single message with the code of a function. The edits are transferred, not copied. The worker
  * never sends strings back: the main thread builds the formatted code from
  * the original code and the edits.
  *
@@ -15,6 +15,8 @@
  */
 
 import { formatJsCodeIncrementally } from './formatter';
+import { extractFunctionSource } from './function-source';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type { FormatWorkerInput, FormatWorkerOutput } from './types';
 
 // Override the `self` type: in the browser this file runs as a DedicatedWorker,
@@ -26,13 +28,33 @@ interface WorkerScope {
 const scope = self as unknown as WorkerScope;
 
 scope.onmessage = (e: MessageEvent<FormatWorkerInput>) => {
-  const { code, dialect } = e.data;
+  const input = e.data;
   try {
-    formatJsCodeIncrementally(code, dialect, (edits, formattedUpTo, isDone) => {
-      scope.postMessage({ type: 'progress', edits, formattedUpTo, isDone }, [
-        edits.buffer,
-      ]);
-    });
+    switch (input.type) {
+      case 'format':
+        formatJsCodeIncrementally(
+          input.code,
+          input.dialect,
+          (edits, formattedUpTo, isDone) => {
+            scope.postMessage(
+              { type: 'progress', edits, formattedUpTo, isDone },
+              [edits.buffer]
+            );
+          }
+        );
+        break;
+      case 'extract-function':
+        scope.postMessage(
+          {
+            type: 'function-source',
+            functionSource: extractFunctionSource(input.request),
+          },
+          []
+        );
+        break;
+      default:
+        throw assertExhaustiveCheck(input);
+    }
   } catch (error) {
     scope.postMessage(
       {

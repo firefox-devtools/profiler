@@ -667,7 +667,20 @@ export function parseJsScopeTree(
   sourceText: string,
   dialect: JsDialect = ''
 ): FunctionScope[] {
-  const tree = parserForDialect(dialect).parse(sourceText);
+  return getJsScopeTreeFromSyntaxTree(
+    parserForDialect(dialect).parse(sourceText),
+    sourceText
+  );
+}
+
+/**
+ * Like parseJsScopeTree, but for code which has already been parsed, so that
+ * callers which also need the syntax tree don't parse the code twice.
+ */
+export function getJsScopeTreeFromSyntaxTree(
+  tree: ReturnType<typeof lezerJsParser.parse>,
+  sourceText: string
+): FunctionScope[] {
   const topLevel: FunctionScope[] = [];
   _walkChildren(tree.topNode, sourceText, topLevel);
   return topLevel;
