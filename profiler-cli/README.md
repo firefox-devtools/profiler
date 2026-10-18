@@ -116,24 +116,25 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 
 ## Options
 
-| Flag                   | Description                                                                                                                                              |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--thread <handle>`    | Specify thread (e.g., `t-0`)                                                                                                                             |
-| `--search <term>`      | Filter by substring; `thread markers` also takes `field:value` (see its `--help`).                                                                       |
-| `--include-idle`       | Include idle samples (excluded by default in samples commands)                                                                                           |
-| `--json`               | Output as JSON (for use with `jq`, etc.)                                                                                                                 |
-| `--limit <N>`          | Limit number of results shown                                                                                                                            |
-| `--max-lines <N>`      | Limit call tree nodes for `samples-top-down`/`samples-bottom-up` (default: 100)                                                                          |
-| `--sort <order>`       | Order `thread network` requests: `duration` (default, slowest first) or `start` (chronological)                                                          |
-| `--scoring <strategy>` | Call tree scoring: `exponential-0.95`, `exponential-0.9` (default), `exponential-0.8`, `harmonic-0.1`, `harmonic-0.5`, `harmonic-1.0`, `percentage-only` |
-| `--navigation <N>`     | Select which navigation to show in `thread page-load` (1-based, default: last completed)                                                                 |
-| `--jank-limit <N>`     | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |
-| `--list`               | Show a flat chronological list of individual markers (for `thread markers`)                                                                              |
-| `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
-| `--to <src-N>`         | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
-| `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
-| `--permalink`          | Also print a profiler.firefox.com URL for the view the command shows (published profiles only)                                                           |
-| `--short-permalink`    | Like `--permalink`, shortened through share.firefox.dev                                                                                                  |
+| Flag                      | Description                                                                                                                                              |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--thread <handle>`       | Specify thread (e.g., `t-0`)                                                                                                                             |
+| `--search <term>`         | Filter by substring; `thread markers` also takes `field:value` (see its `--help`).                                                                       |
+| `--include-idle`          | Include idle samples (excluded by default in samples commands)                                                                                           |
+| `--implementation <name>` | Frames to keep in samples commands: `combined` (default), `js` or `cpp`. Dropped frames are merged into their callers.                                   |
+| `--json`                  | Output as JSON (for use with `jq`, etc.)                                                                                                                 |
+| `--limit <N>`             | Limit number of results shown                                                                                                                            |
+| `--max-lines <N>`         | Limit call tree nodes for `samples-top-down`/`samples-bottom-up` (default: 100)                                                                          |
+| `--sort <order>`          | Order `thread network` requests: `duration` (default, slowest first) or `start` (chronological)                                                          |
+| `--scoring <strategy>`    | Call tree scoring: `exponential-0.95`, `exponential-0.9` (default), `exponential-0.8`, `harmonic-0.1`, `harmonic-0.5`, `harmonic-1.0`, `percentage-only` |
+| `--navigation <N>`        | Select which navigation to show in `thread page-load` (1-based, default: last completed)                                                                 |
+| `--jank-limit <N>`        | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |
+| `--list`                  | Show a flat chronological list of individual markers (for `thread markers`)                                                                              |
+| `--all`                   | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
+| `--to <src-N>`            | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
+| `--session <id>`          | Use a specific session instead of the current one                                                                                                        |
+| `--permalink`             | Also print a profiler.firefox.com URL for the view the command shows (published profiles only)                                                           |
+| `--short-permalink`       | Like `--permalink`, shortened through share.firefox.dev                                                                                                  |
 
 ## Sample Filter Flags
 
@@ -144,6 +145,7 @@ These work ephemerally on `thread samples` / `thread functions`, and as persiste
 | `--excludes-function <f-N>`        | Drop samples containing this function                              |
 | `--merge <f-N,...>`                | Remove functions from stacks (collapse them out)                   |
 | `--root-at <f-N>`                  | Re-root stacks at this function                                    |
+| `--focus-self <f-N[:js\|:cpp]>`    | Keep only this function's self time; `:js` uses JS-only self time  |
 | `--includes-function <f-N,...>`    | Keep only samples containing any of these functions                |
 | `--includes-prefix <f-N,...>`      | Keep only samples whose stack starts with this root-first sequence |
 | `--includes-suffix <f-N>`          | Keep only samples whose leaf frame is this function                |

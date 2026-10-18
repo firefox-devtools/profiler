@@ -10,10 +10,12 @@ import type { Command } from 'commander';
 import { parseEphemeralFilters, parseLimitArg } from '../utils/parse';
 import {
   addGlobalOptions,
+  addImplementationOption,
   addSampleFilterOptions,
   addStrategyOption,
   parseIntArg,
   parseFloatArg,
+  parseOptionalImplementationArg,
   parseOptionalStrategyArg,
   runCommand,
 } from './shared';
@@ -43,16 +45,18 @@ const VALID_SCORING_STRATEGIES: CallTreeScoringStrategy[] = [
 ];
 
 function addSamplesOptions(cmd: Command): Command {
-  return addStrategyOption(
-    addSampleFilterOptions(
-      addGlobalOptions(cmd)
-        .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-        .option('--include-idle', 'Include idle samples in percentages')
-        .option(
-          '--search <term>',
-          'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
-        )
-        .option('--limit <N>', 'Limit the number of results shown')
+  return addImplementationOption(
+    addStrategyOption(
+      addSampleFilterOptions(
+        addGlobalOptions(cmd)
+          .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+          .option('--include-idle', 'Include idle samples in percentages')
+          .option(
+            '--search <term>',
+            'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
+          )
+          .option('--limit <N>', 'Limit the number of results shown')
+      )
     )
   );
 }
@@ -217,6 +221,7 @@ export function registerThreadCommand(
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
         strategy: parseOptionalStrategyArg(opts.strategy),
+        implementation: parseOptionalImplementationArg(opts.implementation),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
       opts
@@ -239,6 +244,7 @@ export function registerThreadCommand(
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
         strategy: parseOptionalStrategyArg(opts.strategy),
+        implementation: parseOptionalImplementationArg(opts.implementation),
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
@@ -262,6 +268,7 @@ export function registerThreadCommand(
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
         strategy: parseOptionalStrategyArg(opts.strategy),
+        implementation: parseOptionalImplementationArg(opts.implementation),
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
@@ -525,23 +532,25 @@ Examples:
   });
 
   // thread functions
-  addStrategyOption(
-    addSampleFilterOptions(
-      addGlobalOptions(
-        thread
-          .command('functions')
-          .description('List all functions with CPU percentages')
-          .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-          .option('--search <term>', 'Filter by substring')
-          .option(
-            '--min-self <percent>',
-            'Filter by minimum self time percentage'
-          )
-          .option(
-            '--limit <N>',
-            'Limit the number of results shown (0 = no limit)'
-          )
-          .option('--include-idle', 'Include idle samples in percentages')
+  addImplementationOption(
+    addStrategyOption(
+      addSampleFilterOptions(
+        addGlobalOptions(
+          thread
+            .command('functions')
+            .description('List all functions with CPU percentages')
+            .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+            .option('--search <term>', 'Filter by substring')
+            .option(
+              '--min-self <percent>',
+              'Filter by minimum self time percentage'
+            )
+            .option(
+              '--limit <N>',
+              'Limit the number of results shown (0 = no limit)'
+            )
+            .option('--include-idle', 'Include idle samples in percentages')
+        )
       )
     )
   ).action(async (opts) => {
@@ -578,6 +587,7 @@ Examples:
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         strategy: parseOptionalStrategyArg(opts.strategy),
+        implementation: parseOptionalImplementationArg(opts.implementation),
         functionFilters,
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },

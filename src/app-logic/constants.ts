@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { MarkerPhase } from 'firefox-profiler/types';
+import type {
+  MarkerPhase,
+  BenchmarkBucketFilter,
+} from 'firefox-profiler/types';
 
 // The current version of the Gecko profile format.
 // Please don't forget to update the gecko profile format changelog in
@@ -111,3 +114,12 @@ export const INSTANT: MarkerPhase = 0;
 export const INTERVAL: MarkerPhase = 1;
 export const INTERVAL_START: MarkerPhase = 2;
 export const INTERVAL_END: MarkerPhase = 3;
+
+// What the benchmark comparison lists when the URL doesn't say: buckets that
+// moved the score, in both directions.
+export const DEFAULT_BENCHMARK_BUCKET_FILTER: BenchmarkBucketFilter = {
+  mode: 'movers',
+  subject: null,
+  comparand: 'best',
+  show: 'all',
+};

@@ -6,6 +6,7 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/types';
 import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
+import { DEFAULT_BENCHMARK_BUCKET_FILTER } from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -18,6 +19,7 @@ import type {
   CallTreeSummaryStrategy,
   TimelineType,
   UrlState,
+  BenchmarkBucketFilter,
   Reducer,
   SourceViewState,
   AssemblyViewState,
@@ -58,6 +60,8 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'unpublished';
     case 'SET_DATA_SOURCE':
       return action.dataSource;
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
+      return 'compare-benchmark';
     default:
       return state;
   }
@@ -89,7 +93,32 @@ const profileUrl: Reducer<string> = (state = '', action) => {
 const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_PROFILES_TO_COMPARE':
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
       return action.profiles;
+    default:
+      return state;
+  }
+};
+
+const profileNamesToCompare: Reducer<string[] | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
+      return action.profileNames;
+    default:
+      return state;
+  }
+};
+
+const benchmarkBucketFilter: Reducer<BenchmarkBucketFilter> = (
+  state = DEFAULT_BENCHMARK_BUCKET_FILTER,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_BENCHMARK_BUCKET_FILTER':
+      return action.filter;
     default:
       return state;
   }
@@ -921,6 +950,8 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     hash,
     profileUrl,
     profilesToCompare,
+    profileNamesToCompare,
+    benchmarkBucketFilter,
     selectedTab,
     pathInZipFile,
     profileSpecific,

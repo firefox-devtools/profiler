@@ -40,6 +40,7 @@ export function registerFilterCommand(
       excludesFunction: opts.excludesFunction,
       merge: opts.merge,
       rootAt: opts.rootAt,
+      focusSelf: opts.focusSelf,
       includesFunction: opts.includesFunction,
       includesPrefix: opts.includesPrefix,
       includesSuffix: opts.includesSuffix,

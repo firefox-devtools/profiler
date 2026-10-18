@@ -81,10 +81,13 @@ export const mainBundleConfig = {
       : 'undefined',
     // no need to define NODE_ENV:
     // esbuild automatically defines NODE_ENV based on the value for "minify"
-    // In dev, the worker is not hashed so the path is predictable.
-    // In production, build.mjs overrides this after building the worker first.
+    // In dev, the workers are not hashed so their paths are predictable.
+    // In production, build.mjs overrides these after building them first.
     SOURCE_MAP_WORKER_PATH: JSON.stringify('/source-map.worker.js'),
     FORMAT_WORKER_PATH: JSON.stringify('/format.worker.js'),
+    BENCHMARK_COMPARE_WORKER_PATH: JSON.stringify(
+      '/benchmark-compare.worker.js'
+    ),
     'process.env.ENABLE_SERVICE_WORKER': JSON.stringify(
       process.env.ENABLE_SERVICE_WORKER || 'true'
     ),
@@ -119,56 +122,56 @@ export const mainBundleConfig = {
   ],
 };
 
-// Source map worker bundle configuration.
-// Built as a standalone IIFE so that npm dependencies (lezer, source-map) are
-// bundled into a single file that can be loaded as a Web Worker without needing
-// ES module support. Watched builds use a stable filename because the main
-// bundle's SOURCE_MAP_WORKER_PATH define can't be updated when only the worker
-// changes. The one-off production build overrides this with a content hash and
-// injects the resulting path into the main bundle.
-export const sourceMapWorkerConfig = {
-  ...baseConfig,
-  entryPoints: ['src/profile-logic/source-maps/source-map.worker.ts'],
-  outdir: 'dist',
-  format: 'iife',
-  platform: 'browser',
-  target: browserslistToEsbuild(),
-  sourcemap: true,
-  splitting: false,
-  entryNames: '[name]',
-  metafile: true,
-  plugins: [wasmLoader()],
-};
+// Web Worker bundle configuration.
+//
+// Each worker is built as a standalone IIFE, so that its dependencies end up in a
+// single file that can be loaded as a Web Worker without needing ES module
+// support. Watched builds use a stable filename because the main bundle's
+// worker path defines can't be updated when only a worker changes. The one-off
+// production build overrides this with a content hash and injects the resulting
+// paths into the main bundle.
+function workerConfig(entryPoint, plugins = []) {
+  return {
+    ...baseConfig,
+    entryPoints: [entryPoint],
+    outdir: 'dist',
+    format: 'iife',
+    platform: 'browser',
+    target: browserslistToEsbuild(),
+    sourcemap: true,
+    splitting: false,
+    entryNames: '[name]',
+    metafile: true,
+    plugins,
+  };
+}
 
-// Format worker bundle configuration, for formatting JS code in the source
-// view. Built in the same way as the source map worker, see above.
-export const formatWorkerConfig = {
-  ...baseConfig,
-  entryPoints: ['src/profile-logic/js-format/format.worker.ts'],
-  outdir: 'dist',
-  format: 'iife',
-  platform: 'browser',
-  target: browserslistToEsbuild(),
-  sourcemap: true,
-  splitting: false,
-  entryNames: '[name]',
-  metafile: true,
-};
+// Source map symbolication: needs the wasm loader for the `source-map` package's
+// mappings.wasm.
+export const sourceMapWorkerConfig = workerConfig(
+  'src/profile-logic/source-maps/source-map.worker.ts',
+  [wasmLoader()]
+);
 
-function _getWorkerPath(workerConfig, metafile) {
-  const [entryPoint] = workerConfig.entryPoints;
+// Formatting JS code in the source view.
+export const formatWorkerConfig = workerConfig(
+  'src/profile-logic/js-format/format.worker.ts'
+);
+
+// The benchmark comparison's bucket tables. Nothing but the comparison's own
+// arithmetic, so no plugins and a very small bundle.
+export const benchmarkCompareWorkerConfig = workerConfig(
+  'src/profile-logic/benchmark/benchmark-compare.worker.ts'
+);
+
+/** The URL to load a worker built with `workerConfig` from, read out of the
+ * build's metafile since in production the filename carries a content hash. */
+export function getWorkerPath(config, metafile) {
+  const [entryPoint] = config.entryPoints;
   const [outputPath] = Object.entries(metafile.outputs).find(
     ([, output]) => output.entryPoint === entryPoint
   );
   return '/' + path.basename(outputPath);
-}
-
-export function getSourceMapWorkerPath(metafile) {
-  return _getWorkerPath(sourceMapWorkerConfig, metafile);
-}
-
-export function getFormatWorkerPath(metafile) {
-  return _getWorkerPath(formatWorkerConfig, metafile);
 }
 
 // Photon styling build configuration
