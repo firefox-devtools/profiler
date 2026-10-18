@@ -4,7 +4,12 @@
 import { getProfile } from 'firefox-profiler/selectors/profile';
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { getSymbolServerUrl } from 'firefox-profiler/selectors/url-state';
-import { getSourceCodeCacheGeneration } from 'firefox-profiler/selectors/code';
+import {
+  getSourceCodeCacheGeneration,
+  getSourceFormattingCache,
+  getSourceFormattingCacheGeneration,
+  type SourceFormattingRequest,
+} from 'firefox-profiler/selectors/code';
 import {
   fetchSource,
   type FetchSourceResult,
@@ -20,6 +25,7 @@ import type {
   DecodedInstruction,
   IndexIntoSourceTable,
 } from 'firefox-profiler/types';
+import { runFormatWorker } from 'firefox-profiler/profile-logic/js-format/run-format-worker';
 
 // The `generation` argument of these is the source code cache generation from
 // when the fetch started, see SourceCodeCacheState.
@@ -151,4 +157,53 @@ export function failLoadingAssemblyCode(
   errors: ApiQueryError[]
 ): Action {
   return { type: 'ASSEMBLY_CODE_LOADING_ERROR', nativeSymbolKey, errors };
+}
+
+/**
+ * Pretty-prints a source in the format worker. The worker reports its progress
+ * in steps, so that the source view can show partially-formatted code.
+ */
+export function startFormattingSource(
+  request: SourceFormattingRequest
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const { sourceIndex, code, dialect } = request;
+    const state = getState();
+    if (getSourceFormattingCache(state).has(sourceIndex)) {
+      return;
+    }
+    const generation = getSourceFormattingCacheGeneration(state);
+    dispatch({ type: 'SOURCE_FORMATTING_BEGIN', sourceIndex, generation });
+    // The number of edits from the progress messages so far.
+    let editCount = 0;
+    runFormatWorker({ code, dialect }, (output) => {
+      switch (output.type) {
+        case 'progress':
+          editCount = output.keptEditCount + output.edits.length / 3;
+          dispatch({
+            type: 'SOURCE_FORMATTING_PROGRESS',
+            sourceIndex,
+            keptEditCount: output.keptEditCount,
+            edits: output.edits,
+            isDone: output.isDone,
+            generation,
+          });
+          break;
+        case 'error':
+          console.error('Formatting the source failed:', output.message);
+          // Keep the edits that were made so far.
+          dispatch({
+            type: 'SOURCE_FORMATTING_PROGRESS',
+            sourceIndex,
+            keptEditCount: editCount,
+            edits: new Int32Array(0),
+            isDone: true,
+            generation,
+          });
+          break;
+        default:
+          throw assertExhaustiveCheck(output);
+      }
+    });
+  };
 }
