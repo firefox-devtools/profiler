@@ -37,6 +37,7 @@ import type {
   TimelineType,
   SourceViewState,
   AssemblyViewState,
+  GeneratedSourceViewState,
   NativeSymbolInfo,
   Transform,
   IndexIntoFrameTable,
@@ -180,6 +181,8 @@ type BaseQuery = {
   timelineType: string;
   sourceViewIndex: number;
   sourceViewPretty: null | undefined;
+  generatedSourceViewIndex: number;
+  generatedSourceViewPretty: null | undefined;
   assemblyView: string;
 };
 
@@ -226,6 +229,8 @@ type Query = BaseQuery & {
   transforms?: string;
   sourceViewIndex?: number;
   sourceViewPretty?: null | undefined;
+  generatedSourceViewIndex?: number;
+  generatedSourceViewPretty?: null | undefined;
   assemblyView?: string;
   bottomFullscreen?: boolean;
 
@@ -375,6 +380,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
       const {
         sourceView,
+        generatedSourceView,
         assemblyView,
         isBottomBoxOpenPerPanel,
         isBottomBoxFullscreen,
@@ -384,6 +390,15 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         if (sourceView.sourceIndex !== null) {
           query.sourceViewIndex = sourceView.sourceIndex;
           query.sourceViewPretty = sourceView.isPrettyPrinted
+            ? null
+            : undefined;
+        }
+        if (
+          generatedSourceView.isOpen &&
+          generatedSourceView.sourceIndex !== null
+        ) {
+          query.generatedSourceViewIndex = generatedSourceView.sourceIndex;
+          query.generatedSourceViewPretty = generatedSourceView.isPrettyPrinted
             ? null
             : undefined;
         }
@@ -591,6 +606,14 @@ export function stateFromLocation(
     highlightedColumn: null,
     isPrettyPrinted: query.sourceViewPretty !== undefined,
   };
+  const generatedSourceView: GeneratedSourceViewState = {
+    isOpen: false,
+    scrollGeneration: 0,
+    sourceIndex: null,
+    highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: query.generatedSourceViewPretty !== undefined,
+  };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
     scrollGeneration: 0,
@@ -602,6 +625,11 @@ export function stateFromLocation(
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceViewIndex !== undefined) {
     sourceView.sourceIndex = Number(query.sourceViewIndex);
+    isBottomBoxOpenPerPanel[selectedTab] = true;
+  }
+  if (query.generatedSourceViewIndex !== undefined) {
+    generatedSourceView.sourceIndex = Number(query.generatedSourceViewIndex);
+    generatedSourceView.isOpen = true;
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
   if (query.assemblyView) {
@@ -645,6 +673,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceView,
+      generatedSourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
       isBottomBoxFullscreen: query.bottomFullscreen || false,

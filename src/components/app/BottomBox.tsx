@@ -10,6 +10,7 @@ import { AssemblyView } from '../shared/AssemblyView';
 import { FullscreenToggleButton } from './FullscreenToggleButton';
 import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
+import { GeneratedSourceViewToggleButton } from './GeneratedSourceViewToggleButton';
 import { PrettyPrintToggleButton } from './PrettyPrintToggleButton';
 import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
@@ -22,6 +23,12 @@ import {
   getSourceViewScrollToColumnNumber,
   getSourceViewHighlightedColumn,
   getSourceViewIsPrettyPrinted,
+  getGeneratedSourceViewScrollGeneration,
+  getGeneratedSourceViewScrollToLineNumber,
+  getGeneratedSourceViewHighlightedLine,
+  getGeneratedSourceViewScrollToColumnNumber,
+  getGeneratedSourceViewHighlightedColumn,
+  getGeneratedSourceViewIsPrettyPrinted,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -33,19 +40,25 @@ import {
   closeBottomBox,
   toggleBottomBoxFullscreen,
   setSourceViewPrettyPrint,
+  setGeneratedSourceViewPrettyPrint,
 } from 'firefox-profiler/actions/profile-view';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   getSourceViewCode,
+  getGeneratedSourceViewCode,
   getAssemblyViewCode,
   getSourceViewFormatDialect,
+  getGeneratedSourceViewFormatDialect,
   getSourceViewFormatting,
+  getGeneratedSourceViewFormatting,
 } from 'firefox-profiler/selectors/code';
 import type { SourceViewFormatting } from 'firefox-profiler/profile-logic/js-format/formatted-source';
 import {
   getSourceViewFile,
   getSourceViewStartLine,
+  getGeneratedSourceViewFile,
+  getGeneratedSourceViewStartLine,
 } from 'firefox-profiler/selectors/profile';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
@@ -79,6 +92,18 @@ type StateProps = {
   readonly sourceViewIsPrettyPrinted: boolean;
   readonly sourceViewFormatting: SourceViewFormatting | null;
   readonly globalLineTimings: LineTimings;
+  readonly generatedSourceViewFile: string | null;
+  readonly generatedSourceViewCode: SourceCodeStatus | void;
+  readonly generatedSourceViewScrollGeneration: number;
+  readonly generatedSourceViewScrollToLineNumber?: number;
+  readonly generatedSourceViewHighlightedLine: number | null;
+  readonly generatedSourceViewScrollToColumnNumber?: number;
+  readonly generatedSourceViewHighlightedColumn: number | null;
+  readonly generatedSourceViewStartLine: number;
+  readonly generatedSourceViewCanPrettyPrint: boolean;
+  readonly generatedSourceViewIsPrettyPrinted: boolean;
+  readonly generatedSourceViewFormatting: SourceViewFormatting | null;
+  readonly generatedLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
   readonly assemblyViewCode: AssemblyCodeStatus | void;
@@ -92,6 +117,7 @@ type DispatchProps = {
   readonly closeBottomBox: typeof closeBottomBox;
   readonly toggleBottomBoxFullscreen: typeof toggleBottomBoxFullscreen;
   readonly setSourceViewPrettyPrint: typeof setSourceViewPrettyPrint;
+  readonly setGeneratedSourceViewPrettyPrint: typeof setGeneratedSourceViewPrettyPrint;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -215,6 +241,7 @@ export function AssemblyCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
 
 class BottomBoxImpl extends React.PureComponent<Props> {
   _sourceView = React.createRef<SourceView>();
+  _generatedSourceView = React.createRef<SourceView>();
   _assemblyView = React.createRef<AssemblyView>();
 
   override componentDidMount() {
@@ -233,6 +260,10 @@ class BottomBoxImpl extends React.PureComponent<Props> {
 
   _onChangeSourceViewPrettyPrint = (isPrettyPrinted: boolean) => {
     this.props.setSourceViewPrettyPrint(isPrettyPrinted);
+  };
+
+  _onChangeGeneratedSourceViewPrettyPrint = (isPrettyPrinted: boolean) => {
+    this.props.setGeneratedSourceViewPrettyPrint(isPrettyPrinted);
   };
 
   _onClickCloseButton = () => {
@@ -258,6 +289,18 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewCanPrettyPrint,
       sourceViewIsPrettyPrinted,
       sourceViewFormatting,
+      generatedSourceViewFile,
+      generatedSourceViewCode,
+      generatedSourceViewScrollGeneration,
+      generatedSourceViewScrollToLineNumber,
+      generatedSourceViewHighlightedLine,
+      generatedSourceViewScrollToColumnNumber,
+      generatedSourceViewHighlightedColumn,
+      generatedSourceViewStartLine,
+      generatedSourceViewCanPrettyPrint,
+      generatedSourceViewIsPrettyPrinted,
+      generatedSourceViewFormatting,
+      generatedLineTimings,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
       assemblyViewScrollToInstructionAddress,
@@ -281,6 +324,17 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     const sourceIsIonGraph = path !== null && path.endsWith('iongraph.json');
     const displaySourceView = sourceViewFile !== null && !sourceIsIonGraph;
     const displayIonGraph = sourceViewFile !== null && sourceIsIonGraph;
+    const generatedSourceCode =
+      generatedSourceViewCode && generatedSourceViewCode.type === 'AVAILABLE'
+        ? generatedSourceViewCode.code
+        : '';
+    const generatedPath =
+      generatedSourceViewFile !== null
+        ? parseFileNameFromSymbolication(generatedSourceViewFile).path
+        : null;
+    // generatedSourceViewFile is only non-null if the generated source view
+    // is open and the current function is source-mapped.
+    const displayGeneratedSourceView = generatedPath !== null;
     const sourceViewLines = _getDisplayedLines(
       sourceViewFormatting,
       sourceViewStartLine,
@@ -289,16 +343,27 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewHighlightedLine,
       sourceViewHighlightedColumn
     );
+    const generatedSourceViewLines = _getDisplayedLines(
+      generatedSourceViewFormatting,
+      generatedSourceViewStartLine,
+      generatedSourceViewScrollToLineNumber,
+      generatedSourceViewScrollToColumnNumber,
+      generatedSourceViewHighlightedLine,
+      generatedSourceViewHighlightedColumn
+    );
 
-    // The bottom box has one or more side-by-side panes.
-    // At the moment it always has either one or two panes:
-    //  - It always has the source view pane
-    //  - It also has the assembly view pane, if the assembly view is open.
+    // The bottom box has one or more side-by-side panes:
+    //  - It always has the source view pane.
+    //  - It has the generated source view pane, if the generated source view
+    //    is open and the function is source-mapped. This pane shows the code
+    //    that the browser runs, for example a minified JS bundle.
+    //  - It has the assembly view pane, if the assembly view is open.
 
     // These trailing header buttons go into the bottom-box-bar of the last pane.
     const trailingHeaderButtons = (
       <div className="bottom-box-header-trailing-buttons">
         {assemblyViewIsOpen ? <AssemblyViewNativeSymbolNavigator /> : null}
+        <GeneratedSourceViewToggleButton />
         <AssemblyViewToggleButton />
         <FullscreenToggleButton />
         <Localized id="SourceView--close-button" attrs={{ title: true }}>
@@ -333,7 +398,9 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                   onChange={this._onChangeSourceViewPrettyPrint}
                 />
               ) : null}
-              {assemblyViewIsOpen ? null : trailingHeaderButtons}
+              {assemblyViewIsOpen || displayGeneratedSourceView
+                ? null
+                : trailingHeaderButtons}
             </div>
           </div>
           <div className="bottom-sourceview-wrapper">
@@ -366,12 +433,68 @@ class BottomBoxImpl extends React.PureComponent<Props> {
           </div>
         </div>
 
+        {displayGeneratedSourceView ? (
+          <ResizableWithSplitter
+            splitterPosition="start"
+            controlledProperty="width"
+            percent={true}
+            initialSize={assemblyViewIsOpen ? '33%' : '50%'}
+          >
+            <div className="bottom-box-pane">
+              <div className="bottom-box-bar">
+                <Localized
+                  id="GeneratedSourceView--title"
+                  vars={{ path: generatedPath }}
+                >
+                  <h3 className="bottom-box-title">
+                    {`Generated: ${generatedPath}`}
+                  </h3>
+                </Localized>
+                <div className="bottom-box-header-buttons">
+                  {generatedSourceViewCanPrettyPrint ? (
+                    <PrettyPrintToggleButton
+                      isPrettyPrinted={generatedSourceViewIsPrettyPrinted}
+                      onChange={this._onChangeGeneratedSourceViewPrettyPrint}
+                    />
+                  ) : null}
+                  {assemblyViewIsOpen ? null : trailingHeaderButtons}
+                </div>
+              </div>
+              <div className="bottom-sourceview-wrapper">
+                <SourceView
+                  timings={generatedLineTimings}
+                  sourceCode={generatedSourceCode}
+                  formattedLines={generatedSourceViewLines.formattedLines}
+                  filePath={generatedPath}
+                  scrollGeneration={generatedSourceViewScrollGeneration}
+                  scrollToLineNumber={
+                    generatedSourceViewLines.scrollToLineNumber
+                  }
+                  highlightedLine={generatedSourceViewLines.highlightedLine}
+                  startLine={generatedSourceViewLines.startLine}
+                  ref={this._generatedSourceView}
+                />
+                {generatedSourceViewCode !== undefined &&
+                generatedSourceViewCode.type === 'LOADING' ? (
+                  <CodeLoadingOverlay source={generatedSourceViewCode.source} />
+                ) : null}
+                {generatedSourceViewCode !== undefined &&
+                generatedSourceViewCode.type === 'ERROR' ? (
+                  <SourceCodeErrorOverlay
+                    errors={generatedSourceViewCode.errors}
+                  />
+                ) : null}
+              </div>
+            </div>
+          </ResizableWithSplitter>
+        ) : null}
+
         {assemblyViewIsOpen ? (
           <ResizableWithSplitter
             splitterPosition="start"
             controlledProperty="width"
             percent={true}
-            initialSize="50%"
+            initialSize={displayGeneratedSourceView ? '33%' : '50%'}
           >
             <div className="bottom-box-pane">
               <div className="bottom-box-bar">
@@ -435,6 +558,26 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewCanPrettyPrint: getSourceViewFormatDialect(state) !== null,
     sourceViewIsPrettyPrinted: getSourceViewIsPrettyPrinted(state),
     sourceViewFormatting: getSourceViewFormatting(state),
+    generatedSourceViewFile: getGeneratedSourceViewFile(state),
+    generatedSourceViewCode: getGeneratedSourceViewCode(state),
+    generatedLineTimings:
+      selectedThreadSelectors.getGeneratedSourceViewLineTimings(state),
+    generatedSourceViewScrollGeneration:
+      getGeneratedSourceViewScrollGeneration(state),
+    generatedSourceViewScrollToLineNumber:
+      getGeneratedSourceViewScrollToLineNumber(state),
+    generatedSourceViewHighlightedLine:
+      getGeneratedSourceViewHighlightedLine(state),
+    generatedSourceViewScrollToColumnNumber:
+      getGeneratedSourceViewScrollToColumnNumber(state),
+    generatedSourceViewHighlightedColumn:
+      getGeneratedSourceViewHighlightedColumn(state),
+    generatedSourceViewStartLine: getGeneratedSourceViewStartLine(state),
+    generatedSourceViewCanPrettyPrint:
+      getGeneratedSourceViewFormatDialect(state) !== null,
+    generatedSourceViewIsPrettyPrinted:
+      getGeneratedSourceViewIsPrettyPrinted(state),
+    generatedSourceViewFormatting: getGeneratedSourceViewFormatting(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:
@@ -450,6 +593,7 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     closeBottomBox,
     toggleBottomBoxFullscreen,
     setSourceViewPrettyPrint,
+    setGeneratedSourceViewPrettyPrint,
   },
   component: BottomBoxImpl,
 });

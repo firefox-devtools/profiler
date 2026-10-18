@@ -348,21 +348,36 @@ type ProfileAction =
   | {
       readonly type: 'UPDATE_BOTTOM_BOX';
       readonly sourceIndex: IndexIntoSourceTable | null;
+      readonly generatedSourceIndex: IndexIntoSourceTable | null;
       readonly nativeSymbols: NativeSymbolInfo[];
       readonly currentNativeSymbol: number | null;
       readonly currentTab: TabSlug;
       readonly shouldOpenBottomBox: boolean;
       readonly shouldOpenAssemblyView: boolean;
       readonly scrollToLineNumber?: number;
+      readonly scrollToGeneratedLineNumber?: number;
       readonly scrollToInstructionAddress?: number;
       readonly highlightedLineNumber: number | null;
+      readonly highlightedGeneratedLineNumber: number | null;
       readonly highlightedInstructionAddress: number | null;
       readonly scrollToColumnNumber?: number;
+      readonly scrollToGeneratedColumnNumber?: number;
       readonly highlightedColumnNumber?: number;
+      readonly highlightedGeneratedColumnNumber?: number;
+    }
+  | {
+      readonly type: 'OPEN_GENERATED_SOURCE_VIEW';
     }
   | {
       readonly type: 'SET_SOURCE_VIEW_PRETTY_PRINT';
       readonly isPrettyPrinted: boolean;
+    }
+  | {
+      readonly type: 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT';
+      readonly isPrettyPrinted: boolean;
+    }
+  | {
+      readonly type: 'CLOSE_GENERATED_SOURCE_VIEW';
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';

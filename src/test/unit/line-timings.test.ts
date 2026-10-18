@@ -226,6 +226,73 @@ describe('getLineTimings for getStackLineInfo', function () {
     expect(lineTimings.selfLineHits.get(5)).toBe(undefined);
     expect(lineTimings.selfLineHits.get(7)).toBe(undefined);
   });
+
+  it('attributes the generated lines to the compiled source when no sourceLocationTable is passed', function () {
+    const { derivedThreads } = getProfileFromTextSamples(`
+      A[file:compiled.js][line:5]
+      B[file:compiled.js][line:7]
+    `);
+    const [thread] = derivedThreads;
+    const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
+    const compiledSourceIndex = thread.sources.filename.indexOf(
+      stringTable.indexForString('compiled.js')
+    );
+
+    // Map every frame and func to an original source, at line 100 + the
+    // compiled line.
+    const originalSourceIndex = thread.sources.length;
+    thread.sources.id.push(null);
+    thread.sources.filename.push(stringTable.indexForString('original.ts'));
+    thread.sources.sourceMapURL.push(null);
+    thread.sources.content.push(null);
+    thread.sources.length++;
+    const sourceLocationTable = thread.sourceLocationTable;
+    for (let frame = 0; frame < frameTable.length; frame++) {
+      sourceLocationTable.source.push(originalSourceIndex);
+      sourceLocationTable.line.push(100 + frameTable.line[frame]);
+      sourceLocationTable.column.push(1);
+      frameTable.originalLocation[frame] = sourceLocationTable.length++;
+      frameTable.flags[frame] |= FrameFlag.HasOriginalLocation;
+      const func = frameTable.func[frame];
+      sourceLocationTable.source.push(originalSourceIndex);
+      sourceLocationTable.line.push(100);
+      sourceLocationTable.column.push(1);
+      funcTable.originalLocation[func] = sourceLocationTable.length++;
+      funcTable.flags[func] |= FuncFlag.HasOriginalLocation;
+    }
+
+    // In original coordinates, the compiled source has no hits.
+    const originalLineTimings = getLineTimings(
+      getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        compiledSourceIndex,
+        sourceLocationTable
+      ),
+      samples
+    );
+    expect(originalLineTimings.totalLineHits.size).toBe(0);
+
+    // In generated coordinates, the compiled lines are hit.
+    const generatedLineTimings = getLineTimings(
+      getStackLineInfo(
+        stackTable,
+        frameTable,
+        funcTable,
+        compiledSourceIndex,
+        null
+      ),
+      samples
+    );
+    expect(generatedLineTimings.selfLineHits).toEqual(new Map([[7, 1]]));
+    expect(generatedLineTimings.totalLineHits).toEqual(
+      new Map([
+        [5, 1],
+        [7, 1],
+      ])
+    );
+  });
 });
 
 describe('getTotalLineTimingsForCallNode', function () {

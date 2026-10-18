@@ -6,6 +6,7 @@ import type {
   AssemblyCodeStatus,
   IndexIntoSourceTable,
   Lib,
+  Profile,
   SourceCodeStatus,
   SourceFormattingStatus,
   Selector,
@@ -13,6 +14,8 @@ import type {
 import {
   getSourceViewSourceIndex,
   getSourceViewIsPrettyPrinted,
+  getGeneratedSourceViewSourceIndex,
+  getGeneratedSourceViewIsPrettyPrinted,
   getAssemblyViewNativeSymbol,
 } from './url-state';
 import {
@@ -20,6 +23,9 @@ import {
   getSourceViewFile,
   getSourceViewStartLine,
   getSourceViewStartColumn,
+  getGeneratedSourceViewFile,
+  getGeneratedSourceViewStartLine,
+  getGeneratedSourceViewStartColumn,
 } from './profile';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
@@ -35,23 +41,37 @@ export const getSourceCodeCache: Selector<
   Map<IndexIntoSourceTable, SourceCodeStatus>
 > = (state) => state.code.sourceCodeCache;
 
+function _getCodeForSource(
+  sourceCodeCache: Map<IndexIntoSourceTable, SourceCodeStatus>,
+  sourceIndex: IndexIntoSourceTable | null,
+  profile: Profile | null
+): SourceCodeStatus | void {
+  if (sourceIndex === null) {
+    return undefined;
+  }
+  // Prefer source content stored in the profile (from source map sourcesContent),
+  // so the source view works offline and when sharing profiles.
+  const inlineCode = profile?.shared.sources.content[sourceIndex];
+  if (inlineCode !== null && inlineCode !== undefined) {
+    return { type: 'AVAILABLE', code: inlineCode };
+  }
+  return sourceCodeCache.get(sourceIndex);
+}
+
 export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(
     getSourceCodeCache,
     getSourceViewSourceIndex,
     getProfileOrNull,
-    (sourceCodeCache, sourceIndex, profile) => {
-      if (sourceIndex === null) {
-        return undefined;
-      }
-      // Prefer source content stored in the profile (from source map sourcesContent),
-      // so the source view works offline and when sharing profiles.
-      const inlineCode = profile?.shared.sources.content[sourceIndex];
-      if (inlineCode !== null && inlineCode !== undefined) {
-        return { type: 'AVAILABLE', code: inlineCode };
-      }
-      return sourceCodeCache.get(sourceIndex);
-    }
+    _getCodeForSource
+  );
+
+export const getGeneratedSourceViewCode: Selector<SourceCodeStatus | void> =
+  createSelector(
+    getSourceCodeCache,
+    getGeneratedSourceViewSourceIndex,
+    getProfileOrNull,
+    _getCodeForSource
   );
 
 export const getSourceFormattingCache: Selector<
@@ -69,6 +89,9 @@ function _getFormatDialectForFile(file: string | null): JsDialect | null {
 
 export const getSourceViewFormatDialect: Selector<JsDialect | null> =
   createSelector(getSourceViewFile, _getFormatDialectForFile);
+
+export const getGeneratedSourceViewFormatDialect: Selector<JsDialect | null> =
+  createSelector(getGeneratedSourceViewFile, _getFormatDialectForFile);
 
 function _getFormatting(
   isPrettyPrinted: boolean,
@@ -117,6 +140,18 @@ export const getSourceViewFormatting: Selector<SourceViewFormatting | null> =
     _getFormatting
   );
 
+export const getGeneratedSourceViewFormatting: Selector<SourceViewFormatting | null> =
+  createSelector(
+    getGeneratedSourceViewIsPrettyPrinted,
+    getGeneratedSourceViewFormatDialect,
+    getGeneratedSourceViewSourceIndex,
+    getGeneratedSourceViewCode,
+    getSourceFormattingCache,
+    getGeneratedSourceViewStartLine,
+    getGeneratedSourceViewStartColumn,
+    _getFormatting
+  );
+
 export type SourceFormattingRequest = {
   sourceIndex: IndexIntoSourceTable;
   code: string;
@@ -151,6 +186,16 @@ export const getSourceViewFormattingRequest: Selector<SourceFormattingRequest | 
     getSourceViewFormatDialect,
     getSourceViewSourceIndex,
     getSourceViewCode,
+    getSourceFormattingCache,
+    _getFormattingRequest
+  );
+
+export const getGeneratedSourceViewFormattingRequest: Selector<SourceFormattingRequest | null> =
+  createSelector(
+    getGeneratedSourceViewIsPrettyPrinted,
+    getGeneratedSourceViewFormatDialect,
+    getGeneratedSourceViewSourceIndex,
+    getGeneratedSourceViewCode,
     getSourceFormattingCache,
     _getFormattingRequest
   );

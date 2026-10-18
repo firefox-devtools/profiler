@@ -937,20 +937,27 @@ export type NativeSymbolInfo = {
  */
 export type BottomBoxInfo = {
   sourceIndex: IndexIntoSourceTable | null;
+  // The source with the generated (compiled) code, if the function was
+  // source-mapped, e.g. a JS bundle. Null if there is no source map.
+  generatedSourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
   initialNativeSymbol: number | null; // index into `nativeSymbols`
   // Optional line number + instruction address to scroll into view.
   scrollToLineNumber?: number;
+  scrollToGeneratedLineNumber?: number;
   scrollToInstructionAddress?: number;
   // Which lines / instructions to highlight (or none). This is used when clicking
   // a stack frame in a marker stack.
   highlightedLineNumber: number | null;
+  highlightedGeneratedLineNumber: number | null;
   highlightedInstructionAddress: number | null;
   // Optional column numbers for the lines above. These are used to find the
   // right line when the source is pretty-printed, because minified code often
   // has very long lines.
   scrollToColumnNumber?: number;
+  scrollToGeneratedColumnNumber?: number;
   highlightedColumnNumber?: number;
+  highlightedGeneratedColumnNumber?: number;
 };
 
 /**

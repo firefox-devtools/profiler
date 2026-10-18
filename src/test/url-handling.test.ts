@@ -18,7 +18,10 @@ import {
   setDataSource,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  openGeneratedSourceView,
+  closeGeneratedSourceView,
   setSourceViewPrettyPrint,
+  setGeneratedSourceViewPrettyPrint,
   changeShowUserTimings,
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
@@ -2032,9 +2035,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: null,
       nativeSymbols: [],
       initialNativeSymbol: null,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -2054,19 +2059,69 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     ).toBeNull();
   });
 
-  it('persists pretty-printing of the source view', function () {
+  it('persists the generated source view to the URL only while it is open', function () {
+    const { dispatch, getState, getSourceIndex } = setup();
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
+    // The URL handling doesn't care what the generated source index refers to,
+    // it only needs to differ from the source view's index.
+    const generatedSourceIndex = sourceIndex + 1;
+    const bottomBoxInfo: BottomBoxInfo = {
+      sourceIndex,
+      generatedSourceIndex,
+      nativeSymbols: [],
+      initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
+      highlightedInstructionAddress: null,
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+
+    // The generated source view starts out closed.
+    let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
+    ).toBeFalse();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewSourceIndex(newStore.getState())
+    ).toBeNull();
+
+    dispatch(openGeneratedSourceView());
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewSourceIndex(newStore.getState())
+    ).toBe(sourceIndex);
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewSourceIndex(newStore.getState())
+    ).toBe(generatedSourceIndex);
+
+    dispatch(closeGeneratedSourceView());
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
+    ).toBeFalse();
+  });
+
+  it('persists pretty-printing of both source panes', function () {
     const { dispatch, getState, getSourceIndex } = setup();
     const sourceFile =
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: sourceIndex + 1,
       nativeSymbols: [],
       initialNativeSymbol: null,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    dispatch(openGeneratedSourceView());
     expect(getQueryStringFromState(getState())).not.toContain('Pretty');
 
     dispatch(setSourceViewPrettyPrint(true));
@@ -2074,12 +2129,23 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
     ).toBeTrue();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsPrettyPrinted(
+        newStore.getState()
+      )
+    ).toBeFalse();
 
     dispatch(setSourceViewPrettyPrint(false));
+    dispatch(setGeneratedSourceViewPrettyPrint(true));
     newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
     expect(
       urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
     ).toBeFalse();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsPrettyPrinted(
+        newStore.getState()
+      )
+    ).toBeTrue();
   });
 
   it('keeps a closed bottom box closed, even if a source file was loaded before', function () {
@@ -2094,9 +2160,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: null,
       nativeSymbols: [],
       initialNativeSymbol: null,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -2124,9 +2192,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex: null,
+      generatedSourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -2168,9 +2238,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
