@@ -46,6 +46,7 @@ import type {
   ThreadSelectResult,
   StrategySelectResult,
   CallTreeSummaryStrategy,
+  ImplementationFilter,
   WeightType,
   CounterSummary,
   CounterListResult,
@@ -1227,6 +1228,24 @@ function formatCallTree(
   return lines.join('\n');
 }
 
+/**
+ * Describe a non-default implementation filter, or return null for combined.
+ */
+function formatImplementationNote(
+  implementation: ImplementationFilter
+): string | null {
+  switch (implementation) {
+    case 'combined':
+      return null;
+    case 'js':
+      return 'Implementation: js (native frames merged into their JS callers)';
+    case 'cpp':
+      return 'Implementation: cpp (JS frames merged into their native callers)';
+    default:
+      throw assertExhaustiveCheck(implementation);
+  }
+}
+
 function formatSamplesPreamble(result: {
   context: SessionContext;
   activeFilters?: FilterEntry[];
@@ -1235,6 +1254,7 @@ function formatSamplesPreamble(result: {
   search?: string;
   friendlyThreadName: string;
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  implementation: ImplementationFilter;
 }): string {
   const contextHeader = formatContextHeader(
     result.context,
@@ -1244,6 +1264,10 @@ function formatSamplesPreamble(result: {
   const strategy = result.callTreeSummaryStrategy;
   const isTiming = strategy === 'timing';
   const dataSourceNote = isTiming ? '' : `Data source: ${strategy}\n\n`;
+  const implementationNote = formatImplementationNote(result.implementation);
+  const implementationPart = implementationNote
+    ? `${implementationNote}\n\n`
+    : '';
   // Idle samples only exist in the timing table, so the note would be
   // meaningless under an allocation strategy.
   const activeOnlyNote =
@@ -1258,7 +1282,7 @@ function formatSamplesPreamble(result: {
   ];
   const filtersNote =
     filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
-  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${searchNote}${filtersNote}`;
+  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${implementationPart}${activeOnlyNote}${searchNote}${filtersNote}`;
 }
 
 /**
@@ -1643,6 +1667,11 @@ export function formatThreadFunctionsResult(
 
   if (!isTiming) {
     lines.push(`Data source: ${result.callTreeSummaryStrategy}\n`);
+  }
+
+  const implementationNote = formatImplementationNote(result.implementation);
+  if (implementationNote) {
+    lines.push(`${implementationNote}\n`);
   }
 
   if (result.activeOnly && isTiming) {

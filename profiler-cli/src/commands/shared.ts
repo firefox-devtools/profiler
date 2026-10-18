@@ -16,6 +16,7 @@ import type {
   ClientCommand,
   CallTreeSummaryStrategy,
   CommandResult,
+  ImplementationFilter,
   PermalinkFormat,
 } from '../protocol';
 
@@ -138,6 +139,41 @@ export function addStrategyOption(cmd: Command): Command {
   );
 }
 
+export const IMPLEMENTATION_FILTERS: ImplementationFilter[] = [
+  'combined',
+  'js',
+  'cpp',
+];
+
+/**
+ * Parse the optional --implementation flag and exit with an error if the
+ * value is not a valid implementation filter.
+ */
+export function parseOptionalImplementationArg(
+  value: string | undefined
+): ImplementationFilter | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!(IMPLEMENTATION_FILTERS as string[]).includes(value)) {
+    console.error(
+      `Error: --implementation must be one of: ${IMPLEMENTATION_FILTERS.join(', ')}`
+    );
+    process.exit(1);
+  }
+  return value as ImplementationFilter;
+}
+
+/**
+ * Add the --implementation option to a command.
+ */
+export function addImplementationOption(cmd: Command): Command {
+  return cmd.option(
+    '--implementation <name>',
+    "Which frames stacks keep: combined (all frames, the default), js (JS only) or cpp (native only). Dropped frames are merged into their callers, so their time becomes the caller's self time"
+  );
+}
+
 /**
  * Returns true if the user typed the name of `cmd`, false if it ran as the
  * default subcommand of its parent. Used to decide whether to print an "other
@@ -199,6 +235,14 @@ export function addSampleFilterOptions(cmd: Command): Command {
     )
     .addOption(
       new Option('--root-at <f-N>', 'Re-root stacks at this function')
+        .argParser(collectStrings)
+        .default([])
+    )
+    .addOption(
+      new Option(
+        '--focus-self <f-N[:js|:cpp]>',
+        'Keep only samples where this function is the leaf, rooted at it. With ":js", the leaf check ignores native frames, so the tree shows the native code that makes up the function\'s JS self time'
+      )
         .argParser(collectStrings)
         .default([])
     )

@@ -41,6 +41,7 @@ export type {
   FunctionCategoryBreakdown,
   FunctionCategoryBreakdowns,
   CallTreeSummaryStrategy,
+  ImplementationFilter,
   WeightType,
   StrategySelectResult,
   InlineStatus,
@@ -101,6 +102,7 @@ import type {
   ThreadInfoResult,
   StrategySelectResult,
   CallTreeSummaryStrategy,
+  ImplementationFilter,
   ThreadListResult,
   ThreadListOptions,
   MarkerStackResult,
@@ -189,6 +191,7 @@ export type ClientCommand =
       includeIdle?: boolean;
       search?: string;
       strategy?: CallTreeSummaryStrategy;
+      implementation?: ImplementationFilter;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
       threadListOptions?: ThreadListOptions;

@@ -58,6 +58,13 @@ CORE WORKFLOW
     Use --strategy to summarize allocated bytes instead of CPU time on profiles with
     allocation tracking. See DATA SOURCES below.
 
+    Use --implementation js to keep only JS frames (plus the few native frames
+    marked as relevant for JS). Native frames are merged into their JS callers,
+    so a JS function's self time includes the native code it called. This is
+    the profiler's "JavaScript" call tree. --implementation cpp keeps native
+    frames only. The default is combined (all frames).
+      profiler-cli thread samples-bottom-up --implementation js   JS self time
+
     Use --search to focus the call tree on paths containing a specific function:
     profiler-cli thread samples-top-down --search GC
     profiler-cli thread samples-bottom-up --search "JS::Compile"
@@ -243,6 +250,14 @@ FILTERS
     Stack transforms -- modify stack structure:
       --merge f-N,...                   remove funcs from stacks (A→f-N→B becomes A→B)
       --root-at f-N                     re-root all stacks at f-N (subtree within f-N)
+      --focus-self f-N[:js|:cpp]        keep only f-N's self time, rooted at f-N
+
+    --focus-self f-N keeps the samples where f-N is the leaf frame and drops
+    its callers. With the ":js" suffix, the leaf check ignores native frames:
+    a sample counts if f-N is its innermost JS frame. The native frames below
+    f-N stay in the tree, so it shows the native code that makes up f-N's JS
+    self time. The suffix belongs to the filter only. Don't also pass
+    --implementation js, because that would hide those native frames again.
 
   COMBINING FILTERS
 
@@ -355,6 +370,10 @@ COMMON ANALYSIS PATTERNS
     profiler-cli filter push --includes-function f-500   Sticky: only samples containing f-500
     profiler-cli filter push --root-at f-500             Sticky: re-root at f-500
     profiler-cli thread samples-top-down                 Call tree within f-500 only
+
+  Break down a JS function's self time into the native code it ran:
+    profiler-cli thread functions --search updateStyle   Note the handle (e.g. f-1234)
+    profiler-cli thread samples-top-down --focus-self f-1234:js
 
   Correlate CPU with a specific event type:
     profiler-cli thread markers --search Paint           Check Paint marker frequency/duration
