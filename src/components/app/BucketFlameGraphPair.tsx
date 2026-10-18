@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 
 import { FlameGraph } from 'firefox-profiler/components/flame-graph/FlameGraph';
 import { useBenchmarkProfileNames } from './BenchmarkProfileNames';
+import { BucketFunctionSource } from './BucketFunctionSource';
 import { computeBucketFlameGraphData } from 'firefox-profiler/profile-logic/benchmark/bucket-flame-graph-data';
 import { encodeUintArrayForUrlComponent } from 'firefox-profiler/utils/uintarray-encoding';
 import { CURRENT_URL_VERSION } from 'firefox-profiler/app-logic/url-handling';
@@ -262,6 +263,14 @@ export function BucketFlameGraphPair({
         sideKey="new"
         widthFraction={newTotal / maxTotal}
         deepLinkUrl={newDeepLinkUrl}
+      />
+      <BucketFunctionSource
+        baseProfile={baseBundle.profile}
+        newProfile={newBundle.profile}
+        baseFunc={baseFunc}
+        newFunc={newFunc}
+        baseLabel={names.base}
+        newLabel={names.new}
       />
     </div>
   );

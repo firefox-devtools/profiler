@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { JsDialect } from './dialect';
+import type { FunctionSource, FunctionSourceRequest } from './function-source';
 
 /**
  * Formatting JS source code ("pretty printing") only ever changes the
@@ -31,21 +32,32 @@ export const FORMAT_WS_INDENT_MASK = 0xffff;
 // The string for one level of indentation.
 export const FORMAT_INDENT = '  ';
 
-export type FormatWorkerInput = {
+export type FormatRequest = {
   code: string;
   dialect: JsDialect;
 };
 
 /**
- * The worker formats the code from front to back and sends a message after
- * each step, so that the source view can show partially-formatted code while
- * the worker is busy. The code before `formattedUpTo` is formatted; the code
+ * The worker either formats a whole file, or extracts the code of a single
+ * function from a file, see function-source.ts.
+ */
+export type FormatWorkerInput =
+  | ({ type: 'format' } & FormatRequest)
+  | { type: 'extract-function'; request: FunctionSourceRequest };
+
+/**
+ * For a 'format' request, the worker formats the code from front to back and
+ * sends a 'progress' message after each step, so that the source view can
+ * show partially-formatted code while the worker is busy. The code before `formattedUpTo` is formatted; the code
  * after it is still unformatted.
  *
  * A step can correct the edits of earlier steps. So each message says how
  * many of the edits from earlier messages are still valid, and contains the
  * edits which come after them; see updateFormatEdits. After the last
  * message, the edits are final.
+ *
+ * For an 'extract-function' request, the worker sends a single
+ * 'function-source' message.
  */
 export type FormatWorkerOutput =
   | {
@@ -54,6 +66,11 @@ export type FormatWorkerOutput =
       edits: FormatEdits;
       formattedUpTo: number;
       isDone: boolean;
+    }
+  | {
+      type: 'function-source';
+      // Null if there's no function at the requested position.
+      functionSource: FunctionSource | null;
     }
   | {
       type: 'error';

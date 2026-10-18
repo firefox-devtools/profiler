@@ -685,6 +685,57 @@
   flex-direction: column;
 }
 
+.bucketFunctionSource {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+.bucketFunctionSource__row {
+  display: flex;
+  gap: 0.5em;
+}
+
+.bucketFunctionSource__panel {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  border: 1px solid var(--internal-panel-border);
+  border-radius: 4px;
+  background: var(--base-background-color);
+}
+
+.bucketFunctionSource__label {
+  overflow: hidden;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--internal-panel-border);
+  background: var(--internal-panel-label-background);
+  color: var(--internal-text-muted);
+  font-size: 0.85em;
+  font-weight: bold;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bucketFunctionSource__filename {
+  margin-left: 0.75em;
+  color: var(--internal-text-hint);
+  font-weight: normal;
+}
+
+.bucketFunctionSource__code {
+  display: flex;
+  flex-direction: column;
+}
+
+.bucketFunctionSource__message {
+  padding: 8px;
+  color: var(--internal-text-hint);
+  font-style: italic;
+}
+
 .bucketFlameGraphSide__empty {
   display: flex;
   flex: 1;
