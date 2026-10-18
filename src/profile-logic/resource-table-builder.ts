@@ -24,6 +24,12 @@ export class ResourceTableBuilder {
   _libNameToResourceIndex: Map<IndexIntoStringTable, IndexIntoResourceTable> =
     new Map();
   _originToResourceIndex: Map<string, IndexIntoResourceTable> = new Map();
+  // Maps the string index of an extension ID to its add-on resource in the
+  // existing resource table, so that addExtensionOrigins can reuse it.
+  _extensionIdToResourceIndex: Map<
+    IndexIntoStringTable,
+    IndexIntoResourceTable
+  > = new Map();
 
   constructor(stringTable: StringTable, existingResources?: ResourceTable) {
     this._stringTable = stringTable;
@@ -57,6 +63,14 @@ export class ResourceTableBuilder {
           }
           break;
         }
+        case ResourceType.Addon: {
+          // The host of an add-on resource is the extension ID.
+          const host = existingResources.host[i];
+          if (host !== null && !this._extensionIdToResourceIndex.has(host)) {
+            this._extensionIdToResourceIndex.set(host, i);
+          }
+          break;
+        }
         default:
           break;
       }
@@ -70,22 +84,24 @@ export class ResourceTableBuilder {
     const resourceTable = this._resourceTable;
     for (let i = 0; i < extensions.length; i++) {
       const origin = new URL(extensions.baseURL[i]).origin;
+      if (this._originToResourceIndex.has(origin)) {
+        continue;
+      }
 
-      let resourceIndex = this._originToResourceIndex.get(origin);
+      const idIndex = this._stringTable.indexForString(extensions.id[i]);
+      let resourceIndex = this._extensionIdToResourceIndex.get(idIndex);
       if (resourceIndex === undefined) {
         resourceIndex = resourceTable.length++;
-        this._originToResourceIndex.set(origin, resourceIndex);
 
         const quotedName = JSON.stringify(extensions.name[i]);
         const name = `Extension ${quotedName} (ID: ${extensions.id[i]})`;
-
-        const idIndex = this._stringTable.indexForString(extensions.id[i]);
 
         resourceTable.name[resourceIndex] =
           this._stringTable.indexForString(name);
         resourceTable.host[resourceIndex] = idIndex;
         resourceTable.type[resourceIndex] = ResourceType.Addon;
       }
+      this._originToResourceIndex.set(origin, resourceIndex);
     }
   }
 
