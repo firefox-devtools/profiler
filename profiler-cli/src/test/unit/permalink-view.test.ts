@@ -14,6 +14,7 @@ describe('permalinkViewForCommand', function () {
         search: 'js::RunScript',
         includeIdle: true,
         strategy: 'timing',
+        implementation: 'js',
         sampleFilters: [{ type: 'merge', funcIndexes: [3] }],
       })
     ).toEqual({
@@ -22,6 +23,7 @@ describe('permalinkViewForCommand', function () {
       callTreeSearch: 'js::RunScript',
       includeIdle: true,
       strategy: 'timing',
+      implementation: 'js',
       sampleFilters: [{ type: 'merge', funcIndexes: [3] }],
       invertCallstack: true,
     });

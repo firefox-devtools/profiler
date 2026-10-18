@@ -5,6 +5,7 @@
 import {
   getSelectedThreadIndexes,
   getAllCommittedRanges,
+  getImplementationFilter,
 } from 'firefox-profiler/selectors/url-state';
 import {
   getCategories,
@@ -353,6 +354,7 @@ export function collectThreadSamples(
     friendlyThreadName,
     categoryBreakdown: collectThreadCategoryBreakdown(store, threadIndexes),
     callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    implementation: getImplementationFilter(state),
     weightType: threadSelectors.getWeightTypeForCallTree(state),
     topFunctionsByTotal,
     topFunctionsBySelf,
@@ -423,6 +425,7 @@ export function collectThreadSamplesBottomUp(
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
     callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    implementation: getImplementationFilter(state),
     weightType,
     invertedCallTree,
   };
@@ -456,6 +459,7 @@ export function collectThreadSamplesTopDown(
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
     callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    implementation: getImplementationFilter(state),
     weightType: threadSelectors.getWeightTypeForCallTree(state),
     regularCallTree,
   };
@@ -581,6 +585,7 @@ export function collectThreadFunctions(
     threadHandle: threadHandleDisplay,
     friendlyThreadName,
     callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    implementation: getImplementationFilter(state),
     weightType: threadSelectors.getWeightTypeForCallTree(state),
     totalFunctionCount,
     filteredFunctionCount: filteredFunctions.length,

@@ -915,6 +915,63 @@ describe('ProfileQuerier', function () {
     });
   });
 
+  describe('implementation filter', function () {
+    function collectTreeNames(node: {
+      name: string;
+      children?: { name: string; children?: unknown[] }[];
+    }): string[] {
+      const names: string[] = [node.name];
+      for (const child of node.children ?? []) {
+        names.push(
+          ...collectTreeNames(child as Parameters<typeof collectTreeNames>[0])
+        );
+      }
+      return names;
+    }
+
+    // X.js has JS self time in all three samples. The native code that makes
+    // up that self time is Y, Z and W.
+    function querierWithJsAndNative() {
+      const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+        0     1     2
+        A.js  A.js  A.js
+        X.js  X.js  B.js
+        Y     Z     X.js
+                    W
+      `);
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      return { store, querier, funcNames: funcNamesDictPerThread[0] };
+    }
+
+    it('keeps only JS frames for one query', async function () {
+      const { querier } = querierWithJsAndNative();
+
+      const jsOnly = await querier.threadSamplesTopDown(
+        undefined,
+        undefined,
+        false,
+        undefined,
+        undefined,
+        undefined,
+        'js'
+      );
+      expect(jsOnly.implementation).toBe('js');
+      const jsNames = collectTreeNames(jsOnly.regularCallTree);
+      expect(jsNames).toContain('X.js');
+      expect(jsNames).not.toContain('Y');
+      expect(jsNames).not.toContain('W');
+
+      // The next query is back to all frames.
+      const combined = await querier.threadSamplesTopDown();
+      expect(combined.implementation).toBe('combined');
+      expect(collectTreeNames(combined.regularCallTree)).toContain('Y');
+    });
+  });
+
   describe('permalink', function () {
     function querierWithSamples() {
       const { profile } = getProfileFromTextSamples(`
