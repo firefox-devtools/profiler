@@ -11,6 +11,7 @@ import {
   SourceCodeFetcher,
   GeneratedSourceCodeFetcher,
 } from './SourceCodeFetcher';
+import { SourceFormatter, GeneratedSourceFormatter } from './SourceFormatter';
 import { AssemblyCodeFetcher } from './AssemblyCodeFetcher';
 import { BottomBox } from './BottomBox';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
@@ -144,6 +145,8 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <CurrentProfileUploadedInformationLoader />
           <SourceCodeFetcher />
           <GeneratedSourceCodeFetcher />
+          <SourceFormatter />
+          <GeneratedSourceFormatter />
           <AssemblyCodeFetcher />
         </div>
       </KeyboardShortcut>

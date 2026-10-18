@@ -21,7 +21,10 @@ import {
   getTotalNativeSymbolTimingsForCallNode,
 } from './profile-data';
 import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
-import { getTotalLineTimingsForCallNode } from './line-timings';
+import {
+  getTotalLineTimingsForCallNode,
+  getHottestColumnForLineInCallNode,
+} from './line-timings';
 import { getTotalAddressTimingsForCallNode } from './address-timings';
 
 /**
@@ -108,6 +111,17 @@ export function getBottomBoxInfoForCallNode(
     thread.sourceLocationTable
   );
   const hottestLine = mapGetKeyWithMaxValue(lineTimings);
+  const hottestColumn =
+    hottestLine !== undefined
+      ? getHottestColumnForLineInCallNode(
+          samples,
+          callNodeFramePerStack,
+          frameTable,
+          funcTable,
+          hottestLine,
+          thread.sourceLocationTable
+        )
+      : undefined;
   // Passing null for the sourceLocationTable gives us the generated lines.
   const hottestGeneratedLine =
     generatedSourceIndex !== null
@@ -128,6 +142,17 @@ export function getBottomBoxInfoForCallNode(
           )
         )
       : undefined;
+  const hottestGeneratedColumn =
+    hottestGeneratedLine !== undefined
+      ? getHottestColumnForLineInCallNode(
+          samples,
+          callNodeFramePerStack,
+          frameTable,
+          funcTable,
+          hottestGeneratedLine,
+          null
+        )
+      : undefined;
   const addressTimings = getTotalAddressTimingsForCallNode(
     samples,
     callNodeFramePerStack,
@@ -145,7 +170,9 @@ export function getBottomBoxInfoForCallNode(
         ? nativeSymbolsForCallNodeArr.indexOf(initialNativeSymbol)
         : null,
     scrollToLineNumber: hottestLine,
+    scrollToColumnNumber: hottestColumn,
     scrollToGeneratedLineNumber: hottestGeneratedLine,
+    scrollToGeneratedColumnNumber: hottestGeneratedColumn,
     scrollToInstructionAddress: hottestInstructionAddress,
     highlightedLineNumber: null,
     highlightedGeneratedLineNumber: null,
@@ -166,7 +193,11 @@ export function getBottomBoxInfoForStackFrame(
 
   const frameIndex = stackTable.frame[stackIndex];
   const funcIndex = frameTable.func[frameIndex];
-  const { source: sourceIndex, line: lineNumber } = getOriginalPositionForFrame(
+  const {
+    source: sourceIndex,
+    line: lineNumber,
+    column: columnNumber,
+  } = getOriginalPositionForFrame(
     frameIndex,
     funcIndex,
     frameTable,
@@ -174,7 +205,7 @@ export function getBottomBoxInfoForStackFrame(
     thread.sourceLocationTable
   );
   const generatedSourceIndex = getGeneratedSourceForFunc(funcIndex, funcTable);
-  const generatedLineNumber =
+  const generatedPosition =
     generatedSourceIndex !== null
       ? getOriginalPositionForFrame(
           frameIndex,
@@ -182,8 +213,10 @@ export function getBottomBoxInfoForStackFrame(
           frameTable,
           funcTable,
           null
-        ).line
+        )
       : null;
+  const generatedLineNumber = generatedPosition?.line ?? null;
+  const generatedColumnNumber = generatedPosition?.column ?? null;
   // Get native symbol for this frame
   const frameFlags = frameTable.flags[frameIndex];
   const hasNativeSymbol = (frameFlags & FrameFlag.HasNativeSymbol) !== 0;
@@ -208,9 +241,13 @@ export function getBottomBoxInfoForStackFrame(
     nativeSymbols: nativeSymbolInfos,
     initialNativeSymbol: 0,
     scrollToLineNumber: lineNumber ?? undefined,
+    scrollToColumnNumber: columnNumber ?? undefined,
     highlightedLineNumber: lineNumber,
+    highlightedColumnNumber: columnNumber ?? undefined,
     scrollToGeneratedLineNumber: generatedLineNumber ?? undefined,
+    scrollToGeneratedColumnNumber: generatedColumnNumber ?? undefined,
     highlightedGeneratedLineNumber: generatedLineNumber,
+    highlightedGeneratedColumnNumber: generatedColumnNumber ?? undefined,
     scrollToInstructionAddress: instructionAddress ?? undefined,
     highlightedInstructionAddress: instructionAddress,
   };

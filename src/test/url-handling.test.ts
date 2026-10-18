@@ -20,6 +20,8 @@ import {
   closeBottomBox,
   openGeneratedSourceView,
   closeGeneratedSourceView,
+  setSourceViewPrettyPrint,
+  setGeneratedSourceViewPrettyPrint,
   changeShowUserTimings,
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
@@ -2102,6 +2104,48 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
     ).toBeFalse();
+  });
+
+  it('persists pretty-printing of both source panes', function () {
+    const { dispatch, getState, getSourceIndex } = setup();
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
+    const bottomBoxInfo: BottomBoxInfo = {
+      sourceIndex,
+      generatedSourceIndex: sourceIndex + 1,
+      nativeSymbols: [],
+      initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
+      highlightedInstructionAddress: null,
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    dispatch(openGeneratedSourceView());
+    expect(getQueryStringFromState(getState())).not.toContain('Pretty');
+
+    dispatch(setSourceViewPrettyPrint(true));
+    let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsPrettyPrinted(
+        newStore.getState()
+      )
+    ).toBeFalse();
+
+    dispatch(setSourceViewPrettyPrint(false));
+    dispatch(setGeneratedSourceViewPrettyPrint(true));
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+    ).toBeFalse();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsPrettyPrinted(
+        newStore.getState()
+      )
+    ).toBeTrue();
   });
 
   it('keeps a closed bottom box closed, even if a source file was loaded before', function () {

@@ -1172,6 +1172,13 @@ export const getSourceViewStartLine: Selector<number> = createSelector(
     sourceIndex !== null ? sources.startLine[sourceIndex] : 1
 );
 
+export const getSourceViewStartColumn: Selector<number> = createSelector(
+  getSourceTable,
+  UrlState.getSourceViewSourceIndex,
+  (sources, sourceIndex) =>
+    sourceIndex !== null ? sources.startColumn[sourceIndex] : 1
+);
+
 export const getGeneratedSourceViewFile: Selector<string | null> =
   createSelector(
     getSourceTable,
@@ -1203,3 +1210,11 @@ export const getGeneratedSourceViewStartLine: Selector<number> = createSelector(
   (sources, sourceIndex) =>
     sourceIndex !== null ? sources.startLine[sourceIndex] : 1
 );
+
+export const getGeneratedSourceViewStartColumn: Selector<number> =
+  createSelector(
+    getSourceTable,
+    UrlState.getGeneratedSourceViewSourceIndex,
+    (sources, sourceIndex) =>
+      sourceIndex !== null ? sources.startColumn[sourceIndex] : 1
+  );

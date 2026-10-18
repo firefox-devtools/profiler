@@ -15,6 +15,10 @@ import type { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
 import {
+  getSourceViewFormatting,
+  getGeneratedSourceViewFormatting,
+} from '../code';
+import {
   getStackLineInfo,
   getLineTimings,
 } from '../../profile-logic/line-timings';
@@ -158,9 +162,11 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       threadSelectors.getFilteredThread,
       UrlState.getSourceViewSourceIndex,
+      getSourceViewFormatting,
       (
         { stackTable, frameTable, funcTable, sourceLocationTable }: Thread,
-        sourceIndex
+        sourceIndex,
+        formatting
       ): StackLineInfo | null => {
         if (sourceIndex === null) {
           return null;
@@ -170,7 +176,8 @@ export function getStackAndSampleSelectorsPerThread(
           frameTable,
           funcTable,
           sourceIndex,
-          sourceLocationTable
+          sourceLocationTable,
+          formatting !== null ? formatting.mapPositionToLine : null
         );
       }
     );
@@ -182,9 +189,11 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       threadSelectors.getFilteredThread,
       UrlState.getGeneratedSourceViewSourceIndex,
+      getGeneratedSourceViewFormatting,
       (
         { stackTable, frameTable, funcTable }: Thread,
-        sourceIndex
+        sourceIndex,
+        formatting
       ): StackLineInfo | null => {
         if (sourceIndex === null) {
           return null;
@@ -194,7 +203,8 @@ export function getStackAndSampleSelectorsPerThread(
           frameTable,
           funcTable,
           sourceIndex,
-          null
+          null,
+          formatting !== null ? formatting.mapPositionToLine : null
         );
       }
     );

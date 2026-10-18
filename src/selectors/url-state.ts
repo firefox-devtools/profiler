@@ -82,6 +82,14 @@ export const getSourceViewScrollToLineNumber: Selector<number | undefined> = (
 ) => getProfileSpecificState(state).sourceView.scrollToLineNumber;
 export const getSourceViewHighlightedLine: Selector<number | null> = (state) =>
   getProfileSpecificState(state).sourceView.highlightedLine;
+export const getSourceViewScrollToColumnNumber: Selector<number | undefined> = (
+  state
+) => getProfileSpecificState(state).sourceView.scrollToColumnNumber;
+export const getSourceViewHighlightedColumn: Selector<number | null> = (
+  state
+) => getProfileSpecificState(state).sourceView.highlightedColumn;
+export const getSourceViewIsPrettyPrinted: Selector<boolean> = (state) =>
+  getProfileSpecificState(state).sourceView.isPrettyPrinted;
 export const getGeneratedSourceViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).generatedSourceView.isOpen;
 // True if the current function was source-mapped, so that there is generated
@@ -107,6 +115,17 @@ export const getGeneratedSourceViewScrollToLineNumber: Selector<
 export const getGeneratedSourceViewHighlightedLine: Selector<number | null> = (
   state
 ) => getProfileSpecificState(state).generatedSourceView.highlightedLine;
+export const getGeneratedSourceViewScrollToColumnNumber: Selector<
+  number | undefined
+> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.scrollToColumnNumber;
+export const getGeneratedSourceViewHighlightedColumn: Selector<
+  number | null
+> = (state) =>
+  getProfileSpecificState(state).generatedSourceView.highlightedColumn;
+export const getGeneratedSourceViewIsPrettyPrinted: Selector<boolean> = (
+  state
+) => getProfileSpecificState(state).generatedSourceView.isPrettyPrinted;
 export const getAssemblyViewIsOpen: Selector<boolean> = (state) =>
   getProfileSpecificState(state).assemblyView.isOpen;
 export const getAssemblyViewNativeSymbol: Selector<NativeSymbolInfo | null> = (

@@ -631,6 +631,8 @@ const sourceView: Reducer<SourceViewState> = (
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: false,
   },
   action
 ) => {
@@ -643,9 +645,14 @@ const sourceView: Reducer<SourceViewState> = (
           : state.scrollGeneration,
         sourceIndex: action.sourceIndex,
         scrollToLineNumber: action.scrollToLineNumber,
+        scrollToColumnNumber: action.scrollToColumnNumber,
         highlightedLine: action.highlightedLineNumber,
+        highlightedColumn: action.highlightedColumnNumber ?? null,
+        isPrettyPrinted: state.isPrettyPrinted,
       };
     }
+    case 'SET_SOURCE_VIEW_PRETTY_PRINT':
+      return { ...state, isPrettyPrinted: action.isPrettyPrinted };
     case 'SANITIZED_PROFILE_PUBLISHED': {
       if (!action.translationMaps || state.sourceIndex === null) {
         return state;
@@ -670,6 +677,8 @@ const generatedSourceView: Reducer<GeneratedSourceViewState> = (
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: false,
   },
   action
 ) => {
@@ -683,9 +692,14 @@ const generatedSourceView: Reducer<GeneratedSourceViewState> = (
           : state.scrollGeneration,
         sourceIndex: action.generatedSourceIndex,
         scrollToLineNumber: action.scrollToGeneratedLineNumber,
+        scrollToColumnNumber: action.scrollToGeneratedColumnNumber,
         highlightedLine: action.highlightedGeneratedLineNumber,
+        highlightedColumn: action.highlightedGeneratedColumnNumber ?? null,
+        isPrettyPrinted: state.isPrettyPrinted,
       };
     }
+    case 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT':
+      return { ...state, isPrettyPrinted: action.isPrettyPrinted };
     case 'OPEN_GENERATED_SOURCE_VIEW':
       return { ...state, isOpen: true };
     case 'CLOSE_GENERATED_SOURCE_VIEW':

@@ -1960,6 +1960,10 @@ export function updateBottomBoxContentsAndMaybeOpen(
     highlightedLineNumber,
     highlightedGeneratedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    scrollToGeneratedColumnNumber,
+    highlightedColumnNumber,
+    highlightedGeneratedColumnNumber,
   } = bottomBoxInfo;
 
   const haveSource = sourceIndex !== null;
@@ -1986,6 +1990,26 @@ export function updateBottomBoxContentsAndMaybeOpen(
     highlightedLineNumber,
     highlightedGeneratedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    scrollToGeneratedColumnNumber,
+    highlightedColumnNumber,
+    highlightedGeneratedColumnNumber,
+  };
+}
+
+export function setSourceViewPrettyPrint(isPrettyPrinted: boolean): Action {
+  return {
+    type: 'SET_SOURCE_VIEW_PRETTY_PRINT',
+    isPrettyPrinted,
+  };
+}
+
+export function setGeneratedSourceViewPrettyPrint(
+  isPrettyPrinted: boolean
+): Action {
+  return {
+    type: 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT',
+    isPrettyPrinted,
   };
 }
 

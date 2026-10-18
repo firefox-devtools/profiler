@@ -11,6 +11,7 @@ import { FullscreenToggleButton } from './FullscreenToggleButton';
 import { ResizableWithSplitter } from '../shared/ResizableWithSplitter';
 import { AssemblyViewToggleButton } from './AssemblyViewToggleButton';
 import { GeneratedSourceViewToggleButton } from './GeneratedSourceViewToggleButton';
+import { PrettyPrintToggleButton } from './PrettyPrintToggleButton';
 import { AssemblyViewNativeSymbolNavigator } from './AssemblyViewNativeSymbolNavigator';
 import { IonGraphView } from '../shared/IonGraphView';
 import { CodeLoadingOverlay } from './CodeLoadingOverlay';
@@ -19,9 +20,15 @@ import {
   getSourceViewScrollGeneration,
   getSourceViewScrollToLineNumber,
   getSourceViewHighlightedLine,
+  getSourceViewScrollToColumnNumber,
+  getSourceViewHighlightedColumn,
+  getSourceViewIsPrettyPrinted,
   getGeneratedSourceViewScrollGeneration,
   getGeneratedSourceViewScrollToLineNumber,
   getGeneratedSourceViewHighlightedLine,
+  getGeneratedSourceViewScrollToColumnNumber,
+  getGeneratedSourceViewHighlightedColumn,
+  getGeneratedSourceViewIsPrettyPrinted,
   getAssemblyViewIsOpen,
   getAssemblyViewNativeSymbol,
   getAssemblyViewScrollGeneration,
@@ -32,6 +39,8 @@ import {
 import {
   closeBottomBox,
   toggleBottomBoxFullscreen,
+  setSourceViewPrettyPrint,
+  setGeneratedSourceViewPrettyPrint,
 } from 'firefox-profiler/actions/profile-view';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
@@ -39,7 +48,12 @@ import {
   getSourceViewCode,
   getGeneratedSourceViewCode,
   getAssemblyViewCode,
+  getSourceViewFormatDialect,
+  getGeneratedSourceViewFormatDialect,
+  getSourceViewFormatting,
+  getGeneratedSourceViewFormatting,
 } from 'firefox-profiler/selectors/code';
+import type { SourceViewFormatting } from 'firefox-profiler/profile-logic/js-format/formatted-source';
 import {
   getSourceViewFile,
   getSourceViewStartLine,
@@ -71,14 +85,24 @@ type StateProps = {
   readonly sourceViewScrollGeneration: number;
   readonly sourceViewScrollToLineNumber?: number;
   readonly sourceViewHighlightedLine: number | null;
+  readonly sourceViewScrollToColumnNumber?: number;
+  readonly sourceViewHighlightedColumn: number | null;
   readonly sourceViewStartLine: number;
+  readonly sourceViewCanPrettyPrint: boolean;
+  readonly sourceViewIsPrettyPrinted: boolean;
+  readonly sourceViewFormatting: SourceViewFormatting | null;
   readonly globalLineTimings: LineTimings;
   readonly generatedSourceViewFile: string | null;
   readonly generatedSourceViewCode: SourceCodeStatus | void;
   readonly generatedSourceViewScrollGeneration: number;
   readonly generatedSourceViewScrollToLineNumber?: number;
   readonly generatedSourceViewHighlightedLine: number | null;
+  readonly generatedSourceViewScrollToColumnNumber?: number;
+  readonly generatedSourceViewHighlightedColumn: number | null;
   readonly generatedSourceViewStartLine: number;
+  readonly generatedSourceViewCanPrettyPrint: boolean;
+  readonly generatedSourceViewIsPrettyPrinted: boolean;
+  readonly generatedSourceViewFormatting: SourceViewFormatting | null;
   readonly generatedLineTimings: LineTimings;
   readonly assemblyViewIsOpen: boolean;
   readonly assemblyViewNativeSymbol: NativeSymbolInfo | null;
@@ -92,9 +116,54 @@ type StateProps = {
 type DispatchProps = {
   readonly closeBottomBox: typeof closeBottomBox;
   readonly toggleBottomBoxFullscreen: typeof toggleBottomBoxFullscreen;
+  readonly setSourceViewPrettyPrint: typeof setSourceViewPrettyPrint;
+  readonly setGeneratedSourceViewPrettyPrint: typeof setGeneratedSourceViewPrettyPrint;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
+
+type DisplayedLines = {
+  formattedLines: string[] | null;
+  startLine: number;
+  scrollToLineNumber?: number;
+  highlightedLine: number | null;
+};
+
+/**
+ * The line numbers in the state refer to the code as it is. If the code is
+ * pretty-printed, convert them to the lines of the formatted code. The
+ * formatted code starts at line 1, even for inline scripts.
+ */
+function _getDisplayedLines(
+  formatting: SourceViewFormatting | null,
+  startLine: number,
+  scrollToLineNumber: number | undefined,
+  scrollToColumnNumber: number | undefined,
+  highlightedLine: number | null,
+  highlightedColumn: number | null
+): DisplayedLines {
+  if (formatting === null) {
+    return {
+      formattedLines: null,
+      startLine,
+      scrollToLineNumber,
+      highlightedLine,
+    };
+  }
+  const { lines, mapPositionToLine } = formatting;
+  return {
+    formattedLines: lines,
+    startLine: 1,
+    scrollToLineNumber:
+      scrollToLineNumber !== undefined
+        ? mapPositionToLine(scrollToLineNumber, scrollToColumnNumber ?? null)
+        : undefined,
+    highlightedLine:
+      highlightedLine !== null
+        ? mapPositionToLine(highlightedLine, highlightedColumn)
+        : null,
+  };
+}
 
 export function SourceCodeErrorOverlay({ errors }: CodeErrorOverlayProps) {
   return (
@@ -189,6 +258,14 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     }
   };
 
+  _onChangeSourceViewPrettyPrint = (isPrettyPrinted: boolean) => {
+    this.props.setSourceViewPrettyPrint(isPrettyPrinted);
+  };
+
+  _onChangeGeneratedSourceViewPrettyPrint = (isPrettyPrinted: boolean) => {
+    this.props.setGeneratedSourceViewPrettyPrint(isPrettyPrinted);
+  };
+
   _onClickCloseButton = () => {
     this.props.closeBottomBox();
     // Close the fullscreen if we're closing the bottom box
@@ -206,13 +283,23 @@ class BottomBoxImpl extends React.PureComponent<Props> {
       sourceViewScrollGeneration,
       sourceViewScrollToLineNumber,
       sourceViewHighlightedLine,
+      sourceViewScrollToColumnNumber,
+      sourceViewHighlightedColumn,
       sourceViewStartLine,
+      sourceViewCanPrettyPrint,
+      sourceViewIsPrettyPrinted,
+      sourceViewFormatting,
       generatedSourceViewFile,
       generatedSourceViewCode,
       generatedSourceViewScrollGeneration,
       generatedSourceViewScrollToLineNumber,
       generatedSourceViewHighlightedLine,
+      generatedSourceViewScrollToColumnNumber,
+      generatedSourceViewHighlightedColumn,
       generatedSourceViewStartLine,
+      generatedSourceViewCanPrettyPrint,
+      generatedSourceViewIsPrettyPrinted,
+      generatedSourceViewFormatting,
       generatedLineTimings,
       assemblyViewIsOpen,
       assemblyViewScrollGeneration,
@@ -248,6 +335,22 @@ class BottomBoxImpl extends React.PureComponent<Props> {
     // generatedSourceViewFile is only non-null if the generated source view
     // is open and the current function is source-mapped.
     const displayGeneratedSourceView = generatedPath !== null;
+    const sourceViewLines = _getDisplayedLines(
+      sourceViewFormatting,
+      sourceViewStartLine,
+      sourceViewScrollToLineNumber,
+      sourceViewScrollToColumnNumber,
+      sourceViewHighlightedLine,
+      sourceViewHighlightedColumn
+    );
+    const generatedSourceViewLines = _getDisplayedLines(
+      generatedSourceViewFormatting,
+      generatedSourceViewStartLine,
+      generatedSourceViewScrollToLineNumber,
+      generatedSourceViewScrollToColumnNumber,
+      generatedSourceViewHighlightedLine,
+      generatedSourceViewHighlightedColumn
+    );
 
     // The bottom box has one or more side-by-side panes:
     //  - It always has the source view pane.
@@ -288,9 +391,17 @@ class BottomBoxImpl extends React.PureComponent<Props> {
         <div className="bottom-box-pane">
           <div className="bottom-box-bar">
             <h3 className="bottom-box-title">{path ?? '(no source file)'}</h3>
-            {assemblyViewIsOpen || displayGeneratedSourceView
-              ? null
-              : trailingHeaderButtons}
+            <div className="bottom-box-header-buttons">
+              {displaySourceView && sourceViewCanPrettyPrint ? (
+                <PrettyPrintToggleButton
+                  isPrettyPrinted={sourceViewIsPrettyPrinted}
+                  onChange={this._onChangeSourceViewPrettyPrint}
+                />
+              ) : null}
+              {assemblyViewIsOpen || displayGeneratedSourceView
+                ? null
+                : trailingHeaderButtons}
+            </div>
           </div>
           <div className="bottom-sourceview-wrapper">
             {displayIonGraph ? (
@@ -303,11 +414,12 @@ class BottomBoxImpl extends React.PureComponent<Props> {
               <SourceView
                 timings={globalLineTimings}
                 sourceCode={sourceCode}
+                formattedLines={sourceViewLines.formattedLines}
                 filePath={path}
                 scrollGeneration={sourceViewScrollGeneration}
-                scrollToLineNumber={sourceViewScrollToLineNumber}
-                highlightedLine={sourceViewHighlightedLine}
-                startLine={sourceViewStartLine}
+                scrollToLineNumber={sourceViewLines.scrollToLineNumber}
+                highlightedLine={sourceViewLines.highlightedLine}
+                startLine={sourceViewLines.startLine}
                 ref={this._sourceView}
               />
             ) : null}
@@ -338,17 +450,28 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                     {`Generated: ${generatedPath}`}
                   </h3>
                 </Localized>
-                {assemblyViewIsOpen ? null : trailingHeaderButtons}
+                <div className="bottom-box-header-buttons">
+                  {generatedSourceViewCanPrettyPrint ? (
+                    <PrettyPrintToggleButton
+                      isPrettyPrinted={generatedSourceViewIsPrettyPrinted}
+                      onChange={this._onChangeGeneratedSourceViewPrettyPrint}
+                    />
+                  ) : null}
+                  {assemblyViewIsOpen ? null : trailingHeaderButtons}
+                </div>
               </div>
               <div className="bottom-sourceview-wrapper">
                 <SourceView
                   timings={generatedLineTimings}
                   sourceCode={generatedSourceCode}
+                  formattedLines={generatedSourceViewLines.formattedLines}
                   filePath={generatedPath}
                   scrollGeneration={generatedSourceViewScrollGeneration}
-                  scrollToLineNumber={generatedSourceViewScrollToLineNumber}
-                  highlightedLine={generatedSourceViewHighlightedLine}
-                  startLine={generatedSourceViewStartLine}
+                  scrollToLineNumber={
+                    generatedSourceViewLines.scrollToLineNumber
+                  }
+                  highlightedLine={generatedSourceViewLines.highlightedLine}
+                  startLine={generatedSourceViewLines.startLine}
                   ref={this._generatedSourceView}
                 />
                 {generatedSourceViewCode !== undefined &&
@@ -429,7 +552,12 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
     sourceViewScrollGeneration: getSourceViewScrollGeneration(state),
     sourceViewScrollToLineNumber: getSourceViewScrollToLineNumber(state),
     sourceViewHighlightedLine: getSourceViewHighlightedLine(state),
+    sourceViewScrollToColumnNumber: getSourceViewScrollToColumnNumber(state),
+    sourceViewHighlightedColumn: getSourceViewHighlightedColumn(state),
     sourceViewStartLine: getSourceViewStartLine(state),
+    sourceViewCanPrettyPrint: getSourceViewFormatDialect(state) !== null,
+    sourceViewIsPrettyPrinted: getSourceViewIsPrettyPrinted(state),
+    sourceViewFormatting: getSourceViewFormatting(state),
     generatedSourceViewFile: getGeneratedSourceViewFile(state),
     generatedSourceViewCode: getGeneratedSourceViewCode(state),
     generatedLineTimings:
@@ -440,7 +568,16 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
       getGeneratedSourceViewScrollToLineNumber(state),
     generatedSourceViewHighlightedLine:
       getGeneratedSourceViewHighlightedLine(state),
+    generatedSourceViewScrollToColumnNumber:
+      getGeneratedSourceViewScrollToColumnNumber(state),
+    generatedSourceViewHighlightedColumn:
+      getGeneratedSourceViewHighlightedColumn(state),
     generatedSourceViewStartLine: getGeneratedSourceViewStartLine(state),
+    generatedSourceViewCanPrettyPrint:
+      getGeneratedSourceViewFormatDialect(state) !== null,
+    generatedSourceViewIsPrettyPrinted:
+      getGeneratedSourceViewIsPrettyPrinted(state),
+    generatedSourceViewFormatting: getGeneratedSourceViewFormatting(state),
     assemblyViewNativeSymbol: getAssemblyViewNativeSymbol(state),
     assemblyViewCode: getAssemblyViewCode(state),
     globalAddressTimings:
@@ -455,6 +592,8 @@ export const BottomBox = explicitConnect<{}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     closeBottomBox,
     toggleBottomBoxFullscreen,
+    setSourceViewPrettyPrint,
+    setGeneratedSourceViewPrettyPrint,
   },
   component: BottomBoxImpl,
 });

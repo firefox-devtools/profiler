@@ -8,14 +8,34 @@ import type {
   Lib,
   Profile,
   SourceCodeStatus,
+  SourceFormattingStatus,
   Selector,
 } from 'firefox-profiler/types';
 import {
   getSourceViewSourceIndex,
+  getSourceViewIsPrettyPrinted,
   getGeneratedSourceViewSourceIndex,
+  getGeneratedSourceViewIsPrettyPrinted,
   getAssemblyViewNativeSymbol,
 } from './url-state';
-import { getProfileOrNull } from './profile';
+import {
+  getProfileOrNull,
+  getSourceViewFile,
+  getSourceViewStartLine,
+  getSourceViewStartColumn,
+  getGeneratedSourceViewFile,
+  getGeneratedSourceViewStartLine,
+  getGeneratedSourceViewStartColumn,
+} from './profile';
+import { parseFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
+import {
+  type JsDialect,
+  getFormatDialectForPath,
+} from 'firefox-profiler/profile-logic/js-format/dialect';
+import {
+  type SourceViewFormatting,
+  createSourceViewFormatting,
+} from 'firefox-profiler/profile-logic/js-format/formatted-source';
 
 export const getSourceCodeCache: Selector<
   Map<IndexIntoSourceTable, SourceCodeStatus>
@@ -52,6 +72,132 @@ export const getGeneratedSourceViewCode: Selector<SourceCodeStatus | void> =
     getGeneratedSourceViewSourceIndex,
     getProfileOrNull,
     _getCodeForSource
+  );
+
+export const getSourceFormattingCache: Selector<
+  Map<IndexIntoSourceTable, SourceFormattingStatus>
+> = (state) => state.code.sourceFormattingCache;
+
+// The dialect for pretty-printing the source, or null if the source can't be
+// pretty-printed because it isn't JavaScript.
+function _getFormatDialectForFile(file: string | null): JsDialect | null {
+  if (file === null) {
+    return null;
+  }
+  return getFormatDialectForPath(parseFileNameFromSymbolication(file).path);
+}
+
+export const getSourceViewFormatDialect: Selector<JsDialect | null> =
+  createSelector(getSourceViewFile, _getFormatDialectForFile);
+
+export const getGeneratedSourceViewFormatDialect: Selector<JsDialect | null> =
+  createSelector(getGeneratedSourceViewFile, _getFormatDialectForFile);
+
+function _getFormatting(
+  isPrettyPrinted: boolean,
+  dialect: JsDialect | null,
+  sourceIndex: IndexIntoSourceTable | null,
+  codeStatus: SourceCodeStatus | void,
+  formattingCache: Map<IndexIntoSourceTable, SourceFormattingStatus>,
+  startLine: number,
+  startColumn: number
+): SourceViewFormatting | null {
+  if (
+    !isPrettyPrinted ||
+    dialect === null ||
+    sourceIndex === null ||
+    codeStatus === undefined ||
+    codeStatus.type !== 'AVAILABLE'
+  ) {
+    return null;
+  }
+  const formattingStatus = formattingCache.get(sourceIndex);
+  if (formattingStatus === undefined) {
+    return null;
+  }
+  return createSourceViewFormatting(
+    codeStatus.code,
+    formattingStatus,
+    startLine,
+    startColumn
+  );
+}
+
+/**
+ * The pretty-printed code for the source view, or null if the source view
+ * shows the code as it is. While the format worker is busy, this contains
+ * partially-formatted code.
+ */
+export const getSourceViewFormatting: Selector<SourceViewFormatting | null> =
+  createSelector(
+    getSourceViewIsPrettyPrinted,
+    getSourceViewFormatDialect,
+    getSourceViewSourceIndex,
+    getSourceViewCode,
+    getSourceFormattingCache,
+    getSourceViewStartLine,
+    getSourceViewStartColumn,
+    _getFormatting
+  );
+
+export const getGeneratedSourceViewFormatting: Selector<SourceViewFormatting | null> =
+  createSelector(
+    getGeneratedSourceViewIsPrettyPrinted,
+    getGeneratedSourceViewFormatDialect,
+    getGeneratedSourceViewSourceIndex,
+    getGeneratedSourceViewCode,
+    getSourceFormattingCache,
+    getGeneratedSourceViewStartLine,
+    getGeneratedSourceViewStartColumn,
+    _getFormatting
+  );
+
+export type SourceFormattingRequest = {
+  sourceIndex: IndexIntoSourceTable;
+  code: string;
+  dialect: JsDialect;
+};
+
+function _getFormattingRequest(
+  isPrettyPrinted: boolean,
+  dialect: JsDialect | null,
+  sourceIndex: IndexIntoSourceTable | null,
+  codeStatus: SourceCodeStatus | void,
+  formattingCache: Map<IndexIntoSourceTable, SourceFormattingStatus>
+): SourceFormattingRequest | null {
+  if (
+    !isPrettyPrinted ||
+    dialect === null ||
+    sourceIndex === null ||
+    codeStatus === undefined ||
+    codeStatus.type !== 'AVAILABLE' ||
+    formattingCache.has(sourceIndex)
+  ) {
+    return null;
+  }
+  return { sourceIndex, code: codeStatus.code, dialect };
+}
+
+// The source that needs to be formatted for the source view, if the source
+// view is pretty-printed and the formatting hasn't started yet.
+export const getSourceViewFormattingRequest: Selector<SourceFormattingRequest | null> =
+  createSelector(
+    getSourceViewIsPrettyPrinted,
+    getSourceViewFormatDialect,
+    getSourceViewSourceIndex,
+    getSourceViewCode,
+    getSourceFormattingCache,
+    _getFormattingRequest
+  );
+
+export const getGeneratedSourceViewFormattingRequest: Selector<SourceFormattingRequest | null> =
+  createSelector(
+    getGeneratedSourceViewIsPrettyPrinted,
+    getGeneratedSourceViewFormatDialect,
+    getGeneratedSourceViewSourceIndex,
+    getGeneratedSourceViewCode,
+    getSourceFormattingCache,
+    _getFormattingRequest
   );
 
 export const getAssemblyCodeCache: Selector<Map<string, AssemblyCodeStatus>> = (

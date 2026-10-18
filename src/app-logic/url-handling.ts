@@ -180,7 +180,9 @@ type BaseQuery = {
   implementation: string;
   timelineType: string;
   sourceViewIndex: number;
+  sourceViewPretty: null | undefined;
   generatedSourceViewIndex: number;
+  generatedSourceViewPretty: null | undefined;
   assemblyView: string;
 };
 
@@ -226,7 +228,9 @@ type Query = BaseQuery & {
   ctSummary?: string;
   transforms?: string;
   sourceViewIndex?: number;
+  sourceViewPretty?: null | undefined;
   generatedSourceViewIndex?: number;
+  generatedSourceViewPretty?: null | undefined;
   assemblyView?: string;
   bottomFullscreen?: boolean;
 
@@ -385,12 +389,18 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       if (isBottomBoxOpenPerPanel[selectedTab]) {
         if (sourceView.sourceIndex !== null) {
           query.sourceViewIndex = sourceView.sourceIndex;
+          query.sourceViewPretty = sourceView.isPrettyPrinted
+            ? null
+            : undefined;
         }
         if (
           generatedSourceView.isOpen &&
           generatedSourceView.sourceIndex !== null
         ) {
           query.generatedSourceViewIndex = generatedSourceView.sourceIndex;
+          query.generatedSourceViewPretty = generatedSourceView.isPrettyPrinted
+            ? null
+            : undefined;
         }
         if (assemblyView.isOpen && assemblyView.currentNativeSymbol !== null) {
           const { currentNativeSymbol, nativeSymbols } = assemblyView;
@@ -578,12 +588,16 @@ export function stateFromLocation(
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: query.sourceViewPretty !== undefined,
   };
   const generatedSourceView: GeneratedSourceViewState = {
     isOpen: false,
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: query.generatedSourceViewPretty !== undefined,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,

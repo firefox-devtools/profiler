@@ -34,6 +34,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { FormatEdits } from '../profile-logic/js-format/types';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
@@ -359,9 +360,21 @@ type ProfileAction =
       readonly highlightedLineNumber: number | null;
       readonly highlightedGeneratedLineNumber: number | null;
       readonly highlightedInstructionAddress: number | null;
+      readonly scrollToColumnNumber?: number;
+      readonly scrollToGeneratedColumnNumber?: number;
+      readonly highlightedColumnNumber?: number;
+      readonly highlightedGeneratedColumnNumber?: number;
     }
   | {
       readonly type: 'OPEN_GENERATED_SOURCE_VIEW';
+    }
+  | {
+      readonly type: 'SET_SOURCE_VIEW_PRETTY_PRINT';
+      readonly isPrettyPrinted: boolean;
+    }
+  | {
+      readonly type: 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT';
+      readonly isPrettyPrinted: boolean;
     }
   | {
       readonly type: 'CLOSE_GENERATED_SOURCE_VIEW';
@@ -747,6 +760,18 @@ type SourcesAction =
       readonly type: 'SOURCE_CODE_LOADING_ERROR';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly errors: SourceCodeLoadingError[];
+    }
+  | {
+      readonly type: 'SOURCE_FORMATTING_BEGIN';
+      readonly sourceIndex: IndexIntoSourceTable;
+    }
+  | {
+      // The edits of one formatting step. They come after the edits of
+      // earlier steps.
+      readonly type: 'SOURCE_FORMATTING_PROGRESS';
+      readonly sourceIndex: IndexIntoSourceTable;
+      readonly edits: FormatEdits;
+      readonly isDone: boolean;
     };
 
 // nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`

@@ -28,6 +28,25 @@ jest.mock('../../components/timeline', () => ({
   Timeline: 'custom-timeline',
 }));
 
+// The format worker needs to be bundled by esbuild, so run the formatter on
+// the main thread instead.
+jest.mock('../../profile-logic/js-format/run-format-worker', () => ({
+  runFormatWorker: (
+    { code, dialect }: { code: string; dialect: string },
+    onOutput: (output: unknown) => void
+  ) => {
+    const { formatJsCode } = jest.requireActual(
+      '../../profile-logic/js-format/formatter'
+    );
+    onOutput({
+      type: 'progress',
+      edits: formatJsCode(code, dialect),
+      formattedUpTo: code.length,
+      isDone: true,
+    });
+  },
+}));
+
 describe('BottomBox', () => {
   autoMockDomRect();
   afterEach(() => {
@@ -335,5 +354,45 @@ describe('BottomBox with source maps', () => {
 
     fireFullClick(ensureExists(toggleButton()));
     expect(sourceViews()).toHaveLength(1);
+  });
+
+  it('pretty-prints the generated code when the {} button is pressed', async () => {
+    const { sourceViews, toggleButton } = setup();
+
+    const frameElement = screen.getByRole('treeitem', { name: /^B/ });
+    fireFullClick(frameElement);
+    fireFullClick(frameElement, { detail: 2 });
+    fireFullClick(ensureExists(toggleButton()));
+
+    // Both panes show JS code, so both have a {} button.
+    const prettyPrintButtons = () =>
+      Array.from(
+        document.querySelectorAll('.bottom-pretty-print-button')
+      ) as HTMLElement[];
+    expect(prettyPrintButtons()).toHaveLength(2);
+
+    const generatedView = sourceViews()[1] as HTMLElement;
+    const generatedContent = await within(generatedView).findByRole('textbox');
+    await within(generatedContent).findAllByText(/function/);
+    const getLines = () =>
+      Array.from(generatedContent.querySelectorAll('.cm-line')).map(
+        (line) => line.textContent
+      );
+    expect(getLines()).toEqual(['function a(){b()}', 'function b(){}']);
+
+    const generatedButton = prettyPrintButtons()[1];
+    expect(generatedButton).toHaveAttribute('aria-pressed', 'false');
+    fireFullClick(generatedButton);
+    expect(prettyPrintButtons()[1]).toHaveAttribute('aria-pressed', 'true');
+    expect(prettyPrintButtons()[0]).toHaveAttribute('aria-pressed', 'false');
+    expect(getLines()).toEqual([
+      'function a() {',
+      '  b()',
+      '}',
+      'function b() {}',
+    ]);
+
+    fireFullClick(prettyPrintButtons()[1]);
+    expect(getLines()).toEqual(['function a(){b()}', 'function b(){}']);
   });
 });
