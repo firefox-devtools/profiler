@@ -4,8 +4,12 @@
 
 import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
-import { objectEntries } from '../utils/types';
+import { objectEntries, objectMap } from '../utils/types';
 import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
+import {
+  FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  WING_VIEWS_DEFAULT,
+} from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -24,12 +28,17 @@ import type {
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
+  SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
+  WingViewsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import { translateThreadsKey } from 'firefox-profiler/profile-logic/profile-data';
 import { translateTransformStack } from 'firefox-profiler/profile-logic/transforms';
+import { translateFuncIndex } from 'firefox-profiler/profile-logic/index-translation';
+import { applyFuncSubstitutionToFunc } from 'firefox-profiler/profile-logic/symbolication';
 
 /*
  * This state file governs the state that comes from, and alters, the window
@@ -201,6 +210,42 @@ const markerTableSort: Reducer<SingleColumnSortState[] | null> = (
   switch (action.type) {
     case 'CHANGE_MARKER_TABLE_SORT':
       return action.sort;
+    default:
+      return state;
+  }
+};
+
+const functionListSort: Reducer<SingleColumnSortState[] | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNCTION_LIST_SORT':
+      return action.sort;
+    default:
+      return state;
+  }
+};
+
+const functionListSectionsOpen: Reducer<FunctionListSectionsOpenState> = (
+  state = FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNCTION_LIST_SECTION_OPEN':
+      return { ...state, [action.section]: action.isOpen };
+    default:
+      return state;
+  }
+};
+
+const wingViews: Reducer<WingViewsState> = (
+  state = WING_VIEWS_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_WING_VIEW':
+      return { ...state, [action.wing]: action.view };
     default:
       return state;
   }
@@ -786,6 +831,57 @@ const selectedMarkers: Reducer<SelectedMarkersPerThread> = (
   }
 };
 
+const selectedFunctions: Reducer<SelectedFunctionsPerThread> = (
+  state = {},
+  action
+): SelectedFunctionsPerThread => {
+  switch (action.type) {
+    case 'CHANGE_SELECTED_FUNCTION': {
+      const { threadsKey, selectedFunctionIndex } = action;
+      if (state[threadsKey] === selectedFunctionIndex) {
+        return state;
+      }
+      return {
+        ...state,
+        [threadsKey]: selectedFunctionIndex,
+      };
+    }
+    case 'BULK_SYMBOLICATION': {
+      const { oldFuncToNewFuncsMap } = action;
+      return objectMap(state, (funcIndex) =>
+        funcIndex === null
+          ? null
+          : applyFuncSubstitutionToFunc(oldFuncToNewFuncsMap, funcIndex)
+      );
+    }
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      const { translationMaps } = action;
+      if (!translationMaps) {
+        return state;
+      }
+
+      const newState: SelectedFunctionsPerThread = {};
+      for (const [threadsKey, funcIndex] of objectEntries(state)) {
+        const newThreadsKey = translationMaps.oldThreadIndexToNew
+          ? translateThreadsKey(threadsKey, translationMaps.oldThreadIndexToNew)
+          : threadsKey;
+        if (newThreadsKey === null) {
+          // Discard the selection for threads that were removed.
+          continue;
+        }
+
+        newState[newThreadsKey] =
+          funcIndex === null
+            ? null
+            : translateFuncIndex(funcIndex, translationMaps);
+      }
+      return newState;
+    }
+    default:
+      return state;
+  }
+};
+
 /**
  * These values are specific to an individual profile.
  */
@@ -816,7 +912,11 @@ const profileSpecific = combineReducers({
   showJsTracerSummary,
   tabFilter,
   selectedMarkers,
+  selectedFunctions,
   markerTableSort,
+  functionListSort,
+  functionListSectionsOpen,
+  wingViews,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading
