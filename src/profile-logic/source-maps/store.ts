@@ -3,10 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { SourceMapConsumer as LibSourceMapConsumer } from 'source-map';
-import type { RawSourceMap } from 'source-map';
+import type { RawIndexMap, RawSourceMap } from 'source-map';
 import type { IndexIntoSourceTable } from 'firefox-profiler/types';
 
 export type SourceMapConsumer = LibSourceMapConsumer;
+
+/**
+ * A parsed source map, either a regular one or an index map made of sections.
+ */
+export type SourceMap = RawSourceMap | RawIndexMap;
 
 /**
  * Holds pre-parsed SourceMapConsumer instances keyed by IndexIntoSourceTable.
@@ -20,7 +25,7 @@ export class SourceMapStore {
   }
 
   static async create(
-    resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>,
+    resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap>,
     wasmUrl: string
   ): Promise<SourceMapStore> {
     const consumers = new Map<IndexIntoSourceTable, SourceMapConsumer>();

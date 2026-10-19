@@ -26,7 +26,7 @@ import {
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import type { ExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type {
   Profile,
   IndexIntoFuncTable,
@@ -64,7 +64,7 @@ class NodeExternalCommunicationDelegate implements ExternalCommunicationDelegate
     throw new Error('No browser connection available in profiler-cli');
   }
 
-  async fetchSourceMapFromBrowser(_sourceId: string): Promise<RawSourceMap> {
+  async fetchSourceMapFromBrowser(_sourceId: string): Promise<SourceMap> {
     throw new Error('No browser connection available in profiler-cli');
   }
 }

@@ -129,6 +129,43 @@ describe('embedJsSources', function () {
     });
   });
 
+  it('applies an index source map', async function () {
+    // The bundle is a concatenation of two chunks, and the function is in the
+    // second one, on the bundle's second line.
+    const firstChunk = 'var c=1;';
+    const firstChunkMap = new SourceMapGenerator({ file: 'first.js' });
+    firstChunkMap.addMapping({
+      source: '../src/first.js',
+      original: { line: 1, column: 0 },
+      generated: { line: 1, column: 0 },
+    });
+    const indexMap = JSON.stringify({
+      version: 3,
+      file: 'bundle.js',
+      sections: [
+        { offset: { line: 0, column: 0 }, map: firstChunkMap.toJSON() },
+        { offset: { line: 1, column: 0 }, map: JSON.parse(buildSourceMap()) },
+      ],
+    });
+    const profile = makeProfile(BUNDLE_URL, { sourceMapURL: 'bundle.js.map' });
+    profile.shared.funcTable.lineNumber[0] = 2;
+    profile.shared.frameTable.line[0] = 2;
+    await embedJsSources(
+      profile,
+      makeReader({
+        [BUNDLE_URL]: firstChunk + '\n' + BUNDLE_SOURCE,
+        [BUNDLE_URL + '.map']: indexMap,
+      }),
+      runSourceMapSymbolicationNode
+    );
+    expect(getOriginalLocationOfFunc(profile)).toEqual({
+      name: 'greet',
+      filename: ORIGINAL_FILENAME,
+      line: 1,
+      content: ORIGINAL_SOURCE,
+    });
+  });
+
   it('falls back to the sourceMappingURL comment', async function () {
     const profile = makeProfile(BUNDLE_URL);
     const bundleWithComment =

@@ -81,9 +81,35 @@ describe('parseSourceMapFileContents', function () {
     expect(parseSourceMapFileContents('null')).toBeNull();
   });
 
-  it('rejects index maps (with a sections field)', function () {
-    const indexMap = JSON.stringify({ version: 3, sections: [] });
-    expect(parseSourceMapFileContents(indexMap)).toBeNull();
+  it('parses an index map', function () {
+    const indexMap = {
+      version: 3,
+      file: 'bundle.js',
+      sections: [
+        { offset: { line: 0, column: 0 }, map: makeMap() },
+        { offset: { line: 10, column: 0 }, map: makeMap() },
+      ],
+    };
+    expect(parseSourceMapFileContents(JSON.stringify(indexMap))).toEqual(
+      indexMap
+    );
+  });
+
+  it('returns null for malformed index maps', function () {
+    const section = { offset: { line: 0, column: 0 }, map: makeMap() };
+    for (const indexMap of [
+      { version: 3, sections: 'not an array' },
+      { version: 3, sections: [{ ...section, offset: { line: 0 } }] },
+      { version: 3, sections: [{ ...section, map: { version: 3 } }] },
+      { version: 3, sections: [{ offset: section.offset, url: 'a.map' }] },
+      // Nested index maps are not allowed.
+      {
+        version: 3,
+        sections: [{ ...section, map: { version: 3, sections: [section] } }],
+      },
+    ]) {
+      expect(parseSourceMapFileContents(JSON.stringify(indexMap))).toBeNull();
+    }
   });
 });
 

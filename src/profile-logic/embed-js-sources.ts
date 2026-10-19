@@ -12,7 +12,7 @@ import { parseSourceMapFileContents } from 'firefox-profiler/profile-logic/sourc
 import { base64StringToBytes } from 'firefox-profiler/utils/base64';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type { SourceMapRunner } from 'firefox-profiler/profile-logic/source-maps/worker-types';
 import type { IndexIntoSourceTable, Profile } from 'firefox-profiler/types';
 
@@ -70,7 +70,7 @@ function _resolveSourceMapURL(
 async function _readSourceMap(
   resolvedSourceMapURL: string,
   readSource: SourceReader
-): Promise<RawSourceMap | null> {
+): Promise<SourceMap | null> {
   const isInline = resolvedSourceMapURL.startsWith('data:');
   const sourceMapText = isInline
     ? _decodeDataUrl(resolvedSourceMapURL)
@@ -119,7 +119,7 @@ export async function embedJsSources(
   const stringTable = StringTable.withBackingArray(stringArray);
   let embeddedCount = 0;
   const compiledSources = new Map<IndexIntoSourceTable, string>();
-  const resolvedSourceMaps = new Map<IndexIntoSourceTable, RawSourceMap>();
+  const resolvedSourceMaps = new Map<IndexIntoSourceTable, SourceMap>();
   // Gecko keys source rows by their ScriptSource id, so a script that's loaded
   // more than once can have several rows with the same URL.
   const readSourceOnce = _cacheByKey(readSource);
