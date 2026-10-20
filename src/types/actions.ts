@@ -46,6 +46,7 @@ import type {
   TableViewOptions,
   DecodedInstruction,
   ProfileEncodingResult,
+  FetchedSourceCodeOrigin,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -735,6 +736,7 @@ export type SourcesAction =
       readonly type: 'SOURCE_CODE_LOADING_SUCCESS';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly code: string;
+      readonly origin: FetchedSourceCodeOrigin;
       readonly generation: number;
     }
   | {

@@ -290,10 +290,18 @@ export type DecodedInstruction = {
   decodedString: string;
 };
 
+// Where the contents of a source file were fetched from. LOCAL covers the
+// browser connection and local symbol servers, which read the user's disk, so
+// the file may not exist anywhere else even if its path looks like a public URL.
+export type FetchedSourceCodeOrigin = 'LOCAL' | 'WEB';
+
+// FetchedSourceCodeOrigin, plus PROFILE for contents embedded in the profile.
+export type SourceCodeOrigin = FetchedSourceCodeOrigin | 'PROFILE';
+
 export type SourceCodeStatus =
   | { type: 'LOADING'; source: CodeLoadingSource }
   | { type: 'ERROR'; errors: SourceCodeLoadingError[] }
-  | { type: 'AVAILABLE'; code: string };
+  | { type: 'AVAILABLE'; code: string; origin: SourceCodeOrigin };
 
 export type AssemblyCodeStatus =
   | { type: 'LOADING'; source: CodeLoadingSource }

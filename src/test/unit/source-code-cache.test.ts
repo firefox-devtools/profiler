@@ -55,7 +55,7 @@ describe('source code cache with IndexIntoSourceTable', function () {
   it('returns undefined when sourceIndex is not in cache', function () {
     const { getState, dispatch, generation } = setupStoreWithSourceIndex(999);
     // Add some other source to cache but not index 999
-    dispatch(finishLoadingSourceCode(0, 'some code', generation));
+    dispatch(finishLoadingSourceCode(0, 'some code', 'LOCAL', generation));
 
     const sourceViewCode = getSourceViewCode(getState());
     expect(sourceViewCode).toBeUndefined();
@@ -64,13 +64,19 @@ describe('source code cache with IndexIntoSourceTable', function () {
   it('retrieves cached source code for AVAILABLE status', function () {
     const { getState, dispatch, generation } = setupStoreWithSourceIndex(0);
     dispatch(
-      finishLoadingSourceCode(0, 'console.log("Source 0");', generation)
+      finishLoadingSourceCode(
+        0,
+        'console.log("Source 0");',
+        'LOCAL',
+        generation
+      )
     );
 
     const sourceViewCode = getSourceViewCode(getState());
     expect(sourceViewCode).toEqual({
       type: 'AVAILABLE',
       code: 'console.log("Source 0");',
+      origin: 'LOCAL',
     });
   });
 
@@ -136,7 +142,12 @@ describe('source code cache with IndexIntoSourceTable', function () {
       const { getState, dispatch, generation } =
         setupStoreWithSourceIndex(null);
       dispatch(
-        finishLoadingSourceCode(0, 'console.log("Source 0");', generation)
+        finishLoadingSourceCode(
+          0,
+          'console.log("Source 0");',
+          'LOCAL',
+          generation
+        )
       );
 
       const result = getSourceCodeCache(getState());
@@ -144,6 +155,7 @@ describe('source code cache with IndexIntoSourceTable', function () {
       expect(result.get(0)).toEqual({
         type: 'AVAILABLE',
         code: 'console.log("Source 0");',
+        origin: 'LOCAL',
       });
     });
 
@@ -159,7 +171,12 @@ describe('source code cache with IndexIntoSourceTable', function () {
       const { getState, dispatch, generation } =
         setupStoreWithSourceIndex(null);
       dispatch(
-        finishLoadingSourceCode(0, 'console.log("Source 0");', generation)
+        finishLoadingSourceCode(
+          0,
+          'console.log("Source 0");',
+          'LOCAL',
+          generation
+        )
       );
       expect(getSourceCodeCache(getState()).size).toBe(1);
 
@@ -184,7 +201,7 @@ describe('source code cache with IndexIntoSourceTable', function () {
         )
       );
       dispatch(beginLoadingSourceCodeFromBrowserConnection(1, generation));
-      dispatch(finishLoadingSourceCode(2, 'stale code', generation));
+      dispatch(finishLoadingSourceCode(2, 'stale code', 'LOCAL', generation));
       dispatch(
         failLoadingSourceCode(3, [{ type: 'NO_KNOWN_CORS_URL' }], generation)
       );
@@ -206,12 +223,15 @@ describe('source code cache with IndexIntoSourceTable', function () {
       let sourceViewCode = getSourceViewCode(getState());
       expect(sourceViewCode?.type).toBe('LOADING');
 
-      dispatch(finishLoadingSourceCode(0, 'const result = 42;', generation));
+      dispatch(
+        finishLoadingSourceCode(0, 'const result = 42;', 'LOCAL', generation)
+      );
 
       sourceViewCode = getSourceViewCode(getState());
       expect(sourceViewCode).toEqual({
         type: 'AVAILABLE',
         code: 'const result = 42;',
+        origin: 'LOCAL',
       });
     });
 

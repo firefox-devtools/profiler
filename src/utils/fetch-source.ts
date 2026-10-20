@@ -15,10 +15,11 @@ import type { ExternalCommunicationDelegate } from './query-api';
 import type {
   SourceCodeLoadingError,
   AddressProof,
+  FetchedSourceCodeOrigin,
 } from 'firefox-profiler/types';
 
 export type FetchSourceResult =
-  | { type: 'SUCCESS'; source: string }
+  | { type: 'SUCCESS'; source: string; origin: FetchedSourceCodeOrigin }
   | { type: 'ERROR'; errors: SourceCodeLoadingError[] };
 
 /**
@@ -78,6 +79,7 @@ export async function fetchSource(
         return {
           type: 'SUCCESS',
           source: queryResult.convertedResponse,
+          origin: 'LOCAL',
         };
       case 'ERROR': {
         errors.push(...queryResult.errors);
@@ -97,6 +99,7 @@ export async function fetchSource(
         return {
           type: 'SUCCESS',
           source: response,
+          origin: 'LOCAL',
         };
       }
     } catch (e) {
@@ -120,7 +123,7 @@ export async function fetchSource(
       try {
         const response = await delegate.fetchUrlResponse(url);
         const source = await response.text();
-        return { type: 'SUCCESS', source };
+        return { type: 'SUCCESS', source, origin: 'WEB' };
       } catch (e) {
         errors.push({
           type: 'NETWORK_ERROR',
@@ -169,7 +172,7 @@ export async function fetchSource(
           const entry = stream.next();
           if (entry.name === pathInArchive && entry.buffer !== null) {
             const source = textDecoder.decode(entry.buffer);
-            return { type: 'SUCCESS', source };
+            return { type: 'SUCCESS', source, origin: 'WEB' };
           }
         }
         errors.push({

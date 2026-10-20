@@ -47,7 +47,7 @@ function _getSourceCodeStatus(action: SourcesAction): SourceCodeStatus {
     case 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION':
       return { type: 'LOADING', source: { type: 'BROWSER_CONNECTION' } };
     case 'SOURCE_CODE_LOADING_SUCCESS':
-      return { type: 'AVAILABLE', code: action.code };
+      return { type: 'AVAILABLE', code: action.code, origin: action.origin };
     case 'SOURCE_CODE_LOADING_ERROR':
       return { type: 'ERROR', errors: action.errors };
     default:

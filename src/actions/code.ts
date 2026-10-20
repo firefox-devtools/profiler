@@ -19,6 +19,7 @@ import type {
   ApiQueryError,
   DecodedInstruction,
   IndexIntoSourceTable,
+  FetchedSourceCodeOrigin,
 } from 'firefox-profiler/types';
 
 // The `generation` argument of these is the source code cache generation from
@@ -51,9 +52,16 @@ export function beginLoadingSourceCodeFromBrowserConnection(
 export function finishLoadingSourceCode(
   sourceIndex: IndexIntoSourceTable,
   code: string,
+  origin: FetchedSourceCodeOrigin,
   generation: number
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_SUCCESS', sourceIndex, code, generation };
+  return {
+    type: 'SOURCE_CODE_LOADING_SUCCESS',
+    sourceIndex,
+    code,
+    origin,
+    generation,
+  };
 }
 
 export function failLoadingSourceCode(
@@ -106,7 +114,12 @@ export function fetchSourceCode(
     switch (result.type) {
       case 'SUCCESS':
         dispatch(
-          finishLoadingSourceCode(sourceIndex, result.source, generation)
+          finishLoadingSourceCode(
+            sourceIndex,
+            result.source,
+            result.origin,
+            generation
+          )
         );
         break;
       case 'ERROR':

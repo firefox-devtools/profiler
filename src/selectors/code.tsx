@@ -35,7 +35,7 @@ export const getSourceViewCode: Selector<SourceCodeStatus | void> =
       // so the source view works offline and when sharing profiles.
       const inlineCode = profile?.shared.sources.content[sourceIndex];
       if (inlineCode !== null && inlineCode !== undefined) {
-        return { type: 'AVAILABLE', code: inlineCode };
+        return { type: 'AVAILABLE', code: inlineCode, origin: 'PROFILE' };
       }
       return sourceCodeCache.get(sourceIndex);
     }
