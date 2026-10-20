@@ -323,6 +323,35 @@ describe('computeSourceCodeSharingCandidates', function () {
     ]);
   });
 
+  it('groups the files that ship inside the browser under one root', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[file:chrome://browser/content/browser.js]
+      B[file:resource://gre/modules/AppConstants.sys.mjs]
+      C[file:moz-src:///toolkit/components/foo.mjs]
+      D[file:https://example.com/app.js]
+      E[file:jar:file:///Applications/Firefox%20Nightly.app/Contents/Resources/omni.ja!/chrome/toolkit/content/global/bar.js]
+      F[file:C:\\Users\\me\\win.cpp]
+    `);
+
+    const candidates = computeSourceCodeSharingCandidates(profile);
+    expect(candidates.map((c) => c.pathSegments)).toEqual([
+      ['Firefox', 'chrome://browser', 'content', 'browser.js'],
+      ['Firefox', 'resource://gre', 'modules', 'AppConstants.sys.mjs'],
+      ['Firefox', 'moz-src://', 'toolkit', 'components', 'foo.mjs'],
+      ['https://example.com', 'app.js'],
+      [
+        'Firefox',
+        'omni.ja',
+        'chrome',
+        'toolkit',
+        'content',
+        'global',
+        'bar.js',
+      ],
+      ['C:', 'Users', 'me', 'win.cpp'],
+    ]);
+  });
+
   it('splits URLs so that the "//" does not become an empty segment', function () {
     const { profile } = getProfileFromTextSamples(
       `Ajs[file:https://example.com/static/app.js]`

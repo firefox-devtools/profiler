@@ -70,6 +70,10 @@ export function computeSourceContentsForSharing(
   return contents;
 }
 
+// The URL schemes for files that ship inside the browser. They get a common
+// root in the tree, named after the product, rather than one root per scheme.
+const INTERNAL_URL_SCHEMES = new Set(['chrome', 'resource', 'moz-src']);
+
 function _splitPath(path: string): string[] {
   return path.split('/').filter((s) => s !== '');
 }
@@ -79,10 +83,21 @@ function _splitPath(path: string): string[] {
 const URL_ORIGIN_REGEX = /^([a-z][a-z0-9+.-]*):\/\/([^/]*)(\/.*)?$/i;
 
 // The tree segments for a file.
-function _pathSegmentsForFilename(path: string): string[] {
+function _pathSegmentsForFilename(path: string, productName: string): string[] {
+  // Files inside the browser's omni.ja archive, which is the packaged form of
+  // the chrome:// and resource:// files. The install path in front of it is
+  // noise.
+  const omniJarMatch = /^jar:.*\bomni\.ja!(\/.*)$/i.exec(path);
+  if (omniJarMatch !== null) {
+    return [productName, 'omni.ja', ..._splitPath(omniJarMatch[1])];
+  }
+
   const originMatch = URL_ORIGIN_REGEX.exec(path);
   if (originMatch !== null) {
     const [, scheme, host, rest] = originMatch;
+    if (INTERNAL_URL_SCHEMES.has(scheme.toLowerCase())) {
+      return [productName, `${scheme}://${host}`, ..._splitPath(rest ?? '')];
+    }
     return [`${scheme}://${host}`, ..._splitPath(rest ?? '')];
   }
 
@@ -206,6 +221,7 @@ export function computeSourceCodeSharingCandidates(
   profile: Profile
 ): SourceCodeSharingCandidate[] {
   const { sources, stringArray } = profile.shared;
+  const productName = profile.meta.product || 'Firefox';
   const sourcesOnStacks = _computeSourcesOnStacks(profile, profile.threads);
 
   const sourceIndexes = Array.from(sourcesOnStacks).sort((a, b) => a - b);
@@ -215,7 +231,7 @@ export function computeSourceCodeSharingCandidates(
     return {
       sourceIndex,
       path,
-      pathSegments: _pathSegmentsForFilename(path),
+      pathSegments: _pathSegmentsForFilename(path, productName),
       isPubliclyDownloadable: _isPubliclyDownloadable(filename),
     };
   });
@@ -463,8 +479,8 @@ function _finishTreeNode(
     fileRowNode = { segment: node.segment, children: new Map(), files };
     files = [];
   }
-  // File rows show the file's real path, which the tree path can differ from,
-  // for example by dropping the leading "/".
+  // File rows show the file's real path, which the tree path can differ from:
+  // it drops the leading "/" and adds the group root for internal URLs.
   const path = files.length > 0 ? files[0].path : treePath;
 
   const start = sourceIndexes.length;
