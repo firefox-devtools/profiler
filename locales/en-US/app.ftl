@@ -764,6 +764,7 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
 MenuButtons--publish--renderCheckbox-label-argument-values = Include JavaScript execution tracing function argument values
 MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
     .title = This profile contains function argument values recorded from the page, which may include personal data
+MenuButtons--publish--renderCheckbox-label-source-code = Include source code
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
 MenuButtons--publish--save-performance-profile = Save Performance Profile
@@ -781,6 +782,74 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--save = Save
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
+
+## Publish panel, "Include source code" option
+## Shown next to the "Include source code" checkbox while it is unchecked, so
+## that the number and size of the source files is visible without having to
+## turn the option on. Source files whose contents aren't in the profile yet
+## have to be fetched from the browser that recorded the profile, or from a
+## local symbol server, before they can be shared.
+## Variables:
+##   $totalFileCount (Number) - Number of source files that could be shared
+##   $fileCount (Number) - Number of those files that have been fetched
+##   $size (String) - Pretty-printed total size of the fetched files, e.g. "12 kB"
+
+MenuButtons--publish--source-code-available =
+    { $totalFileCount ->
+        [one] ({ $totalFileCount } file available, { $size } uncompressed)
+       *[other] ({ $totalFileCount } files available, { $size } uncompressed)
+    }
+# Only fetched files are included.
+MenuButtons--publish--source-code-partially-fetched =
+    { $totalFileCount ->
+        [one] ({ $fileCount } of { $totalFileCount } file fetched, { $size } uncompressed)
+       *[other] ({ $fileCount } of { $totalFileCount } files fetched, { $size } uncompressed)
+    }
+# The checkbox is disabled if none of the files can be fetched either.
+MenuButtons--publish--source-code-none-fetched =
+    { $totalFileCount ->
+        [one] ({ $totalFileCount } file, none fetched yet)
+       *[other] ({ $totalFileCount } files, none fetched yet)
+    }
+
+## Shown above the file tree of the "Include source code" option.
+
+# Labels a row of radio buttons that select a ready-made set of files.
+MenuButtons--publish--source-code-preset-legend = Include:
+MenuButtons--publish--source-code-preset-current-file = Current file
+MenuButtons--publish--source-code-preset-selected-threads = Selected threads
+MenuButtons--publish--source-code-preset-all-available-files = All available files
+# Not something the user can pick. It's shown as the selected radio button once
+# the user has edited the file tree so that it no longer matches any of the
+# others.
+MenuButtons--publish--source-code-preset-custom = Custom
+
+## Shown in the size column of the file tree, in place of a size.
+
+# For files that can't be fetched from here, and for directories where none of
+# the files can be.
+MenuButtons--publish--source-code-unavailable = Unavailable
+    .title = Fetching requires the browser that recorded the profile or a local symbol server.
+
+## Status lines shown under the file tree of the "Include source code" option.
+
+# How much source code the picked files add to the shared profile.
+# Variables:
+#   $fileCount (Number) - Number of picked source files that have been fetched
+#   $size (String) - Pretty-printed total size of those files, e.g. "12 kB"
+MenuButtons--publish--source-code-status =
+    { $fileCount ->
+        [one] { $fileCount } file, { $size } uncompressed.
+       *[other] { $fileCount } files, { $size } uncompressed.
+    }
+# The tooltip of an info icon at the end of the status line.
+# Variables:
+#   $unavailableCount (Number) - Number of listed files that can’t be fetched from here
+MenuButtons--publish--source-code-left-out-unavailable =
+    { $unavailableCount ->
+        [one] { $unavailableCount } file can’t be fetched from here. Fetching it requires the browser that recorded the profile or a local symbol server.
+       *[other] { $unavailableCount } files can’t be fetched from here. Fetching them requires the browser that recorded the profile or a local symbol server.
+    }
 
 ## NetworkSettings
 ## This is used in the network chart.

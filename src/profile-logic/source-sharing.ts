@@ -18,6 +18,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoSourceTable,
   IndexIntoStackTable,
+  OfferedSourceSharingPreset,
   Profile,
   RawThread,
   SourceCodeAvailability,
@@ -545,6 +546,24 @@ export function setSharedSourceCode(
       sources: { ...sources, content },
     },
   };
+}
+
+// The presets the publish panel offers, narrowest first.
+export const OFFERED_SOURCE_SHARING_PRESETS: readonly OfferedSourceSharingPreset[] =
+  ['current-file', 'selected-threads', 'all-files'];
+
+// The narrowest preset that selects any file, or null if they're all empty.
+export function findNarrowestNonEmptyPreset(
+  filesForPresets: Record<
+    OfferedSourceSharingPreset,
+    ReadonlySet<IndexIntoSourceTable>
+  >
+): OfferedSourceSharingPreset | null {
+  return (
+    OFFERED_SOURCE_SHARING_PRESETS.find(
+      (preset) => filesForPresets[preset].size > 0
+    ) ?? null
+  );
 }
 
 export function computeSourceCodeSharingSummary(
