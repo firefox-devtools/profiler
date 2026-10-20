@@ -4,12 +4,15 @@
 
 import {
   attemptToPublish,
+  publishPanelOpened,
   encodeSanitizedProfile,
   resetUploadState,
   updateSharingOption,
   updateSourceFilesToShare,
   fetchSourceFilesToShare,
   cancelSourceCodeFetch,
+  setSourceSharingDownloadedOnly,
+  turnOnSourceCodeSharing,
   revertToPrePublishedState,
 } from '../../actions/publish';
 import {
@@ -34,6 +37,9 @@ import {
   getHasSourceCodeToShare,
   getSourceCodeSharingStats,
   getSourceCodeFetchState,
+  getSourceFilesToFetch,
+  getActiveSourceSharingPreset,
+  getSourceSharingDownloadedOnly,
   getSourceFilesForPresets,
   getUploadPhase,
   getUploadError,
@@ -88,6 +94,7 @@ import {
   commitRange,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  changeSelectedThreads,
 } from '../../actions/profile-view';
 import { changeTabFilter, loadProfile } from '../../actions/receive-profile';
 
@@ -120,7 +127,7 @@ const { UploadAbortedError } = jest.requireActual(
 );
 
 function offeredPresets(state: State) {
-  const filesForPresets = getSourceFilesForPresets(state);
+  const filesForPresets = getSourceFilesForPresets(state, 'upload');
   return OFFERED_SOURCE_SHARING_PRESETS.filter(
     (preset) => filesForPresets[preset].size > 0
   );
@@ -430,8 +437,8 @@ describe('getRemoveProfileInformation', function () {
 
     it('should select the file the source view is showing', function () {
       const { getState, dispatch } = getStoreWithEmbeddedSource();
-      // Simulate opening this file in the source view.
       dispatch(openSourceView(0));
+      dispatch(publishPanelOpened('upload'));
 
       expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set([0]));
       expect(
@@ -439,11 +446,14 @@ describe('getRemoveProfileInformation', function () {
       ).toEqual([SOURCE]);
     });
 
-    it('should select nothing once the source view is closed again', function () {
+    it('refreshes the default selection when the publish panel reopens', function () {
       const { getState, dispatch } = getStoreWithEmbeddedSource();
       dispatch(openSourceView(0));
+      dispatch(publishPanelOpened('upload'));
       dispatch(closeBottomBox());
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set([0]));
 
+      dispatch(publishPanelOpened('upload'));
       expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
       expect(
         getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
@@ -792,7 +802,7 @@ describe('attemptToPublish', function () {
       }
 
       it('offers a native file for fetching once the browser connection is there', function () {
-        const { getState } = setupWithBrowserConnection();
+        const { getState, dispatch } = setupWithBrowserConnection();
         expect(getSourceCodeSharingFiles(getState())).toMatchObject([
           {
             path: LOCAL_FILE,
@@ -800,6 +810,9 @@ describe('attemptToPublish', function () {
             uncompressedSize: null,
           },
         ]);
+        // The presets only reach it once they may pick files to be fetched.
+        expect(offeredPresets(getState())).toEqual([]);
+        dispatch(setSourceSharingDownloadedOnly('upload', false));
         expect(offeredPresets(getState())).toEqual([
           'selected-threads',
           'all-files',
@@ -887,6 +900,130 @@ describe('attemptToPublish', function () {
           { availability: 'FAILED' },
         ]);
         expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+      });
+
+      it('can keep the presets to the files that are already downloaded', function () {
+        const OTHER_FILE = '/home/user/moz/mozilla-central/dom/base/nsNode.cpp';
+        const { profile } = getProfileFromTextSamples(
+          `A[file:${LOCAL_FILE}][lib:xul][address:1234]  B[file:${OTHER_FILE}]`
+        );
+        // B is downloaded, A would have to be fetched.
+        profile.shared.sources.content[1] = 'void nsNode::Foo() {}';
+        const store = storeWithProfile(profile);
+        connectFakeBrowser(store);
+        const { dispatch, getState } = store;
+
+        dispatch(setSourceSharingDownloadedOnly('upload', false));
+        dispatch(updateSourceFilesToShare('upload', new Set([0, 1])));
+        expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(
+          new Set([0])
+        );
+
+        // The active preset follows the option to its new meaning.
+        dispatch(setSourceSharingDownloadedOnly('upload', true));
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+          new Set([1])
+        );
+        expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(new Set());
+        expect(getActiveSourceSharingPreset(getState(), 'upload')).toBe(
+          'selected-threads'
+        );
+
+        dispatch(setSourceSharingDownloadedOnly('upload', false));
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+          new Set([0, 1])
+        );
+      });
+
+      describe('turning the downloaded-only option back on', function () {
+        const OTHER_FILE = '/home/user/moz/mozilla-central/dom/base/nsNode.cpp';
+        const THIRD_FILE = '/home/user/moz/mozilla-central/dom/base/nsAttr.cpp';
+
+        function storeWithBrowserConnection(profile: Profile) {
+          const store = storeWithProfile(profile);
+          connectFakeBrowser(store);
+          return store;
+        }
+
+        it('narrows "Selected threads" even once it matches "All files"', function () {
+          // Thread 0 has A (to be fetched) and B (downloaded), thread 1 has C
+          // (to be fetched). Downloaded-only, both presets come down to B.
+          const { profile } = getProfileFromTextSamples(
+            `A[file:${LOCAL_FILE}][lib:xul][address:1234]  B[file:${OTHER_FILE}]`,
+            `C[file:${THIRD_FILE}][lib:xul][address:5678]`
+          );
+          profile.shared.sources.content[1] = 'void nsNode::Foo() {}';
+          const { dispatch, getState } = storeWithBrowserConnection(profile);
+          dispatch(changeSelectedThreads(new Set([0])));
+          dispatch(setSourceSharingDownloadedOnly('upload', false));
+          dispatch(updateSourceFilesToShare('upload', new Set([0, 1])));
+
+          dispatch(setSourceSharingDownloadedOnly('upload', true));
+          expect(offeredPresets(getState())).toEqual([
+            'selected-threads',
+            'all-files',
+          ]);
+          expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+            new Set([1])
+          );
+          expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(
+            new Set()
+          );
+        });
+
+        it('moves to the narrowest offered preset when the active one becomes empty', function () {
+          const { profile } = getProfileFromTextSamples(
+            `A[file:${LOCAL_FILE}][lib:xul][address:1234]  B[file:${OTHER_FILE}]`
+          );
+          profile.shared.sources.content[1] = 'void nsNode::Foo() {}';
+          const { dispatch, getState } = storeWithBrowserConnection(profile);
+          // The current file is the one that would have to be fetched.
+          dispatch(openSourceView(0));
+          dispatch(setSourceSharingDownloadedOnly('upload', false));
+          dispatch(updateSourceFilesToShare('upload', new Set([0])));
+
+          dispatch(setSourceSharingDownloadedOnly('upload', true));
+          expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+            new Set([1])
+          );
+          expect(getActiveSourceSharingPreset(getState(), 'upload')).toBe(
+            'selected-threads'
+          );
+        });
+
+        it('leaves nothing to fetch when nothing is downloaded', function () {
+          const { dispatch, getState } = setupWithBrowserConnection();
+          dispatch(turnOnSourceCodeSharing('upload'));
+          expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(
+            new Set([0])
+          );
+
+          dispatch(setSourceSharingDownloadedOnly('upload', true));
+          expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+            new Set()
+          );
+          expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(
+            new Set()
+          );
+        });
+      });
+
+      it('falls back to fetchable files when turning the option on with nothing downloaded', function () {
+        const { dispatch, getState } = setupWithBrowserConnection();
+        expect(getSourceSharingDownloadedOnly(getState(), 'upload')).toBe(true);
+        // The downloaded-only presets are all empty here.
+        expect(offeredPresets(getState())).toEqual([]);
+
+        dispatch(turnOnSourceCodeSharing('upload'));
+        expect(getSourceSharingDownloadedOnly(getState(), 'upload')).toBe(
+          false
+        );
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+          new Set([0])
+        );
+        expect(getActiveSourceSharingPreset(getState(), 'upload')).toBe(
+          'selected-threads'
+        );
       });
 
       it('can be cancelled', async function () {
@@ -1041,8 +1178,8 @@ describe('attemptToPublish', function () {
         const { dispatch, getState, resolveUpload, assertUploadSuccess } =
           setupResult;
 
-        // With no explicit pick, the selection follows the source view.
         dispatch(openSourceView(sourceIndexFor(LOCAL_FILE)));
+        dispatch(publishPanelOpened('upload'));
         const publishAttempt = dispatch(attemptToPublish());
         expect(getSourceCodeFetchState(getState(), 'upload').isFetching).toBe(
           true

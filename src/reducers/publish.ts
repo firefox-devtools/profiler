@@ -14,6 +14,7 @@ import type {
   Reducer,
   State,
   SanitizedProfileEncodingState,
+  IndexIntoSourceTable,
   SourceCodeFetchState,
   SourceFileSelection,
   Action,
@@ -81,6 +82,24 @@ const checkedSharingOptions: Reducer<
   }
 };
 
+const initialDefaultSourceFiles = {
+  download: new Set<IndexIntoSourceTable>(),
+  upload: new Set<IndexIntoSourceTable>(),
+};
+
+const defaultSourceFiles: Reducer<
+  Record<SharingMode, ReadonlySet<IndexIntoSourceTable>>
+> = (state = initialDefaultSourceFiles, action) => {
+  switch (action.type) {
+    case 'PUBLISH_PANEL_OPENED':
+      return { ...state, [action.mode]: action.defaultSourceFiles };
+    case 'PROFILE_LOADED':
+      return initialDefaultSourceFiles;
+    default:
+      return state;
+  }
+};
+
 // `null` means untouched, in which case `getSourceFilesToShare` falls back to
 // the default selection.
 const sourceFileSelection: Reducer<
@@ -97,6 +116,22 @@ const sourceFileSelection: Reducer<
           preset: action.preset,
         },
       };
+    default:
+      return state;
+  }
+};
+
+// On by default, so that picking a preset doesn't download anything unless
+// the user asks for it.
+const sourceSharingDownloadedOnly: Reducer<Record<SharingMode, boolean>> = (
+  state = { download: true, upload: true },
+  action
+) => {
+  switch (action.type) {
+    case 'PROFILE_LOADED':
+      return { download: true, upload: true };
+    case 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY':
+      return { ...state, [action.mode]: action.value };
     default:
       return state;
   }
@@ -370,7 +405,9 @@ const sourceCodeFetch: Reducer<Record<SharingMode, SourceCodeFetchState>> = (
 
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
+  defaultSourceFiles,
   sourceFileSelection,
+  sourceSharingDownloadedOnly,
   sanitizedProfileEncodingState,
   sourceCodeFetch,
   upload,

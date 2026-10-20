@@ -13,8 +13,11 @@ import {
   getPrePublishedState,
   getSanitizedProfileEncodingState,
   getSourceFilesToFetch,
+  getDefaultSourceFilesToShare,
   getSourceCodeFetchState,
+  getActiveSourceSharingPreset,
   getSourceFilesForPresets,
+  getSourceSharingDownloadedOnly,
 } from 'firefox-profiler/selectors/publish';
 import { fetchSourceCode } from './code';
 import { findNarrowestNonEmptyPreset } from 'firefox-profiler/profile-logic/source-sharing';
@@ -71,6 +74,16 @@ import type {
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
+
+export function publishPanelOpened(mode: SharingMode): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'PUBLISH_PANEL_OPENED',
+      mode,
+      defaultSourceFiles: getDefaultSourceFilesToShare(getState()),
+    });
+  };
+}
 
 export function updateSharingOption(
   mode: SharingMode,
@@ -388,15 +401,55 @@ export function encodeSanitizedProfile(
 }
 
 /**
- * Turn the "Include source code" option on, picking the narrowest preset.
+ * Turn the "Include source code" option on, picking the narrowest preset. When
+ * nothing is downloaded yet, the downloaded-only presets are all empty, so fall
+ * back to the full ones and show that by turning the downloaded-only option
+ * off.
  */
 export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
   return (dispatch, getState) => {
-    const filesForPresets = getSourceFilesForPresets(getState());
-    const preset = findNarrowestNonEmptyPreset(filesForPresets);
+    let preset = findNarrowestNonEmptyPreset(
+      getSourceFilesForPresets(getState(), mode)
+    );
+    if (preset === null && getSourceSharingDownloadedOnly(getState(), mode)) {
+      dispatch({
+        type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY',
+        mode,
+        value: false,
+      });
+      preset = findNarrowestNonEmptyPreset(
+        getSourceFilesForPresets(getState(), mode)
+      );
+    }
     if (preset === null) {
       return;
     }
+    const files = getSourceFilesForPresets(getState(), mode)[preset];
+    dispatch(updateSourceFilesToShare(mode, files, preset));
+    dispatch(encodeSanitizedProfile(mode));
+  };
+}
+
+/**
+ * Turn "only files that are already downloaded" on or off for the presets.
+ * When a preset is active, the selection follows it to its new meaning, or to
+ * the narrowest offered preset if that meaning is empty.
+ */
+export function setSourceSharingDownloadedOnly(
+  mode: SharingMode,
+  value: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const activePreset = getActiveSourceSharingPreset(getState(), mode);
+    dispatch({ type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY', mode, value });
+    if (activePreset === 'custom') {
+      return;
+    }
+    const filesForPresets = getSourceFilesForPresets(getState(), mode);
+    const preset =
+      filesForPresets[activePreset].size > 0
+        ? activePreset
+        : (findNarrowestNonEmptyPreset(filesForPresets) ?? activePreset);
     dispatch(updateSourceFilesToShare(mode, filesForPresets[preset], preset));
     dispatch(encodeSanitizedProfile(mode));
   };

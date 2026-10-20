@@ -5,6 +5,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
+  publishPanelOpened,
   updateSharingOption,
   attemptToPublish,
   resetUploadState,
@@ -81,6 +82,7 @@ type StateProps = {
 };
 
 type DispatchProps = {
+  readonly publishPanelOpened: typeof publishPanelOpened;
   readonly updateSharingOption: typeof updateSharingOption;
   readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
   readonly attemptToPublish: typeof attemptToPublish;
@@ -91,6 +93,7 @@ type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   override componentDidMount(): void {
+    this.props.publishPanelOpened(this.props.mode);
     this.props.encodeSanitizedProfile(this.props.mode);
   }
 
@@ -482,6 +485,7 @@ export const PublishPanel = explicitConnect<
     abortFunction: getAbortFunction(state),
   }),
   mapDispatchToProps: {
+    publishPanelOpened,
     updateSharingOption,
     encodeSanitizedProfile,
     attemptToPublish,

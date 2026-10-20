@@ -830,6 +830,10 @@ MenuButtons--publish--source-code-preset-all-available-files = All available fil
 # the user has edited the file tree so that it no longer matches any of the
 # others.
 MenuButtons--publish--source-code-preset-custom = Custom
+# A checkbox under the radio buttons. When checked, "Selected threads" and "All
+# available files" only pick files that are already fetched, so that sharing
+# doesn't fetch anything more.
+MenuButtons--publish--source-code-fetched-only = Only already fetched files
 
 ## Shown in the size column of the file tree, in place of a size.
 
