@@ -15,6 +15,7 @@ import type {
   State,
   SanitizedProfileEncodingState,
   IndexIntoSourceTable,
+  SourceCodeFetchState,
   Action,
 } from 'firefox-profiler/types';
 
@@ -303,10 +304,72 @@ const sanitizedProfileEncodingState: Reducer<
   }
 };
 
+const _initialSourceCodeFetchState: SourceCodeFetchState = {
+  isFetching: false,
+  totalCount: 0,
+  completedCount: 0,
+  generation: 0,
+};
+
+const _cancelSourceCodeFetch = (
+  state: SourceCodeFetchState
+): SourceCodeFetchState => ({
+  ...state,
+  isFetching: false,
+  generation: state.generation + 1,
+});
+
+const sourceCodeFetch: Reducer<Record<SharingMode, SourceCodeFetchState>> = (
+  state = {
+    download: _initialSourceCodeFetchState,
+    upload: _initialSourceCodeFetchState,
+  },
+  action
+) => {
+  switch (action.type) {
+    case 'SOURCE_CODE_FETCH_STARTED':
+      return {
+        ...state,
+        [action.mode]: {
+          ...state[action.mode],
+          isFetching: true,
+          totalCount: action.totalCount,
+          completedCount: 0,
+        },
+      };
+    case 'SOURCE_CODE_FETCH_PROGRESS':
+      return {
+        ...state,
+        [action.mode]: {
+          ...state[action.mode],
+          completedCount: action.completedCount,
+        },
+      };
+    case 'SOURCE_CODE_FETCH_FINISHED':
+      return {
+        ...state,
+        [action.mode]: { ...state[action.mode], isFetching: false },
+      };
+    case 'SOURCE_CODE_FETCH_CANCELLED':
+      return {
+        ...state,
+        [action.mode]: _cancelSourceCodeFetch(state[action.mode]),
+      };
+    case 'PROFILE_LOADED':
+      return {
+        download: _cancelSourceCodeFetch(state.download),
+        upload: _cancelSourceCodeFetch(state.upload),
+      };
+    default:
+      return state;
+  }
+};
+
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
   sourceFileSelection,
   sanitizedProfileEncodingState,
+  sourceCodeFetch,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,

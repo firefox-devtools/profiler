@@ -252,10 +252,23 @@ export type PublishState = {
     SharingMode,
     SanitizedProfileEncodingState
   >;
+  readonly sourceCodeFetch: Record<SharingMode, SourceCodeFetchState>;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
   readonly prePublishedState: State | null;
+};
+
+/**
+ * The progress of fetching the source files picked in the publish panel, which
+ * happens when sharing or on request.
+ */
+export type SourceCodeFetchState = {
+  readonly isFetching: boolean;
+  readonly totalCount: number;
+  readonly completedCount: number;
+  // Bumped when a fetch is cancelled, so that the in-flight one can tell.
+  readonly generation: number;
 };
 
 export type ZippedProfilesState = {

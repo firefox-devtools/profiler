@@ -785,7 +785,7 @@ MenuButtons--publish--source-code-partially-downloaded =
        *[other] ({ $fileCount } of { $totalFileCount } files downloaded, { $size } uncompressed)
     }
 # Same place as the previous string, when none of the files have been downloaded
-# yet. The checkbox is disabled in that case.
+# yet. The checkbox is disabled if none of them can be downloaded either.
 # Variables:
 #   $totalFileCount (Number) - Number of source files that could be shared
 MenuButtons--publish--source-code-none-downloaded =
@@ -793,6 +793,12 @@ MenuButtons--publish--source-code-none-downloaded =
         [one] ({ $totalFileCount } file, none downloaded yet)
        *[other] ({ $totalFileCount } files, none downloaded yet)
     }
+# Shown in the size column of the file tree for files whose contents we don't
+# have yet. They are downloaded when sharing, if picked.
+MenuButtons--publish--source-code-not-downloaded = Not downloaded
+# Shown in the size column of the file tree for files that we tried to download
+# during this session and couldn't.
+MenuButtons--publish--source-code-download-failed = Download failed
 # Shown in the size column of the file tree for files that can't be downloaded
 # from here, and for directories where none of the files can be.
 MenuButtons--publish--source-code-unavailable = Unavailable
@@ -822,6 +828,40 @@ MenuButtons--publish--source-code-status =
     { $fileCount ->
         [one] { $fileCount } file, { $size } uncompressed.
        *[other] { $fileCount } files, { $size } uncompressed.
+    }
+# Shown on a line of its own under the previous string when some of the picked
+# files still have to be downloaded. A "Download now" button comes after it.
+# Variables:
+#   $fileCount (Number) - Number of picked source files whose contents we don't have
+MenuButtons--publish--source-code-status-to-download =
+    { $fileCount ->
+        [one] { $fileCount } file will be downloaded when sharing.
+       *[other] { $fileCount } files will be downloaded when sharing.
+    }
+# Replaces the previous string in the Save panel, where the Save button stays
+# disabled until the picked files are downloaded.
+# Variables:
+#   $fileCount (Number) - Number of picked source files whose contents we don't have
+MenuButtons--publish--source-code-status-to-download-before-saving =
+    { $fileCount ->
+        [one] { $fileCount } file must be downloaded before saving.
+       *[other] { $fileCount } files must be downloaded before saving.
+    }
+MenuButtons--publish--source-code-download-now = Download now
+# Replaces the status line while the download is underway.
+# Variables:
+#   $completedCount (Number) - Number of source files downloaded so far
+#   $totalCount (Number) - Number of source files being downloaded
+MenuButtons--publish--source-code-downloading = Downloading source files… ({ $completedCount } of { $totalCount })
+MenuButtons--publish--source-code-cancel-download = Cancel
+# Shown under the upload error message when the upload stopped because some of
+# the picked source files couldn't be downloaded.
+# Variables:
+#   $failedCount (Number) - Number of picked source files that couldn't be downloaded
+MenuButtons--publish--source-code-fetch-failed =
+    { $failedCount ->
+        [one] { $failedCount } of the picked source files could not be downloaded. It has been left out, so uploading again will share the rest.
+       *[other] { $failedCount } of the picked source files could not be downloaded. They have been left out, so uploading again will share the rest.
     }
 # The tooltip of an info icon at the end of the status line, when some of the
 # listed files can't be picked because they can't be downloaded from here.

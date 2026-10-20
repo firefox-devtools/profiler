@@ -18,6 +18,7 @@ import {
   getMarkerSchemaByName,
   getStackTable,
   getIdleCategoryIndex,
+  getSourceAddressProofs,
 } from './profile';
 import {
   sanitizePII,
@@ -26,6 +27,7 @@ import {
 } from '../profile-logic/sanitize';
 import {
   buildSourceFileTree,
+  computeFetchableSources,
   computePickableSources,
   computeSourceCodeSharingCandidates,
   computeSourceCodeSharingFiles,
@@ -37,14 +39,18 @@ import {
   setSharedSourceCode,
 } from '../profile-logic/source-sharing';
 import { getSourceCodeCache } from './code';
+import { getBrowserConnection } from './app';
+import { isLocalURL } from '../utils/url';
 import { ensureExists } from '../utils/types';
 import { formatNumber } from '../utils/format-numbers';
 import {
+  getDataSource,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getIsBottomBoxOpen,
   getSelectedThreadIndexesOrNull,
   getSourceViewSourceIndex,
+  getSymbolServerUrl,
 } from './url-state';
 
 import type {
@@ -62,6 +68,7 @@ import type {
   CounterIndex,
   SanitizedProfileEncodingState,
   IndexIntoSourceTable,
+  SourceCodeFetchState,
   SourceCodeSharingCandidate,
   SourceCodeSharingFile,
   SourceCodeSharingStats,
@@ -127,10 +134,46 @@ const getSourceContentsForSharing: Selector<Map<IndexIntoSourceTable, string>> =
 const getSourceCodeSharingCandidates: Selector<SourceCodeSharingCandidate[]> =
   createSelector(getProfile, computeSourceCodeSharingCandidates);
 
+// The symbolication API is only asked for sources through the browser, or
+// when it runs locally, since the public one doesn't have them.
+const getCanQuerySourceApi: Selector<boolean> = createSelector(
+  getBrowserConnection,
+  getSymbolServerUrl,
+  (browserConnection, symbolServerUrl) =>
+    browserConnection !== null || isLocalURL(symbolServerUrl)
+);
+
+// The browser only serves JS sources to the tab that captured the profile.
+const getCanGetJSSourcesFromBrowser: Selector<boolean> = (state) =>
+  getBrowserConnection(state) !== null &&
+  getDataSource(state) === 'from-browser';
+
+const getFetchableSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
+  createSelector(
+    getProfile,
+    getSourceAddressProofs,
+    getCanQuerySourceApi,
+    getCanGetJSSourcesFromBrowser,
+    computeFetchableSources
+  );
+
+const getFailedSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
+  createSelector(getSourceCodeCache, (cache) => {
+    const failed = new Set<IndexIntoSourceTable>();
+    for (const [sourceIndex, status] of cache) {
+      if (status.type === 'ERROR') {
+        failed.add(sourceIndex);
+      }
+    }
+    return failed;
+  });
+
 export const getSourceCodeSharingFiles: Selector<SourceCodeSharingFile[]> =
   createSelector(
     getSourceCodeSharingCandidates,
     getSourceContentsForSharing,
+    getFetchableSources,
+    getFailedSources,
     computeSourceCodeSharingFiles
   );
 
@@ -307,6 +350,32 @@ export const getSourceCodeSharingSummary: DangerousSelectorWithArguments<
     computeSourceCodeSharingSummary
   )
 );
+
+// The picked files whose contents we don't have yet. They get fetched when
+// sharing, or when the user asks for it.
+export const getSourceFilesToFetch: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceFilesToShare(state, mode),
+    getSourceContentsForSharing,
+    (selection, contents) => {
+      const toFetch = new Set<IndexIntoSourceTable>();
+      for (const sourceIndex of selection) {
+        if (!contents.has(sourceIndex)) {
+          toFetch.add(sourceIndex);
+        }
+      }
+      return toFetch;
+    }
+  )
+);
+
+export const getSourceCodeFetchState: DangerousSelectorWithArguments<
+  SourceCodeFetchState,
+  SharingMode
+> = (state, mode) => getPublishState(state).sourceCodeFetch[mode];
 
 export const getRemoveProfileInformation: DangerousSelectorWithArguments<
   RemoveProfileInformation | null,

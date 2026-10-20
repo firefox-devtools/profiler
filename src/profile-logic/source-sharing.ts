@@ -14,6 +14,7 @@ import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
 
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
+  AddressProof,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoSourceLocationTable,
@@ -259,6 +260,32 @@ function _computeSourcesOnStacks(
 }
 
 /**
+ * The sources whose contents could be fetched from here. Native files go
+ * through the symbolication API, which needs an address proof and either the
+ * browser connection or a local symbol server. JS files come straight from
+ * the browser, by their source id, but only in the tab that captured the
+ * profile.
+ */
+export function computeFetchableSources(
+  profile: Profile,
+  addressProofs: Map<IndexIntoSourceTable, AddressProof>,
+  canQuerySourceApi: boolean,
+  canGetJSSourcesFromBrowser: boolean
+): Set<IndexIntoSourceTable> {
+  const fetchable = new Set<IndexIntoSourceTable>();
+  const { sources } = profile.shared;
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    if (
+      (canQuerySourceApi && addressProofs.has(sourceIndex)) ||
+      (canGetJSSourcesFromBrowser && sources.id[sourceIndex] !== null)
+    ) {
+      fetchable.add(sourceIndex);
+    }
+  }
+  return fetchable;
+}
+
+/**
  * The pickable source files anywhere on the given threads' stacks, not only in
  * the leaf frames.
  */
@@ -383,15 +410,29 @@ export function computeSourceTreeRootWeights(
  */
 export function computeSourceCodeSharingFiles(
   candidates: SourceCodeSharingCandidate[],
-  contents: Map<IndexIntoSourceTable, string>
+  contents: Map<IndexIntoSourceTable, string>,
+  fetchableSources: ReadonlySet<IndexIntoSourceTable>,
+  failedSources: ReadonlySet<IndexIntoSourceTable>
 ): SourceCodeSharingFile[] {
   return candidates.map((candidate) => {
-    const fileContents = contents.get(candidate.sourceIndex);
+    const { sourceIndex } = candidate;
+    const fileContents = contents.get(sourceIndex);
+    let availability: SourceCodeAvailability = 'UNAVAILABLE';
+    if (fileContents !== undefined) {
+      availability = 'DOWNLOADED';
+    } else if (failedSources.has(sourceIndex)) {
+      availability = 'FAILED';
+    } else if (
+      candidate.isPubliclyDownloadable ||
+      fetchableSources.has(sourceIndex)
+    ) {
+      availability = 'FETCHABLE';
+    }
     return {
-      sourceIndex: candidate.sourceIndex,
+      sourceIndex,
       path: candidate.path,
       pathSegments: candidate.pathSegments,
-      availability: fileContents !== undefined ? 'DOWNLOADED' : 'UNAVAILABLE',
+      availability,
       uncompressedSize: fileContents !== undefined ? fileContents.length : null,
     };
   });
@@ -402,6 +443,7 @@ export function computeSourceCodeSharingStats(
 ): SourceCodeSharingStats {
   let downloadedFileCount = 0;
   let downloadedUncompressedSize = 0;
+  let fetchableFileCount = 0;
   let unavailableFileCount = 0;
   for (const file of files) {
     switch (file.availability) {
@@ -409,8 +451,13 @@ export function computeSourceCodeSharingStats(
         downloadedFileCount++;
         downloadedUncompressedSize += file.uncompressedSize ?? 0;
         break;
+      case 'FETCHABLE':
+        fetchableFileCount++;
+        break;
       case 'UNAVAILABLE':
         unavailableFileCount++;
+        break;
+      case 'FAILED':
         break;
       default:
         throw assertExhaustiveCheck(file.availability);
@@ -420,6 +467,7 @@ export function computeSourceCodeSharingStats(
     fileCount: files.length,
     downloadedFileCount,
     downloadedUncompressedSize,
+    pickableFileCount: downloadedFileCount + fetchableFileCount,
     unavailableFileCount,
   };
 }
@@ -427,7 +475,9 @@ export function computeSourceCodeSharingStats(
 function _isPickable(availability: SourceCodeAvailability): boolean {
   switch (availability) {
     case 'DOWNLOADED':
+    case 'FETCHABLE':
       return true;
+    case 'FAILED':
     case 'UNAVAILABLE':
       return false;
     default:
@@ -436,7 +486,8 @@ function _isPickable(availability: SourceCodeAvailability): boolean {
 }
 
 /**
- * The files the user can pick, which are the downloaded ones.
+ * The files the user can pick: the downloaded ones and the ones that will be
+ * fetched when sharing.
  */
 export function computePickableSources(
   files: SourceCodeSharingFile[]
@@ -530,8 +581,12 @@ function _availabilityRank(availability: SourceCodeAvailability): number {
   switch (availability) {
     case 'DOWNLOADED':
       return 0;
-    case 'UNAVAILABLE':
+    case 'FETCHABLE':
       return 1;
+    case 'FAILED':
+      return 2;
+    case 'UNAVAILABLE':
+      return 3;
     default:
       throw assertExhaustiveCheck(availability);
   }
@@ -570,6 +625,7 @@ function _finishTreeNode(
   let availability: SourceCodeAvailability | null = null;
   let uncompressedSize = 0;
   let downloadedFileCount = 0;
+  let fetchableFileCount = 0;
   for (const file of files) {
     if (
       availability === null ||
@@ -585,6 +641,10 @@ function _finishTreeNode(
         uncompressedSize += file.uncompressedSize ?? 0;
         downloadedFileCount++;
         break;
+      case 'FETCHABLE':
+        fetchableFileCount++;
+        break;
+      case 'FAILED':
       case 'UNAVAILABLE':
         break;
       default:
@@ -607,6 +667,7 @@ function _finishTreeNode(
   for (const child of children) {
     uncompressedSize += child.uncompressedSize;
     downloadedFileCount += child.downloadedFileCount;
+    fetchableFileCount += child.fetchableFileCount;
   }
 
   return {
@@ -617,6 +678,7 @@ function _finishTreeNode(
     sourceIndexes: sourceIndexes.buffer.subarray(start, sourceIndexes.length),
     uncompressedSize,
     downloadedFileCount,
+    fetchableFileCount,
     children,
   };
 }

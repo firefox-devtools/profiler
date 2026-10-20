@@ -90,6 +90,20 @@ function _renderSize(node: SourceFileTreeNode) {
   if (node.downloadedFileCount > 0) {
     return prettyBytes(node.uncompressedSize);
   }
+  if (node.fetchableFileCount > 0) {
+    return (
+      <Localized id="MenuButtons--publish--source-code-not-downloaded">
+        Not downloaded
+      </Localized>
+    );
+  }
+  if (node.availability === 'FAILED') {
+    return (
+      <Localized id="MenuButtons--publish--source-code-download-failed">
+        Download failed
+      </Localized>
+    );
+  }
   return (
     <Localized
       id="MenuButtons--publish--source-code-unavailable"

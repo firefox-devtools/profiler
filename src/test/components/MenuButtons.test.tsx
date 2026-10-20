@@ -23,7 +23,11 @@ import {
   persistUploadedProfileInformationToDb,
   retrieveUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
-import { updateUrlState } from 'firefox-profiler/actions/app';
+import {
+  updateUrlState,
+  updateBrowserConnectionStatus,
+} from 'firefox-profiler/actions/app';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   changeSelectedThreads,
   updateBottomBoxContentsAndMaybeOpen,
@@ -776,7 +780,7 @@ describe('app/MenuButtons', function () {
         'dom/base/nsDocument.cpp',
         'gfx/nsFoo.cpp',
       ]);
-      // Nothing is downloaded for these, so there's nothing to pick.
+      // Without a browser connection nothing can fetch these files.
       const missingCheckbox = getSourceTreeCheckbox(OTHER_SOURCE_FILE);
       expect(missingCheckbox).toBeDisabled();
       expect(getSourceTreeCheckbox('opt/lib')).toBeDisabled();
@@ -812,6 +816,193 @@ describe('app/MenuButtons', function () {
         '1 file, 25 B uncompressed.',
       ]);
       await waitForEncoding();
+    });
+
+    it('downloads picked files from the browser on request', async () => {
+      const { profile } = createPartlyDownloadedSourceCodeProfile();
+      // The browser knows the second file as a JS source.
+      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      const getJSSource = jest.fn(async () => 'void nsFoo::Bar() {}');
+      const browserConnection = {
+        getJSSource,
+        querySymbolicationApi: async () => {
+          throw new Error('No source for this address');
+        },
+      } as unknown as BrowserConnection;
+      const {
+        dispatch,
+        getSourceTreeCheckbox,
+        getSourceFileSizes,
+        getSourceCodeSummaryLines,
+        enableSourceCode,
+        openPublishPanel,
+      } = setupForPublish(profile);
+      act(() => {
+        dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+      });
+      await openPublishPanel();
+      enableSourceCode();
+
+      // Only the file the browser can serve is pickable.
+      const fetchableCheckbox = getSourceTreeCheckbox(OTHER_SOURCE_FILE);
+      expect(fetchableCheckbox).toBeEnabled();
+      expect(getSourceTreeCheckbox('opt/lib')).toBeDisabled();
+      expect(getSourceFileSizes()).toEqual([
+        'Unavailable',
+        '25 B',
+        '25 B',
+        'Not downloaded',
+      ]);
+
+      // Turning the option on picked every pickable file, this one included.
+      expect(fetchableCheckbox).toBeChecked();
+      expect(getSourceCodeSummaryLines()).toEqual([
+        '1 file, 25 B uncompressed.',
+        '1 file will be downloaded when sharing.',
+      ]);
+
+      fireFullClick(screen.getByText('Download now'));
+      await screen.findByText('20 B');
+      expect(getJSSource).toHaveBeenCalledWith(
+        'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41'
+      );
+      expect(getSourceFileSizes()).toEqual([
+        'Unavailable',
+        '45 B',
+        '25 B',
+        '20 B',
+      ]);
+      expect(getSourceCodeSummaryLines()).toEqual([
+        '2 files, 45 B uncompressed.',
+      ]);
+    });
+
+    it('waits for the picked files to be downloaded before saving', async () => {
+      const { profile } = createPartlyDownloadedSourceCodeProfile();
+      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      const browserConnection = {
+        getJSSource: async () => 'void nsFoo::Bar() {}',
+        querySymbolicationApi: async () => {
+          throw new Error('No source for this address');
+        },
+      } as unknown as BrowserConnection;
+      const {
+        dispatch,
+        getSourceCodeSummaryLines,
+        enableSourceCode,
+        openDownloadPanel,
+        waitForEncoding,
+      } = setupForPublish(profile);
+      act(() => {
+        dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+      });
+      await openDownloadPanel();
+      enableSourceCode();
+
+      expect(getSourceCodeSummaryLines()).toEqual([
+        '1 file, 25 B uncompressed.',
+        '1 file must be downloaded before saving.',
+      ]);
+      await waitForEncoding();
+      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+      expect(
+        screen.queryByRole('link', { name: /Save/ })
+      ).not.toBeInTheDocument();
+
+      fireFullClick(screen.getByText('Download now'));
+      await screen.findByText('20 B');
+      await screen.findByRole('link', { name: /Save/ });
+    });
+
+    it('waits for a running download before uploading', async () => {
+      const { profile } = createPartlyDownloadedSourceCodeProfile();
+      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      let resolveSource: (source: string) => void = () => {};
+      const getJSSource = jest.fn(
+        () => new Promise<string>((resolve) => (resolveSource = resolve))
+      );
+      const browserConnection = {
+        getJSSource,
+        querySymbolicationApi: async () => {
+          throw new Error('No source for this address');
+        },
+      } as unknown as BrowserConnection;
+      const {
+        dispatch,
+        getPanelForm,
+        resolveUpload,
+        enableSourceCode,
+        openPublishPanel,
+        waitForEncoding,
+      } = setupForPublish(profile);
+      act(() => {
+        dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+      });
+      await openPublishPanel();
+      enableSourceCode();
+
+      const uploadButton = screen.getByRole('button', { name: /Upload/ });
+      fireFullClick(screen.getByText('Download now'));
+      expect(uploadButton).toBeDisabled();
+
+      act(() => resolveSource('void nsFoo::Bar() {}'));
+      await screen.findByText('20 B');
+      await waitForEncoding();
+      expect(uploadButton).toBeEnabled();
+
+      fireEvent.submit(getPanelForm());
+      resolveUpload('SOME_HASH');
+      await screen.findByText(/revert/i);
+      // The upload found the file in hand and didn't ask for it again.
+      expect(getJSSource).toHaveBeenCalledTimes(1);
+    });
+
+    it('says why the upload stopped when a picked file cannot be downloaded', async () => {
+      const { profile } = createPartlyDownloadedSourceCodeProfile();
+      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      const browserConnection = {
+        getJSSource: async () => {
+          throw new Error('No such source');
+        },
+        querySymbolicationApi: async () => {
+          throw new Error('No source for this address');
+        },
+      } as unknown as BrowserConnection;
+      const { dispatch, getPanelForm, enableSourceCode, openPublishPanel } =
+        setupForPublish(profile);
+      act(() => {
+        dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+      });
+      await openPublishPanel();
+      enableSourceCode();
+      fireEvent.submit(getPanelForm());
+
+      fireFullClick(await screen.findByText('Error uploading'));
+      expect(
+        await screen.findByText(
+          /of the picked source files could not be downloaded. It has been left out/
+        )
+      ).toBeInTheDocument();
     });
 
     it('disables the option until at least one file has been downloaded', async () => {
@@ -1009,7 +1200,7 @@ describe('app/MenuButtons', function () {
       await waitForEncoding();
     });
 
-    it('offers files which anybody can download', async () => {
+    it('offers files which anybody can download from a public profile', async () => {
       const PUBLIC_FILE =
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28';
       const { profile } = getProfileFromTextSamples(`
@@ -1017,8 +1208,6 @@ describe('app/MenuButtons', function () {
         B[file:${PUBLIC_FILE}]
       `);
       profile.meta.updateChannel = 'release';
-      profile.shared.sources.content[0] = 'void nsDocument::Foo() {}';
-      profile.shared.sources.content[1] = 'nsAppShell contents';
 
       const {
         waitForEncoding,
@@ -1029,6 +1218,8 @@ describe('app/MenuButtons', function () {
         openPublishPanel,
       } = setupForPublish(profile);
       await openPublishPanel();
+      // Neither file is downloaded and there is no browser connection, but the
+      // public file can still be fetched from the web.
       enableSourceCode();
 
       // nsAppShell.mm is the leaf, so its root has all the self time.
@@ -1037,9 +1228,12 @@ describe('app/MenuButtons', function () {
         'home/user/moz/dom/base/nsDocument.cpp',
       ]);
       expect(getSourceCodeSummaryLines()).toEqual([
-        '2 files, 44 B uncompressed.',
+        '0 files, 0 B uncompressed.',
+        '1 file will be downloaded when sharing.',
       ]);
-      expect(getSourceCodeLeftOutInfo()).toBe(undefined);
+      expect(getSourceCodeLeftOutInfo()).toBe(
+        '1 file can’t be downloaded from here. Downloading it requires the browser that recorded the profile or a local symbol server.'
+      );
       await waitForEncoding();
     });
 

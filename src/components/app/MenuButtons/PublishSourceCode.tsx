@@ -7,6 +7,8 @@ import { Localized, useLocalization } from '@fluent/react';
 
 import {
   updateSourceFilesToShare,
+  fetchSourceFilesToShare,
+  cancelSourceCodeFetch,
   turnOnSourceCodeSharing,
   encodeSanitizedProfile,
 } from 'firefox-profiler/actions/publish';
@@ -14,6 +16,8 @@ import {
   getUploadPhase,
   getActiveSourceSharingPreset,
   getSourceCodeSharingStats,
+  getSourceFilesToFetch,
+  getSourceCodeFetchState,
   getSourceCodeSharingSummary,
   getSourceFileTree,
   getSourceFilesForOfferedPresets,
@@ -28,6 +32,7 @@ import explicitConnect, {
 import type {
   IndexIntoSourceTable,
   SharingMode,
+  SourceCodeFetchState,
   SourceCodeSharingStats,
   SourceCodeSharingSummary,
   SourceFileTreeNode,
@@ -77,6 +82,8 @@ type OwnProps = {
 type StateProps = {
   readonly uploadPhase: UploadPhase;
   readonly sourceCodeSharingStats: SourceCodeSharingStats;
+  readonly sourceFilesToFetch: ReadonlySet<IndexIntoSourceTable>;
+  readonly sourceCodeFetchState: SourceCodeFetchState;
   readonly sourceFileTree: SourceFileTreeNode[];
   readonly sourceFilesToShare: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceFilesForPresets: Map<
@@ -89,6 +96,8 @@ type StateProps = {
 
 type DispatchProps = {
   readonly updateSourceFilesToShare: typeof updateSourceFilesToShare;
+  readonly fetchSourceFilesToShare: typeof fetchSourceFilesToShare;
+  readonly cancelSourceCodeFetch: typeof cancelSourceCodeFetch;
   readonly turnOnSourceCodeSharing: typeof turnOnSourceCodeSharing;
   readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
 };
@@ -131,6 +140,14 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
     this.props.encodeSanitizedProfile(mode);
   };
 
+  _onFetchSourceFiles = () => {
+    this.props.fetchSourceFilesToShare(this.props.mode);
+  };
+
+  _onCancelSourceFetch = () => {
+    this.props.cancelSourceCodeFetch(this.props.mode);
+  };
+
   _onPresetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { mode, sourceFilesForPresets, updateSourceFilesToShare } =
       this.props;
@@ -144,27 +161,85 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
     this.props.encodeSanitizedProfile(mode);
   };
 
-  // One line under the tree: what will be included, and an info icon for the
-  // files that are left out.
+  // Under the tree: what will be included, with an info icon for the files that
+  // are left out, then what still has to be downloaded, with a button to do it
+  // now. While a download runs, its progress and a cancel instead.
   _renderStatusRow() {
-    const { sourceCodeSharingSummary, sourceCodeSharingStats } = this.props;
+    const {
+      mode,
+      sourceFilesToFetch,
+      sourceCodeFetchState,
+      sourceCodeSharingSummary,
+      sourceCodeSharingStats,
+    } = this.props;
     const { unavailableFileCount } = sourceCodeSharingStats;
 
-    return (
-      <div className="publishPanelSourceCodeStatus">
-        <span className="publishPanelSourceCodeSummary">
+    if (sourceCodeFetchState.isFetching) {
+      return (
+        <div className="publishPanelSourceCodeStatus">
           <Localized
-            id="MenuButtons--publish--source-code-status"
+            id="MenuButtons--publish--source-code-downloading"
             vars={{
-              fileCount: sourceCodeSharingSummary.fileCount,
-              size: prettyBytes(sourceCodeSharingSummary.uncompressedSize),
+              completedCount: sourceCodeFetchState.completedCount,
+              totalCount: sourceCodeFetchState.totalCount,
             }}
           >
-            <span />
+            <span className="publishPanelSourceCodeSummary" />
           </Localized>
-        </span>
-        <SourceCodeLeftOutInfo unavailableCount={unavailableFileCount} />
-      </div>
+          <button
+            type="button"
+            className="photon-button photon-button-micro"
+            onClick={this._onCancelSourceFetch}
+          >
+            <Localized id="MenuButtons--publish--source-code-cancel-download">
+              Cancel
+            </Localized>
+          </button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <div className="publishPanelSourceCodeStatus">
+          <span className="publishPanelSourceCodeSummary">
+            <Localized
+              id="MenuButtons--publish--source-code-status"
+              vars={{
+                fileCount: sourceCodeSharingSummary.fileCount,
+                size: prettyBytes(sourceCodeSharingSummary.uncompressedSize),
+              }}
+            >
+              <span />
+            </Localized>
+          </span>
+          <SourceCodeLeftOutInfo unavailableCount={unavailableFileCount} />
+        </div>
+        {sourceFilesToFetch.size > 0 ? (
+          <div className="publishPanelSourceCodeStatus">
+            <Localized
+              id={
+                mode === 'download'
+                  ? 'MenuButtons--publish--source-code-status-to-download-before-saving'
+                  : 'MenuButtons--publish--source-code-status-to-download'
+              }
+              vars={{ fileCount: sourceFilesToFetch.size }}
+            >
+              <span className="publishPanelSourceCodeSummary" />
+            </Localized>
+            <button
+              type="button"
+              className="photon-button photon-button-micro"
+              disabled={this._isUploading()}
+              onClick={this._onFetchSourceFiles}
+            >
+              <Localized id="MenuButtons--publish--source-code-download-now">
+                Download now
+              </Localized>
+            </button>
+          </div>
+        ) : null}
+      </>
     );
   }
 
@@ -247,10 +322,10 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
             className="photon-checkbox photon-checkbox-default"
             onChange={this._onToggleSourceCode}
             checked={isSharingSourceCode}
-            // Nothing can be shared when no file is downloaded.
+            // Nothing can be shared when no file is downloaded or fetchable.
             disabled={
               this._isUploading() ||
-              sourceCodeSharingStats.downloadedFileCount === 0
+              sourceCodeSharingStats.pickableFileCount === 0
             }
           />
           <span>
@@ -295,6 +370,8 @@ export const PublishSourceCodeSection = explicitConnect<
   mapStateToProps: (state, { mode }) => ({
     uploadPhase: getUploadPhase(state),
     sourceCodeSharingStats: getSourceCodeSharingStats(state),
+    sourceFilesToFetch: getSourceFilesToFetch(state, mode),
+    sourceCodeFetchState: getSourceCodeFetchState(state, mode),
     sourceFileTree: getSourceFileTree(state),
     sourceFilesToShare: getSourceFilesToShare(state, mode),
     sourceFilesForPresets: getSourceFilesForOfferedPresets(state),
@@ -303,6 +380,8 @@ export const PublishSourceCodeSection = explicitConnect<
   }),
   mapDispatchToProps: {
     updateSourceFilesToShare,
+    fetchSourceFilesToShare,
+    cancelSourceCodeFetch,
     turnOnSourceCodeSharing,
     encodeSanitizedProfile,
   },

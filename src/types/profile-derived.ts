@@ -778,11 +778,18 @@ export type SourceCodeSharingCandidate = {
 };
 
 /**
- * Whether the contents of a source file are in hand.
+ * Whether the contents of a source file are in hand, or could be.
  * - DOWNLOADED: we have the contents.
- * - UNAVAILABLE: we don't, so the file can't be picked.
+ * - FETCHABLE: we don't, but the web, the browser connection or a local symbol
+ *   server can get them, so the file can be picked and is fetched when sharing.
+ * - FAILED: a fetch was tried during this session and failed.
+ * - UNAVAILABLE: nothing we can reach has this file.
  */
-export type SourceCodeAvailability = 'DOWNLOADED' | 'UNAVAILABLE';
+export type SourceCodeAvailability =
+  | 'DOWNLOADED'
+  | 'FETCHABLE'
+  | 'FAILED'
+  | 'UNAVAILABLE';
 
 /**
  * One source file offered in the publish panel.
@@ -821,14 +828,15 @@ export type SourceFileTreeNode = {
   // For a file row, the availability of the file. null for rows that only
   // stand for directories.
   availability: SourceCodeAvailability | null;
-  // Every source index at or below this row that can be picked, so downloaded.
-  // A file row can hold several when the same path was loaded with different
-  // contents. This is a view into a buffer shared by the whole tree, so that
-  // the indexes aren't copied into every ancestor.
+  // Every source index at or below this row that can be picked, so downloaded
+  // or fetchable. A file row can hold several when the same path was loaded
+  // with different contents. This is a view into a buffer shared by the whole
+  // tree, so that the indexes aren't copied into every ancestor.
   sourceIndexes: Int32Array;
   // The size of the contents we have for the files at or below this row.
   uncompressedSize: number;
   downloadedFileCount: number;
+  fetchableFileCount: number;
   children: SourceFileTreeNode[];
 };
 
@@ -842,7 +850,9 @@ export type SourceCodeSharingStats = {
   // The listed files whose contents we have, and their total size.
   downloadedFileCount: number;
   downloadedUncompressedSize: number;
-  // The listed files whose contents we don't have.
+  // The listed files that can be picked, so downloaded or fetchable.
+  pickableFileCount: number;
+  // The listed files that nothing reachable from here can serve.
   unavailableFileCount: number;
 };
 

@@ -22,6 +22,7 @@ import {
   SampleRelations,
   extractProfileFilterPageData,
   findAddressProofForFile,
+  computeSourceAddressProofs,
   calculateFunctionSizeLowerBound,
   computeFrameTableFromRawFrameTable,
   computeNativeSymbolTableFromRawNativeSymbolTable,
@@ -1564,6 +1565,26 @@ describe('findAddressProofForFile', function () {
       breakpadId: 'SOMETHING_FAKE',
       address: 0x20,
     });
+  });
+});
+
+describe('computeSourceAddressProofs', function () {
+  it('finds a frame address for each native file', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:/src/a.cpp][lib:xul][address:1234]
+      B[file:/src/b.cpp]
+    `);
+    const [{ A, B }] = funcNamesDictPerThread;
+    const { funcTable } = profile.shared;
+
+    const proofs = computeSourceAddressProofs(profile);
+    expect(proofs.get(ensureExists(funcTable.source[A]))).toEqual({
+      debugName: 'xul',
+      breakpadId: expect.any(String),
+      address: 0x1234,
+    });
+    // B has no address, so nothing can vouch for its file.
+    expect(proofs.has(ensureExists(funcTable.source[B]))).toBe(false);
   });
 });
 
