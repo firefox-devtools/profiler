@@ -8,7 +8,7 @@ import type {
   ExternalMarkersData,
   FaviconData,
 } from 'firefox-profiler/types';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 
 /**
  * This file is in charge of handling the message managing between profiler.firefox.com
@@ -162,7 +162,7 @@ type GetPageFaviconsResponse = Array<FaviconData | null>;
 type OpenScriptInTabDebuggerResponse = void;
 type GetJSSourceReponseItem = { sourceText: string } | { error: string };
 type GetJSSourcesResponse = Array<GetJSSourceReponseItem>;
-type GetSourceMapResponse = RawSourceMap;
+type GetSourceMapResponse = SourceMap;
 
 // TypeScript function overloads for request/response pairs.
 function _sendMessageWithResponse(
