@@ -655,6 +655,11 @@ type PublishAction =
       readonly value: boolean;
     }
   | {
+      readonly type: 'UPDATE_SOURCE_FILES_TO_SHARE';
+      readonly mode: SharingMode;
+      readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+    }
+  | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly sanitizedProfile: Profile;
       readonly encodingPromise: Promise<ProfileEncodingResult>;

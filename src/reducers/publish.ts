@@ -14,6 +14,7 @@ import type {
   Reducer,
   State,
   SanitizedProfileEncodingState,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
@@ -74,6 +75,24 @@ const checkedSharingOptions: Reducer<
           ...state[action.mode],
           [action.slug]: action.value,
         },
+      };
+    default:
+      return state;
+  }
+};
+
+// `null` means untouched, in which case `getSourceFilesToShare` falls back to
+// the default selection.
+const sourceFileSelection: Reducer<
+  Record<SharingMode, ReadonlySet<IndexIntoSourceTable> | null>
+> = (state = { download: null, upload: null }, action) => {
+  switch (action.type) {
+    case 'PROFILE_LOADED':
+      return { download: null, upload: null };
+    case 'UPDATE_SOURCE_FILES_TO_SHARE':
+      return {
+        ...state,
+        [action.mode]: action.sourceIndexes,
       };
     default:
       return state;
@@ -266,6 +285,7 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
 
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
+  sourceFileSelection,
   sanitizedProfileEncodingState,
   upload,
   isHidingStaleProfile,

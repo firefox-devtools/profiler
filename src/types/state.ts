@@ -239,6 +239,13 @@ export type SanitizedProfileEncodingState =
 
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
+  // The source files the user picked in the publish panel, per sharing mode.
+  // `null` means the user hasn't touched the selection yet, in which case the
+  // default selection applies.
+  readonly sourceFileSelection: Record<
+    SharingMode,
+    ReadonlySet<IndexIntoSourceTable> | null
+  >;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;

@@ -12,6 +12,7 @@ import {
   getRemoveProfileInformation,
   getPrePublishedState,
   getSanitizedProfileEncodingState,
+  getSourceFilesForOfferedPresets,
 } from 'firefox-profiler/selectors/publish';
 import {
   getDataSource,
@@ -60,6 +61,7 @@ import type {
   ProfileIndexTranslationMaps,
   ProfileEncodingResult,
   SharingMode,
+  IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
@@ -74,6 +76,22 @@ export function updateSharingOption(
     mode,
     slug,
     value,
+  };
+}
+
+/**
+ * Replace the set of source files whose contents will be part of the shared
+ * profile. The publish panel's file tree passes the full new set, rather than a
+ * single file, because checking a directory row toggles all the files below it.
+ */
+export function updateSourceFilesToShare(
+  mode: SharingMode,
+  sourceIndexes: ReadonlySet<IndexIntoSourceTable>
+): Action {
+  return {
+    type: 'UPDATE_SOURCE_FILES_TO_SHARE',
+    mode,
+    sourceIndexes,
   };
 }
 
@@ -344,6 +362,21 @@ export function encodeSanitizedProfile(
       sanitizedProfileEncodingStarted(sanitizedProfile, encodingPromise)
     );
     return { sanitizedProfile, encodingPromise };
+  };
+}
+
+/**
+ * Turn the "Include source code" option on, picking the narrowest preset.
+ */
+export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const [firstPreset] = getSourceFilesForOfferedPresets(getState());
+    if (firstPreset === undefined) {
+      return;
+    }
+    const [, files] = firstPreset;
+    dispatch(updateSourceFilesToShare(mode, files));
+    dispatch(encodeSanitizedProfile(mode));
   };
 }
 
