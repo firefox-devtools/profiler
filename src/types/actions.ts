@@ -672,11 +672,21 @@ type PublishAction =
       readonly value: boolean;
     }
   | {
+      readonly type: 'PUBLISH_PANEL_OPENED';
+      readonly mode: SharingMode;
+      readonly defaultSourceFiles: ReadonlySet<IndexIntoSourceTable>;
+    }
+  | {
       readonly type: 'UPDATE_SOURCE_FILES_TO_SHARE';
       readonly mode: SharingMode;
       readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
       // The preset these files come from, or null for edits of the file tree.
       readonly preset: OfferedSourceSharingPreset | null;
+    }
+  | {
+      readonly type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY';
+      readonly mode: SharingMode;
+      readonly value: boolean;
     }
   | {
       readonly type: 'SOURCE_CODE_FETCH_STARTED';

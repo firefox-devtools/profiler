@@ -10,6 +10,7 @@ import {
   updateSourceFilesToShare,
   fetchSourceFilesToShare,
   cancelSourceCodeFetch,
+  setSourceSharingDownloadedOnly,
   turnOnSourceCodeSharing,
   encodeSanitizedProfile,
 } from 'firefox-profiler/actions/publish';
@@ -19,6 +20,7 @@ import {
   getSourceCodeSharingStats,
   getSourceFilesToFetch,
   getSourceCodeFetchState,
+  getSourceSharingDownloadedOnly,
   getSourceCodeSharingSummary,
   getSourceFileTree,
   getSourceFilesForPresets,
@@ -86,6 +88,7 @@ type StateProps = {
   readonly sourceCodeSharingStats: SourceCodeSharingStats;
   readonly sourceFilesToFetch: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceCodeFetchState: SourceCodeFetchState;
+  readonly sourceSharingDownloadedOnly: boolean;
   readonly sourceFileTree: SourceFileTreeNode[];
   readonly sourceFilesToShare: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceFilesForPresets: Record<
@@ -100,6 +103,7 @@ type DispatchProps = {
   readonly updateSourceFilesToShare: typeof updateSourceFilesToShare;
   readonly fetchSourceFilesToShare: typeof fetchSourceFilesToShare;
   readonly cancelSourceCodeFetch: typeof cancelSourceCodeFetch;
+  readonly setSourceSharingDownloadedOnly: typeof setSourceSharingDownloadedOnly;
   readonly turnOnSourceCodeSharing: typeof turnOnSourceCodeSharing;
   readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
 };
@@ -107,7 +111,7 @@ type DispatchProps = {
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  readonly isSourceCodeSharingOn: boolean;
+  readonly isEditingSourceFiles: boolean;
 };
 
 /**
@@ -119,7 +123,7 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
   // while the user edits it. The panel unmounts this when it closes, so it
   // comes back off if nothing is picked.
   override state: State = {
-    isSourceCodeSharingOn: this.props.sourceFilesToShare.size > 0,
+    isEditingSourceFiles: false,
   };
 
   _isUploading(): boolean {
@@ -137,22 +141,29 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
         newSelection.delete(sourceIndex);
       }
     }
+    this.setState({ isEditingSourceFiles: true });
     updateSourceFilesToShare(mode, newSelection);
     this.props.encodeSanitizedProfile(mode);
   };
 
   // Turning sharing on picks the narrowest preset rather than every file, so
   // that opting in doesn't share more than the user looked at.
-  _onToggleSourceCode = () => {
+  _onToggleSourceCode = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { mode, updateSourceFilesToShare } = this.props;
-    if (!this.state.isSourceCodeSharingOn) {
-      this.setState({ isSourceCodeSharingOn: true });
+    this.setState({ isEditingSourceFiles: e.target.checked });
+    if (e.target.checked) {
       this.props.turnOnSourceCodeSharing(mode);
       return;
     }
-    this.setState({ isSourceCodeSharingOn: false });
     updateSourceFilesToShare(mode, new Set());
     this.props.encodeSanitizedProfile(mode);
+  };
+
+  _onToggleDownloadedOnly = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.setSourceSharingDownloadedOnly(
+      this.props.mode,
+      e.target.checked
+    );
   };
 
   _onFetchSourceFiles = () => {
@@ -255,8 +266,20 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
   }
 
   _renderPresets() {
-    const { mode, activeSourceSharingPreset, sourceFilesForPresets } =
-      this.props;
+    const {
+      mode,
+      activeSourceSharingPreset,
+      sourceFilesForPresets,
+      sourceCodeSharingStats,
+      sourceSharingDownloadedOnly,
+    } = this.props;
+
+    // The downloaded-only option only matters while some shareable file would
+    // have to be fetched.
+    const showDownloadedOnly =
+      sourceCodeSharingStats.shareableFileCount >
+      sourceCodeSharingStats.downloadedFileCount;
+
     // Presets that would select nothing stay in place, disabled, so that the
     // row doesn't change shape as files get fetched or the options change.
     const presets: SourceSharingPreset[] = [...OFFERED_SOURCE_SHARING_PRESETS];
@@ -265,42 +288,63 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
     }
 
     return (
-      <fieldset className="publishPanelSourceCodePresets">
-        <Localized id="MenuButtons--publish--source-code-preset-legend">
-          <legend className="publishPanelSourceCodePresetsLegend">
-            Include:
-          </legend>
-        </Localized>
-        {presets.map((preset) => (
-          <label
-            key={preset}
-            className={classNames(
-              'photon-label publishPanelSourceCodePresetLabel',
-              {
-                publishPanelLabelDisabled:
-                  preset !== 'custom' &&
-                  sourceFilesForPresets[preset].size === 0,
-              }
-            )}
-          >
+      <>
+        <fieldset className="publishPanelSourceCodePresets">
+          <Localized id="MenuButtons--publish--source-code-preset-legend">
+            <legend className="publishPanelSourceCodePresetsLegend">
+              Include:
+            </legend>
+          </Localized>
+          {presets.map((preset) => (
+            <label
+              key={preset}
+              className={classNames(
+                'photon-label publishPanelSourceCodePresetLabel',
+                {
+                  publishPanelLabelDisabled:
+                    preset !== 'custom' &&
+                    sourceFilesForPresets[preset].size === 0,
+                }
+              )}
+            >
+              <input
+                type="radio"
+                className="photon-radio photon-radio-micro"
+                name={`sourceCodePreset-${mode}`}
+                value={preset}
+                checked={activeSourceSharingPreset === preset}
+                // "Custom" only reports the state of the tree.
+                disabled={
+                  this._isUploading() ||
+                  preset === 'custom' ||
+                  sourceFilesForPresets[preset].size === 0
+                }
+                onChange={this._onPresetChange}
+              />
+              <Localized id={PRESET_L10N_IDS[preset]} />
+            </label>
+          ))}
+        </fieldset>
+        {showDownloadedOnly ? (
+          <label className="photon-label publishPanelSourceCodeDownloadedOnly">
             <input
-              type="radio"
-              className="photon-radio photon-radio-micro"
-              name={`sourceCodePreset-${mode}`}
-              value={preset}
-              checked={activeSourceSharingPreset === preset}
-              // "Custom" only reports the state of the tree.
+              type="checkbox"
+              className="photon-checkbox photon-checkbox-micro"
+              checked={sourceSharingDownloadedOnly}
+              // With nothing downloaded, turning it on would pick nothing.
               disabled={
                 this._isUploading() ||
-                preset === 'custom' ||
-                sourceFilesForPresets[preset].size === 0
+                (!sourceSharingDownloadedOnly &&
+                  sourceCodeSharingStats.downloadedFileCount === 0)
               }
-              onChange={this._onPresetChange}
+              onChange={this._onToggleDownloadedOnly}
             />
-            <Localized id={PRESET_L10N_IDS[preset]} />
+            <Localized id="MenuButtons--publish--source-code-fetched-only">
+              Only already fetched files
+            </Localized>
           </label>
-        ))}
-      </fieldset>
+        ) : null}
+      </>
     );
   }
 
@@ -353,7 +397,8 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
   override render() {
     const { mode, sourceFileTree, sourceFilesToShare, sourceCodeSharingStats } =
       this.props;
-    const { isSourceCodeSharingOn } = this.state;
+    const isSourceCodeSharingOn =
+      this.state.isEditingSourceFiles || sourceFilesToShare.size > 0;
     // Nothing can be shared when no file is downloaded or fetchable.
     const hasNothingToPick = sourceCodeSharingStats.shareableFileCount === 0;
 
@@ -415,9 +460,10 @@ export const PublishSourceCodeSection = explicitConnect<
     sourceCodeSharingStats: getSourceCodeSharingStats(state),
     sourceFilesToFetch: getSourceFilesToFetch(state, mode),
     sourceCodeFetchState: getSourceCodeFetchState(state, mode),
+    sourceSharingDownloadedOnly: getSourceSharingDownloadedOnly(state, mode),
     sourceFileTree: getSourceFileTree(state),
     sourceFilesToShare: getSourceFilesToShare(state, mode),
-    sourceFilesForPresets: getSourceFilesForPresets(state),
+    sourceFilesForPresets: getSourceFilesForPresets(state, mode),
     activeSourceSharingPreset: getActiveSourceSharingPreset(state, mode),
     sourceCodeSharingSummary: getSourceCodeSharingSummary(state, mode),
   }),
@@ -425,6 +471,7 @@ export const PublishSourceCodeSection = explicitConnect<
     updateSourceFilesToShare,
     fetchSourceFilesToShare,
     cancelSourceCodeFetch,
+    setSourceSharingDownloadedOnly,
     turnOnSourceCodeSharing,
     encodeSanitizedProfile,
   },

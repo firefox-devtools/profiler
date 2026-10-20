@@ -232,7 +232,7 @@ export const getSourceFilesForCurrentFile: Selector<
 
 // The selection the panel starts from. The source view keeps its file after
 // the bottom box is closed, so only start from it while it's still visible.
-const _getDefaultSourceFilesToShare: Selector<
+export const getDefaultSourceFilesToShare: Selector<
   ReadonlySet<IndexIntoSourceTable>
 > = createSelector(
   getIsBottomBoxOpen,
@@ -247,21 +247,11 @@ export const getSourceFilesToShare: DangerousSelectorWithArguments<
 > = _perSharingMode((mode) =>
   createSelector(
     (state: State) =>
-      getPublishState(state).sourceFileSelection[mode]?.sourceIndexes ?? null,
+      getPublishState(state).sourceFileSelection[mode]?.sourceIndexes ??
+      getPublishState(state).defaultSourceFiles[mode],
     getShareableSources,
-    _getDefaultSourceFilesToShare,
-    (storedSelection, shareableSources, defaultSelection) => {
-      if (storedSelection === null) {
-        return defaultSelection;
-      }
-      const selection = new Set<IndexIntoSourceTable>();
-      for (const sourceIndex of storedSelection) {
-        if (shareableSources.has(sourceIndex)) {
-          selection.add(sourceIndex);
-        }
-      }
-      return selection;
-    }
+    (storedSelection, shareableSources) =>
+      _intersect(storedSelection, shareableSources)
   )
 );
 
@@ -277,18 +267,60 @@ function _areSetsEqual<T>(a: ReadonlySet<T>, b: ReadonlySet<T>): boolean {
   return true;
 }
 
-// The files behind every preset, whether offered or not.
-export const getSourceFilesForPresets: Selector<
-  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>
-> = createSelector(
-  getSourceFilesForCurrentFile,
-  getSourceFilesForSelectedThreads,
-  getShareableSources,
-  (currentFile, selectedThreads, allFiles) => ({
-    'current-file': currentFile,
-    'selected-threads': selectedThreads,
-    'all-files': allFiles,
-  })
+export const getSourceSharingDownloadedOnly: DangerousSelectorWithArguments<
+  boolean,
+  SharingMode
+> = (state, mode) => getPublishState(state).sourceSharingDownloadedOnly[mode];
+
+function _intersect<T>(
+  a: ReadonlySet<T>,
+  b: { has(value: T): boolean }
+): Set<T> {
+  const result = new Set<T>();
+  for (const value of a) {
+    if (b.has(value)) {
+      result.add(value);
+    }
+  }
+  return result;
+}
+
+// The files behind every preset, whether offered or not. With "downloaded
+// only" on, each is narrowed to the files whose contents we already have.
+export const getSourceFilesForPresets: DangerousSelectorWithArguments<
+  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    getSourceFilesForCurrentFile,
+    getSourceFilesForSelectedThreads,
+    getShareableSources,
+    getSourceContentsForSharing,
+    (state: State) => getSourceSharingDownloadedOnly(state, mode),
+    (
+      currentFile,
+      selectedThreads,
+      allFiles,
+      contents,
+      downloadedOnly
+    ): Record<
+      OfferedSourceSharingPreset,
+      ReadonlySet<IndexIntoSourceTable>
+    > => {
+      if (!downloadedOnly) {
+        return {
+          'current-file': currentFile,
+          'selected-threads': selectedThreads,
+          'all-files': allFiles,
+        };
+      }
+      return {
+        'current-file': _intersect(currentFile, contents),
+        'selected-threads': _intersect(selectedThreads, contents),
+        'all-files': _intersect(allFiles, contents),
+      };
+    }
+  )
 );
 
 // The offered preset that the selection matches, or 'custom'. Presets that
@@ -300,7 +332,7 @@ export const getActiveSourceSharingPreset: DangerousSelectorWithArguments<
 > = _perSharingMode((mode) =>
   createSelector(
     (state: State) => getSourceFilesToShare(state, mode),
-    getSourceFilesForPresets,
+    (state: State) => getSourceFilesForPresets(state, mode),
     (state: State) =>
       getPublishState(state).sourceFileSelection[mode]?.preset ?? null,
     (selection, filesForPresets, pickedPreset): SourceSharingPreset => {
