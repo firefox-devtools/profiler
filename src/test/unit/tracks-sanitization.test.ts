@@ -33,13 +33,13 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
     expect(map.get(2)).toBe(1);
   });
 
-  it('matches screenshot tracks by id', function () {
+  it('matches screenshot tracks by marker name', function () {
     const oldTracks: Track[] = [
-      { type: 'screenshots', id: 'win-A', threadIndex: 0 },
-      { type: 'screenshots', id: 'win-B', threadIndex: 0 },
+      { type: 'screenshots', markerName: 'win-A', threadIndex: 0 },
+      { type: 'screenshots', markerName: 'win-B', threadIndex: 0 },
     ];
     const newTracks: Track[] = [
-      { type: 'screenshots', id: 'win-B', threadIndex: 0 },
+      { type: 'screenshots', markerName: 'win-B', threadIndex: 0 },
     ];
     const map = computeOldTrackIndexToNewTrackIndexMap({
       oldTracks,
@@ -234,7 +234,7 @@ describe('computeOldTrackIndexToNewTrackIndexMap', function () {
   it('handles a mixed track list (process + screenshots + visual-progress)', function () {
     const oldTracks: Track[] = [
       { type: 'process', pid: '1', mainThreadIndex: 0 },
-      { type: 'screenshots', id: 'win-A', threadIndex: 0 },
+      { type: 'screenshots', markerName: 'win-A', threadIndex: 0 },
       { type: 'process', pid: '2', mainThreadIndex: 1 },
       { type: 'visual-progress' },
     ];
