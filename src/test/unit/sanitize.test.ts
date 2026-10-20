@@ -40,6 +40,7 @@ import {
 import { ValueSummaryReader } from 'devtools-reps';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { FrameFlag } from 'firefox-profiler/types';
+import { getMarkerSchemaStyleFallback } from '../../profile-logic/marker-styles';
 import type {
   MarkerSchemaByName,
   Profile,
@@ -108,6 +109,7 @@ describe('sanitizePII', function () {
     const additionalMarkerSchemas: MarkerSchemaByName = {
       FileIO: {
         name: 'FileIO',
+        style: getMarkerSchemaStyleFallback('FileIO'),
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
         fields: [
           {
@@ -134,6 +136,7 @@ describe('sanitizePII', function () {
       },
       Url: {
         name: 'Url',
+        style: getMarkerSchemaStyleFallback('Url'),
         tableLabel: '{marker.name} - {marker.data.url}',
         display: ['marker-chart', 'marker-table'],
         fields: [
@@ -145,6 +148,7 @@ describe('sanitizePII', function () {
       },
       HostResolver: {
         name: 'HostResolver',
+        style: getMarkerSchemaStyleFallback('HostResolver'),
         tableLabel: '{marker.name} - {marker.data.host}',
         display: ['marker-chart', 'marker-table'],
         fields: [
@@ -198,6 +202,7 @@ describe('sanitizePII', function () {
   const uniqueStringTextSchema: MarkerSchemaByName = {
     Text: addPIICategoriesToMarkerSchema({
       name: 'Text',
+      style: getMarkerSchemaStyleFallback('Text'),
       tableLabel: '{marker.name} — {marker.data.name}',
       display: ['marker-chart', 'marker-table'],
       fields: [{ key: 'name', label: 'Details', format: 'unique-string' }],
@@ -280,6 +285,7 @@ describe('sanitizePII', function () {
     const markerSchemaByName: MarkerSchemaByName = {
       ExtensionText: {
         name: 'ExtensionText',
+        style: getMarkerSchemaStyleFallback('ExtensionText'),
         display: ['marker-chart', 'marker-table'],
         fields: [
           {

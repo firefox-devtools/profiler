@@ -29,6 +29,7 @@ import type {
   Pid,
 } from 'firefox-profiler/types';
 import type { StringTable } from '../utils/string-table';
+import { getMarkerSchemaStyleFallback } from './marker-styles';
 
 // Profiles recorded by Gecko versions without PII annotations use these defaults.
 const markerSchemaPIICategoriesBySchemaName = new Map<
@@ -81,6 +82,7 @@ export function addPIICategoriesToMarkerSchemas(
 
 export const extensionTextMarkerSchema: MarkerSchema = {
   name: 'ExtensionText',
+  style: getMarkerSchemaStyleFallback('ExtensionText'),
   tableLabel:
     "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
   chartLabel:
@@ -110,6 +112,7 @@ export const extensionTextMarkerSchema: MarkerSchema = {
 const markerSchemaFrontEndOnlyWithoutPII: MarkerSchema[] = [
   {
     name: 'Jank',
+    style: getMarkerSchemaStyleFallback('Jank'),
     display: ['marker-table', 'marker-chart'],
     tooltipLabel: 'Jank – event processing delay',
     tableLabel: 'Event processing delay',
@@ -124,6 +127,7 @@ const markerSchemaFrontEndOnlyWithoutPII: MarkerSchema[] = [
   // for IPC, the Gecko ones get overwritten by this definition.
   {
     name: 'IPC',
+    style: getMarkerSchemaStyleFallback('IPC'),
     tooltipLabel: 'IPC — {marker.data.niceDirection}',
     tableLabel: '{marker.data.messageType} — {marker.data.niceDirection}',
     chartLabel: '{marker.data.messageType}',
@@ -141,6 +145,7 @@ const markerSchemaFrontEndOnlyWithoutPII: MarkerSchema[] = [
     // `display` property is used to decide where to display these markers, and
     // we need it to hide them from the marker chart.
     name: 'Network',
+    style: getMarkerSchemaStyleFallback('Network'),
     display: ['marker-table', 'marker-chart', 'timeline-network'],
     chartLabel: '{marker.data.URI}',
     fields: [

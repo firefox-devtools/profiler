@@ -3,11 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type { MarkerSchema } from 'firefox-profiler/types';
 import { addPIICategoriesToMarkerSchemas } from 'firefox-profiler/profile-logic/marker-schema';
+import { getMarkerSchemaStyleFallback } from '../../../profile-logic/marker-styles';
 
 export const FILE_IO_TABLE_LABEL =
   "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
 
-const markerSchemaForTestsWithoutPII: MarkerSchema[] = [
+const markerSchemasWithoutStyle: Array<Omit<MarkerSchema, 'style'>> = [
   {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
@@ -199,6 +200,15 @@ const markerSchemaForTestsWithoutPII: MarkerSchema[] = [
   },
 ];
 
+function getMarkerSchemaWithStyle(
+  schema: Omit<MarkerSchema, 'style'>
+): MarkerSchema {
+  return {
+    ...schema,
+    style: getMarkerSchemaStyleFallback(schema.name),
+  };
+}
+
 export const markerSchemaForTests = addPIICategoriesToMarkerSchemas(
-  markerSchemaForTestsWithoutPII
+  markerSchemasWithoutStyle.map(getMarkerSchemaWithStyle)
 );
