@@ -119,14 +119,14 @@ function setup() {
 describe('pretty-printing the source view', function () {
   it('only requests formatting when pretty-printing is enabled', function () {
     const { dispatch, getState, sourceIndex } = setup();
-    expect(CodeSelectors.getSourceViewFormatDialect(getState())).toBe('');
+    expect(CodeSelectors.getSourceViewFormatDialect(getState())).toBe('jsx');
     expect(CodeSelectors.getSourceViewFormattingRequest(getState())).toBeNull();
 
     dispatch(setSourceViewPrettyPrint(true));
     expect(CodeSelectors.getSourceViewFormattingRequest(getState())).toEqual({
       sourceIndex,
       code: CODE,
-      dialect: '',
+      dialect: 'jsx',
     });
   });
 

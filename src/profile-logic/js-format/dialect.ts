@@ -16,6 +16,10 @@ export type JsDialect = '' | 'ts' | 'jsx' | 'ts jsx';
  * Map a source filename to the Lezer dialect needed to parse it. Looks at the
  * file extension only. Accepts URL-style source paths (the typical content of
  * a source map's `sources[]`).
+ *
+ * Files that aren't TypeScript are parsed as JSX, because React code often
+ * uses JSX in .js files. This is safe for plain JS: JSX elements can only
+ * start where an expression starts, and plain JS never has a `<` there.
  */
 export function dialectForFilename(filename: string): JsDialect {
   const lower = filename.toLowerCase();
@@ -32,7 +36,7 @@ export function dialectForFilename(filename: string): JsDialect {
   ) {
     return 'ts';
   }
-  return '';
+  return 'jsx';
 }
 
 const NON_JS_EXTENSIONS = [
