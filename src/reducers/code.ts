@@ -46,22 +46,9 @@ const sourceCodeCache: Reducer<Map<IndexIntoSourceTable, SourceCodeStatus>> = (
       newState.set(sourceIndex, { type: 'ERROR', errors });
       return newState;
     }
-    case 'SANITIZED_PROFILE_PUBLISHED': {
-      if (!action.translationMaps) {
-        return state;
-      }
-      const { oldSourceToNewSourcePlusOne } = action.translationMaps;
-      const newState = new Map();
-      for (const [sourceIndex, status] of state) {
-        const newSourceIndexPlusOne = oldSourceToNewSourcePlusOne[sourceIndex];
-        if (newSourceIndexPlusOne === 0) {
-          continue;
-        }
-        const newSourceIndex = newSourceIndexPlusOne - 1;
-        newState.set(newSourceIndex, status);
-      }
-      return newState;
-    }
+    case 'PROFILE_LOADED':
+      // The source indexes only mean something for the profile they came from.
+      return new Map();
     default:
       return state;
   }
