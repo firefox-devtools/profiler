@@ -14,7 +14,9 @@ import {
   getSanitizedProfileEncodingState,
   getSourceFilesToFetch,
   getSourceCodeFetchState,
+  getActiveSourceSharingPreset,
   getSourceFilesForOfferedPresets,
+  getSourceSharingDownloadedOnly,
 } from 'firefox-profiler/selectors/publish';
 import { fetchSourceCode } from './code';
 import {
@@ -374,17 +376,56 @@ export function encodeSanitizedProfile(
 }
 
 /**
- * Turn the "Include source code" option on, picking the narrowest preset.
+ * Turn the "Include source code" option on, picking the narrowest preset. When
+ * nothing is downloaded yet, the downloaded-only presets are all empty, so fall
+ * back to the full ones and show that by turning the downloaded-only option
+ * off.
  */
 export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
   return (dispatch, getState) => {
-    const [firstPreset] = getSourceFilesForOfferedPresets(getState());
+    let presets = getSourceFilesForOfferedPresets(getState(), mode);
+    if (
+      presets.size === 0 &&
+      getSourceSharingDownloadedOnly(getState(), mode)
+    ) {
+      dispatch({
+        type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY',
+        mode,
+        value: false,
+      });
+      presets = getSourceFilesForOfferedPresets(getState(), mode);
+    }
+    const [firstPreset] = presets;
     if (firstPreset === undefined) {
       return;
     }
     const [preset, files] = firstPreset;
     dispatch(updateSourceFilesToShare(mode, files, preset));
     dispatch(encodeSanitizedProfile(mode));
+  };
+}
+
+/**
+ * Turn "only files that are already downloaded" on or off for the presets.
+ * When a preset is active, the selection follows it to its new meaning.
+ */
+export function setSourceSharingDownloadedOnly(
+  mode: SharingMode,
+  value: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const activePreset = getActiveSourceSharingPreset(getState(), mode);
+    dispatch({ type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY', mode, value });
+    if (activePreset === 'custom') {
+      return;
+    }
+    const files = getSourceFilesForOfferedPresets(getState(), mode).get(
+      activePreset
+    );
+    if (files !== undefined) {
+      dispatch(updateSourceFilesToShare(mode, files, activePreset));
+      dispatch(encodeSanitizedProfile(mode));
+    }
   };
 }
 

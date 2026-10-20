@@ -10,6 +10,8 @@ import {
   updateSourceFilesToShare,
   fetchSourceFilesToShare,
   cancelSourceCodeFetch,
+  setSourceSharingDownloadedOnly,
+  turnOnSourceCodeSharing,
   revertToPrePublishedState,
 } from '../../actions/publish';
 import {
@@ -32,6 +34,9 @@ import {
   getHasSourceCodeToShare,
   getSourceCodeSharingStats,
   getSourceCodeFetchState,
+  getSourceFilesToFetch,
+  getActiveSourceSharingPreset,
+  getSourceSharingDownloadedOnly,
   getSourceFilesForOfferedPresets,
   getUploadPhase,
   getUploadError,
@@ -116,7 +121,7 @@ const { UploadAbortedError } = jest.requireActual(
 );
 
 function offeredPresets(state: State) {
-  return [...getSourceFilesForOfferedPresets(state).keys()];
+  return [...getSourceFilesForOfferedPresets(state, 'upload').keys()];
 }
 
 function openSourceView(sourceIndex: IndexIntoSourceTable) {
@@ -734,10 +739,13 @@ describe('attemptToPublish', function () {
       }
 
       it('offers a native file for fetching once the browser connection is there', function () {
-        const { getState } = setupWithBrowserConnection();
+        const { getState, dispatch } = setupWithBrowserConnection();
         expect(getSourceCodeSharingFiles(getState())).toMatchObject([
           { path: LOCAL_FILE, availability: 'FETCHABLE', byteCount: null },
         ]);
+        // The presets only reach it once they may pick files to be fetched.
+        expect(offeredPresets(getState())).toEqual([]);
+        dispatch(setSourceSharingDownloadedOnly('upload', false));
         expect(offeredPresets(getState())).toEqual(['all-files']);
       });
 
@@ -795,6 +803,65 @@ describe('attemptToPublish', function () {
           { availability: 'FAILED' },
         ]);
         expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+      });
+
+      it('can keep the presets to the files that are already downloaded', function () {
+        const OTHER_FILE = '/home/user/moz/mozilla-central/dom/base/nsNode.cpp';
+        const { profile } = getProfileFromTextSamples(
+          `A[file:${LOCAL_FILE}][lib:xul][address:1234]  B[file:${OTHER_FILE}]`
+        );
+        // B is downloaded, A would have to be fetched.
+        profile.shared.sources.content[1] = 'void nsNode::Foo() {}';
+        const store = storeWithProfile(profile);
+        store.dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection: makeBrowserConnection(async () => NATIVE_SOURCE)
+              .browserConnection,
+          })
+        );
+        const { dispatch, getState } = store;
+
+        dispatch(setSourceSharingDownloadedOnly('upload', false));
+        dispatch(
+          updateSourceFilesToShare('upload', new Set([0, 1]), 'all-files')
+        );
+        expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(
+          new Set([0])
+        );
+
+        // The active preset follows the option to its new meaning.
+        dispatch(setSourceSharingDownloadedOnly('upload', true));
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+          new Set([1])
+        );
+        expect(getSourceFilesToFetch(getState(), 'upload')).toEqual(new Set());
+        expect(getActiveSourceSharingPreset(getState(), 'upload')).toBe(
+          'all-files'
+        );
+
+        dispatch(setSourceSharingDownloadedOnly('upload', false));
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+          new Set([0, 1])
+        );
+      });
+
+      it('falls back to fetchable files when turning the option on with nothing downloaded', function () {
+        const { dispatch, getState } = setupWithBrowserConnection();
+        expect(getSourceSharingDownloadedOnly(getState(), 'upload')).toBe(true);
+        // The downloaded-only presets are all empty here.
+        expect(offeredPresets(getState())).toEqual([]);
+
+        dispatch(turnOnSourceCodeSharing('upload'));
+        expect(getSourceSharingDownloadedOnly(getState(), 'upload')).toBe(
+          false
+        );
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+          new Set([0])
+        );
+        expect(getActiveSourceSharingPreset(getState(), 'upload')).toBe(
+          'all-files'
+        );
       });
 
       it('can be cancelled', async function () {

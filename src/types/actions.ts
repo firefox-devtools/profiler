@@ -662,6 +662,11 @@ type PublishAction =
       readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
       readonly preset: OfferedSourceSharingPreset | null;
     }
+  | {
+      readonly type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY';
+      readonly mode: SharingMode;
+      readonly value: boolean;
+    }
   | { readonly type: 'SOURCE_CODE_FETCH_STARTED'; readonly totalCount: number }
   | {
       readonly type: 'SOURCE_CODE_FETCH_PROGRESS';

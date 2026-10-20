@@ -9,6 +9,7 @@ import {
   updateSourceFilesToShare,
   fetchSourceFilesToShare,
   cancelSourceCodeFetch,
+  setSourceSharingDownloadedOnly,
   turnOnSourceCodeSharing,
   encodeSanitizedProfile,
 } from 'firefox-profiler/actions/publish';
@@ -18,6 +19,7 @@ import {
   getSourceCodeSharingStats,
   getSourceFilesToFetch,
   getSourceCodeFetchState,
+  getSourceSharingDownloadedOnly,
   getSourceCodeSharingSummary,
   getSourceFileTree,
   getSourceFilesForOfferedPresets,
@@ -100,6 +102,7 @@ type StateProps = {
   readonly sourceCodeSharingStats: SourceCodeSharingStats;
   readonly sourceFilesToFetch: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceCodeFetchState: SourceCodeFetchState;
+  readonly sourceSharingDownloadedOnly: boolean;
   readonly sourceFileTree: SourceFileTreeNode[];
   readonly sourceFilesToShare: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceFilesForPresets: Map<
@@ -114,6 +117,7 @@ type DispatchProps = {
   readonly updateSourceFilesToShare: typeof updateSourceFilesToShare;
   readonly fetchSourceFilesToShare: typeof fetchSourceFilesToShare;
   readonly cancelSourceCodeFetch: typeof cancelSourceCodeFetch;
+  readonly setSourceSharingDownloadedOnly: typeof setSourceSharingDownloadedOnly;
   readonly turnOnSourceCodeSharing: typeof turnOnSourceCodeSharing;
   readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
 };
@@ -157,6 +161,13 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
     }
     updateSourceFilesToShare(mode, new Set());
     this.props.encodeSanitizedProfile(mode);
+  };
+
+  _onToggleDownloadedOnly = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.props.setSourceSharingDownloadedOnly(
+      this.props.mode,
+      e.target.checked
+    );
   };
 
   _onFetchSourceFiles = () => {
@@ -262,11 +273,20 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
   }
 
   _renderPresets() {
-    const { mode, activeSourceSharingPreset, sourceFilesForPresets } =
-      this.props;
-    if (sourceFilesForPresets.size < 2) {
-      return null;
-    }
+    const {
+      mode,
+      activeSourceSharingPreset,
+      sourceFilesForPresets,
+      sourceCodeSharingStats,
+      sourceSharingDownloadedOnly,
+    } = this.props;
+
+    const showPresets = sourceFilesForPresets.size >= 2;
+    // The downloaded-only option only matters while some pickable file would
+    // have to be fetched.
+    const showDownloadedOnly =
+      sourceCodeSharingStats.pickableFileCount >
+      sourceCodeSharingStats.downloadedFileCount;
 
     const presets: SourceSharingPreset[] = [...sourceFilesForPresets.keys()];
     if (activeSourceSharingPreset === 'custom') {
@@ -274,31 +294,49 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
     }
 
     return (
-      <fieldset className="publishPanelSourceCodePresets">
-        <Localized id="MenuButtons--publish--source-code-preset-legend">
-          <legend className="publishPanelSourceCodePresetsLegend">
-            Include:
-          </legend>
-        </Localized>
-        {presets.map((preset) => (
-          <label
-            key={preset}
-            className="photon-label publishPanelSourceCodePresetLabel"
-          >
+      <>
+        {showPresets ? (
+          <fieldset className="publishPanelSourceCodePresets">
+            <Localized id="MenuButtons--publish--source-code-preset-legend">
+              <legend className="publishPanelSourceCodePresetsLegend">
+                Include:
+              </legend>
+            </Localized>
+            {presets.map((preset) => (
+              <label
+                key={preset}
+                className="photon-label publishPanelSourceCodePresetLabel"
+              >
+                <input
+                  type="radio"
+                  className="photon-radio photon-radio-micro"
+                  name={`sourceCodePreset-${mode}`}
+                  value={preset}
+                  checked={activeSourceSharingPreset === preset}
+                  // "Custom" only reports the state of the tree.
+                  disabled={this._isUploading() || preset === 'custom'}
+                  onChange={this._onPresetChange}
+                />
+                <Localized id={PRESET_L10N_IDS[preset]} />
+              </label>
+            ))}
+          </fieldset>
+        ) : null}
+        {showDownloadedOnly ? (
+          <label className="photon-label publishPanelSourceCodeDownloadedOnly">
             <input
-              type="radio"
-              className="photon-radio photon-radio-micro"
-              name={`sourceCodePreset-${mode}`}
-              value={preset}
-              checked={activeSourceSharingPreset === preset}
-              // "Custom" only reports the state of the tree.
-              disabled={this._isUploading() || preset === 'custom'}
-              onChange={this._onPresetChange}
+              type="checkbox"
+              className="photon-checkbox photon-checkbox-micro"
+              checked={sourceSharingDownloadedOnly}
+              disabled={this._isUploading()}
+              onChange={this._onToggleDownloadedOnly}
             />
-            <Localized id={PRESET_L10N_IDS[preset]} />
+            <Localized id="MenuButtons--publish--source-code-downloaded-only">
+              Only already downloaded files
+            </Localized>
           </label>
-        ))}
-      </fieldset>
+        ) : null}
+      </>
     );
   }
 
@@ -394,9 +432,10 @@ export const PublishSourceCodeSection = explicitConnect<
     sourceCodeSharingStats: getSourceCodeSharingStats(state),
     sourceFilesToFetch: getSourceFilesToFetch(state, mode),
     sourceCodeFetchState: getSourceCodeFetchState(state),
+    sourceSharingDownloadedOnly: getSourceSharingDownloadedOnly(state, mode),
     sourceFileTree: getSourceFileTree(state),
     sourceFilesToShare: getSourceFilesToShare(state, mode),
-    sourceFilesForPresets: getSourceFilesForOfferedPresets(state),
+    sourceFilesForPresets: getSourceFilesForOfferedPresets(state, mode),
     activeSourceSharingPreset: getActiveSourceSharingPreset(state, mode),
     sourceCodeSharingSummary: getSourceCodeSharingSummary(state, mode),
   }),
@@ -404,6 +443,7 @@ export const PublishSourceCodeSection = explicitConnect<
     updateSourceFilesToShare,
     fetchSourceFilesToShare,
     cancelSourceCodeFetch,
+    setSourceSharingDownloadedOnly,
     turnOnSourceCodeSharing,
     encodeSanitizedProfile,
   },

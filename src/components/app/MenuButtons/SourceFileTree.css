@@ -175,6 +175,12 @@
   float: left;
 }
 
+.publishPanelSourceCodeDownloadedOnly {
+  display: flex;
+  align-items: center;
+  margin: 2px 0 0;
+}
+
 .publishPanelSourceCodePresetLabel {
   display: flex;
   align-items: center;
