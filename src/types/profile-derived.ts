@@ -854,6 +854,22 @@ export type SourceCodeSharingSummary = {
 };
 
 /**
+ * One of the ready-made file selections offered in the publish panel, above the
+ * file tree.
+ */
+export type OfferedSourceSharingPreset =
+  | 'current-file'
+  | 'selected-threads'
+  | 'all-files';
+
+/**
+ * The preset the publish panel shows as checked. `custom` isn't offered, it's
+ * what the panel falls back to once the tree no longer matches any of the
+ * offered presets.
+ */
+export type SourceSharingPreset = OfferedSourceSharingPreset | 'custom';
+
+/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */

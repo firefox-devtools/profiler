@@ -33,6 +33,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -239,11 +240,23 @@ export type SanitizedProfileEncodingState =
 
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
+  // The source files the user picked in the publish panel, per sharing mode.
+  // `null` means the user hasn't touched the selection yet, in which case the
+  // default selection applies.
+  readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
   readonly prePublishedState: State | null;
+};
+
+export type SourceFileSelection = {
+  readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+  // The preset the user picked to get this selection, if any. Several presets
+  // can select the same files, so the files alone can't tell which one to show
+  // as checked.
+  readonly preset: OfferedSourceSharingPreset | null;
 };
 
 export type ZippedProfilesState = {

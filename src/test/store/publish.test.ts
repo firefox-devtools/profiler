@@ -7,9 +7,11 @@ import {
   encodeSanitizedProfile,
   resetUploadState,
   updateSharingOption,
+  updateSourceFilesToShare,
   revertToPrePublishedState,
 } from '../../actions/publish';
 import { changeSelectedTab } from '../../actions/app';
+import { finishLoadingSourceCode } from '../../actions/code';
 import {
   viewProfileFromPathInZipFile,
   returnToZipFileList,
@@ -18,6 +20,12 @@ import {
   getAbortFunction,
   getCheckedSharingOptions,
   getRemoveProfileInformation,
+  getSanitizedProfile,
+  getSourceFilesToShare,
+  getSourceCodeSharingFiles,
+  getHasSourceCodeToShare,
+  getSourceCodeSharingStats,
+  getSourceFilesForOfferedPresets,
   getUploadPhase,
   getUploadError,
   getUploadProgress,
@@ -34,11 +42,18 @@ import {
   getHash,
   getTransformStack,
   getHiddenGlobalTracks,
+  getSourceViewSourceIndex,
 } from '../../selectors/url-state';
+import {
+  getSourceCodeCache,
+  getSourceCodeCacheGeneration,
+  getSourceViewCode,
+} from '../../selectors/code';
 import {
   getHasPreferenceMarkers,
   getHasJSTracingArgumentValues,
   getGlobalTracks,
+  getProfile,
 } from '../../selectors/profile';
 import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
@@ -61,6 +76,8 @@ import {
   addTransformToStack,
   hideGlobalTrack,
   commitRange,
+  updateBottomBoxContentsAndMaybeOpen,
+  closeBottomBox,
 } from '../../actions/profile-view';
 import { changeTabFilter } from '../../actions/receive-profile';
 
@@ -69,7 +86,16 @@ import {
   listAllUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
 
-import type { Store, UploadPhase } from 'firefox-profiler/types';
+import type {
+  IndexIntoSourceTable,
+  Profile,
+  State,
+  Store,
+  UploadPhase,
+} from 'firefox-profiler/types';
+
+import { decompress } from 'firefox-profiler/utils/gz';
+import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
 autoMockIndexedDB();
@@ -80,6 +106,20 @@ jest.mock('../../profile-logic/profile-store');
 const { UploadAbortedError } = jest.requireActual(
   '../../profile-logic/profile-store'
 );
+
+function offeredPresets(state: State) {
+  return [...getSourceFilesForOfferedPresets(state).keys()];
+}
+
+function openSourceView(sourceIndex: IndexIntoSourceTable) {
+  return updateBottomBoxContentsAndMaybeOpen('calltree', {
+    sourceIndex,
+    nativeSymbols: [],
+    initialNativeSymbol: null,
+    highlightedLineNumber: null,
+    highlightedInstructionAddress: null,
+  });
+}
 
 describe('getCheckedSharingOptions', function () {
   describe('default filtering by channel', function () {
@@ -309,6 +349,100 @@ describe('getRemoveProfileInformation', function () {
       expect(getRemoveProfileInformation(getState(), 'upload')).toEqual(null);
     });
   });
+
+  describe('source code', function () {
+    // A path on the machine that recorded the profile: nobody who opens the
+    // shared profile can download this file, so it's worth embedding.
+    const LOCAL_FILE = '/home/user/moz/mozilla-central/dom/base/nsDocument.cpp';
+    const SOURCE = 'void nsDocument::Foo() {}';
+
+    function getStoreWithEmbeddedSource() {
+      const { profile } = getProfileFromTextSamples(`A[file:${LOCAL_FILE}]`);
+      profile.shared.sources.content[0] = SOURCE;
+      return storeWithProfile(profile);
+    }
+
+    it('should select the file the source view is showing', function () {
+      const { getState, dispatch } = getStoreWithEmbeddedSource();
+      // Simulate opening this file in the source view.
+      dispatch(openSourceView(0));
+
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set([0]));
+      expect(
+        getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
+      ).toEqual([SOURCE]);
+    });
+
+    it('should select nothing once the source view is closed again', function () {
+      const { getState, dispatch } = getStoreWithEmbeddedSource();
+      dispatch(openSourceView(0));
+      dispatch(closeBottomBox());
+
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+      expect(
+        getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
+      ).toEqual([null]);
+    });
+
+    it('should list a sampled file before its contents are downloaded', function () {
+      const { profile } = getProfileFromTextSamples(`A[file:${LOCAL_FILE}]`);
+      const { getState, dispatch } = storeWithProfile(profile);
+
+      expect(getHasSourceCodeToShare(getState())).toBe(true);
+      expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        { path: LOCAL_FILE, byteCount: null },
+      ]);
+      expect(getSourceCodeSharingStats(getState())).toMatchObject({
+        fileCount: 1,
+        downloadedFileCount: 0,
+      });
+      // There's nothing to pick yet, so nothing to offer either.
+      expect(offeredPresets(getState())).toEqual([]);
+      // Picking the file anyway changes nothing, since we have no contents.
+      dispatch(updateSourceFilesToShare('upload', new Set([0])));
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+      expect(
+        getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
+      ).toEqual([null]);
+
+      dispatch(
+        finishLoadingSourceCode(
+          0,
+          SOURCE,
+          'LOCAL',
+          getSourceCodeCacheGeneration(getState())
+        )
+      );
+      expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        { path: LOCAL_FILE, byteCount: SOURCE.length },
+      ]);
+      expect(getSourceCodeSharingStats(getState())).toMatchObject({
+        fileCount: 1,
+        downloadedFileCount: 1,
+        downloadedByteCount: SOURCE.length,
+      });
+      expect(offeredPresets(getState())).toEqual(['all-files']);
+      // The earlier pick now has contents to go with it.
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set([0]));
+    });
+
+    it('should keep the picked files apart for downloading and uploading', function () {
+      const { getState, dispatch } = getStoreWithEmbeddedSource();
+      dispatch(updateSourceFilesToShare('download', new Set([0])));
+
+      expect(getSourceFilesToShare(getState(), 'download')).toEqual(
+        new Set([0])
+      );
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+      expect(
+        getSanitizedProfile(getState(), 'download').profile.shared.sources
+          .content
+      ).toEqual([SOURCE]);
+      expect(
+        getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
+      ).toEqual([null]);
+    });
+  });
 });
 
 describe('attemptToPublish', function () {
@@ -319,6 +453,7 @@ describe('attemptToPublish', function () {
 
   function setupFakeUpload() {
     let updateUploadProgress: ((progress: number) => void) | undefined;
+    let uploadedData: unknown;
 
     // Create a promise with the resolve function outside of it.
     // const { promise, resolve: resolveUpload, reject: rejectUpload } = Promise.withResolvers();
@@ -346,7 +481,8 @@ describe('attemptToPublish', function () {
         rejectUpload(new UploadAbortedError());
         abortFunction();
       },
-      startUpload: (_data, callback) => {
+      startUpload: (data, callback) => {
+        uploadedData = data;
         updateUploadProgress = callback;
         return promise;
       },
@@ -360,7 +496,28 @@ describe('attemptToPublish', function () {
       );
     }
 
+    // Inflate and parse the bytes that were handed to the upload, so that tests
+    // can assert on what actually left the browser.
+    async function getUploadedProfile(): Promise<Profile> {
+      const blob = ensureExists(
+        uploadedData,
+        'Expected the upload to have been started.'
+      ) as Blob;
+      // jsdom's Blob has no arrayBuffer(), so go through a FileReader.
+      const buffer = await new Promise<ArrayBuffer>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as ArrayBuffer);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsArrayBuffer(blob);
+      });
+      const json = new TextDecoder().decode(
+        await decompress(new Uint8Array(buffer))
+      );
+      return unserializeProfileOfArbitraryFormat(json);
+    }
+
     return {
+      getUploadedProfile,
       // @ts-expect-error - TS2454: Variable 'resolveUpload' is used before being assigned.
       // This is incorrect; new Promise runs its callback synchronously so these variables
       // are already assigned. Anyway, once we can use Promise.withResolvers, that'll be
@@ -426,6 +583,130 @@ describe('attemptToPublish', function () {
       profileToken: BARE_PROFILE_TOKEN,
       publishedRange: { start: 0, end: 1 },
       urlPath: urlFromState(getUrlState(getState())),
+    });
+  });
+
+  describe('sharing source code', function () {
+    // A path on the machine that recorded the profile, so there's no way to
+    // download this file after the profile has been shared.
+    const LOCAL_FILE = '/home/user/moz/mozilla-central/dom/base/nsDocument.cpp';
+    const SOURCE = 'void nsDocument::Foo() {}';
+
+    function setupWithSourceCode() {
+      const { profile } = getProfileFromTextSamples(`A[file:${LOCAL_FILE}]`);
+      const store = storeWithProfile(profile);
+      // Pretend the user opened this file in the source view.
+      store.dispatch(
+        finishLoadingSourceCode(
+          0,
+          SOURCE,
+          'LOCAL',
+          getSourceCodeCacheGeneration(store.getState())
+        )
+      );
+      return setupFakeUploadsWithStore(store);
+    }
+
+    async function getSourceContentsOfUploadedProfile(
+      setupResult: ReturnType<typeof setupWithSourceCode>
+    ) {
+      const {
+        dispatch,
+        resolveUpload,
+        assertUploadSuccess,
+        getUploadedProfile,
+      } = setupResult;
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      const uploadedProfile = await getUploadedProfile();
+      const { sources, stringArray } = uploadedProfile.shared;
+      return new Map(
+        Array.from(sources.content.entries()).map(([sourceIndex, content]) => [
+          stringArray[sources.filename[sourceIndex]],
+          content,
+        ])
+      );
+    }
+
+    it('uploads the source code when the user opted in', async function () {
+      const setupResult = setupWithSourceCode();
+      setupResult.dispatch(updateSourceFilesToShare('upload', new Set([0])));
+
+      expect(await getSourceContentsOfUploadedProfile(setupResult)).toEqual(
+        new Map([[LOCAL_FILE, SOURCE]])
+      );
+    });
+
+    it('does not upload the source code by default', async function () {
+      const setupResult = setupWithSourceCode();
+
+      expect(await getSourceContentsOfUploadedProfile(setupResult)).toEqual(
+        new Map([[LOCAL_FILE, null]])
+      );
+    });
+
+    // Two main threads with a file each, the first one hidden. Sanitizing drops
+    // the hidden thread along with its source file, so LOCAL_FILE moves from
+    // index 1 to index 0.
+    function setupWithHiddenThread() {
+      const OTHER_FILE = '/home/user/moz/mozilla-central/dom/base/nsNode.cpp';
+      const { profile } = getProfileFromTextSamples(
+        `A[file:${OTHER_FILE}]`,
+        `B[file:${LOCAL_FILE}]`
+      );
+      profile.meta.updateChannel = 'release';
+      profile.threads[0].name = 'GeckoMain';
+      profile.threads[0].isMainThread = true;
+      profile.threads[1].name = 'GeckoMain';
+      profile.threads[1].isMainThread = true;
+      profile.threads[1].pid = '1';
+      const store = storeWithProfile(profile);
+      const generation = getSourceCodeCacheGeneration(store.getState());
+      store.dispatch(
+        finishLoadingSourceCode(0, 'void nsNode::Foo() {}', 'LOCAL', generation)
+      );
+      store.dispatch(finishLoadingSourceCode(1, SOURCE, 'LOCAL', generation));
+      store.dispatch(hideGlobalTrack(0));
+      return setupFakeUploadsWithStore(store);
+    }
+
+    it('forgets the picked files once the sources are reindexed', async function () {
+      const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+        setupWithHiddenThread();
+
+      dispatch(updateSourceFilesToShare('upload', new Set([1])));
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      const { sources, stringArray } = getProfile(getState()).shared;
+      expect(sources.length).toBe(1);
+      expect(stringArray[sources.filename[0]]).toBe(LOCAL_FILE);
+      // The old index 1 would now be out of bounds, or point at another file.
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+    });
+
+    it('keeps showing a shared file in the source view after a sanitized publish', async function () {
+      const { dispatch, getState, resolveUpload, assertUploadSuccess } =
+        setupWithHiddenThread();
+
+      dispatch(openSourceView(1));
+      dispatch(updateSourceFilesToShare('upload', new Set([1])));
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload(JWT_TOKEN);
+      await assertUploadSuccess(publishAttempt);
+
+      // The fetched contents were indexed for the old profile, so they are
+      // gone, and the source view reads the file from the profile instead.
+      expect(getSourceCodeCache(getState()).size).toBe(0);
+      expect(getSourceViewSourceIndex(getState())).toBe(0);
+      expect(getSourceViewCode(getState())).toEqual({
+        type: 'AVAILABLE',
+        code: SOURCE,
+        origin: 'PROFILE',
+      });
     });
   });
 

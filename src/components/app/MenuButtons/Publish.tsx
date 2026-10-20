@@ -27,7 +27,9 @@ import {
   getUploadError,
   getShouldSanitizeByDefault,
   getSanitizedProfileEncodingState,
+  getHasSourceCodeToShare,
 } from 'firefox-profiler/selectors/publish';
+import { PublishSourceCodeSection } from './PublishSourceCode';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
@@ -60,6 +62,7 @@ type StateProps = {
   readonly shouldShowPreferenceOption: boolean;
   readonly profileContainsPrivateBrowsingInformation: boolean;
   readonly profileHasJSTracingArgumentValues: boolean;
+  readonly hasSourceCodeToShare: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
@@ -131,6 +134,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
       profileHasJSTracingArgumentValues,
+      hasSourceCodeToShare,
       sanitizedProfileEncodingState,
       downloadFileName,
       shouldSanitizeByDefault,
@@ -252,6 +256,9 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                   />
                 )
               : null}
+            {hasSourceCodeToShare ? (
+              <PublishSourceCodeSection mode={mode} />
+            ) : null}
           </div>
           {sanitizedProfileEncodingState.phase === 'ERROR' ? (
             <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
@@ -420,6 +427,7 @@ export const PublishPanel = explicitConnect<
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
+    hasSourceCodeToShare: getHasSourceCodeToShare(state),
     checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
     downloadFileName: getFilenameString(state),
     sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
