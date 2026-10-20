@@ -10,7 +10,10 @@ import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { getOriginalSourceForFrame } from 'firefox-profiler/profile-logic/profile-data';
 
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
+  IndexIntoFuncTable,
+  IndexIntoSourceLocationTable,
   IndexIntoSourceTable,
   Profile,
   SourceCodeAvailability,
@@ -76,8 +79,15 @@ function _splitPath(path: string): string[] {
 // into empty rows.
 const URL_ORIGIN_REGEX = /^([a-z][a-z0-9+.-]*):\/\/([^/]*)(\/.*)?$/i;
 
-// The tree segments for a file.
-function _pathSegmentsForFilename(path: string, productName: string): string[] {
+/**
+ * The tree segments for a file. `bundleUrl` is set for files that a source
+ * map produced, and is the URL of the generated file they were mapped from.
+ */
+function _pathSegmentsForFilename(
+  path: string,
+  productName: string,
+  bundleUrl: string | null
+): string[] {
   // Files inside the browser's omni.ja archive, which is the packaged form of
   // the chrome:// and resource:// files. The install path in front of it is
   // noise.
@@ -86,17 +96,84 @@ function _pathSegmentsForFilename(path: string, productName: string): string[] {
     return [productName, 'omni.ja', ..._splitPath(omniJarMatch[1])];
   }
 
+  let segments;
+  let isWebUrl = false;
   const originMatch = URL_ORIGIN_REGEX.exec(path);
   if (originMatch !== null) {
     const [, scheme, host, rest] = originMatch;
     if (INTERNAL_URL_SCHEMES.has(scheme.toLowerCase())) {
       return [productName, `${scheme}://${host}`, ..._splitPath(rest ?? '')];
     }
-    return [`${scheme}://${host}`, ..._splitPath(rest ?? '')];
+    segments = [`${scheme}://${host}`, ..._splitPath(rest ?? '')];
+    isWebUrl = /^https?$/i.test(scheme) && host !== '';
+  } else {
+    segments = path.split(/[/\\]/).filter((s) => s !== '');
+    if (segments.length === 0) {
+      segments = [path];
+    }
   }
 
-  const segments = path.split(/[/\\]/).filter((s) => s !== '');
-  return segments.length > 0 ? segments : [path];
+  // Source maps name their files in all sorts of ways: relative to the
+  // bundle, with a webpack:// scheme, or as paths on the build machine. None
+  // of those say which site the code ran on, so they go under the site that
+  // served the bundle, as they are.
+  const bundleOrigin = _siteOrigin(bundleUrl);
+  return bundleOrigin !== null && !isWebUrl
+    ? [bundleOrigin, ...segments]
+    : segments;
+}
+
+// "<scheme>://<host>" for URLs with a host, which is what tells sites apart.
+function _siteOrigin(url: string | null): string | null {
+  if (url === null) {
+    return null;
+  }
+  const match = URL_ORIGIN_REGEX.exec(url);
+  return match !== null && match[2] !== '' ? `${match[1]}://${match[2]}` : null;
+}
+
+/**
+ * For each file that a source map produced, the generated file it was mapped
+ * from. Original files are only reachable through funcs and frames, so this
+ * is a pass over both tables.
+ */
+function _computeOriginalToGeneratedSource(
+  profile: Profile
+): Map<IndexIntoSourceTable, IndexIntoSourceTable> {
+  const { funcTable, frameTable, sourceLocationTable } = profile.shared;
+  const originalToGenerated = new Map<
+    IndexIntoSourceTable,
+    IndexIntoSourceTable
+  >();
+  if (sourceLocationTable === null) {
+    return originalToGenerated;
+  }
+  const record = (
+    locationIndex: IndexIntoSourceLocationTable,
+    funcIndex: IndexIntoFuncTable
+  ) => {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
+      return;
+    }
+    const original = sourceLocationTable.source[locationIndex];
+    if (!originalToGenerated.has(original)) {
+      originalToGenerated.set(original, funcTable.source[funcIndex]);
+    }
+  };
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasOriginalLocation) !== 0) {
+      record(funcTable.originalLocation[funcIndex], funcIndex);
+    }
+  }
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+    if ((frameTable.flags[frameIndex] & FrameFlag.HasOriginalLocation) !== 0) {
+      record(
+        frameTable.originalLocation[frameIndex],
+        frameTable.func[frameIndex]
+      );
+    }
+  }
+  return originalToGenerated;
 }
 
 /**
@@ -261,14 +338,22 @@ export function computeSourceCodeSharingCandidates(
   const { sources, stringArray } = profile.shared;
   const productName = profile.meta.product || 'Firefox';
   const totalWeights = _computeSourceTotalWeights(profile, stackToSource);
+  const originalToGenerated = _computeOriginalToGeneratedSource(profile);
 
   const candidates = Array.from(totalWeights.keys(), (sourceIndex) => {
     const filename = stringArray[sources.filename[sourceIndex]];
     const path = parseFileNameFromSymbolication(filename).path;
+    const generated = originalToGenerated.get(sourceIndex);
+    const bundleUrl =
+      generated !== undefined
+        ? parseFileNameFromSymbolication(
+            stringArray[sources.filename[generated]]
+          ).path
+        : null;
     return {
       sourceIndex,
       path,
-      pathSegments: _pathSegmentsForFilename(path, productName),
+      pathSegments: _pathSegmentsForFilename(path, productName, bundleUrl),
       isPubliclyDownloadable: _isPubliclyDownloadable(filename),
     };
   });
