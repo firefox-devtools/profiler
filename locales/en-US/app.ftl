@@ -811,6 +811,10 @@ MenuButtons--publish--source-code-none-fetched =
         [one] ({ $totalFileCount } file, none fetched yet)
        *[other] ({ $totalFileCount } files, none fetched yet)
     }
+# The tooltip of the file count when the "Include source code" checkbox is
+# disabled because none of the files can be included.
+MenuButtons--publish--source-code-nothing-to-include =
+    .title = None of these source files can be included. Their contents aren’t in the profile, and they can’t be fetched from here.
 
 ## Shown above the file tree of the "Include source code" option.
 
@@ -829,6 +833,10 @@ MenuButtons--publish--source-code-preset-custom = Custom
 
 ## Shown in the size column of the file tree, in place of a size.
 
+# For files that are fetched when sharing, if picked.
+MenuButtons--publish--source-code-not-fetched = Not fetched
+# For files that couldn't be fetched during this session.
+MenuButtons--publish--source-code-file-fetch-failed = Fetch failed
 # For files that can't be fetched from here, and for directories where none of
 # the files can be.
 MenuButtons--publish--source-code-unavailable = Unavailable
@@ -852,6 +860,40 @@ MenuButtons--publish--source-code-left-out-unavailable =
     { $unavailableCount ->
         [one] { $unavailableCount } file can’t be fetched from here. Fetching it requires the browser that recorded the profile or a local symbol server.
        *[other] { $unavailableCount } files can’t be fetched from here. Fetching them requires the browser that recorded the profile or a local symbol server.
+    }
+# Shown in the upload panel, followed by a "Fetch now" button.
+# Variables:
+#   $fileCount (Number) - Number of picked source files that haven't been fetched yet
+MenuButtons--publish--source-code-status-to-fetch =
+    { $fileCount ->
+        [one] { $fileCount } file will be fetched when sharing.
+       *[other] { $fileCount } files will be fetched when sharing.
+    }
+# Shown in the save panel, followed by a "Fetch now" button. The Save button
+# stays disabled until the picked files are fetched.
+# Variables:
+#   $fileCount (Number) - Number of picked source files that haven't been fetched yet
+MenuButtons--publish--source-code-status-to-fetch-before-saving =
+    { $fileCount ->
+        [one] { $fileCount } file must be fetched before saving.
+       *[other] { $fileCount } files must be fetched before saving.
+    }
+MenuButtons--publish--source-code-fetch-now = Fetch now
+# Shown while the picked files are being fetched, followed by a "Cancel" button.
+# Also shown in the upload progress while an upload waits for them.
+# Variables:
+#   $completedCount (Number) - Number of source files fetched so far
+#   $totalCount (Number) - Number of source files being fetched
+MenuButtons--publish--source-code-fetching = Fetching source files… ({ $completedCount } of { $totalCount })
+MenuButtons--publish--source-code-cancel-fetch = Cancel
+# Shown under the upload error message when the upload stopped because some of
+# the picked source files couldn't be fetched.
+# Variables:
+#   $failedCount (Number) - Number of picked source files that couldn't be fetched
+MenuButtons--publish--source-code-fetch-failed =
+    { $failedCount ->
+        [one] { $failedCount } of the picked source files could not be fetched. It has been left out, so uploading again will share the rest.
+       *[other] { $failedCount } of the picked source files could not be fetched. They have been left out, so uploading again will share the rest.
     }
 
 ## NetworkSettings

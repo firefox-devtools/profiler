@@ -679,6 +679,21 @@ type PublishAction =
       readonly preset: OfferedSourceSharingPreset | null;
     }
   | {
+      readonly type: 'SOURCE_CODE_FETCH_STARTED';
+      readonly mode: SharingMode;
+      readonly totalCount: number;
+    }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_PROGRESS';
+      readonly mode: SharingMode;
+      readonly completedCount: number;
+    }
+  | { readonly type: 'SOURCE_CODE_FETCH_FINISHED'; readonly mode: SharingMode }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_CANCELLED';
+      readonly mode: SharingMode;
+    }
+  | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
