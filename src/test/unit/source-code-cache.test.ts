@@ -12,6 +12,8 @@ import {
   finishLoadingSourceCode,
   failLoadingSourceCode,
 } from '../../actions/code';
+import { viewProfile } from '../../actions/receive-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import type { IndexIntoSourceTable } from 'firefox-profiler/types';
 
@@ -129,6 +131,18 @@ describe('source code cache with IndexIntoSourceTable', function () {
       const result = getSourceCodeCache(getState());
       expect(result).toBeInstanceOf(Map);
       expect(result.size).toBe(0);
+    });
+
+    it('forgets the cache when another profile is loaded', async function () {
+      const { getState, dispatch } = setupStoreWithSourceIndex(null);
+      dispatch(finishLoadingSourceCode(0, 'console.log("Source 0");'));
+      expect(getSourceCodeCache(getState()).size).toBe(1);
+
+      // The indexes of the old cache would point at unrelated files in the new
+      // profile, so the whole cache has to go.
+      const { profile } = getProfileFromTextSamples('A[file:other.js]');
+      await dispatch(viewProfile(profile));
+      expect(getSourceCodeCache(getState()).size).toBe(0);
     });
   });
 
