@@ -274,18 +274,60 @@ function _areSetsEqual<T>(a: ReadonlySet<T>, b: ReadonlySet<T>): boolean {
   return true;
 }
 
-// The files behind every preset, whether offered or not.
-const _getSourceFilesForPresets: Selector<
-  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>
-> = createSelector(
-  getSourceFilesForCurrentFile,
-  getSourceFilesForSelectedThreads,
-  getPickableSources,
-  (currentFile, selectedThreads, allFiles) => ({
-    'current-file': currentFile,
-    'selected-threads': selectedThreads,
-    'all-files': allFiles,
-  })
+export const getSourceSharingDownloadedOnly: DangerousSelectorWithArguments<
+  boolean,
+  SharingMode
+> = (state, mode) => getPublishState(state).sourceSharingDownloadedOnly[mode];
+
+function _intersect<T>(
+  a: ReadonlySet<T>,
+  b: { has(value: T): boolean }
+): Set<T> {
+  const result = new Set<T>();
+  for (const value of a) {
+    if (b.has(value)) {
+      result.add(value);
+    }
+  }
+  return result;
+}
+
+// The files behind every preset, whether offered or not. With "downloaded
+// only" on, each is narrowed to the files whose contents we already have.
+export const getSourceFilesForPresets: DangerousSelectorWithArguments<
+  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    getSourceFilesForCurrentFile,
+    getSourceFilesForSelectedThreads,
+    getPickableSources,
+    getSourceContentsForSharing,
+    (state: State) => getSourceSharingDownloadedOnly(state, mode),
+    (
+      currentFile,
+      selectedThreads,
+      allFiles,
+      contents,
+      downloadedOnly
+    ): Record<
+      OfferedSourceSharingPreset,
+      ReadonlySet<IndexIntoSourceTable>
+    > => {
+      if (!downloadedOnly) {
+        return {
+          'current-file': currentFile,
+          'selected-threads': selectedThreads,
+          'all-files': allFiles,
+        };
+      }
+      return {
+        'current-file': _intersect(currentFile, contents),
+        'selected-threads': _intersect(selectedThreads, contents),
+        'all-files': _intersect(allFiles, contents),
+      };
+    }
+  )
 );
 
 /**
@@ -294,31 +336,37 @@ const _getSourceFilesForPresets: Selector<
  * that select the same files are offered once, under the most specific name:
  * "Current file", then "All available files", then "Selected threads".
  */
-export const getSourceFilesForOfferedPresets: Selector<
-  Map<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>
-> = createSelector(_getSourceFilesForPresets, (filesForPreset) => {
-  const currentFile = filesForPreset['current-file'];
-  const selectedThreads = filesForPreset['selected-threads'];
-  const allFiles = filesForPreset['all-files'];
-  const offered = new Map<
-    OfferedSourceSharingPreset,
-    ReadonlySet<IndexIntoSourceTable>
-  >();
-  if (currentFile.size > 0) {
-    offered.set('current-file', currentFile);
-  }
-  if (
-    selectedThreads.size > 0 &&
-    !_areSetsEqual(selectedThreads, currentFile) &&
-    !_areSetsEqual(selectedThreads, allFiles)
-  ) {
-    offered.set('selected-threads', selectedThreads);
-  }
-  if (allFiles.size > 0 && !_areSetsEqual(allFiles, currentFile)) {
-    offered.set('all-files', allFiles);
-  }
-  return offered;
-});
+export const getSourceFilesForOfferedPresets: DangerousSelectorWithArguments<
+  Map<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceFilesForPresets(state, mode),
+    (filesForPreset) => {
+      const currentFile = filesForPreset['current-file'];
+      const selectedThreads = filesForPreset['selected-threads'];
+      const allFiles = filesForPreset['all-files'];
+      const offered = new Map<
+        OfferedSourceSharingPreset,
+        ReadonlySet<IndexIntoSourceTable>
+      >();
+      if (currentFile.size > 0) {
+        offered.set('current-file', currentFile);
+      }
+      if (
+        selectedThreads.size > 0 &&
+        !_areSetsEqual(selectedThreads, currentFile) &&
+        !_areSetsEqual(selectedThreads, allFiles)
+      ) {
+        offered.set('selected-threads', selectedThreads);
+      }
+      if (allFiles.size > 0 && !_areSetsEqual(allFiles, currentFile)) {
+        offered.set('all-files', allFiles);
+      }
+      return offered;
+    }
+  )
+);
 
 // The offered preset that the selection matches, or 'custom'. Offered presets
 // never select the same files, so there's at most one match.
@@ -328,7 +376,7 @@ export const getActiveSourceSharingPreset: DangerousSelectorWithArguments<
 > = _perSharingMode((mode) =>
   createSelector(
     (state: State) => getSourceFilesToShare(state, mode),
-    getSourceFilesForOfferedPresets,
+    (state: State) => getSourceFilesForOfferedPresets(state, mode),
     (selection, filesForPresets): SourceSharingPreset => {
       for (const [preset, files] of filesForPresets) {
         if (_areSetsEqual(selection, files)) {

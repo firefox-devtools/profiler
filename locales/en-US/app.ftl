@@ -813,6 +813,10 @@ MenuButtons--publish--source-code-preset-selected-threads = Selected threads
 # Selects every source file that was fetched or came with the profile, and that
 # can be shared.
 MenuButtons--publish--source-code-preset-all-available-files = All available files
+# A checkbox next to the presets. When checked, "Selected threads" and "All
+# available files" only pick files whose contents are already downloaded, so
+# that sharing doesn't download anything more.
+MenuButtons--publish--source-code-downloaded-only = Only already downloaded files
 # Not something the user can pick. This is shown as the selected option once the
 # user has edited the file tree so that it no longer matches any of the others.
 MenuButtons--publish--source-code-preset-custom = Custom
