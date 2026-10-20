@@ -3677,8 +3677,8 @@ function _shouldShowBothOriginAndFileName(
 export function getOriginalPositionForFrame(
   frameIndex: IndexIntoFrameTable | null,
   funcIndex: IndexIntoFuncTable,
-  frameTable: FrameTable,
-  funcTable: FuncTable,
+  frameTable: FrameTable | RawFrameTable,
+  funcTable: FuncTable | RawFuncTable,
   sourceLocationTable: SourceLocationTable | null
 ): {
   source: IndexIntoSourceTable | null;
