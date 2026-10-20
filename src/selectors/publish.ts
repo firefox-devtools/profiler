@@ -45,6 +45,20 @@ import { getThreadSelectors } from './per-thread';
 
 export const getPublishState: Selector<PublishState> = (state) => state.publish;
 
+/**
+ * Build one memoized selector per sharing mode, so that the download and upload
+ * panels don't evict each other's results.
+ */
+function _perSharingMode<T>(
+  makeSelector: (mode: SharingMode) => Selector<T>
+): DangerousSelectorWithArguments<T, SharingMode> {
+  const selectors: Record<SharingMode, Selector<T>> = {
+    download: makeSelector('download'),
+    upload: makeSelector('upload'),
+  };
+  return (state, mode) => selectors[mode](state);
+}
+
 export const getCheckedSharingOptions: DangerousSelectorWithArguments<
   CheckedSharingOptions,
   SharingMode
@@ -73,7 +87,10 @@ export const getFilenameString: Selector<string> = createSelector(
   }
 );
 
-const _makeGetRemoveProfileInformation = (mode: SharingMode) =>
+export const getRemoveProfileInformation: DangerousSelectorWithArguments<
+  RemoveProfileInformation | null,
+  SharingMode
+> = _perSharingMode((mode) =>
   createSelector(
     (state: State) => getCheckedSharingOptions(state, mode),
     getProfile,
@@ -190,22 +207,8 @@ const _makeGetRemoveProfileInformation = (mode: SharingMode) =>
           !checkedSharingOptions.includeArgumentValues,
       };
     }
-  );
-
-// One memoized selector per mode, so switching panels doesn't recompute the
-// expensive sanitization.
-const _removeProfileInformationSelectors: Record<
-  SharingMode,
-  Selector<RemoveProfileInformation | null>
-> = {
-  download: _makeGetRemoveProfileInformation('download'),
-  upload: _makeGetRemoveProfileInformation('upload'),
-};
-
-export const getRemoveProfileInformation: DangerousSelectorWithArguments<
-  RemoveProfileInformation | null,
-  SharingMode
-> = (state, mode) => _removeProfileInformationSelectors[mode](state);
+  )
+);
 
 /**
  * The derived markers are needed for profile sanitization, but they are also
@@ -252,7 +255,10 @@ function getTracedValuesBuffersForAllThreads(
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
  */
-const _makeGetSanitizedProfile = (mode: SharingMode) =>
+export const getSanitizedProfile: DangerousSelectorWithArguments<
+  SanitizeProfileResult,
+  SharingMode
+> = _perSharingMode((mode) =>
   createSelector(
     getProfile,
     getDerivedMarkerInfoForAllThreads,
@@ -260,20 +266,8 @@ const _makeGetSanitizedProfile = (mode: SharingMode) =>
     (state: State) => getRemoveProfileInformation(state, mode),
     getMarkerSchemaByName,
     sanitizePII
-  );
-
-const _sanitizedProfileSelectors: Record<
-  SharingMode,
-  Selector<SanitizeProfileResult>
-> = {
-  download: _makeGetSanitizedProfile('download'),
-  upload: _makeGetSanitizedProfile('upload'),
-};
-
-export const getSanitizedProfile: DangerousSelectorWithArguments<
-  SanitizeProfileResult,
-  SharingMode
-> = (state, mode) => _sanitizedProfileSelectors[mode](state);
+  )
+);
 
 export const getSanitizedProfileEncodingState: Selector<
   SanitizedProfileEncodingState
