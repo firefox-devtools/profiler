@@ -1,8 +1,19 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import { getProfile } from 'firefox-profiler/selectors/profile';
+import { getBrowserConnection } from 'firefox-profiler/selectors/app';
+import { getSymbolServerUrl } from 'firefox-profiler/selectors/url-state';
+import {
+  fetchSource,
+  type FetchSourceResult,
+} from 'firefox-profiler/utils/fetch-source';
+import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';
 import type {
   Action,
+  ThunkAction,
   SourceCodeLoadingError,
   ApiQueryError,
   DecodedInstruction,
@@ -34,6 +45,54 @@ export function failLoadingSourceCode(
   errors: SourceCodeLoadingError[]
 ): Action {
   return { type: 'SOURCE_CODE_LOADING_ERROR', sourceIndex, errors };
+}
+
+/**
+ * Fetch the contents of a source file into the source code cache, from the
+ * browser, a symbol server or the web, whichever can serve it.
+ *
+ * This always fetches, so callers need to skip sources that are already in the
+ * cache or embedded in the profile. Callers should keep one archiveCache across
+ * their fetches, so that each archive is only downloaded once.
+ */
+export function fetchSourceCode(
+  sourceIndex: IndexIntoSourceTable,
+  archiveCache: Map<string, Promise<Uint8Array>>
+): ThunkAction<Promise<FetchSourceResult>> {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const { sources, stringArray } = getProfile(state).shared;
+    const delegate = new RegularExternalCommunicationDelegate(
+      getBrowserConnection(state),
+      {
+        onBeginUrlRequest: (url) => {
+          dispatch(beginLoadingSourceCodeFromUrl(sourceIndex, url));
+        },
+        onBeginBrowserConnectionQuery: () => {
+          dispatch(beginLoadingSourceCodeFromBrowserConnection(sourceIndex));
+        },
+      }
+    );
+    const result = await fetchSource(
+      stringArray[sources.filename[sourceIndex]],
+      sources.id[sourceIndex],
+      getSymbolServerUrl(state),
+      findAddressProofForFile(getProfile(state), sourceIndex),
+      archiveCache,
+      delegate
+    );
+    switch (result.type) {
+      case 'SUCCESS':
+        dispatch(finishLoadingSourceCode(sourceIndex, result.source));
+        break;
+      case 'ERROR':
+        dispatch(failLoadingSourceCode(sourceIndex, result.errors));
+        break;
+      default:
+        throw assertExhaustiveCheck(result);
+    }
+    return result;
+  };
 }
 
 export function beginLoadingAssemblyCodeFromUrl(
