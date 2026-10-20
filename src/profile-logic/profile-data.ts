@@ -76,6 +76,7 @@ import type {
   IndexIntoStackTable,
   IndexIntoResourceTable,
   IndexIntoNativeSymbolTable,
+  IndexIntoSourceLocationTable,
   CallNodeTableBitSet,
   ThreadIndex,
   Category,
@@ -3646,6 +3647,32 @@ function _shouldShowBothOriginAndFileName(
 }
 
 /**
+ * The source-map entry used by tiers 1 and 2 of `getOriginalPositionForFrame`,
+ * or null if it falls back to the compiled position.
+ */
+function _getOriginalLocationForFrame(
+  frameIndex: IndexIntoFrameTable | null,
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable | RawFrameTable,
+  funcTable: FuncTable | RawFuncTable,
+  sourceLocationTable: SourceLocationTable | null
+): IndexIntoSourceLocationTable | null {
+  if (sourceLocationTable === null) {
+    return null;
+  }
+  if (
+    frameIndex !== null &&
+    (frameTable.flags[frameIndex] & FrameFlag.HasOriginalLocation) !== 0
+  ) {
+    return frameTable.originalLocation[frameIndex];
+  }
+  if ((funcTable.flags[funcIndex] & FuncFlag.HasOriginalLocation) !== 0) {
+    return funcTable.originalLocation[funcIndex];
+  }
+  return null;
+}
+
+/**
  * Resolves the original (source-mapped) position for a frame's execution point,
  * with a 3-tier fallback that always produces a self-consistent
  * (source, line, column) triple where all three come from the same file.
@@ -3671,32 +3698,22 @@ export function getOriginalPositionForFrame(
   line: number | null;
   column: number | null;
 } {
-  if (
-    sourceLocationTable !== null &&
-    frameIndex !== null &&
-    (frameTable.flags[frameIndex] & FrameFlag.HasOriginalLocation) !== 0
-  ) {
-    const frameOriginalLocationIdx = frameTable.originalLocation[frameIndex];
+  const originalLocation = _getOriginalLocationForFrame(
+    frameIndex,
+    funcIndex,
+    frameTable,
+    funcTable,
+    sourceLocationTable
+  );
+  if (sourceLocationTable !== null && originalLocation !== null) {
     return {
-      source: sourceLocationTable.source[frameOriginalLocationIdx],
-      line: sourceLocationTable.line[frameOriginalLocationIdx],
-      column: sourceLocationTable.column[frameOriginalLocationIdx],
+      source: sourceLocationTable.source[originalLocation],
+      line: sourceLocationTable.line[originalLocation],
+      column: sourceLocationTable.column[originalLocation],
     };
   }
 
   const funcFlags = funcTable.flags[funcIndex];
-  if (
-    sourceLocationTable !== null &&
-    (funcFlags & FuncFlag.HasOriginalLocation) !== 0
-  ) {
-    const funcOriginalLocationIdx = funcTable.originalLocation[funcIndex];
-    return {
-      source: sourceLocationTable.source[funcOriginalLocationIdx],
-      line: sourceLocationTable.line[funcOriginalLocationIdx],
-      column: sourceLocationTable.column[funcOriginalLocationIdx],
-    };
-  }
-
   const funcSource =
     (funcFlags & FuncFlag.HasSource) !== 0 ? funcTable.source[funcIndex] : null;
   const funcLine =
@@ -3728,6 +3745,32 @@ export function getOriginalPositionForFrame(
     line: funcLine,
     column: funcColumn,
   };
+}
+
+/**
+ * The source that `getOriginalPositionForFrame` resolves to, without allocating
+ * the position object, for callers that run this for every stack.
+ */
+export function getOriginalSourceForFrame(
+  frameIndex: IndexIntoFrameTable | null,
+  funcIndex: IndexIntoFuncTable,
+  frameTable: FrameTable | RawFrameTable,
+  funcTable: FuncTable | RawFuncTable,
+  sourceLocationTable: SourceLocationTable | null
+): IndexIntoSourceTable | null {
+  const originalLocation = _getOriginalLocationForFrame(
+    frameIndex,
+    funcIndex,
+    frameTable,
+    funcTable,
+    sourceLocationTable
+  );
+  if (sourceLocationTable !== null && originalLocation !== null) {
+    return sourceLocationTable.source[originalLocation];
+  }
+  return (funcTable.flags[funcIndex] & FuncFlag.HasSource) !== 0
+    ? funcTable.source[funcIndex]
+    : null;
 }
 
 /**
