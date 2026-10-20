@@ -298,6 +298,9 @@ export type FetchedSourceCodeOrigin = 'LOCAL' | 'WEB';
 // FetchedSourceCodeOrigin, plus PROFILE for contents embedded in the profile.
 export type SourceCodeOrigin = FetchedSourceCodeOrigin | 'PROFILE';
 
+// The contents of a source file that we have on hand, and where they came from.
+export type SourceCodeContents = { code: string; origin: SourceCodeOrigin };
+
 export type SourceCodeStatus =
   | { type: 'LOADING'; source: CodeLoadingSource }
   | { type: 'ERROR'; errors: SourceCodeLoadingError[] }
