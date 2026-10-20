@@ -814,6 +814,9 @@ MenuButtons--publish--source-code-none-fetched =
 
 ## Shown above the file tree of the "Include source code" option.
 
+# Shown next to a warning icon in the upload panel, since the uploaded profile
+# is public.
+MenuButtons--publish--source-code-rights-notice = These files will be public. Only include code you have the right to share.
 # Labels a row of radio buttons that select a ready-made set of files.
 MenuButtons--publish--source-code-preset-legend = Include:
 MenuButtons--publish--source-code-preset-current-file = Current file
