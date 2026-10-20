@@ -810,6 +810,9 @@ MenuButtons--publish--source-code-preset-all-available-files = All available fil
 # Not something the user can pick. This is shown as the selected option once the
 # user has edited the file tree so that it no longer matches any of the others.
 MenuButtons--publish--source-code-preset-custom = Custom
+# Shown under the "Include source code" checkbox in the upload panel, next to a
+# warning icon, since the uploaded profile is public.
+MenuButtons--publish--source-code-rights-notice = These files will be public. Only include code you have the right to share.
 # The status line underneath the file tree of the "Include source code"
 # option: how much source code the picked files add to the shared profile.
 # Variables:

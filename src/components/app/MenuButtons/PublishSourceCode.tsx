@@ -262,7 +262,7 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
   }
 
   override render() {
-    const { sourceFileTree, sourceFilesToShare, sourceCodeSharingStats } =
+    const { mode, sourceFileTree, sourceFilesToShare, sourceCodeSharingStats } =
       this.props;
     const isSharingSourceCode = sourceFilesToShare.size > 0;
 
@@ -287,6 +287,16 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props> {
         </label>
         {isSharingSourceCode ? (
           <>
+            {mode === 'upload' ? (
+              <div className="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content publishPanelSourceCodeNotice">
+                <Localized id="MenuButtons--publish--source-code-rights-notice">
+                  <div className="photon-message-bar-inner-text">
+                    These files will be public. Only include code you have the
+                    right to share.
+                  </div>
+                </Localized>
+              </div>
+            ) : null}
             {this._renderPresets()}
             <div className="publishPanelSourceFileTreeContainer">
               <SourceFileTree

@@ -804,6 +804,26 @@ describe('app/MenuButtons', function () {
       ).toBeInTheDocument();
     });
 
+    it('warns about the distribution rights when uploading', async () => {
+      const { profile } = createSourceCodeProfile();
+      const { enableSourceCode, openPublishPanel } = setupForPublish(profile);
+      await openPublishPanel();
+      enableSourceCode();
+      expect(
+        screen.getByText(/Only include code you have the right to share/)
+      ).toBeInTheDocument();
+    });
+
+    it('does not bring up the distribution rights when saving to disk', async () => {
+      const { profile } = createSourceCodeProfile();
+      const { enableSourceCode, openDownloadPanel } = setupForPublish(profile);
+      await openDownloadPanel();
+      enableSourceCode();
+      expect(
+        screen.queryByText(/Only include code you have the right to share/)
+      ).not.toBeInTheDocument();
+    });
+
     it('shows the size of every row in the file tree', async () => {
       const { profile } = createSourceCodeProfile();
       const { getSourceFileSizes, enableSourceCode, openPublishPanel } =

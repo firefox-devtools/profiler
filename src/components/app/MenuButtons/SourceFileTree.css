@@ -133,6 +133,20 @@
   background-size: 14px 14px;
 }
 
+/* A slimmer version of the photon message bar, with less padding and a smaller
+ * icon. */
+.publishPanelSourceCodeNotice {
+  min-height: 0;
+  padding: 3px 8px 3px 26px;
+  margin: 4px 0 0;
+  background-position: 7px 6px;
+  background-size: 12px 12px;
+}
+
+.publishPanelSourceCodeNotice > .photon-message-bar-inner-text {
+  padding: 0;
+}
+
 .publishPanelSourceCodeAvailable {
   margin-left: 5px;
   color: var(--internal-dimmed-foreground-color);
