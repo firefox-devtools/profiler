@@ -289,8 +289,10 @@ describe('createSourceViewFormatting', function () {
 
 describe('getFormatDialectForPath', function () {
   it('returns the dialect for JS files, and null for other files', function () {
-    expect(getFormatDialectForPath('https://example.com/bundle.js')).toBe('');
-    expect(getFormatDialectForPath('https://example.com/')).toBe('');
+    expect(getFormatDialectForPath('https://example.com/bundle.js')).toBe(
+      'jsx'
+    );
+    expect(getFormatDialectForPath('https://example.com/')).toBe('jsx');
     expect(getFormatDialectForPath('src/app.tsx')).toBe('ts jsx');
     expect(getFormatDialectForPath('src/main.cpp')).toBeNull();
     expect(getFormatDialectForPath('src/lib.rs')).toBeNull();

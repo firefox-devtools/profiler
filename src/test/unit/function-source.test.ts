@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { extractFunctionSource } from '../../profile-logic/js-format/function-source';
+import { getFormatDialectForPath } from '../../profile-logic/js-format/dialect';
 
 describe('extractFunctionSource', function () {
   const code = [
@@ -155,6 +156,38 @@ describe('extractFunctionSource', function () {
     ).toEqual({
       lines: ['export function f(a: number): number {', '  return a;', '}'],
       firstLine: 1,
+    });
+  });
+
+  it('finds the whole function when a .js file contains JSX', function () {
+    const jsx = [
+      'const List = ({ items }) => (',
+      '  <ul>',
+      '    {items.map((item) => {',
+      '      return <li key={item.id}>{item.name}</li>;',
+      '    })}',
+      '  </ul>',
+      ');',
+    ].join('\n');
+    const dialect = getFormatDialectForPath('src/List.js');
+    if (dialect === null) {
+      throw new Error('Expected .js to be a JS file.');
+    }
+    expect(
+      extractFunctionSource({
+        code: jsx,
+        dialect,
+        line: 3,
+        column: 16,
+        format: 'never',
+      })
+    ).toEqual({
+      lines: [
+        '{items.map((item) => {',
+        '  return <li key={item.id}>{item.name}</li>;',
+        '})}',
+      ],
+      firstLine: 3,
     });
   });
 });
