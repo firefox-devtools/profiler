@@ -34,6 +34,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -248,8 +249,19 @@ export type SanitizedProfileEncodingState =
     }
   | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
 
+export type SourceFileSelection = {
+  readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+  // The preset the files come from, so that it stays checked when another
+  // preset happens to select the same files. null for edits of the file tree.
+  readonly preset: OfferedSourceSharingPreset | null;
+};
+
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
+  // The source files the user picked in the publish panel, per sharing mode.
+  // `null` means the user hasn't touched the selection yet, in which case the
+  // default selection applies.
+  readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;

@@ -29,6 +29,7 @@ import type {
   ThreadsKey,
   NativeSymbolInfo,
   ProfileIndexTranslationMaps,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -669,6 +670,13 @@ type PublishAction =
       readonly mode: SharingMode;
       readonly slug: keyof CheckedSharingOptions;
       readonly value: boolean;
+    }
+  | {
+      readonly type: 'UPDATE_SOURCE_FILES_TO_SHARE';
+      readonly mode: SharingMode;
+      readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+      // The preset these files come from, or null for edits of the file tree.
+      readonly preset: OfferedSourceSharingPreset | null;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';

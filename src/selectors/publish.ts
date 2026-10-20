@@ -16,15 +16,37 @@ import {
   getHasJSTracingArgumentValues,
   getThreads,
   getMarkerSchemaByName,
+  getStackTable,
+  getIdleCategoryIndex,
 } from './profile';
 import {
   sanitizePII,
   getShouldSanitizeByDefault as getShouldSanitizeByDefaultImpl,
   type SanitizeProfileResult,
 } from '../profile-logic/sanitize';
+import {
+  buildSourceFileTree,
+  computeShareableSources,
+  computeSourceCodeSharingCandidates,
+  computeSourceCodeSharingFiles,
+  computeSourceCodeSharingStats,
+  computeSourceCodeSharingSummary,
+  computeSourceContentsForSharing,
+  computeSourcesForThreads,
+  computeSourceTreeRootWeights,
+  OFFERED_SOURCE_SHARING_PRESETS,
+  setSharedSourceCode,
+} from '../profile-logic/source-sharing';
+import { getSourceCodeCache } from './code';
 import { ensureExists } from '../utils/types';
 import { formatNumber } from '../utils/format-numbers';
-import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
+import {
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
+  getIsBottomBoxOpen,
+  getSelectedThreadIndexesOrNull,
+  getSourceViewSourceIndex,
+} from './url-state';
 
 import type {
   PublishState,
@@ -40,6 +62,15 @@ import type {
   ThreadIndex,
   CounterIndex,
   SanitizedProfileEncodingState,
+  IndexIntoSourceTable,
+  SourceCodeSharingCandidate,
+  SourceCodeSharingFile,
+  SourceCodeSharingStats,
+  SourceCodeSharingSummary,
+  SourceFileTreeNode,
+  OfferedSourceSharingPreset,
+  SourceSharingPreset,
+  Profile,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -85,6 +116,171 @@ export const getFilenameString: Selector<string> = createSelector(
     // Return the final file name
     return `${product} ${dateString} profile.json`;
   }
+);
+
+const getSourceContentsForSharing: Selector<Map<IndexIntoSourceTable, string>> =
+  createSelector(
+    getProfile,
+    getSourceCodeCache,
+    computeSourceContentsForSharing
+  );
+
+const getSourceCodeSharingCandidates: Selector<SourceCodeSharingCandidate[]> =
+  createSelector(getProfile, computeSourceCodeSharingCandidates);
+
+export const getSourceCodeSharingFiles: Selector<SourceCodeSharingFile[]> =
+  createSelector(
+    getSourceCodeSharingCandidates,
+    getSourceContentsForSharing,
+    computeSourceCodeSharingFiles
+  );
+
+// The files the user can pick: downloaded, or fetchable when sharing.
+const getShareableSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
+  createSelector(getSourceCodeSharingFiles, computeShareableSources);
+
+export const getSourceCodeSharingStats: Selector<SourceCodeSharingStats> =
+  createSelector(getSourceCodeSharingFiles, computeSourceCodeSharingStats);
+
+export const getHasSourceCodeToShare: Selector<boolean> = createSelector(
+  getSourceCodeSharingFiles,
+  (files) => files.length > 0
+);
+
+export const getSourceFilesForSelectedThreads: Selector<
+  ReadonlySet<IndexIntoSourceTable>
+> = createSelector(
+  getProfile,
+  // A navigation can replace the UrlState and drop the thread selection.
+  getSelectedThreadIndexesOrNull,
+  getShareableSources,
+  (profile, threadIndexes, shareableSources) =>
+    threadIndexes === null
+      ? new Set<IndexIntoSourceTable>()
+      : computeSourcesForThreads(profile, threadIndexes, shareableSources)
+);
+
+const getSourceTreeRootWeights: Selector<Map<string, number>> = createSelector(
+  getProfile,
+  getStackTable,
+  getSourceCodeSharingCandidates,
+  getIdleCategoryIndex,
+  computeSourceTreeRootWeights
+);
+
+export const getSourceFileTree: Selector<SourceFileTreeNode[]> = createSelector(
+  getSourceCodeSharingFiles,
+  getSourceTreeRootWeights,
+  buildSourceFileTree
+);
+
+// The "Current file" preset: the file in the source view, if it's shareable.
+export const getSourceFilesForCurrentFile: Selector<
+  ReadonlySet<IndexIntoSourceTable>
+> = createSelector(
+  getShareableSources,
+  getSourceViewSourceIndex,
+  (shareableSources, sourceViewSourceIndex) =>
+    sourceViewSourceIndex !== null &&
+    shareableSources.has(sourceViewSourceIndex)
+      ? new Set([sourceViewSourceIndex])
+      : new Set<IndexIntoSourceTable>()
+);
+
+// The selection the panel starts from. The source view keeps its file after
+// the bottom box is closed, so only start from it while it's still visible.
+const _getDefaultSourceFilesToShare: Selector<
+  ReadonlySet<IndexIntoSourceTable>
+> = createSelector(
+  getIsBottomBoxOpen,
+  getSourceFilesForCurrentFile,
+  (isBottomBoxOpen, currentFileSelection) =>
+    isBottomBoxOpen ? currentFileSelection : new Set<IndexIntoSourceTable>()
+);
+
+export const getSourceFilesToShare: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) =>
+      getPublishState(state).sourceFileSelection[mode]?.sourceIndexes ?? null,
+    getShareableSources,
+    _getDefaultSourceFilesToShare,
+    (storedSelection, shareableSources, defaultSelection) => {
+      if (storedSelection === null) {
+        return defaultSelection;
+      }
+      const selection = new Set<IndexIntoSourceTable>();
+      for (const sourceIndex of storedSelection) {
+        if (shareableSources.has(sourceIndex)) {
+          selection.add(sourceIndex);
+        }
+      }
+      return selection;
+    }
+  )
+);
+
+function _areSetsEqual<T>(a: ReadonlySet<T>, b: ReadonlySet<T>): boolean {
+  if (a.size !== b.size) {
+    return false;
+  }
+  for (const value of a) {
+    if (!b.has(value)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// The files behind every preset, whether offered or not.
+export const getSourceFilesForPresets: Selector<
+  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>
+> = createSelector(
+  getSourceFilesForCurrentFile,
+  getSourceFilesForSelectedThreads,
+  getShareableSources,
+  (currentFile, selectedThreads, allFiles) => ({
+    'current-file': currentFile,
+    'selected-threads': selectedThreads,
+    'all-files': allFiles,
+  })
+);
+
+// The offered preset that the selection matches, or 'custom'. Presets that
+// select nothing never match. When several presets select the same files, the
+// one the user picked wins, then the narrowest one.
+export const getActiveSourceSharingPreset: DangerousSelectorWithArguments<
+  SourceSharingPreset,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceFilesToShare(state, mode),
+    getSourceFilesForPresets,
+    (state: State) =>
+      getPublishState(state).sourceFileSelection[mode]?.preset ?? null,
+    (selection, filesForPresets, pickedPreset): SourceSharingPreset => {
+      const matches = (preset: OfferedSourceSharingPreset) =>
+        filesForPresets[preset].size > 0 &&
+        _areSetsEqual(selection, filesForPresets[preset]);
+      if (pickedPreset !== null && matches(pickedPreset)) {
+        return pickedPreset;
+      }
+      return OFFERED_SOURCE_SHARING_PRESETS.find(matches) ?? 'custom';
+    }
+  )
+);
+
+export const getSourceCodeSharingSummary: DangerousSelectorWithArguments<
+  SourceCodeSharingSummary,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    getSourceContentsForSharing,
+    (state: State) => getSourceFilesToShare(state, mode),
+    computeSourceCodeSharingSummary
+  )
 );
 
 export const getRemoveProfileInformation: DangerousSelectorWithArguments<
@@ -251,6 +447,21 @@ function getTracedValuesBuffersForAllThreads(
 }
 
 /**
+ * The profile with only the picked source contents in it. This is kept out of
+ * `sanitizePII` because it doesn't need reindexing, so it shouldn't turn an
+ * unsanitized upload into a sanitized one.
+ */
+const _getProfileToShare: DangerousSelectorWithArguments<Profile, SharingMode> =
+  _perSharingMode((mode) =>
+    createSelector(
+      getProfile,
+      getSourceContentsForSharing,
+      (state: State) => getSourceFilesToShare(state, mode),
+      setSharedSourceCode
+    )
+  );
+
+/**
  * Run the profile sanitization step, and also get information about how any
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
@@ -260,7 +471,7 @@ export const getSanitizedProfile: DangerousSelectorWithArguments<
   SharingMode
 > = _perSharingMode((mode) =>
   createSelector(
-    getProfile,
+    (state: State) => _getProfileToShare(state, mode),
     getDerivedMarkerInfoForAllThreads,
     getTracedValuesBuffersForAllThreads,
     (state: State) => getRemoveProfileInformation(state, mode),
