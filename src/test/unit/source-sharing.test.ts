@@ -19,6 +19,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
+import { getEmptySourceLocationTable } from 'firefox-profiler/profile-logic/data-structures';
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 import type {
@@ -349,6 +350,64 @@ describe('computeSourceCodeSharingCandidates', function () {
         'bar.js',
       ],
       ['C:', 'Users', 'me', 'win.cpp'],
+    ]);
+  });
+
+  it('puts source-mapped files under the site that served their bundle', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:https://example.com/assets/app.js]
+      B[file:https://example.com/assets/app.js]
+      C[file:https://example.com/assets/app.js]
+      D[file:https://example.com/assets/app.js]
+    `);
+    const [{ A, B, C, D }] = funcNamesDictPerThread;
+    const { funcTable, sources, stringArray } = profile.shared;
+
+    // Pretend a source map resolved these funcs to the shapes source maps
+    // commonly produce. The paths are kept as they are, under the site.
+    const addOriginal = (funcIndex: number, filename: string) => {
+      const sourceIndex = sources.length++;
+      sources.id.push(null);
+      sources.filename.push(stringArray.push(filename) - 1);
+      sources.startLine.push(1);
+      sources.startColumn.push(1);
+      sources.sourceMapURL.push(null);
+      sources.content.push(null);
+      const table = ensureExists(profile.shared.sourceLocationTable);
+      table.source.push(sourceIndex);
+      table.line.push(1);
+      table.column.push(1);
+      funcTable.flags[funcIndex] |= FuncFlag.HasOriginalLocation;
+      funcTable.originalLocation[funcIndex] = table.length++;
+    };
+    profile.shared.sourceLocationTable = getEmptySourceLocationTable();
+    addOriginal(A, '../node_modules/react-dom/cjs/react-dom.production.js');
+    addOriginal(B, 'webpack:///./src/components/App.tsx');
+    addOriginal(C, 'webpack://my-app/./src/index.js');
+    // A file that is a web URL on its own already says where it came from.
+    addOriginal(D, 'https://cdn.example.org/lib.js');
+
+    const candidates = computeSourceCodeSharingCandidates(profile);
+    expect(candidates.map((c) => c.pathSegments)).toEqual([
+      ['https://example.com', 'assets', 'app.js'],
+      [
+        'https://example.com',
+        '..',
+        'node_modules',
+        'react-dom',
+        'cjs',
+        'react-dom.production.js',
+      ],
+      [
+        'https://example.com',
+        'webpack://',
+        '.',
+        'src',
+        'components',
+        'App.tsx',
+      ],
+      ['https://example.com', 'webpack://my-app', '.', 'src', 'index.js'],
+      ['https://cdn.example.org', 'lib.js'],
     ]);
   });
 
