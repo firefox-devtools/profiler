@@ -23,7 +23,11 @@ import {
   persistUploadedProfileInformationToDb,
   retrieveUploadedProfileInformationFromDb,
 } from 'firefox-profiler/app-logic/uploaded-profiles-db';
-import { updateUrlState } from 'firefox-profiler/actions/app';
+import {
+  updateUrlState,
+  updateBrowserConnectionStatus,
+} from 'firefox-profiler/actions/app';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import {
   changeSelectedThreads,
   updateBottomBoxContentsAndMaybeOpen,
@@ -751,7 +755,7 @@ describe('app/MenuButtons', function () {
         'gfx/nsFoo.cpp',
         'opt/lib',
       ]);
-      // Nothing is downloaded for these, so there's nothing to pick.
+      // Without a browser connection nothing can fetch these files.
       const missingCheckbox = getSourceTreeCheckbox(OTHER_SOURCE_FILE);
       expect(missingCheckbox).toBeDisabled();
       expect(getSourceTreeCheckbox('opt/lib')).toBeDisabled();
@@ -786,6 +790,103 @@ describe('app/MenuButtons', function () {
       expect(getSourceCodeSummaryLines()).toEqual([
         '1 file, 25 B uncompressed.',
       ]);
+    });
+
+    it('downloads picked files from the browser on request', async () => {
+      const { profile } = createPartlyDownloadedSourceCodeProfile();
+      // The browser knows the second file as a JS source.
+      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      const getJSSource = jest.fn(async () => 'void nsFoo::Bar() {}');
+      const browserConnection = {
+        getJSSource,
+        querySymbolicationApi: async () => {
+          throw new Error('No source for this address');
+        },
+      } as unknown as BrowserConnection;
+      const {
+        dispatch,
+        getSourceTreeCheckbox,
+        getSourceFileSizes,
+        getSourceCodeSummaryLines,
+        enableSourceCode,
+        openPublishPanel,
+      } = setupForPublish(profile);
+      act(() => {
+        dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+      });
+      await openPublishPanel();
+      enableSourceCode();
+
+      // Only the file the browser can serve is pickable.
+      const fetchableCheckbox = getSourceTreeCheckbox(OTHER_SOURCE_FILE);
+      expect(fetchableCheckbox).toBeEnabled();
+      expect(getSourceTreeCheckbox('opt/lib')).toBeDisabled();
+      expect(getSourceFileSizes()).toEqual([
+        '25 B',
+        '25 B',
+        'Not downloaded',
+        'Unavailable',
+      ]);
+
+      // Turning the option on picked every pickable file, this one included.
+      expect(fetchableCheckbox).toBeChecked();
+      expect(getSourceCodeSummaryLines()).toEqual([
+        '1 file, 25 B uncompressed.',
+        '1 file will be downloaded when sharing.',
+      ]);
+
+      fireFullClick(screen.getByText('Download now'));
+      await screen.findByText('20 B');
+      expect(getJSSource).toHaveBeenCalledWith(
+        'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41'
+      );
+      expect(getSourceFileSizes()).toEqual([
+        '45 B',
+        '25 B',
+        '20 B',
+        'Unavailable',
+      ]);
+      expect(getSourceCodeSummaryLines()).toEqual([
+        '2 files, 45 B uncompressed.',
+      ]);
+    });
+
+    it('says why the upload stopped when a picked file cannot be downloaded', async () => {
+      const { profile } = createPartlyDownloadedSourceCodeProfile();
+      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      const browserConnection = {
+        getJSSource: async () => {
+          throw new Error('No such source');
+        },
+        querySymbolicationApi: async () => {
+          throw new Error('No source for this address');
+        },
+      } as unknown as BrowserConnection;
+      const { dispatch, getPanelForm, enableSourceCode, openPublishPanel } =
+        setupForPublish(profile);
+      act(() => {
+        dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+      });
+      await openPublishPanel();
+      enableSourceCode();
+      fireEvent.submit(getPanelForm());
+
+      fireFullClick(await screen.findByText('Error uploading'));
+      expect(
+        await screen.findByText(
+          /of the picked source files could not be downloaded. It has been left out/
+        )
+      ).toBeInTheDocument();
     });
 
     it('disables the option until at least one file has been downloaded', async () => {

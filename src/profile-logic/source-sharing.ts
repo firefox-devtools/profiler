@@ -12,6 +12,7 @@ import { getOriginalSourceForFrame } from 'firefox-profiler/profile-logic/profil
 
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
+  AddressProof,
   IndexIntoFuncTable,
   IndexIntoSourceLocationTable,
   IndexIntoSourceTable,
@@ -253,6 +254,32 @@ export function computeSourcesForThreads(
 }
 
 /**
+ * The sources whose contents could be fetched from here. Native files go
+ * through the symbolication API, which needs an address proof and either the
+ * browser connection or a local symbol server. JS files come straight from
+ * the browser, by their source id.
+ */
+export function computeFetchableSources(
+  profile: Profile,
+  addressProofs: Map<IndexIntoSourceTable, AddressProof>,
+  hasBrowserConnection: boolean,
+  hasLocalSymbolServer: boolean
+): Set<IndexIntoSourceTable> {
+  const fetchable = new Set<IndexIntoSourceTable>();
+  const { sources } = profile.shared;
+  const canUseSourceApi = hasBrowserConnection || hasLocalSymbolServer;
+  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    if (
+      (canUseSourceApi && addressProofs.has(sourceIndex)) ||
+      (hasBrowserConnection && sources.id[sourceIndex] !== null)
+    ) {
+      fetchable.add(sourceIndex);
+    }
+  }
+  return fetchable;
+}
+
+/**
  * The total (not self) sample weight of each source across all threads,
  * counting a source once per stack even if it appears several times. Only
  * meaningful relative to each other. Sources which are never on a sampled
@@ -373,26 +400,34 @@ export function computeSourceCodeSharingCandidates(
 
 /**
  * The files worth offering in the publish panel: downloaded ones first, then
- * the rest, each in candidate order. Files that anybody can download are left
- * out, unless their contents came from the user's own machine, in which case
- * the public URL may well not work.
+ * the ones that could be fetched, then the rest, each in candidate order.
+ * Files that anybody can download are left out, unless their contents came
+ * from the user's own machine, in which case the public URL may well not work.
  */
 export function computeSourceCodeSharingFiles(
   candidates: SourceCodeSharingCandidate[],
-  contents: Map<IndexIntoSourceTable, SourceCodeContents>
+  contents: Map<IndexIntoSourceTable, SourceCodeContents>,
+  fetchableSources: ReadonlySet<IndexIntoSourceTable>,
+  failedSources: ReadonlySet<IndexIntoSourceTable>
 ): SourceCodeSharingFile[] {
   const byAvailability: Record<
     SourceCodeAvailability,
     SourceCodeSharingFile[]
-  > = { DOWNLOADED: [], UNAVAILABLE: [] };
+  > = { DOWNLOADED: [], FETCHABLE: [], FAILED: [], UNAVAILABLE: [] };
   for (const candidate of candidates) {
     const { sourceIndex } = candidate;
     const fileContents = contents.get(sourceIndex);
     if (candidate.isPubliclyDownloadable && fileContents?.origin !== 'LOCAL') {
       continue;
     }
-    const availability: SourceCodeAvailability =
-      fileContents !== undefined ? 'DOWNLOADED' : 'UNAVAILABLE';
+    let availability: SourceCodeAvailability = 'UNAVAILABLE';
+    if (fileContents !== undefined) {
+      availability = 'DOWNLOADED';
+    } else if (failedSources.has(sourceIndex)) {
+      availability = 'FAILED';
+    } else if (fetchableSources.has(sourceIndex)) {
+      availability = 'FETCHABLE';
+    }
     byAvailability[availability].push({
       sourceIndex,
       path: candidate.path,
@@ -401,7 +436,12 @@ export function computeSourceCodeSharingFiles(
       byteCount: fileContents !== undefined ? fileContents.code.length : null,
     });
   }
-  return [...byAvailability.DOWNLOADED, ...byAvailability.UNAVAILABLE];
+  return [
+    ...byAvailability.DOWNLOADED,
+    ...byAvailability.FETCHABLE,
+    ...byAvailability.FAILED,
+    ...byAvailability.UNAVAILABLE,
+  ];
 }
 
 export function computeSourceCodeSharingStats(
@@ -410,6 +450,7 @@ export function computeSourceCodeSharingStats(
 ): SourceCodeSharingStats {
   let downloadedFileCount = 0;
   let downloadedByteCount = 0;
+  let fetchableFileCount = 0;
   let unavailableFileCount = 0;
   for (const file of files) {
     switch (file.availability) {
@@ -417,8 +458,13 @@ export function computeSourceCodeSharingStats(
         downloadedFileCount++;
         downloadedByteCount += file.byteCount ?? 0;
         break;
+      case 'FETCHABLE':
+        fetchableFileCount++;
+        break;
       case 'UNAVAILABLE':
         unavailableFileCount++;
+        break;
+      case 'FAILED':
         break;
       default:
         throw assertExhaustiveCheck(file.availability);
@@ -428,20 +474,25 @@ export function computeSourceCodeSharingStats(
     fileCount: files.length,
     downloadedFileCount,
     downloadedByteCount,
+    pickableFileCount: downloadedFileCount + fetchableFileCount,
     unavailableFileCount,
     publiclyDownloadableFileCount: candidates.length - files.length,
   };
 }
 
 /**
- * The files the user can pick, which are the downloaded ones.
+ * The files the user can pick: the downloaded ones and the ones that will be
+ * fetched when sharing.
  */
 export function computePickableSources(
   files: SourceCodeSharingFile[]
 ): Set<IndexIntoSourceTable> {
   const pickable = new Set<IndexIntoSourceTable>();
   for (const file of files) {
-    if (file.availability === 'DOWNLOADED') {
+    if (
+      file.availability === 'DOWNLOADED' ||
+      file.availability === 'FETCHABLE'
+    ) {
       pickable.add(file.sourceIndex);
     }
   }
@@ -511,6 +562,7 @@ function _finishTreeNode(
   const sourceIndexes = [];
   let byteCount = 0;
   let downloadedFileCount = 0;
+  let fetchableFileCount = 0;
   for (const file of node.files) {
     switch (file.availability) {
       case 'DOWNLOADED':
@@ -518,6 +570,11 @@ function _finishTreeNode(
         byteCount += file.byteCount ?? 0;
         downloadedFileCount++;
         break;
+      case 'FETCHABLE':
+        sourceIndexes.push(file.sourceIndex);
+        fetchableFileCount++;
+        break;
+      case 'FAILED':
       case 'UNAVAILABLE':
         break;
       default:
@@ -528,6 +585,7 @@ function _finishTreeNode(
     sourceIndexes.push(...child.sourceIndexes);
     byteCount += child.byteCount;
     downloadedFileCount += child.downloadedFileCount;
+    fetchableFileCount += child.fetchableFileCount;
   }
 
   return {
@@ -538,6 +596,7 @@ function _finishTreeNode(
     sourceIndexes,
     byteCount,
     downloadedFileCount,
+    fetchableFileCount,
     children,
   };
 }

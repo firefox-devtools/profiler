@@ -12,8 +12,11 @@ import {
   getRemoveProfileInformation,
   getPrePublishedState,
   getSanitizedProfileEncodingState,
+  getSourceFilesToFetch,
+  getSourceCodeFetchState,
   getSourceFilesForOfferedPresets,
 } from 'firefox-profiler/selectors/publish';
+import { fetchSourceCode } from './code';
 import {
   getDataSource,
   getProfileNameForStorage,
@@ -33,6 +36,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
+import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
@@ -384,6 +388,81 @@ export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
   };
 }
 
+export function cancelSourceCodeFetch(): Action {
+  return { type: 'SOURCE_CODE_FETCH_CANCELLED' };
+}
+
+type SourceCodeFetchResult = {
+  failedCount: number;
+  wasCancelled: boolean;
+};
+
+// How many source files to fetch at once.
+const SOURCE_CODE_FETCH_CONCURRENCY = 6;
+
+/**
+ * Fetch the picked source files whose contents we don't have yet into the
+ * source code cache, so that the shared profile can carry them. This runs
+ * before an upload, and on request from the publish panel.
+ */
+export function fetchSourceFilesToShare(
+  mode: SharingMode
+): ThunkAction<Promise<SourceCodeFetchResult>> {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const sourceIndexes = Array.from(getSourceFilesToFetch(state, mode));
+    if (sourceIndexes.length === 0) {
+      return { failedCount: 0, wasCancelled: false };
+    }
+
+    const { generation } = getSourceCodeFetchState(state);
+    const isCancelled = () =>
+      getSourceCodeFetchState(getState()).generation !== generation;
+    const archiveCache = new Map<string, Promise<Uint8Array>>();
+
+    dispatch({
+      type: 'SOURCE_CODE_FETCH_STARTED',
+      totalCount: sourceIndexes.length,
+    });
+
+    let completedCount = 0;
+    let failedCount = 0;
+    let nextIndex = 0;
+
+    const fetchOne = async (sourceIndex: IndexIntoSourceTable) => {
+      // The outcome goes into the cache even after a cancellation, so that
+      // the source view doesn't show the file as loading forever.
+      const result = await dispatch(fetchSourceCode(sourceIndex, archiveCache));
+      if (result.type === 'ERROR') {
+        failedCount++;
+      }
+      if (!isCancelled()) {
+        completedCount++;
+        dispatch({ type: 'SOURCE_CODE_FETCH_PROGRESS', completedCount });
+      }
+    };
+
+    const worker = async () => {
+      while (nextIndex < sourceIndexes.length && !isCancelled()) {
+        await fetchOne(sourceIndexes[nextIndex++]);
+      }
+    };
+    const workerCount = Math.min(
+      SOURCE_CODE_FETCH_CONCURRENCY,
+      sourceIndexes.length
+    );
+    await Promise.all(Array.from({ length: workerCount }, worker));
+
+    if (isCancelled()) {
+      return { failedCount, wasCancelled: true };
+    }
+    dispatch({ type: 'SOURCE_CODE_FETCH_FINISHED' });
+    // The profile to share has changed, so encode it again.
+    dispatch(encodeSanitizedProfile(mode));
+    return { failedCount, wasCancelled: false };
+  };
+}
+
 /**
  * This function starts the profile sharing process.
  *
@@ -423,14 +502,24 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         // Later on the promise from `startUpload` will get rejected too, and we
         // handle this in the `catch` block.
         dispatch({ type: 'UPLOAD_ABORTED' });
+        dispatch(cancelSourceCodeFetch());
         abortUpload();
       };
       dispatch(uploadCompressionStarted(abortfunction));
 
-      const sanitizedInformation = getSanitizedProfile(
-        prePublishedState,
-        'upload'
+      // Picked source files that haven't been downloaded yet go first, since
+      // the profile to share depends on them.
+      const sourceFetchResult = await dispatch(
+        fetchSourceFilesToShare('upload')
       );
+      if (uploadGeneration !== getUploadGeneration(getState())) {
+        return false;
+      }
+      if (sourceFetchResult.failedCount > 0) {
+        throw new SourceCodeFetchError(sourceFetchResult.failedCount);
+      }
+
+      const sanitizedInformation = getSanitizedProfile(getState(), 'upload');
       const profileEncoding = dispatch(encodeSanitizedProfile('upload'));
       const encodingResult = await profileEncoding.encodingPromise;
 

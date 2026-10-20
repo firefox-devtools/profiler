@@ -8,9 +8,15 @@ import {
   resetUploadState,
   updateSharingOption,
   updateSourceFilesToShare,
+  fetchSourceFilesToShare,
+  cancelSourceCodeFetch,
   revertToPrePublishedState,
 } from '../../actions/publish';
-import { changeSelectedTab } from '../../actions/app';
+import {
+  changeSelectedTab,
+  updateBrowserConnectionStatus,
+} from '../../actions/app';
+import type { BrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { finishLoadingSourceCode } from '../../actions/code';
 import {
   viewProfileFromPathInZipFile,
@@ -25,6 +31,7 @@ import {
   getSourceCodeSharingFiles,
   getHasSourceCodeToShare,
   getSourceCodeSharingStats,
+  getSourceCodeFetchState,
   getSourceFilesForOfferedPresets,
   getUploadPhase,
   getUploadError,
@@ -95,6 +102,7 @@ import type {
 } from 'firefox-profiler/types';
 
 import { decompress } from 'firefox-profiler/utils/gz';
+import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
@@ -671,6 +679,148 @@ describe('attemptToPublish', function () {
       store.dispatch(hideGlobalTrack(0));
       return setupFakeUploadsWithStore(store);
     }
+
+    describe('fetching picked files', function () {
+      const NATIVE_SOURCE = 'void nsDocument::Native() {}';
+
+      // A fake browser connection whose symbolication API serves one file.
+      function makeBrowserConnection(
+        serve: (requestJson: string) => Promise<string>
+      ) {
+        const querySymbolicationApi = jest.fn(
+          async (path: string, requestJson: string) => {
+            if (path !== '/source/v1') {
+              throw new Error(`Unexpected API path ${path}`);
+            }
+            const source = await serve(requestJson);
+            return JSON.stringify({
+              symbolsLastModified: null,
+              sourceLastModified: null,
+              file: JSON.parse(requestJson).file,
+              source,
+            });
+          }
+        );
+        return {
+          querySymbolicationApi,
+          browserConnection: {
+            querySymbolicationApi,
+            getJSSource: async () => {
+              throw new Error('Not a JS source');
+            },
+          } as unknown as BrowserConnection,
+        };
+      }
+
+      function setupWithBrowserConnection(
+        serve: (requestJson: string) => Promise<string> = async () =>
+          NATIVE_SOURCE
+      ) {
+        // A native frame with an address, which is what the symbolication
+        // API needs to find the file.
+        const { profile } = getProfileFromTextSamples(
+          `A[file:${LOCAL_FILE}][lib:xul][address:1234]`
+        );
+        const store = storeWithProfile(profile);
+        const { querySymbolicationApi, browserConnection } =
+          makeBrowserConnection(serve);
+        store.dispatch(
+          updateBrowserConnectionStatus({
+            status: 'ESTABLISHED',
+            browserConnection,
+          })
+        );
+        return { ...setupFakeUploadsWithStore(store), querySymbolicationApi };
+      }
+
+      it('offers a native file for fetching once the browser connection is there', function () {
+        const { getState } = setupWithBrowserConnection();
+        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+          { path: LOCAL_FILE, availability: 'FETCHABLE', byteCount: null },
+        ]);
+        expect(offeredPresets(getState())).toEqual(['all-files']);
+      });
+
+      it('downloads the picked files on request', async function () {
+        const { dispatch, getState, querySymbolicationApi } =
+          setupWithBrowserConnection();
+        dispatch(updateSourceFilesToShare('download', new Set([0])));
+
+        const result = await dispatch(fetchSourceFilesToShare('download'));
+        expect(result).toEqual({ failedCount: 0, wasCancelled: false });
+        expect(querySymbolicationApi).toHaveBeenCalledTimes(1);
+        expect(JSON.parse(querySymbolicationApi.mock.calls[0][1])).toEqual({
+          debugName: 'xul',
+          debugId: expect.any(String),
+          moduleOffset: '0x1234',
+          file: LOCAL_FILE,
+        });
+        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+          { availability: 'DOWNLOADED', byteCount: NATIVE_SOURCE.length },
+        ]);
+        expect(getSourceCodeFetchState(getState())).toMatchObject({
+          isFetching: false,
+          totalCount: 1,
+          completedCount: 1,
+        });
+        expect(
+          getSanitizedProfile(getState(), 'download').profile.shared.sources
+            .content
+        ).toEqual([NATIVE_SOURCE]);
+      });
+
+      it('downloads the picked files before uploading', async function () {
+        const setupResult = setupWithBrowserConnection();
+        setupResult.dispatch(updateSourceFilesToShare('upload', new Set([0])));
+
+        expect(await getSourceContentsOfUploadedProfile(setupResult)).toEqual(
+          new Map([[LOCAL_FILE, NATIVE_SOURCE]])
+        );
+      });
+
+      it('stops the upload when a picked file cannot be downloaded', async function () {
+        const { dispatch, getState } = setupWithBrowserConnection(async () => {
+          throw new Error('No such file');
+        });
+        dispatch(updateSourceFilesToShare('upload', new Set([0])));
+
+        await dispatch(attemptToPublish());
+        expect(getUploadPhase(getState())).toBe('error');
+        const error = getUploadError(getState());
+        expect(error).toBeInstanceOf(SourceCodeFetchError);
+        expect(error).toHaveProperty('failedCount', 1);
+        // The file is marked as failed and drops out of the selection, so
+        // that the next attempt goes through.
+        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+          { availability: 'FAILED' },
+        ]);
+        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
+      });
+
+      it('can be cancelled', async function () {
+        let resolveFetch: (source: string) => void = () => {};
+        const { dispatch, getState } = setupWithBrowserConnection(
+          () => new Promise((resolve) => (resolveFetch = resolve))
+        );
+        dispatch(updateSourceFilesToShare('download', new Set([0])));
+
+        const fetchPromise = dispatch(fetchSourceFilesToShare('download'));
+        expect(getSourceCodeFetchState(getState()).isFetching).toBe(true);
+        dispatch(cancelSourceCodeFetch());
+        expect(getSourceCodeFetchState(getState()).isFetching).toBe(false);
+
+        // The late result still lands in the cache, so the file isn't stuck
+        // as loading, but the fetch reports the cancellation.
+        resolveFetch(NATIVE_SOURCE);
+        expect(await fetchPromise).toEqual({
+          failedCount: 0,
+          wasCancelled: true,
+        });
+        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+          { availability: 'DOWNLOADED' },
+        ]);
+      });
+    });
 
     it('forgets the picked files once the sources are reindexed', async function () {
       const { dispatch, getState, resolveUpload, assertUploadSuccess } =

@@ -245,6 +245,7 @@ export type PublishState = {
   // default selection applies.
   readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  readonly sourceCodeFetch: SourceCodeFetchState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
@@ -257,6 +258,18 @@ export type SourceFileSelection = {
   // can select the same files, so the files alone can't tell which one to show
   // as checked.
   readonly preset: OfferedSourceSharingPreset | null;
+};
+
+/**
+ * The progress of fetching the source files picked in the publish panel, which
+ * happens when sharing or on request.
+ */
+export type SourceCodeFetchState = {
+  readonly isFetching: boolean;
+  readonly totalCount: number;
+  readonly completedCount: number;
+  // Bumped when a fetch is cancelled, so that the in-flight one can tell.
+  readonly generation: number;
 };
 
 export type ZippedProfilesState = {

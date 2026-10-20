@@ -28,10 +28,12 @@ import {
   getShouldSanitizeByDefault,
   getSanitizedProfileEncodingState,
   getHasSourceCodeToShare,
+  getSourceCodeFetchState,
 } from 'firefox-profiler/selectors/publish';
 import { PublishSourceCodeSection } from './PublishSourceCode';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
 import explicitConnect, {
@@ -42,6 +44,7 @@ import type {
   Profile,
   CheckedSharingOptions,
   SharingMode,
+  SourceCodeFetchState,
   StartEndRange,
   UploadPhase,
   SanitizedProfileEncodingState,
@@ -63,6 +66,7 @@ type StateProps = {
   readonly profileContainsPrivateBrowsingInformation: boolean;
   readonly profileHasJSTracingArgumentValues: boolean;
   readonly hasSourceCodeToShare: boolean;
+  readonly sourceCodeFetchState: SourceCodeFetchState;
   readonly checkedSharingOptions: CheckedSharingOptions;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
@@ -311,6 +315,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       abortFunction,
       downloadFileName,
       sanitizedProfileEncodingState,
+      sourceCodeFetchState,
     } = this.props;
 
     return (
@@ -325,7 +330,19 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             </Localized>
           </div>
           <div className="publishPanelUploadPercentage">
-            {uploadProgressString}
+            {sourceCodeFetchState.isFetching ? (
+              <Localized
+                id="MenuButtons--publish--source-code-downloading"
+                vars={{
+                  completedCount: sourceCodeFetchState.completedCount,
+                  totalCount: sourceCodeFetchState.totalCount,
+                }}
+              >
+                <span />
+              </Localized>
+            ) : (
+              uploadProgressString
+            )}
           </div>
           <div className="publishPanelUploadBar">
             <div
@@ -368,6 +385,17 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     } else if (typeof error === 'string') {
       message = error;
     }
+    const errorDetails =
+      error instanceof SourceCodeFetchError ? (
+        <Localized
+          id="MenuButtons--publish--source-code-fetch-failed"
+          vars={{ failedCount: error.failedCount }}
+        >
+          <span>{message}</span>
+        </Localized>
+      ) : (
+        message
+      );
 
     return (
       <div
@@ -390,7 +418,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             </Localized>
           </button>
         </div>
-        <div className="publishPanelError">{message}</div>
+        <div className="publishPanelError">{errorDetails}</div>
       </div>
     );
   }
@@ -428,6 +456,7 @@ export const PublishPanel = explicitConnect<
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
     hasSourceCodeToShare: getHasSourceCodeToShare(state),
+    sourceCodeFetchState: getSourceCodeFetchState(state),
     checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
     downloadFileName: getFilenameString(state),
     sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),

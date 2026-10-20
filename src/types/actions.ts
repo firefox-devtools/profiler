@@ -662,6 +662,13 @@ type PublishAction =
       readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
       readonly preset: OfferedSourceSharingPreset | null;
     }
+  | { readonly type: 'SOURCE_CODE_FETCH_STARTED'; readonly totalCount: number }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_PROGRESS';
+      readonly completedCount: number;
+    }
+  | { readonly type: 'SOURCE_CODE_FETCH_FINISHED' }
+  | { readonly type: 'SOURCE_CODE_FETCH_CANCELLED' }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly sanitizedProfile: Profile;

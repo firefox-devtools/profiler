@@ -1,7 +1,10 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import { getProfile } from 'firefox-profiler/selectors/profile';
+import {
+  getProfile,
+  getSourceAddressProofs,
+} from 'firefox-profiler/selectors/profile';
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { getSymbolServerUrl } from 'firefox-profiler/selectors/url-state';
 import { getSourceCodeCacheGeneration } from 'firefox-profiler/selectors/code';
@@ -11,7 +14,6 @@ import {
 } from 'firefox-profiler/utils/fetch-source';
 import { RegularExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { findAddressProofForFile } from 'firefox-profiler/profile-logic/profile-data';
 import type {
   Action,
   ThunkAction,
@@ -107,7 +109,7 @@ export function fetchSourceCode(
       stringArray[sources.filename[sourceIndex]],
       sources.id[sourceIndex],
       getSymbolServerUrl(state),
-      findAddressProofForFile(getProfile(state), sourceIndex),
+      getSourceAddressProofs(state).get(sourceIndex) ?? null,
       archiveCache,
       delegate
     );

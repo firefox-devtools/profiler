@@ -4,6 +4,7 @@
 
 import {
   buildSourceFileTree,
+  computeFetchableSources,
   computePickableSources,
   computeSourceCodeSharingCandidates,
   computeSourceCodeSharingFiles,
@@ -12,6 +13,7 @@ import {
   computeSourcesForThreads,
   computeStackToSource,
 } from '../../profile-logic/source-sharing';
+import { computeSourceAddressProofs } from '../../profile-logic/profile-data';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/types';
 import { getEmptySourceLocationTable } from '../../profile-logic/data-structures';
@@ -385,13 +387,62 @@ describe('computeSourceCodeSharingCandidates', function () {
   });
 });
 
-describe('computeSourceCodeSharingFiles', function () {
-  it('tells the files we have from the ones we do not', function () {
+describe('computeFetchableSources', function () {
+  function setupNativeAndJs() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A[file:/src/a.cpp]  B[file:/src/b.cpp]
+      A[file:/src/a.cpp][lib:xul][address:1234]
+      B[file:https://example.com/app.js]
+      C[file:/src/c.cpp]
     `);
-    const [{ B }] = funcNamesDictPerThread;
-    const sourceB = ensureExists(profile.shared.funcTable.source[B]);
+    const [{ A, B, C }] = funcNamesDictPerThread;
+    const { funcTable, sources } = profile.shared;
+    const native = ensureExists(funcTable.source[A]);
+    const js = ensureExists(funcTable.source[B]);
+    const unprovable = ensureExists(funcTable.source[C]);
+    // The browser knows this JS source by its id.
+    sources.id[js] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+    return {
+      profile,
+      proofs: computeSourceAddressProofs(profile),
+      native,
+      js,
+      unprovable,
+    };
+  }
+
+  it('can fetch native files through the API and JS files from the browser', function () {
+    const { profile, proofs, native, js } = setupNativeAndJs();
+    expect(computeFetchableSources(profile, proofs, true, false)).toEqual(
+      new Set([native, js])
+    );
+  });
+
+  it('only gets native files from a local symbol server', function () {
+    const { profile, proofs, native } = setupNativeAndJs();
+    expect(computeFetchableSources(profile, proofs, false, true)).toEqual(
+      new Set([native])
+    );
+  });
+
+  it('can fetch nothing without a browser connection or a local symbol server', function () {
+    const { profile, proofs } = setupNativeAndJs();
+    expect(computeFetchableSources(profile, proofs, false, false)).toEqual(
+      new Set()
+    );
+  });
+});
+
+describe('computeSourceCodeSharingFiles', function () {
+  const NONE: ReadonlySet<IndexIntoSourceTable> = new Set();
+
+  it('tells fetchable, failed and unavailable files apart, in that order', function () {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:/src/a.cpp]  B[file:/src/b.cpp]  C[file:/src/c.cpp]  D[file:/src/d.cpp]
+    `);
+    const [{ B, C, D }] = funcNamesDictPerThread;
+    const { funcTable } = profile.shared;
+    const sourceOf = (funcIndex: number) =>
+      ensureExists(funcTable.source[funcIndex]);
     const candidates = computeSourceCodeSharingCandidates(
       profile,
       computeStackToSource(profile)
@@ -399,19 +450,29 @@ describe('computeSourceCodeSharingFiles', function () {
 
     const files = computeSourceCodeSharingFiles(
       candidates,
-      computeSourceContentsForSharing(profile, availableCode([[sourceB, 'b']]))
+      computeSourceContentsForSharing(
+        profile,
+        availableCode([[sourceOf(D), 'd']])
+      ),
+      new Set([sourceOf(B)]),
+      new Set([sourceOf(C)])
     );
     expect(
       files.map((file) => [file.path, file.availability, file.byteCount])
     ).toEqual([
-      ['/src/b.cpp', 'DOWNLOADED', 1],
+      ['/src/d.cpp', 'DOWNLOADED', 1],
+      ['/src/b.cpp', 'FETCHABLE', null],
+      ['/src/c.cpp', 'FAILED', null],
       ['/src/a.cpp', 'UNAVAILABLE', null],
     ]);
-    expect(computePickableSources(files)).toEqual(new Set([sourceB]));
+    expect(computePickableSources(files)).toEqual(
+      new Set([sourceOf(D), sourceOf(B)])
+    );
     expect(computeSourceCodeSharingStats(candidates, files)).toEqual({
-      fileCount: 2,
+      fileCount: 4,
       downloadedFileCount: 1,
       downloadedByteCount: 1,
+      pickableFileCount: 2,
       unavailableFileCount: 1,
       publiclyDownloadableFileCount: 0,
     });
@@ -420,7 +481,9 @@ describe('computeSourceCodeSharingFiles', function () {
   it('lists files we have not downloaded, without a size', function () {
     const { candidates, localSourceIndex } = setup();
 
-    expect(computeSourceCodeSharingFiles(candidates, new Map())).toEqual([
+    expect(
+      computeSourceCodeSharingFiles(candidates, new Map(), NONE, NONE)
+    ).toEqual([
       {
         sourceIndex: localSourceIndex,
         path: LOCAL_FILE,
@@ -449,7 +512,7 @@ describe('computeSourceCodeSharingFiles', function () {
 
     expect(filePaths(candidates)).toEqual(['/src/b.cpp', '/src/a.cpp']);
     expect(
-      filePaths(computeSourceCodeSharingFiles(candidates, contents))
+      filePaths(computeSourceCodeSharingFiles(candidates, contents, NONE, NONE))
     ).toEqual(['/src/a.cpp', '/src/b.cpp']);
   });
 
@@ -460,7 +523,12 @@ describe('computeSourceCodeSharingFiles', function () {
       availableCode([[localSourceIndex, 'int main() {}']])
     );
 
-    const files = computeSourceCodeSharingFiles(candidates, contents);
+    const files = computeSourceCodeSharingFiles(
+      candidates,
+      contents,
+      NONE,
+      NONE
+    );
     expect(files[0].byteCount).toBe('int main() {}'.length);
   });
 
@@ -473,7 +541,7 @@ describe('computeSourceCodeSharingFiles', function () {
     );
 
     expect(
-      filePaths(computeSourceCodeSharingFiles(candidates, contents))
+      filePaths(computeSourceCodeSharingFiles(candidates, contents, NONE, NONE))
     ).toEqual([LOCAL_FILE]);
   });
 
@@ -487,7 +555,12 @@ describe('computeSourceCodeSharingFiles', function () {
     );
 
     // The downloaded file comes first, however the candidates are ordered.
-    const files = computeSourceCodeSharingFiles(candidates, contents);
+    const files = computeSourceCodeSharingFiles(
+      candidates,
+      contents,
+      NONE,
+      NONE
+    );
     expect(filePaths(files)).toEqual([
       'widget/cocoa/nsAppShell.mm',
       LOCAL_FILE,
@@ -550,19 +623,28 @@ describe('buildSourceFileTree', function () {
     expect(formatTree(tree)).toEqual(['src/thing', '  nested.cpp']);
   });
 
-  it('does not let files we have no contents for be picked', function () {
+  it('lets fetchable files be picked, but not unavailable ones', function () {
     const tree = buildSourceFileTree(
-      makeFiles(['/src/a.cpp', '/src/b.cpp'], { '/src/b.cpp': 'UNAVAILABLE' })
+      makeFiles(['/src/a.cpp', '/src/b.cpp', '/src/c.cpp'], {
+        '/src/b.cpp': 'FETCHABLE',
+        '/src/c.cpp': 'UNAVAILABLE',
+      })
     );
     const [src] = tree;
     expect(src).toMatchObject({
-      sourceIndexes: [0],
+      sourceIndexes: [0, 1],
       byteCount: 1,
       downloadedFileCount: 1,
+      fetchableFileCount: 1,
       availability: null,
     });
     expect(src.children[1]).toMatchObject({
       label: 'b.cpp',
+      availability: 'FETCHABLE',
+      sourceIndexes: [1],
+    });
+    expect(src.children[2]).toMatchObject({
+      label: 'c.cpp',
       availability: 'UNAVAILABLE',
       sourceIndexes: [],
     });

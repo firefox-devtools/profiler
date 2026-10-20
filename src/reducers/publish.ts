@@ -14,6 +14,7 @@ import type {
   Reducer,
   State,
   SanitizedProfileEncodingState,
+  SourceCodeFetchState,
   SourceFileSelection,
 } from 'firefox-profiler/types';
 
@@ -286,10 +287,40 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
   }
 };
 
+const sourceCodeFetch: Reducer<SourceCodeFetchState> = (
+  state = {
+    isFetching: false,
+    totalCount: 0,
+    completedCount: 0,
+    generation: 0,
+  },
+  action
+) => {
+  switch (action.type) {
+    case 'SOURCE_CODE_FETCH_STARTED':
+      return {
+        ...state,
+        isFetching: true,
+        totalCount: action.totalCount,
+        completedCount: 0,
+      };
+    case 'SOURCE_CODE_FETCH_PROGRESS':
+      return { ...state, completedCount: action.completedCount };
+    case 'SOURCE_CODE_FETCH_FINISHED':
+      return { ...state, isFetching: false };
+    case 'SOURCE_CODE_FETCH_CANCELLED':
+    case 'PROFILE_LOADED':
+      return { ...state, isFetching: false, generation: state.generation + 1 };
+    default:
+      return state;
+  }
+};
+
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
   sourceFileSelection,
   sanitizedProfileEncodingState,
+  sourceCodeFetch,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,

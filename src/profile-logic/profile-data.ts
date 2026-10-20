@@ -4793,6 +4793,28 @@ export function findAddressProofForFile(
 }
 
 /**
+ * `findAddressProofForFile` for every source at once, in one pass over the
+ * frame table.
+ */
+export function computeSourceAddressProofs(
+  profile: Profile
+): Map<IndexIntoSourceTable, AddressProof> {
+  const { frameTable, funcTable } = profile.shared;
+  const proofs = new Map<IndexIntoSourceTable, AddressProof>();
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+    const sourceIndex = _getAddressProvenSource(
+      frameTable,
+      funcTable,
+      frameIndex
+    );
+    if (sourceIndex !== null && !proofs.has(sourceIndex)) {
+      proofs.set(sourceIndex, _getAddressProofForFrame(profile, frameIndex));
+    }
+  }
+  return proofs;
+}
+
+/**
  * Calculate a lower bound for the function size, in bytes, of a native symbol.
  * This is used when the symbol server does not return a size for a function.
  * We need to know the size when we want to show assembly code for the function,

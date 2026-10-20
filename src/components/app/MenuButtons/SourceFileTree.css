@@ -125,6 +125,11 @@
   margin: 0;
 }
 
+.publishPanelSourceCodeStatus > .photon-button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
 .publishPanelSourceCodeInfoIcon {
   width: 14px;
   height: 14px;
