@@ -14,6 +14,18 @@
   --codeview-linenum-foreground-color: ##aaa;
   --codeview-nonzero-background-color: #edf6ff;
   --codeview-highlight-background-color: #fffbcc;
+  --codeview-textfield-border-color: var(--grey-90-a20);
+  --codeview-textfield-hover-border-color: var(--grey-90-a30);
+  --codeview-search-match-background-color: color-mix(
+    in srgb,
+    var(--yellow-50) 40%,
+    transparent
+  );
+  --codeview-search-selected-match-background-color: color-mix(
+    in srgb,
+    var(--orange-50) 50%,
+    transparent
+  );
 
   display: flex;
   min-height: 0;
@@ -50,6 +62,18 @@
     --codeview-linenum-foreground-color: var(--grey-30);
     --codeview-nonzero-background-color: var(--grey-80);
     --codeview-highlight-background-color: var(--yellow-90);
+    --codeview-textfield-border-color: var(--grey-10-a20);
+    --codeview-textfield-hover-border-color: var(--grey-10-a40);
+    --codeview-search-match-background-color: color-mix(
+      in srgb,
+      var(--yellow-60) 35%,
+      transparent
+    );
+    --codeview-search-selected-match-background-color: color-mix(
+      in srgb,
+      var(--orange-60) 60%,
+      transparent
+    );
     --theme-highlight-keyword: var(--magenta-65);
     --theme-highlight-type: var(--purple-40);
     --theme-highlight-variable: var(--blue-40);
@@ -172,6 +196,130 @@
   overflow-wrap: normal;
   word-break: normal;
   word-spacing: normal;
+}
+
+/**
+ * CodeMirror's search panel and search matches. CodeMirror's base theme gives
+ * the panel tiny fonts, cramped spacing and gradient buttons. Its colors are
+ * always the light ones, because we don't tell CodeMirror about our dark mode;
+ * we use our own color variables instead. The base theme's selectors are
+ * scoped by generated class names. The ".codeView .cm-editor" prefix makes
+ * these rules more specific than the base theme's.
+ */
+.codeView .cm-editor {
+  .cm-panels {
+    background-color: var(--codeview-header-background-color);
+    color: var(--codeview-foreground-color);
+  }
+
+  .cm-panels-top {
+    border-bottom: 1px solid var(--codeview-header-border-color);
+  }
+
+  .cm-textfield {
+    border: 1px solid var(--codeview-textfield-border-color);
+    border-radius: 2px;
+    background-color: var(--base-background-color);
+    color: var(--base-foreground-color);
+    font-size: inherit;
+  }
+
+  .cm-textfield:hover {
+    border-color: var(--codeview-textfield-hover-border-color);
+  }
+
+  /* The same focus ring as .photon-input, which CodeMirror's text field can't
+     use because CodeMirror creates the element. */
+  .cm-textfield:focus-visible {
+    border-color: var(--focus-border-color);
+    box-shadow:
+      0 0 0 1px var(--focus-border-color),
+      0 0 0 4px var(--focus-shadow-color);
+    outline: 0;
+  }
+
+  .cm-button {
+    /* No border, so that the focus ring sits on the button's edge. The extra
+       1px of padding makes up for the text field's border. */
+    padding: calc(0.2em + 1px) 1em;
+    border: none;
+    border-radius: 2px;
+    background-color: var(--clickable-background-color);
+    background-image: none;
+    color: var(--clickable-foreground-color);
+    font-size: inherit;
+  }
+
+  .cm-button:hover {
+    background-color: var(--clickable-hover-background-color);
+  }
+
+  /* CodeMirror's base theme has a gradient for pressed buttons, even when the
+     pointer has left the button. */
+  .cm-button:active {
+    background-image: none;
+  }
+
+  .cm-button:active:hover {
+    background-color: var(--clickable-active-background-color);
+  }
+
+  .cm-searchMatch {
+    background-color: var(--codeview-search-match-background-color);
+  }
+
+  .cm-searchMatch-selected {
+    background-color: var(--codeview-search-selected-match-background-color);
+  }
+
+  .cm-panel.cm-search {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 4px;
+    font-size: 12px;
+    row-gap: 4px;
+
+    input,
+    .cm-button,
+    label {
+      margin: 0 2px;
+    }
+
+    input[type='checkbox'] {
+      margin-inline-end: 4px;
+      vertical-align: -2px;
+    }
+
+    label {
+      font-size: inherit;
+    }
+
+    /* CodeMirror positions the close button absolutely at the top. Put it at
+       the end of the row instead, so that it's centered with the other
+       controls. */
+    [name='close'] {
+      position: static;
+      display: flex;
+      width: 20px;
+      height: 20px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      margin-left: auto;
+      color: inherit;
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    [name='close']:hover {
+      background-color: var(--clickable-ghost-hover-background-color);
+    }
+
+    [name='close']:active:hover {
+      background-color: var(--clickable-ghost-active-background-color);
+    }
+  }
 }
 
 /**
