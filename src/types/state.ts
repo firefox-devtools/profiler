@@ -414,8 +414,15 @@ export type PseudoStrategy = null | 'bidi' | 'accented';
  */
 export type IconsWithClassNames = Map<string, string>;
 
+export type SourceCodeCacheState = {
+  // Bumped on PROFILE_LOADED. Loading actions carry the value from when their
+  // fetch started, and the ones from an older generation are dropped.
+  readonly generation: number;
+  readonly statuses: Map<IndexIntoSourceTable, SourceCodeStatus>;
+};
+
 export type CodeState = {
-  readonly sourceCodeCache: Map<IndexIntoSourceTable, SourceCodeStatus>;
+  readonly sourceCodeCache: SourceCodeCacheState;
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
 };
 
