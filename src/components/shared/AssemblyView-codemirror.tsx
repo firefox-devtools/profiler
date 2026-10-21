@@ -43,6 +43,7 @@ import {
   updateTimingsEffect,
   StringMarker,
   createHighlightedLineExtension,
+  codeViewerExtension,
 } from 'firefox-profiler/utils/codemirror-shared';
 
 // An "effect" is like a redux action. This effect is used to replace the value
@@ -209,8 +210,7 @@ export class AssemblyViewEditor {
         instructionAddressGutter,
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
-        EditorState.readOnly.of(true),
-        EditorView.editable.of(false),
+        codeViewerExtension,
       ],
     });
     const lineTimings = addressTimingsToLineTimings(
