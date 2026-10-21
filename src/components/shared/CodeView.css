@@ -78,6 +78,7 @@
 
 .cm-editor {
   min-height: 0;
+  flex: 1;
 }
 
 .cm-scroller {
