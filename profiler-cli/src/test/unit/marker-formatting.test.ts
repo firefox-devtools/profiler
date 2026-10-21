@@ -7,6 +7,7 @@ import {
   formatThreadMarkersResult,
   formatMarkerInfoResult,
   formatMarkerInfoMultiResult,
+  formatMarkerStackResult,
 } from '../../formatters';
 import type {
   ThreadMarkersResult,
@@ -300,6 +301,24 @@ describe.each([
           totalCount: 1,
           matchingThreadCount: 1,
         }),
+        context,
+      }),
+  },
+  {
+    name: 'marker stack',
+    format: (start: number, context: SessionContext) =>
+      formatMarkerStackResult({
+        type: 'marker-stack',
+        markerIndex: 0,
+        threadHandle: 't-0',
+        friendlyThreadName: 'GeckoMain',
+        markerHandle: 'm-1',
+        markerName: 'DOMEvent',
+        stack: {
+          capturedAt: start,
+          frames: [{ name: 'Paint', nameWithLibrary: 'Paint' }],
+          truncated: false,
+        },
         context,
       }),
   },
