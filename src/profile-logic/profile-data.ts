@@ -4661,6 +4661,35 @@ export function nudgeReturnAddresses(profile: Profile): Profile {
 }
 
 /**
+ * The source of a frame with an address, which is what can prove to the
+ * symbolication API's /source/v1 that the source belongs to the library. Null
+ * when the frame has no address or its func no source.
+ */
+function _getAddressProvenSource(
+  frameTable: RawFrameTable,
+  funcTable: RawFuncTable,
+  frameIndex: IndexIntoFrameTable
+): IndexIntoSourceTable | null {
+  if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) === 0) {
+    return null;
+  }
+  const funcIndex = frameTable.func[frameIndex];
+  if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
+    return null;
+  }
+  return funcTable.source[funcIndex];
+}
+
+function _getAddressProofForFrame(
+  profile: Profile,
+  frameIndex: IndexIntoFrameTable
+): AddressProof {
+  const { frameTable } = profile.shared;
+  const { debugName, breakpadId } = profile.libs[frameTable.lib[frameIndex]];
+  return { debugName, breakpadId, address: frameTable.address[frameIndex] };
+}
+
+/**
  * Find the address and library (debugName, breakpadId) for any frame which
  * was symbolicated to the given filename.
  */
@@ -4668,41 +4697,15 @@ export function findAddressProofForFile(
   profile: Profile,
   sourceIndex: IndexIntoSourceTable
 ): AddressProof | null {
-  const { libs } = profile;
   const { frameTable, funcTable } = profile.shared;
-  // Scan for the func manually rather than using `funcTable.source.indexOf`:
-  // the `source` column only carries a meaningful value for funcs which have
-  // the `HasSource` flag set, and holds an arbitrary value (usually zero) for
-  // all other funcs. An `indexOf` would happily match one of those.
-  let func = -1;
-  for (let i = 0; i < funcTable.length; i++) {
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
     if (
-      (funcTable.flags[i] & FuncFlag.HasSource) !== 0 &&
-      funcTable.source[i] === sourceIndex
+      _getAddressProvenSource(frameTable, funcTable, frameIndex) === sourceIndex
     ) {
-      func = i;
-      break;
+      return _getAddressProofForFrame(profile, frameIndex);
     }
   }
-  if (func === -1) {
-    return null;
-  }
-  const frame = frameTable.func.indexOf(func);
-  if (frame === -1) {
-    return null;
-  }
-  if ((frameTable.flags[frame] & FrameFlag.HasAddress) === 0) {
-    return null;
-  }
-  const address = frameTable.address[frame];
-  const libIndex = frameTable.lib[frame];
-  const lib = libs[libIndex];
-  const { debugName, breakpadId } = lib;
-  return {
-    debugName,
-    breakpadId,
-    address,
-  };
+  return null;
 }
 
 /**
