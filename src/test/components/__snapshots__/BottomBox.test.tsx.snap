@@ -11,6 +11,7 @@ exports[`BottomBox should show the assembly view when pressing the toggle button
   role="textbox"
   spellcheck="false"
   style="tab-size: 4;"
+  tabindex="0"
   translate="no"
   writingsuggestions="false"
 >
