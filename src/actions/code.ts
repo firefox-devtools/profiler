@@ -4,6 +4,7 @@
 import { getProfile } from 'firefox-profiler/selectors/profile';
 import { getBrowserConnection } from 'firefox-profiler/selectors/app';
 import { getSymbolServerUrl } from 'firefox-profiler/selectors/url-state';
+import { getSourceCodeCacheGeneration } from 'firefox-profiler/selectors/code';
 import {
   fetchSource,
   type FetchSourceResult,
@@ -20,31 +21,47 @@ import type {
   IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
+// The `generation` argument of these is the source code cache generation from
+// when the fetch started, see SourceCodeCacheState.
+
 export function beginLoadingSourceCodeFromUrl(
   sourceIndex: IndexIntoSourceTable,
-  url: string
+  url: string,
+  generation: number
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_BEGIN_URL', sourceIndex, url };
+  return {
+    type: 'SOURCE_CODE_LOADING_BEGIN_URL',
+    sourceIndex,
+    url,
+    generation,
+  };
 }
 
 export function beginLoadingSourceCodeFromBrowserConnection(
-  sourceIndex: IndexIntoSourceTable
+  sourceIndex: IndexIntoSourceTable,
+  generation: number
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION', sourceIndex };
+  return {
+    type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION',
+    sourceIndex,
+    generation,
+  };
 }
 
 export function finishLoadingSourceCode(
   sourceIndex: IndexIntoSourceTable,
-  code: string
+  code: string,
+  generation: number
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_SUCCESS', sourceIndex, code };
+  return { type: 'SOURCE_CODE_LOADING_SUCCESS', sourceIndex, code, generation };
 }
 
 export function failLoadingSourceCode(
   sourceIndex: IndexIntoSourceTable,
-  errors: SourceCodeLoadingError[]
+  errors: SourceCodeLoadingError[],
+  generation: number
 ): Action {
-  return { type: 'SOURCE_CODE_LOADING_ERROR', sourceIndex, errors };
+  return { type: 'SOURCE_CODE_LOADING_ERROR', sourceIndex, errors, generation };
 }
 
 /**
@@ -62,14 +79,19 @@ export function fetchSourceCode(
   return async (dispatch, getState) => {
     const state = getState();
     const { sources, stringArray } = getProfile(state).shared;
+    // Read once here, so that the reducer can drop everything this fetch
+    // dispatches after another profile got loaded.
+    const generation = getSourceCodeCacheGeneration(state);
     const delegate = new RegularExternalCommunicationDelegate(
       getBrowserConnection(state),
       {
         onBeginUrlRequest: (url) => {
-          dispatch(beginLoadingSourceCodeFromUrl(sourceIndex, url));
+          dispatch(beginLoadingSourceCodeFromUrl(sourceIndex, url, generation));
         },
         onBeginBrowserConnectionQuery: () => {
-          dispatch(beginLoadingSourceCodeFromBrowserConnection(sourceIndex));
+          dispatch(
+            beginLoadingSourceCodeFromBrowserConnection(sourceIndex, generation)
+          );
         },
       }
     );
@@ -83,10 +105,12 @@ export function fetchSourceCode(
     );
     switch (result.type) {
       case 'SUCCESS':
-        dispatch(finishLoadingSourceCode(sourceIndex, result.source));
+        dispatch(
+          finishLoadingSourceCode(sourceIndex, result.source, generation)
+        );
         break;
       case 'ERROR':
-        dispatch(failLoadingSourceCode(sourceIndex, result.errors));
+        dispatch(failLoadingSourceCode(sourceIndex, result.errors, generation));
         break;
       default:
         throw assertExhaustiveCheck(result);
