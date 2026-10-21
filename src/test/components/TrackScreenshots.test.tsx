@@ -79,6 +79,93 @@ describe('timeline/TrackScreenshots', function () {
     expect(size).toEqual({ width: 350, height: 175 });
   });
 
+  it('renders screenshot fields identified by the schema', () => {
+    const profile = getScreenshotTrackProfile();
+    const { markers } = profile.threads[0];
+    const firstPayload = markers.data[0];
+    if (firstPayload?.type !== 'CompositorScreenshot') {
+      throw new Error('Expected a screenshot marker.');
+    }
+    const imageUrl = profile.shared.stringArray[ensureExists(firstPayload.url)];
+    markers.data = markers.data.map((payload) => {
+      if (payload?.type !== 'CompositorScreenshot') {
+        return payload;
+      }
+      return {
+        type: 'NoPayloadUserData' as const,
+        ...(payload.url !== undefined && { image: payload.url }),
+        ...(payload.windowSize !== undefined && {
+          dimensions: { width: 100, height: 200 },
+        }),
+      };
+    });
+    profile.meta.markerSchema = [
+      {
+        name: 'NoPayloadUserData',
+        display: ['timeline-screenshots'],
+        fields: [
+          { key: 'dimensions', format: 'screenshot-size' },
+          {
+            key: 'image',
+            format: {
+              type: 'screenshot-data-url',
+              sizeFieldForAspectRatio: 'dimensions',
+            },
+          },
+        ],
+      },
+    ];
+
+    const { container, moveMouseAndGetImageSize, screenshotHover } =
+      setup(profile);
+    const thumbnail = ensureExists(
+      container.querySelector('.timelineTrackScreenshotImg')
+    );
+    expect(thumbnail).toHaveAttribute('src', imageUrl);
+    expect(thumbnail).toHaveStyle({
+      width: `${FULL_TRACK_SCREENSHOT_HEIGHT / 2}px`,
+      height: `${FULL_TRACK_SCREENSHOT_HEIGHT}px`,
+    });
+    expect(moveMouseAndGetImageSize(LEFT)).toEqual({
+      width: 175,
+      height: 350,
+    });
+    expect(screenshotHover().querySelector('img')).toHaveAttribute(
+      'src',
+      imageUrl
+    );
+  });
+
+  it.each(['url', 'windowSize'] as const)(
+    'does not render images without %s',
+    (field) => {
+      const profile = getScreenshotTrackProfile();
+      for (const payload of profile.threads[0].markers.data) {
+        if (payload?.type === 'CompositorScreenshot') {
+          delete payload[field];
+        }
+      }
+
+      const { container, moveMouse, screenshotHover } = setup(profile);
+      expect(container.querySelector('img')).toBeNull();
+      moveMouse(LEFT);
+      expect(screenshotHover).toThrow();
+    }
+  );
+
+  it('does not render images without a screenshot image field in the schema', () => {
+    const profile = getScreenshotTrackProfile();
+    profile.meta.markerSchema = profile.meta.markerSchema.map((schema) => ({
+      ...schema,
+      fields: [],
+    }));
+
+    const { container, moveMouse, screenshotHover } = setup(profile);
+    expect(container.querySelector('img')).toBeNull();
+    moveMouse(LEFT);
+    expect(screenshotHover).toThrow();
+  });
+
   it('sets a preview selection when clicking with the mouse', () => {
     const { selectionOverlay, screenshotClick, getState } = setup(
       undefined,
@@ -204,8 +291,10 @@ describe('timeline/TrackScreenshots', function () {
     const profile = getScreenshotTrackProfile();
     const { shared, threads } = profile;
     const [thread] = threads;
-    const markerIndexA = thread.markers.length - 3;
-    const markerIndexB = thread.markers.length - 2;
+    // Screenshots are stored as start / end pairs, so these are the start markers
+    // of the second to last and third to last screenshots.
+    const markerIndexA = thread.markers.length - 5;
+    const markerIndexB = thread.markers.length - 3;
     // We keep the last marker so that the profile's root range is correct.
 
     _setScreenshotMarkersToUnknown(thread, shared, markerIndexA, markerIndexB);
@@ -232,8 +321,9 @@ describe('timeline/TrackScreenshots', function () {
     const { shared, threads } = profile;
     const [thread] = threads;
 
+    // The start markers of the first two screenshots.
     const markerIndexA = 0;
-    const markerIndexB = 1;
+    const markerIndexB = 2;
 
     _setScreenshotMarkersToUnknown(thread, shared, markerIndexA, markerIndexB);
 
@@ -284,7 +374,12 @@ describe('timeline/TrackScreenshots', function () {
 
 function setup(
   profile: Profile = getScreenshotTrackProfile(),
-  component = <TimelineTrackScreenshots threadIndex={0} windowId="0" />
+  component = (
+    <TimelineTrackScreenshots
+      threadIndex={0}
+      markerName="CompositorScreenshot 0"
+    />
+  )
 ) {
   const store = storeWithProfile(profile);
   const { getState, dispatch } = store;
@@ -396,15 +491,11 @@ function _setScreenshotMarkersToUnknown(
   shared: RawProfileSharedData,
   ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
-  // Remove off the last few screenshot markers
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const unknownStringIndex = stringTable.indexForString('Unknown');
-  const screenshotStringIndex = stringTable.indexForString(
-    'CompositorScreenshot'
-  );
   for (const markerIndex of markerIndexes) {
     // Double check that we've actually got screenshot markers:
-    if (thread.markers.name[markerIndex] !== screenshotStringIndex) {
+    if (thread.markers.data[markerIndex]?.type !== 'CompositorScreenshot') {
       throw new Error('This is not a screenshot marker.');
     }
     thread.markers.name[markerIndex] = unknownStringIndex;

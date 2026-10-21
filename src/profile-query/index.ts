@@ -947,6 +947,8 @@ export class ProfileQuerier {
       type: 'filter-stack',
       threadHandle: actualHandle,
       filters,
+      callTreeSearch:
+        getCurrentSearchString(this._store.getState()) || undefined,
       action: 'push',
       message: `Pushed filter ${pushed.index}: ${pushed.description}`,
     };
@@ -998,13 +1000,15 @@ export class ProfileQuerier {
       type: 'filter-stack',
       threadHandle: actualHandle,
       filters,
+      callTreeSearch:
+        getCurrentSearchString(this._store.getState()) || undefined,
       action: 'pop',
       message,
     };
   }
 
   /**
-   * Clear all transforms from the thread's transform stack.
+   * Clear the thread's transforms and the session-wide call tree search.
    */
   filterClear(threadHandle?: string): FilterStackResult {
     const threadIndexes = this._resolveThreadIndexes(threadHandle);
@@ -1013,9 +1017,14 @@ export class ProfileQuerier {
       threadHandle ?? this._threadMap.handleForThreadIndexes(threadIndexes);
 
     const entryCount = this._syncPushGroups(threadsKey).length;
+    const search = getCurrentSearchString(this._store.getState());
+    const filterCount = entryCount + (search ? 1 : 0);
     this._pushGroupSizes.set(threadsKey, []);
     if (entryCount > 0) {
       this._store.dispatch(popTransformsFromStackForThreads(threadsKey, 0));
+    }
+    if (search) {
+      this._store.dispatch(changeCallTreeSearchString(''));
     }
 
     return {
@@ -1024,14 +1033,14 @@ export class ProfileQuerier {
       filters: [],
       action: 'clear',
       message:
-        entryCount === 0
+        filterCount === 0
           ? 'No filters to clear'
-          : `Cleared ${entryCount} filter(s)`,
+          : `Cleared ${filterCount} filter(s)`,
     };
   }
 
   /**
-   * List the thread's full Redux transform stack as filter entries.
+   * List the thread's transforms and the session-wide call tree search.
    */
   filterList(threadHandle?: string): FilterStackResult {
     const threadIndexes = this._resolveThreadIndexes(threadHandle);
@@ -1043,6 +1052,8 @@ export class ProfileQuerier {
       type: 'filter-stack',
       threadHandle: actualHandle,
       filters: this._collectFilterEntries(threadsKey),
+      callTreeSearch:
+        getCurrentSearchString(this._store.getState()) || undefined,
     };
   }
 
@@ -1071,7 +1082,11 @@ export class ProfileQuerier {
     const result = this._withEphemeralView(
       threadIndexes,
       { includeIdle, callTreeSearch: search, sampleFilters, strategy },
-      collect
+      () => {
+        const result = collect();
+        const context = this._getContext(strategy, threadIndexes);
+        return { ...result, search: context.callTreeSearch, context };
+      }
     );
     const activeFilters = this._collectFilterEntries(
       getThreadsKey(threadIndexes)
@@ -1079,11 +1094,9 @@ export class ProfileQuerier {
     return {
       ...result,
       activeOnly,
-      search: search || undefined,
       activeFilters: activeFilters.length > 0 ? activeFilters : undefined,
       ephemeralFilters:
         sampleFilters && sampleFilters.length > 0 ? sampleFilters : undefined,
-      context: this._getContext(strategy, threadIndexes),
     };
   }
 
@@ -1272,8 +1285,7 @@ export class ProfileQuerier {
    * This is a lightweight version of getStatus() that includes only
    * the current view range (not the full stack).
    *
-   * Commands given a one-shot --strategy pass it as `effectiveStrategy`: the
-   * store has already been restored to the session value by then.
+   * Commands collecting context after restoring a one-shot --strategy pass it as `effectiveStrategy`.
    */
   private _getContext(
     effectiveStrategy?: CallTreeSummaryStrategy,
@@ -1306,6 +1318,7 @@ export class ProfileQuerier {
       rootRange,
       callTreeSummaryStrategy:
         effectiveStrategy ?? this._getEffectiveStrategy(state),
+      callTreeSearch: getCurrentSearchString(state) || undefined,
     };
   }
 
@@ -1363,6 +1376,7 @@ export class ProfileQuerier {
       rootRange,
       filterStacks,
       callTreeSummaryStrategy: this._getEffectiveStrategy(state),
+      callTreeSearch: getCurrentSearchString(state) || undefined,
     };
   }
 

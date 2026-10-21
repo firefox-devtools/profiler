@@ -203,7 +203,7 @@ function formatThreadList(
 
 /**
  * Format a SessionContext as a compact header line.
- * Shows current thread selection, zoom range, and full profile duration.
+ * Shows current thread selection, zoom range, full profile duration, and search.
  */
 export function formatContextHeader(
   context: SessionContext,
@@ -247,7 +247,10 @@ export function formatContextHeader(
     (activeFilters?.length ?? 0) + (ephemeralFilters?.length ?? 0);
   const filterInfo =
     totalFilterCount > 0 ? ` | Filters: ${totalFilterCount}` : '';
-  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
+  const searchInfo = context.callTreeSearch
+    ? ` | Call tree search: "${context.callTreeSearch}"`
+    : '';
+  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}${searchInfo}]`;
 }
 
 /**
@@ -271,6 +274,11 @@ export function formatStatusResult(result: StatusResult): string {
   }
 
   const filterLines: string[] = [];
+  if (result.callTreeSearch) {
+    filterLines.push(
+      `  Call tree search (all threads): "${result.callTreeSearch}"`
+    );
+  }
   for (const stack of result.filterStacks) {
     if (stack.filters.length === 0) {
       continue;
@@ -307,8 +315,13 @@ export function formatFilterStackResult(result: FilterStackResult): string {
   if (result.message) {
     lines.push(result.message);
   }
+  if (result.callTreeSearch) {
+    lines.push(`Call tree search (all threads): "${result.callTreeSearch}"`);
+  }
   if (result.filters.length === 0) {
-    lines.push(`No active filters for ${result.threadHandle}`);
+    if (!result.callTreeSearch) {
+      lines.push(`No active filters for ${result.threadHandle}`);
+    }
   } else {
     lines.push(`Filters for ${result.threadHandle} (applied in order):`);
     for (const f of result.filters) {
@@ -1250,7 +1263,6 @@ function formatSamplesPreamble(result: {
     result.activeOnly && isTiming
       ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
       : '';
-  const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   const filtersParts: string[] = [
     ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
       []),
@@ -1258,7 +1270,7 @@ function formatSamplesPreamble(result: {
   ];
   const filtersNote =
     filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
-  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${searchNote}${filtersNote}`;
+  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${filtersNote}`;
 }
 
 /**
@@ -1271,7 +1283,7 @@ export function formatThreadSamplesResult(
 
   if (result.search && result.topFunctionsByTotal.length === 0) {
     output +=
-      `No samples matched --search "${result.search}".\n` +
+      `No samples matched call tree search "${result.search}".\n` +
       'Tip: --search keeps samples with a matching frame anywhere in the stack.\n' +
       '     Use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
       '     "|" is treated as a literal character, not OR.\n';
@@ -1383,7 +1395,7 @@ export function formatThreadSamplesTopDownResult(
 
   // Top-down call tree
   const topDownEmpty = result.search
-    ? `No samples matched --search "${result.search}".\n` +
+    ? `No samples matched call tree search "${result.search}".\n` +
       'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
       '     "|" is treated as a literal character, not OR.'
     : undefined;
@@ -1403,7 +1415,7 @@ export function formatThreadSamplesBottomUpResult(
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {
     const bottomUpEmpty = result.search
-      ? `No samples matched --search "${result.search}".\n` +
+      ? `No samples matched call tree search "${result.search}".\n` +
         'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
         '     "|" is treated as a literal character, not OR.'
       : undefined;

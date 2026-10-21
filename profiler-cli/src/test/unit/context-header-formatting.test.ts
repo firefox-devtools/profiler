@@ -12,6 +12,7 @@
 
 import {
   formatContextHeader,
+  formatFilterStackResult,
   formatStatusResult,
   formatThreadSelectResult,
 } from '../../formatters';
@@ -100,6 +101,12 @@ describe('formatContextHeader', function () {
       '[Thread: No thread selected'
     );
   });
+
+  it('shows the effective call tree search', function () {
+    expect(
+      formatContextHeader(createContext({ callTreeSearch: 'testGetValue' }))
+    ).toContain('Call tree search: "testGetValue"');
+  });
 });
 
 describe('formatStatusResult', function () {
@@ -118,6 +125,51 @@ describe('formatStatusResult', function () {
     expect(formatStatusResult(result)).toContain(
       'Selected thread: t-94 (GeckoMain, WebExtensions)'
     );
+  });
+
+  it('shows session search even when there are no thread transforms', function () {
+    const result: StatusResult = {
+      type: 'status',
+      selectedThreadHandle: 't-94',
+      selectedThreads: createContext().selectedThreads,
+      viewRanges: [],
+      rootRange: { start: 0, end: 3000 },
+      filterStacks: [],
+      callTreeSummaryStrategy: 'timing',
+      callTreeSearch: 'testGetValue',
+    };
+    const output = formatStatusResult(result);
+    expect(output).toContain('Call tree search (all threads): "testGetValue"');
+    expect(output).not.toContain('Filters: none');
+  });
+});
+
+describe('formatFilterStackResult', function () {
+  it('shows session search even when the thread has no transforms', function () {
+    const output = formatFilterStackResult({
+      type: 'filter-stack',
+      threadHandle: 't-0',
+      filters: [],
+      callTreeSearch: 'testGetValue',
+    });
+    expect(output).toBe('Call tree search (all threads): "testGetValue"');
+  });
+
+  it('shows session search alongside numbered thread transforms', function () {
+    const output = formatFilterStackResult({
+      type: 'filter-stack',
+      threadHandle: 't-0',
+      callTreeSearch: 'testGetValue',
+      filters: [
+        {
+          index: 1,
+          transforms: [{ type: 'merge-function', funcIndex: 0 }],
+          description: 'merge: f-0',
+        },
+      ],
+    });
+    expect(output).toContain('Call tree search (all threads): "testGetValue"');
+    expect(output).toContain('1. merge: f-0');
   });
 });
 

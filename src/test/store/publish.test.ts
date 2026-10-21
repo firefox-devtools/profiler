@@ -44,6 +44,7 @@ import { urlFromState } from '../../app-logic/url-handling';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import {
   getProfileFromTextSamples,
+  addCompositorScreenshotSchemaIfNeeded,
   addRawMarkersToThread,
   makeCompositorScreenshot,
 } from '../fixtures/profiles/processed-profile';
@@ -670,6 +671,7 @@ describe('attemptToPublish', function () {
     addRawMarkersToThread(profile.threads[0], profile.shared, [
       makeCompositorScreenshot(0.5),
     ]);
+    addCompositorScreenshotSchemaIfNeeded(profile);
 
     const store = storeWithProfile(profile);
     const { dispatch, getState, resolveUpload, assertUploadSuccess } =
@@ -771,6 +773,7 @@ describe('attemptToPublish', function () {
     addRawMarkersToThread(profile.threads[2], profile.shared, [
       makeCompositorScreenshot(0.5),
     ]);
+    addCompositorScreenshotSchemaIfNeeded(profile);
 
     const store = storeWithProfile(profile);
     const { dispatch, getState, resolveUpload, assertUploadSuccess } =

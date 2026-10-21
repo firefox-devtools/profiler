@@ -120,6 +120,7 @@ export type FilterStackResult = {
   type: 'filter-stack';
   threadHandle: string;
   filters: FilterEntry[];
+  callTreeSearch?: string;
   action?: 'push' | 'pop' | 'clear';
   message?: string;
 };
@@ -161,6 +162,7 @@ export type SessionContext = {
     end: number;
   };
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  callTreeSearch?: string;
 };
 
 /**
@@ -220,6 +222,7 @@ export type StatusResult = {
     filters: FilterEntry[];
   }>;
   callTreeSummaryStrategy: CallTreeSummaryStrategy;
+  callTreeSearch?: string;
 };
 
 // ===== Category Breakdown =====

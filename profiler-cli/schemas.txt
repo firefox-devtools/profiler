@@ -11,7 +11,8 @@ SessionContext (present on all command results):
     resultThreads: [{ threadIndex, name, processName }],
     currentViewRange: { start, startName, end, endName } | null,
     rootRange: { start, end },
-    callTreeSummaryStrategy: CallTreeSummaryStrategy
+    callTreeSummaryStrategy: CallTreeSummaryStrategy,
+    callTreeSearch?
   }
 
 PermalinkFields (merged into any command result when --permalink or
@@ -331,7 +332,8 @@ profiler-cli status --json
     viewRanges: [{ start, startName, end, endName }],
     rootRange: { start, end },
     filterStacks: [{ threadHandle, filters: FilterEntry[] }],
-    callTreeSummaryStrategy: CallTreeSummaryStrategy
+    callTreeSummaryStrategy: CallTreeSummaryStrategy,
+    callTreeSearch?
   }
 
 profiler-cli permalink --json
