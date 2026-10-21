@@ -15,6 +15,9 @@ const PROFILER_URL = `https://profiler.firefox.com/from-url/${encodeURIComponent
 
 describe('ProfileQuerier URL view state', function () {
   beforeEach(function () {
+    // The loader logs its progress for the CLI, silence it here.
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+
     const samples = `
       1000  1010  1020
       A     A     A
