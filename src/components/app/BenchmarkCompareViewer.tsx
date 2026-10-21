@@ -666,10 +666,33 @@ function makeMeanReader(columns: MeanColumn[], label: string): MeanReader {
   };
 }
 
-/** Label, the mean columns, and the six that describe the comparison of two of
- * them. */
+/** Label, the mean columns, and the seven that describe the comparison of two
+ * of them. */
 function scoreTableColumnCount(columnCount: number): number {
-  return 7 + columnCount;
+  return 8 + columnCount;
+}
+
+/**
+ * How many times the subject's mean is the comparand's: 2.00× means the subject
+ * takes twice as long. Two decimals regardless of magnitude, so that the column
+ * lines up; a bucket that is absent on one side has no finite factor.
+ */
+function formatFactor(baseMean: number, newMean: number): string {
+  if (baseMean === 0) {
+    return newMean === 0 ? '—' : 'appeared';
+  }
+  if (newMean === 0) {
+    return 'disappeared';
+  }
+  return (newMean / baseMean).toFixed(2) + '\u00d7';
+}
+
+function FactorCell({ row }: { row: ComparisonStats }) {
+  return (
+    <td className="benchmarkCell--number">
+      {formatFactor(row.baseMean, row.newMean)}
+    </td>
+  );
 }
 
 /**
@@ -751,6 +774,7 @@ function ScoreRow({
         />
       ))}
       <td className="benchmarkCell--number">{absDiffStr}</td>
+      <FactorCell row={row} />
       <td
         className="benchmarkCell--number benchmarkCell--mde"
         title={mdeTitle(row, names, comparisonCount)}
@@ -1124,6 +1148,18 @@ function ScoreTable({
             Δ abs
           </th>
           <th
+            className="benchmarkCell--number benchmarkCell--colNarrow"
+            title={
+              againstFastest
+                ? `${names.new}'s mean divided by the marked profile's mean. ` +
+                  `2.00× means ${names.new} takes twice as long here.`
+                : `${names.new}'s mean divided by ${names.base}'s mean. 2.00× ` +
+                  `means ${names.new} takes twice as long here.`
+            }
+          >
+            Factor
+          </th>
+          <th
             className="benchmarkCell--number benchmarkCell--colFixed"
             title={
               'Minimum detectable effect: the smallest Δ abs this row could have ' +
@@ -1483,6 +1519,7 @@ function BucketTable({
           <col className="benchmarkCell--colFixed" key={column.index} />
         ))}
         <col className="benchmarkCell--colFixed" />
+        <col className="benchmarkCell--colNarrow" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
         <col className="benchmarkCell--colFixed" />
@@ -1533,6 +1570,7 @@ function BucketTable({
                     />
                   ))}
                   <td className="benchmarkCell--number">{absDiffStr}</td>
+                  <FactorCell row={c} />
                   <td
                     className="benchmarkCell--number benchmarkCell--mde"
                     title={mdeTitle(c, rowNames, comparisonCount)}
