@@ -381,6 +381,11 @@
   width: 5rem;
 }
 
+/* Wide enough for the "Factor" header and for "disappeared". */
+.benchmarkCell--colFactor {
+  width: 7rem;
+}
+
 /* Wide enough for "<name> slower" at the default names. A longer name is
  * ellipsised rather than given more room: the verdict's job is to be readable
  * in one glance down the column, and a column that resizes itself to the
