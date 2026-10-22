@@ -21,6 +21,16 @@ AppHeader--app-header = <header>{ -profiler-brand-name }</header> — <subheader
 AppHeader--github-icon =
     .title = Перейти до нашого репозиторію Git (відкриється у новому вікні)
 
+## ThemeToggle
+## They are used at the top right side of the home page to switch between themes.
+
+ThemeToggle--system =
+    .title = Дотримуватись системних налаштувань теми
+ThemeToggle--light =
+    .title = Використовувати світлу тему
+ThemeToggle--dark =
+    .title = Використовувати темну тему
+
 ## AppViewRouter
 ## This is used for displaying errors when loading the application.
 
@@ -39,8 +49,21 @@ AppViewRouter--error-from-localhost-url-safari =
     імпортувати профілі з локальної машини у цей браузер. Натомість
     відкрийте цю сторінку в { -firefox-brand-name } або Chrome.
     .title = Safari не може імпортувати локальні профілі
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Цей профіль використовує формат, який не підтримується цією версією { -profiler-brand-name }.
+    Спробуйте оновити сторінку, щоб перевірити, чи є доступне оновлення для { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = URL-адреса, до якої ви намагаєтеся отримати доступ, не розпізнана.
+
+## Backtrace
+## This is used to display a backtrace (call stack) for a marker or sample.
+
+# Variables:
+#   $function (String) - Name of the function that was inlined.
+Backtrace--inlining-badge = (вбудовано)
+    .title = { $function } була вбудована в її викликач компілятором.
 
 ## CallNodeContextMenu
 ## This is used as a context menu for the Call Tree, Flame Graph and Stack Chart
@@ -63,7 +86,7 @@ CallNodeContextMenu--transform-merge-call-node = Об'єднати лише ву
 # This is used as the context menu item title for "Focus on function" and "Focus
 # on function (inverted)" transforms.
 CallNodeContextMenu--transform-focus-function-title =
-    Фокус на функції вилучить будь-який зразок, який не містить цієї функції.
+    Фокус на функції вилучить будь-яку вибірку, яка не містить цієї функції.
     Крім того, він повторно вкорінює дерево викликів, щоб функція була єдиним
     коренем дерева. Це може об'єднати кілька функцій викликів сайтів у профілі
     в один вузол виклику.
@@ -72,11 +95,23 @@ CallNodeContextMenu--transform-focus-function = Фокус на функції
 CallNodeContextMenu--transform-focus-function-inverted = Фокус на функції (інвертовано)
     .title = { CallNodeContextMenu--transform-focus-function-title }
 
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title =
+    Фокусування на собі подібне до фокусування на функції, але зберігає лише ті вибірки,
+    які роблять внесок у час виконання самої функції. Вибірки у викликаних функціях видаляються,
+    а дерево викликів перенаправляється до сфокусованої функції.
+CallNodeContextMenu--transform-focus-self = Сфокусуватися лише на собі
+    .title = { CallNodeContextMenu--transform-focus-self-title }
+
 ##
 
 CallNodeContextMenu--transform-focus-subtree = Фокус лише на піддереві
     .title =
-        Фокус на піддереві вилучить будь-який зразок, який не включає цю
+        Фокус на піддереві вилучить будь-яку вибірку, яка не включає цю
         конкретну частину дерева викликів. Це витягує гілку дерева викликів,
         однак робить це лише для того єдиного вузла виклику. Усі інші виклики
         функції ігноруються.
@@ -107,9 +142,9 @@ CallNodeContextMenu--transform-collapse-direct-recursion-only = Згорнути
     .title =
         Згортання прямої рекурсії вилучає виклики, які повторювано звертаються
         до тієї самої функції без проміжних функцій у стеку.
-CallNodeContextMenu--transform-drop-function = Покинути зразки з цією функцією
+CallNodeContextMenu--transform-drop-function = Видалити вибірки з цією функцією
     .title =
-        Якщо покинути зразки, їх час вилучається з профілю. Це корисно для
+        Якщо видалити вибірки, їх час вилучається з профілю. Це корисно для
         усунення інформації про час, який не стосується аналізу.
 CallNodeContextMenu--expand-all = Розгорнути все
 # Searchfox is a source code indexing tool for Mozilla Firefox.
@@ -135,14 +170,14 @@ CallTree--tracing-ms-self = Власний (мс)
         Якщо ця функція викликала інші функції, час “інших” функцій не
         враховується. "Власний" час корисний для розуміння того, на що
         був фактично витрачений час у програмі.
-CallTree--samples-total = Всього (зразки)
+CallTree--samples-total = Всього (вибірки)
     .title =
-        "Всього" зразків включає суму кожного зразка, де ця функція була
+        "Всього" вибірок включає суму кожної вибірки, де ця функція була
         виявлена у стеку. Сюди входить час, коли функція насправді виконувалася,
         а також час, витрачений ініціаторами з цієї функції.
 CallTree--samples-self = Власний
     .title =
-        "Власний" підрахунок зразків включає лише зразки, де функція була
+        "Власний" підрахунок вибірок включає лише ті вибірки, де функція була
         кінцем стека. Якщо ця функція викликала інші функції, час “інших” функцій
         не включається. "Власний" підрахунок корисний для розуміння того,
         на що був фактично витрачений час у програмі.
@@ -199,13 +234,13 @@ CallTreeSidebar--traced-running-time =
 CallTreeSidebar--traced-self-time =
     .label = Відстежувана самостійно тривалість
 CallTreeSidebar--running-time =
-    .label = Тривалість роботи
+    .label = Тривалість
 CallTreeSidebar--self-time =
     .label = Власний час
 CallTreeSidebar--running-samples =
-    .label = Виконувані зразки
+    .label = Виконувані вибірки
 CallTreeSidebar--self-samples =
-    .label = Власні зразки
+    .label = Власні вибірки
 CallTreeSidebar--running-size =
     .label = Виконуваний розмір
 CallTreeSidebar--self-size =
@@ -213,10 +248,10 @@ CallTreeSidebar--self-size =
 CallTreeSidebar--categories = Категорії
 CallTreeSidebar--implementation = Імплементація
 CallTreeSidebar--running-milliseconds = Виконання - мілісекунд
-CallTreeSidebar--running-sample-count = Кількість виконуваних зразків
+CallTreeSidebar--running-sample-count = Кількість виконуваних вибірок
 CallTreeSidebar--running-bytes = Виконувані байти
 CallTreeSidebar--self-milliseconds = Власні - мілісекунд
-CallTreeSidebar--self-sample-count = Кількість власних зразків
+CallTreeSidebar--self-sample-count = Кількість власних вибірок
 CallTreeSidebar--self-bytes = Власні - байтів
 
 ## CompareHome
@@ -263,6 +298,18 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Повідомити про помилку на GitHub
 
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
+
+SettingsMenu--button =
+    .title = Налаштування
+SettingsMenu--docs = Документація
+SettingsMenu--legal = Правові положення
+SettingsMenu--privacy = Приватність
+SettingsMenu--cookies = Файли cookie
+SettingsMenu--language-switcher =
+    .title = Змінити мову
+
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -307,6 +354,16 @@ Home--record-instructions =
     Щоб розпочати запис профілю, натисніть кнопку запису або скористайтеся
     комбінацією клавіш. Під час запису профілю піктограма стає синього кольору.
     Натисніть <kbd>Захопити</kbd>, щоб завантажити дані на profiler.firefox.com.
+Home--instructions-content2 =
+    Для запису профілів швидкодії потрібен <a>{ -firefox-brand-name } для комп'ютера</a>.
+    Однак, наявні профілі можна переглядати в будь-якому сучасному браузері.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } можна профілювати безпосередньо на цьому пристрої.
+    Докладніше у статті <a>Профілювання { -firefox-android-brand-name } безпосередньо на пристрої</a>.
+Home--fenix-instructions-remotely =
+    Ви також можете створити профіль { -firefox-android-brand-name } віддалено з
+    { -firefox-brand-name } для комп’ютера. Докладніше про це у документації:
+    <a>Віддалене профілювання { -firefox-android-brand-name }</a>.
 Home--record-instructions-start-stop = Зупинити й почати запис профілю
 Home--record-instructions-capture-load = Захопити й завантажити профіль
 Home--profiler-motto = Отримайте профіль швидкодії. Проаналізуйте його. Поділіться ним. Зробіть Інтернет швидшим.
@@ -314,6 +371,7 @@ Home--additional-content-title = Завантажити наявні профі�
 Home--additional-content-content = Ви можете <strong>перетягнути</strong> файл профілю сюди, щоб завантажити його, або:
 Home--compare-recordings-info = Ви також можете порівняти записи. <a>Відкрити інтерфейс порівняння.</a>
 Home--your-recent-uploaded-recordings-title = Ваші недавно вивантажені записи
+Home--dark-mode-title = Темний режим
 # We replace the elements such as <perf> and <simpleperf> with links to the
 # documentation to use these tools.
 Home--load-files-from-other-tools2 =
@@ -331,6 +389,15 @@ Home--chrome-extension-recording-instructions =
     Після встановлення використовуйте піктограму розширення на панелі інструментів
     або ярлики для запуску та зупинки профілювання. Ви також можете
     експортувати профілі та завантажити їх тут для детального аналізу.
+
+## IdleSearchField
+## The component that is used for all the search inputs in the application.
+
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Введіть умови фільтра (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -398,7 +465,14 @@ MarkerContextMenu--select-the-sender-thread = Виберіть потік-від
 # This string is used on the marker filters menu item when clicked on the filter icon.
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
-MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Перетягніть зразки за межі маркерів, що відповідають “<strong>{ $filter }</strong>”
+MarkerFiltersContextMenu--drop-samples-outside-of-markers-matching = Перетягніть вибірки за межі маркерів, що відповідають “<strong>{ $filter }</strong>”
+
+## MarkerCopyTableContextMenu
+## This is the menu when the copy icon is clicked in Marker Chart and Marker
+## Table panels.
+
+MarkerCopyTableContextMenu--copy-table-as-plain = Копіювати таблицю маркерів як звичайний текст
+MarkerCopyTableContextMenu--copy-table-as-markdown = Копіювати таблицю маркерів як Markdown
 
 ## MarkerSettings
 ## This is used in all panels related to markers.
@@ -408,6 +482,14 @@ MarkerSettings--panel-search =
     .title = Показувати лише маркери, що відповідають певній назві
 MarkerSettings--marker-filters =
     .title = Фільтр маркерів
+MarkerSettings--copy-table =
+    .title = Копіювати таблицю як текст
+# This string is used when the user tries to copy a marker table with
+# more than 10000 rows.
+# Variable:
+#   $rows (Number) - Number of rows the marker table has
+#   $maxRows (Number) - Number of maximum rows that can be copied
+MarkerSettings--copy-table-exceeed-max-rows = Кількість рядків перевищує ліміт: { $rows } > { $maxRows }. Скопіюються лише перші рядки { $maxRows }.
 
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
@@ -422,6 +504,16 @@ MarkerTable--duration = Тривалість
 MarkerTable--name = Назва
 MarkerTable--details = Подробиці
 
+## MarkerTooltip
+## This is the component for Marker Tooltip panel.
+
+# This is used as the tooltip for the filter button in marker tooltips.
+# Variables:
+#   $filter (String) - Search string that will be used to filter the markers.
+MarkerTooltip--filter-button-tooltip =
+    .aria-label = Показувати лише маркери, що відповідають: “{ $filter }”
+    .title = Показувати лише маркери, що відповідають: “{ $filter }”
+
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
 
@@ -429,6 +521,12 @@ MenuButtons--index--metaInfo-button =
     .label = Дані профілю
 MenuButtons--index--full-view = Повний огляд
 MenuButtons--index--cancel-upload = Скасувати вивантаження
+MenuButtons--index--save =
+    .label = Зберегти…
+MenuButtons--index--share =
+    .label = Поділитися…
+MenuButtons--index--reshare =
+    .label = Поділитися повторно…
 MenuButtons--index--share-error-uploading =
     .label = Помилка вивантаження
 MenuButtons--index--revert = Повернутися до початкового профілю
@@ -449,6 +547,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Повторно символіз
 MenuButtons--metaInfo--symbolicate-profile = Символізувати профіль
 MenuButtons--metaInfo--attempting-resymbolicate = Спроба повторно символізувати профіль
 MenuButtons--metaInfo--currently-symbolicating = Наразі профіль символізується
+MenuButtons--metaInfo--source-maps = Карти джерел:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Застосувати карту джерел…
+    .title = Завантажте файл .map з диска для символізації мініфікованого пакета JavaScript, щоб відновити оригінальні назви функцій та розташування джерел.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Оберіть, до якого пакету застосовується ця карта джерел:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Застосувати
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Скасувати
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Оригінальне джерело { $filename } зіставлено.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Жодна позиція стеку в { $filename } не відповідає цій карті джерела.
+MenuButtons--metaInfo--source-map-error-invalid = Вибраний файл не є дійсною картою джерела.
+MenuButtons--metaInfo--source-map-error-no-eligible = Цей профіль не має JS-пакетів з URL-адресами карти джерела.
+MenuButtons--metaInfo--source-map-error-failed = Не вдалося застосувати цю карту джерел до профілю.
 MenuButtons--metaInfo--cpu-model = Модель ЦП:
 MenuButtons--metaInfo--cpu-cores = Ядра ЦП:
 MenuButtons--metaInfo--main-memory = Основна пам'ять:
@@ -503,6 +623,8 @@ MenuButtons--metaInfo--profiling-started = Запис розпочато:
 MenuButtons--metaInfo--profiling-session = Тривалість запису:
 MenuButtons--metaInfo--main-process-started = Основний процес розпочато:
 MenuButtons--metaInfo--main-process-ended = Основний процес завершено:
+MenuButtons--metaInfo--file-name = Назва файлу:
+MenuButtons--metaInfo--file-size = Розмір файлу:
 MenuButtons--metaInfo--interval = Інтервал:
 MenuButtons--metaInfo--buffer-capacity = Обсяг буфера:
 MenuButtons--metaInfo--buffer-duration = Тривалість буфера:
@@ -519,6 +641,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Необмежено
 MenuButtons--metaInfo--application = Застосунок
 MenuButtons--metaInfo--name-and-version = Назва та версія:
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Час роботи:
 MenuButtons--metaInfo--update-channel = Канал оновлень:
 MenuButtons--metaInfo--build-id = ID збірки:
 MenuButtons--metaInfo--build-type = Тип збірки:
@@ -555,13 +679,13 @@ MenuButtons--metaOverheadStatistics-mean = Середнє
 MenuButtons--metaOverheadStatistics-max = Макс
 MenuButtons--metaOverheadStatistics-min = Мін
 MenuButtons--metaOverheadStatistics-statkeys-overhead = Спожиті для роботи ресурси
-    .title = Час отримання всіх потоків.
+    .title = Час створення вибірки всіх потоків.
 MenuButtons--metaOverheadStatistics-statkeys-cleaning = Очищення
     .title = Час викинути застарілі дані.
 MenuButtons--metaOverheadStatistics-statkeys-counter = Лічильник
     .title = Час збору всіх лічильників
 MenuButtons--metaOverheadStatistics-statkeys-interval = Інтервал:
-    .title = Зафіксований інтервал між двома зразками.
+    .title = Зафіксований інтервал між двома вибірками.
 MenuButtons--metaOverheadStatistics-statkeys-lockings = Блокування
     .title = Час до блокування перед виконанням вимірювань.
 MenuButtons--metaOverheadStatistics-overhead-duration = Тривалість споживання ресурсів на роботу:
@@ -581,8 +705,15 @@ MenuButtons--publish--renderCheckbox-label-preference = Включити зна�
 MenuButtons--publish--renderCheckbox-label-private-browsing = Включити дані з вікон приватного перегляду
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Цей профіль містить дані приватного перегляду
+MenuButtons--publish--renderCheckbox-label-argument-values = Включити значення аргументів функції трасування виконання JavaScript
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Цей профіль містить значення аргументів функцій, записані зі сторінки, які можуть містити персональні дані
 MenuButtons--publish--share-performance-profile = Поділитися профілем швидкодії
+MenuButtons--publish--reshare-performance-profile = Повторно поділитися профілем швидкодії
+MenuButtons--publish--save-performance-profile = Зберегти профіль швидкодії
+MenuButtons--publish--local-profile-description = Цей профіль не вивантажено та буде втрачено після закриття цієї вкладки. Щоб залишити його, збережіть його на своєму комп’ютері або завантажте за допомогою функції Поділитися.
 MenuButtons--publish--info-description = Вивантажте свій профіль і зробіть його доступним для всіх, хто має посилання.
+MenuButtons--publish--download-info-description = Зберегти цей профіль як файл на своєму комп'ютері.
 MenuButtons--publish--info-description-default = Типово ваші особисті дані вилучаються.
 MenuButtons--publish--info-description-firefox-nightly2 = Цей профіль з { -firefox-nightly-brand-name }, тому типово включено більшість інформації.
 MenuButtons--publish--include-additional-data = Включити додаткові дані, які можуть розкрити вашу ідентичність
@@ -591,6 +722,7 @@ MenuButtons--publish--upload-title = Вивантаження профілю…
 MenuButtons--publish--cancel-upload = Скасувати вивантаження
 MenuButtons--publish--message-something-went-wrong = Йой, під час вивантаження профілю сталася якась халепа.
 MenuButtons--publish--message-try-again = Повторити спробу
+MenuButtons--publish--save = Зберегти
 MenuButtons--publish--compressing = Стиснення…
 MenuButtons--publish--error-while-compressing = Помилка під час стиснення, спробуйте прибрати прапорці біля деяких полів, щоб зменшити розмір профілю.
 
@@ -723,7 +855,7 @@ StackSettings--implementation-native2 = Вбудовані
 StackSettings--stack-implementation-label = Фільтр стеків:
 StackSettings--use-data-source-label = Джерело даних:
 StackSettings--call-tree-strategy-timing = Таймінги
-    .title = Створити підсумок окремих стеків виконаного впродовж певного часу коду
+    .title = Підсумовувати, використовуючи вибіркові стеки виконаного коду з плином часу
 StackSettings--call-tree-strategy-js-allocations = Розподіл ресурсів JavaScript
     .title = Підсумовувати розподілені байти JavaScript (без вивільнених)
 StackSettings--call-tree-strategy-native-retained-allocations = Утримана пам'ять
@@ -736,6 +868,8 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Вивільне�
     .title = Підсумовувати байти вивільненої сайтом пам'яті, на якому її було вивільнено
 StackSettings--invert-call-stack = Інвертувати стек викликів
     .title = Сортувати за часом, витраченим у вузлі виклику, ігноруючи його дочірні вузли.
+StackSettings--include-idle-samples = Включити вибірки часу неактивності
+    .title = Приберіть позначку, щоб сховати вибірки, кінцевий фрейм яких перебуває в категорії Простій.
 StackSettings--show-user-timing = Показати таймінги користувача
 StackSettings--use-stack-chart-same-widths = Використовувати однакову ширину для кожного стека
 StackSettings--panel-search =
@@ -797,6 +931,32 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = Сховати процес
 
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = відносна пам'ять на цю мить
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = діапазон пам'яті в графіку
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = розподіл і вивільнення після попередньої вибірки
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = ЦП
+
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
 ## graphed over time.
@@ -822,6 +982,11 @@ TrackPower--tooltip-power-watt = { $value } Вт
 #   $value (String) - the power value at this location
 TrackPower--tooltip-power-milliwatt = { $value } мВт
     .label = Потужність
+# This is used in the tooltip when the instant power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-power-microwatt = { $value } мкВт
+    .label = Потужність
 # This is used in the tooltip when the power value uses the kilowatt unit.
 # Variables:
 #   $value (String) - the power value at this location
@@ -836,6 +1001,11 @@ TrackPower--tooltip-average-power-watt = { $value } Вт
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } мВт
+    .label = Середня потужність у поточній вибірці
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } мкВт
     .label = Середня потужність у поточній вибірці
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
@@ -906,12 +1076,12 @@ TrackPower--tooltip-energy-carbon-used-in-preview-microwatthour = { $value } м�
 #   $value (String) - the value for the data transfer speed.
 #                     Will contain the unit (eg. B, KB, MB)
 TrackBandwidthGraph--speed = { $value } за секунду
-    .label = Швидкість передавання для цього зразка
+    .label = Швидкість передавання для цієї вибірки
 # This is used in the tooltip of the bandwidth track.
 # Variables:
 #   $value (String) - how many read or write operations were performed since the previous sample
 TrackBandwidthGraph--read-write-operations-since-the-previous-sample = { $value }
-    .label = операцій читання/запису від попереднього зразка
+    .label = операцій читання/запису від попередньої вибірки
 # This is used in the tooltip of the bandwidth track.
 # Variables:
 #   $value (String) - the total of transfered data until the hovered time.
@@ -971,6 +1141,12 @@ TransformNavigator--focus-subtree = Вузол фокусування: { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Сфокусуватися: { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Фокус на собі: { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:
@@ -1009,7 +1185,7 @@ TransformNavigator--collapse-function-subtree = Згорнути піддере�
 # "Drop samples outside of markers matching ..." transform.
 # Variables:
 #   $item (String) - Search filter of the markers that transform will apply to.
-TransformNavigator--drop-samples-outside-of-markers-matching = Перетягніть зразки за межі маркерів, що відповідають: “{ $item }”
+TransformNavigator--drop-samples-outside-of-markers-matching = Перетягніть вибірки за межі маркерів, що відповідають: “{ $item }”
 
 ## "Bottom box" - a view which contains the source view and the assembly view,
 ## at the bottom of the profiler UI
@@ -1042,6 +1218,12 @@ BottomBox--assembly-code-not-available-title = Код асемблера нед�
 # Elements:
 #   <a>link text</a> - A link to the github issue about supported scenarios.
 BottomBox--assembly-code-not-available-text = Перегляньте <a>обговорення #4520</a>, щоб дізнатися про підтримувані сценарії та заплановані вдосконалення.
+# The toggle button for making the bottom box fullscreen.
+BottomBox--hide-fullscreen =
+    .title = Вийти з повноекранного режиму
+# The toggle button for making the bottom box fullscreen.
+BottomBox--show-fullscreen =
+    .title = Повноекранний режим
 SourceView--close-button =
     .title = Закрити вікно з кодом
 
@@ -1098,6 +1280,13 @@ SourceView--not-in-archive-error-when-obtaining-source = Файл { $pathInArchi
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = Не вдалося проаналізувати архів за адресою { $url }: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Браузеру не вдалося отримати файл джерела для { $url } з sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 
@@ -1109,6 +1298,17 @@ AssemblyView--show-button =
 # Assembly refers to the low-level programming language.
 AssemblyView--hide-button =
     .title = Сховати перегляд асемблера
+# The "◀" button above the assembly view.
+AssemblyView--prev-button =
+    .title = Попередня
+# The "▶" button above the assembly view.
+AssemblyView--next-button =
+    .title = Наступна
+# The label showing the current position and total count above the assembly view.
+# Variables:
+#   $current (Number) - The current position (1-indexed).
+#   $total (Number) - The total count.
+AssemblyView--position-label = { $current } із { $total }
 
 ## UploadedRecordingsHome
 ## This is the page that displays all the profiles that user has uploaded.

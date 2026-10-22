@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { IndexIntoSourceTable, SourceTable } from 'firefox-profiler/types';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from './store';
 
 /**
  * A source row that already carries a sourceMapURL, and is therefore eligible
@@ -60,45 +60,69 @@ export function getSourcesWithSourceMapURL(
   return eligible;
 }
 
+function _isPosition(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+  const position = value as Record<string, unknown>;
+  return (
+    typeof position.line === 'number' && typeof position.column === 'number'
+  );
+}
+
+function _isRegularSourceMap(value: unknown): boolean {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+  const map = value as Record<string, unknown>;
+  return (
+    typeof map.version === 'number' &&
+    typeof map.mappings === 'string' &&
+    Array.isArray(map.sources)
+  );
+}
+
+// An index map replaces the top-level `mappings` string with a `sections`
+// array, each section pairing a generated-code offset with an embedded source
+// map (ECMA-426 section 10: https://tc39.es/ecma426/#sec-index-source-map).
+// The embedded maps must be regular source maps: the spec decodes them with
+// DecodeSourceMap, so index maps can't be nested. Sections that reference
+// their map by `url` instead are not supported by the source-map library.
+function _isIndexSourceMap(map: Record<string, unknown>): boolean {
+  return (
+    typeof map.version === 'number' &&
+    Array.isArray(map.sections) &&
+    map.sections.every(
+      (section) =>
+        section !== null &&
+        typeof section === 'object' &&
+        _isPosition(section.offset) &&
+        _isRegularSourceMap(section.map)
+    )
+  );
+}
+
+function _isSourceMap(value: unknown): value is SourceMap {
+  if (value === null || typeof value !== 'object') {
+    return false;
+  }
+  const map = value as Record<string, unknown>;
+  return 'sections' in map ? _isIndexSourceMap(map) : _isRegularSourceMap(map);
+}
+
 /**
- * Parse the text contents of a `.map` file into a RawSourceMap. Returns null
- * for invalid JSON, for JSON that isn't a source map (missing version /
- * mappings / sources), and for index maps.
- *
- * An index map replaces the top-level `mappings` string with a `sections`
- * array, each section pairing a generated-code offset with an embedded source
- * map (ECMA-426 section 10: https://tc39.es/ecma426/#sec-index-source-map).
- * We skip them because no mainstream web bundler emits one, and we currently
- * don't support it.
+ * Parse the text contents of a `.map` file into a source map. Returns null
+ * for invalid JSON, and for JSON that isn't a source map (missing version /
+ * mappings / sources, or malformed index map sections).
  */
-export function parseSourceMapFileContents(text: string): RawSourceMap | null {
+export function parseSourceMapFileContents(text: string): SourceMap | null {
   let parsed: unknown;
   try {
     parsed = JSON.parse(text);
   } catch {
     return null;
   }
-
-  if (parsed === null || typeof parsed !== 'object') {
-    return null;
-  }
-
-  const map = parsed as Record<string, unknown>;
-
-  // Index maps use `sections` instead of top-level `mappings`. Reject them.
-  if ('sections' in map) {
-    return null;
-  }
-
-  if (
-    typeof map.version !== 'number' ||
-    typeof map.mappings !== 'string' ||
-    !Array.isArray(map.sources)
-  ) {
-    return null;
-  }
-
-  return parsed as RawSourceMap;
+  return _isSourceMap(parsed) ? parsed : null;
 }
 
 /**
@@ -158,7 +182,7 @@ function matchByBasename(
  * one, which we match unconditionally regardless of name.
  */
 export function matchSourceMapToSource(
-  map: RawSourceMap,
+  map: SourceMap,
   uploadedFileName: string,
   eligible: EligibleSource[]
 ): SourceMapMatchResult {

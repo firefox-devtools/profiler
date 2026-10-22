@@ -61,6 +61,7 @@ import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
 import {
   formatTimestamp as formatDuration,
+  formatSeconds,
   formatBytes,
 } from 'firefox-profiler/utils/format-numbers';
 
@@ -86,6 +87,17 @@ const INLINE_LEGEND =
   '(inl?) = some calls were inlined by the compiler.';
 
 const BAR_WIDTH = 28;
+
+function createTimestampFormatter(context: SessionContext) {
+  const range = context.currentViewRange ?? context.rootRange;
+  // Resolve a thousandth of the view, with at least millisecond precision
+  // and a nanosecond floor to avoid exposing floating-point noise.
+  const precision = Math.max(
+    0.000001,
+    Math.min(1, (range.end - range.start) / 1000)
+  );
+  return (time: number) => formatSeconds(time, 5, 3, precision);
+}
 
 /**
  * Render aligned `label / bar / count / percentage` rows. `barRatio` is the
@@ -203,7 +215,7 @@ function formatThreadList(
 
 /**
  * Format a SessionContext as a compact header line.
- * Shows current thread selection, zoom range, and full profile duration.
+ * Shows current thread selection, zoom range, full profile duration, and search.
  */
 export function formatContextHeader(
   context: SessionContext,
@@ -247,7 +259,10 @@ export function formatContextHeader(
     (activeFilters?.length ?? 0) + (ephemeralFilters?.length ?? 0);
   const filterInfo =
     totalFilterCount > 0 ? ` | Filters: ${totalFilterCount}` : '';
-  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
+  const searchInfo = context.callTreeSearch
+    ? ` | Call tree search: "${context.callTreeSearch}"`
+    : '';
+  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}${searchInfo}]`;
 }
 
 /**
@@ -271,6 +286,11 @@ export function formatStatusResult(result: StatusResult): string {
   }
 
   const filterLines: string[] = [];
+  if (result.callTreeSearch) {
+    filterLines.push(
+      `  Call tree search (all threads): "${result.callTreeSearch}"`
+    );
+  }
   for (const stack of result.filterStacks) {
     if (stack.filters.length === 0) {
       continue;
@@ -307,8 +327,13 @@ export function formatFilterStackResult(result: FilterStackResult): string {
   if (result.message) {
     lines.push(result.message);
   }
+  if (result.callTreeSearch) {
+    lines.push(`Call tree search (all threads): "${result.callTreeSearch}"`);
+  }
   if (result.filters.length === 0) {
-    lines.push(`No active filters for ${result.threadHandle}`);
+    if (!result.callTreeSearch) {
+      lines.push(`No active filters for ${result.threadHandle}`);
+    }
   } else {
     lines.push(`Filters for ${result.threadHandle} (applied in order):`);
     for (const f of result.filters) {
@@ -467,6 +492,7 @@ export function formatMarkerStackResult(
   result: WithContext<MarkerStackResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const formatTimestamp = createTimestampFormatter(result.context);
   let output = `${contextHeader}
 
 Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
@@ -477,7 +503,7 @@ Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
   }
 
   if (result.stack.capturedAt !== undefined) {
-    output += `\nCaptured at: ${formatDuration(result.stack.capturedAt)}\n`;
+    output += `\nCaptured at: ${formatTimestamp(result.stack.capturedAt)}\n`;
   }
 
   for (let i = 0; i < result.stack.frames.length; i++) {
@@ -499,7 +525,8 @@ export function formatMarkerInfoResult(
   result: WithContext<MarkerInfoResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
-  return `${contextHeader}\n\n${formatMarkerInfoBody(result)}`;
+  const formatTimestamp = createTimestampFormatter(result.context);
+  return `${contextHeader}\n\n${formatMarkerInfoBody(result, formatTimestamp)}`;
 }
 
 /**
@@ -511,6 +538,7 @@ export function formatMarkerInfoMultiResult(
   result: WithContext<MarkerInfoMultiResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const formatTimestamp = createTimestampFormatter(result.context);
   const total = result.markers.length + result.errors.length;
   const records: string[] = [];
 
@@ -525,7 +553,9 @@ export function formatMarkerInfoMultiResult(
     const prefix = `[${position}/${total}] `;
     const marker = byHandle.get(markerHandle);
     if (marker) {
-      records.push(prefix + formatMarkerInfoBody(marker).trimEnd());
+      records.push(
+        prefix + formatMarkerInfoBody(marker, formatTimestamp).trimEnd()
+      );
       continue;
     }
     const error = errorsByHandle.get(markerHandle);
@@ -555,7 +585,10 @@ export function formatMarkerInfoMultiResult(
 /**
  * Format one marker info record, below the context header.
  */
-function formatMarkerInfoBody(result: MarkerInfoResult): string {
+function formatMarkerInfoBody(
+  result: MarkerInfoResult,
+  formatTimestamp: (time: number) => string
+): string {
   let output = `Marker ${result.markerHandle}: ${result.name}`;
   if (result.tooltipLabel) {
     output += ` - ${result.tooltipLabel}`;
@@ -566,9 +599,9 @@ function formatMarkerInfoBody(result: MarkerInfoResult): string {
   output += `Type: ${result.markerType ?? 'None'}\n`;
   output += `Category: ${result.category.name}\n`;
 
-  const startStr = formatDuration(result.start);
+  const startStr = formatTimestamp(result.start);
   if (result.end !== null) {
-    const endStr = formatDuration(result.end);
+    const endStr = formatTimestamp(result.end);
     const durationStr = formatDuration(result.duration!);
     output += `Time: ${startStr} - ${endStr} (${durationStr})\n`;
   } else {
@@ -595,7 +628,7 @@ function formatMarkerInfoBody(result: MarkerInfoResult): string {
   if (result.stack && result.stack.frames.length > 0) {
     output += '\nStack trace:\n';
     if (result.stack.capturedAt !== undefined) {
-      output += `  Captured at: ${formatDuration(result.stack.capturedAt)}\n`;
+      output += `  Captured at: ${formatTimestamp(result.stack.capturedAt)}\n`;
     }
 
     for (let i = 0; i < result.stack.frames.length; i++) {
@@ -1250,7 +1283,6 @@ function formatSamplesPreamble(result: {
     result.activeOnly && isTiming
       ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
       : '';
-  const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
   const filtersParts: string[] = [
     ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
       []),
@@ -1258,7 +1290,7 @@ function formatSamplesPreamble(result: {
   ];
   const filtersNote =
     filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
-  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${searchNote}${filtersNote}`;
+  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${filtersNote}`;
 }
 
 /**
@@ -1271,7 +1303,7 @@ export function formatThreadSamplesResult(
 
   if (result.search && result.topFunctionsByTotal.length === 0) {
     output +=
-      `No samples matched --search "${result.search}".\n` +
+      `No samples matched call tree search "${result.search}".\n` +
       'Tip: --search keeps samples with a matching frame anywhere in the stack.\n' +
       '     Use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
       '     "|" is treated as a literal character, not OR.\n';
@@ -1383,7 +1415,7 @@ export function formatThreadSamplesTopDownResult(
 
   // Top-down call tree
   const topDownEmpty = result.search
-    ? `No samples matched --search "${result.search}".\n` +
+    ? `No samples matched call tree search "${result.search}".\n` +
       'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
       '     "|" is treated as a literal character, not OR.'
     : undefined;
@@ -1403,7 +1435,7 @@ export function formatThreadSamplesBottomUpResult(
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {
     const bottomUpEmpty = result.search
-      ? `No samples matched --search "${result.search}".\n` +
+      ? `No samples matched call tree search "${result.search}".\n` +
         'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
         '     "|" is treated as a literal character, not OR.'
       : undefined;
@@ -1457,9 +1489,10 @@ export function formatThreadMarkersResult(
 
   // Flat list mode: one row per marker in chronological order
   if (result.flatMarkers) {
+    const formatTimestamp = createTimestampFormatter(result.context);
     for (const m of result.flatMarkers) {
       const stackIndicator = m.hasStack ? '✓' : '✗';
-      const startStr = `t=${formatDuration(m.start)}`;
+      const startStr = `t=${formatTimestamp(m.start)}`;
       const durationStr =
         m.duration !== undefined ? formatDuration(m.duration) : 'instant';
       const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
@@ -2262,9 +2295,10 @@ export function formatProfileMarkersResult(
   }
   lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
 
+  const formatTimestamp = createTimestampFormatter(result.context);
   for (const m of result.markers) {
     const stackIndicator = m.hasStack ? '✓' : '✗';
-    const startStr = `t=${formatDuration(m.start)}`;
+    const startStr = `t=${formatTimestamp(m.start)}`;
     const durationStr =
       m.duration !== undefined ? formatDuration(m.duration) : 'instant';
     const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';

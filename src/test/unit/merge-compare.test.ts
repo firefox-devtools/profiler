@@ -11,6 +11,7 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
+  addCompositorScreenshotSchemaIfNeeded,
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
@@ -81,7 +82,10 @@ describe('mergeProfilesForDiffing function', function () {
         libName = mergedLibs[libIndex].name;
       }
 
-      /* eslint-disable jest/no-conditional-expect */
+      // These conditional expects aren't reported because of an oxlint bug:
+      // https://github.com/oxc-project/oxc/issues/28054
+      // Once it's fixed, wrap this switch in
+      // oxlint-disable/enable jest/no-conditional-expect comments.
       switch (funcName) {
         case 'A':
           expect(libName).toBeOneOf(['libA', 'libB']);
@@ -97,7 +101,6 @@ describe('mergeProfilesForDiffing function', function () {
           break;
         default:
       }
-      /* eslint-enable */
     }
   });
 
@@ -365,6 +368,57 @@ describe('mergeProfilesForDiffing function', function () {
       '  - Y (total: 2, self: 2)',
       '  - Z (total: 2, self: 2)',
     ]);
+  });
+
+  it('keeps the screenshot markers of a profile when the other profile has none', function () {
+    const { profile: profileA } = getProfileFromTextSamples('A  B  C');
+    const { profile: profileB, stringTable: stringTableB } =
+      getProfileFromTextSamples('D');
+    const screenshotUrl = 'Screenshot Url';
+    addMarkersToThreadWithCorrespondingSamples(
+      profileB.threads[0],
+      profileB.shared,
+      [
+        [
+          'CompositorScreenshot 0',
+          1,
+          2,
+          {
+            type: 'CompositorScreenshot',
+            url: stringTableB.indexForString(screenshotUrl),
+            windowID: '0',
+            windowSize: { width: 300, height: 150 },
+          },
+        ],
+      ]
+    );
+    addCompositorScreenshotSchemaIfNeeded(profileB);
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [profileA, profileB],
+      [profileState, profileState]
+    );
+
+    expect(mergedProfile.meta.markerSchema.map(({ name }) => name)).toContain(
+      'CompositorScreenshot'
+    );
+
+    const mergedStringTable = StringTable.withBackingArray(
+      mergedProfile.shared.stringArray
+    );
+    const screenshotData = ensureExists(
+      mergedProfile.threads[1].markers.data.find(
+        (data) => data !== null && data.type === 'CompositorScreenshot'
+      )
+    );
+    expect(
+      mergedStringTable.getString(ensureExists((screenshotData as any).url))
+    ).toBe(screenshotUrl);
   });
 
   it('should preserve transforms and produce matching call trees', () => {
@@ -735,8 +789,7 @@ describe('mergeThreads function', function () {
           type: 'CompositorScreenshot',
           url: screenshot1UrlIndex,
           windowID: 'XXX',
-          windowWidth: 300,
-          windowHeight: 600,
+          windowSize: { width: 300, height: 600 },
         },
       ],
     ]);
@@ -750,8 +803,7 @@ describe('mergeThreads function', function () {
           type: 'CompositorScreenshot',
           url: screenshot2UrlIndex,
           windowID: 'YYY',
-          windowWidth: 300,
-          windowHeight: 600,
+          windowSize: { width: 300, height: 600 },
         },
       ],
     ]);

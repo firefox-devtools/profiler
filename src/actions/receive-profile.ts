@@ -79,7 +79,7 @@ import {
 import { doSourceMapSymbolication } from './source-map-symbolication';
 import type { SourceMapSymbolicationResult } from './source-map-symbolication';
 
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type {
   RequestedLib,
   ImplementationFilter,
@@ -849,7 +849,7 @@ async function doResolveSourceMaps(
   browserConnection: BrowserConnection,
   dispatch: Dispatch
 ): Promise<{
-  resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>;
+  resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap>;
   compiledSources: Map<IndexIntoSourceTable, string>;
 }> {
   const { sources, stringArray } = profile.shared;
@@ -872,7 +872,7 @@ async function doResolveSourceMaps(
   }
 
   // Fetch source maps and compiled sources in parallel, ignoring individual failures.
-  const resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap> = new Map();
+  const resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap> = new Map();
   const compiledSources: Map<IndexIntoSourceTable, string> = new Map();
 
   dispatch({ type: 'START_SOURCE_MAP_FETCHING' });

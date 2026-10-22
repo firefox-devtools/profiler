@@ -16,7 +16,7 @@ import {
   getJSSourcesViaWebChannelV7,
   getSourceMapViaWebChannel,
 } from './web-channel';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type {
   Milliseconds,
   FaviconData,
@@ -92,7 +92,7 @@ export interface BrowserConnection {
 
   // Get source map of the given source directly from the browser.
   // Requires WebChannel version 7+.
-  getSourceMap(sourceId: string): Promise<RawSourceMap>;
+  getSourceMap(sourceId: string): Promise<SourceMap>;
 
   // True when the browser exposes GET_SOURCE_MAP (WebChannel version 7+).
   // Callers use this to gate source-map-based features.
@@ -247,7 +247,7 @@ class BrowserConnectionImpl implements BrowserConnection {
     return [];
   }
 
-  async getSourceMap(sourceId: string): Promise<RawSourceMap> {
+  async getSourceMap(sourceId: string): Promise<SourceMap> {
     if (!this.supportsGetSourceMap) {
       throw new Error(
         "Can't use getSourceMap in Firefox versions with the old WebChannel."

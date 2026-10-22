@@ -19,6 +19,8 @@ import {
 import {
   getNativeSymbolInfo,
   getNativeSymbolsForFunc,
+  getFunctionFramePerStack,
+  getTotalNativeSymbolTimingsForCallNode,
   findAddressProofForFile,
   getOriginalPositionForFrame,
   computeFuncTableFromRawFuncTable,
@@ -26,7 +28,7 @@ import {
 import { fetchAssembly } from 'firefox-profiler/utils/fetch-assembly';
 import { fetchSource } from 'firefox-profiler/utils/fetch-source';
 import type { ExternalCommunicationDelegate } from 'firefox-profiler/utils/query-api';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type {
   Profile,
   IndexIntoFuncTable,
@@ -64,7 +66,7 @@ class NodeExternalCommunicationDelegate implements ExternalCommunicationDelegate
     throw new Error('No browser connection available in profiler-cli');
   }
 
-  async fetchSourceMapFromBrowser(_sourceId: string): Promise<RawSourceMap> {
+  async fetchSourceMapFromBrowser(_sourceId: string): Promise<SourceMap> {
     throw new Error('No browser connection available in profiler-cli');
   }
 }
@@ -226,7 +228,40 @@ async function fetchSourceAnnotation(
   };
 }
 
+// Computing address timings and fetching assembly is done per native symbol,
+// and costs a pass over the whole stack table each. Functions that are inlined
+// in many places can have tens of thousands of native symbols, so only the
+// heaviest ones are annotated.
+const MAX_ASM_NATIVE_SYMBOLS = 10;
+
+export function selectHeaviestNativeSymbols(
+  funcIndex: IndexIntoFuncTable,
+  nativeSymbolsForFunc: Set<IndexIntoNativeSymbolTable>,
+  thread: Thread,
+  samples: SamplesLikeTable
+): Set<IndexIntoNativeSymbolTable> {
+  const { stackTable, frameTable } = thread;
+  const funcFramePerStack = getFunctionFramePerStack(
+    funcIndex,
+    stackTable,
+    frameTable
+  );
+  const weightPerSymbol = getTotalNativeSymbolTimingsForCallNode(
+    samples,
+    funcFramePerStack,
+    frameTable
+  );
+  return new Set(
+    Array.from(nativeSymbolsForFunc)
+      .sort(
+        (a, b) => (weightPerSymbol.get(b) ?? 0) - (weightPerSymbol.get(a) ?? 0)
+      )
+      .slice(0, MAX_ASM_NATIVE_SYMBOLS)
+  );
+}
+
 async function fetchAsmAnnotations(
+  funcIndex: IndexIntoFuncTable,
   functionHandle: string,
   nativeSymbolsForFunc: Set<IndexIntoNativeSymbolTable>,
   thread: Thread,
@@ -245,8 +280,21 @@ async function fetchAsmAnnotations(
   const { stackTable, frameTable, funcTable: threadFuncTable } = thread;
   const nativeSymbolCount = nativeSymbolsForFunc.size;
 
+  let symbolsToAnnotate = nativeSymbolsForFunc;
+  if (nativeSymbolCount > MAX_ASM_NATIVE_SYMBOLS) {
+    symbolsToAnnotate = selectHeaviestNativeSymbols(
+      funcIndex,
+      nativeSymbolsForFunc,
+      thread,
+      samples
+    );
+    warnings.push(
+      `Function ${functionHandle} has ${nativeSymbolCount} native symbols; showing only the ${MAX_ASM_NATIVE_SYMBOLS} with the most samples.`
+    );
+  }
+
   const results = await Promise.all(
-    Array.from(nativeSymbolsForFunc).map(async (nsIndex) => {
+    Array.from(symbolsToAnnotate).map(async (nsIndex) => {
       const nativeSymbolInfo = getNativeSymbolInfo(
         nsIndex,
         thread.nativeSymbols,
@@ -408,6 +456,7 @@ export async function functionAnnotate(
   const asmPromise: Promise<AsmAnnotationsResult> =
     mode === 'asm' || mode === 'all'
       ? fetchAsmAnnotations(
+          funcIndex,
           functionHandle,
           nativeSymbolsForFunc,
           thread,

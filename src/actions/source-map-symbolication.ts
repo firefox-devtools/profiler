@@ -20,7 +20,7 @@ import type {
   EligibleSource,
   SourceMapAmbiguityReason,
 } from 'firefox-profiler/profile-logic/source-maps/matching';
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 /**
@@ -40,7 +40,7 @@ import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 export type SourceMapSymbolicationResult = 'applied' | 'no-match' | 'error';
 
 export function doSourceMapSymbolication(
-  resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>,
+  resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap>,
   compiledSources: Map<IndexIntoSourceTable, string>,
   run: SourceMapRunner = _runSourceMapWorker
 ): ThunkAction<Promise<SourceMapSymbolicationResult>> {

@@ -699,6 +699,7 @@ MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
 MenuButtons--publish--reshare-performance-profile = Νέα κοινή χρήση προφίλ επιδόσεων
 MenuButtons--publish--save-performance-profile = Αποθήκευση προφίλ επιδόσεων
+MenuButtons--publish--local-profile-description = Αυτό το προφίλ δεν έχει μεταφορτωθεί και θα χαθεί όταν κλείσετε αυτήν την καρτέλα. Για να το διατηρήσετε, αποθηκεύστε το στον υπολογιστή σας ή μεταφορτώστε το με την επιλογή «Κοινή χρήση».
 MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
 MenuButtons--publish--download-info-description = Αποθηκεύστε αυτό το προφίλ ως αρχείο στον υπολογιστή σας.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
