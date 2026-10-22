@@ -34,6 +34,7 @@ import {
   getHiddenLocalTracks,
   getInvertCallstack,
   getHash,
+  getUrlState,
 } from 'firefox-profiler/selectors/url-state';
 import {
   assertExhaustiveCheck,
@@ -75,12 +76,14 @@ import type {
   TableViewOptions,
   SelectionContext,
   BottomBoxInfo,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
   funcHasRecursiveCall,
 } from '../profile-logic/transforms';
 import { changeStoredProfileNameInDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
+import { replaceHistoryWithUrlState } from 'firefox-profiler/app-logic/url-handling';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
@@ -132,6 +135,32 @@ export function changeSelectedCallNode(
 }
 
 /**
+ * Select a function for a given thread in the function list.
+ *
+ * Replaces the current history entry rather than pushing a new one, so that
+ * holding e.g. the down arrow key in the function list doesn't get rate-limited
+ * by the browser and doesn't flood the back/forward history.
+ */
+export function changeSelectedFunctionIndex(
+  threadsKey: ThreadsKey,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  context: SelectionContext = { source: 'auto' }
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'CHANGE_SELECTED_FUNCTION',
+      selectedFunctionIndex,
+      threadsKey,
+      context,
+    });
+    // Update window.history synchronously instead of waiting for the
+    // UrlManager's componentDidUpdate, which is deferred by React's render
+    // scheduling and would otherwise pushState a new entry.
+    replaceHistoryWithUrlState(getUrlState(getState()));
+  };
+}
+
+/**
  * This action is used when the user right clicks on a call node (in panels such
  * as the call tree, the flame chart, or the stack chart). It's especially used
  * to display the context menu.
@@ -144,6 +173,17 @@ export function changeRightClickedCallNode(
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
     callNodePath,
+  };
+}
+
+export function changeRightClickedFunctionIndex(
+  threadsKey: ThreadsKey,
+  functionIndex: IndexIntoFuncTable | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
+    threadsKey,
+    functionIndex,
   };
 }
 
@@ -204,6 +244,38 @@ export function selectSelfCallNode(
       // In the non-inverted tree, we want to select the self node.
       dispatch(changeSelectedCallNode(threadsKey, callNodePath.reverse()));
     }
+  };
+}
+
+/**
+ * Like selectSelfCallNode, but selects the function of the self call node
+ * instead. Used when the function list tab is active.
+ */
+export function selectSelfFunction(
+  threadsKey: ThreadsKey,
+  sampleIndex: IndexIntoSamplesTable | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (sampleIndex === null || sampleIndex < 0) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const sampleCallNodes =
+      threadSelectors.getSampleCallNodesForFilteredThread(getState());
+    if (sampleIndex >= sampleCallNodes.length) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const funcIndex =
+      callNodeInfo.getCallNodeTable().func[nonInvertedSelfCallNode];
+    dispatch(changeSelectedFunctionIndex(threadsKey, funcIndex));
   };
 }
 
@@ -1624,6 +1696,15 @@ export function changeMarkerTableSort(
   };
 }
 
+export function changeFunctionListSort(
+  sort: SingleColumnSortState[] | null
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SORT',
+    sort,
+  };
+}
+
 export function changeNetworkSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_NETWORK_SEARCH_STRING',
@@ -2032,27 +2113,76 @@ export function handleCallNodeTransformShortcut(
     if (event.metaKey || event.ctrlKey || event.altKey) {
       return;
     }
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const unfilteredThread = threadSelectors.getThread(getState());
-    const implementation = getImplementationFilter(getState());
-    const inverted = getInvertCallstack(getState());
-    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const category = callNodeInfo.categoryForNode(callNodeIndex);
-
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     switch (event.key) {
-      case 'F':
+      case 'F': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        const inverted = getInvertCallstack(getState());
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'focus-subtree',
-            callNodePath: callNodePath,
+            callNodePath,
             implementation,
             inverted,
           })
         );
         break;
+      }
+      case 'M': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-call-node',
+            callNodePath,
+            implementation,
+          })
+        );
+        break;
+      }
+      case 'g': {
+        const category = callNodeInfo.categoryForNode(callNodeIndex);
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-category',
+            category,
+          })
+        );
+        break;
+      }
+      default:
+        dispatch(
+          handleFunctionTransformShortcut(
+            event,
+            threadsKey,
+            callNodeInfo,
+            funcIndex
+          )
+        );
+    }
+  };
+}
+
+export function handleFunctionTransformShortcut(
+  event: React.KeyboardEvent<HTMLElement>,
+  threadsKey: ThreadsKey,
+  callNodeInfo: CallNodeInfo,
+  funcIndex: IndexIntoFuncTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const implementation = getImplementationFilter(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const unfilteredThread = threadSelectors.getThread(getState());
+
+    switch (event.key) {
       case 'f':
         dispatch(
           addTransformToStack(threadsKey, {
@@ -2066,15 +2196,6 @@ export function handleCallNodeTransformShortcut(
           addTransformToStack(threadsKey, {
             type: 'focus-self',
             funcIndex,
-            implementation,
-          })
-        );
-        break;
-      case 'M':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'merge-call-node',
-            callNodePath: callNodePath,
             implementation,
           })
         );
@@ -2133,7 +2254,7 @@ export function handleCallNodeTransformShortcut(
         }
         break;
       }
-      case 'c': {
+      case 'c':
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'collapse-function-subtree',
@@ -2141,17 +2262,8 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
-      }
-      case 'g':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'focus-category',
-            category,
-          })
-        );
-        break;
       default:
-      // This did not match a call tree transform.
+      // This did not match a function transform.
     }
   };
 }
