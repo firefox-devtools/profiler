@@ -1866,6 +1866,15 @@
     "@codemirror/view" "^6.0.0"
     crelt "^1.0.5"
 
+"@codemirror/search@^6.7.2":
+  version "6.7.2"
+  resolved "https://registry.yarnpkg.com/@codemirror/search/-/search-6.7.2.tgz#93a49eb21c026de473c4fc3a047b8fd67784b0f0"
+  integrity sha512-gUYkYhT2+n/+VGZ+8EzE5WFkYZUZYm1VOKDudIsNqh42uRVQJ0a6Yss9sdKT3MeOYfuL1N6AZA57oza0Oyr0LA==
+  dependencies:
+    "@codemirror/state" "^6.0.0"
+    "@codemirror/view" "^6.37.0"
+    crelt "^1.0.5"
+
 "@codemirror/state@^6.0.0", "@codemirror/state@^6.7.0", "@codemirror/state@^6.7.6":
   version "6.7.6"
   resolved "https://registry.yarnpkg.com/@codemirror/state/-/state-6.7.6.tgz#48af761fae3947745f17fa143cc5b5084225388d"
@@ -1878,10 +1887,10 @@
   resolved "https://registry.yarnpkg.com/@codemirror/streamparser/-/streamparser-6.0.0.tgz#cc48a8f67e9001222d69938fabab157d68ce59d6"
   integrity sha512-JTFPF6xrfjt0mnfGPgzcLiMwYmvIyNaoizp8BYzv8FE8KrT6GBGDZ190rtt+O7Wke3gG/MFHyiY9YGNeimof4w==
 
-"@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.43.13":
-  version "6.43.13"
-  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.43.13.tgz#a2d0286bf9e6051cb89076fd1c8dd58b907008d0"
-  integrity sha512-sihaFrUzAsYBQsL9J2t69y8nfMQGwcYmggAZsk+kjPbjYZMyuf2hU8tUNTZ+P+isb6XRr8JE22TZlJxBoVdH1A==
+"@codemirror/view@^6.0.0", "@codemirror/view@^6.17.0", "@codemirror/view@^6.23.0", "@codemirror/view@^6.37.0", "@codemirror/view@^6.43.13":
+  version "6.43.15"
+  resolved "https://registry.yarnpkg.com/@codemirror/view/-/view-6.43.15.tgz#3da2515b3919e199b68520a5b6e559c2a4cfbe9e"
+  integrity sha512-HHsfpqFeHyXLs983pSRe38Xajs0vFWZQ2BuX0m7Ki8w3jZ5iD8cuR3lBz2/5/X53Dhf32SBHKh6rtSTB6tKeGw==
   dependencies:
     "@codemirror/state" "^6.7.0"
     crelt "^1.0.6"
