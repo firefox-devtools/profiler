@@ -719,25 +719,29 @@ type CurrentProfileUploadedInformationAction = {
   readonly uploadedProfileInformation: UploadedProfileInformation | null;
 };
 
-type SourcesAction =
+export type SourcesAction =
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_URL';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly url: string;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION';
       readonly sourceIndex: IndexIntoSourceTable;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_SUCCESS';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly code: string;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_ERROR';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly errors: SourceCodeLoadingError[];
+      readonly generation: number;
     };
 
 // nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`
