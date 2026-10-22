@@ -1546,6 +1546,25 @@ describe('findAddressProofForFile', function () {
     );
     expect(missingAddressProof).toBeNull();
   });
+
+  it('finds an address for a file whose first frame has none', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[lib:XUL][file:a.cpp]
+      B[lib:XUL][file:a.cpp][address:20]
+    `);
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    const sourceIndex = profile.shared.sources.filename.indexOf(
+      stringTable.indexForString('a.cpp')
+    );
+
+    expect(findAddressProofForFile(profile, sourceIndex)).toEqual({
+      debugName: 'XUL',
+      breakpadId: 'SOMETHING_FAKE',
+      address: 0x20,
+    });
+  });
 });
 
 describe('calculateFunctionSizeLowerBound', function () {

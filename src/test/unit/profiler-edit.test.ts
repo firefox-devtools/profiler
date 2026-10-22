@@ -136,6 +136,21 @@ describe('makeOptionsFromArgv', function () {
     expect(options.mapSourcePaths).toEqual('/path/to/mapping.json');
   });
 
+  it('recognizes optional --js-sources-from-func-names', function () {
+    const args = [
+      ...commonArgs,
+      '-i',
+      '/path/to/profile.json',
+      '-o',
+      '/path/to/output.json',
+    ];
+    expect(makeOptionsFromArgv(args).jsSourcesFromFuncNames).toBe(false);
+    expect(
+      makeOptionsFromArgv([...args, '--js-sources-from-func-names'])
+        .jsSourcesFromFuncNames
+    ).toBe(true);
+  });
+
   it('recognizes optional --insert-label-frames', function () {
     const options = makeOptionsFromArgv([
       ...commonArgs,

@@ -14,7 +14,12 @@ import { StringTable } from 'firefox-profiler/utils/string-table';
 
 import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type { SourceMapRunner } from 'firefox-profiler/profile-logic/source-maps/worker-types';
-import type { IndexIntoSourceTable, Profile } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
+import type {
+  IndexIntoSourceTable,
+  IndexIntoStringTable,
+  Profile,
+} from 'firefox-profiler/types';
 
 /**
  * Returns the text of the file at this URL, or null if it can't be read.
@@ -99,6 +104,107 @@ function _cacheByKey<T>(
     }
     return promise;
   };
+}
+
+// Matches "name (url:line:column)", where the URL has a scheme like http://
+// or resource://.
+const FUNC_NAME_WITH_LOCATION_REGEXP =
+  /^(.*) \(([a-z][a-z0-9+.-]*:\/\/.+?):([0-9]+):([0-9]+)\)$/i;
+
+/**
+ * Some profiles only have the location of a JS function in its name, like
+ * "foo (http://example.com/a.js:12:5)". This is the case for the JS funcs of
+ * samply profiles. Move the source, line and column out of the name of these
+ * JS funcs, like the processing of Gecko profiles does, so that their sources
+ * can be embedded too. The JS funcs that already have a source are left alone.
+ */
+export function attachSourcesFromFuncNames(profile: Profile): void {
+  const { funcTable, sources } = profile.shared;
+  const stringArray = profile.shared.stringArray.slice();
+  const stringTable = StringTable.withBackingArray(stringArray);
+  const flags = funcTable.flags.slice();
+  const name = funcTable.name.slice();
+  const source = funcTable.source.slice();
+  const lineNumber = funcTable.lineNumber.slice();
+  const columnNumber = funcTable.columnNumber.slice();
+  const newSources = {
+    length: sources.length,
+    id: sources.id.slice(),
+    filename: sources.filename.slice(),
+    startLine: sources.startLine.slice(),
+    startColumn: sources.startColumn.slice(),
+    sourceMapURL: sources.sourceMapURL.slice(),
+    content: sources.content.slice(),
+  };
+  const sourceIndexByFilename = new Map<
+    IndexIntoStringTable,
+    IndexIntoSourceTable
+  >();
+
+  let attachedCount = 0;
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    if (
+      (flags[funcIndex] & FuncFlag.IsJS) === 0 ||
+      flags[funcIndex] & FuncFlag.HasSource
+    ) {
+      continue;
+    }
+    const match = FUNC_NAME_WITH_LOCATION_REGEXP.exec(
+      stringArray[funcTable.name[funcIndex]]
+    );
+    if (match === null) {
+      continue;
+    }
+    const [, funcName, url, line, column] = match;
+    const filenameIndex = stringTable.indexForString(url);
+    let sourceIndex = sourceIndexByFilename.get(filenameIndex);
+    if (sourceIndex === undefined) {
+      sourceIndex = newSources.length++;
+      newSources.id.push(null);
+      newSources.filename.push(filenameIndex);
+      newSources.startLine.push(1);
+      newSources.startColumn.push(1);
+      newSources.sourceMapURL.push(null);
+      newSources.content.push(null);
+      sourceIndexByFilename.set(filenameIndex, sourceIndex);
+    }
+    // SpiderMonkey names the functions without a name "*". Name them like
+    // Gecko profiles do.
+    name[funcIndex] = stringTable.indexForString(
+      funcName === '*' ? `(root scope) ${url}` : funcName
+    );
+    source[funcIndex] = sourceIndex;
+    flags[funcIndex] |= FuncFlag.HasSource;
+    if ((flags[funcIndex] & FuncFlag.HasLine) === 0) {
+      lineNumber[funcIndex] = Number(line);
+      flags[funcIndex] |= FuncFlag.HasLine;
+    }
+    if ((flags[funcIndex] & FuncFlag.HasColumn) === 0) {
+      columnNumber[funcIndex] = Number(column);
+      flags[funcIndex] |= FuncFlag.HasColumn;
+    }
+    attachedCount++;
+  }
+
+  if (attachedCount === 0) {
+    return;
+  }
+  profile.shared = {
+    ...profile.shared,
+    funcTable: {
+      ...funcTable,
+      flags,
+      name,
+      source,
+      lineNumber,
+      columnNumber,
+    },
+    sources: newSources,
+    stringArray,
+  };
+  console.log(
+    `Found the sources of ${attachedCount} funcs in their names, in ${newSources.length - sources.length} new sources.`
+  );
 }
 
 /**

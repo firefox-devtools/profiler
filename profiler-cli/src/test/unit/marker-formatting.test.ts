@@ -5,7 +5,9 @@
 import {
   formatProfileMarkersResult,
   formatThreadMarkersResult,
+  formatMarkerInfoResult,
   formatMarkerInfoMultiResult,
+  formatMarkerStackResult,
 } from '../../formatters';
 import type {
   ThreadMarkersResult,
@@ -185,10 +187,10 @@ describe('formatThreadMarkersResult flat list mode', function () {
     expect(output).not.toContain('By Category');
   });
 
-  // `start` is already profile-start-relative, so `t=` must print it verbatim.
+  // `start` is already profile-start-relative, so `t=` must use that time base.
   // Needs a non-zero `rootRange.start`: at the 0 used elsewhere in this file, a
   // second subtraction would be invisible.
-  it('renders the flat marker start verbatim, without re-subtracting rootRange.start', function () {
+  it('renders the flat marker start without re-subtracting rootRange.start', function () {
     const result = makeResult({
       context: { ...createContext(), rootRange: { start: 9.2, end: 3000 } },
       filteredMarkerCount: 1,
@@ -197,8 +199,8 @@ describe('formatThreadMarkersResult flat list mode', function () {
 
     const output = formatThreadMarkersResult(result);
     const line = output.split('\n').find((l) => l.includes('m-1'))!;
-    expect(line).toContain('t=549.34ms');
-    expect(line).not.toContain('540.14ms'); // 549.34 - 9.2, if subtracted twice
+    expect(line).toContain('t=0.549s');
+    expect(line).not.toContain('0.540s'); // 549.34 - 9.2, if subtracted twice
   });
 });
 
@@ -281,6 +283,131 @@ function makeProfileMarker(
     ...overrides,
   };
 }
+
+describe.each([
+  {
+    name: 'thread markers',
+    format: (start: number, context: SessionContext) =>
+      formatThreadMarkersResult(
+        makeResult({ context, flatMarkers: [makeFlat({ start })] })
+      ),
+  },
+  {
+    name: 'profile markers',
+    format: (start: number, context: SessionContext) =>
+      formatProfileMarkersResult({
+        ...makeProfileMarkersResult({
+          markers: [makeProfileMarker({ start })],
+          totalCount: 1,
+          matchingThreadCount: 1,
+        }),
+        context,
+      }),
+  },
+  {
+    name: 'marker stack',
+    format: (start: number, context: SessionContext) =>
+      formatMarkerStackResult({
+        type: 'marker-stack',
+        markerIndex: 0,
+        threadHandle: 't-0',
+        friendlyThreadName: 'GeckoMain',
+        markerHandle: 'm-1',
+        markerName: 'DOMEvent',
+        stack: {
+          capturedAt: start,
+          frames: [{ name: 'Paint', nameWithLibrary: 'Paint' }],
+          truncated: false,
+        },
+        context,
+      }),
+  },
+  {
+    name: 'single marker info',
+    format: (start: number, context: SessionContext) =>
+      formatMarkerInfoResult({ ...makeMarkerInfo({ start }), context }),
+  },
+  {
+    name: 'multiple marker info',
+    format: (start: number, context: SessionContext) =>
+      formatMarkerInfoMultiResult(
+        makeMultiResult({ context, markers: [makeMarkerInfo({ start })] })
+      ),
+  },
+])('$name timestamp precision', ({ format }) => {
+  it('uses fractional seconds with precision from the current view', () => {
+    const context: SessionContext = {
+      ...createContext(),
+      rootRange: { start: 9.2, end: 90000 },
+    };
+    expect(format(63871, context)).toContain('63.871s');
+    expect(format(63896, context)).toContain('63.896s');
+
+    context.currentViewRange = {
+      start: 63870,
+      end: 63875,
+      startName: 'ts-0',
+      endName: 'ts-1',
+    };
+    expect(format(63871.76, context)).toContain('63.871760s');
+    expect(format(63871.86, context)).toContain('63.871860s');
+  });
+});
+
+describe('timestamp precision bounds', () => {
+  it('uses the full profile width when no zoom is active', () => {
+    const context = { ...createContext(), rootRange: { start: 9, end: 14 } };
+    const output = formatThreadMarkersResult(
+      makeResult({ context, flatMarkers: [makeFlat({ start: 2.08376 })] })
+    );
+    expect(output).toContain('t=0.002084s');
+  });
+
+  it('limits precision to nanoseconds for extremely narrow ranges', () => {
+    const context = {
+      ...createContext(),
+      rootRange: { start: 0, end: 0.000001 },
+    };
+    const output = formatThreadMarkersResult(
+      makeResult({ context, flatMarkers: [makeFlat({ start: 0.0000006 })] })
+    );
+    expect(output).toContain('t=0.000000001s');
+  });
+});
+
+describe('marker info interval timestamp precision', () => {
+  it('formats both endpoints and the stack capture time with view precision', () => {
+    const context: SessionContext = {
+      ...createContext(),
+      currentViewRange: {
+        start: 2082,
+        end: 2087,
+        startName: 'ts-0',
+        endName: 'ts-1',
+      },
+    };
+    const marker = makeMarkerInfo({
+      start: 2083.76,
+      end: 2083.86,
+      duration: 0.1,
+      stack: {
+        capturedAt: 2083.81,
+        frames: [{ name: 'Paint', nameWithLibrary: 'Paint' }],
+        truncated: false,
+      },
+    });
+    const outputs = [
+      formatMarkerInfoResult({ ...marker, context }),
+      formatMarkerInfoMultiResult(
+        makeMultiResult({ context, markers: [marker] })
+      ),
+    ];
+    for (const output of outputs) {
+      expect(output).toContain('Time: 2.083760s - 2.083860s (100μs)');
+      expect(output).toContain('Captured at: 2.083810s');
+    }
+  });
+});
 
 describe('formatProfileMarkersResult', function () {
   it('shows the thread column on every row and a per-thread breakdown', function () {
@@ -620,8 +747,8 @@ describe('formatMarkerInfoMultiResult', function () {
   });
 
   // Mirrors the single-handle guard: `start` is already profile-start-relative,
-  // so each record must print it verbatim. Needs a non-zero `rootRange.start`.
-  it('renders record times verbatim, without re-subtracting rootRange.start', function () {
+  // so each record must use that time base. Needs a non-zero `rootRange.start`.
+  it('renders record times without re-subtracting rootRange.start', function () {
     const output = formatMarkerInfoMultiResult(
       makeMultiResult({
         context: { ...createContext(), rootRange: { start: 9.2, end: 3000 } },
@@ -633,9 +760,9 @@ describe('formatMarkerInfoMultiResult', function () {
       })
     );
 
-    expect(output).toContain('549.34ms');
-    expect(output).not.toContain('540.14ms'); // 549.34 - 9.2, if subtracted twice
-    expect(output).toContain('700ms - 750ms');
+    expect(output).toContain('0.549s');
+    expect(output).not.toContain('0.540s'); // 549.34 - 9.2, if subtracted twice
+    expect(output).toContain('0.700s - 0.750s');
   });
 
   it('omits the range warning when the query did not set one', function () {

@@ -61,6 +61,7 @@ import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
 import {
   formatTimestamp as formatDuration,
+  formatSeconds,
   formatBytes,
 } from 'firefox-profiler/utils/format-numbers';
 
@@ -86,6 +87,17 @@ const INLINE_LEGEND =
   '(inl?) = some calls were inlined by the compiler.';
 
 const BAR_WIDTH = 28;
+
+function createTimestampFormatter(context: SessionContext) {
+  const range = context.currentViewRange ?? context.rootRange;
+  // Resolve a thousandth of the view, with at least millisecond precision
+  // and a nanosecond floor to avoid exposing floating-point noise.
+  const precision = Math.max(
+    0.000001,
+    Math.min(1, (range.end - range.start) / 1000)
+  );
+  return (time: number) => formatSeconds(time, 5, 3, precision);
+}
 
 /**
  * Render aligned `label / bar / count / percentage` rows. `barRatio` is the
@@ -480,6 +492,7 @@ export function formatMarkerStackResult(
   result: WithContext<MarkerStackResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const formatTimestamp = createTimestampFormatter(result.context);
   let output = `${contextHeader}
 
 Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
@@ -490,7 +503,7 @@ Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
   }
 
   if (result.stack.capturedAt !== undefined) {
-    output += `\nCaptured at: ${formatDuration(result.stack.capturedAt)}\n`;
+    output += `\nCaptured at: ${formatTimestamp(result.stack.capturedAt)}\n`;
   }
 
   for (let i = 0; i < result.stack.frames.length; i++) {
@@ -512,7 +525,8 @@ export function formatMarkerInfoResult(
   result: WithContext<MarkerInfoResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
-  return `${contextHeader}\n\n${formatMarkerInfoBody(result)}`;
+  const formatTimestamp = createTimestampFormatter(result.context);
+  return `${contextHeader}\n\n${formatMarkerInfoBody(result, formatTimestamp)}`;
 }
 
 /**
@@ -524,6 +538,7 @@ export function formatMarkerInfoMultiResult(
   result: WithContext<MarkerInfoMultiResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const formatTimestamp = createTimestampFormatter(result.context);
   const total = result.markers.length + result.errors.length;
   const records: string[] = [];
 
@@ -538,7 +553,9 @@ export function formatMarkerInfoMultiResult(
     const prefix = `[${position}/${total}] `;
     const marker = byHandle.get(markerHandle);
     if (marker) {
-      records.push(prefix + formatMarkerInfoBody(marker).trimEnd());
+      records.push(
+        prefix + formatMarkerInfoBody(marker, formatTimestamp).trimEnd()
+      );
       continue;
     }
     const error = errorsByHandle.get(markerHandle);
@@ -568,7 +585,10 @@ export function formatMarkerInfoMultiResult(
 /**
  * Format one marker info record, below the context header.
  */
-function formatMarkerInfoBody(result: MarkerInfoResult): string {
+function formatMarkerInfoBody(
+  result: MarkerInfoResult,
+  formatTimestamp: (time: number) => string
+): string {
   let output = `Marker ${result.markerHandle}: ${result.name}`;
   if (result.tooltipLabel) {
     output += ` - ${result.tooltipLabel}`;
@@ -579,9 +599,9 @@ function formatMarkerInfoBody(result: MarkerInfoResult): string {
   output += `Type: ${result.markerType ?? 'None'}\n`;
   output += `Category: ${result.category.name}\n`;
 
-  const startStr = formatDuration(result.start);
+  const startStr = formatTimestamp(result.start);
   if (result.end !== null) {
-    const endStr = formatDuration(result.end);
+    const endStr = formatTimestamp(result.end);
     const durationStr = formatDuration(result.duration!);
     output += `Time: ${startStr} - ${endStr} (${durationStr})\n`;
   } else {
@@ -608,7 +628,7 @@ function formatMarkerInfoBody(result: MarkerInfoResult): string {
   if (result.stack && result.stack.frames.length > 0) {
     output += '\nStack trace:\n';
     if (result.stack.capturedAt !== undefined) {
-      output += `  Captured at: ${formatDuration(result.stack.capturedAt)}\n`;
+      output += `  Captured at: ${formatTimestamp(result.stack.capturedAt)}\n`;
     }
 
     for (let i = 0; i < result.stack.frames.length; i++) {
@@ -1469,9 +1489,10 @@ export function formatThreadMarkersResult(
 
   // Flat list mode: one row per marker in chronological order
   if (result.flatMarkers) {
+    const formatTimestamp = createTimestampFormatter(result.context);
     for (const m of result.flatMarkers) {
       const stackIndicator = m.hasStack ? '✓' : '✗';
-      const startStr = `t=${formatDuration(m.start)}`;
+      const startStr = `t=${formatTimestamp(m.start)}`;
       const durationStr =
         m.duration !== undefined ? formatDuration(m.duration) : 'instant';
       const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
@@ -2274,9 +2295,10 @@ export function formatProfileMarkersResult(
   }
   lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
 
+  const formatTimestamp = createTimestampFormatter(result.context);
   for (const m of result.markers) {
     const stackIndicator = m.hasStack ? '✓' : '✗';
-    const startStr = `t=${formatDuration(m.start)}`;
+    const startStr = `t=${formatTimestamp(m.start)}`;
     const durationStr =
       m.duration !== undefined ? formatDuration(m.duration) : 'instant';
     const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
