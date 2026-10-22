@@ -33,3 +33,7 @@ To enable secret settings, follow these steps:
 - Scroll to the bottom and you should see a "Stop profiler" option has replaced the "Start Profiler" one.
 - After you click it, you should see a dialogue with a warning regarding the information contained in the profile.
 - Once stopped, the URL for the profile that finished recording will be copied to your clipboard which you can then use to share.
+
+## Recording logs on the device
+
+If you also need Gecko logs, you can use `about:logging` directly on the device to record them into a profile. See [Recording logs with about:logging](./guide-about-logging.md).
