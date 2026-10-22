@@ -38,6 +38,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'WEB',
       source:
         'Fake response from https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm',
     });
@@ -100,6 +101,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'WEB',
       source: 'Fake addr2line-0.17.0 src/lib.rs contents',
     });
     expect(fetchUrlResponse).toHaveBeenCalledTimes(1);
@@ -124,6 +126,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'WEB',
       source: 'Fake addr2line-0.17.0 src/function.rs contents',
     });
     // No additional call should have been made.
@@ -237,6 +240,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'LOCAL',
       source:
         'Fake source from browser symbolication API, for request JSON {"debugName":"FAKE_DEBUGNAME","debugId":"FAKE_DEBUGID","moduleOffset":"0x1234","file":"/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs"}',
     });
@@ -294,6 +298,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'LOCAL',
       source:
         'Fake source from local server symbolication API, with post data {"debugName":"FAKE_DEBUGNAME","debugId":"FAKE_DEBUGID","moduleOffset":"0x1234","file":"/Users/mstange/code/mozilla/gfx/wr/webrender/src/renderer/mod.rs"}',
     });
@@ -351,6 +356,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'LOCAL',
       source:
         'Fake source from local server symbolication API, with post data {"debugName":"FAKE_DEBUGNAME","debugId":"FAKE_DEBUGID","moduleOffset":"0x1234","file":"git:github.com/rust-lang/rust:library/core/src/intrinsics.rs:acbe4443cc4c9695c0b74a7b64b60333c990a400"}',
     });
@@ -406,6 +412,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'WEB',
       source:
         'Fake response from https://raw.githubusercontent.com/rust-lang/rust/acbe4443cc4c9695c0b74a7b64b60333c990a400/library/core/src/intrinsics.rs',
     });
@@ -624,6 +631,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'LOCAL',
       source: `console.log("Hello from browser with sourceUuid ${TEST_SOURCE_UUID}");`,
     });
   });
@@ -704,6 +712,7 @@ describe('fetchSource', function () {
       )
     ).toEqual({
       type: 'SUCCESS',
+      origin: 'WEB',
       source:
         'Fallback response from https://hg.mozilla.org/mozilla-central/raw-file/997f00815e6bc28806b75448c8829f0259d2cb28/widget/cocoa/nsAppShell.mm',
     });
