@@ -94,7 +94,8 @@ class ConnectedFlameGraphImpl
 {
   _flameGraph: React.RefObject<FlameGraph | null> = React.createRef();
 
-  // eslint-disable-next-line react/no-unused-class-component-methods -- called via ConnectedFlameGraphHandle ref from FlameGraphViewImpl
+  // Called via ConnectedFlameGraphHandle ref from FlameGraphViewImpl.
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   focus() {
     this._flameGraph.current?.focus();
   }

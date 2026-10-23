@@ -82,7 +82,10 @@ describe('mergeProfilesForDiffing function', function () {
         libName = mergedLibs[libIndex].name;
       }
 
-      /* eslint-disable jest/no-conditional-expect */
+      // These conditional expects aren't reported because of an oxlint bug:
+      // https://github.com/oxc-project/oxc/issues/28054
+      // Once it's fixed, wrap this switch in
+      // oxlint-disable/enable jest/no-conditional-expect comments.
       switch (funcName) {
         case 'A':
           expect(libName).toBeOneOf(['libA', 'libB']);
@@ -98,7 +101,6 @@ describe('mergeProfilesForDiffing function', function () {
           break;
         default:
       }
-      /* eslint-enable */
     }
   });
 
