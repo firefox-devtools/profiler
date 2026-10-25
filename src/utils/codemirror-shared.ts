@@ -8,9 +8,15 @@ import {
   GutterMarker,
   gutter,
   gutterLineClass,
+  keymap,
 } from '@codemirror/view';
-import type { EditorState } from '@codemirror/state';
-import { StateField, StateEffect, RangeSet } from '@codemirror/state';
+import {
+  EditorState,
+  StateField,
+  StateEffect,
+  RangeSet,
+} from '@codemirror/state';
+import { search, searchKeymap } from '@codemirror/search';
 
 import type { LineTimings } from 'firefox-profiler/types';
 
@@ -191,6 +197,22 @@ export const timingsExtension = [
   selfTimingsGutter,
   nonZeroLineGutterHighlighter,
   nonZeroLineDecorationHighlighter,
+];
+
+// Adjustments to make a CodeMirror editor work as a non-editable code viewer.
+export const codeViewerExtension = [
+  EditorState.readOnly.of(true),
+  EditorView.editable.of(false),
+  // Allow tabbing to the view (to an element *inside* the scroller so that the
+  // up / down keys trigger scrolling), and take focus on mousedown.
+  EditorView.contentAttributes.of({ tabindex: '0' }),
+  // CodeMirror only renders the lines in and near the viewport, so the
+  // browser's find-in-page can't find text outside of it. CodeMirror's own
+  // search panel searches the whole document. It opens with Ctrl/Cmd+F while
+  // the editor has focus. The replace controls are hidden because the editor
+  // is read-only.
+  search({ top: true }),
+  keymap.of(searchKeymap),
 ];
 
 export { createHighlightedLineExtension };
