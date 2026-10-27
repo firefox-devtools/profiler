@@ -17,6 +17,7 @@ import type {
   RawFrameTable,
   SourceLocationTable,
   SourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 import type {
   Thread,
@@ -46,6 +47,10 @@ import type {
   TableViewOptions,
   DecodedInstruction,
   ProfileEncodingResult,
+  CallNodeArea,
+  FunctionListSectionName,
+  WingViewName,
+  WingViewType,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -189,10 +194,16 @@ type ProfileAction =
     }
   | {
       readonly type: 'CHANGE_SELECTED_CALL_NODE';
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly threadsKey: ThreadsKey;
       readonly selectedCallNodePath: CallNodePath;
       readonly optionalExpandedToCallNodePath: CallNodePath | undefined;
+      readonly context: SelectionContext;
+    }
+  | {
+      readonly type: 'CHANGE_SELECTED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly selectedFunctionIndex: IndexIntoFuncTable | null;
       readonly context: SelectionContext;
     }
   | {
@@ -203,7 +214,13 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE';
       readonly threadsKey: ThreadsKey;
+      readonly area: CallNodeArea;
       readonly callNodePath: CallNodePath | null;
+    }
+  | {
+      readonly type: 'CHANGE_RIGHT_CLICKED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly functionIndex: IndexIntoFuncTable | null;
     }
   | {
       readonly type: 'FOCUS_CALL_TREE';
@@ -211,7 +228,7 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_EXPANDED_CALL_NODES';
       readonly threadsKey: ThreadsKey;
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly expandedCallNodePaths: Array<CallNodePath>;
     }
   | {
@@ -565,6 +582,20 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_MARKER_TABLE_SORT';
       readonly sort: SingleColumnSortState[] | null;
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SORT';
+      readonly sort: SingleColumnSortState[] | null;
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN';
+      readonly section: FunctionListSectionName;
+      readonly isOpen: boolean;
+    }
+  | {
+      readonly type: 'CHANGE_WING_VIEW';
+      readonly wing: WingViewName;
+      readonly view: WingViewType;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
