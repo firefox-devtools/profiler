@@ -240,24 +240,21 @@ describe('MarkerChart', function () {
     );
     expect(diamondOperationsXY.size).toBe(3);
 
-    // Check that we have a fillRect operation for the first small interval
-    // marker. We filter also using w or h to filter out the initial clearing
-    // fillRect operation as well as the separators.
-    const fillRectOperations = drawCalls.filter(
-      ([operation, , , w, h]) =>
-        operation === 'fillRect' &&
-        w !== containerWidth - TIMELINE_MARGIN_RIGHT &&
-        h !== containerHeight
+    // Check that we have a solid fillRect operation for the first small
+    // interval marker. Small interval markers are drawn as narrow rectangles
+    // in the marker area, which is to the right of the left margin. We filter
+    // out the vertical separator, which is to the left of the marker area.
+    const smallMarkerOperations = drawCalls.filter(
+      ([operation, x, , w]) =>
+        operation === 'fillRect' && x >= TIMELINE_MARGIN_LEFT && w <= 2
     );
-    expect(fillRectOperations).toHaveLength(1);
+    expect(smallMarkerOperations).toHaveLength(1);
 
-    // Check that the rect operation for the later longer marker is present.
-    const rectOperations = drawCalls.filter(
-      ([operation]) => operation === 'rect'
+    // Check that the border of the later longer marker is drawn.
+    const strokeRectOperations = drawCalls.filter(
+      ([operation]) => operation === 'strokeRect'
     );
-    // We'll actually have 2 rect operations, because we also have a rect first
-    // for the initial `clip` operation, and one for the longer marker.
-    expect(rectOperations).toHaveLength(2);
+    expect(strokeRectOperations).toHaveLength(1);
 
     // @ts-expect-error - "property must be optional"
     delete window.devicePixelRatio;
@@ -772,7 +769,7 @@ describe('MarkerChart', function () {
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
-      expect(text).toEqual(['Dot marker E', 'Other']);
+      expect(text).toEqual(['Other', 'Dot marker E']);
     });
   });
 
