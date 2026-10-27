@@ -425,13 +425,34 @@ export type CodeState = {
  */
 export type ChatStatus = 'idle' | 'streaming' | 'running-tool' | 'error';
 
+// How a chat turn ended.
+export type ChatTurnOutcome =
+  | { readonly type: 'done' }
+  | { readonly type: 'cancelled' }
+  | { readonly type: 'max-tokens' }
+  | { readonly type: 'tool-limit' }
+  | { readonly type: 'refusal'; readonly explanation: string | null };
+
+// Why a chat turn failed.
+export type ChatError =
+  | { readonly type: 'auth'; readonly message: string }
+  | { readonly type: 'rate-limit' }
+  | { readonly type: 'permission'; readonly message: string }
+  | { readonly type: 'connection'; readonly message: string }
+  | {
+      readonly type: 'api';
+      readonly status: number | null;
+      readonly message: string;
+    }
+  | { readonly type: 'unknown'; readonly message: string };
+
 export type ChatState = {
   readonly isOpen: boolean;
   readonly status: ChatStatus;
   // Shown when the last turn failed.
-  readonly error: string | null;
+  readonly error: ChatError | null;
   // Shown when the last turn ended early, e.g. cancelled or cut off.
-  readonly notice: string | null;
+  readonly notice: ChatTurnOutcome | null;
   // The conversation exactly as sent to the Anthropic API. Append-only.
   readonly apiHistory: BetaMessageParam[];
   // Text of the response that is currently streaming in.

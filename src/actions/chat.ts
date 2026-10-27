@@ -14,9 +14,7 @@ import {
   getChatConversationId,
   getIsChatTurnRunning,
 } from 'firefox-profiler/selectors/chat';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type { Action, ThunkAction } from 'firefox-profiler/types';
-import type { ChatTurnOutcome } from 'firefox-profiler/app-logic/profile-chat/chat-engine';
 
 // Limits how often streamed text is dispatched, to avoid a render per token.
 const STREAMING_TEXT_THROTTLE_MS = 50;
@@ -57,25 +55,6 @@ export function forgetApiKey(): ThunkAction<void> {
     removeApiKey();
     dispatch({ type: 'CHAT_API_KEY_CHANGED', hasApiKey: false });
   };
-}
-
-function _noticeForOutcome(outcome: ChatTurnOutcome): string | null {
-  switch (outcome.type) {
-    case 'done':
-      return null;
-    case 'cancelled':
-      return 'Stopped.';
-    case 'max-tokens':
-      return 'The response was cut off because it got too long.';
-    case 'tool-limit':
-      return 'Stopped after too many profiler-cli commands. Ask a narrower question, or send "continue".';
-    case 'refusal':
-      return outcome.explanation
-        ? `The response was declined: ${outcome.explanation}`
-        : 'The response was declined.';
-    default:
-      throw assertExhaustiveCheck(outcome);
-  }
 }
 
 /**
@@ -155,21 +134,19 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
       });
 
       cancelStreamingText();
-      dispatch({
-        type: 'CHAT_TURN_FINISHED',
-        conversationId,
-        notice: _noticeForOutcome(outcome),
-      });
+      dispatch({ type: 'CHAT_TURN_FINISHED', conversationId, outcome });
     } catch (error) {
       cancelStreamingText();
       const { describeChatError } =
         await import('firefox-profiler/app-logic/profile-chat/chat-engine');
-      const { message, isAuthError } = describeChatError(error);
-      if (isAuthError) {
-        removeApiKey();
-        dispatch({ type: 'CHAT_API_KEY_CHANGED', hasApiKey: false });
-      }
-      dispatch({ type: 'CHAT_TURN_FAILED', conversationId, error: message });
+      // The key is kept even when the API rejects it: a 401 can also come from
+      // an organization policy, such as no browser access with custom data
+      // retention, where entering the key again wouldn't help.
+      dispatch({
+        type: 'CHAT_TURN_FAILED',
+        conversationId,
+        error: describeChatError(error),
+      });
     } finally {
       if (_currentTurnController === controller) {
         _currentTurnController = null;

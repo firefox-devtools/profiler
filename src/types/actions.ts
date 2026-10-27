@@ -5,6 +5,19 @@
 import type JSZip from 'jszip';
 import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import type {
+  ChatError,
+  ChatTurnOutcome,
+  UrlState,
+  UploadState,
+  State,
+  UploadedProfileInformation,
+  SourceCodeLoadingError,
+  ApiQueryError,
+  TableViewOptions,
+  DecodedInstruction,
+  ProfileEncodingResult,
+} from './state';
+import type {
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -37,17 +50,6 @@ import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type {
-  UrlState,
-  UploadState,
-  State,
-  UploadedProfileInformation,
-  SourceCodeLoadingError,
-  ApiQueryError,
-  TableViewOptions,
-  DecodedInstruction,
-  ProfileEncodingResult,
-} from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
@@ -792,12 +794,12 @@ type ChatAction =
   | {
       readonly type: 'CHAT_TURN_FINISHED';
       readonly conversationId: number;
-      readonly notice: string | null;
+      readonly outcome: ChatTurnOutcome;
     }
   | {
       readonly type: 'CHAT_TURN_FAILED';
       readonly conversationId: number;
-      readonly error: string;
+      readonly error: ChatError;
     };
 
 export type Action =

@@ -6,7 +6,9 @@ import { createSelector } from 'reselect';
 import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import { VIEW_CONTEXT_START } from 'firefox-profiler/app-logic/profile-chat/view-context';
 import type {
+  ChatError,
   ChatState,
+  ChatTurnOutcome,
   ChatStatus,
   ChatTranscriptItem,
   Selector,
@@ -17,9 +19,9 @@ export const getIsChatOpen: Selector<boolean> = (state) =>
   getChat(state).isOpen;
 export const getChatStatus: Selector<ChatStatus> = (state) =>
   getChat(state).status;
-export const getChatError: Selector<string | null> = (state) =>
+export const getChatError: Selector<ChatError | null> = (state) =>
   getChat(state).error;
-export const getChatNotice: Selector<string | null> = (state) =>
+export const getChatNotice: Selector<ChatTurnOutcome | null> = (state) =>
   getChat(state).notice;
 export const getChatApiHistory: Selector<BetaMessageParam[]> = (state) =>
   getChat(state).apiHistory;

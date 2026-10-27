@@ -56,6 +56,7 @@
 }
 
 .buttonWithPanel.open > .menuButtonsButton,
+.menuButtonsButton.menuButtonsChatButtonOpen,
 .menuButtonsButton:hover:active {
   background-color: var(--internal-active-background-color);
 }

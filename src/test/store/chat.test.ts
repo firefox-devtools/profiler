@@ -130,7 +130,7 @@ describe('profile chat', function () {
     ]);
     await store.dispatch(sendChatMessage('Hi'));
     expect(getChatStatus(store.getState())).toBe('idle');
-    expect(getChatNotice(store.getState())).toBe('Stopped.');
+    expect(getChatNotice(store.getState())).toEqual({ type: 'cancelled' });
     // Only the user message, so the next message continues a valid history.
     expect(getChatApiHistory(store.getState())).toHaveLength(1);
   });
@@ -149,7 +149,7 @@ describe('profile chat', function () {
     expect(getChatStatus(store.getState())).toBe('idle');
   });
 
-  it('asks for a new key when the key is rejected', async function () {
+  it('keeps the key when the API rejects it', async function () {
     const store = setup();
     window.fetchMock.post(MESSAGES_API_URL, {
       status: 401,
@@ -160,7 +160,12 @@ describe('profile chat', function () {
     });
     await store.dispatch(sendChatMessage('Hi'));
     expect(getChatStatus(store.getState())).toBe('error');
-    expect(getChatError(store.getState())).toMatch(/API key was rejected/);
-    expect(getChatHasApiKey(store.getState())).toBe(false);
+    expect(getChatError(store.getState())).toEqual({
+      type: 'auth',
+      message: 'invalid x-api-key',
+    });
+    // A 401 can be an organization policy rather than a bad key, so the user
+    // decides whether to forget it.
+    expect(getChatHasApiKey(store.getState())).toBe(true);
   });
 });

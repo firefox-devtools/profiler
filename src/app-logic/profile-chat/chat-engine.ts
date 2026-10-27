@@ -20,6 +20,7 @@ import type {
   BetaToolResultBlockParam,
   BetaToolUseBlock,
 } from '@anthropic-ai/sdk/resources/beta/messages/messages';
+import type { ChatError, ChatTurnOutcome } from 'firefox-profiler/types';
 import { getSystemPrompt, PROFILER_CLI_TOOL_NAME } from './system-prompt';
 
 export const CHAT_MODEL = 'claude-opus-5-5';
@@ -54,13 +55,6 @@ export type ToolRunResult = {
   text: string;
   isError: boolean;
 };
-
-export type ChatTurnOutcome =
-  | { type: 'done' }
-  | { type: 'cancelled' }
-  | { type: 'max-tokens' }
-  | { type: 'tool-limit' }
-  | { type: 'refusal'; explanation: string | null };
 
 export type RunChatTurnOptions = {
   client: Anthropic;
@@ -259,45 +253,39 @@ export async function runChatTurn({
   }
 }
 
+// The SDK's message is the status followed by the raw JSON body, so prefer
+// the human-readable message from the body when there is one.
+function _getApiErrorMessage(error: InstanceType<typeof Anthropic.APIError>) {
+  const body = error.error as { error?: { message?: unknown } } | undefined;
+  const message = body?.error?.message;
+  return typeof message === 'string' ? message : error.message;
+}
+
 /**
- * Describe an error thrown by runChatTurn for the user.
+ * Classify an error thrown by runChatTurn for display.
  */
-export function describeChatError(error: unknown): {
-  message: string;
-  isAuthError: boolean;
-} {
+export function describeChatError(error: unknown): ChatError {
   if (error instanceof Anthropic.AuthenticationError) {
-    return {
-      message: 'The API key was rejected. Enter a valid Anthropic API key.',
-      isAuthError: true,
-    };
+    return { type: 'auth', message: _getApiErrorMessage(error) };
   }
   if (error instanceof Anthropic.PermissionDeniedError) {
-    return {
-      message: `This API key can't use ${CHAT_MODEL}: ${error.message}`,
-      isAuthError: false,
-    };
+    return { type: 'permission', message: _getApiErrorMessage(error) };
   }
   if (error instanceof Anthropic.RateLimitError) {
-    return {
-      message: 'Rate limited by the Anthropic API. Wait a bit and try again.',
-      isAuthError: false,
-    };
+    return { type: 'rate-limit' };
   }
   if (error instanceof Anthropic.APIConnectionError) {
-    return {
-      message: `Could not reach the Anthropic API: ${error.message}`,
-      isAuthError: false,
-    };
+    return { type: 'connection', message: error.message };
   }
   if (error instanceof Anthropic.APIError) {
     return {
-      message: `Anthropic API error${error.status ? ` ${error.status}` : ''}: ${error.message}`,
-      isAuthError: false,
+      type: 'api',
+      status: error.status ?? null,
+      message: _getApiErrorMessage(error),
     };
   }
   return {
+    type: 'unknown',
     message: error instanceof Error ? error.message : String(error),
-    isAuthError: false,
   };
 }

@@ -242,8 +242,8 @@ describe('runChatTurn', function () {
     const { run } = setup();
     const error = await run().catch((e) => e);
     expect(describeChatError(error)).toEqual({
-      message: 'The API key was rejected. Enter a valid Anthropic API key.',
-      isAuthError: true,
+      type: 'auth',
+      message: 'invalid x-api-key',
     });
   });
 });

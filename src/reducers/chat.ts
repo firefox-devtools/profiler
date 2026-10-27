@@ -88,7 +88,7 @@ const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
         ...state,
         status: 'idle',
         streamingText: '',
-        notice: action.notice,
+        notice: action.outcome.type === 'done' ? null : action.outcome,
       };
     case 'CHAT_TURN_FAILED':
       return {

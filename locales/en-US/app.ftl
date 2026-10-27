@@ -589,9 +589,58 @@ MenuButtons--index--share-error-uploading =
     .label = Error uploading
 
 MenuButtons--index--revert = Revert to Original Profile
+MenuButtons--index--ask-about-profile = Ask about this profile
 
 MenuButtons--permalink--button =
     .label = Permalink
+
+## ChatDrawer
+## The experimental chat drawer that answers questions about the profile, using
+## an AI model from Anthropic that inspects the profile with profiler-cli
+## commands. "Anthropic" is a company name and "profiler-cli" a program name,
+## they should not be translated.
+
+ChatDrawer--title = Ask about this profile
+ChatDrawer--new-chat-button = New chat
+ChatDrawer--forget-key-button = Forget key
+ChatDrawer--close-button =
+    .title = Close
+
+ChatApiKeyForm--description = Enter an <a>Anthropic API key</a> to ask questions about this profile.
+ChatApiKeyForm--privacy-warning = The key is stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to Anthropic.
+ChatApiKeyForm--input =
+    .placeholder = Anthropic API key
+ChatApiKeyForm--save-button = Save key
+
+ChatComposer--input =
+    .placeholder = Ask about this profile
+ChatComposer--hint = Enter to send, Shift+Enter for a new line
+ChatComposer--send-button = Send
+ChatComposer--stop-button = Stop
+
+ChatTranscript--empty = Ask a question about this profile, for example “Which functions take the most time on the main thread?”
+ChatTranscript--thinking = Thinking…
+ChatTranscript--notice-cancelled = Stopped.
+ChatTranscript--notice-max-tokens = The response was cut off because it got too long.
+ChatTranscript--notice-tool-limit = Stopped after too many profiler commands. Ask a narrower question, or send “continue”.
+ChatTranscript--notice-refusal = The response was declined.
+# Variables:
+#   $explanation (String) - The reason given by the AI model, in English.
+ChatTranscript--notice-refusal-with-explanation = The response was declined: { $explanation }
+
+# Variables:
+#   $message (String) - The error message from the Anthropic API, in English.
+ChatError--auth-with-reason = Anthropic rejected the API key: { $message } Use “Forget key” to enter a different one.
+ChatError--rate-limit = The Anthropic API is rate limiting requests. Wait a bit and try again.
+# Variables:
+#   $message (String) - The error message from the Anthropic API, in English.
+ChatError--permission = This API key is not allowed to use the model: { $message }
+# Variables:
+#   $message (String) - The network error message, in English.
+ChatError--connection = Could not reach the Anthropic API: { $message }
+# Variables:
+#   $message (String) - The error message, in English.
+ChatError--other = Something went wrong: { $message }
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about

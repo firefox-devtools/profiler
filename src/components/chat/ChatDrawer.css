@@ -1,0 +1,260 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.chatDrawerWrapper {
+  /* The profile viewer's top bar can overflow when the drawer makes it narrow,
+   * and its buttons are positioned, so they would paint over the drawer. */
+  position: relative;
+  flex-direction: row;
+}
+
+.chatDrawer {
+  --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
+  --internal-dimmed-foreground-color: var(--grey-50);
+  --internal-user-background-color: var(--blue-50);
+  --internal-user-foreground-color: #fff;
+  --internal-tool-background-color: var(--grey-20);
+  --internal-error-foreground-color: var(--red-70);
+  --internal-error-background-color: rgb(255 0 57 / 0.1);
+
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  background: var(--panel-background-color);
+  color: var(--base-foreground-color);
+  font-size: 12px;
+}
+
+.chatDrawerHeader {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 4px 4px 4px 12px;
+  border-bottom: 1px solid var(--panel-border-color);
+  gap: 4px;
+}
+
+.chatDrawerTitle {
+  overflow: hidden;
+  flex: 1;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatDrawerHeaderButton {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.chatDrawerCloseButton {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  background-image: var(--internal-close-icon);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+}
+
+.chatTranscript {
+  display: flex;
+  overflow: auto;
+  flex: 1;
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.chatTranscriptEmpty,
+.chatTranscriptThinking,
+.chatNotice {
+  margin: 0;
+  color: var(--internal-dimmed-foreground-color);
+}
+
+.chatMessage {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.chatMessageUser {
+  align-self: flex-end;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--internal-user-background-color);
+  color: var(--internal-user-foreground-color);
+  white-space: pre-wrap;
+}
+
+.chatMarkdown > :first-child {
+  margin-top: 0;
+}
+
+.chatMarkdown > :last-child {
+  margin-bottom: 0;
+}
+
+.chatMarkdown pre {
+  overflow: auto;
+  padding: 6px;
+  border-radius: 4px;
+  background: var(--internal-tool-background-color);
+}
+
+.chatMarkdown code {
+  font-size: 11px;
+}
+
+.chatMarkdown ul,
+.chatMarkdown ol {
+  padding-inline-start: 20px;
+}
+
+.chatToolCall {
+  border-radius: 4px;
+  background: var(--internal-tool-background-color);
+  font-size: 11px;
+}
+
+.chatToolCallSummary {
+  overflow: hidden;
+  padding: 3px 8px;
+  cursor: default;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatToolCallRunning .chatToolCallSummary {
+  color: var(--internal-dimmed-foreground-color);
+}
+
+.chatToolCallError {
+  background: var(--internal-error-background-color);
+  color: var(--internal-error-foreground-color);
+}
+
+.chatToolCallOutput {
+  overflow: auto;
+  max-height: 300px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--panel-border-color);
+  margin: 0;
+  font-size: 10px;
+}
+
+.chatError {
+  padding: 6px 8px;
+  border-radius: 4px;
+  margin: 0;
+  background: var(--internal-error-background-color);
+  color: var(--internal-error-foreground-color);
+}
+
+.chatComposer {
+  flex-shrink: 0;
+  padding: 8px;
+  border-top: 1px solid var(--panel-border-color);
+}
+
+.chatComposerBox {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--panel-border-color);
+  border-radius: 6px;
+  background: var(--raised-background-color);
+}
+
+.chatComposerBox:focus-within {
+  border-color: var(--focus-border-color);
+  box-shadow: 0 0 0 3px var(--focus-shadow-color);
+}
+
+.chatComposerInput {
+  padding: 8px 10px 4px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: 0;
+  resize: none;
+}
+
+.chatComposerActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 4px 10px;
+  gap: 8px;
+}
+
+.chatComposerHint {
+  overflow: hidden;
+  color: var(--internal-dimmed-foreground-color);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chatComposerButton {
+  flex-shrink: 0;
+  padding: 0 12px;
+  border-radius: 4px;
+}
+
+.chatComposerSendButton {
+  background-color: var(--blue-60);
+  color: #fff;
+}
+
+.chatComposerSendButton:disabled {
+  background-color: var(--clickable-background-color);
+  color: var(--internal-dimmed-foreground-color);
+  opacity: 1;
+}
+
+.chatComposerSendButton:hover:not(:disabled) {
+  background-color: var(--blue-70);
+}
+
+.chatComposerSendButton:hover:active:not(:disabled) {
+  background-color: var(--blue-80);
+}
+
+.chatApiKeyForm {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.chatApiKeyForm p {
+  margin: 0;
+}
+
+.chatApiKeyFormWarning {
+  color: var(--internal-dimmed-foreground-color);
+}
+
+.chatApiKeyFormInput {
+  padding: 4px 6px;
+}
+
+.chatApiKeyForm .photon-button {
+  align-self: flex-start;
+}
+
+:root.dark-mode {
+  .chatDrawer {
+    --internal-close-icon: url(../../../res/img/svg/close-light.svg);
+    --internal-dimmed-foreground-color: var(--grey-40);
+    --internal-tool-background-color: var(--grey-70);
+    --internal-error-foreground-color: var(--red-50);
+  }
+}

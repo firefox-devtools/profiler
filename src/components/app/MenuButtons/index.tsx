@@ -37,6 +37,9 @@ import {
   dismissNewlyPublished,
   profileRemotelyDeleted,
 } from 'firefox-profiler/actions/app';
+import { openChat, closeChat } from 'firefox-profiler/actions/chat';
+import { getIsChatOpen } from 'firefox-profiler/selectors/chat';
+import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
 
 import {
   getAbortFunction,
@@ -73,12 +76,15 @@ type StateProps = {
   readonly hasPrePublishedState: boolean;
   readonly abortFunction: () => void;
   readonly currentProfileUploadedInformation: UploadedProfileInformation | null;
+  readonly isChatOpen: boolean;
 };
 
 type DispatchProps = {
   readonly dismissNewlyPublished: typeof dismissNewlyPublished;
   readonly revertToPrePublishedState: typeof revertToPrePublishedState;
   readonly profileRemotelyDeleted: typeof profileRemotelyDeleted;
+  readonly openChat: typeof openChat;
+  readonly closeChat: typeof closeChat;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -350,9 +356,39 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     );
   }
 
+  _onChatButtonClick = () => {
+    const { isChatOpen, openChat, closeChat } = this.props;
+    if (isChatOpen) {
+      closeChat();
+    } else {
+      openChat();
+    }
+  };
+
+  _renderChatButton() {
+    if (!isChatFeatureEnabled()) {
+      return null;
+    }
+    return (
+      <Localized id="MenuButtons--index--ask-about-profile">
+        <button
+          type="button"
+          className={classNames('menuButtonsButton', {
+            menuButtonsChatButtonOpen: this.props.isChatOpen,
+          })}
+          aria-pressed={this.props.isChatOpen}
+          onClick={this._onChatButtonClick}
+        >
+          Ask about this profile
+        </button>
+      </Localized>
+    );
+  }
+
   override render() {
     return (
       <>
+        {this._renderChatButton()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -378,11 +414,14 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       abortFunction: getAbortFunction(state),
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
+      isChatOpen: getIsChatOpen(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
       profileRemotelyDeleted,
+      openChat,
+      closeChat,
     },
     component: MenuButtonsImpl,
   }

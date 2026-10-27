@@ -19,7 +19,12 @@ const browserEnvConfig = {
   // Transform ESM modules to CommonJS for Jest
   // These packages ship as pure ESM and need to be transformed by Babel
   transformIgnorePatterns: [
-    '/node_modules/(?!(query-string|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander)/)',
+    '/node_modules/(?!(query-string|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander|' +
+      // react-markdown and its unified / micromark dependencies.
+      'react-markdown|unified|remark-[^/]+|micromark[^/]*|mdast-util-[^/]+|hast-util-[^/]+|unist-util-[^/]+|vfile[^/]*|estree-util-[^/]+|' +
+      'bail|ccount|character-entities[^/]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|' +
+      'html-url-attributes|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|parse-entities|' +
+      'property-information|space-separated-tokens|stringify-entities|trim-lines|trough|zwitch|@ungap/structured-clone)/)',
   ],
 
   // Mock static assets (images, CSS, etc.)
