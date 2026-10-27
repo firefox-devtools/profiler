@@ -7,7 +7,6 @@ import {
   GREY_60,
   GREY_90,
   BLUE_60,
-  BLUE_80,
   GREY_70,
 } from 'photon-colors';
 import { getForegroundColor, getBackgroundColor } from '../../utils/colors';
@@ -21,7 +20,10 @@ import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
 import { bisectionLeft, bisectionRight } from 'firefox-profiler/utils/bisect';
-import { snap } from 'firefox-profiler/utils/device-pixels';
+import {
+  snap,
+  snapValueToMultipleOf,
+} from 'firefox-profiler/utils/device-pixels';
 import memoize from 'memoize-immutable';
 import type {
   updatePreviewSelection,
@@ -55,8 +57,6 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 import {
   getStrokeColor,
-  getFillColor,
-  getDotColor,
   getTextColor,
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
@@ -103,8 +103,9 @@ const TEXT_OFFSET_TOP = 11;
 const TEXT_OFFSET_START = 3;
 const MARKER_DOT_RADIUS = 0.25;
 const LABEL_PADDING = 5;
-const MARKER_BORDER_COLOR = '#2c77d1';
-const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
+const DEFAULT_FILL_COLOR = '#5aaaf8'; // Medium blue for non-highlighted
+// The gap at the right edge of interval markers, in device pixels.
+const MARKER_GAP = 0.8;
 const FONT_SIZE = 10;
 
 /**
@@ -150,14 +151,12 @@ function getHighlightRowBackgroundColor() {
 function getDefaultMarkerColors(isHighlighted: boolean) {
   if (isDarkMode()) {
     return {
-      fillColor: isHighlighted ? 'hsl(208, 81%, 52%)' : 'hsl(208, 88%, 32%)',
-      strokeColor: isHighlighted ? 'hsl(208, 82%, 58%)' : 'hsl(208, 71%, 40%)',
+      fillColor: isHighlighted ? 'hsl(208, 81%, 52%)' : 'hsl(208, 80%, 38%)',
       textColor: isHighlighted ? GREY_90 : GREY_20,
     };
   }
   return {
     fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
-    strokeColor: isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR,
     textColor: isHighlighted ? 'white' : 'black', // White text on dark blue, black text on light blue
   };
 }
@@ -165,6 +164,8 @@ function getDefaultMarkerColors(isHighlighted: boolean) {
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
   _textMeasurementCssToDeviceScale: number = 1;
+  // Pre-rendered instant marker diamonds, see _getInstantMarkerImage.
+  _instantMarkerImages: Map<string, HTMLCanvasElement> = new Map();
 
   override componentDidUpdate(prevProps: Props) {
     const viewportDidMount =
@@ -220,7 +221,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean
   ): {
     fillColor: string;
-    strokeColor: string;
     textColor: string;
   } {
     const { getMarker, markerSchemaByName } = this.props;
@@ -257,13 +257,13 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       if (isHighlighted) {
         return {
           fillColor: getStrokeColor(color),
-          strokeColor: getDotColor(color),
           textColor: getTextColor(color), // Use appropriate contrast color when highlighted
         };
       }
       return {
-        fillColor: getFillColor(color),
-        strokeColor: getStrokeColor(color),
+        // Markers have no border, so use a more opaque fill than
+        // getFillColor, which the timeline graphs use.
+        fillColor: getStrokeColor(color) + 'bb',
         textColor: getForegroundColor(), // Always use black/white text for unselected markers
       };
     }
@@ -564,70 +564,87 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     // which would be completely covered by the previous marker.
     let prevInstantMarkerX: DevicePixels | null = null;
     let prevIntervalMarkerRight: DevicePixels = -Infinity;
-    const highlightedMarkerTimingIndexes = [];
+    // Highlighted markers are drawn after the normal markers so that they
+    // stand out more. This stores [timing index, left, right] triples.
+    const highlightedMarkers: number[] = [];
 
     for (let i = startIndex; i < endIndex; i++) {
       const markerIndex = markerTiming.index[i];
-      if (
+      const isHighlighted =
         markerIndex === hoveredMarker ||
         markerIndex === selectedMarkerIndex ||
-        markerIndex === rightClickedMarkerIndex
-      ) {
-        // Draw highlighted markers after the normal markers so that they stand
-        // out more.
-        highlightedMarkerTimingIndexes.push(i);
-        continue;
-      }
-
+        markerIndex === rightClickedMarkerIndex;
       const startTime = markerTiming.start[i];
       const endTime = markerTiming.end[i];
-      const left = snap(
-        marginLeft + (startTime - timeAtMarginLeft) * devicePixelsPerMs
-      );
+      const leftUnsnapped =
+        marginLeft + (startTime - timeAtMarginLeft) * devicePixelsPerMs;
+
       if (startTime === endTime) {
-        if (left === prevInstantMarkerX) {
+        const x = snap(leftUnsnapped);
+        if (isHighlighted) {
+          highlightedMarkers.push(i, x, x);
           continue;
         }
-        prevInstantMarkerX = left;
+        if (x === prevInstantMarkerX) {
+          continue;
+        }
+        prevInstantMarkerX = x;
         this._drawInstantMarker(
           ctx,
           coords,
-          left,
+          x,
           rowTop,
           contentHeight,
           markerIndex,
           false
         );
-      } else {
-        const right = Math.max(
-          left + 1,
-          snap(marginLeft + (endTime - timeAtMarginLeft) * devicePixelsPerMs)
-        );
-        if (right <= prevIntervalMarkerRight) {
-          continue;
-        }
-        prevIntervalMarkerRight = right;
-        this._drawIntervalMarker(
-          ctx,
-          coords,
-          left,
-          right,
-          rowTop,
-          contentHeight,
-          markerIndex,
-          false
-        );
+        continue;
       }
+
+      // Snap the left and right edges to the nearest multiple of two device
+      // pixels, like the flame graph does. If both edges snap to the same
+      // value, make the box two device pixels wide, so that short markers stay
+      // visible.
+      let left = snapValueToMultipleOf(leftUnsnapped, 2);
+      let right = snapValueToMultipleOf(
+        marginLeft + (endTime - timeAtMarginLeft) * devicePixelsPerMs,
+        2
+      );
+      if (right === left) {
+        right = left + 2;
+      }
+
+      if (isHighlighted) {
+        highlightedMarkers.push(i, left, right);
+        continue;
+      }
+
+      // Markers which got enlarged by the snapping can overlap the next
+      // marker. Let the earlier marker win, and skip markers which are
+      // entirely covered.
+      if (right <= prevIntervalMarkerRight) {
+        continue;
+      }
+      left = Math.max(left, prevIntervalMarkerRight);
+      prevIntervalMarkerRight = right;
+      this._drawIntervalMarker(
+        ctx,
+        coords,
+        left,
+        right,
+        rowTop,
+        contentHeight,
+        markerIndex,
+        false
+      );
     }
 
-    for (const i of highlightedMarkerTimingIndexes) {
-      const startTime = markerTiming.start[i];
-      const endTime = markerTiming.end[i];
+    for (let j = 0; j < highlightedMarkers.length; j += 3) {
+      const i = highlightedMarkers[j];
+      const left = highlightedMarkers[j + 1];
+      const right = highlightedMarkers[j + 2];
       const markerIndex = markerTiming.index[i];
-      const left = snap(
-        marginLeft + (startTime - timeAtMarginLeft) * devicePixelsPerMs
-      );
-      if (startTime === endTime) {
+      if (markerTiming.start[i] === markerTiming.end[i]) {
         this._drawInstantMarker(
           ctx,
           coords,
@@ -638,10 +655,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
           true
         );
       } else {
-        const right = Math.max(
-          left + 1,
-          snap(marginLeft + (endTime - timeAtMarginLeft) * devicePixelsPerMs)
-        );
         this._drawIntervalMarker(
           ctx,
           coords,
@@ -668,44 +681,16 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     markerIndex: MarkerIndex,
     isHighlighted: boolean
   ) {
-    const { marginLeft, lineWidth, cssToDeviceScale } = coords;
-    const { fillColor, strokeColor, textColor } = this._getMarkerColors(
+    const { marginLeft, cssToDeviceScale } = coords;
+    const { fillColor, textColor } = this._getMarkerColors(
       markerIndex,
       isHighlighted
     );
 
-    // Leave a gap of one line width above and below the marker.
-    const top = rowTop + lineWidth;
-    const height = contentHeight - 2 * lineWidth;
-    const width = right - left;
-
-    if (width <= 2 * lineWidth) {
-      // This marker is too narrow to have an inside part: with a border on
-      // both sides, it would be only border. So draw it as a solid rect in
-      // the border color.
-      ctx.fillStyle = strokeColor;
-      ctx.fillRect(left, top, width, height);
-      return;
-    }
-
-    // The fill color can be translucent, so don't let the fill and the border
-    // overlap. The stroke is centered on the path, so inset the path by half
-    // the line width to make the border cover whole device pixels.
+    // Markers are drawn as flat boxes without a border. Leave a small gap at
+    // the right edge, so that adjacent markers can be told apart.
     ctx.fillStyle = fillColor;
-    ctx.fillRect(
-      left + lineWidth,
-      top + lineWidth,
-      width - 2 * lineWidth,
-      height - 2 * lineWidth
-    );
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = strokeColor;
-    ctx.strokeRect(
-      left + lineWidth / 2,
-      top + lineWidth / 2,
-      width - lineWidth,
-      height - lineWidth
-    );
+    ctx.fillRect(left, rowTop, right - left - MARKER_GAP, contentHeight);
 
     // Draw the text label, constrained to the visible part of the marker.
     // TODO - L10N RTL.
@@ -741,26 +726,47 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     markerIndex: MarkerIndex,
     isHighlighted: boolean
   ) {
-    const { fillColor, strokeColor } = this._getMarkerColors(
-      markerIndex,
-      isHighlighted
+    const { fillColor } = this._getMarkerColors(markerIndex, isHighlighted);
+    const image = this._getInstantMarkerImage(
+      fillColor,
+      contentHeight,
+      coords.lineWidth
     );
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-    ctx.lineWidth = coords.cssToDeviceScale;
+    // The image has an odd width, so its middle column is at x.
+    ctx.drawImage(image, x - (image.width - 1) / 2, rowTop);
+  }
 
-    // We're drawing a diamond shape, whose height is about contentHeight - 3
-    // CSS pixels, and whose width is contentHeight / 2.
-    const verticalInset = 1.5 * coords.cssToDeviceScale;
-    const h = contentHeight;
-    ctx.beginPath();
-    ctx.moveTo(x - h / 4, rowTop + h / 2);
-    ctx.lineTo(x, rowTop + verticalInset);
-    ctx.lineTo(x + h / 4, rowTop + h / 2);
-    ctx.lineTo(x, rowTop + h - verticalInset);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+  /**
+   * Instant markers are drawn as diamonds. Drawing them as paths is slow when
+   * there are many of them, so render each diamond once into a small canvas
+   * and copy it with drawImage. The diamond is about half as wide as it is
+   * high.
+   */
+  _getInstantMarkerImage(
+    fillColor: string,
+    contentHeight: DevicePixels,
+    lineWidth: DevicePixels
+  ): HTMLCanvasElement {
+    const key = `${fillColor} ${contentHeight} ${lineWidth}`;
+    let image = this._instantMarkerImages.get(key);
+    if (image === undefined) {
+      image = document.createElement('canvas');
+      const width = 2 * Math.floor(contentHeight / 4) + 1;
+      image.width = width;
+      image.height = contentHeight;
+      const ctx = image.getContext('2d')!;
+      // Leave a gap of one line width above and below the diamond.
+      ctx.fillStyle = fillColor;
+      ctx.beginPath();
+      ctx.moveTo(0, contentHeight / 2);
+      ctx.lineTo(width / 2, lineWidth);
+      ctx.lineTo(width, contentHeight / 2);
+      ctx.lineTo(width / 2, contentHeight - lineWidth);
+      ctx.closePath();
+      ctx.fill();
+      this._instantMarkerImages.set(key, image);
+    }
+    return image;
   }
 
   /**

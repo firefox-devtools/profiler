@@ -4,7 +4,7 @@
 
 import { Provider } from 'react-redux';
 import { BLUE_60 } from 'photon-colors';
-import { getFillColor } from 'firefox-profiler/profile-logic/graph-color';
+import { getStrokeColor } from 'firefox-profiler/profile-logic/graph-color';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -28,7 +28,8 @@ import { ensureExists } from '../../utils/types';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import type {
   DrawOperation,
-  MoveToOperation,
+  DrawImageOperation,
+  FillRectOperation,
 } from '../fixtures/mocks/canvas-context';
 import {
   autoMockCanvasContext,
@@ -55,7 +56,7 @@ import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import type { CssPixels, GraphColor, Profile } from 'firefox-profiler/types';
 
 // Constants matching those in Canvas.tsx
-const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
+const DEFAULT_FILL_COLOR = '#5aaaf8'; // Medium blue for non-highlighted
 
 const MARKERS: TestDefinedMarker[] = [
   ['Marker A', 0, 10],
@@ -226,35 +227,31 @@ describe('MarkerChart', function () {
     const drawCalls = flushDrawLog();
 
     // Check that we have 3 diamonds (initial instant marker, first "middle"
-    // instant marker, and last marker). We use the moveTo operation as a proxy
-    // to know that a diamond is drawn.
-    const diamondOperations = drawCalls.filter<MoveToOperation>(
+    // instant marker, and last marker). Diamonds are drawn with drawImage.
+    const diamondOperations = drawCalls.filter<DrawImageOperation>(
       // @ts-expect-error "must be a type predicate"
-      ([operation]) => operation === 'moveTo'
+      ([operation]) => operation === 'drawImage'
     );
     expect(diamondOperations).toHaveLength(3);
 
     // Check that all X, Y values are different
     const diamondOperationsXY = new Set(
-      diamondOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
+      diamondOperations.map(([, , x, y]) => `${Math.round(x)};${Math.round(y)}`)
     );
     expect(diamondOperationsXY.size).toBe(3);
 
-    // Check that we have a solid fillRect operation for the first small
-    // interval marker. Small interval markers are drawn as narrow rectangles
-    // in the marker area, which is to the right of the left margin. We filter
-    // out the vertical separator, which is to the left of the marker area.
-    const smallMarkerOperations = drawCalls.filter(
-      ([operation, x, , w]) =>
-        operation === 'fillRect' && x >= TIMELINE_MARGIN_LEFT && w <= 2
+    // Interval markers are drawn as rectangles in the marker area, which is
+    // to the right of the left margin. This filters out the row backgrounds
+    // and the vertical separator, which are to the left of the marker area.
+    const intervalMarkerOperations = drawCalls.filter<FillRectOperation>(
+      // @ts-expect-error "must be a type predicate"
+      ([operation, x]) => operation === 'fillRect' && x >= TIMELINE_MARGIN_LEFT
     );
-    expect(smallMarkerOperations).toHaveLength(1);
-
-    // Check that the border of the later longer marker is drawn.
-    const strokeRectOperations = drawCalls.filter(
-      ([operation]) => operation === 'strokeRect'
-    );
-    expect(strokeRectOperations).toHaveLength(1);
+    // Check that we have a narrow rectangle for the first small interval
+    // marker, and a wide one for the later longer marker.
+    expect(
+      intervalMarkerOperations.map(([, , , w]) => (w <= 2 ? 'narrow' : 'wide'))
+    ).toEqual(['narrow', 'wide']);
 
     // @ts-expect-error - "property must be optional"
     delete window.devicePixelRatio;
@@ -873,9 +870,9 @@ describe('MarkerChart', function () {
       // The colors should include our marker colors with transparency
       expect(fillColors).toEqual(
         expect.arrayContaining([
-          getFillColor('green'),
-          getFillColor('red'),
-          getFillColor('yellow'),
+          getStrokeColor('green') + 'bb',
+          getStrokeColor('red') + 'bb',
+          getStrokeColor('yellow') + 'bb',
         ])
       );
     });
@@ -925,7 +922,7 @@ describe('MarkerChart', function () {
         [['Test without color', 0, 5, { type: 'Test', status: 'unknown' }]],
         'orange'
       );
-      expect(fillColors).toContain(getFillColor('orange'));
+      expect(fillColors).toContain(getStrokeColor('orange') + 'bb');
       expect(fillColors).not.toContain(DEFAULT_FILL_COLOR);
     });
 
@@ -941,8 +938,8 @@ describe('MarkerChart', function () {
         ],
         'orange'
       );
-      expect(fillColors).toContain(getFillColor('green'));
-      expect(fillColors).not.toContain(getFillColor('orange'));
+      expect(fillColors).toContain(getStrokeColor('green') + 'bb');
+      expect(fillColors).not.toContain(getStrokeColor('orange') + 'bb');
     });
 
     it('ignores an invalid schema color', () => {

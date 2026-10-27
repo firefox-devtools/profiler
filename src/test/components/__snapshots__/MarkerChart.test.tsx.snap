@@ -285,25 +285,10 @@ Array [
   ],
   Array [
     "fillRect",
-    173,
-    130,
-    65,
-    11,
-  ],
-  Array [
-    "set lineWidth",
-    1,
-  ],
-  Array [
-    "set strokeStyle",
-    "#002275",
-  ],
-  Array [
-    "strokeRect",
-    172.5,
-    129.5,
-    66,
-    12,
+    172,
+    128,
+    65.2,
+    15,
   ],
   Array [
     "set fillStyle",
@@ -708,38 +693,30 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "set lineWidth",
-    2,
+    "#5aaaf8",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "moveTo",
-    381.5,
-    47,
+    0,
+    15,
   ],
   Array [
     "lineTo",
-    389,
-    35,
+    7.5,
+    2,
   ],
   Array [
     "lineTo",
-    396.5,
-    47,
+    15,
+    15,
   ],
   Array [
     "lineTo",
-    389,
-    59,
+    7.5,
+    28,
   ],
   Array [
     "closePath",
@@ -748,7 +725,13 @@ Array [
     "fill",
   ],
   Array [
-    "stroke",
+    "drawImage",
+    <canvas
+      height="30"
+      width="15"
+    />,
+    382,
+    32,
   ],
   Array [
     "restore",
@@ -826,29 +809,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    302,
-    68,
-    218,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
-    301,
-    67,
-    220,
-    24,
+    300,
+    64,
+    221.2,
+    30,
   ],
   Array [
     "measureText",
@@ -856,29 +824,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    546,
-    68,
-    130,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
-    545,
-    67,
-    132,
-    24,
+    544,
+    64,
+    133.2,
+    30,
   ],
   Array [
     "restore",
@@ -948,29 +901,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    302,
-    100,
-    218,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
-    301,
-    99,
-    220,
-    24,
+    300,
+    96,
+    221.2,
+    30,
   ],
   Array [
     "restore",
@@ -1026,29 +964,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    413,
-    132,
-    107,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
     412,
-    131,
-    109,
-    24,
+    128,
+    109.2,
+    30,
   ],
   Array [
     "measureText",
@@ -1061,7 +984,7 @@ Array [
   Array [
     "fillText",
     "click",
-    417,
+    418,
     150,
   ],
   Array [
@@ -1132,29 +1055,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    502,
-    164,
-    18,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
-    501,
-    163,
-    20,
-    24,
+    500,
+    160,
+    21.2,
+    30,
   ],
   Array [
     "restore",
@@ -1224,29 +1132,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    302,
-    196,
-    63,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
-    301,
-    195,
-    65,
-    24,
+    300,
+    192,
+    65.2,
+    30,
   ],
   Array [
     "restore",
@@ -1315,48 +1208,13 @@ Array [
     "clip",
   ],
   Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    448.5,
-    239,
-  ],
-  Array [
-    "lineTo",
-    456,
-    227,
-  ],
-  Array [
-    "lineTo",
-    463.5,
-    239,
-  ],
-  Array [
-    "lineTo",
-    456,
-    251,
-  ],
-  Array [
-    "closePath",
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
+    "drawImage",
+    <canvas
+      height="30"
+      width="15"
+    />,
+    449,
+    224,
   ],
   Array [
     "restore",
@@ -1426,29 +1284,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    346,
-    260,
-    130,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
-    345,
-    259,
-    132,
-    24,
+    344,
+    256,
+    133.2,
+    30,
   ],
   Array [
     "measureText",
@@ -1532,29 +1375,14 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
+    "#5aaaf8",
   ],
   Array [
     "fillRect",
-    413,
-    292,
-    218,
-    22,
-  ],
-  Array [
-    "set lineWidth",
-    2,
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "strokeRect",
     412,
-    291,
-    220,
-    24,
+    288,
+    221.2,
+    30,
   ],
   Array [
     "restore",
