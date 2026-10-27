@@ -7,6 +7,7 @@ import { stripIndent } from 'common-tags';
 import { ProfileViewer } from 'firefox-profiler/components/app/ProfileViewer';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { viewProfile } from 'firefox-profiler/actions/receive-profile';
+import { getIsBottomBoxFullscreen } from 'firefox-profiler/selectors/url-state';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { ensureExists } from 'firefox-profiler/utils/types';
 
@@ -14,6 +15,7 @@ import {
   render,
   screen,
   within,
+  fireEvent,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
@@ -109,6 +111,7 @@ describe('BottomBox', () => {
     );
 
     return {
+      store,
       sourceView: () => document.querySelector('.sourceView') as HTMLElement,
       assemblyView: () =>
         document.querySelector('.assemblyView') as HTMLElement,
@@ -236,5 +239,34 @@ describe('BottomBox', () => {
     ).toBeInTheDocument();
     expect(prevButton).toBeDisabled();
     expect(nextButton).toBeEnabled();
+  });
+
+  it('closes the find bar before leaving fullscreen when pressing Escape', async () => {
+    const { store, sourceView } = setup();
+
+    const frameElement = screen.getByRole('treeitem', { name: /^A/ });
+    fireFullClick(frameElement);
+    fireFullClick(frameElement, { detail: 2 });
+    const sourceViewContent = await within(
+      ensureExists(sourceView())
+    ).findByRole('textbox');
+
+    fireFullClick(screen.getByRole('button', { name: 'Fullscreen' }));
+    expect(getIsBottomBoxFullscreen(store.getState())).toBe(true);
+
+    // Open the find bar. CodeMirror maps Mod to Ctrl outside of macOS.
+    fireEvent.keyDown(sourceViewContent, { key: 'f', ctrlKey: true });
+    const searchField = await screen.findByRole('textbox', { name: 'Find' });
+
+    // The first Escape closes the find bar and stays in fullscreen.
+    fireEvent.keyDown(searchField, { key: 'Escape', keyCode: 27 });
+    expect(
+      screen.queryByRole('textbox', { name: 'Find' })
+    ).not.toBeInTheDocument();
+    expect(getIsBottomBoxFullscreen(store.getState())).toBe(true);
+
+    // The second Escape leaves fullscreen.
+    fireEvent.keyDown(sourceViewContent, { key: 'Escape', keyCode: 27 });
+    expect(getIsBottomBoxFullscreen(store.getState())).toBe(false);
   });
 });
