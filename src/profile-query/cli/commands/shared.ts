@@ -8,16 +8,17 @@
 
 import type { Command } from 'commander';
 import { Option } from 'commander';
-import { collectStrings } from '../utils/parse';
-import { sendCommand } from '../client';
-import { formatOutput } from 'firefox-profiler/profile-query/cli/output';
+import {
+  CliUsageError,
+  collectStrings,
+} from 'firefox-profiler/profile-query/cli/parse';
 import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
 import type {
   ClientCommand,
   CallTreeSummaryStrategy,
   CommandResult,
   PermalinkFormat,
-} from '../protocol';
+} from 'firefox-profiler/profile-query/cli/protocol';
 
 /**
  * Options shared by every command action via `addGlobalOptions`.
@@ -27,6 +28,40 @@ export type GlobalOptions = {
   json?: boolean;
   permalink?: boolean;
   shortPermalink?: boolean;
+};
+
+/**
+ * Local file access for the commands that read or write files.
+ */
+export type CommandFileSystem = {
+  /** Resolve a path typed by the user against the working directory. */
+  resolvePath(path: string): string;
+  exists(path: string): boolean;
+  /** The platform's path separator. */
+  sep: string;
+};
+
+/**
+ * What the command definitions need from the environment that runs them: the
+ * profiler-cli client, which sends commands to the daemon and prints to the
+ * terminal, or the web app, which runs them on its own store.
+ */
+export type CommandContext = {
+  /**
+   * Run a command, print its formatted result, and return the result.
+   */
+  run(
+    command: ClientCommand,
+    opts: GlobalOptions
+  ): Promise<string | CommandResult>;
+  /** Print a line of extra output. */
+  print(text: string): void;
+  /** Report the command as failed without aborting it. */
+  setFailed(): void;
+  /** The arguments as typed, without the program name. */
+  args: string[];
+  /** Null where there is no file system, which leaves out the file commands. */
+  fileSystem: CommandFileSystem | null;
 };
 
 /** Which permalink, if any, the global flags ask for. */
@@ -43,27 +78,7 @@ export function permalinkFormat(
 }
 
 /**
- * Send a command to the daemon and print the formatted result. Centralizes the
- * `sendCommand` + `formatOutput` tail that every command action shares, so no
- * call site can forget to pass `opts.session` or honor `opts.json`.
- */
-export async function runCommand(
-  sessionDir: string,
-  command: ClientCommand,
-  opts: GlobalOptions
-): Promise<string | CommandResult> {
-  const { result, permalink } = await sendCommand(
-    sessionDir,
-    command,
-    opts.session,
-    { permalink: permalinkFormat(opts) }
-  );
-  console.log(formatOutput(result, opts.json ?? false, permalink));
-  return result;
-}
-
-/**
- * Parse a string as an integer and exit with an error if it is not a valid
+ * Parse a string as an integer and throw a usage error if it is not a valid
  * integer >= min. Pass a custom `msg` to override the default error message.
  */
 export function parseIntArg(
@@ -74,17 +89,16 @@ export function parseIntArg(
 ): number {
   const v = parseInt(value, 10);
   if (isNaN(v) || v < min) {
-    console.error(
+    throw new CliUsageError(
       msg ??
-        `Error: ${flagName} must be a ${min <= 0 ? 'non-negative' : 'positive'} integer`
+        `${flagName} must be a ${min <= 0 ? 'non-negative' : 'positive'} integer`
     );
-    process.exit(1);
   }
   return v;
 }
 
 /**
- * Parse a string as a float in [min, max] and exit with an error on failure.
+ * Parse a string as a float in [min, max] and throw a usage error on failure.
  */
 export function parseFloatArg(
   flagName: string,
@@ -95,27 +109,25 @@ export function parseFloatArg(
 ): number {
   const v = parseFloat(value);
   if (isNaN(v) || v < min || v > max) {
-    console.error(
+    throw new CliUsageError(
       msg ??
-        `Error: ${flagName} must be a number between ${min} and ${max === Infinity ? '∞' : max}`
+        `${flagName} must be a number between ${min} and ${max === Infinity ? '∞' : max}`
     );
-    process.exit(1);
   }
   return v;
 }
 
 /**
- * Parse a strategy name and exit with an error if it is not a valid strategy.
+ * Parse a strategy name and throw a usage error if it is not a valid strategy.
  */
 export function parseStrategyArg(
   flagName: string,
   value: string
 ): CallTreeSummaryStrategy {
   if (!(CALL_TREE_SUMMARY_STRATEGIES as string[]).includes(value)) {
-    console.error(
-      `Error: ${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
+    throw new CliUsageError(
+      `${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
     );
-    process.exit(1);
   }
   return value as CallTreeSummaryStrategy;
 }
@@ -145,11 +157,14 @@ export function addStrategyOption(cmd: Command): Command {
  * Returns true if the given subcommand was explicitly typed by the user.
  * Used to decide whether to print a "other subcommands" hint after a default action.
  *
- * e.g. `profiler-cli session`       -> wasExplicit('session', 'list') === false
- *      `profiler-cli session list`  -> wasExplicit('session', 'list') === true
+ * e.g. `profiler-cli filter`       -> wasExplicit(args, 'filter', 'list') === false
+ *      `profiler-cli filter list`  -> wasExplicit(args, 'filter', 'list') === true
  */
-export function wasExplicit(parent: string, subcommand: string): boolean {
-  const args = process.argv;
+export function wasExplicit(
+  args: string[],
+  parent: string,
+  subcommand: string
+): boolean {
   const idx = args.lastIndexOf(parent);
   return idx !== -1 && args[idx + 1] === subcommand;
 }

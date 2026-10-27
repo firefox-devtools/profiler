@@ -8,7 +8,7 @@
 
 import type { Command } from 'commander';
 import type { SessionMetadata } from '../protocol';
-import { wasExplicit } from './shared';
+import { wasExplicit } from 'firefox-profiler/profile-query/cli/commands/shared';
 import {
   cleanupIfDaemonGone,
   cleanupSession,
@@ -117,7 +117,7 @@ export function registerSessionCommand(
         );
       }
 
-      if (!wasExplicit('session', 'list')) {
+      if (!wasExplicit(process.argv, 'session', 'list')) {
         console.log('\nOther subcommands: profiler-cli session use <id>');
       }
     });

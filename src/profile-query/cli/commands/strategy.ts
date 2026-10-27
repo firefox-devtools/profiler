@@ -8,11 +8,15 @@
 
 import type { Command } from 'commander';
 import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
-import { addGlobalOptions, parseStrategyArg, runCommand } from './shared';
+import {
+  addGlobalOptions,
+  parseStrategyArg,
+  type CommandContext,
+} from './shared';
 
 export function registerStrategyCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   addGlobalOptions(
     program
@@ -21,8 +25,7 @@ export function registerStrategyCommand(
         `Set the data source that the samples and functions commands summarize: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
       )
   ).action(async (nameArg: string, opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'strategy', strategy: parseStrategyArg('strategy', nameArg) },
       opts
     );

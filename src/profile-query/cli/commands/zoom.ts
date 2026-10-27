@@ -7,11 +7,11 @@
  */
 
 import type { Command } from 'commander';
-import { addGlobalOptions, runCommand } from './shared';
+import { addGlobalOptions, type CommandContext } from './shared';
 
 export function registerZoomCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const zoom = program.command('zoom').description('Manage zoom ranges');
 
@@ -22,17 +22,13 @@ export function registerZoomCommand(
         'Push a zoom range (e.g. 2.7,3.1 in seconds, 2700ms,3100ms in milliseconds, 10%,20% as percentage, or m-158 for a marker)'
       )
   ).action(async (range: string, opts) => {
-    await runCommand(
-      sessionDir,
-      { command: 'zoom', subcommand: 'push', range },
-      opts
-    );
+    await ctx.run({ command: 'zoom', subcommand: 'push', range }, opts);
   });
 
   addGlobalOptions(
     zoom.command('pop').description('Pop the most recent zoom range')
   ).action(async (opts) => {
-    await runCommand(sessionDir, { command: 'zoom', subcommand: 'pop' }, opts);
+    await ctx.run({ command: 'zoom', subcommand: 'pop' }, opts);
   });
 
   addGlobalOptions(
@@ -40,10 +36,6 @@ export function registerZoomCommand(
       .command('clear')
       .description('Clear all zoom ranges (return to full profile)')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
-      { command: 'zoom', subcommand: 'clear' },
-      opts
-    );
+    await ctx.run({ command: 'zoom', subcommand: 'clear' }, opts);
   });
 }

@@ -8,11 +8,12 @@
 
 import type { Command } from 'commander';
 import { expandMarkerHandleSpecs } from 'firefox-profiler/profile-query/marker-map';
-import { addGlobalOptions, runCommand } from './shared';
+import { CliUsageError } from 'firefox-profiler/profile-query/cli/parse';
+import { addGlobalOptions, type CommandContext } from './shared';
 
 export function registerMarkerCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const marker = program.command('marker').description('Marker-level commands');
 
@@ -32,8 +33,7 @@ export function registerMarkerCommand(
       (spec): spec is string => spec !== undefined
     );
 
-    const result = await runCommand(
-      sessionDir,
+    const result = await ctx.run(
       { command: 'marker', subcommand: 'info', markers: specs },
       opts
     );
@@ -42,7 +42,7 @@ export function registerMarkerCommand(
       result.type === 'marker-info-multi' &&
       (result.errors.length > 0 || result.rangeSpansThreadsWarning)
     ) {
-      process.exitCode = 1;
+      ctx.setFailed();
     }
   });
 
@@ -63,23 +63,20 @@ export function registerMarkerCommand(
       try {
         expanded = expandMarkerHandleSpecs([markerHandle]);
       } catch (error) {
-        console.error(
-          `Error: ${error instanceof Error ? error.message : String(error)}`
+        throw new CliUsageError(
+          error instanceof Error ? error.message : String(error)
         );
-        process.exit(1);
       }
       if (expanded.length !== 1) {
-        console.error(
+        throw new CliUsageError(
           expanded.length === 0
-            ? `Error: marker stack requires a marker handle.`
-            : `Error: marker stack takes a single handle; ranges and lists are only supported by 'marker info'.`
+            ? `marker stack requires a marker handle.`
+            : `marker stack takes a single handle; ranges and lists are only supported by 'marker info'.`
         );
-        process.exit(1);
       }
       markerHandle = expanded[0];
     }
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'marker', subcommand: 'stack', marker: markerHandle },
       opts
     );

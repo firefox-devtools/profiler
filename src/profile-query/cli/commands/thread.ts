@@ -7,7 +7,11 @@
  */
 
 import type { Command } from 'commander';
-import { parseEphemeralFilters, parseLimitArg } from '../utils/parse';
+import {
+  CliUsageError,
+  parseEphemeralFilters,
+  parseLimitArg,
+} from 'firefox-profiler/profile-query/cli/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
@@ -15,7 +19,7 @@ import {
   parseIntArg,
   parseFloatArg,
   parseOptionalStrategyArg,
-  runCommand,
+  type CommandContext,
 } from './shared';
 import type {
   CallTreeScoringStrategy,
@@ -23,7 +27,7 @@ import type {
   FunctionFilterOptions,
   ThreadListOptions,
   ThreadListSort,
-} from '../protocol';
+} from 'firefox-profiler/profile-query/cli/protocol';
 
 const VALID_THREAD_LIST_SORTS: ThreadListSort[] = [
   'cpu',
@@ -84,10 +88,9 @@ function parseCallTreeOptions(opts: {
   }
   if (opts.scoring !== undefined) {
     if (!(VALID_SCORING_STRATEGIES as string[]).includes(opts.scoring)) {
-      console.error(
-        `Error: --scoring must be one of: ${VALID_SCORING_STRATEGIES.join(', ')}`
+      throw new CliUsageError(
+        `--scoring must be one of: ${VALID_SCORING_STRATEGIES.join(', ')}`
       );
-      process.exit(1);
     }
     result.scoringStrategy = opts.scoring as CallTreeScoringStrategy;
   }
@@ -95,7 +98,7 @@ function parseCallTreeOptions(opts: {
 }
 
 /** Add the flags and action of `thread list` to its command. */
-function addThreadListCommand(cmd: Command, sessionDir: string): Command {
+function addThreadListCommand(cmd: Command, ctx: CommandContext): Command {
   return addGlobalOptions(
     cmd
       .description(
@@ -138,10 +141,9 @@ process lifetimes, counters, and CPU activity over time.`
 
     if (opts.sort !== undefined) {
       if (!(VALID_THREAD_LIST_SORTS as string[]).includes(opts.sort)) {
-        console.error(
-          `Error: --sort must be one of: ${VALID_THREAD_LIST_SORTS.join(', ')}`
+        throw new CliUsageError(
+          `--sort must be one of: ${VALID_THREAD_LIST_SORTS.join(', ')}`
         );
-        process.exit(1);
       }
       threadListOptions.sort = opts.sort as ThreadListSort;
     }
@@ -153,12 +155,11 @@ process lifetimes, counters, and CPU activity over time.`
         '--limit',
         opts.limit,
         0,
-        'Error: --limit must be a non-negative integer (0 = show all)'
+        '--limit must be a non-negative integer (0 = show all)'
       );
     }
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'thread', subcommand: 'list', threadListOptions },
       opts
     );
@@ -167,12 +168,12 @@ process lifetimes, counters, and CPU activity over time.`
 
 export function registerThreadCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const thread = program.command('thread').description('Thread-level commands');
 
   // thread list
-  addThreadListCommand(thread.command('list'), sessionDir);
+  addThreadListCommand(thread.command('list'), ctx);
 
   // thread info
   addGlobalOptions(
@@ -181,8 +182,7 @@ export function registerThreadCommand(
       .description('Print detailed thread information')
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'thread', subcommand: 'info', thread: opts.thread },
       opts
     );
@@ -196,8 +196,7 @@ export function registerThreadCommand(
       .option('--thread <handle>', 'Thread handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const threadHandle = handleArg ?? opts.thread;
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'thread', subcommand: 'select', thread: threadHandle },
       opts
     );
@@ -210,8 +209,7 @@ export function registerThreadCommand(
       .description('Show hot functions list for a thread')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'samples',
@@ -232,8 +230,7 @@ export function registerThreadCommand(
       .description('Show top-down call tree (where CPU time is spent)')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'samples-top-down',
@@ -255,8 +252,7 @@ export function registerThreadCommand(
       .description('Show bottom-up call tree (what calls hot functions)')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'samples-bottom-up',
@@ -375,7 +371,7 @@ Examples:
           opts.minDuration,
           0,
           Infinity,
-          'Error: --min-duration must be a positive number (in milliseconds)'
+          '--min-duration must be a positive number (in milliseconds)'
         );
       }
       if (opts.maxDuration !== undefined) {
@@ -384,7 +380,7 @@ Examples:
           opts.maxDuration,
           0,
           Infinity,
-          'Error: --max-duration must be a positive number (in milliseconds)'
+          '--max-duration must be a positive number (in milliseconds)'
         );
       }
       markerFilters.limit = parseLimitArg('--limit', opts.limit);
@@ -393,8 +389,7 @@ Examples:
       }
     }
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'markers',
@@ -439,8 +434,7 @@ Examples:
     }
     if (opts.sort !== undefined) {
       if (opts.sort !== 'start' && opts.sort !== 'duration') {
-        console.error('Error: --sort must be "start" or "duration"');
-        process.exit(1);
+        throw new CliUsageError('--sort must be "start" or "duration"');
       }
       networkFilters.sort = opts.sort;
     }
@@ -450,7 +444,7 @@ Examples:
         opts.minDuration,
         0,
         Infinity,
-        'Error: --min-duration must be a positive number (in milliseconds)'
+        '--min-duration must be a positive number (in milliseconds)'
       );
     }
     if (opts.maxDuration !== undefined) {
@@ -459,7 +453,7 @@ Examples:
         opts.maxDuration,
         0,
         Infinity,
-        'Error: --max-duration must be a positive number (in milliseconds)'
+        '--max-duration must be a positive number (in milliseconds)'
       );
     }
     if (opts.limit !== undefined) {
@@ -468,8 +462,7 @@ Examples:
       networkFilters.limit = 20;
     }
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'network',
@@ -505,7 +498,7 @@ Examples:
         '--navigation',
         opts.navigation,
         1,
-        'Error: --navigation must be a positive integer (1-based index)'
+        '--navigation must be a positive integer (1-based index)'
       );
     }
     if (opts.jankLimit !== undefined) {
@@ -515,8 +508,7 @@ Examples:
         parseLimitArg('--jank-limit', opts.jankLimit) ?? 0;
     }
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'page-load',
@@ -565,7 +557,7 @@ Examples:
           opts.minSelf,
           0,
           100,
-          'Error: --min-self must be a number between 0 and 100 (percentage)'
+          '--min-self must be a number between 0 and 100 (percentage)'
         );
       }
       functionFilters.limit = parseLimitArg('--limit', opts.limit);
@@ -573,8 +565,7 @@ Examples:
 
     const sampleFilters = parseEphemeralFilters(opts);
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'thread',
         subcommand: 'functions',

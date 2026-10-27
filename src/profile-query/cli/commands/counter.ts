@@ -7,11 +7,11 @@
  */
 
 import type { Command } from 'commander';
-import { addGlobalOptions, runCommand } from './shared';
+import { addGlobalOptions, type CommandContext } from './shared';
 
 export function registerCounterCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const counter = program
     .command('counter')
@@ -22,11 +22,7 @@ export function registerCounterCommand(
       .command('list')
       .description('List all counters with one-line summaries')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
-      { command: 'counter', subcommand: 'list' },
-      opts
-    );
+    await ctx.run({ command: 'counter', subcommand: 'list' }, opts);
   });
 
   addGlobalOptions(
@@ -36,8 +32,7 @@ export function registerCounterCommand(
       .option('--counter <handle>', 'Counter handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const counterHandle = handleArg ?? opts.counter;
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'counter', subcommand: 'info', counter: counterHandle },
       opts
     );

@@ -7,18 +7,18 @@
  */
 
 import type { Command } from 'commander';
-import { parseFilterSpec } from '../utils/parse';
+import { parseFilterSpec } from 'firefox-profiler/profile-query/cli/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
   parseIntArg,
-  runCommand,
   wasExplicit,
+  type CommandContext,
 } from './shared';
 
 export function registerFilterCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const filter = program
     .command('filter')
@@ -47,8 +47,7 @@ export function registerFilterCommand(
       outsideMarker: opts.outsideMarker,
       search: opts.search,
     });
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'filter', subcommand: 'push', thread: opts.thread, spec },
       opts
     );
@@ -66,10 +65,9 @@ export function registerFilterCommand(
       'count',
       String(raw),
       1,
-      'Error: count must be a positive integer'
+      'count must be a positive integer'
     );
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'filter', subcommand: 'pop', thread: opts.thread, count },
       opts
     );
@@ -81,14 +79,13 @@ export function registerFilterCommand(
       .description('List active filters for current thread')
       .option('--thread <handle>', 'Thread handle')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'filter', subcommand: 'list', thread: opts.thread },
       opts
     );
 
-    if (!wasExplicit('filter', 'list')) {
-      console.log(
+    if (!wasExplicit(ctx.args, 'filter', 'list')) {
+      ctx.print(
         '\nOther subcommands: profiler-cli filter <push|pop|clear> [options]'
       );
     }
@@ -102,8 +99,7 @@ export function registerFilterCommand(
       )
       .option('--thread <handle>', 'Thread handle')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'filter', subcommand: 'clear', thread: opts.thread },
       opts
     );
