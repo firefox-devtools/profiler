@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
 import type {
@@ -11,6 +12,9 @@ import type {
 } from 'firefox-profiler/types';
 
 import type { AssemblyViewEditor } from './AssemblyView-codemirror';
+
+import type { CodeFindBarPortal } from 'firefox-profiler/utils/codemirror-shared';
+import { CodeFindBar } from './CodeFindBar';
 
 import './CodeView.css';
 
@@ -51,7 +55,15 @@ type AssemblyViewProps = {
 
 let editorModulePromise: Promise<any> | null = null;
 
-export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
+type AssemblyViewState = {
+  readonly findBar: CodeFindBarPortal | null;
+};
+
+export class AssemblyView extends React.PureComponent<
+  AssemblyViewProps,
+  AssemblyViewState
+> {
+  override state: AssemblyViewState = { findBar: null };
   _ref = React.createRef<HTMLDivElement>();
   _editor: AssemblyViewEditor | null = null;
 
@@ -93,11 +105,19 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
     }));
   }
 
+  _onFindBarChange = (findBar: CodeFindBarPortal | null) => {
+    this.setState({ findBar });
+  };
+
   override render() {
+    const { findBar } = this.state;
     return (
       <div className="assemblyView codeView">
         <AssemblyViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
+        {findBar
+          ? createPortal(<CodeFindBar {...findBar.props} />, findBar.dom)
+          : null}
       </div>
     );
   }
@@ -120,7 +140,8 @@ export class AssemblyView extends React.PureComponent<AssemblyViewProps> {
         this._getAssemblyCodeOrFallback(),
         this.props.timings,
         this.props.highlightedInstruction,
-        domParent
+        domParent,
+        this._onFindBarChange
       );
       this._editor = editor;
       if (this.props.scrollToInstructionAddress !== undefined) {

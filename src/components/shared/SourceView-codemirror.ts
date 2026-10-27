@@ -32,7 +32,8 @@ import {
   timingsExtension,
   updateTimingsEffect,
   createHighlightedLineExtension,
-  codeViewerExtension,
+  createCodeViewerExtension,
+  type CodeFindBarPortal,
 } from 'firefox-profiler/utils/codemirror-shared';
 
 // This "compartment" allows us to swap the syntax highlighting language when
@@ -105,7 +106,8 @@ export class SourceViewEditor {
     timings: LineTimings,
     highlightedLine: number | null,
     startLine: number,
-    domParent: Element
+    domParent: Element,
+    onFindBarChange: (findBar: CodeFindBarPortal | null) => void
   ) {
     let state = EditorState.create({
       doc: initialText,
@@ -115,7 +117,7 @@ export class SourceViewEditor {
         languageConf.of(_languageExtForPath(path)),
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
-        codeViewerExtension,
+        createCodeViewerExtension(onFindBarChange),
       ],
     });
     state = state.update({
