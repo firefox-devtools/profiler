@@ -7,6 +7,7 @@ import { withChartViewport, type Viewport } from '../shared/chart/Viewport';
 import { ChartCanvas } from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
+import { snap, snapValueToMultipleOf } from '../../utils/device-pixels';
 import {
   mapCategoryColorNameToStackChartStyles,
   getForegroundColor,
@@ -98,27 +99,6 @@ const ROW_HEIGHT = 16;
 const TEXT_OFFSET_START = 3;
 const TEXT_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
-
-/**
- * Round the given value to integers, consistently rounding x.5 towards positive infinity.
- * This is different from Math.round: Math.round rounds 0.5 to the right (to 1), and -0.5
- * to the left (to -1).
- * snap should be preferred over Math.round for rounding coordinates which might
- * be negative, so that there is no discontinuity when a box moves past zero.
- */
-function snap(floatDeviceValue: DevicePixels): DevicePixels {
-  return Math.floor(floatDeviceValue + 0.5);
-}
-
-/**
- * Round the given value to a multiple of `integerFactor`.
- */
-function snapValueToMultipleOf(
-  floatDeviceValue: DevicePixels,
-  integerFactor: number
-): DevicePixels {
-  return snap(floatDeviceValue / integerFactor) * integerFactor;
-}
 
 class FlameGraphCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
