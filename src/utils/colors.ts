@@ -235,3 +235,93 @@ export function getForegroundColor(): string {
 export function getBackgroundColor(): string {
   return lightDark('#ffffff', '#18181a');
 }
+
+type RgbaColor = { r: number; g: number; b: number; a: number };
+
+/**
+ * Parse a color in the #rrggbb or #rrggbbaa format. The returned channels are
+ * between 0 and 1.
+ */
+function parseHexColor(color: string): RgbaColor {
+  const match = /^#([0-9a-f]{6})([0-9a-f]{2})?$/i.exec(color);
+  if (match === null) {
+    throw new Error(`Expected a color in the #rrggbb[aa] format: ${color}`);
+  }
+  const rgb = parseInt(match[1], 16);
+  return {
+    r: ((rgb >> 16) & 0xff) / 255,
+    g: ((rgb >> 8) & 0xff) / 255,
+    b: (rgb & 0xff) / 255,
+    a: match[2] === undefined ? 1 : parseInt(match[2], 16) / 255,
+  };
+}
+
+function toHexColor({ r, g, b }: RgbaColor): string {
+  const toHex = (channel: number) =>
+    Math.round(channel * 255)
+      .toString(16)
+      .padStart(2, '0');
+  return '#' + toHex(r) + toHex(g) + toHex(b);
+}
+
+/**
+ * Compute the opaque color that results from drawing `color`, which can be
+ * translucent, on top of `backgroundColor`. Both colors use the #rrggbb[aa]
+ * format. The result uses the #rrggbb format.
+ */
+export function blendColors(color: string, backgroundColor: string): string {
+  const fg = parseHexColor(color);
+  const bg = parseHexColor(backgroundColor);
+  const blend = (fgChannel: number, bgChannel: number) =>
+    fgChannel * fg.a + bgChannel * (1 - fg.a);
+  return toHexColor({
+    r: blend(fg.r, bg.r),
+    g: blend(fg.g, bg.g),
+    b: blend(fg.b, bg.b),
+    a: 1,
+  });
+}
+
+/**
+ * Compute the relative luminance of an opaque color, as defined by WCAG 2.
+ * See https://www.w3.org/TR/WCAG22/#dfn-relative-luminance
+ */
+function getRelativeLuminance(color: string): number {
+  const { r, g, b } = parseHexColor(color);
+  const linearize = (channel: number) =>
+    channel <= 0.04045
+      ? channel / 12.92
+      : Math.pow((channel + 0.055) / 1.055, 2.4);
+  return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+}
+
+/**
+ * Compute the contrast ratio between two opaque colors, as defined by WCAG 2.
+ * The result is between 1 and 21. For small text, WCAG level AA requires a
+ * contrast ratio of at least 4.5.
+ * See https://www.w3.org/TR/WCAG22/#dfn-contrast-ratio
+ */
+export function getContrastRatio(colorA: string, colorB: string): number {
+  const luminanceA = getRelativeLuminance(colorA);
+  const luminanceB = getRelativeLuminance(colorB);
+  return (
+    (Math.max(luminanceA, luminanceB) + 0.05) /
+    (Math.min(luminanceA, luminanceB) + 0.05)
+  );
+}
+
+/**
+ * Return black or white, whichever has the higher contrast with text drawn on
+ * `fillColor`. The fill color can be translucent, in which case it's blended
+ * with `backgroundColor` first.
+ */
+export function getContrastingTextColor(
+  fillColor: string,
+  backgroundColor: string
+): string {
+  const color = blendColors(fillColor, backgroundColor);
+  return getContrastRatio('#000000', color) >=
+    getContrastRatio('#ffffff', color)
+    ? '#000000'
+    : '#ffffff';
+}

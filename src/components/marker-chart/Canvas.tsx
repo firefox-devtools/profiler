@@ -1,15 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import { GREY_20, GREY_30, GREY_60, BLUE_60, GREY_70 } from 'photon-colors';
 import {
-  GREY_20,
-  GREY_30,
-  GREY_60,
-  GREY_90,
-  BLUE_60,
-  GREY_70,
-} from 'photon-colors';
-import { getForegroundColor, getBackgroundColor } from '../../utils/colors';
+  getForegroundColor,
+  getBackgroundColor,
+  getContrastingTextColor,
+} from '../../utils/colors';
 import { isDarkMode, lightDark } from '../../utils/dark-mode';
 import * as React from 'react';
 import {
@@ -57,7 +54,6 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 import {
   getStrokeColor,
-  getTextColor,
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
 import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
@@ -144,21 +140,46 @@ function getBucketBorderColor() {
   return lightDark(GREY_30, GREY_60);
 }
 
-function getHighlightRowBackgroundColor() {
-  return 'rgba(40, 122, 169, 0.2)';
+export function getHighlightRowBackgroundColor() {
+  return '#287aa933';
 }
 
-function getDefaultMarkerColors(isHighlighted: boolean) {
-  if (isDarkMode()) {
-    return {
-      fillColor: isHighlighted ? 'hsl(208, 81%, 52%)' : 'hsl(208, 80%, 38%)',
-      textColor: isHighlighted ? GREY_90 : GREY_20,
-    };
+function getMarkerFillColor(
+  color: GraphColor | null,
+  isHighlighted: boolean
+): string {
+  if (color !== null) {
+    // Markers have no border, so use a more opaque fill than getFillColor,
+    // which the timeline graphs use.
+    return isHighlighted ? getStrokeColor(color) : getStrokeColor(color) + 'bb';
   }
-  return {
-    fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
-    textColor: isHighlighted ? 'white' : 'black', // White text on dark blue, black text on light blue
-  };
+  if (isDarkMode()) {
+    return isHighlighted ? '#218be8' : '#1366ae';
+  }
+  return isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR;
+}
+
+// Maps "fillColor backgroundColor" to the text color for this combination.
+const _textColorCache: Map<string, string> = new Map();
+
+/**
+ * Get the fill and text colors for a marker. `color` is the marker's color
+ * from its schema's colorField, or null for the default blue. The text is
+ * black or white, whichever has the higher contrast with the fill.
+ */
+export function getMarkerColors(
+  color: GraphColor | null,
+  isHighlighted: boolean
+): { fillColor: string; textColor: string } {
+  const fillColor = getMarkerFillColor(color, isHighlighted);
+  const backgroundColor = getBackgroundColor();
+  const key = fillColor + ' ' + backgroundColor;
+  let textColor = _textColorCache.get(key);
+  if (textColor === undefined) {
+    textColor = getContrastingTextColor(fillColor, backgroundColor);
+    _textColorCache.set(key, textColor);
+  }
+  return { fillColor, textColor };
 }
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
@@ -211,7 +232,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   };
 
   /**
-   * Get the fill, stroke, and text colors for a marker based on its schema and data.
+   * Get the fill and text colors for a marker based on its schema and data.
    * If the marker schema has a colorField, use that field's value.
    * Otherwise use the marker schema's color.
    * Fall back to default blue if no color is specified.
@@ -253,22 +274,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       color = schema.color;
     }
 
-    if (color) {
-      if (isHighlighted) {
-        return {
-          fillColor: getStrokeColor(color),
-          textColor: getTextColor(color), // Use appropriate contrast color when highlighted
-        };
-      }
-      return {
-        // Markers have no border, so use a more opaque fill than
-        // getFillColor, which the timeline graphs use.
-        fillColor: getStrokeColor(color) + 'bb',
-        textColor: getForegroundColor(), // Always use black/white text for unselected markers
-      };
-    }
-    // Fall back to default blue colors
-    return getDefaultMarkerColors(isHighlighted);
+    return getMarkerColors(color, isHighlighted);
   }
 
   drawCanvas = (

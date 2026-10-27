@@ -254,7 +254,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgba(40, 122, 169, 0.2)",
+    "#287aa933",
   ],
   Array [
     "fillRect",
@@ -292,7 +292,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "white",
+    "#ffffff",
   ],
   Array [
     "fillText",
@@ -979,7 +979,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "#000000",
   ],
   Array [
     "fillText",
@@ -1299,7 +1299,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "black",
+    "#000000",
   ],
   Array [
     "fillText",
