@@ -31,21 +31,8 @@ import {
   isStringIndexMarkerField,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { changeMarkersSearchString } from '../../actions/profile-view';
-import type { Store } from '../../types/store';
-import type { ThreadMap } from '../thread-map';
-import type { MarkerMap } from '../marker-map';
 import type {
-  Marker,
-  MarkerIndex,
-  CategoryList,
-  Thread,
-  Lib,
-  IndexIntoStackTable,
-  MarkerSchemaByName,
-  MarkerFormatType,
-} from 'firefox-profiler/types';
-import type { StringTable } from 'firefox-profiler/utils/string-table';
-import type {
+  QuerierStore,
   MarkerStackResult,
   MarkerInfoResult,
   StackTraceData,
@@ -65,6 +52,19 @@ import type {
   ProfileMarkersResult,
   ProfileMarkersThreadBreakdown,
 } from '../types';
+import type { ThreadMap } from '../thread-map';
+import type { MarkerMap } from '../marker-map';
+import type {
+  Marker,
+  MarkerIndex,
+  CategoryList,
+  Thread,
+  Lib,
+  IndexIntoStackTable,
+  MarkerSchemaByName,
+  MarkerFormatType,
+} from 'firefox-profiler/types';
+import type { StringTable } from 'firefox-profiler/utils/string-table';
 import {
   LOG_LEVEL_STRING_TO_LETTER,
   LOG_LETTER_TO_LEVEL,
@@ -705,7 +705,7 @@ function aggregateMarkersByCategory(
  * Collect thread markers data in structured format for JSON output.
  */
 export function collectThreadMarkers(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   markerMap: MarkerMap,
   threadHandle?: string,
@@ -956,7 +956,7 @@ export const MAX_PROFILE_MARKERS_ROWS = 100000;
  * set.
  */
 export function collectProfileMarkers(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   markerMap: MarkerMap,
   filterOptions: MarkerFilterOptions & { thread?: string } = {}
@@ -1211,7 +1211,7 @@ function collectStackTrace(
  * Collect marker stack trace data in structured format.
  */
 export function collectMarkerStack(
-  store: Store,
+  store: QuerierStore,
   markerMap: MarkerMap,
   threadMap: ThreadMap,
   markerHandle: string
@@ -1378,7 +1378,7 @@ function collectMarkerData(
  * Collect detailed marker information in structured format.
  */
 export function collectMarkerInfo(
-  store: Store,
+  store: QuerierStore,
   markerMap: MarkerMap,
   threadMap: ThreadMap,
   markerHandle: string
@@ -1502,7 +1502,7 @@ function buildNetworkPhases(data: NetworkPayload): NetworkPhaseTimings {
 }
 
 export function collectThreadNetwork(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   markerMap: MarkerMap,
   threadHandle?: string,
@@ -1703,7 +1703,7 @@ export function collectThreadNetwork(
 }
 
 export function collectProfileLogs(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   filterOptions: {
     thread?: string;

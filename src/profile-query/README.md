@@ -14,18 +14,19 @@ yarn build-profile-query
 
 ```javascript
 // Node.js interactive session
-const { ProfileQuerier } = (await import('./dist/profile-query.js')).default;
+const { ProfileQuerierNode } = (await import('./dist/profile-query.js'))
+  .default;
 
 // Load from file
-const p1 = await ProfileQuerier.load('/path/to/profile.json.gz');
+const p1 = await ProfileQuerierNode.load('/path/to/profile.json.gz');
 
 // Load from profiler.firefox.com URL
-const p2 = await ProfileQuerier.load(
+const p2 = await ProfileQuerierNode.load(
   'https://profiler.firefox.com/from-url/http%3A%2F%2Fexample.com%2Fprofile.json/'
 );
 
 // Load from share URL
-const p3 = await ProfileQuerier.load('https://share.firefox.dev/4oLEjCw');
+const p3 = await ProfileQuerierNode.load('https://share.firefox.dev/4oLEjCw');
 
 // Query the profile
 const profileInfo = await p1.profileInfo();
@@ -39,7 +40,8 @@ All query methods return structured result objects (typed as `WithContext<...>` 
 
 The library is built on top of the Firefox Profiler's Redux store and selectors:
 
-- **ProfileQuerier**: Main class that wraps a Redux store and provides query methods
+- **ProfileQuerier** (`index.ts`): Main class that wraps a Redux store and provides query methods. Browser-safe, so the web app can run it on its live store.
+- **ProfileQuerierNode** (`node.ts`): Adds the Node-only parts: loading a profile from a file or URL, `profile save`, and reading source map files from disk.
 - **TimestampManager**: Manages timestamp naming for time range queries
 - **ThreadMap**: Maps thread handles (e.g., `t-0`, `t-1`) to thread indexes
 - **MarkerMap**: Maps marker handles (e.g., `m-0`, `m-1`) to marker indexes within threads

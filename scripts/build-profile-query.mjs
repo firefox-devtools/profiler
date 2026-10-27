@@ -6,7 +6,7 @@ import { nodeBaseConfig } from './lib/esbuild-configs.mjs';
 
 const profileQueryConfig = {
   ...nodeBaseConfig,
-  entryPoints: ['src/profile-query/index.ts'],
+  entryPoints: ['src/profile-query/node.ts'],
   outfile: 'dist/profile-query.js',
   external: [...nodeBaseConfig.external, 'gecko-profiler-demangle'],
 };

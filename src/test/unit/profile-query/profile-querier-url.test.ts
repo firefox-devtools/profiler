@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { ProfileQuerier } from 'firefox-profiler/profile-query';
+import { ProfileQuerierNode } from 'firefox-profiler/profile-query/node';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
 import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
 import {
@@ -37,7 +37,7 @@ describe('ProfileQuerier URL view state', function () {
   });
 
   async function loadWithSearch() {
-    return ProfileQuerier.load(
+    return ProfileQuerierNode.load(
       `${PROFILER_URL}/calltree/?search=B&range=0m21&thread=0&v=17`
     );
   }
@@ -131,8 +131,8 @@ describe('ProfileQuerier URL view state', function () {
   });
 
   it('gives the same sample queries for raw URLs and marker-selection links', async function () {
-    const raw = await ProfileQuerier.load(PROFILE_URL);
-    const linked = await ProfileQuerier.load(
+    const raw = await ProfileQuerierNode.load(PROFILE_URL);
+    const linked = await ProfileQuerierNode.load(
       `${PROFILER_URL}/marker-table/?marker=0&thread=0&v=17`
     );
     for (const querier of [raw, linked]) {

@@ -36,16 +36,16 @@ import type {
   CounterTooltipRow,
   ProfileMeta,
 } from 'firefox-profiler/types';
-import type { Store } from '../../types/store';
-import type { ThreadMap } from '../thread-map';
-import type { TimestampManager } from '../timestamps';
 import type {
+  QuerierStore,
   CounterStat,
   CounterSummary,
   CounterTimeBucket,
   CounterListResult,
   CounterInfoResult,
 } from '../types';
+import type { ThreadMap } from '../thread-map';
+import type { TimestampManager } from '../timestamps';
 
 // Number of buckets in the detailed "over time" table.
 const OVER_TIME_BUCKET_COUNT = 10;
@@ -64,7 +64,7 @@ const RANGE_AGGREGATE_SOURCES: Set<CounterTooltipDataSource> = new Set([
 
 const naturalSort = new Intl.Collator('en-US', { numeric: true });
 
-export function getSortedCounterIndexes(store: Store): CounterIndex[] {
+export function getSortedCounterIndexes(store: QuerierStore): CounterIndex[] {
   const state = store.getState();
   const counters = getCounters(state) ?? [];
   const order = counters.map((_, index) => index);
@@ -137,7 +137,7 @@ function formatCounterRowValue(
  * Resolve the counter's range-aggregate tooltip rows into formatted stats.
  */
 function collectCounterStats(
-  store: Store,
+  store: QuerierStore,
   counterIndex: CounterIndex
 ): CounterStat[] {
   const state = store.getState();
@@ -185,7 +185,7 @@ function collectCounterStats(
  * range-aware.
  */
 export function collectCounterSummary(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   processIndexMap: Map<string, number>,
   counterIndex: CounterIndex
@@ -237,7 +237,7 @@ export function collectCounterSummary(
  * the profile has no counters.
  */
 export function collectCounterList(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   processIndexMap: Map<string, number>
 ): CounterListResult {
@@ -294,7 +294,7 @@ function getOverTimeMode(display: CounterDisplayConfig): {
  * sums, and time spans should exclude them.
  */
 function getInRangeSampleIndexes(
-  store: Store,
+  store: QuerierStore,
   counterIndex: CounterIndex
 ): [number, number] {
   const state = store.getState();
@@ -328,7 +328,7 @@ type CounterBuckets = {
  * sample-less buckets by carrying the level forward (accumulated) or with zero.
  */
 function getCounterBuckets(
-  store: Store,
+  store: QuerierStore,
   counterIndex: CounterIndex,
   requestedBucketCount: number,
   capToSampleCount: boolean
@@ -430,7 +430,7 @@ function getCounterBuckets(
  * range total; accumulated buckets as a share of the range peak (countRange).
  */
 function collectCounterOverTime(
-  store: Store,
+  store: QuerierStore,
   counterIndex: CounterIndex,
   timestampManager: TimestampManager
 ): CounterTimeBucket[] {
@@ -498,7 +498,7 @@ function collectCounterOverTime(
  * independent of the detailed "over time" table's coarser buckets.
  */
 function collectCounterGraph(
-  store: Store,
+  store: QuerierStore,
   counterIndex: CounterIndex
 ): number[] {
   const counterBuckets = getCounterBuckets(
@@ -516,7 +516,7 @@ function collectCounterGraph(
  * Build detailed information about a single counter, resolved by handle.
  */
 export function collectCounterInfo(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   processIndexMap: Map<string, number>,
   timestampManager: TimestampManager,

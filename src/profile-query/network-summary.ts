@@ -8,7 +8,13 @@ import {
   getProfile,
 } from 'firefox-profiler/selectors/profile';
 import { isNetworkMarker } from 'firefox-profiler/profile-logic/marker-data';
-import type { Store } from '../types/store';
+import type {
+  QuerierStore,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
+  ProfileNetworkThreadBreakdown,
+} from './types';
 import type {
   ThreadIndex,
   MarkerIndex,
@@ -17,14 +23,8 @@ import type {
 import type { NetworkPayload } from 'firefox-profiler/types/markers';
 import type { ThreadMap } from './thread-map';
 import type { MarkerMap } from './marker-map';
-import type {
-  NetworkSummaryRequest,
-  ThreadNetworkSummary,
-  ProfileNetworkSummary,
-  ProfileNetworkThreadBreakdown,
-} from './types';
 
-type State = ReturnType<Store['getState']>;
+type State = ReturnType<QuerierStore['getState']>;
 
 /**
  * One derived network marker, resolved to absolute times and a handle.
@@ -252,7 +252,7 @@ function isCompleted(record: NetworkRecord): boolean {
  * markers, so callers can omit the section entirely.
  */
 export function computeThreadNetworkSummary(
-  store: Store,
+  store: QuerierStore,
   threadIndexes: Set<ThreadIndex>,
   markerMap: MarkerMap,
   threadMap: ThreadMap
@@ -366,7 +366,7 @@ function dedupeRecords(records: NetworkRecord[]): NetworkRecord[] {
  * Returns null when no thread has network markers.
  */
 export function computeProfileNetworkSummary(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   markerMap: MarkerMap
 ): ProfileNetworkSummary | null {

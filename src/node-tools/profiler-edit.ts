@@ -50,7 +50,7 @@ import {
   embedJsSources,
   type SourceReader,
 } from 'firefox-profiler/profile-logic/embed-js-sources';
-import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/source-map';
+import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/source-map-node';
 import { mergeMarkersFromProfile } from 'firefox-profiler/profile-logic/merge-markers';
 
 /**

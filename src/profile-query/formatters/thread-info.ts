@@ -29,6 +29,7 @@ import type {
   ThreadFunctionsResult,
   FunctionFilterOptions,
   TopFunctionInfo,
+  QuerierStore,
 } from '../types';
 import {
   extractFunctionData,
@@ -44,7 +45,6 @@ import {
   extractSamplesLikeTable,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getInvertedCallNodeInfo } from 'firefox-profiler/profile-logic/profile-data';
-import type { Store } from '../../types/store';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
 import { getFunctionHandle } from '../function-map';
@@ -65,7 +65,7 @@ const threadNameSort = new Intl.Collator('en-US', { numeric: true });
  * regardless of the current zoom, matching `profile info`.
  */
 export function collectThreadList(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   processIndexMap: Map<string, number>,
   options: ThreadListOptions = {}
@@ -155,7 +155,7 @@ export function collectThreadList(
  * Collect thread info as structured data.
  */
 export function collectThreadInfo(
-  store: Store,
+  store: QuerierStore,
   timestampManager: TimestampManager,
   threadMap: ThreadMap,
   markerMap: MarkerMap,
@@ -212,7 +212,7 @@ export function collectThreadInfo(
  * Collect thread samples data in structured format.
  */
 export function collectThreadSamples(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   threadHandle?: string
 ): ThreadSamplesResult {
@@ -365,7 +365,7 @@ export function collectThreadSamples(
  * Shows the inverted call tree (callers of hot functions).
  */
 export function collectThreadSamplesBottomUp(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   threadHandle?: string,
   callTreeOptions?: CallTreeCollectionOptions
@@ -433,7 +433,7 @@ export function collectThreadSamplesBottomUp(
  * Shows the regular call tree (top-down view of hot paths).
  */
 export function collectThreadSamplesTopDown(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   threadHandle?: string,
   callTreeOptions?: CallTreeCollectionOptions
@@ -466,7 +466,7 @@ export function collectThreadSamplesTopDown(
  * Lists all functions with their weight percentages, supporting search and filtering.
  */
 export function collectThreadFunctions(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   threadHandle?: string,
   filterOptions?: FunctionFilterOptions

@@ -20,13 +20,13 @@ import type {
   ItemTimings,
 } from 'firefox-profiler/profile-logic/profile-data';
 import type { SortedCategoryBreakdown } from 'firefox-profiler/profile-logic/category-breakdown';
-import type { Store } from '../../types/store';
-import type { ThreadMap } from '../thread-map';
 import type {
+  QuerierStore,
   CategoryBreakdown,
   FunctionCategoryBreakdown,
   FunctionCategoryBreakdowns,
 } from '../types';
+import type { ThreadMap } from '../thread-map';
 
 const EMPTY_BREAKDOWN: CategoryBreakdown = { totalSamples: 0, categories: [] };
 
@@ -88,7 +88,7 @@ function getSamplesAndCategories(
  * Collect the category breakdown of every sample currently in view for a thread.
  */
 export function collectThreadCategoryBreakdown(
-  store: Store,
+  store: QuerierStore,
   threadIndexes: Set<ThreadIndex>
 ): CategoryBreakdown {
   const state = store.getState();
@@ -122,7 +122,7 @@ function toFunctionBreakdown(
  * the call paths it appears in.
  */
 export function collectFunctionCategoryBreakdowns(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   threadIndexes: Set<ThreadIndex>,
   funcIndex: IndexIntoFuncTable

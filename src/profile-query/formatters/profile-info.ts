@@ -15,12 +15,11 @@ import {
 import { collectSliceTree } from '../cpu-activity';
 import { collectCounterSummary, getSortedCounterIndexes } from './counter-info';
 import { computeProfileNetworkSummary } from '../network-summary';
-import type { Store } from '../../types/store';
+import type { QuerierStore, ProfileInfoResult, CounterSummary } from '../types';
 import type { ThreadInfo, ProcessListItem } from '../process-thread-list';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
 import type { MarkerMap } from '../marker-map';
-import type { ProfileInfoResult, CounterSummary } from '../types';
 
 /**
  * Filter a list of processes by a search string.
@@ -62,7 +61,7 @@ function applySearchFilter(
  * Collect profile information in structured format.
  */
 export function collectProfileInfo(
-  store: Store,
+  store: QuerierStore,
   timestampManager: TimestampManager,
   threadMap: ThreadMap,
   markerMap: MarkerMap,

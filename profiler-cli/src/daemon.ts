@@ -10,7 +10,7 @@
 import * as net from 'net';
 import * as fs from 'fs';
 import type * as child_process from 'child_process';
-import { ProfileQuerier } from '../../src/profile-query';
+import { ProfileQuerierNode } from '../../src/profile-query/node';
 import type { LoadPhase } from '../../src/profile-query/loader';
 import { ProfileVersionError } from 'firefox-profiler/profile-logic/errors';
 import type {
@@ -69,7 +69,7 @@ function formatProfileLoadError(error: unknown): string {
 }
 
 export class Daemon {
-  private querier: ProfileQuerier | null = null;
+  private querier: ProfileQuerierNode | null = null;
   private server: net.Server | null = null;
   private sessionDir: string;
   private sessionId: string;
@@ -286,7 +286,7 @@ export class Daemon {
 
       console.log('Loading profile...');
       const skipSymbolication = process.env.PROFILER_CLI_NO_SYMBOLICATE === '1';
-      this.querier = await ProfileQuerier.load(loadInput, {
+      this.querier = await ProfileQuerierNode.load(loadInput, {
         explicitSymbolServerUrl: this.symbolServerUrl,
         skipSymbolication,
         onPhaseChange: (phase) => {
