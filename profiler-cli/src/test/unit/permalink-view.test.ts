@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { permalinkViewForCommand } from '../../permalink-view';
+import { permalinkViewForCommand } from 'firefox-profiler/profile-query/cli/permalink-view';
 
 describe('permalinkViewForCommand', function () {
   it('maps sample queries to the call tree with their ephemeral settings', function () {

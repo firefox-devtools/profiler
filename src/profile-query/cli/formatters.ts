@@ -57,8 +57,8 @@ import type {
   ProfileSaveResult,
 } from './protocol';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { truncateFunctionName } from '../../src/profile-query/function-list';
-import { describeSpec } from '../../src/profile-query/filter-stack';
+import { truncateFunctionName } from 'firefox-profiler/profile-query/function-list';
+import { describeSpec } from 'firefox-profiler/profile-query/filter-stack';
 import {
   formatTimestamp as formatDuration,
   formatSeconds,

@@ -11,7 +11,7 @@ import * as path from 'path';
 import type { Command } from 'commander';
 import { addGlobalOptions, runCommand, permalinkFormat } from './shared';
 import { sendCommand } from '../client';
-import { formatOutput } from '../output';
+import { formatOutput } from 'firefox-profiler/profile-query/cli/output';
 
 export function registerSourcemapCommand(
   program: Command,

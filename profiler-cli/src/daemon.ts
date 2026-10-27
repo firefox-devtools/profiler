@@ -18,7 +18,6 @@ import type {
   ClientMessage,
   ServerResponse,
   SessionMetadata,
-  CommandResult,
   PermalinkOutcome,
 } from './protocol';
 import {
@@ -38,11 +37,10 @@ import {
   describeStaleSocketFailure,
   toErrorMessage,
 } from './diagnostics';
-import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { expandMarkerHandleSpecs } from 'firefox-profiler/profile-query/marker-map';
+import { executeClientCommand } from 'firefox-profiler/profile-query/cli/execute';
 import { BUILD_HASH, PACKAGE_NAME } from './constants';
 import { startSamplyServer } from './samply';
-import { permalinkViewForCommand } from './permalink-view';
+import { permalinkViewForCommand } from 'firefox-profiler/profile-query/cli/permalink-view';
 
 /**
  * Exit code used when the daemon dies before it is able to serve requests. The
@@ -408,7 +406,11 @@ export class Daemon {
           };
         }
 
-        const result = await this.processCommand(message.command);
+        const result = await executeClientCommand(
+          this.querier,
+          message.command,
+          this.querier
+        );
         if (!message.permalink) {
           return { type: 'success', result };
         }
@@ -445,222 +447,6 @@ export class Daemon {
       );
     } catch (error) {
       return { error: toErrorMessage(error) };
-    }
-  }
-
-  private async processCommand(
-    command: ClientCommand
-  ): Promise<string | CommandResult> {
-    if (!this.querier) {
-      throw new Error('Profile not loaded');
-    }
-
-    switch (command.command) {
-      case 'profile':
-        switch (command.subcommand) {
-          case 'info':
-            return this.querier.profileInfo(command.all, command.search);
-          case 'meta':
-            return this.querier.profileMeta();
-          case 'threads':
-            throw new Error('unimplemented');
-          case 'logs':
-            return this.querier.profileLogs(command.logFilters);
-          case 'save':
-            return this.querier.saveProfile(command.path, command.force);
-          case 'markers':
-            return this.querier.profileMarkers(command.markerFilters);
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'thread':
-        switch (command.subcommand) {
-          case 'info':
-            return this.querier.threadInfo(command.thread);
-          case 'list':
-            return this.querier.threadList(command.threadListOptions);
-          case 'select':
-            if (!command.thread) {
-              throw new Error('thread handle required for thread select');
-            }
-            return this.querier.threadSelect(command.thread);
-          case 'samples':
-            return this.querier.threadSamples(
-              command.thread,
-              command.includeIdle,
-              command.search,
-              command.sampleFilters,
-              command.strategy
-            );
-          case 'samples-top-down':
-            return this.querier.threadSamplesTopDown(
-              command.thread,
-              command.callTreeOptions,
-              command.includeIdle,
-              command.search,
-              command.sampleFilters,
-              command.strategy
-            );
-          case 'samples-bottom-up':
-            return this.querier.threadSamplesBottomUp(
-              command.thread,
-              command.callTreeOptions,
-              command.includeIdle,
-              command.search,
-              command.sampleFilters,
-              command.strategy
-            );
-          case 'markers':
-            return this.querier.threadMarkers(
-              command.thread,
-              command.markerFilters
-            );
-          case 'functions':
-            return this.querier.threadFunctions(
-              command.thread,
-              command.functionFilters,
-              command.includeIdle,
-              command.sampleFilters,
-              command.strategy
-            );
-          case 'network':
-            return this.querier.threadNetwork(
-              command.thread,
-              command.networkFilters
-            );
-          case 'page-load':
-            return this.querier.threadPageLoad(
-              command.thread,
-              command.pageLoadOptions
-            );
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'marker':
-        switch (command.subcommand) {
-          case 'info': {
-            // Expand once here, so the single/multi result shape follows what
-            // the specs actually resolve to: every spelling of one marker
-            // ("m-1", "m-1,", "m-1..m-1") returns the single-marker shape.
-            const specs = command.markers ?? [];
-            const handles = expandMarkerHandleSpecs(specs);
-            if (handles.length === 0) {
-              throw new Error('marker handle required for marker info');
-            }
-            if (handles.length === 1) {
-              return this.querier.markerInfo(handles[0]);
-            }
-            return this.querier.markerInfoMulti(specs);
-          }
-          case 'stack':
-            if (!command.marker) {
-              throw new Error('marker handle required for marker stack');
-            }
-            return this.querier.markerStack(command.marker);
-          case 'select':
-            throw new Error('unimplemented');
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'counter':
-        switch (command.subcommand) {
-          case 'list':
-            return this.querier.counterList();
-          case 'info':
-            if (!command.counter) {
-              throw new Error('counter handle required for counter info');
-            }
-            return this.querier.counterInfo(command.counter);
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'sample':
-        switch (command.subcommand) {
-          case 'info':
-            throw new Error('unimplemented');
-          case 'select':
-            throw new Error('unimplemented');
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'function':
-        switch (command.subcommand) {
-          case 'info':
-            if (!command.function) {
-              throw new Error('function handle required for function info');
-            }
-            return this.querier.functionInfo(command.function);
-          case 'expand':
-            if (!command.function) {
-              throw new Error('function handle required for function expand');
-            }
-            return this.querier.functionExpand(command.function);
-          case 'select':
-            throw new Error('unimplemented');
-          case 'annotate':
-            if (!command.function) {
-              throw new Error('function handle required for function annotate');
-            }
-            return this.querier.functionAnnotate(
-              command.function,
-              command.annotateMode ?? 'src',
-              command.symbolServerUrl,
-              command.annotateContext ?? '2',
-              command.strategy
-            );
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'permalink':
-        return this.querier.permalink({}, command.short ?? false);
-      case 'strategy':
-        return this.querier.strategySelect(command.strategy);
-      case 'zoom':
-        switch (command.subcommand) {
-          case 'push':
-            if (!command.range) {
-              throw new Error('range parameter is required for zoom push');
-            }
-            return this.querier.pushViewRange(command.range);
-          case 'pop':
-            return this.querier.popViewRange();
-          case 'clear':
-            return this.querier.clearViewRange();
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'filter':
-        switch (command.subcommand) {
-          case 'push':
-            if (!command.spec) {
-              throw new Error('spec is required for filter push');
-            }
-            return this.querier.filterPush(command.spec, command.thread);
-          case 'pop':
-            return this.querier.filterPop(command.count ?? 1, command.thread);
-          case 'list':
-            return this.querier.filterList(command.thread);
-          case 'clear':
-            return this.querier.filterClear(command.thread);
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'sourcemap':
-        switch (command.subcommand) {
-          case 'sources':
-            return this.querier.listSourceMapSources();
-          case 'apply':
-            if (!command.path) {
-              throw new Error('path is required for sourcemap apply');
-            }
-            return this.querier.applySourceMap(command.path, command.to);
-          default:
-            throw assertExhaustiveCheck(command);
-        }
-      case 'status':
-        return this.querier.getStatus();
-      default:
-        throw assertExhaustiveCheck(command);
     }
   }
 

@@ -5,7 +5,7 @@
 import {
   formatSourceMapSourcesResult,
   formatApplySourceMapResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 import type {
   SessionContext,
   SourceEntry,

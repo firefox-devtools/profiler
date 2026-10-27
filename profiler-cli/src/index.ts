@@ -31,7 +31,7 @@ import schemasText from '../schemas.txt';
 import { startDaemon } from './daemon';
 import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
-import { formatOutput } from './output';
+import { formatOutput } from 'firefox-profiler/profile-query/cli/output';
 import {
   addGlobalOptions,
   addSessionOption,

@@ -1,0 +1,294 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/**
+ * The commands that profiler-cli can run against a ProfileQuerier, and their
+ * results. Shared by the profiler-cli daemon and the in-browser executor.
+ */
+
+// Re-export shared types from profile-query
+export type {
+  MarkerFilterOptions,
+  FlatMarkerItem,
+  FunctionFilterOptions,
+  SampleFilterSpec,
+  FilterEntry,
+  FilterStackResult,
+  SessionContext,
+  WithContext,
+  StatusResult,
+  PermalinkResult,
+  PermalinkView,
+  FunctionExpandResult,
+  FunctionInfoResult,
+  FunctionAnnotateResult,
+  AnnotateMode,
+  ViewRangeResult,
+  ThreadInfoResult,
+  ThreadListResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListSort,
+  ThreadSamplesResult,
+  ThreadSamplesTopDownResult,
+  ThreadSamplesBottomUpResult,
+  CallTreeNode,
+  CallTreeScoringStrategy,
+  CategoryBreakdown,
+  CategoryBreakdownEntry,
+  CategorySubBreakdownEntry,
+  FunctionCategoryBreakdown,
+  FunctionCategoryBreakdowns,
+  CallTreeSummaryStrategy,
+  WeightType,
+  StrategySelectResult,
+  InlineStatus,
+  ThreadMarkersResult,
+  ThreadNetworkResult,
+  NetworkRequestEntry,
+  NetworkRequestSort,
+  NetworkPhaseTimings,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
+  ProfileNetworkThreadBreakdown,
+  ThreadFunctionsResult,
+  ThreadPageLoadResult,
+  NavigationMilestone,
+  PageLoadResourceEntry,
+  PageLoadCategoryEntry,
+  JankPeriod,
+  JankFunction,
+  DurationStats,
+  RateStats,
+  MarkerGroupData,
+  MarkerInfoResult,
+  MarkerInfoMultiResult,
+  MarkerStackResult,
+  StackTraceData,
+  ProfileInfoResult,
+  ProfileMetaResult,
+  ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileMarkerItem,
+  ProfileMarkersThreadBreakdown,
+  ProfileSaveResult,
+  ThreadSelectResult,
+  CounterSummary,
+  CounterListResult,
+  CounterInfoResult,
+  SourceEntry,
+  SourceMapLocation,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
+} from 'firefox-profiler/profile-query/types';
+export type { CallTreeCollectionOptions } from 'firefox-profiler/profile-query/formatters/call-tree';
+
+// Import types for use in type definitions
+import type {
+  MarkerFilterOptions,
+  FunctionFilterOptions,
+  SampleFilterSpec,
+  WithContext,
+  StatusResult,
+  PermalinkResult,
+  FunctionExpandResult,
+  FunctionInfoResult,
+  FunctionAnnotateResult,
+  AnnotateMode,
+  ViewRangeResult,
+  ThreadInfoResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
+  ThreadListResult,
+  ThreadListOptions,
+  MarkerStackResult,
+  MarkerInfoResult,
+  MarkerInfoMultiResult,
+  ProfileInfoResult,
+  ProfileMetaResult,
+  ThreadSamplesResult,
+  ThreadSamplesTopDownResult,
+  ThreadSamplesBottomUpResult,
+  ThreadMarkersResult,
+  ThreadNetworkResult,
+  NetworkRequestSort,
+  ThreadFunctionsResult,
+  ThreadPageLoadResult,
+  FilterStackResult,
+  ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileSaveResult,
+  ThreadSelectResult,
+  CounterListResult,
+  CounterInfoResult,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
+} from 'firefox-profiler/profile-query/types';
+import type { CallTreeCollectionOptions } from 'firefox-profiler/profile-query/formatters/call-tree';
+
+export type ClientCommand =
+  | {
+      command: 'profile';
+      subcommand: 'info' | 'threads';
+      all?: boolean;
+      search?: string;
+    }
+  | {
+      command: 'profile';
+      subcommand: 'meta';
+    }
+  | {
+      command: 'profile';
+      subcommand: 'markers';
+      markerFilters?: MarkerFilterOptions & { thread?: string };
+    }
+  | {
+      command: 'profile';
+      subcommand: 'logs';
+      logFilters?: {
+        thread?: string;
+        module?: string;
+        level?: string;
+        search?: string;
+        limit?: number;
+      };
+    }
+  | {
+      command: 'profile';
+      subcommand: 'save';
+      /** Absolute destination file or directory (resolved client-side). */
+      path: string;
+      force: boolean;
+    }
+  | {
+      command: 'thread';
+      subcommand:
+        | 'info'
+        | 'list'
+        | 'select'
+        | 'samples'
+        | 'samples-top-down'
+        | 'samples-bottom-up'
+        | 'markers'
+        | 'functions'
+        | 'network'
+        | 'page-load';
+      thread?: string;
+      includeIdle?: boolean;
+      search?: string;
+      strategy?: CallTreeSummaryStrategy;
+      markerFilters?: MarkerFilterOptions;
+      functionFilters?: FunctionFilterOptions;
+      threadListOptions?: ThreadListOptions;
+      callTreeOptions?: CallTreeCollectionOptions;
+      networkFilters?: {
+        searchString?: string;
+        minDuration?: number;
+        maxDuration?: number;
+        limit?: number;
+        sort?: NetworkRequestSort;
+      };
+      pageLoadOptions?: {
+        navigationIndex?: number;
+        jankLimit?: number;
+      };
+      /** Ephemeral sample filters applied only to this command invocation */
+      sampleFilters?: SampleFilterSpec[];
+    }
+  | {
+      command: 'marker';
+      subcommand: 'info' | 'select' | 'stack';
+      /** Single handle, for `stack`. */
+      marker?: string;
+      /** Handle specs for `info`, e.g. ["m-42", "m-50..m-53"]. */
+      markers?: string[];
+    }
+  | {
+      command: 'counter';
+      subcommand: 'list' | 'info';
+      counter?: string;
+    }
+  | { command: 'sample'; subcommand: 'info' | 'select'; sample?: string }
+  | {
+      command: 'function';
+      subcommand: 'info' | 'select' | 'expand' | 'annotate';
+      function?: string;
+      annotateMode?: AnnotateMode;
+      symbolServerUrl?: string;
+      /** "file", "function", or a number of context lines (e.g. "2") */
+      annotateContext?: string;
+      strategy?: CallTreeSummaryStrategy;
+    }
+  | {
+      command: 'strategy';
+      strategy: CallTreeSummaryStrategy;
+    }
+  | {
+      command: 'zoom';
+      subcommand: 'push' | 'pop' | 'clear';
+      range?: string;
+    }
+  | {
+      command: 'filter';
+      subcommand: 'push' | 'pop' | 'list' | 'clear';
+      thread?: string;
+      spec?: SampleFilterSpec;
+      count?: number;
+    }
+  | {
+      command: 'sourcemap';
+      subcommand: 'sources' | 'apply';
+      /** Absolute path to the `.map` file (resolved client-side). */
+      path?: string;
+      /** `src-N` handle of the target source; skips auto-matching when set. */
+      to?: string;
+    }
+  | { command: 'status' }
+  | { command: 'permalink'; short?: boolean };
+
+/** `short` goes through the share.firefox.dev shortener. */
+export type PermalinkFormat = 'long' | 'short';
+
+/**
+ * Outcome of a `--permalink` request. The link is best effort: a failure to
+ * build it (e.g. an unpublished local file) must not fail the command itself.
+ */
+export type PermalinkOutcome = PermalinkResult | { error: string };
+
+/**
+ * CommandResult is a union of all possible structured result types.
+ * Commands can return either a string (legacy) or a structured result.
+ */
+export type CommandResult =
+  | StatusResult
+  | PermalinkResult
+  | WithContext<FunctionExpandResult>
+  | WithContext<FunctionInfoResult>
+  | ViewRangeResult
+  | FilterStackResult
+  | WithContext<ThreadInfoResult>
+  | WithContext<ThreadListResult>
+  | WithContext<MarkerStackResult>
+  | WithContext<MarkerInfoResult>
+  | WithContext<MarkerInfoMultiResult>
+  | WithContext<ProfileInfoResult>
+  | WithContext<ProfileMetaResult>
+  | WithContext<ThreadSamplesResult>
+  | WithContext<ThreadSamplesTopDownResult>
+  | WithContext<ThreadSamplesBottomUpResult>
+  | WithContext<ThreadMarkersResult>
+  | WithContext<ThreadFunctionsResult>
+  | WithContext<ThreadNetworkResult>
+  | WithContext<FunctionAnnotateResult>
+  | WithContext<ProfileLogsResult>
+  | WithContext<ProfileMarkersResult>
+  | WithContext<ProfileSaveResult>
+  | WithContext<ThreadPageLoadResult>
+  | WithContext<ThreadSelectResult>
+  | WithContext<StrategySelectResult>
+  | WithContext<CounterListResult>
+  | WithContext<CounterInfoResult>
+  | WithContext<SourceMapSourcesResult>
+  | WithContext<ApplySourceMapResult>;

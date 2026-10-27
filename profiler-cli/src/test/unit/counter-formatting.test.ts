@@ -5,7 +5,7 @@
 import {
   formatCounterListResult,
   formatCounterInfoResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 import type {
   CounterSummary,
   CounterListResult,
