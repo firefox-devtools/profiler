@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
+import path from 'path';
 
 // Plugin to mark chrome:// URLs as external in CSS
 //
@@ -154,6 +155,35 @@ export function generateHtmlPlugin(options) {
 
         fs.writeFileSync(outdir + '/' + filename, html);
       });
+    },
+  };
+}
+
+// commander imports a handful of Node built-ins at module level. In the browser
+// we only use its parser with exitOverride() and configureOutput(), so redirect
+// those imports to small shims instead of failing the build.
+const NODE_SHIMS = {
+  'node:events': 'src/utils/node-shims/events.ts',
+  'node:process': 'src/utils/node-shims/process.ts',
+  'node:util': 'src/utils/node-shims/util.ts',
+  'node:fs': 'src/utils/node-shims/unsupported.ts',
+  'node:path': 'src/utils/node-shims/unsupported.ts',
+  'node:child_process': 'src/utils/node-shims/unsupported.ts',
+};
+
+export function commanderNodeShimsPlugin({ projectRoot }) {
+  return {
+    name: 'commander-node-shims',
+    setup(build) {
+      build.onResolve(
+        { filter: /^node:(events|process|util|fs|path|child_process)$/ },
+        (args) => {
+          if (!/[\\/]node_modules[\\/]commander[\\/]/.test(args.importer)) {
+            return undefined;
+          }
+          return { path: path.join(projectRoot, NODE_SHIMS[args.path]) };
+        }
+      );
     },
   };
 }

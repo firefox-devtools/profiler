@@ -11,6 +11,7 @@ import copy from 'esbuild-plugin-copy';
 import {
   externalChromeUrlsPlugin,
   circularDependencyPlugin,
+  commanderNodeShimsPlugin,
   generateHtmlPlugin,
 } from './esbuild-plugins.mjs';
 
@@ -92,6 +93,7 @@ export const mainBundleConfig = {
   plugins: [
     externalChromeUrlsPlugin(),
     circularDependencyPlugin(),
+    commanderNodeShimsPlugin({ projectRoot }),
     wasmLoader(),
     copy({
       resolveFrom: projectRoot,
