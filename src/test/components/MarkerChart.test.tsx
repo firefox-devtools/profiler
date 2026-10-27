@@ -15,7 +15,10 @@ import {
   fireEvent,
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
-import { changeMarkersSearchString } from '../../actions/profile-view';
+import {
+  changeMarkersSearchString,
+  changeSelectedMarker,
+} from '../../actions/profile-view';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
@@ -98,6 +101,23 @@ const MARKERS: TestDefinedMarker[] = [
   ],
   getUserTiming('Marker B', 2, 6),
 ];
+
+/**
+ * Return the horizontal extent of the instant marker diamonds in the draw log,
+ * and whether they're drawn whole or clipped.
+ */
+function getDrawnDiamonds(drawLog: DrawOperation[]) {
+  return drawLog
+    .filter<DrawImageOperation>(
+      // @ts-expect-error "must be a type predicate"
+      ([operation]) => operation === 'drawImage'
+    )
+    .map(([, image, , , , , left, , width]) => ({
+      left,
+      right: left + width,
+      isWhole: width === image.width,
+    }));
+}
 
 function setupWithProfile(profile: Profile) {
   const flushRafCalls = mockRaf();
@@ -200,14 +220,24 @@ describe('MarkerChart', function () {
     const rowName = 'TestMarker';
 
     const markers: TestDefinedMarker[] = [
-      // DIAMOND [RENDERED]: This marker defines the start of our range.
+      // DIAMOND [RENDERED]: This marker defines the start of our range. It's
+      // far from the other markers, so it's drawn as a whole diamond.
       [rowName, 0],
-      // DIAMOND [RENDERED]: This is the first instant marker, so it's rendered.
+      // CLIPPED DIAMOND [RENDERED]: This instant marker is close to the next
+      // one, so only the left part of its diamond is drawn.
       [rowName, 5000],
+      // CLIPPED DIAMOND [RENDERED]: The next instant markers are so close that
+      // nothing is left of this marker's diamond. It's drawn as a slice that's
+      // two pixels wide.
+      [rowName, 5001],
+      // CLIPPED DIAMOND [NOT-RENDERED]: This marker's slice would be drawn on
+      // the same pixels as the previous one, so it's not rendered.
+      [rowName, 5001.5],
       // RECTANGLE [RENDERED]: This marker has a duration, but it's very small,
       // so it's rendered as a small rectangle. It's rendered because it's the the first.
       [rowName, 5001, 5001.1],
-      // DIAMOND [NOT-RENDERED]: The second instant marker, so it's not rendered.
+      // CLIPPED DIAMOND [RENDERED]: This is the last instant marker of the
+      // cluster, so only the right part of its diamond is drawn.
       [rowName, 5002],
       // RECTANGLE [NOT-RENDERED]: This marker has a duration, but it's very small, and would get
       // rendered as 1 pixel wide rectangle if it was rendered. But it's not because it's close to
@@ -217,6 +247,7 @@ describe('MarkerChart', function () {
       // at the same location as a small marker
       [rowName, 5002.1, 7000],
       // DIAMOND [RENDERED]: Add a final marker that's quite far away to have a big time range.
+      // It's far from the other markers, so it's drawn as a whole diamond.
       [rowName, 15000],
     ];
 
@@ -226,19 +257,21 @@ describe('MarkerChart', function () {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 3 diamonds (initial instant marker, first "middle"
-    // instant marker, and last marker). Diamonds are drawn with drawImage.
-    const diamondOperations = drawCalls.filter<DrawImageOperation>(
-      // @ts-expect-error "must be a type predicate"
-      ([operation]) => operation === 'drawImage'
-    );
-    expect(diamondOperations).toHaveLength(3);
+    // Check which diamonds are drawn, and whether they're whole or clipped.
+    // Diamonds are drawn with drawImage.
+    const diamonds = getDrawnDiamonds(drawCalls);
+    expect(diamonds.map(({ isWhole }) => isWhole)).toEqual([
+      true,
+      false,
+      false,
+      false,
+      true,
+    ]);
 
-    // Check that all X, Y values are different
-    const diamondOperationsXY = new Set(
-      diamondOperations.map(([, , x, y]) => `${Math.round(x)};${Math.round(y)}`)
-    );
-    expect(diamondOperationsXY.size).toBe(3);
+    // Check that the clipped diamonds don't overlap.
+    for (let i = 1; i < diamonds.length; i++) {
+      expect(diamonds[i].left).toBeGreaterThanOrEqual(diamonds[i - 1].right);
+    }
 
     // Interval markers are drawn as rectangles in the marker area, which is
     // to the right of the left margin. This filters out the row backgrounds
@@ -252,6 +285,41 @@ describe('MarkerChart', function () {
     expect(
       intervalMarkerOperations.map(([, , , w]) => (w <= 2 ? 'narrow' : 'wide'))
     ).toEqual(['narrow', 'wide']);
+
+    // @ts-expect-error - "property must be optional"
+    delete window.devicePixelRatio;
+  });
+
+  it('draws a selected instant marker as a whole diamond even in a cluster', () => {
+    window.devicePixelRatio = 1;
+    const rowName = 'TestMarker';
+    const profile = getProfileWithMarkers([
+      [rowName, 0],
+      // These two instant markers are too close to be drawn as whole
+      // diamonds.
+      [rowName, 5000],
+      [rowName, 5100],
+      [rowName, 15000],
+    ]);
+    const { flushRafCalls, dispatch, getState } = setupWithProfile(profile);
+    flushRafCalls();
+
+    const countWholeDiamonds = () =>
+      getDrawnDiamonds(flushDrawLog()).filter(({ isWhole }) => isWhole).length;
+    expect(countWholeDiamonds()).toBe(2);
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerIndex = ensureExists(
+      selectedThreadSelectors
+        .getFullMarkerListIndexes(getState())
+        .find((index) => getMarker(index).start === 5000)
+    );
+    act(() => {
+      dispatch(changeSelectedMarker(0, markerIndex));
+    });
+    flushRafCalls();
+
+    expect(countWholeDiamonds()).toBe(3);
 
     // @ts-expect-error - "property must be optional"
     delete window.devicePixelRatio;

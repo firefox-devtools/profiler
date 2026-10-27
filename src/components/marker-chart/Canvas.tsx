@@ -159,6 +159,17 @@ function getMarkerFillColor(
   return isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR;
 }
 
+/**
+ * Instant markers are drawn as diamonds that are about half as wide as they
+ * are high. The width is odd, so that the diamond's middle column can be
+ * centered on the marker's timestamp.
+ */
+function getInstantMarkerDiamondWidth(
+  contentHeight: DevicePixels
+): DevicePixels {
+  return 2 * Math.floor(contentHeight / 4) + 1;
+}
+
 // Maps "fillColor backgroundColor" to the text color for this combination.
 const _textColorCache: Map<string, string> = new Map();
 
@@ -553,10 +564,12 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
 
     // Only draw the markers that are horizontally within view. The markers in
     // a row don't overlap, so both the start and the end times are sorted.
-    // Instant markers are drawn as diamonds that extend beyond their timestamp,
-    // so include markers that are up to half a diamond width out of view.
+    // Instant markers can be drawn as diamonds that extend beyond their
+    // timestamp, so include markers that are up to half a diamond width out of
+    // view.
+    const diamondWidth = getInstantMarkerDiamondWidth(contentHeight);
     const diamondHalfWidthInTime =
-      devicePixelsPerMs > 0 ? contentHeight / 4 / devicePixelsPerMs : 0;
+      devicePixelsPerMs > 0 ? diamondWidth / 2 / devicePixelsPerMs : 0;
     const startIndex = bisectionLeft(
       markerTiming.end,
       timeAtMarginLeft - diamondHalfWidthInTime
@@ -566,10 +579,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       timeAtContainerRight + diamondHalfWidthInTime
     );
 
-    // Track the last drawn positions, so that we can avoid drawing markers
-    // which would be completely covered by the previous marker.
-    let prevInstantMarkerX: DevicePixels | null = null;
-    let prevIntervalMarkerRight: DevicePixels = -Infinity;
+    // Track the right edge of the last drawn marker, so that we can avoid
+    // drawing markers which would be completely covered by the previous one.
+    let prevMarkerRight: DevicePixels = -Infinity;
     // Highlighted markers are drawn after the normal markers so that they
     // stand out more. This stores [timing index, left, right] triples.
     const highlightedMarkers: number[] = [];
@@ -586,19 +598,61 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         marginLeft + (startTime - timeAtMarginLeft) * devicePixelsPerMs;
 
       if (startTime === endTime) {
+        // This is an instant marker. It's drawn as a diamond centered on x.
         const x = snap(leftUnsnapped);
+        const diamondLeft = x - (diamondWidth - 1) / 2;
+        const diamondRight = diamondLeft + diamondWidth;
         if (isHighlighted) {
-          highlightedMarkers.push(i, x, x);
+          // Highlighted instant markers are always drawn as whole diamonds,
+          // so that they stand out even in a dense cluster.
+          highlightedMarkers.push(i, diamondLeft, diamondRight);
           continue;
         }
-        if (x === prevInstantMarkerX) {
+
+        // Clip the diamond so that it doesn't overlap its neighbors, because
+        // overlapping diamonds fuse into a blob. The clip edges are aligned
+        // like the edges of interval markers.
+        let left = diamondLeft;
+        let right = diamondRight;
+        let hasGap = false;
+        if (i > 0) {
+          left = Math.max(
+            left,
+            snapValueToMultipleOf(
+              this._getBoundaryBetweenMarkers(markerTiming, i - 1, coords),
+              2
+            )
+          );
+        }
+        if (i + 1 < markerTiming.length) {
+          const boundary = snapValueToMultipleOf(
+            this._getBoundaryBetweenMarkers(markerTiming, i, coords),
+            2
+          );
+          if (boundary < right) {
+            right = boundary;
+            hasGap = true;
+          }
+        }
+        if (right <= left) {
+          // The neighbors are so close that nothing is left of the diamond.
+          // Keep a slice that's two device pixels wide, so that it stays
+          // visible.
+          right = left + 2;
+          hasGap = true;
+        }
+
+        if (right <= prevMarkerRight) {
           continue;
         }
-        prevInstantMarkerX = x;
+        left = Math.max(left, prevMarkerRight);
+        prevMarkerRight = right;
         this._drawInstantMarker(
           ctx,
           coords,
           x,
+          left,
+          hasGap ? right - MARKER_GAP : right,
           rowTop,
           contentHeight,
           markerIndex,
@@ -628,11 +682,11 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       // Markers which got enlarged by the snapping can overlap the next
       // marker. Let the earlier marker win, and skip markers which are
       // entirely covered.
-      if (right <= prevIntervalMarkerRight) {
+      if (right <= prevMarkerRight) {
         continue;
       }
-      left = Math.max(left, prevIntervalMarkerRight);
-      prevIntervalMarkerRight = right;
+      left = Math.max(left, prevMarkerRight);
+      prevMarkerRight = right;
       this._drawIntervalMarker(
         ctx,
         coords,
@@ -654,7 +708,9 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         this._drawInstantMarker(
           ctx,
           coords,
+          (left + right - 1) / 2,
           left,
+          right,
           rowTop,
           contentHeight,
           markerIndex,
@@ -720,13 +776,43 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     }
   }
 
-  // x indicates the center of this marker
+  /**
+   * Return the position, in unsnapped device pixels, of the boundary between
+   * the marker at `index` and the next marker in the row. Instant markers are
+   * clipped at this boundary. Between two instant markers, it's halfway
+   * between them. Next to an interval marker, it's the interval marker's edge.
+   */
+  _getBoundaryBetweenMarkers(
+    markerTiming: MarkerTiming,
+    index: number,
+    coords: DeviceCoordinates
+  ): DevicePixels {
+    const { marginLeft, timeAtMarginLeft, devicePixelsPerMs } = coords;
+    const prevStart = markerTiming.start[index];
+    const prevEnd = markerTiming.end[index];
+    const nextStart = markerTiming.start[index + 1];
+    const nextEnd = markerTiming.end[index + 1];
+    let boundaryTime;
+    if (prevStart === prevEnd && nextStart === nextEnd) {
+      boundaryTime = (prevStart + nextStart) / 2;
+    } else if (prevStart === prevEnd) {
+      boundaryTime = nextStart;
+    } else {
+      boundaryTime = prevEnd;
+    }
+    return marginLeft + (boundaryTime - timeAtMarginLeft) * devicePixelsPerMs;
+  }
+
+  // x indicates the center of this marker. Only the part of the diamond
+  // between clipLeft and clipRight is drawn.
   // rowTop indicates the top of the row
   // contentHeight indicates the available height in the row
   _drawInstantMarker(
     ctx: CanvasRenderingContext2D,
     coords: DeviceCoordinates,
     x: DevicePixels,
+    clipLeft: DevicePixels,
+    clipRight: DevicePixels,
     rowTop: DevicePixels,
     contentHeight: DevicePixels,
     markerIndex: MarkerIndex,
@@ -739,14 +825,24 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       coords.lineWidth
     );
     // The image has an odd width, so its middle column is at x.
-    ctx.drawImage(image, x - (image.width - 1) / 2, rowTop);
+    const imageLeft = x - (image.width - 1) / 2;
+    const width = clipRight - clipLeft;
+    ctx.drawImage(
+      image,
+      clipLeft - imageLeft,
+      0,
+      width,
+      contentHeight,
+      clipLeft,
+      rowTop,
+      width,
+      contentHeight
+    );
   }
 
   /**
-   * Instant markers are drawn as diamonds. Drawing them as paths is slow when
-   * there are many of them, so render each diamond once into a small canvas
-   * and copy it with drawImage. The diamond is about half as wide as it is
-   * high.
+   * Drawing diamonds as paths is slow when there are many of them, so render
+   * each diamond once into a small canvas and copy it with drawImage.
    */
   _getInstantMarkerImage(
     fillColor: string,
@@ -757,7 +853,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     let image = this._instantMarkerImages.get(key);
     if (image === undefined) {
       image = document.createElement('canvas');
-      const width = 2 * Math.floor(contentHeight / 4) + 1;
+      const width = getInstantMarkerDiamondWidth(contentHeight);
       image.width = width;
       image.height = contentHeight;
       const ctx = image.getContext('2d')!;

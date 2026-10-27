@@ -33,7 +33,20 @@ export type LineToOperation = ['lineTo', number, number];
 export type RectOperation = ['rect', number, number, number, number];
 export type SetFillStyleOperation = ['set fillStyle', string];
 export type FillRectOperation = ['fillRect', number, number, number, number];
-export type DrawImageOperation = ['drawImage', unknown, number, number];
+// This only covers the drawImage overload with a source and a destination
+// rectangle.
+export type DrawImageOperation = [
+  'drawImage',
+  HTMLCanvasElement,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+  number,
+];
 export type ClearRectOperation = ['clearRect', number, number, number, number];
 export type FillTextOperation = ['fillText', string];
 
