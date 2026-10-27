@@ -28,3 +28,4 @@
 - [Frames, funcs, stacks and CallNodes in C++](./call-nodes-in-cpp.md)
 - [Deploying to production](./deploying.md)
 - [Symbolication](./symbolication.md)
+- [Profile chat](./profile-chat.md)
