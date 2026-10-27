@@ -12,7 +12,6 @@ import type {
 } from 'firefox-profiler/types';
 import { queryApiWithFallback } from './query-api';
 import type { ExternalCommunicationDelegate } from './query-api';
-import { isLocalURL } from './url';
 
 export type FetchAssemblyResult =
   | { type: 'SUCCESS'; instructions: DecodedInstruction[] }
@@ -74,8 +73,8 @@ export async function fetchAssembly(
 // local symbol servers. Check the symbol server URL to avoid hammering the
 // official Mozilla symbolication server with requests it can't handle.
 // This check can be removed once it adds support for /asm/v1.
-function _serverMightSupportAssembly(symbolServerUrl: string): boolean {
-  return isLocalURL(symbolServerUrl);
+function _serverMightSupportAssembly(_symbolServerUrl: string): boolean {
+  return true;
 }
 
 // Convert the response from the JSON format into our own DecodedInstruction

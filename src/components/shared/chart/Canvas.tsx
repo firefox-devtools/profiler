@@ -410,6 +410,7 @@ export class ChartCanvas<Item> extends React.Component<
     // If the viewport hasn't been laid out yet,
     // componentDidUpdate will pick it up once it becomes non-zero.
     if (
+      this.props.stickyTooltips &&
       this.props.selectedItem !== undefined &&
       this.props.containerWidth !== 0
     ) {
@@ -427,7 +428,7 @@ export class ChartCanvas<Item> extends React.Component<
 
   override componentDidUpdate(prevProps: Props<Item>, prevState: State<Item>) {
     if (prevProps !== this.props) {
-      if (this.props.selectedItem !== undefined) {
+      if (this.props.stickyTooltips && this.props.selectedItem !== undefined) {
         const selectedItemChanged =
           this.props.selectedItem !== prevProps.selectedItem;
         const canvasJustGotSize =
