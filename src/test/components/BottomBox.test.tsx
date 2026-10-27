@@ -269,4 +269,41 @@ describe('BottomBox', () => {
     fireEvent.keyDown(sourceViewContent, { key: 'Escape', keyCode: 27 });
     expect(getIsBottomBoxFullscreen(store.getState())).toBe(false);
   });
+
+  it('highlights the matches of the find bar query', async () => {
+    const { sourceView } = setup();
+
+    const frameElement = screen.getByRole('treeitem', { name: /^A/ });
+    fireFullClick(frameElement);
+    fireFullClick(frameElement, { detail: 2 });
+    const sourceViewElement = ensureExists(sourceView());
+    const sourceViewContent =
+      await within(sourceViewElement).findByRole('textbox');
+    await within(sourceViewContent).findAllByText('line');
+
+    fireEvent.keyDown(sourceViewContent, { key: 'f', ctrlKey: true });
+    const searchField = await screen.findByRole('textbox', { name: 'Find' });
+    expect(searchField).toHaveFocus();
+
+    fireEvent.change(searchField, { target: { value: 'line 3' } });
+    expect(searchField).toHaveValue('line 3');
+    expect(sourceViewElement.querySelectorAll('.cm-searchMatch')).toHaveLength(
+      1
+    );
+
+    fireEvent.keyDown(searchField, { key: 'Enter', keyCode: 13 });
+    expect(
+      sourceViewElement.querySelectorAll('.cm-searchMatch-selected')
+    ).toHaveLength(1);
+
+    // With "Whole words", "lin" no longer matches inside "line".
+    fireEvent.change(searchField, { target: { value: 'lin' } });
+    expect(
+      sourceViewElement.querySelectorAll('.cm-searchMatch').length
+    ).toBeGreaterThan(1);
+    fireFullClick(screen.getByRole('checkbox', { name: 'Whole words' }));
+    expect(sourceViewElement.querySelectorAll('.cm-searchMatch')).toHaveLength(
+      0
+    );
+  });
 });
