@@ -14,8 +14,6 @@
   --codeview-linenum-foreground-color: ##aaa;
   --codeview-nonzero-background-color: #edf6ff;
   --codeview-highlight-background-color: #fffbcc;
-  --codeview-textfield-border-color: var(--grey-90-a20);
-  --codeview-textfield-hover-border-color: var(--grey-90-a30);
   --codeview-search-match-background-color: color-mix(
     in srgb,
     var(--yellow-50) 40%,
@@ -62,8 +60,6 @@
     --codeview-linenum-foreground-color: var(--grey-30);
     --codeview-nonzero-background-color: var(--grey-80);
     --codeview-highlight-background-color: var(--yellow-90);
-    --codeview-textfield-border-color: var(--grey-10-a20);
-    --codeview-textfield-hover-border-color: var(--grey-10-a40);
     --codeview-search-match-background-color: color-mix(
       in srgb,
       var(--yellow-60) 35%,
@@ -199,12 +195,11 @@
 }
 
 /**
- * CodeMirror's search panel and search matches. CodeMirror's base theme gives
- * the panel tiny fonts, cramped spacing and gradient buttons. Its colors are
- * always the light ones, because we don't tell CodeMirror about our dark mode;
- * we use our own color variables instead. The base theme's selectors are
- * scoped by generated class names. The ".codeView .cm-editor" prefix makes
- * these rules more specific than the base theme's.
+ * The panel area above the code, which contains the find bar, and the search
+ * matches. CodeMirror's base theme always uses light colors, because we don't
+ * tell CodeMirror about our dark mode. The base theme's selectors are scoped
+ * by generated class names. The ".codeView .cm-editor" prefix makes these
+ * rules more specific than the base theme's.
  */
 .codeView .cm-editor {
   .cm-panels {
@@ -216,54 +211,6 @@
     border-bottom: 1px solid var(--codeview-header-border-color);
   }
 
-  .cm-textfield {
-    border: 1px solid var(--codeview-textfield-border-color);
-    border-radius: 2px;
-    background-color: var(--base-background-color);
-    color: var(--base-foreground-color);
-    font-size: inherit;
-  }
-
-  .cm-textfield:hover {
-    border-color: var(--codeview-textfield-hover-border-color);
-  }
-
-  /* The same focus ring as .photon-input, which CodeMirror's text field can't
-     use because CodeMirror creates the element. */
-  .cm-textfield:focus-visible {
-    border-color: var(--focus-border-color);
-    box-shadow:
-      0 0 0 1px var(--focus-border-color),
-      0 0 0 4px var(--focus-shadow-color);
-    outline: 0;
-  }
-
-  .cm-button {
-    /* No border, so that the focus ring sits on the button's edge. The extra
-       1px of padding makes up for the text field's border. */
-    padding: calc(0.2em + 1px) 1em;
-    border: none;
-    border-radius: 2px;
-    background-color: var(--clickable-background-color);
-    background-image: none;
-    color: var(--clickable-foreground-color);
-    font-size: inherit;
-  }
-
-  .cm-button:hover {
-    background-color: var(--clickable-hover-background-color);
-  }
-
-  /* CodeMirror's base theme has a gradient for pressed buttons, even when the
-     pointer has left the button. */
-  .cm-button:active {
-    background-image: none;
-  }
-
-  .cm-button:active:hover {
-    background-color: var(--clickable-active-background-color);
-  }
-
   .cm-searchMatch {
     background-color: var(--codeview-search-match-background-color);
   }
@@ -271,55 +218,51 @@
   .cm-searchMatch-selected {
     background-color: var(--codeview-search-selected-match-background-color);
   }
+}
 
-  .cm-panel.cm-search {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 4px;
-    font-size: 12px;
-    row-gap: 4px;
+.codeFindBar {
+  --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
 
-    input,
-    .cm-button,
-    label {
-      margin: 0 2px;
-    }
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 4px;
+  gap: 4px 8px;
+}
 
-    input[type='checkbox'] {
-      margin-inline-end: 4px;
-      vertical-align: -2px;
-    }
+:root.dark-mode .codeFindBar {
+  --internal-close-icon: url(../../../res/img/svg/close-light.svg);
+}
 
-    label {
-      font-size: inherit;
-    }
+.codeFindBarInput {
+  width: 20em;
+  height: 24px;
 
-    /* CodeMirror positions the close button absolutely at the top. Put it at
-       the end of the row instead, so that it's centered with the other
-       controls. */
-    [name='close'] {
-      position: static;
-      display: flex;
-      width: 20px;
-      height: 20px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 2px;
-      margin-left: auto;
-      color: inherit;
-      font-size: 16px;
-      line-height: 1;
-    }
+  /* Inputs don't inherit the font by default. */
+  font: inherit;
+}
 
-    [name='close']:hover {
-      background-color: var(--clickable-ghost-hover-background-color);
-    }
+/* Override the 13px font size from .photon-button-default, so that the
+ * buttons match the input and the checkbox labels. Also drop its 132px
+ * minimum width, which is too wide for a compact bar. */
+.codeFindBar .photon-button {
+  min-width: 0;
+  font-size: inherit;
+}
 
-    [name='close']:active:hover {
-      background-color: var(--clickable-ghost-active-background-color);
-    }
-  }
+.codeFindBarLabel {
+  display: flex;
+  align-items: center;
+}
+
+.codeFindBarCloseButton {
+  width: 24px;
+  height: 24px;
+  background-image: var(--internal-close-icon);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  margin-inline-start: auto;
 }
 
 /**

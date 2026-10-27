@@ -9,6 +9,7 @@ import {
   gutter,
   gutterLineClass,
   keymap,
+  runScopeHandlers,
 } from '@codemirror/view';
 import {
   EditorState,
@@ -18,6 +19,9 @@ import {
 } from '@codemirror/state';
 import {
   search,
+  SearchQuery,
+  getSearchQuery,
+  setSearchQuery,
   openSearchPanel,
   closeSearchPanel,
   findNext,
@@ -26,6 +30,7 @@ import {
 } from '@codemirror/search';
 
 import type { LineTimings } from 'firefox-profiler/types';
+import type { CodeFindBarProps } from 'firefox-profiler/components/shared/CodeFindBar';
 
 import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
 
@@ -244,5 +249,22 @@ export const codeViewerExtension = [
   search({ top: true }),
   keymap.of(findKeymap),
 ];
+
+// Returns the props for a CodeFindBar that searches in the view.
+export function getCodeFindBarProps(view: EditorView): CodeFindBarProps {
+  const { search, caseSensitive, regexp, wholeWord } = getSearchQuery(
+    view.state
+  );
+  return {
+    query: { search, caseSensitive, regexp, wholeWord },
+    onQueryChange: (query) => {
+      view.dispatch({ effects: setSearchQuery.of(new SearchQuery(query)) });
+    },
+    onFindNext: () => findNext(view),
+    onFindPrevious: () => findPrevious(view),
+    onClose: () => closeSearchPanel(view),
+    onKeyDown: (event) => runScopeHandlers(view, event, 'search-panel'),
+  };
+}
 
 export { createHighlightedLineExtension };
