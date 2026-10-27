@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type JSZip from 'jszip';
+import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import type {
   Profile,
   RawProfileSharedData,
@@ -768,6 +769,37 @@ type AppAction = {
   readonly browserConnectionStatus: BrowserConnectionStatus;
 };
 
+type ChatAction =
+  | { readonly type: 'OPEN_CHAT' }
+  | { readonly type: 'CLOSE_CHAT' }
+  | { readonly type: 'CHAT_API_KEY_CHANGED'; readonly hasApiKey: boolean }
+  | { readonly type: 'RESET_CHAT' }
+  | {
+      readonly type: 'CHAT_TURN_STARTED';
+      readonly conversationId: number;
+      readonly message: BetaMessageParam;
+    }
+  | {
+      readonly type: 'CHAT_STREAMING_TEXT';
+      readonly conversationId: number;
+      readonly text: string;
+    }
+  | {
+      readonly type: 'CHAT_MESSAGE_APPENDED';
+      readonly conversationId: number;
+      readonly message: BetaMessageParam;
+    }
+  | {
+      readonly type: 'CHAT_TURN_FINISHED';
+      readonly conversationId: number;
+      readonly notice: string | null;
+    }
+  | {
+      readonly type: 'CHAT_TURN_FAILED';
+      readonly conversationId: number;
+      readonly error: string;
+    };
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -780,4 +812,5 @@ export type Action =
   | CurrentProfileUploadedInformationAction
   | SourcesAction
   | AssemblyAction
-  | AppAction;
+  | AppAction
+  | ChatAction;

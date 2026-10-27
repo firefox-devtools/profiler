@@ -9,6 +9,7 @@ import icons from './icons';
 import zippedProfiles from './zipped-profiles';
 import publish from './publish';
 import code from './code';
+import chat from './chat';
 import { combineReducers } from 'redux';
 import type { Reducer, State } from 'firefox-profiler/types';
 
@@ -38,6 +39,7 @@ const rootReducer: Reducer<State> = wrapReducerInResetter(
     zippedProfiles,
     publish,
     code,
+    chat,
   })
 );
 

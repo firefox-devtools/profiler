@@ -124,6 +124,16 @@ function _truncate(text: string): string {
 }
 
 /**
+ * The `status` output for the current view: selected thread, committed ranges
+ * and filters.
+ */
+export async function getCurrentViewStatus(
+  store: QuerierStore
+): Promise<string> {
+  return formatOutput(await _getQuerier(store).getStatus(), false);
+}
+
+/**
  * Run one profiler-cli command line, e.g. `thread samples --limit 10`, and
  * return its text output. Usage errors, unknown commands and failing queries
  * come back with `isError: true` instead of throwing.

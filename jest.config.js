@@ -13,6 +13,7 @@ const browserEnvConfig = {
 
   transform: {
     '\\.([jt]sx?|mjs)$': 'babel-jest',
+    '\\.txt$': '<rootDir>/src/test/fixtures/mocks/text-transform.js',
   },
 
   // Transform ESM modules to CommonJS for Jest

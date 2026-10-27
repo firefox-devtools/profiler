@@ -31,6 +31,7 @@ const baseConfig = {
     '.jpg': 'file',
     '.svg': 'dataurl',
     '.worker.js': 'file',
+    '.txt': 'text',
   },
   alias: {
     'firefox-profiler': './src',

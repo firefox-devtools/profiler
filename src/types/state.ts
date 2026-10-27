@@ -38,6 +38,7 @@ import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
+import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
@@ -419,6 +420,46 @@ export type CodeState = {
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
 };
 
+/**
+ * Profile chat state. Nothing here is URL state: a reload starts a new chat.
+ */
+export type ChatStatus = 'idle' | 'streaming' | 'running-tool' | 'error';
+
+export type ChatState = {
+  readonly isOpen: boolean;
+  readonly status: ChatStatus;
+  // Shown when the last turn failed.
+  readonly error: string | null;
+  // Shown when the last turn ended early, e.g. cancelled or cut off.
+  readonly notice: string | null;
+  // The conversation exactly as sent to the Anthropic API. Append-only.
+  readonly apiHistory: BetaMessageParam[];
+  // Text of the response that is currently streaming in.
+  readonly streamingText: string;
+  readonly hasApiKey: boolean;
+  // Incremented whenever the conversation is reset, so that a turn that is
+  // still running for the previous conversation can't write into the new one.
+  readonly conversationId: number;
+};
+
+/**
+ * One entry of the chat transcript as rendered, derived from the API history.
+ */
+export type ChatTranscriptItem =
+  | { readonly type: 'user'; readonly text: string }
+  | { readonly type: 'assistant'; readonly text: string }
+  | {
+      readonly type: 'tool-call';
+      readonly id: string;
+      // The profiler-cli command line the model ran.
+      readonly command: string;
+      // Null while the command is still running.
+      readonly result: {
+        readonly text: string;
+        readonly isError: boolean;
+      } | null;
+    };
+
 export type State = {
   readonly app: AppState;
   readonly profileView: ProfileViewState;
@@ -427,4 +468,5 @@ export type State = {
   readonly zippedProfiles: ZippedProfilesState;
   readonly publish: PublishState;
   readonly code: CodeState;
+  readonly chat: ChatState;
 };
