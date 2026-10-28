@@ -2,86 +2,44 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// This code was originally from https://github.com/InvokIT/js-untar/blob/master/src/untar-worker.js (MIT).
-// It was modernized, the Worker requirement was removed, and some Flow types were added.
-// Tar is an uncompressed format. If you have the tar bytes in a buffer, you can
-// access the contained files simply by creating a new view around that same buffer,
-// with the correct offsets. The parsing of the tar header is fast; the slow part
-// would be the copy of the contained bytes to and from the worker. So having
-// everything on the main thread is both simpler and faster, because it skips the copy.
-
-// TODO: Consider unifying this ByteReader with the one in art-trace.js
-class ByteReader {
-  _uint8Array: Uint8Array;
-  _bufferView: DataView;
-  _position = 0;
-  // Names in tar headers are raw bytes; in practice they are UTF-8. Bytes that
-  // aren't valid UTF-8 become U+FFFD, so such names can't match any real path.
-  _textDecoder = new TextDecoder('utf-8');
-
-  constructor(arrayBuffer: ArrayBufferLike) {
-    this._uint8Array = new Uint8Array(arrayBuffer);
-    this._bufferView = new DataView(arrayBuffer);
-  }
-
-  readString(byteCount: number): string {
-    const bytes = this.readBuffer(byteCount);
-    const nulBytePos = bytes.indexOf(0);
-    return nulBytePos === -1
-      ? this._textDecoder.decode(bytes)
-      : this._textDecoder.decode(bytes.subarray(0, nulBytePos));
-  }
-
-  readOctal(byteCount: number): number | null {
-    return _parseOctal(this.readBuffer(byteCount));
-  }
-
-  readBuffer(byteCount: number): Uint8Array {
-    if (this.position() + byteCount > this.size()) {
-      throw new Error('Unexpected end of tar archive');
-    }
-    const buf = this._uint8Array.subarray(
-      this.position(),
-      this.position() + byteCount
-    );
-    this.seekBy(byteCount);
-    return buf;
-  }
-
-  seekBy(byteCount: number): void {
-    this._position += byteCount;
-  }
-
-  seekTo(newpos: number): void {
-    this._position = newpos;
-  }
-
-  peekBuffer(byteCount: number): Uint8Array {
-    return this._uint8Array.subarray(
-      this.position(),
-      this.position() + byteCount
-    );
-  }
-
-  position(): number {
-    return this._position;
-  }
-
-  size(): number {
-    return this._bufferView.byteLength;
-  }
-}
-
-type FieldEntry = {
-  name: string;
-  value: string | number | null;
-};
+// A tar parser which works in place on an ArrayBuffer. Tar is an uncompressed
+// format, so the contained files are returned as views into that same buffer,
+// without copies.
+//
+// The parser is deliberately strict: it rejects malformed headers and unusual
+// combinations of extension headers rather than guessing, so that it is less
+// likely to disagree with other tar implementations about the contents of an
+// archive. See https://astral.sh/blog/tar-codec for background.
+//
+// References:
+// https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html
+// https://www.gnu.org/software/tar/manual/html_node/Standard.html
 
 const BLOCK_SIZE = 512;
 
-// The checksum field covers bytes 148..156 of the header.
-const CHECKSUM_OFFSET = 148;
-const CHECKSUM_LENGTH = 8;
+// Byte ranges of the header fields we use, as [offset, length].
+type Field = [number, number];
+const NAME: Field = [0, 100];
+const SIZE: Field = [124, 12];
+const CHECKSUM: Field = [148, 8];
+const TYPEFLAG: Field = [156, 1];
+const LINKNAME: Field = [157, 100];
+const MAGIC: Field = [257, 6];
+const PREFIX: Field = [345, 155];
+
+// Names in tar headers are raw bytes; in practice they are UTF-8. Bytes that
+// aren't valid UTF-8 become U+FFFD, so such names can't match any real path.
+const textDecoder = new TextDecoder('utf-8');
+
+function _field(header: Uint8Array, [offset, length]: Field): Uint8Array {
+  return header.subarray(offset, offset + length);
+}
+
+// Decode a NUL-terminated (or NUL-padded) string.
+function _parseString(bytes: Uint8Array): string {
+  const nulPos = bytes.indexOf(0);
+  return textDecoder.decode(nulPos === -1 ? bytes : bytes.subarray(0, nulPos));
+}
 
 /**
  * Parse a numeric header field. These fields contain octal digits, optionally
@@ -118,12 +76,11 @@ function _isZeroBlock(block: Uint8Array): boolean {
  * checksum field itself counted as if it contained spaces.
  */
 function _verifyChecksum(header: Uint8Array): void {
-  const expected = _parseOctal(
-    header.subarray(CHECKSUM_OFFSET, CHECKSUM_OFFSET + CHECKSUM_LENGTH)
-  );
-  let sum = 0x20 * CHECKSUM_LENGTH;
+  const [checksumOffset, checksumLength] = CHECKSUM;
+  const expected = _parseOctal(_field(header, CHECKSUM));
+  let sum = 0x20 * checksumLength;
   for (let i = 0; i < header.length; i++) {
-    if (i < CHECKSUM_OFFSET || i >= CHECKSUM_OFFSET + CHECKSUM_LENGTH) {
+    if (i < checksumOffset || i >= checksumOffset + checksumLength) {
       sum += header[i];
     }
   }
@@ -132,263 +89,185 @@ function _verifyChecksum(header: Uint8Array): void {
   }
 }
 
-function _parseIntStrict(s: string, base: number): number {
-  const val = parseInt(s, base);
-  if (isNaN(val)) {
-    throw new Error('Parsing number failed');
-  }
-  return val;
-}
+// The pax keywords we use. Records with other keywords are ignored.
+const PAX_KEYWORDS = new Set(['path', 'linkpath', 'size']);
 
 /**
- * A PaxHeader is a set of fields with names and values. The fields get applied
- * to a file entry.
- * When reading file entries, the header is read first, then the file, and then
- * the header is applied to the file.
+ * Parse the records of a pax extended header. Each record has the form
+ * "%d %s=%s\n" (<length>, <keyword>, <value>), where <length> is the decimal
+ * length of the whole record in bytes, including the trailing newline.
+ * An empty value means that the field is deleted.
  */
-class PaxHeader {
-  _fields: FieldEntry[];
-
-  static parse(buffer: Uint8Array): PaxHeader {
-    // https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_03
-    // An extended header shall consist of one or more records, each constructed as follows:
-    // "%d %s=%s\n", <length>, <keyword>, <value>
-
-    // The extended header records shall be encoded according to the ISO/IEC10646-1:2000 standard (UTF-8).
-    // The <length> field, <blank>, equals sign, and <newline> shown shall be limited to the portable character set, as
-    // encoded in UTF-8. The <keyword> and <value> fields can be any UTF-8 characters. The <length> field shall be the
-    // decimal length of the extended header record in octets, including the trailing <newline>.
-
-    let bytes = new Uint8Array(buffer);
-    const fields = [];
-
-    const textDecoder = new TextDecoder('utf-8', { fatal: true });
-
-    while (bytes.length > 0) {
-      // Decode bytes up to the first space character; that is the total field length
-      const spacePos = bytes.indexOf(0x20);
-      if (spacePos === -1) {
-        throw new Error('Expected space character');
+function _parsePaxRecords(data: Uint8Array): Map<string, string> {
+  const records = new Map();
+  let pos = 0;
+  while (pos < data.length) {
+    const spacePos = data.indexOf(0x20, pos);
+    const lengthString =
+      spacePos === -1 ? '' : textDecoder.decode(data.subarray(pos, spacePos));
+    if (!/^[1-9][0-9]*$/.test(lengthString)) {
+      throw new Error('Invalid pax record length');
+    }
+    const end = pos + Number(lengthString);
+    const equalsPos = data.indexOf(0x3d, spacePos + 1);
+    if (
+      end > data.length ||
+      data[end - 1] !== 0x0a ||
+      equalsPos === -1 ||
+      equalsPos >= end ||
+      equalsPos === spacePos + 1
+    ) {
+      throw new Error('Invalid pax record');
+    }
+    const keyword = textDecoder.decode(data.subarray(spacePos + 1, equalsPos));
+    if (PAX_KEYWORDS.has(keyword)) {
+      if (records.has(keyword)) {
+        throw new Error(`Duplicate pax record: ${keyword}`);
       }
-      const fieldLength = _parseIntStrict(
-        textDecoder.decode(bytes.subarray(0, spacePos)),
-        10
+      records.set(
+        keyword,
+        textDecoder.decode(data.subarray(equalsPos + 1, end - 1))
       );
-      const fieldText = textDecoder.decode(bytes.subarray(0, fieldLength));
-      const fieldMatch = fieldText.match(/^\d+ ([^=]+)=(.*)\n$/);
-
-      if (fieldMatch === null) {
-        throw new Error('Invalid PAX header data format.');
-      }
-
-      const fieldName = fieldMatch[1];
-      let fieldValue: string | number | null = fieldMatch[2];
-
-      if (typeof fieldValue === 'string' && fieldValue.length === 0) {
-        fieldValue = null;
-      } else if (typeof fieldValue === 'string' && /^\d+$/.test(fieldValue)) {
-        // If it's an integer field, parse it as int
-        fieldValue = _parseIntStrict(fieldValue, 10);
-      }
-      // Don't parse float values since precision is lost
-
-      const field = {
-        name: fieldName,
-        value: fieldValue,
-      };
-
-      fields.push(field);
-
-      bytes = bytes.subarray(fieldLength); // Cut off the parsed field data
     }
-
-    return new PaxHeader(fields);
+    pos = end;
   }
+  return records;
+}
 
-  constructor(fields: FieldEntry[]) {
-    this._fields = fields;
+function _parsePaxSize(value: string): number {
+  const size = Number(value);
+  if (!/^[0-9]+$/.test(value) || !Number.isSafeInteger(size)) {
+    throw new Error('Invalid pax size');
   }
-
-  applyHeader(file: any): void {
-    // Apply fields to the file
-    // If a field is of value null, it should be deleted from the file
-    // https://pubs.opengroup.org/onlinepubs/9699919799/utilities/pax.html#tag_20_92_13_03
-
-    for (const field of this._fields) {
-      let fieldName = field.name;
-      const fieldValue = field.value;
-
-      if (fieldName === 'path') {
-        // This overrides the name and prefix fields in the following header block.
-        fieldName = 'name';
-
-        if (file.namePrefix !== undefined) {
-          delete file.namePrefix;
-        }
-      } else if (fieldName === 'linkpath') {
-        // This overrides the linkname field in the following header block.
-        fieldName = 'linkname';
-      }
-
-      if (fieldValue === null) {
-        delete file[fieldName];
-      } else {
-        file[fieldName] = fieldValue;
-      }
-    }
-  }
+  return size;
 }
 
 export type TarFileEntry = {
   name: string;
+  // The typeflag, e.g. '0' for a regular file or '5' for a directory. Old
+  // archives use '' for regular files.
   type: string;
   size: number;
+  // The contents of a regular file, as a view into the archive buffer.
+  // null for all other entry types.
   buffer: Uint8Array | null;
-  mode: string;
-  uid: number | null;
-  gid: number | null;
-  mtime: number | null;
   linkname: string;
-  ustarFormat: string;
-  version: string | null;
-  uname: string | null;
-  gname: string | null;
-  devmajor: number | null;
-  devminor: number | null;
-  namePrefix: string | null;
 };
 
 export class UntarFileStream {
-  _reader: ByteReader;
-  _globalPaxHeader: PaxHeader | null = null;
+  _bytes: Uint8Array;
+  _position = 0;
 
   constructor(arrayBuffer: ArrayBufferLike) {
-    this._reader = new ByteReader(arrayBuffer);
+    this._bytes = new Uint8Array(arrayBuffer);
   }
 
-  hasNext(): boolean {
-    // A tar archive ends with two all-zero blocks. We stop at the first one,
-    // and also accept an archive that ends right after its last member.
-    const reader = this._reader;
-    return (
-      reader.position() < reader.size() &&
-      !_isZeroBlock(reader.peekBuffer(BLOCK_SIZE))
-    );
+  /**
+   * Return the next member of the archive, or null at the end of the archive.
+   * Throws if the archive is malformed.
+   */
+  next(): TarFileEntry | null {
+    // The records of a pax 'x' header, which apply to the next member.
+    let localPax: Map<string, string> | null = null;
+
+    while (true) {
+      const header = this._readHeader();
+      if (header === null) {
+        if (localPax !== null) {
+          throw new Error('Pax header at the end of the tar archive');
+        }
+        return null;
+      }
+
+      const type = _parseString(_field(header, TYPEFLAG));
+      const headerSize = _parseOctal(_field(header, SIZE));
+      if (headerSize === null) {
+        throw new Error('Missing size in tar header');
+      }
+
+      if (type === 'g') {
+        // Global pax header. Its records apply to all following members. We
+        // reject all the keywords we'd otherwise use: overriding the path or
+        // size of every member isn't meaningful. So there's nothing to keep.
+        const records = _parsePaxRecords(this._readData(headerSize));
+        if (records.size !== 0) {
+          throw new Error('Unsupported record in global pax header');
+        }
+        continue;
+      }
+
+      if (type === 'x') {
+        if (localPax !== null) {
+          throw new Error('Multiple pax headers for one tar member');
+        }
+        localPax = _parsePaxRecords(this._readData(headerSize));
+        continue;
+      }
+
+      // This is a real member. Resolve its fields, with pax records taking
+      // precedence over the header. A pax record with an empty value deletes
+      // the field.
+      let headerName = _parseString(_field(header, NAME));
+      if (_parseString(_field(header, MAGIC)).startsWith('ustar')) {
+        const prefix = _parseString(_field(header, PREFIX));
+        if (prefix !== '') {
+          headerName = prefix + '/' + headerName;
+        }
+      }
+      const name = localPax?.get('path') ?? headerName;
+      const linkname =
+        localPax?.get('linkpath') ?? _parseString(_field(header, LINKNAME));
+      const paxSize = localPax?.get('size');
+      const size = paxSize === undefined ? headerSize : _parsePaxSize(paxSize);
+      if (name === '') {
+        throw new Error('Tar member with an empty name');
+      }
+
+      const data = this._readData(size);
+
+      // Regular files have the type '0', or '' in old archives. Type '7'
+      // (contiguous file) is usually treated like a regular file.
+      const isNormalFile = type === '0' || type === '' || type === '7';
+
+      return {
+        name,
+        type,
+        size,
+        buffer: isNormalFile ? data : null,
+        linkname,
+      };
+    }
   }
 
-  next(): TarFileEntry {
-    return this._readNextFile();
+  // Read a header block, or return null at the end of the archive. A tar
+  // archive ends with two all-zero blocks. We stop at the first one, and also
+  // accept an archive that ends right after its last member.
+  _readHeader(): Uint8Array | null {
+    if (this._position >= this._bytes.length) {
+      return null;
+    }
+    const header = this._read(BLOCK_SIZE);
+    if (_isZeroBlock(header)) {
+      return null;
+    }
+    _verifyChecksum(header);
+    return header;
   }
 
-  _readNextFile(): TarFileEntry {
-    const stream = this._reader;
+  // Read the data that follows a header, and skip its padding.
+  _readData(size: number): Uint8Array {
+    const data = this._read(size);
+    this._position += Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE - size;
+    return data;
+  }
 
-    const headerBeginPos = stream.position();
-    if (headerBeginPos + BLOCK_SIZE > stream.size()) {
+  _read(byteCount: number): Uint8Array {
+    const end = this._position + byteCount;
+    if (end > this._bytes.length) {
       throw new Error('Unexpected end of tar archive');
     }
-    _verifyChecksum(stream.peekBuffer(BLOCK_SIZE));
-
-    // Read header
-    let name = stream.readString(100);
-    const mode = stream.readString(8);
-    const uid = stream.readOctal(8);
-    const gid = stream.readOctal(8);
-    const size = stream.readOctal(12);
-    if (size === null) {
-      throw new Error('Missing size in tar header');
-    }
-    const mtime = stream.readOctal(12);
-    stream.seekBy(CHECKSUM_LENGTH);
-    const type = stream.readString(1);
-    const linkname = stream.readString(100);
-    const ustarFormat = stream.readString(6);
-    let version = null;
-    let uname = null;
-    let gname = null;
-    let devmajor = null;
-    let devminor = null;
-    let namePrefix = null;
-
-    if (ustarFormat.indexOf('ustar') > -1) {
-      version = stream.readString(2);
-      uname = stream.readString(32);
-      gname = stream.readString(32);
-      devmajor = stream.readOctal(8);
-      devminor = stream.readOctal(8);
-      namePrefix = stream.readString(155);
-
-      if (namePrefix.length > 0) {
-        name = namePrefix + '/' + name;
-      }
-    }
-
-    // The size is padded to be aligned with 512 bytes.
-    const alignedSize = Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE;
-
-    const dataBeginPos = headerBeginPos + BLOCK_SIZE;
-    const dataEndPos = dataBeginPos + alignedSize;
-
-    stream.seekTo(dataBeginPos);
-
-    // Handle the various file types.
-
-    // Derived from https://www.mkssoftware.com/docs/man4/pax.4.asp
-    // and https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.3.0/com.ibm.zos.v2r3.bpxa500/pxarchfm.htm
-    // Also see https://en.wikipedia.org/wiki/Tar_(computing)#File_format
-
-    if (type === 'g') {
-      // Global PAX header
-      this._globalPaxHeader = PaxHeader.parse(stream.readBuffer(size));
-      stream.seekTo(dataEndPos);
-
-      // Read the next entry. It will apply the global PAX header to itself.
-      return this._readNextFile();
-    }
-
-    if (type === 'x') {
-      // PAX header
-      const paxHeader = PaxHeader.parse(stream.readBuffer(size));
-      stream.seekTo(dataEndPos);
-
-      // Read the next entry, and then apply this PAX header to it.
-      const file = this._readNextFile();
-      paxHeader.applyHeader(file);
-      return file;
-    }
-
-    // Normal file is either "0" or "\0".
-    // In case of "\0", readString returns an empty string, that is "".
-    // In addition, according to wikipedia, type 7 is usually handled like type 0.
-    const isNormalFile = type === '0' || type === '' || type === '7';
-
-    const buffer = isNormalFile ? stream.readBuffer(size) : null;
-
-    stream.seekTo(dataEndPos);
-
-    const file = {
-      name,
-      type,
-      buffer,
-      mode,
-      uid,
-      gid,
-      size,
-      mtime,
-      linkname,
-      ustarFormat,
-      version,
-      uname,
-      gname,
-      devmajor,
-      devminor,
-      namePrefix,
-    };
-
-    if (this._globalPaxHeader !== null) {
-      this._globalPaxHeader.applyHeader(file);
-    }
-
-    return file;
+    const bytes = this._bytes.subarray(this._position, end);
+    this._position = end;
+    return bytes;
   }
 }

@@ -11,6 +11,8 @@ type HeaderSpec = {
   format?: 'ustar' | 'gnu';
   prefix?: string;
   uid?: string;
+  // Overrides the size field, which defaults to the content length.
+  size?: number;
   // Raw bytes written at the given offset before the checksum is computed.
   patches?: Array<{ offset: number; bytes: string | Uint8Array }>;
   // Corrupt the checksum after it is computed.
@@ -58,9 +60,35 @@ function makeEntry(spec: HeaderSpec, content: string | Uint8Array = '') {
   const data = toBytes(content);
   const paddedSize = Math.ceil(data.length / 512) * 512;
   const entry = new Uint8Array(512 + paddedSize);
-  entry.set(makeHeader(spec, data.length), 0);
+  entry.set(makeHeader(spec, spec.size ?? data.length), 0);
   entry.set(data, 512);
   return entry;
+}
+
+function concatBytes(
+  parts: Array<string | Uint8Array>
+): Uint8Array<ArrayBuffer> {
+  const arrays = parts.map(toBytes);
+  const result = new Uint8Array(arrays.reduce((a, b) => a + b.length, 0));
+  let offset = 0;
+  for (const array of arrays) {
+    result.set(array, offset);
+    offset += array.length;
+  }
+  return result;
+}
+
+// Build the payload of a pax header from [keyword, value] pairs.
+function paxRecords(records: Array<[string, string | Uint8Array]>): Uint8Array {
+  return concatBytes(
+    records.map(([keyword, value]) => {
+      const rest = concatBytes([' ' + keyword + '=', value, '\n']);
+      // The length prefix counts its own digits.
+      let length = rest.length + String(rest.length).length;
+      length = rest.length + String(length).length;
+      return concatBytes([String(length), rest]);
+    })
+  );
 }
 
 function makeArchive(
@@ -70,22 +98,15 @@ function makeArchive(
   if (trailer) {
     entries = [...entries, new Uint8Array(1024)];
   }
-  const totalLength = entries.reduce((a, e) => a + e.length, 0);
-  const archive = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const entry of entries) {
-    archive.set(entry, offset);
-    offset += entry.length;
-  }
-  return archive.buffer;
+  return concatBytes(entries).buffer;
 }
 
 function listEntries(archive: ArrayBuffer) {
   const decoder = new TextDecoder();
   const stream = new UntarFileStream(archive);
   const result = [];
-  while (stream.hasNext()) {
-    const { name, type, buffer } = stream.next();
+  for (let entry = stream.next(); entry !== null; entry = stream.next()) {
+    const { name, type, buffer } = entry;
     result.push({
       name,
       type,
@@ -107,12 +128,11 @@ describe('untar', function () {
 
     const fileEntries = [];
 
-    while (stream.hasNext()) {
-      const { name, buffer, size, uid } = stream.next();
+    for (let entry = stream.next(); entry !== null; entry = stream.next()) {
+      const { name, buffer, size } = entry;
       fileEntries.push({
         name,
         size,
-        uid,
         offset: buffer ? buffer.byteOffset : null,
       });
     }
@@ -123,121 +143,101 @@ describe('untar', function () {
           "name": "addr2line-0.17.0/.cargo_vcs_info.json",
           "offset": 512,
           "size": 74,
-          "uid": null,
         },
         Object {
           "name": "addr2line-0.17.0/.gitignore",
           "offset": 1536,
           "size": 33,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/CHANGELOG.md",
           "offset": 2560,
           "size": 7347,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/Cargo.lock",
           "offset": 10752,
           "size": 11506,
-          "uid": null,
         },
         Object {
           "name": "addr2line-0.17.0/Cargo.toml",
           "offset": 23040,
           "size": 2792,
-          "uid": null,
         },
         Object {
           "name": "addr2line-0.17.0/Cargo.toml.orig",
           "offset": 26624,
           "size": 2334,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/LICENSE-APACHE",
           "offset": 29696,
           "size": 10847,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/LICENSE-MIT",
           "offset": 41472,
           "size": 1069,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/README.md",
           "offset": 43520,
           "size": 2550,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/bench.plot.r",
           "offset": 46592,
           "size": 1000,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/benchmark.sh",
           "offset": 48128,
           "size": 3084,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/coverage.sh",
           "offset": 52224,
           "size": 177,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/examples/addr2line.rs",
           "offset": 53248,
           "size": 9447,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/rustfmt.toml",
           "offset": 63488,
           "size": 1,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/src/function.rs",
           "offset": 64512,
           "size": 19078,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/src/lazy.rs",
           "offset": 84480,
           "size": 919,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/src/lib.rs",
           "offset": 86016,
           "size": 41209,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/tests/correctness.rs",
           "offset": 128000,
           "size": 2756,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/tests/output_equivalence.rs",
           "offset": 131584,
           "size": 3905,
-          "uid": 0,
         },
         Object {
           "name": "addr2line-0.17.0/tests/parse.rs",
           "offset": 136192,
           "size": 3035,
-          "uid": 0,
         },
       ]
     `);
@@ -299,12 +299,11 @@ describe('untar', function () {
     }
   });
 
-  it('treats an empty numeric field as missing', function () {
+  it('accepts an empty optional numeric field', function () {
     const archive = makeArchive([
       makeEntry({ name: 'a', uid: '\0'.repeat(8) }, 'a'),
     ]);
-    const stream = new UntarFileStream(archive);
-    expect(stream.next().uid).toBe(null);
+    expect(listEntries(archive).map((e) => e.name)).toEqual(['a']);
   });
 
   it('rejects a truncated archive', function () {
@@ -322,5 +321,108 @@ describe('untar', function () {
     expect(listEntries(archive).map((e) => e.name)).toEqual([
       'prefix-ü/mycrate-1.0.0/é.rs',
     ]);
+  });
+
+  it('applies pax path and linkpath records', function () {
+    const longName = 'dir/'.repeat(40) + 'é\nfile.rs';
+    const archive = makeArchive([
+      makeEntry(
+        { name: 'PaxHeaders/x', type: 'x' },
+        paxRecords([
+          ['path', longName],
+          ['linkpath', 'target'],
+        ])
+      ),
+      makeEntry({ name: 'truncated', prefix: 'ignored', type: '2' }),
+      makeEntry({ name: 'next' }, 'n'),
+    ]);
+    const stream = new UntarFileStream(archive);
+    expect(stream.next()).toMatchObject({
+      name: longName,
+      linkname: 'target',
+    });
+    // The pax header only applies to one member.
+    expect(stream.next()).toMatchObject({ name: 'next', linkname: '' });
+  });
+
+  it('keeps all-digit pax paths as strings', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'x', type: 'x' }, paxRecords([['path', '1234']])),
+      makeEntry({ name: 'a' }, 'a'),
+    ]);
+    expect(listEntries(archive)[0].name).toBe('1234');
+  });
+
+  it('uses the pax size for framing', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'x', type: 'x' }, paxRecords([['size', '600']])),
+      makeEntry({ name: 'a', size: 0 }, 'a'.repeat(600)),
+      makeEntry({ name: 'b' }, 'b'),
+    ]);
+    expect(listEntries(archive)).toEqual([
+      { name: 'a', type: '0', content: 'a'.repeat(600) },
+      { name: 'b', type: '0', content: 'b' },
+    ]);
+  });
+
+  it('ignores unknown pax records', function () {
+    const archive = makeArchive([
+      makeEntry(
+        { name: 'x', type: 'x' },
+        paxRecords([
+          ['buffer', '1'],
+          ['type', '5'],
+          ['SCHILY.xattr.user.foo', new Uint8Array([0xff, 0x00, 0x0a])],
+          ['mtime', '1234.5'],
+        ])
+      ),
+      makeEntry({ name: 'a' }, 'a'),
+    ]);
+    expect(listEntries(archive)).toEqual([
+      { name: 'a', type: '0', content: 'a' },
+    ]);
+  });
+
+  it('ignores global pax headers without recognized records', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'g', type: 'g' }, paxRecords([['comment', 'hi']])),
+      makeEntry({ name: 'a' }, 'a'),
+    ]);
+    expect(listEntries(archive).map((e) => e.name)).toEqual(['a']);
+  });
+
+  it('rejects invalid pax header sequences', function () {
+    const a = makeEntry({ name: 'a' }, 'a');
+    const x = (records: Array<[string, string]>) =>
+      makeEntry({ name: 'x', type: 'x' }, paxRecords(records));
+    const g = (records: Array<[string, string]>) =>
+      makeEntry({ name: 'g', type: 'g' }, paxRecords(records));
+    const cases: Array<[Uint8Array[], string]> = [
+      [[x([['path', 'b']]), x([['path', 'c']]), a], 'Multiple pax headers'],
+      [[x([['path', '']]), a], 'empty name'],
+      [[x([['size', '']]), a], 'Invalid pax size'],
+      [[x([['size', '-1']]), a], 'Invalid pax size'],
+      [[x([['size', '1e3']]), a], 'Invalid pax size'],
+      [[g([['size', '1']]), a], 'global pax header'],
+      [[g([['path', 'b']]), a], 'global pax header'],
+      [[x([['path', 'b']])], 'end of the tar archive'],
+      [
+        [
+          x([
+            ['path', 'b'],
+            ['path', 'c'],
+          ]),
+          a,
+        ],
+        'Duplicate pax record',
+      ],
+      [[makeEntry({ name: 'x', type: 'x' }, '99 path=a\n'), a], 'pax'],
+      [[makeEntry({ name: 'x', type: 'x' }, '3 path=a\n'), a], 'pax'],
+      [[makeEntry({ name: 'x', type: 'x' }, '07 a=b\n'), a], 'pax'],
+      [[makeEntry({ name: 'x', type: 'x' }, '5 =b\n'), a], 'pax'],
+    ];
+    for (const [entries, message] of cases) {
+      expect(() => listEntries(makeArchive(entries))).toThrow(message);
+    }
   });
 });
