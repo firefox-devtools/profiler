@@ -27,9 +27,9 @@ ChatDrawer (src/components/chat)
    |  dispatch(sendChatMessage(text))
    v
 thunks (src/actions/chat.ts)              state.chat (src/reducers/chat.ts)
-   |  runChatTurn(...)                       apiHistory, status, streamingText, ...
+   |  runChatTurn(provider, ...)             conversation, status, streamingText, ...
    v
-chat-engine.ts       Anthropic SDK -> api.anthropic.com
+chat-engine.ts  ->  providers/anthropic.ts  ->  Anthropic SDK -> api.anthropic.com
    |  run_profiler_cli tool calls
    v
 pq-browser-executor.ts
@@ -38,7 +38,8 @@ pq-browser-executor.ts
 ProfileQuerier on the live store (src/profile-query)
 ```
 
-- `src/app-logic/profile-chat/chat-engine.ts`: the agentic loop. It streams one response, runs the tool calls the model asks for, and repeats until the model ends its turn. It doesn't know about Redux, which keeps it testable with a mocked `fetch`.
+- `src/app-logic/profile-chat/chat-engine.ts`: the agentic loop. It streams one response, runs the tool calls the model asks for, and repeats until the model ends its turn. It doesn't know about Redux or about a particular API, which keeps it testable with a mocked `fetch`.
+- `src/app-logic/profile-chat/providers/`: one `ChatProvider` per wire format (`types.ts`). A provider builds the user and tool result messages, streams a response and classifies errors. `transcript.ts` turns a conversation into the rendered transcript without importing an SDK, because a selector uses it.
 - `src/app-logic/profile-chat/pq-browser-executor.ts`: runs one pq command line on the store and returns its text output. Usage errors, unknown commands and failing queries come back as errors rather than exceptions, so the model can read and fix them. Output is truncated at 32 KB.
 - `src/app-logic/profile-chat/system-prompt.ts`: an intro plus `profiler-cli/guide.txt` and `profiler-cli/schemas.txt`. It is the same for every request, so it's cached.
 - `src/app-logic/profile-chat/view-context.ts`: every user message ends with a `<current_view>` block (selected tab, plus the `status` output for the selected thread, committed ranges and filters), so "this" and "here" mean what the user is looking at. The block isn't shown in the transcript.
@@ -48,7 +49,7 @@ The commands run on the live store, so `thread select`, `zoom push` and `filter 
 
 ### The conversation
 
-`state.chat.apiHistory` holds the messages exactly as they're sent to the API, and the transcript is a selector over it. The history is append-only: assistant messages are kept unchanged, including their thinking blocks, which the API requires for later requests. Every `tool_use` gets a `tool_result` in the next message, also when the turn is stopped, cut off by `max_tokens`, or stopped by the 25 tool rounds limit. In those cases the remaining calls get an error result.
+`state.chat.conversation` holds the messages exactly as they're sent to the API, in the provider's own format, and the transcript is a selector over it. The history is append-only: assistant messages are kept unchanged, including their thinking blocks, which the API requires for later requests. Every tool call gets a result in the next message, also when the turn is stopped, cut off by `max_tokens`, or stopped by the 25 tool rounds limit. In those cases the remaining calls get an error result.
 
 "New chat" and loading another profile start a new conversation. A turn that is still running for the old one is aborted, and its results are dropped by comparing `conversationId`.
 

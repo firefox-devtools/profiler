@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import {
   getApiKey,
   removeApiKey,
@@ -10,11 +9,22 @@ import {
 } from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
 import { buildViewContext } from 'firefox-profiler/app-logic/profile-chat/view-context';
 import {
-  getChatApiHistory,
+  describeUnknownChatError,
+  type ChatProvider,
+} from 'firefox-profiler/app-logic/profile-chat/providers/types';
+import {
+  getChatConversation,
   getChatConversationId,
   getIsChatTurnRunning,
 } from 'firefox-profiler/selectors/chat';
-import type { Action, ThunkAction } from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import type {
+  Action,
+  ChatConversation,
+  ChatError,
+  ChatTurnOutcome,
+  ThunkAction,
+} from 'firefox-profiler/types';
 
 // Limits how often streamed text is dispatched, to avoid a render per token.
 const STREAMING_TEXT_THROTTLE_MS = 50;
@@ -87,7 +97,17 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
       }
     };
 
-    try {
+    // Replaced by the provider's own once it's loaded.
+    let describeError: (error: unknown) => ChatError = describeUnknownChatError;
+
+    // Runs the turn with the provider of the conversation's format. `wrap`
+    // tags messages with that format for the actions.
+    async function runTurn<M>(
+      provider: ChatProvider<M>,
+      history: M[],
+      wrap: (messages: M[]) => ChatConversation
+    ) {
+      describeError = (error) => provider.describeError(error);
       // Loaded on demand to keep the SDK and commander out of the main bundle.
       const [engine, executor] = await Promise.all([
         import('firefox-profiler/app-logic/profile-chat/chat-engine'),
@@ -95,23 +115,20 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
       ]);
 
       const status = await executor.getCurrentViewStatus(store);
-      const userMessage: BetaMessageParam = {
-        role: 'user',
-        content: [
-          { type: 'text', text },
-          { type: 'text', text: buildViewContext(getState(), status) },
-        ],
-      };
+      const userMessage = provider.makeUserMessage(
+        text,
+        buildViewContext(getState(), status)
+      );
       dispatch({
         type: 'CHAT_TURN_STARTED',
         conversationId,
-        message: userMessage,
+        messages: wrap([userMessage]),
       });
 
       let pendingText = '';
-      const outcome = await engine.runChatTurn({
-        client: engine.createChatClient(apiKey),
-        history: getChatApiHistory(getState()),
+      return engine.runChatTurn({
+        provider,
+        history: [...history, userMessage],
         runTool: (args) => executor.runProfilerCliCommand(store, args),
         signal: controller.signal,
         onTextDelta: (streamedText) => {
@@ -127,25 +144,47 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
             }, STREAMING_TEXT_THROTTLE_MS);
           }
         },
-        onMessage: (message) => {
+        onMessages: (messages, isRunningTools) => {
           cancelStreamingText();
-          dispatch({ type: 'CHAT_MESSAGE_APPENDED', conversationId, message });
+          dispatch({
+            type: 'CHAT_MESSAGES_APPENDED',
+            conversationId,
+            messages: wrap(messages),
+            isRunningTools,
+          });
         },
       });
+    }
+
+    try {
+      const conversation = getChatConversation(getState());
+      let outcome: ChatTurnOutcome;
+      switch (conversation.format) {
+        case 'anthropic': {
+          const { createAnthropicProvider } =
+            await import('firefox-profiler/app-logic/profile-chat/providers/anthropic');
+          outcome = await runTurn(
+            createAnthropicProvider(apiKey),
+            conversation.messages,
+            (messages) => ({ format: 'anthropic', messages })
+          );
+          break;
+        }
+        default:
+          throw assertExhaustiveCheck(conversation.format);
+      }
 
       cancelStreamingText();
       dispatch({ type: 'CHAT_TURN_FINISHED', conversationId, outcome });
     } catch (error) {
       cancelStreamingText();
-      const { describeChatError } =
-        await import('firefox-profiler/app-logic/profile-chat/chat-engine');
       // The key is kept even when the API rejects it: a 401 can also come from
       // an organization policy, such as no browser access with custom data
       // retention, where entering the key again wouldn't help.
       dispatch({
         type: 'CHAT_TURN_FAILED',
         conversationId,
-        error: describeChatError(error),
+        error: describeError(error),
       });
     } finally {
       if (_currentTurnController === controller) {

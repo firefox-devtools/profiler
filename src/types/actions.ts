@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type JSZip from 'jszip';
-import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import type {
+  ChatConversation,
   ChatError,
   ChatTurnOutcome,
   UrlState,
@@ -779,7 +779,8 @@ type ChatAction =
   | {
       readonly type: 'CHAT_TURN_STARTED';
       readonly conversationId: number;
-      readonly message: BetaMessageParam;
+      // The user message, in the format of the conversation.
+      readonly messages: ChatConversation;
     }
   | {
       readonly type: 'CHAT_STREAMING_TEXT';
@@ -787,9 +788,10 @@ type ChatAction =
       readonly text: string;
     }
   | {
-      readonly type: 'CHAT_MESSAGE_APPENDED';
+      readonly type: 'CHAT_MESSAGES_APPENDED';
       readonly conversationId: number;
-      readonly message: BetaMessageParam;
+      readonly messages: ChatConversation;
+      readonly isRunningTools: boolean;
     }
   | {
       readonly type: 'CHAT_TURN_FINISHED';

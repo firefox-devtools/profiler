@@ -12,7 +12,7 @@ import {
   sendChatMessage,
 } from 'firefox-profiler/actions/chat';
 import {
-  getChatApiHistory,
+  getChatConversation,
   getChatError,
   getChatHasApiKey,
   getChatNotice,
@@ -115,7 +115,9 @@ describe('profile chat', function () {
     expect(userText).toContain('GeckoMain');
     expect(requests[1].messages).toEqual(
       JSON.parse(
-        JSON.stringify(getChatApiHistory(store.getState()).slice(0, 3))
+        JSON.stringify(
+          getChatConversation(store.getState()).messages.slice(0, 3)
+        )
       )
     );
   });
@@ -132,7 +134,7 @@ describe('profile chat', function () {
     expect(getChatStatus(store.getState())).toBe('idle');
     expect(getChatNotice(store.getState())).toEqual({ type: 'cancelled' });
     // Only the user message, so the next message continues a valid history.
-    expect(getChatApiHistory(store.getState())).toHaveLength(1);
+    expect(getChatConversation(store.getState()).messages).toHaveLength(1);
   });
 
   it('drops a running turn when the chat is reset', async function () {
@@ -144,7 +146,7 @@ describe('profile chat', function () {
       },
     ]);
     await store.dispatch(sendChatMessage('Hi'));
-    expect(getChatApiHistory(store.getState())).toEqual([]);
+    expect(getChatConversation(store.getState()).messages).toEqual([]);
     expect(getChatNotice(store.getState())).toBeNull();
     expect(getChatStatus(store.getState())).toBe('idle');
   });

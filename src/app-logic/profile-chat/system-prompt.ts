@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { BetaTextBlockParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import guideText from '../../../profiler-cli/guide.txt';
 import schemasText from '../../../profiler-cli/schemas.txt';
 
@@ -18,21 +17,49 @@ You can inspect the profile with the ${PROFILER_CLI_TOOL_NAME} tool, which runs 
 
 Answer in short markdown. Refer to functions, markers and threads by name, and include their handles (f-N, m-N, t-N) when the user may want to dig further. Base your answers on what the tool returns, and say so when the profile doesn't contain the data to answer.`;
 
+export const PROFILER_CLI_TOOL_DESCRIPTION =
+  'Run a profiler-cli command against the profile that is open in the page and return its text output. ' +
+  'Pass the command line without the program name, e.g. "thread samples --limit 20" or "zoom push 2.7,3.1". ' +
+  'Commands that select a thread, zoom or push filters change what the user sees.';
+
+// The JSON schema of the tool input.
+export const PROFILER_CLI_TOOL_PARAMETERS = {
+  type: 'object' as const,
+  properties: {
+    args: {
+      type: 'string',
+      description:
+        'The profiler-cli command line, e.g. "thread functions --search GC". Quote arguments with spaces.',
+    },
+  },
+  required: ['args'],
+  additionalProperties: false,
+};
+
 /**
- * The static system prompt. It's identical for every request so that it can be
- * cached, which is why the per-turn view context goes into the user message.
+ * The static system prompt, in parts. It's identical for every request so that
+ * it can be cached, which is why the per-turn view context goes into the user
+ * message.
  */
-export function getSystemPrompt(): BetaTextBlockParam[] {
+export function getSystemPromptParts(): string[] {
   return [
-    { type: 'text', text: INTRO },
-    {
-      type: 'text',
-      text: `<profiler_cli_guide>\n${guideText}\n</profiler_cli_guide>`,
-    },
-    {
-      type: 'text',
-      text: `<profiler_cli_schemas>\n${schemasText}\n</profiler_cli_schemas>`,
-      cache_control: { type: 'ephemeral' },
-    },
+    INTRO,
+    `<profiler_cli_guide>\n${guideText}\n</profiler_cli_guide>`,
+    `<profiler_cli_schemas>\n${schemasText}\n</profiler_cli_schemas>`,
   ];
+}
+
+/**
+ * Get the profiler-cli command line out of the tool input, or null if the
+ * model called another tool or passed something else.
+ */
+export function getProfilerCliArgs(
+  toolName: string,
+  input: unknown
+): string | null {
+  const args = (input as { args?: unknown } | null)?.args;
+  if (toolName !== PROFILER_CLI_TOOL_NAME || typeof args !== 'string') {
+    return null;
+  }
+  return args;
 }

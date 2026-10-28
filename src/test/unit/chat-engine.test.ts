@@ -4,12 +4,11 @@
 
 import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import {
-  createChatClient,
-  describeChatError,
   runChatTurn,
   MAX_TOOL_ITERATIONS,
   type ToolRunResult,
 } from 'firefox-profiler/app-logic/profile-chat/chat-engine';
+import { createAnthropicProvider } from 'firefox-profiler/app-logic/profile-chat/providers/anthropic';
 import { MESSAGES_API_URL, mockMessagesApi } from '../fixtures/anthropic-api';
 
 describe('runChatTurn', function () {
@@ -21,9 +20,10 @@ describe('runChatTurn', function () {
     const textDeltas: string[] = [];
     const controller = new AbortController();
     const toolCalls: string[] = [];
+    const provider = createAnthropicProvider('sk-test');
     const run = (signal = controller.signal) =>
       runChatTurn({
-        client: createChatClient('sk-test'),
+        provider,
         history,
         runTool: async (args) => {
           toolCalls.push(args);
@@ -33,9 +33,17 @@ describe('runChatTurn', function () {
         },
         signal,
         onTextDelta: (text) => textDeltas.push(text),
-        onMessage: (message) => appended.push(message),
+        onMessages: (messages) => appended.push(...messages),
       });
-    return { history, appended, textDeltas, controller, toolCalls, run };
+    return {
+      history,
+      appended,
+      textDeltas,
+      controller,
+      toolCalls,
+      provider,
+      run,
+    };
   }
 
   it('streams a text-only answer', async function () {
@@ -239,9 +247,9 @@ describe('runChatTurn', function () {
         error: { type: 'authentication_error', message: 'invalid x-api-key' },
       },
     });
-    const { run } = setup();
+    const { provider, run } = setup();
     const error = await run().catch((e) => e);
-    expect(describeChatError(error)).toEqual({
+    expect(provider.describeError(error)).toEqual({
       type: 'auth',
       message: 'invalid x-api-key',
     });

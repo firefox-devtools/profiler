@@ -3,143 +3,51 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * The agentic loop behind the profile chat. It knows nothing about Redux: it
- * streams one user turn from the Anthropic API, runs the tool calls the model
- * asks for, and reports every message it adds to the conversation.
+ * The agentic loop behind the profile chat. It knows nothing about Redux or
+ * about a particular API: it streams one user turn through a ChatProvider,
+ * runs the tool calls the model asks for, and reports every message it adds
+ * to the conversation.
  *
  * The conversation must stay append-only. Earlier messages, including their
- * thinking blocks, are sent back unchanged, and every tool_use gets a matching
- * tool_result, even when the turn is cancelled or cut short.
+ * thinking blocks, are sent back unchanged, and every tool call gets a
+ * matching result, even when the turn is cancelled or cut short.
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import type { ChatTurnOutcome } from 'firefox-profiler/types';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
-  BetaMessage,
-  BetaMessageParam,
-  BetaTool,
-  BetaToolResultBlockParam,
-  BetaToolUseBlock,
-} from '@anthropic-ai/sdk/resources/beta/messages/messages';
-import type { ChatError, ChatTurnOutcome } from 'firefox-profiler/types';
-import { getSystemPrompt, PROFILER_CLI_TOOL_NAME } from './system-prompt';
-
-export const CHAT_MODEL = 'claude-opus-5-5';
-
-const MAX_TOKENS = 16000;
+  ChatProvider,
+  ProviderResponse,
+  ToolCall,
+  ToolResult,
+} from './providers/types';
 
 // Tool rounds allowed for one user message before the turn is stopped.
 export const MAX_TOOL_ITERATIONS = 25;
-
-const PROFILER_CLI_TOOL: BetaTool = {
-  name: PROFILER_CLI_TOOL_NAME,
-  description:
-    'Run a profiler-cli command against the profile that is open in the page and return its text output. ' +
-    'Pass the command line without the program name, e.g. "thread samples --limit 20" or "zoom push 2.7,3.1". ' +
-    'Commands that select a thread, zoom or push filters change what the user sees.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      args: {
-        type: 'string',
-        description:
-          'The profiler-cli command line, e.g. "thread functions --search GC". Quote arguments with spaces.',
-      },
-    },
-    required: ['args'],
-    additionalProperties: false,
-  },
-  strict: true,
-};
 
 export type ToolRunResult = {
   text: string;
   isError: boolean;
 };
 
-export type RunChatTurnOptions = {
-  client: Anthropic;
+export type RunChatTurnOptions<M> = {
+  provider: ChatProvider<M>;
   /** The conversation so far, ending with the new user message. */
-  history: BetaMessageParam[];
+  history: M[];
   /** Runs one profiler-cli command line. */
   runTool: (args: string) => Promise<ToolRunResult>;
   signal: AbortSignal;
   /** Called with the visible text streamed so far for the current response. */
   onTextDelta: (text: string) => void;
-  /** Called for each message appended to the conversation. */
-  onMessage: (message: BetaMessageParam) => void;
+  /**
+   * Called with the messages appended to the conversation. `isRunningTools`
+   * is true when the tool calls of these messages are about to run.
+   */
+  onMessages: (messages: M[], isRunningTools: boolean) => void;
 };
 
-export function createChatClient(apiKey: string): Anthropic {
-  return new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
-}
-
-function _getToolUses(message: BetaMessage): BetaToolUseBlock[] {
-  return message.content.filter(
-    (block): block is BetaToolUseBlock => block.type === 'tool_use'
-  );
-}
-
-function _errorResult(
-  toolUse: BetaToolUseBlock,
-  text: string
-): BetaToolResultBlockParam {
-  return {
-    type: 'tool_result',
-    tool_use_id: toolUse.id,
-    content: text,
-    is_error: true,
-  };
-}
-
-function _getArgs(toolUse: BetaToolUseBlock): string | null {
-  const input = toolUse.input as { args?: unknown } | null;
-  if (
-    toolUse.name !== PROFILER_CLI_TOOL_NAME ||
-    typeof input?.args !== 'string'
-  ) {
-    return null;
-  }
-  return input.args;
-}
-
-async function _streamResponse(
-  client: Anthropic,
-  messages: BetaMessageParam[],
-  signal: AbortSignal,
-  onTextDelta: (text: string) => void
-): Promise<BetaMessage> {
-  const stream = client.beta.messages.stream(
-    {
-      model: CHAT_MODEL,
-      max_tokens: MAX_TOKENS,
-      system: getSystemPrompt(),
-      tools: [PROFILER_CLI_TOOL],
-      messages,
-      output_config: { effort: 'medium' },
-      // Retries a refused request on another model instead of stopping.
-      betas: ['server-side-fallback-2026-07-01'],
-      fallbacks: 'default',
-    },
-    { signal }
-  );
-
-  let text = '';
-  for await (const event of stream) {
-    if (
-      event.type === 'content_block_start' &&
-      event.content_block.type === 'text' &&
-      text !== ''
-    ) {
-      text += '\n\n';
-    } else if (
-      event.type === 'content_block_delta' &&
-      event.delta.type === 'text_delta'
-    ) {
-      text += event.delta.text;
-      onTextDelta(text);
-    }
-  }
-  return stream.finalMessage();
+function _errorResult(toolCall: ToolCall, text: string): ToolResult {
+  return { id: toolCall.id, text, isError: true };
 }
 
 /**
@@ -148,144 +56,103 @@ async function _streamResponse(
  * API errors are thrown, except for an abort through `signal`, which ends the
  * turn as cancelled.
  */
-export async function runChatTurn({
-  client,
+export async function runChatTurn<M>({
+  provider,
   history,
   runTool,
   signal,
   onTextDelta,
-  onMessage,
-}: RunChatTurnOptions): Promise<ChatTurnOutcome> {
+  onMessages,
+}: RunChatTurnOptions<M>): Promise<ChatTurnOutcome> {
   const messages = history.slice();
-  const append = (message: BetaMessageParam) => {
-    messages.push(message);
-    onMessage(message);
-  };
-  // Every tool_use needs a tool_result in the next message, even when we stop.
-  const answerAllWithError = (toolUses: BetaToolUseBlock[], text: string) => {
-    if (toolUses.length > 0) {
-      append({
-        role: 'user',
-        content: toolUses.map((toolUse) => _errorResult(toolUse, text)),
-      });
+  const append = (appended: M[], isRunningTools: boolean) => {
+    if (appended.length > 0) {
+      messages.push(...appended);
+      onMessages(appended, isRunningTools);
     }
   };
+  const answer = (results: ToolResult[]) =>
+    append(provider.makeToolResultMessages(results), false);
+  // Every tool call needs a result, even when we stop.
+  const answerAllWithError = (toolCalls: ToolCall[], text: string) =>
+    answer(toolCalls.map((toolCall) => _errorResult(toolCall, text)));
 
   for (let iteration = 0; ; iteration++) {
-    let message: BetaMessage;
+    let response: ProviderResponse<M>;
     try {
-      message = await _streamResponse(client, messages, signal, onTextDelta);
+      response = await provider.streamResponse(messages, signal, onTextDelta);
     } catch (error) {
-      if (error instanceof Anthropic.APIUserAbortError || signal.aborted) {
+      if (signal.aborted) {
         return { type: 'cancelled' };
       }
       throw error;
     }
 
-    append({ role: 'assistant', content: message.content });
-    const toolUses = _getToolUses(message);
+    const { toolCalls } = response;
+    const isLastIteration = iteration + 1 >= MAX_TOOL_ITERATIONS;
+    append(
+      response.messages,
+      response.stop === 'tool-calls' && !isLastIteration
+    );
 
-    switch (message.stop_reason) {
-      case 'tool_use':
+    switch (response.stop) {
+      case 'tool-calls':
         break;
-      case 'max_tokens':
+      case 'max-tokens':
         answerAllWithError(
-          toolUses,
+          toolCalls,
           'The response was cut off before this tool call was complete.'
         );
         return { type: 'max-tokens' };
-      case 'refusal': {
-        answerAllWithError(toolUses, 'The response was declined.');
-        const explanation =
-          message.stop_details?.type === 'refusal'
-            ? (message.stop_details.explanation ?? null)
-            : null;
-        return { type: 'refusal', explanation };
-      }
-      default:
-        // end_turn, and pause_turn, which only server tools produce.
-        answerAllWithError(toolUses, 'This tool call was not run.');
+      case 'refusal':
+        answerAllWithError(toolCalls, 'The response was declined.');
+        return { type: 'refusal', explanation: response.refusalExplanation };
+      case 'end':
+        answerAllWithError(toolCalls, 'This tool call was not run.');
         return { type: 'done' };
+      default:
+        throw assertExhaustiveCheck(response.stop);
     }
 
-    if (iteration + 1 >= MAX_TOOL_ITERATIONS) {
+    if (isLastIteration) {
       answerAllWithError(
-        toolUses,
+        toolCalls,
         'Stopped: too many tool calls for one message.'
       );
       return { type: 'tool-limit' };
     }
 
     // Run sequentially: the commands share the store, and some change it.
-    const results: BetaToolResultBlockParam[] = [];
-    for (const toolUse of toolUses) {
+    const results: ToolResult[] = [];
+    for (const toolCall of toolCalls) {
       if (signal.aborted) {
-        results.push(_errorResult(toolUse, 'Cancelled by the user.'));
+        results.push(_errorResult(toolCall, 'Cancelled by the user.'));
         continue;
       }
-      const args = _getArgs(toolUse);
-      if (args === null) {
+      if (toolCall.args === null) {
         results.push(
           _errorResult(
-            toolUse,
-            `Unknown tool or invalid input: ${toolUse.name}`
+            toolCall,
+            `Unknown tool or invalid input: ${toolCall.name}`
           )
         );
         continue;
       }
       try {
-        const { text, isError } = await runTool(args);
+        const { text, isError } = await runTool(toolCall.args);
         results.push({
-          type: 'tool_result',
-          tool_use_id: toolUse.id,
-          content: text === '' ? '(no output)' : text,
-          is_error: isError,
+          id: toolCall.id,
+          text: text === '' ? '(no output)' : text,
+          isError,
         });
       } catch (error) {
-        results.push(_errorResult(toolUse, `Error: ${error.message}`));
+        results.push(_errorResult(toolCall, `Error: ${error.message}`));
       }
     }
-    append({ role: 'user', content: results });
+    answer(results);
 
     if (signal.aborted) {
       return { type: 'cancelled' };
     }
   }
-}
-
-// The SDK's message is the status followed by the raw JSON body, so prefer
-// the human-readable message from the body when there is one.
-function _getApiErrorMessage(error: InstanceType<typeof Anthropic.APIError>) {
-  const body = error.error as { error?: { message?: unknown } } | undefined;
-  const message = body?.error?.message;
-  return typeof message === 'string' ? message : error.message;
-}
-
-/**
- * Classify an error thrown by runChatTurn for display.
- */
-export function describeChatError(error: unknown): ChatError {
-  if (error instanceof Anthropic.AuthenticationError) {
-    return { type: 'auth', message: _getApiErrorMessage(error) };
-  }
-  if (error instanceof Anthropic.PermissionDeniedError) {
-    return { type: 'permission', message: _getApiErrorMessage(error) };
-  }
-  if (error instanceof Anthropic.RateLimitError) {
-    return { type: 'rate-limit' };
-  }
-  if (error instanceof Anthropic.APIConnectionError) {
-    return { type: 'connection', message: error.message };
-  }
-  if (error instanceof Anthropic.APIError) {
-    return {
-      type: 'api',
-      status: error.status ?? null,
-      message: _getApiErrorMessage(error),
-    };
-  }
-  return {
-    type: 'unknown',
-    message: error instanceof Error ? error.message : String(error),
-  };
 }

@@ -446,6 +446,13 @@ export type ChatError =
     }
   | { readonly type: 'unknown'; readonly message: string };
 
+// The conversation exactly as sent to the API, in the provider's own message
+// format. Append-only.
+export type ChatConversation = {
+  readonly format: 'anthropic';
+  readonly messages: BetaMessageParam[];
+};
+
 export type ChatState = {
   readonly isOpen: boolean;
   readonly status: ChatStatus;
@@ -453,8 +460,7 @@ export type ChatState = {
   readonly error: ChatError | null;
   // Shown when the last turn ended early, e.g. cancelled or cut off.
   readonly notice: ChatTurnOutcome | null;
-  // The conversation exactly as sent to the Anthropic API. Append-only.
-  readonly apiHistory: BetaMessageParam[];
+  readonly conversation: ChatConversation;
   // Text of the response that is currently streaming in.
   readonly streamingText: string;
   readonly hasApiKey: boolean;
@@ -464,7 +470,7 @@ export type ChatState = {
 };
 
 /**
- * One entry of the chat transcript as rendered, derived from the API history.
+ * One entry of the chat transcript as rendered, derived from the conversation.
  */
 export type ChatTranscriptItem =
   | { readonly type: 'user'; readonly text: string }

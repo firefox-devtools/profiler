@@ -2,7 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { Reducer, ChatState } from 'firefox-profiler/types';
+import type {
+  Reducer,
+  ChatConversation,
+  ChatState,
+} from 'firefox-profiler/types';
 import { getApiKey } from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
 
 function _getInitialState(): ChatState {
@@ -11,7 +15,7 @@ function _getInitialState(): ChatState {
     status: 'idle',
     error: null,
     notice: null,
-    apiHistory: [],
+    conversation: { format: 'anthropic', messages: [] },
     streamingText: '',
     hasApiKey: getApiKey() !== null,
     conversationId: 0,
@@ -24,9 +28,23 @@ function _startNewConversation(state: ChatState): ChatState {
     status: 'idle',
     error: null,
     notice: null,
-    apiHistory: [],
+    conversation: { format: state.conversation.format, messages: [] },
     streamingText: '',
     conversationId: state.conversationId + 1,
+  };
+}
+
+function _appendMessages(
+  conversation: ChatConversation,
+  appended: ChatConversation
+): ChatConversation {
+  if (conversation.format !== appended.format) {
+    // Can't happen: the format only changes with a new conversation.
+    return conversation;
+  }
+  return {
+    format: conversation.format,
+    messages: [...conversation.messages, ...appended.messages],
   };
 }
 
@@ -61,28 +79,17 @@ const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
         error: null,
         notice: null,
         streamingText: '',
-        apiHistory: [...state.apiHistory, action.message],
+        conversation: _appendMessages(state.conversation, action.messages),
       };
     case 'CHAT_STREAMING_TEXT':
       return { ...state, streamingText: action.text };
-    case 'CHAT_MESSAGE_APPENDED': {
-      const { message } = action;
-      let status = state.status;
-      if (message.role === 'assistant') {
-        const hasToolUse =
-          Array.isArray(message.content) &&
-          message.content.some((block) => block.type === 'tool_use');
-        status = hasToolUse ? 'running-tool' : 'streaming';
-      } else {
-        status = 'streaming';
-      }
+    case 'CHAT_MESSAGES_APPENDED':
       return {
         ...state,
-        status,
+        status: action.isRunningTools ? 'running-tool' : 'streaming',
         streamingText: '',
-        apiHistory: [...state.apiHistory, message],
+        conversation: _appendMessages(state.conversation, action.messages),
       };
-    }
     case 'CHAT_TURN_FINISHED':
       return {
         ...state,
