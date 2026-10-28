@@ -30,7 +30,14 @@ class ByteReader {
       : this._asciiDecoder.decode(bytes.subarray(0, nulBytePos));
   }
 
+  readOctal(byteCount: number): number | null {
+    return _parseOctal(this.readBuffer(byteCount));
+  }
+
   readBuffer(byteCount: number): Uint8Array {
+    if (this.position() + byteCount > this.size()) {
+      throw new Error('Unexpected end of tar archive');
+    }
     const buf = this._uint8Array.subarray(
       this.position(),
       this.position() + byteCount
@@ -47,8 +54,11 @@ class ByteReader {
     this._position = newpos;
   }
 
-  peekUint32(): number {
-    return this._bufferView.getUint32(this.position(), true);
+  peekBuffer(byteCount: number): Uint8Array {
+    return this._uint8Array.subarray(
+      this.position(),
+      this.position() + byteCount
+    );
   }
 
   position(): number {
@@ -65,19 +75,67 @@ type FieldEntry = {
   value: string | number | null;
 };
 
+const BLOCK_SIZE = 512;
+
+// The checksum field covers bytes 148..156 of the header.
+const CHECKSUM_OFFSET = 148;
+const CHECKSUM_LENGTH = 8;
+
+/**
+ * Parse a numeric header field. These fields contain octal digits, optionally
+ * preceded by spaces or NULs and followed by spaces or NULs. Anything else,
+ * including GNU base-256 numbers, is rejected. Returns null if the field
+ * contains no digits at all.
+ */
+function _parseOctal(bytes: Uint8Array): number | null {
+  const isPadding = (b: number) => b === 0x00 || b === 0x20;
+  let i = 0;
+  while (i < bytes.length && isPadding(bytes[i])) {
+    i++;
+  }
+  let value = 0;
+  let digitCount = 0;
+  for (; i < bytes.length && bytes[i] >= 0x30 && bytes[i] <= 0x37; i++) {
+    value = value * 8 + (bytes[i] - 0x30);
+    digitCount++;
+  }
+  for (; i < bytes.length; i++) {
+    if (!isPadding(bytes[i])) {
+      throw new Error('Invalid numeric field in tar header');
+    }
+  }
+  return digitCount === 0 ? null : value;
+}
+
+function _isZeroBlock(block: Uint8Array): boolean {
+  return block.every((b) => b === 0);
+}
+
+/**
+ * Check the header checksum: the unsigned sum of all header bytes, with the
+ * checksum field itself counted as if it contained spaces.
+ */
+function _verifyChecksum(header: Uint8Array): void {
+  const expected = _parseOctal(
+    header.subarray(CHECKSUM_OFFSET, CHECKSUM_OFFSET + CHECKSUM_LENGTH)
+  );
+  let sum = 0x20 * CHECKSUM_LENGTH;
+  for (let i = 0; i < header.length; i++) {
+    if (i < CHECKSUM_OFFSET || i >= CHECKSUM_OFFSET + CHECKSUM_LENGTH) {
+      sum += header[i];
+    }
+  }
+  if (expected !== sum) {
+    throw new Error('Tar header checksum mismatch');
+  }
+}
+
 function _parseIntStrict(s: string, base: number): number {
   const val = parseInt(s, base);
   if (isNaN(val)) {
     throw new Error('Parsing number failed');
   }
   return val;
-}
-
-function _parseOptionalInt(s: string, base: number): number | null {
-  if (s === '') {
-    return null;
-  }
-  return _parseIntStrict(s, base);
 }
 
 /**
@@ -188,7 +246,6 @@ export type TarFileEntry = {
   uid: number | null;
   gid: number | null;
   mtime: number | null;
-  checksum: number | null;
   linkname: string;
   ustarFormat: string;
   version: string | null;
@@ -208,10 +265,12 @@ export class UntarFileStream {
   }
 
   hasNext(): boolean {
-    // A tar file ends with 4 zero bytes
+    // A tar archive ends with two all-zero blocks. We stop at the first one,
+    // and also accept an archive that ends right after its last member.
+    const reader = this._reader;
     return (
-      this._reader.position() + 4 < this._reader.size() &&
-      this._reader.peekUint32() !== 0
+      reader.position() < reader.size() &&
+      !_isZeroBlock(reader.peekBuffer(BLOCK_SIZE))
     );
   }
 
@@ -223,15 +282,22 @@ export class UntarFileStream {
     const stream = this._reader;
 
     const headerBeginPos = stream.position();
+    if (headerBeginPos + BLOCK_SIZE > stream.size()) {
+      throw new Error('Unexpected end of tar archive');
+    }
+    _verifyChecksum(stream.peekBuffer(BLOCK_SIZE));
 
     // Read header
     let name = stream.readString(100);
     const mode = stream.readString(8);
-    const uid = _parseOptionalInt(stream.readString(8), 8);
-    const gid = _parseOptionalInt(stream.readString(8), 8);
-    const size = _parseIntStrict(stream.readString(12), 8);
-    const mtime = _parseOptionalInt(stream.readString(12), 8);
-    const checksum = _parseOptionalInt(stream.readString(8), 10);
+    const uid = stream.readOctal(8);
+    const gid = stream.readOctal(8);
+    const size = stream.readOctal(12);
+    if (size === null) {
+      throw new Error('Missing size in tar header');
+    }
+    const mtime = stream.readOctal(12);
+    stream.seekBy(CHECKSUM_LENGTH);
     const type = stream.readString(1);
     const linkname = stream.readString(100);
     const ustarFormat = stream.readString(6);
@@ -246,8 +312,8 @@ export class UntarFileStream {
       version = stream.readString(2);
       uname = stream.readString(32);
       gname = stream.readString(32);
-      devmajor = _parseOptionalInt(stream.readString(8), 10);
-      devminor = _parseOptionalInt(stream.readString(8), 10);
+      devmajor = stream.readOctal(8);
+      devminor = stream.readOctal(8);
       namePrefix = stream.readString(155);
 
       if (namePrefix.length > 0) {
@@ -256,9 +322,9 @@ export class UntarFileStream {
     }
 
     // The size is padded to be aligned with 512 bytes.
-    const alignedSize = ((size - 1) | 511) + 1;
+    const alignedSize = Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE;
 
-    const dataBeginPos = headerBeginPos + 512;
+    const dataBeginPos = headerBeginPos + BLOCK_SIZE;
     const dataEndPos = dataBeginPos + alignedSize;
 
     stream.seekTo(dataBeginPos);
@@ -307,7 +373,6 @@ export class UntarFileStream {
       gid,
       size,
       mtime,
-      checksum,
       linkname,
       ustarFormat,
       version,
