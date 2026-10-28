@@ -7,8 +7,9 @@ import { UntarFileStream } from 'firefox-profiler/utils/untar';
 type HeaderSpec = {
   name: string;
   type?: string;
-  // 'ustar' is POSIX UStar / pax, 'gnu' is the old GNU format used by cargo.
-  format?: 'ustar' | 'gnu';
+  // 'ustar' is POSIX UStar / pax, 'gnu' is the old GNU format used by cargo,
+  // 'v7' has no magic.
+  format?: 'ustar' | 'gnu' | 'v7';
   prefix?: string;
   uid?: string;
   // Overrides the size field, which defaults to the content length.
@@ -38,7 +39,7 @@ function makeHeader(spec: HeaderSpec, size: number): Uint8Array {
   write(156, spec.type ?? '0');
   if (spec.format === 'gnu') {
     write(257, 'ustar  \0');
-  } else {
+  } else if (spec.format !== 'v7') {
     write(257, 'ustar\x0000');
   }
   if (spec.prefix !== undefined) {
@@ -424,5 +425,53 @@ describe('untar', function () {
     for (const [entries, message] of cases) {
       expect(() => listEntries(makeArchive(entries))).toThrow(message);
     }
+  });
+
+  it('does not read a name prefix from GNU headers', function () {
+    // In GNU headers, the UStar prefix bytes contain atime and ctime.
+    const archive = makeArchive([
+      makeEntry(
+        {
+          name: 'crate/a.rs',
+          format: 'gnu',
+          patches: [{ offset: 345, bytes: '14751573214\x0014751573214\x00' }],
+        },
+        'a'
+      ),
+    ]);
+    expect(listEntries(archive).map((e) => e.name)).toEqual(['crate/a.rs']);
+  });
+
+  it('reads v7 archives', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'a', format: 'v7', prefix: 'ignored' }, 'a'),
+    ]);
+    expect(listEntries(archive).map((e) => e.name)).toEqual(['a']);
+  });
+
+  it('rejects unknown header formats', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'a', patches: [{ offset: 263, bytes: '01' }] }, 'a'),
+    ]);
+    expect(() => listEntries(archive)).toThrow('Unknown tar header format');
+  });
+
+  it('rejects mixed header formats', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'a', format: 'gnu' }, 'a'),
+      makeEntry({ name: 'b', format: 'ustar' }, 'b'),
+    ]);
+    expect(() => listEntries(archive)).toThrow('Mixed header formats');
+  });
+
+  it('rejects pax headers in GNU archives', function () {
+    const archive = makeArchive([
+      makeEntry(
+        { name: 'x', type: 'x', format: 'gnu' },
+        paxRecords([['path', 'b']])
+      ),
+      makeEntry({ name: 'a', format: 'gnu' }, 'a'),
+    ]);
+    expect(() => listEntries(archive)).toThrow('Pax header in a gnu');
   });
 });
