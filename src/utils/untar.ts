@@ -24,7 +24,8 @@ const SIZE: Field = [124, 12];
 const CHECKSUM: Field = [148, 8];
 const TYPEFLAG: Field = [156, 1];
 const LINKNAME: Field = [157, 100];
-const MAGIC: Field = [257, 6];
+// The magic and version fields together.
+const MAGIC: Field = [257, 8];
 const PREFIX: Field = [345, 155];
 
 // Names in tar headers are raw bytes; in practice they are UTF-8. Bytes that
@@ -134,6 +135,27 @@ function _parsePaxRecords(data: Uint8Array): Map<string, string> {
   return records;
 }
 
+// Archives use one of these header formats:
+//  - 'ustar': POSIX UStar, possibly with pax extended headers ('x' and 'g').
+//  - 'gnu': The old GNU format, which cargo uses. It has no name prefix field;
+//    those bytes contain other fields.
+//  - 'v7': The original tar format, without any extensions.
+type TarFormat = 'ustar' | 'gnu' | 'v7';
+
+function _getFormat(header: Uint8Array): TarFormat {
+  const magic = String.fromCharCode(..._field(header, MAGIC));
+  switch (magic) {
+    case 'ustar\x0000':
+      return 'ustar';
+    case 'ustar  \x00':
+      return 'gnu';
+    case '\x00'.repeat(8):
+      return 'v7';
+    default:
+      throw new Error('Unknown tar header format');
+  }
+}
+
 function _parsePaxSize(value: string): number {
   const size = Number(value);
   if (!/^[0-9]+$/.test(value) || !Number.isSafeInteger(size)) {
@@ -157,6 +179,9 @@ export type TarFileEntry = {
 export class UntarFileStream {
   _bytes: Uint8Array;
   _position = 0;
+  // Mixing header formats in one archive is not allowed. This is the format
+  // of the first header.
+  _format: TarFormat | null = null;
 
   constructor(arrayBuffer: ArrayBufferLike) {
     this._bytes = new Uint8Array(arrayBuffer);
@@ -185,6 +210,17 @@ export class UntarFileStream {
         throw new Error('Missing size in tar header');
       }
 
+      const format = _getFormat(header);
+      if (this._format === null) {
+        this._format = format;
+      } else if (format !== this._format) {
+        throw new Error('Mixed header formats in tar archive');
+      }
+
+      if ((type === 'g' || type === 'x') && format !== 'ustar') {
+        throw new Error(`Pax header in a ${format} tar archive`);
+      }
+
       if (type === 'g') {
         // Global pax header. Its records apply to all following members. We
         // reject all the keywords we'd otherwise use: overriding the path or
@@ -208,7 +244,7 @@ export class UntarFileStream {
       // precedence over the header. A pax record with an empty value deletes
       // the field.
       let headerName = _parseString(_field(header, NAME));
-      if (_parseString(_field(header, MAGIC)).startsWith('ustar')) {
+      if (format === 'ustar') {
         const prefix = _parseString(_field(header, PREFIX));
         if (prefix !== '') {
           headerName = prefix + '/' + headerName;
