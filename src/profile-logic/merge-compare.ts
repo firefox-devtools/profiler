@@ -615,7 +615,13 @@ function mergeSources(
           ? oldSourceToNewSourcePlusOne[originalGeneratedSource] - 1
           : null;
 
-      const sourceKey = id ?? `null-id-${newUrlIndex}`;
+      // Original sources from source maps are identified by their bundle and
+      // URL. Two bundles can list the same URL for different files.
+      const sourceKey =
+        id ??
+        (newGeneratedSource !== null
+          ? `original-${newGeneratedSource}-${newUrlIndex}`
+          : `null-id-${newUrlIndex}`);
       let insertedSourceIndex = mapOfInsertedSources.get(sourceKey);
       if (insertedSourceIndex === undefined) {
         // Add new source

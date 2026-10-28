@@ -565,7 +565,9 @@ export function applySymbolicationSteps(
     IndexIntoSourceTable
   >();
   for (let i = 0; i < sources.length; i++) {
-    if (sources.id[i] === null) {
+    // Skip original sources from JS source maps. Their URLs are only unique
+    // per bundle.
+    if (sources.id[i] === null && sources.generatedSource[i] === null) {
       sourceIndexForNativeFilename.set(sources.filename[i], i);
     }
   }
