@@ -20,6 +20,7 @@ import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
+import { computeCodeChallenge } from 'firefox-profiler/app-logic/profile-chat/providers/openrouter-auth';
 import { mockMessagesApi } from 'firefox-profiler/test/fixtures/anthropic-api';
 import { fireEvent, waitFor } from '@testing-library/react';
 
@@ -208,6 +209,112 @@ describe('ChatDrawer', function () {
     expect(
       screen.getByPlaceholderText('Ask about this profile')
     ).toBeInTheDocument();
+  });
+
+  it('connects OpenRouter through the popup and lists tool models', async function () {
+    window.fetchMock.get('https://openrouter.ai/api/v1/models', {
+      data: [
+        { id: 'vendor/chat-only', supported_parameters: ['max_tokens'] },
+        { id: 'vendor/with-tools', supported_parameters: ['tools'] },
+      ],
+    });
+    window.fetchMock.post('https://openrouter.ai/api/v1/auth/keys', {
+      key: 'sk-or-v1-test',
+    });
+    const openSpy = jest.spyOn(window, 'open').mockReturnValue({} as Window);
+    const { openChat, getStoredSettings } = setup();
+    openChat();
+    fireEvent.change(await screen.findByLabelText('Provider'), {
+      target: { value: 'openrouter' },
+    });
+    expect(
+      screen.getByText(/sent to OpenRouter and to the provider/)
+    ).toBeInTheDocument();
+
+    const connectButton = screen.getByRole('button', {
+      name: 'Connect OpenRouter',
+    });
+    // Enabled once the PKCE parameters are ready.
+    await waitFor(() => expect(connectButton).toBeEnabled());
+    fireFullClick(connectButton);
+    expect(openSpy).toHaveBeenCalledTimes(1);
+    const authURL = new URL(openSpy.mock.calls[0][0] as string);
+    expect(authURL.origin + authURL.pathname).toBe(
+      'https://openrouter.ai/auth'
+    );
+    expect(authURL.searchParams.get('callback_url')).toBe(
+      'http://localhost/oauth/openrouter-callback.html'
+    );
+    expect(
+      screen.getByText(/Finish signing in to OpenRouter/)
+    ).toBeInTheDocument();
+
+    // What res/oauth/openrouter-callback.js does in the popup.
+    const callback = new BroadcastChannel('profiler-openrouter-auth');
+    callback.postMessage({
+      code: 'code-1',
+      state: authURL.searchParams.get('state'),
+    });
+    callback.close();
+
+    await waitFor(() =>
+      expect(screen.getByLabelText('API key')).toHaveValue('sk-or-v1-test')
+    );
+    // Stored right away, the key exists in the user's account now.
+    expect(getStoredSettings('openrouter')).toEqual({
+      apiKey: 'sk-or-v1-test',
+    });
+    expect(
+      screen.getByRole('button', { name: 'Forget key' })
+    ).toBeInTheDocument();
+    const exchange = window.fetchMock.callHistory.lastCall(
+      'https://openrouter.ai/api/v1/auth/keys'
+    );
+    const exchangeBody = JSON.parse(exchange?.options.body as string);
+    expect(exchangeBody.code).toBe('code-1');
+    expect(await computeCodeChallenge(exchangeBody.code_verifier)).toBe(
+      authURL.searchParams.get('code_challenge')
+    );
+
+    const modelInput = screen.getByLabelText('Model');
+    await waitFor(() =>
+      expect(
+        [
+          ...document.querySelectorAll(
+            `#${CSS.escape(modelInput.getAttribute('list') ?? '')} option`
+          ),
+        ].map((option) => option.getAttribute('value'))
+      ).toEqual(['vendor/with-tools'])
+    );
+    fireEvent.change(modelInput, { target: { value: 'vendor/with-tools' } });
+    fireFullClick(screen.getByRole('button', { name: 'Save' }));
+    expect(getStoredSettings('openrouter')).toEqual({
+      apiKey: 'sk-or-v1-test',
+      model: 'vendor/with-tools',
+    });
+    expect(window.localStorage.getItem('profiler.chat.provider')).toBe(
+      'openrouter'
+    );
+    openSpy.mockRestore();
+  });
+
+  it('says when the OpenRouter popup is blocked', async function () {
+    window.fetchMock.get('https://openrouter.ai/api/v1/models', { data: [] });
+    const openSpy = jest.spyOn(window, 'open').mockReturnValue(null);
+    const { openChat } = setup();
+    openChat();
+    fireEvent.change(await screen.findByLabelText('Provider'), {
+      target: { value: 'openrouter' },
+    });
+    const connectButton = screen.getByRole('button', {
+      name: 'Connect OpenRouter',
+    });
+    await waitFor(() => expect(connectButton).toBeEnabled());
+    fireFullClick(connectButton);
+    expect(
+      screen.getByText(/The OpenRouter window was blocked/)
+    ).toBeInTheDocument();
+    openSpy.mockRestore();
   });
 
   it('configures a local model, typing the name when the list fails', async function () {

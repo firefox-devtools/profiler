@@ -470,7 +470,12 @@ export type ChatConversationFormat = ChatConversation['format'];
 
 // The provider choices in the chat settings. Each one uses one conversation
 // format, see src/app-logic/profile-chat/provider-settings.ts.
-export type ChatProviderPreset = 'anthropic' | 'openai' | 'local' | 'custom';
+export type ChatProviderPreset =
+  | 'anthropic'
+  | 'openai'
+  | 'openrouter'
+  | 'local'
+  | 'custom';
 
 export type ChatState = {
   readonly isOpen: boolean;

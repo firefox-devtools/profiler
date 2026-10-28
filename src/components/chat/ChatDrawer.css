@@ -254,6 +254,10 @@
   padding: 4px 6px;
 }
 
+.chatProviderSettingsConnectButton {
+  align-self: flex-start;
+}
+
 .chatProviderSettingsButtons {
   display: flex;
   gap: 8px;

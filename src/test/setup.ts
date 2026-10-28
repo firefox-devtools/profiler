@@ -85,5 +85,7 @@ expect.extend({
 Object.defineProperty(global.self, 'crypto', {
   value: {
     subtle: crypto.webcrypto.subtle,
+    getRandomValues: <T extends ArrayBufferView>(array: T): T =>
+      crypto.webcrypto.getRandomValues(array as any) as T,
   },
 });

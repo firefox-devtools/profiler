@@ -9,6 +9,7 @@ import {
   getStoredProviderPreset,
   getStoredProviderSettings,
   hasCompleteSettings,
+  storeProviderPreset,
   storeProviderSettings,
   type ChatProviderSettings,
 } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
@@ -72,6 +73,7 @@ export function saveChatProviderSettings(
       dispatch(cancelChatTurn());
     }
     storeProviderSettings(preset, settings);
+    storeProviderPreset(preset);
     dispatch({
       type: 'CHAT_PROVIDER_CHANGED',
       preset,
@@ -81,19 +83,22 @@ export function saveChatProviderSettings(
 }
 
 /**
- * Forget the API key of the selected provider, keeping its other settings.
+ * Forget the API key of a provider, keeping its other settings.
  */
-export function forgetChatApiKey(): ThunkAction<void> {
+export function forgetChatApiKey(
+  preset: ChatProviderPreset
+): ThunkAction<void> {
   return (dispatch, getState) => {
-    dispatch(cancelChatTurn());
-    const preset = getChatProviderPreset(getState());
     const { apiKey: _apiKey, ...settings } = getStoredProviderSettings(preset);
     storeProviderSettings(preset, settings);
-    dispatch({
-      type: 'CHAT_PROVIDER_CHANGED',
-      preset,
-      hasCredentials: hasCompleteSettings(preset, settings),
-    });
+    if (preset === getChatProviderPreset(getState())) {
+      dispatch(cancelChatTurn());
+      dispatch({
+        type: 'CHAT_PROVIDER_CHANGED',
+        preset,
+        hasCredentials: hasCompleteSettings(preset, settings),
+      });
+    }
   };
 }
 

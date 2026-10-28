@@ -11,8 +11,16 @@ import {
   getBaseURL,
   getStoredProviderSettings,
   hasCompleteSettings,
+  storeProviderSettings,
   type ChatProviderSettings as Settings,
 } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
+import {
+  createPkceParams,
+  exchangeOpenRouterCode,
+  getOpenRouterAuthURL,
+  waitForOpenRouterCode,
+  type PkceParams,
+} from 'firefox-profiler/app-logic/profile-chat/providers/openrouter-auth';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { ChatErrorMessage } from './ChatTranscript';
 import type { ChatError, ChatProviderPreset } from 'firefox-profiler/types';
@@ -22,7 +30,7 @@ type Props = {
   readonly preset: ChatProviderPreset;
   readonly error: ChatError | null;
   readonly onSave: (preset: ChatProviderPreset, settings: Settings) => void;
-  readonly onForgetApiKey: () => void;
+  readonly onForgetApiKey: (preset: ChatProviderPreset) => void;
   // Null when there's nothing to go back to.
   readonly onCancel: (() => void) | null;
 };
@@ -73,6 +81,19 @@ function PresetDescription({
           </p>
         </Localized>
       );
+    case 'openrouter':
+      return (
+        <Localized
+          id="ChatProviderSettings--description-openrouter"
+          elems={{ a: _link('https://openrouter.ai/settings/keys') }}
+        >
+          <p>
+            Connect your OpenRouter account to create an API key for this site,
+            or paste an existing <a>OpenRouter key</a>. OpenRouter gives access
+            to models from many providers.
+          </p>
+        </Localized>
+      );
     case 'local':
       return (
         <Localized
@@ -112,6 +133,10 @@ const PRESET_LABELS: {
     l10nId: 'ChatProviderSettings--provider-openai',
     fallback: 'OpenAI',
   },
+  openrouter: {
+    l10nId: 'ChatProviderSettings--provider-openrouter',
+    fallback: 'OpenRouter',
+  },
   local: {
     l10nId: 'ChatProviderSettings--provider-local',
     fallback: 'Local model (Ollama, LM Studio)',
@@ -144,6 +169,21 @@ function PresetPrivacy({ preset }: { readonly preset: ChatProviderPreset }) {
           </p>
         </Localized>
       );
+    case 'openrouter':
+      return (
+        <Localized
+          id="ChatProviderSettings--privacy-openrouter"
+          elems={{ a: _link('https://openrouter.ai/settings/keys') }}
+        >
+          <p className="chatProviderSettingsPrivacy">
+            Settings are stored in this browser only. Your questions and the
+            parts of the profile needed to answer them, such as function names,
+            URLs and marker data, are sent to OpenRouter and to the provider of
+            the model you pick. You can revoke the key in your{' '}
+            <a>OpenRouter settings</a>.
+          </p>
+        </Localized>
+      );
     case 'local':
       return (
         <Localized id="ChatProviderSettings--privacy-local">
@@ -169,6 +209,43 @@ function PresetPrivacy({ preset }: { readonly preset: ChatProviderPreset }) {
   }
 }
 
+function SignInStatusMessage({ signIn }: { readonly signIn: SignInStatus }) {
+  switch (signIn.status) {
+    case 'idle':
+      return null;
+    case 'waiting':
+      return (
+        <Localized id="ChatProviderSettings--connect-waiting">
+          <span className="chatProviderSettingsHint">
+            Finish signing in to OpenRouter in the window that opened.
+          </span>
+        </Localized>
+      );
+    case 'popup-blocked':
+      return (
+        <Localized id="ChatProviderSettings--connect-popup-blocked">
+          <span className="chatError">
+            The OpenRouter window was blocked. Allow pop-ups for this site, or
+            paste a key instead.
+          </span>
+        </Localized>
+      );
+    case 'error':
+      return (
+        <Localized
+          id="ChatProviderSettings--connect-error"
+          vars={{ message: signIn.message }}
+        >
+          <span className="chatError">
+            Could not connect OpenRouter: {signIn.message}
+          </span>
+        </Localized>
+      );
+    default:
+      throw assertExhaustiveCheck(signIn);
+  }
+}
+
 /**
  * Fetch the model list of an OpenAI-compatible endpoint while the form is
  * shown, so that the model field can suggest them.
@@ -185,7 +262,8 @@ function useModelList(
   const canFetch =
     info.hasModelChoice &&
     baseURL !== '' &&
-    (!info.requiresApiKey || apiKey !== '');
+    (info.isModelListPublic || !info.requiresApiKey || apiKey !== '');
+  const { canFilterToolModels } = info;
 
   React.useEffect(() => {
     if (!canFetch) {
@@ -195,7 +273,12 @@ function useModelList(
     setModelList({ status: 'loading' });
     const controller = new AbortController();
     const timer = setTimeout(() => {
-      fetchModelList(baseURL, apiKey || null, controller.signal).then(
+      fetchModelList(
+        baseURL,
+        apiKey || null,
+        canFilterToolModels,
+        controller.signal
+      ).then(
         (models) => setModelList({ status: 'loaded', models }),
         (error) => {
           if (!controller.signal.aborted) {
@@ -208,9 +291,91 @@ function useModelList(
       clearTimeout(timer);
       controller.abort();
     };
-  }, [canFetch, baseURL, apiKey]);
+  }, [canFetch, baseURL, apiKey, canFilterToolModels]);
 
   return modelList;
+}
+
+type SignInStatus =
+  | { readonly status: 'idle' }
+  | { readonly status: 'waiting' }
+  | { readonly status: 'popup-blocked' }
+  | { readonly status: 'error'; readonly message: string };
+
+/**
+ * The "Connect OpenRouter" flow, see openrouter-auth.ts. The PKCE parameters
+ * are prepared ahead of the click, so that the popup opens synchronously.
+ */
+function useOpenRouterSignIn(
+  isEnabled: boolean,
+  onApiKey: (apiKey: string) => void
+) {
+  const [pkce, setPkce] = React.useState<PkceParams | null>(null);
+  const [signIn, setSignIn] = React.useState<SignInStatus>({ status: 'idle' });
+  const controllerRef = React.useRef<AbortController | null>(null);
+
+  React.useEffect(() => {
+    if (!isEnabled || pkce !== null) {
+      return undefined;
+    }
+    let isCancelled = false;
+    createPkceParams().then((params) => {
+      if (!isCancelled) {
+        setPkce(params);
+      }
+    });
+    return () => {
+      isCancelled = true;
+    };
+  }, [isEnabled, pkce]);
+
+  React.useEffect(() => {
+    if (!isEnabled) {
+      controllerRef.current?.abort();
+      setSignIn({ status: 'idle' });
+    }
+  }, [isEnabled]);
+
+  React.useEffect(() => () => controllerRef.current?.abort(), []);
+
+  const connect = React.useCallback(() => {
+    if (pkce === null) {
+      return;
+    }
+    const popup = window.open(
+      getOpenRouterAuthURL(pkce, window.location.origin),
+      'profiler-openrouter-auth',
+      'popup,width=600,height=760'
+    );
+    if (popup === null) {
+      setSignIn({ status: 'popup-blocked' });
+      return;
+    }
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    setSignIn({ status: 'waiting' });
+    // Codes are single-use, so prepare the next sign-in.
+    setPkce(null);
+
+    waitForOpenRouterCode(pkce.state, controller.signal)
+      .then((code) =>
+        exchangeOpenRouterCode(code, pkce.codeVerifier, controller.signal)
+      )
+      .then(
+        (apiKey) => {
+          setSignIn({ status: 'idle' });
+          onApiKey(apiKey);
+        },
+        (error) => {
+          if (!controller.signal.aborted) {
+            setSignIn({ status: 'error', message: error.message });
+          }
+        }
+      );
+  }, [pkce, onApiKey]);
+
+  return { canConnect: pkce !== null, signIn, connect };
 }
 
 export function ChatProviderSettings({
@@ -284,8 +449,24 @@ export function ChatProviderSettings({
     [canSave, onSave, preset, settings]
   );
 
+  // The key is stored right away, so that it isn't lost when the form is
+  // left without saving: it was created in the user's OpenRouter account.
+  const onSignInApiKey = React.useCallback((newApiKey: string) => {
+    const newStored = {
+      ...getStoredProviderSettings('openrouter'),
+      apiKey: newApiKey,
+    };
+    storeProviderSettings('openrouter', newStored);
+    setStored(newStored);
+    setApiKey(newApiKey);
+  }, []);
+  const { canConnect, signIn, connect } = useOpenRouterSignIn(
+    info.hasSignIn,
+    onSignInApiKey
+  );
+
   const onForgetApiKeyClick = React.useCallback(() => {
-    onForgetApiKey();
+    onForgetApiKey(preset);
     setApiKey('');
     setStored(getStoredProviderSettings(preset));
   }, [onForgetApiKey, preset]);
@@ -312,6 +493,21 @@ export function ChatProviderSettings({
       <PresetPrivacy preset={preset} />
       {error !== null && preset === selectedPreset ? (
         <ChatErrorMessage error={error} preset={selectedPreset} />
+      ) : null}
+      {info.hasSignIn && apiKey === '' ? (
+        <div className="chatProviderSettingsField">
+          <Localized id="ChatProviderSettings--connect-openrouter-button">
+            <button
+              className="photon-button photon-button-primary chatProviderSettingsConnectButton"
+              type="button"
+              disabled={!canConnect}
+              onClick={connect}
+            >
+              Connect OpenRouter
+            </button>
+          </Localized>
+          <SignInStatusMessage signIn={signIn} />
+        </div>
       ) : null}
       {info.canChangeBaseURL ? (
         <label className="chatProviderSettingsField">
@@ -408,7 +604,7 @@ export function ChatProviderSettings({
             </button>
           </Localized>
         ) : null}
-        {preset === selectedPreset && stored.apiKey ? (
+        {stored.apiKey ? (
           <Localized id="ChatProviderSettings--forget-key-button">
             <button
               className="photon-button"

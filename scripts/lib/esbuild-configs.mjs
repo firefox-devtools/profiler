@@ -104,6 +104,7 @@ export const mainBundleConfig = {
         { from: ['res/contribute.json'], to: ['dist'] },
         { from: ['res/robots.txt'], to: ['dist'] },
         { from: ['res/service-worker-compat.js'], to: ['dist'] },
+        { from: ['res/oauth/*'], to: ['dist/oauth'] },
         { from: ['res/img/favicon.png'], to: ['dist/res/img'] },
         { from: ['docs-user/**/*'], to: ['dist/docs'] },
         { from: ['locales/**/*'], to: ['dist/locales'] },

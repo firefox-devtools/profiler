@@ -597,9 +597,10 @@ MenuButtons--permalink--button =
 ## ChatDrawer
 ## The experimental chat drawer that answers questions about the profile, using
 ## an AI model that inspects the profile with profiler-cli commands. The model
-## comes from a provider the user picks: Anthropic, OpenAI, a model running on
-## the user's computer, or another server compatible with the OpenAI API.
-## "Anthropic", "OpenAI", "Ollama" and "LM Studio" are company or product names
+## comes from a provider the user picks: Anthropic, OpenAI, OpenRouter, a model
+## running on the user's computer, or another server compatible with the OpenAI
+## API. "Anthropic", "OpenAI", "OpenRouter", "Ollama" and "LM Studio" are
+## company or product names
 ## and "profiler-cli" a program name, they should not be translated.
 
 ChatDrawer--title = Ask about this profile
@@ -611,16 +612,25 @@ ChatDrawer--close-button =
 ChatProviderSettings--provider-label = Provider
 ChatProviderSettings--provider-anthropic = Anthropic
 ChatProviderSettings--provider-openai = OpenAI
+ChatProviderSettings--provider-openrouter = OpenRouter
 ChatProviderSettings--provider-local = Local model (Ollama, LM Studio)
 ChatProviderSettings--provider-custom = Other OpenAI-compatible server
 ChatProviderSettings--description-anthropic = Enter an <a>Anthropic API key</a> to ask questions about this profile.
 ChatProviderSettings--description-openai = Enter an <a>OpenAI API key</a> and pick a model to ask questions about this profile.
+ChatProviderSettings--description-openrouter = Connect your OpenRouter account to create an API key for this site, or paste an existing <a>OpenRouter key</a>. OpenRouter gives access to models from many providers.
 ChatProviderSettings--description-local = Use a model running on this computer, through its OpenAI-compatible API. The model needs to support tool calling and a long context. Ollama needs to allow requests from this site, see the <a>documentation</a>.
 ChatProviderSettings--description-custom = Use any server that implements the OpenAI Chat Completions API, such as a company gateway. The model needs to support tool calling.
 ChatProviderSettings--privacy-anthropic = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to Anthropic.
 ChatProviderSettings--privacy-openai = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to OpenAI.
+ChatProviderSettings--privacy-openrouter = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to OpenRouter and to the provider of the model you pick. You can revoke the key in your <a>OpenRouter settings</a>.
 ChatProviderSettings--privacy-local = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them stay on this computer, unless the URL points to another machine.
 ChatProviderSettings--privacy-custom = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to the server at this URL.
+ChatProviderSettings--connect-openrouter-button = Connect OpenRouter
+ChatProviderSettings--connect-waiting = Finish signing in to OpenRouter in the window that opened.
+ChatProviderSettings--connect-popup-blocked = The OpenRouter window was blocked. Allow pop-ups for this site, or paste a key instead.
+# Variables:
+#   $message (String) - The error message, in English.
+ChatProviderSettings--connect-error = Could not connect OpenRouter: { $message }
 ChatProviderSettings--base-url-label = Server URL
 ChatProviderSettings--api-key-label = API key
 ChatProviderSettings--api-key-optional-label = API key (optional)

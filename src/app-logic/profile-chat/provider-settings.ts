@@ -34,6 +34,13 @@ type PresetInfo = {
   readonly requiresApiKey: boolean;
   // Whether the user picks the model. Anthropic uses a fixed model.
   readonly hasModelChoice: boolean;
+  // Whether the model list can be fetched without an API key.
+  readonly isModelListPublic: boolean;
+  // Whether the model list says which models support tool calling, so that
+  // the others can be left out.
+  readonly canFilterToolModels: boolean;
+  // Whether the user can get a key by signing in, see openrouter-auth.ts.
+  readonly hasSignIn: boolean;
   // Only OpenAI is known to support strict function schemas.
   readonly strictTools: boolean;
   // The name used in messages like "Could not reach OpenAI". Null to use the
@@ -50,6 +57,9 @@ export const CHAT_PROVIDER_PRESETS: {
     canChangeBaseURL: false,
     requiresApiKey: true,
     hasModelChoice: false,
+    isModelListPublic: false,
+    canFilterToolModels: false,
+    hasSignIn: false,
     strictTools: true,
     name: 'Anthropic',
   },
@@ -59,8 +69,23 @@ export const CHAT_PROVIDER_PRESETS: {
     canChangeBaseURL: false,
     requiresApiKey: true,
     hasModelChoice: true,
+    isModelListPublic: false,
+    canFilterToolModels: false,
+    hasSignIn: false,
     strictTools: true,
     name: 'OpenAI',
+  },
+  openrouter: {
+    format: 'openai-chat',
+    defaultBaseURL: 'https://openrouter.ai/api/v1',
+    canChangeBaseURL: false,
+    requiresApiKey: true,
+    hasModelChoice: true,
+    isModelListPublic: true,
+    canFilterToolModels: true,
+    hasSignIn: true,
+    strictTools: false,
+    name: 'OpenRouter',
   },
   local: {
     format: 'openai-chat',
@@ -69,6 +94,9 @@ export const CHAT_PROVIDER_PRESETS: {
     canChangeBaseURL: true,
     requiresApiKey: false,
     hasModelChoice: true,
+    isModelListPublic: false,
+    canFilterToolModels: false,
+    hasSignIn: false,
     strictTools: false,
     name: null,
   },
@@ -78,6 +106,9 @@ export const CHAT_PROVIDER_PRESETS: {
     canChangeBaseURL: true,
     requiresApiKey: false,
     hasModelChoice: true,
+    isModelListPublic: false,
+    canFilterToolModels: false,
+    hasSignIn: false,
     strictTools: false,
     name: null,
   },
@@ -86,6 +117,7 @@ export const CHAT_PROVIDER_PRESETS: {
 export const CHAT_PROVIDER_PRESET_ORDER: ChatProviderPreset[] = [
   'anthropic',
   'openai',
+  'openrouter',
   'local',
   'custom',
 ];
@@ -137,15 +169,19 @@ export function getStoredProviderSettings(
   }
 }
 
-/**
- * Store the settings of `preset` and make it the selected provider.
- */
+export function storeProviderPreset(preset: ChatProviderPreset): void {
+  try {
+    window.localStorage.setItem(PRESET_STORAGE_KEY, preset);
+  } catch {
+    // The choice then only lives until the page is reloaded.
+  }
+}
+
 export function storeProviderSettings(
   preset: ChatProviderPreset,
   settings: ChatProviderSettings
 ): void {
   try {
-    window.localStorage.setItem(PRESET_STORAGE_KEY, preset);
     window.localStorage.setItem(
       SETTINGS_STORAGE_KEY_PREFIX + preset,
       JSON.stringify(settings)
@@ -204,10 +240,13 @@ export function getProviderDisplayName(
 /**
  * List the models of an OpenAI-compatible endpoint, sorted by id. This uses
  * fetch rather than the SDK so that the settings form doesn't load the SDK.
+ * With `toolModelsOnly`, models that don't list "tools" in their supported
+ * parameters (an OpenRouter extension) are left out.
  */
 export async function fetchModelList(
   baseURL: string,
   apiKey: string | null,
+  toolModelsOnly: boolean,
   signal: AbortSignal
 ): Promise<string[]> {
   const response = await fetch(baseURL.replace(/\/+$/, '') + '/models', {
@@ -222,6 +261,12 @@ export async function fetchModelList(
     throw new Error('Unexpected response');
   }
   return json.data
+    .filter(
+      (model: { supported_parameters?: unknown }) =>
+        !toolModelsOnly ||
+        (Array.isArray(model?.supported_parameters) &&
+          model.supported_parameters.includes('tools'))
+    )
     .map((model: { id?: unknown }) => model?.id)
     .filter((id): id is string => typeof id === 'string')
     .sort();

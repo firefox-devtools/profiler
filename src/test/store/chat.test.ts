@@ -72,7 +72,7 @@ describe('profile chat', function () {
         window.localStorage.getItem('profiler.chat.settings.anthropic') ?? ''
       )
     ).toEqual({ apiKey: 'sk-test' });
-    store.dispatch(forgetChatApiKey());
+    store.dispatch(forgetChatApiKey('anthropic'));
     expect(getChatHasCredentials(store.getState())).toBe(false);
     expect(
       JSON.parse(

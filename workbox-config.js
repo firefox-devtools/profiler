@@ -30,6 +30,9 @@ module.exports = {
     // the index file as they're not part of the SPA
     /^\/docs(?:\/|$)/,
     /^\/photon(?:\/|$)/,
+    // The OAuth callback pages are static pages, and their query string would
+    // prevent them from matching their precached entries.
+    /^\/oauth\//,
     // Allow navigating to source maps. This is not necessary, but it is
     // more developer friendly.
     /^\/[^/?]+\.map$/,
