@@ -15,7 +15,9 @@ class ByteReader {
   _uint8Array: Uint8Array;
   _bufferView: DataView;
   _position = 0;
-  _asciiDecoder = new TextDecoder('ascii', { fatal: true });
+  // Names in tar headers are raw bytes; in practice they are UTF-8. Bytes that
+  // aren't valid UTF-8 become U+FFFD, so such names can't match any real path.
+  _textDecoder = new TextDecoder('utf-8');
 
   constructor(arrayBuffer: ArrayBufferLike) {
     this._uint8Array = new Uint8Array(arrayBuffer);
@@ -26,8 +28,8 @@ class ByteReader {
     const bytes = this.readBuffer(byteCount);
     const nulBytePos = bytes.indexOf(0);
     return nulBytePos === -1
-      ? this._asciiDecoder.decode(bytes)
-      : this._asciiDecoder.decode(bytes.subarray(0, nulBytePos));
+      ? this._textDecoder.decode(bytes)
+      : this._textDecoder.decode(bytes.subarray(0, nulBytePos));
   }
 
   readOctal(byteCount: number): number | null {
