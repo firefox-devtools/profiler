@@ -37,34 +37,35 @@ export type OpenAIChatProviderOptions = {
   // Local servers usually don't need one.
   apiKey: string | null;
   model: string;
-  // Only OpenAI is known to support strict function schemas.
-  strictTools: boolean;
 };
 
 type StreamedToolCall = { id: string; name: string; arguments: string };
 
-function _getTool(strict: boolean): ChatCompletionFunctionTool {
-  return {
-    type: 'function',
-    function: {
-      name: PROFILER_CLI_TOOL_NAME,
-      description: PROFILER_CLI_TOOL_DESCRIPTION,
-      parameters: PROFILER_CLI_TOOL_PARAMETERS,
-      ...(strict ? { strict: true } : {}),
-    },
-  };
-}
+// Not strict: other servers than OpenAI may reject or ignore the field, and
+// the arguments are checked anyway.
+const PROFILER_CLI_TOOL: ChatCompletionFunctionTool = {
+  type: 'function',
+  function: {
+    name: PROFILER_CLI_TOOL_NAME,
+    description: PROFILER_CLI_TOOL_DESCRIPTION,
+    parameters: PROFILER_CLI_TOOL_PARAMETERS,
+  },
+};
 
-function _parseToolCall({
-  id,
-  name,
-  arguments: args,
-}: StreamedToolCall): ToolCall {
+/**
+ * A function tool call, with its JSON arguments checked. Unparseable arguments
+ * are reported to the model as invalid input.
+ */
+export function parseFunctionToolCall(
+  id: string,
+  name: string,
+  args: string
+): ToolCall {
   let input: unknown = null;
   try {
     input = JSON.parse(args);
   } catch {
-    // Reported to the model as invalid input.
+    // Left as null.
   }
   return { id, name, args: getProfilerCliArgs(name, input) };
 }
@@ -95,12 +96,46 @@ function _getApiErrorMessage(error: InstanceType<typeof OpenAI.APIError>) {
   return typeof body?.message === 'string' ? body.message : error.message;
 }
 
+/**
+ * Classify an error thrown by the openai SDK for display. `name` is the
+ * provider name for the message.
+ */
+export function describeOpenAIError(error: unknown, name: string): ChatError {
+  if (error instanceof OpenAI.AuthenticationError) {
+    return {
+      type: 'auth',
+      provider: name,
+      message: _getApiErrorMessage(error),
+    };
+  }
+  if (error instanceof OpenAI.PermissionDeniedError) {
+    return { type: 'permission', message: _getApiErrorMessage(error) };
+  }
+  if (error instanceof OpenAI.RateLimitError) {
+    return { type: 'rate-limit', provider: name };
+  }
+  if (error instanceof OpenAI.APIConnectionError) {
+    return {
+      type: 'connection',
+      provider: name,
+      message: error.message,
+    };
+  }
+  if (error instanceof OpenAI.APIError) {
+    return {
+      type: 'api',
+      status: error.status ?? null,
+      message: _getApiErrorMessage(error),
+    };
+  }
+  return describeUnknownChatError(error);
+}
+
 export function createOpenAIChatProvider({
   name,
   baseURL,
   apiKey,
   model,
-  strictTools,
 }: OpenAIChatProviderOptions): ChatProvider<ChatCompletionMessageParam> {
   const client = new OpenAI({
     baseURL,
@@ -108,7 +143,6 @@ export function createOpenAIChatProvider({
     apiKey: apiKey ?? 'none',
     dangerouslyAllowBrowser: true,
   });
-  const tool = _getTool(strictTools);
   const systemPrompt = getSystemPromptParts().join('\n\n');
 
   return {
@@ -129,7 +163,7 @@ export function createOpenAIChatProvider({
         {
           model,
           messages: [{ role: 'system', content: systemPrompt }, ...history],
-          tools: [tool],
+          tools: [PROFILER_CLI_TOOL],
           stream: true,
         },
         { signal }
@@ -213,7 +247,9 @@ export function createOpenAIChatProvider({
 
       return {
         messages,
-        toolCalls: streamedToolCalls.map(_parseToolCall),
+        toolCalls: streamedToolCalls.map(({ id, name, arguments: args }) =>
+          parseFunctionToolCall(id, name, args)
+        ),
         stop: _getStopReason(
           finishReason,
           streamedToolCalls.length > 0,
@@ -234,35 +270,6 @@ export function createOpenAIChatProvider({
       }));
     },
 
-    describeError(error: unknown): ChatError {
-      if (error instanceof OpenAI.AuthenticationError) {
-        return {
-          type: 'auth',
-          provider: name,
-          message: _getApiErrorMessage(error),
-        };
-      }
-      if (error instanceof OpenAI.PermissionDeniedError) {
-        return { type: 'permission', message: _getApiErrorMessage(error) };
-      }
-      if (error instanceof OpenAI.RateLimitError) {
-        return { type: 'rate-limit', provider: name };
-      }
-      if (error instanceof OpenAI.APIConnectionError) {
-        return {
-          type: 'connection',
-          provider: name,
-          message: error.message,
-        };
-      }
-      if (error instanceof OpenAI.APIError) {
-        return {
-          type: 'api',
-          status: error.status ?? null,
-          message: _getApiErrorMessage(error),
-        };
-      }
-      return describeUnknownChatError(error);
-    },
+    describeError: (error) => describeOpenAIError(error, name),
   };
 }

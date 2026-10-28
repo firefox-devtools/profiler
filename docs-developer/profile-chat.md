@@ -17,12 +17,12 @@ An "Ask about this profile" button then appears in the top bar. The first time, 
 | Preset                         | Wire format      | Base URL                                        | Needs                                           |
 | ------------------------------ | ---------------- | ----------------------------------------------- | ----------------------------------------------- |
 | Anthropic                      | Messages API     | `api.anthropic.com`                             | API key. The model is fixed.                    |
-| OpenAI                         | Chat Completions | `https://api.openai.com/v1`                     | API key, model                                  |
+| OpenAI                         | Responses API    | `https://api.openai.com/v1`                     | API key, model                                  |
 | OpenRouter                     | Chat Completions | `https://openrouter.ai/api/v1`                  | API key ("Connect OpenRouter" or pasted), model |
 | Local model                    | Chat Completions | `http://localhost:11434/v1` by default (Ollama) | Model. The key is optional.                     |
 | Other OpenAI-compatible server | Chat Completions | Entered by the user                             | Base URL, model. The key is optional.           |
 
-The presets are defined in `src/app-logic/profile-chat/provider-settings.ts`. Everything except Anthropic uses the same provider, `providers/openai-chat.ts`, with a different base URL. The settings are stored in `localStorage`: `profiler.chat.provider` holds the selected preset, and `profiler.chat.settings.<preset>` holds `{ apiKey?, baseURL?, model? }` as JSON, so switching between presets keeps each one's settings. "Forget key" removes the key and keeps the rest.
+The presets are defined in `src/app-logic/profile-chat/provider-settings.ts`. OpenAI uses the Responses API (`providers/openai-responses.ts`), because OpenAI's Chat Completions endpoint rejects function tools together with reasoning on some models. The other presets use the same Chat Completions provider, `providers/openai-chat.ts`, with a different base URL, because that's the API those servers implement. The settings are stored in `localStorage`: `profiler.chat.provider` holds the selected preset, and `profiler.chat.settings.<preset>` holds `{ apiKey?, baseURL?, model? }` as JSON, so switching between presets keeps each one's settings. "Forget key" removes the key and keeps the rest.
 
 For OpenAI-compatible presets the form suggests models from `GET {baseURL}/models`. The user can also type a model name, for servers where the list fails or is incomplete. On OpenRouter the list only shows models whose `supported_parameters` include `tools`. The chat needs a model with tool calling and a long context window: the system prompt alone is about 11k tokens, before any tool output. Small local models may use pq badly, or keep calling it until the 25 tool rounds limit.
 
@@ -75,6 +75,7 @@ thunks (src/actions/chat.ts)              state.chat (src/reducers/chat.ts)
    |  runChatTurn(provider, ...)             conversation, status, streamingText, ...
    v
 chat-engine.ts  ->  providers/anthropic.ts    ->  Anthropic SDK -> api.anthropic.com
+   |            ->  providers/openai-responses.ts -> openai SDK -> api.openai.com/v1/responses
    |            ->  providers/openai-chat.ts  ->  openai SDK    -> {baseURL}/chat/completions
    |  run_profiler_cli tool calls
    v
@@ -96,12 +97,12 @@ The commands run on the live store, so `thread select`, `zoom push` and `filter 
 
 ### The conversation
 
-`state.chat.conversation` holds the messages exactly as they're sent to the API, tagged with their format (`anthropic` or `openai-chat`), and the transcript is a selector over it. Nothing is translated between formats, so switching provider starts a new conversation. The history is append-only: assistant messages are kept unchanged, including Anthropic's thinking blocks and OpenRouter's `reasoning_details`, which some models need in later requests. Every tool call gets a result in the next message, also when the turn is stopped, cut off by the token limit, or stopped by the 25 tool rounds limit. In those cases the remaining calls get an error result.
+`state.chat.conversation` holds the messages exactly as they're sent to the API, tagged with their format (`anthropic`, `openai-responses` or `openai-chat`), and the transcript is a selector over it. Nothing is translated between formats, so switching provider starts a new conversation. The history is append-only: assistant messages are kept unchanged, including Anthropic's thinking blocks, OpenAI's encrypted reasoning items and OpenRouter's `reasoning_details`, which models need in later requests to keep their reasoning across tool calls. Every tool call gets a result in the next message, also when the turn is stopped, cut off by the token limit, or stopped by the 25 tool rounds limit. In those cases the remaining calls get an error result.
 
-The two formats differ in a few places:
+The formats differ in a few places:
 
-- Anthropic user messages have the text and the view context as two text blocks. Chat Completions user messages are one string, with the view context after a blank line, because some compatible servers only accept strings.
-- Anthropic answers all tool calls in one user message with `tool_result` blocks, which have an `is_error` flag. Chat Completions has one `role: 'tool'` message per call and no error flag, so failed commands start with `Error: `, which the transcript uses to show them as errors.
+- Anthropic and Responses user messages have the text and the view context as two text parts. Chat Completions user messages are one string, with the view context after a blank line, because some compatible servers only accept strings.
+- Anthropic answers all tool calls in one user message with `tool_result` blocks, which have an `is_error` flag. Chat Completions has one `role: 'tool'` message per call, and Responses one `function_call_output` item per call. Neither has an error flag, so failed commands start with `Error: `, which the transcript uses to show them as errors.
 - Some OpenAI-compatible servers end a response that has tool calls with `finish_reason: 'stop'`, so the tool calls are run whatever the finish reason, except `length` and `content_filter`.
 
 "New chat" and loading another profile start a new conversation. A turn that is still running for the old one is aborted, and its results are dropped by comparing `conversationId`.
@@ -120,9 +121,17 @@ Anthropic:
 - Refused requests are retried on another model with the server-side fallback beta (`fallbacks: 'default'`).
 - The tool is strict, and the system prompt is cached.
 
-OpenAI-compatible:
+OpenAI (Responses API):
+
+- The model the user picked, with its default reasoning effort and token limit.
+- `store: false`, so OpenAI doesn't keep the conversation, with `include: ['reasoning.encrypted_content']` so that the reasoning items can be sent back. The system prompt goes in `instructions`, and OpenAI caches long prompt prefixes automatically.
+- The tool is strict.
+
+Other OpenAI-compatible presets (Chat Completions):
 
 - The model the user picked, with the server's default token limit and reasoning settings.
-- The system prompt is a `system` message at the start of every request. OpenAI caches long prompt prefixes automatically, other servers may not, so long chats can cost more there.
-- The tool is strict only for the OpenAI preset, because other servers may reject the field. Tool arguments are parsed and checked in any case, and malformed ones are answered with an error the model can read.
+- The system prompt is a `system` message at the start of every request. Servers may not cache it, so long chats can cost more there.
+- The tool isn't strict, because other servers than OpenAI may reject the field.
 - Reasoning text, when a server sends it, isn't shown.
+
+With both APIs, tool arguments are parsed and checked, and malformed ones are answered with an error the model can read.

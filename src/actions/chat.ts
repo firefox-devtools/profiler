@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
-  CHAT_PROVIDER_PRESETS,
   getBaseURL,
   getProviderDisplayName,
   getStoredProviderPreset,
@@ -223,10 +222,24 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
               baseURL: getBaseURL(preset, settings),
               apiKey: settings.apiKey ?? null,
               model: settings.model ?? '',
-              strictTools: CHAT_PROVIDER_PRESETS[preset].strictTools,
             }),
             conversation.messages,
             (messages) => ({ format: 'openai-chat', messages })
+          );
+          break;
+        }
+        case 'openai-responses': {
+          const { createOpenAIResponsesProvider } =
+            await import('firefox-profiler/app-logic/profile-chat/providers/openai-responses');
+          outcome = await runTurn(
+            createOpenAIResponsesProvider({
+              name: getProviderDisplayName(preset, settings),
+              baseURL: getBaseURL(preset, settings),
+              apiKey: settings.apiKey ?? '',
+              model: settings.model ?? '',
+            }),
+            conversation.messages,
+            (messages) => ({ format: 'openai-responses', messages })
           );
           break;
         }

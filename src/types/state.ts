@@ -40,6 +40,7 @@ import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
 import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { ResponseInputItem } from 'openai/resources/responses/responses';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
@@ -464,6 +465,10 @@ export type ChatConversation =
   | {
       readonly format: 'openai-chat';
       readonly messages: ChatCompletionMessageParam[];
+    }
+  | {
+      readonly format: 'openai-responses';
+      readonly messages: ResponseInputItem[];
     };
 
 export type ChatConversationFormat = ChatConversation['format'];

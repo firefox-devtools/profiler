@@ -25,6 +25,7 @@ import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { MESSAGES_API_URL, mockMessagesApi } from '../fixtures/anthropic-api';
+import { mockResponsesApi } from '../fixtures/openai-responses-api';
 import {
   mockChatCompletionsApi,
   TEST_OPENAI_BASE_URL,
@@ -269,6 +270,47 @@ describe('profile chat', function () {
     expect(requests[1].messages.slice(1)).toEqual(
       getChatConversation(store.getState()).messages.slice(0, 4)
     );
+  });
+
+  it('uses the Responses API for OpenAI', async function () {
+    const store = setup();
+    store.dispatch(
+      saveChatProviderSettings('openai', {
+        apiKey: 'sk-openai',
+        model: 'gpt-6-luna',
+      })
+    );
+    expect(getChatConversation(store.getState()).format).toBe(
+      'openai-responses'
+    );
+    const requests = mockResponsesApi(
+      [
+        {
+          reasoning: { id: 'rs_1', encryptedContent: 'secret' },
+          toolCalls: [{ id: 'call_1', args: 'thread select t-1' }],
+          status: 'completed',
+        },
+        { text: 'The worker runs Ygc.', status: 'completed' },
+      ],
+      'https://api.openai.com/v1/responses'
+    );
+
+    await store.dispatch(sendChatMessage('What is the worker doing?'));
+
+    expect(getChatError(store.getState())).toBeNull();
+    expect(getSelectedThreadIndexes(store.getState())).toEqual(new Set([1]));
+    expect(getChatTranscript(store.getState())).toEqual([
+      { type: 'user', text: 'What is the worker doing?' },
+      {
+        type: 'tool-call',
+        id: 'call_1',
+        command: 'thread select t-1',
+        result: { text: expect.stringContaining('t-1'), isError: false },
+      },
+      { type: 'assistant', text: 'The worker runs Ygc.' },
+    ]);
+    expect(requests[0].model).toBe('gpt-6-luna');
+    expect(requests[0].input[0].content[1].text).toContain('<current_view>');
   });
 
   it('names the local server in connection errors', async function () {

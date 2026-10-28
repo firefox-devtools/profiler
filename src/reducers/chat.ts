@@ -70,6 +70,13 @@ function _appendMessages(
             messages: [...conversation.messages, ...appended.messages],
           }
         : conversation;
+    case 'openai-responses':
+      return appended.format === 'openai-responses'
+        ? {
+            format: 'openai-responses',
+            messages: [...conversation.messages, ...appended.messages],
+          }
+        : conversation;
     default:
       throw assertExhaustiveCheck(conversation);
   }

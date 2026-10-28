@@ -9,6 +9,7 @@ import {
 } from 'firefox-profiler/app-logic/profile-chat/chat-engine';
 import { createAnthropicProvider } from 'firefox-profiler/app-logic/profile-chat/providers/anthropic';
 import { createOpenAIChatProvider } from 'firefox-profiler/app-logic/profile-chat/providers/openai-chat';
+import { createOpenAIResponsesProvider } from 'firefox-profiler/app-logic/profile-chat/providers/openai-responses';
 import type {
   ChatProvider,
   ToolResult,
@@ -23,6 +24,11 @@ import {
   mockChatCompletionsApi,
   TEST_OPENAI_BASE_URL,
 } from '../fixtures/openai-api';
+import {
+  mockResponsesApi,
+  RESPONSES_API_URL,
+  TEST_RESPONSES_BASE_URL,
+} from '../fixtures/openai-responses-api';
 
 // A response described without a wire format, so the engine tests run against
 // both providers.
@@ -124,7 +130,6 @@ const OPENAI_CHAT: FormatHarness = {
       baseURL: TEST_OPENAI_BASE_URL,
       apiKey: 'sk-test',
       model: 'test-model',
-      strictTools: false,
     }),
   mock: (responses) =>
     mockChatCompletionsApi(
@@ -156,6 +161,66 @@ const OPENAI_CHAT: FormatHarness = {
         id: message.tool_call_id,
         text: message.content.replace(/^Error: /, ''),
         isError: message.content.startsWith('Error: '),
+      })),
+};
+
+const OPENAI_RESPONSES: FormatHarness = {
+  name: 'openai-responses',
+  createProvider: () =>
+    createOpenAIResponsesProvider({
+      name: 'OpenAI',
+      baseURL: TEST_RESPONSES_BASE_URL,
+      apiKey: 'sk-test',
+      model: 'test-model',
+    }),
+  mock: (responses) =>
+    mockResponsesApi(
+      responses.map((response) => {
+        if (typeof response === 'function') {
+          return response;
+        }
+        switch (response.stop) {
+          case 'end':
+          case 'tool-calls':
+            return {
+              text: response.text,
+              toolCalls: response.toolCalls,
+              status: 'completed',
+            };
+          case 'max-tokens':
+          case 'refusal':
+            return {
+              text: response.text,
+              toolCalls: response.toolCalls,
+              status: 'incomplete',
+              incompleteReason:
+                response.stop === 'refusal'
+                  ? 'content_filter'
+                  : 'max_output_tokens',
+            };
+          default:
+            throw new Error('Unknown stop');
+        }
+      })
+    ),
+  mockAuthError: () =>
+    window.fetchMock.post(RESPONSES_API_URL, {
+      status: 401,
+      body: {
+        error: {
+          message: 'invalid x-api-key',
+          type: 'invalid_request_error',
+          code: 'invalid_api_key',
+        },
+      },
+    }),
+  getToolResults: (appended) =>
+    appended
+      .filter((item) => item.type === 'function_call_output')
+      .map((item) => ({
+        id: item.call_id,
+        text: item.output.replace(/^Error: /, ''),
+        isError: item.output.startsWith('Error: '),
       })),
 };
 
@@ -198,148 +263,158 @@ function setup(
   };
 }
 
-describe.each([ANTHROPIC, OPENAI_CHAT])('runChatTurn with $name', (format) => {
-  it('streams a text-only answer', async function () {
-    format.mock([{ text: 'Hello there', stop: 'end' }]);
-    const { appended, textDeltas, run } = setup(format);
+describe.each([ANTHROPIC, OPENAI_CHAT, OPENAI_RESPONSES])(
+  'runChatTurn with $name',
+  (format) => {
+    it('streams a text-only answer', async function () {
+      format.mock([{ text: 'Hello there', stop: 'end' }]);
+      const { appended, textDeltas, run } = setup(format);
 
-    expect(await run()).toEqual({ type: 'done' });
-    expect(textDeltas).toEqual(['Hello', 'Hello there']);
-    expect(appended).toHaveLength(1);
-    expect(appended[0].role).toBe('assistant');
-  });
-
-  it('runs parallel tool calls and answers all of them', async function () {
-    const requests = format.mock([
-      {
-        text: 'Let me look.',
-        toolCalls: [
-          { id: 'call_1', args: 'thread list' },
-          { id: 'call_2', args: 'thread samples' },
-        ],
-        stop: 'tool-calls',
-      },
-      { text: 'GC is hot.', stop: 'end' },
-    ]);
-    const { appended, runningTools, toolCalls, run } = setup(
-      format,
-      async (args) =>
-        args === 'thread samples'
-          ? { text: 'no samples', isError: true }
-          : { text: 't-0 GeckoMain', isError: false }
-    );
-
-    expect(await run()).toEqual({ type: 'done' });
-    expect(toolCalls).toEqual(['thread list', 'thread samples']);
-    expect(runningTools).toEqual([true, false, false]);
-    expect(format.getToolResults(appended)).toEqual([
-      { id: 'call_1', text: 't-0 GeckoMain', isError: false },
-      { id: 'call_2', text: 'no samples', isError: true },
-    ]);
-    // The second request carries the whole conversation.
-    const secondRequestMessages = requests[1].messages.filter(
-      (message: any) => message.role !== 'system'
-    );
-    expect(secondRequestMessages).toHaveLength(1 + appended.length - 1);
-  });
-
-  it('reports a thrown tool as an error result', async function () {
-    format.mock([
-      {
-        toolCalls: [{ id: 'call_1', args: 'profile info' }],
-        stop: 'tool-calls',
-      },
-      { text: 'ok', stop: 'end' },
-    ]);
-    const { appended, run } = setup(format, async () => {
-      throw new Error('boom');
-    });
-    await run();
-    expect(format.getToolResults(appended)).toEqual([
-      { id: 'call_1', text: expect.stringContaining('boom'), isError: true },
-    ]);
-  });
-
-  it('stops after too many tool iterations, answering the last tool calls', async function () {
-    format.mock(
-      Array.from({ length: MAX_TOOL_ITERATIONS }, () => ({
-        toolCalls: [{ id: 'call_x', args: 'profile info' }],
-        stop: 'tool-calls' as const,
-      }))
-    );
-    const { appended, toolCalls, run } = setup(format);
-
-    expect(await run()).toEqual({ type: 'tool-limit' });
-    expect(toolCalls).toHaveLength(MAX_TOOL_ITERATIONS - 1);
-    expect(format.getToolResults(appended).at(-1)).toEqual({
-      id: 'call_x',
-      text: 'Stopped: too many tool calls for one message.',
-      isError: true,
-    });
-  });
-
-  it('answers tool calls that were cut off', async function () {
-    format.mock([
-      {
-        text: 'A long answ',
-        toolCalls: [{ id: 'call_1', args: 'profile info' }],
-        stop: 'max-tokens',
-      },
-    ]);
-    const { appended, toolCalls, run } = setup(format);
-    expect(await run()).toEqual({ type: 'max-tokens' });
-    expect(toolCalls).toEqual([]);
-    expect(format.getToolResults(appended)).toEqual([
-      { id: 'call_1', text: expect.stringContaining('cut off'), isError: true },
-    ]);
-  });
-
-  it('cancels while the response is streaming', async function () {
-    const { controller, appended, run } = setup(format);
-    format.mock([
-      () => {
-        controller.abort();
-        return new Promise(() => {});
-      },
-    ]);
-    expect(await run()).toEqual({ type: 'cancelled' });
-    expect(appended).toEqual([]);
-  });
-
-  it('keeps the history valid when cancelled between tool calls', async function () {
-    format.mock([
-      {
-        toolCalls: [
-          { id: 'call_1', args: 'thread list' },
-          { id: 'call_2', args: 'thread samples' },
-        ],
-        stop: 'tool-calls',
-      },
-    ]);
-    const { controller, appended, toolCalls, run } = setup(format, async () => {
-      controller.abort();
-      return { text: 'done', isError: false };
+      expect(await run()).toEqual({ type: 'done' });
+      expect(textDeltas).toEqual(['Hello', 'Hello there']);
+      expect(appended).toHaveLength(1);
+      expect(appended[0].role).toBe('assistant');
     });
 
-    expect(await run()).toEqual({ type: 'cancelled' });
-    expect(toolCalls).toEqual(['thread list']);
-    expect(format.getToolResults(appended)).toEqual([
-      { id: 'call_1', text: 'done', isError: false },
-      { id: 'call_2', text: 'Cancelled by the user.', isError: true },
-    ]);
-  });
+    it('runs parallel tool calls and answers all of them', async function () {
+      const requests = format.mock([
+        {
+          text: 'Let me look.',
+          toolCalls: [
+            { id: 'call_1', args: 'thread list' },
+            { id: 'call_2', args: 'thread samples' },
+          ],
+          stop: 'tool-calls',
+        },
+        { text: 'GC is hot.', stop: 'end' },
+      ]);
+      const { appended, runningTools, toolCalls, run } = setup(
+        format,
+        async (args) =>
+          args === 'thread samples'
+            ? { text: 'no samples', isError: true }
+            : { text: 't-0 GeckoMain', isError: false }
+      );
 
-  it('throws API errors that the provider can explain', async function () {
-    format.mockAuthError();
-    const { provider, run } = setup(format);
-    const error = await run().catch((e) => e);
-    expect(provider.describeError(error)).toEqual({
-      type: 'auth',
-      provider: expect.any(String),
-      message: 'invalid x-api-key',
+      expect(await run()).toEqual({ type: 'done' });
+      expect(toolCalls).toEqual(['thread list', 'thread samples']);
+      expect(runningTools).toEqual([true, false, false]);
+      expect(format.getToolResults(appended)).toEqual([
+        { id: 'call_1', text: 't-0 GeckoMain', isError: false },
+        { id: 'call_2', text: 'no samples', isError: true },
+      ]);
+      // The second request carries the whole conversation.
+      const secondRequestMessages = (
+        requests[1].messages ?? requests[1].input
+      ).filter((message: any) => message.role !== 'system');
+      expect(secondRequestMessages).toHaveLength(1 + appended.length - 1);
     });
-  });
-});
+
+    it('reports a thrown tool as an error result', async function () {
+      format.mock([
+        {
+          toolCalls: [{ id: 'call_1', args: 'profile info' }],
+          stop: 'tool-calls',
+        },
+        { text: 'ok', stop: 'end' },
+      ]);
+      const { appended, run } = setup(format, async () => {
+        throw new Error('boom');
+      });
+      await run();
+      expect(format.getToolResults(appended)).toEqual([
+        { id: 'call_1', text: expect.stringContaining('boom'), isError: true },
+      ]);
+    });
+
+    it('stops after too many tool iterations, answering the last tool calls', async function () {
+      format.mock(
+        Array.from({ length: MAX_TOOL_ITERATIONS }, () => ({
+          toolCalls: [{ id: 'call_x', args: 'profile info' }],
+          stop: 'tool-calls' as const,
+        }))
+      );
+      const { appended, toolCalls, run } = setup(format);
+
+      expect(await run()).toEqual({ type: 'tool-limit' });
+      expect(toolCalls).toHaveLength(MAX_TOOL_ITERATIONS - 1);
+      expect(format.getToolResults(appended).at(-1)).toEqual({
+        id: 'call_x',
+        text: 'Stopped: too many tool calls for one message.',
+        isError: true,
+      });
+    });
+
+    it('answers tool calls that were cut off', async function () {
+      format.mock([
+        {
+          text: 'A long answ',
+          toolCalls: [{ id: 'call_1', args: 'profile info' }],
+          stop: 'max-tokens',
+        },
+      ]);
+      const { appended, toolCalls, run } = setup(format);
+      expect(await run()).toEqual({ type: 'max-tokens' });
+      expect(toolCalls).toEqual([]);
+      expect(format.getToolResults(appended)).toEqual([
+        {
+          id: 'call_1',
+          text: expect.stringContaining('cut off'),
+          isError: true,
+        },
+      ]);
+    });
+
+    it('cancels while the response is streaming', async function () {
+      const { controller, appended, run } = setup(format);
+      format.mock([
+        () => {
+          controller.abort();
+          return new Promise(() => {});
+        },
+      ]);
+      expect(await run()).toEqual({ type: 'cancelled' });
+      expect(appended).toEqual([]);
+    });
+
+    it('keeps the history valid when cancelled between tool calls', async function () {
+      format.mock([
+        {
+          toolCalls: [
+            { id: 'call_1', args: 'thread list' },
+            { id: 'call_2', args: 'thread samples' },
+          ],
+          stop: 'tool-calls',
+        },
+      ]);
+      const { controller, appended, toolCalls, run } = setup(
+        format,
+        async () => {
+          controller.abort();
+          return { text: 'done', isError: false };
+        }
+      );
+
+      expect(await run()).toEqual({ type: 'cancelled' });
+      expect(toolCalls).toEqual(['thread list']);
+      expect(format.getToolResults(appended)).toEqual([
+        { id: 'call_1', text: 'done', isError: false },
+        { id: 'call_2', text: 'Cancelled by the user.', isError: true },
+      ]);
+    });
+
+    it('throws API errors that the provider can explain', async function () {
+      format.mockAuthError();
+      const { provider, run } = setup(format);
+      const error = await run().catch((e) => e);
+      expect(provider.describeError(error)).toEqual({
+        type: 'auth',
+        provider: expect.any(String),
+        message: 'invalid x-api-key',
+      });
+    });
+  }
+);
 
 describe('the Anthropic provider', function () {
   it('sends the expected request', async function () {
@@ -416,10 +491,8 @@ describe('the Anthropic provider', function () {
 
 describe('the OpenAI-compatible provider', function () {
   function setupOpenAI({
-    strictTools = false,
     runTool,
   }: {
-    strictTools?: boolean;
     runTool?: (args: string) => Promise<ToolRunResult>;
   } = {}) {
     return setup(
@@ -431,7 +504,6 @@ describe('the OpenAI-compatible provider', function () {
             baseURL: TEST_OPENAI_BASE_URL,
             apiKey: 'sk-test',
             model: 'test-model',
-            strictTools,
           }),
       },
       runTool
@@ -466,14 +538,6 @@ describe('the OpenAI-compatible provider', function () {
     const call = window.fetchMock.callHistory.lastCall(CHAT_COMPLETIONS_URL);
     const headers = call?.options.headers as Record<string, string>;
     expect(headers.authorization).toBe('Bearer sk-test');
-  });
-
-  it('only asks for strict tools when enabled', async function () {
-    const requests = mockChatCompletionsApi([
-      { text: 'Hello', finishReason: 'stop' },
-    ]);
-    await setupOpenAI({ strictTools: true }).run();
-    expect(requests[0].tools[0].function.strict).toBe(true);
   });
 
   it('assembles tool calls split across chunks', async function () {
@@ -605,7 +669,6 @@ describe('the OpenAI-compatible provider', function () {
       baseURL: TEST_OPENAI_BASE_URL,
       apiKey: null,
       model: 'test-model',
-      strictTools: false,
     });
     const error = await provider
       .streamResponse([], new AbortController().signal, () => {})
@@ -614,6 +677,135 @@ describe('the OpenAI-compatible provider', function () {
       type: 'connection',
       provider: 'localhost:11434',
       message: expect.any(String),
+    });
+  });
+});
+
+describe('the OpenAI Responses provider', function () {
+  it('sends the expected request', async function () {
+    const requests = mockResponsesApi([{ text: 'Hello', status: 'completed' }]);
+    const { appended, run } = setup(OPENAI_RESPONSES);
+    expect(await run()).toEqual({ type: 'done' });
+
+    expect(appended).toEqual([
+      expect.objectContaining({
+        type: 'message',
+        role: 'assistant',
+        content: [
+          expect.objectContaining({ type: 'output_text', text: 'Hello' }),
+        ],
+      }),
+    ]);
+    const [request] = requests;
+    expect(request.model).toBe('test-model');
+    expect(request.stream).toBe(true);
+    expect(request.store).toBe(false);
+    expect(request.include).toEqual(['reasoning.encrypted_content']);
+    // The model's default effort, which is what Chat Completions rejects
+    // together with tools for some models.
+    expect(request.reasoning).toBeUndefined();
+    expect(request.instructions).toContain('profiler-cli');
+    expect(request.input).toEqual([
+      {
+        role: 'user',
+        content: [
+          { type: 'input_text', text: 'Why is it slow?' },
+          { type: 'input_text', text: '' },
+        ],
+      },
+    ]);
+    expect(request.tools).toEqual([
+      expect.objectContaining({
+        type: 'function',
+        name: 'run_profiler_cli',
+        strict: true,
+      }),
+    ]);
+  });
+
+  it('sends encrypted reasoning back with the function calls', async function () {
+    const requests = mockResponsesApi([
+      {
+        reasoning: { id: 'rs_1', encryptedContent: 'gAAAA-secret' },
+        toolCalls: [
+          { id: 'call_1', args: 'thread list' },
+          { id: 'call_2', args: 'thread samples' },
+        ],
+        status: 'completed',
+      },
+      { text: 'Done.', status: 'completed' },
+    ]);
+    const { appended, toolCalls, run } = setup(OPENAI_RESPONSES);
+    expect(await run()).toEqual({ type: 'done' });
+    expect(toolCalls).toEqual(['thread list', 'thread samples']);
+
+    const second = requests[1].input;
+    expect(second).toHaveLength(6);
+    expect(second[1]).toEqual({
+      id: 'rs_1',
+      type: 'reasoning',
+      summary: [],
+      encrypted_content: 'gAAAA-secret',
+      status: 'completed',
+    });
+    expect(second[2]).toMatchObject({
+      type: 'function_call',
+      call_id: 'call_1',
+      arguments: '{"args":"thread list"}',
+    });
+    expect(second.slice(4)).toEqual([
+      {
+        type: 'function_call_output',
+        call_id: 'call_1',
+        output: 'ran thread list',
+      },
+      {
+        type: 'function_call_output',
+        call_id: 'call_2',
+        output: 'ran thread samples',
+      },
+    ]);
+    expect(second).toEqual(
+      JSON.parse(
+        JSON.stringify([requests[0].input[0], ...appended.slice(0, 5)])
+      )
+    );
+  });
+
+  it('answers unparseable arguments with an error', async function () {
+    mockResponsesApi([
+      {
+        toolCalls: [{ id: 'call_1', rawArguments: '{"args": "thr' }],
+        status: 'completed',
+      },
+      { text: 'Sorry.', status: 'completed' },
+    ]);
+    const { appended, toolCalls, run } = setup(OPENAI_RESPONSES);
+    await run();
+    expect(toolCalls).toEqual([]);
+    expect(appended[1]).toEqual({
+      type: 'function_call_output',
+      call_id: 'call_1',
+      output: 'Error: Unknown tool or invalid input: run_profiler_cli',
+    });
+  });
+
+  it('reports refusals with their explanation', async function () {
+    mockResponsesApi([{ refusal: 'I can not help.', status: 'completed' }]);
+    const { run } = setup(OPENAI_RESPONSES);
+    expect(await run()).toEqual({
+      type: 'refusal',
+      explanation: 'I can not help.',
+    });
+  });
+
+  it('throws when the response failed', async function () {
+    mockResponsesApi([{ status: 'failed', errorMessage: 'Server exploded' }]);
+    const { provider, run } = setup(OPENAI_RESPONSES);
+    const error = await run().catch((e) => e);
+    expect(provider.describeError(error)).toEqual({
+      type: 'unknown',
+      message: 'Server exploded',
     });
   });
 });

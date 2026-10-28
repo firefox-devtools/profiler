@@ -41,8 +41,6 @@ type PresetInfo = {
   readonly canFilterToolModels: boolean;
   // Whether the user can get a key by signing in, see openrouter-auth.ts.
   readonly hasSignIn: boolean;
-  // Only OpenAI is known to support strict function schemas.
-  readonly strictTools: boolean;
   // The name used in messages like "Could not reach OpenAI". Null to use the
   // host of the base URL.
   readonly name: string | null;
@@ -60,11 +58,12 @@ export const CHAT_PROVIDER_PRESETS: {
     isModelListPublic: false,
     canFilterToolModels: false,
     hasSignIn: false,
-    strictTools: true,
     name: 'Anthropic',
   },
   openai: {
-    format: 'openai-chat',
+    // Chat Completions doesn't support function tools with reasoning on all
+    // of OpenAI's reasoning models.
+    format: 'openai-responses',
     defaultBaseURL: 'https://api.openai.com/v1',
     canChangeBaseURL: false,
     requiresApiKey: true,
@@ -72,7 +71,6 @@ export const CHAT_PROVIDER_PRESETS: {
     isModelListPublic: false,
     canFilterToolModels: false,
     hasSignIn: false,
-    strictTools: true,
     name: 'OpenAI',
   },
   openrouter: {
@@ -84,7 +82,6 @@ export const CHAT_PROVIDER_PRESETS: {
     isModelListPublic: true,
     canFilterToolModels: true,
     hasSignIn: true,
-    strictTools: false,
     name: 'OpenRouter',
   },
   local: {
@@ -97,7 +94,6 @@ export const CHAT_PROVIDER_PRESETS: {
     isModelListPublic: false,
     canFilterToolModels: false,
     hasSignIn: false,
-    strictTools: false,
     name: null,
   },
   custom: {
@@ -109,7 +105,6 @@ export const CHAT_PROVIDER_PRESETS: {
     isModelListPublic: false,
     canFilterToolModels: false,
     hasSignIn: false,
-    strictTools: false,
     name: null,
   },
 };
