@@ -22,11 +22,12 @@ export type WorkerInput = SourceMapSymbolicationInput & {
 
 /**
  * Resolved original location for a single frame. Line/column are 1-based
- * (Gecko convention). `originalSource` is a URL string; the apply step on
- * the main thread looks it up against the current sources table.
+ * (Gecko convention). `originalSourceIndex` indexes into the response's
+ * `originalSources` list; the apply step on the main thread adds a sources
+ * table entry for it.
  */
 export type FrameResolution = {
-  originalSource: string;
+  originalSourceIndex: number;
   originalLine: number;
   originalColumn: number;
 };
@@ -38,6 +39,19 @@ export type FrameResolution = {
  */
 export type FuncResolution = FrameResolution & {
   name: string | null;
+};
+
+/**
+ * An original source listed by a bundle's source map. `url` is the source's
+ * URL as the source map gives it, which may be relative. Two bundles can list
+ * the same URL for different files, so an original source is identified by
+ * `generatedSource` (the bundle) and `url` together. `content` is null when
+ * the source map didn't carry sourcesContent for this URL.
+ */
+export type OriginalSource = {
+  generatedSource: IndexIntoSourceTable;
+  url: string;
+  content: string | null;
 };
 
 /**
@@ -58,10 +72,10 @@ export type SourceMapSymbolicationResponse = {
   funcResults: Map<IndexIntoFuncTable, FuncResolution>;
   // Same idea for frames.
   frameResults: Map<IndexIntoFrameTable, FrameResolution>;
-  // Original sources discovered during symbolication, keyed by URL. content
-  // is null when the source map didn't carry sourcesContent for this URL.
-  // The apply step dedupes URLs against the current sources table.
-  originalSources: Map<string, { content: string | null }>;
+  // Original sources discovered during symbolication, each listed once. The
+  // apply step adds a sources table entry for each one that an applied
+  // result refers to.
+  originalSources: OriginalSource[];
 };
 
 export type WorkerOutput =
