@@ -9,6 +9,7 @@ import classNames from 'classnames';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
   ChatError,
+  ChatProviderPreset,
   ChatStatus,
   ChatTranscriptItem,
   ChatTurnOutcome,
@@ -16,6 +17,7 @@ import type {
 
 type Props = {
   readonly items: ChatTranscriptItem[];
+  readonly preset: ChatProviderPreset;
   readonly streamingText: string;
   readonly status: ChatStatus;
   readonly notice: ChatTurnOutcome | null;
@@ -90,25 +92,34 @@ function ChatNotice({ notice }: { readonly notice: ChatTurnOutcome }) {
   }
 }
 
-export function ChatErrorMessage({ error }: { readonly error: ChatError }) {
+type ErrorProps = {
+  readonly error: ChatError;
+  // The provider of the conversation, which the error came from.
+  readonly preset: ChatProviderPreset;
+};
+
+export function ChatErrorMessage({ error, preset }: ErrorProps) {
   switch (error.type) {
     case 'auth':
       return (
         <Localized
-          id="ChatError--auth-with-reason"
-          vars={{ message: error.message }}
+          id="ChatError--auth-rejected"
+          vars={{ provider: error.provider, message: error.message }}
         >
           <p className="chatError">
-            Anthropic rejected the API key: {error.message} Use “Forget key” to
-            enter a different one.
+            {error.provider} rejected the API key: {error.message} Open
+            “Settings” to enter a different one.
           </p>
         </Localized>
       );
     case 'rate-limit':
       return (
-        <Localized id="ChatError--rate-limit">
+        <Localized
+          id="ChatError--rate-limited"
+          vars={{ provider: error.provider }}
+        >
           <p className="chatError">
-            The Anthropic API is rate limiting requests. Wait a bit and try
+            {error.provider} is rate limiting requests. Wait a bit and try
             again.
           </p>
         </Localized>
@@ -123,11 +134,24 @@ export function ChatErrorMessage({ error }: { readonly error: ChatError }) {
       );
     case 'connection':
       return (
-        <Localized id="ChatError--connection" vars={{ message: error.message }}>
-          <p className="chatError">
-            Could not reach the Anthropic API: {error.message}
-          </p>
-        </Localized>
+        <>
+          <Localized
+            id="ChatError--connection-failed"
+            vars={{ provider: error.provider, message: error.message }}
+          >
+            <p className="chatError">
+              Could not reach {error.provider}: {error.message}
+            </p>
+          </Localized>
+          {preset === 'local' ? (
+            <Localized id="ChatError--connection-local-hint">
+              <p className="chatError">
+                Check that the server is running and allows requests from this
+                site. For Ollama, set OLLAMA_ORIGINS.
+              </p>
+            </Localized>
+          ) : null}
+        </>
       );
     case 'api':
     case 'unknown':
@@ -170,6 +194,7 @@ export function ChatToolCallChip({ command, result }: ToolCallProps) {
 
 export function ChatTranscript({
   items,
+  preset,
   streamingText,
   status,
   notice,
@@ -241,7 +266,9 @@ export function ChatTranscript({
         </Localized>
       ) : null}
       {notice !== null ? <ChatNotice notice={notice} /> : null}
-      {error !== null ? <ChatErrorMessage error={error} /> : null}
+      {error !== null ? (
+        <ChatErrorMessage error={error} preset={preset} />
+      ) : null}
     </div>
   );
 }

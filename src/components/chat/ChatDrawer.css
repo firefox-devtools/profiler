@@ -226,28 +226,37 @@
   background-color: var(--blue-80);
 }
 
-.chatApiKeyForm {
+.chatProviderSettings {
   display: flex;
+  overflow: auto;
   flex-direction: column;
   padding: 12px;
   gap: 8px;
   line-height: 1.5;
 }
 
-.chatApiKeyForm p {
+.chatProviderSettings p {
   margin: 0;
 }
 
-.chatApiKeyFormWarning {
+.chatProviderSettingsPrivacy,
+.chatProviderSettingsHint {
   color: var(--internal-dimmed-foreground-color);
 }
 
-.chatApiKeyFormInput {
+.chatProviderSettingsField {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chatProviderSettingsInput {
   padding: 4px 6px;
 }
 
-.chatApiKeyForm .photon-button {
-  align-self: flex-start;
+.chatProviderSettingsButtons {
+  display: flex;
+  gap: 8px;
 }
 
 :root.dark-mode {

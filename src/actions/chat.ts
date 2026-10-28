@@ -3,10 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import {
-  getApiKey,
-  removeApiKey,
-  setApiKey,
-} from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
+  CHAT_PROVIDER_PRESETS,
+  getBaseURL,
+  getProviderDisplayName,
+  getStoredProviderPreset,
+  getStoredProviderSettings,
+  hasCompleteSettings,
+  storeProviderSettings,
+  type ChatProviderSettings,
+} from 'firefox-profiler/app-logic/profile-chat/provider-settings';
 import { buildViewContext } from 'firefox-profiler/app-logic/profile-chat/view-context';
 import {
   describeUnknownChatError,
@@ -14,6 +19,7 @@ import {
 } from 'firefox-profiler/app-logic/profile-chat/providers/types';
 import {
   getChatConversation,
+  getChatProviderPreset,
   getChatConversationId,
   getIsChatTurnRunning,
 } from 'firefox-profiler/selectors/chat';
@@ -22,6 +28,7 @@ import type {
   Action,
   ChatConversation,
   ChatError,
+  ChatProviderPreset,
   ChatTurnOutcome,
   ThunkAction,
 } from 'firefox-profiler/types';
@@ -52,18 +59,41 @@ export function resetChat(): ThunkAction<void> {
   };
 }
 
-export function saveApiKey(apiKey: string): ThunkAction<void> {
-  return (dispatch) => {
-    setApiKey(apiKey);
-    dispatch({ type: 'CHAT_API_KEY_CHANGED', hasApiKey: true });
+/**
+ * Store the settings of a provider and select it. Selecting another provider
+ * starts a new chat.
+ */
+export function saveChatProviderSettings(
+  preset: ChatProviderPreset,
+  settings: ChatProviderSettings
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (preset !== getChatProviderPreset(getState())) {
+      dispatch(cancelChatTurn());
+    }
+    storeProviderSettings(preset, settings);
+    dispatch({
+      type: 'CHAT_PROVIDER_CHANGED',
+      preset,
+      hasCredentials: hasCompleteSettings(preset, settings),
+    });
   };
 }
 
-export function forgetApiKey(): ThunkAction<void> {
-  return (dispatch) => {
+/**
+ * Forget the API key of the selected provider, keeping its other settings.
+ */
+export function forgetChatApiKey(): ThunkAction<void> {
+  return (dispatch, getState) => {
     dispatch(cancelChatTurn());
-    removeApiKey();
-    dispatch({ type: 'CHAT_API_KEY_CHANGED', hasApiKey: false });
+    const preset = getChatProviderPreset(getState());
+    const { apiKey: _apiKey, ...settings } = getStoredProviderSettings(preset);
+    storeProviderSettings(preset, settings);
+    dispatch({
+      type: 'CHAT_PROVIDER_CHANGED',
+      preset,
+      hasCredentials: hasCompleteSettings(preset, settings),
+    });
   };
 }
 
@@ -73,9 +103,18 @@ export function forgetApiKey(): ThunkAction<void> {
  */
 export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    const apiKey = getApiKey();
-    if (apiKey === null) {
-      dispatch({ type: 'CHAT_API_KEY_CHANGED', hasApiKey: false });
+    const preset = getStoredProviderPreset();
+    const settings = getStoredProviderSettings(preset);
+    if (
+      preset !== getChatProviderPreset(getState()) ||
+      !hasCompleteSettings(preset, settings)
+    ) {
+      // The settings changed in another tab.
+      dispatch({
+        type: 'CHAT_PROVIDER_CHANGED',
+        preset,
+        hasCredentials: hasCompleteSettings(preset, settings),
+      });
       return;
     }
     // The controller is set before anything async, so a second send while the
@@ -164,14 +203,30 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
           const { createAnthropicProvider } =
             await import('firefox-profiler/app-logic/profile-chat/providers/anthropic');
           outcome = await runTurn(
-            createAnthropicProvider(apiKey),
+            createAnthropicProvider(settings.apiKey ?? ''),
             conversation.messages,
             (messages) => ({ format: 'anthropic', messages })
           );
           break;
         }
+        case 'openai-chat': {
+          const { createOpenAIChatProvider } =
+            await import('firefox-profiler/app-logic/profile-chat/providers/openai-chat');
+          outcome = await runTurn(
+            createOpenAIChatProvider({
+              name: getProviderDisplayName(preset, settings),
+              baseURL: getBaseURL(preset, settings),
+              apiKey: settings.apiKey ?? null,
+              model: settings.model ?? '',
+              strictTools: CHAT_PROVIDER_PRESETS[preset].strictTools,
+            }),
+            conversation.messages,
+            (messages) => ({ format: 'openai-chat', messages })
+          );
+          break;
+        }
         default:
-          throw assertExhaustiveCheck(conversation.format);
+          throw assertExhaustiveCheck(conversation);
       }
 
       cancelStreamingText();

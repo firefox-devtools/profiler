@@ -23,7 +23,7 @@ import { Timeline } from 'firefox-profiler/components/timeline';
 import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
 import { getIsChatOpen } from 'firefox-profiler/selectors/chat';
-import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
+import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
 import {
   getUploadProgress,
   getUploadPhase,

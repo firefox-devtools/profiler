@@ -7,6 +7,7 @@ import { getChatTranscriptItems } from 'firefox-profiler/app-logic/profile-chat/
 import type {
   ChatConversation,
   ChatError,
+  ChatProviderPreset,
   ChatState,
   ChatTurnOutcome,
   ChatStatus,
@@ -27,8 +28,10 @@ export const getChatConversation: Selector<ChatConversation> = (state) =>
   getChat(state).conversation;
 export const getChatStreamingText: Selector<string> = (state) =>
   getChat(state).streamingText;
-export const getChatHasApiKey: Selector<boolean> = (state) =>
-  getChat(state).hasApiKey;
+export const getChatProviderPreset: Selector<ChatProviderPreset> = (state) =>
+  getChat(state).providerPreset;
+export const getChatHasCredentials: Selector<boolean> = (state) =>
+  getChat(state).hasCredentials;
 export const getChatConversationId: Selector<number> = (state) =>
   getChat(state).conversationId;
 

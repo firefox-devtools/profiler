@@ -39,6 +39,7 @@ import type { TransformStacksPerThread } from './transforms';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
 import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
@@ -434,11 +435,21 @@ export type ChatTurnOutcome =
   | { readonly type: 'refusal'; readonly explanation: string | null };
 
 // Why a chat turn failed.
+// `provider` is the name shown in the message, e.g. "OpenAI" or
+// "localhost:11434".
 export type ChatError =
-  | { readonly type: 'auth'; readonly message: string }
-  | { readonly type: 'rate-limit' }
+  | {
+      readonly type: 'auth';
+      readonly provider: string;
+      readonly message: string;
+    }
+  | { readonly type: 'rate-limit'; readonly provider: string }
   | { readonly type: 'permission'; readonly message: string }
-  | { readonly type: 'connection'; readonly message: string }
+  | {
+      readonly type: 'connection';
+      readonly provider: string;
+      readonly message: string;
+    }
   | {
       readonly type: 'api';
       readonly status: number | null;
@@ -448,10 +459,18 @@ export type ChatError =
 
 // The conversation exactly as sent to the API, in the provider's own message
 // format. Append-only.
-export type ChatConversation = {
-  readonly format: 'anthropic';
-  readonly messages: BetaMessageParam[];
-};
+export type ChatConversation =
+  | { readonly format: 'anthropic'; readonly messages: BetaMessageParam[] }
+  | {
+      readonly format: 'openai-chat';
+      readonly messages: ChatCompletionMessageParam[];
+    };
+
+export type ChatConversationFormat = ChatConversation['format'];
+
+// The provider choices in the chat settings. Each one uses one conversation
+// format, see src/app-logic/profile-chat/provider-settings.ts.
+export type ChatProviderPreset = 'anthropic' | 'openai' | 'local' | 'custom';
 
 export type ChatState = {
   readonly isOpen: boolean;
@@ -463,7 +482,9 @@ export type ChatState = {
   readonly conversation: ChatConversation;
   // Text of the response that is currently streaming in.
   readonly streamingText: string;
-  readonly hasApiKey: boolean;
+  readonly providerPreset: ChatProviderPreset;
+  // Whether the settings of the selected provider are complete.
+  readonly hasCredentials: boolean;
   // Incremented whenever the conversation is reset, so that a turn that is
   // still running for the previous conversation can't write into the new one.
   readonly conversationId: number;

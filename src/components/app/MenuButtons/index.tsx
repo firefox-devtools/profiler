@@ -39,7 +39,7 @@ import {
 } from 'firefox-profiler/actions/app';
 import { openChat, closeChat } from 'firefox-profiler/actions/chat';
 import { getIsChatOpen } from 'firefox-profiler/selectors/chat';
-import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
+import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
 
 import {
   getAbortFunction,

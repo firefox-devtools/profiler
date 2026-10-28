@@ -164,16 +164,24 @@ export function createAnthropicProvider(
 
     describeError(error: unknown): ChatError {
       if (error instanceof Anthropic.AuthenticationError) {
-        return { type: 'auth', message: _getApiErrorMessage(error) };
+        return {
+          type: 'auth',
+          provider: 'Anthropic',
+          message: _getApiErrorMessage(error),
+        };
       }
       if (error instanceof Anthropic.PermissionDeniedError) {
         return { type: 'permission', message: _getApiErrorMessage(error) };
       }
       if (error instanceof Anthropic.RateLimitError) {
-        return { type: 'rate-limit' };
+        return { type: 'rate-limit', provider: 'Anthropic' };
       }
       if (error instanceof Anthropic.APIConnectionError) {
-        return { type: 'connection', message: error.message };
+        return {
+          type: 'connection',
+          provider: 'Anthropic',
+          message: error.message,
+        };
       }
       if (error instanceof Anthropic.APIError) {
         return {

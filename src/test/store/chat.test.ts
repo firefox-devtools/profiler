@@ -5,17 +5,18 @@
 import {
   cancelChatTurn,
   closeChat,
-  forgetApiKey,
+  forgetChatApiKey,
   openChat,
   resetChat,
-  saveApiKey,
+  saveChatProviderSettings,
   sendChatMessage,
 } from 'firefox-profiler/actions/chat';
 import {
   getChatConversation,
   getChatError,
-  getChatHasApiKey,
+  getChatHasCredentials,
   getChatNotice,
+  getChatProviderPreset,
   getChatStatus,
   getChatTranscript,
   getIsChatOpen,
@@ -24,6 +25,10 @@ import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { MESSAGES_API_URL, mockMessagesApi } from '../fixtures/anthropic-api';
+import {
+  mockChatCompletionsApi,
+  TEST_OPENAI_BASE_URL,
+} from '../fixtures/openai-api';
 
 describe('profile chat', function () {
   function setup() {
@@ -40,7 +45,9 @@ describe('profile chat', function () {
     profile.threads[0].name = 'GeckoMain';
     profile.threads[1].name = 'DOM Worker';
     const store = storeWithProfile(profile);
-    store.dispatch(saveApiKey('sk-test'));
+    store.dispatch(
+      saveChatProviderSettings('anthropic', { apiKey: 'sk-test' })
+    );
     return store;
   }
 
@@ -48,7 +55,7 @@ describe('profile chat', function () {
     window.localStorage.clear();
   });
 
-  it('opens, closes and stores the key', function () {
+  it('opens, closes and stores the settings', function () {
     const store = setup();
     expect(getIsChatOpen(store.getState())).toBe(false);
     store.dispatch(openChat());
@@ -56,15 +63,22 @@ describe('profile chat', function () {
     store.dispatch(closeChat());
     expect(getIsChatOpen(store.getState())).toBe(false);
 
-    expect(getChatHasApiKey(store.getState())).toBe(true);
-    expect(window.localStorage.getItem('profiler.chat.anthropicApiKey')).toBe(
-      'sk-test'
+    expect(getChatHasCredentials(store.getState())).toBe(true);
+    expect(window.localStorage.getItem('profiler.chat.provider')).toBe(
+      'anthropic'
     );
-    store.dispatch(forgetApiKey());
-    expect(getChatHasApiKey(store.getState())).toBe(false);
     expect(
-      window.localStorage.getItem('profiler.chat.anthropicApiKey')
-    ).toBeNull();
+      JSON.parse(
+        window.localStorage.getItem('profiler.chat.settings.anthropic') ?? ''
+      )
+    ).toEqual({ apiKey: 'sk-test' });
+    store.dispatch(forgetChatApiKey());
+    expect(getChatHasCredentials(store.getState())).toBe(false);
+    expect(
+      JSON.parse(
+        window.localStorage.getItem('profiler.chat.settings.anthropic') ?? ''
+      )
+    ).toEqual({});
   });
 
   it('runs a full turn against the live store', async function () {
@@ -164,10 +178,110 @@ describe('profile chat', function () {
     expect(getChatStatus(store.getState())).toBe('error');
     expect(getChatError(store.getState())).toEqual({
       type: 'auth',
+      provider: 'Anthropic',
       message: 'invalid x-api-key',
     });
     // A 401 can be an organization policy rather than a bad key, so the user
     // decides whether to forget it.
-    expect(getChatHasApiKey(store.getState())).toBe(true);
+    expect(getChatHasCredentials(store.getState())).toBe(true);
+  });
+
+  it('starts a new chat in the right format when switching provider', async function () {
+    const store = setup();
+    mockMessagesApi([
+      { content: [{ type: 'text', text: 'Hi' }], stopReason: 'end_turn' },
+    ]);
+    await store.dispatch(sendChatMessage('Hi'));
+    expect(getChatTranscript(store.getState())).toHaveLength(2);
+
+    // Saving the same provider keeps the conversation.
+    store.dispatch(
+      saveChatProviderSettings('anthropic', { apiKey: 'sk-other' })
+    );
+    expect(getChatTranscript(store.getState())).toHaveLength(2);
+
+    store.dispatch(
+      saveChatProviderSettings('custom', {
+        baseURL: TEST_OPENAI_BASE_URL,
+      })
+    );
+    expect(getChatProviderPreset(store.getState())).toBe('custom');
+    expect(getChatConversation(store.getState())).toEqual({
+      format: 'openai-chat',
+      messages: [],
+    });
+    // A model is required.
+    expect(getChatHasCredentials(store.getState())).toBe(false);
+
+    store.dispatch(
+      saveChatProviderSettings('custom', {
+        baseURL: TEST_OPENAI_BASE_URL,
+        model: 'test-model',
+      })
+    );
+    expect(getChatHasCredentials(store.getState())).toBe(true);
+  });
+
+  it('runs a full turn through an OpenAI-compatible server', async function () {
+    const store = setup();
+    store.dispatch(
+      saveChatProviderSettings('local', {
+        baseURL: TEST_OPENAI_BASE_URL,
+        model: 'qwen3',
+      })
+    );
+    const requests = mockChatCompletionsApi([
+      {
+        toolCalls: [
+          { id: 'call_1', args: 'thread select t-1' },
+          { id: 'call_2', args: 'thread select t-99' },
+        ],
+        finishReason: 'tool_calls',
+      },
+      { text: 'Ygc takes all the time.', finishReason: 'stop' },
+    ]);
+
+    await store.dispatch(sendChatMessage('What is the worker doing?'));
+
+    expect(getChatError(store.getState())).toBeNull();
+    expect(getSelectedThreadIndexes(store.getState())).toEqual(new Set([1]));
+    expect(getChatTranscript(store.getState())).toEqual([
+      { type: 'user', text: 'What is the worker doing?' },
+      {
+        type: 'tool-call',
+        id: 'call_1',
+        command: 'thread select t-1',
+        result: { text: expect.stringContaining('t-1'), isError: false },
+      },
+      {
+        type: 'tool-call',
+        id: 'call_2',
+        command: 'thread select t-99',
+        result: { text: expect.stringContaining('t-99'), isError: true },
+      },
+      { type: 'assistant', text: 'Ygc takes all the time.' },
+    ]);
+
+    const [request] = requests;
+    expect(request.model).toBe('qwen3');
+    expect(request.messages[1].content).toContain('<current_view>');
+    expect(request.tools[0].function.strict).toBeUndefined();
+    expect(requests[1].messages.slice(1)).toEqual(
+      getChatConversation(store.getState()).messages.slice(0, 4)
+    );
+  });
+
+  it('names the local server in connection errors', async function () {
+    const store = setup();
+    store.dispatch(saveChatProviderSettings('local', { model: 'qwen3' }));
+    window.fetchMock.post('http://localhost:11434/v1/chat/completions', {
+      throws: new TypeError('Failed to fetch'),
+    });
+    await store.dispatch(sendChatMessage('Hi'));
+    expect(getChatError(store.getState())).toEqual({
+      type: 'connection',
+      provider: 'localhost:11434',
+      message: expect.any(String),
+    });
   });
 });

@@ -22,7 +22,7 @@ exports[`ChatDrawer runs a turn, showing the commands and the answer 1`] = `
       class="chatDrawerHeaderButton photon-button photon-button-micro"
       type="button"
     >
-      Forget key
+      Settings
     </button>
     <button
       class="chatDrawerCloseButton photon-button photon-button-ghost"

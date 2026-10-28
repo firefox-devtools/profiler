@@ -596,21 +596,44 @@ MenuButtons--permalink--button =
 
 ## ChatDrawer
 ## The experimental chat drawer that answers questions about the profile, using
-## an AI model from Anthropic that inspects the profile with profiler-cli
-## commands. "Anthropic" is a company name and "profiler-cli" a program name,
-## they should not be translated.
+## an AI model that inspects the profile with profiler-cli commands. The model
+## comes from a provider the user picks: Anthropic, OpenAI, a model running on
+## the user's computer, or another server compatible with the OpenAI API.
+## "Anthropic", "OpenAI", "Ollama" and "LM Studio" are company or product names
+## and "profiler-cli" a program name, they should not be translated.
 
 ChatDrawer--title = Ask about this profile
 ChatDrawer--new-chat-button = New chat
-ChatDrawer--forget-key-button = Forget key
+ChatDrawer--settings-button = Settings
 ChatDrawer--close-button =
     .title = Close
 
-ChatApiKeyForm--description = Enter an <a>Anthropic API key</a> to ask questions about this profile.
-ChatApiKeyForm--privacy-warning = The key is stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to Anthropic.
-ChatApiKeyForm--input =
-    .placeholder = Anthropic API key
-ChatApiKeyForm--save-button = Save key
+ChatProviderSettings--provider-label = Provider
+ChatProviderSettings--provider-anthropic = Anthropic
+ChatProviderSettings--provider-openai = OpenAI
+ChatProviderSettings--provider-local = Local model (Ollama, LM Studio)
+ChatProviderSettings--provider-custom = Other OpenAI-compatible server
+ChatProviderSettings--description-anthropic = Enter an <a>Anthropic API key</a> to ask questions about this profile.
+ChatProviderSettings--description-openai = Enter an <a>OpenAI API key</a> and pick a model to ask questions about this profile.
+ChatProviderSettings--description-local = Use a model running on this computer, through its OpenAI-compatible API. The model needs to support tool calling and a long context. Ollama needs to allow requests from this site, see the <a>documentation</a>.
+ChatProviderSettings--description-custom = Use any server that implements the OpenAI Chat Completions API, such as a company gateway. The model needs to support tool calling.
+ChatProviderSettings--privacy-anthropic = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to Anthropic.
+ChatProviderSettings--privacy-openai = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to OpenAI.
+ChatProviderSettings--privacy-local = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them stay on this computer, unless the URL points to another machine.
+ChatProviderSettings--privacy-custom = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to the server at this URL.
+ChatProviderSettings--base-url-label = Server URL
+ChatProviderSettings--api-key-label = API key
+ChatProviderSettings--api-key-optional-label = API key (optional)
+ChatProviderSettings--model-label = Model
+ChatProviderSettings--model-input =
+    .placeholder = Model name
+ChatProviderSettings--models-loading = Loading the model list…
+# Variables:
+#   $message (String) - The error message, in English.
+ChatProviderSettings--models-error = Could not load the model list ({ $message }). Type the model name instead.
+ChatProviderSettings--save-button = Save
+ChatProviderSettings--cancel-button = Cancel
+ChatProviderSettings--forget-key-button = Forget key
 
 ChatComposer--input =
     .placeholder = Ask about this profile
@@ -629,15 +652,20 @@ ChatTranscript--notice-refusal = The response was declined.
 ChatTranscript--notice-refusal-with-explanation = The response was declined: { $explanation }
 
 # Variables:
-#   $message (String) - The error message from the Anthropic API, in English.
-ChatError--auth-with-reason = Anthropic rejected the API key: { $message } Use “Forget key” to enter a different one.
-ChatError--rate-limit = The Anthropic API is rate limiting requests. Wait a bit and try again.
+#   $provider (String) - The provider name, such as "Anthropic", or a host name, such as "localhost:11434".
+#   $message (String) - The error message from the provider, in English.
+ChatError--auth-rejected = { $provider } rejected the API key: { $message } Open “Settings” to enter a different one.
 # Variables:
-#   $message (String) - The error message from the Anthropic API, in English.
+#   $provider (String) - The provider name, such as "Anthropic", or a host name, such as "localhost:11434".
+ChatError--rate-limited = { $provider } is rate limiting requests. Wait a bit and try again.
+# Variables:
+#   $message (String) - The error message from the provider, in English.
 ChatError--permission = This API key is not allowed to use the model: { $message }
 # Variables:
+#   $provider (String) - The provider name, such as "Anthropic", or a host name, such as "localhost:11434".
 #   $message (String) - The network error message, in English.
-ChatError--connection = Could not reach the Anthropic API: { $message }
+ChatError--connection-failed = Could not reach { $provider }: { $message }
+ChatError--connection-local-hint = Check that the server is running and allows requests from this site. For Ollama, set OLLAMA_ORIGINS.
 # Variables:
 #   $message (String) - The error message, in English.
 ChatError--other = Something went wrong: { $message }

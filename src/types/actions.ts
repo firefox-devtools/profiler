@@ -6,6 +6,7 @@ import type JSZip from 'jszip';
 import type {
   ChatConversation,
   ChatError,
+  ChatProviderPreset,
   ChatTurnOutcome,
   UrlState,
   UploadState,
@@ -774,7 +775,11 @@ type AppAction = {
 type ChatAction =
   | { readonly type: 'OPEN_CHAT' }
   | { readonly type: 'CLOSE_CHAT' }
-  | { readonly type: 'CHAT_API_KEY_CHANGED'; readonly hasApiKey: boolean }
+  | {
+      readonly type: 'CHAT_PROVIDER_CHANGED';
+      readonly preset: ChatProviderPreset;
+      readonly hasCredentials: boolean;
+    }
   | { readonly type: 'RESET_CHAT' }
   | {
       readonly type: 'CHAT_TURN_STARTED';

@@ -21,7 +21,7 @@ import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profil
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 import { mockMessagesApi } from 'firefox-profiler/test/fixtures/anthropic-api';
-import { fireEvent } from '@testing-library/react';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 // We're not interested in the timeline in this test.
 jest.mock('../../components/timeline', () => ({
@@ -30,6 +30,9 @@ jest.mock('../../components/timeline', () => ({
 
 describe('ChatDrawer', function () {
   autoMockDomRect();
+
+  const getDrawer = () =>
+    within(ensureExists(document.querySelector<HTMLElement>('.chatDrawer')));
 
   afterEach(function () {
     window.localStorage.clear();
@@ -40,7 +43,10 @@ describe('ChatDrawer', function () {
       window.localStorage.setItem('profiler.chat.enabled', 'true');
     }
     if (apiKey !== null) {
-      window.localStorage.setItem('profiler.chat.anthropicApiKey', apiKey);
+      window.localStorage.setItem(
+        'profiler.chat.settings.anthropic',
+        JSON.stringify({ apiKey })
+      );
     }
     const { profile } = getProfileFromTextSamples(
       `
@@ -81,7 +87,19 @@ describe('ChatDrawer', function () {
       fireEvent.change(input, { target: { value: text } });
       fireEvent.keyDown(input, { key: 'Enter' });
     };
-    return { ...renderResult, store, openChat, getInput, send };
+    const getStoredSettings = (preset: string) =>
+      JSON.parse(
+        window.localStorage.getItem(`profiler.chat.settings.${preset}`) ??
+          'null'
+      );
+    return {
+      ...renderResult,
+      store,
+      openChat,
+      getInput,
+      send,
+      getStoredSettings,
+    };
   }
 
   it('is hidden without the feature flag', function () {
@@ -92,29 +110,162 @@ describe('ChatDrawer', function () {
     expect(document.querySelector('.chatDrawer')).toBeNull();
   });
 
-  it('asks for a key, then shows the composer', async function () {
-    const { openChat } = setup();
+  it('asks for an Anthropic key, then shows the composer', async function () {
+    const { openChat, getStoredSettings } = setup();
     openChat();
     expect(await screen.findByText(/sent to Anthropic/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Model')).not.toBeInTheDocument();
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    expect(saveButton).toBeDisabled();
 
-    const keyInput = screen.getByPlaceholderText('Anthropic API key');
-    fireEvent.change(keyInput, { target: { value: ' sk-ant-test ' } });
-    fireFullClick(screen.getByRole('button', { name: 'Save key' }));
+    fireEvent.change(screen.getByLabelText('API key'), {
+      target: { value: ' sk-ant-test ' },
+    });
+    fireFullClick(saveButton);
 
-    expect(window.localStorage.getItem('profiler.chat.anthropicApiKey')).toBe(
-      'sk-ant-test'
+    expect(getStoredSettings('anthropic')).toEqual({ apiKey: 'sk-ant-test' });
+    expect(window.localStorage.getItem('profiler.chat.provider')).toBe(
+      'anthropic'
     );
     expect(
       screen.getByPlaceholderText('Ask about this profile')
     ).toBeInTheDocument();
 
+    // The settings show the stored key, which can be forgotten.
+    fireFullClick(getDrawer().getByRole('button', { name: 'Settings' }));
+    expect(screen.getByLabelText('API key')).toHaveValue('sk-ant-test');
     fireFullClick(screen.getByRole('button', { name: 'Forget key' }));
+    expect(getStoredSettings('anthropic')).toEqual({});
+    expect(screen.getByLabelText('API key')).toHaveValue('');
+    // Nothing to go back to without a key.
     expect(
-      window.localStorage.getItem('profiler.chat.anthropicApiKey')
-    ).toBeNull();
+      screen.queryByRole('button', { name: 'Cancel' })
+    ).not.toBeInTheDocument();
+  });
+
+  it('can go back from the settings without changing them', async function () {
+    const { openChat } = setup({ apiKey: 'sk-ant-test' });
+    openChat();
+    await screen.findByPlaceholderText('Ask about this profile');
+    fireFullClick(getDrawer().getByRole('button', { name: 'Settings' }));
+    fireEvent.change(screen.getByLabelText('Provider'), {
+      target: { value: 'openai' },
+    });
+    fireFullClick(screen.getByRole('button', { name: 'Cancel' }));
     expect(
-      screen.getByPlaceholderText('Anthropic API key')
+      screen.getByPlaceholderText('Ask about this profile')
     ).toBeInTheDocument();
+    expect(window.localStorage.getItem('profiler.chat.provider')).toBeNull();
+  });
+
+  it('configures OpenAI with a model from the model list', async function () {
+    window.fetchMock.get('https://api.openai.com/v1/models', {
+      object: 'list',
+      data: [{ id: 'gpt-b' }, { id: 'gpt-a' }],
+    });
+    const { openChat, getStoredSettings } = setup();
+    openChat();
+    const providerSelect = await screen.findByLabelText('Provider');
+    fireEvent.change(providerSelect, { target: { value: 'openai' } });
+    expect(screen.getByText(/sent to OpenAI/)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Server URL')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('API key'), {
+      target: { value: 'sk-openai' },
+    });
+    expect(
+      await screen.findByText('Loading the model list…')
+    ).toBeInTheDocument();
+    const modelInput = screen.getByLabelText('Model');
+    const getSuggestedModels = () =>
+      [
+        ...document.querySelectorAll(
+          `#${CSS.escape(modelInput.getAttribute('list') ?? '')} option`
+        ),
+      ].map((option) => option.getAttribute('value'));
+    await waitFor(() =>
+      expect(getSuggestedModels()).toEqual(['gpt-a', 'gpt-b'])
+    );
+    const call = window.fetchMock.callHistory.lastCall(
+      'https://api.openai.com/v1/models'
+    );
+    expect(
+      (call?.options.headers as Record<string, string>).authorization
+    ).toBe('Bearer sk-openai');
+
+    // A model is required.
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    expect(saveButton).toBeDisabled();
+    fireEvent.change(modelInput, { target: { value: 'gpt-a' } });
+    fireFullClick(saveButton);
+    expect(getStoredSettings('openai')).toEqual({
+      apiKey: 'sk-openai',
+      model: 'gpt-a',
+    });
+    expect(window.localStorage.getItem('profiler.chat.provider')).toBe(
+      'openai'
+    );
+    expect(
+      screen.getByPlaceholderText('Ask about this profile')
+    ).toBeInTheDocument();
+  });
+
+  it('configures a local model, typing the name when the list fails', async function () {
+    window.fetchMock.get('http://localhost:11434/v1/models', {
+      throws: new TypeError('Failed to fetch'),
+    });
+    const { openChat, getStoredSettings } = setup();
+    openChat();
+    fireEvent.change(await screen.findByLabelText('Provider'), {
+      target: { value: 'local' },
+    });
+    expect(screen.getByText(/stay on this computer/)).toBeInTheDocument();
+    expect(screen.getByLabelText('Server URL')).toHaveValue(
+      'http://localhost:11434/v1'
+    );
+    expect(screen.getByLabelText('API key (optional)')).toHaveValue('');
+
+    expect(
+      await screen.findByText(/Could not load the model list \(.*\)/)
+    ).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('Model'), {
+      target: { value: 'qwen3:8b' },
+    });
+    fireFullClick(screen.getByRole('button', { name: 'Save' }));
+    expect(getStoredSettings('local')).toEqual({
+      baseURL: 'http://localhost:11434/v1',
+      model: 'qwen3:8b',
+    });
+  });
+
+  it('requires a URL for a custom server', async function () {
+    const { openChat, getStoredSettings } = setup();
+    openChat();
+    fireEvent.change(await screen.findByLabelText('Provider'), {
+      target: { value: 'custom' },
+    });
+    expect(
+      screen.getByText(/sent to the server at this URL/)
+    ).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Model'), {
+      target: { value: 'gateway-model' },
+    });
+    const saveButton = screen.getByRole('button', { name: 'Save' });
+    expect(saveButton).toBeDisabled();
+
+    fireEvent.change(screen.getByLabelText('Server URL'), {
+      target: { value: 'https://gateway.example.com/v1' },
+    });
+    fireEvent.change(screen.getByLabelText('API key (optional)'), {
+      target: { value: 'gw-key' },
+    });
+    fireFullClick(saveButton);
+    expect(getStoredSettings('custom')).toEqual({
+      apiKey: 'gw-key',
+      baseURL: 'https://gateway.example.com/v1',
+      model: 'gateway-model',
+    });
   });
 
   it('runs a turn, showing the commands and the answer', async function () {

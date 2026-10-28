@@ -11,26 +11,28 @@ import { ResizableWithSplitter } from 'firefox-profiler/components/shared/Resiza
 import {
   cancelChatTurn,
   closeChat,
-  forgetApiKey,
+  forgetChatApiKey,
   resetChat,
-  saveApiKey,
+  saveChatProviderSettings,
   sendChatMessage,
 } from 'firefox-profiler/actions/chat';
 import {
   getChatError,
-  getChatHasApiKey,
+  getChatHasCredentials,
   getChatNotice,
+  getChatProviderPreset,
   getChatStatus,
   getChatStreamingText,
   getChatTranscript,
   getIsChatTurnRunning,
 } from 'firefox-profiler/selectors/chat';
-import { ChatApiKeyForm } from './ChatApiKeyForm';
+import { ChatProviderSettings } from './ChatProviderSettings';
 import { ChatComposer } from './ChatComposer';
 import { ChatTranscript } from './ChatTranscript';
 
 import type {
   ChatError,
+  ChatProviderPreset,
   ChatStatus,
   ChatTranscriptItem,
   ChatTurnOutcome,
@@ -40,7 +42,8 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 import './ChatDrawer.css';
 
 type StateProps = {
-  readonly hasApiKey: boolean;
+  readonly hasCredentials: boolean;
+  readonly preset: ChatProviderPreset;
   readonly status: ChatStatus;
   readonly error: ChatError | null;
   readonly notice: ChatTurnOutcome | null;
@@ -52,22 +55,42 @@ type StateProps = {
 type DispatchProps = {
   readonly closeChat: typeof closeChat;
   readonly resetChat: typeof resetChat;
-  readonly forgetApiKey: typeof forgetApiKey;
-  readonly saveApiKey: typeof saveApiKey;
+  readonly forgetChatApiKey: typeof forgetChatApiKey;
+  readonly saveChatProviderSettings: typeof saveChatProviderSettings;
   readonly sendChatMessage: typeof sendChatMessage;
   readonly cancelChatTurn: typeof cancelChatTurn;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
-class ChatDrawerImpl extends PureComponent<Props> {
+type State = {
+  readonly isSettingsOpen: boolean;
+};
+
+class ChatDrawerImpl extends PureComponent<Props, State> {
+  override state: State = { isSettingsOpen: false };
+
   _onSend = (text: string) => {
     this.props.sendChatMessage(text);
   };
 
+  _openSettings = () => {
+    this.setState({ isSettingsOpen: true });
+  };
+
+  _closeSettings = () => {
+    this.setState({ isSettingsOpen: false });
+  };
+
+  _onSaveSettings = (...args: Parameters<typeof saveChatProviderSettings>) => {
+    this.props.saveChatProviderSettings(...args);
+    this.setState({ isSettingsOpen: false });
+  };
+
   override render() {
     const {
-      hasApiKey,
+      hasCredentials,
+      preset,
       status,
       error,
       notice,
@@ -76,10 +99,10 @@ class ChatDrawerImpl extends PureComponent<Props> {
       isTurnRunning,
       closeChat,
       resetChat,
-      forgetApiKey,
-      saveApiKey,
+      forgetChatApiKey,
       cancelChatTurn,
     } = this.props;
+    const showSettings = !hasCredentials || this.state.isSettingsOpen;
 
     return (
       <ResizableWithSplitter
@@ -94,7 +117,7 @@ class ChatDrawerImpl extends PureComponent<Props> {
             <Localized id="ChatDrawer--title">
               <h2 className="chatDrawerTitle">Ask about this profile</h2>
             </Localized>
-            {hasApiKey ? (
+            {showSettings ? null : (
               <>
                 <Localized id="ChatDrawer--new-chat-button">
                   <button
@@ -105,17 +128,17 @@ class ChatDrawerImpl extends PureComponent<Props> {
                     New chat
                   </button>
                 </Localized>
-                <Localized id="ChatDrawer--forget-key-button">
+                <Localized id="ChatDrawer--settings-button">
                   <button
                     className="chatDrawerHeaderButton photon-button photon-button-micro"
                     type="button"
-                    onClick={forgetApiKey}
+                    onClick={this._openSettings}
                   >
-                    Forget key
+                    Settings
                   </button>
                 </Localized>
               </>
-            ) : null}
+            )}
             <Localized id="ChatDrawer--close-button" attrs={{ title: true }}>
               <button
                 className={classNames(
@@ -129,10 +152,19 @@ class ChatDrawerImpl extends PureComponent<Props> {
               />
             </Localized>
           </header>
-          {hasApiKey ? (
+          {showSettings ? (
+            <ChatProviderSettings
+              preset={preset}
+              error={error}
+              onSave={this._onSaveSettings}
+              onForgetApiKey={forgetChatApiKey}
+              onCancel={hasCredentials ? this._closeSettings : null}
+            />
+          ) : (
             <>
               <ChatTranscript
                 items={transcript}
+                preset={preset}
                 streamingText={streamingText}
                 status={status}
                 notice={notice}
@@ -144,8 +176,6 @@ class ChatDrawerImpl extends PureComponent<Props> {
                 onStop={cancelChatTurn}
               />
             </>
-          ) : (
-            <ChatApiKeyForm error={error} onSave={saveApiKey} />
           )}
         </aside>
       </ResizableWithSplitter>
@@ -155,7 +185,8 @@ class ChatDrawerImpl extends PureComponent<Props> {
 
 export const ChatDrawer = explicitConnect<{}, StateProps, DispatchProps>({
   mapStateToProps: (state) => ({
-    hasApiKey: getChatHasApiKey(state),
+    hasCredentials: getChatHasCredentials(state),
+    preset: getChatProviderPreset(state),
     status: getChatStatus(state),
     error: getChatError(state),
     notice: getChatNotice(state),
@@ -166,8 +197,8 @@ export const ChatDrawer = explicitConnect<{}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     closeChat,
     resetChat,
-    forgetApiKey,
-    saveApiKey,
+    forgetChatApiKey,
+    saveChatProviderSettings,
     sendChatMessage,
     cancelChatTurn,
   },

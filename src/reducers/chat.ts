@@ -5,19 +5,35 @@
 import type {
   Reducer,
   ChatConversation,
+  ChatProviderPreset,
   ChatState,
 } from 'firefox-profiler/types';
-import { getApiKey } from 'firefox-profiler/app-logic/profile-chat/api-key-storage';
+import {
+  CHAT_PROVIDER_PRESETS,
+  getStoredProviderPreset,
+  getStoredProviderSettings,
+  hasCompleteSettings,
+} from 'firefox-profiler/app-logic/profile-chat/provider-settings';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+
+function _emptyConversation(preset: ChatProviderPreset): ChatConversation {
+  return { format: CHAT_PROVIDER_PRESETS[preset].format, messages: [] };
+}
 
 function _getInitialState(): ChatState {
+  const preset = getStoredProviderPreset();
   return {
     isOpen: false,
     status: 'idle',
     error: null,
     notice: null,
-    conversation: { format: 'anthropic', messages: [] },
+    conversation: _emptyConversation(preset),
     streamingText: '',
-    hasApiKey: getApiKey() !== null,
+    providerPreset: preset,
+    hasCredentials: hasCompleteSettings(
+      preset,
+      getStoredProviderSettings(preset)
+    ),
     conversationId: 0,
   };
 }
@@ -28,7 +44,7 @@ function _startNewConversation(state: ChatState): ChatState {
     status: 'idle',
     error: null,
     notice: null,
-    conversation: { format: state.conversation.format, messages: [] },
+    conversation: _emptyConversation(state.providerPreset),
     streamingText: '',
     conversationId: state.conversationId + 1,
   };
@@ -38,14 +54,25 @@ function _appendMessages(
   conversation: ChatConversation,
   appended: ChatConversation
 ): ChatConversation {
-  if (conversation.format !== appended.format) {
-    // Can't happen: the format only changes with a new conversation.
-    return conversation;
+  // A mismatch can't happen: the format only changes with a new conversation.
+  switch (conversation.format) {
+    case 'anthropic':
+      return appended.format === 'anthropic'
+        ? {
+            format: 'anthropic',
+            messages: [...conversation.messages, ...appended.messages],
+          }
+        : conversation;
+    case 'openai-chat':
+      return appended.format === 'openai-chat'
+        ? {
+            format: 'openai-chat',
+            messages: [...conversation.messages, ...appended.messages],
+          }
+        : conversation;
+    default:
+      throw assertExhaustiveCheck(conversation);
   }
-  return {
-    format: conversation.format,
-    messages: [...conversation.messages, ...appended.messages],
-  };
 }
 
 const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
@@ -54,8 +81,17 @@ const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
       return { ...state, isOpen: true };
     case 'CLOSE_CHAT':
       return { ...state, isOpen: false };
-    case 'CHAT_API_KEY_CHANGED':
-      return { ...state, hasApiKey: action.hasApiKey };
+    case 'CHAT_PROVIDER_CHANGED': {
+      const newState = {
+        ...state,
+        providerPreset: action.preset,
+        hasCredentials: action.hasCredentials,
+      };
+      // Conversations aren't translated between providers.
+      return action.preset === state.providerPreset
+        ? newState
+        : _startNewConversation(newState);
+    }
     case 'RESET_CHAT':
     case 'PROFILE_LOADED':
       // A conversation is about one profile, so a new one starts a new chat.
