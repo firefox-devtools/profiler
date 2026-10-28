@@ -879,6 +879,7 @@ function _findOrCreateSource(
   sources.startColumn.push(1);
   sources.sourceMapURL.push(null);
   sources.content.push(null);
+  sources.generatedSource.push(null);
   sources.length++;
 
   sourceByFilename.set(filenameStrIndex, index);
@@ -1073,6 +1074,7 @@ function _shallowCloneSourceTable(sources: SourceTable): SourceTable {
     startColumn: sources.startColumn.slice(),
     sourceMapURL: sources.sourceMapURL.slice(),
     content: sources.content.slice(),
+    generatedSource: sources.generatedSource.slice(),
     length: sources.length,
   };
 }

@@ -958,6 +958,7 @@ function _partiallyApplySymbolicationStep(
             sources.startColumn.push(1);
             sources.sourceMapURL.push(null);
             sources.content.push(null);
+            sources.generatedSource.push(null);
             sources.length++;
             sourceIndexForNativeFilename.set(fileNameStringIndex, sourceIndex);
           }
