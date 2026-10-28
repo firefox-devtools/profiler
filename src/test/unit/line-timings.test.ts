@@ -185,6 +185,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     thread.sources.filename.push(originalFilenameIndex);
     thread.sources.sourceMapURL.push(null);
     thread.sources.content.push(null);
+    thread.sources.generatedSource.push(null);
     thread.sources.length++;
 
     // For both funcs, add a sourceLocationTable entry pointing at the original

@@ -889,6 +889,7 @@ describe('ProfileQuerier', function () {
         startColumn: [1],
         sourceMapURL: [null],
         content: ['console.log("secret");'],
+        generatedSource: [null],
       };
       const store = storeWithProfile(profile);
       const querier = new ProfileQuerier(

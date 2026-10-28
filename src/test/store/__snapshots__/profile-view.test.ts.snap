@@ -435,7 +435,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 76,
+    "preprocessedProfileVersion": 77,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -680,6 +680,7 @@ Object {
     "sources": Object {
       "content": Array [],
       "filename": Array [],
+      "generatedSource": Array [],
       "id": Array [],
       "length": 0,
       "sourceMapURL": Array [],
@@ -2718,6 +2719,7 @@ CallTree {
     "sources": Object {
       "content": Array [],
       "filename": Array [],
+      "generatedSource": Array [],
       "id": Array [],
       "length": 0,
       "sourceMapURL": Array [],
@@ -3105,6 +3107,7 @@ Object {
   "sources": Object {
     "content": Array [],
     "filename": Array [],
+    "generatedSource": Array [],
     "id": Array [],
     "length": 0,
     "sourceMapURL": Array [],
@@ -3560,6 +3563,7 @@ Object {
   "sources": Object {
     "content": Array [],
     "filename": Array [],
+    "generatedSource": Array [],
     "id": Array [],
     "length": 0,
     "sourceMapURL": Array [],
@@ -3945,6 +3949,7 @@ Object {
   "sources": Object {
     "content": Array [],
     "filename": Array [],
+    "generatedSource": Array [],
     "id": Array [],
     "length": 0,
     "sourceMapURL": Array [],
@@ -4330,6 +4335,7 @@ Object {
   "sources": Object {
     "content": Array [],
     "filename": Array [],
+    "generatedSource": Array [],
     "id": Array [],
     "length": 0,
     "sourceMapURL": Array [],
