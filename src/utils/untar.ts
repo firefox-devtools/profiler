@@ -138,7 +138,8 @@ function _parsePaxRecords(data: Uint8Array): Map<string, string> {
 // Archives use one of these header formats:
 //  - 'ustar': POSIX UStar, possibly with pax extended headers ('x' and 'g').
 //  - 'gnu': The old GNU format, which cargo uses. It has no name prefix field;
-//    those bytes contain other fields.
+//    those bytes contain other fields. Long names are stored in separate 'L'
+//    and 'K' entries.
 //  - 'v7': The original tar format, without any extensions.
 type TarFormat = 'ustar' | 'gnu' | 'v7';
 
@@ -192,14 +193,17 @@ export class UntarFileStream {
    * Throws if the archive is malformed.
    */
   next(): TarFileEntry | null {
-    // The records of a pax 'x' header, which apply to the next member.
+    // Extension headers which apply to the next member: the records of a pax
+    // 'x' header, and the GNU long name ('L') and long link name ('K').
     let localPax: Map<string, string> | null = null;
+    let longName: string | null = null;
+    let longLinkname: string | null = null;
 
     while (true) {
       const header = this._readHeader();
       if (header === null) {
-        if (localPax !== null) {
-          throw new Error('Pax header at the end of the tar archive');
+        if (localPax !== null || longName !== null || longLinkname !== null) {
+          throw new Error('Extension header at the end of the tar archive');
         }
         return null;
       }
@@ -221,6 +225,26 @@ export class UntarFileStream {
         throw new Error(`Pax header in a ${format} tar archive`);
       }
 
+      if ((type === 'L' || type === 'K') && format !== 'gnu') {
+        throw new Error(`GNU long name header in a ${format} tar archive`);
+      }
+
+      if (type === 'L') {
+        if (longName !== null) {
+          throw new Error('Multiple GNU long names for one tar member');
+        }
+        longName = _parseString(this._readData(headerSize));
+        continue;
+      }
+
+      if (type === 'K') {
+        if (longLinkname !== null) {
+          throw new Error('Multiple GNU long link names for one tar member');
+        }
+        longLinkname = _parseString(this._readData(headerSize));
+        continue;
+      }
+
       if (type === 'g') {
         // Global pax header. Its records apply to all following members. We
         // reject all the keywords we'd otherwise use: overriding the path or
@@ -240,9 +264,10 @@ export class UntarFileStream {
         continue;
       }
 
-      // This is a real member. Resolve its fields, with pax records taking
-      // precedence over the header. A pax record with an empty value deletes
-      // the field.
+      // This is a real member. Resolve its fields, with extension headers
+      // taking precedence over the header. A pax record with an empty value
+      // deletes the field. Only one kind of extension header can be present,
+      // because the format check above ties pax to UStar and L/K to GNU.
       let headerName = _parseString(_field(header, NAME));
       if (format === 'ustar') {
         const prefix = _parseString(_field(header, PREFIX));
@@ -250,9 +275,11 @@ export class UntarFileStream {
           headerName = prefix + '/' + headerName;
         }
       }
-      const name = localPax?.get('path') ?? headerName;
+      const name = localPax?.get('path') ?? longName ?? headerName;
       const linkname =
-        localPax?.get('linkpath') ?? _parseString(_field(header, LINKNAME));
+        localPax?.get('linkpath') ??
+        longLinkname ??
+        _parseString(_field(header, LINKNAME));
       const paxSize = localPax?.get('size');
       const size = paxSize === undefined ? headerSize : _parsePaxSize(paxSize);
       if (name === '') {
