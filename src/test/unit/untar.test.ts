@@ -314,4 +314,13 @@ describe('untar', function () {
     expect(() => listEntries(archive.slice(0, 1000))).toThrow('Unexpected end');
     expect(() => listEntries(archive.slice(0, 300))).toThrow('Unexpected end');
   });
+
+  it('decodes names as UTF-8', function () {
+    const archive = makeArchive([
+      makeEntry({ name: 'mycrate-1.0.0/é.rs', prefix: 'prefix-ü' }, 'a'),
+    ]);
+    expect(listEntries(archive).map((e) => e.name)).toEqual([
+      'prefix-ü/mycrate-1.0.0/é.rs',
+    ]);
+  });
 });
