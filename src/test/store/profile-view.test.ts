@@ -28,7 +28,7 @@ import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, addSourceToTable } from '../fixtures/utils';
 
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
@@ -60,6 +60,7 @@ import type {
   CallNodePath,
   RawThread,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
   const {
@@ -1006,6 +1007,36 @@ describe('actions/ProfileView', function () {
       // "sc1" matches fn1 by filename; "rs4" matches fn4 by lib name.
       dispatch(ProfileView.changeCallTreeSearchString('sc1,rs4'));
       expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1', 'fn4']);
+    });
+
+    it('matches a func by its source-mapped original filename', function () {
+      const {
+        profile,
+        stringTable,
+        funcNamesDictPerThread: [{ fn1 }],
+        funcNamesPerThread: [funcNames],
+      } = getProfileFromTextSamples(`
+        fn1[file:bundle.js]  fn2[file:bundle.js]
+      `);
+      const { funcTable, sources, sourceLocationTable } = profile.shared;
+      const originalSourceIndex = addSourceToTable(
+        sources,
+        stringTable.indexForString(
+          '../../node_modules/react-dom/cjs/react-dom-client.production.js'
+        )
+      );
+      sourceLocationTable.source.push(originalSourceIndex);
+      sourceLocationTable.line.push(1);
+      sourceLocationTable.column.push(1);
+      funcTable.originalLocation[fn1] = sourceLocationTable.length++;
+      funcTable.flags[fn1] |= FuncFlag.HasOriginalLocation;
+
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(ProfileView.changeCallTreeSearchString('react-dom'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1']);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual(['- fn1 (total: 1, self: 1)']);
     });
   });
 
