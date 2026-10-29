@@ -762,6 +762,124 @@ export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
 /**
+ * A source file that is on a sampled stack, as far as the profile alone can
+ * tell. Which candidates the publish panel offers also depends on the
+ * contents fetched during the session.
+ */
+export type SourceCodeSharingCandidate = {
+  sourceIndex: IndexIntoSourceTable;
+  // The full file path, with any symbolication decorations stripped.
+  path: string;
+  // `path`, split into the segments shown in the file tree.
+  pathSegments: string[];
+  // Whether the path has a download recipe, so that anybody who opens the
+  // shared profile can fetch the file themselves.
+  isPubliclyDownloadable: boolean;
+};
+
+/**
+ * Whether the contents of a source file are in hand, or could be.
+ * - DOWNLOADED: we have the contents.
+ * - FETCHABLE: we don't, but the browser connection or a local symbol server
+ *   can get them, so the file can be picked and is fetched when sharing.
+ * - FAILED: a fetch was tried during this session and failed.
+ * - UNAVAILABLE: nothing we can reach has this file.
+ */
+export type SourceCodeAvailability =
+  | 'DOWNLOADED'
+  | 'FETCHABLE'
+  | 'FAILED'
+  | 'UNAVAILABLE';
+
+/**
+ * One source file offered in the publish panel.
+ */
+export type SourceCodeSharingFile = {
+  sourceIndex: IndexIntoSourceTable;
+  path: string;
+  pathSegments: string[];
+  availability: SourceCodeAvailability;
+  // The size of the file contents, or null when we don't have them. This counts
+  // UTF-16 code units rather than encoded bytes, which is close enough for
+  // source code.
+  byteCount: number | null;
+};
+
+/**
+ * A row in the file tree shown under the "Include source code" checkbox
+ * in the publish panel.
+ *
+ * A row can stand for a single file, for a chain of directories, or for a chain
+ * of directories ending in a file: any node which is an only child is collapsed
+ * into its parent's row, so that deep paths don't produce a row per component.
+ */
+export type SourceFileTreeNode = {
+  // Identifies this row across renders. This is the full path, which is unique
+  // within the tree.
+  key: string;
+  // What the row displays: the segments this row covers, joined with "/".
+  label: string;
+  // For a file row, the file's path. For a directory row, the path from the
+  // root of the tree to it.
+  path: string;
+  // For a file row, the availability of the file. null for rows that only
+  // stand for directories.
+  availability: SourceCodeAvailability | null;
+  // Every source index at or below this row that can be picked, so downloaded
+  // or fetchable, in tree order. A file row can hold several when the same
+  // path was loaded with different contents.
+  sourceIndexes: IndexIntoSourceTable[];
+  // The size of the contents we have for the files at or below this row.
+  byteCount: number;
+  downloadedFileCount: number;
+  fetchableFileCount: number;
+  children: SourceFileTreeNode[];
+};
+
+/**
+ * Counts over the source files listed in the publish panel, which the text
+ * around the "Include source code" checkbox is made of.
+ */
+export type SourceCodeSharingStats = {
+  // The files listed in the panel.
+  fileCount: number;
+  // The listed files whose contents we have, and their total size.
+  downloadedFileCount: number;
+  downloadedByteCount: number;
+  // The listed files that can be picked, so downloaded or fetchable.
+  pickableFileCount: number;
+  // The listed files that nothing reachable from here can serve.
+  unavailableFileCount: number;
+  // The sampled files left out of the panel because anybody can download them.
+  publiclyDownloadableFileCount: number;
+};
+
+/**
+ * How many files, and how many bytes of source code, the publish panel's
+ * current selection would add to the shared profile.
+ */
+export type SourceCodeSharingSummary = {
+  fileCount: number;
+  byteCount: number;
+};
+
+/**
+ * One of the ready-made file selections offered in the publish panel, above the
+ * file tree.
+ */
+export type OfferedSourceSharingPreset =
+  | 'current-file'
+  | 'selected-threads'
+  | 'all-files';
+
+/**
+ * The preset the publish panel shows as checked. `custom` isn't offered, it's
+ * what the panel falls back to once the tree no longer matches any of the
+ * offered presets.
+ */
+export type SourceSharingPreset = OfferedSourceSharingPreset | 'custom';
+
+/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */

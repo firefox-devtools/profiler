@@ -14,6 +14,8 @@ import type {
   Reducer,
   State,
   SanitizedProfileEncodingState,
+  SourceCodeFetchState,
+  SourceFileSelection,
 } from 'firefox-profiler/types';
 
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
@@ -75,6 +77,43 @@ const checkedSharingOptions: Reducer<
           [action.slug]: action.value,
         },
       };
+    default:
+      return state;
+  }
+};
+
+// `null` means untouched, in which case `getSourceFilesToShare` falls back to
+// the default selection.
+const sourceFileSelection: Reducer<
+  Record<SharingMode, SourceFileSelection | null>
+> = (state = { download: null, upload: null }, action) => {
+  switch (action.type) {
+    case 'PROFILE_LOADED':
+      return { download: null, upload: null };
+    case 'UPDATE_SOURCE_FILES_TO_SHARE':
+      return {
+        ...state,
+        [action.mode]: {
+          sourceIndexes: action.sourceIndexes,
+          preset: action.preset,
+        },
+      };
+    default:
+      return state;
+  }
+};
+
+// On by default, so that picking a preset doesn't download anything unless
+// the user asks for it.
+const sourceSharingDownloadedOnly: Reducer<Record<SharingMode, boolean>> = (
+  state = { download: true, upload: true },
+  action
+) => {
+  switch (action.type) {
+    case 'PROFILE_LOADED':
+      return { download: true, upload: true };
+    case 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY':
+      return { ...state, [action.mode]: action.value };
     default:
       return state;
   }
@@ -264,9 +303,41 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
   }
 };
 
+const sourceCodeFetch: Reducer<SourceCodeFetchState> = (
+  state = {
+    isFetching: false,
+    totalCount: 0,
+    completedCount: 0,
+    generation: 0,
+  },
+  action
+) => {
+  switch (action.type) {
+    case 'SOURCE_CODE_FETCH_STARTED':
+      return {
+        ...state,
+        isFetching: true,
+        totalCount: action.totalCount,
+        completedCount: 0,
+      };
+    case 'SOURCE_CODE_FETCH_PROGRESS':
+      return { ...state, completedCount: action.completedCount };
+    case 'SOURCE_CODE_FETCH_FINISHED':
+      return { ...state, isFetching: false };
+    case 'SOURCE_CODE_FETCH_CANCELLED':
+    case 'PROFILE_LOADED':
+      return { ...state, isFetching: false, generation: state.generation + 1 };
+    default:
+      return state;
+  }
+};
+
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
+  sourceFileSelection,
+  sourceSharingDownloadedOnly,
   sanitizedProfileEncodingState,
+  sourceCodeFetch,
   upload,
   isHidingStaleProfile,
   hasSanitizedProfile,

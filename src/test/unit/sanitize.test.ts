@@ -1751,15 +1751,29 @@ describe('sanitizePII', function () {
     ).toEqual([true, false]);
   });
 
-  it('always removes source contents even when no PII removal is requested', function () {
+  // Whether the source contents are shared is decided before sanitization, by
+  // the selectors in src/selectors/publish.ts, so sanitization itself has to
+  // leave whatever it is handed alone.
+  it('keeps the source contents it is handed', function () {
     const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
     // There should be only one source.
     expect(profile.shared.sources.content.length).toEqual(1);
     // Pretend the source content have been loaded.
     profile.shared.sources.content[0] = 'source code';
 
+    // Ask for some unrelated sanitization, so that the whole sanitization path
+    // runs, including the compaction step.
+    const { sanitizedProfile } = setup({ shouldRemoveUrls: true }, profile);
+
+    expect(sanitizedProfile.shared.sources.content).toEqual(['source code']);
+  });
+
+  it('keeps the source contents when no PII removal is requested', function () {
+    const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
+    profile.shared.sources.content[0] = 'source code';
+
     // A null `RemoveProfileInformation` means the user kept all sharing options
-    // checked, so no other sanitization happens.
+    // checked, so nothing is sanitized at all.
     const { profile: sanitizedProfile } = sanitizePII(
       profile,
       [],
@@ -1768,9 +1782,6 @@ describe('sanitizePII', function () {
       {}
     );
 
-    expect(sanitizedProfile.shared.sources.content.length).toEqual(
-      profile.shared.sources.content.length
-    );
-    expect(sanitizedProfile.shared.sources.content[0]).toBe(null);
+    expect(sanitizedProfile.shared.sources.content).toEqual(['source code']);
   });
 });

@@ -471,6 +471,7 @@ describe('receive-profile -> JS source map symbolication', function () {
       expect(getSourceViewCode(getState())).toEqual({
         type: 'AVAILABLE',
         code: ORIGINAL_SOURCE,
+        origin: 'PROFILE',
       });
     });
   });

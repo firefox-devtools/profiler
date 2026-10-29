@@ -28,6 +28,7 @@ import type {
   ThreadsKey,
   NativeSymbolInfo,
   ProfileIndexTranslationMaps,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -46,6 +47,7 @@ import type {
   TableViewOptions,
   DecodedInstruction,
   ProfileEncodingResult,
+  FetchedSourceCodeOrigin,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -655,6 +657,24 @@ type PublishAction =
       readonly value: boolean;
     }
   | {
+      readonly type: 'UPDATE_SOURCE_FILES_TO_SHARE';
+      readonly mode: SharingMode;
+      readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+      readonly preset: OfferedSourceSharingPreset | null;
+    }
+  | {
+      readonly type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY';
+      readonly mode: SharingMode;
+      readonly value: boolean;
+    }
+  | { readonly type: 'SOURCE_CODE_FETCH_STARTED'; readonly totalCount: number }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_PROGRESS';
+      readonly completedCount: number;
+    }
+  | { readonly type: 'SOURCE_CODE_FETCH_FINISHED' }
+  | { readonly type: 'SOURCE_CODE_FETCH_CANCELLED' }
+  | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly sanitizedProfile: Profile;
       readonly encodingPromise: Promise<ProfileEncodingResult>;
@@ -719,25 +739,30 @@ type CurrentProfileUploadedInformationAction = {
   readonly uploadedProfileInformation: UploadedProfileInformation | null;
 };
 
-type SourcesAction =
+export type SourcesAction =
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_URL';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly url: string;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION';
       readonly sourceIndex: IndexIntoSourceTable;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_SUCCESS';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly code: string;
+      readonly origin: FetchedSourceCodeOrigin;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_ERROR';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly errors: SourceCodeLoadingError[];
+      readonly generation: number;
     };
 
 // nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`
