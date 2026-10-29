@@ -170,6 +170,7 @@ export class GlobalDataCollector {
       this._sources.startColumn[index] = startColumn;
       this._sources.sourceMapURL[index] = sourceMapURLIndex;
       this._sources.content[index] = null;
+      this._sources.generatedSource[index] = null;
       this._sources.length++;
 
       if (id !== null) {

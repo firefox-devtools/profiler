@@ -716,6 +716,7 @@ export function addSourceToTable(
   sources.startColumn.push(startColumn);
   sources.sourceMapURL.push(sourceMapURLStringIndex);
   sources.content.push(null);
+  sources.generatedSource.push(null);
   sources.length = sources.filename.length;
 
   return sourceIndex;

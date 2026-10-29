@@ -6,6 +6,14 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 77
+
+A `generatedSource` column was added to the source table (`profile.shared.sources`). It contains the index of the corresponding "bundle" source in the source table, or null. It is only non-null on "original sources" which were obtained from a source map.
+
+This lets us differentiate two original sources with the path "webpack://src/index.js" if they came from different generated sources / "bundles", e.g. from `https://foo.com/bundle.js` and `https://bar.com/bundle.js`. Tracking the bundle URL lets us do correct merging in the compare view, and it is also just useful information to keep around.
+
+If a func has `source` 3 and `originalLocation` -> `source` 5, then source 5 will have `generatedSource` 3.
+
 ### Version 76
 
 The `CompositorScreenshot` marker payload's `windowWidth` and `windowHeight` fields were replaced with a single `windowSize` field of the form `{ width, height }`. The `windowID` field is now always a string.

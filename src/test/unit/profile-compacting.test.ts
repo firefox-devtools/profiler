@@ -4,6 +4,8 @@
 
 import { computeCompactedProfile } from '../../profile-logic/profile-compacting';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { FuncFlag } from 'firefox-profiler/types';
+import type { SourceTable } from 'firefox-profiler/types';
 
 describe('computeCompactedProfile', function () {
   // Every column whose format type allows a typed array should come out of
@@ -60,5 +62,48 @@ describe('computeCompactedProfile', function () {
     expect(after.length).toBe(before.length);
     expect(Array.from(after.category)).toEqual(beforeCategory);
     expect(Array.from(after.subcategory)).toEqual(beforeSubcategory);
+  });
+
+  it('keeps the generated source of a referenced original source', function () {
+    const { profile } = getProfileFromTextSamples(`A[file:a.js]`);
+    const { sources, sourceLocationTable, funcTable, stringArray } =
+      profile.shared;
+    function addSource(filename: string, generatedSource: number | null) {
+      sources.id.push(null);
+      sources.filename.push(stringArray.push(filename) - 1);
+      sources.startLine.push(1);
+      sources.startColumn.push(1);
+      sources.sourceMapURL.push(null);
+      sources.content.push(null);
+      sources.generatedSource.push(generatedSource);
+      return sources.length++;
+    }
+    // Neither of these is referenced by a func. The bundle is only referenced
+    // through the original source's generatedSource column.
+    addSource('unused.js', null);
+    const bundleIndex = addSource('bundle.js', null);
+    const originalIndex = addSource('src/original.js', bundleIndex);
+    sourceLocationTable.source.push(originalIndex);
+    sourceLocationTable.line.push(1);
+    sourceLocationTable.column.push(1);
+    sourceLocationTable.length++;
+    funcTable.originalLocation[0] = 0;
+    funcTable.flags[0] |= FuncFlag.HasOriginalLocation;
+
+    const { profile: compacted } = computeCompactedProfile(profile);
+    const shared = compacted.shared;
+    const getFilename = (sourceIndex: number) =>
+      shared.stringArray[shared.sources.filename[sourceIndex]];
+    const describeSources = (table: SourceTable) =>
+      table.generatedSource.map((generatedSource, sourceIndex) => ({
+        filename: getFilename(sourceIndex),
+        generatedSource:
+          generatedSource === null ? null : getFilename(generatedSource),
+      }));
+    expect(describeSources(shared.sources)).toEqual([
+      { filename: 'a.js', generatedSource: null },
+      { filename: 'bundle.js', generatedSource: null },
+      { filename: 'src/original.js', generatedSource: 'bundle.js' },
+    ]);
   });
 });
