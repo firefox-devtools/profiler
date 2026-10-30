@@ -12,6 +12,10 @@ import {
   getSourceViewFile,
   getSourceViewSourceIndex,
   getSourceViewSourceId,
+  getGeneratedSourceViewCode,
+  getGeneratedSourceViewFile,
+  getGeneratedSourceViewSourceIndex,
+  getGeneratedSourceViewSourceId,
 } from 'firefox-profiler/selectors';
 import {
   beginLoadingSourceCodeFromUrl,
@@ -33,6 +37,9 @@ import type {
   IndexIntoSourceTable,
 } from 'firefox-profiler/types';
 
+// The same component fetches the code for the source view and for the
+// generated source view. The StateProps describe the source of the respective
+// view.
 type StateProps = {
   readonly sourceViewFile: string | null;
   readonly sourceViewSourceIndex: IndexIntoSourceTable | null;
@@ -132,6 +139,13 @@ class SourceCodeFetcherImpl extends React.PureComponent<Props> {
   }
 }
 
+const mapDispatchToProps = {
+  beginLoadingSourceCodeFromUrl,
+  beginLoadingSourceCodeFromBrowserConnection,
+  finishLoadingSourceCode,
+  failLoadingSourceCode,
+};
+
 export const SourceCodeFetcher = explicitConnect<{}, StateProps, DispatchProps>(
   {
     mapStateToProps: (state) => ({
@@ -143,12 +157,25 @@ export const SourceCodeFetcher = explicitConnect<{}, StateProps, DispatchProps>(
       profile: getProfileOrNull(state),
       browserConnection: getBrowserConnection(state),
     }),
-    mapDispatchToProps: {
-      beginLoadingSourceCodeFromUrl,
-      beginLoadingSourceCodeFromBrowserConnection,
-      finishLoadingSourceCode,
-      failLoadingSourceCode,
-    },
+    mapDispatchToProps,
     component: SourceCodeFetcherImpl,
   }
 );
+
+export const GeneratedSourceCodeFetcher = explicitConnect<
+  {},
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state) => ({
+    sourceViewSourceIndex: getGeneratedSourceViewSourceIndex(state),
+    sourceViewFile: getGeneratedSourceViewFile(state),
+    sourceViewSourceId: getGeneratedSourceViewSourceId(state),
+    sourceViewCode: getGeneratedSourceViewCode(state),
+    symbolServerUrl: getSymbolServerUrl(state),
+    profile: getProfileOrNull(state),
+    browserConnection: getBrowserConnection(state),
+  }),
+  mapDispatchToProps,
+  component: SourceCodeFetcherImpl,
+});

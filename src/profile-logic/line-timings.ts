@@ -16,6 +16,14 @@ import type {
 } from 'firefox-profiler/types';
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
+import { mapGetKeyWithMaxValue } from 'firefox-profiler/utils';
+
+// Maps a line and column in a source to the line that should be used for the
+// line timings. The column is null if it's unknown.
+export type PositionToLineMapper = (
+  line: LineNumber,
+  column: number | null
+) => LineNumber;
 
 /**
  * For each stack in `stackTable`, and one specific source file, compute the
@@ -44,13 +52,22 @@ import { SetCollectionBuilder } from 'firefox-profiler/utils/set-collection';
  * This last line is the stack's "self line".
  * If there is recursion, and the same line is present in multiple frames in the
  * same stack, the line is only counted once - the lines are stored in a set.
+ *
+ * If sourceLocationTable is null, source-mapped frames are attributed to their
+ * generated (compiled) position rather than to their original position. This
+ * is used to compute the timings for the generated code of a bundle.
+ *
+ * If mapPositionToLine is given, it maps each line and column to the line
+ * which is used in the result. This is used when the source view shows
+ * pretty-printed code. The column is null if it's unknown.
  */
 export function getStackLineInfo(
   stackTable: StackTable,
   frameTable: FrameTable,
   funcTable: FuncTable,
   sourceViewSourceIndex: IndexIntoSourceTable,
-  sourceLocationTable: SourceLocationTable
+  sourceLocationTable: SourceLocationTable | null,
+  mapPositionToLine: PositionToLineMapper | null = null
 ): StackLineInfo {
   const builder = new SetCollectionBuilder<number>();
   const stackIndexToLineSetIndex = new Int32Array(stackTable.length);
@@ -70,8 +87,10 @@ export function getStackLineInfo(
     const frameFlags = frameTable.flags[frame];
     const funcFlags = funcTable.flags[func];
     const frameHasOriginalLocation =
+      sourceLocationTable !== null &&
       (frameFlags & FrameFlag.HasOriginalLocation) !== 0;
     const funcHasOriginalLocation =
+      sourceLocationTable !== null &&
       (funcFlags & FuncFlag.HasOriginalLocation) !== 0;
     const frameOriginalLocationIdx = frameHasOriginalLocation
       ? frameTable.originalLocation[frame]
@@ -98,14 +117,26 @@ export function getStackLineInfo(
     } else {
       let selfLineOrNull: number | null = null;
       if (matchesSource) {
+        let column: number | null = null;
         if (frameHasOriginalLocation) {
           selfLineOrNull = sourceLocationTable.line[frameOriginalLocationIdx];
+          column = sourceLocationTable.column[frameOriginalLocationIdx];
         } else if (funcHasOriginalLocation) {
           selfLineOrNull = sourceLocationTable.line[funcOriginalLocationIdx];
+          column = sourceLocationTable.column[funcOriginalLocationIdx];
         } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
           selfLineOrNull = frameTable.line[frame];
+          if ((frameFlags & FrameFlag.HasColumn) !== 0) {
+            column = frameTable.column[frame];
+          }
         } else if ((funcFlags & FuncFlag.HasLine) !== 0) {
           selfLineOrNull = funcTable.lineNumber[func];
+          if ((funcFlags & FuncFlag.HasColumn) !== 0) {
+            column = funcTable.columnNumber[func];
+          }
+        }
+        if (mapPositionToLine !== null && selfLineOrNull !== null) {
+          selfLineOrNull = mapPositionToLine(selfLineOrNull, column);
         }
       }
 
@@ -206,13 +237,15 @@ export function getLineTimings(
 // along with the total of the sample weights per line.
 // callNodeFramePerStack needs to be a mapping from stackIndex to the
 // corresponding frame in the call node of interest.
+// If sourceLocationTable is null, the generated (compiled) lines are used for
+// source-mapped frames, like in getStackLineInfo.
 export function getTotalLineTimingsForCallNode(
   samples: SamplesLikeTable,
   callNodeFramePerStack: Int32Array,
   frameTable: FrameTable,
   funcTable: FuncTable,
   funcLine: LineNumber | null,
-  sourceLocationTable: SourceLocationTable
+  sourceLocationTable: SourceLocationTable | null
 ): Map<LineNumber, number> {
   const totalPerLine = new Map<LineNumber, number>();
   for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
@@ -233,10 +266,16 @@ export function getTotalLineTimingsForCallNode(
     const frameFlags = frameTable.flags[callNodeFrame];
     const funcFlags = funcTable.flags[funcIndex];
     let frameLine: number | null;
-    if ((frameFlags & FrameFlag.HasOriginalLocation) !== 0) {
+    if (
+      sourceLocationTable !== null &&
+      (frameFlags & FrameFlag.HasOriginalLocation) !== 0
+    ) {
       frameLine =
         sourceLocationTable.line[frameTable.originalLocation[callNodeFrame]];
-    } else if ((funcFlags & FuncFlag.HasOriginalLocation) !== 0) {
+    } else if (
+      sourceLocationTable !== null &&
+      (funcFlags & FuncFlag.HasOriginalLocation) !== 0
+    ) {
       frameLine =
         sourceLocationTable.line[funcTable.originalLocation[funcIndex]];
     } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
@@ -257,4 +296,83 @@ export function getTotalLineTimingsForCallNode(
   }
 
   return totalPerLine;
+}
+
+/**
+ * Returns the column with the highest sample weight on the given line of a
+ * call node, or undefined if no sample has a column on this line. The lines
+ * are resolved in the same way as in getTotalLineTimingsForCallNode.
+ *
+ * This is used to scroll to the right place in a pretty-printed source view:
+ * minified code often has very long lines, so the line alone doesn't say
+ * much.
+ */
+export function getHottestColumnForLineInCallNode(
+  samples: SamplesLikeTable,
+  callNodeFramePerStack: Int32Array,
+  frameTable: FrameTable,
+  funcTable: FuncTable,
+  line: LineNumber,
+  sourceLocationTable: SourceLocationTable | null
+): number | undefined {
+  const totalPerColumn = new Map<number, number>();
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stack = samples.stack[sampleIndex];
+    if (stack === null) {
+      continue;
+    }
+    const callNodeFrame = callNodeFramePerStack[stack];
+    if (callNodeFrame === -1) {
+      continue;
+    }
+
+    const funcIndex = frameTable.func[callNodeFrame];
+    const frameFlags = frameTable.flags[callNodeFrame];
+    const funcFlags = funcTable.flags[funcIndex];
+    let frameLine: number;
+    let frameColumn: number;
+    if (
+      sourceLocationTable !== null &&
+      (frameFlags & FrameFlag.HasOriginalLocation) !== 0
+    ) {
+      const locationIndex = frameTable.originalLocation[callNodeFrame];
+      frameLine = sourceLocationTable.line[locationIndex];
+      frameColumn = sourceLocationTable.column[locationIndex];
+    } else if (
+      sourceLocationTable !== null &&
+      (funcFlags & FuncFlag.HasOriginalLocation) !== 0
+    ) {
+      const locationIndex = funcTable.originalLocation[funcIndex];
+      frameLine = sourceLocationTable.line[locationIndex];
+      frameColumn = sourceLocationTable.column[locationIndex];
+    } else if ((frameFlags & FrameFlag.HasLine) !== 0) {
+      if ((frameFlags & FrameFlag.HasColumn) === 0) {
+        continue;
+      }
+      frameLine = frameTable.line[callNodeFrame];
+      frameColumn = frameTable.column[callNodeFrame];
+    } else if (
+      (funcFlags & FuncFlag.HasLine) !== 0 &&
+      (funcFlags & FuncFlag.HasColumn) !== 0
+    ) {
+      // Like in getTotalLineTimingsForCallNode, frames without a line use the
+      // start of the function.
+      frameLine = funcTable.lineNumber[funcIndex];
+      frameColumn = funcTable.columnNumber[funcIndex];
+    } else {
+      continue;
+    }
+    if (frameLine !== line) {
+      continue;
+    }
+
+    const sampleWeight =
+      samples.weight !== null ? samples.weight[sampleIndex] : 1;
+    totalPerColumn.set(
+      frameColumn,
+      (totalPerColumn.get(frameColumn) ?? 0) + sampleWeight
+    );
+  }
+
+  return mapGetKeyWithMaxValue(totalPerColumn);
 }

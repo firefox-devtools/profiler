@@ -38,6 +38,7 @@ import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
+import type { FormatEdits } from '../profile-logic/js-format/types';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
@@ -259,11 +260,41 @@ export type SourceViewState = {
   scrollGeneration: number;
   // Optional line number to scroll to in the source view.
   scrollToLineNumber?: number;
+  // Optional column number on scrollToLineNumber. This is used to find the
+  // right line when the source view is pretty-printed.
+  scrollToColumnNumber?: number;
   // Index into source table. Contains information (filename and uuid) about the
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;
   // The line number of the highlighted line in the source view.
   highlightedLine: number | null;
+  // The column number on the highlighted line, if known.
+  highlightedColumn: number | null;
+  // Whether JS code is pretty-printed in the source view. This stays the same
+  // when a different source is shown.
+  isPrettyPrinted: boolean;
+};
+
+export type GeneratedSourceViewState = {
+  // Whether the generated source view panel is open within the bottom box.
+  // This can be true even if the bottom box itself is closed, or if the current
+  // function has no source map. The panel is only displayed if sourceIndex is
+  // non-null.
+  isOpen: boolean;
+  scrollGeneration: number;
+  // Optional line number to scroll to in the generated source view.
+  scrollToLineNumber?: number;
+  // Optional column number on scrollToLineNumber, see SourceViewState.
+  scrollToColumnNumber?: number;
+  // Index into the source table for the generated (compiled) code, for example
+  // a JS bundle. Null if the current function isn't source-mapped.
+  sourceIndex: IndexIntoSourceTable | null;
+  // The line number of the highlighted line in the generated source view.
+  highlightedLine: number | null;
+  // The column number on the highlighted line, if known.
+  highlightedColumn: number | null;
+  // Whether the generated code is pretty-printed.
+  isPrettyPrinted: boolean;
 };
 
 export type AssemblyViewState = {
@@ -373,6 +404,7 @@ export type ProfileSpecificUrlState = {
   transforms: TransformStacksPerThread;
   timelineType: TimelineType;
   sourceView: SourceViewState;
+  generatedSourceView: GeneratedSourceViewState;
   assemblyView: AssemblyViewState;
   isBottomBoxOpenPerPanel: IsOpenPerPanelState;
   isBottomBoxFullscreen: boolean;
@@ -389,6 +421,74 @@ export type ProfileSpecificUrlState = {
   markerTableSort: SingleColumnSortState[] | null;
 };
 
+/**
+ * Which buckets the benchmark comparison lists, by how they relate to the
+ * overall score. See BUCKET_FILTER_MODES in BenchmarkCompareViewer.tsx.
+ */
+export type BenchmarkBucketFilterMode = 'movers' | 'significant' | 'none';
+
+/**
+ * Which buckets to list: all of them, or only the ones on one side of the
+ * comparison.
+ *
+ * A mixed list is the right default when you are asking "what did my patch do",
+ * because the answer includes both. It is the wrong shape for the other question
+ * this view now serves — "where is Firefox losing to Chrome" — where the wins and
+ * the losses are separate pieces of work and interleaving them by size means
+ * scanning past half the table to read either one. The old comparison report
+ * built a separate list per direction for exactly this reason.
+ *
+ * The choice is a sentence with two slots — which profile, then which direction
+ * — rather than one list naming the slower side. With two profiles the two forms
+ * select the same three subsets, so the difference is entirely one of reading: a
+ * list of "Firefox is slower" / "Chrome is slower" contains the answer to "where
+ * is Firefox faster" but never says the word, and a reader looking at an
+ * unfamiliar report does not reliably make the substitution. Observed, on a
+ * Firefox-vs-Chrome comparison: they asked how to show where Firefox was faster
+ * and did not recognise "Chrome is slower" as it. Naming a side once and then
+ * saying faster or slower about it costs one more control and answers the
+ * question as asked.
+ *
+ * The profile slot is the *subject* of that sentence, and the subject is also
+ * what the whole report is about: every row is the subject measured against the
+ * comparand. So picking a subject recomputes the report, and with two profiles
+ * it swaps the two sides.
+ */
+export type BenchmarkBucketShow = 'all' | 'faster' | 'slower';
+
+/**
+ * What the subject is being compared with: another profile by its position in
+ * the loaded list, or whichever of the others is quickest on the row in hand.
+ *
+ * The aggregate is the point of loading a third profile. "Firefox is slower than
+ * Chrome" is a question about Chrome; "Firefox is slower than the fastest of the
+ * others" is the question a browser engineer actually has, because its answer
+ * comes with an existence proof -- somebody does this faster, so it can be done
+ * faster. It is also why the comparand is a slot rather than the options being
+ * written out one per phrasing: "the fastest of the others" is not an ordered
+ * pair, so there is no ready-made sentence for it. How such a row is computed
+ * is in best-of-others.ts.
+ *
+ * With two profiles loaded, 'best' *is* the other profile, so the slot has one
+ * distinct value and is not shown.
+ */
+export type BenchmarkBucketComparand = number | 'best';
+
+/**
+ * What the benchmark comparison compares, and which of its buckets it lists, as
+ * the URL carries it.
+ *
+ * Profiles are referred to by their position in `profilesToCompare`. A null
+ * `subject` means the second profile, which is the new side when two profiles
+ * are a before and an after.
+ */
+export type BenchmarkBucketFilter = {
+  readonly mode: BenchmarkBucketFilterMode;
+  readonly subject: number | null;
+  readonly comparand: BenchmarkBucketComparand;
+  readonly show: BenchmarkBucketShow;
+};
+
 export type UrlState = {
   readonly dataSource: DataSource;
   // This is used for the "public" dataSource".
@@ -397,6 +497,12 @@ export type UrlState = {
   readonly profileUrl: string;
   // This is used for the "compare" dataSource, to compare 2 profiles.
   readonly profilesToCompare: string[] | null;
+  // Display names for `profilesToCompare`, used by the "compare-benchmark"
+  // dataSource. Null when the URL doesn't name them, in which case the
+  // benchmark view falls back to DEFAULT_BENCHMARK_PROFILE_NAMES.
+  readonly profileNamesToCompare: string[] | null;
+  // Used by the "compare-benchmark" dataSource.
+  readonly benchmarkBucketFilter: BenchmarkBucketFilter;
   readonly selectedTab: TabSlug;
   readonly pathInZipFile: string | null;
   readonly profileName: string | null;
@@ -414,9 +520,21 @@ export type PseudoStrategy = null | 'bidi' | 'accented';
  */
 export type IconsWithClassNames = Map<string, string>;
 
+// The result of pretty-printing a source, see FormatEdits. While the format
+// worker is busy, isDone is false and the edits only cover the start of the
+// code.
+export type SourceFormattingStatus = {
+  readonly edits: FormatEdits;
+  readonly isDone: boolean;
+};
+
 export type CodeState = {
   readonly sourceCodeCache: Map<IndexIntoSourceTable, SourceCodeStatus>;
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
+  readonly sourceFormattingCache: Map<
+    IndexIntoSourceTable,
+    SourceFormattingStatus
+  >;
 };
 
 export type State = {

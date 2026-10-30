@@ -18,13 +18,22 @@ import {
   setDataSource,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  openGeneratedSourceView,
+  closeGeneratedSourceView,
+  setSourceViewPrettyPrint,
+  setGeneratedSourceViewPrettyPrint,
   changeShowUserTimings,
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
   changeSelectedMarker,
   changeMarkerTableSort,
 } from '../actions/profile-view';
-import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
+import {
+  changeSelectedTab,
+  changeProfilesToCompare,
+  changeProfilesToCompareBenchmark,
+  changeBenchmarkBucketFilter,
+} from '../actions/app';
 import {
   stateFromLocation,
   getQueryStringFromUrlState,
@@ -1759,6 +1768,71 @@ describe('compare', function () {
   });
 });
 
+describe('compare-benchmark', function () {
+  const url1 = 'http://fake-url.com/hash/1';
+  const url2 = 'http://fake-url.com/hash/2';
+  const url3 = 'http://fake-url.com/hash/3';
+
+  function getStoreWithProfiles() {
+    const store = _getStoreWithURL(
+      { pathname: '/compare-benchmark/' },
+      /* no profile */ null
+    );
+    store.dispatch(
+      changeProfilesToCompareBenchmark(
+        [url1, url2, url3],
+        ['Chrome', 'Firefox', 'Safari']
+      )
+    );
+    return store;
+  }
+
+  it('leaves an unfiltered comparison out of the URL', function () {
+    const store = getStoreWithProfiles();
+    const url = urlFromState(urlStateSelectors.getUrlState(store.getState()));
+    expect(url).not.toMatch('show=');
+    expect(url).not.toMatch('buckets=');
+    expect(url).not.toMatch('subject=');
+    expect(url).not.toMatch('than=');
+  });
+
+  it('round-trips the bucket filter through the URL', function () {
+    const store = getStoreWithProfiles();
+    const filter = {
+      mode: 'significant',
+      subject: 1,
+      comparand: 2,
+      show: 'faster',
+    } as const;
+    store.dispatch(changeBenchmarkBucketFilter(filter));
+    const url = urlFromState(urlStateSelectors.getUrlState(store.getState()));
+    expect(url).toMatch('show=faster');
+
+    const newUrlState = stateFromLocation(
+      new URL(url, 'https://profiler.firefox.com')
+    );
+    expect(newUrlState.benchmarkBucketFilter).toEqual(filter);
+  });
+
+  it('falls back to the defaults for values it does not recognise', function () {
+    const store = _getStoreWithURL(
+      {
+        pathname: '/compare-benchmark/',
+        search: '?show=sideways&buckets=all&subject=-1&than=best',
+      },
+      /* no profile */ null
+    );
+    expect(
+      urlStateSelectors.getBenchmarkBucketFilter(store.getState())
+    ).toEqual({
+      mode: 'movers',
+      subject: null,
+      comparand: 'best',
+      show: 'all',
+    });
+  });
+});
+
 describe('uploaded-recordings', function () {
   it('unserializes uploaded-recordings URLs', () => {
     const store = _getStoreWithURL(
@@ -2031,9 +2105,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: null,
       nativeSymbols: [],
       initialNativeSymbol: null,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -2053,6 +2129,95 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     ).toBeNull();
   });
 
+  it('persists the generated source view to the URL only while it is open', function () {
+    const { dispatch, getState, getSourceIndex } = setup();
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
+    // The URL handling doesn't care what the generated source index refers to,
+    // it only needs to differ from the source view's index.
+    const generatedSourceIndex = sourceIndex + 1;
+    const bottomBoxInfo: BottomBoxInfo = {
+      sourceIndex,
+      generatedSourceIndex,
+      nativeSymbols: [],
+      initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
+      highlightedInstructionAddress: null,
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+
+    // The generated source view starts out closed.
+    let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
+    ).toBeFalse();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewSourceIndex(newStore.getState())
+    ).toBeNull();
+
+    dispatch(openGeneratedSourceView());
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewSourceIndex(newStore.getState())
+    ).toBe(sourceIndex);
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewSourceIndex(newStore.getState())
+    ).toBe(generatedSourceIndex);
+
+    dispatch(closeGeneratedSourceView());
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsOpen(newStore.getState())
+    ).toBeFalse();
+  });
+
+  it('persists pretty-printing of both source panes', function () {
+    const { dispatch, getState, getSourceIndex } = setup();
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
+    const bottomBoxInfo: BottomBoxInfo = {
+      sourceIndex,
+      generatedSourceIndex: sourceIndex + 1,
+      nativeSymbols: [],
+      initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
+      highlightedInstructionAddress: null,
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    dispatch(openGeneratedSourceView());
+    expect(getQueryStringFromState(getState())).not.toContain('Pretty');
+
+    dispatch(setSourceViewPrettyPrint(true));
+    let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+    ).toBeTrue();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsPrettyPrinted(
+        newStore.getState()
+      )
+    ).toBeFalse();
+
+    dispatch(setSourceViewPrettyPrint(false));
+    dispatch(setGeneratedSourceViewPrettyPrint(true));
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+    ).toBeFalse();
+    expect(
+      urlStateSelectors.getGeneratedSourceViewIsPrettyPrinted(
+        newStore.getState()
+      )
+    ).toBeTrue();
+  });
+
   it('keeps a closed bottom box closed, even if a source file was loaded before', function () {
     const { dispatch, getState, getSourceIndex } = setup();
     expect(urlStateSelectors.getSelectedTab(getState())).toBe('calltree');
@@ -2065,9 +2230,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: null,
       nativeSymbols: [],
       initialNativeSymbol: null,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -2095,9 +2262,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex: null,
+      generatedSourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
@@ -2139,9 +2308,11 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     };
     const bottomBoxInfo: BottomBoxInfo = {
       sourceIndex,
+      generatedSourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
       highlightedLineNumber: null,
+      highlightedGeneratedLineNumber: null,
       highlightedInstructionAddress: null,
     };
     dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));

@@ -14,6 +14,7 @@
  *   profiler-cli stop [<id>] [--all]                   Stop the daemon
  *   profiler-cli session list                          List all running sessions
  *   profiler-cli session use <id>                      Switch the current session
+ *   profiler-cli -i [<command>]                        Interactive prompt, optionally running <command> first
  *
  * Build:
  *   yarn build-cli
@@ -48,6 +49,7 @@ import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
 import { registerSourcemapCommand } from './commands/sourcemap';
 import { registerSessionCommand } from './commands/session';
+import { runRepl, type ReplState } from './repl';
 
 // Read session directory from environment (only place this is read)
 const SESSION_DIR =
@@ -83,10 +85,55 @@ async function main(): Promise<void> {
     return;
   }
 
+  if (rawArgs[0] === '-i' || rawArgs[0] === '--interactive') {
+    const state: ReplState = {
+      sessionId: undefined,
+      ownedSessionIds: new Set(),
+    };
+    await runRepl(
+      state,
+      rawArgs.slice(1),
+      async (args) => {
+        await createProgram(state).parseAsync(args, { from: 'user' });
+      },
+      (sessionId) => stopDaemon(SESSION_DIR, sessionId)
+    );
+    return;
+  }
+
+  try {
+    await createProgram().parseAsync(process.argv);
+  } catch (error) {
+    console.error(`Error: ${error instanceof Error ? error.message : error}`);
+    process.exit(1);
+  }
+}
+
+/**
+ * Build the commander program with all commands registered. `repl` is passed
+ * when running inside the interactive prompt, which builds a fresh program for
+ * every line.
+ */
+function createProgram(repl?: ReplState): Command {
   const program = addSessionOption(new Command());
+  if (repl) {
+    // Throw instead of exiting on --help and on parse errors. This must be set
+    // before the subcommands are added, because they copy it when created.
+    program.exitOverride();
+  }
   program.hook('preAction', (rootCommand, actionCommand) => {
+    if (rootCommand.opts().interactive && !repl) {
+      throw new Error('-i/--interactive must be the first argument.');
+    }
     if (actionCommand.opts().session === undefined) {
-      actionCommand.setOptionValue('session', rootCommand.opts().session);
+      // "load" without --session starts a new session, so the prompt's pinned
+      // session does not apply to it.
+      const replSessionId =
+        actionCommand.name() === 'load' ? undefined : repl?.sessionId;
+      actionCommand.setOptionValue(
+        'session',
+        rootCommand.opts().session ?? replSessionId
+      );
     }
   });
   program
@@ -94,12 +141,17 @@ async function main(): Promise<void> {
     .description('Profiler CLI — query Firefox profiles from the terminal')
     .version(VERSION, '-V, --version', 'Print the version number')
     .helpOption('-h, --help', 'Show help')
+    .option(
+      '-i, --interactive',
+      'Start an interactive prompt (must be the first argument); a command given after it runs first'
+    )
     .addHelpCommand('help [command]', 'Show help for a command')
     .addHelpText(
       'after',
       `
 Examples:
   profiler-cli load profile.json.gz
+  profiler-cli -i load profile.json.gz
   profiler-cli load profile.json --with-samply
   profiler-cli profile info
   profiler-cli thread list
@@ -121,9 +173,10 @@ Examples:
 
   // Unknown commands
   program.on('command:*', (operands: string[]) => {
-    console.error(`Error: Unknown command '${operands[0]}'\n`);
-    program.outputHelp();
-    process.exit(1);
+    const hint = repl ? 'Type "help"' : 'Run "profiler-cli --help"';
+    throw new Error(
+      `Unknown command '${operands[0]}'. ${hint} for a list of commands.`
+    );
   });
 
   // profiler-cli load <path>
@@ -149,6 +202,10 @@ Examples:
       opts.withSamply ?? false
     );
     console.log(`Session started: ${sessionId}`);
+    if (repl) {
+      repl.sessionId = sessionId;
+      repl.ownedSessionIds.add(sessionId);
+    }
     const { result: status } = await sendCommand(
       SESSION_DIR,
       { command: 'status' },
@@ -205,6 +262,10 @@ Examples:
           `Error: ${failure.reason instanceof Error ? failure.reason.message : failure.reason}`
         );
       }
+      if (repl) {
+        repl.ownedSessionIds.clear();
+        repl.sessionId = undefined;
+      }
       if (failures.length !== 0) {
         throw new Error(
           `Could not stop ${failures.length} of ${sessionIds.length} sessions.`
@@ -213,6 +274,12 @@ Examples:
     } else {
       const sessionId = idArg ?? opts.session;
       await stopDaemon(SESSION_DIR, sessionId);
+      if (repl && sessionId !== undefined) {
+        repl.ownedSessionIds.delete(sessionId);
+        if (repl.sessionId === sessionId) {
+          repl.sessionId = undefined;
+        }
+      }
     }
   });
 
@@ -241,14 +308,13 @@ Examples:
   registerZoomCommand(program, SESSION_DIR);
   registerFilterCommand(program, SESSION_DIR);
   registerSourcemapCommand(program, SESSION_DIR);
-  registerSessionCommand(program, SESSION_DIR);
+  registerSessionCommand(program, SESSION_DIR, (sessionId) => {
+    if (repl) {
+      repl.sessionId = sessionId;
+    }
+  });
 
-  try {
-    await program.parseAsync(process.argv);
-  } catch (error) {
-    console.error(`Error: ${error instanceof Error ? error.message : error}`);
-    process.exit(1);
-  }
+  return program;
 }
 
 main().catch((error) => {

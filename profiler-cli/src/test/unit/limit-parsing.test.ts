@@ -17,23 +17,6 @@
 import { parseLimitArg } from '../../utils/parse';
 
 describe('parseLimitArg', function () {
-  let exitSpy: jest.SpyInstance;
-  let errorSpy: jest.SpyInstance;
-
-  beforeEach(function () {
-    // `process.exit` is typed as returning `never`; throwing keeps the control
-    // flow honest so a non-exiting parser cannot silently pass these tests.
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation((code) => {
-      throw new Error(`process.exit(${code})`);
-    }) as unknown as jest.SpyInstance;
-    errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-  });
-
-  afterEach(function () {
-    exitSpy.mockRestore();
-    errorSpy.mockRestore();
-  });
-
   it('maps 0 to "no limit" rather than to a zero-length window', function () {
     // The whole point of item B: 0 must not survive as the number 0, which
     // every `slice(0, limit)` downstream would read as "show nothing".
@@ -53,18 +36,14 @@ describe('parseLimitArg', function () {
   it('rejects negative and non-numeric values, naming the 0 case', function () {
     for (const value of ['-1', '-100', 'abc', '']) {
       expect(() => parseLimitArg('--limit', value)).toThrow(
-        /process\.exit\(1\)/
+        '--limit must be a non-negative integer (0 = no limit)'
       );
     }
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Error: --limit must be a non-negative integer (0 = no limit)'
-    );
   });
 
   it('names the flag it was given in the error message', function () {
-    expect(() => parseLimitArg('--jank-limit', '-1')).toThrow();
-    expect(errorSpy).toHaveBeenCalledWith(
-      'Error: --jank-limit must be a non-negative integer (0 = no limit)'
+    expect(() => parseLimitArg('--jank-limit', '-1')).toThrow(
+      '--jank-limit must be a non-negative integer (0 = no limit)'
     );
   });
 
