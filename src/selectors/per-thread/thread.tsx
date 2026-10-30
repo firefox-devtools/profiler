@@ -615,6 +615,7 @@ export function getThreadSelectorsWithMarkersPerThread(
           thread.funcTable,
           thread.resourceTable,
           thread.sources,
+          thread.sourceLocationTable,
           thread.stringTable,
           searchStrings
         )
