@@ -16,6 +16,7 @@
   - [Perf profiling on Android](./guide-android-profiling.md)
   - [IPC Messages](./ipc-messages.md)
   - [Profiler control using POSIX signals](./async-posix-signal-control.md)
+  - [Recording logs with about:logging](./guide-about-logging.md)
 - [Video Tutorials](./videos.md)
   - [Firefox Profiler intro](./videos-intro.md)
   - [Samples and markers](./videos-samples-markers.md)
