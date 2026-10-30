@@ -597,6 +597,9 @@ export function getStackAndSampleSelectorsPerThread(
   const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
     (state: State) => _getNonInvertedCallNodeInfo(state).getCallNodeTable(),
     (state: State) => threadSelectors.getFilteredThread(state).funcTable,
+    (state: State) => threadSelectors.getFilteredThread(state).sources,
+    (state: State) =>
+      threadSelectors.getFilteredThread(state).sourceLocationTable,
     (state: State) => threadSelectors.getFilteredThread(state).stringTable,
     FlameGraph.computeFlameGraphRows
   );

@@ -6,7 +6,11 @@ import type {
   CallNodeTable,
   FuncTable,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
+  SourceTable,
+  SourceLocationTable,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
   CallTreeTimingsInverted,
@@ -14,7 +18,7 @@ import type {
 } from './call-tree';
 import type { CallNodeInfoInverted } from './call-node-info';
 
-import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
+import { bisectionRightBy } from 'firefox-profiler/utils/bisect';
 
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
@@ -200,7 +204,9 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
  * The call nodes are ordered in the same order that they'll be displayed in the
  * flame graph:
  *
- *  - Siblings are ordered by function name.
+ *  - Siblings are ordered by function name. Siblings with the same function
+ *    name are ordered by file name, then by original (source-mapped) file
+ *    name, then by the line and column where the function starts.
  *  - Siblings are grouped, i.e. all nodes with the same prefix are next to each other.
  *  - The order of these groups with respect to each other is determined by how
  *    their prefix call nodes are ordered in the previous row.
@@ -229,12 +235,24 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
  */
 export type FlameGraphRows = IndexIntoCallNodeTable[][];
 
+function compareStrings(a: string, b: string): number {
+  if (a < b) {
+    return -1;
+  }
+  if (a > b) {
+    return 1;
+  }
+  return 0;
+}
+
 /**
  * Compute the FlameGraphRows. The result is independent of timing information.
  */
 export function computeFlameGraphRows(
   callNodeTable: CallNodeTable,
   funcTable: FuncTable,
+  sources: SourceTable,
+  sourceLocationTable: SourceLocationTable,
   stringTable: StringTable
 ): FlameGraphRows {
   if (callNodeTable.length === 0) {
@@ -243,6 +261,72 @@ export function computeFlameGraphRows(
 
   const { func, nextSibling, subtreeRangeEnd, maxDepth } = callNodeTable;
   const funcTableNameColumn = funcTable.name;
+
+  // Returns the file name of a function, or the empty string if the function
+  // has no source.
+  function getFuncFileName(funcIndex: IndexIntoFuncTable): string {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
+      return '';
+    }
+    return stringTable.getString(sources.filename[funcTable.source[funcIndex]]);
+  }
+
+  function hasOriginalLocation(funcIndex: IndexIntoFuncTable): boolean {
+    return (funcTable.flags[funcIndex] & FuncFlag.HasOriginalLocation) !== 0;
+  }
+
+  // Returns the original (source-mapped) file name of a function, or the empty
+  // string if the function has no original location.
+  function getFuncOriginalFileName(funcIndex: IndexIntoFuncTable): string {
+    if (!hasOriginalLocation(funcIndex)) {
+      return '';
+    }
+    const location = funcTable.originalLocation[funcIndex];
+    return stringTable.getString(
+      sources.filename[sourceLocationTable.source[location]]
+    );
+  }
+
+  // Returns the line where a function starts, preferring the original
+  // location. Returns 0 if the line is unknown.
+  function getFuncStartLine(funcIndex: IndexIntoFuncTable): number {
+    if (hasOriginalLocation(funcIndex)) {
+      return sourceLocationTable.line[funcTable.originalLocation[funcIndex]];
+    }
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasLine) !== 0) {
+      return funcTable.lineNumber[funcIndex];
+    }
+    return 0;
+  }
+
+  // Returns the column where a function starts, preferring the original
+  // location. Returns 0 if the column is unknown.
+  function getFuncStartColumn(funcIndex: IndexIntoFuncTable): number {
+    if (hasOriginalLocation(funcIndex)) {
+      return sourceLocationTable.column[funcTable.originalLocation[funcIndex]];
+    }
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasColumn) !== 0) {
+      return funcTable.columnNumber[funcIndex];
+    }
+    return 0;
+  }
+
+  // Compares two functions with the same name, so that siblings with the same
+  // function name have a defined order.
+  function compareFuncsWithSameName(
+    funcA: IndexIntoFuncTable,
+    funcB: IndexIntoFuncTable
+  ): number {
+    return (
+      compareStrings(getFuncFileName(funcA), getFuncFileName(funcB)) ||
+      compareStrings(
+        getFuncOriginalFileName(funcA),
+        getFuncOriginalFileName(funcB)
+      ) ||
+      getFuncStartLine(funcA) - getFuncStartLine(funcB) ||
+      getFuncStartColumn(funcA) - getFuncStartColumn(funcB)
+    );
+  }
 
   // flameGraphRows is what we'll return from this function.
   //
@@ -294,13 +378,22 @@ export function computeFlameGraphRows(
       } else {
         // There are other siblings already present in rowAtThisDepth[siblingIndexRangeStart..].
         // Do an ordered insert, to keep siblings ordered by function name.
+        // Siblings with the same function name are compared further by
+        // compareFuncsWithSameName.
         // assert(siblingIndexRangeStart < siblingIndexRangeEnd)
         const thisFunc = func[currentSibling];
         const funcName = stringTable.getString(funcTableNameColumn[thisFunc]);
-        const insertionIndex = bisectionRightByStrKey(
+        const insertionIndex = bisectionRightBy(
           rowAtThisDepth,
-          funcName,
-          (cn) => stringTable.getString(funcTableNameColumn[func[cn]]),
+          (cn) => {
+            const siblingFunc = func[cn];
+            return (
+              compareStrings(
+                stringTable.getString(funcTableNameColumn[siblingFunc]),
+                funcName
+              ) || compareFuncsWithSameName(siblingFunc, thisFunc)
+            );
+          },
           siblingIndexRangeStart,
           siblingIndexRangeEnd
         );

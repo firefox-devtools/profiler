@@ -157,14 +157,17 @@ export function bisectionRightByKey<T>(
 }
 
 /**
- * This is the same as bisectionRightByKey but uses string as the key type.
- * If you can find a way to make Flow accept a single function that handles
- * both string and number keys, please remove this duplication.
+ * This is the same as bisectionRightByKey but uses a comparison function.
+ * cmp(elem) compares an element of the array to the looked-up value, which is
+ * usually captured by the closure:
+ * - rv > 0 if elem > value,
+ * - rv === 0 if elem == value,
+ * - rv < 0 if elem < value,
+ * The returned index is the index of the first element for which rv > 0.
  */
-export function bisectionRightByStrKey<T>(
+export function bisectionRightBy<T>(
   array: T[],
-  x: string,
-  toKey: (arg: T) => string,
+  cmp: (elem: T) => number,
   low: number = 0,
   high: number = array.length
 ): number {
@@ -175,7 +178,7 @@ export function bisectionRightByStrKey<T>(
   while (low < high) {
     const mid = (low + high) >> 1;
 
-    if (x < toKey(array[mid])) {
+    if (cmp(array[mid]) > 0) {
       high = mid;
     } else {
       low = mid + 1;
