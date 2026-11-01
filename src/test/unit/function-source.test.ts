@@ -4,6 +4,7 @@
 
 import { extractFunctionSource } from '../../profile-logic/js-format/function-source';
 import { getFormatDialectForPath } from '../../profile-logic/js-format/dialect';
+import { isPositionInCode } from '../../profile-logic/benchmark/bucket-function-source';
 
 describe('extractFunctionSource', function () {
   const code = [
@@ -189,5 +190,37 @@ describe('extractFunctionSource', function () {
       ],
       firstLine: 3,
     });
+  });
+});
+
+describe('isPositionInCode', function () {
+  const code = 'function f() {\n  return 1;\n}';
+
+  it('accepts positions inside the code', function () {
+    expect(isPositionInCode(code, 1, 1)).toBe(true);
+    expect(isPositionInCode(code, 2, 3)).toBe(true);
+    expect(isPositionInCode(code, 3, 1)).toBe(true);
+  });
+
+  it('accepts the position just after the end of a line', function () {
+    expect(isPositionInCode(code, 2, 12)).toBe(true);
+    expect(isPositionInCode(code, 3, 2)).toBe(true);
+  });
+
+  it('rejects positions past the end of a line', function () {
+    expect(isPositionInCode(code, 2, 13)).toBe(false);
+    expect(isPositionInCode(code, 3, 3)).toBe(false);
+  });
+
+  it('rejects lines past the end of the code', function () {
+    // For example, a source map whose mappings were made for an unminified
+    // file, but whose sourcesContent has the minified file.
+    expect(isPositionInCode(code, 4, 1)).toBe(false);
+    expect(isPositionInCode(code, 25, 1)).toBe(false);
+  });
+
+  it('rejects positions before the start of the code', function () {
+    expect(isPositionInCode(code, 0, 1)).toBe(false);
+    expect(isPositionInCode(code, 1, 0)).toBe(false);
   });
 });
