@@ -99,6 +99,49 @@ const LINE_HEIGHT_PX = 16;
 // scrollbar.
 const SOURCE_VIEW_EXTRA_HEIGHT_PX = 36;
 
+function FunctionSourceCode({
+  profile,
+  view,
+}: {
+  profile: Profile;
+  view: FunctionSourceView;
+}) {
+  const state = useFunctionSource(profile, view);
+
+  if (state.status === 'loading') {
+    return <div className="bucketFunctionSource__message">Loading…</div>;
+  }
+  if (state.status === 'error' || state.functionSource === null) {
+    return (
+      <div className="bucketFunctionSource__message">
+        The function couldn’t be found in this file.
+      </div>
+    );
+  }
+  const { lines, firstLine } = state.functionSource;
+  const visibleLines = Math.min(lines.length, MAX_VISIBLE_LINES);
+  return (
+    <div
+      className="bucketFunctionSource__code"
+      style={{
+        height: visibleLines * LINE_HEIGHT_PX + SOURCE_VIEW_EXTRA_HEIGHT_PX,
+      }}
+    >
+      <SourceView
+        timings={NO_TIMINGS}
+        sourceCode={lines.join('\n')}
+        formattedLines={null}
+        filePath={view.filename}
+        scrollGeneration={0}
+        highlightedLine={null}
+        startLine={
+          firstLine === null ? 1 : firstLine + view.sourceStartLine - 1
+        }
+      />
+    </div>
+  );
+}
+
 function FunctionSourcePanel({
   profile,
   view,
@@ -108,49 +151,21 @@ function FunctionSourcePanel({
   view: FunctionSourceView;
   title: string;
 }) {
-  const state = useFunctionSource(profile, view);
-
-  let content;
-  if (state.status === 'loading') {
-    content = <div className="bucketFunctionSource__message">Loading…</div>;
-  } else if (state.status === 'error' || state.functionSource === null) {
-    content = (
-      <div className="bucketFunctionSource__message">
-        The function couldn’t be found in this file.
-      </div>
-    );
-  } else {
-    const { lines, firstLine } = state.functionSource;
-    const visibleLines = Math.min(lines.length, MAX_VISIBLE_LINES);
-    content = (
-      <div
-        className="bucketFunctionSource__code"
-        style={{
-          height: visibleLines * LINE_HEIGHT_PX + SOURCE_VIEW_EXTRA_HEIGHT_PX,
-        }}
-      >
-        <SourceView
-          timings={NO_TIMINGS}
-          sourceCode={lines.join('\n')}
-          formattedLines={null}
-          filePath={view.filename}
-          scrollGeneration={0}
-          highlightedLine={null}
-          startLine={
-            firstLine === null ? 1 : firstLine + view.sourceStartLine - 1
-          }
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="bucketFunctionSource__panel">
       <div className="bucketFunctionSource__label" title={view.filename}>
         {title}
         <span className="bucketFunctionSource__filename">{view.filename}</span>
       </div>
-      {content}
+      {view.isPositionInCode ? (
+        <FunctionSourceCode profile={profile} view={view} />
+      ) : (
+        <div className="bucketFunctionSource__message">
+          The function’s position (line{' '}
+          {view.request.line + view.sourceStartLine - 1}) is outside of this
+          file.
+        </div>
+      )}
     </div>
   );
 }

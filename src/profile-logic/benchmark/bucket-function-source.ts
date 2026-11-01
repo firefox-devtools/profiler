@@ -25,8 +25,39 @@ export type FunctionSourceView = {
   // The 1-based line of the start of the source in its file. For inline
   // scripts, the code only covers the script, not the whole file.
   sourceStartLine: number;
+  // False if the position is past the end of its line or of the code, for
+  // example because the source map's mappings don't match its
+  // sourcesContent. There's no point in looking for a function then.
+  isPositionInCode: boolean;
   request: FunctionSourceRequest;
 };
+
+/**
+ * Returns whether the 1-based line and column are inside the code. The
+ * column can be one past the end of the line.
+ */
+export function isPositionInCode(
+  code: string,
+  line: number,
+  column: number
+): boolean {
+  if (line < 1 || column < 1) {
+    return false;
+  }
+  let lineStart = 0;
+  for (let i = 1; i < line; i++) {
+    const newline = code.indexOf('\n', lineStart);
+    if (newline === -1) {
+      return false;
+    }
+    lineStart = newline + 1;
+  }
+  let lineEnd = code.indexOf('\n', lineStart);
+  if (lineEnd === -1) {
+    lineEnd = code.length;
+  }
+  return column - 1 <= lineEnd - lineStart;
+}
 
 export type BucketFunctionSources = {
   // The code as it was written, from the source map. Null if the function
@@ -67,6 +98,7 @@ function _getFunctionSourceView(
     filename,
     sourceIndex,
     sourceStartLine: startLine,
+    isPositionInCode: isPositionInCode(code, relativeLine, relativeColumn),
     request: {
       code,
       dialect,

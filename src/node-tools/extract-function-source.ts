@@ -18,6 +18,7 @@ import minimist from 'minimist';
 import { extractFunctionSource } from '../profile-logic/js-format/function-source';
 import type { FunctionFormatMode } from '../profile-logic/js-format/function-source';
 import { getFormatDialectForPath } from '../profile-logic/js-format/dialect';
+import { isPositionInCode } from '../profile-logic/benchmark/bucket-function-source';
 
 const FORMAT_MODES: FunctionFormatMode[] = ['always', 'never', 'auto'];
 
@@ -72,6 +73,10 @@ function main() {
   }
 
   const code = fs.readFileSync(path, 'utf8');
+  if (!isPositionInCode(code, line, column)) {
+    console.error(`${path}:${line}:${column} is outside of the file.`);
+    process.exit(1);
+  }
   const functionSource = extractFunctionSource({
     code,
     dialect,
