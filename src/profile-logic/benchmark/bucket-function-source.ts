@@ -31,6 +31,8 @@ export type FunctionSourceView = {
 export type BucketFunctionSources = {
   // The code as it was written, from the source map. Null if the function
   // isn't source-mapped, or if the profile doesn't contain the original code.
+  // Pretty-printed if it looks minified, for example a library from
+  // node_modules that was minified before it was bundled.
   original: FunctionSourceView | null;
   // The code that the browser ran, pretty-printed. For functions that aren't
   // source-mapped, this is the only code, and it's only pretty-printed if it
@@ -96,7 +98,7 @@ export function getBucketFunctionSources(
       sourceLocationTable.source[location],
       sourceLocationTable.line[location],
       sourceLocationTable.column[location],
-      'never'
+      'auto'
     );
   }
   const generated = _getFunctionSourceView(
