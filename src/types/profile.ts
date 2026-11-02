@@ -1163,6 +1163,13 @@ export type SourceTable = {
   // Original source file contents from source map sourcesContent, or null if
   // not available. Stored for offline source view when a profile is shared.
   content: Array<string | null>;
+  // For original sources found through a source map: the source of the
+  // generated file (the bundle) whose source map listed this source. The
+  // filename is then the URL as written in that source map, which may be
+  // relative. An original source is identified by this pair: two bundles can
+  // list the same URL for different files. null for all other sources.
+  // A generated source always comes before its original sources in the table.
+  generatedSource: Array<IndexIntoSourceTable | null>;
 };
 
 /**

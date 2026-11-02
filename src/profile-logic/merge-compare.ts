@@ -607,7 +607,21 @@ function mergeSources(
           ? oldStringToNewStringPlusOne[originalSourceMapURLIndex] - 1
           : null;
 
-      const sourceKey = id ?? `null-id-${newUrlIndex}`;
+      // A generated source comes before its original sources, so it has
+      // already been translated.
+      const originalGeneratedSource = sources.generatedSource[i];
+      const newGeneratedSource =
+        originalGeneratedSource !== null
+          ? oldSourceToNewSourcePlusOne[originalGeneratedSource] - 1
+          : null;
+
+      // Original sources from source maps are identified by their bundle and
+      // URL. Two bundles can list the same URL for different files.
+      const sourceKey =
+        id ??
+        (newGeneratedSource !== null
+          ? `original-${newGeneratedSource}-${newUrlIndex}`
+          : `null-id-${newUrlIndex}`);
       let insertedSourceIndex = mapOfInsertedSources.get(sourceKey);
       if (insertedSourceIndex === undefined) {
         // Add new source
@@ -618,6 +632,7 @@ function mergeSources(
         newSources.startColumn[insertedSourceIndex] = sources.startColumn[i];
         newSources.sourceMapURL[insertedSourceIndex] = newSourceMapURLIndex;
         newSources.content[insertedSourceIndex] = sources.content[i];
+        newSources.generatedSource[insertedSourceIndex] = newGeneratedSource;
         newSources.length++;
         mapOfInsertedSources.set(sourceKey, insertedSourceIndex);
       }

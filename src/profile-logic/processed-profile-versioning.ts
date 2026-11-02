@@ -3800,6 +3800,16 @@ const _upgraders: {
       });
     }
   },
+  [77]: (profile: any) => {
+    // The source table gained a generatedSource column. For original sources
+    // found through a source map, it refers to the source of the bundle whose
+    // source map listed them. Existing profiles don't record which bundle that
+    // was, so the column is filled with null.
+    const sources = profile.shared && profile.shared.sources;
+    if (sources) {
+      sources.generatedSource = new Array(sources.length).fill(null);
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
