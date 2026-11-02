@@ -527,17 +527,20 @@ type Location = {
   hash: string;
 };
 
+// The query parameters whose values are arrays.
+const ARRAY_QUERY_KEYS = new Set(['profiles', 'names']);
+
 /**
  * query-string returns an array for a repeated parameter, even without brackets.
- * `profiles` is the only array parameter, so for any other repeated parameter
- * the last value wins. This keeps hand-edited URLs working.
+ * For a parameter that isn't in ARRAY_QUERY_KEYS, the last value wins. This
+ * keeps hand-edited URLs working.
  */
 function parseQueryString(search: string) {
   const query = queryString.parse(search, {
     arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
   });
   for (const [key, value] of Object.entries(query)) {
-    if (key !== 'profiles' && Array.isArray(value)) {
+    if (!ARRAY_QUERY_KEYS.has(key) && Array.isArray(value)) {
       query[key] = value[value.length - 1];
     }
   }

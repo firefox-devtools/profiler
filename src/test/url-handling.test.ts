@@ -1787,6 +1787,20 @@ describe('compare-benchmark', function () {
     return store;
   }
 
+  it('reads the profile names from the URL', function () {
+    const search = queryString.stringify(
+      { profiles: [url1, url2], names: ['Baseline', 'New'] },
+      { arrayFormat: 'bracket' }
+    );
+    const store = _getStoreWithURL(
+      { pathname: '/compare-benchmark/', search: '?' + search },
+      /* no profile */ null
+    );
+    expect(
+      urlStateSelectors.getProfileNamesToCompare(store.getState())
+    ).toEqual(['Baseline', 'New']);
+  });
+
   it('leaves an unfiltered comparison out of the URL', function () {
     const store = getStoreWithProfiles();
     const url = urlFromState(urlStateSelectors.getUrlState(store.getState()));
