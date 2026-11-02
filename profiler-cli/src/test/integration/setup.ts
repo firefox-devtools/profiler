@@ -9,3 +9,6 @@
 
 // Importing this makes jest-extended matchers available everywhere
 import 'jest-extended/all';
+
+// Jest ignores testTimeout in project configs, so set it here.
+jest.setTimeout(30000);
