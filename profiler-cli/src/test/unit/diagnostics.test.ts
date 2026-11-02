@@ -12,6 +12,7 @@ import * as os from 'os';
 import * as path from 'path';
 import {
   assertSocketPathUsable,
+  describeProfileVersionError,
   describeSessionDirFailure,
   describeSocketConnectError,
   describeSocketListenError,
@@ -20,6 +21,8 @@ import {
   getErrnoCode,
   indentBlock,
 } from '../../diagnostics';
+import { ProfileVersionError } from 'firefox-profiler/profile-logic/errors';
+import { snapshotEnv } from '../integration/fake-samply';
 
 function errnoError(code: string, message: string): NodeJS.ErrnoException {
   const error: NodeJS.ErrnoException = new Error(message);
@@ -227,6 +230,53 @@ describe('profiler-cli diagnostics', function () {
   describe('indentBlock', function () {
     it('indents every line', function () {
       expect(indentBlock('a\nb')).toBe('  a\n  b');
+    });
+  });
+
+  describe('describeProfileVersionError', function () {
+    const PACKAGE = '@firefox-devtools/profiler-cli';
+    const error = new ProfileVersionError('processed', 78, 77);
+    let restoreEnv: () => void;
+
+    beforeEach(function () {
+      restoreEnv = snapshotEnv(['MOZBUILD_STATE_PATH']);
+      process.env.MOZBUILD_STATE_PATH = path.join(tmpDir, 'mozbuild');
+    });
+
+    afterEach(function () {
+      restoreEnv();
+    });
+
+    it('points npm installs at npm', function () {
+      const message = describeProfileVersionError(
+        error,
+        PACKAGE,
+        path.join(tmpDir, 'npm', 'profiler-cli', 'dist', 'profiler-cli.js')
+      );
+      expect(message).toContain('version 78');
+      expect(message).toContain('up to version 77 of the processed');
+      expect(message).toContain(`npm install -g ${PACKAGE}@latest`);
+      expect(message).not.toContain('mach bootstrap');
+    });
+
+    it('points bootstrapped installs at mach bootstrap', function () {
+      const message = describeProfileVersionError(
+        error,
+        PACKAGE,
+        path.join(tmpDir, 'mozbuild', 'profiler-cli', 'dist', 'profiler-cli.js')
+      );
+      expect(message).toContain('version 78');
+      expect(message).toContain('./mach bootstrap');
+      expect(message).not.toContain('npm install -g');
+    });
+
+    it('does not treat a sibling directory of the bootstrapped copy as bootstrapped', function () {
+      const message = describeProfileVersionError(
+        error,
+        PACKAGE,
+        path.join(tmpDir, 'mozbuild', 'profiler-cli-old', 'profiler-cli.js')
+      );
+      expect(message).not.toContain('mach bootstrap');
     });
   });
 });
