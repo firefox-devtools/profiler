@@ -164,6 +164,27 @@ describe('makeOptionsFromArgv', function () {
     expect(options.insertLabelFrames).toEqual('/path/to/labels.toml');
   });
 
+  it('recognizes optional --merge-markers-from and --only-keep-processes-with-name-prefix', function () {
+    const options = makeOptionsFromArgv([
+      ...commonArgs,
+      '-i',
+      '/path/to/simpleperf.json',
+      '-o',
+      '/path/to/output.json',
+      '--merge-markers-from',
+      'https://example.com/gecko.json',
+      '--only-keep-processes-with-name-prefix',
+      'org.mozilla.fenix',
+    ]);
+    expect(options.mergeMarkersFrom).toEqual({
+      type: 'URL',
+      url: 'https://example.com/gecko.json',
+    });
+    expect(options.onlyKeepProcessesWithNamePrefix).toEqual(
+      'org.mozilla.fenix'
+    );
+  });
+
   it('throws when no input is provided', function () {
     expect(() =>
       makeOptionsFromArgv([...commonArgs, '-o', '/path/to/output.json'])
