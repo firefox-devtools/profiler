@@ -92,6 +92,14 @@ export type ProfileBenchmarkStats = {
    * a focusSelf() flame graph.
    */
   bucketFuncs: Array<IndexIntoFuncTable>;
+  /**
+   * Whether each bucket is a JS function, as opposed to a DOM binding, a label
+   * or the synthetic "no JS frame" bucket. Same length as bucketNames. Used to
+   * sum every JS function into one row; see `jsFunctionIterationTotals`.
+   *
+   * Absent from stats files written before it was added.
+   */
+  bucketIsJS?: boolean[];
   /** Per-suite sparse bucket data. This is the only per-bucket weight data
    * stored; the geomean-normalised "global" view across all suites is derived
    * from it at comparison time by `computeGlobalBuckets`, because the
@@ -246,6 +254,12 @@ export function extractBenchmarkStatsFromProfile(
     return bucketNames[b];
   });
 
+  const bucketIsJS = bucketFuncs.map(
+    (funcIndex) =>
+      funcIndex !== -1 &&
+      (sharedFuncTable.flags[funcIndex] & FuncFlag.IsJS) !== 0
+  );
+
   const bucketCount = bucketFuncs.length;
   const { allSuiteScores } = benchmarkScores;
 
@@ -273,5 +287,5 @@ export function extractBenchmarkStatsFromProfile(
     };
   });
 
-  return { bucketNames, bucketKeys, bucketFuncs, suites };
+  return { bucketNames, bucketKeys, bucketFuncs, bucketIsJS, suites };
 }

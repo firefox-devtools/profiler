@@ -13,6 +13,8 @@ import {
   computeGlobalBuckets,
   computeSharedSuiteFactors,
   describeVerdict,
+  bucketIsJSOf,
+  jsFunctionIterationTotals,
   matchBucketKeys,
 } from '../../profile-logic/benchmark/compare-benchmark-stats';
 import type { ScoreComparison } from '../../profile-logic/benchmark/compare-benchmark-stats';
@@ -438,6 +440,64 @@ describe('bucket matching', function () {
   });
 });
 
+describe('JS function totals', function () {
+  // Buckets 0 and 1 are JS functions, bucket 2 is a DOM binding.
+  function makeJsStats(): ProfileBenchmarkStats {
+    return {
+      ...makeStats(
+        ['jsA', 'jsB', 'Element.getBoundingClientRect'],
+        [
+          {
+            suiteName: 'Suite',
+            buckets: [
+              [0, [1, 2, 3]],
+              [1, [10, 20, 30]],
+              [2, [5, 5, 5]],
+            ],
+          },
+        ]
+      ),
+      bucketIsJS: [true, true, false],
+    };
+  }
+
+  it('sums the JS functions and nothing else', function () {
+    const stats = makeJsStats();
+    expect(
+      jsFunctionIterationTotals(stats.suites[0].buckets, bucketIsJSOf(stats), 3)
+    ).toEqual([11, 22, 33]);
+  });
+
+  it('marks each compared row with whether it is a JS function', function () {
+    const stats = makeJsStats();
+    const rows = compare(
+      stats,
+      stats,
+      stats.suites[0].buckets,
+      stats.suites[0].buckets,
+      3
+    );
+    expect(rows.map((row) => [row.bucketName, row.isJS])).toEqual([
+      ['jsA', true],
+      ['jsB', true],
+      ['Element.getBoundingClientRect', false],
+    ]);
+  });
+
+  it('treats location-keyed buckets as JS in older stats files', function () {
+    const stats = makeStats(
+      ['jsA', 'Element.getBoundingClientRect'],
+      [{ suiteName: 'Suite', buckets: [[0, [1, 1]]] }]
+    );
+    expect(
+      bucketIsJSOf({
+        ...stats,
+        bucketKeys: ['app.js:10:5', 'Element.getBoundingClientRect'],
+      })
+    ).toEqual([true, false]);
+  });
+});
+
 describe('multiple-comparisons correction', function () {
   /** `count` buckets drawn from one process on both sides, so none of them
    * changed, plus one that plainly did. Deterministic. */
@@ -716,8 +776,18 @@ describe('multiple-comparisons correction', function () {
       // No buckets at all: there is no family to relabel, so the rows keep the
       // Welch stand-in and nothing throws on the way out.
       const meta = {
-        base: { bucketNames: [], bucketKeys: [], bucketFuncs: [] },
-        new: { bucketNames: [], bucketKeys: [], bucketFuncs: [] },
+        base: {
+          bucketNames: [],
+          bucketKeys: [],
+          bucketFuncs: [],
+          bucketIsJS: [],
+        },
+        new: {
+          bucketNames: [],
+          bucketKeys: [],
+          bucketFuncs: [],
+          bucketIsJS: [],
+        },
       };
       const input = {
         keys: matchBucketKeys(meta),

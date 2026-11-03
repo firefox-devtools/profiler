@@ -106,6 +106,47 @@ function recordingRunner(jobs: BucketTableJob[]): TableRunnerFactory {
 }
 
 describe('compareStatsProgressively', function () {
+  it('sums the JS functions of every table into one row', async function () {
+    const { baseStats, newStats } = makePair();
+    // Everything but gammaFunc is a JS function.
+    const bucketIsJS = [true, true, false];
+    let last: ComparisonProgress | null = null;
+    for await (const progress of compareStatsProgressively(
+      [
+        { ...baseStats, bucketIsJS },
+        { ...newStats, bucketIsJS },
+      ],
+      1,
+      0,
+      sourcesFor(2),
+      new AbortController().signal
+    )) {
+      if (last === null) {
+        // There from the first snapshot, alongside the score rows.
+        expect([...progress.jsFunctionRows.keys()]).toEqual([
+          'Overall (geomean-normalised)',
+          'Alpha',
+          'Beta',
+        ]);
+      }
+      last = progress;
+    }
+    if (last === null) {
+      throw new Error('No snapshot.');
+    }
+    for (const [label, jsRow] of last.jsFunctionRows) {
+      const table = last.bucketTables.get(label) ?? [];
+      const jsDelta = table
+        .filter((row) => row.isJS)
+        .reduce((sum, row) => sum + row.delta, 0);
+      expect(jsRow.delta).toBeCloseTo(jsDelta, 10);
+      expect(jsRow.baseFunc).toBeNull();
+      expect(jsRow.newFunc).toBeNull();
+    }
+    // Beta doubled, and betaFunc is a JS function.
+    expect(last.jsFunctionRows.get('Beta')?.delta).toBeGreaterThan(0);
+  });
+
   it('reports the score rows before any bucket table', async function () {
     const [first] = await collect();
     expect(first.scores.overallScore.label).toBe(

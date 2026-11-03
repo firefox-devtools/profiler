@@ -184,6 +184,7 @@ type BaseQuery = {
   show: string; // "slower"
   subject: string; // "1"
   than: string; // "2"
+  js: string; // "merged"
   profileName: string;
   symbolServer: string;
   view: string;
@@ -1916,7 +1917,7 @@ function stringifyAssemblyViewSymbol(symbol: NativeSymbolInfo): string {
  */
 function benchmarkBucketFilterToQuery(
   filter: BenchmarkBucketFilter
-): Partial<Pick<BaseQuery, 'buckets' | 'show' | 'subject' | 'than'>> {
+): Partial<Pick<BaseQuery, 'buckets' | 'show' | 'subject' | 'than' | 'js'>> {
   const defaults = DEFAULT_BENCHMARK_BUCKET_FILTER;
   return {
     buckets: filter.mode === defaults.mode ? undefined : filter.mode,
@@ -1926,6 +1927,7 @@ function benchmarkBucketFilterToQuery(
       filter.comparand === defaults.comparand
         ? undefined
         : String(filter.comparand),
+    js: filter.mergeJsFunctions ? 'merged' : undefined,
   };
 }
 
@@ -1957,5 +1959,6 @@ function parseBenchmarkBucketFilter(
         : defaults.show,
     subject: parseProfileIndex(query.subject),
     comparand: parseProfileIndex(query.than) ?? defaults.comparand,
+    mergeJsFunctions: query.js === 'merged',
   };
 }

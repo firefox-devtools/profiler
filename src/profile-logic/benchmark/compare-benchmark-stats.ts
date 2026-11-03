@@ -431,6 +431,8 @@ export type BucketComparison = {
   baseFunc: IndexIntoFuncTable | null;
   /** Func index of the bucket in the new profile, or null if absent there. */
   newFunc: IndexIntoFuncTable | null;
+  /** Whether the bucket is a JS function. See `bucketIsJSOf`. */
+  isJS: boolean;
 } & ComparisonStats;
 
 /**
@@ -702,6 +704,7 @@ export type BucketTableSide = {
   bucketNames: string[];
   bucketKeys: string[];
   bucketFuncs: IndexIntoFuncTable[];
+  bucketIsJS: boolean[];
 };
 
 /**
@@ -732,11 +735,56 @@ export function bucketTableSideOf(
   stats: ProfileBenchmarkStats
 ): BucketTableSide {
   const { bucketNames } = stats;
+  const bucketKeys = stats.bucketKeys ?? bucketNames;
   return {
     bucketNames,
-    bucketKeys: stats.bucketKeys ?? bucketNames,
+    bucketKeys,
     bucketFuncs: stats.bucketFuncs ?? new Array(bucketNames.length).fill(-1),
+    bucketIsJS:
+      stats.bucketIsJS ?? bucketKeys.map((key, b) => key !== bucketNames[b]),
   };
+}
+
+/** What the row that sums every JS function of a table is called. */
+export const JS_FUNCTIONS_BUCKET_NAME = 'JS functions';
+
+/**
+ * Whether each of a profile's buckets is a JS function, as opposed to a DOM
+ * binding, a label or the "no JS frame" bucket.
+ *
+ * Stats files from before `bucketIsJS` existed fall back to treating every
+ * bucket with a source-location key as a JS function. Those keys are only
+ * written for JS functions.
+ */
+export function bucketIsJSOf(stats: ProfileBenchmarkStats): boolean[] {
+  return bucketTableSideOf(stats).bucketIsJS;
+}
+
+/**
+ * The per-iteration time of one table's JS functions, summed.
+ *
+ * This answers "how much of the difference is in JS" rather than "which JS
+ * function differs". A JS function's bucket includes the native code it calls
+ * that is not a DOM binding, such as GC and JIT compilation, so this is roughly
+ * the JS engine's share.
+ */
+export function jsFunctionIterationTotals(
+  buckets: SparseBucketEntry[],
+  bucketIsJS: boolean[],
+  iterationCount: number
+): number[] {
+  const totals = new Array<number>(iterationCount).fill(0);
+  for (const entry of buckets) {
+    if (!bucketIsJS[entry.bucketIndex]) {
+      continue;
+    }
+    const { iterationTotals } = entry;
+    const count = Math.min(iterationCount, iterationTotals.length);
+    for (let i = 0; i < count; i++) {
+      totals[i] += iterationTotals[i];
+    }
+  }
+  return totals;
 }
 
 /**
@@ -888,6 +936,21 @@ export function* computeBucketTableShardInSlices(
 }
 
 /**
+ * The func a bucket can be drawn from, or null if there is none. A negative func
+ * index is the "no JS frame" bucket, which no single function stands for.
+ */
+function funcOf(
+  side: BucketTableSide,
+  bucket: number
+): IndexIntoFuncTable | null {
+  if (bucket === -1) {
+    return null;
+  }
+  const func = side.bucketFuncs[bucket];
+  return func === undefined || func < 0 ? null : func;
+}
+
+/**
  * Look up what each row is called.
  *
  * The naming follows the base profile whenever it has the key at all, since the
@@ -912,10 +975,9 @@ function resolveBucketTableRows(
     return {
       key: named.side.bucketKeys[named.bucket] ?? fallback,
       bucketName: named.side.bucketNames[named.bucket] ?? fallback,
-      baseFunc:
-        baseBucket === -1 ? null : (meta.base.bucketFuncs[baseBucket] ?? null),
-      newFunc:
-        newBucket === -1 ? null : (meta.new.bucketFuncs[newBucket] ?? null),
+      baseFunc: funcOf(meta.base, baseBucket),
+      newFunc: funcOf(meta.new, newBucket),
+      isJS: named.side.bucketIsJS[named.bucket] ?? false,
       ...stats,
     };
   });

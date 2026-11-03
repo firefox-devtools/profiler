@@ -487,6 +487,9 @@ export type BenchmarkBucketFilter = {
   readonly subject: number | null;
   readonly comparand: BenchmarkBucketComparand;
   readonly show: BenchmarkBucketShow;
+  /** Fold every JS function into one "JS functions" bucket, to see how much of
+   * the difference is in the JS engine as opposed to, say, layout. */
+  readonly mergeJsFunctions: boolean;
 };
 
 export type UrlState = {

@@ -166,6 +166,7 @@ function bothSpentNothing(template: BucketComparison): BucketComparison {
     bucketName: template.bucketName,
     baseFunc: null,
     newFunc: null,
+    isJS: template.isJS,
     baseMean: 0,
     newMean: 0,
     relChange: 0,
