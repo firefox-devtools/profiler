@@ -169,7 +169,7 @@
     "lockfile-lint": "^5.1.0",
     "npm-run-all2": "^8.0.4",
     "open": "^11.0.4",
-    "oxfmt": "^0.72.0",
+    "oxfmt": "^0.75.0",
     "oxlint": "1.85.0",
     "oxlint-tsgolint": "^7.0.2002",
     "patch-package": "^8.0.1",
