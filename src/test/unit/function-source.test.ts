@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { extractFunctionSource } from '../../profile-logic/js-format/function-source';
-import { getFormatDialectForPath } from '../../profile-logic/js-format/dialect';
+import { getSourceDialectForPath } from '../../profile-logic/js-format/dialect';
 import { isPositionInCode } from '../../profile-logic/benchmark/bucket-function-source';
 
 describe('extractFunctionSource', function () {
@@ -170,7 +170,7 @@ describe('extractFunctionSource', function () {
       '  </ul>',
       ');',
     ].join('\n');
-    const dialect = getFormatDialectForPath('src/List.js');
+    const dialect = getSourceDialectForPath('src/List.js');
     if (dialect === null) {
       throw new Error('Expected .js to be a JS file.');
     }
@@ -190,6 +190,51 @@ describe('extractFunctionSource', function () {
       ],
       firstLine: 3,
     });
+  });
+});
+
+describe('extractFunctionSource in Svelte components', function () {
+  const code = [
+    '<script>',
+    '  let count = 0;',
+    '  function increment() {',
+    '    count++;',
+    '  }',
+    '</script>',
+    '',
+    '<button on:click={() => (count = 0)}>{count}</button>',
+    '{#if count > 0}',
+    '  <p>Clicked</p>',
+    '{/if}',
+  ].join('\n');
+
+  function extract(line: number, column: number) {
+    return extractFunctionSource({
+      code,
+      dialect: 'svelte',
+      line,
+      column,
+      format: 'never',
+    });
+  }
+
+  it('finds functions in the script', function () {
+    expect(extract(3, 3)).toEqual({
+      lines: ['function increment() {', '  count++;', '}'],
+      firstLine: 3,
+    });
+  });
+
+  it('finds functions in template expressions, and shows the markup around them', function () {
+    expect(extract(8, 19)).toEqual({
+      lines: ['<button on:click={() => (count = 0)}>{count}</button>'],
+      firstLine: 8,
+    });
+  });
+
+  it("doesn't find functions in the markup", function () {
+    expect(extract(9, 1)).toBeNull();
+    expect(extract(10, 3)).toBeNull();
   });
 });
 

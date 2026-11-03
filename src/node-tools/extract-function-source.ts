@@ -17,7 +17,7 @@ import fs from 'fs';
 import minimist from 'minimist';
 import { extractFunctionSource } from '../profile-logic/js-format/function-source';
 import type { FunctionFormatMode } from '../profile-logic/js-format/function-source';
-import { getFormatDialectForPath } from '../profile-logic/js-format/dialect';
+import { getSourceDialectForPath } from '../profile-logic/js-format/dialect';
 import { isPositionInCode } from '../profile-logic/benchmark/bucket-function-source';
 
 const FORMAT_MODES: FunctionFormatMode[] = ['always', 'never', 'auto'];
@@ -67,7 +67,7 @@ function main() {
     usage(`Unknown format mode: ${argv.format}`);
   }
   const { path, line, column } = parsePosition(argv._.map(String));
-  const dialect = getFormatDialectForPath(path);
+  const dialect = getSourceDialectForPath(path);
   if (dialect === null) {
     usage(`${path} isn't a JS file.`);
   }

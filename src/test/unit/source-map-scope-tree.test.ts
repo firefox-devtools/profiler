@@ -550,6 +550,43 @@ describe('parseJsScopeTree', () => {
   });
 });
 
+describe('parseJsScopeTree for Svelte components', () => {
+  it('finds the functions in scripts and template expressions', () => {
+    const src = stripIndent`
+      <script lang="ts">
+        let items: string[] = [];
+        function add(item: string) {
+          items = [...items, item];
+        }
+        $: count = items.length
+      </script>
+
+      <style>
+        p { color: red; }
+      </style>
+
+      <!-- {() => notCode} -->
+      <ul>
+        {#each items as item}
+          <li on:click={() => add(item)}>Add</li>
+        {/each}
+      </ul>
+    `;
+    const scopes = parseJsScopeTree(src, 'svelte');
+    expect(
+      scopes.map((scope) => [src.slice(scope.start, scope.end), scope.lhsText])
+    ).toEqual([
+      [
+        'function add(item: string) {\n    items = [...items, item];\n  }',
+        null,
+      ],
+      // The arrow isn't parsed as an argument of a call to `items.length`, so
+      // it doesn't get the name `count`.
+      ['() => add(item)', null],
+    ]);
+  });
+});
+
 describe('dialectForFilename', () => {
   it('returns ts for .ts/.mts/.cts', () => {
     expect(dialectForFilename('foo.ts')).toBe('ts');
@@ -574,6 +611,10 @@ describe('dialectForFilename', () => {
   it('matches case-insensitively', () => {
     expect(dialectForFilename('FOO.TSX')).toBe('ts jsx');
     expect(dialectForFilename('Bar.TS')).toBe('ts');
+  });
+
+  it('returns svelte for .svelte', () => {
+    expect(dialectForFilename('../src/App.svelte')).toBe('svelte');
   });
 
   it('handles URL-style source paths', () => {
