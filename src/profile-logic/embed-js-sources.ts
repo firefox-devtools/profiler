@@ -135,6 +135,7 @@ export function attachSourcesFromFuncNames(profile: Profile): void {
     startColumn: sources.startColumn.slice(),
     sourceMapURL: sources.sourceMapURL.slice(),
     content: sources.content.slice(),
+    generatedSource: sources.generatedSource.slice(),
   };
   const sourceIndexByFilename = new Map<
     IndexIntoStringTable,
@@ -166,6 +167,7 @@ export function attachSourcesFromFuncNames(profile: Profile): void {
       newSources.startColumn.push(1);
       newSources.sourceMapURL.push(null);
       newSources.content.push(null);
+      newSources.generatedSource.push(null);
       sourceIndexByFilename.set(filenameIndex, sourceIndex);
     }
     // SpiderMonkey names the functions without a name "*". Name them like

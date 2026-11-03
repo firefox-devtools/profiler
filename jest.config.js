@@ -75,9 +75,6 @@ const allProjects = [
 
     setupFilesAfterEnv: ['./profiler-cli/src/test/integration/setup.ts'],
 
-    // Integration tests can be slow (loading profiles, spawning processes)
-    testTimeout: 30000,
-
     moduleFileExtensions: ['ts', 'js'],
 
     transform: {

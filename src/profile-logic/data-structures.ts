@@ -666,6 +666,7 @@ export function getEmptySourceTable(): SourceTable {
     startColumn: [],
     sourceMapURL: [],
     content: [],
+    generatedSource: [],
     length: 0,
   };
 }
