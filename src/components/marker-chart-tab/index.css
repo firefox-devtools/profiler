@@ -1,0 +1,7 @@
+.markerChartTabContainer {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-flow: column nowrap;
+}
