@@ -12,10 +12,10 @@
 // every type annotation or JSX element unless the matching dialect is used.
 export type JsDialect = '' | 'ts' | 'jsx' | 'ts jsx';
 
-// The dialect for finding the functions in a source. Svelte components
-// aren't JS, but the JS in them can be parsed after masking the markup, see
-// svelte.ts.
-export type SourceDialect = JsDialect | 'svelte';
+// The dialect for finding the functions in a source. Svelte and Vue
+// components aren't JS, but the JS in them can be parsed after masking the
+// markup, see component-markup.ts.
+export type SourceDialect = JsDialect | 'svelte' | 'vue';
 
 /**
  * Map a source filename to the Lezer dialect needed to parse it. Looks at the
@@ -30,6 +30,9 @@ export function dialectForFilename(filename: string): SourceDialect {
   const lower = filename.toLowerCase();
   if (lower.endsWith('.svelte')) {
     return 'svelte';
+  }
+  if (lower.endsWith('.vue')) {
+    return 'vue';
   }
   if (lower.endsWith('.tsx')) {
     return 'ts jsx';
@@ -77,11 +80,11 @@ export function getSourceDialectForPath(path: string): SourceDialect | null {
 
 /**
  * Returns the dialect to use for pretty-printing the whole source at this
- * path, or null if it can't be pretty-printed. Svelte components can't be
- * pretty-printed, because the formatter replaces the text between JS tokens,
- * and in a component, that text includes the markup.
+ * path, or null if it can't be pretty-printed. Svelte and Vue components can't
+ * be pretty-printed, because the formatter replaces the text between JS
+ * tokens, and in a component, that text includes the markup.
  */
 export function getFormatDialectForPath(path: string): JsDialect | null {
   const dialect = getSourceDialectForPath(path);
-  return dialect === 'svelte' ? null : dialect;
+  return dialect === 'svelte' || dialect === 'vue' ? null : dialect;
 }

@@ -88,7 +88,10 @@ import {
   type SourceDialect,
   dialectForFilename,
 } from 'firefox-profiler/profile-logic/js-format/dialect';
-import { maskSvelteMarkup } from 'firefox-profiler/profile-logic/js-format/svelte';
+import {
+  maskSvelteMarkup,
+  maskVueMarkup,
+} from 'firefox-profiler/profile-logic/js-format/component-markup';
 
 // Derive SyntaxNode from the parser to avoid version conflicts with nested
 // @lezer/common copies in node_modules (they have incompatible private fields).
@@ -658,27 +661,31 @@ export function parserForDialect(dialect: JsDialect): typeof lezerJsParser {
 }
 
 /**
- * Parse `sourceText` with Lezer. For Svelte components, only the JS in them is
- * parsed, but the node positions are still positions in `sourceText`.
+ * Parse `sourceText` with Lezer. For Svelte and Vue components, only the JS in
+ * them is parsed, but the node positions are still positions in `sourceText`.
  */
 export function parseSource(
   sourceText: string,
   dialect: SourceDialect
 ): ReturnType<typeof lezerJsParser.parse> {
-  if (dialect === 'svelte') {
-    // Svelte components can have <script lang="ts">. Plain JS parses the
-    // same with the TS dialect.
-    return parserForDialect('ts').parse(maskSvelteMarkup(sourceText));
+  // Components can have <script lang="ts">. Plain JS parses the same with the
+  // TS dialect.
+  switch (dialect) {
+    case 'svelte':
+      return parserForDialect('ts').parse(maskSvelteMarkup(sourceText));
+    case 'vue':
+      return parserForDialect('ts').parse(maskVueMarkup(sourceText));
+    default:
+      return parserForDialect(dialect).parse(sourceText);
   }
-  return parserForDialect(dialect).parse(sourceText);
 }
 
 /**
  * Parse `sourceText` with Lezer and return the top-level function scopes.
  *
  * `dialect` selects the Lezer dialect: `'ts'` for TypeScript, `'jsx'` for
- * JSX, `'ts jsx'` for TSX. Default `''` is plain JS. `'svelte'` parses the JS
- * in a Svelte component.
+ * JSX, `'ts jsx'` for TSX. Default `''` is plain JS. `'svelte'` and `'vue'`
+ * parse the JS in a Svelte or Vue component.
  *
  * Lezer never throws on invalid JS. Error nodes are silently skipped.
  */

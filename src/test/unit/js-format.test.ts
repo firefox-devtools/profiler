@@ -299,7 +299,8 @@ describe('getFormatDialectForPath', function () {
     expect(getFormatDialectForPath('iongraph.json')).toBeNull();
   });
 
-  it("returns null for Svelte components, which can't be pretty-printed", function () {
+  it("returns null for Svelte and Vue components, which can't be pretty-printed", function () {
     expect(getFormatDialectForPath('../src/App.svelte')).toBeNull();
+    expect(getFormatDialectForPath('../src/App.vue')).toBeNull();
   });
 });

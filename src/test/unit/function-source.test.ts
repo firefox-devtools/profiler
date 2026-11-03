@@ -238,6 +238,49 @@ describe('extractFunctionSource in Svelte components', function () {
   });
 });
 
+describe('extractFunctionSource in Vue components', function () {
+  const code = [
+    '<script setup lang="ts">',
+    'function reset(): void {',
+    '  count.value = 0;',
+    '}',
+    '</script>',
+    '',
+    '<template>',
+    '  <button @click="reset()">{{ count }}</button>',
+    '</template>',
+  ].join('\n');
+
+  function extract(line: number, column: number) {
+    return extractFunctionSource({
+      code,
+      dialect: 'vue',
+      line,
+      column,
+      format: 'never',
+    });
+  }
+
+  it('finds functions in the script', function () {
+    expect(extract(2, 1)).toEqual({
+      lines: ['function reset(): void {', '  count.value = 0;', '}'],
+      firstLine: 2,
+    });
+  });
+
+  it('finds event handlers, and shows the markup around them', function () {
+    expect(extract(8, 19)).toEqual({
+      lines: ['<button @click="reset()">{{ count }}</button>'],
+      firstLine: 8,
+    });
+  });
+
+  it("doesn't find functions in the markup", function () {
+    expect(extract(8, 3)).toBeNull();
+    expect(extract(8, 31)).toBeNull();
+  });
+});
+
 describe('isPositionInCode', function () {
   const code = 'function f() {\n  return 1;\n}';
 
