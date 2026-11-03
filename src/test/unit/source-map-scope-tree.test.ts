@@ -587,6 +587,51 @@ describe('parseJsScopeTree for Svelte components', () => {
   });
 });
 
+describe('parseJsScopeTree for Vue components', () => {
+  it('finds the functions in scripts and template expressions', () => {
+    const src = stripIndent`
+      <script setup lang="ts">
+        const items = ref<string[]>([]);
+        function add(item: string) {
+          items.value.push(item);
+        }
+        const count = items.value.length
+      </script>
+
+      <template>
+        <ul :class="{ empty: count === 0 }">
+          <li v-for="item in items.filter((i) => i)" @click="add(item)">
+            {{ item.split('').map((c) => c) }}
+          </li>
+          <template #footer="{ close }">
+            <button @click="(event) => close(event)">Close</button>
+          </template>
+        </ul>
+      </template>
+
+      <style scoped>
+        ul { color: red; }
+      </style>
+    `;
+    const scopes = parseJsScopeTree(src, 'vue');
+    expect(
+      scopes.map((scope) => [src.slice(scope.start, scope.end), scope.lhsText])
+    ).toEqual([
+      ['function add(item: string) {\n    items.value.push(item);\n  }', null],
+      // The v-for source, but not its alias.
+      ['(i) => i', null],
+      // Event handlers are functions, like the functions that Vue compiles
+      // them to. The function starts at the masked characters which became
+      // the `;()=>{` before the handler.
+      ['ick="add(item)"', null],
+      // The interpolation isn't parsed as an argument of a call to
+      // `items.value.length`, so its arrow doesn't get the name `count`.
+      ['(c) => c', null],
+      ['ick="(event) => close(event)"', null],
+    ]);
+  });
+});
+
 describe('dialectForFilename', () => {
   it('returns ts for .ts/.mts/.cts', () => {
     expect(dialectForFilename('foo.ts')).toBe('ts');
@@ -613,8 +658,9 @@ describe('dialectForFilename', () => {
     expect(dialectForFilename('Bar.TS')).toBe('ts');
   });
 
-  it('returns svelte for .svelte', () => {
+  it('returns svelte for .svelte, and vue for .vue', () => {
     expect(dialectForFilename('../src/App.svelte')).toBe('svelte');
+    expect(dialectForFilename('../../src/components/Row.vue')).toBe('vue');
   });
 
   it('handles URL-style source paths', () => {
