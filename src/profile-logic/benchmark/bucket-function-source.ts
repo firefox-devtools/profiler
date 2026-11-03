@@ -8,7 +8,7 @@
  * profiles which contain the JS sources, see embed-js-sources.ts.
  */
 
-import { getFormatDialectForPath } from '../js-format/dialect';
+import { getSourceDialectForPath } from '../js-format/dialect';
 import { FuncFlag } from '../../types/profile';
 
 import type { FunctionSourceRequest } from '../js-format/function-source';
@@ -84,7 +84,7 @@ function _getFunctionSourceView(
     return null;
   }
   const filename = stringArray[sources.filename[sourceIndex]];
-  const dialect = getFormatDialectForPath(filename);
+  const dialect = getSourceDialectForPath(filename);
   if (dialect === null) {
     return null;
   }

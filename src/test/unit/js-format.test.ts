@@ -298,4 +298,8 @@ describe('getFormatDialectForPath', function () {
     expect(getFormatDialectForPath('src/lib.rs')).toBeNull();
     expect(getFormatDialectForPath('iongraph.json')).toBeNull();
   });
+
+  it("returns null for Svelte components, which can't be pretty-printed", function () {
+    expect(getFormatDialectForPath('../src/App.svelte')).toBeNull();
+  });
 });

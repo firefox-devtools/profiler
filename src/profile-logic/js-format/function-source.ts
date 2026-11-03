@@ -11,7 +11,7 @@
 import {
   getJsScopeTreeFromSyntaxTree,
   findInnermostFunctionScope,
-  parserForDialect,
+  parseSource,
 } from 'firefox-profiler/profile-logic/source-maps/scope-tree';
 import {
   buildLineOffsets,
@@ -20,7 +20,7 @@ import {
 } from 'firefox-profiler/utils/line-offsets';
 import { computeFormatEdits } from './formatter';
 import { applyFormatEdits } from './formatted-source';
-import type { JsDialect } from './dialect';
+import type { SourceDialect } from './dialect';
 
 /**
  * Whether the function code should be pretty-printed. 'auto' pretty-prints
@@ -30,7 +30,7 @@ export type FunctionFormatMode = 'always' | 'never' | 'auto';
 
 export type FunctionSourceRequest = {
   code: string;
-  dialect: JsDialect;
+  dialect: SourceDialect;
   // The 1-based line and column of the function, relative to the start of
   // the code. Any position inside the function works, but the function's own
   // position is the most reliable one: with a position inside the body, a
@@ -104,7 +104,7 @@ export function extractFunctionSource({
   column,
   format,
 }: FunctionSourceRequest): FunctionSource | null {
-  const tree = parserForDialect(dialect).parse(code);
+  const tree = parseSource(code, dialect);
   const scopes = getJsScopeTreeFromSyntaxTree(tree, code);
   const lineOffsets = buildLineOffsets(code);
   const lineIndex = Math.min(Math.max(line - 1, 0), lineOffsets.length - 1);

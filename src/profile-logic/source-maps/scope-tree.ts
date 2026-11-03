@@ -85,8 +85,10 @@ import { parser as lezerJsParser } from '@lezer/javascript';
 import { bisectionRightByKey } from 'firefox-profiler/utils/bisect';
 import {
   type JsDialect,
+  type SourceDialect,
   dialectForFilename,
 } from 'firefox-profiler/profile-logic/js-format/dialect';
+import { maskSvelteMarkup } from 'firefox-profiler/profile-logic/js-format/svelte';
 
 // Derive SyntaxNode from the parser to avoid version conflicts with nested
 // @lezer/common copies in node_modules (they have incompatible private fields).
@@ -638,7 +640,7 @@ function _walkChildren(
 // ---------------------------------------------------------------------------
 
 // Always configure the matching dialect for original sources, see JsDialect.
-export type { JsDialect };
+export type { JsDialect, SourceDialect };
 export { dialectForFilename };
 
 const _configuredParsers = new Map<JsDialect, typeof lezerJsParser>();
@@ -656,19 +658,36 @@ export function parserForDialect(dialect: JsDialect): typeof lezerJsParser {
 }
 
 /**
+ * Parse `sourceText` with Lezer. For Svelte components, only the JS in them is
+ * parsed, but the node positions are still positions in `sourceText`.
+ */
+export function parseSource(
+  sourceText: string,
+  dialect: SourceDialect
+): ReturnType<typeof lezerJsParser.parse> {
+  if (dialect === 'svelte') {
+    // Svelte components can have <script lang="ts">. Plain JS parses the
+    // same with the TS dialect.
+    return parserForDialect('ts').parse(maskSvelteMarkup(sourceText));
+  }
+  return parserForDialect(dialect).parse(sourceText);
+}
+
+/**
  * Parse `sourceText` with Lezer and return the top-level function scopes.
  *
  * `dialect` selects the Lezer dialect: `'ts'` for TypeScript, `'jsx'` for
- * JSX, `'ts jsx'` for TSX. Default `''` is plain JS.
+ * JSX, `'ts jsx'` for TSX. Default `''` is plain JS. `'svelte'` parses the JS
+ * in a Svelte component.
  *
  * Lezer never throws on invalid JS. Error nodes are silently skipped.
  */
 export function parseJsScopeTree(
   sourceText: string,
-  dialect: JsDialect = ''
+  dialect: SourceDialect = ''
 ): FunctionScope[] {
   return getJsScopeTreeFromSyntaxTree(
-    parserForDialect(dialect).parse(sourceText),
+    parseSource(sourceText, dialect),
     sourceText
   );
 }
