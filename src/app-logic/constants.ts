@@ -122,4 +122,5 @@ export const DEFAULT_BENCHMARK_BUCKET_FILTER: BenchmarkBucketFilter = {
   subject: null,
   comparand: 'best',
   show: 'all',
+  mergeJsFunctions: false,
 };

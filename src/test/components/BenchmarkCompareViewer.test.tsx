@@ -163,6 +163,8 @@ function makeStats(
     bucketNames,
     bucketKeys: bucketNames,
     bucketFuncs: bucketNames.map((_, i) => i),
+    // Everything but gammaFunc is a JS function.
+    bucketIsJS: bucketNames.map((name) => name !== 'gammaFunc'),
     suites: suites.map(({ suiteName, buckets }) => ({
       suiteName,
       iterationCount: buckets[0][1].length,
@@ -500,6 +502,7 @@ describe('app/BenchmarkCompareViewer', () => {
       subject: null,
       comparand: 'best',
       show: 'slower',
+      mergeJsFunctions: false,
     });
 
     fireEvent.change(screen.getByLabelText('Profile the report is about'), {
@@ -509,6 +512,41 @@ describe('app/BenchmarkCompareViewer', () => {
       subject: 0,
       show: 'faster',
     });
+  });
+
+  it('lists the JS functions under one row', async () => {
+    const { store } = setup();
+    await screen.findByText('Overall (geomean-normalised)');
+    expect(await releaseNextTable()).toBe('Overall (geomean-normalised)');
+    fireEvent.click(screen.getByLabelText('Unfiltered'));
+    fireEvent.click(
+      screen
+        .getByText('Overall (geomean-normalised)')
+        .closest('tr') as HTMLTableRowElement
+    );
+    const listed = () =>
+      [...document.querySelectorAll('.benchmarkCell--bucketName')]
+        .map((td) => td.getAttribute('title'))
+        .sort();
+
+    fireEvent.click(screen.getByLabelText('Group JS functions into one row'));
+    expect(getBenchmarkBucketFilter(store.getState())).toMatchObject({
+      mergeJsFunctions: true,
+    });
+    // Grouping is a way of showing the same tables, so nothing is recomputed.
+    expect(comparisons).toHaveLength(1);
+    expect(listed()).toEqual(['JS functions', 'gammaFunc']);
+
+    // Expanding the group lists the functions it sums.
+    fireEvent.click(
+      screen.getByTitle('JS functions').closest('tr') as HTMLTableRowElement
+    );
+    expect(listed()).toEqual([
+      'JS functions',
+      'alphaFunc',
+      'betaFunc',
+      'gammaFunc',
+    ]);
   });
 
   it('gives a subtest the new profile did not run no arrow at all', async () => {

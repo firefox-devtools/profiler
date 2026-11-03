@@ -38,11 +38,14 @@ import type {
 } from './extract-benchmark-stats';
 import {
   applyBenjaminiHochberg,
+  bucketIsJSOf,
   bucketTableSideOf,
   compareBucketsInSlices,
   compareIterationTotals,
   computeGlobalBuckets,
   computeSharedSuiteFactors,
+  JS_FUNCTIONS_BUCKET_NAME,
+  jsFunctionIterationTotals,
   matchBucketKeys,
   suiteIterationTotals,
 } from './compare-benchmark-stats';
@@ -58,6 +61,7 @@ import type {
   ComparedBucket,
   ComparedScore,
   PairwiseBucketTable,
+  PairwiseRow,
 } from './best-of-others';
 import { computeProfileMeans } from './profile-means';
 import type { ProfileMeans } from './profile-means';
@@ -108,6 +112,17 @@ export type ComparisonProgress = {
    * comparisons in themselves: see profile-means.ts.
    */
   otherMeans: Map<number, ProfileMeans>;
+  /**
+   * Per score row, keyed like `bucketTables`, the time of every JS function in
+   * that row summed into one comparison. The viewer can show it in place of the
+   * individual JS function rows, which it then lists underneath.
+   *
+   * Tested like a score row, on its own p-value rather than against the
+   * functions of its table: "did the time spent in JS change" is one question
+   * asked up front, not one of thousands. Computed with the score rows, so it is
+   * there in the first snapshot, for every row that will have a table.
+   */
+  jsFunctionRows: Map<string, ComparedBucket>;
   /**
    * The per-function comparisons behind each score row, keyed by that row's
    * label — `overallScore.label` for the geomean-normalised global view, and the
@@ -558,6 +573,35 @@ export async function* compareStatsProgressively(
   // go, because the rows without one have to be able to say so immediately. A
   // subtest that the subject did not run gets no table at all, and showing it a
   // spinner that never resolves would be a lie.
+  const isJSPerProfile = stats.map(bucketIsJSOf);
+  const pairwiseJsRows = new Map<string, Array<PairwiseRow<ScoreComparison>>>();
+  const addJsRow = (
+    label: string,
+    k: number,
+    baseBuckets: SparseBucketEntry[],
+    baseIterationCount: number,
+    newBuckets: SparseBucketEntry[],
+    newIterationCount: number
+  ) => {
+    const row = compareIterationTotals(
+      JS_FUNCTIONS_BUCKET_NAME,
+      jsFunctionIterationTotals(
+        baseBuckets,
+        isJSPerProfile[comparands[k]],
+        baseIterationCount
+      ),
+      jsFunctionIterationTotals(
+        newBuckets,
+        isJSPerProfile[subject],
+        newIterationCount
+      )
+    );
+    row.mde = minimumDetectableEffect(row, familyWiseAlpha);
+    const rows = pairwiseJsRows.get(label) ?? [];
+    rows.push({ comparand: comparands[k], row });
+    pairwiseJsRows.set(label, rows);
+  };
+
   const jobs: BucketTableJob[] = comparands.map((_, k) => ({
     label: overallScore.label,
     pairIndex: k,
@@ -567,6 +611,16 @@ export async function* compareStatsProgressively(
     iterationCount,
     splitAcrossThreads: true,
   }));
+  comparands.forEach((_, k) =>
+    addJsRow(
+      overallScore.label,
+      k,
+      comparandGlobalBuckets[k],
+      iterationCount,
+      subjectGlobalBuckets,
+      iterationCount
+    )
+  );
   for (const row of suiteScores) {
     const newSuite = findSuite(subjectStats, row.label);
     if (newSuite === undefined) {
@@ -586,6 +640,31 @@ export async function* compareStatsProgressively(
         iterationCount: baseSuite.iterationCount,
         splitAcrossThreads: false,
       });
+      addJsRow(
+        row.label,
+        k,
+        baseSuite.buckets,
+        baseSuite.iterationCount,
+        newSuite.buckets,
+        newSuite.iterationCount
+      );
+    });
+  }
+
+  const jsFunctionRows = new Map<string, ComparedBucket>();
+  for (const [label, candidates] of pairwiseJsRows) {
+    const { label: _label, ...combined } =
+      comparisonCount === 1
+        ? { ...candidates[0].row, comparand: candidates[0].comparand }
+        : combineAgainstFastest(candidates, comparisonCount, ALPHA);
+    jsFunctionRows.set(label, {
+      key: JS_FUNCTIONS_BUCKET_NAME,
+      bucketName: JS_FUNCTIONS_BUCKET_NAME,
+      // No single function stands for it, so it has no flame graph.
+      baseFunc: null,
+      newFunc: null,
+      isJS: false,
+      ...combined,
     });
   }
 
@@ -606,6 +685,7 @@ export async function* compareStatsProgressively(
     sources,
     scores,
     otherMeans,
+    jsFunctionRows,
     bucketTables: new Map(tables),
     pendingLabels,
   });

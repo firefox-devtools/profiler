@@ -1882,6 +1882,7 @@ describe('compare-benchmark', function () {
     expect(url).not.toMatch('buckets=');
     expect(url).not.toMatch('subject=');
     expect(url).not.toMatch('than=');
+    expect(url).not.toMatch('js=');
   });
 
   it('round-trips the bucket filter through the URL', function () {
@@ -1891,10 +1892,12 @@ describe('compare-benchmark', function () {
       subject: 1,
       comparand: 2,
       show: 'faster',
+      mergeJsFunctions: true,
     } as const;
     store.dispatch(changeBenchmarkBucketFilter(filter));
     const url = urlFromState(urlStateSelectors.getUrlState(store.getState()));
     expect(url).toMatch('show=faster');
+    expect(url).toMatch('js=merged');
 
     const newUrlState = stateFromLocation(
       new URL(url, 'https://profiler.firefox.com')
@@ -1906,7 +1909,7 @@ describe('compare-benchmark', function () {
     const store = _getStoreWithURL(
       {
         pathname: '/compare-benchmark/',
-        search: '?show=sideways&buckets=all&subject=-1&than=best',
+        search: '?show=sideways&buckets=all&subject=-1&than=best&js=yes',
       },
       /* no profile */ null
     );
@@ -1917,6 +1920,7 @@ describe('compare-benchmark', function () {
       subject: null,
       comparand: 'best',
       show: 'all',
+      mergeJsFunctions: false,
     });
   });
 });

@@ -138,6 +138,7 @@ describe('combineBucketTables', function () {
       bucketName: key,
       baseFunc: 1,
       newFunc: 2,
+      isJS: false,
       ...pairwise(comparandMean, q),
     };
   }

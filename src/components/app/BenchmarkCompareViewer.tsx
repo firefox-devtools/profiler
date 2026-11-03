@@ -166,6 +166,9 @@ type BucketFilter = {
    * others, row by row. Only ever 'best' with three or more profiles loaded. */
   comparand: BucketComparand;
   show: BucketShow;
+  /** Whether the JS functions of a table are listed under one "JS functions"
+   * row, rather than among the other buckets. */
+  mergeJsFunctions: boolean;
 };
 
 /**
@@ -196,7 +199,13 @@ function resolveBucketFilter(
   if (comparand === 'best' && profileCount === 2) {
     comparand = 1 - subject;
   }
-  return { mode: urlFilter.mode, show: urlFilter.show, subject, comparand };
+  return {
+    mode: urlFilter.mode,
+    show: urlFilter.show,
+    subject,
+    comparand,
+    mergeJsFunctions: urlFilter.mergeJsFunctions,
+  };
 }
 
 /** How many pairwise comparisons the report is made of: one per profile the
@@ -1043,6 +1052,7 @@ function ScoreTable({
   overallScore,
   suiteScores,
   bucketTables,
+  jsFunctionRows,
   pendingLabels,
   filter,
   getBundle,
@@ -1052,6 +1062,8 @@ function ScoreTable({
   suiteScores: ComparedScore[];
   /** Per-function tables computed so far, keyed by score-row label. */
   bucketTables: Map<string, ComparedBucket[]>;
+  /** Each table's JS functions summed into one row, keyed the same way. */
+  jsFunctionRows: Map<string, ComparedBucket>;
   /** Rows whose table is still being computed. */
   pendingLabels: string[];
   filter: BucketFilter;
@@ -1283,6 +1295,11 @@ function ScoreTable({
                       {comparisons ? (
                         <BucketTable
                           comparisons={comparisons}
+                          jsFunctionsRow={
+                            filter.mergeJsFunctions
+                              ? (jsFunctionRows.get(row.label) ?? null)
+                              : null
+                          }
                           label={row.label}
                           enclosing={row}
                           isOverall={isOverall}
@@ -1398,6 +1415,7 @@ function Counterfactual({
 
 function BucketTable({
   comparisons,
+  jsFunctionsRow,
   label,
   enclosing,
   isOverall,
@@ -1407,6 +1425,9 @@ function BucketTable({
   viewerUrls,
 }: {
   comparisons: ComparedBucket[];
+  /** When not null, the JS functions in `comparisons` are not listed on their
+   * own but under this row, which sums them. */
+  jsFunctionsRow: ComparedBucket | null;
   label: string;
   /** The score row this table expands (overall row or subtest row). Each
    * bucket's Δ is expressed as a share of it, to give the bucket's impact on
@@ -1481,15 +1502,40 @@ function BucketTable({
     });
   }, []);
 
+  const scale: ImpactScale = againstFastest ? 'subject' : 'base';
+  const rowsForFilter = (list: ComparedBucket[], rowFilter: BucketFilter) =>
+    bucketRowsForFilter(
+      list,
+      enclosing,
+      isOverall,
+      numSuites,
+      rowFilter,
+      scale
+    );
+
   // The same list the collapsed row's badge counted, now ranked and capped.
-  const significant = bucketRowsForFilter(
-    comparisons,
-    enclosing,
-    isOverall,
-    numSuites,
-    filter,
-    againstFastest ? 'subject' : 'base'
-  )
+  // When the JS functions are grouped, they move under one row, and the badge
+  // still counts them.
+  const jsFunctions =
+    jsFunctionsRow === null ? null : comparisons.filter((c) => c.isJS);
+  const rows = rowsForFilter(
+    jsFunctions === null ? comparisons : comparisons.filter((c) => !c.isJS),
+    filter
+  );
+  const jsFunctionCount =
+    jsFunctions === null ? 0 : rowsForFilter(jsFunctions, filter).length;
+  if (jsFunctionsRow !== null) {
+    // Listed whenever something under it passes the filter, even if the sum
+    // does not, so that grouping never hides a function the filter admits.
+    const [groupRow] = rowsForFilter(
+      [jsFunctionsRow],
+      jsFunctionCount > 0 ? { ...filter, mode: 'none', show: 'all' } : filter
+    );
+    if (groupRow !== undefined) {
+      rows.push(groupRow);
+    }
+  }
+  const significant = rows
     .sort((a, b) => Math.abs(b.absDiff) - Math.abs(a.absDiff))
     .slice(0, TOP_N);
 
@@ -1529,10 +1575,13 @@ function BucketTable({
       <tbody>
         {significant.map(({ c, absDiff, subtestRel, overallRel }) => {
           const absDiffStr = (absDiff >= 0 ? '+' : '') + absDiff.toFixed(2);
-          // A bucket can be expanded if at least one side has a func index.
-          // (If both are null it's a degenerate "appeared/disappeared with no
+          // The JS functions row expands into the functions it sums. Any other
+          // bucket can be expanded if at least one side has a func index. (If
+          // both are null it's a degenerate "appeared/disappeared with no
           // attributable func" case.)
-          const expandable = c.baseFunc !== null || c.newFunc !== null;
+          const group = c === jsFunctionsRow ? jsFunctions : null;
+          const expandable =
+            group !== null || c.baseFunc !== null || c.newFunc !== null;
           const isExpanded = expanded.has(c.key);
           const rowNames = {
             base: allNames[c.comparand] ?? names.base,
@@ -1558,6 +1607,15 @@ function BucketTable({
                       </span>
                     ) : null}
                     {c.bucketName}
+                    {group === null ? null : (
+                      <>
+                        {' '}
+                        <BucketCountBadge
+                          count={jsFunctionCount}
+                          filter={filter}
+                        />
+                      </>
+                    )}
                   </td>
                   {columns.map((column) => (
                     <MeanCell
@@ -1609,15 +1667,29 @@ function BucketTable({
                         alreadyOverall={isOverall}
                         numSuites={numSuites}
                       />
-                      <BucketFlameGraphPair
-                        baseBundle={getInnerBundle(c.comparand)}
-                        newBundle={getInnerBundle(filter.subject)}
-                        baseFunc={c.baseFunc}
-                        newFunc={c.newFunc}
-                        baseViewerUrl={viewerUrls[c.comparand] ?? ''}
-                        newViewerUrl={viewerUrls[filter.subject] ?? ''}
-                        suiteName={isOverall ? null : label}
-                      />
+                      {group !== null ? (
+                        <BucketTable
+                          comparisons={group}
+                          jsFunctionsRow={null}
+                          label={label}
+                          enclosing={enclosing}
+                          isOverall={isOverall}
+                          numSuites={numSuites}
+                          filter={filter}
+                          getBundle={getBundle}
+                          viewerUrls={viewerUrls}
+                        />
+                      ) : (
+                        <BucketFlameGraphPair
+                          baseBundle={getInnerBundle(c.comparand)}
+                          newBundle={getInnerBundle(filter.subject)}
+                          baseFunc={c.baseFunc}
+                          newFunc={c.newFunc}
+                          baseViewerUrl={viewerUrls[c.comparand] ?? ''}
+                          newViewerUrl={viewerUrls[filter.subject] ?? ''}
+                          suiteName={isOverall ? null : label}
+                        />
+                      )}
                     </td>
                   </tr>
                 ) : null}
@@ -1861,6 +1933,13 @@ function ComparisonResults({
     [changeFilter]
   );
 
+  const handleMergeJsFunctionsChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      changeFilter({ mergeJsFunctions: e.currentTarget.checked });
+    },
+    [changeFilter]
+  );
+
   const than = comparandName(filter, allNames);
 
   return (
@@ -1923,6 +2002,27 @@ function ComparisonResults({
           </label>
         ))}
       </div>
+      <div className="benchmarkFilters">
+        <label
+          className="benchmarkFilter"
+          title={
+            'List the JS functions under one row that sums them, to see how ' +
+            'much of the difference is in JS, as opposed to DOM bindings or ' +
+            'code that runs with no JS on the stack, such as layout and ' +
+            'painting. The sum includes the native code that JS functions ' +
+            'call, other than DOM bindings: GC, JIT compilation and so on. The ' +
+            'sum is tested on its own, like a subtest row, rather than ' +
+            'corrected for the functions in its table.'
+          }
+        >
+          <input
+            type="checkbox"
+            checked={filter.mergeJsFunctions}
+            onChange={handleMergeJsFunctionsChange}
+          />
+          <span>Group JS functions into one row</span>
+        </label>
+      </div>
       <ColumnsNote
         comparisonCount={comparisonCount}
         profileCount={profileCount}
@@ -1933,6 +2033,7 @@ function ComparisonResults({
             overallScore={scores.overallScore}
             suiteScores={scores.suiteScores}
             bucketTables={bucketTables}
+            jsFunctionRows={progress.jsFunctionRows}
             pendingLabels={pendingLabels}
             filter={filter}
             getBundle={getBundle}

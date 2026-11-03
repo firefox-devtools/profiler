@@ -172,6 +172,7 @@ function makeFixture(bucketCount: number) {
     bucketNames,
     bucketKeys: bucketNames,
     bucketFuncs: bucketNames.map((_, i) => i),
+    bucketIsJS: bucketNames.map(() => false),
   };
   const meta: BucketTableMetadata = { base: side, new: side };
   return {

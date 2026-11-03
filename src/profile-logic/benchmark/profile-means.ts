@@ -23,6 +23,7 @@ import {
   bucketMatchKey,
   bucketTableSideOf,
   computeGlobalBuckets,
+  JS_FUNCTIONS_BUCKET_NAME,
   mean,
   suiteIterationTotals,
 } from './compare-benchmark-stats';
@@ -40,6 +41,9 @@ export type ProfileMeans = {
    * Absent means the profile has no bucket matching that key, which for a column
    * of times reads as zero: it spent none. That is the same thing the pairwise
    * comparison does with a bucket only one side has.
+   *
+   * Also has an entry for `JS_FUNCTIONS_BUCKET_NAME`: the sum of every JS
+   * function, for the row that groups them.
    */
   bucketMeans: Map<string, Map<string, number>>;
 };
@@ -105,6 +109,11 @@ function meansByKey(
 ): Map<string, number> {
   const side = bucketTableSideOf(stats);
   const sums = new Map<string, number>();
+  const jsKey = bucketMatchKey(
+    JS_FUNCTIONS_BUCKET_NAME,
+    JS_FUNCTIONS_BUCKET_NAME
+  );
+  let jsSum = 0;
   for (const entry of buckets) {
     const b = entry.bucketIndex;
     const fallback = `bucket#${b}`;
@@ -117,6 +126,12 @@ function meansByKey(
       sum += entry.iterationTotals[i];
     }
     sums.set(key, (sums.get(key) ?? 0) + sum);
+    if (side.bucketIsJS[b]) {
+      jsSum += sum;
+    }
+  }
+  if (jsSum !== 0) {
+    sums.set(jsKey, jsSum);
   }
   // Summed over iterations above, so the mean is one division per key rather
   // than a second pass over every iteration of every bucket.
