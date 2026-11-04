@@ -485,6 +485,23 @@ type Location = {
 };
 
 /**
+ * query-string returns an array for a repeated parameter, even without brackets.
+ * `profiles` is the only array parameter, so for any other repeated parameter
+ * the last value wins. This keeps hand-edited URLs working.
+ */
+function parseQueryString(search: string) {
+  const query = queryString.parse(search, {
+    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+  });
+  for (const [key, value] of Object.entries(query)) {
+    if (key !== 'profiles' && Array.isArray(value)) {
+      query[key] = value[value.length - 1];
+    }
+  }
+  return query;
+}
+
+/**
  * Parse the window.location string to create the UrlState.
  *
  * `profile` parameter is nullable and optional. It's nullable because data sources
@@ -501,9 +518,7 @@ export function stateFromLocation(
     {
       pathname: location.pathname,
       hash: location.hash,
-      query: queryString.parse(location.search.substr(1), {
-        arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-      }),
+      query: parseQueryString(location.search.substr(1)),
     },
     profileAndUpgradeInfo === null ? null : profileAndUpgradeInfo?.profile,
     profileAndUpgradeInfo?.upgradeInfo

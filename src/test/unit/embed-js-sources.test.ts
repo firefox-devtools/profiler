@@ -20,17 +20,21 @@ describe('embedJsSources', function () {
     'function greet(name) {\n  return "Hello, " + name;\n}\n';
   const BUNDLE_SOURCE = 'function a(b){return"Hello, "+b}';
 
-  function buildSourceMap(): string {
+  function buildSourceMap(
+    originalSource: string = ORIGINAL_SOURCE,
+    functionName: string = 'greet',
+    originalFilename: string = ORIGINAL_FILENAME
+  ): string {
     const gen = new SourceMapGenerator({ file: 'bundle.js' });
-    gen.setSourceContent(ORIGINAL_FILENAME, ORIGINAL_SOURCE);
+    gen.setSourceContent(originalFilename, originalSource);
     gen.addMapping({
-      source: ORIGINAL_FILENAME,
+      source: originalFilename,
       original: { line: 1, column: 9 },
       generated: { line: 1, column: 9 },
-      name: 'greet',
+      name: functionName,
     });
     gen.addMapping({
-      source: ORIGINAL_FILENAME,
+      source: originalFilename,
       original: { line: 2, column: 2 },
       generated: { line: 1, column: 14 },
     });
@@ -191,6 +195,89 @@ describe('embedJsSources', function () {
       content: ORIGINAL_SOURCE,
     });
   });
+
+  // Symbolicate a profile with one function in each of two bundles,
+  // app1/dist/bundle.js and app2/dist/bundle.js, which have the same text
+  // but different source maps. Returns the original location of each
+  // function.
+  async function symbolicateTwoBundles(sourceMap1: string, sourceMap2: string) {
+    const url1 = 'http://127.0.0.1:62763/app1/dist/bundle.js';
+    const url2 = 'http://127.0.0.1:62763/app2/dist/bundle.js';
+    const { profile } = getProfileFromTextSamples(
+      `Ajs[file:${url1}]  Bjs[file:${url2}]`
+    );
+    const { funcTable, frameTable, sources, stringArray } = profile.shared;
+    for (let i = 0; i < 2; i++) {
+      funcTable.lineNumber[i] = 1;
+      funcTable.columnNumber[i] = 10;
+      funcTable.flags[i] |= FuncFlag.HasLine | FuncFlag.HasColumn;
+      frameTable.line[i] = 1;
+      frameTable.column[i] = 15;
+      frameTable.flags[i] |= FrameFlag.HasLine | FrameFlag.HasColumn;
+      sources.sourceMapURL[i] = stringArray.length;
+      stringArray.push('bundle.js.map');
+    }
+
+    await embedJsSources(
+      profile,
+      makeReader({
+        [url1]: BUNDLE_SOURCE,
+        [url2]: BUNDLE_SOURCE,
+        [url1 + '.map']: sourceMap1,
+        [url2 + '.map']: sourceMap2,
+      }),
+      runSourceMapSymbolicationNode
+    );
+
+    const shared = profile.shared;
+    return [0, 1].map((funcIndex) => {
+      const row = shared.funcTable.originalLocation[funcIndex];
+      const sourceIndex = shared.sourceLocationTable.source[row];
+      const frameRow = shared.frameTable.originalLocation[funcIndex];
+      return {
+        name: shared.stringArray[shared.funcTable.name[funcIndex]],
+        sourceIndex,
+        frameSourceIndex: shared.sourceLocationTable.source[frameRow],
+        generatedSource: shared.sources.generatedSource[sourceIndex],
+        filename: shared.stringArray[shared.sources.filename[sourceIndex]],
+        content: shared.sources.content[sourceIndex],
+      };
+    });
+  }
+
+  it.each([
+    ['a relative URL', ORIGINAL_FILENAME],
+    ['an absolute URL', 'webpack:///src/hello.js'],
+  ])(
+    'keeps sources apart that two source maps list with %s',
+    async function (_, url) {
+      // Two apps bundle different versions of the same file. The bundles and
+      // the original function positions are identical, only the original
+      // function names differ.
+      const source2 = ORIGINAL_SOURCE.replace('greet', 'hallo');
+      const [result1, result2] = await symbolicateTwoBundles(
+        buildSourceMap(ORIGINAL_SOURCE, 'greet', url),
+        buildSourceMap(source2, 'hallo', url)
+      );
+      expect(result1).toEqual({
+        name: 'greet',
+        sourceIndex: result1.sourceIndex,
+        frameSourceIndex: result1.sourceIndex,
+        generatedSource: 0,
+        filename: url,
+        content: ORIGINAL_SOURCE,
+      });
+      expect(result2).toEqual({
+        name: 'hallo',
+        sourceIndex: result2.sourceIndex,
+        frameSourceIndex: result2.sourceIndex,
+        generatedSource: 1,
+        filename: url,
+        content: source2,
+      });
+      expect(result1.sourceIndex).not.toBe(result2.sourceIndex);
+    }
+  );
 
   it('skips inline scripts', async function () {
     const htmlUrl = 'http://127.0.0.1:62763/index.html';

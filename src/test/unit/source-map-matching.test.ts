@@ -39,6 +39,7 @@ describe('getSourcesWithSourceMapURL', function () {
       startColumn: [0, 0, 0],
       sourceMapURL: [1, null, 4],
       content: [null, null, null],
+      generatedSource: [null, null, null],
     };
 
     expect(getSourcesWithSourceMapURL(sources, stringArray)).toEqual([
@@ -57,6 +58,7 @@ describe('getSourcesWithSourceMapURL', function () {
       startColumn: [0],
       sourceMapURL: [1],
       content: [null],
+      generatedSource: [null],
     };
     expect(getSourcesWithSourceMapURL(sources, stringArray)).toHaveLength(1);
   });

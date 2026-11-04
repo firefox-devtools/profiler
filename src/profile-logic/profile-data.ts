@@ -2024,6 +2024,7 @@ export function computeSearchStringFilterOutput(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   sources: SourceTable,
+  sourceLocationTable: SourceLocationTable,
   stringTable: StringTable,
   searchStrings: string[] | null
 ): SearchStringFilterOutput {
@@ -2040,6 +2041,7 @@ export function computeSearchStringFilterOutput(
         funcTable,
         resourceTable,
         sources,
+        sourceLocationTable,
         stringTable,
         searchString
       );
@@ -2082,14 +2084,16 @@ export function computeSearchStringFilterOutput(
 }
 
 /**
- * Compute a BitSet of functions whose name, source filename, or resource name
- * matches the given search string. This is used both for filtering stacks and
- * for dimming non-matching nodes in the stack chart.
+ * Compute a BitSet of functions whose name, source filename (generated or
+ * source-mapped original), or resource name matches the given search string.
+ * This is used both for filtering stacks and for dimming non-matching nodes in
+ * the stack chart.
  */
 export function computeFuncMatchesSearchString(
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   sources: SourceTable,
+  sourceLocationTable: SourceLocationTable,
   stringTable: StringTable,
   searchString: string
 ): BitSet {
@@ -2105,6 +2109,16 @@ export function computeFuncMatchesSearchString(
     const funcFlags = funcTable.flags[func];
     if ((funcFlags & FuncFlag.HasSource) !== 0) {
       const sourceIndex = funcTable.source[func];
+      const urlIndex = sources.filename[sourceIndex];
+      const fileNameString = stringTable.getString(urlIndex);
+      if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {
+        return true;
+      }
+    }
+
+    if ((funcFlags & FuncFlag.HasOriginalLocation) !== 0) {
+      const originalLocationIndex = funcTable.originalLocation[func];
+      const sourceIndex = sourceLocationTable.source[originalLocationIndex];
       const urlIndex = sources.filename[sourceIndex];
       const fileNameString = stringTable.getString(urlIndex);
       if (fileNameString.toLowerCase().includes(lowercaseSearchString)) {

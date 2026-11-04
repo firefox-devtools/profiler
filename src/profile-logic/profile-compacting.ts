@@ -255,6 +255,12 @@ export function computeCompactedProfile(
     functionSize: ColDesc.noRefTyped(Int32Array),
   };
   const sourcesDesc: TableDescription<SourceTable> = {
+    // This column refers to the sources table itself. It must come first, so
+    // that a generated source which is only kept alive by one of its original
+    // sources is marked before the other columns mark the strings it uses.
+    // Marking happens in a single pass, so this relies on generated sources
+    // not having a generated source themselves.
+    generatedSource: ColDesc.indexRefOrNull(tcs.sources),
     id: ColDesc.noRef(),
     filename: ColDesc.indexRef(tcs.stringArray),
     startLine: ColDesc.noRef(),

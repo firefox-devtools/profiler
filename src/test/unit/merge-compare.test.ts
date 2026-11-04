@@ -82,10 +82,7 @@ describe('mergeProfilesForDiffing function', function () {
         libName = mergedLibs[libIndex].name;
       }
 
-      // These conditional expects aren't reported because of an oxlint bug:
-      // https://github.com/oxc-project/oxc/issues/28054
-      // Once it's fixed, wrap this switch in
-      // oxlint-disable/enable jest/no-conditional-expect comments.
+      /* oxlint-disable jest/no-conditional-expect */
       switch (funcName) {
         case 'A':
           expect(libName).toBeOneOf(['libA', 'libB']);
@@ -101,6 +98,7 @@ describe('mergeProfilesForDiffing function', function () {
           break;
         default:
       }
+      /* oxlint-enable jest/no-conditional-expect */
     }
   });
 
@@ -1084,6 +1082,54 @@ describe('mergeProfilesForDiffing with source tables', function () {
     expect(mergedProfile.shared.sources).toEqual(
       singleProfile.profile.shared.sources
     );
+  });
+
+  it('keeps original sources of different bundles apart', function () {
+    // Each profile has two bundles, and each bundle's source map lists
+    // `src/hello.js`. These are different files.
+    function makeProfile(funcPrefix: string) {
+      const { profile } = getProfileFromTextSamples(
+        `${funcPrefix}A[file:a.js]  ${funcPrefix}B[file:b.js]`
+      );
+      const { sources, stringArray } = profile.shared;
+      const filename = stringArray.push('src/hello.js') - 1;
+      for (const generatedSource of [0, 1]) {
+        sources.id.push(null);
+        sources.filename.push(filename);
+        sources.startLine.push(1);
+        sources.startColumn.push(1);
+        sources.sourceMapURL.push(null);
+        sources.content.push(null);
+        sources.generatedSource.push(generatedSource);
+        sources.length++;
+      }
+      return profile;
+    }
+
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+    const { profile: mergedProfile } = mergeProfilesForDiffing(
+      [makeProfile('X'), makeProfile('Y')],
+      [profileState, profileState]
+    );
+
+    const { sources, stringArray } = mergedProfile.shared;
+    const getFilename = (sourceIndex: number) =>
+      stringArray[sources.filename[sourceIndex]];
+    expect(
+      sources.generatedSource.map((generatedSource, sourceIndex) => [
+        getFilename(sourceIndex),
+        generatedSource === null ? null : getFilename(generatedSource),
+      ])
+    ).toEqual([
+      ['a.js', null],
+      ['b.js', null],
+      ['src/hello.js', 'a.js'],
+      ['src/hello.js', 'b.js'],
+    ]);
   });
 
   it('should merge sourceLocationTables and remap funcTable / frameTable references', function () {

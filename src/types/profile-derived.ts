@@ -877,6 +877,9 @@ export type CallNodeSelfAndSummary = {
   // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number;
+  // The total used as the 100% reference for flame graph box widths.
+  // Usually equals rootTotalSummary.
+  flameGraphWidthTotal: number;
 };
 
 /**

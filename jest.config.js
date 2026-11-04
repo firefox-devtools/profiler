@@ -18,7 +18,7 @@ const browserEnvConfig = {
   // Transform ESM modules to CommonJS for Jest
   // These packages ship as pure ESM and need to be transformed by Babel
   transformIgnorePatterns: [
-    '/node_modules/(?!(query-string|decode-uri-component|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander)/)',
+    '/node_modules/(?!(query-string|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander)/)',
   ],
 
   // Mock static assets (images, CSS, etc.)
@@ -74,9 +74,6 @@ const allProjects = [
     testEnvironment: 'node',
 
     setupFilesAfterEnv: ['./profiler-cli/src/test/integration/setup.ts'],
-
-    // Integration tests can be slow (loading profiles, spawning processes)
-    testTimeout: 30000,
 
     moduleFileExtensions: ['ts', 'js'],
 
