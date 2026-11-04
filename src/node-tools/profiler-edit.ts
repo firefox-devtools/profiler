@@ -51,6 +51,7 @@ import {
   type SourceReader,
 } from 'firefox-profiler/profile-logic/embed-js-sources';
 import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/source-map';
+import { mergeMarkersFromProfile } from 'firefox-profiler/profile-logic/merge-markers';
 
 /**
  * A CLI tool for editing profiles.
@@ -81,6 +82,10 @@ import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/so
  *
  *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json.gz \
  *     --js-sources-from-func-names --map-source-paths mapping.json
+ *
+ *   node node-tools-dist/profiler-edit.js -i simpleperf-profile.json \
+ *     -o merged.json.gz --merge-markers-from gecko-profile.json \
+ *     --only-keep-processes-with-name-prefix org.mozilla.fenix
  */
 
 export type ProfileSource =
@@ -102,6 +107,8 @@ export interface WasmSymbolicationCliSpec {
 export interface CliOptions {
   input: ProfileSource;
   output: string;
+  mergeMarkersFrom?: ProfileSource;
+  onlyKeepProcessesWithNamePrefix?: string;
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
   mapSourcePaths?: string;
@@ -339,8 +346,53 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
   }
 }
 
+function keepThreads(
+  profile: Profile,
+  shouldKeep: (thread: RawThread, threadIndex: ThreadIndex) => boolean
+): Profile {
+  const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
+  const keptThreads: RawThread[] = [];
+  profile.threads.forEach((thread, oldIndex) => {
+    if (shouldKeep(thread, oldIndex)) {
+      oldThreadIndexToNew.set(oldIndex, keptThreads.length);
+      keptThreads.push(thread);
+    }
+  });
+  return {
+    ...profile,
+    threads: keptThreads,
+    ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
+  };
+}
+
 export async function run(options: CliOptions) {
   let profile = await loadProfile(options.input);
+
+  const processNamePrefix = options.onlyKeepProcessesWithNamePrefix;
+  if (processNamePrefix !== undefined) {
+    const before = profile.threads.length;
+    profile = keepThreads(
+      profile,
+      (thread) => thread.processName?.startsWith(processNamePrefix) ?? false
+    );
+    console.log(
+      `Kept ${profile.threads.length} of ${before} threads in processes whose name starts with ${JSON.stringify(processNamePrefix)}.`
+    );
+  }
+
+  if (options.mergeMarkersFrom !== undefined) {
+    const markersProfile = await loadProfile(options.mergeMarkersFrom);
+    const result = mergeMarkersFromProfile(profile, markersProfile);
+    profile = result.profile;
+    console.log(
+      `Merged the markers of ${result.mergedThreadNames.length} threads, aligning the profiles with ${result.usedClock}.`
+    );
+    if (result.unmatchedThreadNames.length !== 0) {
+      console.log(
+        `Dropped the markers of ${result.unmatchedThreadNames.length} threads without a matching pid and tid: ${result.unmatchedThreadNames.join(', ')}`
+      );
+    }
+  }
 
   if (options.symbolicateWithServer !== undefined) {
     const server = options.symbolicateWithServer;
@@ -434,19 +486,9 @@ export async function run(options: CliOptions) {
       profile,
       options.onlyKeepThreadsWithMarkersMatching
     );
-    const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
-    const matchingThreads: RawThread[] = [];
-    profile.threads.forEach((thread, oldIndex) => {
-      if (matchingThreadIndexes.has(oldIndex)) {
-        oldThreadIndexToNew.set(oldIndex, matchingThreads.length);
-        matchingThreads.push(thread);
-      }
-    });
-    profile = {
-      ...profile,
-      threads: matchingThreads,
-      ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
-    };
+    profile = keepThreads(profile, (_thread, threadIndex) =>
+      matchingThreadIndexes.has(threadIndex)
+    );
     console.log(
       `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
     );
@@ -493,6 +535,12 @@ function collectWasm(
   return [...previous, { unstrippedWasmPath: value }];
 }
 
+function parseFileOrUrl(value: string): ProfileSource {
+  return /^https?:\/\//i.test(value)
+    ? { type: 'URL', url: value }
+    : { type: 'FILE', path: value };
+}
+
 function requireNonEmpty(flagName: string): (value: string) => string {
   return (value: string) => {
     if (value === '') {
@@ -516,6 +564,16 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     .option('--from-file <path>', 'Load input from a file')
     .option('--from-url <url>', 'Load input from a URL')
     .option('--from-hash <hash>', 'Load input from a profile hash')
+    .option(
+      '--only-keep-processes-with-name-prefix <prefix>',
+      'Keep only the threads of processes whose name starts with this prefix',
+      requireNonEmpty('--only-keep-processes-with-name-prefix')
+    )
+    .option(
+      '--merge-markers-from <fileOrUrl>',
+      'Copy the markers of this profile into the threads with the same pid and tid, e.g. from a Gecko profile into a simpleperf profile of the same run',
+      requireNonEmpty('--merge-markers-from')
+    )
     .option(
       '--symbolicate-with-server <url>',
       'Symbolicate frames using this symbol server URL'
@@ -556,11 +614,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
 
   const sources: ProfileSource[] = [];
   if (typeof opts.input === 'string' && opts.input !== '') {
-    if (/^https?:\/\//i.test(opts.input)) {
-      sources.push({ type: 'URL', url: opts.input });
-    } else {
-      sources.push({ type: 'FILE', path: opts.input });
-    }
+    sources.push(parseFileOrUrl(opts.input));
   }
   if (typeof opts.fromFile === 'string' && opts.fromFile !== '') {
     sources.push({ type: 'FILE', path: opts.fromFile });
@@ -590,6 +644,14 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
   return {
     input: sources[0],
     output: opts.output,
+    mergeMarkersFrom:
+      typeof opts.mergeMarkersFrom === 'string'
+        ? parseFileOrUrl(opts.mergeMarkersFrom)
+        : undefined,
+    onlyKeepProcessesWithNamePrefix:
+      typeof opts.onlyKeepProcessesWithNamePrefix === 'string'
+        ? opts.onlyKeepProcessesWithNamePrefix
+        : undefined,
     symbolicateWithServer:
       typeof opts.symbolicateWithServer === 'string' &&
       opts.symbolicateWithServer !== ''
