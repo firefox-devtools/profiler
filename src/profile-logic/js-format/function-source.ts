@@ -19,6 +19,7 @@ import {
   offsetToLineCol,
 } from 'firefox-profiler/utils/line-offsets';
 import { computeFormatEdits } from './formatter';
+import { getCompiledComponentPartRange } from './component-markup';
 import { applyFormatEdits } from './formatted-source';
 import type { SourceDialect } from './dialect';
 
@@ -94,8 +95,35 @@ function _dedent(lines: string[], from: number): string[] {
 }
 
 /**
+ * Returns the part of a Svelte or Vue component that the framework compiles
+ * to a function, such as the template, if the offset is in it, see
+ * getCompiledComponentPartRange. Such a part is never pretty-printed, because
+ * the formatter only understands JS.
+ */
+function _extractComponentPartSource(
+  code: string,
+  dialect: SourceDialect,
+  offset: number,
+  lineOffsets: number[]
+): FunctionSource | null {
+  if (dialect !== 'svelte' && dialect !== 'vue') {
+    return null;
+  }
+  const range = getCompiledComponentPartRange(code, dialect, offset);
+  if (range === null) {
+    return null;
+  }
+  const firstLineStart = code.lastIndexOf('\n', range.start - 1) + 1;
+  const lines = code.slice(firstLineStart, range.end).split(/\r?\n/);
+  const firstLineIndex = offsetToLineCol(firstLineStart, lineOffsets).line;
+  return { lines: _dedent(lines, 0), firstLine: firstLineIndex + 1 };
+}
+
+/**
  * Returns the code of the innermost function at the given position, or null
- * if the position isn't inside a function.
+ * if the position isn't inside a function. In Svelte and Vue components,
+ * positions outside of functions can return the template or the script,
+ * see _extractComponentPartSource.
  */
 export function extractFunctionSource({
   code,
@@ -115,7 +143,7 @@ export function extractFunctionSource({
   );
   const scopePath = findInnermostFunctionScope(scopes, offset);
   if (scopePath === null) {
-    return null;
+    return _extractComponentPartSource(code, dialect, offset, lineOffsets);
   }
   const { start, end } = scopePath[0];
 
