@@ -550,6 +550,19 @@ describe('parseJsScopeTree', () => {
   });
 });
 
+describe('parseJsScopeTree for exported functions', () => {
+  it('starts the scope of an exported function declaration at `export`', () => {
+    // Bundlers can map the function to the `export` keyword.
+    const src = 'export function foo() {}\nexport default function () {}';
+    const scopes = parseJsScopeTree(src);
+    expect(scopes.map((scope) => src.slice(scope.start, scope.end))).toEqual([
+      'export function foo() {}',
+      'export default function () {}',
+    ]);
+    expect(scopes[0].astName).toBe('foo');
+  });
+});
+
 describe('parseJsScopeTree for Svelte components', () => {
   it('finds the functions in scripts and template expressions', () => {
     const src = stripIndent`
