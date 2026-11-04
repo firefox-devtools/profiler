@@ -190,3 +190,26 @@ describe('the original position of a function', function () {
     expect(result).toMatchObject({ originalLine: 1, originalColumn: 1 });
   });
 });
+
+describe('the name of a function', function () {
+  it('uses the names of the enclosing functions in the original source', async function () {
+    const original = [
+      'function outer() {',
+      '  return [1].map((x) => x);',
+      '}',
+    ].join('\n');
+    // The source map has no names, so the compiled source only knows `a`.
+    const compiled = 'function a(){return[1].map(b=>b)}';
+    const result = await symbolicateFunction(
+      compiled,
+      compiled.indexOf('b=>'),
+      { 'outer.js': original },
+      [
+        { generatedColumn: 0, source: 'outer.js', line: 1, column: 0 },
+        { generatedColumn: 13, source: 'outer.js', line: 2, column: 2 },
+        { generatedColumn: 27, source: 'outer.js', line: 2, column: 17 },
+      ]
+    );
+    expect(result).toMatchObject({ name: 'outer/<' });
+  });
+});

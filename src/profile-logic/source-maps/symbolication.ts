@@ -818,11 +818,16 @@ function _resolveFunctionName(
   //    we keep it but drop into the chain branch below so the result carries
   //    the enclosing function, matching SpiderMonkey's output shape (e.g.
   //    `outer/Foo.prototype.bar`).
-  const originalName = _resolveOriginalName(
+  const originalPath = _findOriginalScopePath(
     original,
     originalSourceIndex,
     originalSources
   );
+  const originalScope = originalPath === null ? null : originalPath[0];
+  const originalName =
+    originalScope === null
+      ? null
+      : (originalScope.astName ?? originalScope.lhsText);
   if (originalName !== null && !_isMemberStyleName(originalName)) {
     return originalName;
   }
@@ -837,7 +842,6 @@ function _resolveFunctionName(
   }
 
   const scope = scopePath[0];
-  const ancestors = scopePath.slice(1);
 
   // Use the original-source name if available. Otherwise fall back to
   // compiled-source resolution. Skipping the compiled path when the original
@@ -855,9 +859,10 @@ function _resolveFunctionName(
   // segment doesn't fully express the function's identity (anonymous,
   // contributes-to, computed-member, or any other member-style name where
   // the receiver references an outer-scope identifier).
+  const contributesTo = (originalScope ?? scope).contributesTo;
   const needsChain =
     resolvedName === null ||
-    scope.contributesTo ||
+    contributesTo ||
     scope.computedKeyLoc !== null ||
     _isMemberStyleName(resolvedName);
   if (!needsChain) {
@@ -874,14 +879,20 @@ function _resolveFunctionName(
   // inside a few anonymous IIFEs. Gecko emits e.g. `ewH8/</local`, not
   // `</</</local`. If no named ancestor is found anywhere, drop the chain
   // entirely: a string of leading `<` segments adds noise without info.
+  //
+  // The ancestors come from the original source if it has a function at the
+  // position, because the original source has the names that the minifier
+  // removed. Otherwise, they come from the compiled source, and their names
+  // are looked up in the source map.
   const ancestorSegments: NonymousSegment[] = [];
   let anyNamedAncestor = false;
-  for (let i = 0; i < ancestors.length; i++) {
-    const segment = _resolveAncestorSegment(
-      ancestors[i],
-      consumer,
-      lineOffsets
-    );
+  const ancestorCount =
+    originalPath === null ? scopePath.length - 1 : originalPath.length - 1;
+  for (let i = 0; i < ancestorCount; i++) {
+    const segment =
+      originalPath === null
+        ? _resolveAncestorSegment(scopePath[i + 1], consumer, lineOffsets)
+        : _getOriginalAncestorSegment(originalPath[i + 1]);
     if (segment.kind === 'named') {
       anyNamedAncestor = true;
       ancestorSegments.push(segment);
@@ -901,7 +912,7 @@ function _resolveFunctionName(
       ? {
           kind: 'named',
           name: resolvedName,
-          contributesTo: scope.contributesTo,
+          contributesTo,
         }
       : { kind: 'anonymous' };
 
@@ -1060,6 +1071,29 @@ function _resolveOriginalName(
   originalSourceIndex: IndexIntoOriginalSources,
   originalSources: OriginalSourceList
 ): string | null {
+  const path = _findOriginalScopePath(
+    original,
+    originalSourceIndex,
+    originalSources
+  );
+  if (path === null) {
+    return null;
+  }
+  const scope = path[0];
+  return scope.astName ?? scope.lhsText;
+}
+
+/**
+ * Returns the path of function scopes in the original source at the
+ * position, from the innermost to the outermost, see
+ * findInnermostFunctionScope. Returns null if the original source isn't
+ * embedded, or if there's no function at the position.
+ */
+function _findOriginalScopePath(
+  original: OriginalPosition,
+  originalSourceIndex: IndexIntoOriginalSources,
+  originalSources: OriginalSourceList
+): FunctionScope[] | null {
   const entry = originalSources.getParsed(originalSourceIndex);
   if (entry === null) {
     return null;
@@ -1070,12 +1104,20 @@ function _resolveOriginalName(
     original.column ?? 0,
     entry.lineOffsets
   );
-  const path = findInnermostFunctionScope(entry.tree, offset);
-  if (path === null) {
-    return null;
+  return findInnermostFunctionScope(entry.tree, offset);
+}
+
+/**
+ * Returns the NonymousSegment for an ancestor scope in the original source.
+ * Unlike in the compiled source, the names are in the code, so there's no
+ * need to look them up in the source map.
+ */
+function _getOriginalAncestorSegment(scope: FunctionScope): NonymousSegment {
+  const name = scope.astName ?? scope.lhsText;
+  if (name === null) {
+    return { kind: 'anonymous' };
   }
-  const scope = path[0];
-  return scope.astName ?? scope.lhsText;
+  return { kind: 'named', name, contributesTo: scope.contributesTo };
 }
 
 /**
