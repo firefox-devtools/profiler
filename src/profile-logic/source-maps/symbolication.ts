@@ -86,6 +86,7 @@ import {
 } from 'firefox-profiler/utils/line-offsets';
 import { serializeNonymousName } from 'firefox-profiler/profile-logic/nonymous';
 import { SourceMapStore } from './store';
+import { SourceMapConsumer as LibSourceMapConsumer } from 'source-map';
 
 import type { NonymousSegment } from 'firefox-profiler/profile-logic/nonymous';
 import type { FunctionScope } from './scope-tree';
@@ -401,11 +402,37 @@ function _buildSourceMapSymbolicationResponse(
     }
     const line = funcTable.lineNumber[funcIndex];
     const column = funcTable.columnNumber[funcIndex];
-    const remap = _remapPosition(
+
+    const compiledText = compiledSources.get(sourceIndex);
+    let compiled: ParsedSource | null = null;
+    if (compiledText !== undefined) {
+      compiled = compiledSourceCache.get(sourceIndex) ?? null;
+      if (compiled === null) {
+        compiled = {
+          tree: parseJsScopeTree(compiledText),
+          lineOffsets: buildLineOffsets(compiledText),
+        };
+        compiledSourceCache.set(sourceIndex, compiled);
+      }
+    }
+
+    // source-map's originalPositionFor uses 1-based lines, 0-based columns.
+    let original = consumer.originalPositionFor({ line, column: column - 1 });
+    if (compiled !== null) {
+      original = _originalPositionForFunction(
+        sourceIndex,
+        consumer,
+        original,
+        line,
+        column,
+        compiled,
+        originalSources
+      );
+    }
+    const remap = _remapOriginalPosition(
       sourceIndex,
       consumer,
-      line,
-      column,
+      original,
       originalSources
     );
     if (remap === null) {
@@ -416,18 +443,8 @@ function _buildSourceMapSymbolicationResponse(
     // compiled bundle is available. Otherwise (e.g. the profile was captured
     // without the JS Sources feature) fall back to original-source-only
     // resolution, which still recovers names from `sourcesContent`.
-    const compiledText = compiledSources.get(sourceIndex);
     let resolvedName: string | null;
-    if (compiledText !== undefined) {
-      let compiled = compiledSourceCache.get(sourceIndex);
-      if (compiled === undefined) {
-        compiled = {
-          tree: parseJsScopeTree(compiledText),
-          lineOffsets: buildLineOffsets(compiledText),
-        };
-        compiledSourceCache.set(sourceIndex, compiled);
-      }
-
+    if (compiled !== null) {
       resolvedName = _resolveFunctionName(
         consumer,
         remap.original,
@@ -527,7 +544,29 @@ function _remapPosition(
   originalColumn: number;
   original: OriginalPosition;
 } | null {
-  const original = consumer.originalPositionFor({ line, column: column - 1 });
+  return _remapOriginalPosition(
+    generatedSource,
+    consumer,
+    consumer.originalPositionFor({ line, column: column - 1 }),
+    originalSources
+  );
+}
+
+/**
+ * Like _remapPosition, but for a position that has already been looked up
+ * in the source map.
+ */
+function _remapOriginalPosition(
+  generatedSource: IndexIntoSourceTable,
+  consumer: SourceMapConsumer,
+  original: NullableMappedPosition,
+  originalSources: OriginalSourceList
+): {
+  originalSourceIndex: IndexIntoOriginalSources;
+  originalLine: number;
+  originalColumn: number;
+  original: OriginalPosition;
+} | null {
   if (original.source === null || original.line === null) {
     return null;
   }
@@ -542,6 +581,196 @@ function _remapPosition(
     originalColumn: (original.column ?? 0) + 1,
     original: original as OriginalPosition,
   };
+}
+
+function _isSameOriginalPosition(
+  a: NullableMappedPosition,
+  b: NullableMappedPosition
+): boolean {
+  return a.source === b.source && a.line === b.line && a.column === b.column;
+}
+
+/**
+ * Returns the first mapping whose generated position is in [from, to), or
+ * null if there's none. Positions are 0-based.
+ *
+ * The source map library doesn't return the generated position of a
+ * mapping, and its lookups don't cross lines. So on each line, a
+ * least-upper-bound lookup finds the first mapping at or after the start.
+ * On the last line, that mapping is only in the range if a
+ * greatest-lower-bound lookup at the end of the range finds a mapping which
+ * isn't the one before the start.
+ */
+function _firstMappingInRange(
+  consumer: SourceMapConsumer,
+  from: { line: number; col: number },
+  to: { line: number; col: number }
+): OriginalPosition | null {
+  for (let line = from.line; line <= to.line; line++) {
+    const col = line === from.line ? from.col : 0;
+    if (line === to.line && col >= to.col) {
+      return null;
+    }
+    const first = consumer.originalPositionFor({
+      line: line + 1,
+      column: col,
+      bias: LibSourceMapConsumer.LEAST_UPPER_BOUND,
+    });
+    if (first.source === null || first.line === null) {
+      continue;
+    }
+    if (line < to.line) {
+      return first as OriginalPosition;
+    }
+    const last = consumer.originalPositionFor({
+      line: line + 1,
+      column: to.col - 1,
+    });
+    if (last.source === null) {
+      return null;
+    }
+    if (col > 0) {
+      const beforeStart = consumer.originalPositionFor({
+        line: line + 1,
+        column: col - 1,
+      });
+      if (_isSameOriginalPosition(last, beforeStart)) {
+        return null;
+      }
+    }
+    return first as OriginalPosition;
+  }
+  return null;
+}
+
+// The number of positions that _mostCommonSourceInRange looks up.
+const SOURCE_SAMPLE_COUNT = 16;
+
+/**
+ * Returns the original file that most of the code in [from, to) maps to,
+ * by looking up positions spread over the range. Lookups that return
+ * `inherited`, the mapping of the code before the range, are ignored.
+ */
+function _mostCommonSourceInRange(
+  consumer: SourceMapConsumer,
+  inherited: NullableMappedPosition,
+  from: number,
+  to: number,
+  lineOffsets: number[]
+): string | null {
+  const counts = new Map<string, number>();
+  let mostCommonSource = null;
+  let mostCommonCount = 0;
+  const step = Math.max(1, (to - from) / SOURCE_SAMPLE_COUNT);
+  for (let offset = from; offset < to; offset += step) {
+    const pos = offsetToLineCol(Math.floor(offset), lineOffsets);
+    const sample = consumer.originalPositionFor({
+      line: pos.line + 1,
+      column: pos.col,
+    });
+    if (sample.source === null || _isSameOriginalPosition(sample, inherited)) {
+      continue;
+    }
+    const count = (counts.get(sample.source) ?? 0) + 1;
+    counts.set(sample.source, count);
+    if (count > mostCommonCount) {
+      mostCommonSource = sample.source;
+      mostCommonCount = count;
+    }
+  }
+  return mostCommonSource;
+}
+
+/**
+ * Returns the original position of a function, given `glb`, the mapping
+ * that a lookup at the function's position returned.
+ *
+ * Most bundlers emit a mapping right at the start of each function. When
+ * they don't, the lookup returns the mapping of the code before the
+ * function, which can be outside of the function in the original source,
+ * or even in a different file. For example, Vue compiles a component's
+ * template to a render function that <script setup> returns, and the render
+ * function's position maps to the last token of the script. And an arrow
+ * function in `computed(() => count.value)` can map to `computed`.
+ *
+ * In that case, this uses the first mapping in the function's own code,
+ * i.e. before any nested function. The original mapping is kept if it's in
+ * the original function that contains the first mapping, because then it's
+ * probably the start of that function, which is more precise. It's also kept
+ * if the first mapping is in a different file, but most of the function's
+ * own code is in the file of the original mapping.
+ */
+function _originalPositionForFunction(
+  generatedSource: IndexIntoSourceTable,
+  consumer: SourceMapConsumer,
+  glb: NullableMappedPosition,
+  line: number,
+  column: number,
+  compiled: ParsedSource,
+  originalSources: OriginalSourceList
+): NullableMappedPosition {
+  // Gecko uses 1-based line/column.
+  const pos = { line: line - 1, col: column - 1 };
+  if (glb.source !== null && _isExactSourceMapEntry(consumer, pos, glb)) {
+    return glb;
+  }
+  const funcOffset = lineColToOffset(pos.line, pos.col, compiled.lineOffsets);
+  const scopePath = findInnermostFunctionScope(compiled.tree, funcOffset);
+  if (scopePath === null) {
+    return glb;
+  }
+  const scope = scopePath[0];
+  const firstChild = scope.children.find((child) => child.start > funcOffset);
+  const ownCodeEnd = firstChild?.start ?? scope.end;
+  const first = _firstMappingInRange(
+    consumer,
+    pos,
+    offsetToLineCol(ownCodeEnd, compiled.lineOffsets)
+  );
+  if (first === null) {
+    return glb;
+  }
+  if (glb.source === null || glb.line === null) {
+    return first;
+  }
+  if (glb.source !== first.source) {
+    // The first mapping can be in a different file if a bundler inlined a
+    // function call there. So only use it if most of the function's own code
+    // isn't in the file of `glb`.
+    const mostCommonSource = _mostCommonSourceInRange(
+      consumer,
+      glb,
+      funcOffset,
+      ownCodeEnd,
+      compiled.lineOffsets
+    );
+    return mostCommonSource === glb.source ? glb : first;
+  }
+
+  const parsed = originalSources.getParsed(
+    originalSources.indexFor(generatedSource, consumer, first.source)
+  );
+  if (parsed === null) {
+    // Without the original source, there's no way to tell which position is
+    // better, so keep the position of the lookup.
+    return glb;
+  }
+  const firstPath = findInnermostFunctionScope(
+    parsed.tree,
+    lineColToOffset(first.line - 1, first.column ?? 0, parsed.lineOffsets)
+  );
+  if (firstPath !== null) {
+    const glbOffset = lineColToOffset(
+      glb.line - 1,
+      glb.column ?? 0,
+      parsed.lineOffsets
+    );
+    const { start, end } = firstPath[0];
+    if (start <= glbOffset && glbOffset < end) {
+      return glb;
+    }
+  }
+  return first;
 }
 
 /**
