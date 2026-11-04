@@ -548,8 +548,17 @@ function _processNode(
     case 'FunctionDeclaration':
     case 'FunctionExpression': {
       const nameNode = node.getChild('VariableDefinition');
+      // Bundlers can map the start of an exported function to the `export`
+      // keyword in `export function foo() {}`, so the scope starts there.
+      const parent = node.parent;
+      const start =
+        node.name === 'FunctionDeclaration' &&
+        parent !== null &&
+        parent.name === 'ExportDeclaration'
+          ? parent.from
+          : node.from;
       const scope: FunctionScope = {
-        start: node.from,
+        start,
         end: node.to,
         nameMappingLocations: _mappingLocationsForFunction(node, text),
         astName: nameNode ? text.slice(nameNode.from, nameNode.to) : null,
