@@ -232,9 +232,44 @@ describe('extractFunctionSource in Svelte components', function () {
     });
   });
 
-  it("doesn't find functions in the markup", function () {
-    expect(extract(9, 1)).toBeNull();
-    expect(extract(10, 3)).toBeNull();
+  it('returns the markup for positions in it, because Svelte compiles it to functions', function () {
+    const markup = {
+      lines: [
+        '<button on:click={() => (count = 0)}>{count}</button>',
+        '{#if count > 0}',
+        '  <p>Clicked</p>',
+        '{/if}',
+      ],
+      firstLine: 8,
+    };
+    expect(extract(9, 1)).toEqual(markup);
+    expect(extract(10, 3)).toEqual(markup);
+  });
+
+  it('returns the script for positions outside of its functions, because Svelte compiles it to a function', function () {
+    expect(extract(2, 3)).toEqual({
+      lines: code.split('\n').slice(0, 6),
+      firstLine: 1,
+    });
+  });
+
+  it("doesn't return the module script, which isn't compiled to a function", function () {
+    const moduleCode = [
+      '<script context="module">',
+      '  export const count = 0;',
+      '</script>',
+      '',
+      '<p>{count}</p>',
+    ].join('\n');
+    expect(
+      extractFunctionSource({
+        code: moduleCode,
+        dialect: 'svelte',
+        line: 2,
+        column: 3,
+        format: 'never',
+      })
+    ).toBeNull();
   });
 });
 
@@ -275,9 +310,41 @@ describe('extractFunctionSource in Vue components', function () {
     });
   });
 
-  it("doesn't find functions in the markup", function () {
-    expect(extract(8, 3)).toBeNull();
-    expect(extract(8, 31)).toBeNull();
+  it('returns the template for positions in it, because Vue compiles it to a render function', function () {
+    const template = {
+      lines: [
+        '<template>',
+        '  <button @click="reset()">{{ count }}</button>',
+        '</template>',
+      ],
+      firstLine: 7,
+    };
+    expect(extract(8, 3)).toEqual(template);
+    expect(extract(8, 31)).toEqual(template);
+  });
+
+  it('returns <script setup> for positions outside of its functions, because Vue compiles it to the setup function', function () {
+    expect(extract(5, 1)).toEqual({
+      lines: code.split('\n').slice(0, 5),
+      firstLine: 1,
+    });
+  });
+
+  it("doesn't return a <script> without setup, which isn't compiled to a function", function () {
+    const optionsCode = [
+      '<script lang="ts">',
+      'const count = 0;',
+      '</script>',
+    ].join('\n');
+    expect(
+      extractFunctionSource({
+        code: optionsCode,
+        dialect: 'vue',
+        line: 2,
+        column: 1,
+        format: 'never',
+      })
+    ).toBeNull();
   });
 });
 

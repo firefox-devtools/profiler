@@ -333,3 +333,107 @@ export function maskVueMarkup(code: string): string {
   }
   return masker.result();
 }
+
+/**
+ * Returns the range of the part of a component that the framework compiles to
+ * a function, if the offset is in such a part, or null otherwise:
+ *  - Vue compiles <script setup> to the component's setup function, and the
+ *    <template> element to the render function.
+ *  - Svelte compiles the <script> element to the component's instance
+ *    function, and the markup to functions that create and update it. The
+ *    markup is everything outside of <script> and <style> elements. If these
+ *    elements are in the middle of the markup, it has no single range, so
+ *    there's no range for it.
+ * Positions in these functions map to the code of these parts, outside of
+ * any of the functions in the code.
+ */
+export function getCompiledComponentPartRange(
+  code: string,
+  dialect: 'svelte' | 'vue',
+  offset: number
+): { start: number; end: number } | null {
+  const scriptRegExp = /<script\b([^>]*)>[\s\S]*?<\/script\s*>/gi;
+  for (const match of code.matchAll(scriptRegExp)) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (offset < start || offset >= end) {
+      continue;
+    }
+    const attributes = match[1];
+    // Vue's <script> without `setup` and Svelte's module script run once,
+    // when the module is evaluated, so they aren't compiled to a function.
+    const isCompiledToFunction =
+      dialect === 'vue'
+        ? /\bsetup\b/.test(attributes)
+        : !/\bcontext\s*=\s*["']?module|\bmodule\b/.test(attributes);
+    return isCompiledToFunction ? { start, end } : null;
+  }
+  const range =
+    dialect === 'vue'
+      ? _getVueTemplateRange(code)
+      : _getSvelteTemplateRange(code);
+  if (range === null || offset < range.start || offset >= range.end) {
+    return null;
+  }
+  return range;
+}
+
+function _getVueTemplateRange(
+  code: string
+): { start: number; end: number } | null {
+  // Comments, <script> and <style> elements can contain text that looks like
+  // a <template> tag, so they're matched to skip them.
+  const tagRegExp =
+    /<!--[\s\S]*?-->|<(script|style)\b[\s\S]*?<\/\1\s*>|<template\b[^>]*>|<\/template\s*>/gi;
+  let start = null;
+  let depth = 0;
+  for (const match of code.matchAll(tagRegExp)) {
+    const tag = match[0];
+    if (/^<template/i.test(tag)) {
+      if (depth === 0) {
+        start = match.index;
+      }
+      depth++;
+    } else if (/^<\/template/i.test(tag) && depth > 0) {
+      depth--;
+      if (depth === 0 && start !== null) {
+        return { start, end: match.index + tag.length };
+      }
+    }
+  }
+  return null;
+}
+
+function _getSvelteTemplateRange(
+  code: string
+): { start: number; end: number } | null {
+  const elementRegExp = /<(script|style)\b[\s\S]*?<\/\1\s*>/gi;
+  const elements = Array.from(code.matchAll(elementRegExp), (match) => ({
+    start: match.index,
+    end: match.index + match[0].length,
+  }));
+  let start = null;
+  let end = null;
+  let elementIndex = 0;
+  for (let i = 0; i < code.length; i++) {
+    const element = elements[elementIndex];
+    if (element !== undefined && i === element.start) {
+      i = element.end - 1;
+      elementIndex++;
+      continue;
+    }
+    if (!/\s/.test(code[i])) {
+      start ??= i;
+      end = i + 1;
+    }
+  }
+  if (start === null || end === null) {
+    return null;
+  }
+  for (const element of elements) {
+    if (element.start > start && element.end < end) {
+      return null;
+    }
+  }
+  return { start, end };
+}
