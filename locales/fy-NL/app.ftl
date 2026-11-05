@@ -285,9 +285,9 @@ DebugWarning--warning-message =
 ## used at the bottom part of the UI.
 
 Details--open-sidebar-button =
-    .title = De sidebalke iepenje
+    .title = De sydbalke iepenje
 Details--close-sidebar-button =
-    .title = De sidebalke slute
+    .title = De sydbalke slute
 Details--error-boundary-message =
     .message = Uh oh, der is in ûnbekende flater yn dit paniel bard.
 
