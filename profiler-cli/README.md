@@ -23,6 +23,17 @@ profiler-cli stop                         # Stop the daemon
 
 `profiler-cli` is also available as `pq` for shorter invocations (e.g. `pq thread samples`).
 
+For manual exploration, `profiler-cli -i` starts an interactive prompt. Each line is a command without the `profiler-cli` prefix. A command after `-i` runs first:
+
+```bash
+profiler-cli -i load https://share.firefox.dev/XXXXXX
+> thread select t-0
+> thread samples
+> exit
+```
+
+The prompt keeps using the session it loaded, even if you load other profiles elsewhere. It stops that session when you exit with `exit` or Ctrl-D. Without a command, `profiler-cli -i` uses the current session and leaves it running.
+
 Run `profiler-cli guide` for a detailed usage guide with patterns and tips.
 Run `profiler-cli --help` for the full options reference.
 

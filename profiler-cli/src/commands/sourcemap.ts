@@ -48,9 +48,7 @@ export function registerSourcemapCommand(
     // so it can only read the file by absolute path (mirrors the load flow).
     const absolutePath = path.resolve(mapPath);
     if (!fs.existsSync(absolutePath)) {
-      console.error(`Error: Source map file not found: ${absolutePath}`);
-      process.exitCode = 1;
-      return;
+      throw new Error(`Source map file not found: ${absolutePath}`);
     }
 
     const { result, permalink } = await sendCommand(

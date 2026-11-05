@@ -23,10 +23,7 @@ export function parseFuncList(value: string): number[] {
   return value.split(',').map((s) => {
     const m = /^f-(\d+)$/.exec(s.trim());
     if (!m) {
-      console.error(
-        `Error: invalid function handle "${s.trim()}" (expected f-<N>)`
-      );
-      process.exit(1);
+      throw new Error(`invalid function handle "${s.trim()}" (expected f-<N>)`);
     }
     return parseInt(m[1], 10);
   });
@@ -45,10 +42,9 @@ export function parseLimitArg(
   }
   const v = parseInt(value, 10);
   if (isNaN(v) || v < 0) {
-    console.error(
-      `Error: ${flagName} must be a non-negative integer (0 = no limit)`
+    throw new Error(
+      `${flagName} must be a non-negative integer (0 = no limit)`
     );
-    process.exit(1);
   }
   return v === 0 ? undefined : v;
 }
@@ -88,8 +84,7 @@ export function parseEphemeralFilters(
   for (const v of opts.rootAt ?? []) {
     const indexes = parseFuncList(v);
     if (indexes.length !== 1) {
-      console.error('Error: --root-at takes exactly one function handle');
-      process.exit(1);
+      throw new Error('--root-at takes exactly one function handle');
     }
     specs.push({ type: 'root-at', funcIndex: indexes[0] });
   }
@@ -102,24 +97,19 @@ export function parseEphemeralFilters(
   for (const v of opts.includesSuffix ?? []) {
     const indexes = parseFuncList(v);
     if (indexes.length !== 1) {
-      console.error(
-        'Error: --includes-suffix takes exactly one function handle'
-      );
-      process.exit(1);
+      throw new Error('--includes-suffix takes exactly one function handle');
     }
     specs.push({ type: 'includes-suffix', funcIndex: indexes[0] });
   }
   if (opts.duringMarker === true) {
     if (!opts.search) {
-      console.error('Error: --during-marker requires --search <text>');
-      process.exit(1);
+      throw new Error('--during-marker requires --search <text>');
     }
     specs.push({ type: 'during-marker', searchString: opts.search });
   }
   if (opts.outsideMarker === true) {
     if (!opts.search) {
-      console.error('Error: --outside-marker requires --search <text>');
-      process.exit(1);
+      throw new Error('--outside-marker requires --search <text>');
     }
     specs.push({ type: 'outside-marker', searchString: opts.search });
   }
@@ -159,12 +149,10 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
       '--during-marker',
       '--outside-marker',
     ];
-    console.error('Error: filter push requires one of: ' + allFlags.join(', '));
-    process.exit(1);
+    throw new Error('filter push requires one of: ' + allFlags.join(', '));
   }
   if (totalActive > 1) {
-    console.error('Error: filter push accepts only one filter flag per push');
-    process.exit(1);
+    throw new Error('filter push accepts only one filter flag per push');
   }
 
   if (activeValueFlags.length > 0) {
@@ -181,8 +169,7 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
       case 'rootAt': {
         const indexes = parseFuncList(value);
         if (indexes.length !== 1) {
-          console.error('Error: --root-at takes exactly one function handle');
-          process.exit(1);
+          throw new Error('--root-at takes exactly one function handle');
         }
         return { type: 'root-at', funcIndex: indexes[0] };
       }
@@ -193,10 +180,9 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
       case 'includesSuffix': {
         const indexes = parseFuncList(value);
         if (indexes.length !== 1) {
-          console.error(
-            'Error: --includes-suffix takes exactly one function handle'
+          throw new Error(
+            '--includes-suffix takes exactly one function handle'
           );
-          process.exit(1);
         }
         return { type: 'includes-suffix', funcIndex: indexes[0] };
       }
@@ -208,21 +194,17 @@ export function parseFilterSpec(opts: EphemeralFilterOpts): SampleFilterSpec {
   // Marker flags
   if (opts.duringMarker === true) {
     if (!opts.search) {
-      console.error('Error: --during-marker requires --search <text>');
-      process.exit(1);
+      throw new Error('--during-marker requires --search <text>');
     }
     return { type: 'during-marker', searchString: opts.search };
   }
   if (opts.outsideMarker === true) {
     if (!opts.search) {
-      console.error('Error: --outside-marker requires --search <text>');
-      process.exit(1);
+      throw new Error('--outside-marker requires --search <text>');
     }
     return { type: 'outside-marker', searchString: opts.search };
   }
 
   // Should not be reachable.
-  console.error('Error: no valid filter flag found');
-  process.exit(1);
-  throw new Error('unreachable');
+  throw new Error('no valid filter flag found');
 }
