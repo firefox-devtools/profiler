@@ -186,12 +186,12 @@ describe('ChatDrawer', function () {
     await waitFor(() =>
       expect(getSuggestedModels()).toEqual(['gpt-a', 'gpt-b'])
     );
-    const call = window.fetchMock.callHistory.lastCall(
-      'https://api.openai.com/v1/models'
+    const call = ensureExists(
+      window.fetchMock.callHistory.lastCall('https://api.openai.com/v1/models')
     );
-    expect(
-      (call?.options.headers as Record<string, string>).authorization
-    ).toBe('Bearer sk-openai');
+    expect((call.options.headers as Record<string, string>).authorization).toBe(
+      'Bearer sk-openai'
+    );
 
     // A model is required.
     const saveButton = screen.getByRole('button', { name: 'Save' });
