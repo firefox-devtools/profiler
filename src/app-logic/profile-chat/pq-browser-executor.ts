@@ -21,11 +21,9 @@ import { formatOutput } from 'firefox-profiler/profile-query/cli/output';
 import { permalinkViewForCommand } from 'firefox-profiler/profile-query/cli/permalink-view';
 import type { PermalinkOutcome } from 'firefox-profiler/profile-query/cli/protocol';
 import type { QuerierStore } from 'firefox-profiler/profile-query/types';
-import {
-  getProfile,
-  getProfileRootRange,
-} from 'firefox-profiler/selectors/profile';
-import type { Profile } from 'firefox-profiler/types';
+import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
+import { getChatConversationId } from 'firefox-profiler/selectors/chat';
+import type { GetState } from 'firefox-profiler/types';
 
 export const MAX_COMMAND_OUTPUT_LENGTH = 32 * 1024;
 
@@ -97,19 +95,25 @@ export function tokenizeCommandLine(line: string): string[] {
   return tokens;
 }
 
-// Handles are only meaningful for one querier, so keep one per profile. The
-// profile object changes when the profile data changes (e.g. symbolication),
-// and handles are deterministic for a given profile, so recreating is safe.
-const _queriers: WeakMap<Profile, ProfileQuerier> = new WeakMap();
+// Some handles, such as m-N, are handed out as commands run, so they're only
+// meaningful for the querier that handed them out. Keep one querier for the
+// whole conversation, also when the profile object changes underneath it
+// (e.g. when symbolication finishes). Loading another profile starts a new
+// conversation, and with it a new querier.
+const _queriers: WeakMap<
+  GetState,
+  { readonly conversationId: number; readonly querier: ProfileQuerier }
+> = new WeakMap();
 
 function _getQuerier(store: QuerierStore): ProfileQuerier {
   const state = store.getState();
-  const profile = getProfile(state);
-  let querier = _queriers.get(profile);
-  if (querier === undefined) {
-    querier = new ProfileQuerier(store, getProfileRootRange(state));
-    _queriers.set(profile, querier);
+  const conversationId = getChatConversationId(state);
+  const cached = _queriers.get(store.getState);
+  if (cached !== undefined && cached.conversationId === conversationId) {
+    return cached.querier;
   }
+  const querier = new ProfileQuerier(store, getProfileRootRange(state));
+  _queriers.set(store.getState, { conversationId, querier });
   return querier;
 }
 

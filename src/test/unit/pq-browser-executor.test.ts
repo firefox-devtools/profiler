@@ -7,7 +7,10 @@ import {
   runProfilerCliCommand,
   tokenizeCommandLine,
 } from 'firefox-profiler/app-logic/profile-chat/pq-browser-executor';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getSelectedThreadIndexes,
@@ -125,6 +128,25 @@ describe('runProfilerCliCommand', function () {
     const info = await runProfilerCliCommand(store, `function info ${handle}`);
     expect(info.isError).toBe(false);
     expect(info.text).toContain('Djs');
+  });
+
+  it('keeps marker handles when the profile changes', async function () {
+    const store = storeWithProfile(
+      getProfileWithMarkers([
+        ['FirstMarker', 0, 1],
+        ['SecondMarker', 2, 3],
+      ])
+    );
+    const markers = await runProfilerCliCommand(store, 'thread markers --list');
+    const handle = /m-\d+/.exec(markers.text)?.[0];
+    expect(handle).toBeDefined();
+
+    // Replaces the profile object, like the end of symbolication does.
+    store.dispatch({ type: 'DONE_SYMBOLICATING' });
+
+    const info = await runProfilerCliCommand(store, `marker info ${handle}`);
+    expect(info.isError).toBe(false);
+    expect(info.text).toContain('Marker');
   });
 
   it('supports --json', async function () {
