@@ -10,6 +10,7 @@ import type {
 import { Provider } from 'react-redux';
 
 import { render, act } from 'firefox-profiler/test/fixtures/testing-library';
+import { fireEvent } from '@testing-library/react';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getTimelineType, getSelectedTab } from '../../selectors/url-state';
 import { getLastVisibleThreadTabSlug } from '../../selectors/app';
@@ -28,7 +29,12 @@ import {
 } from '../fixtures/mocks/canvas-context';
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { fireFullClick } from '../fixtures/utils';
+import {
+  fireFullClick,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   autoMockElementSize,
@@ -66,6 +72,8 @@ describe('ThreadActivityGraph', function () {
   autoMockCanvasContext();
   autoMockElementSize({ width: GRAPH_WIDTH, height: GRAPH_HEIGHT });
   autoMockIntersectionObserver();
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
 
   function setup(profile: Profile = getSamplesProfile()) {
     const store = storeWithProfile(profile);
@@ -98,15 +106,40 @@ describe('ThreadActivityGraph', function () {
     const thread = profile.threads[0];
     const { funcTable, stringArray } = profile.shared;
 
+    function getActivityGraphCoordinates(
+      index: IndexIntoSamplesTable,
+      graphHeightPercentage: number
+    ) {
+      const x = getSamplesPixelPosition(index);
+      return {
+        pageX: x,
+        offsetX: x,
+        offsetY: GRAPH_HEIGHT * graphHeightPercentage,
+      };
+    }
+
     // Perform a click on the activity graph.
     function clickActivityGraph(
       index: IndexIntoSamplesTable,
       graphHeightPercentage: number
     ) {
-      fireFullClick(activityGraphCanvas, {
-        offsetX: getSamplesPixelPosition(index),
-        offsetY: GRAPH_HEIGHT * graphHeightPercentage,
-      });
+      fireFullClick(
+        activityGraphCanvas,
+        getActivityGraphCoordinates(index, graphHeightPercentage)
+      );
+    }
+
+    function hoverActivityGraph(
+      index: IndexIntoSamplesTable,
+      graphHeightPercentage: number
+    ) {
+      fireEvent(
+        activityGraphCanvas,
+        getMouseEvent(
+          'mousemove',
+          getActivityGraphCoordinates(index, graphHeightPercentage)
+        )
+      );
     }
 
     // This function gets the selected call node path as a list of function names.
@@ -134,6 +167,7 @@ describe('ThreadActivityGraph', function () {
       threadIndex,
       activityGraphCanvas,
       clickActivityGraph,
+      hoverActivityGraph,
       getCallNodePath,
       getContextDrawCalls,
     };
@@ -260,6 +294,35 @@ describe('ThreadActivityGraph', function () {
     // If there are CPU values, it should be automatically defaulted to this view.
     expect(getTimelineType(getState())).toBe('cpu-category');
     expect(flushDrawLog()).toMatchSnapshot();
+  });
+
+  it('does not show the tooltip anymore when the committed range changes while a sample is hovered', function () {
+    const { dispatch, hoverActivityGraph } = setup();
+
+    hoverActivityGraph(6, 0.2);
+    expect(document.querySelector('.tooltip')).toBeTruthy();
+
+    act(() => {
+      dispatch(commitRange(0, 5));
+    });
+
+    expect(document.querySelector('.tooltip')).toBeFalsy();
+  });
+
+  it('does not keep showing a tooltip for another sample when the committed range changes', function () {
+    const { dispatch, getState, hoverActivityGraph } = setup();
+
+    hoverActivityGraph(3, 0.2);
+    expect(document.querySelector('.tooltip')).toBeTruthy();
+
+    act(() => {
+      dispatch(commitRange(2, 20));
+    });
+
+    expect(
+      selectedThreadSelectors.getRangeFilteredThread(getState()).samples.length
+    ).toBeGreaterThan(3);
+    expect(document.querySelector('.tooltip')).toBeFalsy();
   });
 
   it('selects the full call node path when clicked', function () {

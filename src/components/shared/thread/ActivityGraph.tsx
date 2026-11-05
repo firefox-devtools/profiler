@@ -63,6 +63,7 @@ type State = {
   hoveredPixelState: null | HoveredPixelState;
   mouseX: CssPixels;
   mouseY: CssPixels;
+  previousThread: Thread | null;
 };
 
 class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
@@ -72,7 +73,18 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
+    previousThread: null,
   };
+
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.rangeFilteredThread !== state.previousThread) {
+      return {
+        previousThread: props.rangeFilteredThread,
+        hoveredPixelState: null,
+      };
+    }
+    return null;
+  }
 
   _onMouseLeave = () => {
     this.setState({ hoveredPixelState: null });
