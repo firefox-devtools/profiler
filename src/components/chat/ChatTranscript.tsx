@@ -31,10 +31,14 @@ const MARKDOWN_COMPONENTS = {
 };
 
 function ChatMarkdown({ text }: { readonly text: string }) {
-  // react-markdown doesn't render raw HTML unless a plugin enables it.
+  // react-markdown doesn't render raw HTML unless a plugin enables it. Images
+  // are dropped because loading one sends a request without a click, so a
+  // prompt injection in the profile could leak profile data in its URL.
   return (
     <div className="chatMarkdown">
-      <Markdown components={MARKDOWN_COMPONENTS}>{text}</Markdown>
+      <Markdown components={MARKDOWN_COMPONENTS} disallowedElements={['img']}>
+        {text}
+      </Markdown>
     </div>
   );
 }

