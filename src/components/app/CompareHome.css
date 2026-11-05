@@ -21,9 +21,15 @@
   grid-template-columns: auto 1fr;
 }
 
-.compareHomeSubmitButton {
-  font-size: inherit; /* override the photon style to make it nicer with the rest of the form. */
+.compareHomeButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
   grid-column-start: span 2;
+}
+
+.compareHomeButtons .photon-button {
+  font-size: inherit; /* override the photon style to make it nicer with the rest of the form. */
 }
 
 .compareHomeFormLabel {

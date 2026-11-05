@@ -16,6 +16,7 @@ import type {
   ClientCommand,
   CallTreeSummaryStrategy,
   CommandResult,
+  ImplementationFilter,
   PermalinkFormat,
 } from '../protocol';
 
@@ -63,7 +64,7 @@ export async function runCommand(
 }
 
 /**
- * Parse a string as an integer and exit with an error if it is not a valid
+ * Parse a string as an integer and throw an error if it is not a valid
  * integer >= min. Pass a custom `msg` to override the default error message.
  */
 export function parseIntArg(
@@ -74,17 +75,16 @@ export function parseIntArg(
 ): number {
   const v = parseInt(value, 10);
   if (isNaN(v) || v < min) {
-    console.error(
+    throw new Error(
       msg ??
-        `Error: ${flagName} must be a ${min <= 0 ? 'non-negative' : 'positive'} integer`
+        `${flagName} must be a ${min <= 0 ? 'non-negative' : 'positive'} integer`
     );
-    process.exit(1);
   }
   return v;
 }
 
 /**
- * Parse a string as a float in [min, max] and exit with an error on failure.
+ * Parse a string as a float in [min, max] and throw an error on failure.
  */
 export function parseFloatArg(
   flagName: string,
@@ -95,27 +95,25 @@ export function parseFloatArg(
 ): number {
   const v = parseFloat(value);
   if (isNaN(v) || v < min || v > max) {
-    console.error(
+    throw new Error(
       msg ??
-        `Error: ${flagName} must be a number between ${min} and ${max === Infinity ? '∞' : max}`
+        `${flagName} must be a number between ${min} and ${max === Infinity ? '∞' : max}`
     );
-    process.exit(1);
   }
   return v;
 }
 
 /**
- * Parse a strategy name and exit with an error if it is not a valid strategy.
+ * Parse a strategy name and throw an error if it is not a valid strategy.
  */
 export function parseStrategyArg(
   flagName: string,
   value: string
 ): CallTreeSummaryStrategy {
   if (!(CALL_TREE_SUMMARY_STRATEGIES as string[]).includes(value)) {
-    console.error(
-      `Error: ${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
+    throw new Error(
+      `${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
     );
-    process.exit(1);
   }
   return value as CallTreeSummaryStrategy;
 }
@@ -141,17 +139,52 @@ export function addStrategyOption(cmd: Command): Command {
   );
 }
 
+export const IMPLEMENTATION_FILTERS: ImplementationFilter[] = [
+  'combined',
+  'js',
+  'cpp',
+];
+
 /**
- * Returns true if the given subcommand was explicitly typed by the user.
- * Used to decide whether to print a "other subcommands" hint after a default action.
- *
- * e.g. `profiler-cli session`       -> wasExplicit('session', 'list') === false
- *      `profiler-cli session list`  -> wasExplicit('session', 'list') === true
+ * Parse the optional --implementation flag and exit with an error if the
+ * value is not a valid implementation filter.
  */
-export function wasExplicit(parent: string, subcommand: string): boolean {
-  const args = process.argv;
-  const idx = args.lastIndexOf(parent);
-  return idx !== -1 && args[idx + 1] === subcommand;
+export function parseOptionalImplementationArg(
+  value: string | undefined
+): ImplementationFilter | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!(IMPLEMENTATION_FILTERS as string[]).includes(value)) {
+    console.error(
+      `Error: --implementation must be one of: ${IMPLEMENTATION_FILTERS.join(', ')}`
+    );
+    process.exit(1);
+  }
+  return value as ImplementationFilter;
+}
+
+/**
+ * Add the --implementation option to a command.
+ */
+export function addImplementationOption(cmd: Command): Command {
+  return cmd.option(
+    '--implementation <name>',
+    "Which frames stacks keep: combined (all frames, the default), js (JS only) or cpp (native only). Dropped frames are merged into their callers, so their time becomes the caller's self time"
+  );
+}
+
+/**
+ * Returns true if the user typed the name of `cmd`, false if it ran as the
+ * default subcommand of its parent. Used to decide whether to print an "other
+ * subcommands" hint after a default action.
+ *
+ * e.g. `profiler-cli session`       -> false for the `list` command
+ *      `profiler-cli session list`  -> true for the `list` command
+ */
+export function wasExplicit(cmd: Command): boolean {
+  // The parent records its operands before dispatching to the subcommand.
+  return cmd.parent?.args[0] === cmd.name();
 }
 
 /**
@@ -202,6 +235,14 @@ export function addSampleFilterOptions(cmd: Command): Command {
     )
     .addOption(
       new Option('--root-at <f-N>', 'Re-root stacks at this function')
+        .argParser(collectStrings)
+        .default([])
+    )
+    .addOption(
+      new Option(
+        '--focus-self <f-N[:js|:cpp]>',
+        'Keep only samples where this function is the leaf, rooted at it. With ":js", the leaf check ignores native frames, so the tree shows the native code that makes up the function\'s JS self time'
+      )
         .argParser(collectStrings)
         .default([])
     )

@@ -1338,6 +1338,12 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Close the source view
 
+# The title of the generated source view, which shows the code that the browser
+# runs for a source-mapped function, for example a minified JavaScript bundle.
+# Variables:
+#   $path (String) - The path or URL of the file with the generated code.
+GeneratedSourceView--title = Generated: { $path }
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
@@ -1419,6 +1425,26 @@ SourceView--not-in-browser-error-when-obtaining-js-source =
     The browser was unable to obtain the source file for { $url } with sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
+
+# The toggle button for the generated source view, while it is hidden. The
+# generated code is the code that the browser runs, for example a minified
+# JavaScript bundle, as opposed to the original code from the source map.
+GeneratedSourceView--show-button =
+    .title = Show the generated code
+
+# The toggle button for the generated source view, while it is shown.
+GeneratedSourceView--hide-button =
+    .title = Hide the generated code
+
+# The {} toggle button for pretty-printing the JavaScript code in the source
+# view, while the code is shown as it is. Pretty-printing adds line breaks and
+# indentation to make minified code easier to read.
+SourceView--pretty-print-show-button =
+    .title = Pretty-print the code
+
+# The {} toggle button for pretty-printing, while the code is pretty-printed.
+SourceView--pretty-print-hide-button =
+    .title = Show the code without pretty-printing
 
 # The toggle button for the assembly view, while the assembly view is hidden.
 # Assembly refers to the low-level programming language.

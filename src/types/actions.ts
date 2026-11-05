@@ -34,10 +34,12 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { FormatEdits } from '../profile-logic/js-format/types';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   UrlState,
+  BenchmarkBucketFilter,
   UploadState,
   State,
   UploadedProfileInformation,
@@ -86,6 +88,9 @@ export type DataSource =
   // This is used when comparing two profiles. The displayed profile is a
   // comparison profile created from two input profiles.
   | 'compare'
+  // This is used for the benchmark comparison page at /compare-benchmark/.
+  // It loads two benchmark profiles and shows statistical comparison tables.
+  | 'compare-benchmark'
   // This is a page which displays a list of profiles that were uploaded from
   // this browser, and allows deleting / unpublishing those profiles.
   | 'uploaded-recordings';
@@ -347,15 +352,36 @@ type ProfileAction =
   | {
       readonly type: 'UPDATE_BOTTOM_BOX';
       readonly sourceIndex: IndexIntoSourceTable | null;
+      readonly generatedSourceIndex: IndexIntoSourceTable | null;
       readonly nativeSymbols: NativeSymbolInfo[];
       readonly currentNativeSymbol: number | null;
       readonly currentTab: TabSlug;
       readonly shouldOpenBottomBox: boolean;
       readonly shouldOpenAssemblyView: boolean;
       readonly scrollToLineNumber?: number;
+      readonly scrollToGeneratedLineNumber?: number;
       readonly scrollToInstructionAddress?: number;
       readonly highlightedLineNumber: number | null;
+      readonly highlightedGeneratedLineNumber: number | null;
       readonly highlightedInstructionAddress: number | null;
+      readonly scrollToColumnNumber?: number;
+      readonly scrollToGeneratedColumnNumber?: number;
+      readonly highlightedColumnNumber?: number;
+      readonly highlightedGeneratedColumnNumber?: number;
+    }
+  | {
+      readonly type: 'OPEN_GENERATED_SOURCE_VIEW';
+    }
+  | {
+      readonly type: 'SET_SOURCE_VIEW_PRETTY_PRINT';
+      readonly isPrettyPrinted: boolean;
+    }
+  | {
+      readonly type: 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT';
+      readonly isPrettyPrinted: boolean;
+    }
+  | {
+      readonly type: 'CLOSE_GENERATED_SOURCE_VIEW';
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';
@@ -572,6 +598,19 @@ type UrlStateAction =
     }
   | { readonly type: 'CHANGE_PROFILES_TO_COMPARE'; readonly profiles: string[] }
   | {
+      readonly type: 'CHANGE_BENCHMARK_BUCKET_FILTER';
+      readonly filter: BenchmarkBucketFilter;
+    }
+  | {
+      readonly type: 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK';
+      readonly profiles: string[];
+      /** Display names for the two profiles, parallel to `profiles`. The
+       * comparison is not necessarily before-patch vs after-patch: it can just
+       * as well be Chrome vs Firefox or Release vs Nightly, and the whole
+       * report is worded in terms of these. */
+      readonly profileNames: string[];
+    }
+  | {
       readonly type: 'CHANGE_PROFILE_NAME';
       readonly profileName: string | null;
     }
@@ -738,6 +777,18 @@ type SourcesAction =
       readonly type: 'SOURCE_CODE_LOADING_ERROR';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly errors: SourceCodeLoadingError[];
+    }
+  | {
+      readonly type: 'SOURCE_FORMATTING_BEGIN';
+      readonly sourceIndex: IndexIntoSourceTable;
+    }
+  | {
+      // The edits of one formatting step. They come after the edits of
+      // earlier steps.
+      readonly type: 'SOURCE_FORMATTING_PROGRESS';
+      readonly sourceIndex: IndexIntoSourceTable;
+      readonly edits: FormatEdits;
+      readonly isDone: boolean;
     };
 
 // nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`

@@ -113,7 +113,7 @@ export function registerProfileCommand(
         opts.minDuration,
         0,
         Infinity,
-        'Error: --min-duration must be a positive number (in milliseconds)'
+        '--min-duration must be a positive number (in milliseconds)'
       );
     }
     if (opts.maxDuration !== undefined) {
@@ -122,19 +122,18 @@ export function registerProfileCommand(
         opts.maxDuration,
         0,
         Infinity,
-        'Error: --max-duration must be a positive number (in milliseconds)'
+        '--max-duration must be a positive number (in milliseconds)'
       );
     }
     // Without a filter this sweeps every marker in the profile and the first
     // rows are whichever markers thread 0 happened to record first, which
     // answers nothing. `--limit` is an explicit opt-in to that browsing mode.
     if (Object.keys(markerFilters).length === 0 && opts.limit === undefined) {
-      console.error(
-        'Error: profile markers needs a filter: --search, --category, --min-duration, --max-duration, --has-stack, or --thread.\n' +
+      throw new Error(
+        'profile markers needs a filter: --search, --category, --min-duration, --max-duration, --has-stack, or --thread.\n' +
           'Or pass --limit <N> to browse without a filter, showing the first N rows.\n' +
           'For a thread inventory use "profile info"; to browse one thread use "thread markers".'
       );
-      process.exit(1);
     }
 
     if (opts.limit !== undefined) {
@@ -195,10 +194,7 @@ export function registerProfileCommand(
       .option('--limit <N>', 'Limit to first N entries (0 = no limit)')
   ).action(async (opts) => {
     if (opts.level !== undefined && !VALID_LOG_LEVELS.includes(opts.level)) {
-      console.error(
-        `Error: --level must be one of: ${VALID_LOG_LEVELS.join(', ')}`
-      );
-      process.exit(1);
+      throw new Error(`--level must be one of: ${VALID_LOG_LEVELS.join(', ')}`);
     }
 
     const limit = parseLimitArg('--limit', opts.limit);

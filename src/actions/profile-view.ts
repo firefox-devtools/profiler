@@ -1951,12 +1951,19 @@ export function updateBottomBoxContentsAndMaybeOpen(
 ): Action {
   const {
     sourceIndex,
+    generatedSourceIndex,
     nativeSymbols,
     initialNativeSymbol,
     scrollToLineNumber,
+    scrollToGeneratedLineNumber,
     scrollToInstructionAddress,
     highlightedLineNumber,
+    highlightedGeneratedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    scrollToGeneratedColumnNumber,
+    highlightedColumnNumber,
+    highlightedGeneratedColumnNumber,
   } = bottomBoxInfo;
 
   const haveSource = sourceIndex !== null;
@@ -1971,15 +1978,50 @@ export function updateBottomBoxContentsAndMaybeOpen(
   return {
     type: 'UPDATE_BOTTOM_BOX',
     sourceIndex,
+    generatedSourceIndex,
     nativeSymbols,
     currentNativeSymbol: initialNativeSymbol,
     currentTab,
     shouldOpenBottomBox,
     shouldOpenAssemblyView,
     scrollToLineNumber,
+    scrollToGeneratedLineNumber,
     scrollToInstructionAddress,
     highlightedLineNumber,
+    highlightedGeneratedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    scrollToGeneratedColumnNumber,
+    highlightedColumnNumber,
+    highlightedGeneratedColumnNumber,
+  };
+}
+
+export function setSourceViewPrettyPrint(isPrettyPrinted: boolean): Action {
+  return {
+    type: 'SET_SOURCE_VIEW_PRETTY_PRINT',
+    isPrettyPrinted,
+  };
+}
+
+export function setGeneratedSourceViewPrettyPrint(
+  isPrettyPrinted: boolean
+): Action {
+  return {
+    type: 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT',
+    isPrettyPrinted,
+  };
+}
+
+export function openGeneratedSourceView(): Action {
+  return {
+    type: 'OPEN_GENERATED_SOURCE_VIEW',
+  };
+}
+
+export function closeGeneratedSourceView(): Action {
+  return {
+    type: 'CLOSE_GENERATED_SOURCE_VIEW',
   };
 }
 

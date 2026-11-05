@@ -6,6 +6,7 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/types';
 import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
+import { DEFAULT_BENCHMARK_BUCKET_FILTER } from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -18,9 +19,11 @@ import type {
   CallTreeSummaryStrategy,
   TimelineType,
   UrlState,
+  BenchmarkBucketFilter,
   Reducer,
   SourceViewState,
   AssemblyViewState,
+  GeneratedSourceViewState,
   IsOpenPerPanelState,
   TabID,
   SelectedMarkersPerThread,
@@ -57,6 +60,8 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'unpublished';
     case 'SET_DATA_SOURCE':
       return action.dataSource;
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
+      return 'compare-benchmark';
     default:
       return state;
   }
@@ -88,7 +93,32 @@ const profileUrl: Reducer<string> = (state = '', action) => {
 const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_PROFILES_TO_COMPARE':
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
       return action.profiles;
+    default:
+      return state;
+  }
+};
+
+const profileNamesToCompare: Reducer<string[] | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILES_TO_COMPARE_BENCHMARK':
+      return action.profileNames;
+    default:
+      return state;
+  }
+};
+
+const benchmarkBucketFilter: Reducer<BenchmarkBucketFilter> = (
+  state = DEFAULT_BENCHMARK_BUCKET_FILTER,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_BENCHMARK_BUCKET_FILTER':
+      return action.filter;
     default:
       return state;
   }
@@ -630,6 +660,8 @@ const sourceView: Reducer<SourceViewState> = (
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: false,
   },
   action
 ) => {
@@ -642,9 +674,14 @@ const sourceView: Reducer<SourceViewState> = (
           : state.scrollGeneration,
         sourceIndex: action.sourceIndex,
         scrollToLineNumber: action.scrollToLineNumber,
+        scrollToColumnNumber: action.scrollToColumnNumber,
         highlightedLine: action.highlightedLineNumber,
+        highlightedColumn: action.highlightedColumnNumber ?? null,
+        isPrettyPrinted: state.isPrettyPrinted,
       };
     }
+    case 'SET_SOURCE_VIEW_PRETTY_PRINT':
+      return { ...state, isPrettyPrinted: action.isPrettyPrinted };
     case 'SANITIZED_PROFILE_PUBLISHED': {
       if (!action.translationMaps || state.sourceIndex === null) {
         return state;
@@ -658,6 +695,56 @@ const sourceView: Reducer<SourceViewState> = (
       };
     }
 
+    default:
+      return state;
+  }
+};
+
+const generatedSourceView: Reducer<GeneratedSourceViewState> = (
+  state = {
+    isOpen: false,
+    scrollGeneration: 0,
+    sourceIndex: null,
+    highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: false,
+  },
+  action
+) => {
+  switch (action.type) {
+    case 'UPDATE_BOTTOM_BOX': {
+      const shouldScroll = action.scrollToGeneratedLineNumber !== undefined;
+      return {
+        isOpen: state.isOpen,
+        scrollGeneration: shouldScroll
+          ? state.scrollGeneration + 1
+          : state.scrollGeneration,
+        sourceIndex: action.generatedSourceIndex,
+        scrollToLineNumber: action.scrollToGeneratedLineNumber,
+        scrollToColumnNumber: action.scrollToGeneratedColumnNumber,
+        highlightedLine: action.highlightedGeneratedLineNumber,
+        highlightedColumn: action.highlightedGeneratedColumnNumber ?? null,
+        isPrettyPrinted: state.isPrettyPrinted,
+      };
+    }
+    case 'SET_GENERATED_SOURCE_VIEW_PRETTY_PRINT':
+      return { ...state, isPrettyPrinted: action.isPrettyPrinted };
+    case 'OPEN_GENERATED_SOURCE_VIEW':
+      return { ...state, isOpen: true };
+    case 'CLOSE_GENERATED_SOURCE_VIEW':
+      return { ...state, isOpen: false };
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      if (!action.translationMaps || state.sourceIndex === null) {
+        return state;
+      }
+      const newSourceIndexPlusOne =
+        action.translationMaps.oldSourceToNewSourcePlusOne[state.sourceIndex];
+      return {
+        ...state,
+        sourceIndex:
+          newSourceIndexPlusOne !== 0 ? newSourceIndexPlusOne - 1 : null,
+      };
+    }
     default:
       return state;
   }
@@ -804,6 +891,7 @@ const profileSpecific = combineReducers({
   networkSearchString,
   transforms,
   sourceView,
+  generatedSourceView,
   assemblyView,
   isBottomBoxOpenPerPanel,
   isBottomBoxFullscreen,
@@ -862,6 +950,8 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     hash,
     profileUrl,
     profilesToCompare,
+    profileNamesToCompare,
+    benchmarkBucketFilter,
     selectedTab,
     pathInZipFile,
     profileSpecific,

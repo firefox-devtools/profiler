@@ -550,6 +550,101 @@ describe('parseJsScopeTree', () => {
   });
 });
 
+describe('parseJsScopeTree for exported functions', () => {
+  it('starts the scope of an exported function declaration at `export`', () => {
+    // Bundlers can map the function to the `export` keyword.
+    const src = 'export function foo() {}\nexport default function () {}';
+    const scopes = parseJsScopeTree(src);
+    expect(scopes.map((scope) => src.slice(scope.start, scope.end))).toEqual([
+      'export function foo() {}',
+      'export default function () {}',
+    ]);
+    expect(scopes[0].astName).toBe('foo');
+  });
+});
+
+describe('parseJsScopeTree for Svelte components', () => {
+  it('finds the functions in scripts and template expressions', () => {
+    const src = stripIndent`
+      <script lang="ts">
+        let items: string[] = [];
+        function add(item: string) {
+          items = [...items, item];
+        }
+        $: count = items.length
+      </script>
+
+      <style>
+        p { color: red; }
+      </style>
+
+      <!-- {() => notCode} -->
+      <ul>
+        {#each items as item}
+          <li on:click={() => add(item)}>Add</li>
+        {/each}
+      </ul>
+    `;
+    const scopes = parseJsScopeTree(src, 'svelte');
+    expect(
+      scopes.map((scope) => [src.slice(scope.start, scope.end), scope.lhsText])
+    ).toEqual([
+      [
+        'function add(item: string) {\n    items = [...items, item];\n  }',
+        null,
+      ],
+      // The arrow isn't parsed as an argument of a call to `items.length`, so
+      // it doesn't get the name `count`.
+      ['() => add(item)', null],
+    ]);
+  });
+});
+
+describe('parseJsScopeTree for Vue components', () => {
+  it('finds the functions in scripts and template expressions', () => {
+    const src = stripIndent`
+      <script setup lang="ts">
+        const items = ref<string[]>([]);
+        function add(item: string) {
+          items.value.push(item);
+        }
+        const count = items.value.length
+      </script>
+
+      <template>
+        <ul :class="{ empty: count === 0 }">
+          <li v-for="item in items.filter((i) => i)" @click="add(item)">
+            {{ item.split('').map((c) => c) }}
+          </li>
+          <template #footer="{ close }">
+            <button @click="(event) => close(event)">Close</button>
+          </template>
+        </ul>
+      </template>
+
+      <style scoped>
+        ul { color: red; }
+      </style>
+    `;
+    const scopes = parseJsScopeTree(src, 'vue');
+    expect(
+      scopes.map((scope) => [src.slice(scope.start, scope.end), scope.lhsText])
+    ).toEqual([
+      ['function add(item: string) {\n    items.value.push(item);\n  }', null],
+      // The v-for source, but not its alias.
+      ['(i) => i', null],
+      // Event handlers are functions, like the functions that Vue compiles
+      // them to. The function starts at the masked characters which became
+      // the `;()=>{` before the handler.
+      ['ick="add(item)"', null],
+      // The interpolation isn't parsed as an argument of a call to
+      // `items.value.length`, so its arrow doesn't get the name `count`.
+      ['(c) => c', null],
+      ['ick="(event) => close(event)"', null],
+    ]);
+  });
+});
+
 describe('dialectForFilename', () => {
   it('returns ts for .ts/.mts/.cts', () => {
     expect(dialectForFilename('foo.ts')).toBe('ts');
@@ -565,15 +660,20 @@ describe('dialectForFilename', () => {
     expect(dialectForFilename('foo.jsx')).toBe('jsx');
   });
 
-  it('returns empty string for plain js extensions', () => {
-    expect(dialectForFilename('foo.js')).toBe('');
-    expect(dialectForFilename('foo.mjs')).toBe('');
-    expect(dialectForFilename('noext')).toBe('');
+  it('returns jsx for plain js extensions, which can contain JSX', () => {
+    expect(dialectForFilename('foo.js')).toBe('jsx');
+    expect(dialectForFilename('foo.mjs')).toBe('jsx');
+    expect(dialectForFilename('noext')).toBe('jsx');
   });
 
   it('matches case-insensitively', () => {
     expect(dialectForFilename('FOO.TSX')).toBe('ts jsx');
     expect(dialectForFilename('Bar.TS')).toBe('ts');
+  });
+
+  it('returns svelte for .svelte, and vue for .vue', () => {
+    expect(dialectForFilename('../src/App.svelte')).toBe('svelte');
+    expect(dialectForFilename('../../src/components/Row.vue')).toBe('vue');
   });
 
   it('handles URL-style source paths', () => {

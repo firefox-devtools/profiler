@@ -27,6 +27,7 @@ export function permalinkViewForCommand(command: ClientCommand): PermalinkView {
             command.search ?? command.functionFilters?.searchString;
           view.includeIdle = command.includeIdle;
           view.strategy = command.strategy;
+          view.implementation = command.implementation;
           view.sampleFilters = command.sampleFilters;
           view.invertCallstack = subcommand === 'samples-bottom-up';
           break;

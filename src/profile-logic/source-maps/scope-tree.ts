@@ -83,6 +83,15 @@
 import { parser as lezerJsParser } from '@lezer/javascript';
 
 import { bisectionRightByKey } from 'firefox-profiler/utils/bisect';
+import {
+  type JsDialect,
+  type SourceDialect,
+  dialectForFilename,
+} from 'firefox-profiler/profile-logic/js-format/dialect';
+import {
+  maskSvelteMarkup,
+  maskVueMarkup,
+} from 'firefox-profiler/profile-logic/js-format/component-markup';
 
 // Derive SyntaxNode from the parser to avoid version conflicts with nested
 // @lezer/common copies in node_modules (they have incompatible private fields).
@@ -539,8 +548,17 @@ function _processNode(
     case 'FunctionDeclaration':
     case 'FunctionExpression': {
       const nameNode = node.getChild('VariableDefinition');
+      // Bundlers can map the start of an exported function to the `export`
+      // keyword in `export function foo() {}`, so the scope starts there.
+      const parent = node.parent;
+      const start =
+        node.name === 'FunctionDeclaration' &&
+        parent !== null &&
+        parent.name === 'ExportDeclaration'
+          ? parent.from
+          : node.from;
       const scope: FunctionScope = {
-        start: node.from,
+        start,
         end: node.to,
         nameMappingLocations: _mappingLocationsForFunction(node, text),
         astName: nameNode ? text.slice(nameNode.from, nameNode.to) : null,
@@ -633,15 +651,13 @@ function _walkChildren(
 // Public API
 // ---------------------------------------------------------------------------
 
-// @lezer/javascript ships TS and JSX as opt-in dialects. The base parser only
-// understands plain JS, so a `.ts` or `.tsx` source feeding back through
-// `sourcesContent` produces Error nodes for every type annotation or JSX
-// element. Always configure the matching dialect for original sources.
-export type JsDialect = '' | 'ts' | 'jsx' | 'ts jsx';
+// Always configure the matching dialect for original sources, see JsDialect.
+export type { JsDialect, SourceDialect };
+export { dialectForFilename };
 
 const _configuredParsers = new Map<JsDialect, typeof lezerJsParser>();
 
-function _parserForDialect(dialect: JsDialect): typeof lezerJsParser {
+export function parserForDialect(dialect: JsDialect): typeof lezerJsParser {
   if (!dialect) {
     return lezerJsParser;
   }
@@ -654,41 +670,52 @@ function _parserForDialect(dialect: JsDialect): typeof lezerJsParser {
 }
 
 /**
- * Map a source filename to the Lezer dialect needed to parse it. Looks at the
- * file extension only. Accepts URL-style source paths (the typical content of
- * a source map's `sources[]`).
+ * Parse `sourceText` with Lezer. For Svelte and Vue components, only the JS in
+ * them is parsed, but the node positions are still positions in `sourceText`.
  */
-export function dialectForFilename(filename: string): JsDialect {
-  const lower = filename.toLowerCase();
-  if (lower.endsWith('.tsx')) {
-    return 'ts jsx';
+export function parseSource(
+  sourceText: string,
+  dialect: SourceDialect
+): ReturnType<typeof lezerJsParser.parse> {
+  // Components can have <script lang="ts">. Plain JS parses the same with the
+  // TS dialect.
+  switch (dialect) {
+    case 'svelte':
+      return parserForDialect('ts').parse(maskSvelteMarkup(sourceText));
+    case 'vue':
+      return parserForDialect('ts').parse(maskVueMarkup(sourceText));
+    default:
+      return parserForDialect(dialect).parse(sourceText);
   }
-  if (lower.endsWith('.jsx')) {
-    return 'jsx';
-  }
-  if (
-    lower.endsWith('.ts') ||
-    lower.endsWith('.mts') ||
-    lower.endsWith('.cts')
-  ) {
-    return 'ts';
-  }
-  return '';
 }
 
 /**
  * Parse `sourceText` with Lezer and return the top-level function scopes.
  *
  * `dialect` selects the Lezer dialect: `'ts'` for TypeScript, `'jsx'` for
- * JSX, `'ts jsx'` for TSX. Default `''` is plain JS.
+ * JSX, `'ts jsx'` for TSX. Default `''` is plain JS. `'svelte'` and `'vue'`
+ * parse the JS in a Svelte or Vue component.
  *
  * Lezer never throws on invalid JS. Error nodes are silently skipped.
  */
 export function parseJsScopeTree(
   sourceText: string,
-  dialect: JsDialect = ''
+  dialect: SourceDialect = ''
 ): FunctionScope[] {
-  const tree = _parserForDialect(dialect).parse(sourceText);
+  return getJsScopeTreeFromSyntaxTree(
+    parseSource(sourceText, dialect),
+    sourceText
+  );
+}
+
+/**
+ * Like parseJsScopeTree, but for code which has already been parsed, so that
+ * callers which also need the syntax tree don't parse the code twice.
+ */
+export function getJsScopeTreeFromSyntaxTree(
+  tree: ReturnType<typeof lezerJsParser.parse>,
+  sourceText: string
+): FunctionScope[] {
   const topLevel: FunctionScope[] = [];
   _walkChildren(tree.topNode, sourceText, topLevel);
   return topLevel;

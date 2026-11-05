@@ -25,6 +25,7 @@ import {
 import { oneLine } from 'common-tags';
 import type {
   UrlState,
+  BenchmarkBucketFilter,
   DataSource,
   Pid,
   Profile,
@@ -37,6 +38,7 @@ import type {
   TimelineType,
   SourceViewState,
   AssemblyViewState,
+  GeneratedSourceViewState,
   NativeSymbolInfo,
   Transform,
   IndexIntoFrameTable,
@@ -50,6 +52,7 @@ import {
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { tabSlugs } from '../app-logic/tabs-handling';
+import { DEFAULT_BENCHMARK_BUCKET_FILTER } from '../app-logic/constants';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import type { ProfileUpgradeInfo } from 'firefox-profiler/profile-logic/processed-profile-versioning';
 import type { ProfileAndProfileUpgradeInfo } from 'firefox-profiler/actions/receive-profile';
@@ -133,6 +136,8 @@ function getPathParts(urlState: UrlState): string[] {
         return ['compare'];
       }
       return ['compare', urlState.selectedTab];
+    case 'compare-benchmark':
+      return ['compare-benchmark'];
     case 'uploaded-recordings':
       return ['uploaded-recordings'];
     case 'from-browser':
@@ -173,12 +178,22 @@ type BaseQuery = {
   file: string; // Path into a zip file.
   transforms: string;
   profiles: string[];
+  names: string[]; // Display names for `profiles`, e.g. ["Chrome", "Firefox"]
+  // The benchmark comparison's bucket filter. See BenchmarkBucketFilter.
+  buckets: string; // "significant"
+  show: string; // "slower"
+  subject: string; // "1"
+  than: string; // "2"
+  js: string; // "merged"
   profileName: string;
   symbolServer: string;
   view: string;
   implementation: string;
   timelineType: string;
   sourceViewIndex: number;
+  sourceViewPretty: null | undefined;
+  generatedSourceViewIndex: number;
+  generatedSourceViewPretty: null | undefined;
   assemblyView: string;
 };
 
@@ -224,6 +239,9 @@ type Query = BaseQuery & {
   ctSummary?: string;
   transforms?: string;
   sourceViewIndex?: number;
+  sourceViewPretty?: null | undefined;
+  generatedSourceViewIndex?: number;
+  generatedSourceViewPretty?: null | undefined;
   assemblyView?: string;
   bottomFullscreen?: boolean;
 
@@ -271,6 +289,18 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
         return '';
       }
       break;
+    case 'compare-benchmark':
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      return queryString.stringify(
+        {
+          profiles: urlState.profilesToCompare,
+          names: urlState.profileNamesToCompare ?? undefined,
+          ...benchmarkBucketFilterToQuery(urlState.benchmarkBucketFilter),
+        },
+        { arrayFormat: 'bracket' }
+      );
     case 'public':
     case 'local':
     case 'from-browser':
@@ -373,6 +403,7 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
           : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
       const {
         sourceView,
+        generatedSourceView,
         assemblyView,
         isBottomBoxOpenPerPanel,
         isBottomBoxFullscreen,
@@ -381,6 +412,18 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       if (isBottomBoxOpenPerPanel[selectedTab]) {
         if (sourceView.sourceIndex !== null) {
           query.sourceViewIndex = sourceView.sourceIndex;
+          query.sourceViewPretty = sourceView.isPrettyPrinted
+            ? null
+            : undefined;
+        }
+        if (
+          generatedSourceView.isOpen &&
+          generatedSourceView.sourceIndex !== null
+        ) {
+          query.generatedSourceViewIndex = generatedSourceView.sourceIndex;
+          query.generatedSourceViewPretty = generatedSourceView.isPrettyPrinted
+            ? null
+            : undefined;
         }
         if (assemblyView.isOpen && assemblyView.currentNativeSymbol !== null) {
           const { currentNativeSymbol, nativeSymbols } = assemblyView;
@@ -464,6 +507,7 @@ export function ensureIsValidDataSource(
     case 'public':
     case 'from-url':
     case 'compare':
+    case 'compare-benchmark':
     case 'uploaded-recordings':
       return coercedDataSource;
     default:
@@ -484,17 +528,20 @@ type Location = {
   hash: string;
 };
 
+// The query parameters whose values are arrays.
+const ARRAY_QUERY_KEYS = new Set(['profiles', 'names']);
+
 /**
  * query-string returns an array for a repeated parameter, even without brackets.
- * `profiles` is the only array parameter, so for any other repeated parameter
- * the last value wins. This keeps hand-edited URLs working.
+ * For a parameter that isn't in ARRAY_QUERY_KEYS, the last value wins. This
+ * keeps hand-edited URLs working.
  */
 function parseQueryString(search: string) {
   const query = queryString.parse(search, {
     arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
   });
   for (const [key, value] of Object.entries(query)) {
-    if (key !== 'profiles' && Array.isArray(value)) {
+    if (!ARRAY_QUERY_KEYS.has(key) && Array.isArray(value)) {
       query[key] = value[value.length - 1];
     }
   }
@@ -583,6 +630,16 @@ export function stateFromLocation(
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: query.sourceViewPretty !== undefined,
+  };
+  const generatedSourceView: GeneratedSourceViewState = {
+    isOpen: false,
+    scrollGeneration: 0,
+    sourceIndex: null,
+    highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: query.generatedSourceViewPretty !== undefined,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,
@@ -595,6 +652,11 @@ export function stateFromLocation(
   tabSlugs.forEach((tabSlug) => (isBottomBoxOpenPerPanel[tabSlug] = false));
   if (query.sourceViewIndex !== undefined) {
     sourceView.sourceIndex = Number(query.sourceViewIndex);
+    isBottomBoxOpenPerPanel[selectedTab] = true;
+  }
+  if (query.generatedSourceViewIndex !== undefined) {
+    generatedSourceView.sourceIndex = Number(query.generatedSourceViewIndex);
+    generatedSourceView.isOpen = true;
     isBottomBoxOpenPerPanel[selectedTab] = true;
   }
   if (query.assemblyView) {
@@ -617,6 +679,8 @@ export function stateFromLocation(
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     profilesToCompare: query.profiles || null,
+    profileNamesToCompare: query.names || null,
+    benchmarkBucketFilter: parseBenchmarkBucketFilter(query),
     selectedTab,
     pathInZipFile: query.file || null,
     profileName: query.profileName,
@@ -638,6 +702,7 @@ export function stateFromLocation(
       networkSearchString: query.networkSearch || '',
       transforms,
       sourceView,
+      generatedSourceView,
       assemblyView,
       isBottomBoxOpenPerPanel,
       isBottomBoxFullscreen: query.bottomFullscreen || false,
@@ -1844,4 +1909,56 @@ function stringifyAssemblyViewSymbol(symbol: NativeSymbolInfo): string {
     functionSizeStr += '_';
   }
   return `${libIndex}~${addressStr}~${functionSizeStr}~${name}`;
+}
+
+/**
+ * The benchmark bucket filter's query parameters. Values that match the default
+ * are left out, so a comparison nobody has filtered keeps its short URL.
+ */
+function benchmarkBucketFilterToQuery(
+  filter: BenchmarkBucketFilter
+): Partial<Pick<BaseQuery, 'buckets' | 'show' | 'subject' | 'than' | 'js'>> {
+  const defaults = DEFAULT_BENCHMARK_BUCKET_FILTER;
+  return {
+    buckets: filter.mode === defaults.mode ? undefined : filter.mode,
+    show: filter.show === defaults.show ? undefined : filter.show,
+    subject: filter.subject === null ? undefined : String(filter.subject),
+    than:
+      filter.comparand === defaults.comparand
+        ? undefined
+        : String(filter.comparand),
+    js: filter.mergeJsFunctions ? 'merged' : undefined,
+  };
+}
+
+function parseProfileIndex(value: string | undefined): number | null {
+  if (value === undefined || !/^\d+$/.test(value)) {
+    return null;
+  }
+  return Number(value);
+}
+
+/**
+ * Read the benchmark bucket filter back out of the query. Anything unrecognised
+ * falls back to its default. An index past the end of the profile list is kept,
+ * because the list is parsed separately; the viewer ignores it.
+ */
+function parseBenchmarkBucketFilter(
+  query: Partial<BaseQuery>
+): BenchmarkBucketFilter {
+  const defaults = DEFAULT_BENCHMARK_BUCKET_FILTER;
+  const { buckets, show } = query;
+  return {
+    mode:
+      buckets === 'movers' || buckets === 'significant' || buckets === 'none'
+        ? buckets
+        : defaults.mode,
+    show:
+      show === 'all' || show === 'faster' || show === 'slower'
+        ? show
+        : defaults.show,
+    subject: parseProfileIndex(query.subject),
+    comparand: parseProfileIndex(query.than) ?? defaults.comparand,
+    mergeJsFunctions: query.js === 'merged',
+  };
 }
