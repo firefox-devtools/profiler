@@ -36,7 +36,10 @@ import type {
 // Limits how often streamed text is dispatched, to avoid a render per token.
 const STREAMING_TEXT_THROTTLE_MS = 50;
 
-let _currentTurnController: AbortController | null = null;
+let _currentTurn: {
+  readonly controller: AbortController;
+  readonly conversationId: number;
+} | null = null;
 
 export function openChat(): Action {
   return { type: 'OPEN_CHAT' };
@@ -48,7 +51,7 @@ export function closeChat(): Action {
 
 export function cancelChatTurn(): ThunkAction<void> {
   return () => {
-    _currentTurnController?.abort();
+    _currentTurn?.controller.abort();
   };
 }
 
@@ -121,16 +124,31 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
       });
       return;
     }
-    // The controller is set before anything async, so a second send while the
-    // first one is still loading is ignored too.
-    if (_currentTurnController !== null || getIsChatTurnRunning(getState())) {
+    const conversationId = getChatConversationId(getState());
+    if (getIsChatTurnRunning(getState())) {
       return;
     }
+    // The turn is set before anything async, so a second send while the first
+    // one is still loading is ignored too. A turn whose conversation is gone,
+    // after "New chat" or a profile load, is stopped instead.
+    if (_currentTurn !== null) {
+      if (_currentTurn.conversationId === conversationId) {
+        return;
+      }
+      _currentTurn.controller.abort();
+    }
 
-    const conversationId = getChatConversationId(getState());
     const store = { getState, dispatch };
     const controller = new AbortController();
-    _currentTurnController = controller;
+    const turn = { controller, conversationId };
+    _currentTurn = turn;
+    // Loading another profile starts a new conversation without going through
+    // these actions, so the turn checks for it before going on.
+    const stopIfConversationIsGone = () => {
+      if (getChatConversationId(getState()) !== conversationId) {
+        controller.abort();
+      }
+    };
 
     let flushTimer: ReturnType<typeof setTimeout> | null = null;
     const cancelStreamingText = () => {
@@ -172,9 +190,19 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
       return engine.runChatTurn({
         provider,
         history: [...history, userMessage],
-        runTool: (args) => executor.runProfilerCliCommand(store, args),
+        runTool: (args) => {
+          stopIfConversationIsGone();
+          if (controller.signal.aborted) {
+            return Promise.resolve({
+              text: 'Cancelled: the conversation was closed.',
+              isError: true,
+            });
+          }
+          return executor.runProfilerCliCommand(store, args);
+        },
         signal: controller.signal,
         onTextDelta: (streamedText) => {
+          stopIfConversationIsGone();
           pendingText = streamedText;
           if (flushTimer === null) {
             flushTimer = setTimeout(() => {
@@ -260,8 +288,8 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
         error: describeError(error),
       });
     } finally {
-      if (_currentTurnController === controller) {
-        _currentTurnController = null;
+      if (_currentTurn === turn) {
+        _currentTurn = null;
       }
     }
   };

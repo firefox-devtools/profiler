@@ -24,7 +24,12 @@ import {
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import { MESSAGES_API_URL, mockMessagesApi } from '../fixtures/anthropic-api';
+import {
+  MESSAGES_API_URL,
+  makeSseResponse,
+  mockMessagesApi,
+} from '../fixtures/anthropic-api';
+import { viewProfile } from 'firefox-profiler/actions/receive-profile';
 import { mockResponsesApi } from '../fixtures/openai-responses-api';
 import {
   mockChatCompletionsApi,
@@ -163,6 +168,33 @@ describe('profile chat', function () {
     await store.dispatch(sendChatMessage('Hi'));
     expect(getChatConversation(store.getState()).messages).toEqual([]);
     expect(getChatNotice(store.getState())).toBeNull();
+    expect(getChatStatus(store.getState())).toBe('idle');
+  });
+
+  it('stops a running turn when another profile is loaded', async function () {
+    const store = setup();
+    const { profile: otherProfile } = getProfileFromTextSamples('D', 'E');
+    const requests = mockMessagesApi([
+      async () => {
+        await store.dispatch(
+          viewProfile(otherProfile, { skipSymbolication: true })
+        );
+        return makeSseResponse({
+          content: [
+            { type: 'tool_use', id: 'toolu_1', args: 'thread select t-1' },
+          ],
+          stopReason: 'tool_use',
+        });
+      },
+      { content: [{ type: 'text', text: 'Hi' }], stopReason: 'end_turn' },
+    ]);
+
+    await store.dispatch(sendChatMessage('What is the worker doing?'));
+
+    // The old turn's command didn't run on the new profile.
+    expect(requests).toHaveLength(1);
+    expect(getSelectedThreadIndexes(store.getState())).toEqual(new Set([0]));
+    expect(getChatConversation(store.getState()).messages).toEqual([]);
     expect(getChatStatus(store.getState())).toBe('idle');
   });
 
