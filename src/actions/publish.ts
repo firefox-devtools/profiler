@@ -12,7 +12,13 @@ import {
   getRemoveProfileInformation,
   getPrePublishedState,
   getSanitizedProfileEncodingState,
+  getSourceFilesToFetch,
+  getSourceCodeFetchState,
+  getActiveSourceSharingPreset,
+  getSourceFilesForOfferedPresets,
+  getSourceSharingDownloadedOnly,
 } from 'firefox-profiler/selectors/publish';
+import { fetchSourceCode } from './code';
 import {
   getDataSource,
   getProfileNameForStorage,
@@ -32,6 +38,7 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
+import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
@@ -60,6 +67,8 @@ import type {
   ProfileIndexTranslationMaps,
   ProfileEncodingResult,
   SharingMode,
+  IndexIntoSourceTable,
+  OfferedSourceSharingPreset,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
@@ -74,6 +83,25 @@ export function updateSharingOption(
     mode,
     slug,
     value,
+  };
+}
+
+/**
+ * Replace the set of source files whose contents will be part of the shared
+ * profile. The publish panel's file tree passes the full new set, rather than a
+ * single file, because checking a directory row toggles all the files below it.
+ * `preset` is the preset the user picked to get this selection, if any.
+ */
+export function updateSourceFilesToShare(
+  mode: SharingMode,
+  sourceIndexes: ReadonlySet<IndexIntoSourceTable>,
+  preset: OfferedSourceSharingPreset | null = null
+): Action {
+  return {
+    type: 'UPDATE_SOURCE_FILES_TO_SHARE',
+    mode,
+    sourceIndexes,
+    preset,
   };
 }
 
@@ -348,6 +376,135 @@ export function encodeSanitizedProfile(
 }
 
 /**
+ * Turn the "Include source code" option on, picking the narrowest preset. When
+ * nothing is downloaded yet, the downloaded-only presets are all empty, so fall
+ * back to the full ones and show that by turning the downloaded-only option
+ * off.
+ */
+export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
+  return (dispatch, getState) => {
+    let presets = getSourceFilesForOfferedPresets(getState(), mode);
+    if (
+      presets.size === 0 &&
+      getSourceSharingDownloadedOnly(getState(), mode)
+    ) {
+      dispatch({
+        type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY',
+        mode,
+        value: false,
+      });
+      presets = getSourceFilesForOfferedPresets(getState(), mode);
+    }
+    const [firstPreset] = presets;
+    if (firstPreset === undefined) {
+      return;
+    }
+    const [preset, files] = firstPreset;
+    dispatch(updateSourceFilesToShare(mode, files, preset));
+    dispatch(encodeSanitizedProfile(mode));
+  };
+}
+
+/**
+ * Turn "only files that are already downloaded" on or off for the presets.
+ * When a preset is active, the selection follows it to its new meaning.
+ */
+export function setSourceSharingDownloadedOnly(
+  mode: SharingMode,
+  value: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const activePreset = getActiveSourceSharingPreset(getState(), mode);
+    dispatch({ type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY', mode, value });
+    if (activePreset === 'custom') {
+      return;
+    }
+    const files = getSourceFilesForOfferedPresets(getState(), mode).get(
+      activePreset
+    );
+    if (files !== undefined) {
+      dispatch(updateSourceFilesToShare(mode, files, activePreset));
+      dispatch(encodeSanitizedProfile(mode));
+    }
+  };
+}
+
+export function cancelSourceCodeFetch(): Action {
+  return { type: 'SOURCE_CODE_FETCH_CANCELLED' };
+}
+
+type SourceCodeFetchResult = {
+  failedCount: number;
+  wasCancelled: boolean;
+};
+
+// How many source files to fetch at once.
+const SOURCE_CODE_FETCH_CONCURRENCY = 6;
+
+/**
+ * Fetch the picked source files whose contents we don't have yet into the
+ * source code cache, so that the shared profile can carry them. This runs
+ * before an upload, and on request from the publish panel.
+ */
+export function fetchSourceFilesToShare(
+  mode: SharingMode
+): ThunkAction<Promise<SourceCodeFetchResult>> {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const sourceIndexes = Array.from(getSourceFilesToFetch(state, mode));
+    if (sourceIndexes.length === 0) {
+      return { failedCount: 0, wasCancelled: false };
+    }
+
+    const { generation } = getSourceCodeFetchState(state);
+    const isCancelled = () =>
+      getSourceCodeFetchState(getState()).generation !== generation;
+    const archiveCache = new Map<string, Promise<Uint8Array>>();
+
+    dispatch({
+      type: 'SOURCE_CODE_FETCH_STARTED',
+      totalCount: sourceIndexes.length,
+    });
+
+    let completedCount = 0;
+    let failedCount = 0;
+    let nextIndex = 0;
+
+    const fetchOne = async (sourceIndex: IndexIntoSourceTable) => {
+      // The outcome goes into the cache even after a cancellation, so that
+      // the source view doesn't show the file as loading forever.
+      const result = await dispatch(fetchSourceCode(sourceIndex, archiveCache));
+      if (result.type === 'ERROR') {
+        failedCount++;
+      }
+      if (!isCancelled()) {
+        completedCount++;
+        dispatch({ type: 'SOURCE_CODE_FETCH_PROGRESS', completedCount });
+      }
+    };
+
+    const worker = async () => {
+      while (nextIndex < sourceIndexes.length && !isCancelled()) {
+        await fetchOne(sourceIndexes[nextIndex++]);
+      }
+    };
+    const workerCount = Math.min(
+      SOURCE_CODE_FETCH_CONCURRENCY,
+      sourceIndexes.length
+    );
+    await Promise.all(Array.from({ length: workerCount }, worker));
+
+    if (isCancelled()) {
+      return { failedCount, wasCancelled: true };
+    }
+    dispatch({ type: 'SOURCE_CODE_FETCH_FINISHED' });
+    // The profile to share has changed, so encode it again.
+    dispatch(encodeSanitizedProfile(mode));
+    return { failedCount, wasCancelled: false };
+  };
+}
+
+/**
  * This function starts the profile sharing process.
  *
  * There are two share buttons: one for the first upload, and one to re-share
@@ -386,14 +543,24 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         // Later on the promise from `startUpload` will get rejected too, and we
         // handle this in the `catch` block.
         dispatch({ type: 'UPLOAD_ABORTED' });
+        dispatch(cancelSourceCodeFetch());
         abortUpload();
       };
       dispatch(uploadCompressionStarted(abortfunction));
 
-      const sanitizedInformation = getSanitizedProfile(
-        prePublishedState,
-        'upload'
+      // Picked source files that haven't been downloaded yet go first, since
+      // the profile to share depends on them.
+      const sourceFetchResult = await dispatch(
+        fetchSourceFilesToShare('upload')
       );
+      if (uploadGeneration !== getUploadGeneration(getState())) {
+        return false;
+      }
+      if (sourceFetchResult.failedCount > 0) {
+        throw new SourceCodeFetchError(sourceFetchResult.failedCount);
+      }
+
+      const sanitizedInformation = getSanitizedProfile(getState(), 'upload');
       const profileEncoding = dispatch(encodeSanitizedProfile('upload'));
       const encodingResult = await profileEncoding.encodingPromise;
 

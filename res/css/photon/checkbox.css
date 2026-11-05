@@ -39,6 +39,12 @@
   background-color: var(--clickable-checked-background-color);
 }
 
+/* Only the DOM `indeterminate` property sets this, there is no HTML attribute. */
+.photon-checkbox:indeterminate:not([disabled]) {
+  border: none;
+  background-color: var(--clickable-checked-background-color);
+}
+
 .photon-checkbox:hover:active:not([disabled]) {
   background-color: var(--clickable-active-background-color);
 }
@@ -47,14 +53,30 @@
   background-image: url(../../img/svg/checkbox-check-16.svg);
 }
 
+.photon-checkbox-default:indeterminate:not([disabled]) {
+  background-image: url(../../img/svg/checkbox-indeterminate-16.svg);
+}
+
 .photon-checkbox-micro:checked:not([disabled]) {
   background-image: url(../../img/svg/checkbox-check-13.svg);
+}
+
+.photon-checkbox-micro:indeterminate:not([disabled]) {
+  background-image: url(../../img/svg/checkbox-indeterminate-13.svg);
 }
 
 .photon-checkbox:checked:hover:not([disabled]) {
   background-color: var(--clickable-checked-hover-background-color);
 }
 
+.photon-checkbox:indeterminate:hover:not([disabled]) {
+  background-color: var(--clickable-checked-hover-background-color);
+}
+
 .photon-checkbox:checked:hover:active:not([disabled]) {
+  background-color: var(--clickable-checked-hover-background-color);
+}
+
+.photon-checkbox:indeterminate:hover:active:not([disabled]) {
   background-color: var(--clickable-checked-hover-background-color);
 }

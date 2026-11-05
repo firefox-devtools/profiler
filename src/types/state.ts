@@ -33,6 +33,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -239,11 +240,39 @@ export type SanitizedProfileEncodingState =
 
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
+  // The source files the user picked in the publish panel, per sharing mode.
+  // `null` means the user hasn't touched the selection yet, in which case the
+  // default selection applies.
+  readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
+  // Whether the presets should only pick files whose contents we already
+  // have, per sharing mode, rather than also the ones that would be fetched.
+  readonly sourceSharingDownloadedOnly: Record<SharingMode, boolean>;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  readonly sourceCodeFetch: SourceCodeFetchState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
   readonly prePublishedState: State | null;
+};
+
+export type SourceFileSelection = {
+  readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+  // The preset the user picked to get this selection, if any. Several presets
+  // can select the same files, so the files alone can't tell which one to show
+  // as checked.
+  readonly preset: OfferedSourceSharingPreset | null;
+};
+
+/**
+ * The progress of fetching the source files picked in the publish panel, which
+ * happens when sharing or on request.
+ */
+export type SourceCodeFetchState = {
+  readonly isFetching: boolean;
+  readonly totalCount: number;
+  readonly completedCount: number;
+  // Bumped when a fetch is cancelled, so that the in-flight one can tell.
+  readonly generation: number;
 };
 
 export type ZippedProfilesState = {
@@ -290,10 +319,21 @@ export type DecodedInstruction = {
   decodedString: string;
 };
 
+// Where the contents of a source file were fetched from. LOCAL covers the
+// browser connection and local symbol servers, which read the user's disk, so
+// the file may not exist anywhere else even if its path looks like a public URL.
+export type FetchedSourceCodeOrigin = 'LOCAL' | 'WEB';
+
+// FetchedSourceCodeOrigin, plus PROFILE for contents embedded in the profile.
+export type SourceCodeOrigin = FetchedSourceCodeOrigin | 'PROFILE';
+
+// The contents of a source file that we have on hand, and where they came from.
+export type SourceCodeContents = { code: string; origin: SourceCodeOrigin };
+
 export type SourceCodeStatus =
   | { type: 'LOADING'; source: CodeLoadingSource }
   | { type: 'ERROR'; errors: SourceCodeLoadingError[] }
-  | { type: 'AVAILABLE'; code: string };
+  | { type: 'AVAILABLE'; code: string; origin: SourceCodeOrigin };
 
 export type AssemblyCodeStatus =
   | { type: 'LOADING'; source: CodeLoadingSource }
@@ -414,8 +454,15 @@ export type PseudoStrategy = null | 'bidi' | 'accented';
  */
 export type IconsWithClassNames = Map<string, string>;
 
+export type SourceCodeCacheState = {
+  // Bumped on PROFILE_LOADED. Loading actions carry the value from when their
+  // fetch started, and the ones from an older generation are dropped.
+  readonly generation: number;
+  readonly statuses: Map<IndexIntoSourceTable, SourceCodeStatus>;
+};
+
 export type CodeState = {
-  readonly sourceCodeCache: Map<IndexIntoSourceTable, SourceCodeStatus>;
+  readonly sourceCodeCache: SourceCodeCacheState;
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
 };
 
