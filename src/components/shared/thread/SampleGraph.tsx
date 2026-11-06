@@ -57,6 +57,7 @@ type State = {
   hoveredPixelState: null | HoveredPixelState;
   mouseX: CssPixels;
   mouseY: CssPixels;
+  previousThread: Thread | null;
 };
 
 type CanvasProps = {
@@ -252,7 +253,18 @@ export class ThreadSampleGraphImpl extends PureComponent<Props, State> {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
+    previousThread: null,
   };
+
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.thread !== state.previousThread) {
+      return {
+        previousThread: props.thread,
+        hoveredPixelState: null,
+      };
+    }
+    return null;
+  }
 
   _onClick = (event: React.MouseEvent<HTMLElement>) => {
     const hoveredSample = this._getSampleAtMouseEvent(event);
