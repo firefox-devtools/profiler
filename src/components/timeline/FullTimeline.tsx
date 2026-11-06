@@ -13,6 +13,7 @@ import { OverflowEdgeIndicator } from './OverflowEdgeIndicator';
 import { Reorderable } from 'firefox-profiler/components/shared/Reorderable';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import explicitConnect from 'firefox-profiler/utils/connect';
+import { getTrackSelectionModifiers } from 'firefox-profiler/utils';
 import {
   getCommittedRange,
   getZeroAt,
@@ -30,6 +31,7 @@ import type { SizeProps } from 'firefox-profiler/components/shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
+  selectAllVisibleTracks,
   changeRightClickedTrack,
 } from 'firefox-profiler/actions/profile-view';
 
@@ -63,6 +65,7 @@ type StateProps = {
 
 type DispatchProps = {
   readonly changeGlobalTrackOrder: typeof changeGlobalTrackOrder;
+  readonly selectAllVisibleTracks: typeof selectAllVisibleTracks;
   readonly changeRightClickedTrack: typeof changeRightClickedTrack;
 };
 
@@ -125,12 +128,42 @@ class FullTimelineImpl extends React.PureComponent<Props, State> {
     initialSelected: null,
   };
 
+  override componentDidMount() {
+    window.addEventListener('keydown', this._onKeyDown);
+  }
+
+  override componentWillUnmount() {
+    window.removeEventListener('keydown', this._onKeyDown);
+  }
+
   /**
    * This method collects the initially selected track's HTMLElement. This allows the timeline
    * to scroll the initially selected track into view once the page is loaded.
    */
   setInitialSelected = (el: InitialSelectedTrackReference) => {
     this.setState({ initialSelected: el });
+  };
+
+  _onKeyDown = (event: KeyboardEvent) => {
+    const target = event.target;
+    const { ctrlOrMeta, shift } = getTrackSelectionModifiers(event);
+    if (
+      event.defaultPrevented ||
+      event.isComposing ||
+      !ctrlOrMeta ||
+      shift ||
+      event.key.toLowerCase() !== 'a' ||
+      (target instanceof HTMLElement &&
+        (target.tagName === 'INPUT' ||
+          target.tagName === 'TEXTAREA' ||
+          target.tagName === 'SELECT' ||
+          target.isContentEditable))
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    this.props.selectAllVisibleTracks();
   };
 
   override render() {
@@ -214,6 +247,7 @@ export const FullTimeline = explicitConnect<
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
+    selectAllVisibleTracks,
     changeRightClickedTrack,
   },
   component: withSize(FullTimelineImpl),
