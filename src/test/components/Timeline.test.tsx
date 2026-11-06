@@ -11,6 +11,7 @@ import {
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { Timeline } from '../../components/timeline';
+import { changeSelectedTab } from 'firefox-profiler/actions/app';
 import {
   computeTimeColumnForRawSamplesTable,
   filterRawThreadSamplesToRange,
@@ -20,14 +21,21 @@ import {
   getRightClickedTrack,
   getMouseTimePosition,
   getLocalTracksByPid,
+  getSelectedThreadIndexes,
+  getSelectedTab,
 } from 'firefox-profiler/selectors';
 import { FULL_TRACK_SCREENSHOT_HEIGHT } from 'firefox-profiler/app-logic/constants';
 import { ensureExists } from 'firefox-profiler/utils/types';
-import { showLocalTrack } from 'firefox-profiler/actions/profile-view';
+import {
+  showLocalTrack,
+  hideLocalTrack,
+  hideGlobalTrack,
+} from 'firefox-profiler/actions/profile-view';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileFromTextSamples,
+  getThreadWithJsTracerEvents,
   addIPCMarkerPairToThreads,
 } from '../fixtures/profiles/processed-profile';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
@@ -105,6 +113,177 @@ describe('Timeline multiple thread selection', function () {
 
     return { ...renderResult, ...store, showAllIPCTracks };
   }
+
+  it.each([
+    { key: 'a', ctrlKey: true },
+    { key: 'a', metaKey: true },
+    { key: 'A', ctrlKey: true },
+    { key: 'a', code: 'KeyQ', ctrlKey: true },
+  ])(
+    'selects visible threads from a focused timeline track with %j',
+    (options) => {
+      const { getState, getByRole } = setup();
+      const button = getByRole('button', { name: 'DOM Worker' });
+      const selectedTab = getSelectedTab(getState());
+      const event = new KeyboardEvent('keydown', {
+        ...options,
+        bubbles: true,
+        cancelable: true,
+      });
+      fireEvent(button, event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(getSelectedThreadIndexes(getState())).toEqual(
+        new Set([0, 1, 2, 3])
+      );
+      expect(getSelectedTab(getState())).toBe(selectedTab);
+    }
+  );
+
+  it.each(['body', 'window'])(
+    'selects visible threads when the shortcut targets %s',
+    (target) => {
+      const { getState } = setup();
+      const event = new KeyboardEvent('keydown', {
+        key: 'a',
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      fireEvent(target === 'body' ? document.body : window, event);
+      expect(event.defaultPrevented).toBe(true);
+      expect(getSelectedThreadIndexes(getState())).toEqual(
+        new Set([0, 1, 2, 3])
+      );
+    }
+  );
+
+  it('returns from the network chart to the last thread panel', () => {
+    const { getState, dispatch, getByRole } = setup();
+    act(() => {
+      dispatch(changeSelectedTab('marker-table'));
+      dispatch(changeSelectedTab('network-chart'));
+    });
+    fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
+      key: 'a',
+      metaKey: true,
+    });
+    expect(getSelectedThreadIndexes(getState())).toEqual(new Set([0, 1, 2, 3]));
+    expect(getSelectedTab(getState())).toBe('marker-table');
+  });
+
+  it('falls back to a useful tab when JS tracer is unavailable for merged threads', () => {
+    const profile = getProfileWithNiceTracks();
+    profile.threads[1].jsTracer = getThreadWithJsTracerEvents(
+      [['A', 0, 10]],
+      profile.shared
+    ).jsTracer;
+    const { getState, dispatch, getByRole } = setup(profile);
+    act(() => {
+      dispatch(changeSelectedTab('js-tracer'));
+    });
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toContain(
+      'js-tracer'
+    );
+    expect(getSelectedTab(getState())).toBe('js-tracer');
+
+    fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
+      key: 'a',
+      ctrlKey: true,
+    });
+
+    expect(getSelectedThreadIndexes(getState())).toEqual(new Set([0, 1, 2, 3]));
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).not.toContain(
+      'js-tracer'
+    );
+    expect(getSelectedTab(getState())).toBe('calltree');
+  });
+
+  it('does not select hidden processes or local threads', () => {
+    const { getState, dispatch, getByRole } = setup();
+    act(() => {
+      dispatch(hideGlobalTrack(0));
+      dispatch(hideLocalTrack('222', 1));
+    });
+    fireEvent.keyDown(getByRole('button', { name: 'DOM Worker' }), {
+      key: 'a',
+      ctrlKey: true,
+    });
+    expect(getSelectedThreadIndexes(getState())).toEqual(new Set([1, 2]));
+  });
+
+  it.each([
+    { key: 'a' },
+    { key: 'a', ctrlKey: true, altKey: true },
+    { key: 'a', metaKey: true, shiftKey: true },
+    { key: 'a', ctrlKey: true, isComposing: true },
+    { key: 'q', ctrlKey: true },
+    { key: 'ф', ctrlKey: true },
+  ])('leaves other keyboard input unchanged: %j', (options) => {
+    const { getState, getByRole } = setup();
+    const selected = getSelectedThreadIndexes(getState());
+    const event = new KeyboardEvent('keydown', {
+      ...options,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(getByRole('button', { name: 'DOM Worker' }), event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(getSelectedThreadIndexes(getState())).toBe(selected);
+  });
+
+  it.each(['input', 'textarea', 'select', 'contenteditable'])(
+    'preserves select-all in %s elements',
+    (tagName) => {
+      const { getState, container } = setup();
+      const selected = getSelectedThreadIndexes(getState());
+      const input = document.createElement(
+        tagName === 'contenteditable' ? 'div' : tagName
+      );
+      if (tagName === 'contenteditable') {
+        // jsdom does not implement isContentEditable.
+        Object.defineProperty(input, 'isContentEditable', { value: true });
+      }
+      container.appendChild(input);
+      const event = new KeyboardEvent('keydown', {
+        key: 'a',
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      fireEvent(input, event);
+      expect(event.defaultPrevented).toBe(false);
+      expect(getSelectedThreadIndexes(getState())).toBe(selected);
+    }
+  );
+
+  it('leaves an already handled shortcut unchanged', () => {
+    const { getState } = setup();
+    const selected = getSelectedThreadIndexes(getState());
+    const event = new KeyboardEvent('keydown', {
+      key: 'a',
+      ctrlKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    event.preventDefault();
+    fireEvent(window, event);
+    expect(getSelectedThreadIndexes(getState())).toBe(selected);
+  });
+
+  it('stops handling the shortcut when the timeline unmounts', () => {
+    const { getState, unmount } = setup();
+    const selected = getSelectedThreadIndexes(getState());
+    unmount();
+    const event = new KeyboardEvent('keydown', {
+      key: 'a',
+      metaKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    fireEvent(window, event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(getSelectedThreadIndexes(getState())).toBe(selected);
+  });
 
   it('can toggle select multiple threads', function () {
     const { getState, getByRole } = setup();
