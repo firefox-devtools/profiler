@@ -18,6 +18,7 @@ import {
   setDataSource,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  setSourceViewPrettyPrint,
   changeShowUserTimings,
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
@@ -2051,6 +2052,34 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getAssemblyViewNativeSymbol(newStore.getState())
     ).toBeNull();
+  });
+
+  it('persists pretty-printing of the source view', function () {
+    const { dispatch, getState, getSourceIndex } = setup();
+    const sourceFile =
+      'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
+    const sourceIndex = getSourceIndex(sourceFile);
+    const bottomBoxInfo: BottomBoxInfo = {
+      sourceIndex,
+      nativeSymbols: [],
+      initialNativeSymbol: null,
+      highlightedLineNumber: null,
+      highlightedInstructionAddress: null,
+    };
+    dispatch(updateBottomBoxContentsAndMaybeOpen('calltree', bottomBoxInfo));
+    expect(getQueryStringFromState(getState())).not.toContain('Pretty');
+
+    dispatch(setSourceViewPrettyPrint(true));
+    let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+    ).toBeTrue();
+
+    dispatch(setSourceViewPrettyPrint(false));
+    newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+    expect(
+      urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+    ).toBeFalse();
   });
 
   it('keeps a closed bottom box closed, even if a source file was loaded before', function () {

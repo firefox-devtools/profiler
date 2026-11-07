@@ -630,6 +630,8 @@ const sourceView: Reducer<SourceViewState> = (
     scrollGeneration: 0,
     sourceIndex: null,
     highlightedLine: null,
+    highlightedColumn: null,
+    isPrettyPrinted: false,
   },
   action
 ) => {
@@ -642,9 +644,14 @@ const sourceView: Reducer<SourceViewState> = (
           : state.scrollGeneration,
         sourceIndex: action.sourceIndex,
         scrollToLineNumber: action.scrollToLineNumber,
+        scrollToColumnNumber: action.scrollToColumnNumber,
         highlightedLine: action.highlightedLineNumber,
+        highlightedColumn: action.highlightedColumnNumber ?? null,
+        isPrettyPrinted: state.isPrettyPrinted,
       };
     }
+    case 'SET_SOURCE_VIEW_PRETTY_PRINT':
+      return { ...state, isPrettyPrinted: action.isPrettyPrinted };
     case 'SANITIZED_PROFILE_PUBLISHED': {
       if (!action.translationMaps || state.sourceIndex === null) {
         return state;

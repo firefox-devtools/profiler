@@ -1957,6 +1957,8 @@ export function updateBottomBoxContentsAndMaybeOpen(
     scrollToInstructionAddress,
     highlightedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    highlightedColumnNumber,
   } = bottomBoxInfo;
 
   const haveSource = sourceIndex !== null;
@@ -1980,6 +1982,15 @@ export function updateBottomBoxContentsAndMaybeOpen(
     scrollToInstructionAddress,
     highlightedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    highlightedColumnNumber,
+  };
+}
+
+export function setSourceViewPrettyPrint(isPrettyPrinted: boolean): Action {
+  return {
+    type: 'SET_SOURCE_VIEW_PRETTY_PRINT',
+    isPrettyPrinted,
   };
 }
 
