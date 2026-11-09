@@ -10,8 +10,8 @@
 
 import * as child_process from 'child_process';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
+import { getMozbuildStatePath } from './diagnostics';
 
 export type SamplyServer = {
   binaryPath: string;
@@ -35,16 +35,6 @@ function isExecutableFile(filePath: string): boolean {
   } catch {
     return false;
   }
-}
-
-/**
- * Where `./mach` keeps its downloaded tools. Firefox's bootstrap installs
- * samply there, so it is a good fallback when samply is not on PATH.
- */
-function getMozbuildStatePath(): string {
-  return (
-    process.env.MOZBUILD_STATE_PATH || path.join(os.homedir(), '.mozbuild')
-  );
 }
 
 /**
