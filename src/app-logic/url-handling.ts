@@ -123,16 +123,26 @@ export function getIsHistoryReplaceState(): boolean {
 }
 
 /**
- * Synchronously replace the current history entry to match the given UrlState.
- *
- * Use this from action thunks for high-frequency actions (e.g. arrow-key
- * navigation) where deferring the URL update to UrlManager.componentDidUpdate
- * would result in unwanted pushState calls and history-flooding. By updating
- * window.history synchronously here, the URL already matches the new state by
- * the time UrlManager's componentDidUpdate runs, so it becomes a no-op.
+ * Returns true if going from `prevUrlState` to `nextUrlState` only changes the
+ * selection in a panel, for example the selected function in the function
+ * list. Such changes replace the current history entry rather than pushing a
+ * new one, so that holding e.g. the down arrow key doesn't get rate-limited by
+ * the browser and doesn't flood the back/forward history.
  */
-export function replaceHistoryWithUrlState(urlState: UrlState): void {
-  window.history.replaceState(urlState, document.title, urlFromState(urlState));
+export function isSelectionOnlyUrlChange(
+  prevUrlState: UrlState,
+  nextUrlState: UrlState
+): boolean {
+  const prevUrlStateWithNextSelection = {
+    ...prevUrlState,
+    profileSpecific: {
+      ...prevUrlState.profileSpecific,
+      selectedFunctions: nextUrlState.profileSpecific.selectedFunctions,
+    },
+  };
+  return (
+    urlFromState(prevUrlStateWithNextSelection) === urlFromState(nextUrlState)
+  );
 }
 
 function getPathParts(urlState: UrlState): string[] {
