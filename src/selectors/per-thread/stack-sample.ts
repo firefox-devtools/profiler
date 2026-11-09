@@ -594,10 +594,20 @@ export function getStackAndSampleSelectorsPerThread(
   > = (state) =>
     _getStackTimingByDepthWithMap(state).sameWidthsIndexToTimestampMap;
 
+  const _getFlameGraphFuncComparator: Selector<FlameGraph.FlameGraphFuncComparator> =
+    createSelector(
+      (state: State) => threadSelectors.getFilteredThread(state).funcTable,
+      (state: State) => threadSelectors.getFilteredThread(state).resourceTable,
+      (state: State) => threadSelectors.getFilteredThread(state).sources,
+      (state: State) =>
+        threadSelectors.getFilteredThread(state).sourceLocationTable,
+      (state: State) => threadSelectors.getFilteredThread(state).stringTable,
+      FlameGraph.makeFlameGraphFuncComparator
+    );
+
   const getFlameGraphRows: Selector<FlameGraph.FlameGraphRows> = createSelector(
     (state: State) => _getNonInvertedCallNodeInfo(state).getCallNodeTable(),
-    (state: State) => threadSelectors.getFilteredThread(state).funcTable,
-    (state: State) => threadSelectors.getFilteredThread(state).stringTable,
+    _getFlameGraphFuncComparator,
     FlameGraph.computeFlameGraphRows
   );
 
@@ -620,8 +630,7 @@ export function getStackAndSampleSelectorsPerThread(
     createSelector(
       _getInvertedCallNodeInfo,
       getCallTreeTimingsInverted,
-      (state: State) => threadSelectors.getFilteredThread(state).funcTable,
-      (state: State) => threadSelectors.getFilteredThread(state).stringTable,
+      _getFlameGraphFuncComparator,
       FlameGraph.getInvertedFlameGraphTiming
     );
 
