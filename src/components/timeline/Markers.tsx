@@ -8,6 +8,7 @@ import { InView } from 'react-intersection-observer';
 import {
   overlayFills,
   getMarkerStyle,
+  MARKER_HEIGHT,
 } from 'firefox-profiler/profile-logic/marker-styles';
 import { withSize } from 'firefox-profiler/components/shared/WithSize';
 import { Tooltip } from 'firefox-profiler/components/tooltip/Tooltip';
@@ -157,42 +158,37 @@ class TimelineMarkersCanvas extends React.PureComponent<CanvasProps> {
       const markerStyle = getMarkerStyle(marker);
       ctx.fillStyle = markerStyle.getBackground();
       if (markerStyle.squareCorners) {
-        ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
+        ctx.fillRect(pos, markerStyle.top, itemWidth, MARKER_HEIGHT);
       } else {
         _drawRoundedRect(
           ctx,
           pos,
           markerStyle.top,
           itemWidth,
-          markerStyle.height,
+          MARKER_HEIGHT,
           1 / devicePixelRatio
         );
       }
       if (markerStyle.hasBorderLeft()) {
         ctx.fillStyle = markerStyle.getBorderLeft();
-        ctx.fillRect(pos, markerStyle.top, 1, markerStyle.height);
+        ctx.fillRect(pos, markerStyle.top, 1, MARKER_HEIGHT);
       }
       if (markerStyle.hasBorderRight()) {
         ctx.fillStyle = markerStyle.getBorderRight();
-        ctx.fillRect(
-          pos + itemWidth - 1,
-          markerStyle.top,
-          1,
-          markerStyle.height
-        );
+        ctx.fillRect(pos + itemWidth - 1, markerStyle.top, 1, MARKER_HEIGHT);
       }
       const markerState = this._getMarkerState(marker);
       if (markerState === 'HOVERED' || markerState === 'PRESSED') {
         ctx.fillStyle = overlayFills[markerState];
         if (markerStyle.squareCorners) {
-          ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
+          ctx.fillRect(pos, markerStyle.top, itemWidth, MARKER_HEIGHT);
         } else {
           _drawRoundedRect(
             ctx,
             pos,
             markerStyle.top,
             itemWidth,
-            markerStyle.height,
+            MARKER_HEIGHT,
             1 / devicePixelRatio
           );
         }
@@ -356,7 +352,7 @@ class TimelineMarkers extends React.PureComponent<Props, State> {
 
       const markerStyle = getMarkerStyle(marker);
 
-      if (y >= markerStyle.top && y < markerStyle.top + markerStyle.height) {
+      if (y >= markerStyle.top && y < markerStyle.top + MARKER_HEIGHT) {
         return markerIndex;
       }
     }
