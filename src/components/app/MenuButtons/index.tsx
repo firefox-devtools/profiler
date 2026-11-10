@@ -104,6 +104,21 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     this.props.dismissNewlyPublished();
   }
 
+  override componentDidUpdate(prevProps: Props) {
+    // When the chat drawer closes with the focus inside, the focus is lost with
+    // it, so bring it back to the button that opens the chat.
+    if (
+      prevProps.isChatOpen &&
+      !this.props.isChatOpen &&
+      (document.activeElement === null ||
+        document.activeElement === document.body)
+    ) {
+      this._chatButtonRef.current?.focus();
+    }
+  }
+
+  _chatButtonRef = React.createRef<HTMLButtonElement>();
+
   _getUploadedStatus(dataSource: DataSource, profileUrl: string) {
     switch (dataSource) {
       case 'public':
@@ -387,6 +402,7 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
         attrs={{ title: true }}
       >
         <button
+          ref={this._chatButtonRef}
           type="button"
           className={classNames('menuButtonsButton', {
             menuButtonsChatButtonOpen: isChatOpen,

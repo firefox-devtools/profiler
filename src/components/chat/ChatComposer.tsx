@@ -20,6 +20,11 @@ export function ChatComposer({
   onSend,
   onStop,
 }: Props) {
+  const inputRef = React.useRef<HTMLTextAreaElement>(null);
+  React.useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   const send = React.useCallback(() => {
     const trimmed = text.trim();
     if (trimmed === '' || isTurnRunning) {
@@ -55,6 +60,7 @@ export function ChatComposer({
       <div className="chatComposerBox">
         <Localized id="ChatComposer--input" attrs={{ placeholder: true }}>
           <textarea
+            ref={inputRef}
             className="chatComposerInput"
             rows={3}
             placeholder="Ask about this profile"

@@ -2,6 +2,7 @@
 
 exports[`ChatDrawer runs a turn, showing the commands and the answer 1`] = `
 <aside
+  aria-labelledby="chatDrawerTitle"
   class="chatDrawer"
 >
   <header
@@ -9,6 +10,7 @@ exports[`ChatDrawer runs a turn, showing the commands and the answer 1`] = `
   >
     <h2
       class="chatDrawerTitle"
+      id="chatDrawerTitle"
     >
       Ask about this profile
     </h2>
@@ -31,7 +33,9 @@ exports[`ChatDrawer runs a turn, showing the commands and the answer 1`] = `
     />
   </header>
   <div
+    aria-busy="false"
     class="chatTranscript"
+    role="log"
   >
     <div
       class="chatMessage chatMessageUser"

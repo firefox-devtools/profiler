@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { PureComponent } from 'react';
+import { PureComponent, type KeyboardEvent } from 'react';
 import { Localized } from '@fluent/react';
 import classNames from 'classnames';
 
@@ -74,6 +74,12 @@ type State = {
 class ChatDrawerImpl extends PureComponent<Props, State> {
   override state: State = { isSettingsOpen: false };
 
+  _onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Escape' && !event.defaultPrevented) {
+      this.props.closeChat();
+    }
+  };
+
   _onSend = (text: string) => {
     this.props.sendChatMessage(text);
   };
@@ -118,10 +124,16 @@ class ChatDrawerImpl extends PureComponent<Props, State> {
         percent={false}
         initialSize="380px"
       >
-        <aside className="chatDrawer">
+        <aside
+          className="chatDrawer"
+          aria-labelledby="chatDrawerTitle"
+          onKeyDown={this._onKeyDown}
+        >
           <header className="chatDrawerHeader">
             <Localized id="ChatDrawer--title">
-              <h2 className="chatDrawerTitle">Ask about this profile</h2>
+              <h2 className="chatDrawerTitle" id="chatDrawerTitle">
+                Ask about this profile
+              </h2>
             </Localized>
             {showSettings ? null : (
               <>

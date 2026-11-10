@@ -235,7 +235,15 @@ export function ChatTranscript({
   }, [items, streamingText, status, notice, error]);
 
   return (
-    <div className="chatTranscript" ref={scrollerRef} onScroll={onScroll}>
+    <div
+      className="chatTranscript"
+      ref={scrollerRef}
+      onScroll={onScroll}
+      role="log"
+      // Screen readers announce the answer once it's complete instead of each
+      // streamed update.
+      aria-busy={status === 'streaming' || status === 'running-tool'}
+    >
       {items.length === 0 ? (
         <Localized id="ChatTranscript--empty">
           <p className="chatTranscriptEmpty">

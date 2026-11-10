@@ -551,6 +551,22 @@ describe('ChatDrawer', function () {
     ).toHaveValue('Why is the GC');
   });
 
+  it('moves the focus in on open, and back to the menu button on close', async function () {
+    const { openChat } = setup({ apiKey: 'sk-ant-test' });
+    openChat();
+    const input = await screen.findByPlaceholderText('Ask about this profile');
+    expect(input).toHaveFocus();
+    expect(
+      screen.getByRole('complementary', { name: 'Ask about this profile' })
+    ).toBeInTheDocument();
+
+    fireEvent.keyDown(input, { key: 'Escape' });
+    expect(input).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Ask about this profile' })
+    ).toHaveFocus();
+  });
+
   it('can be stopped', async function () {
     const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
     let respond: (() => void) | null = null;
