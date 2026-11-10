@@ -81,6 +81,7 @@ Object {
     "logicalCPUs": 0,
     "markerSchema": Array [
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -88,8 +89,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -97,8 +102,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -106,8 +115,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "yellow",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -115,9 +128,13 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
+        "color": "blue",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -141,6 +158,7 @@ Object {
         ],
         "name": "FileIO",
         "tableLabel": "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}",
+        "timelineStyle": undefined,
       },
       Object {
         "display": Array [
@@ -162,6 +180,7 @@ Object {
         "name": "MediaSample",
       },
       Object {
+        "color": "teal",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -195,6 +214,9 @@ Object {
           },
         ],
         "name": "Styles",
+        "timelineStyle": Object {
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -435,7 +457,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 77,
+    "preprocessedProfileVersion": 78,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",

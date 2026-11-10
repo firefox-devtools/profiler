@@ -13,12 +13,14 @@ import type {
   VisualMetrics,
   ProfilerConfiguration,
   SampleUnits,
+  GraphColor,
 } from './profile';
 import type {
   MarkerPayload_Gecko,
   MarkerDisplayLocation,
   MarkerFormatType,
   MarkerGraph,
+  MarkerTimelineStyle,
 } from './markers';
 import type { Milliseconds, Nanoseconds, MemoryOffset, Bytes } from './units';
 
@@ -395,6 +397,12 @@ export type GeckoMetaMarkerSchema = {
 
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>;
+
+  // If present, the color of markers of this type in timeline marker tracks.
+  color?: GraphColor;
+
+  // If present, how markers of this type are drawn in timeline marker tracks.
+  timelineStyle?: MarkerTimelineStyle;
 
   // If present, specifies the key of a marker field that contains the marker's color.
   // The field should contain one of the GraphColor values.

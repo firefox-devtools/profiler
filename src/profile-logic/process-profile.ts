@@ -62,6 +62,7 @@ import {
 } from '../utils/typed-arrays';
 import {
   addPIICategoriesToMarkerSchema,
+  addStyleToMarkerSchema,
   computeStringIndexMarkerFieldsByDataType,
   extensionTextMarkerSchema,
 } from '../profile-logic/marker-schema';
@@ -1765,6 +1766,8 @@ function _convertGeckoMarkerSchema(
     display,
     data,
     graphs,
+    color,
+    timelineStyle,
     colorField,
     isStackBased,
   } = markerSchema;
@@ -1802,7 +1805,7 @@ function _convertGeckoMarkerSchema(
     description = staticFields[staticDescriptionFieldIndex].value;
   }
 
-  return addPIICategoriesToMarkerSchema({
+  const processedMarkerSchema = addPIICategoriesToMarkerSchema({
     name,
     tooltipLabel,
     tableLabel,
@@ -1811,9 +1814,12 @@ function _convertGeckoMarkerSchema(
     fields,
     description,
     graphs,
+    color,
+    timelineStyle,
     colorField,
     isStackBased,
   });
+  return addStyleToMarkerSchema(processedMarkerSchema);
 }
 
 /**

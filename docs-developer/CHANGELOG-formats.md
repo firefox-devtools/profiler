@@ -6,6 +6,14 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 78
+
+An optional `color` field has been added to the marker schema. It holds a graph color name (such as `blue` or `orange`) and sets the color of markers of this type in timeline marker tracks.
+
+An optional `timelineStyle` field has been added to the marker schema. It sets the vertical offset, the corner shape and the borders of markers of this type in timeline marker tracks.
+
+The upgrader adds both fields to the schemas of the marker types that had built-in timeline styles before.
+
 ### Version 77
 
 A `generatedSource` column was added to the source table (`profile.shared.sources`). It contains the index of the corresponding "bundle" source in the source table, or null. It is only non-null on "original sources" which were obtained from a source map.

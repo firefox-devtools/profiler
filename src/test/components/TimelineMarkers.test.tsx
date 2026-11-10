@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { Provider } from 'react-redux';
+import { BLUE_50, GREEN_50, PURPLE_50, RED_50, RED_60 } from 'photon-colors';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -59,16 +60,24 @@ function setupWithMarkers(
     rangeStart,
     rangeEnd,
     component,
+    markerSchemaOverrides,
   }: {
     rangeStart: number;
     rangeEnd: number;
     component?: typeof TimelineMarkersOverview;
+    markerSchemaOverrides?: { [schemaName: string]: object };
   },
   ...markersPerThread: TestDefinedMarker[][]
 ) {
   const flushRafCalls = mockRaf();
 
   const profile = getProfileWithMarkers(...markersPerThread);
+  if (markerSchemaOverrides) {
+    profile.meta.markerSchema = profile.meta.markerSchema.map((schema) => ({
+      ...schema,
+      ...markerSchemaOverrides[schema.name],
+    }));
+  }
   const TimelineMarkersComponent = component ?? TimelineMarkersOverview;
 
   const renderResult = render(
@@ -175,6 +184,77 @@ describe('TimelineMarkers', function () {
   // element to be present in DOM.
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
+
+  describe('marker schema styles', function () {
+    function setupWithTracingSchema(tracingSchemaOverrides: object) {
+      setupWithMarkers(
+        {
+          rangeStart: 0,
+          rangeEnd: 10,
+          markerSchemaOverrides: { tracing: tracingSchemaOverrides },
+        },
+        [['Custom', 0, 10, { type: 'tracing', category: 'Paint' }]]
+      );
+      const drawCalls = flushDrawLog();
+      return {
+        fillStyles: drawCalls
+          .filter(([operation]) => operation === 'set fillStyle')
+          .map(([, fillStyle]) => fillStyle),
+        rects: drawCalls.filter(
+          (operation): operation is FillRectOperation =>
+            operation[0] === 'fillRect'
+        ),
+      };
+    }
+
+    it('draws markers with the color and timeline style of their schema', () => {
+      const { fillStyles, rects } = setupWithTracingSchema({
+        color: 'blue',
+        timelineStyle: { top: 3, squareCorners: true },
+      });
+      expect(fillStyles).toEqual([BLUE_50]);
+      expect(rects).toEqual([['fillRect', 0, 3, GRAPH_WIDTH, 6]]);
+    });
+
+    it('draws borders in a darker shade of the schema color', () => {
+      const { fillStyles, rects } = setupWithTracingSchema({
+        color: 'red',
+        timelineStyle: { squareCorners: true, borders: true },
+      });
+      expect(fillStyles).toEqual([RED_50, RED_60, RED_60]);
+      expect(rects).toEqual([
+        ['fillRect', 0, 0, GRAPH_WIDTH, 6],
+        ['fillRect', 0, 0, 1, 6],
+        ['fillRect', GRAPH_WIDTH - 1, 0, 1, 6],
+      ]);
+    });
+
+    it('uses the default style when the schema color is not a graph color', () => {
+      const { fillStyles } = setupWithTracingSchema({
+        color: 'not-a-color',
+        timelineStyle: { borders: true },
+      });
+      expect(fillStyles).toEqual(['black']);
+    });
+
+    it('prefers the marker name style over the schema style', () => {
+      setupWithMarkers(
+        {
+          rangeStart: 0,
+          rangeEnd: 10,
+          markerSchemaOverrides: { tracing: { color: 'green' } },
+        },
+        [
+          ['Custom', 0, 5, { type: 'tracing', category: 'Paint' }],
+          ['DisplayList', 5, 10, { type: 'tracing', category: 'Paint' }],
+        ]
+      );
+      const fillStyles = flushDrawLog()
+        .filter(([operation]) => operation === 'set fillStyle')
+        .map(([, fillStyle]) => fillStyle);
+      expect(fillStyles).toEqual([GREEN_50, PURPLE_50]);
+    });
+  });
 
   it('redraws when the system theme changes', () => {
     const { flushRafCalls } = setupWithMarkers(

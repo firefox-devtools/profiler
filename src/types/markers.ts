@@ -2,7 +2,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
+import type {
+  Milliseconds,
+  Microseconds,
+  Seconds,
+  Bytes,
+  CssPixels,
+} from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type {
   IndexIntoStackTable,
@@ -137,6 +143,15 @@ export type MarkerGraph = {
   color?: GraphColor;
 };
 
+export type MarkerTimelineStyle = {
+  // The vertical offset of the markers in the track.
+  top?: CssPixels;
+  squareCorners?: boolean;
+  // If true, the markers have left and right borders in a darker shade of
+  // the schema's color.
+  borders?: boolean;
+};
+
 export type MarkerSchemaPIICategory =
   | 'url'
   | 'extension-id'
@@ -193,6 +208,12 @@ export type MarkerSchema = {
 
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>;
+
+  // If present, the color of markers of this type in timeline marker tracks.
+  color?: GraphColor;
+
+  // If present, how markers of this type are drawn in timeline marker tracks.
+  timelineStyle?: MarkerTimelineStyle;
 
   // If present, specifies the key of a marker field that contains the marker's color.
   // The field should contain one of the GraphColor values.
