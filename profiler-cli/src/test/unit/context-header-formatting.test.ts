@@ -142,6 +142,34 @@ describe('formatStatusResult', function () {
     expect(output).toContain('Call tree search (all threads): "testGetValue"');
     expect(output).not.toContain('Filters: none');
   });
+
+  it('shows the selected marker with its handle', function () {
+    const result: StatusResult = {
+      type: 'status',
+      selectedThreadHandle: 't-94',
+      selectedThreads: createContext().selectedThreads,
+      viewRanges: [],
+      rootRange: { start: 0, end: 3000 },
+      selectedMarker: {
+        markerHandle: 'm-1',
+        markerIndex: 42,
+        name: 'CPU Use',
+        start: 1500,
+        duration: 5,
+      },
+      filterStacks: [],
+      callTreeSummaryStrategy: 'timing',
+    };
+    expect(formatStatusResult(result)).toContain(
+      'Selected marker: m-1 CPU Use t=1.500s (5ms)'
+    );
+    expect(
+      formatStatusResult({
+        ...result,
+        selectedMarker: { ...result.selectedMarker!, duration: undefined },
+      })
+    ).toContain('Selected marker: m-1 CPU Use t=1.500s (instant)');
+  });
 });
 
 describe('formatFilterStackResult', function () {
