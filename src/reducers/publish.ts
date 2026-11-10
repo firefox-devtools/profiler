@@ -15,6 +15,7 @@ import type {
   State,
   SanitizedProfileEncodingState,
   IndexIntoSourceTable,
+  Action,
 } from 'firefox-profiler/types';
 
 function _getSanitizingSharingOptions(): CheckedSharingOptions {
@@ -47,8 +48,6 @@ function _getMostlyNonSanitizingSharingOptions(): CheckedSharingOptions {
   };
 }
 
-// Both modes reference the same object until one is edited, so an untouched
-// profile is only encoded once.
 function _sharingOptionsForBothModes(
   options: CheckedSharingOptions
 ): Record<SharingMode, CheckedSharingOptions> {
@@ -249,9 +248,9 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
-  state = { phase: 'INITIAL' },
-  action
+const _encodingStateForMode = (
+  state: SanitizedProfileEncodingState,
+  action: Action
 ): SanitizedProfileEncodingState => {
   switch (action.type) {
     case 'SANITIZED_PROFILE_ENCODING_STARTED': {
@@ -277,6 +276,27 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
         return { phase: 'ERROR', sanitizedProfile, error };
       }
       return state; // Ignore updates from earlier encodings.
+    }
+    default:
+      return state;
+  }
+};
+
+const sanitizedProfileEncodingState: Reducer<
+  Record<SharingMode, SanitizedProfileEncodingState>
+> = (
+  state = { download: { phase: 'INITIAL' }, upload: { phase: 'INITIAL' } },
+  action
+) => {
+  switch (action.type) {
+    case 'SANITIZED_PROFILE_ENCODING_STARTED':
+    case 'SANITIZED_PROFILE_ENCODING_COMPLETED':
+    case 'SANITIZED_PROFILE_ENCODING_FAILED': {
+      const modeState = _encodingStateForMode(state[action.mode], action);
+      if (modeState === state[action.mode]) {
+        return state;
+      }
+      return { ...state, [action.mode]: modeState };
     }
     default:
       return state;

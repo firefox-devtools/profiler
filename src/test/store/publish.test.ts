@@ -21,6 +21,7 @@ import {
   getCheckedSharingOptions,
   getRemoveProfileInformation,
   getSanitizedProfile,
+  getSanitizedProfileEncodingState,
   getSourceFilesToShare,
   getSourceCodeSharingFiles,
   getHasSourceCodeToShare,
@@ -89,6 +90,7 @@ import {
 import type {
   IndexIntoSourceTable,
   Profile,
+  SharingMode,
   State,
   Store,
   UploadPhase,
@@ -232,6 +234,57 @@ describe('encodeSanitizedProfile', function () {
 
     expect(second.encodingPromise).toBe(first.encodingPromise);
     await first.encodingPromise;
+  });
+
+  it('keeps a separate encoding per sharing mode', async function () {
+    const { profile } = getProfileFromTextSamples('A');
+    const { dispatch } = storeWithProfile(profile);
+
+    const download = dispatch(encodeSanitizedProfile('download'));
+    const upload = dispatch(encodeSanitizedProfile('upload'));
+    expect(upload.encodingPromise).not.toBe(download.encodingPromise);
+
+    // Reopening a panel reuses its own encoding instead of starting another.
+    expect(dispatch(encodeSanitizedProfile('download')).encodingPromise).toBe(
+      download.encodingPromise
+    );
+    expect(dispatch(encodeSanitizedProfile('upload')).encodingPromise).toBe(
+      upload.encodingPromise
+    );
+
+    await Promise.all([download.encodingPromise, upload.encodingPromise]);
+  });
+
+  it("never gives a sharing mode the other mode's encoded profile", async function () {
+    const { profile } = getProfileFromTextSamples('A');
+    profile.pages = [
+      {
+        tabID: 1,
+        innerWindowID: 1,
+        url: 'https://example.com/private-page',
+        embedderInnerWindowID: 0,
+      },
+    ];
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    dispatch(updateSharingOption('upload', 'includeUrls', true));
+    await dispatch(encodeSanitizedProfile('upload')).encodingPromise;
+    expect(getSanitizedProfileEncodingState(getState(), 'upload').phase).toBe(
+      'DONE'
+    );
+    expect(getSanitizedProfileEncodingState(getState(), 'download').phase).toBe(
+      'INITIAL'
+    );
+
+    await dispatch(encodeSanitizedProfile('download')).encodingPromise;
+    const getEncodedBlob = (mode: SharingMode) => {
+      const encodingState = getSanitizedProfileEncodingState(getState(), mode);
+      if (encodingState.phase !== 'DONE') {
+        throw new Error(`Expected the ${mode} encoding to be DONE.`);
+      }
+      return encodingState.profileData;
+    };
+    expect(getEncodedBlob('download')).not.toBe(getEncodedBlob('upload'));
   });
 });
 

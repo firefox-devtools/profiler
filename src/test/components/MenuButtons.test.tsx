@@ -384,13 +384,16 @@ describe('app/MenuButtons', function () {
       // Tests that end right after such a change need to wait for it, so that
       // its store update doesn't happen outside of act().
       const waitForEncoding = async () => {
-        const encodingState = getSanitizedProfileEncodingState(
-          setupResult.getState()
-        );
-        if (encodingState.phase === 'ENCODING') {
-          await act(async () => {
-            await encodingState.encodingPromise;
-          });
+        for (const mode of ['download', 'upload'] as const) {
+          const encodingState = getSanitizedProfileEncodingState(
+            setupResult.getState(),
+            mode
+          );
+          if (encodingState.phase === 'ENCODING') {
+            await act(async () => {
+              await encodingState.encodingPromise;
+            });
+          }
         }
       };
       const getPanel = () => screen.getByTestId('PublishPanel-container');

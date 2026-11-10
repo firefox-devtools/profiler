@@ -505,9 +505,10 @@ export const getSanitizedProfile: DangerousSelectorWithArguments<
   )
 );
 
-export const getSanitizedProfileEncodingState: Selector<
-  SanitizedProfileEncodingState
-> = (state) => getPublishState(state).sanitizedProfileEncodingState;
+export const getSanitizedProfileEncodingState: DangerousSelectorWithArguments<
+  SanitizedProfileEncodingState,
+  SharingMode
+> = (state, mode) => getPublishState(state).sanitizedProfileEncodingState[mode];
 
 export const getUploadState: Selector<UploadState> = (state) =>
   getPublishState(state).upload;
