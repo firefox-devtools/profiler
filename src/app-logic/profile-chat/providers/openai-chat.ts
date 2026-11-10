@@ -41,6 +41,10 @@ export type OpenAIChatProviderOptions = {
 
 type StreamedToolCall = { id: string; name: string; arguments: string };
 
+// Counts the ids given to tool calls that came without one, so that they're
+// unique for the whole conversation.
+let _generatedToolCallIdCount = 0;
+
 // Not strict: other servers than OpenAI may reject or ignore the field, and
 // the arguments are checked anyway.
 const PROFILER_CLI_TOOL: ChatCompletionFunctionTool = {
@@ -131,6 +135,36 @@ export function describeOpenAIError(error: unknown, name: string): ChatError {
   return describeUnknownChatError(error);
 }
 
+/**
+ * A turn that was stopped or failed before the model answered leaves its user
+ * message without a reply, so the next one follows it directly. Some chat
+ * templates, e.g. Gemma's and Mistral's in llama.cpp and LM Studio, reject
+ * that, so send them as one message.
+ */
+function _mergeConsecutiveUserMessages(
+  history: ChatCompletionMessageParam[]
+): ChatCompletionMessageParam[] {
+  const merged: ChatCompletionMessageParam[] = [];
+  for (const message of history) {
+    const previous = merged[merged.length - 1];
+    if (
+      previous !== undefined &&
+      previous.role === 'user' &&
+      message.role === 'user' &&
+      typeof previous.content === 'string' &&
+      typeof message.content === 'string'
+    ) {
+      merged[merged.length - 1] = {
+        role: 'user',
+        content: `${previous.content}\n\n${message.content}`,
+      };
+    } else {
+      merged.push(message);
+    }
+  }
+  return merged;
+}
+
 export function createOpenAIChatProvider({
   name,
   baseURL,
@@ -162,7 +196,10 @@ export function createOpenAIChatProvider({
       const stream = await client.chat.completions.create(
         {
           model,
-          messages: [{ role: 'system', content: systemPrompt }, ...history],
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ..._mergeConsecutiveUserMessages(history),
+          ],
           tools: [PROFILER_CLI_TOOL],
           stream: true,
         },
@@ -213,10 +250,10 @@ export function createOpenAIChatProvider({
 
       const streamedToolCalls = toolCalls
         .filter((toolCall) => toolCall !== undefined)
-        .map((toolCall, index) => ({
+        .map((toolCall) => ({
           ...toolCall,
           // Some servers leave the id out.
-          id: toolCall.id || `call_${index}`,
+          id: toolCall.id || `call_generated_${++_generatedToolCallIdCount}`,
         }));
 
       const messages: ChatCompletionMessageParam[] = [];

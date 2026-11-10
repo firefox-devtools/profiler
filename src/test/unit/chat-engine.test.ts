@@ -623,6 +623,58 @@ describe('the OpenAI-compatible provider', function () {
     ]);
   });
 
+  it('gives tool calls without an id ids that are unique across turns', async function () {
+    mockChatCompletionsApi([
+      { toolCalls: [{ args: 'profile info' }], finishReason: 'tool_calls' },
+      { text: 'Done.', finishReason: 'stop' },
+      { toolCalls: [{ args: 'thread list' }], finishReason: 'tool_calls' },
+      { text: 'Done.', finishReason: 'stop' },
+    ]);
+    const { appended, run } = setupOpenAI();
+    await run();
+    await run();
+
+    const toolCallIds = appended
+      .filter((message) => message.role === 'assistant' && message.tool_calls)
+      .map((message) => message.tool_calls[0].id);
+    const toolResultIds = appended
+      .filter((message) => message.role === 'tool')
+      .map((message) => message.tool_call_id);
+    expect(toolCallIds).toHaveLength(2);
+    expect(new Set(toolCallIds).size).toBe(2);
+    expect(toolResultIds).toEqual(toolCallIds);
+  });
+
+  it('sends user messages without a reply in between as one', async function () {
+    const requests = mockChatCompletionsApi([
+      { text: 'Hello', finishReason: 'stop' },
+    ]);
+    const provider = createOpenAIChatProvider({
+      name: 'Test server',
+      baseURL: TEST_OPENAI_BASE_URL,
+      apiKey: 'sk-test',
+      model: 'test-model',
+    });
+    await runChatTurn({
+      provider,
+      history: [
+        provider.makeUserMessage('Why is it slow?', 'View A'),
+        provider.makeUserMessage('What about the GC?', 'View B'),
+      ],
+      runTool: async () => ({ text: '', isError: false }),
+      signal: new AbortController().signal,
+      onTextDelta: () => {},
+      onMessages: () => {},
+    });
+
+    expect(requests[0].messages.slice(1)).toEqual([
+      {
+        role: 'user',
+        content: 'Why is it slow?\n\nView A\n\nWhat about the GC?\n\nView B',
+      },
+    ]);
+  });
+
   it('runs tool calls that end with finish_reason "stop"', async function () {
     mockChatCompletionsApi([
       {

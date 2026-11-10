@@ -12,9 +12,10 @@ export const CHAT_COMPLETIONS_URL = `${TEST_OPENAI_BASE_URL}/chat/completions`;
 
 export type FakeChatCompletion = {
   text?: string;
-  // `rawArguments` replaces the JSON arguments built from `args`.
+  // `rawArguments` replaces the JSON arguments built from `args`. Without an
+  // `id`, the tool call is sent without one, like some servers do.
   toolCalls?: Array<{
-    id: string;
+    id?: string;
     args?: string;
     name?: string;
     rawArguments?: string;
