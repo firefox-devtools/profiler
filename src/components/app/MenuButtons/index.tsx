@@ -38,7 +38,10 @@ import {
   profileRemotelyDeleted,
 } from 'firefox-profiler/actions/app';
 import { openChat, closeChat } from 'firefox-profiler/actions/chat';
-import { getIsChatOpen } from 'firefox-profiler/selectors/chat';
+import {
+  getIsChatOpen,
+  getIsChatTurnRunning,
+} from 'firefox-profiler/selectors/chat';
 import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
 
 import {
@@ -77,6 +80,7 @@ type StateProps = {
   readonly abortFunction: () => void;
   readonly currentProfileUploadedInformation: UploadedProfileInformation | null;
   readonly isChatOpen: boolean;
+  readonly isChatTurnRunning: boolean;
 };
 
 type DispatchProps = {
@@ -369,14 +373,26 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     if (!isChatFeatureEnabled()) {
       return null;
     }
+    const { isChatOpen, isChatTurnRunning } = this.props;
+    // The chat keeps working when its drawer is closed, and changes the view
+    // as it runs commands, so say so.
+    const isWorkingInBackground = isChatTurnRunning && !isChatOpen;
     return (
-      <Localized id="MenuButtons--index--ask-about-profile">
+      <Localized
+        id={
+          isWorkingInBackground
+            ? 'MenuButtons--index--ask-about-profile-working'
+            : 'MenuButtons--index--ask-about-profile'
+        }
+        attrs={{ title: true }}
+      >
         <button
           type="button"
           className={classNames('menuButtonsButton', {
-            menuButtonsChatButtonOpen: this.props.isChatOpen,
+            menuButtonsChatButtonOpen: isChatOpen,
+            menuButtonsChatButtonWorking: isWorkingInBackground,
           })}
-          aria-pressed={this.props.isChatOpen}
+          aria-pressed={isChatOpen}
           onClick={this._onChatButtonClick}
         >
           Ask about this profile
@@ -415,6 +431,7 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
       isChatOpen: getIsChatOpen(state),
+      isChatTurnRunning: getIsChatTurnRunning(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,

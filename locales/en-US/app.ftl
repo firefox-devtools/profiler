@@ -590,6 +590,9 @@ MenuButtons--index--share-error-uploading =
 
 MenuButtons--index--revert = Revert to Original Profile
 MenuButtons--index--ask-about-profile = Ask about this profile
+# Shown when the chat is still answering after its drawer was closed.
+MenuButtons--index--ask-about-profile-working = Ask about this profile
+    .title = The chat is still working on an answer.
 
 MenuButtons--permalink--button =
     .label = Permalink

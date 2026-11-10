@@ -21,7 +21,10 @@ import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profil
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
 import { autoMockDomRect } from 'firefox-profiler/test/fixtures/mocks/domrect';
 import { computeCodeChallenge } from 'firefox-profiler/app-logic/profile-chat/providers/openrouter-auth';
-import { mockMessagesApi } from 'firefox-profiler/test/fixtures/anthropic-api';
+import {
+  makeSseResponse,
+  mockMessagesApi,
+} from 'firefox-profiler/test/fixtures/anthropic-api';
 import { fireEvent, waitFor } from '@testing-library/react';
 
 // We're not interested in the timeline in this test.
@@ -495,6 +498,39 @@ describe('ChatDrawer', function () {
     );
     expect(await within(drawer).findByText(/here\./)).toBeInTheDocument();
     expect(drawer.querySelector('img')).toBeNull();
+  });
+
+  it('keeps working when closed, and says so on the menu button', async function () {
+    const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
+    let respond: (() => void) | null = null;
+    mockMessagesApi([
+      () =>
+        new Promise<Response>((resolve) => {
+          respond = () =>
+            resolve(
+              makeSseResponse({
+                content: [{ type: 'text', text: 'All done.' }],
+                stopReason: 'end_turn',
+              })
+            );
+        }),
+    ]);
+    openChat();
+    await send('Hello');
+    await screen.findByRole('button', { name: 'Stop' });
+
+    fireFullClick(screen.getByRole('button', { name: 'Close' }));
+    const menuButton = screen.getByTitle(
+      'The chat is still working on an answer.'
+    );
+    expect(menuButton).toHaveTextContent('Ask about this profile');
+
+    await act(async () => {
+      respond?.();
+    });
+    await waitFor(() => expect(menuButton).not.toHaveAttribute('title'));
+    openChat();
+    expect(await screen.findByText('All done.')).toBeInTheDocument();
   });
 
   it('can be stopped', async function () {
