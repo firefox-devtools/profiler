@@ -11,7 +11,10 @@ import {
   computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
 } from '../../profile-logic/call-tree';
-import { computeFlameGraphRows } from '../../profile-logic/flame-graph';
+import {
+  computeFlameGraphRows,
+  makeFlameGraphFuncComparator,
+} from '../../profile-logic/flame-graph';
 import {
   computeFrameTableFromRawFrameTable,
   computeFuncTableFromRawFuncTable,
@@ -31,7 +34,17 @@ import {
   addSourceToTable,
 } from '../fixtures/utils';
 import { ensureExists } from 'firefox-profiler/utils/types';
-import type { CallNodePath } from 'firefox-profiler/types';
+import type { CallNodePath, Thread } from 'firefox-profiler/types';
+
+function makeFuncComparator(thread: Thread) {
+  return makeFlameGraphFuncComparator(
+    thread.funcTable,
+    thread.resourceTable,
+    thread.sources,
+    thread.sourceLocationTable,
+    thread.stringTable
+  );
+}
 
 describe('unfiltered call tree', function () {
   // These values are hoisted at the top for the ease of access. In the profile fixture
@@ -128,14 +141,150 @@ describe('unfiltered call tree', function () {
 
       const rows = computeFlameGraphRows(
         callNodeInfo.getCallNodeTable(),
-        thread.funcTable,
-        thread.stringTable
+        makeFuncComparator(thread)
       );
       expect(rows).toEqual([
         // Siblings are ordered in lexically ascending order.
         [cnG, cnK, cnZ],
         [cnGH, cnKM, cnKN, cnZX],
         [cnGHI, cnGHJ, cnZXW, cnZXY],
+      ]);
+    });
+
+    it('orders siblings with the same function name by file name', function () {
+      const { derivedThreads, defaultCategory } = getProfileFromTextSamples(`
+        A[file:b.js]  A[file:a.js]  A
+        B[file:b.js]  B             B[file:a.js]
+      `);
+      const [thread] = derivedThreads;
+      const { funcTable, sources, stringTable } = thread;
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        defaultCategory
+      );
+      const callNodeTable = callNodeInfo.getCallNodeTable();
+      const rows = computeFlameGraphRows(
+        callNodeTable,
+        makeFuncComparator(thread)
+      );
+
+      // Describe each call node as "funcName fileName".
+      const describe = (callNodeIndex: number) => {
+        const funcIndex = callNodeTable.func[callNodeIndex];
+        const name = stringTable.getString(funcTable.name[funcIndex]);
+        const fileName =
+          (funcTable.flags[funcIndex] & FuncFlag.HasSource) !== 0
+            ? stringTable.getString(
+                sources.filename[funcTable.source[funcIndex]]
+              )
+            : '(no file)';
+        return `${name} ${fileName}`;
+      };
+      expect(rows.map((row) => row.map(describe))).toEqual([
+        // Functions without a file come first.
+        ['A (no file)', 'A a.js', 'A b.js'],
+        // Children are grouped by their parent, in the parent's order.
+        ['B a.js', 'B (no file)', 'B b.js'],
+      ]);
+    });
+
+    it('orders siblings with the same function name by resource name', function () {
+      const { derivedThreads, defaultCategory } = getProfileFromTextSamples(`
+        A[lib:libb.so]  A[lib:liba.so]  A
+      `);
+      const [thread] = derivedThreads;
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        defaultCategory
+      );
+      const rows = computeFlameGraphRows(
+        callNodeInfo.getCallNodeTable(),
+        makeFuncComparator(thread)
+      );
+      const { resourceTable, funcTable, stringTable } = thread;
+      const describe = (callNodeIndex: number) => {
+        const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
+        return (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0
+          ? stringTable.getString(
+              resourceTable.name[funcTable.resource[funcIndex]]
+            )
+          : '(no resource)';
+      };
+      expect(rows.map((row) => row.map(describe))).toEqual([
+        ['(no resource)', 'liba.so', 'libb.so'],
+      ]);
+    });
+
+    it('orders siblings from the same file by their original location', function () {
+      // The fixture merges functions with the same name and file, so create
+      // them with different names and rename them afterwards.
+      const {
+        derivedThreads,
+        funcNamesDictPerThread: [{ A, view1, view2, view3, view4 }],
+        defaultCategory,
+      } = getProfileFromTextSamples(`
+        A                      A                      A                      A
+        view1[file:bundle.js]  view2[file:bundle.js]  view3[file:bundle.js]  view4[file:bundle.js]
+      `);
+      const [thread] = derivedThreads;
+      const { funcTable, sources, sourceLocationTable, stringTable } = thread;
+      const viewNameIndex = stringTable.indexForString('view');
+      for (const funcIndex of [view1, view2, view3, view4]) {
+        funcTable.name[funcIndex] = viewNameIndex;
+      }
+
+      function addSource(fileName: string): number {
+        sources.id.push(null);
+        sources.filename.push(stringTable.indexForString(fileName));
+        sources.startLine.push(1);
+        sources.startColumn.push(1);
+        sources.sourceMapURL.push(null);
+        sources.content.push(null);
+        return sources.length++;
+      }
+      function setOriginalLocation(
+        funcIndex: number,
+        source: number,
+        line: number,
+        column: number
+      ) {
+        sourceLocationTable.source.push(source);
+        sourceLocationTable.line.push(line);
+        sourceLocationTable.column.push(column);
+        funcTable.originalLocation[funcIndex] = sourceLocationTable.length++;
+        funcTable.flags[funcIndex] |= FuncFlag.HasOriginalLocation;
+      }
+      const controls = addSource('Controls.js');
+      const todoItem = addSource('TodoItem.js');
+      setOriginalLocation(view1, todoItem, 3, 1);
+      setOriginalLocation(view2, controls, 20, 5);
+      setOriginalLocation(view3, controls, 9, 7);
+      setOriginalLocation(view4, controls, 9, 5);
+
+      const callNodeInfo = getCallNodeInfo(
+        thread.stackTable,
+        thread.frameTable,
+        defaultCategory
+      );
+      const callNodeTable = callNodeInfo.getCallNodeTable();
+      const rows = computeFlameGraphRows(
+        callNodeTable,
+        makeFuncComparator(thread)
+      );
+      const cnA = callNodeInfo.getCallNodeIndexFromPath([A]);
+      const cnForView = (funcIndex: number) =>
+        callNodeInfo.getCallNodeIndexFromPath([A, funcIndex]);
+      expect(rows).toEqual([
+        [cnA],
+        // Ordered by original file name, then line, then column.
+        [
+          cnForView(view4),
+          cnForView(view3),
+          cnForView(view2),
+          cnForView(view1),
+        ],
       ]);
     });
   });

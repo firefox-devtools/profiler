@@ -15,6 +15,7 @@
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
+import type { ProfileVersionError } from 'firefox-profiler/profile-logic/errors';
 
 /**
  * Advice shown whenever the failure looks like a sandbox restriction on the
@@ -345,4 +346,59 @@ export function indentBlock(text: string, prefix: string = '  '): string {
     .split('\n')
     .map((line) => `${prefix}${line}`)
     .join('\n');
+}
+
+/**
+ * Where `./mach` keeps its downloaded tools, including the copies of samply
+ * and profiler-cli that Firefox's bootstrap installs.
+ */
+export function getMozbuildStatePath(): string {
+  return (
+    process.env.MOZBUILD_STATE_PATH || path.join(os.homedir(), '.mozbuild')
+  );
+}
+
+function realpathOrSelf(filePath: string): string {
+  try {
+    return fs.realpathSync(filePath);
+  } catch {
+    return path.resolve(filePath);
+  }
+}
+
+/**
+ * Whether the profiler-cli script at `scriptPath` is the copy that
+ * `./mach bootstrap` installed from Firefox's in-tree toolchain.
+ */
+export function isInstalledByMachBootstrap(scriptPath: string): boolean {
+  const toolDir = realpathOrSelf(
+    path.join(getMozbuildStatePath(), 'profiler-cli')
+  );
+  const relative = path.relative(toolDir, realpathOrSelf(scriptPath));
+  return (
+    relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative)
+  );
+}
+
+/**
+ * Explain that a profile is too new for this build and how to update it.
+ * The bootstrapped copy can only be updated through "./mach bootstrap".
+ */
+export function describeProfileVersionError(
+  error: ProfileVersionError,
+  packageName: string,
+  scriptPath: string
+): string {
+  const versionLine = `This profile is version ${error.profileVersion}, but this profiler-cli only supports up to version ${error.supportedVersion} of the ${error.formatName} profile format.`;
+  if (isInstalledByMachBootstrap(scriptPath)) {
+    return [
+      versionLine,
+      'This profiler-cli was installed by "./mach bootstrap". Update your Firefox checkout to the latest main branch and run "./mach bootstrap" again.',
+    ].join('\n');
+  }
+  return [
+    versionLine,
+    'Update to the latest version with:',
+    `  npm install -g ${packageName}@latest`,
+  ].join('\n');
 }

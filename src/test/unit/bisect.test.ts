@@ -6,7 +6,7 @@ import {
   bisectionLeft,
   bisectionRight,
   bisectionRightByKey,
-  bisectionRightByStrKey,
+  bisectionRightBy,
 } from '../../utils/bisect';
 
 describe('bisectionRight', function () {
@@ -114,7 +114,7 @@ describe('bisectionRightByKey', function () {
   });
 });
 
-describe('bisectionRightByStrKey', function () {
+describe('bisectionRightBy', function () {
   const array = [
     { name: 'a0' },
     { name: 'a1' },
@@ -131,51 +131,59 @@ describe('bisectionRightByStrKey', function () {
     { name: 'a9' },
   ];
 
-  function getName(x: { name: string }): string {
-    return x.name;
+  function compareNameTo(x: string): (elem: { name: string }) => number {
+    return (elem) => {
+      if (elem.name < x) {
+        return -1;
+      }
+      if (elem.name > x) {
+        return 1;
+      }
+      return 0;
+    };
   }
 
   // The new element to be inserted into this array is referred to as x
   it('returns index of the first element whose key is greater than x', function () {
-    expect(bisectionRightByStrKey(array, 'a4', getName)).toBe(8);
-    expect(bisectionRightByStrKey(array, 'a3', getName)).toBe(8);
+    expect(bisectionRightBy(array, compareNameTo('a4'))).toBe(8);
+    expect(bisectionRightBy(array, compareNameTo('a3'))).toBe(8);
   });
 
   it('returns index of the first element whose key is greater than x, occuring after low', function () {
-    expect(bisectionRightByStrKey(array, 'a4', getName, 8)).toBe(8);
-    expect(bisectionRightByStrKey(array, 'a3', getName, 9)).toBe(9);
+    expect(bisectionRightBy(array, compareNameTo('a4'), 8)).toBe(8);
+    expect(bisectionRightBy(array, compareNameTo('a3'), 9)).toBe(9);
   });
 
   it('returns index of the first element whose key is greater than x, between low and high', function () {
-    expect(bisectionRightByStrKey(array, 'a4', getName, 1, 7)).toBe(7);
-    expect(bisectionRightByStrKey(array, 'a3', getName, 4, 6)).toBe(6);
+    expect(bisectionRightBy(array, compareNameTo('a4'), 1, 7)).toBe(7);
+    expect(bisectionRightBy(array, compareNameTo('a3'), 4, 6)).toBe(6);
   });
 
   it('returns 0 if all the keys of elements are greater than x', function () {
-    expect(bisectionRightByStrKey(array, '_', getName)).toBe(0);
+    expect(bisectionRightBy(array, compareNameTo('_'))).toBe(0);
   });
 
   it('returns array length if x is greater than keys of all elements', function () {
-    expect(bisectionRightByStrKey(array, 'b', getName)).toBe(13);
+    expect(bisectionRightBy(array, compareNameTo('b'))).toBe(13);
   });
 
   it('throws TypeError if either low or high are outside the range of the array', function () {
-    expect(() => bisectionRightByStrKey(array, 'b', getName, -2)).toThrow(
+    expect(() => bisectionRightBy(array, compareNameTo('b'), -2)).toThrow(
       TypeError
     );
-    expect(() => bisectionRightByStrKey(array, 'b', getName, 100)).toThrow(
+    expect(() => bisectionRightBy(array, compareNameTo('b'), 100)).toThrow(
       TypeError
     );
-    expect(() => bisectionRightByStrKey(array, 'b', getName, 2, -10)).toThrow(
+    expect(() => bisectionRightBy(array, compareNameTo('b'), 2, -10)).toThrow(
       TypeError
     );
-    expect(() => bisectionRightByStrKey(array, 'b', getName, 2, 100)).toThrow(
+    expect(() => bisectionRightBy(array, compareNameTo('b'), 2, 100)).toThrow(
       TypeError
     );
-    expect(() => bisectionRightByStrKey(array, 'b', getName, -20, -10)).toThrow(
+    expect(() => bisectionRightBy(array, compareNameTo('b'), -20, -10)).toThrow(
       TypeError
     );
-    expect(() => bisectionRightByStrKey(array, 'b', getName, 100, 200)).toThrow(
+    expect(() => bisectionRightBy(array, compareNameTo('b'), 100, 200)).toThrow(
       TypeError
     );
   });
