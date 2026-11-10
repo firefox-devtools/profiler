@@ -122,14 +122,26 @@ function _isPreset(value: string | null): value is ChatProviderPreset {
 }
 
 /**
- * The chat is hidden unless enabled from the console with:
- *   localStorage.setItem('profiler.chat.enabled', 'true')
+ * The chat is hidden unless enabled from the console with
+ * window.experimental.enableProfileChat(), which is remembered in this browser.
  */
 export function isChatFeatureEnabled(): boolean {
   try {
     return window.localStorage.getItem(ENABLED_STORAGE_KEY) === 'true';
   } catch {
     return false;
+  }
+}
+
+export function storeChatFeatureEnabled(isEnabled: boolean): void {
+  try {
+    if (isEnabled) {
+      window.localStorage.setItem(ENABLED_STORAGE_KEY, 'true');
+    } else {
+      window.localStorage.removeItem(ENABLED_STORAGE_KEY);
+    }
+  } catch {
+    // The choice then only lives until the page is reloaded.
   }
 }
 

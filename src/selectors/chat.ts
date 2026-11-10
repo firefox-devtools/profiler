@@ -16,6 +16,8 @@ import type {
 } from 'firefox-profiler/types';
 
 export const getChat: Selector<ChatState> = (state) => state.chat;
+export const getIsChatFeatureEnabled: Selector<boolean> = (state) =>
+  getChat(state).isFeatureEnabled;
 export const getIsChatOpen: Selector<boolean> = (state) =>
   getChat(state).isOpen;
 export const getChatStatus: Selector<ChatStatus> = (state) =>

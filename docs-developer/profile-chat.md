@@ -4,13 +4,13 @@ The profile chat is an experimental drawer that answers questions about the open
 
 ## Enabling it
 
-The feature is hidden behind a `localStorage` flag. Run this in the console and reload:
+The feature is hidden behind an experimental flag. Run this in the console:
 
 ```js
-localStorage.setItem('profiler.chat.enabled', 'true');
+window.experimental.enableProfileChat();
 ```
 
-An "Ask about this profile" button then appears in the top bar. The first time, the drawer shows the provider settings. "Settings" in the drawer header opens them again. Nothing about the chat is URL state, so a reload starts a new conversation.
+An "Ask about this profile" button then appears in the top bar. The flag is stored in `localStorage` (`profiler.chat.enabled`), so it stays on in this browser until `window.experimental.disableProfileChat()`. It isn't URL state on purpose: a shared link shouldn't turn on a feature that sends profile data to a third party. The first time, the drawer shows the provider settings. "Settings" in the drawer header opens them again. Nothing about the chat is URL state, so a reload starts a new conversation.
 
 ## Providers
 

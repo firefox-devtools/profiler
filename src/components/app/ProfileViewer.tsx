@@ -24,8 +24,10 @@ import { returnToZipFileList } from 'firefox-profiler/actions/zipped-profiles';
 import { Timeline } from 'firefox-profiler/components/timeline';
 import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
-import { getIsChatOpen } from 'firefox-profiler/selectors/chat';
-import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
+import {
+  getIsChatFeatureEnabled,
+  getIsChatOpen,
+} from 'firefox-profiler/selectors/chat';
 import {
   getUploadProgress,
   getUploadPhase,
@@ -59,6 +61,7 @@ type StateProps = {
   readonly hasSanitizedProfile: boolean;
   readonly icons: IconsWithClassNames;
   readonly isBottomBoxOpen: boolean;
+  readonly isChatFeatureEnabled: boolean;
   readonly isChatOpen: boolean;
 };
 
@@ -79,6 +82,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
       hasSanitizedProfile,
       icons,
       isBottomBoxOpen,
+      isChatFeatureEnabled,
       isChatOpen,
     } = this.props;
 
@@ -156,7 +160,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <SourceCodeFetcher />
           <AssemblyCodeFetcher />
         </div>
-        {isChatOpen && isChatFeatureEnabled() ? (
+        {isChatOpen && isChatFeatureEnabled ? (
           <Localized
             id="ChatDrawer--error-boundary-message"
             attrs={{ message: true }}
@@ -182,6 +186,7 @@ export const ProfileViewer = explicitConnect<{}, StateProps, DispatchProps>({
     hasSanitizedProfile: getHasSanitizedProfile(state),
     icons: getIconsWithClassNames(state),
     isBottomBoxOpen: getIsBottomBoxOpen(state),
+    isChatFeatureEnabled: getIsChatFeatureEnabled(state),
     isChatOpen: getIsChatOpen(state),
   }),
   mapDispatchToProps: {

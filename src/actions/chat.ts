@@ -8,6 +8,7 @@ import {
   getStoredProviderPreset,
   getStoredProviderSettings,
   hasCompleteSettings,
+  storeChatFeatureEnabled,
   storeProviderPreset,
   storeProviderSettings,
   type ChatProviderSettings,
@@ -40,6 +41,19 @@ let _currentTurn: {
   readonly controller: AbortController;
   readonly conversationId: number;
 } | null = null;
+
+/**
+ * Show or hide the experimental chat, and remember the choice in this browser.
+ */
+export function setChatFeatureEnabled(isEnabled: boolean): ThunkAction<void> {
+  return (dispatch) => {
+    if (!isEnabled) {
+      dispatch(cancelChatTurn());
+    }
+    storeChatFeatureEnabled(isEnabled);
+    dispatch({ type: 'CHANGE_CHAT_FEATURE_ENABLED', isEnabled });
+  };
+}
 
 export function openChat(): Action {
   return { type: 'OPEN_CHAT' };

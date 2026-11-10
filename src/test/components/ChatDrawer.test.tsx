@@ -16,6 +16,7 @@ import {
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { updateUrlState } from 'firefox-profiler/actions/app';
 import { viewProfile } from 'firefox-profiler/actions/receive-profile';
+import { setChatFeatureEnabled } from 'firefox-profiler/actions/chat';
 import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
 import { getProfileFromTextSamples } from 'firefox-profiler/test/fixtures/profiles/processed-profile';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
@@ -26,6 +27,9 @@ import {
   mockMessagesApi,
 } from 'firefox-profiler/test/fixtures/anthropic-api';
 import { fireEvent, waitFor } from '@testing-library/react';
+// ProfileViewer loads the drawer lazily. Loading it here keeps that cost out
+// of the first test that opens it, which could time out on slow CI machines.
+import 'firefox-profiler/components/chat/ChatDrawer';
 
 // We're not interested in the timeline in this test.
 jest.mock('../../components/timeline', () => ({
@@ -112,6 +116,25 @@ describe('ChatDrawer', function () {
       screen.queryByRole('button', { name: 'Ask about this profile' })
     ).not.toBeInTheDocument();
     expect(document.querySelector('.chatDrawer')).toBeNull();
+  });
+
+  it('can be enabled and disabled without a reload', async function () {
+    const { store, openChat } = setup({ enabled: false });
+    act(() => {
+      store.dispatch(setChatFeatureEnabled(true));
+    });
+    expect(window.localStorage.getItem('profiler.chat.enabled')).toBe('true');
+    openChat();
+    expect(await screen.findByText(/sent to Anthropic/)).toBeInTheDocument();
+
+    act(() => {
+      store.dispatch(setChatFeatureEnabled(false));
+    });
+    expect(window.localStorage.getItem('profiler.chat.enabled')).toBeNull();
+    expect(document.querySelector('.chatDrawer')).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: 'Ask about this profile' })
+    ).not.toBeInTheDocument();
   });
 
   it('asks for an Anthropic key, then shows the composer', async function () {

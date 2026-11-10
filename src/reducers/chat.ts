@@ -13,6 +13,7 @@ import {
   getStoredProviderPreset,
   getStoredProviderSettings,
   hasCompleteSettings,
+  isChatFeatureEnabled,
 } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -23,6 +24,7 @@ function _emptyConversation(preset: ChatProviderPreset): ChatConversation {
 function _getInitialState(): ChatState {
   const preset = getStoredProviderPreset();
   return {
+    isFeatureEnabled: isChatFeatureEnabled(),
     isOpen: false,
     status: 'idle',
     error: null,
@@ -85,6 +87,12 @@ function _appendMessages(
 
 const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
   switch (action.type) {
+    case 'CHANGE_CHAT_FEATURE_ENABLED':
+      return {
+        ...state,
+        isFeatureEnabled: action.isEnabled,
+        isOpen: action.isEnabled && state.isOpen,
+      };
     case 'OPEN_CHAT':
       return { ...state, isOpen: true };
     case 'CLOSE_CHAT':

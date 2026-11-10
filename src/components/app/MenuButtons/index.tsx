@@ -39,10 +39,10 @@ import {
 } from 'firefox-profiler/actions/app';
 import { openChat, closeChat } from 'firefox-profiler/actions/chat';
 import {
+  getIsChatFeatureEnabled,
   getIsChatOpen,
   getIsChatTurnRunning,
 } from 'firefox-profiler/selectors/chat';
-import { isChatFeatureEnabled } from 'firefox-profiler/app-logic/profile-chat/provider-settings';
 
 import {
   getAbortFunction,
@@ -79,6 +79,7 @@ type StateProps = {
   readonly hasPrePublishedState: boolean;
   readonly abortFunction: () => void;
   readonly currentProfileUploadedInformation: UploadedProfileInformation | null;
+  readonly isChatFeatureEnabled: boolean;
   readonly isChatOpen: boolean;
   readonly isChatTurnRunning: boolean;
 };
@@ -385,10 +386,10 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
   };
 
   _renderChatButton() {
-    if (!isChatFeatureEnabled()) {
+    const { isChatFeatureEnabled, isChatOpen, isChatTurnRunning } = this.props;
+    if (!isChatFeatureEnabled) {
       return null;
     }
-    const { isChatOpen, isChatTurnRunning } = this.props;
     // The chat keeps working when its drawer is closed, and changes the view
     // as it runs commands, so say so.
     const isWorkingInBackground = isChatTurnRunning && !isChatOpen;
@@ -446,6 +447,7 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       abortFunction: getAbortFunction(state),
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
+      isChatFeatureEnabled: getIsChatFeatureEnabled(state),
       isChatOpen: getIsChatOpen(state),
       isChatTurnRunning: getIsChatTurnRunning(state),
     }),

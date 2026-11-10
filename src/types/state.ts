@@ -483,6 +483,8 @@ export type ChatProviderPreset =
   | 'custom';
 
 export type ChatState = {
+  // Whether the experimental chat is shown at all.
+  readonly isFeatureEnabled: boolean;
   readonly isOpen: boolean;
   readonly status: ChatStatus;
   // Shown when the last turn failed.

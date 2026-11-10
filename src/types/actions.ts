@@ -773,6 +773,10 @@ type AppAction = {
 };
 
 type ChatAction =
+  | {
+      readonly type: 'CHANGE_CHAT_FEATURE_ENABLED';
+      readonly isEnabled: boolean;
+    }
   | { readonly type: 'OPEN_CHAT' }
   | { readonly type: 'CLOSE_CHAT' }
   | {
