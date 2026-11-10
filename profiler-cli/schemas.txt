@@ -331,6 +331,7 @@ profiler-cli status --json
     selectedThreads: [{ threadIndex, name, processName }],
     viewRanges: [{ start, startName, end, endName }],
     rootRange: { start, end },
+    selectedMarker?: { markerHandle, markerIndex, name, start, duration? },
     filterStacks: [{ threadHandle, filters: FilterEntry[] }],
     callTreeSummaryStrategy: CallTreeSummaryStrategy,
     callTreeSearch?
