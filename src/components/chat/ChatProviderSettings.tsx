@@ -18,6 +18,7 @@ import {
   createPkceParams,
   exchangeOpenRouterCode,
   getOpenRouterAuthURL,
+  OpenRouterSignInCancelledError,
   waitForOpenRouterCode,
   type PkceParams,
 } from 'firefox-profiler/app-logic/profile-chat/providers/openrouter-auth';
@@ -230,6 +231,14 @@ function SignInStatusMessage({ signIn }: { readonly signIn: SignInStatus }) {
           </span>
         </Localized>
       );
+    case 'cancelled':
+      return (
+        <Localized id="ChatProviderSettings--connect-cancelled">
+          <span className="chatProviderSettingsHint">
+            The OpenRouter sign-in was cancelled.
+          </span>
+        </Localized>
+      );
     case 'error':
       return (
         <Localized
@@ -300,6 +309,7 @@ type SignInStatus =
   | { readonly status: 'idle' }
   | { readonly status: 'waiting' }
   | { readonly status: 'popup-blocked' }
+  | { readonly status: 'cancelled' }
   | { readonly status: 'error'; readonly message: string };
 
 /**
@@ -368,7 +378,12 @@ function useOpenRouterSignIn(
           onApiKey(apiKey);
         },
         (error) => {
-          if (!controller.signal.aborted) {
+          if (controller.signal.aborted) {
+            return;
+          }
+          if (error instanceof OpenRouterSignInCancelledError) {
+            setSignIn({ status: 'cancelled' });
+          } else {
             setSignIn({ status: 'error', message: error.message });
           }
         }

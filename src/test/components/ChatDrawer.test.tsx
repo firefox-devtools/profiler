@@ -298,6 +298,34 @@ describe('ChatDrawer', function () {
     openSpy.mockRestore();
   });
 
+  it('says when the OpenRouter sign-in is denied', async function () {
+    window.fetchMock.get('https://openrouter.ai/api/v1/models', { data: [] });
+    const openSpy = jest.spyOn(window, 'open').mockReturnValue({} as Window);
+    const { openChat } = setup();
+    openChat();
+    fireEvent.change(await screen.findByLabelText('Provider'), {
+      target: { value: 'openrouter' },
+    });
+    const connectButton = screen.getByRole('button', {
+      name: 'Connect OpenRouter',
+    });
+    await waitFor(() => expect(connectButton).toBeEnabled());
+    fireFullClick(connectButton);
+    expect(
+      screen.getByText(/Finish signing in to OpenRouter/)
+    ).toBeInTheDocument();
+
+    // OpenRouter redirects without a code or a state when access is denied.
+    const callback = new BroadcastChannel('profiler-openrouter-auth');
+    callback.postMessage({ code: null, state: null });
+    callback.close();
+
+    expect(
+      await screen.findByText('The OpenRouter sign-in was cancelled.')
+    ).toBeInTheDocument();
+    openSpy.mockRestore();
+  });
+
   it('says when the OpenRouter popup is blocked', async function () {
     window.fetchMock.get('https://openrouter.ai/api/v1/models', { data: [] });
     const openSpy = jest.spyOn(window, 'open').mockReturnValue(null);

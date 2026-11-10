@@ -13,7 +13,6 @@
   channel.postMessage({
     code: params.get('code'),
     state: params.get('state'),
-    error: params.get('error'),
   });
   channel.close();
   // Drop the code from the history and the address bar.

@@ -628,6 +628,7 @@ ChatProviderSettings--privacy-custom = Settings are stored in this browser only.
 ChatProviderSettings--connect-openrouter-button = Connect OpenRouter
 ChatProviderSettings--connect-waiting = Finish signing in to OpenRouter in the window that opened.
 ChatProviderSettings--connect-popup-blocked = The OpenRouter window was blocked. Allow pop-ups for this site, or paste a key instead.
+ChatProviderSettings--connect-cancelled = The OpenRouter sign-in was cancelled.
 # Variables:
 #   $message (String) - The error message, in English.
 ChatProviderSettings--connect-error = Could not connect OpenRouter: { $message }

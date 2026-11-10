@@ -32,8 +32,21 @@ export type PkceParams = {
 type CallbackMessage = {
   code?: unknown;
   state?: unknown;
-  error?: unknown;
 };
+
+// Codes are only valid for 10 minutes, so there's no point in waiting longer.
+const SIGN_IN_TIMEOUT_MS = 10 * 60 * 1000;
+
+/**
+ * The user denied access on the OpenRouter page.
+ */
+export class OpenRouterSignInCancelledError extends Error {
+  override name = 'OpenRouterSignInCancelledError';
+}
+
+function _isEmpty(value: unknown): boolean {
+  return value === undefined || value === null || value === '';
+}
 
 function _base64UrlEncode(bytes: Uint8Array): string {
   let binary = '';
@@ -102,7 +115,12 @@ export function waitForOpenRouterCode(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     const channel = new BroadcastChannel(OPENROUTER_AUTH_CHANNEL);
+    const timeout = setTimeout(() => {
+      finish();
+      reject(new Error('The sign-in timed out'));
+    }, SIGN_IN_TIMEOUT_MS);
     const finish = () => {
+      clearTimeout(timeout);
       channel.close();
       signal.removeEventListener('abort', onAbort);
     };
@@ -111,7 +129,15 @@ export function waitForOpenRouterCode(
       reject(new DOMException('Aborted', 'AbortError'));
     };
     channel.onmessage = (event: MessageEvent<CallbackMessage>) => {
-      const { code, state: messageState, error } = event.data ?? {};
+      const { code, state: messageState } = event.data ?? {};
+      // OpenRouter doesn't send the state back when the user denies access,
+      // so such a callback can't be matched to its sign-in. Ending another
+      // waiting sign-in with it is harmless, the user can connect again.
+      if (_isEmpty(code) && _isEmpty(messageState)) {
+        finish();
+        reject(new OpenRouterSignInCancelledError());
+        return;
+      }
       if (messageState !== state) {
         return;
       }
@@ -119,9 +145,7 @@ export function waitForOpenRouterCode(
       if (typeof code === 'string' && code !== '') {
         resolve(code);
       } else {
-        reject(
-          new Error(typeof error === 'string' ? error : 'No code was returned')
-        );
+        reject(new Error('No code was returned'));
       }
     };
     if (signal.aborted) {

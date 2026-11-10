@@ -8,6 +8,7 @@ import {
   exchangeOpenRouterCode,
   getOpenRouterAuthURL,
   OPENROUTER_AUTH_CHANNEL,
+  OpenRouterSignInCancelledError,
   waitForOpenRouterCode,
 } from 'firefox-profiler/app-logic/profile-chat/providers/openrouter-auth';
 
@@ -73,12 +74,30 @@ describe('OpenRouter sign-in', function () {
         'state-1',
         new AbortController().signal
       );
-      callback.postMessage({
-        code: null,
-        state: 'state-1',
-        error: 'access_denied',
-      });
-      await expect(promise).rejects.toThrow('access_denied');
+      callback.postMessage({ code: null, state: 'state-1' });
+      await expect(promise).rejects.toThrow('No code was returned');
+    });
+
+    it('rejects as cancelled when the user denies access', async function () {
+      const promise = waitForOpenRouterCode(
+        'state-1',
+        new AbortController().signal
+      );
+      // OpenRouter leaves the state out in this case.
+      callback.postMessage({ code: null, state: null });
+      await expect(promise).rejects.toBeInstanceOf(
+        OpenRouterSignInCancelledError
+      );
+    });
+
+    it('stops waiting after 10 minutes', async function () {
+      jest.useFakeTimers();
+      const promise = waitForOpenRouterCode(
+        'state-1',
+        new AbortController().signal
+      );
+      jest.advanceTimersByTime(10 * 60 * 1000);
+      await expect(promise).rejects.toThrow('timed out');
     });
 
     it('stops waiting when aborted', async function () {
