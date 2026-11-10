@@ -440,6 +440,7 @@ describe('the Anthropic provider', function () {
       expect.objectContaining({ name: 'run_profiler_cli', strict: true }),
     ]);
     expect(request.system.at(-1).cache_control).toEqual({ type: 'ephemeral' });
+    expect(request.cache_control).toEqual({ type: 'ephemeral' });
     expect(request.system.at(-2).text).toContain('profiler-cli');
 
     const call = window.fetchMock.callHistory.lastCall(MESSAGES_API_URL);

@@ -119,7 +119,7 @@ Anthropic:
 
 - Model `claude-opus-5-5`, with `output_config.effort: 'medium'`. Thinking is adaptive, which is the default for this model.
 - Refused requests are retried on another model with the server-side fallback beta (`fallbacks: 'default'`).
-- The tool is strict, and the system prompt is cached.
+- The tool is strict. The system prompt is cached, and so is the conversation up to the last message, so that each tool round only pays in full for what the previous one added.
 
 OpenAI (Responses API):
 

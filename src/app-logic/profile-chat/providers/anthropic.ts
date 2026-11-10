@@ -101,6 +101,9 @@ export function createAnthropicProvider(
           system: _getSystemPrompt(),
           tools: [PROFILER_CLI_TOOL],
           messages: history,
+          // Caches the conversation up to the last block, so that each tool
+          // round only pays in full for what the previous one added.
+          cache_control: { type: 'ephemeral' },
           output_config: { effort: 'medium' },
           // Retries a refused request on another model instead of stopping.
           betas: ['server-side-fallback-2026-07-01'],
