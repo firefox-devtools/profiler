@@ -156,7 +156,7 @@
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest-dom": "^5.10.1",
-    "eslint-plugin-jest-formatting": "^3.1.0",
+    "eslint-plugin-jest-formatting": "^4.0.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-testing-library": "^7.16.2",
     "fake-indexeddb": "^6.2.6",

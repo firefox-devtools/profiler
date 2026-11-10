@@ -5696,10 +5696,10 @@ eslint-plugin-jest-dom@^5.10.1:
   dependencies:
     requireindex "^1.2.0"
 
-eslint-plugin-jest-formatting@^3.1.0:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-3.1.0.tgz#b26dd5a40f432b642dcc880021a771bb1c93dcd2"
-  integrity sha512-XyysraZ1JSgGbLSDxjj5HzKKh0glgWf+7CkqxbTqb7zEhW7X2WHo5SBQ8cGhnszKN+2Lj3/oevBlHNbHezoc/A==
+eslint-plugin-jest-formatting@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jest-formatting/-/eslint-plugin-jest-formatting-4.0.0.tgz#8ca2f8999a0b2782122c7579a27de0ea5cd4b06c"
+  integrity sha512-98RiPKqKZf6HLr7fzH9wcZ7By3aaW+g76kAseagXP2AT6VvIQcPEbas4+Hl/SXD4Cyzl2DDvV6Kw+SZX9EUc4A==
 
 eslint-plugin-react@^7.37.5:
   version "7.37.5"
