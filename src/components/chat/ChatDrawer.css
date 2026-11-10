@@ -116,6 +116,26 @@
   padding-inline-start: 20px;
 }
 
+.chatMarkdown table {
+  /* Wide tables scroll instead of widening the drawer, or breaking words in
+   * the middle. */
+  display: block;
+  border-collapse: collapse;
+  overflow-wrap: normal;
+  overflow-x: auto;
+}
+
+.chatMarkdown th,
+.chatMarkdown td {
+  padding: 2px 8px;
+  border: 1px solid var(--panel-border-color);
+  text-align: start;
+}
+
+.chatMarkdown th {
+  background: var(--internal-tool-background-color);
+}
+
 .chatToolCall {
   border-radius: 4px;
   background: var(--internal-tool-background-color);

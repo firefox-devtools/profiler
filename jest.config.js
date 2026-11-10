@@ -24,7 +24,8 @@ const browserEnvConfig = {
       'react-markdown|unified|remark-[^/]+|micromark[^/]*|mdast-util-[^/]+|hast-util-[^/]+|unist-util-[^/]+|vfile[^/]*|estree-util-[^/]+|' +
       'bail|ccount|character-entities[^/]*|character-reference-invalid|comma-separated-tokens|decode-named-character-reference|devlop|' +
       'html-url-attributes|is-alphabetical|is-alphanumerical|is-decimal|is-hexadecimal|is-plain-obj|longest-streak|parse-entities|' +
-      'property-information|space-separated-tokens|stringify-entities|trim-lines|trough|zwitch|@ungap/structured-clone)/)',
+      'property-information|space-separated-tokens|stringify-entities|trim-lines|trough|zwitch|@ungap/structured-clone|' +
+      'escape-string-regexp|markdown-table)/)',
   ],
 
   // Mock static assets (images, CSS, etc.)

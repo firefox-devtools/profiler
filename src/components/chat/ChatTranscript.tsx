@@ -5,6 +5,7 @@
 import * as React from 'react';
 import { Localized } from '@fluent/react';
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import classNames from 'classnames';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
@@ -32,6 +33,10 @@ const MARKDOWN_COMPONENTS = {
   ),
 };
 
+// GitHub-flavored markdown, mostly for tables, which models often use to
+// summarize profiler-cli output.
+const REMARK_PLUGINS = [remarkGfm];
+
 // Memoized, because the transcript renders again for each streamed update and
 // parsing all the finished answers again each time is slow.
 const ChatMarkdown = React.memo(function ChatMarkdown({
@@ -44,7 +49,11 @@ const ChatMarkdown = React.memo(function ChatMarkdown({
   // prompt injection in the profile could leak profile data in its URL.
   return (
     <div className="chatMarkdown">
-      <Markdown components={MARKDOWN_COMPONENTS} disallowedElements={['img']}>
+      <Markdown
+        components={MARKDOWN_COMPONENTS}
+        remarkPlugins={REMARK_PLUGINS}
+        disallowedElements={['img']}
+      >
         {text}
       </Markdown>
     </div>

@@ -451,6 +451,29 @@ describe('ChatDrawer', function () {
     expect(document.querySelector('.chatDrawer')).toMatchSnapshot();
   });
 
+  it('renders tables in the answer', async function () {
+    const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
+    mockMessagesApi([
+      {
+        content: [
+          {
+            type: 'text',
+            text: '| Function | Samples |\n| --- | --- |\n| A | 3 |',
+          },
+        ],
+        stopReason: 'end_turn',
+      },
+    ]);
+    openChat();
+    await send('Which function is hot?');
+
+    const table = await screen.findByRole('table');
+    expect(
+      within(table).getByRole('columnheader', { name: 'Samples' })
+    ).toBeInTheDocument();
+    expect(within(table).getByRole('cell', { name: '3' })).toBeInTheDocument();
+  });
+
   it("doesn't load images from the answer", async function () {
     const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
     mockMessagesApi([
