@@ -49,6 +49,10 @@ export function closeChat(): Action {
   return { type: 'CLOSE_CHAT' };
 }
 
+export function updateChatDraft(text: string): Action {
+  return { type: 'UPDATE_CHAT_DRAFT', text };
+}
+
 export function cancelChatTurn(): ThunkAction<void> {
   return () => {
     _currentTurn?.controller.abort();

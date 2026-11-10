@@ -783,6 +783,7 @@ type ChatAction =
       readonly startsNewConversation: boolean;
     }
   | { readonly type: 'RESET_CHAT' }
+  | { readonly type: 'UPDATE_CHAT_DRAFT'; readonly text: string }
   | {
       readonly type: 'CHAT_TURN_STARTED';
       readonly conversationId: number;

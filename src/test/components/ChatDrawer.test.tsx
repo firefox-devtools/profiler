@@ -533,6 +533,24 @@ describe('ChatDrawer', function () {
     expect(await screen.findByText('All done.')).toBeInTheDocument();
   });
 
+  it('keeps the draft when closed', async function () {
+    const { openChat } = setup({ apiKey: 'sk-ant-test' });
+    openChat();
+    fireEvent.change(
+      await screen.findByPlaceholderText('Ask about this profile'),
+      { target: { value: 'Why is the GC' } }
+    );
+    fireFullClick(screen.getByRole('button', { name: 'Close' }));
+    expect(
+      screen.queryByPlaceholderText('Ask about this profile')
+    ).not.toBeInTheDocument();
+
+    openChat();
+    expect(
+      await screen.findByPlaceholderText('Ask about this profile')
+    ).toHaveValue('Why is the GC');
+  });
+
   it('can be stopped', async function () {
     const { openChat, send } = setup({ apiKey: 'sk-ant-test' });
     let respond: (() => void) | null = null;

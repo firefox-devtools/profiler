@@ -34,6 +34,7 @@ export const getChatHasCredentials: Selector<boolean> = (state) =>
   getChat(state).hasCredentials;
 export const getChatConversationId: Selector<number> = (state) =>
   getChat(state).conversationId;
+export const getChatDraft: Selector<string> = (state) => getChat(state).draft;
 
 export const getIsChatTurnRunning: Selector<boolean> = (state) => {
   const status = getChatStatus(state);

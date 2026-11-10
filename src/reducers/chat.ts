@@ -35,6 +35,7 @@ function _getInitialState(): ChatState {
       getStoredProviderSettings(preset)
     ),
     conversationId: 0,
+    draft: '',
   };
 }
 
@@ -98,6 +99,8 @@ const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
         ? _startNewConversation(newState)
         : newState;
     }
+    case 'UPDATE_CHAT_DRAFT':
+      return { ...state, draft: action.text };
     case 'RESET_CHAT':
     case 'PROFILE_LOADED':
       // A conversation is about one profile, so a new one starts a new chat.

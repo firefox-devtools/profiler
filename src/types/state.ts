@@ -498,6 +498,8 @@ export type ChatState = {
   // Incremented whenever the conversation is reset, so that a turn that is
   // still running for the previous conversation can't write into the new one.
   readonly conversationId: number;
+  // The message being written, kept here so that closing the drawer keeps it.
+  readonly draft: string;
 };
 
 /**

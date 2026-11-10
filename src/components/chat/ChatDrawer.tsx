@@ -15,8 +15,10 @@ import {
   resetChat,
   saveChatProviderSettings,
   sendChatMessage,
+  updateChatDraft,
 } from 'firefox-profiler/actions/chat';
 import {
+  getChatDraft,
   getChatError,
   getChatHasCredentials,
   getChatNotice,
@@ -50,6 +52,7 @@ type StateProps = {
   readonly transcript: ChatTranscriptItem[];
   readonly streamingText: string;
   readonly isTurnRunning: boolean;
+  readonly draft: string;
 };
 
 type DispatchProps = {
@@ -59,6 +62,7 @@ type DispatchProps = {
   readonly saveChatProviderSettings: typeof saveChatProviderSettings;
   readonly sendChatMessage: typeof sendChatMessage;
   readonly cancelChatTurn: typeof cancelChatTurn;
+  readonly updateChatDraft: typeof updateChatDraft;
 };
 
 type Props = ConnectedProps<{}, StateProps, DispatchProps>;
@@ -97,10 +101,12 @@ class ChatDrawerImpl extends PureComponent<Props, State> {
       transcript,
       streamingText,
       isTurnRunning,
+      draft,
       closeChat,
       resetChat,
       forgetChatApiKey,
       cancelChatTurn,
+      updateChatDraft,
     } = this.props;
     const showSettings = !hasCredentials || this.state.isSettingsOpen;
 
@@ -172,6 +178,8 @@ class ChatDrawerImpl extends PureComponent<Props, State> {
               />
               <ChatComposer
                 isTurnRunning={isTurnRunning}
+                text={draft}
+                onTextChange={updateChatDraft}
                 onSend={this._onSend}
                 onStop={cancelChatTurn}
               />
@@ -193,6 +201,7 @@ export const ChatDrawer = explicitConnect<{}, StateProps, DispatchProps>({
     transcript: getChatTranscript(state),
     streamingText: getChatStreamingText(state),
     isTurnRunning: getIsChatTurnRunning(state),
+    draft: getChatDraft(state),
   }),
   mapDispatchToProps: {
     closeChat,
@@ -201,6 +210,7 @@ export const ChatDrawer = explicitConnect<{}, StateProps, DispatchProps>({
     saveChatProviderSettings,
     sendChatMessage,
     cancelChatTurn,
+    updateChatDraft,
   },
   component: ChatDrawerImpl,
 });

@@ -7,26 +7,32 @@ import { Localized } from '@fluent/react';
 
 type Props = {
   readonly isTurnRunning: boolean;
+  readonly text: string;
+  readonly onTextChange: (text: string) => void;
   readonly onSend: (text: string) => void;
   readonly onStop: () => void;
 };
 
-export function ChatComposer({ isTurnRunning, onSend, onStop }: Props) {
-  const [text, setText] = React.useState('');
-
+export function ChatComposer({
+  isTurnRunning,
+  text,
+  onTextChange,
+  onSend,
+  onStop,
+}: Props) {
   const send = React.useCallback(() => {
     const trimmed = text.trim();
     if (trimmed === '' || isTurnRunning) {
       return;
     }
     onSend(trimmed);
-    setText('');
-  }, [text, isTurnRunning, onSend]);
+    onTextChange('');
+  }, [text, isTurnRunning, onSend, onTextChange]);
 
   const onChange = React.useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement>) =>
-      setText(event.target.value),
-    []
+      onTextChange(event.target.value),
+    [onTextChange]
   );
 
   const onKeyDown = React.useCallback(
