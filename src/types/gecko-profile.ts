@@ -398,7 +398,8 @@ export type GeckoMetaMarkerSchema = {
   // if present, give the marker its own local track
   graphs?: Array<MarkerGraph>;
 
-  // If present, the color of markers of this type in timeline marker tracks.
+  // If present, the color of markers of this type. In the marker chart, a
+  // valid colorField value takes precedence.
   color?: GraphColor;
 
   // If present, how markers of this type are drawn in timeline marker tracks.
