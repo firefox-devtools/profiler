@@ -32,7 +32,13 @@ const MARKDOWN_COMPONENTS = {
   ),
 };
 
-function ChatMarkdown({ text }: { readonly text: string }) {
+// Memoized, because the transcript renders again for each streamed update and
+// parsing all the finished answers again each time is slow.
+const ChatMarkdown = React.memo(function ChatMarkdown({
+  text,
+}: {
+  readonly text: string;
+}) {
   // react-markdown doesn't render raw HTML unless a plugin enables it. Images
   // are dropped because loading one sends a request without a click, so a
   // prompt injection in the profile could leak profile data in its URL.
@@ -43,7 +49,7 @@ function ChatMarkdown({ text }: { readonly text: string }) {
       </Markdown>
     </div>
   );
-}
+});
 
 function ChatNotice({ notice }: { readonly notice: ChatTurnOutcome }) {
   switch (notice.type) {
