@@ -21,3 +21,30 @@ export class SymbolsNotFoundError extends Error {
     this.errors = errors;
   }
 }
+
+// Thrown when a profile's format version is newer than the most recent version
+// understood by this build. The message is deliberately neutral and only states
+// the facts. Consumers (the web app, the CLI) detect this by name and append
+// their own advice on how to update, since that advice is frontend-specific.
+export class ProfileVersionError extends Error {
+  formatName: string;
+  profileVersion: number;
+  supportedVersion: number;
+
+  constructor(
+    formatName: string,
+    profileVersion: number,
+    supportedVersion: number
+  ) {
+    super(
+      `Unable to parse a ${formatName} profile of version ${profileVersion}. ` +
+        `The most recent version understood by this build is version ${supportedVersion}.`
+    );
+    // Workaround for a babel issue when extending Errors
+    (this as any).__proto__ = ProfileVersionError.prototype;
+    this.name = 'ProfileVersionError';
+    this.formatName = formatName;
+    this.profileVersion = profileVersion;
+    this.supportedVersion = supportedVersion;
+  }
+}

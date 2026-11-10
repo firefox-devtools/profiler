@@ -11,11 +11,10 @@ import type {
   Pid,
   TabID,
   IndexIntoCategoryList,
-  IndexIntoLibs,
   PageList,
   IndexIntoSourceTable,
-  FuncTable,
-  FrameTable,
+  RawFuncTable,
+  RawFrameTable,
   SourceLocationTable,
   SourceTable,
 } from './profile';
@@ -35,6 +34,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   UrlState,
@@ -45,6 +45,7 @@ import type {
   ApiQueryError,
   TableViewOptions,
   DecodedInstruction,
+  ProfileEncodingResult,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -158,7 +159,10 @@ export type CheckedSharingOptions = {
   includeExtension: boolean;
   includePreferenceValues: boolean;
   includePrivateBrowsingData: boolean;
+  includeArgumentValues: boolean;
 };
+
+export type SharingMode = 'download' | 'upload';
 
 // This type is used when selecting tracks in the timeline. Ctrl and Meta are
 // stored in the same property to accommodate all OSes.
@@ -342,7 +346,6 @@ type ProfileAction =
     }
   | {
       readonly type: 'UPDATE_BOTTOM_BOX';
-      readonly libIndex: IndexIntoLibs | null;
       readonly sourceIndex: IndexIntoSourceTable | null;
       readonly nativeSymbols: NativeSymbolInfo[];
       readonly currentNativeSymbol: number | null;
@@ -453,8 +456,8 @@ type ReceiveProfileAction =
   | { readonly type: 'SOURCE_MAP_SYMBOLICATION_FAILED' }
   | {
       readonly type: 'BULK_SOURCE_MAP_SYMBOLICATION';
-      readonly newFuncTable: FuncTable;
-      readonly newFrameTable: FrameTable;
+      readonly newFuncTable: RawFuncTable;
+      readonly newFrameTable: RawFrameTable;
       readonly newSourceLocationTable: SourceLocationTable;
       readonly newSources: SourceTable;
       readonly newStringArray: string[];
@@ -535,6 +538,7 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_INVERT_CALLSTACK';
       readonly invertCallstack: boolean;
+      readonly selectedTab: TabSlug;
       readonly newSelectedCallNodePath: CallNodePath;
       readonly selectedThreadIndexes: Set<ThreadIndex>;
     }
@@ -557,6 +561,10 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_MARKER_SEARCH_STRING';
       readonly searchString: string;
+    }
+  | {
+      readonly type: 'CHANGE_MARKER_TABLE_SORT';
+      readonly sort: SingleColumnSortState[] | null;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
@@ -642,12 +650,14 @@ type SidebarAction = {
 type PublishAction =
   | {
       readonly type: 'UPDATE_SHARING_OPTION';
+      readonly mode: SharingMode;
       readonly slug: keyof CheckedSharingOptions;
       readonly value: boolean;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
       readonly sanitizedProfile: Profile;
+      readonly encodingPromise: Promise<ProfileEncodingResult>;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';

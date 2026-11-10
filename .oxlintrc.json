@@ -1,0 +1,540 @@
+// Oxlint configuration for the Firefox Profiler.
+//
+// All lint categories are switched off, so only the rules listed here run.
+//
+// Rules that oxlint doesn't implement natively come from ESLint plugins, loaded
+// through `jsPlugins`. eslint-plugin-react is loaded as `react-js` so that it
+// doesn't clash with oxlint's native `react` plugin. jsPlugins support is still
+// in alpha, so an oxlint upgrade may require changes here.
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "ignorePatterns": [
+    "src/profile-logic/import/proto/**",
+    "src/types/libdef/npm/**",
+    "profiler-cli/dist/**",
+    "res/**",
+    "dist/**",
+    "node-tools-dist/**",
+    "docs-user/**",
+    "coverage/**"
+  ],
+  "plugins": ["typescript", "react", "import", "jest"],
+  "categories": {
+    "correctness": "off",
+    "suspicious": "off",
+    "pedantic": "off",
+    "perf": "off",
+    "style": "off",
+    "restriction": "off",
+    "nursery": "off"
+  },
+  "env": {
+    "browser": true,
+    "es2024": true,
+    "node": true
+  },
+  "globals": {
+    "AVAILABLE_STAGING_LOCALES": "readonly"
+  },
+  "settings": {
+    "react": {
+      "version": "19.0"
+    },
+    // Used by import-js/no-unresolved.
+    "import/resolver": {
+      "alias": {
+        "map": [
+          ["firefox-profiler", "./src"],
+          ["firefox-profiler-res", "./res"]
+        ],
+        "extensions": [".js", ".ts", ".tsx", ".jpg"]
+      }
+    }
+  },
+  "options": {
+    "typeAware": true,
+    "reportUnusedDisableDirectives": "error"
+  },
+  "rules": {
+    "array-callback-return": [
+      "error",
+      {
+        "allowImplicit": false,
+        "checkForEach": false,
+        "allowVoid": false
+      }
+    ],
+    "curly": ["error", "all"],
+    "default-case": ["error", {}],
+    "eqeqeq": "error",
+    "for-direction": "error",
+    "import/named": "error",
+    "import/no-duplicates": "error",
+    "no-alert": "error",
+    "no-array-constructor": "error",
+    "no-async-promise-executor": "error",
+    "no-caller": "error",
+    "no-case-declarations": "error",
+    "no-compare-neg-zero": "error",
+    "no-cond-assign": ["error", "except-parens"],
+    "no-console": [
+      "error",
+      {
+        "allow": ["log", "warn", "error"]
+      }
+    ],
+    "no-constant-binary-expression": "error",
+    "no-constant-condition": [
+      "error",
+      {
+        "checkLoops": false
+      }
+    ],
+    "no-control-regex": "error",
+    "no-debugger": "error",
+    "no-delete-var": "error",
+    "no-dupe-else-if": "error",
+    "no-duplicate-case": "error",
+    "no-else-return": [
+      "error",
+      {
+        "allowElseIf": true
+      }
+    ],
+    "no-empty": [
+      "error",
+      {
+        "allowEmptyCatch": false
+      }
+    ],
+    "no-empty-character-class": "error",
+    "no-empty-pattern": [
+      "error",
+      {
+        "allowObjectPatternsAsParameters": false
+      }
+    ],
+    "no-empty-static-block": "error",
+    "no-eval": [
+      "error",
+      {
+        "allowIndirect": false
+      }
+    ],
+    "no-ex-assign": "error",
+    "no-extend-native": [
+      "error",
+      {
+        "exceptions": []
+      }
+    ],
+    "no-extra-bind": "error",
+    "no-extra-boolean-cast": ["error", {}],
+    "no-extra-label": "error",
+    "no-fallthrough": "error",
+    "no-global-assign": [
+      "error",
+      {
+        "exceptions": []
+      }
+    ],
+    "no-implied-eval": "error",
+    "no-invalid-regexp": ["error", {}],
+    "no-irregular-whitespace": [
+      "error",
+      {
+        "skipComments": false,
+        "skipJSXText": false,
+        "skipRegExps": false,
+        "skipStrings": true,
+        "skipTemplates": false
+      }
+    ],
+    "no-loss-of-precision": "error",
+    "no-misleading-character-class": [
+      "error",
+      {
+        "allowEscape": false
+      }
+    ],
+    "no-nested-ternary": "error",
+    "no-nonoctal-decimal-escape": "error",
+    "no-prototype-builtins": "error",
+    "no-regex-spaces": "error",
+    "no-self-assign": [
+      "error",
+      {
+        "props": true
+      }
+    ],
+    "no-self-compare": "error",
+    "no-shadow-restricted-names": [
+      "error",
+      {
+        "reportGlobalThis": false
+      }
+    ],
+    "no-sparse-arrays": "error",
+    "no-throw-literal": "error",
+    "no-unexpected-multiline": "error",
+    "no-unmodified-loop-condition": "error",
+    "no-unsafe-finally": "error",
+    "no-unsafe-optional-chaining": [
+      "error",
+      {
+        "disallowArithmeticOperators": false
+      }
+    ],
+    "no-unused-expressions": [
+      "error",
+      {
+        "allowShortCircuit": false,
+        "allowTaggedTemplates": false,
+        "allowTernary": false
+      }
+    ],
+    "no-unused-labels": "error",
+    "no-unused-private-class-members": "error",
+    // Prefix a name with an underscore to mark it as intentionally unused.
+    "no-unused-vars": [
+      "error",
+      {
+        "args": "all",
+        "argsIgnorePattern": "^_",
+        "caughtErrors": "all",
+        "caughtErrorsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "no-useless-backreference": "error",
+    "no-useless-call": "error",
+    "no-useless-catch": "error",
+    "no-useless-computed-key": [
+      "error",
+      {
+        "enforceForClassMembers": true
+      }
+    ],
+    "no-useless-concat": "error",
+    "no-useless-constructor": "error",
+    "no-useless-escape": [
+      "error",
+      {
+        "allowRegexCharacters": []
+      }
+    ],
+    "no-useless-rename": [
+      "error",
+      {
+        "ignoreDestructuring": false,
+        "ignoreImport": false,
+        "ignoreExport": false
+      }
+    ],
+    "no-useless-return": "error",
+    "no-var": "error",
+    "no-void": [
+      "error",
+      {
+        "allowAsStatement": false
+      }
+    ],
+    "no-with": "error",
+    "prefer-const": [
+      "error",
+      {
+        "destructuring": "any",
+        "ignoreReadBeforeAssign": false
+      }
+    ],
+    "prefer-promise-reject-errors": [
+      "error",
+      {
+        "allowEmptyReject": false
+      }
+    ],
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "react-js/jsx-no-bind": "error",
+    "react-js/jsx-no-leaked-render": "error",
+    "react-js/no-access-state-in-setstate": "error",
+    "react-js/no-deprecated": "error",
+    "react-js/no-typos": "error",
+    "react-js/no-unused-class-component-methods": "error",
+    "react-js/no-unused-state": "error",
+
+    // react-js/no-unused-prop-types is not enabled: it mistakes functions with
+    // destructured parameters for function components.
+    // See https://github.com/yannickcr/eslint-plugin-react/issues/1561
+
+    "react/button-has-type": "error",
+    "react/display-name": "error",
+    "react/jsx-curly-brace-presence": [
+      "error",
+      {
+        "props": "never",
+        "children": "never"
+      }
+    ],
+    "react/jsx-key": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-target-blank": "error",
+    "react/jsx-no-undef": "error",
+    "react/no-children-prop": "error",
+    "react/no-danger": "error",
+    "react/no-danger-with-children": "error",
+    "react/no-direct-mutation-state": "error",
+    "react/no-find-dom-node": "error",
+    "react/no-is-mounted": "error",
+    "react/no-redundant-should-component-update": "error",
+    "react/no-render-return-value": "error",
+    "react/no-string-refs": "error",
+    "react/no-this-in-sfc": "error",
+    "react/no-unescaped-entities": "error",
+    "react/no-unknown-property": "error",
+    "react/no-will-update-set-state": "error",
+    "react/require-render-return": "error",
+    "require-yield": "error",
+    // Allow @ts-expect-error annotations with descriptions. Don't allow
+    // @ts-ignore or @ts-nocheck: we want to be notified when the error goes
+    // away so that the annotation can be removed. @ts-check is allowed even
+    // without a description.
+    "typescript/ban-ts-comment": [
+      "error",
+      {
+        "ts-expect-error": "allow-with-description",
+        "ts-ignore": true,
+        "ts-nocheck": true,
+        "ts-check": false
+      }
+    ],
+    // Use `import type` everywhere we can.
+    "typescript/consistent-type-imports": "error",
+    "typescript/no-duplicate-enum-values": "error",
+    "typescript/no-extra-non-null-assertion": "error",
+    "typescript/no-misused-new": "error",
+    "typescript/no-namespace": "error",
+    "typescript/no-non-null-asserted-optional-chain": "error",
+    "typescript/no-this-alias": "error",
+    "typescript/no-unnecessary-type-constraint": "error",
+    "typescript/no-unsafe-declaration-merging": "error",
+    "typescript/no-unsafe-function-type": "error",
+    "typescript/no-wrapper-object-types": "error",
+    "typescript/prefer-as-const": "error",
+    "typescript/prefer-namespace-keyword": "error",
+    "typescript/triple-slash-reference": "error",
+    "use-isnan": [
+      "error",
+      {
+        "enforceForIndexOf": false,
+        "enforceForSwitchCase": true
+      }
+    ],
+    "valid-typeof": [
+      "error",
+      {
+        "requireStringLiterals": false
+      }
+    ],
+
+    // The following rules are off by default. They are listed to record why
+    // they stay off.
+
+    // Allow `as any` escape hatches.
+    "typescript/no-explicit-any": "off",
+    // The TypeScript FAQ disapproves of this rule.
+    "typescript/no-empty-object-type": "off",
+    // TypeScript imports react-jsx into .tsx files for us.
+    "react/react-in-jsx-scope": "off",
+
+    // The "no-unsafe" rules complain about using "any" freely.
+    "typescript/no-unsafe-argument": "off",
+    "typescript/no-unsafe-assignment": "off",
+    "typescript/no-unsafe-call": "off",
+    "typescript/no-unsafe-member-access": "off",
+    "typescript/no-unsafe-return": "off",
+
+    // False positives when narrowing return types, see
+    // https://github.com/typescript-eslint/typescript-eslint/issues/6951
+    // (`yarn lint-fix` can make `yarn ts` fail).
+    "typescript/no-unnecessary-type-assertion": "off",
+
+    // Consider enabling these in the future.
+    "typescript/await-thenable": "off",
+    "typescript/no-array-delete": "off",
+    "typescript/no-base-to-string": "off",
+    "typescript/no-floating-promises": "off",
+    "typescript/no-misused-promises": "off",
+    "typescript/no-redundant-type-constituents": "off",
+    "typescript/only-throw-error": "off",
+    "typescript/prefer-promise-reject-errors": "off",
+    "typescript/require-await": "off",
+    "typescript/restrict-plus-operands": "off",
+    "typescript/restrict-template-expressions": "off",
+    "typescript/unbound-method": "off"
+  },
+  "overrides": [
+    // Type-aware rules. These need type information, so they only run on
+    // TypeScript files.
+    {
+      "files": ["**/*.ts", "**/*.tsx"],
+      "rules": {
+        "typescript/consistent-return": [
+          "error",
+          {
+            "treatUndefinedAsUnspecified": false
+          }
+        ],
+        "typescript/dot-notation": [
+          "error",
+          {
+            "allowKeywords": true,
+            "allowPattern": ""
+          }
+        ],
+        "typescript/no-duplicate-type-constituents": "error",
+        "typescript/no-for-in-array": "error",
+        "typescript/no-implied-eval": "error",
+        "typescript/no-unsafe-enum-comparison": "error",
+        "typescript/no-unsafe-unary-minus": "error",
+        // Only reports an `await` whose presence or absence changes which errors
+        // a surrounding try/catch sees.
+        "typescript/return-await": ["error", "error-handling-correctness-only"]
+      }
+    },
+    // Checks for JavaScript files that TypeScript or type-aware rules provide
+    // for TypeScript files. oxlint only implements consistent-return and
+    // dot-notation as type-aware rules, so use ESLint's own implementations.
+    // For TypeScript files, tsc reports unresolved imports (TS2307).
+    {
+      "files": ["**/*.js", "**/*.mjs", "**/*.cjs"],
+      "rules": {
+        "eslint-js/consistent-return": [
+          "error",
+          {
+            "treatUndefinedAsUnspecified": false
+          }
+        ],
+        "eslint-js/dot-notation": [
+          "error",
+          {
+            "allowKeywords": true
+          }
+        ],
+        "import-js/no-unresolved": "error"
+      }
+    },
+    // For non-test files, only allow import, no require(). Test files use
+    // require() for JSON fixtures.
+    {
+      "files": ["src/**/*.ts", "src/**/*.tsx"],
+      "rules": {
+        "typescript/no-require-imports": "error"
+      }
+    },
+    {
+      "files": ["src/test/**/*", "profiler-cli/src/test/**/*"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "jest-dom/prefer-checked": "error",
+        "jest-dom/prefer-empty": "error",
+        "jest-dom/prefer-enabled-disabled": "error",
+        "jest-dom/prefer-focus": "error",
+        "jest-dom/prefer-in-document": "error",
+        "jest-dom/prefer-required": "error",
+        "jest-dom/prefer-to-have-attribute": "error",
+        "jest-dom/prefer-to-have-class": "error",
+        "jest-dom/prefer-to-have-style": "error",
+        "jest-dom/prefer-to-have-text-content": "error",
+        "jest-dom/prefer-to-have-value": "error",
+        "jest-formatting/padding-around-describe-blocks": "error",
+        "jest/expect-expect": "error",
+        "jest/no-alias-methods": "error",
+        "jest/no-commented-out-tests": "error",
+        "jest/no-conditional-expect": "error",
+        "jest/no-deprecated-functions": "error",
+        "jest/no-disabled-tests": "error",
+        "jest/no-done-callback": "error",
+        "jest/no-export": "error",
+        "jest/no-focused-tests": "error",
+        "jest/no-identical-title": "error",
+        "jest/no-interpolation-in-snapshots": "error",
+        "jest/no-jasmine-globals": "error",
+        "jest/no-mocks-import": "error",
+        "jest/no-standalone-expect": "error",
+        "jest/no-test-prefixes": "error",
+        "jest/padding-around-test-blocks": "error",
+        "jest/valid-describe-callback": "error",
+        "jest/valid-expect": "error",
+        "jest/valid-expect-in-promise": "error",
+        "react-js/jsx-no-bind": "off",
+        "testing-library/await-async-events": "error",
+        "testing-library/await-async-queries": "error",
+        "testing-library/await-async-utils": "error",
+        "testing-library/no-await-sync-events": "error",
+        "testing-library/no-await-sync-queries": "error",
+        "testing-library/no-debugging-utils": "error",
+        "testing-library/no-dom-import": "error",
+        "testing-library/no-global-regexp-flag-in-query": "error",
+        "testing-library/no-manual-cleanup": "error",
+        "testing-library/no-promise-in-fire-event": "error",
+        "testing-library/no-render-in-lifecycle": "error",
+        "testing-library/no-unnecessary-act": "error",
+        "testing-library/no-wait-for-multiple-assertions": "error",
+        "testing-library/no-wait-for-side-effects": "error",
+        "testing-library/no-wait-for-snapshot": "error",
+        "testing-library/prefer-explicit-assert": [
+          "error",
+          {
+            "includeFindQueries": false
+          }
+        ],
+        "testing-library/prefer-find-by": "error",
+        "testing-library/prefer-presence-queries": "error",
+        "testing-library/prefer-query-by-disappearance": "error",
+        "testing-library/prefer-screen-queries": "error",
+        "typescript/no-require-imports": "off",
+
+        // The following rules are off by default. They are listed to record
+        // why they stay off.
+
+        // TypeScript already checks test titles.
+        "jest/valid-title": "off",
+        // A purely stylistic rule.
+        "testing-library/render-result-naming-convention": "off",
+        // `container` and direct node access (e.g. firstChild) still have
+        // legitimate uses in our tests.
+        "testing-library/no-container": "off",
+        "testing-library/no-node-access": "off"
+      }
+    },
+    {
+      "files": ["__mocks__/**/*"],
+      "env": {
+        "jest": true
+      }
+    }
+  ],
+  "jsPlugins": [
+    "eslint-plugin-testing-library",
+    "eslint-plugin-jest-dom",
+    "eslint-plugin-jest-formatting",
+    {
+      "name": "react-js",
+      "specifier": "eslint-plugin-react"
+    },
+    {
+      "name": "import-js",
+      "specifier": "eslint-plugin-import"
+    },
+    {
+      "name": "eslint-js",
+      "specifier": "./scripts/lib/oxlint-eslint-core-rules.mjs"
+    }
+  ]
+}

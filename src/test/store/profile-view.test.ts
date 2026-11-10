@@ -19,15 +19,16 @@ import {
   getThreadWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import {
+  finishRawSamplesTableBuilder,
   getEmptyThread,
   getEmptyProfile,
-  getEmptySamplesTableWithEventDelay,
+  getRawSamplesTableBuilderWithEventDelay,
 } from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
-import { formatTree } from '../fixtures/utils';
+import { formatTree, addSourceToTable } from '../fixtures/utils';
 
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
@@ -53,12 +54,13 @@ import { checkBit } from '../../utils/bitset';
 import type {
   TrackReference,
   Milliseconds,
-  RawThread,
   StartEndRange,
   Marker,
   MixedObject,
   CallNodePath,
+  RawThread,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 describe('call node paths on implementation filter change', function () {
   const {
@@ -1006,6 +1008,36 @@ describe('actions/ProfileView', function () {
       dispatch(ProfileView.changeCallTreeSearchString('sc1,rs4'));
       expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1', 'fn4']);
     });
+
+    it('matches a func by its source-mapped original filename', function () {
+      const {
+        profile,
+        stringTable,
+        funcNamesDictPerThread: [{ fn1 }],
+        funcNamesPerThread: [funcNames],
+      } = getProfileFromTextSamples(`
+        fn1[file:bundle.js]  fn2[file:bundle.js]
+      `);
+      const { funcTable, sources, sourceLocationTable } = profile.shared;
+      const originalSourceIndex = addSourceToTable(
+        sources,
+        stringTable.indexForString(
+          '../../node_modules/react-dom/cjs/react-dom-client.production.js'
+        )
+      );
+      sourceLocationTable.source.push(originalSourceIndex);
+      sourceLocationTable.line.push(1);
+      sourceLocationTable.column.push(1);
+      funcTable.originalLocation[fn1] = sourceLocationTable.length++;
+      funcTable.flags[fn1] |= FuncFlag.HasOriginalLocation;
+
+      const { dispatch, getState } = storeWithProfile(profile);
+      dispatch(ProfileView.changeCallTreeSearchString('react-dom'));
+      expect(getMatchingFuncNames(getState, funcNames)).toEqual(['fn1']);
+      expect(
+        formatTree(selectedThreadSelectors.getCallTree(getState()))
+      ).toEqual(['- fn1 (total: 1, self: 1)']);
+    });
   });
 
   /**
@@ -1713,6 +1745,30 @@ describe('actions/ProfileView', function () {
       });
       expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
     });
+
+    it('does not apply call tree inversion to the stack chart', function () {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+      `);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      dispatch(App.changeSelectedTab('calltree'));
+      dispatch(ProfileView.changeInvertCallstack(true));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+      expect(
+        selectedThreadSelectors.getCallNodeInfo(getState()).isInverted()
+      ).toBe(true);
+
+      dispatch(App.changeSelectedTab('stack-chart'));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+      expect(
+        selectedThreadSelectors.getCallNodeInfo(getState()).isInverted()
+      ).toBe(false);
+
+      dispatch(App.changeSelectedTab('calltree'));
+      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+    });
   });
 
   describe('changeIncludeIdleSamples', function () {
@@ -1943,6 +1999,26 @@ describe('actions/ProfileView', function () {
       });
     });
 
+    it.each([0, 2])(
+      'pops committed ranges from index %s without setting a preview selection',
+      function (firstPoppedFilterIndex) {
+        const { getState, dispatch } = setupStore();
+        dispatch(
+          ProfileView.updatePreviewSelection({
+            isModifying: false,
+            selectionStart: 1,
+            selectionEnd: 9,
+          })
+        );
+
+        dispatch(ProfileView.popCommittedRanges(firstPoppedFilterIndex, false));
+        expect(
+          UrlStateSelectors.getAllCommittedRanges(getState())
+        ).toHaveLength(firstPoppedFilterIndex);
+        expect(ProfileViewSelectors.getPreviewSelection(getState())).toBe(null);
+      }
+    );
+
     it('unsets the selection when popping the current committed range', function () {
       const { getState, dispatch } = setupStore();
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
@@ -2042,22 +2118,26 @@ describe('actions/ProfileView', function () {
     });
   });
 
-  describe('getRangeFilteredScreenshotsById', function () {
+  describe('getRangeFilteredScreenshotsByName', function () {
     it('can extract some screenshot markers', function () {
       const profile = getScreenshotTrackProfile();
       const { getState } = storeWithProfile(profile);
-      const screenshotMarkersById =
-        selectedThreadSelectors.getRangeFilteredScreenshotsById(getState());
-      const keys = [...screenshotMarkersById.keys()];
+      const screenshotMarkersByName =
+        selectedThreadSelectors.getRangeFilteredScreenshotsByName(getState());
+      const keys = [...screenshotMarkersByName.keys()];
       expect(keys.length).toEqual(3);
 
-      const screenshots = screenshotMarkersById.get('0');
+      const screenshots = screenshotMarkersByName.get('CompositorScreenshot 0');
       expect(screenshots?.length).toEqual(5);
       for (const screenshot of screenshots ?? []) {
-        expect(screenshot.name).toEqual('CompositorScreenshot');
+        expect(screenshot.name).toEqual('CompositorScreenshot 0');
       }
-      expect(screenshotMarkersById.get('1')?.length).toEqual(6);
-      expect(screenshotMarkersById.get('2')?.length).toEqual(10);
+      expect(
+        screenshotMarkersByName.get('CompositorScreenshot 1')?.length
+      ).toEqual(5);
+      expect(
+        screenshotMarkersByName.get('CompositorScreenshot 2')?.length
+      ).toEqual(10);
     });
 
     it('filters screenshots within a range selection', function () {
@@ -2065,15 +2145,15 @@ describe('actions/ProfileView', function () {
       const [{ markers }] = profile.threads;
       const { dispatch, getState } = storeWithProfile(profile);
 
-      // Double check that there are 21 markers in the test data, and commit a
+      // Double check that there are 38 raw markers in the test data, and commit a
       // subsection of that range.
-      expect(markers.length).toBe(21);
+      expect(markers.length).toBe(38);
       dispatch(ProfileView.commitRange(3.1, 7.5));
 
       // Get out the markers.
-      const screenshotMarkersById =
-        selectedThreadSelectors.getRangeFilteredScreenshotsById(getState());
-      const screenshots = screenshotMarkersById.get('2');
+      const screenshotMarkersByName =
+        selectedThreadSelectors.getRangeFilteredScreenshotsByName(getState());
+      const screenshots = screenshotMarkersByName.get('CompositorScreenshot 2');
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }
@@ -2385,9 +2465,13 @@ describe('snapshots of selectors/profile', function () {
 
   it('matches the last stored run of selectedThreadSelector.getFlameGraphTiming', function () {
     const { getState } = setupStore();
-    expect(
-      selectedThreadSelectors.getFlameGraphTiming(getState())
-    ).toMatchSnapshot();
+    const timing = selectedThreadSelectors.getFlameGraphTiming(getState());
+    // Build a plain shape with the flame graph timing contents, so that the
+    // snapshot doesn't contain the class name / class fields.
+    const plainTiming = {
+      rows: timing.getAllRowsForTesting(),
+    };
+    expect(plainTiming).toMatchSnapshot();
   });
 
   it('matches the last stored run of selectedThreadSelector.getFriendlyThreadName', function () {
@@ -2476,7 +2560,7 @@ describe('changeSelectedCallNode', function () {
     );
 
     dispatch(App.changeSelectedTab('flame-graph'));
-    // In the flame graph, everything should still be non-inverted.
+    // In the flame graph, the invert state is independent and defaults to false.
     expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
     // The original non-inverted selected call node should be selected.
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
@@ -2589,6 +2673,7 @@ describe('getTimingsForSidebar', () => {
       };
       expect(timings).toEqual({
         forPath: expectedTiming,
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2634,6 +2719,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2680,6 +2766,7 @@ describe('getTimingsForSidebar', () => {
 
       expect(timings).toEqual({
         forPath: expectedTiming,
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2758,6 +2845,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2800,6 +2888,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2831,6 +2920,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2873,6 +2963,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: expectedTiming,
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2904,6 +2995,7 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: { selfTime: expectedTiming, totalTime: expectedTiming },
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -2950,15 +3042,11 @@ describe('getTimingsForSidebar', () => {
       };
       expect(timings).toEqual({
         forPath: {
-          selfTime: {
-            // Inverted trees have an empty breakdown for the selftime because
-            // it's always the same values as for totaltime, or 0. For a root
-            // node, the value is non-0 though.
-            ...EMPTY_TIMING,
-            value: 3,
-          },
+          // For inverted root nodes, selfTime === totalTime.
+          selfTime: expectedTiming,
           totalTime: expectedTiming,
         },
+        isInvertedRoot: true,
         rootTime: 5,
       });
     });
@@ -2986,6 +3074,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -2997,24 +3086,27 @@ describe('getTimingsForSidebar', () => {
       } = setupForInvertedTree();
 
       // Select the function as a root node
+      const expectedRootTiming = {
+        value: 1,
+        breakdownByCategory: withSingleSubcategory([
+          0,
+          0,
+          1, // Layout
+          0,
+          0,
+          0,
+          0,
+          0,
+        ]),
+      };
       let timings = getTimingsForPath([H]);
       expect(timings).toEqual({
         forPath: {
-          selfTime: { ...EMPTY_TIMING, value: 1 },
-          totalTime: {
-            value: 1,
-            breakdownByCategory: withSingleSubcategory([
-              0,
-              0,
-              1, // Layout
-              0,
-              0,
-              0,
-              0,
-              0,
-            ]),
-          },
+          // For inverted root nodes, selfTime === totalTime.
+          selfTime: expectedRootTiming,
+          totalTime: expectedRootTiming,
         },
+        isInvertedRoot: true,
         rootTime: 5,
       });
 
@@ -3037,6 +3129,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -3064,6 +3157,7 @@ describe('getTimingsForSidebar', () => {
             ]),
           },
         },
+        isInvertedRoot: false,
         rootTime: 5,
       });
     });
@@ -3149,15 +3243,11 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: {
-            selfTime: {
-              // selftime breakdowns are always empty for inverted trees because
-              // they're the same than the total time.
-              ...EMPTY_TIMING,
-              // But root nodes have self time value of course!
-              value: 1,
-            },
+            // For inverted root nodes, selfTime === totalTime.
+            selfTime: expectedTiming,
             totalTime: expectedTiming,
           },
+          isInvertedRoot: true,
           rootTime: 4,
         });
       });
@@ -3189,15 +3279,11 @@ describe('getTimingsForSidebar', () => {
         };
         expect(timings).toEqual({
           forPath: {
-            selfTime: {
-              // selftime breakdowns are always empty for inverted trees because
-              // they're the same than the total time.
-              ...EMPTY_TIMING,
-              // But root nodes have a selftime value
-              value: 1,
-            },
+            // For inverted root nodes, selfTime === totalTime.
+            selfTime: expectedTiming,
             totalTime: expectedTiming,
           },
+          isInvertedRoot: true,
           rootTime: 4,
         });
       });
@@ -3227,6 +3313,7 @@ describe('getTimingsForSidebar', () => {
               ]),
             },
           },
+          isInvertedRoot: false,
           rootTime: 4,
         });
       });
@@ -3820,7 +3907,7 @@ describe('getProcessedEventDelays', function () {
     const profile = getEmptyProfile();
 
     // Create event delay values.
-    const samples = getEmptySamplesTableWithEventDelay();
+    const samples = getRawSamplesTableBuilderWithEventDelay();
     if (eventDelay) {
       samples.eventDelay = eventDelay;
     } else {
@@ -3838,7 +3925,9 @@ describe('getProcessedEventDelays', function () {
       .fill(0)
       .map((_, i) => i);
     samples.stack = Array(samples.length).fill(null);
-    profile.threads.push(getEmptyThread({ samples }));
+    profile.threads.push(
+      getEmptyThread({ samples: finishRawSamplesTableBuilder(samples) })
+    );
 
     const { dispatch, getState } = storeWithProfile(profile);
 

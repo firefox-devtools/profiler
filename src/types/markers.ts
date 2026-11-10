@@ -80,10 +80,20 @@ export type MarkerFormatType =
   // use it for time information.
   // "Label: 52.23, 0.0054, 123,456.78"
   | 'decimal'
+  // An integer displayed in hexadecimal with a "0x" prefix, e.g. for bit flags.
+  // "Label: 0xff"
+  | 'hexadecimal'
   | 'pid'
   | 'tid'
   | 'list'
-  | { type: 'table'; columns: TableColumnFormat[] };
+  // The size of a window in pixels, as a { width, height } object.
+  // "Label: 1280px × 1000px"
+  | 'screenshot-size'
+  | { type: 'table'; columns: TableColumnFormat[] }
+  // An image data URL, stored as an index into the profile's string table.
+  // It is rendered at the aspect ratio of the 'screenshot-size' field named by
+  // `sizeFieldForAspectRatio`.
+  | { type: 'screenshot-data-url'; sizeFieldForAspectRatio: string };
 
 type TableColumnFormat = {
   // type for formatting, default is string
@@ -113,6 +123,10 @@ export type MarkerDisplayLocation =
   | 'timeline-ipc'
   // This adds markers to the FileIO timeline area in the header.
   | 'timeline-fileio'
+  // This adds markers to the Network track.
+  | 'timeline-network'
+  // This adds markers to the Screenshots track.
+  | 'timeline-screenshots'
   // TODO - This is not supported yet.
   | 'stack-chart';
 
@@ -122,6 +136,12 @@ export type MarkerGraph = {
   type: MarkerGraphType;
   color?: GraphColor;
 };
+
+export type MarkerSchemaPIICategory =
+  | 'url'
+  | 'extension-id'
+  | 'preference-value'
+  | 'private-browsing';
 
 export type MarkerSchemaField = {
   // The property key of the marker data property that carries the field value.
@@ -139,6 +159,8 @@ export type MarkerSchemaField = {
   // of fields in the tooltip or in the sidebar. Such fields can still be
   // used inside labels and their values are matched when searching.
   hidden?: boolean;
+
+  containsPII?: MarkerSchemaPIICategory[];
 };
 
 export type MarkerSchema = {
@@ -551,6 +573,15 @@ export type NetworkPayload = {
   // Used to show the HTTP response status code
   responseStatus?: number;
 
+  // The `Sec-Purpose` request header, only present for prefetches.
+  // It's always absent in Firefox < 155.
+  secPurpose?: string;
+
+  // Matches PerformanceNavigationTiming's deliveryType. Only present when the
+  // navigation was served from a prefetch, as "navigational-prefetch".
+  // It's always absent in Firefox < 155.
+  deliveryType?: string;
+
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
   // `src/profile-logic/marker-data.js` for more information.
@@ -619,7 +650,16 @@ export type UserTimingMarkerPayload = {
 
 export type TextMarkerPayload = {
   type: 'Text';
+  // A string table index in newer profiles, the text itself in older ones.
+  name: string | IndexIntoStringTable;
+  cause?: CauseBacktrace;
+  innerWindowID?: number;
+};
+
+export type ExtensionTextMarkerPayload = {
+  type: 'ExtensionText';
   name: string;
+  extensionId?: string;
   cause?: CauseBacktrace;
   innerWindowID?: number;
 };
@@ -653,7 +693,8 @@ export type LogMarkerPayload =
       type: 'Log';
       // String table index resolving to "Error", "Warning", "Info", "Debug", or "Verbose".
       level: number;
-      message: string;
+      // A string table index in newer profiles, the message itself in older ones.
+      message: string | IndexIntoStringTable;
       color?: string;
     };
 
@@ -684,30 +725,28 @@ type VsyncTimestampPayload = {
   type: 'VsyncTimestamp';
 };
 
-export type ScreenshotPayload =
-  | {
-      type: 'CompositorScreenshot';
-      // This field represents the data url of the image. It is saved in the string table.
-      url: IndexIntoStringTable;
-      // A memory address that can uniquely identify a window. It has no meaning other than
-      // a way to identify a window.
-      windowID: string;
-      // The original dimensions of the window that was captured. The actual image that is
-      // stored in the string table will be scaled down from the original size.
-      windowWidth: number;
-      windowHeight: number;
-    }
-  // Markers that represent the closing of a window (name === 'CompositorScreenshotWindowDestroyed')
-  // only have a windowID data.
-  | {
-      type: 'CompositorScreenshot';
-      // A memory address that can uniquely identify a window. It has no meaning other than
-      // a way to identify a window.
-      windowID: string;
-      // Having the property present but void makes it easier to deal with Flow in
-      // our flow version.
-      url: void;
-    };
+export type ScreenshotPayload = {
+  type: 'CompositorScreenshot';
+  // A value that can uniquely identify a window. It has no meaning other than
+  // a way to identify a window.
+  windowID: string;
+  // This field represents the data url of the image. It is saved in the string table.
+  // The marker that only closes a window's last screenshot doesn't have one.
+  url?: IndexIntoStringTable;
+  // The original dimensions of the window that was captured. The actual image that is
+  // stored in the string table will be scaled down from the original size.
+  windowSize?: { width: number; height: number };
+};
+
+export type ScreenshotPayload_Gecko = {
+  type: 'CompositorScreenshot';
+  windowID: number | string;
+  url?: IndexIntoStringTable;
+  // Gecko writes the window dimensions as two separate fields.
+  // Profile processing folds them into a single `windowSize` field.
+  windowWidth?: number;
+  windowHeight?: number;
+};
 
 export type StyleMarkerPayload = {
   type: 'Styles';
@@ -848,6 +887,7 @@ export type MarkerPayload =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | ExtensionTextMarkerPayload
   | LogMarkerPayload
   | PaintProfilerMarkerTracing
   | CcMarkerTracing
@@ -880,7 +920,7 @@ export type MarkerPayload_Gecko =
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
   | VsyncTimestampPayload
-  | ScreenshotPayload
+  | ScreenshotPayload_Gecko
   | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload

@@ -1,12 +1,13 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-import type { FuncTable, FrameTable, Profile } from 'firefox-profiler/types';
+import type { FuncTable, RawFrameTable, Profile } from 'firefox-profiler/types';
 
 import {
   getEmptyThread,
   getEmptyProfile,
-  getEmptyRawStackTable,
+  getRawStackTableBuilder,
+  finishRawStackTableBuilder,
 } from '../../../profile-logic/data-structures';
 import { StringTable } from '../../../utils/string-table';
 
@@ -42,14 +43,13 @@ export default function getProfile(): Profile {
 
   // Be explicit about table creation so flow errors are really readable.
   const funcTable: FuncTable = {
-    name: funcNames,
-    isJS: Array(funcNames.length).fill(false),
-    resource: Array(funcNames.length).fill(-1),
-    relevantForJS: Array(funcNames.length).fill(false),
-    source: Array(funcNames.length).fill(null),
-    lineNumber: Array(funcNames.length).fill(null),
-    columnNumber: Array(funcNames.length).fill(null),
-    originalLocation: Array(funcNames.length).fill(null),
+    flags: new Uint8Array(funcNames.length),
+    name: new Int32Array(funcNames),
+    resource: new Int32Array(funcNames.length),
+    source: new Int32Array(funcNames.length),
+    lineNumber: new Int32Array(funcNames.length),
+    columnNumber: new Int32Array(funcNames.length),
+    originalLocation: new Int32Array(funcNames.length),
     length: funcNames.length,
   };
 
@@ -73,21 +73,22 @@ export default function getProfile(): Profile {
     funcFFrame,
   ] = frameFuncs.map((_, i) => i);
 
-  const frameTable: FrameTable = {
+  const frameTable: RawFrameTable = {
+    flags: Array(frameFuncs.length).fill(0),
     func: frameFuncs.map((stringIndex) => funcTable.name.indexOf(stringIndex)),
-    address: Array(frameFuncs.length).fill(-1),
-    inlineDepth: Array(frameFuncs.length).fill(0),
-    nativeSymbol: Array(frameFuncs.length).fill(null),
-    category: Array(frameFuncs.length).fill(null),
-    subcategory: Array(frameFuncs.length).fill(null),
-    innerWindowID: Array(frameFuncs.length).fill(null),
-    line: Array(frameFuncs.length).fill(null),
-    column: Array(frameFuncs.length).fill(null),
-    originalLocation: Array(frameFuncs.length).fill(null),
+    address: Array(frameFuncs.length).fill(0),
+    lib: Array(frameFuncs.length).fill(0),
+    nativeSymbol: Array(frameFuncs.length).fill(0),
+    category: Array(frameFuncs.length).fill(0),
+    subcategory: Array(frameFuncs.length).fill(0),
+    innerWindowID: Array(frameFuncs.length).fill(0),
+    line: Array(frameFuncs.length).fill(0),
+    column: Array(frameFuncs.length).fill(0),
+    originalLocation: Array(frameFuncs.length).fill(0),
     length: frameFuncs.length,
   };
 
-  const stackTable = getEmptyRawStackTable();
+  const stackTable = getRawStackTableBuilder();
 
   // Provide a utility function for readability.
   function addToStackTable(frame: any, prefix: any) {
@@ -119,7 +120,12 @@ export default function getProfile(): Profile {
     length: 2,
   };
 
-  profile.shared = { ...profile.shared, stackTable, funcTable, frameTable };
+  profile.shared = {
+    ...profile.shared,
+    stackTable: finishRawStackTableBuilder(stackTable),
+    funcTable,
+    frameTable,
+  };
 
   profile.threads.push(thread, { ...thread }, { ...thread });
 

@@ -16,6 +16,31 @@ Array [
     "http://example.com",
   ],
   Array [
+    "url",
+    "https://example.com/path?query=1",
+    <a
+      className="marker-link-value"
+      href="https://example.com/path?query=1"
+      rel="noreferrer"
+      target="_blank"
+    >
+      example.com/path?query=1
+    </a>,
+    "https://example.com/path?query=1",
+  ],
+  Array [
+    "url",
+    "loaded https://example.com successfully",
+    "loaded https://example.com successfully",
+    "loaded https://example.com successfully",
+  ],
+  Array [
+    "url",
+    "https://example.com then some more text",
+    "https://example.com then some more text",
+    "https://example.com then some more text",
+  ],
+  Array [
     "file-path",
     "/Users/me/gecko",
     "/Users/me/gecko",
@@ -252,6 +277,33 @@ Array [
       </li>
     </ul>,
     "a, b",
+  ],
+  Array [
+    "screenshot-size",
+    Object {
+      "height": 1000,
+      "width": 1280,
+    },
+    "1280px × 1000px",
+    "1280px × 1000px",
+  ],
+  Array [
+    Object {
+      "sizeFieldForAspectRatio": "windowSize",
+      "type": "screenshot-data-url",
+    },
+    0,
+    <img
+      className="tooltipScreenshotImg"
+      src="data:image/jpeg;base64,AAAA"
+      style={
+        Object {
+          "maxHeight": 350,
+          "maxWidth": 350,
+        }
+      }
+    />,
+    "(screenshot)",
   ],
 ]
 `;

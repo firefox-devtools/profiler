@@ -12,6 +12,7 @@ import type {
   TrackReference,
   TimelineType,
   CheckedSharingOptions,
+  SharingMode,
   LastNonShiftClickInformation,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -21,7 +22,6 @@ import type {
   ThreadIndex,
   Pid,
   TabID,
-  IndexIntoLibs,
   IndexIntoSourceTable,
 } from './profile';
 
@@ -36,6 +36,7 @@ import type {
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
+import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
@@ -216,11 +217,19 @@ export type UploadState = {
   generation: number;
 };
 
+export type ProfileEncodingResult =
+  | { type: 'SUCCESS'; profileData: Blob }
+  | { type: 'ERROR'; error: Error };
+
 export type SanitizedProfileEncodingState =
   | {
       phase: 'INITIAL';
     }
-  | { phase: 'ENCODING'; sanitizedProfile: Profile }
+  | {
+      phase: 'ENCODING';
+      sanitizedProfile: Profile;
+      encodingPromise: Promise<ProfileEncodingResult>;
+    }
   | {
       phase: 'DONE';
       sanitizedProfile: Profile;
@@ -229,7 +238,7 @@ export type SanitizedProfileEncodingState =
   | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
 
 export type PublishState = {
-  readonly checkedSharingOptions: CheckedSharingOptions;
+  readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
@@ -250,13 +259,6 @@ export type SourceViewState = {
   scrollGeneration: number;
   // Optional line number to scroll to in the source view.
   scrollToLineNumber?: number;
-  // Non-null if this source file was opened for a function from native code.
-  // In theory, multiple different libraries can have source files with the same
-  // path but different content.
-  // Null if the source file is not for native code or if the lib is not known,
-  // for example if the source view was opened via the URL (the source URL param
-  // currently discards the libIndex).
-  libIndex: IndexIntoLibs | null;
   // Index into source table. Contains information (filename and uuid) about the
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;
@@ -359,7 +361,8 @@ export type ProfileSpecificUrlState = {
   selectedThreads: Set<ThreadIndex> | null;
   implementation: ImplementationFilter;
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy;
-  invertCallstack: boolean;
+  invertCallTree: boolean;
+  invertFlameGraph: boolean;
   includeIdleSamples: boolean;
   showUserTimings: boolean;
   stackChartSameWidths: boolean;
@@ -383,6 +386,7 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  markerTableSort: SingleColumnSortState[] | null;
 };
 
 export type UrlState = {

@@ -7,10 +7,12 @@ import {
   serializeProfileToJsonString,
 } from '../../profile-logic/process-profile';
 import { upgradeGeckoProfileToCurrentVersion } from '../../profile-logic/gecko-profile-versioning';
+import { attemptToUpgradeProcessedProfileThroughMutation } from '../../profile-logic/processed-profile-versioning';
 import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../../app-logic/constants';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 
 /* eslint-disable jest/expect-expect */
 // testProfileUpgrading is an assertion, although eslint doesn't realize it. Disable
@@ -71,6 +73,30 @@ describe('upgrading gecko profiles', function () {
     //  - upgrading tracing markers without interval information
     testProfileUpgrading(require('../fixtures/upgrades/gecko-2.json'));
   });
+
+  it('handles a counter with no collected data', function () {
+    // The version 18 upgrader turns a counter whose sample_groups object has no
+    // samples into one with an empty sample_groups array. The version 29
+    // upgrader must not crash when unwrapping that empty array.
+    const profile: any = {
+      meta: { version: 17 },
+      processes: [],
+      threads: [],
+      counters: [
+        {
+          name: 'power',
+          category: 'power',
+          description: 'Power counter',
+          sample_groups: { id: 0 },
+        },
+      ],
+    };
+    upgradeGeckoProfileToCurrentVersion(profile);
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
+    const [counter] = profile.counters;
+    expect(counter.sample_groups).toBe(undefined);
+    expect(counter.samples.data).toEqual([]);
+  });
 });
 
 describe('upgrading processed profiles', function () {
@@ -109,6 +135,142 @@ describe('upgrading processed profiles', function () {
     await testProfileUpgrading(
       require('../fixtures/upgrades/processed-3.json')
     );
+  });
+
+  it('adds PII categories and structures extension markers', function () {
+    const profile = getProfileWithMarkers([
+      [
+        'ExtensionParent',
+        0,
+        1,
+        {
+          type: 'Text',
+          name: 'parent@example.com, api_call: tabs.query',
+        },
+      ],
+      [
+        'ExtensionChild',
+        1,
+        2,
+        {
+          type: 'Text',
+          name: 'child@example.com, api_event: runtime.onMessage',
+        },
+      ],
+      [
+        'Extension Suspend',
+        2,
+        3,
+        {
+          type: 'Text',
+          name: 'onBeforeRequest https://example.com by addon@example.com (chanId: 42)',
+        },
+      ],
+    ]);
+    profile.meta.preprocessedProfileVersion = 71;
+    profile.meta.markerSchema = [
+      { name: 'Network', display: [], fields: [] },
+      {
+        name: 'Text',
+        display: [],
+        fields: [{ key: 'name', format: 'unique-string' }],
+      },
+      {
+        name: 'PreferenceRead',
+        display: [],
+        fields: [{ key: 'prefValue', format: 'string' }],
+      },
+    ];
+
+    attemptToUpgradeProcessedProfileThroughMutation(profile, {});
+
+    expect(profile.meta.markerSchema).toEqual([
+      {
+        name: 'Network',
+        display: [],
+        fields: [
+          {
+            key: 'URI',
+            format: 'string',
+            hidden: true,
+            containsPII: ['url'],
+          },
+          {
+            key: 'RedirectURI',
+            format: 'string',
+            hidden: true,
+            containsPII: ['url'],
+          },
+          {
+            key: 'isPrivateBrowsing',
+            format: 'string',
+            hidden: true,
+            containsPII: ['private-browsing'],
+          },
+        ],
+      },
+      {
+        name: 'Text',
+        display: [],
+        fields: [
+          {
+            key: 'name',
+            format: 'unique-string',
+            containsPII: ['url'],
+          },
+        ],
+      },
+      {
+        name: 'PreferenceRead',
+        display: [],
+        fields: [
+          {
+            key: 'prefValue',
+            format: 'string',
+            containsPII: ['preference-value'],
+          },
+        ],
+      },
+      {
+        name: 'ExtensionText',
+        tableLabel:
+          "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+        chartLabel:
+          "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'extensionId',
+            label: 'Extension ID',
+            format: 'string',
+            containsPII: ['extension-id'],
+          },
+          {
+            key: 'name',
+            label: 'Details',
+            format: 'string',
+            containsPII: ['url'],
+          },
+        ],
+      },
+    ]);
+    expect(profile.threads[0].markers.data).toEqual([
+      {
+        type: 'ExtensionText',
+        name: 'api_call: tabs.query',
+        extensionId: 'parent@example.com',
+      },
+      {
+        type: 'ExtensionText',
+        name: 'api_event: runtime.onMessage',
+        extensionId: 'child@example.com',
+      },
+      {
+        type: 'ExtensionText',
+        name: 'onBeforeRequest https://example.com',
+        extensionId: 'addon@example.com (chanId: 42)',
+      },
+    ]);
   });
 });
 

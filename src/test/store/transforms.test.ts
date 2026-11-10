@@ -2582,13 +2582,16 @@ describe('expanded and selected CallNodePaths on inverted trees', function () {
         type: 'focus-subtree',
         callNodePath: [Z, Y],
         implementation: 'combined',
-        inverted: false,
+        inverted: true,
       })
     );
 
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [Y, X, B]
     );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).not.toBeNull();
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -2599,22 +2602,24 @@ describe('expanded and selected CallNodePaths on inverted trees', function () {
     );
   });
 
-  it('can update call node references for merging a call node', function () {
+  it('can update call node references for merging a function', function () {
     const { dispatch, getState } = storeWithProfile(profile);
     // This opens expands the call nodes up to this point.
     dispatch(changeInvertCallstack(true));
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
     dispatch(
       addTransformToStack(threadIndex, {
-        type: 'merge-call-node',
-        callNodePath: [Z, Y],
-        implementation: 'combined',
+        type: 'merge-function',
+        funcIndex: Y,
       })
     );
 
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       [Z, X, B]
     );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+    ).not.toBeNull();
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [

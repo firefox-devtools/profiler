@@ -5,12 +5,22 @@
 import type {
   Profile,
   RawThread,
-  RawStackTable,
   IndexIntoStackTable,
   MixedObject,
 } from 'firefox-profiler/types';
+import { FrameFlag } from 'firefox-profiler/types';
 
-import { getEmptyProfile, getEmptyThread } from '../data-structures';
+import {
+  finishRawSamplesTableBuilder,
+  finishRawMarkerTableBuilder,
+  getEmptyProfile,
+  getEmptyThread,
+  getRawSamplesTableBuilderWithEventDelay,
+  getRawMarkerTableBuilderFromExisting,
+  type RawMarkerTableBuilder,
+  type RawSamplesTableBuilder,
+  type RawStackTableBuilder,
+} from '../data-structures';
 import type { StringTable } from '../../utils/string-table';
 import { ensureExists, coerce } from '../../utils/types';
 import {
@@ -21,6 +31,10 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import { getTimeRangeForThread } from '../profile-data';
+import {
+  compositorScreenshotMarkerSchema,
+  convertScreenshotMarkersToStartEnd,
+} from '../process-screenshot-markers';
 import { GlobalDataCollector } from '../global-data-collector';
 
 // Chrome Tracing Event Spec:
@@ -39,6 +53,7 @@ export type TracingEventUnion =
   | ThreadSortIndexEvent
   | ScreenshotEvent
   | FallbackEndEvent
+  | ScriptCatchupEvent
   | TracingStartedInBrowserEvent;
 
 type TracingEvent<Event> = {
@@ -180,6 +195,27 @@ type TracingStartedInBrowserEvent = TracingEvent<{
   ph: 'I';
 }>;
 
+// Emitted for every parsed script when a trace is recorded with the
+// "disabled-by-default-devtools.v8-source-rundown" category (the DevTools
+// Performance panel enables it by default). This is the only place a Chrome
+// trace exposes the source map URL for a script. The CPU profile callFrames
+// don't carry it (for now?).
+type ScriptCatchupEvent = TracingEvent<{
+  name: 'ScriptCatchup';
+  args: {
+    data: {
+      executionContextId: number;
+      hasSourceUrl: boolean;
+      isModule: boolean;
+      isolate: string;
+      scriptId: number;
+      url?: string;
+      // The source map URL as declared by the script, often relative to `url`.
+      sourceMapUrl?: string;
+    };
+  };
+}>;
+
 function wrapCpuProfileInEvent(cpuProfile: CpuProfileData): CpuProfileEvent {
   return {
     name: 'CpuProfile',
@@ -267,6 +303,8 @@ export function attemptToConvertChromeProfile(
 
 type ThreadInfo = {
   thread: RawThread;
+  samples: RawSamplesTableBuilder;
+  markers: RawMarkerTableBuilder;
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>;
   lastSeenTime: number;
   lastSampledTime: number;
@@ -313,7 +351,8 @@ function getThreadInfo(
   if (cachedThreadInfo) {
     return cachedThreadInfo;
   }
-  const thread = getEmptyThread();
+  const samples = getRawSamplesTableBuilderWithEventDelay();
+  const thread = getEmptyThread({ samples });
   thread.pid = `${chunk.pid}`;
   // It looks like the TID information in Chrome's data isn't the system's TID
   // but some internal values only unique for a pid. Therefore let's generate a
@@ -396,8 +435,12 @@ function getThreadInfo(
   const nodeIdToStackId = new Map<number | void, IndexIntoStackTable | null>();
   nodeIdToStackId.set(undefined, null);
 
+  const markers = getRawMarkerTableBuilderFromExisting(thread.markers);
+
   const threadInfo: ThreadInfo = {
     thread,
+    samples,
+    markers,
     nodeIdToStackId,
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
@@ -501,7 +544,7 @@ async function processTracingEvents(
   const stringTable = globalDataCollector.getStringTable();
 
   const frameTable = globalDataCollector.getFrameTable();
-  const stackTable = globalDataCollector.getStackTable();
+  const stackTable = globalDataCollector.getStackTableBuilder();
 
   let profileEvents: (ProfileEvent | CpuProfileEvent)[] = (eventsByName.get(
     'Profile'
@@ -516,6 +559,21 @@ async function processTracingEvents(
     ensureExists(profile.meta.categories)
   );
 
+  // Build a lookup from script URL to its source map URL from any ScriptCatchup
+  // events in the trace. The declared source map URL is often relative to the
+  // script URL which matches how Gecko profiles store this column.
+  // Keyed by URL because the source table is deduped by URL too, and the CPU
+  // profile callFrames only expose the script URL (not the isolate), which is
+  // what would be needed to disambiguate scriptIds across isolates.
+  const sourceMapURLByScriptURL = new Map<string, string>();
+  for (const event of (eventsByName.get('ScriptCatchup') ??
+    []) as ScriptCatchupEvent[]) {
+    const { data } = event.args;
+    if (data.url && data.sourceMapUrl) {
+      sourceMapURLByScriptURL.set(data.url, data.sourceMapUrl);
+    }
+  }
+
   const threadInfoByPidAndTid = new Map<string, ThreadInfo>();
   const threadInfoByThread = new Map<RawThread, ThreadInfo>();
   for (const profileEvent of profileEvents) {
@@ -528,7 +586,7 @@ async function processTracingEvents(
       profile,
       profileEvent
     );
-    const { thread, nodeIdToStackId } = threadInfo;
+    const { samples: samplesTable, nodeIdToStackId } = threadInfo;
 
     let profileChunks: any[] = [];
     if (profileEvent.name === 'Profile') {
@@ -561,8 +619,6 @@ async function processTracingEvents(
       if (!timeDeltas) {
         continue;
       }
-
-      const { samples: samplesTable } = thread;
 
       if (nodes) {
         const parentMap = new Map<number, number>();
@@ -614,7 +670,15 @@ async function processTracingEvents(
             functionName !== '' ? functionName : '(anonymous)'
           );
           const source =
-            isJS && url ? globalDataCollector.indexForSource(null, url) : null;
+            isJS && url
+              ? globalDataCollector.indexForSource(
+                  null,
+                  url,
+                  1,
+                  1,
+                  sourceMapURLByScriptURL.get(url) ?? null
+                )
+              : null;
           const resource = isJS
             ? globalDataCollector.indexForURIResource(url || '<unknown>')
             : -1;
@@ -636,17 +700,24 @@ async function processTracingEvents(
               'Unable to find the prefix stack index from a node index.'
             );
           }
-          frameTable.address[frameIndex] = -1;
+          let flags = FrameFlag.HasCategory;
+          if (lineNumber !== undefined) {
+            flags |= FrameFlag.HasLine;
+          }
+          if (columnNumber !== undefined) {
+            flags |= FrameFlag.HasColumn;
+          }
+          frameTable.flags[frameIndex] = flags;
+          frameTable.address[frameIndex] = 0;
           frameTable.category[frameIndex] = category;
           frameTable.subcategory[frameIndex] = 0;
           frameTable.func[frameIndex] = funcId;
-          frameTable.nativeSymbol[frameIndex] = null;
+          frameTable.lib[frameIndex] = 0;
+          frameTable.nativeSymbol[frameIndex] = 0;
           frameTable.innerWindowID[frameIndex] = 0;
-          frameTable.line[frameIndex] =
-            lineNumber === undefined ? null : lineNumber;
-          frameTable.column[frameIndex] =
-            columnNumber === undefined ? null : columnNumber;
-          frameTable.originalLocation[frameIndex] = null;
+          frameTable.line[frameIndex] = lineNumber ?? 0;
+          frameTable.column[frameIndex] = columnNumber ?? 0;
+          frameTable.originalLocation[frameIndex] = 0;
           frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
           stackTable.frame.push(frameIndex);
@@ -782,6 +853,23 @@ async function processTracingEvents(
   const { shared } = globalDataCollector.finish();
   profile.shared = shared;
 
+  let hasScreenshots = false;
+  for (const [thread, threadInfo] of threadInfoByThread) {
+    thread.samples = finishRawSamplesTableBuilder(threadInfo.samples);
+    thread.markers = finishRawMarkerTableBuilder(threadInfo.markers);
+    const markers = convertScreenshotMarkersToStartEnd(
+      thread.markers,
+      stringTable
+    );
+    if (markers !== null) {
+      hasScreenshots = true;
+      thread.markers = markers;
+    }
+  }
+  if (hasScreenshots) {
+    profile.meta.markerSchema.push(compositorScreenshotMarkerSchema);
+  }
+
   return profile;
 }
 
@@ -797,7 +885,7 @@ async function extractScreenshots(
     // No screenshots were found, exit early.
     return;
   }
-  const { thread } = getThreadInfo(
+  const { markers } = getThreadInfo(
     threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
@@ -822,21 +910,20 @@ async function extractScreenshots(
       // The image could not be processed, do not add it.
       continue;
     }
-    thread.markers.data.push({
+    markers.data.push({
       type: 'CompositorScreenshot',
       url: stringTable.indexForString(urlString),
+      // Chrome's Screenshot events don't say which window they belong to, so
+      // they all share one made-up window ID.
       windowID: 'id',
-      windowWidth: size.width,
-      windowHeight: size.height,
+      windowSize: { width: size.width, height: size.height },
     });
-    thread.markers.name.push(
-      stringTable.indexForString('CompositorScreenshot')
-    );
-    thread.markers.startTime.push(screenshot.ts / 1000);
-    thread.markers.endTime.push(null);
-    thread.markers.phase.push(INSTANT);
-    thread.markers.category.push(graphicsIndex);
-    thread.markers.length++;
+    markers.name.push(stringTable.indexForString('CompositorScreenshot'));
+    markers.startTime.push(screenshot.ts / 1000);
+    markers.endTime.push(null);
+    markers.phase.push(INSTANT);
+    markers.category.push(graphicsIndex);
+    markers.length++;
   }
 }
 
@@ -868,7 +955,7 @@ function getImageSize(
  * For sanity, check that stacks are ordered where the prefix stack
  * always preceeds the current stack index in the StackTable.
  */
-function assertStackOrdering(stackTable: RawStackTable) {
+function assertStackOrdering(stackTable: RawStackTableBuilder) {
   const visitedStacks = new Set<number | null>([null]);
   for (let i = 0; i < stackTable.length; i++) {
     if (!visitedStacks.has(stackTable.prefix[i])) {
@@ -988,8 +1075,7 @@ function extractMarkers(
           profile,
           event
         );
-        const { thread } = threadInfo;
-        const { markers } = thread;
+        const { markers } = threadInfo;
         let argData:
           | (object & { type2?: unknown; category2?: unknown; detail?: string })
           | null = null;

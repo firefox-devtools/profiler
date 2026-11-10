@@ -35,8 +35,9 @@ import {
 import {
   getScreenshotTrackProfile,
   getNetworkTrackProfile,
+  addCompositorScreenshotSchemaIfNeeded,
   addIPCMarkerPairToThreads,
-  getThreadWithMarkers,
+  getThreadWithRawMarkers,
   getScreenshotMarkersForWindowId,
 } from '../fixtures/profiles/processed-profile';
 
@@ -1229,19 +1230,20 @@ describe('timeline/TrackContextMenu', function () {
 
       // add a couple of global screenshots tracks
       profile.threads.push({
-        ...getThreadWithMarkers(
+        ...getThreadWithRawMarkers(
           profile.shared,
           getScreenshotMarkersForWindowId('0', 5)
         ),
         tid: profile.threads.length,
       });
       profile.threads.push({
-        ...getThreadWithMarkers(
+        ...getThreadWithRawMarkers(
           profile.shared,
           getScreenshotMarkersForWindowId('1', 5)
         ),
         tid: profile.threads.length,
       });
+      addCompositorScreenshotSchemaIfNeeded(profile);
 
       const { store } = setup(profile);
 

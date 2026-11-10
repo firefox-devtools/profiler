@@ -16,9 +16,13 @@ import {
   getFriendlyThreadName,
   processCounter,
   getInclusiveSampleIndexRangeForSelection,
+  getSampleIndexRangeForSelection,
   computeInnerWindowIDToTabMap,
   computeTabToThreadIndexesMap,
   computeStackTableFromRawStackTable,
+  computeFrameTableFromRawFrameTable,
+  computeFuncTableFromRawFuncTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   reserveFunctionsForCollapsedResources,
   computeSamplesTableFromRawSamplesTable,
 } from '../profile-logic/profile-data';
@@ -32,12 +36,16 @@ import { getDefaultCategories } from 'firefox-profiler/profile-logic/data-struct
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 import { defaultTableViewOptions } from '../reducers/profile-view';
 import { StringTable } from '../utils/string-table';
+import { getSourcesWithSourceMapURL } from '../profile-logic/source-maps/matching';
+import type { EligibleSource } from '../profile-logic/source-maps/matching';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
   RawProfileSharedData,
   StackTable,
+  FrameTable,
+  NativeSymbolTable,
   CategoryList,
   IndexIntoCategoryList,
   RawThread,
@@ -274,9 +282,25 @@ export const getStringTable: Selector<StringTable> = createSelector(
   (stringArray) => StringTable.withBackingArray(stringArray as string[])
 );
 
+export const getFrameTable: Selector<FrameTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).frameTable,
+  getCategories,
+  computeFrameTableFromRawFrameTable
+);
+
+export const getNativeSymbolTable: Selector<NativeSymbolTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).nativeSymbols,
+  computeNativeSymbolTableFromRawNativeSymbolTable
+);
+
+export const getFuncTable: Selector<FuncTable> = createSelector(
+  (state: State) => getRawProfileSharedData(state).funcTable,
+  computeFuncTableFromRawFuncTable
+);
+
 export const getStackTable: Selector<StackTable> = createSelector(
   (state: State) => getRawProfileSharedData(state).stackTable,
-  (state: State) => getRawProfileSharedData(state).frameTable,
+  getFrameTable,
   getCategories,
   getDefaultCategory,
   computeStackTableFromRawStackTable
@@ -309,6 +333,11 @@ export const getMarkerSchema: Selector<MarkerSchema[]> = createSelector(
 
 export const getMarkerSchemaByName: Selector<MarkerSchemaByName> =
   createSelector(getMarkerSchema, computeMarkerSchemaByName);
+
+export const getSourcesWithSourceMaps: Selector<EligibleSource[]> =
+  createSelector(getRawProfileSharedData, ({ sources, stringArray }) =>
+    getSourcesWithSourceMapURL(sources, stringArray)
+  );
 
 type CounterSelectors = ReturnType<typeof _createCounterSelectors>;
 
@@ -379,6 +408,23 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
       )
   );
 
+  const getCommittedRangeCounterSampleSum: Selector<number> = createSelector(
+    getCounter,
+    getCommittedRange,
+    (counter, range) => {
+      const [begin, end] = getSampleIndexRangeForSelection(
+        counter.samples,
+        range.start,
+        range.end
+      );
+      let sum = 0;
+      for (let i = begin; i < end; i++) {
+        sum += counter.samples.count[i];
+      }
+      return sum;
+    }
+  );
+
   return {
     getCounter,
     getDescription,
@@ -387,6 +433,7 @@ function _createCounterSelectors(counterIndex: CounterIndex) {
     getMaxCounterSampleCountPerMs,
     getMaxRangeCounterSampleCountPerMs,
     getCommittedRangeCounterSampleRange,
+    getCommittedRangeCounterSampleSum,
   };
 }
 
@@ -1044,6 +1091,21 @@ export const getContainsPrivateBrowsingInformation: Selector<boolean> =
 
     return hasPrivateThreads;
   });
+
+// Gets whether this profile contains argument values from JS execution tracing.
+// Gecko emits the `argumentValues` column even when it didn't trace anything, so
+// the values buffer and the object shapes are what tell us there is really
+// something here.
+export const getHasJSTracingArgumentValues: Selector<boolean> = createSelector(
+  getThreads,
+  (threads) =>
+    threads.some(
+      (thread) =>
+        thread.samples.argumentValues !== undefined &&
+        thread.tracedValuesBuffer !== undefined &&
+        thread.tracedObjectShapes !== undefined
+    )
+);
 
 /**
  * Returns the TIDs of the threads that are profiled.

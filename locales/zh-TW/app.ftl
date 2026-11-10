@@ -46,6 +46,11 @@ AppViewRouter--error-compare = 無法取得效能檢測檔。
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari = 由於 <a>Safari 的特殊限制</a>，{ -profiler-brand-name } 無法從這套瀏覽器自本機匯入效能檢測檔。請改用 { -firefox-brand-name } 或 Chrome 開啟此頁面。
     .title = 無法使用 Safari 匯入本機效能檢測檔
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    此版本的 { -profiler-brand-name } 不支援此效能檢測檔使用的格式。
+    請嘗試重新整理頁面，看看是否有 { -profiler-brand-name } 的更新可以使用。
 AppViewRouter--route-not-found--home =
     .specialMessage = 無法處理您嘗試開啟的網址。
 
@@ -231,16 +236,17 @@ ErrorBoundary--report-error-to-developers-description = 請將此問題報告給
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = 到 GitHub 回報錯誤
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = 法律資訊
-FooterLinks--Privacy = 隱私權
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = 設定
+SettingsMenu--docs = 文件
+SettingsMenu--legal = 法律資訊
+SettingsMenu--privacy = 隱私權
+SettingsMenu--cookies = Cookie
+SettingsMenu--language-switcher =
     .title = 變更語言
-FooterLinks--hide-button =
-    .title = 隱藏頁尾鏈結
-    .aria-label = 隱藏頁尾鏈結
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -296,8 +302,11 @@ Home--chrome-extension-recording-instructions = 安裝完成後，即可使用�
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = 輸入過濾條件
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = 輸入過濾條件（/）
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -410,8 +419,8 @@ MarkerTable--details = 詳細資訊
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = 只顯示符合「{ $filter }」的標記
     .aria-label = 只顯示符合「{ $filter }」的標記
+    .title = 只顯示符合「{ $filter }」的標記
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -420,14 +429,15 @@ MenuButtons--index--metaInfo-button =
     .label = 檢測檔資訊
 MenuButtons--index--full-view = 完整畫面
 MenuButtons--index--cancel-upload = 取消上傳
-MenuButtons--index--share-upload =
-    .label = 上傳本機檢測檔
-MenuButtons--index--share-re-upload =
-    .label = 重新上傳
+MenuButtons--index--save =
+    .label = 儲存…
+MenuButtons--index--share =
+    .label = 分享…
+MenuButtons--index--reshare =
+    .label = 重新分享…
 MenuButtons--index--share-error-uploading =
     .label = 上傳時發生錯誤
 MenuButtons--index--revert = 回復到原始檢測檔
-MenuButtons--index--docs = 文件
 MenuButtons--permalink--button =
     .label = 永久鏈結
 
@@ -445,6 +455,28 @@ MenuButtons--metaInfo--resymbolicate-profile = 重新將檢測檔符號化
 MenuButtons--metaInfo--symbolicate-profile = 符號化檢測檔
 MenuButtons--metaInfo--attempting-resymbolicate = 正在嘗試重新符號化檢測檔
 MenuButtons--metaInfo--currently-symbolicating = 目前符號化的檢測檔
+MenuButtons--metaInfo--source-maps = 原始碼對應表：
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = 套用原始碼對應表…
+    .title = 從磁碟中載入 .map 檔，讓最小化過的 JavaScript 組合檔能夠符號化，以找回原始函數名稱與在原始碼中的位置。
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = 選擇這份原始碼對應表要套用至哪個組合檔：
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = 套用
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = 取消
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = 已解析 { $filename } 的原始碼。
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = { $filename } 中沒有堆疊位置與此對應表相符。
+MenuButtons--metaInfo--source-map-error-invalid = 選擇的檔案不是有效的原始碼對應表。
+MenuButtons--metaInfo--source-map-error-no-eligible = 此檢測檔中沒有包含原始碼對應表網址的 JS 組合檔。
+MenuButtons--metaInfo--source-map-error-failed = 無法將此對應表套用至檢測檔。
 MenuButtons--metaInfo--cpu-model = CPU 型號：
 MenuButtons--metaInfo--cpu-cores = CPU 核心數：
 MenuButtons--metaInfo--main-memory = 主要記憶體：
@@ -561,9 +593,15 @@ MenuButtons--publish--renderCheckbox-label-preference = 包含偏好設定值
 MenuButtons--publish--renderCheckbox-label-private-browsing = 包含來自隱私瀏覽視窗的資料
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = 此效能檢測檔包含隱私瀏覽資料
-MenuButtons--publish--reupload-performance-profile = 重新上傳效能檢測檔
+MenuButtons--publish--renderCheckbox-label-argument-values = 包含 JavaScript 執行追蹤函數的參數值
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = 此檢測檔包含從頁面記錄到的函數參數值，可能包含個人資料
 MenuButtons--publish--share-performance-profile = 分享效能檢測檔
+MenuButtons--publish--reshare-performance-profile = 重新分享效能檢測檔
+MenuButtons--publish--save-performance-profile = 儲存效能檢測檔
+MenuButtons--publish--local-profile-description = 這份效能分析資料尚未上傳，關閉此分頁後就會遺失。若要保留，請將其儲存至電腦，或使用「分享」功能上傳。
 MenuButtons--publish--info-description = 上傳您的檢測檔並透過鏈結分享，讓任何取得該鏈結的人都能存取。
+MenuButtons--publish--download-info-description = 將此設定檔另存至您的電腦上。
 MenuButtons--publish--info-description-default = 預設情況下，將會移除您的個人資料。
 MenuButtons--publish--info-description-firefox-nightly2 = 此檢測檔來自 { -firefox-nightly-brand-name }，預設情況下將包含大部分資訊。
 MenuButtons--publish--include-additional-data = 包含其他資料後，可能造成檢測檔可被識別。
@@ -572,7 +610,7 @@ MenuButtons--publish--upload-title = 正在上傳檢測檔…
 MenuButtons--publish--cancel-upload = 取消上傳
 MenuButtons--publish--message-something-went-wrong = 哇喔，上傳檢測檔時發生某些錯誤。
 MenuButtons--publish--message-try-again = 再試一次
-MenuButtons--publish--download = 下載
+MenuButtons--publish--save = 儲存
 MenuButtons--publish--compressing = 壓縮中…
 MenuButtons--publish--error-while-compressing = 壓縮時發生錯誤，請嘗試取消勾選部分項目來縮小檢測檔。
 
@@ -607,8 +645,8 @@ PanelSearch--search-field-hint = 您知道可以使用半形逗號（,）搜尋�
 ProfileName--edit-profile-name-button =
     .title = 編輯效能檢測檔名稱
 ProfileName--edit-profile-name-input =
-    .title = 編輯效能檢測檔名稱
     .aria-label = 效能檢測檔名稱
+    .title = 編輯效能檢測檔名稱
 
 ## Profile Delete Button
 
@@ -687,8 +725,8 @@ ServiceWorkerManager--updated-while-not-ready =
     您可能會遇到某些不正常的部分。
 ServiceWorkerManager--new-version-is-ready = 已下載新版本的應用程式，準備好可以使用。
 ServiceWorkerManager--hide-notice-button =
-    .title = 隱藏重新載入通知
     .aria-label = 隱藏重新載入通知
+    .title = 隱藏重新載入通知
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -785,9 +823,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = 此時的相對記憶體用量
-TrackMemoryGraph--memory-range-in-graph = 圖表中的記憶體範圍
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = 上次取樣以來的分配與取消分配
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = 此時間點的相對記憶體
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = 圖表中的記憶體範圍
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = 自上一次取樣的分配與取消分配
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -834,6 +889,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
     .label = 目前選擇範圍的平均功率
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
+    .label = 目前選擇範圍中的平均電力
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:

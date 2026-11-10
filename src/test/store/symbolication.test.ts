@@ -8,10 +8,11 @@ import {
   completeSymbolTable,
   partialSymbolTable,
   jitDumpSymbolTable,
+  jitDumpWithScriptInfoSymbolTable,
 } from '../fixtures/example-symbol-table';
 import type { ExampleSymbolTable } from '../fixtures/example-symbol-table';
 import type { MarkerPayload } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
   AddressResult,
   LibSymbolicationRequest,
@@ -25,7 +26,10 @@ import {
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { INTERVAL } from 'firefox-profiler/app-logic/constants';
-import { getEmptyRawMarkerTable } from '../../profile-logic/data-structures';
+import {
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
+} from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,
@@ -72,6 +76,7 @@ describe('doSymbolicateProfile', function () {
           const symbolTables: Partial<Record<string, ExampleSymbolTable>> = {
             'firefox.pdb': firefoxSymbolTable,
             'jit-52344.dump': jitDumpSymbolTable,
+            'jit-98765.dump': jitDumpWithScriptInfoSymbolTable,
           };
 
           const symbolTable = symbolTables[lib.debugName];
@@ -345,12 +350,16 @@ describe('doSymbolicateProfile', function () {
 
       // 0x000a at inline depth 0 should be at line 14, in the first symbol.
       expect(frameTable.line[firstFrameAt0x000a]).toBe(14);
-      expect(frameTable.inlineDepth[firstFrameAt0x000a]).toBe(0);
+      expect(
+        (frameTable.flags[firstFrameAt0x000a] & FrameFlag.IsInlined) !== 0
+      ).toBe(false);
       expect(frameTable.func[firstFrameAt0x000a]).toBe(firstSymbolFuncIndex);
 
       // 0x000a at inline depth 1 should be at line 37, in the second symbol.
       expect(frameTable.line[secondFrameAt0x000a]).toBe(37);
-      expect(frameTable.inlineDepth[secondFrameAt0x000a]).toBe(1);
+      expect(
+        (frameTable.flags[secondFrameAt0x000a] & FrameFlag.IsInlined) !== 0
+      ).toBe(true);
       expect(frameTable.func[secondFrameAt0x000a]).toBe(secondSymbolFuncIndex);
     });
 
@@ -501,12 +510,132 @@ describe('doSymbolicateProfile', function () {
     await doSymbolicateProfile(dispatch, profile, symbolStore);
 
     // Check that the `useState.js` node shows up in the JS-only call tree.
-    // This function is an inline frame from the jitdump symbol info.
+    // This function is an inline frame from the jitdump symbol info. This symbol
+    // table doesn't say anything about script functions, so the JS-ness of these
+    // funcs comes from what the profile said about these frames.
     dispatch(changeImplementationFilter('js'));
     expect(formatTree(getCallTree(getState()))).toEqual([
       '- renderButton.js (total: 1, self: —)',
       '  - useState.js (total: 1, self: 1)',
       '- runJobs.js (total: 1, self: 1)',
+    ]);
+  });
+
+  it('marks script functions from JIT frames as JS, including inline frames', async () => {
+    const {
+      store: { dispatch, getState },
+      profile,
+      symbolStore,
+      switchSymbolProviderMode,
+      funcNamesToFuncIndexes,
+    } = init(_createUnsymbolicatedJitProfileWithoutJSFuncs());
+
+    switchSymbolProviderMode('from-server');
+
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
+
+    // Check that the `useState` node shows up in the JS-only call tree.
+    // This function is an inline frame from the jitdump symbol info. None of
+    // these funcs were JS funcs before symbolication; they are only JS funcs
+    // because the symbolication result said that they are script functions.
+    dispatch(changeImplementationFilter('js'));
+    expect(formatTree(getCallTree(getState()))).toEqual([
+      '- renderButton (total: 1, self: —)',
+      '  - useState (total: 1, self: 1)',
+      '- runJobs (total: 1, self: 1)',
+    ]);
+
+    const thread = getThread(getState());
+    const { frameTable, funcTable, nativeSymbols, stringTable } = thread;
+    const sources = ProfileViewSelectors.getSourceTable(getState());
+    const [renderButtonFunc, useStateFunc, runJobsFunc] =
+      funcNamesToFuncIndexes(['renderButton', 'useState', 'runJobs']);
+
+    // All three funcs are script functions, with the script URL as their file
+    // and with the position at which the function starts in that script.
+    const getFuncInfo = (funcIndex: number) => ({
+      isJS: (funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0,
+      relevantForJS:
+        (funcTable.flags[funcIndex] & FuncFlag.RelevantForJS) !== 0,
+      file: stringTable.getString(
+        sources.filename[ensureExists(funcTable.source[funcIndex])]
+      ),
+      line:
+        (funcTable.flags[funcIndex] & FuncFlag.HasLine) !== 0
+          ? funcTable.lineNumber[funcIndex]
+          : null,
+      column:
+        (funcTable.flags[funcIndex] & FuncFlag.HasColumn) !== 0
+          ? funcTable.columnNumber[funcIndex]
+          : null,
+    });
+    expect(getFuncInfo(renderButtonFunc)).toEqual({
+      isJS: true,
+      relevantForJS: false,
+      file: 'Button.tsx',
+      line: 40,
+      column: 16,
+    });
+    expect(getFuncInfo(useStateFunc)).toEqual({
+      isJS: true,
+      relevantForJS: false,
+      file: 'react.js',
+      line: 98,
+      column: 21,
+    });
+    expect(getFuncInfo(runJobsFunc)).toEqual({
+      isJS: true,
+      relevantForJS: false,
+      file: 'scheduler.js',
+      line: 10,
+      column: 1,
+    });
+
+    // The frames have the line and column at which the code was executing.
+    // Address 0xa expands into two frames: renderButton at Button.tsx:45:12,
+    // which has an inlined call to useState at react.js:100:7.
+    const framesAt0xa = frameTable.address.reduce<number[]>(
+      (frames, address, frameIndex) =>
+        address === 0xa ? [...frames, frameIndex] : frames,
+      []
+    );
+    expect(
+      framesAt0xa.map((frameIndex) => ({
+        func: funcTable.name[frameTable.func[frameIndex]],
+        isInlined: (frameTable.flags[frameIndex] & FrameFlag.IsInlined) !== 0,
+        line:
+          (frameTable.flags[frameIndex] & FrameFlag.HasLine) !== 0
+            ? frameTable.line[frameIndex]
+            : null,
+        column:
+          (frameTable.flags[frameIndex] & FrameFlag.HasColumn) !== 0
+            ? frameTable.column[frameIndex]
+            : null,
+      }))
+    ).toEqual([
+      {
+        func: funcTable.name[renderButtonFunc],
+        isInlined: false,
+        line: 45,
+        column: 12,
+      },
+      {
+        func: funcTable.name[useStateFunc],
+        isInlined: true,
+        line: 100,
+        column: 7,
+      },
+    ]);
+
+    // The native symbols keep the raw jitdump symbol names, which include the
+    // JIT tier, even though the funcs have the bare function names.
+    expect(
+      Array.from({ length: nativeSymbols.length }, (_, symbolIndex) =>
+        stringTable.getString(nativeSymbols.name[symbolIndex])
+      )
+    ).toEqual([
+      'Ion: renderButton (Button.tsx:40:16)',
+      'Baseline: runJobs (scheduler.js:10:1)',
     ]);
   });
 
@@ -598,15 +727,16 @@ function _createUnsymbolicatedProfile() {
     // "0x000a" and "0x0000" are both in the first symbol, and should be merged.
     // See "exampleSymbolTable" for the actual function boundary ranges.
     `
-      0x000a  0x0000  0x1a0f  0x0f0f
-      0x2000  0x2000
+      0x000a[lib:firefox.exe]  0x0000[lib:firefox.exe]  0x1a0f[lib:firefox.exe]  0x0f0f[lib:firefox.exe]
+      0x2000[lib:firefox.exe]  0x2000[lib:firefox.exe]
     `
   );
   const { threads, shared } = profile;
   const stringTable = StringTable.withBackingArray(shared.stringArray);
   const thread = threads[0];
 
-  // Add a mock lib.
+  // Replace the lib that the text fixture created with a mock lib whose
+  // debugName / breakpadId match the symbol table requests we assert on below.
   const libIndex = 0;
   profile.libs[libIndex] = {
     arch: '',
@@ -620,13 +750,16 @@ function _createUnsymbolicatedProfile() {
 
   profile.shared.resourceTable = {
     length: 1,
-    lib: [libIndex],
     name: [stringTable.indexForString('example lib')],
     host: [stringTable.indexForString('example host')],
     type: [ResourceType.Library],
   };
   for (let i = 0; i < profile.shared.funcTable.length; i++) {
     profile.shared.funcTable.resource[i] = 0;
+  }
+  for (let i = 0; i < profile.shared.frameTable.length; i++) {
+    profile.shared.frameTable.lib[i] = libIndex;
+    profile.shared.frameTable.flags[i] |= FrameFlag.HasAddress;
   }
 
   // Add a marker with a cause stack. We use the stack of the first sample.
@@ -642,7 +775,7 @@ function _createUnsymbolicatedProfile() {
     },
   };
 
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
   const markerIndex = markers.length++;
   markers.data[markerIndex] = markerData;
   markers.name[markerIndex] = stringTable.indexForString('MarkerWithStack');
@@ -651,15 +784,28 @@ function _createUnsymbolicatedProfile() {
   markers.phase[markerIndex] = INTERVAL;
   markers.category[markerIndex] = 0;
 
-  thread.markers = markers;
+  thread.markers = finishRawMarkerTableBuilder(markers);
 
   return profile;
 }
 
 function _createUnsymbolicatedJitProfile() {
   // See jitDumpSyms (in example-symbol-table.ts) for the corresponding symbols.
+  // Func names ending in "js" are JS funcs in this test fixture, so these frames
+  // are known to be JS frames even before symbolication.
   const { profile } = getProfileFromTextSamples(`
     renderButton.js[lib:jit-52344.dump][address:a]  runJobs.js[lib:jit-52344.dump][address:2000]
+  `);
+  return profile;
+}
+
+function _createUnsymbolicatedJitProfileWithoutJSFuncs() {
+  // See jitDumpWithScriptInfoSyms (in example-symbol-table.ts) for the
+  // corresponding symbols. Before symbolication, these frames are just addresses
+  // in a "library" (the jitdump file), and nothing tells us that they are JS
+  // frames - that's information which only symbolication gives us.
+  const { profile } = getProfileFromTextSamples(`
+    0x000a[lib:jit-98765.dump][address:a]  0x2000[lib:jit-98765.dump][address:2000]
   `);
   return profile;
 }

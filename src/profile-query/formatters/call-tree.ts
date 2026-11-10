@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import type { CallTree } from 'firefox-profiler/profile-logic/call-tree';
-import type { IndexIntoCallNodeTable, Lib } from 'firefox-profiler/types';
+import type { IndexIntoCallNodeTable } from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import type {
   CallTreeNode,
@@ -42,21 +42,22 @@ function computeInclusionScore(
   depth: number,
   strategy: CallTreeScoringStrategy
 ): number {
+  const weight = Math.abs(totalPercentage);
   switch (strategy) {
     case 'exponential-0.95':
-      return totalPercentage * Math.pow(0.95, depth);
+      return weight * Math.pow(0.95, depth);
     case 'exponential-0.9':
-      return totalPercentage * Math.pow(0.9, depth);
+      return weight * Math.pow(0.9, depth);
     case 'exponential-0.8':
-      return totalPercentage * Math.pow(0.8, depth);
+      return weight * Math.pow(0.8, depth);
     case 'harmonic-0.1':
-      return totalPercentage / (1 + 0.1 * depth);
+      return weight / (1 + 0.1 * depth);
     case 'harmonic-0.5':
-      return totalPercentage / (1 + 0.5 * depth);
+      return weight / (1 + 0.5 * depth);
     case 'harmonic-1.0':
-      return totalPercentage / (1 + depth);
+      return weight / (1 + depth);
     case 'percentage-only':
-      return totalPercentage;
+      return weight;
     default:
       throw assertExhaustiveCheck(strategy);
   }
@@ -172,7 +173,6 @@ export type CallTreeCollectionOptions = {
  */
 export function collectCallTree(
   tree: CallTree,
-  libs: Lib[],
   options: CallTreeCollectionOptions = {}
 ): CallTreeNode {
   const maxNodes = options.maxNodes ?? 100;
@@ -244,7 +244,7 @@ export function collectCallTree(
     }
   }
 
-  return buildTreeStructure(tree, includedNodes, libs);
+  return buildTreeStructure(tree, includedNodes);
 }
 
 /**
@@ -252,8 +252,7 @@ export function collectCallTree(
  */
 function buildTreeStructure(
   tree: CallTree,
-  includedNodes: Set<IndexIntoCallNodeTable>,
-  libs: Lib[]
+  includedNodes: Set<IndexIntoCallNodeTable>
 ): CallTreeNode {
   // Get total sample count from the tree for percentage calculations
   const totalSampleCount = tree.getTotal();
@@ -299,8 +298,7 @@ function buildTreeStructure(
       // Format function name with library prefix
       const nameWithLibrary = formatFunctionNameWithLibrary(
         funcIndex,
-        tree._thread,
-        libs
+        tree._thread
       );
 
       const inlineStatus = inlineStatusForNode(tree, callNodeIndex);
@@ -336,7 +334,9 @@ function buildTreeStructure(
       for (const childIdx of elidedChildren) {
         const childData = tree.getNodeData(childIdx);
         combinedSamples += childData.total;
-        maxSamples = Math.max(maxSamples, childData.total);
+        if (Math.abs(childData.total) > Math.abs(maxSamples)) {
+          maxSamples = childData.total;
+        }
       }
 
       const combinedRelative = combinedSamples / totalSampleCount;

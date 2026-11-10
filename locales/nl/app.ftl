@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     profielen van de lokale computer in deze browser importeren. Open in plaats daarvan
     deze pagina in { -firefox-brand-name } of Chrome.
     .title = Safari kan geen lokale profielen importeren
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Dit profiel gebruikt een indeling die niet door deze versie van { -profiler-brand-name } wordt ondersteund.
+    Probeer de pagina te vernieuwen om te controleren of er een update beschikbaar is voor { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = De URL die u probeerde te bereiken, werd niet herkend.
 
@@ -297,16 +302,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = De fout op GitHub melden
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Juridisch
-FooterLinks--Privacy = Privacy
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Instellingen
+SettingsMenu--docs = Documentatie
+SettingsMenu--legal = Juridisch
+SettingsMenu--privacy = Privacy
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Taal wijzigen
-FooterLinks--hide-button =
-    .title = Voettekstkoppelingen verbergen
-    .aria-label = Voettekstkoppelingen verbergen
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -392,8 +398,11 @@ Home--chrome-extension-recording-instructions =
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Voer filtertermen in
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Voer filtertermen in (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -506,8 +515,8 @@ MarkerTable--details = Details
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Alleen markeringen tonen die overeenkomen met: ‘{ $filter }’
     .aria-label = Alleen markeringen tonen die overeenkomen met: ‘{ $filter }’
+    .title = Alleen markeringen tonen die overeenkomen met: ‘{ $filter }’
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -516,14 +525,15 @@ MenuButtons--index--metaInfo-button =
     .label = Profielinfo
 MenuButtons--index--full-view = Volledig beeld
 MenuButtons--index--cancel-upload = Uploaden annuleren
-MenuButtons--index--share-upload =
-    .label = Lokaal profiel uploaden
-MenuButtons--index--share-re-upload =
-    .label = Opnieuw uploaden
+MenuButtons--index--save =
+    .label = Opslaan…
+MenuButtons--index--share =
+    .label = Delen…
+MenuButtons--index--reshare =
+    .label = Opnieuw delen…
 MenuButtons--index--share-error-uploading =
     .label = Fout bij uploaden
 MenuButtons--index--revert = Terug naar origineel profiel
-MenuButtons--index--docs = Documentatie
 MenuButtons--permalink--button =
     .label = Permalink
 
@@ -541,6 +551,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Profiel opnieuw symboliseren
 MenuButtons--metaInfo--symbolicate-profile = Profiel symboliseren
 MenuButtons--metaInfo--attempting-resymbolicate = Poging tot hersymboliseren profiel
 MenuButtons--metaInfo--currently-symbolicating = Profiel wordt gesymboliseerd
+MenuButtons--metaInfo--source-maps = Bronkaarten:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Bronkaart toepassen…
+    .title = Een .map-bestand van uw schijf laden om een geminimaliseerde JavaScript-bundel te symboliseren, om oorspronkelijke functienamen en bronlocaties te herstellen.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Kies op welke bundel deze bronkaart van toepassing is:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Toepassen
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Annuleren
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Oorspronkelijke bronnen voor { $filename } opgelost.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Geen enkele stackpositie in { $filename } komt overeen met deze bronkaart.
+MenuButtons--metaInfo--source-map-error-invalid = Het geselecteerde bestand is geen geldige bronkaart.
+MenuButtons--metaInfo--source-map-error-no-eligible = Dit profiel heeft geen JS-bundels met URL’s van bronkaarten.
+MenuButtons--metaInfo--source-map-error-failed = Kan deze bronkaart niet toepassen op het profiel.
 MenuButtons--metaInfo--cpu-model = CPU-model:
 MenuButtons--metaInfo--cpu-cores = CPU-kernen:
 MenuButtons--metaInfo--main-memory = Hoofdgeheugen:
@@ -659,16 +691,22 @@ MenuButtons--metaOverheadStatistics-profiled-duration = Geprofileerde duur:
 MenuButtons--publish--renderCheckbox-label-hidden-threads = Verborgen threads opnemen
 MenuButtons--publish--renderCheckbox-label-include-other-tabs = De gegevens van andere tabbladen opnemen
 MenuButtons--publish--renderCheckbox-label-hidden-time = Verborgen tijdsbereik opnemen
-MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafdrukken opnemen
+MenuButtons--publish--renderCheckbox-label-include-screenshots = Schermafbeeldingen opnemen
 MenuButtons--publish--renderCheckbox-label-resource = Hulpbron-URL’s en -paden opnemen
 MenuButtons--publish--renderCheckbox-label-extension = Extensie-informatie opnemen
 MenuButtons--publish--renderCheckbox-label-preference = Voorkeurswaarden opnemen
 MenuButtons--publish--renderCheckbox-label-private-browsing = De gegevens van privénavigatievensters opnemen
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Dit profiel bevat privénavigatiegegevens
-MenuButtons--publish--reupload-performance-profile = Prestatieprofiel opnieuw uploaden
+MenuButtons--publish--renderCheckbox-label-argument-values = Argumentwaarden voor de traceerfunctie voor uitvoering van JavaScript opnemen
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Dit profiel bevat waarden, opgenomen vanaf de pagina voor functieargumenten, die persoonlijke gegevens kan bevatten
 MenuButtons--publish--share-performance-profile = Prestatieprofiel delen
+MenuButtons--publish--reshare-performance-profile = Prestatieprofiel opnieuw delen
+MenuButtons--publish--save-performance-profile = Prestatieprofiel opslaan
+MenuButtons--publish--local-profile-description = Dit profiel is niet geüpload en zal verloren gaan wanneer u dit tabblad sluit. Sla het op op uw computer of upload het met Delen om het te behouden.
 MenuButtons--publish--info-description = Upload uw profiel en maak het met de koppeling toegankelijk voor iedereen.
+MenuButtons--publish--download-info-description = Dit profiel als een bestand op uw computer opslaan.
 MenuButtons--publish--info-description-default = Standaard worden uw persoonlijke gegevens verwijderd.
 MenuButtons--publish--info-description-firefox-nightly2 = Dit profiel is van { -firefox-nightly-brand-name }, dus standaard worden de meeste gegevens opgenomen.
 MenuButtons--publish--include-additional-data = Aanvullende gegevens die identificeerbaar kunnen zijn toevoegen
@@ -677,7 +715,7 @@ MenuButtons--publish--upload-title = Profiel uploaden…
 MenuButtons--publish--cancel-upload = Uploaden annuleren
 MenuButtons--publish--message-something-went-wrong = O jee, er is iets misgegaan bij het uploaden van het profiel.
 MenuButtons--publish--message-try-again = Opnieuw proberen
-MenuButtons--publish--download = Downloaden
+MenuButtons--publish--save = Opslaan
 MenuButtons--publish--compressing = Comprimeren…
 MenuButtons--publish--error-while-compressing = Fout bij comprimeren. Probeer enkele selectievakjes uit te schakelen om de profielgrootte te verkleinen.
 
@@ -712,8 +750,8 @@ PanelSearch--search-field-hint = Wist u dat u een komma (,) kunt gebruiken om me
 ProfileName--edit-profile-name-button =
     .title = De profielnaam bewerken
 ProfileName--edit-profile-name-input =
-    .title = De profielnaam bewerken
     .aria-label = Profielnaam
+    .title = De profielnaam bewerken
 
 ## Profile Delete Button
 
@@ -793,8 +831,8 @@ ServiceWorkerManager--updated-while-not-ready =
     volledig was geladen. U kunt verstoringen zien.
 ServiceWorkerManager--new-version-is-ready = Een nieuwe versie van de toepassing is gedownload en klaar voor gebruik.
 ServiceWorkerManager--hide-notice-button =
-    .title = Melding opnieuw laden verbergen
     .aria-label = Melding opnieuw laden verbergen
+    .title = Melding opnieuw laden verbergen
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -857,7 +895,7 @@ TrackContextMenu--only-show-this-process = Alleen dit proces tonen
 # Variables:
 #   $trackName (String) - Name of the selected track to isolate.
 TrackContextMenu--only-show-track = Alleen ‘{ $trackName }’ tonen
-TrackContextMenu--hide-other-screenshots-tracks = Andere schermafdruktracks verbergen
+TrackContextMenu--hide-other-screenshots-tracks = Andere schermafbeeldingstracks verbergen
 # This is used as the context menu item to hide the given track.
 # Variables:
 #   $trackName (String) - Name of the selected track to hide.
@@ -891,9 +929,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = relatief geheugen op dit moment
-TrackMemoryGraph--memory-range-in-graph = geheugenbereik in grafiek
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = toewijzingen en verwijderde toewijzingen sinds de vorige steekproef
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = relatief geheugen op dit moment
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = geheugenbereik in grafiek
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allocaties en deallocaties sinds de vorige opname
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -939,6 +994,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Gemiddeld vermogen in de huidige selectie
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } µW
     .label = Gemiddeld vermogen in de huidige selectie
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

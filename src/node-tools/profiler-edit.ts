@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import fs from 'fs';
+import path from 'path';
 import {
   Command,
   CommanderError,
@@ -9,15 +10,12 @@ import {
   Option,
 } from 'commander';
 import { parse as parseToml } from 'smol-toml';
+import * as v from 'valibot';
 
-import {
-  serializeProfileToJsonSlabsFile,
-  serializeProfileToJsonString,
-  unserializeProfileOfArbitraryFormat,
-} from 'firefox-profiler/profile-logic/process-profile';
+import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
+import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
 import { computeCompactedProfile } from 'firefox-profiler/profile-logic/profile-compacting';
 import { GOOGLE_STORAGE_BUCKET } from 'firefox-profiler/app-logic/constants';
-import { compress } from 'firefox-profiler/utils/gz';
 import { insertStackLabels } from 'firefox-profiler/profile-logic/insert-stack-labels';
 import { SymbolStore } from 'firefox-profiler/profile-logic/symbol-store';
 import {
@@ -31,6 +29,7 @@ import {
   type WasmSymbolicationSpec,
 } from 'firefox-profiler/profile-logic/wasm-symbolication';
 import { getThreadsWithMarkersMatchingSearchFilter } from 'firefox-profiler/profile-logic/marker-data';
+import { FuncFlag } from 'firefox-profiler/types/profile';
 import type {
   Profile,
   RawThread,
@@ -46,6 +45,13 @@ import {
   mergeNonOverlappingThreadsByName,
   remapCountersAndProfilerOverhead,
 } from 'firefox-profiler/profile-logic/merge-compare';
+import {
+  attachSourcesFromFuncNames,
+  embedJsSources,
+  type SourceReader,
+} from 'firefox-profiler/profile-logic/embed-js-sources';
+import { runSourceMapSymbolicationNode } from 'firefox-profiler/profile-query/source-map';
+import { mergeMarkersFromProfile } from 'firefox-profiler/profile-logic/merge-markers';
 
 /**
  * A CLI tool for editing profiles.
@@ -70,6 +76,16 @@ import {
  *   node node-tools-dist/profiler-edit.js -i big.json.gz -o small.json.gz \
  *     --only-keep-threads-with-markers-matching '-async,-sync' \
  *     --merge-non-overlapping-threads-by-name
+ *
+ *   node node-tools-dist/profiler-edit.js -i speedometer.json.gz -o out.json.gz \
+ *     --map-source-paths mapping.json
+ *
+ *   node node-tools-dist/profiler-edit.js -i samply-profile.json -o out.json.gz \
+ *     --js-sources-from-func-names --map-source-paths mapping.json
+ *
+ *   node node-tools-dist/profiler-edit.js -i simpleperf-profile.json \
+ *     -o merged.json.gz --merge-markers-from gecko-profile.json \
+ *     --only-keep-processes-with-name-prefix org.mozilla.fenix
  */
 
 export type ProfileSource =
@@ -91,8 +107,12 @@ export interface WasmSymbolicationCliSpec {
 export interface CliOptions {
   input: ProfileSource;
   output: string;
+  mergeMarkersFrom?: ProfileSource;
+  onlyKeepProcessesWithNamePrefix?: string;
   symbolicateWithServer?: string;
   symbolicateWasm: WasmSymbolicationCliSpec[];
+  mapSourcePaths?: string;
+  jsSourcesFromFuncNames?: boolean;
   insertLabelFrames?: string;
   onlyKeepThreadsWithMarkersMatching?: string;
   mergeNonOverlappingThreadsByName?: boolean;
@@ -114,6 +134,132 @@ export function loadWasmSymbolicationSpecs(
 }
 
 /**
+ * One entry of a --map-source-paths file. A file whose URL starts with
+ * `urlPrefix` is read from `localPath`, at the path that follows the prefix in
+ * the URL.
+ */
+export type SourcePathMapping = {
+  // Always ends with a slash.
+  urlPrefix: string;
+  // Absolute path of the directory that `urlPrefix` was served from.
+  localPath: string;
+};
+
+const SourcePathMappingFileSchema = v.object({
+  mappings: v.array(
+    v.object({
+      urlPrefix: v.pipe(
+        v.string(),
+        v.url(),
+        v.transform((urlPrefix) => {
+          const href = new URL(urlPrefix).href;
+          // Without the trailing slash, "/Speedometer3" would also match
+          // "/Speedometer3-other/".
+          return href.endsWith('/') ? href : href + '/';
+        })
+      ),
+      localPath: v.pipe(v.string(), v.nonEmpty('Expected a non-empty path')),
+    })
+  ),
+});
+
+/**
+ * Parse the contents of a --map-source-paths file, which looks like this:
+ *
+ * {
+ *   "mappings": [
+ *     { "urlPrefix": "http://127.0.0.1:62763/", "localPath": "/path/to/dir" },
+ *     { "urlPrefix": "http://127.0.0.1:62763/other/", "localPath": "/other" }
+ *   ]
+ * }
+ *
+ * Relative local paths are resolved against `baseDir`.
+ */
+export function parseSourcePathMappings(
+  jsonText: string,
+  baseDir: string
+): SourcePathMapping[] {
+  const result = v.safeParse(SourcePathMappingFileSchema, JSON.parse(jsonText));
+  if (!result.success) {
+    throw new Error(
+      `Invalid source path mapping file:\n${v.summarize(result.issues)}`
+    );
+  }
+  return result.output.mappings.map(({ urlPrefix, localPath }) => ({
+    urlPrefix,
+    localPath: path.resolve(baseDir, localPath),
+  }));
+}
+
+/**
+ * Find the mapping that covers this URL, and the decoded path of the file
+ * relative to the mapping's root.
+ */
+function resolveMappedPath(
+  mappings: SourcePathMapping[],
+  url: string
+): { mapping: SourcePathMapping; relativePath: string } | null {
+  let normalizedUrl: string;
+  try {
+    // This also resolves "." and ".." segments, so that the remaining path
+    // can't leave the mapped directory.
+    const parsedUrl = new URL(url);
+    parsedUrl.search = '';
+    parsedUrl.hash = '';
+    normalizedUrl = parsedUrl.href;
+  } catch {
+    return null;
+  }
+  for (const mapping of mappings) {
+    if (!normalizedUrl.startsWith(mapping.urlPrefix)) {
+      continue;
+    }
+    try {
+      return {
+        mapping,
+        relativePath: decodeURIComponent(
+          normalizedUrl.slice(mapping.urlPrefix.length)
+        ),
+      };
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Read the files that the mappings cover from the local disk. URLs that no
+ * mapping covers resolve to null.
+ */
+export function createSourceReader(
+  mappings: SourcePathMapping[]
+): SourceReader {
+  // The most specific prefix wins, whatever the order in the file.
+  const sortedMappings = mappings
+    .slice()
+    .sort((a, b) => b.urlPrefix.length - a.urlPrefix.length);
+  return async (url) => {
+    const resolved = resolveMappedPath(sortedMappings, url);
+    if (resolved === null) {
+      return null;
+    }
+    const { mapping, relativePath } = resolved;
+    const filePath = path.resolve(mapping.localPath, relativePath);
+    // Profiles come from web content, so never read outside the mapped
+    // directory, even if the URL decoded to a ".." path.
+    if (!filePath.startsWith(mapping.localPath + path.sep)) {
+      return null;
+    }
+    try {
+      return await fs.promises.readFile(filePath, 'utf8');
+    } catch {
+      return null;
+    }
+  };
+}
+
+/**
  * Reconstruct the func-name strings used by insertStackLabels' prefix matcher
  * (mirrors getLabelIndexForFunc in insert-stack-labels.ts), so auto-discovery
  * sees the same strings the labeler will compare against.
@@ -123,8 +269,8 @@ export function collectFuncNames(profile: Profile): string[] {
   const result: string[] = [];
   for (let i = 0; i < funcTable.length; i++) {
     let name = stringArray[funcTable.name[i]];
-    const sourceIndex = funcTable.source[i];
-    if (sourceIndex !== null) {
+    if ((funcTable.flags[i] & FuncFlag.HasSource) !== 0) {
+      const sourceIndex = funcTable.source[i];
       const filename = stringArray[sources.filename[sourceIndex]];
       name += ` (${filename})`;
     }
@@ -200,26 +346,53 @@ async function loadProfile(source: ProfileSource): Promise<Profile> {
   }
 }
 
-async function encodeProfileWithFilename(
+function keepThreads(
   profile: Profile,
-  filename: string
-): Promise<Uint8Array> {
-  if (filename.endsWith('.jslb') || filename.endsWith('.jslb.gz')) {
-    const bytes = serializeProfileToJsonSlabsFile(profile);
-    if (filename.endsWith('.jslb.gz')) {
-      return compress(bytes);
+  shouldKeep: (thread: RawThread, threadIndex: ThreadIndex) => boolean
+): Profile {
+  const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
+  const keptThreads: RawThread[] = [];
+  profile.threads.forEach((thread, oldIndex) => {
+    if (shouldKeep(thread, oldIndex)) {
+      oldThreadIndexToNew.set(oldIndex, keptThreads.length);
+      keptThreads.push(thread);
     }
-    return bytes;
-  }
-  const s = serializeProfileToJsonString(profile);
-  if (filename.endsWith('.gz')) {
-    return compress(s);
-  }
-  return new TextEncoder().encode(s);
+  });
+  return {
+    ...profile,
+    threads: keptThreads,
+    ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
+  };
 }
 
 export async function run(options: CliOptions) {
   let profile = await loadProfile(options.input);
+
+  const processNamePrefix = options.onlyKeepProcessesWithNamePrefix;
+  if (processNamePrefix !== undefined) {
+    const before = profile.threads.length;
+    profile = keepThreads(
+      profile,
+      (thread) => thread.processName?.startsWith(processNamePrefix) ?? false
+    );
+    console.log(
+      `Kept ${profile.threads.length} of ${before} threads in processes whose name starts with ${JSON.stringify(processNamePrefix)}.`
+    );
+  }
+
+  if (options.mergeMarkersFrom !== undefined) {
+    const markersProfile = await loadProfile(options.mergeMarkersFrom);
+    const result = mergeMarkersFromProfile(profile, markersProfile);
+    profile = result.profile;
+    console.log(
+      `Merged the markers of ${result.mergedThreadNames.length} threads, aligning the profiles with ${result.usedClock}.`
+    );
+    if (result.unmatchedThreadNames.length !== 0) {
+      console.log(
+        `Dropped the markers of ${result.unmatchedThreadNames.length} threads without a matching pid and tid: ${result.unmatchedThreadNames.join(', ')}`
+      );
+    }
+  }
 
   if (options.symbolicateWithServer !== undefined) {
     const server = options.symbolicateWithServer;
@@ -273,6 +446,24 @@ export async function run(options: CliOptions) {
     loadWasmSymbolicationSpecs(options.symbolicateWasm)
   );
 
+  if (options.jsSourcesFromFuncNames) {
+    console.log('Finding the sources of JS functions in their names...');
+    attachSourcesFromFuncNames(profile);
+  }
+
+  if (options.mapSourcePaths !== undefined) {
+    console.log('Embedding sources from mapped paths...');
+    const mappings = parseSourcePathMappings(
+      fs.readFileSync(options.mapSourcePaths, 'utf8'),
+      path.dirname(options.mapSourcePaths)
+    );
+    await embedJsSources(
+      profile,
+      createSourceReader(mappings),
+      runSourceMapSymbolicationNode
+    );
+  }
+
   if (options.insertLabelFrames !== undefined) {
     console.log('Inserting label frames...');
     const tomlText = fs.readFileSync(options.insertLabelFrames, 'utf8');
@@ -295,19 +486,9 @@ export async function run(options: CliOptions) {
       profile,
       options.onlyKeepThreadsWithMarkersMatching
     );
-    const oldThreadIndexToNew = new Map<ThreadIndex, ThreadIndex>();
-    const matchingThreads: RawThread[] = [];
-    profile.threads.forEach((thread, oldIndex) => {
-      if (matchingThreadIndexes.has(oldIndex)) {
-        oldThreadIndexToNew.set(oldIndex, matchingThreads.length);
-        matchingThreads.push(thread);
-      }
-    });
-    profile = {
-      ...profile,
-      threads: matchingThreads,
-      ...remapCountersAndProfilerOverhead(profile, oldThreadIndexToNew),
-    };
+    profile = keepThreads(profile, (_thread, threadIndex) =>
+      matchingThreadIndexes.has(threadIndex)
+    );
     console.log(
       `Kept ${profile.threads.length} of ${before} threads with markers matching ${JSON.stringify(options.onlyKeepThreadsWithMarkersMatching)}.`
     );
@@ -325,7 +506,7 @@ export async function run(options: CliOptions) {
 
   const outputFilename = options.output;
   console.log(`Saving profile to ${outputFilename}`);
-  const bytes = await encodeProfileWithFilename(
+  const { bytes } = await encodeProfileForFilename(
     compactedProfile,
     outputFilename
   );
@@ -354,6 +535,12 @@ function collectWasm(
   return [...previous, { unstrippedWasmPath: value }];
 }
 
+function parseFileOrUrl(value: string): ProfileSource {
+  return /^https?:\/\//i.test(value)
+    ? { type: 'URL', url: value }
+    : { type: 'FILE', path: value };
+}
+
 function requireNonEmpty(flagName: string): (value: string) => string {
   return (value: string) => {
     if (value === '') {
@@ -378,6 +565,16 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
     .option('--from-url <url>', 'Load input from a URL')
     .option('--from-hash <hash>', 'Load input from a profile hash')
     .option(
+      '--only-keep-processes-with-name-prefix <prefix>',
+      'Keep only the threads of processes whose name starts with this prefix',
+      requireNonEmpty('--only-keep-processes-with-name-prefix')
+    )
+    .option(
+      '--merge-markers-from <fileOrUrl>',
+      'Copy the markers of this profile into the threads with the same pid and tid, e.g. from a Gecko profile into a simpleperf profile of the same run',
+      requireNonEmpty('--merge-markers-from')
+    )
+    .option(
       '--symbolicate-with-server <url>',
       'Symbolicate frames using this symbol server URL'
     )
@@ -388,6 +585,14 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
       )
         .argParser(collectWasm)
         .default([] as WasmSymbolicationCliSpec[])
+    )
+    .option(
+      '--map-source-paths <path>',
+      'JSON file mapping JS source URLs to local directories, to embed the sources and apply their source maps'
+    )
+    .option(
+      '--js-sources-from-func-names',
+      'Give JS functions the source in their name, like "foo (url:line:column)", if no JS function has a source'
     )
     .option('--insert-label-frames <path>', 'TOML file with label definitions')
     .option(
@@ -409,11 +614,7 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
 
   const sources: ProfileSource[] = [];
   if (typeof opts.input === 'string' && opts.input !== '') {
-    if (/^https?:\/\//i.test(opts.input)) {
-      sources.push({ type: 'URL', url: opts.input });
-    } else {
-      sources.push({ type: 'FILE', path: opts.input });
-    }
+    sources.push(parseFileOrUrl(opts.input));
   }
   if (typeof opts.fromFile === 'string' && opts.fromFile !== '') {
     sources.push({ type: 'FILE', path: opts.fromFile });
@@ -443,12 +644,25 @@ export function makeOptionsFromArgv(processArgv: string[]): CliOptions {
   return {
     input: sources[0],
     output: opts.output,
+    mergeMarkersFrom:
+      typeof opts.mergeMarkersFrom === 'string'
+        ? parseFileOrUrl(opts.mergeMarkersFrom)
+        : undefined,
+    onlyKeepProcessesWithNamePrefix:
+      typeof opts.onlyKeepProcessesWithNamePrefix === 'string'
+        ? opts.onlyKeepProcessesWithNamePrefix
+        : undefined,
     symbolicateWithServer:
       typeof opts.symbolicateWithServer === 'string' &&
       opts.symbolicateWithServer !== ''
         ? opts.symbolicateWithServer
         : undefined,
     symbolicateWasm: opts.symbolicateWasm,
+    mapSourcePaths:
+      typeof opts.mapSourcePaths === 'string' && opts.mapSourcePaths !== ''
+        ? opts.mapSourcePaths
+        : undefined,
+    jsSourcesFromFuncNames: opts.jsSourcesFromFuncNames === true,
     insertLabelFrames:
       typeof opts.insertLabelFrames === 'string' &&
       opts.insertLabelFrames !== ''

@@ -8,13 +8,19 @@ import {
   getRangeFilteredCombinedThreadActivitySlices,
 } from 'firefox-profiler/selectors/profile';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state';
-import { buildProcessThreadList } from '../process-thread-list';
+import {
+  buildProcessThreadList,
+  getFriendlyProcessName,
+} from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
+import { collectCounterSummary, getSortedCounterIndexes } from './counter-info';
+import { computeProfileNetworkSummary } from '../network-summary';
 import type { Store } from '../../types/store';
 import type { ThreadInfo, ProcessListItem } from '../process-thread-list';
 import type { TimestampManager } from '../timestamps';
 import type { ThreadMap } from '../thread-map';
-import type { ProfileInfoResult } from '../types';
+import type { MarkerMap } from '../marker-map';
+import type { ProfileInfoResult, CounterSummary } from '../types';
 
 /**
  * Filter a list of processes by a search string.
@@ -30,8 +36,7 @@ function applySearchFilter(
 
   for (const process of processes) {
     const processMatches =
-      process.name.toLowerCase().includes(query) ||
-      String(process.pid).includes(query);
+      process.name.toLowerCase().includes(query) || process.pid.includes(query);
 
     const matchingThreads = processMatches
       ? process.threads
@@ -60,6 +65,7 @@ export function collectProfileInfo(
   store: Store,
   timestampManager: TimestampManager,
   threadMap: ThreadMap,
+  markerMap: MarkerMap,
   processIndexMap: Map<string, number>,
   showAll: boolean = false,
   search?: string
@@ -92,10 +98,10 @@ export function collectProfileInfo(
       (t) => t.pid === processItem.pid
     );
     if (threadFromProcess) {
-      processItem.name =
-        threadFromProcess.processName ||
-        threadFromProcess.processType ||
-        'unknown';
+      processItem.name = getFriendlyProcessName(
+        profile.threads,
+        threadFromProcess
+      );
       processItem.etld1 = threadFromProcess['eTLD+1'];
       processItem.startTime = threadFromProcess.processStartupTime;
       processItem.endTime = threadFromProcess.processShutdownTime;
@@ -107,6 +113,19 @@ export function collectProfileInfo(
     search !== undefined
       ? applySearchFilter(result.processes, search)
       : result.processes;
+
+  const countersByPid = new Map<string, CounterSummary[]>();
+  for (const index of getSortedCounterIndexes(store)) {
+    const counter = collectCounterSummary(
+      store,
+      threadMap,
+      processIndexMap,
+      index
+    );
+    const list = countersByPid.get(counter.pid) ?? [];
+    list.push(counter);
+    countersByPid.set(counter.pid, list);
+  }
 
   const processesData: ProfileInfoResult['processes'] = processesToShow.map(
     (processItem) => {
@@ -141,6 +160,7 @@ export function collectProfileInfo(
           cpuMs: thread.cpuMs,
         })),
         remainingThreads: processItem.remainingThreads,
+        counters: countersByPid.get(processItem.pid),
       };
     }
   );
@@ -152,6 +172,12 @@ export function collectProfileInfo(
     combinedCpuActivity !== null
       ? collectSliceTree(combinedCpuActivity, timestampManager)
       : null;
+
+  const networkActivity = computeProfileNetworkSummary(
+    store,
+    threadMap,
+    markerMap
+  );
 
   return {
     type: 'profile-info',
@@ -165,5 +191,6 @@ export function collectProfileInfo(
     remainingProcesses:
       search !== undefined ? undefined : result.remainingProcesses,
     cpuActivity,
+    networkActivity,
   };
 }

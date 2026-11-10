@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     to import profiles from the local machine in this browser. Please open
     this page in { -firefox-brand-name } or Chrome instead.
     .title = Safari cannot import local profiles
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    This profile uses a format that is not supported by this version of { -profiler-brand-name }.
+    Try refreshing the page to check if there is an update available for { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
@@ -297,16 +302,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Report the error on GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Legal
-FooterLinks--Privacy = Privacy
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Settings
+SettingsMenu--docs = Documentation
+SettingsMenu--legal = Legal
+SettingsMenu--privacy = Privacy
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Change language
-FooterLinks--hide-button =
-    .title = Hide footer links
-    .aria-label = Hide footer links
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -392,8 +398,11 @@ Home--chrome-extension-recording-instructions =
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Enter filter terms
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Enter filter terms (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -506,8 +515,8 @@ MarkerTable--details = Details
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Only show markers matching: “{ $filter }”
     .aria-label = Only show markers matching: “{ $filter }”
+    .title = Only show markers matching: “{ $filter }”
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -516,14 +525,9 @@ MenuButtons--index--metaInfo-button =
     .label = Profile Info
 MenuButtons--index--full-view = Full View
 MenuButtons--index--cancel-upload = Cancel Upload
-MenuButtons--index--share-upload =
-    .label = Upload Local Profile
-MenuButtons--index--share-re-upload =
-    .label = Re-upload
 MenuButtons--index--share-error-uploading =
     .label = Error uploading
 MenuButtons--index--revert = Revert to Original Profile
-MenuButtons--index--docs = Docs
 MenuButtons--permalink--button =
     .label = Permalink
 
@@ -541,6 +545,19 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolicate profile
 MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Cancel
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Original sources resolved for { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = No stack positions in { $filename } matched this source map.
+MenuButtons--metaInfo--source-map-error-invalid = The selected file is not a valid source map.
+MenuButtons--metaInfo--source-map-error-no-eligible = This profile has no JS bundles with source map URLs.
+MenuButtons--metaInfo--source-map-error-failed = Could not apply this source map to the profile.
 MenuButtons--metaInfo--cpu-model = CPU model:
 MenuButtons--metaInfo--cpu-cores = CPU cores:
 MenuButtons--metaInfo--main-memory = Main memory:
@@ -666,9 +683,13 @@ MenuButtons--publish--renderCheckbox-label-preference = Include preference value
 MenuButtons--publish--renderCheckbox-label-private-browsing = Include the data from private browsing windows
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = This profile contains private browsing data
-MenuButtons--publish--reupload-performance-profile = Re-upload Performance Profile
+MenuButtons--publish--renderCheckbox-label-argument-values = Include JavaScript execution tracing function argument values
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = This profile contains function argument values recorded from the page, which may include personal data
 MenuButtons--publish--share-performance-profile = Share Performance Profile
+MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
+MenuButtons--publish--download-info-description = Save this profile as a file on your computer.
 MenuButtons--publish--info-description-default = By default, your personal data is removed.
 MenuButtons--publish--info-description-firefox-nightly2 = This profile is from { -firefox-nightly-brand-name }, so by default most information is included.
 MenuButtons--publish--include-additional-data = Include additional data that may be identifiable
@@ -677,7 +698,6 @@ MenuButtons--publish--upload-title = Uploading profile…
 MenuButtons--publish--cancel-upload = Cancel Upload
 MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong when uploading the profile.
 MenuButtons--publish--message-try-again = Try again
-MenuButtons--publish--download = Download
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
 
@@ -712,8 +732,8 @@ PanelSearch--search-field-hint = Did you know you can use the comma (,) to searc
 ProfileName--edit-profile-name-button =
     .title = Edit the profile name
 ProfileName--edit-profile-name-input =
-    .title = Edit the profile name
     .aria-label = Profile name
+    .title = Edit the profile name
 
 ## Profile Delete Button
 
@@ -793,8 +813,8 @@ ServiceWorkerManager--updated-while-not-ready =
     was fully loaded. You might see malfunctions.
 ServiceWorkerManager--new-version-is-ready = A new version of the application has been downloaded and is ready to use.
 ServiceWorkerManager--hide-notice-button =
-    .title = Hide the reload notice
     .aria-label = Hide the reload notice
+    .title = Hide the reload notice
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -891,9 +911,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = relative memory at this time
-TrackMemoryGraph--memory-range-in-graph = memory range in graph
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allocations and deallocations since the previous sample
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = relative memory at this time
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = memory range in graph
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allocations and deallocations since the previous sample
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -939,6 +976,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Average power in the current selection
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Average power in the current selection
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

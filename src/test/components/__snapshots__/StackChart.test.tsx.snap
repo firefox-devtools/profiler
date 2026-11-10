@@ -216,7 +216,7 @@ exports[`CombinedChart renders combined stack chart 1`] = `
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -735,7 +735,7 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -1308,7 +1308,7 @@ exports[`StackChart matches the snapshot and can display a tooltip with the same
               <input
                 class="idleSearchFieldInput photon-input"
                 name="search"
-                placeholder="Enter filter terms"
+                placeholder="Enter filter terms (/)"
                 required=""
                 title="Only display stacks which contain a function whose name matches this substring"
                 type="search"
@@ -2028,7 +2028,7 @@ exports[`StackChart matches the snapshot and can display a tooltip: dom 1`] = `
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
-            placeholder="Enter filter terms"
+            placeholder="Enter filter terms (/)"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -2577,7 +2577,7 @@ exports[`StackChart works when the user selects the JS allocations option 1`] = 
               <input
                 class="idleSearchFieldInput photon-input"
                 name="search"
-                placeholder="Enter filter terms"
+                placeholder="Enter filter terms (/)"
                 required=""
                 title="Only display stacks which contain a function whose name matches this substring"
                 type="search"

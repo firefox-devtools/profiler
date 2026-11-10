@@ -45,9 +45,9 @@ import type {
   MarkerIndex,
   MarkerSchemaByName,
   CategoryList,
-  Milliseconds,
   ProfileIndexTranslationMaps,
 } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type { CallNodeInfo } from 'firefox-profiler/profile-logic/call-node-info';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import {
@@ -717,7 +717,10 @@ function _collapseResourceInCallNodePath(
     callNodePath
       // Map any collapsed functions into the collapsedFuncIndex
       .map((pathFuncIndex) => {
-        return funcTable.resource[pathFuncIndex] === resourceIndex
+        const hasResource =
+          (funcTable.flags[pathFuncIndex] & FuncFlag.HasResource) !== 0;
+        return hasResource &&
+          funcTable.resource[pathFuncIndex] === resourceIndex
           ? collapsedFuncIndex
           : pathFuncIndex;
       })
@@ -798,12 +801,10 @@ export function mergeCallNode(
     // to the merged stack should be attributed to). Only contains entries for merged
     // stacks; the vast majority of stacks are not merged and map to themselves.
     const mergedStackToEffectiveParent = new Map<
-      IndexIntoStackTable | null,
-      IndexIntoStackTable | null
+      IndexIntoStackTable,
+      IndexIntoStackTable
     >();
-    const newPrefixCol = new Array<IndexIntoStackTable | null>(
-      stackTable.length
-    );
+    const newPrefixCol = new Int32Array(stackTable.length);
 
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
@@ -812,11 +813,9 @@ export function mergeCallNode(
     // If undefined: no match
     // Otherwise: length of the partial match, including this stack
     // All values are < callNodePathLength.
-    const partialMatchLengthAtStack = new Map<
-      IndexIntoStackTable | null,
-      number
-    >();
-    partialMatchLengthAtStack.set(null, 0);
+    // Key -1 represents the virtual root above all stack indexes.
+    const partialMatchLengthAtStack = new Map<IndexIntoStackTable, number>();
+    partialMatchLengthAtStack.set(-1, 0);
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
 
@@ -862,8 +861,14 @@ export function mergeCallNode(
     };
 
     return updateThreadStacks(thread, newStackTable, (oldStack) => {
+      if (oldStack === null) {
+        return null;
+      }
       const effectiveParent = mergedStackToEffectiveParent.get(oldStack);
-      return effectiveParent !== undefined ? effectiveParent : oldStack;
+      if (effectiveParent === undefined) {
+        return oldStack;
+      }
+      return effectiveParent === -1 ? null : effectiveParent;
     });
   });
 }
@@ -897,12 +902,12 @@ export function mergeFunction(
   const stackTableFrameCol = stackTable.frame;
   const frameTableFuncCol = frameTable.func;
   const oldPrefixCol = stackTable.prefix;
-  const newPrefixCol = new Array(stackTable.length);
+  const newPrefixCol = new Int32Array(stackTable.length);
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const oldPrefix = oldPrefixCol[stackIndex];
     const newPrefixPlusOne =
-      oldPrefix === null ? 0 : oldStackToNewStackPlusOne[oldPrefix];
+      oldPrefix === -1 ? 0 : oldStackToNewStackPlusOne[oldPrefix];
 
     const frameIndex = stackTableFrameCol[stackIndex];
     const funcIndex = frameTableFuncCol[frameIndex];
@@ -911,8 +916,7 @@ export function mergeFunction(
     } else {
       oldStackToNewStackPlusOne[stackIndex] = stackIndex + 1;
     }
-    const newPrefix = newPrefixPlusOne === 0 ? null : newPrefixPlusOne - 1;
-    newPrefixCol[stackIndex] = newPrefix;
+    newPrefixCol[stackIndex] = newPrefixPlusOne - 1;
   }
 
   const newStackTable = {
@@ -950,7 +954,7 @@ export function dropFunction(
       // This is the function we want to remove.
       funcIndex === funcIndexToDrop ||
       // The parent of this stack contained the function.
-      (prefix !== null && stackContainsFunc[prefix] === 1)
+      (prefix !== -1 && stackContainsFunc[prefix] === 1)
     ) {
       stackContainsFunc[stackIndex] = 1;
     }
@@ -989,8 +993,10 @@ export function collapseResource(
   const newFrameTableFuncCol = frameTable.func.slice();
   for (let i = 0; i < frameTable.length; i++) {
     const funcIndex = frameTable.func[i];
-    const resourceIndex = funcTable.resource[funcIndex];
-    if (resourceIndex === resourceIndexToCollapse) {
+    if (
+      (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0 &&
+      funcTable.resource[funcIndex] === resourceIndexToCollapse
+    ) {
       newFrameTableFuncCol[i] = collapsedFuncIndex;
     }
   }
@@ -1052,11 +1058,11 @@ export function collapseDirectRecursion(
 
   const { stackTable, frameTable } = thread;
   // Map stack indices that are funcToCheck or have a funcToCheck parent, ignoring other implementations,
-  // to the parent stack index of the outermost recursive funcToCheck.
+  // to the parent stack index of the outermost recursive funcToCheck (or -1 if it is a root).
   // E.g. B3 -> A1 in the example.
   const recursionChainPrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable
   >();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
   const newStackTablePrefixColumn = stackTable.prefix.slice();
@@ -1067,7 +1073,7 @@ export function collapseDirectRecursion(
     const funcIndex = frameTable.func[frameIndex];
 
     const recursionChainPrefix =
-      prefix !== null ? recursionChainPrefixForStack.get(prefix) : undefined;
+      prefix !== -1 ? recursionChainPrefixForStack.get(prefix) : undefined;
     if (recursionChainPrefix === undefined) {
       // Our prefix was not part of a recursion chain.
       // If this stack frame matches the collapsed func, this stack node is the root
@@ -1147,12 +1153,12 @@ export function collapseRecursion(
   const { stackTable, frameTable } = thread;
 
   // Map all stack indexes that are inside a funcToCollapse subtree to the
-  // parent stack index of the funcToCollapse subtree root.
+  // parent stack index of the funcToCollapse subtree root (or -1 if it is a root).
   // In the example, all stack nodes under the B1 subtree would be mapped to
   // B1's prefix A1.
   const funcToCollapseSubtreePrefixForStack = new Map<
     IndexIntoStackTable,
-    IndexIntoStackTable | null
+    IndexIntoStackTable
   >();
   const newStackTablePrefixColumn = stackTable.prefix.slice();
 
@@ -1162,7 +1168,7 @@ export function collapseRecursion(
     const funcIndex = frameTable.func[frameIndex];
 
     const subtreePrefix =
-      prefix !== null
+      prefix !== -1
         ? funcToCollapseSubtreePrefixForStack.get(prefix)
         : undefined;
     if (subtreePrefix === undefined) {
@@ -1199,8 +1205,9 @@ const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
   cpp: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
     const { funcTable, stringTable } = thread;
+    const funcFlags = funcTable.flags[funcIndex];
     // Return quickly if this is a JS frame.
-    if (thread.funcTable.isJS[funcIndex]) {
+    if ((funcFlags & FuncFlag.IsJS) !== 0) {
       return false;
     }
 
@@ -1210,13 +1217,15 @@ const FUNC_MATCHES = {
     // frames are not associated with a shared library and thus have no resource
     const locationString = stringTable.getString(funcTable.name[funcIndex]);
     const isProbablyJitCode =
-      funcTable.resource[funcIndex] === -1 && locationString.startsWith('0x');
+      (funcFlags & FuncFlag.HasResource) === 0 &&
+      locationString.startsWith('0x');
     return !isProbablyJitCode;
   },
   js: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
     return (
-      thread.funcTable.isJS[funcIndex] ||
-      thread.funcTable.relevantForJS[funcIndex]
+      (thread.funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
     );
   },
 };
@@ -1231,7 +1240,7 @@ export function collapseFunctionSubtree(
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
-    if (prefix !== null && isInCollapsedSubtree[prefix] !== 0) {
+    if (prefix !== -1 && isInCollapsedSubtree[prefix] !== 0) {
       oldStackToNewStack[stackIndex] = oldStackToNewStack[prefix];
       isInCollapsedSubtree[stackIndex] = 1;
     } else {
@@ -1268,11 +1277,12 @@ export function focusSubtree(
     const stackMatches = new Int32Array(stackTable.length);
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     const oldStackToNewStack = new Int32Array(stackTable.length).fill(-1);
-    const newPrefixCol: Array<IndexIntoStackTable | null> = [];
+    const newPrefixBuf = new Int32Array(stackTable.length);
+    let newPrefixLen = 0;
     const keepStack = makeBitSet(stackTable.length);
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
-      const prefixMatchesUpTo = prefix !== null ? stackMatches[prefix] : 0;
+      const prefixMatchesUpTo = prefix !== -1 ? stackMatches[prefix] : 0;
       let stackMatchesUpTo = -1;
       if (prefixMatchesUpTo !== -1) {
         if (prefixMatchesUpTo === prefixDepth) {
@@ -1288,15 +1298,16 @@ export function focusSubtree(
         }
         if (stackMatchesUpTo === prefixDepth) {
           const prefixNewStack =
-            prefix === null ? -1 : oldStackToNewStack[prefix];
-          oldStackToNewStack[stackIndex] = newPrefixCol.length;
-          newPrefixCol.push(prefixNewStack === -1 ? null : prefixNewStack);
+            prefix === -1 ? -1 : oldStackToNewStack[prefix];
+          oldStackToNewStack[stackIndex] = newPrefixLen;
+          newPrefixBuf[newPrefixLen++] = prefixNewStack;
           setBit(keepStack, stackIndex);
         }
       }
       stackMatches[stackIndex] = stackMatchesUpTo;
     }
 
+    const newPrefixCol = newPrefixBuf.slice(0, newPrefixLen);
     const newStackTable = createStackTableBySkippingDiscarded(
       stackTable,
       newPrefixCol,
@@ -1326,8 +1337,8 @@ export function focusInvertedSubtree(
     function convertStack(leaf: IndexIntoStackTable | null) {
       let matchesUpToDepth = 0; // counted from the leaf
       for (
-        let stack: number | null = leaf;
-        stack !== null;
+        let stack = leaf ?? -1;
+        stack !== -1;
         stack = stackTable.prefix[stack]
       ) {
         const frame = stackTable.frame[stack];
@@ -1370,7 +1381,8 @@ export function focusFunction(
   return timeCode('focusFunction', () => {
     const { stackTable, frameTable } = thread;
     const oldStackToNewStack = new Int32Array(stackTable.length).fill(-1);
-    const newPrefixCol: Array<IndexIntoStackTable | null> = [];
+    const newPrefixBuf = new Int32Array(stackTable.length);
+    let newPrefixLen = 0;
     const keepStack = makeBitSet(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
@@ -1378,14 +1390,15 @@ export function focusFunction(
       const frameIndex = stackTable.frame[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
-      const prefixNewStack = prefix === null ? -1 : oldStackToNewStack[prefix];
+      const prefixNewStack = prefix === -1 ? -1 : oldStackToNewStack[prefix];
       if (prefixNewStack !== -1 || funcIndex === funcIndexToFocus) {
-        oldStackToNewStack[stackIndex] = newPrefixCol.length;
-        newPrefixCol.push(prefixNewStack === -1 ? null : prefixNewStack);
+        oldStackToNewStack[stackIndex] = newPrefixLen;
+        newPrefixBuf[newPrefixLen++] = prefixNewStack;
         setBit(keepStack, stackIndex);
       }
     }
 
+    const newPrefixCol = newPrefixBuf.slice(0, newPrefixLen);
     const newStackTable = createStackTableBySkippingDiscarded(
       stackTable,
       newPrefixCol,
@@ -1410,7 +1423,8 @@ export function focusSelf(
 
     const shouldKeepStack = makeBitSet(stackTable.length);
 
-    const newPrefixCol = new Array<IndexIntoStackTable | null>();
+    const newPrefixBuf = new Int32Array(stackTable.length);
+    let newPrefixLen = 0;
     const oldStackToNewStack = new Int32Array(stackTable.length);
 
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
@@ -1419,25 +1433,26 @@ export function focusSelf(
 
       if (funcIndex === funcIndexToFocus) {
         setBit(shouldKeepStack, stackIndex);
-        const newStackIndex = newPrefixCol.length;
-        newPrefixCol[newStackIndex] = null;
+        const newStackIndex = newPrefixLen++;
+        newPrefixBuf[newStackIndex] = -1;
         oldStackToNewStack[stackIndex] = newStackIndex;
       } else {
         const oldPrefix = stackTable.prefix[stackIndex];
         if (
-          oldPrefix !== null &&
+          oldPrefix !== -1 &&
           checkBit(shouldKeepStack, oldPrefix) &&
           !funcMatchesImplementation(thread, funcIndex)
         ) {
           setBit(shouldKeepStack, stackIndex);
           const newPrefix = oldStackToNewStack[oldPrefix];
-          const newStackIndex = newPrefixCol.length;
-          newPrefixCol[newStackIndex] = newPrefix;
+          const newStackIndex = newPrefixLen++;
+          newPrefixBuf[newStackIndex] = newPrefix;
           oldStackToNewStack[stackIndex] = newStackIndex;
         }
       }
     }
 
+    const newPrefixCol = newPrefixBuf.slice(0, newPrefixLen);
     const newStackTable = createStackTableBySkippingDiscarded(
       stackTable,
       newPrefixCol,
@@ -1461,24 +1476,26 @@ export function focusCategory(thread: Thread, category: IndexIntoCategoryList) {
   return timeCode('focusCategory', () => {
     const { stackTable } = thread;
     const oldStackToNewStack = new Int32Array(stackTable.length).fill(-1);
-    const newPrefixCol: Array<IndexIntoStackTable | null> = [];
+    const newPrefixBuf = new Int32Array(stackTable.length);
+    let newPrefixLen = 0;
     const keepStack = makeBitSet(stackTable.length);
 
     // fill the new stack table with the kept frames
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
-      const prefixNewStack = prefix === null ? -1 : oldStackToNewStack[prefix];
+      const prefixNewStack = prefix === -1 ? -1 : oldStackToNewStack[prefix];
 
       if (stackTable.category[stackIndex] !== category) {
         oldStackToNewStack[stackIndex] = prefixNewStack;
         continue;
       }
 
-      oldStackToNewStack[stackIndex] = newPrefixCol.length;
-      newPrefixCol.push(prefixNewStack === -1 ? null : prefixNewStack);
+      oldStackToNewStack[stackIndex] = newPrefixLen;
+      newPrefixBuf[newPrefixLen++] = prefixNewStack;
       setBit(keepStack, stackIndex);
     }
 
+    const newPrefixCol = newPrefixBuf.slice(0, newPrefixLen);
     const newStackTable = createStackTableBySkippingDiscarded(
       stackTable,
       newPrefixCol,
@@ -1517,7 +1534,7 @@ export function restoreAllFunctionsInCallNodePath(
     const frameIndex = stackTable.frame[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const prefixPathDepth: number | null =
-      prefix === null ? -1 : matchesUpToDepth[prefix];
+      prefix === -1 ? -1 : matchesUpToDepth[prefix];
 
     if (prefixPathDepth === null) {
       continue;
@@ -1548,8 +1565,8 @@ export function restoreAllFunctionsInCallNodePath(
   }
   const newCallNodePath = [];
   for (
-    let stackIndex: IndexIntoStackTable | null = tipStackIndex;
-    stackIndex !== null;
+    let stackIndex: IndexIntoStackTable = tipStackIndex;
+    stackIndex !== -1;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
     const frameIndex = stackTable.frame[stackIndex];
@@ -1599,8 +1616,8 @@ export type BacktraceItem = {
   // library instead.
   // May also be empty.
   origin: string;
-  // The inline depth of this frame. Frames with inline depth > 0 are inlined.
-  inlineDepth: number;
+  // Whether this frame is an inline expansion of another function.
+  isInlined: boolean;
   stackIndex: IndexIntoStackTable;
 };
 
@@ -1625,8 +1642,8 @@ export function getBacktraceItemsForStack(
   const { stackTable, frameTable } = thread;
   const unfilteredPath = [];
   for (
-    let stackIndex: IndexIntoStackTable | null = stack;
-    stackIndex !== null;
+    let stackIndex: IndexIntoStackTable = stack;
+    stackIndex !== -1;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
     const frameIndex = stackTable.frame[stackIndex];
@@ -1634,7 +1651,7 @@ export function getBacktraceItemsForStack(
       category: stackTable.category[stackIndex],
       funcIndex: frameTable.func[frameIndex],
       frameIndex,
-      inlineDepth: frameTable.inlineDepth[frameIndex],
+      isInlined: (frameTable.flags[frameIndex] & FrameFlag.IsInlined) !== 0,
       stackIndex,
     });
   }
@@ -1644,11 +1661,11 @@ export function getBacktraceItemsForStack(
     funcMatchesImplementation(thread, funcIndex)
   );
   return path.map(
-    ({ category, funcIndex, frameIndex, inlineDepth, stackIndex }) => {
+    ({ category, funcIndex, frameIndex, isInlined, stackIndex }) => {
       return {
         funcName: stringTable.getString(funcTable.name[funcIndex]),
         category,
-        isFrameLabel: funcTable.resource[funcIndex] === -1,
+        isFrameLabel: (funcTable.flags[funcIndex] & FuncFlag.HasResource) === 0,
         origin: getOriginAnnotationForFunc(
           funcIndex,
           frameIndex,
@@ -1659,7 +1676,7 @@ export function getBacktraceItemsForStack(
           sources,
           sourceLocationTable
         ),
-        inlineDepth,
+        isInlined,
         stackIndex,
       };
     }
@@ -1677,7 +1694,7 @@ export function funcHasDirectRecursiveCall(
   for (let i = 0; i < callNodeTable.length; i++) {
     if (callNodeTable.func[i] === funcToCheck) {
       const prefix = callNodeTable.prefix[i];
-      if (prefix !== null && callNodeTable.func[prefix] === funcToCheck) {
+      if (prefix !== -1 && callNodeTable.func[prefix] === funcToCheck) {
         return true;
       }
     }
@@ -1781,7 +1798,7 @@ export function filterSamples(
         for (let i = 0; i < stackTable.length; i++) {
           const prefix = stackTable.prefix[i];
           const f = frameTable.func[stackTable.frame[i]];
-          if (funcIndexes.has(f) || (prefix !== null && stackHasFunc[prefix])) {
+          if (funcIndexes.has(f) || (prefix !== -1 && stackHasFunc[prefix])) {
             stackHasFunc[i] = 1;
           }
         }
@@ -1825,7 +1842,7 @@ export function filterSamples(
         for (let i = 0; i < stackTable.length; i++) {
           const prefix = stackTable.prefix[i];
           const f = frameTable.func[stackTable.frame[i]];
-          if (prefix === null) {
+          if (prefix === -1) {
             // Root frame: must match the first element of the prefix.
             if (f === prefixFuncs[0]) {
               matchDepth[i] = 1;
@@ -1867,7 +1884,7 @@ export function filterSamples(
 
         function computeFilteredStackColumn(
           originalStackColumn: Array<IndexIntoStackTable | null>,
-          timeColumn: Milliseconds[]
+          timeColumn: Float64Array<ArrayBuffer>
         ): Array<IndexIntoStackTable | null> {
           const newStackColumn = originalStackColumn.slice();
           let sampleIndex = 0;

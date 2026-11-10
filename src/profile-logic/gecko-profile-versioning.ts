@@ -14,6 +14,7 @@
 
 import { StringTable } from '../utils/string-table';
 import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
+import { ProfileVersionError } from './errors';
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -45,10 +46,10 @@ export function upgradeGeckoProfileToCurrentVersion(json: unknown) {
   }
 
   if (profileVersion > GECKO_PROFILE_VERSION) {
-    throw new Error(
-      `Unable to parse a Gecko profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
-        `The most recent version understood by this version of profiler.firefox.com is version ${GECKO_PROFILE_VERSION}.\n` +
-        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
+    throw new ProfileVersionError(
+      'Gecko',
+      profileVersion,
+      GECKO_PROFILE_VERSION
     );
   }
 
@@ -494,7 +495,7 @@ const _upgraders: {
                 frame[schemaIndexCategory] =
                   oldCategoryToNewCategory[frame[schemaIndexCategory]];
               } else {
-                frame[schemaIndexCategory] = 1 /* Other*/;
+                frame[schemaIndexCategory] = 1; /* Other*/
               }
             }
           }
@@ -1462,7 +1463,13 @@ const _upgraders: {
             // upgraded counters; ignore them.
             continue;
           }
-          counter.samples = counter.sample_groups[0].samples;
+          // A counter that collected no data has an empty sample_groups array
+          // (see the version 18 upgrader), so fall back to an empty samples
+          // table when there is no group to unwrap.
+          counter.samples =
+            counter.sample_groups.length > 0
+              ? counter.sample_groups[0].samples
+              : { schema: { time: 0, count: 1, number: 2 }, data: [] };
           delete counter.sample_groups;
         }
       }
@@ -1555,6 +1562,36 @@ const _upgraders: {
       }
     }
     convertToVersion34Recursive(profile);
+  },
+  [35]: (_: any) => {
+    // This version bump added a new marker schema format type, named "hexadecimal",
+    // which older frontends will not be able to display.
+    // No upgrade is needed, as older versions of firefox would not generate
+    // marker data with hexadecimal typed data, and no modification is needed in the
+    // frontend to display older formats.
+  },
+  [36]: (_: any) => {
+    // The Text marker's "name" field and the Log marker's "message" field are
+    // now unique strings, so their payloads hold a string table index instead
+    // of the text itself.
+    // No upgrade is needed, as the frontend reads the field format from the
+    // marker schema. This bump is only here so that older frontends, which read
+    // these two fields directly, get updated.
+  },
+  [37]: (profile: any) => {
+    function convertToVersion37Recursive(p: any) {
+      for (const schema of p.meta.markerSchema ?? []) {
+        if (schema.name === 'FileIO' && schema.tableLabel === undefined) {
+          schema.tableLabel =
+            "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion37Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion37Recursive(profile);
   },
 
   // If you add a new upgrader here, please document the change in

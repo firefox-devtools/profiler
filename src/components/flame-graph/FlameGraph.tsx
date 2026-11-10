@@ -3,32 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
 
-import { explicitConnectWithForwardRef } from '../../utils/connect';
-import { FlameGraphCanvas } from './Canvas';
-
 import {
-  getCategories,
-  getCommittedRange,
-  getPreviewSelection,
-  getScrollToSelectionGeneration,
-  getProfileInterval,
-  getInnerWindowIDToPageMap,
-  getProfileUsesMultipleStackTypes,
-} from 'firefox-profiler/selectors/profile';
-import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
-import {
-  getSelectedThreadsKey,
-  getInvertCallstack,
-} from '../../selectors/url-state';
+  FlameGraphCanvas,
+  type OwnProps as FlameGraphCanvasProps,
+} from './Canvas';
 import { ContextMenuTrigger } from 'firefox-profiler/components/shared/ContextMenuTrigger';
-import {
-  changeSelectedCallNode,
-  changeRightClickedCallNode,
-  handleCallNodeTransformShortcut,
-  updateBottomBoxContentsAndMaybeOpen,
-} from 'firefox-profiler/actions/profile-view';
-import { extractNonInvertedCallTreeTimings } from 'firefox-profiler/profile-logic/call-tree';
-import { ensureExists } from 'firefox-profiler/utils/types';
 
 import type {
   Thread,
@@ -54,8 +33,6 @@ import type {
   CallTreeTimings,
 } from 'firefox-profiler/profile-logic/call-tree';
 
-import type { ConnectedProps } from 'firefox-profiler/utils/connect';
-
 import './FlameGraph.css';
 
 const STACK_FRAME_HEIGHT = 16;
@@ -67,7 +44,7 @@ const STACK_FRAME_HEIGHT = 16;
  */
 const SELECTABLE_THRESHOLD = 0.001;
 
-type StateProps = {
+export type Props = {
   readonly thread: Thread;
   readonly weightType: WeightType;
   readonly innerWindowIDToPageMap: Map<InnerWindowID, Page> | null;
@@ -83,26 +60,34 @@ type StateProps = {
   readonly scrollToSelectionGeneration: number;
   readonly categories: CategoryList;
   readonly interval: Milliseconds;
-  readonly isInverted: boolean;
+  readonly startsAtBottom: boolean;
   readonly callTreeSummaryStrategy: CallTreeSummaryStrategy;
   readonly ctssSamples: SamplesLikeTable;
   readonly ctssSampleCategoriesAndSubcategories: SampleCategoriesAndSubcategories;
+  readonly ctssSampleCallNodes: Array<IndexIntoCallNodeTable | null>;
   readonly tracedTiming: CallTreeTimings | null;
   readonly displayStackType: boolean;
+  readonly contextMenuId?: string;
+  readonly onSelectedCallNodeChange: (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => void;
+  readonly onRightClickedCallNodeChange: (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => void;
+  readonly onCallNodeEnterOrDoubleClick: (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => void;
+  readonly onKeyboardTransformShortcut: (
+    event: React.KeyboardEvent<HTMLElement>,
+    nodeIndex: IndexIntoCallNodeTable
+  ) => void;
 };
-type DispatchProps = {
-  readonly changeSelectedCallNode: typeof changeSelectedCallNode;
-  readonly changeRightClickedCallNode: typeof changeRightClickedCallNode;
-  readonly handleCallNodeTransformShortcut: typeof handleCallNodeTransformShortcut;
-  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
-};
-type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 export interface FlameGraphHandle {
   focus(): void;
 }
 
-class FlameGraphImpl
+export class FlameGraph
   extends React.PureComponent<Props>
   implements FlameGraphHandle
 {
@@ -116,45 +101,14 @@ class FlameGraphImpl
     document.removeEventListener('copy', this._onCopy, false);
   }
 
-  _onSelectedCallNodeChange = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    const { callNodeInfo, threadsKey, changeSelectedCallNode } = this.props;
-    changeSelectedCallNode(
-      threadsKey,
-      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-    );
-  };
-
-  _onRightClickedCallNodeChange = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    const { callNodeInfo, threadsKey, changeRightClickedCallNode } = this.props;
-    changeRightClickedCallNode(
-      threadsKey,
-      callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-    );
-  };
-
-  _onCallNodeEnterOrDoubleClick = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
-    if (callNodeIndex === null) {
-      return;
-    }
-    const { callTree, updateBottomBoxContentsAndMaybeOpen } = this.props;
-    const bottomBoxInfo = callTree.getBottomBoxInfoForCallNode(callNodeIndex);
-    updateBottomBoxContentsAndMaybeOpen('flame-graph', bottomBoxInfo);
-  };
-
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
   };
 
-  /* This method is called from MaybeFlameGraph. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  /* This method is called from ConnectedFlameGraph. */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   focus = () => {
     if (this._viewport) {
       this._viewport.focus();
@@ -167,9 +121,8 @@ class FlameGraphImpl
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
     const { flameGraphTiming, callNodeInfo } = this.props;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[callNodeIndex];
-    const row = flameGraphTiming[depth];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
+    const row = flameGraphTiming.getRow(depth);
     const columnIndex = row.callNode.indexOf(callNodeIndex);
     return row.end[columnIndex] - row.start[columnIndex] > SELECTABLE_THRESHOLD;
   };
@@ -192,9 +145,8 @@ class FlameGraphImpl
 
     let callNodeIndex = startingCallNodeIndex;
 
-    const callNodeTable = callNodeInfo.getCallNodeTable();
-    const depth = callNodeTable.depth[callNodeIndex];
-    const row = flameGraphTiming[depth];
+    const depth = callNodeInfo.depthForNode(callNodeIndex);
+    const row = flameGraphTiming.getRow(depth);
     let columnIndex = row.callNode.indexOf(callNodeIndex);
 
     do {
@@ -215,15 +167,15 @@ class FlameGraphImpl
 
   _handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
     const {
-      threadsKey,
       callTree,
       callNodeInfo,
       selectedCallNodeIndex,
       rightClickedCallNodeIndex,
-      changeSelectedCallNode,
-      handleCallNodeTransformShortcut,
+      onSelectedCallNodeChange,
+      onCallNodeEnterOrDoubleClick,
+      onKeyboardTransformShortcut,
+      startsAtBottom,
     } = this.props;
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     if (
       // Please do not forget to update the switch/case below if changing the array to allow more keys.
@@ -231,59 +183,49 @@ class FlameGraphImpl
     ) {
       if (selectedCallNodeIndex === null) {
         // Just select the "root" node if we've got no prior selection.
-        changeSelectedCallNode(
-          threadsKey,
-          callNodeInfo.getCallNodePathFromIndex(0)
-        );
+        onSelectedCallNodeChange(0);
         return;
       }
 
-      switch (event.key) {
-        case 'ArrowDown': {
-          const prefix = callNodeTable.prefix[selectedCallNodeIndex];
-          if (prefix !== -1) {
-            changeSelectedCallNode(
-              threadsKey,
-              callNodeInfo.getCallNodePathFromIndex(prefix)
-            );
-          }
-          break;
-        }
-        case 'ArrowUp': {
-          const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
-          // The call nodes returned from getChildren are sorted by
-          // total time in descending order.  The first one in the
-          // array, which is the one we pick, has the longest time and
-          // thus the widest box.
+      // In top-down layout the parent is visually above the selected box, so
+      // ArrowUp navigates to the parent and ArrowDown to the first child.
+      // In bottom-up layout it's the other way around.
+      const isGoToParent = startsAtBottom
+        ? event.key === 'ArrowDown'
+        : event.key === 'ArrowUp';
+      const isGoToChild = startsAtBottom
+        ? event.key === 'ArrowUp'
+        : event.key === 'ArrowDown';
 
-          if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
-            changeSelectedCallNode(
-              threadsKey,
-              callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-            );
-          }
-          break;
+      if (isGoToParent) {
+        const prefix = callNodeInfo.prefixForNode(selectedCallNodeIndex);
+        if (prefix !== -1) {
+          onSelectedCallNodeChange(prefix);
         }
-        case 'ArrowLeft':
-        case 'ArrowRight': {
-          const callNodeIndex = this._nextSelectableInRow(
-            selectedCallNodeIndex,
-            event.key === 'ArrowLeft' ? -1 : 1
-          );
+      } else if (isGoToChild) {
+        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        // The call nodes returned from getChildren are sorted by
+        // total time in descending order.  The first one in the
+        // array, which is the one we pick, has the longest time and
+        // thus the widest box.
 
-          if (callNodeIndex !== undefined) {
-            changeSelectedCallNode(
-              threadsKey,
-              callNodeInfo.getCallNodePathFromIndex(callNodeIndex)
-            );
-          }
-          break;
+        if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
+          onSelectedCallNodeChange(callNodeIndex);
         }
-        default:
-          // We shouldn't arrive here, thanks to the if block at the top.
-          console.error(
-            `An unknown key "${event.key}" was pressed, this shouldn't happen.`
-          );
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        const callNodeIndex = this._nextSelectableInRow(
+          selectedCallNodeIndex,
+          event.key === 'ArrowLeft' ? -1 : 1
+        );
+
+        if (callNodeIndex !== undefined) {
+          onSelectedCallNodeChange(callNodeIndex);
+        }
+      } else {
+        // We shouldn't arrive here, thanks to the if block at the top.
+        console.error(
+          `An unknown key "${event.key}" was pressed, this shouldn't happen.`
+        );
       }
       return;
     }
@@ -298,20 +240,19 @@ class FlameGraphImpl
     }
 
     if (event.key === 'Enter') {
-      this._onCallNodeEnterOrDoubleClick(nodeIndex);
+      onCallNodeEnterOrDoubleClick(nodeIndex);
       return;
     }
 
-    handleCallNodeTransformShortcut(event, threadsKey, nodeIndex);
+    onKeyboardTransformShortcut(event, nodeIndex);
   };
 
   _onCopy = (event: ClipboardEvent) => {
     if (document.activeElement === this._viewport) {
       event.preventDefault();
       const { callNodeInfo, selectedCallNodeIndex, thread } = this.props;
-      const callNodeTable = callNodeInfo.getCallNodeTable();
       if (selectedCallNodeIndex !== null) {
-        const funcIndex = callNodeTable.func[selectedCallNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(selectedCallNodeIndex);
         const funcName = thread.stringTable.getString(
           thread.funcTable.name[funcIndex]
         );
@@ -336,34 +277,26 @@ class FlameGraphImpl
       callTreeSummaryStrategy,
       categories,
       interval,
-      isInverted,
+      startsAtBottom,
       innerWindowIDToPageMap,
       weightType,
       ctssSamples,
       ctssSampleCategoriesAndSubcategories,
+      ctssSampleCallNodes,
       tracedTiming,
       displayStackType,
+      contextMenuId = 'CallNodeContextMenu',
+      onSelectedCallNodeChange,
+      onRightClickedCallNodeChange,
+      onCallNodeEnterOrDoubleClick,
     } = this.props;
-
-    // Get the CallTreeTimingsNonInverted out of tracedTiming. We pass this
-    // along rather than the more generic CallTreeTimings type so that the
-    // FlameGraphCanvas component can operate on the more specialized type.
-    // (CallTreeTimingsNonInverted and CallTreeTimingsInverted are very
-    // different, and the flame graph is only used with non-inverted timings.)
-    const tracedTimingNonInverted =
-      tracedTiming !== null
-        ? ensureExists(
-            extractNonInvertedCallTreeTimings(tracedTiming),
-            'The flame graph should only ever see non-inverted timings, see UrlState.getInvertCallstack'
-          )
-        : null;
 
     const maxViewportHeight = maxStackDepthPlusOne * STACK_FRAME_HEIGHT;
 
     return (
       <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
         <ContextMenuTrigger
-          id="CallNodeContextMenu"
+          id={contextMenuId}
           attributes={{
             className: 'treeViewContextMenu',
           }}
@@ -376,7 +309,7 @@ class FlameGraphImpl
               maxViewportHeight,
               maximumZoom: 1,
               previewSelection,
-              startsAtBottom: true,
+              startsAtBottom,
               disableHorizontalMovement: true,
               viewportNeedsUpdate,
               marginLeft: 0,
@@ -398,15 +331,16 @@ class FlameGraphImpl
               scrollToSelectionGeneration,
               callTreeSummaryStrategy,
               stackFrameHeight: STACK_FRAME_HEIGHT,
-              onSelectionChange: this._onSelectedCallNodeChange,
-              onRightClick: this._onRightClickedCallNodeChange,
-              onDoubleClick: this._onCallNodeEnterOrDoubleClick,
+              onSelectionChange: onSelectedCallNodeChange,
+              onRightClick: onRightClickedCallNodeChange,
+              onDoubleClick: onCallNodeEnterOrDoubleClick,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
-              isInverted,
+              startsAtBottom,
               ctssSamples,
               ctssSampleCategoriesAndSubcategories,
-              tracedTiming: tracedTimingNonInverted,
+              ctssSampleCallNodes,
+              tracedTiming,
               displayStackType,
             }}
           />
@@ -416,58 +350,14 @@ class FlameGraphImpl
   }
 }
 
-function viewportNeedsUpdate() {
-  // By always returning false we prevent the viewport from being
+function viewportNeedsUpdate(
+  prevProps: FlameGraphCanvasProps,
+  nextProps: FlameGraphCanvasProps
+) {
+  // By returning false we prevent the viewport from being
   // reset and scrolled all the way to the bottom when doing
   // operations like changing the time selection or applying a
   // transform.
-  return false;
+  // We only reset the viewport if the layout direction changes.
+  return prevProps.startsAtBottom !== nextProps.startsAtBottom;
 }
-
-export const FlameGraph = explicitConnectWithForwardRef<
-  {},
-  StateProps,
-  DispatchProps,
-  FlameGraphHandle
->({
-  mapStateToProps: (state) => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    weightType: selectedThreadSelectors.getWeightTypeForCallTree(state),
-    // Use the filtered call node max depth, rather than the preview filtered one, so
-    // that the viewport height is stable across preview selections.
-    maxStackDepthPlusOne:
-      selectedThreadSelectors.getFilteredCallNodeMaxDepthPlusOne(state),
-    flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
-    callTree: selectedThreadSelectors.getCallTree(state),
-    timeRange: getCommittedRange(state),
-    previewSelection: getPreviewSelection(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    categories: getCategories(state),
-    threadsKey: getSelectedThreadsKey(state),
-    selectedCallNodeIndex:
-      selectedThreadSelectors.getSelectedCallNodeIndex(state),
-    rightClickedCallNodeIndex:
-      selectedThreadSelectors.getRightClickedCallNodeIndex(state),
-    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    interval: getProfileInterval(state),
-    isInverted: getInvertCallstack(state),
-    callTreeSummaryStrategy:
-      selectedThreadSelectors.getCallTreeSummaryStrategy(state),
-    innerWindowIDToPageMap: getInnerWindowIDToPageMap(state),
-    ctssSamples: selectedThreadSelectors.getPreviewFilteredCtssSamples(state),
-    ctssSampleCategoriesAndSubcategories:
-      selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories(
-        state
-      ),
-    tracedTiming: selectedThreadSelectors.getTracedTiming(state),
-    displayStackType: getProfileUsesMultipleStackTypes(state),
-  }),
-  mapDispatchToProps: {
-    changeSelectedCallNode,
-    changeRightClickedCallNode,
-    handleCallNodeTransformShortcut,
-    updateBottomBoxContentsAndMaybeOpen,
-  },
-  options: { forwardRef: true },
-  component: FlameGraphImpl,
-});

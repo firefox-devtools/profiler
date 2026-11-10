@@ -13,6 +13,7 @@ import {
   getLocalTracksByPid,
   getHasPreferenceMarkers,
   getContainsPrivateBrowsingInformation,
+  getHasJSTracingArgumentValues,
   getThreads,
   getMarkerSchemaByName,
 } from './profile';
@@ -31,7 +32,9 @@ import type {
   UploadPhase,
   State,
   Selector,
+  DangerousSelectorWithArguments,
   CheckedSharingOptions,
+  SharingMode,
   RemoveProfileInformation,
   DerivedMarkerInfo,
   ThreadIndex,
@@ -42,9 +45,10 @@ import { getThreadSelectors } from './per-thread';
 
 export const getPublishState: Selector<PublishState> = (state) => state.publish;
 
-export const getCheckedSharingOptions: Selector<CheckedSharingOptions> = (
-  state
-) => getPublishState(state).checkedSharingOptions;
+export const getCheckedSharingOptions: DangerousSelectorWithArguments<
+  CheckedSharingOptions,
+  SharingMode
+> = (state, mode) => getPublishState(state).checkedSharingOptions[mode];
 
 export const getFilenameString: Selector<string> = createSelector(
   getProfile,
@@ -69,9 +73,9 @@ export const getFilenameString: Selector<string> = createSelector(
   }
 );
 
-export const getRemoveProfileInformation: Selector<RemoveProfileInformation | null> =
+const _makeGetRemoveProfileInformation = (mode: SharingMode) =>
   createSelector(
-    getCheckedSharingOptions,
+    (state: State) => getCheckedSharingOptions(state, mode),
     getProfile,
     getCommittedRange,
     getHiddenGlobalTracks,
@@ -80,6 +84,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     getLocalTracksByPid,
     getHasPreferenceMarkers,
     getContainsPrivateBrowsingInformation,
+    getHasJSTracingArgumentValues,
     (
       checkedSharingOptions,
       profile,
@@ -89,14 +94,15 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       globalTracks,
       localTracksByPid,
       hasPreferenceMarkers,
-      containsPrivateBrowsingInformation
+      containsPrivateBrowsingInformation,
+      hasArgumentValues
     ) => {
       let isIncludingEverything = true;
       for (const [prop, value] of Object.entries(checkedSharingOptions)) {
-        // Do not include preference values or private browsing checkboxes if
-        // they're hidden. Even though `includePreferenceValues` is not taken
-        // into account, it is false, if the profile updateChannel is not
-        // nightly or custom build.
+        // Do not include preference values, private browsing, or argument
+        // values checkboxes if they're hidden. Even though
+        // `includePreferenceValues` is not taken into account, it is false, if
+        // the profile updateChannel is not nightly or custom build.
         if (prop === 'includePreferenceValues' && !hasPreferenceMarkers) {
           continue;
         }
@@ -104,6 +110,9 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           prop === 'includePrivateBrowsingData' &&
           !containsPrivateBrowsingInformation
         ) {
+          continue;
+        }
+        if (prop === 'includeArgumentValues' && !hasArgumentValues) {
           continue;
         }
         isIncludingEverything = isIncludingEverything && value;
@@ -177,9 +186,26 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           !checkedSharingOptions.includePreferenceValues,
         shouldRemovePrivateBrowsingData:
           !checkedSharingOptions.includePrivateBrowsingData,
+        shouldRemoveArgumentValues:
+          !checkedSharingOptions.includeArgumentValues,
       };
     }
   );
+
+// One memoized selector per mode, so switching panels doesn't recompute the
+// expensive sanitization.
+const _removeProfileInformationSelectors: Record<
+  SharingMode,
+  Selector<RemoveProfileInformation | null>
+> = {
+  download: _makeGetRemoveProfileInformation('download'),
+  upload: _makeGetRemoveProfileInformation('upload'),
+};
+
+export const getRemoveProfileInformation: DangerousSelectorWithArguments<
+  RemoveProfileInformation | null,
+  SharingMode
+> = (state, mode) => _removeProfileInformationSelectors[mode](state);
 
 /**
  * The derived markers are needed for profile sanitization, but they are also
@@ -203,18 +229,51 @@ function getDerivedMarkerInfoForAllThreads(state: State): DerivedMarkerInfo[] {
 }
 
 /**
+ * The traced values buffers are needed for profile sanitization when filtering
+ * argument values to a time range. Similar memoization approach as above.
+ */
+let _threadsForBuffers: any = null;
+let _tracedValuesBuffers: Array<ArrayBuffer | undefined> | null = null;
+function getTracedValuesBuffersForAllThreads(
+  state: State
+): Array<ArrayBuffer | undefined> {
+  const threads = getThreads(state);
+  if (_threadsForBuffers !== threads || _tracedValuesBuffers === null) {
+    _threadsForBuffers = threads;
+    _tracedValuesBuffers = threads.map((_: any, threadIndex: ThreadIndex) =>
+      getThreadSelectors(threadIndex).getTracedValuesBuffer(state)
+    );
+  }
+  return _tracedValuesBuffers;
+}
+
+/**
  * Run the profile sanitization step, and also get information about how any
  * UrlState needs to be updated, with things like mapping thread indexes,
  * or providing a new committed range.
  */
-export const getSanitizedProfile: Selector<SanitizeProfileResult> =
+const _makeGetSanitizedProfile = (mode: SharingMode) =>
   createSelector(
     getProfile,
     getDerivedMarkerInfoForAllThreads,
-    getRemoveProfileInformation,
+    getTracedValuesBuffersForAllThreads,
+    (state: State) => getRemoveProfileInformation(state, mode),
     getMarkerSchemaByName,
     sanitizePII
   );
+
+const _sanitizedProfileSelectors: Record<
+  SharingMode,
+  Selector<SanitizeProfileResult>
+> = {
+  download: _makeGetSanitizedProfile('download'),
+  upload: _makeGetSanitizedProfile('upload'),
+};
+
+export const getSanitizedProfile: DangerousSelectorWithArguments<
+  SanitizeProfileResult,
+  SharingMode
+> = (state, mode) => _sanitizedProfileSelectors[mode](state);
 
 export const getSanitizedProfileEncodingState: Selector<
   SanitizedProfileEncodingState

@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import { processGeckoProfile } from '../../profile-logic/process-profile';
+import { attemptToUpgradeProcessedProfileThroughMutation } from '../../profile-logic/processed-profile-versioning';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import {
@@ -12,12 +13,19 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   addInnerWindowIdToStacks,
   getNetworkMarkers,
+  compositorScreenshotMarkerSchema,
 } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/types';
 import {
+  computeCombinedMarkerSchemaList,
+  computeMarkerSchemaByName,
   correlateIPCMarkers,
   deriveMarkersFromRawMarkerTable,
 } from '../../profile-logic/marker-data';
+import {
+  addPIICategoriesToMarkerSchema,
+  extensionTextMarkerSchema,
+} from '../../profile-logic/marker-schema';
 import {
   getTimeRangeForThread,
   computeTimeColumnForRawSamplesTable,
@@ -26,16 +34,40 @@ import {
   callTreeFromProfile,
   formatTree,
 } from 'firefox-profiler/test/fixtures/utils';
+import {
+  base64StringToBytes,
+  bytesToBase64,
+} from 'firefox-profiler/utils/base64';
+import { ValueSummaryReader } from 'devtools-reps';
+import { StringTable } from 'firefox-profiler/utils/string-table';
+import { FrameFlag } from 'firefox-profiler/types';
 import type {
   MarkerSchemaByName,
+  Profile,
   RawThread,
   RemoveProfileInformation,
 } from 'firefox-profiler/types';
 
 describe('sanitizePII', function () {
+  function upgradeProfileWithoutPIIAnnotations(profile: Profile): Profile {
+    profile.meta.preprocessedProfileVersion = 71;
+    profile.meta.markerSchema = profile.meta.markerSchema.map((schema) => ({
+      ...schema,
+      fields: schema.fields.map((field) => {
+        const fieldWithoutPII = { ...field };
+        delete fieldWithoutPII.containsPII;
+        return fieldWithoutPII;
+      }),
+    }));
+    return ensureExists(
+      attemptToUpgradeProcessedProfileThroughMutation(profile, {})
+    );
+  }
+
   function setup(
     piiConfig: Partial<RemoveProfileInformation>,
-    originalProfile = processGeckoProfile(createGeckoProfile())
+    originalProfile = processGeckoProfile(createGeckoProfile()),
+    extraMarkerSchemas: MarkerSchemaByName = {}
   ) {
     const defaultsPii: RemoveProfileInformation = {
       shouldRemoveThreads: new Set(),
@@ -46,6 +78,7 @@ describe('sanitizePII', function () {
       shouldRemoveExtensions: false,
       shouldRemovePreferenceValues: false,
       shouldRemovePrivateBrowsingData: false,
+      shouldRemoveArgumentValues: false,
     };
 
     const PIIToRemove: RemoveProfileInformation = {
@@ -73,7 +106,7 @@ describe('sanitizePII', function () {
       }
     );
 
-    const markerSchemaByName: MarkerSchemaByName = {
+    const additionalMarkerSchemas: MarkerSchemaByName = {
       FileIO: {
         name: 'FileIO',
         display: ['marker-chart', 'marker-table', 'timeline-fileio'],
@@ -130,11 +163,28 @@ describe('sanitizePII', function () {
           },
         ],
       },
+      CompositorScreenshot: compositorScreenshotMarkerSchema,
+      ...extraMarkerSchemas,
     };
+    const markerSchemaByName = computeMarkerSchemaByName(
+      computeCombinedMarkerSchemaList([
+        ...originalProfile.meta.markerSchema,
+        ...Object.values(additionalMarkerSchemas),
+      ])
+    );
+
+    // Mirror what the `getTracedValuesBuffer` selector hands to `sanitizePII`
+    // in the app, instead of pretending that no thread has a buffer.
+    const tracedValuesBuffers = originalProfile.threads.map((thread) =>
+      thread.tracedValuesBuffer
+        ? base64StringToBytes(thread.tracedValuesBuffer)
+        : undefined
+    );
 
     const sanitizedProfile = sanitizePII(
       originalProfile,
       derivedMarkerInfoForAllThreads,
+      tracedValuesBuffers,
       PIIToRemove,
       markerSchemaByName
     ).profile;
@@ -144,6 +194,130 @@ describe('sanitizePII', function () {
       originalProfile,
     };
   }
+
+  // Mirrors what Firefox emits now: the schema declares `name` as a unique
+  // string, so the payload holds a string table index.
+  const uniqueStringTextSchema: MarkerSchemaByName = {
+    Text: addPIICategoriesToMarkerSchema({
+      name: 'Text',
+      tableLabel: '{marker.name} — {marker.data.name}',
+      display: ['marker-chart', 'marker-table'],
+      fields: [{ key: 'name', label: 'Details', format: 'unique-string' }],
+    }),
+  };
+
+  const extensionTextMarkerSchemaByName: MarkerSchemaByName = {
+    ExtensionText: extensionTextMarkerSchema,
+  };
+
+  function setupWithUniqueStringTextMarkers(
+    piiConfig: Partial<RemoveProfileInformation>,
+    markers: Array<[string, string]>
+  ) {
+    const profile = getProfileWithMarkers(
+      markers.map(([markerName, text]) => [
+        markerName,
+        0,
+        1,
+        { type: 'Text', name: text },
+      ])
+    );
+    // The fixtures use their own schema, where Text holds its text inline, so
+    // both the schema and the payloads are replaced here.
+    profile.meta.markerSchema = [uniqueStringTextSchema.Text];
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    profile.threads[0].markers.data = markers.map(([, text]) => ({
+      type: 'Text',
+      name: stringTable.indexForString(text),
+    }));
+
+    const { sanitizedProfile } = setup(
+      piiConfig,
+      profile,
+      uniqueStringTextSchema
+    );
+    const { stringArray } = sanitizedProfile.shared;
+    return sanitizedProfile.threads[0].markers.data.map((data) => {
+      if (!data || data.type !== 'Text') {
+        throw new Error('Expected a Text marker');
+      }
+      if (typeof data.name !== 'number') {
+        throw new Error(
+          'Expected the text to be an index into the string table'
+        );
+      }
+      return stringArray[data.name];
+    });
+  }
+
+  it('should sanitize the URLs inside text markers holding a unique string', function () {
+    // URLs are removed from the whole string table, so nothing else is needed.
+    expect(
+      setupWithUniqueStringTextMarkers({ shouldRemoveUrls: true }, [
+        [
+          'Text marker',
+          'onBeforeRequest https://profiler.firefox.com/ by extension',
+        ],
+      ])
+    ).toEqual(['onBeforeRequest https://<URL> by extension']);
+  });
+
+  it('should not alter other references to a sanitized unique string', function () {
+    const extensionId = 'formautofill@mozilla.org';
+    const profile = getProfileWithMarkers([
+      [
+        'ExtensionParent',
+        0,
+        1,
+        {
+          type: 'ExtensionText',
+          name: 'api_call: runtime.onUpdateAvailable.addListener',
+          extensionId,
+        },
+      ],
+      ['SomeOtherMarker', 0, 1, { type: 'Text', name: extensionId }],
+    ]);
+    const markerSchemaByName: MarkerSchemaByName = {
+      ExtensionText: {
+        name: 'ExtensionText',
+        display: ['marker-chart', 'marker-table'],
+        fields: [
+          {
+            key: 'extensionId',
+            format: 'unique-string',
+            containsPII: ['extension-id'],
+          },
+        ],
+      },
+      Text: uniqueStringTextSchema.Text,
+    };
+    profile.meta.markerSchema = Object.values(markerSchemaByName);
+    const stringTable = StringTable.withBackingArray(
+      profile.shared.stringArray
+    );
+    const extensionIdIndex = stringTable.indexForString(extensionId);
+    profile.threads[0].markers.data = [
+      {
+        type: 'ExtensionText',
+        name: 'api_call: runtime.onUpdateAvailable.addListener',
+        extensionId: extensionIdIndex,
+      } as any,
+      { type: 'Text', name: extensionIdIndex },
+    ];
+
+    const { sanitizedProfile } = setup(
+      { shouldRemoveExtensions: true },
+      profile,
+      markerSchemaByName
+    );
+
+    const { stringArray } = sanitizedProfile.shared;
+    const [sanitized, untouched] = sanitizedProfile.threads[0].markers.data;
+    expect((sanitized as any).extensionId).toBeUndefined();
+    expect(stringArray[(untouched as any).name]).toBe(extensionId);
+  });
 
   it('should sanitize the threads if they are provided', function () {
     const { originalProfile, sanitizedProfile } = setup({
@@ -406,6 +580,28 @@ describe('sanitizePII', function () {
     }
   });
 
+  it('should sanitize the screenshots of any marker type shown in a screenshot track', function () {
+    const profile = getProfileWithMarkers([
+      ['MyScreenshot', 0, 1, { type: 'MyScreenshot', url: 0 } as any],
+      ['Other', 0, 1],
+    ]);
+    const { sanitizedProfile } = setup(
+      { shouldRemoveThreadsWithScreenshots: new Set([0]) },
+      profile,
+      {
+        MyScreenshot: {
+          name: 'MyScreenshot',
+          display: ['marker-chart', 'timeline-screenshots'],
+          fields: [],
+        },
+      }
+    );
+
+    const { markers } = sanitizedProfile.threads[0];
+    expect(markers.length).toBe(1);
+    expect(sanitizedProfile.shared.stringArray[markers.name[0]]).toBe('Other');
+  });
+
   it('should sanitize the pages information', function () {
     const { originalProfile, sanitizedProfile } = setup({
       shouldRemoveUrls: true,
@@ -478,56 +674,64 @@ describe('sanitizePII', function () {
   });
 
   it('should sanitize all the URLs inside network markers', function () {
-    const { sanitizedProfile } = setup({
-      shouldRemoveUrls: true,
-    });
+    const originalProfile = getProfileWithMarkers(
+      getNetworkMarkers({
+        uri: 'https://example.com',
+        payload: { RedirectURI: 'https://redirect.example.com' },
+      })
+    );
+    const originalMarkerData = originalProfile.threads[0].markers.data;
+    const { sanitizedProfile } = setup(
+      { shouldRemoveUrls: true },
+      originalProfile
+    );
 
-    const stringArray = sanitizedProfile.shared.stringArray;
-    for (const thread of sanitizedProfile.threads) {
-      for (let i = 0; i < thread.markers.length; i++) {
-        const currentMarker = thread.markers.data[i];
-        if (
-          currentMarker &&
-          currentMarker.type &&
-          currentMarker.type === 'Network'
-        ) {
-          /* eslint-disable jest/no-conditional-expect */
-          expect(currentMarker.URI).toBeFalsy();
-          expect(currentMarker.RedirectURI).toBeFalsy();
-          const stringIndex = thread.markers.name[i];
-          expect(stringArray[stringIndex].includes('http')).toBe(false);
-          /* eslint-enable */
-        }
-      }
-    }
+    const markers = sanitizedProfile.threads[0].markers;
+    expect(markers.data[0]).toEqual({
+      ...originalMarkerData[0],
+      URI: 'https://<URL>',
+    });
+    expect(markers.data[1]).toEqual({
+      ...originalMarkerData[1],
+      URI: 'https://<URL>',
+      RedirectURI: 'https://<URL>',
+    });
+    expect(
+      markers.name.map((name) => sanitizedProfile.shared.stringArray[name])
+    ).toEqual(['Load 0: https://<URL>', 'Load 0: https://<URL>']);
   });
 
-  it('should sanitize the URLs inside text markers', function () {
+  it('should sanitize URLs after upgrading an extension text marker', function () {
     const unsanitizedNameField =
       'onBeforeRequest https://profiler.firefox.com/ by extension';
-    const sanitizedNameField = 'onBeforeRequest https://<URL> by extension';
+    const originalProfile = getProfileWithMarkers([
+      [
+        'Extension Suspend',
+        0,
+        1,
+        {
+          type: 'Text',
+          name: unsanitizedNameField,
+        },
+      ],
+    ]);
+    upgradeProfileWithoutPIIAnnotations(originalProfile);
     const { sanitizedProfile } = setup(
       {
         shouldRemoveUrls: true,
       },
-      getProfileWithMarkers([
-        [
-          'Extension Suspend',
-          0,
-          1,
-          {
-            type: 'Text',
-            name: unsanitizedNameField,
-          },
-        ],
-      ])
+      originalProfile
     );
 
     const marker = sanitizedProfile.threads[0].markers.data[0];
-    if (!marker || marker.type !== 'Text') {
-      throw new Error('Expected a Text marker');
+    if (!marker || marker.type !== 'ExtensionText') {
+      throw new Error('Expected an ExtensionText marker');
     }
-    expect(marker.name).toBe(sanitizedNameField);
+    expect(marker).toEqual({
+      type: 'ExtensionText',
+      name: 'onBeforeRequest https://<URL>',
+      extensionId: 'extension',
+    });
   });
 
   it('should sanitize all the URLs inside string table', function () {
@@ -564,14 +768,11 @@ describe('sanitizePII', function () {
     }
   });
 
-  it('should sanitize extension ids inside text markers', function () {
-    const unsanitizedNameField =
-      'formautofill@mozilla.org, api_call: runtime.onUpdateAvailable.addListener';
-    const sanitizedNameField =
-      'api_call: runtime.onUpdateAvailable.addListener';
+  it('should sanitize PII inside structured extension markers', function () {
     const { sanitizedProfile } = setup(
       {
         shouldRemoveExtensions: true,
+        shouldRemoveUrls: true,
       },
       getProfileWithMarkers([
         [
@@ -579,8 +780,9 @@ describe('sanitizePII', function () {
           0,
           1,
           {
-            type: 'Text',
-            name: unsanitizedNameField,
+            type: 'ExtensionText',
+            name: 'api_call: tabs.open https://example.com/',
+            extensionId: 'formautofill@mozilla.org',
           },
         ],
         [
@@ -588,26 +790,28 @@ describe('sanitizePII', function () {
           0,
           1,
           {
-            type: 'Text',
-            name: unsanitizedNameField,
+            type: 'ExtensionText',
+            name: 'api_call: tabs.open https://example.com/',
+            extensionId: 'formautofill@mozilla.org',
           },
         ],
-      ])
+      ]),
+      extensionTextMarkerSchemaByName
     );
 
     const markers = sanitizedProfile.threads[0].markers;
     for (const marker of [markers.data[0], markers.data[1]]) {
-      if (!marker || marker.type !== 'Text') {
-        throw new Error('Expected a Text marker');
+      if (!marker || marker.type !== 'ExtensionText') {
+        throw new Error('Expected an extension marker');
       }
-      expect(marker.name).toBe(sanitizedNameField);
+      expect(marker).toEqual({
+        type: 'ExtensionText',
+        name: 'api_call: tabs.open https://<URL>',
+      });
     }
   });
 
   it('should sanitize both URLs and extension ids inside Extension Suspend markers', function () {
-    const unsanitizedNameField =
-      'onBeforeRequest https://profiler.firefox.com/ by extension';
-    const sanitizedNameField = 'onBeforeRequest https://<URL>';
     const { sanitizedProfile } = setup(
       {
         shouldRemoveUrls: true,
@@ -619,18 +823,23 @@ describe('sanitizePII', function () {
           0,
           1,
           {
-            type: 'Text',
-            name: unsanitizedNameField,
+            type: 'ExtensionText',
+            name: 'onBeforeRequest https://profiler.firefox.com/',
+            extensionId: 'extension',
           },
         ],
-      ])
+      ]),
+      extensionTextMarkerSchemaByName
     );
 
     const marker = sanitizedProfile.threads[0].markers.data[0];
-    if (!marker || marker.type !== 'Text') {
-      throw new Error('Expected a Text marker');
+    if (!marker || marker.type !== 'ExtensionText') {
+      throw new Error('Expected an ExtensionText marker');
     }
-    expect(marker.name).toBe(sanitizedNameField);
+    expect(marker).toEqual({
+      type: 'ExtensionText',
+      name: 'onBeforeRequest https://<URL>',
+    });
   });
 
   it('should not sanitize all the preference values inside preference read markers', function () {
@@ -661,7 +870,7 @@ describe('sanitizePII', function () {
     expect(thread.markers.length).toEqual(1);
 
     const marker = thread.markers.data[0];
-    // All the conditions have to be checked to make Flow happy.
+    // All the conditions have to be checked to satisfy the type checker.
     expect(
       marker &&
         marker.type &&
@@ -670,26 +879,25 @@ describe('sanitizePII', function () {
     ).toBeTruthy();
   });
 
-  it('should sanitize all the preference values inside preference read markers', function () {
+  it('should sanitize preference values after upgrading an old processed profile', function () {
+    const preferenceMarker = {
+      type: 'PreferenceRead' as const,
+      prefAccessTime: 0,
+      prefName: 'preferenceName',
+      prefKind: 'preferenceKind',
+      prefType: 'preferenceType',
+      prefValue: 'preferenceValue',
+    };
+    const originalProfile = getProfileWithMarkers([
+      ['PreferenceRead', 0, 1, preferenceMarker],
+    ]);
+    upgradeProfileWithoutPIIAnnotations(originalProfile);
     const { sanitizedProfile } = setup(
       {
         shouldRemovePreferenceValues: true,
+        shouldRemoveUrls: true,
       },
-      getProfileWithMarkers([
-        [
-          'PreferenceRead',
-          0,
-          1,
-          {
-            type: 'PreferenceRead',
-            prefAccessTime: 0,
-            prefName: 'preferenceName',
-            prefKind: 'preferenceKind',
-            prefType: 'preferenceType',
-            prefValue: 'preferenceValue',
-          },
-        ],
-      ])
+      originalProfile
     );
 
     expect(sanitizedProfile.threads.length).toEqual(1);
@@ -697,14 +905,10 @@ describe('sanitizePII', function () {
     const thread = sanitizedProfile.threads[0];
     expect(thread.markers.length).toEqual(1);
 
-    const marker = thread.markers.data[0];
-    // All the conditions have to be checked to make Flow happy.
-    expect(
-      marker &&
-        marker.type &&
-        marker.type === 'PreferenceRead' &&
-        marker.prefValue === ''
-    ).toBeTruthy();
+    expect(thread.markers.data[0]).toEqual({
+      ...preferenceMarker,
+      prefValue: '',
+    });
   });
 
   it('should not push any null values to marker values by mistake while filtering', function () {
@@ -897,6 +1101,242 @@ describe('sanitizePII', function () {
     expect(
       sanitizedProfile.threads.filter((t) => t.tracedObjectShapes).length
     ).toBe(0);
+  });
+
+  describe('traced argument values', function () {
+    // A real values buffer recorded by the JS execution tracer. It holds two
+    // entries: a MouseEvent object summary whose data starts at byte offset 6,
+    // and the number 0 whose data starts at byte offset 24.
+    const TRACED_VALUES_BUFFER = 'AgAAABIAAQAAAAwHAAAAAAYAAAABAAcAAQAAABE=';
+    const TRACED_OBJECT_SHAPES = [['MouseEvent']];
+    const MOUSE_EVENT_ENTRY = 6;
+    const NUMBER_ENTRY = 24;
+
+    function setupTracerProfile(piiConfig: Partial<RemoveProfileInformation>) {
+      // Four samples, at times 0, 1, 2 and 3.
+      const { profile } = getProfileFromTextSamples('A  B  C  D');
+      const [thread] = profile.threads;
+      thread.tracedValuesBuffer = TRACED_VALUES_BUFFER;
+      thread.tracedObjectShapes = TRACED_OBJECT_SHAPES;
+      thread.samples.argumentValues = [
+        null,
+        MOUSE_EVENT_ENTRY,
+        NUMBER_ENTRY,
+        null,
+      ];
+      return setup(piiConfig, profile);
+    }
+
+    // Decodes the arguments recorded for a single sample, going through the
+    // thread's own index so that a buffer rewrite has to keep them in sync.
+    function readArgumentsForSample(thread: RawThread, sampleIndex: number) {
+      const argumentValues = ensureExists(thread.samples.argumentValues);
+      return ValueSummaryReader.getArgumentSummaries(
+        base64StringToBytes(ensureExists(thread.tracedValuesBuffer)),
+        TRACED_OBJECT_SHAPES,
+        ensureExists(argumentValues[sampleIndex])
+      );
+    }
+
+    // Walks the entry size headers to enumerate every entry a buffer still
+    // holds. This lets us assert on the data that actually ships, rather than
+    // only on the indices that happen to point into it.
+    function readAllEntries(base64Buffer: string) {
+      const buffer = base64StringToBytes(base64Buffer);
+      const view = new DataView(buffer);
+      const entries = [];
+      // Skip the 4-byte version header.
+      let offset = 4;
+      while (offset + 2 <= buffer.byteLength) {
+        const entrySize = view.getUint16(offset, true);
+        if (entrySize === 0) {
+          break;
+        }
+        entries.push(
+          ValueSummaryReader.getArgumentSummaries(
+            buffer,
+            TRACED_OBJECT_SHAPES,
+            offset + 2
+          )
+        );
+        offset += entrySize;
+      }
+      return entries;
+    }
+
+    it('keeps the argument values when the user includes them', function () {
+      const { sanitizedProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: false,
+      });
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.tracedObjectShapes).toEqual(TRACED_OBJECT_SHAPES);
+      expect(thread.tracedValuesBuffer).toBeDefined();
+
+      // Both entries still decode to the values they started with.
+      expect(readArgumentsForSample(thread, 1)).toEqual([
+        expect.objectContaining({ type: 'object', class: 'MouseEvent' }),
+      ]);
+      expect(readArgumentsForSample(thread, 2)).toEqual([0]);
+    });
+
+    it('removes the argument values when the user excludes them', function () {
+      const { sanitizedProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: true,
+      });
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.tracedValuesBuffer).toBeUndefined();
+      expect(thread.tracedObjectShapes).toBeUndefined();
+      // The indices have to go as well, otherwise they dangle into a buffer
+      // that is no longer part of the profile.
+      expect(thread.samples.argumentValues).toBeUndefined();
+    });
+
+    it('does not mutate the original thread while removing argument values', function () {
+      const { originalProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: true,
+      });
+      expect(originalProfile.threads[0].samples.argumentValues).toEqual([
+        null,
+        MOUSE_EVENT_ENTRY,
+        NUMBER_ENTRY,
+        null,
+      ]);
+    });
+
+    it('drops the argument values from outside the committed range', function () {
+      // The buffer starts out holding both entries.
+      expect(readAllEntries(TRACED_VALUES_BUFFER)).toHaveLength(2);
+
+      // Samples sit at 0, 1, 2 and 3, so this keeps the last two. That drops
+      // sample 1, which is the only sample referencing the MouseEvent entry.
+      const { sanitizedProfile } = setupTracerProfile({
+        shouldRemoveArgumentValues: false,
+        shouldFilterToCommittedRange: { start: 2, end: 4 },
+      });
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.samples.length).toBe(2);
+      // The surviving entry moved within the buffer, and its index moved with
+      // it, so it still decodes to the same value.
+      expect(readArgumentsForSample(thread, 0)).toEqual([0]);
+      expect(ensureExists(thread.samples.argumentValues)[1]).toBe(null);
+
+      // The MouseEvent data is gone from the exported buffer altogether, not
+      // just left unreferenced in it.
+      expect(readAllEntries(ensureExists(thread.tracedValuesBuffer))).toEqual([
+        [0],
+      ]);
+    });
+
+    it('drops the argument values of private browsing samples', function () {
+      const {
+        profile,
+        funcNamesDictPerThread: [{ A, Cjs, Djs }],
+      } = getProfileFromTextSamples(`
+        A    A
+        Cjs  Djs
+      `);
+
+      const {
+        firstTabTabID: privateTabTabID,
+        firstTabInnerWindowIDs: privateTabInnerWindowIDs,
+        secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
+      } = addTabInformationToProfile(profile);
+      markTabIdsAsPrivateBrowsing(profile, [privateTabTabID]);
+      addInnerWindowIdToStacks(profile.shared, profile.threads[0], [
+        {
+          innerWindowID: nonPrivateTabInnerWindowIDs[0],
+          callNodes: [[A, Cjs]],
+        },
+        {
+          innerWindowID: privateTabInnerWindowIDs[0],
+          callNodes: [[A, Djs]],
+        },
+      ]);
+
+      const [thread] = profile.threads;
+      thread.tracedValuesBuffer = TRACED_VALUES_BUFFER;
+      thread.tracedObjectShapes = TRACED_OBJECT_SHAPES;
+      // Sample 0 is non-private, sample 1 comes from the private window.
+      thread.samples.argumentValues = [NUMBER_ENTRY, MOUSE_EVENT_ENTRY];
+
+      const { sanitizedProfile } = setup(
+        {
+          shouldRemovePrivateBrowsingData: true,
+          shouldRemoveArgumentValues: false,
+        },
+        profile
+      );
+      const [sanitizedThread] = sanitizedProfile.threads;
+
+      // The private browsing sample lost its stack, and its arguments went
+      // with it.
+      expect(sanitizedThread.samples.stack[1]).toBe(null);
+      expect(ensureExists(sanitizedThread.samples.argumentValues)[1]).toBe(
+        null
+      );
+
+      // The non-private sample keeps its arguments.
+      expect(readArgumentsForSample(sanitizedThread, 0)).toEqual([0]);
+
+      // And the MouseEvent recorded for the private browsing sample is gone
+      // from the exported buffer, not just left unreferenced in it.
+      expect(
+        readAllEntries(ensureExists(sanitizedThread.tracedValuesBuffer))
+      ).toEqual([[0]]);
+
+      // The original thread is untouched.
+      expect(profile.threads[0].samples.argumentValues).toEqual([
+        NUMBER_ENTRY,
+        MOUSE_EVENT_ENTRY,
+      ]);
+    });
+
+    it('removes the argument values when the buffer cannot be read', function () {
+      jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      // The version header says 3 instead of 2, which is what a profile
+      // recorded by a Gecko using a newer tracer format looks like. The reader
+      // throws on it, and we can't publish argument values we can't filter.
+      const bytes = base64StringToBytes(TRACED_VALUES_BUFFER);
+      new DataView(bytes).setUint32(0, 3, true);
+
+      const { profile } = getProfileFromTextSamples('A  B');
+      const [thread] = profile.threads;
+      thread.tracedValuesBuffer = bytesToBase64(bytes);
+      thread.tracedObjectShapes = TRACED_OBJECT_SHAPES;
+      thread.samples.argumentValues = [null, MOUSE_EVENT_ENTRY];
+
+      const { sanitizedProfile } = setup(
+        { shouldRemoveArgumentValues: false },
+        profile
+      );
+      const [sanitizedThread] = sanitizedProfile.threads;
+
+      expect(sanitizedThread.tracedValuesBuffer).toBeUndefined();
+      expect(sanitizedThread.tracedObjectShapes).toBeUndefined();
+      expect(sanitizedThread.samples.argumentValues).toBeUndefined();
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('removes the argument values when the buffer is missing', function () {
+      const { profile } = getProfileFromTextSamples('A  B');
+      // A thread can carry indices without the profile carrying the buffer
+      // they point into. There is nothing to export in that case.
+      profile.threads[0].samples.argumentValues = [null, MOUSE_EVENT_ENTRY];
+      profile.threads[0].tracedObjectShapes = TRACED_OBJECT_SHAPES;
+
+      const { sanitizedProfile } = setup(
+        { shouldRemoveArgumentValues: false },
+        profile
+      );
+      const [thread] = sanitizedProfile.threads;
+
+      expect(thread.samples.argumentValues).toBeUndefined();
+      expect(thread.tracedObjectShapes).toBeUndefined();
+    });
   });
 
   it('should sanitize the eTLD+1 field if urls are supposed to be sanitized', function () {
@@ -1274,5 +1714,63 @@ describe('sanitizePII', function () {
     expect(sanitizedProfile.shared.stringArray[filenameStringIndex]).toContain(
       'file2.js'
     );
+  });
+
+  it('should compact the libs and translate the frameTable lib column', function () {
+    // Thread 0's frame is in libA, thread 1's is in libB, and thread 2's frame
+    // has no library at all. A frame only carries a lib if it also has an
+    // address, since the two share the `HasAddress` flag.
+    const { profile } = getProfileFromTextSamples(
+      `A[lib:libA.so][address:10]`,
+      `B[lib:libB.so][address:20]`,
+      `Cjs`
+    );
+
+    expect(profile.libs.map((lib) => lib.name)).toEqual(['libA.so', 'libB.so']);
+    expect([...profile.shared.frameTable.lib]).toEqual([0, 1, 0]);
+    expect(
+      [...profile.shared.frameTable.flags].map(
+        (flags) => (flags & FrameFlag.HasAddress) !== 0
+      )
+    ).toEqual([true, true, false]);
+
+    // Remove thread 0, which is the only user of libA.so.
+    const { sanitizedProfile } = setup(
+      { shouldRemoveThreads: new Set([0]) },
+      profile
+    );
+
+    // libA.so is gone, and the surviving libB.so frame points at the reindexed
+    // libB.so. The lib-less frame still has no lib, which is expressed by the
+    // missing `HasAddress` flag rather than by the value in the lib column.
+    const { frameTable } = sanitizedProfile.shared;
+    expect(sanitizedProfile.libs.map((lib) => lib.name)).toEqual(['libB.so']);
+    expect([...frameTable.lib]).toEqual([0, 0]);
+    expect(
+      [...frameTable.flags].map((flags) => (flags & FrameFlag.HasAddress) !== 0)
+    ).toEqual([true, false]);
+  });
+
+  it('always removes source contents even when no PII removal is requested', function () {
+    const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
+    // There should be only one source.
+    expect(profile.shared.sources.content.length).toEqual(1);
+    // Pretend the source content have been loaded.
+    profile.shared.sources.content[0] = 'source code';
+
+    // A null `RemoveProfileInformation` means the user kept all sharing options
+    // checked, so no other sanitization happens.
+    const { profile: sanitizedProfile } = sanitizePII(
+      profile,
+      [],
+      [],
+      null,
+      {}
+    );
+
+    expect(sanitizedProfile.shared.sources.content.length).toEqual(
+      profile.shared.sources.content.length
+    );
+    expect(sanitizedProfile.shared.sources.content[0]).toBe(null);
   });
 });

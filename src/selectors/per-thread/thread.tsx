@@ -27,7 +27,9 @@ import type {
   JsTracerTable,
   RawSamplesTable,
   SamplesTable,
+  RawNativeAllocationsTable,
   NativeAllocationsTable,
+  RawJsAllocationsTable,
   JsAllocationsTable,
   SamplesLikeTable,
   Selector,
@@ -143,11 +145,25 @@ export function getBasicThreadSelectorsPerThread(
           )
         : null
   );
-  const getNativeAllocations: Selector<NativeAllocationsTable | void> = (
+  const getRawNativeAllocations: Selector<RawNativeAllocationsTable | void> = (
     state
   ) => getRawThread(state).nativeAllocations;
-  const getJsAllocations: Selector<JsAllocationsTable | void> = (state) =>
+  const getRawJsAllocations: Selector<RawJsAllocationsTable | void> = (state) =>
     getRawThread(state).jsAllocations;
+  const getNativeAllocations: Selector<NativeAllocationsTable | undefined> =
+    createSelector(getRawNativeAllocations, (raw) =>
+      raw
+        ? ProfileData.computeNativeAllocationsTableFromRawNativeAllocationsTable(
+            raw
+          )
+        : undefined
+    );
+  const getJsAllocations: Selector<JsAllocationsTable | undefined> =
+    createSelector(getRawJsAllocations, (raw) =>
+      raw
+        ? ProfileData.computeJsAllocationsTableFromRawJsAllocationsTable(raw)
+        : undefined
+    );
   const getThreadRange: Selector<StartEndRange> = (state) =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
@@ -183,11 +199,9 @@ export function getBasicThreadSelectorsPerThread(
     getRawThread,
     getSamplesTable,
     ProfileSelectors.getStackTable,
-    (state: State) =>
-      ProfileSelectors.getRawProfileSharedData(state).frameTable,
+    ProfileSelectors.getFrameTable,
     ProfileSelectors.getFunctionsReservedFuncTable,
-    (state: State) =>
-      ProfileSelectors.getRawProfileSharedData(state).nativeSymbols,
+    ProfileSelectors.getNativeSymbolTable,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).resourceTable,
     ProfileSelectors.getStringTable,
@@ -195,6 +209,8 @@ export function getBasicThreadSelectorsPerThread(
     getTracedValuesBuffer,
     (state: State) =>
       ProfileSelectors.getRawProfileSharedData(state).sourceLocationTable,
+    getJsAllocations,
+    getNativeAllocations,
     ProfileData.createThreadFromDerivedTables
   );
 
@@ -379,6 +395,44 @@ export function getBasicThreadSelectorsPerThread(
   };
 
   /**
+   * Retained memory and deallocated memory need to pair each deallocation with its
+   * allocation, which is only possible when the allocations carry memory addresses.
+   */
+  const getAvailableCallTreeSummaryStrategies: Selector<
+    CallTreeSummaryStrategy[]
+  > = createSelector(
+    getHasUsefulTimingSamples,
+    getHasUsefulJsAllocations,
+    getHasUsefulNativeAllocations,
+    getCanShowRetainedMemory,
+    (
+      hasUsefulTimingSamples,
+      hasUsefulJsAllocations,
+      hasUsefulNativeAllocations,
+      canShowRetainedMemory
+    ) =>
+      ProfileData.CALL_TREE_SUMMARY_STRATEGIES.filter((strategy) => {
+        switch (strategy) {
+          case 'timing':
+            return hasUsefulTimingSamples;
+          case 'js-allocations':
+            return hasUsefulJsAllocations;
+          case 'native-allocations':
+          case 'native-deallocations-sites':
+            return hasUsefulNativeAllocations;
+          case 'native-retained-allocations':
+          case 'native-deallocations-memory':
+            return canShowRetainedMemory;
+          default:
+            throw assertExhaustiveCheck(
+              strategy,
+              'Unhandled call tree summary strategy.'
+            );
+        }
+      })
+  );
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -458,6 +512,7 @@ export function getBasicThreadSelectorsPerThread(
     getHasUsefulJsAllocations,
     getHasUsefulNativeAllocations,
     getCanShowRetainedMemory,
+    getAvailableCallTreeSummaryStrategies,
     getProcessedEventDelays,
     getCallTreeSummaryStrategy,
   };
@@ -560,6 +615,7 @@ export function getThreadSelectorsWithMarkersPerThread(
           thread.funcTable,
           thread.resourceTable,
           thread.sources,
+          thread.sourceLocationTable,
           thread.stringTable,
           searchStrings
         )
@@ -690,6 +746,7 @@ export function getThreadSelectorsWithMarkersPerThread(
     getPreviewFilteredThread,
     getFilteredCtssSamples,
     getPreviewFilteredCtssSamples,
+    getPreviewFilteredCtssSampleIndexOffsets,
     getPreviewFilteredCtssSampleCategoriesAndSubcategories,
     getHasFilteredCtssSamples,
     getHasPreviewFilteredCtssSamples,

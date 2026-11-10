@@ -5,7 +5,10 @@
 import {
   formatFromMarkerSchema,
   parseLabel,
+  extensionTextMarkerSchema,
   markerSchemaFrontEndOnly,
+  isStringIndexFormat,
+  computeStringIndexMarkerFieldsByDataType,
 } from '../../profile-logic/marker-schema';
 import { renderMarkerFieldValue } from 'firefox-profiler/components/tooltip/Marker';
 import type {
@@ -16,8 +19,14 @@ import type {
 import { getDefaultCategories } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import { getMarkerSchema } from '../../selectors/profile';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { markerSchemaForTests } from '../fixtures/profiles/marker-schema';
+import {
+  getProfileFromTextSamples,
+  compositorScreenshotMarkerSchema,
+} from '../fixtures/profiles/processed-profile';
+import {
+  FILE_IO_TABLE_LABEL,
+  markerSchemaForTests,
+} from '../fixtures/profiles/marker-schema';
 import { StringTable } from '../../utils/string-table';
 
 /**
@@ -76,6 +85,31 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  it('formats extension marker labels from structured fields', function () {
+    for (const label of [
+      extensionTextMarkerSchema.tableLabel,
+      extensionTextMarkerSchema.chartLabel,
+    ]) {
+      expect(
+        applyLabel({
+          schemaFields: extensionTextMarkerSchema.fields,
+          label: label as string,
+          payload: {
+            extensionId: 'addon@example.com',
+            name: 'api_call: tabs.query',
+          },
+        })
+      ).toBe('addon@example.com, api_call: tabs.query');
+      expect(
+        applyLabel({
+          schemaFields: extensionTextMarkerSchema.fields,
+          label: label as string,
+          payload: { name: 'api_call: tabs.query' },
+        })
+      ).toBe('api_call: tabs.query');
+    }
+  });
+
   it('can parse a label with just a lookup value', function () {
     expect(
       applyLabel({
@@ -132,6 +166,17 @@ describe('marker schema labels', function () {
     expect(console.error).toHaveBeenCalledTimes(0);
   });
 
+  it('does not display empty strings in labels', function () {
+    expect(
+      applyLabel({
+        label: 'Value: "{marker.data.value}"',
+        schemaFields: [{ key: 'value', label: 'Value', format: 'string' }],
+        payload: { value: '' },
+      })
+    ).toEqual('Value: ""');
+    expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
   it('can look up various parts of the marker', function () {
     const text = applyLabel({
       label: [
@@ -170,6 +215,41 @@ describe('marker schema labels', function () {
       })
     ).toEqual('IPC Message happened because of MouseDown Event');
     expect(console.error).toHaveBeenCalledTimes(0);
+  });
+
+  describe('FileIO labels', function () {
+    const fileIoFields: MarkerSchema['fields'] = [
+      { key: 'operation', label: 'Operation', format: 'string' },
+      { key: 'source', label: 'Source', format: 'string' },
+      { key: 'filename', label: 'Filename', format: 'file-path' },
+    ];
+
+    it('formats labels for all source and filename combinations', function () {
+      expect(
+        [
+          {
+            operation: 'create/open',
+            source: 'PoisonIOInterposer',
+            filename: '/foo/bar',
+          },
+          { operation: 'create/open', source: '', filename: '/foo/bar' },
+          { operation: 'create/open', source: 'PoisonIOInterposer' },
+          { operation: 'create/open', source: '' },
+        ].map((payload) =>
+          applyLabel({
+            label: FILE_IO_TABLE_LABEL,
+            schemaFields: fileIoFields,
+            payload,
+          })
+        )
+      ).toEqual([
+        '(PoisonIOInterposer) create/open — /foo/bar',
+        'create/open — /foo/bar',
+        '(PoisonIOInterposer) create/open',
+        'create/open',
+      ]);
+      expect(console.error).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('ternary expressions', function () {
@@ -297,6 +377,7 @@ describe('marker schema formatting', function () {
       ['file-path', null],
       ['file-path', undefined],
       ['sanitized-string', 'domain.name'],
+      ['string', ''],
       ['duration', 0],
       ['duration', 10],
       ['duration', 12.3456789],
@@ -355,6 +436,10 @@ describe('marker schema formatting', function () {
       ['decimal', 12.3456789],
       ['decimal', 123456.789],
       ['decimal', 0.000123456],
+      ['hexadecimal', 0],
+      ['hexadecimal', 0xff],
+      ['hexadecimal', 0xffffffff],
+      ['hexadecimal', -255],
       ['percentage', 0],
       ['percentage', 0.1],
       ['percentage', 0.123456789],
@@ -388,6 +473,7 @@ describe('marker schema formatting', function () {
         "file-path - (empty)",
         "file-path - (empty)",
         "sanitized-string - domain.name",
+        "string - (empty)",
         "duration - 0s",
         "duration - 10ms",
         "duration - 12.346ms",
@@ -446,6 +532,10 @@ describe('marker schema formatting', function () {
         "decimal - 12",
         "decimal - 123,457",
         "decimal - 0.000",
+        "hexadecimal - 0x0",
+        "hexadecimal - 0xff",
+        "hexadecimal - 0xffffffff",
+        "hexadecimal - 0xffffff01",
         "percentage - 0%",
         "percentage - 10%",
         "percentage - 12%",
@@ -465,6 +555,13 @@ describe('marker schema formatting', function () {
   it('supports complex formats', function () {
     const entries: Array<[MarkerFormatType, unknown]> = [
       ['url', 'http://example.com'],
+      // A whole-string URL is linkified.
+      ['url', 'https://example.com/path?query=1'],
+      // A URL embedded in a longer string is left as plain text.
+      ['url', 'loaded https://example.com successfully'],
+      // A string that starts with a URL but continues with a text is left as
+      // plain text.
+      ['url', 'https://example.com then some more text'],
       ['file-path', '/Users/me/gecko'],
       ['file-path', null],
       ['file-path', undefined],
@@ -501,8 +598,17 @@ describe('marker schema formatting', function () {
       ],
       ['list', []],
       ['list', ['a', 'b']],
+      ['screenshot-size', { width: 1280, height: 1000 }],
+      // Without a payload there's no size field to look up,
+      // so the image falls back to a maximum size.
+      [
+        { type: 'screenshot-data-url', sizeFieldForAspectRatio: 'windowSize' },
+        0,
+      ],
     ];
-    const stringTable = StringTable.withBackingArray([]);
+    const stringTable = StringTable.withBackingArray([
+      'data:image/jpeg;base64,AAAA',
+    ]);
     expect(
       entries.map(([format, value]: [MarkerFormatType, any]): string[][] => [
         format,
@@ -511,6 +617,25 @@ describe('marker schema formatting', function () {
         formatFromMarkerSchema('none', format, value, stringTable),
       ])
     ).toMatchSnapshot();
+  });
+});
+
+describe('computeStringIndexMarkerFieldsByDataType', function () {
+  it('treats the screenshot data URL as a string index', function () {
+    expect(
+      isStringIndexFormat({
+        type: 'screenshot-data-url',
+        sizeFieldForAspectRatio: 'windowSize',
+      })
+    ).toBe(true);
+  });
+
+  it('finds screenshot data URLs in the screenshot marker schema', function () {
+    expect(
+      computeStringIndexMarkerFieldsByDataType([
+        compositorScreenshotMarkerSchema,
+      ])
+    ).toEqual(new Map([['CompositorScreenshot', ['url']]]));
   });
 });
 

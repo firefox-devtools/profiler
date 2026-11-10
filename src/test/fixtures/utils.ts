@@ -18,7 +18,12 @@ import {
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
   computeStackTableFromRawStackTable,
+  computeFrameTableFromRawFrameTable,
+  computeFuncTableFromRawFuncTable,
+  computeNativeSymbolTableFromRawNativeSymbolTable,
   computeSamplesTableFromRawSamplesTable,
+  computeJsAllocationsTableFromRawJsAllocationsTable,
+  computeNativeAllocationsTableFromRawNativeAllocationsTable,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
 import { StringTable } from '../../utils/string-table';
@@ -146,9 +151,17 @@ export function computeThreadFromRawThread(
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   const stringTable = StringTable.withBackingArray(shared.stringArray);
+  const frameTable = computeFrameTableFromRawFrameTable(
+    shared.frameTable,
+    categories
+  );
+  const funcTable = computeFuncTableFromRawFuncTable(shared.funcTable);
+  const nativeSymbols = computeNativeSymbolTableFromRawNativeSymbolTable(
+    shared.nativeSymbols
+  );
   const stackTable = computeStackTableFromRawStackTable(
     shared.stackTable,
-    shared.frameTable,
+    frameTable,
     categories,
     defaultCategory
   );
@@ -162,18 +175,30 @@ export function computeThreadFromRawThread(
   const tracedValuesBuffer = rawThread.tracedValuesBuffer
     ? base64StringToBytes(rawThread.tracedValuesBuffer)
     : undefined;
+  const jsAllocations = rawThread.jsAllocations
+    ? computeJsAllocationsTableFromRawJsAllocationsTable(
+        rawThread.jsAllocations
+      )
+    : undefined;
+  const nativeAllocations = rawThread.nativeAllocations
+    ? computeNativeAllocationsTableFromRawNativeAllocationsTable(
+        rawThread.nativeAllocations
+      )
+    : undefined;
   return createThreadFromDerivedTables(
     rawThread,
     samples,
     stackTable,
-    shared.frameTable,
-    shared.funcTable,
-    shared.nativeSymbols,
+    frameTable,
+    funcTable,
+    nativeSymbols,
     shared.resourceTable,
     stringTable,
     shared.sources,
     tracedValuesBuffer,
-    shared.sourceLocationTable
+    shared.sourceLocationTable,
+    jsAllocations,
+    nativeAllocations
   );
 }
 
@@ -344,8 +369,8 @@ export function formatStack(
     sources,
   } = thread;
   for (
-    let stackIndex: IndexIntoStackTable | null = stack;
-    stackIndex !== null;
+    let stackIndex: IndexIntoStackTable = stack;
+    stackIndex !== -1;
     stackIndex = stackTable.prefix[stackIndex]
   ) {
     const frameIndex = stackTable.frame[stackIndex];
@@ -574,6 +599,9 @@ export function fireFullKeyPress(
     enter: 13,
     escape: 27,
     ' ': 32,
+    // On a QWERTY layout '/' and '?' are the same physical key (191), '?'
+    // being Shift+'/', so they share the same keyCode.
+    '/': 191,
     '?': 191,
     a: 65,
     b: 66,
@@ -688,6 +716,7 @@ export function addSourceToTable(
   sources.startColumn.push(startColumn);
   sources.sourceMapURL.push(sourceMapURLStringIndex);
   sources.content.push(null);
+  sources.generatedSource.push(null);
   sources.length = sources.filename.length;
 
   return sourceIndex;

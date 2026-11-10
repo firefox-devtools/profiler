@@ -29,7 +29,7 @@ import type {
   SampleCategoriesAndSubcategories,
   IndexIntoCategoryList,
 } from 'firefox-profiler/types';
-import { ResourceType } from 'firefox-profiler/types';
+import { ResourceType, FuncFlag } from 'firefox-profiler/types';
 
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
@@ -38,7 +38,11 @@ import { checkBit } from '../utils/bitset';
 import * as ProfileData from './profile-data';
 import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { CallNodeInfo, CallNodeInfoInverted } from './call-node-info';
-import { getBottomBoxInfoForCallNode } from './bottom-box';
+import type { SortableColumn } from '../components/shared/TreeView';
+import {
+  getBottomBoxInfoForCallNode,
+  getBottomBoxInfoForFunction,
+} from './bottom-box';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 
@@ -47,6 +51,7 @@ export type CallTreeTimingsNonInverted = {
   self: Float64Array;
   total: Float64Array;
   rootTotalSummary: number; // sum of absolute values, this is used for computing percentages
+  flameGraphWidthTotal: number; // used as 100% reference for flame graph box widths
 };
 
 type TotalAndHasChildren = { total: number; hasChildren: boolean };
@@ -105,7 +110,8 @@ interface CallTreeInternal {
   hasChildren(callNodeIndex: IndexIntoCallNodeTable): boolean;
   createChildren(nodeIndex: IndexIntoCallNodeTable): CallNodeChildren;
   createRoots(): CallNodeChildren;
-  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal;
+  getSelf(nodeIndex: IndexIntoCallNodeTable): number;
+  getTotal(nodeIndex: IndexIntoCallNodeTable): number;
   findHeaviestPathInSubtree(
     callNodeIndex: IndexIntoCallNodeTable
   ): CallNodePath;
@@ -171,10 +177,12 @@ export class CallTreeInternalNonInverted implements CallTreeInternal {
     return this._callNodeHasChildren[callNodeIndex] !== 0;
   }
 
-  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
-    const self = this._callTreeTimings.self[callNodeIndex];
-    const total = this._callTreeTimings.total[callNodeIndex];
-    return { self, total };
+  getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callTreeTimings.self[callNodeIndex];
+  }
+
+  getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
+    return this._callTreeTimings.total[callNodeIndex];
   }
 
   findHeaviestPathInSubtree(
@@ -216,11 +224,12 @@ export class CallTreeInternalFunctionList implements CallTreeInternal {
     return this._timings.sortedFuncs;
   }
 
-  getSelfAndTotal(nodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
-    return {
-      self: this._timings.funcSelf[nodeIndex],
-      total: this._timings.funcTotal[nodeIndex],
-    };
+  getSelf(nodeIndex: IndexIntoCallNodeTable): number {
+    return this._timings.funcSelf[nodeIndex];
+  }
+
+  getTotal(nodeIndex: IndexIntoCallNodeTable): number {
+    return this._timings.funcTotal[nodeIndex];
   }
 
   findHeaviestPathInSubtree(
@@ -288,13 +297,19 @@ class CallTreeInternalInverted implements CallTreeInternal {
     return children;
   }
 
-  getSelfAndTotal(callNodeIndex: IndexIntoCallNodeTable): SelfAndTotal {
+  getSelf(callNodeIndex: IndexIntoCallNodeTable): number {
     if (this._callNodeInfo.isRoot(callNodeIndex)) {
-      const total = this._totalPerRootFunc[callNodeIndex];
-      return { self: total, total };
+      return this._totalPerRootFunc[callNodeIndex];
+    }
+    return 0;
+  }
+
+  getTotal(callNodeIndex: IndexIntoCallNodeTable): number {
+    if (this._callNodeInfo.isRoot(callNodeIndex)) {
+      return this._totalPerRootFunc[callNodeIndex];
     }
     const { total } = this._getTotalAndHasChildren(callNodeIndex);
-    return { self: 0, total };
+    return total;
   }
 
   _getTotalAndHasChildren(
@@ -390,6 +405,12 @@ export class CallTree {
     this._weightType = weightType;
   }
 
+  // The call tree's own order (by total sample count) is the intended order,
+  // so no columns are user-sortable.
+  getSortableColumns(): SortableColumn[] {
+    return [];
+  }
+
   getTotal(): number {
     return this._rootTotalSummary;
   }
@@ -445,7 +466,8 @@ export class CallTree {
       this._thread.funcTable.name[funcIndex]
     );
 
-    const { self, total } = this._internal.getSelfAndTotal(callNodeIndex);
+    const total = this._internal.getTotal(callNodeIndex);
+    const self = this._internal.getSelf(callNodeIndex);
     const totalRelative = total / this._rootTotalSummary;
     const selfRelative = self / this._rootTotalSummary;
 
@@ -504,9 +526,14 @@ export class CallTree {
       const subcategoryIndex =
         this._callNodeInfo.subcategoryForNode(callNodeIndex);
       const badge = this._getInliningBadge(callNodeIndex, funcName);
-      const resourceIndex = this._thread.funcTable.resource[funcIndex];
-      const resourceType = this._thread.resourceTable.type[resourceIndex];
-      const isFrameLabel = resourceIndex === -1;
+      const funcFlags = this._thread.funcTable.flags[funcIndex];
+      const isFrameLabel = (funcFlags & FuncFlag.HasResource) === 0;
+      const resourceIndex = isFrameLabel
+        ? -1
+        : this._thread.funcTable.resource[funcIndex];
+      const resourceType = isFrameLabel
+        ? -1
+        : this._thread.resourceTable.type[resourceIndex];
       const libName = this._getOriginAnnotation(funcIndex);
       const weightType = this._weightType;
 
@@ -629,6 +656,14 @@ export class CallTree {
     );
   }
 
+  getBottomBoxInfoForFunction(funcIndex: IndexIntoFuncTable): BottomBoxInfo {
+    return getBottomBoxInfoForFunction(
+      funcIndex,
+      this._thread,
+      this._previewFilteredCtssSamples
+    );
+  }
+
   /**
    * Take a IndexIntoCallNodeTable, and compute an inverted path for it.
    *
@@ -689,7 +724,11 @@ export function computeCallNodeSelfAndSummary(
     rootTotalSummary += abs(callNodeSelf[callNodeIndex]);
   }
 
-  return { callNodeSelf, rootTotalSummary };
+  return {
+    callNodeSelf,
+    rootTotalSummary,
+    flameGraphWidthTotal: rootTotalSummary,
+  };
 }
 
 export function getSelfAndTotalForCallNode(
@@ -860,7 +899,8 @@ export function computeCallTreeTimingsNonInverted(
   callNodeSelfAndSummary: CallNodeSelfAndSummary
 ): CallTreeTimingsNonInverted {
   const callNodeTable = callNodeInfo.getCallNodeTable();
-  const { callNodeSelf, rootTotalSummary } = callNodeSelfAndSummary;
+  const { callNodeSelf, rootTotalSummary, flameGraphWidthTotal } =
+    callNodeSelfAndSummary;
 
   // Compute the following variables:
   const callNodeTotal = new Float64Array(callNodeTable.length);
@@ -898,6 +938,7 @@ export function computeCallTreeTimingsNonInverted(
     total: callNodeTotal,
     callNodeHasChildren,
     rootTotalSummary,
+    flameGraphWidthTotal,
   };
 }
 
@@ -1300,5 +1341,9 @@ export function computeCallNodeTracedSelfAndSummary(
     }
   }
 
-  return { callNodeSelf, rootTotalSummary };
+  return {
+    callNodeSelf,
+    rootTotalSummary,
+    flameGraphWidthTotal: rootTotalSummary,
+  };
 }

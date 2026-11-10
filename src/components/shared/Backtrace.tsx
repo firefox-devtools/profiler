@@ -63,7 +63,7 @@ export class Backtrace extends React.PureComponent<Props> {
                   origin,
                   isFrameLabel,
                   category,
-                  inlineDepth,
+                  isInlined,
                   stackIndex,
                 },
                 i
@@ -74,7 +74,7 @@ export class Backtrace extends React.PureComponent<Props> {
                       className={`colored-border category-color-${categories[category].color}`}
                       title={categories[category].name}
                     />
-                    {inlineDepth > 0 ? (
+                    {isInlined ? (
                       <Localized
                         id="Backtrace--inlining-badge"
                         vars={{ function: getFunctionName(funcName) }}

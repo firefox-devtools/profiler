@@ -9,6 +9,7 @@
 
 import type {
   StatusResult,
+  PermalinkResult,
   SessionContext,
   WithContext,
   FunctionExpandResult,
@@ -17,9 +18,12 @@ import type {
   ViewRangeResult,
   FilterStackResult,
   ThreadInfoResult,
+  ThreadListResult,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
@@ -28,17 +32,38 @@ import type {
   ThreadNetworkResult,
   ThreadPageLoadResult,
   NetworkPhaseTimings,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
   MarkerGroupData,
   CallTreeNode,
+  CategoryBreakdown,
   InlineStatus,
   FilterEntry,
   SampleFilterSpec,
   ProfileLogsResult,
+  ProfileMarkersResult,
   ThreadSelectResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
+  WeightType,
+  CounterSummary,
+  CounterListResult,
+  CounterInfoResult,
+  SourceEntry,
+  SourceMapLocation,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
+  ProfileSaveResult,
 } from './protocol';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
-import { formatTimestamp as formatDuration } from 'firefox-profiler/utils/format-numbers';
+import {
+  formatTimestamp as formatDuration,
+  formatSeconds,
+  formatBytes,
+} from 'firefox-profiler/utils/format-numbers';
 
 // Maximum display width for function names in call-tree and sample views.
 const FUNC_NAME_WIDTH = 120;
@@ -61,27 +86,161 @@ const INLINE_LEGEND =
   'Note: (inl) = inlined by the compiler into the nearest non-inlined ancestor above. ' +
   '(inl?) = some calls were inlined by the compiler.';
 
+const BAR_WIDTH = 28;
+
+function createTimestampFormatter(context: SessionContext) {
+  const range = context.currentViewRange ?? context.rootRange;
+  // Resolve a thousandth of the view, with at least millisecond precision
+  // and a nanosecond floor to avoid exposing floating-point noise.
+  const precision = Math.max(
+    0.000001,
+    Math.min(1, (range.end - range.start) / 1000)
+  );
+  return (time: number) => formatSeconds(time, 5, 3, precision);
+}
+
+/**
+ * Render aligned `label / bar / count / percentage` rows. `barRatio` is the
+ * fraction of the bar's full width to fill, which is not always the same as
+ * `percentage`; some tables scale their bars against the largest row instead.
+ */
+function formatBarRows(
+  rows: Array<{
+    label: string;
+    count: number;
+    percentage: number;
+    barRatio: number;
+  }>
+): string[] {
+  const maxLabelLen = Math.max(...rows.map((row) => row.label.length));
+
+  return rows.map((row) => {
+    const barLen = Math.round(row.barRatio * BAR_WIDTH);
+    const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
+    const label = row.label.padEnd(maxLabelLen);
+    const countStr = String(row.count).padStart(6);
+    const pctStr = row.percentage.toFixed(1).padStart(5);
+    return `  ${label}  ${bar}  ${countStr}  ${pctStr}%`;
+  });
+}
+
+/**
+ * Render a category breakdown as a `──── title ────` section, with each
+ * category followed by its non-empty subcategories, indented.
+ */
+function formatCategoryBreakdown(
+  title: string,
+  breakdown: CategoryBreakdown,
+  emptyMessage: string
+): string[] {
+  const lines = [`──── ${title} ────`, ''];
+
+  if (breakdown.categories.length === 0) {
+    lines.push(`  ${emptyMessage}`);
+    return lines;
+  }
+
+  const rows = breakdown.categories.flatMap((category) => [
+    {
+      label: category.name,
+      count: Math.round(category.samples),
+      percentage: category.percentage,
+      barRatio: Math.abs(category.samples) / breakdown.totalSamples,
+    },
+    ...category.subcategories.map((subcategory) => ({
+      label: `  ${subcategory.name}`,
+      count: Math.round(subcategory.samples),
+      percentage: subcategory.percentage,
+      barRatio: Math.abs(subcategory.samples) / breakdown.totalSamples,
+    })),
+  ]);
+
+  lines.push(...formatBarRows(rows));
+  return lines;
+}
+
+/**
+ * Format a call tree weight in the unit the current data source measures in.
+ */
+function formatWeight(value: number, weightType: WeightType): string {
+  switch (weightType) {
+    case 'bytes':
+      return value < 0 ? `-${formatBytes(-value)}` : formatBytes(value);
+    case 'tracing-ms':
+      return formatDuration(value);
+    case 'samples':
+      return String(Math.round(value));
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}
+
+/**
+ * As formatWeight, but with a trailing unit word where the number alone would be
+ * ambiguous. formatBytes and formatDuration already embed their units.
+ */
+function formatWeightWithUnit(value: number, weightType: WeightType): string {
+  const formatted = formatWeight(value, weightType);
+  return weightType === 'samples' ? `${formatted} samples` : formatted;
+}
+
+/**
+ * The noun for a weight in headings like "Top Functions (by self bytes)".
+ */
+function weightHeadingNoun(weightType: WeightType): string {
+  return weightType === 'bytes' ? 'bytes' : 'time';
+}
+
+/**
+ * `GeckoMain, WebExtensions` — thread name then process, the process dropped
+ * when it merely repeats the thread name.
+ */
+function formatThreadAndProcess(thread: {
+  name: string;
+  processName?: string;
+}): string {
+  if (!thread.processName || thread.processName === thread.name) {
+    return thread.name;
+  }
+  return `${thread.name}, ${thread.processName}`;
+}
+
+/** `t-0,t-1 (GeckoMain, Parent Process; Renderer)` */
+function formatThreadList(
+  handle: string,
+  threads: Array<{ name: string; processName?: string }>
+): string {
+  return `${handle} (${threads.map(formatThreadAndProcess).join('; ')})`;
+}
+
 /**
  * Format a SessionContext as a compact header line.
- * Shows current thread selection, zoom range, and full profile duration.
+ * Shows current thread selection, zoom range, full profile duration, and search.
  */
 export function formatContextHeader(
   context: SessionContext,
   activeFilters?: FilterEntry[],
   ephemeralFilters?: SampleFilterSpec[]
 ): string {
-  // Thread info
+  // Thread info. The header leads with the thread this result is about, and
+  // only names the sticky selection separately when the two have diverged, so
+  // that a `--thread` query does not read as having changed the selection.
   let threadInfo = 'No thread selected';
-  if (context.selectedThreadHandle && context.selectedThreads.length > 0) {
-    if (context.selectedThreads.length === 1) {
-      const thread = context.selectedThreads[0];
-      threadInfo = `${context.selectedThreadHandle} (${thread.name})`;
-    } else {
-      const names = context.selectedThreads
-        .map((t: { name: string }) => t.name)
-        .join(', ');
-      threadInfo = `${context.selectedThreadHandle} (${names})`;
-    }
+  let selectedInfo = '';
+  if (context.resultThreadHandle && context.resultThreads.length > 0) {
+    threadInfo = formatThreadList(
+      context.resultThreadHandle,
+      context.resultThreads
+    );
+    selectedInfo = ` | Selected: ${context.selectedThreadHandle ?? 'none'}`;
+  } else if (
+    context.selectedThreadHandle &&
+    context.selectedThreads.length > 0
+  ) {
+    threadInfo = formatThreadList(
+      context.selectedThreadHandle,
+      context.selectedThreads
+    );
   }
 
   // View range info
@@ -100,7 +259,10 @@ export function formatContextHeader(
     (activeFilters?.length ?? 0) + (ephemeralFilters?.length ?? 0);
   const filterInfo =
     totalFilterCount > 0 ? ` | Filters: ${totalFilterCount}` : '';
-  return `[Thread: ${threadInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}]`;
+  const searchInfo = context.callTreeSearch
+    ? ` | Call tree search: "${context.callTreeSearch}"`
+    : '';
+  return `[Thread: ${threadInfo}${selectedInfo} | View: ${viewInfo} | Full: ${fullInfo}${filterInfo}${searchInfo}]`;
 }
 
 /**
@@ -109,13 +271,10 @@ export function formatContextHeader(
 export function formatStatusResult(result: StatusResult): string {
   let threadInfo = 'No thread selected';
   if (result.selectedThreadHandle && result.selectedThreads.length > 0) {
-    if (result.selectedThreads.length === 1) {
-      const thread = result.selectedThreads[0];
-      threadInfo = `${result.selectedThreadHandle} (${thread.name})`;
-    } else {
-      const names = result.selectedThreads.map((t) => t.name).join(', ');
-      threadInfo = `${result.selectedThreadHandle} (${names})`;
-    }
+    threadInfo = formatThreadList(
+      result.selectedThreadHandle,
+      result.selectedThreads
+    );
   }
 
   let rangesInfo = 'Full profile';
@@ -127,6 +286,11 @@ export function formatStatusResult(result: StatusResult): string {
   }
 
   const filterLines: string[] = [];
+  if (result.callTreeSearch) {
+    filterLines.push(
+      `  Call tree search (all threads): "${result.callTreeSearch}"`
+    );
+  }
   for (const stack of result.filterStacks) {
     if (stack.filters.length === 0) {
       continue;
@@ -144,7 +308,15 @@ export function formatStatusResult(result: StatusResult): string {
   return `\
 Session Status:
   Selected thread: ${threadInfo}
-  View range: ${rangesInfo}${filterSection}`;
+  View range: ${rangesInfo}
+  Data source: ${result.callTreeSummaryStrategy}${filterSection}`;
+}
+
+/**
+ * Format a PermalinkResult as plain text: just the URL, so it can be piped.
+ */
+export function formatPermalinkResult(result: PermalinkResult): string {
+  return result.shortUrl ?? result.url;
 }
 
 /**
@@ -155,8 +327,13 @@ export function formatFilterStackResult(result: FilterStackResult): string {
   if (result.message) {
     lines.push(result.message);
   }
+  if (result.callTreeSearch) {
+    lines.push(`Call tree search (all threads): "${result.callTreeSearch}"`);
+  }
   if (result.filters.length === 0) {
-    lines.push(`No active filters for ${result.threadHandle}`);
+    if (!result.callTreeSearch) {
+      lines.push(`No active filters for ${result.threadHandle}`);
+    }
   } else {
     lines.push(`Filters for ${result.threadHandle} (applied in order):`);
     for (const f of result.filters) {
@@ -212,6 +389,28 @@ Function ${result.functionHandle}:
     }
   }
 
+  const { running, self, threadHandle, friendlyThreadName } =
+    result.categoryBreakdown;
+
+  if (running.samples === 0) {
+    output += `\n\n  No samples for this function on ${threadHandle} (${friendlyThreadName}) in the current view.`;
+  } else {
+    for (const [kind, breakdown] of [
+      ['running', running],
+      ['self', self],
+    ] as const) {
+      const count = Math.round(breakdown.samples);
+      const share = breakdown.percentageOfThread.toFixed(1);
+      output +=
+        '\n\n' +
+        formatCategoryBreakdown(
+          `Categories: ${kind} (${count} samples, ${share}% of thread)`,
+          breakdown,
+          `No ${kind} samples for this function in the current view.`
+        ).join('\n');
+    }
+  }
+
   return output;
 }
 
@@ -262,6 +461,7 @@ Created at: ${result.createdAtName}
 Ended at: ${endedAtStr}
 
 This thread contains ${result.sampleCount} samples and ${result.markerCount} markers.
+Data sources: ${result.availableStrategies.join(', ') || 'none'}
 
 CPU activity over time:`;
 
@@ -277,6 +477,11 @@ CPU activity over time:`;
     output += '\nNo significant activity.';
   }
 
+  if (result.networkActivity) {
+    output +=
+      '\n\n' + formatThreadNetworkActivity(result.networkActivity).join('\n');
+  }
+
   return output;
 }
 
@@ -287,6 +492,7 @@ export function formatMarkerStackResult(
   result: WithContext<MarkerStackResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
+  const formatTimestamp = createTimestampFormatter(result.context);
   let output = `${contextHeader}
 
 Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
@@ -297,8 +503,7 @@ Stack trace for marker ${result.markerHandle}: ${result.markerName}\n`;
   }
 
   if (result.stack.capturedAt !== undefined) {
-    const rootStart = result.context.rootRange.start;
-    output += `\nCaptured at: ${formatDuration(result.stack.capturedAt - rootStart)}\n`;
+    output += `\nCaptured at: ${formatTimestamp(result.stack.capturedAt)}\n`;
   }
 
   for (let i = 0; i < result.stack.frames.length; i++) {
@@ -320,9 +525,71 @@ export function formatMarkerInfoResult(
   result: WithContext<MarkerInfoResult>
 ): string {
   const contextHeader = formatContextHeader(result.context);
-  let output = `${contextHeader}
+  const formatTimestamp = createTimestampFormatter(result.context);
+  return `${contextHeader}\n\n${formatMarkerInfoBody(result, formatTimestamp)}`;
+}
 
-Marker ${result.markerHandle}: ${result.name}`;
+/**
+ * Format several marker info records as plain text, one per requested handle
+ * under a single context header. Handles that did not resolve are reported in
+ * place.
+ */
+export function formatMarkerInfoMultiResult(
+  result: WithContext<MarkerInfoMultiResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const formatTimestamp = createTimestampFormatter(result.context);
+  const total = result.markers.length + result.errors.length;
+  const records: string[] = [];
+
+  // Walk the requested handles, so failed lookups keep their place in the order.
+  const byHandle = new Map(result.markers.map((m) => [m.markerHandle, m]));
+  const errorsByHandle = new Map(
+    result.errors.map((e) => [e.markerHandle, e.error])
+  );
+  let position = 0;
+  for (const markerHandle of result.requested) {
+    position++;
+    const prefix = `[${position}/${total}] `;
+    const marker = byHandle.get(markerHandle);
+    if (marker) {
+      records.push(
+        prefix + formatMarkerInfoBody(marker, formatTimestamp).trimEnd()
+      );
+      continue;
+    }
+    const error = errorsByHandle.get(markerHandle);
+    if (error !== undefined) {
+      records.push(`${prefix}Marker ${markerHandle}: error: ${error}`);
+    }
+  }
+
+  let output = `${contextHeader}\n\n${records.join('\n\n----------\n\n')}`;
+  if (result.errors.length > 0) {
+    const verb = result.errors.length === 1 ? 'was' : 'were';
+    output += `\n\n${result.errors.length} of ${total} requested markers ${verb} not found.`;
+  }
+  const spread = result.rangeSpansThreadsWarning;
+  if (spread) {
+    const rangeList = spread.ranges.join(', ');
+    const threadList = spread.threadHandles.join(', ');
+    output +=
+      `\n\nWarning: the range ${rangeList} covers markers in more than one thread ` +
+      `(${threadList}). Handle ranges are numeric, so a range that runs past the end of ` +
+      `the listing you were reading picks up unrelated markers. Re-run the listing and ` +
+      `check the handles.`;
+  }
+  return output;
+}
+
+/**
+ * Format one marker info record, below the context header.
+ */
+function formatMarkerInfoBody(
+  result: MarkerInfoResult,
+  formatTimestamp: (time: number) => string
+): string {
+  let output = `Marker ${result.markerHandle}: ${result.name}`;
   if (result.tooltipLabel) {
     output += ` - ${result.tooltipLabel}`;
   }
@@ -332,11 +599,9 @@ Marker ${result.markerHandle}: ${result.name}`;
   output += `Type: ${result.markerType ?? 'None'}\n`;
   output += `Category: ${result.category.name}\n`;
 
-  // Time and duration (relative to profile root start)
-  const rootStart = result.context.rootRange.start;
-  const startStr = formatDuration(result.start - rootStart);
+  const startStr = formatTimestamp(result.start);
   if (result.end !== null) {
-    const endStr = formatDuration(result.end - rootStart);
+    const endStr = formatTimestamp(result.end);
     const durationStr = formatDuration(result.duration!);
     output += `Time: ${startStr} - ${endStr} (${durationStr})\n`;
   } else {
@@ -363,7 +628,7 @@ Marker ${result.markerHandle}: ${result.name}`;
   if (result.stack && result.stack.frames.length > 0) {
     output += '\nStack trace:\n';
     if (result.stack.capturedAt !== undefined) {
-      output += `  Captured at: ${formatDuration(result.stack.capturedAt - rootStart)}\n`;
+      output += `  Captured at: ${formatTimestamp(result.stack.capturedAt)}\n`;
     }
 
     for (let i = 0; i < result.stack.frames.length; i++) {
@@ -376,6 +641,83 @@ Marker ${result.markerHandle}: ${result.name}`;
     }
   }
 
+  return output;
+}
+
+/**
+ * Format a ThreadListResult as an aligned plain-text table.
+ *
+ * Unlike `profile info`, which nests threads under their process and only shows
+ * the busiest ones, this is one row per thread so a whole profile's thread
+ * inventory can be grepped. The selected thread is flagged with `*`.
+ */
+export function formatThreadListResult(
+  result: WithContext<ThreadListResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const threadCount = result.totalThreadCount;
+  const processCount = result.processCount;
+  const summary =
+    `${threadCount} thread${threadCount === 1 ? '' : 's'} across ` +
+    `${processCount} process${processCount === 1 ? '' : 'es'}`;
+
+  if (result.threads.length === 0) {
+    const reason =
+      result.searchQuery !== undefined
+        ? `No threads match '${result.searchQuery}' (${summary}).`
+        : 'No threads in this profile.';
+    return `${contextHeader}\n\n${reason}`;
+  }
+
+  const rows = result.threads.map((thread) => ({
+    marker: thread.selected ? '*' : ' ',
+    handle: thread.threadHandle,
+    name: thread.name,
+    process: thread.etld1
+      ? `${thread.processName} (${thread.etld1})`
+      : thread.processName,
+    pid: thread.pid,
+    cpu: `${thread.cpuMs.toFixed(3)}ms`,
+    markers: thread.markerCount.toLocaleString('en-US'),
+  }));
+
+  const width = (
+    header: string,
+    pick: (row: (typeof rows)[number]) => string
+  ): number => Math.max(header.length, ...rows.map((row) => pick(row).length));
+
+  const wHandle = width('HANDLE', (r) => r.handle);
+  const wName = width('NAME', (r) => r.name);
+  const wProcess = width('PROCESS', (r) => r.process);
+  const wPid = width('PID', (r) => r.pid);
+  const wCpu = width('CPU', (r) => r.cpu);
+  const wMarkers = width('MARKERS', (r) => r.markers);
+
+  const lines = [
+    `  ${'HANDLE'.padEnd(wHandle)}  ${'NAME'.padEnd(wName)}  ${'PROCESS'.padEnd(wProcess)}  ${'PID'.padStart(wPid)}  ${'CPU'.padStart(wCpu)}  ${'MARKERS'.padStart(wMarkers)}`,
+  ];
+  for (const row of rows) {
+    lines.push(
+      `${row.marker} ${row.handle.padEnd(wHandle)}  ${row.name.padEnd(wName)}  ${row.process.padEnd(wProcess)}  ${row.pid.padStart(wPid)}  ${row.cpu.padStart(wCpu)}  ${row.markers.padStart(wMarkers)}`
+    );
+  }
+
+  const shown =
+    result.threads.length === result.totalThreadCount
+      ? `Threads (${summary})`
+      : `Threads (${result.threads.length} of ${summary})`;
+  const heading = `${shown}, sorted by ${result.sort}${
+    result.searchQuery !== undefined ? `, matching '${result.searchQuery}'` : ''
+  }:`;
+
+  let output = `${contextHeader}\n\n${heading}\n${lines.join('\n')}\n`;
+  if (result.hiddenByLimit > 0) {
+    output +=
+      `  + ${result.hiddenByLimit} more ` +
+      `thread${result.hiddenByLimit === 1 ? '' : 's'} ` +
+      `(use --limit 0 to see all)\n`;
+  }
+  output += '\n* = currently selected thread\n';
   return output;
 }
 
@@ -418,8 +760,7 @@ Name: ${result.name}\n`;
       }
     }
 
-    const etld1Suffix = process.etld1 ? ` [${process.etld1}]` : '';
-    output += `  p-${process.processIndex}: ${process.name}${etld1Suffix} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
+    output += `  p-${process.processIndex}: ${process.name} [pid ${process.pid}]${timingInfo} - ${process.cpuMs.toFixed(3)}ms\n`;
 
     for (const thread of process.threads) {
       output += `    ${thread.threadHandle}: ${thread.name} [tid ${thread.tid}] - ${thread.cpuMs.toFixed(3)}ms\n`;
@@ -427,6 +768,10 @@ Name: ${result.name}\n`;
 
     if (process.remainingThreads) {
       output += `    + ${process.remainingThreads.count} more threads with combined CPU time ${process.remainingThreads.combinedCpuMs.toFixed(3)}ms and max CPU time ${process.remainingThreads.maxCpuMs.toFixed(3)}ms (use --all to see all)\n`;
+    }
+
+    for (const counter of process.counters ?? []) {
+      output += `    ${counter.counterHandle}: ${counter.label}${formatCounterStats(counter)}\n`;
     }
   }
 
@@ -448,7 +793,347 @@ Name: ${result.name}\n`;
     output += 'No significant activity.\n';
   }
 
+  if (result.networkActivity) {
+    output +=
+      '\n' +
+      formatProfileNetworkActivity(result.networkActivity).join('\n') +
+      '\n';
+  }
+
   return output;
+}
+
+function formatCpuCores(result: ProfileMetaResult): string | null {
+  const { physicalCPUs, logicalCPUs } = result;
+  if (physicalCPUs !== undefined && logicalCPUs !== undefined) {
+    return `${physicalCPUs} physical, ${logicalCPUs} logical cores`;
+  }
+  if (physicalCPUs !== undefined) {
+    return `${physicalCPUs} physical cores`;
+  }
+  if (logicalCPUs !== undefined) {
+    return `${logicalCPUs} logical cores`;
+  }
+  return null;
+}
+
+/**
+ * Format the sampling interval. Size profiles measure the "interval" in bytes,
+ * everything else in time.
+ */
+function formatInterval(result: ProfileMetaResult): string {
+  if (result.sampleUnits?.time === 'bytes') {
+    return formatBytes(result.interval);
+  }
+  return formatDuration(result.interval, 4, 1);
+}
+
+/**
+ * Format a ProfileMetaResult as plain text, grouped into the same sections the
+ * web UI's "Profile Info" panel uses. Absent fields (and empty sections) are
+ * skipped.
+ */
+export function formatProfileMetaResult(
+  result: WithContext<ProfileMetaResult>
+): string {
+  const blocks: string[] = [];
+  const pushSection = (heading: string, rows: string[]) => {
+    if (rows.length) {
+      blocks.push(`${heading}:\n` + rows.map((row) => `  ${row}`).join('\n'));
+    }
+  };
+
+  // ===== Recording =====
+  const recording: string[] = [];
+  if (result.startTimeFormatted) {
+    recording.push(`Started: ${result.startTimeFormatted}`);
+  }
+  if (result.durationMs !== undefined) {
+    recording.push(`Duration: ${formatDuration(result.durationMs)}`);
+  }
+  if (result.endTimeFormatted) {
+    recording.push(`Main process ended: ${result.endTimeFormatted}`);
+  }
+  recording.push(`Sampling interval: ${formatInterval(result)}`);
+  if (result.bufferCapacityBytes !== undefined) {
+    recording.push(
+      `Buffer capacity: ${formatBytes(result.bufferCapacityBytes, 0)}`
+    );
+  }
+  if (result.bufferDuration !== undefined) {
+    recording.push(`Buffer duration: ${result.bufferDuration}s`);
+  }
+  if (result.symbolicated !== undefined) {
+    recording.push(`Symbolicated: ${result.symbolicated ? 'yes' : 'no'}`);
+  }
+  if (result.features && result.features.length) {
+    recording.push(`Features: ${result.features.join(', ')}`);
+  }
+  if (result.threadsFilter && result.threadsFilter.length) {
+    recording.push(`Threads filter: ${result.threadsFilter.join(', ')}`);
+  }
+  pushSection('Recording', recording);
+
+  // ===== Application =====
+  const application: string[] = [];
+  if (result.productAndVersion) {
+    let name = result.productAndVersion;
+    if (result.appBuildID) {
+      name += ` (build ${result.appBuildID})`;
+    }
+    application.push(`Name: ${name}`);
+  } else if (result.appBuildID) {
+    application.push(`Build ID: ${result.appBuildID}`);
+  }
+  if (result.uptimeMs !== undefined) {
+    application.push(`Uptime: ${formatDuration(result.uptimeMs)}`);
+  }
+  if (result.updateChannel) {
+    application.push(`Update channel: ${result.updateChannel}`);
+  }
+  if (result.debug !== undefined) {
+    application.push(`Build type: ${result.debug ? 'debug' : 'opt'}`);
+  }
+  if (result.sourceURL) {
+    application.push(`Source URL: ${result.sourceURL}`);
+  }
+  if (result.arguments) {
+    application.push(`Arguments: ${result.arguments}`);
+  }
+  if (result.extensions && result.extensions.length) {
+    const names = result.extensions.map((ext) => ext.name).join(', ');
+    application.push(`Extensions (${result.extensions.length}): ${names}`);
+  }
+  pushSection('Application', application);
+
+  // ===== Platform =====
+  const platform: string[] = [];
+  if (result.device) {
+    platform.push(`Device: ${result.device}`);
+  }
+  if (result.platform) {
+    let os = result.platform;
+    if (result.abi) {
+      os += ` (${result.abi})`;
+    }
+    platform.push(`OS: ${os}`);
+  } else if (result.abi) {
+    platform.push(`ABI: ${result.abi}`);
+  }
+  const cpuCores = formatCpuCores(result);
+  if (result.cpuName) {
+    let cpu = result.cpuName;
+    if (cpuCores) {
+      cpu += ` (${cpuCores})`;
+    }
+    platform.push(`CPU: ${cpu}`);
+  } else if (cpuCores) {
+    platform.push(`CPU cores: ${cpuCores}`);
+  }
+  if (result.mainMemoryBytes !== undefined) {
+    platform.push(`Memory: ${formatBytes(result.mainMemoryBytes)}`);
+  }
+  pushSection('Platform', platform);
+
+  // ===== Import =====
+  const importInfo: string[] = [];
+  if (result.importedFrom) {
+    importInfo.push(`Imported from: ${result.importedFrom}`);
+  }
+  if (result.fileName) {
+    importInfo.push(`File name: ${result.fileName}`);
+  }
+  if (result.fileSize !== undefined) {
+    importInfo.push(`File size: ${formatBytes(result.fileSize)}`);
+  }
+  pushSection('Import', importInfo);
+
+  // ===== Extra =====
+  if (result.extra) {
+    for (const section of result.extra) {
+      const rows = section.entries.map(
+        (entry) => `${entry.label}: ${entry.formatted}`
+      );
+      pushSection(section.label, rows);
+    }
+  }
+
+  const contextHeader = formatContextHeader(result.context);
+  return `${contextHeader}\n\n${blocks.join('\n\n')}`;
+}
+
+function formatCounterStatInline(
+  stat: CounterSummary['stats'][number]
+): string {
+  const value = stat.carbon
+    ? `${stat.formattedValue} (${stat.carbon})`
+    : stat.formattedValue;
+  return `${stat.label}: ${value}`;
+}
+
+/** The ` - stat; stat [N samples]` trailer shared by counter list and profile info. */
+function formatCounterStats(counter: CounterSummary): string {
+  const stats =
+    counter.stats.length > 0
+      ? ` - ${counter.stats.map(formatCounterStatInline).join('; ')}`
+      : '';
+  return `${stats} [${counter.rangeSampleCount} samples]`;
+}
+
+/** `p-N Process Name` identifying the owning process. */
+function formatCounterProcessName(counter: CounterSummary): string {
+  return `p-${counter.processIndex} ${counter.processName}`;
+}
+
+/** The ` [p-N Process Name, pid X]` segment identifying the owning process. */
+function formatCounterProcess(counter: CounterSummary): string {
+  return ` [${formatCounterProcessName(counter)}, pid ${counter.pid}]`;
+}
+
+function formatCounterSummaryLine(counter: CounterSummary): string {
+  return `  ${counter.counterHandle}: ${counter.label} (${counter.category})${formatCounterProcess(counter)}${formatCounterStats(counter)}`;
+}
+
+/**
+ * Format a CounterListResult as plain text.
+ */
+export function formatCounterListResult(
+  result: WithContext<CounterListResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  if (result.counters.length === 0) {
+    return `${contextHeader}\n\nNo counters in this profile.`;
+  }
+  const blocks = result.counters.map((counter) => {
+    const block = [formatCounterSummaryLine(counter)];
+    if (counter.graph.length > 0) {
+      block.push(`      ${counterSparkline(counter)}`);
+    }
+    return block.join('\n');
+  });
+  // Trailing blank line so the last counter's sparkline is separated from the
+  // prompt, matching the blank lines between counters.
+  return `${contextHeader}\n\nCounters (${result.counters.length}):\n${blocks.join('\n\n')}\n`;
+}
+
+const SPARKLINE_CHARS = '▁▂▃▄▅▆▇█';
+
+/**
+ * Render a compact sparkline of the values using block characters, scaled
+ * between `min` (floor) and `max` (top). Values are clamped to that range; a
+ * zero-width range renders at mid-height so it doesn't read as the floor.
+ */
+function renderSparkline(values: number[], min: number, max: number): string {
+  if (values.length === 0) {
+    return '';
+  }
+  const range = max - min;
+  const lastIndex = SPARKLINE_CHARS.length - 1;
+  if (range <= 0) {
+    return SPARKLINE_CHARS[Math.floor(lastIndex / 2)].repeat(values.length);
+  }
+  return values
+    .map((value) => {
+      const clamped = Math.min(max, Math.max(min, value));
+      const index = Math.round(((clamped - min) / range) * lastIndex);
+      return SPARKLINE_CHARS[index];
+    })
+    .join('');
+}
+
+/**
+ * Render a counter's sparkline, choosing the baseline per graph type so the
+ * heights are meaningful: accumulated counters (e.g. Memory) are relative, so
+ * they scale between their own min and max; rate counters are absolute and
+ * anchored at zero, with percent counters (e.g. Process CPU) pinned to 0-100%.
+ */
+function counterSparkline(counter: CounterSummary): string {
+  const { graph } = counter;
+  if (graph.length === 0) {
+    return '';
+  }
+  if (counter.graphType === 'line-accumulated') {
+    return renderSparkline(graph, Math.min(...graph), Math.max(...graph));
+  }
+  if (counter.unit === 'percent') {
+    return renderSparkline(graph, 0, 1);
+  }
+  return renderSparkline(graph, 0, Math.max(...graph));
+}
+
+/**
+ * Format a CounterInfoResult as plain text.
+ */
+export function formatCounterInfoResult(
+  result: WithContext<CounterInfoResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  const lines = [
+    contextHeader,
+    '',
+    `Counter ${result.counterHandle}: ${result.label}`,
+    `  Name: ${result.name}`,
+    `  Category: ${result.category}`,
+  ];
+  if (result.description) {
+    lines.push(`  Description: ${result.description}`);
+  }
+  lines.push(`  Unit: ${result.unit || '(none)'}`);
+  lines.push(`  Graph type: ${result.graphType}`);
+  lines.push(
+    `  Process: ${formatCounterProcessName(result)} [pid ${result.pid}]`
+  );
+  lines.push(
+    `  Main thread: ${result.mainThreadHandle} (${result.mainThreadName})`
+  );
+  lines.push(
+    `  Samples: ${result.sampleCount} total, ${result.rangeSampleCount} in current range`
+  );
+  if (result.rangeStart !== null && result.rangeEnd !== null) {
+    lines.push(
+      `  Time span: ${formatDuration(result.rangeStart)} → ${formatDuration(result.rangeEnd)}`
+    );
+  }
+  if (result.stats.length > 0) {
+    lines.push('  Stats (current range):');
+    for (const stat of result.stats) {
+      const value = stat.carbon
+        ? `${stat.formattedValue} (${stat.carbon})`
+        : stat.formattedValue;
+      lines.push(`    ${stat.label}: ${value}`);
+    }
+  }
+  if (result.overTime.length > 0) {
+    lines.push(`  ${result.label} over time:`);
+    if (result.graph.length > 0) {
+      lines.push(`    ${counterSparkline(result)}`);
+      lines.push('');
+    }
+    // Build the columns first, then pad each to its widest cell so the values
+    // line up in a column.
+    const rows = result.overTime.map((bucket) => {
+      const extras = [
+        bucket.formattedDelta,
+        bucket.formattedPercentage,
+        bucket.carbon,
+      ].filter((part) => part !== undefined);
+      return {
+        handles: `[${bucket.startTimeName} → ${bucket.endTimeName}]`,
+        times: `(${bucket.startTimeStr} - ${bucket.endTimeStr})`,
+        value: bucket.formattedValue,
+        extras: extras.length > 0 ? `(${extras.join(', ')})` : '',
+      };
+    });
+    const handlesWidth = Math.max(...rows.map((row) => row.handles.length));
+    const timesWidth = Math.max(...rows.map((row) => row.times.length));
+    const valueWidth = Math.max(...rows.map((row) => row.value.length));
+    for (const row of rows) {
+      lines.push(
+        `    ${row.handles.padEnd(handlesWidth)}  ${row.times.padEnd(timesWidth)}  ${row.value.padEnd(valueWidth)}  ${row.extras}`.trimEnd()
+      );
+    }
+  }
+  return lines.join('\n');
 }
 
 /**
@@ -582,16 +1267,22 @@ function formatSamplesPreamble(result: {
   activeOnly?: boolean;
   search?: string;
   friendlyThreadName: string;
+  callTreeSummaryStrategy: CallTreeSummaryStrategy;
 }): string {
   const contextHeader = formatContextHeader(
     result.context,
     result.activeFilters,
     result.ephemeralFilters
   );
-  const activeOnlyNote = result.activeOnly
-    ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
-    : '';
-  const searchNote = result.search ? `Search: "${result.search}"\n\n` : '';
+  const strategy = result.callTreeSummaryStrategy;
+  const isTiming = strategy === 'timing';
+  const dataSourceNote = isTiming ? '' : `Data source: ${strategy}\n\n`;
+  // Idle samples only exist in the timing table, so the note would be
+  // meaningless under an allocation strategy.
+  const activeOnlyNote =
+    result.activeOnly && isTiming
+      ? 'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n\n'
+      : '';
   const filtersParts: string[] = [
     ...(result.activeFilters?.map((f) => `[${f.index}] ${f.description}`) ??
       []),
@@ -599,7 +1290,7 @@ function formatSamplesPreamble(result: {
   ];
   const filtersNote =
     filtersParts.length > 0 ? `Filters: ${filtersParts.join(', ')}\n\n` : '';
-  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${activeOnlyNote}${searchNote}${filtersNote}`;
+  return `${contextHeader}\n\nThread: ${result.friendlyThreadName}\n\n${dataSourceNote}${activeOnlyNote}${filtersNote}`;
 }
 
 /**
@@ -612,19 +1303,28 @@ export function formatThreadSamplesResult(
 
   if (result.search && result.topFunctionsByTotal.length === 0) {
     output +=
-      `No samples matched --search "${result.search}".\n` +
+      `No samples matched call tree search "${result.search}".\n` +
       'Tip: --search keeps samples with a matching frame anywhere in the stack.\n' +
       '     Use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
       '     "|" is treated as a literal character, not OR.\n';
     return output;
   }
 
-  // Top functions by total time
-  output += 'Top Functions (by total time):\n';
+  output +=
+    formatCategoryBreakdown(
+      `Categories (${Math.round(result.categoryBreakdown.totalSamples)} running samples)`,
+      result.categoryBreakdown,
+      'No samples in the current view.'
+    ).join('\n') + '\n\n';
+
+  const { weightType } = result;
+  const weightNoun = weightHeadingNoun(weightType);
+
+  output += `Top Functions (by total ${weightNoun}):\n`;
   output +=
     '  (For a call tree starting from these functions, use: profiler-cli thread samples-top-down)\n\n';
   for (const func of result.topFunctionsByTotal) {
-    const totalCount = Math.round(func.totalSamples);
+    const totalCount = formatWeight(func.totalSamples, weightType);
     const totalPct = func.totalPercentage.toFixed(1);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
@@ -635,12 +1335,11 @@ export function formatThreadSamplesResult(
 
   output += '\n';
 
-  // Top functions by self time
-  output += 'Top Functions (by self time):\n';
+  output += `Top Functions (by self ${weightNoun}):\n`;
   output +=
     '  (For a call tree showing what calls these functions, use: profiler-cli thread samples-bottom-up)\n\n';
   for (const func of result.topFunctionsBySelf) {
-    const selfCount = Math.round(func.selfSamples);
+    const selfCount = formatWeight(func.selfSamples, weightType);
     const selfPct = func.selfPercentage.toFixed(1);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
@@ -653,7 +1352,11 @@ export function formatThreadSamplesResult(
 
   // Heaviest stack
   const stack = result.heaviestStack;
-  output += `Heaviest stack (${stack.selfSamples.toFixed(1)} samples, ${stack.frameCount} frames):\n`;
+  const heaviestSelf =
+    weightType === 'samples'
+      ? `${stack.selfSamples.toFixed(1)} samples`
+      : formatWeight(stack.selfSamples, weightType);
+  output += `Heaviest stack (${heaviestSelf}, ${stack.frameCount} frames):\n`;
 
   if (stack.hasInlinedFrames) {
     output += `  ${INLINE_LEGEND}\n\n`;
@@ -664,12 +1367,12 @@ export function formatThreadSamplesResult(
   } else if (stack.frameCount <= 200) {
     // Show all frames
     for (let i = 0; i < stack.frames.length; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
   } else {
     // Show first 100
     for (let i = 0; i < 100; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
 
     // Show placeholder for skipped frames
@@ -678,7 +1381,7 @@ export function formatThreadSamplesResult(
 
     // Show last 100
     for (let i = stack.frameCount - 100; i < stack.frameCount; i++) {
-      output += formatHeaviestStackFrame(stack.frames[i], i);
+      output += formatHeaviestStackFrame(stack.frames[i], i, weightType);
     }
   }
 
@@ -687,16 +1390,17 @@ export function formatThreadSamplesResult(
 
 function formatHeaviestStackFrame(
   frame: ThreadSamplesResult['heaviestStack']['frames'][number],
-  i: number
+  i: number,
+  weightType: WeightType
 ): string {
   const displayName = truncateFunctionName(
     frame.nameWithLibrary,
     FUNC_NAME_WIDTH
   );
   const inlineMark = inlineSuffix(frame.inlineStatus);
-  const totalCount = Math.round(frame.totalSamples);
+  const totalCount = formatWeight(frame.totalSamples, weightType);
   const totalPct = frame.totalPercentage.toFixed(1);
-  const selfCount = Math.round(frame.selfSamples);
+  const selfCount = formatWeight(frame.selfSamples, weightType);
   const selfPct = frame.selfPercentage.toFixed(1);
   return `  ${i + 1}. ${displayName}${inlineMark} - total: ${totalCount} (${totalPct}%), self: ${selfCount} (${selfPct}%)\n`;
 }
@@ -711,7 +1415,7 @@ export function formatThreadSamplesTopDownResult(
 
   // Top-down call tree
   const topDownEmpty = result.search
-    ? `No samples matched --search "${result.search}".\n` +
+    ? `No samples matched call tree search "${result.search}".\n` +
       'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
       '     "|" is treated as a literal character, not OR.'
     : undefined;
@@ -731,7 +1435,7 @@ export function formatThreadSamplesBottomUpResult(
   // Bottom-up call tree (inverted tree shows callers)
   if (result.invertedCallTree) {
     const bottomUpEmpty = result.search
-      ? `No samples matched --search "${result.search}".\n` +
+      ? `No samples matched call tree search "${result.search}".\n` +
         'Tip: use comma to require multiple terms (all must appear), e.g. --search "foo,bar".\n' +
         '     "|" is treated as a literal character, not OR.'
       : undefined;
@@ -763,8 +1467,14 @@ export function formatThreadMarkersResult(
       ? ` (filtered from ${result.totalMarkerCount})`
       : '';
 
+  // When zoomed, show the in-view count against this thread's full-range total.
+  const zoomSuffix =
+    result.fullRangeMarkerCount !== undefined
+      ? ` in view (of ${result.fullRangeMarkerCount} in the full range)`
+      : '';
+
   lines.push(
-    `Markers in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredMarkerCount} markers${filterSuffix}`
+    `Markers in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredMarkerCount} markers${filterSuffix}${zoomSuffix}`
   );
   lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
 
@@ -779,15 +1489,24 @@ export function formatThreadMarkersResult(
 
   // Flat list mode: one row per marker in chronological order
   if (result.flatMarkers) {
-    const rootStart = result.context.rootRange.start;
+    const formatTimestamp = createTimestampFormatter(result.context);
     for (const m of result.flatMarkers) {
       const stackIndicator = m.hasStack ? '✓' : '✗';
-      const startStr = `t=${formatDuration(m.start - rootStart)}`;
+      const startStr = `t=${formatTimestamp(m.start)}`;
       const durationStr =
         m.duration !== undefined ? formatDuration(m.duration) : 'instant';
       const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
       lines.push(
         `  ${m.handle.padEnd(8)}  ${m.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
+      );
+    }
+    // Truncating a chronological list silently would hide the tail of the
+    // timeline, so always say how much was dropped and how to get it back.
+    const omitted = result.filteredMarkerCount - result.flatMarkers.length;
+    if (omitted > 0) {
+      lines.push(
+        `\n  ... (${omitted} more markers omitted: showing the first ${result.flatMarkers.length} of ${result.filteredMarkerCount})`,
+        '  Use --limit 0 to list all of them, or --limit <N> for a larger window.'
       );
     }
     return lines.join('\n');
@@ -840,7 +1559,12 @@ export function formatThreadMarkersResult(
     }
 
     if (result.byType.length > 15) {
-      lines.push(`  ... (${result.byType.length - 15} more marker names)`);
+      // This list is capped at 15 by the formatter, not by --limit, so point at
+      // what does show the rest rather than leaving a dead end.
+      lines.push(
+        `  ... (${result.byType.length - 15} more marker names: showing the top 15 of ${result.byType.length})`,
+        '  Use --json for every marker name, or --search <term> to narrow to one.'
+      );
     }
 
     lines.push('');
@@ -947,7 +1671,14 @@ export function formatThreadFunctionsResult(
     `Functions in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${result.filteredFunctionCount} functions${filterSuffix}\n`
   );
 
-  if (result.activeOnly) {
+  const { weightType } = result;
+  const isTiming = result.callTreeSummaryStrategy === 'timing';
+
+  if (!isTiming) {
+    lines.push(`Data source: ${result.callTreeSummaryStrategy}\n`);
+  }
+
+  if (result.activeOnly && isTiming) {
     lines.push(
       'Note: active samples only (idle excluded) — use --include-idle to include idle samples.\n'
     );
@@ -994,11 +1725,10 @@ export function formatThreadFunctionsResult(
     lines.push(`Filters: ${filterParts.join(', ')}\n`);
   }
 
-  // List functions sorted by self time
-  lines.push('Functions (by self time):');
+  lines.push(`Functions (by self ${weightHeadingNoun(weightType)}):`);
   for (const func of result.functions) {
-    const selfCount = Math.round(func.selfSamples);
-    const totalCount = Math.round(func.totalSamples);
+    const selfCount = formatWeight(func.selfSamples, weightType);
+    const totalCount = formatWeight(func.totalSamples, weightType);
     const displayName = truncateFunctionName(
       func.nameWithLibrary,
       FUNC_NAME_WIDTH
@@ -1027,15 +1757,187 @@ export function formatThreadFunctionsResult(
 
   if (result.filteredFunctionCount > result.functions.length) {
     const omittedCount = result.filteredFunctionCount - result.functions.length;
-    lines.push(`\n  ... (${omittedCount} more functions omitted)`);
+    lines.push(
+      `\n  ... (${omittedCount} more functions omitted: showing the first ${result.functions.length} of ${result.filteredFunctionCount})`,
+      '  Use --limit 0 to list all of them, or --limit <N> for a larger window.'
+    );
   }
 
   lines.push('');
   lines.push(
-    'Use --search <term>, --min-self <percent>, or --limit <N> to filter functions, or f-<N> handles to inspect individual functions.'
+    'Use --search <term>, --min-self <percent>, or --limit <N> (0 = no limit) to filter functions, or f-<N> handles to inspect individual functions.'
   );
 
   return lines.join('\n');
+}
+
+const STARTED_BEFORE_SUFFIX = ' (started before recording)';
+const IN_FLIGHT_SUFFIX = ' (in flight at end)';
+const REDIRECT_SUFFIX = ' (redirect)';
+const CANCELED_SUFFIX = ' (canceled)';
+
+/**
+ * Status-derived suffix for a summary request. STATUS_STOP is the normal
+ * completed request (no suffix); in-flight is handled separately via
+ * `incomplete`. Redirect / cancel legs are surfaced but flagged so they aren't
+ * mistaken for slow completed requests.
+ */
+function networkStatusSuffix(request: NetworkSummaryRequest): string {
+  switch (request.status) {
+    case 'STATUS_REDIRECT':
+      return REDIRECT_SUFFIX;
+    case 'STATUS_CANCEL':
+      return CANCELED_SUFFIX;
+    default:
+      return '';
+  }
+}
+
+/**
+ * Middle-truncate a URL keeping the host (which carries the signal) and the
+ * tail of the path (bare filenames like "channel" are useless on their own).
+ */
+function truncateNetworkUrl(url: string, maxLen: number = 70): string {
+  if (url.length <= maxLen) {
+    return url;
+  }
+  let host = '';
+  let rest = url;
+  try {
+    const parsed = new URL(url);
+    host = parsed.host;
+    rest = parsed.pathname + parsed.search;
+  } catch {
+    // Not a parseable URL; fall through to a raw middle-truncation.
+  }
+  if (host === '') {
+    const keep = Math.max(0, maxLen - 3);
+    const head = Math.ceil(keep / 2);
+    const tail = Math.floor(keep / 2);
+    return url.slice(0, head) + '...' + url.slice(url.length - tail);
+  }
+  const budget = maxLen - host.length;
+  if (budget <= 4) {
+    return host.length > maxLen ? host.slice(0, maxLen - 3) + '...' : host;
+  }
+  if (rest.length <= budget) {
+    return host + rest;
+  }
+  const keep = budget - 3;
+  const head = Math.ceil(keep / 2);
+  const tail = Math.floor(keep / 2);
+  return host + rest.slice(0, head) + '...' + rest.slice(rest.length - tail);
+}
+
+/**
+ * Render a thread-scoped network-activity section (used by `thread info`).
+ * Returns the lines; the caller joins and places them.
+ */
+function formatThreadNetworkActivity(summary: ThreadNetworkSummary): string[] {
+  const lines: string[] = [];
+  const incompletePart =
+    summary.incompleteCount > 0
+      ? `, ${summary.incompleteCount} still in flight at end of recording`
+      : '';
+  lines.push(
+    `Network activity: ${summary.requestCount} completed requests${incompletePart}`
+  );
+
+  const pct = Math.round(summary.inFlightPercentage);
+  const cacheParts: string[] = [];
+  if (summary.cacheHit > 0) {
+    cacheParts.push(`${summary.cacheHit} hit`);
+  }
+  if (summary.cacheMiss > 0) {
+    cacheParts.push(`${summary.cacheMiss} miss`);
+  }
+  if (summary.cacheUnknown > 0) {
+    cacheParts.push(`${summary.cacheUnknown} unknown`);
+  }
+  const cacheStr =
+    cacheParts.length > 0 ? `; cache: ${cacheParts.join(' / ')}` : '';
+  lines.push(
+    `  In flight ${pct}% of the thread's range (${formatDuration(summary.inFlightMs)} of ${formatDuration(summary.rangeDurationMs)}), peak ${summary.peakConcurrency} concurrent${cacheStr}; ${summary.errorCount} failed`
+  );
+
+  if (summary.slowest.length > 0) {
+    lines.push('  Slowest requests:');
+    for (const request of summary.slowest) {
+      const size =
+        request.transferSizeKB !== undefined
+          ? `${request.transferSizeKB.toFixed(1)}KB`
+          : '';
+      const suffix =
+        (request.incomplete ? IN_FLIGHT_SUFFIX : '') +
+        networkStatusSuffix(request) +
+        (request.startedBeforeRecording ? STARTED_BEFORE_SUFFIX : '');
+      const parts = [
+        `    ${request.markerHandle}`,
+        formatDuration(request.durationMs),
+        truncateNetworkUrl(request.url, 60),
+        size,
+      ].filter((part) => part !== '');
+      lines.push(parts.join('  ') + suffix);
+    }
+  }
+  return lines;
+}
+
+/**
+ * Render a profile-wide network-activity section (used by `profile info`).
+ * Returns the lines; the caller joins and places them.
+ */
+function formatProfileNetworkActivity(
+  summary: ProfileNetworkSummary
+): string[] {
+  const lines: string[] = [];
+  const incompletePart =
+    summary.incompleteCount > 0
+      ? `, ${summary.incompleteCount} still in flight at end of recording`
+      : '';
+  lines.push(
+    `Network activity: ${summary.requestCount} completed requests (deduped across processes)${incompletePart}`
+  );
+
+  const pct = Math.round(summary.inFlightPercentage);
+  lines.push(
+    `  In flight ${pct}% of the profile (${formatDuration(summary.inFlightMs)} of ${formatDuration(summary.rangeDurationMs)}), peak ${summary.peakConcurrency} concurrent; ${summary.errorCount} failed`
+  );
+
+  if (summary.slowest.length > 0) {
+    lines.push('  Slowest requests:');
+    for (const request of summary.slowest) {
+      const size =
+        request.transferSizeKB !== undefined
+          ? `${request.transferSizeKB.toFixed(1)}KB`
+          : '';
+      const suffix =
+        (request.incomplete ? IN_FLIGHT_SUFFIX : '') +
+        networkStatusSuffix(request) +
+        (request.startedBeforeRecording ? STARTED_BEFORE_SUFFIX : '');
+      const parts = [
+        `    ${request.markerHandle}`,
+        formatDuration(request.durationMs),
+        truncateNetworkUrl(request.url, 60),
+        `[${request.threadHandle}]`,
+        size,
+      ].filter((part) => part !== '');
+      lines.push(parts.join('  ') + suffix);
+    }
+  }
+
+  if (summary.byThread.length > 0) {
+    // requestCount covers started requests (completed and still in flight) but
+    // excludes redirect and cancel legs, so this reads lower than
+    // `thread network`'s total for the same thread.
+    const parts = summary.byThread.map(
+      (thread) =>
+        `${thread.threadHandle} ${thread.threadName} (${thread.requestCount} started reqs, ${formatDuration(thread.inFlightMs)} in flight)`
+    );
+    lines.push(`  By thread: ${parts.join(', ')}`);
+  }
+
+  return lines;
 }
 
 function formatNetworkPhases(phases: NetworkPhaseTimings): string {
@@ -1066,25 +1968,38 @@ export function formatThreadNetworkResult(
 ): string {
   const lines: string[] = [formatContextHeader(result.context), ''];
 
+  // Not totalRequestCount + incompleteCount: redirect/cancel legs are in neither.
+  const totalCandidates = result.totalCandidateCount;
   const filterSuffix =
     result.filters !== undefined &&
-    result.filteredRequestCount !== result.totalRequestCount
-      ? ` (filtered from ${result.totalRequestCount})`
+    result.filteredRequestCount !== totalCandidates
+      ? ` (filtered from ${totalCandidates})`
       : '';
 
   const truncated = result.requests.length < result.filteredRequestCount;
+  const sortLabel =
+    result.sort === 'duration' ? 'slowest first' : 'chronological';
   const countStr = truncated
-    ? `${result.requests.length} of ${result.filteredRequestCount} requests`
-    : `${result.filteredRequestCount} requests`;
+    ? `${result.requests.length} of ${result.filteredRequestCount} requests (${sortLabel})`
+    : `${result.filteredRequestCount} requests (${sortLabel})`;
 
   lines.push(
     `Network requests in thread ${result.threadHandle} (${result.friendlyThreadName}) — ${countStr}${filterSuffix}`
   );
+  if (result.incompleteCount > 0) {
+    lines.push(
+      `${result.incompleteCount} request(s) did not complete during the recording (in flight at end).`
+    );
+  }
   lines.push('');
 
   // Summary
   const s = result.summary;
   lines.push('Summary:');
+  // Lead with the wall-clock metric
+  lines.push(
+    `  In flight: ${formatDuration(s.inFlightMs)} of ${formatDuration(s.rangeDurationMs)} (${Math.round(s.inFlightPercentage)}%), peak ${s.peakConcurrency} concurrent`
+  );
   lines.push(
     `  Cache: ${s.cacheHit} hit, ${s.cacheMiss} miss, ${s.cacheUnknown} unknown`
   );
@@ -1099,7 +2014,7 @@ export function formatThreadNetworkResult(
     pt.mainThread !== undefined;
 
   if (hasPhaseTotals) {
-    lines.push('  Phase totals:');
+    lines.push('  Phase totals (summed across concurrent requests):');
     if (pt.dns !== undefined) {
       lines.push(`    DNS:              ${formatDuration(pt.dns)}`);
     }
@@ -1129,8 +2044,21 @@ export function formatThreadNetworkResult(
 
   for (const req of result.requests) {
     const url = req.url.length > 100 ? req.url.slice(0, 97) + '...' : req.url;
-    const status =
-      req.httpStatus !== undefined ? String(req.httpStatus) : '???';
+    let status: string;
+    if (req.incomplete) {
+      status = 'in flight';
+    } else if (req.status === 'STATUS_REDIRECT') {
+      status = 'redirect';
+    } else if (req.status === 'STATUS_CANCEL') {
+      status = 'canceled';
+    } else if (req.httpStatus !== undefined) {
+      status = String(req.httpStatus);
+    } else {
+      status = '???';
+    }
+    if (req.startedBeforeRecording) {
+      status += ' (started before recording)';
+    }
     const version = req.httpVersion !== undefined ? `  ${req.httpVersion}` : '';
     const cache =
       req.cacheStatus !== undefined ? `  cache=${req.cacheStatus}` : '';
@@ -1139,7 +2067,7 @@ export function formatThreadNetworkResult(
         ? `  size=${req.transferSizeKB.toFixed(1)}KB`
         : '';
 
-    lines.push(`  ${url}`);
+    lines.push(`  ${req.markerHandle}  ${url}`);
     lines.push(
       `    ${status}${version}${cache}${size}  duration=${formatDuration(req.duration)}`
     );
@@ -1154,11 +2082,11 @@ export function formatThreadNetworkResult(
 
   if (truncated) {
     lines.push(
-      `Use --limit 0 to show all requests, or --limit <N> to set a different limit.`
+      `Use --limit 0 to show all requests, --limit <N> for a different window, or --sort start for chronological order.`
     );
   } else {
     lines.push(
-      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, or --limit <N> to filter.'
+      'Use --search <term>, --min-duration <ms>, --max-duration <ms>, --limit <N>, or --sort start|duration to filter and order.'
     );
   }
 
@@ -1175,11 +2103,19 @@ export function formatFunctionAnnotateResult(
   out.push(contextHeader, '');
   out.push(`Function ${result.functionHandle}: ${result.name}`);
   out.push(`Thread: ${result.friendlyThreadName} (${result.threadHandle})`, '');
+  const { weightType } = result;
+  const weightNoun = weightHeadingNoun(weightType);
+  // Wider columns for byte sizes, which read as "123.4KB" rather than "1234".
+  const W_SELF = weightType === 'bytes' ? 9 : 6;
+  const W_TOTAL = weightType === 'bytes' ? 10 : 7;
   out.push(
-    `Self time: ${Math.round(result.totalSelfSamples)} samples, ` +
-      `Total time: ${Math.round(result.totalTotalSamples)} samples`
+    `Self ${weightNoun}: ${formatWeightWithUnit(result.totalSelfSamples, weightType)}, ` +
+      `Total ${weightNoun}: ${formatWeightWithUnit(result.totalTotalSamples, weightType)}`
   );
   out.push(`Mode: ${result.mode}`);
+  if (result.callTreeSummaryStrategy !== 'timing') {
+    out.push(`Data source: ${result.callTreeSummaryStrategy}`);
+  }
 
   for (const w of result.warnings) {
     out.push('', `Warning: ${w}`);
@@ -1192,14 +2128,12 @@ export function formatFunctionAnnotateResult(
       src.totalFileLines !== null ? ` (${src.totalFileLines} lines)` : '';
     out.push('', `Source file: ${src.filename}${fileSuffix}`);
     out.push(
-      `  ${Math.round(src.samplesWithLineInfo)} of ${Math.round(src.samplesWithFunction)} ` +
-        `samples have line number information`
+      `  ${formatWeight(src.samplesWithLineInfo, weightType)} of ` +
+        `${formatWeightWithUnit(src.samplesWithFunction, weightType)} have line number information`
     );
     out.push(`  Showing: ${src.contextMode}`, '');
 
     const W_LINE = 5;
-    const W_SELF = 6;
-    const W_TOTAL = 7;
 
     out.push(
       `${'Line'.padStart(W_LINE)}  ${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Source`
@@ -1215,12 +2149,12 @@ export function formatFunctionAnnotateResult(
       prevLine = line.lineNumber;
 
       const selfStr =
-        line.selfSamples > 0
-          ? String(Math.round(line.selfSamples)).padStart(W_SELF)
+        line.selfSamples !== 0
+          ? formatWeight(line.selfSamples, weightType).padStart(W_SELF)
           : ' '.repeat(W_SELF);
       const totalStr =
-        line.totalSamples > 0
-          ? String(Math.round(line.totalSamples)).padStart(W_TOTAL)
+        line.totalSamples !== 0
+          ? formatWeight(line.totalSamples, weightType).padStart(W_TOTAL)
           : ' '.repeat(W_TOTAL);
       const srcText = line.sourceText !== null ? `  ${line.sourceText}` : '';
       out.push(
@@ -1246,20 +2180,20 @@ export function formatFunctionAnnotateResult(
 
     out.push('');
     out.push(
-      `  ${'Address'.padEnd(18)}${'Self'.padStart(6)}  ${'Total'.padStart(7)}  Instruction`
+      `  ${'Address'.padEnd(18)}${'Self'.padStart(W_SELF)}  ${'Total'.padStart(W_TOTAL)}  Instruction`
     );
     out.push('  ' + '─'.repeat(70));
 
     for (const instr of asm.instructions) {
       const addrStr = `0x${instr.address.toString(16)}`.padEnd(18);
       const selfStr =
-        instr.selfSamples > 0
-          ? String(Math.round(instr.selfSamples)).padStart(6)
-          : ' '.repeat(6);
+        instr.selfSamples !== 0
+          ? formatWeight(instr.selfSamples, weightType).padStart(W_SELF)
+          : ' '.repeat(W_SELF);
       const totalStr =
-        instr.totalSamples > 0
-          ? String(Math.round(instr.totalSamples)).padStart(7)
-          : ' '.repeat(7);
+        instr.totalSamples !== 0
+          ? formatWeight(instr.totalSamples, weightType).padStart(W_TOTAL)
+          : ' '.repeat(W_TOTAL);
       out.push(`  ${addrStr}${selfStr}  ${totalStr}  ${instr.decodedString}`);
     }
   }
@@ -1304,7 +2238,10 @@ export function formatProfileLogsResult(
   }
 
   if (isFiltered && shown < total) {
-    lines.push(`Showing ${shown} of ${total} log entries (filtered/limited)`);
+    lines.push(
+      `Showing the first ${shown} of ${total} log entries — ${total - shown} omitted by --limit ${shown}.`,
+      'Use --limit 0 to print all of them, or --limit <N> for a larger window.'
+    );
   } else if (isFiltered) {
     lines.push(`${total} log entries (filtered)`);
   } else {
@@ -1315,6 +2252,96 @@ export function formatProfileLogsResult(
   for (const entry of result.entries) {
     lines.push(entry);
   }
+
+  return lines.join('\n');
+}
+
+/** How many threads the "Matches by thread" breakdown lists before truncating. */
+const PROFILE_MARKERS_THREADS_SHOWN = 10;
+
+/**
+ * Format a ProfileMarkersResult as plain text: `thread markers --list` rows
+ * prefixed with their thread, followed by a per-thread breakdown.
+ */
+export function formatProfileMarkersResult(
+  result: WithContext<ProfileMarkersResult>
+): string {
+  const lines: string[] = [formatContextHeader(result.context), ''];
+
+  const isFiltered = result.filters !== undefined;
+  // `--limit` on its own truncates the rows but selects nothing, so the set
+  // below is every marker in the profile rather than a set of matches.
+  const { limit, ...selectingFilters } = result.filters ?? {};
+  const isSelected = Object.values(selectingFilters).some(
+    (v) => v !== undefined
+  );
+  const shown = result.markers.length;
+  const total = result.totalCount;
+
+  if (total === 0) {
+    lines.push(
+      isFiltered
+        ? `No markers match the specified filters (searched ${result.searchedThreadCount} threads).`
+        : 'No markers found in this profile.'
+    );
+    return lines.join('\n');
+  }
+
+  const threadSuffix = `across ${result.matchingThreadCount} of ${result.searchedThreadCount} threads`;
+  if (shown < total) {
+    lines.push(`Showing ${shown} of ${total} markers ${threadSuffix}`);
+  } else {
+    lines.push(`${total} markers ${threadSuffix}`);
+  }
+  lines.push('Legend: ✓ = has stack trace, ✗ = no stack trace\n');
+
+  const formatTimestamp = createTimestampFormatter(result.context);
+  for (const m of result.markers) {
+    const stackIndicator = m.hasStack ? '✓' : '✗';
+    const startStr = `t=${formatTimestamp(m.start)}`;
+    const durationStr =
+      m.duration !== undefined ? formatDuration(m.duration) : 'instant';
+    const labelSuffix = m.label !== m.name ? `  ${m.label}` : '';
+    lines.push(
+      `  ${m.threadHandle.padEnd(6)}  ${m.handle.padEnd(8)}  ${m.name.padEnd(30)}  ${startStr.padEnd(14)}  ${durationStr.padEnd(10)}  ${stackIndicator}${labelSuffix}`
+    );
+  }
+
+  // With a single matching thread the breakdown only repeats the thread
+  // handle already on every row, so it is left out.
+  if (result.byThread.length > 1) {
+    // Nothing was "matched" unless something selected these markers, so an
+    // unfiltered browse gets a plain heading. Say "exact counts" whenever rows
+    // were capped: the counts are computed over every marker in the set, not
+    // over the rows above.
+    const heading = isSelected ? 'Matches by thread' : 'Markers by thread';
+    lines.push(
+      '',
+      shown < total ? `${heading} (exact counts):` : `${heading}:`
+    );
+    for (const t of result.byThread.slice(0, PROFILE_MARKERS_THREADS_SHOWN)) {
+      const who = `${t.threadName} (${t.processName}, pid ${t.pid})`;
+      lines.push(
+        `  ${t.threadHandle.padEnd(6)}  ${who.padEnd(50)}  ${t.count}`
+      );
+    }
+    const omitted = result.byThread.length - PROFILE_MARKERS_THREADS_SHOWN;
+    if (omitted > 0) {
+      lines.push(
+        `  ... and ${omitted} more ${omitted === 1 ? 'thread' : 'threads'}; --json lists them all`
+      );
+    }
+  }
+
+  lines.push('');
+  if (result.maxRowsClamped !== undefined) {
+    lines.push(
+      `Rows were capped at ${result.maxRowsClamped}, the most this command can return; the counts above are exact. Narrow with --search/--thread.`
+    );
+  }
+  lines.push(
+    'Use --thread <handle> to restrict the sweep, or "marker info m-<N>" to inspect one marker.'
+  );
 
   return lines.join('\n');
 }
@@ -1463,19 +2490,18 @@ export function formatThreadPageLoadResult(
   if (result.categories.length === 0) {
     lines.push('  No sample data available during page load.');
   } else {
-    const BAR_WIDTH = 28;
     const maxCount = result.categories[0].count;
-    const maxNameLen = Math.max(...result.categories.map((c) => c.name.length));
 
-    for (const cat of result.categories) {
-      const barLen =
-        maxCount > 0 ? Math.round((cat.count / maxCount) * BAR_WIDTH) : 0;
-      const bar = '█'.repeat(barLen).padEnd(BAR_WIDTH);
-      const name = cat.name.padEnd(maxNameLen);
-      const countStr = String(cat.count).padStart(6);
-      const pctStr = cat.percentage.toFixed(1).padStart(5);
-      lines.push(`  ${name}  ${bar}  ${countStr}  ${pctStr}%`);
-    }
+    lines.push(
+      ...formatBarRows(
+        result.categories.map((cat) => ({
+          label: cat.name,
+          count: cat.count,
+          percentage: cat.percentage,
+          barRatio: maxCount > 0 ? cat.count / maxCount : 0,
+        }))
+      )
+    );
   }
 
   lines.push('');
@@ -1526,9 +2552,111 @@ export function formatThreadSelectResult(
   result: WithContext<ThreadSelectResult>
 ): string {
   const count = result.threadNames.length;
-  const names = result.threadNames.join(', ');
+  // Only the context carries process names, so fall back if it disagrees.
+  const names =
+    result.context.selectedThreads.length === count
+      ? result.context.selectedThreads.map(formatThreadAndProcess).join('; ')
+      : result.threadNames.join(', ');
   if (count === 1) {
     return `Selected thread: ${result.threadHandle} (${names})`;
   }
   return `Selected ${count} threads: ${result.threadHandle} (${names})`;
+}
+
+function describeSourceMapLocation(sourceMap: SourceMapLocation): string {
+  switch (sourceMap.kind) {
+    case 'url':
+      return sourceMap.url;
+    case 'inline': {
+      const mediaType = sourceMap.mediaType ?? 'unknown media type';
+      return `inline data: URL, ${mediaType}, ${formatBytes(sourceMap.byteLength)}`;
+    }
+    default:
+      throw assertExhaustiveCheck(sourceMap);
+  }
+}
+
+/** One `src-N  filename  (sourceMapURL: ...)` line, shared by sources and ambiguous. */
+function formatSourceEntry(entry: SourceEntry): string {
+  return `  ${entry.sourceHandle}  ${entry.filename}  (sourceMapURL: ${describeSourceMapLocation(entry.sourceMap)})`;
+}
+
+export function formatSourceMapSourcesResult(
+  result: WithContext<SourceMapSourcesResult>
+): string {
+  const contextHeader = formatContextHeader(result.context);
+  if (result.sources.length === 0) {
+    return `${contextHeader}\n\nNo sources with a source map URL in this profile.`;
+  }
+  const lines = result.sources.map(formatSourceEntry);
+  return `${contextHeader}\n\nSources with source maps (${result.sources.length}):\n${lines.join('\n')}`;
+}
+
+const APPLY_SOURCE_MAP_AMBIGUOUS_HEADERS: Record<
+  Extract<ApplySourceMapResult, { type: 'sourcemap-ambiguous' }>['reason'],
+  string
+> = {
+  'multiple-matches':
+    'The source map matches more than one source. Re-run with --to <src-N> to pick one:',
+  'no-matches':
+    'The source map does not match any source in this profile. Re-run with --to <src-N> to apply it to one of these anyway:',
+};
+
+const APPLY_SOURCE_MAP_ERROR_MESSAGES: Record<
+  Extract<ApplySourceMapResult, { type: 'sourcemap-error' }>['error'],
+  string
+> = {
+  'invalid-source-map':
+    'The file is not a valid source map (invalid JSON, or not a source map).',
+  'no-eligible-sources':
+    'No sources in this profile carry a source map URL, so nothing to apply to.',
+  'symbolication-failed': 'Source map symbolication failed.',
+};
+
+export function formatApplySourceMapResult(
+  result: WithContext<ApplySourceMapResult>
+): string {
+  switch (result.type) {
+    case 'sourcemap-applied':
+      return `Applied source map to ${result.filename} (${result.sourceHandle}). Re-run thread commands to see de-minified names.`;
+    case 'sourcemap-unchanged':
+      return `Source map applied to ${result.filename} (${result.sourceHandle}) but nothing changed (no stack positions mapped).`;
+    case 'sourcemap-ambiguous': {
+      const lines = result.candidates.map(formatSourceEntry);
+      return [APPLY_SOURCE_MAP_AMBIGUOUS_HEADERS[result.reason], ...lines].join(
+        '\n'
+      );
+    }
+    case 'sourcemap-error':
+      return `Error: ${APPLY_SOURCE_MAP_ERROR_MESSAGES[result.error]}`;
+    default:
+      throw assertExhaustiveCheck(result);
+  }
+}
+
+/**
+ * Format a StrategySelectResult as plain text.
+ */
+export function formatStrategySelectResult(
+  result: WithContext<StrategySelectResult>
+): string {
+  return (
+    `Data source: ${result.strategy}\n` +
+    `Available in ${result.threadHandle}: ${result.availableStrategies.join(', ')}`
+  );
+}
+
+/**
+ * Format a ProfileSaveResult as plain text.
+ */
+export function formatProfileSaveResult(
+  result: WithContext<ProfileSaveResult>
+): string {
+  const FORMAT_NAMES: Record<ProfileSaveResult['format'], string> = {
+    json: 'JSON',
+    'json-gz': 'gzipped JSON',
+    jslb: 'JSON slabs',
+    'jslb-gz': 'gzipped JSON slabs',
+  };
+  return `Saved profile to ${result.path} (${FORMAT_NAMES[result.format]}, ${formatBytes(result.bytes)}).`;
 }

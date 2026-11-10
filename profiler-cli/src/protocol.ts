@@ -18,22 +18,41 @@ export type {
   SessionContext,
   WithContext,
   StatusResult,
+  PermalinkResult,
+  PermalinkView,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  ThreadListResult,
+  ThreadListItem,
+  ThreadListOptions,
+  ThreadListSort,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   CallTreeNode,
   CallTreeScoringStrategy,
+  CategoryBreakdown,
+  CategoryBreakdownEntry,
+  CategorySubBreakdownEntry,
+  FunctionCategoryBreakdown,
+  FunctionCategoryBreakdowns,
+  CallTreeSummaryStrategy,
+  WeightType,
+  StrategySelectResult,
   InlineStatus,
   ThreadMarkersResult,
   ThreadNetworkResult,
   NetworkRequestEntry,
+  NetworkRequestSort,
   NetworkPhaseTimings,
+  NetworkSummaryRequest,
+  ThreadNetworkSummary,
+  ProfileNetworkSummary,
+  ProfileNetworkThreadBreakdown,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   NavigationMilestone,
@@ -45,11 +64,24 @@ export type {
   RateStats,
   MarkerGroupData,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   MarkerStackResult,
   StackTraceData,
   ProfileInfoResult,
+  ProfileMetaResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileMarkerItem,
+  ProfileMarkersThreadBreakdown,
+  ProfileSaveResult,
   ThreadSelectResult,
+  CounterSummary,
+  CounterListResult,
+  CounterInfoResult,
+  SourceEntry,
+  SourceMapLocation,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
 } from '../../src/profile-query/types';
 export type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
@@ -60,30 +92,49 @@ import type {
   SampleFilterSpec,
   WithContext,
   StatusResult,
+  PermalinkResult,
   FunctionExpandResult,
   FunctionInfoResult,
   FunctionAnnotateResult,
   AnnotateMode,
   ViewRangeResult,
   ThreadInfoResult,
+  StrategySelectResult,
+  CallTreeSummaryStrategy,
+  ThreadListResult,
+  ThreadListOptions,
   MarkerStackResult,
   MarkerInfoResult,
+  MarkerInfoMultiResult,
   ProfileInfoResult,
+  ProfileMetaResult,
   ThreadSamplesResult,
   ThreadSamplesTopDownResult,
   ThreadSamplesBottomUpResult,
   ThreadMarkersResult,
   ThreadNetworkResult,
+  NetworkRequestSort,
   ThreadFunctionsResult,
   ThreadPageLoadResult,
   FilterStackResult,
   ProfileLogsResult,
+  ProfileMarkersResult,
+  ProfileSaveResult,
   ThreadSelectResult,
+  CounterListResult,
+  CounterInfoResult,
+  SourceMapSourcesResult,
+  ApplySourceMapResult,
 } from '../../src/profile-query/types';
 import type { CallTreeCollectionOptions } from '../../src/profile-query/formatters/call-tree';
 
 export type ClientMessage =
-  | { type: 'command'; command: ClientCommand }
+  | {
+      type: 'command';
+      command: ClientCommand;
+      /** Also build a profiler.firefox.com URL for the view this command shows. */
+      permalink?: PermalinkFormat;
+    }
   | { type: 'shutdown' }
   | { type: 'status' };
 
@@ -93,6 +144,15 @@ export type ClientCommand =
       subcommand: 'info' | 'threads';
       all?: boolean;
       search?: string;
+    }
+  | {
+      command: 'profile';
+      subcommand: 'meta';
+    }
+  | {
+      command: 'profile';
+      subcommand: 'markers';
+      markerFilters?: MarkerFilterOptions & { thread?: string };
     }
   | {
       command: 'profile';
@@ -106,9 +166,17 @@ export type ClientCommand =
       };
     }
   | {
+      command: 'profile';
+      subcommand: 'save';
+      /** Absolute destination file or directory (resolved client-side). */
+      path: string;
+      force: boolean;
+    }
+  | {
       command: 'thread';
       subcommand:
         | 'info'
+        | 'list'
         | 'select'
         | 'samples'
         | 'samples-top-down'
@@ -120,14 +188,17 @@ export type ClientCommand =
       thread?: string;
       includeIdle?: boolean;
       search?: string;
+      strategy?: CallTreeSummaryStrategy;
       markerFilters?: MarkerFilterOptions;
       functionFilters?: FunctionFilterOptions;
+      threadListOptions?: ThreadListOptions;
       callTreeOptions?: CallTreeCollectionOptions;
       networkFilters?: {
         searchString?: string;
         minDuration?: number;
         maxDuration?: number;
         limit?: number;
+        sort?: NetworkRequestSort;
       };
       pageLoadOptions?: {
         navigationIndex?: number;
@@ -139,7 +210,15 @@ export type ClientCommand =
   | {
       command: 'marker';
       subcommand: 'info' | 'select' | 'stack';
+      /** Single handle, for `stack`. */
       marker?: string;
+      /** Handle specs for `info`, e.g. ["m-42", "m-50..m-53"]. */
+      markers?: string[];
+    }
+  | {
+      command: 'counter';
+      subcommand: 'list' | 'info';
+      counter?: string;
     }
   | { command: 'sample'; subcommand: 'info' | 'select'; sample?: string }
   | {
@@ -150,6 +229,11 @@ export type ClientCommand =
       symbolServerUrl?: string;
       /** "file", "function", or a number of context lines (e.g. "2") */
       annotateContext?: string;
+      strategy?: CallTreeSummaryStrategy;
+    }
+  | {
+      command: 'strategy';
+      strategy: CallTreeSummaryStrategy;
     }
   | {
       command: 'zoom';
@@ -163,10 +247,32 @@ export type ClientCommand =
       spec?: SampleFilterSpec;
       count?: number;
     }
-  | { command: 'status' };
+  | {
+      command: 'sourcemap';
+      subcommand: 'sources' | 'apply';
+      /** Absolute path to the `.map` file (resolved client-side). */
+      path?: string;
+      /** `src-N` handle of the target source; skips auto-matching when set. */
+      to?: string;
+    }
+  | { command: 'status' }
+  | { command: 'permalink'; short?: boolean };
+
+/** `short` goes through the share.firefox.dev shortener. */
+export type PermalinkFormat = 'long' | 'short';
+
+/**
+ * Outcome of a `--permalink` request. The link is best effort: a failure to
+ * build it (e.g. an unpublished local file) must not fail the command itself.
+ */
+export type PermalinkOutcome = PermalinkResult | { error: string };
 
 export type ServerResponse =
-  | { type: 'success'; result: string | CommandResult }
+  | {
+      type: 'success';
+      result: string | CommandResult;
+      permalink?: PermalinkOutcome;
+    }
   | { type: 'error'; error: string }
   | { type: 'loading' }
   | { type: 'symbolicating' }
@@ -178,14 +284,18 @@ export type ServerResponse =
  */
 export type CommandResult =
   | StatusResult
+  | PermalinkResult
   | WithContext<FunctionExpandResult>
   | WithContext<FunctionInfoResult>
   | ViewRangeResult
   | FilterStackResult
   | WithContext<ThreadInfoResult>
+  | WithContext<ThreadListResult>
   | WithContext<MarkerStackResult>
   | WithContext<MarkerInfoResult>
+  | WithContext<MarkerInfoMultiResult>
   | WithContext<ProfileInfoResult>
+  | WithContext<ProfileMetaResult>
   | WithContext<ThreadSamplesResult>
   | WithContext<ThreadSamplesTopDownResult>
   | WithContext<ThreadSamplesBottomUpResult>
@@ -194,8 +304,15 @@ export type CommandResult =
   | WithContext<ThreadNetworkResult>
   | WithContext<FunctionAnnotateResult>
   | WithContext<ProfileLogsResult>
+  | WithContext<ProfileMarkersResult>
+  | WithContext<ProfileSaveResult>
   | WithContext<ThreadPageLoadResult>
-  | WithContext<ThreadSelectResult>;
+  | WithContext<ThreadSelectResult>
+  | WithContext<StrategySelectResult>
+  | WithContext<CounterListResult>
+  | WithContext<CounterInfoResult>
+  | WithContext<SourceMapSourcesResult>
+  | WithContext<ApplySourceMapResult>;
 
 export interface SessionMetadata {
   id: string;

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { computeStringIndexMarkerFieldsByDataType } from './marker-schema';
+import { subcategoriesNeedSixteenBits } from './profile-data';
 import { type BitSet, makeBitSet, setBit, checkBit } from '../utils/bitset';
 
 import type {
@@ -12,14 +13,15 @@ import type {
   RawMarkerTable,
   IndexIntoStackTable,
   RawStackTable,
-  FrameTable,
-  FuncTable,
+  RawFrameTable,
+  RawFuncTable,
   ResourceTable,
-  NativeSymbolTable,
+  RawNativeSymbolTable,
   Lib,
   SourceTable,
   SourceLocationTable,
 } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -41,22 +43,56 @@ export type CompactedProfileWithTranslationMaps = {
   translationMaps: TranslationMaps;
 };
 
-type ColumnDescription<TCol> = null extends (
-  TCol extends Array<infer E> ? E : never
-)
-  ?
-      | { type: 'INDEX_REF_OR_NULL'; referencedTable: TableCompactionState }
-      | { type: 'SELF_INDEX_REF_OR_NULL' }
-      | { type: 'NO_REF' }
-  :
-      | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
-      | { type: 'INDEX_REF_OR_NEG_ONE'; referencedTable: TableCompactionState }
-      | { type: 'NO_REF' };
+type NumericArrayConstructor =
+  | Uint8ArrayConstructor
+  | Uint16ArrayConstructor
+  | Uint32ArrayConstructor
+  | Int32ArrayConstructor
+  | Float64ArrayConstructor;
+
+/**
+ * `NO_REF_TYPED` is only offered for columns which hold plain numbers, since
+ * those are the only ones that fit into a typed array. Columns whose elements
+ * can be `null` (or strings, or booleans) are excluded: putting a `null` into a
+ * typed array would silently turn it into a zero.
+ */
+type TypedColumnDescription<TCol> =
+  TCol extends ArrayLike<number>
+    ? { type: 'NO_REF_TYPED'; arrayConstructor: NumericArrayConstructor }
+    : never;
+
+type ColumnDescription<TCol> =
+  | TypedColumnDescription<TCol>
+  | (null extends (TCol extends Array<infer E> ? E : never)
+      ?
+          | { type: 'INDEX_REF_OR_NULL'; referencedTable: TableCompactionState }
+          | { type: 'NO_REF' }
+      : Int32Array<ArrayBuffer> extends TCol
+        ?
+            | { type: 'INDEX_REF_INT32'; referencedTable: TableCompactionState }
+            | {
+                type: 'INDEX_REF_INT32_GATED_BY_FLAG';
+                referencedTable: TableCompactionState;
+                flagBit: number;
+              }
+            | { type: 'SELF_RELATIVE_PARENT' }
+            | { type: 'NO_REF' }
+        :
+            | { type: 'INDEX_REF'; referencedTable: TableCompactionState }
+            | { type: 'NO_REF' });
 
 type TableDescription<T> = {
-  [K in keyof T as T[K] extends Array<any> ? K : never]: ColumnDescription<
-    T[K]
-  >;
+  [
+    K in keyof T as T[K] extends
+      | Array<any>
+      | Int32Array<ArrayBuffer>
+      | Uint8Array<ArrayBuffer>
+      | Uint16Array<ArrayBuffer>
+      | Uint32Array<ArrayBuffer>
+      | Float64Array<ArrayBuffer>
+      ? K
+      : never
+  ]: ColumnDescription<T[K]>;
 };
 
 const ColDesc = {
@@ -64,16 +100,32 @@ const ColDesc = {
     type: 'INDEX_REF' as const,
     referencedTable,
   }),
+  indexRefInt32: (referencedTable: TableCompactionState) => ({
+    type: 'INDEX_REF_INT32' as const,
+    referencedTable,
+  }),
+  indexRefInt32GatedByFlag: (
+    referencedTable: TableCompactionState,
+    flagBit: number
+  ) => ({
+    type: 'INDEX_REF_INT32_GATED_BY_FLAG' as const,
+    referencedTable,
+    flagBit,
+  }),
   indexRefOrNull: (referencedTable: TableCompactionState) => ({
     type: 'INDEX_REF_OR_NULL' as const,
     referencedTable,
   }),
-  indexRefOrNegOne: (referencedTable: TableCompactionState) => ({
-    type: 'INDEX_REF_OR_NEG_ONE' as const,
-    referencedTable,
-  }),
-  selfIndexRefOrNull: () => ({ type: 'SELF_INDEX_REF_OR_NULL' as const }),
+  selfPrefixOffset: () => ({ type: 'SELF_RELATIVE_PARENT' as const }),
   noRef: () => ({ type: 'NO_REF' as const }),
+  // Like noRef, but the compacted column is always a typed array of the given
+  // kind, even if the old column was a plain array. Use this for every column
+  // whose format type allows a typed array, so that compaction normalizes the
+  // representation instead of preserving whatever the profile was loaded with.
+  noRefTyped: (arrayConstructor: NumericArrayConstructor) => ({
+    type: 'NO_REF_TYPED' as const,
+    arrayConstructor,
+  }),
 };
 
 class TableCompactionState {
@@ -145,30 +197,46 @@ export function computeCompactedProfile(
   };
 
   const stackTableDesc: TableDescription<RawStackTable> = {
-    frame: ColDesc.indexRef(tcs.frameTable),
-    prefix: ColDesc.selfIndexRefOrNull(),
+    frame: ColDesc.indexRefInt32(tcs.frameTable),
+    prefixOffset: ColDesc.selfPrefixOffset(),
   };
-  const frameTableDesc: TableDescription<FrameTable> = {
-    address: ColDesc.noRef(),
-    inlineDepth: ColDesc.noRef(),
-    category: ColDesc.noRef(),
-    subcategory: ColDesc.noRef(),
-    func: ColDesc.indexRef(tcs.funcTable),
-    nativeSymbol: ColDesc.indexRefOrNull(tcs.nativeSymbols),
-    innerWindowID: ColDesc.noRef(),
-    line: ColDesc.noRef(),
-    column: ColDesc.noRef(),
-    originalLocation: ColDesc.indexRefOrNull(tcs.sourceLocationTable),
+  const frameTableDesc: TableDescription<RawFrameTable> = {
+    flags: ColDesc.noRefTyped(Uint8Array),
+    address: ColDesc.noRefTyped(Uint32Array),
+    category: ColDesc.noRefTyped(Uint8Array),
+    subcategory: ColDesc.noRefTyped(
+      subcategoriesNeedSixteenBits(profile.meta.categories)
+        ? Uint16Array
+        : Uint8Array
+    ),
+    func: ColDesc.indexRefInt32(tcs.funcTable),
+    lib: ColDesc.indexRefInt32GatedByFlag(tcs.libs, FrameFlag.HasAddress),
+    nativeSymbol: ColDesc.indexRefInt32GatedByFlag(
+      tcs.nativeSymbols,
+      FrameFlag.HasNativeSymbol
+    ),
+    innerWindowID: ColDesc.noRefTyped(Float64Array),
+    line: ColDesc.noRefTyped(Int32Array),
+    column: ColDesc.noRefTyped(Int32Array),
+    originalLocation: ColDesc.indexRefInt32GatedByFlag(
+      tcs.sourceLocationTable,
+      FrameFlag.HasOriginalLocation
+    ),
   };
-  const funcTableDesc: TableDescription<FuncTable> = {
-    name: ColDesc.indexRef(tcs.stringArray),
-    isJS: ColDesc.noRef(),
-    relevantForJS: ColDesc.noRef(),
-    resource: ColDesc.indexRefOrNegOne(tcs.resourceTable),
-    source: ColDesc.indexRefOrNull(tcs.sources),
+  const funcTableDesc: TableDescription<RawFuncTable> = {
+    flags: ColDesc.noRef(),
+    name: ColDesc.indexRefInt32(tcs.stringArray),
+    resource: ColDesc.indexRefInt32GatedByFlag(
+      tcs.resourceTable,
+      FuncFlag.HasResource
+    ),
+    source: ColDesc.indexRefInt32GatedByFlag(tcs.sources, FuncFlag.HasSource),
     lineNumber: ColDesc.noRef(),
     columnNumber: ColDesc.noRef(),
-    originalLocation: ColDesc.indexRefOrNull(tcs.sourceLocationTable),
+    originalLocation: ColDesc.indexRefInt32GatedByFlag(
+      tcs.sourceLocationTable,
+      FuncFlag.HasOriginalLocation
+    ),
   };
   const sourceLocationTableDesc: TableDescription<SourceLocationTable> = {
     source: ColDesc.indexRef(tcs.sources),
@@ -178,16 +246,21 @@ export function computeCompactedProfile(
   const resourceTableDesc: TableDescription<ResourceTable> = {
     name: ColDesc.indexRef(tcs.stringArray),
     host: ColDesc.indexRefOrNull(tcs.stringArray),
-    lib: ColDesc.indexRefOrNull(tcs.libs),
     type: ColDesc.noRef(),
   };
-  const nativeSymbolsDesc: TableDescription<NativeSymbolTable> = {
-    libIndex: ColDesc.indexRef(tcs.libs),
-    address: ColDesc.noRef(),
-    name: ColDesc.indexRef(tcs.stringArray),
-    functionSize: ColDesc.noRef(),
+  const nativeSymbolsDesc: TableDescription<RawNativeSymbolTable> = {
+    libIndex: ColDesc.indexRefInt32(tcs.libs),
+    address: ColDesc.noRefTyped(Uint32Array),
+    name: ColDesc.indexRefInt32(tcs.stringArray),
+    functionSize: ColDesc.noRefTyped(Int32Array),
   };
   const sourcesDesc: TableDescription<SourceTable> = {
+    // This column refers to the sources table itself. It must come first, so
+    // that a generated source which is only kept alive by one of its original
+    // sources is marked before the other columns mark the strings it uses.
+    // Marking happens in a single pass, so this relies on generated sources
+    // not having a generated source themselves.
+    generatedSource: ColDesc.indexRefOrNull(tcs.sources),
     id: ColDesc.noRef(),
     filename: ColDesc.indexRef(tcs.stringArray),
     startLine: ColDesc.noRef(),
@@ -315,8 +388,8 @@ function _markTableAndComputeTranslation<T>(
   // we look up which rows of other tables they reference.
   for (const key of keys) {
     const desc = tableDesc[key];
-    if (desc.type === 'SELF_INDEX_REF_OR_NULL') {
-      markSelfColumnWithNullableFields((table as any)[key], markBuffer);
+    if (desc.type === 'SELF_RELATIVE_PARENT') {
+      markSelfColumnPrefixOffset((table as any)[key], markBuffer);
     }
   }
 
@@ -326,7 +399,17 @@ function _markTableAndComputeTranslation<T>(
     const col = (table as any)[key];
     switch (desc.type) {
       case 'INDEX_REF':
+      case 'INDEX_REF_INT32':
         markColumn(col, markBuffer, desc.referencedTable.markBuffer);
+        break;
+      case 'INDEX_REF_INT32_GATED_BY_FLAG':
+        markColumnGatedByFlag(
+          col,
+          (table as any).flags,
+          desc.flagBit,
+          markBuffer,
+          desc.referencedTable.markBuffer
+        );
         break;
       case 'INDEX_REF_OR_NULL':
         markColumnWithNullableFields(
@@ -335,16 +418,10 @@ function _markTableAndComputeTranslation<T>(
           desc.referencedTable.markBuffer
         );
         break;
-      case 'SELF_INDEX_REF_OR_NULL':
+      case 'SELF_RELATIVE_PARENT':
         break; // already handled in the first pass
-      case 'INDEX_REF_OR_NEG_ONE':
-        markColumnWithNegOneableFields(
-          col,
-          markBuffer,
-          desc.referencedTable.markBuffer
-        );
-        break;
       case 'NO_REF':
+      case 'NO_REF_TYPED':
         break;
       default:
         throw assertExhaustiveCheck(desc);
@@ -354,7 +431,13 @@ function _markTableAndComputeTranslation<T>(
   thisTableCompactionState.computeIndexTranslation();
 }
 
-function markColumn(col: Array<number>, shouldMark: BitSet, markBuf: BitSet) {
+function markColumn(
+  col: Array<number> | Int32Array<ArrayBuffer>,
+  shouldMark: BitSet,
+  markBuf: BitSet
+) {
+  // Polymorphic: indexing works the same on Int32Array as on number[], so the
+  // INDEX_REF and INDEX_REF_INT32 cases share this function.
   for (let i = 0; i < col.length; i++) {
     if (checkBit(shouldMark, i)) {
       const val = col[i];
@@ -381,31 +464,30 @@ function markColumnWithNullableFields(
 // Self-referential columns must be iterated in reverse so that marking a
 // prefix propagates transitively: since prefix[i] < i is guaranteed, iterating
 // high-to-low means a newly marked row will still be visited.
-function markSelfColumnWithNullableFields(
-  col: Array<number | null>,
+function markSelfColumnPrefixOffset(
+  col: Int32Array<ArrayBuffer>,
   markBuf: BitSet
 ) {
   for (let i = col.length - 1; i >= 0; i--) {
     if (checkBit(markBuf, i)) {
-      const val = col[i];
-      if (val !== null) {
-        setBit(markBuf, val);
+      const offset = col[i];
+      if (offset !== 0) {
+        setBit(markBuf, i - offset);
       }
     }
   }
 }
 
-function markColumnWithNegOneableFields(
-  col: Array<number | -1>,
+function markColumnGatedByFlag(
+  col: Array<number> | Int32Array<ArrayBuffer>,
+  flagCol: Array<number> | Uint8Array<ArrayBuffer>,
+  flagBit: number,
   shouldMark: BitSet,
   markBuf: BitSet
 ) {
   for (let i = 0; i < col.length; i++) {
-    if (checkBit(shouldMark, i)) {
-      const val = col[i];
-      if (val !== -1) {
-        setBit(markBuf, val);
-      }
+    if (checkBit(shouldMark, i) && (flagCol[i] & flagBit) !== 0) {
+      setBit(markBuf, col[i]);
     }
   }
 }
@@ -499,6 +581,24 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
+      case 'INDEX_REF_INT32':
+        result[key] = _compactColIndexInt32(
+          oldCol,
+          markBuffer,
+          desc.referencedTable.oldIndexToNewIndexPlusOne,
+          newLength
+        );
+        break;
+      case 'INDEX_REF_INT32_GATED_BY_FLAG':
+        result[key] = _compactColIndexInt32GatedByFlag(
+          oldCol,
+          (oldTable as any).flags,
+          desc.flagBit,
+          markBuffer,
+          desc.referencedTable.oldIndexToNewIndexPlusOne,
+          newLength
+        );
+        break;
       case 'INDEX_REF_OR_NULL':
         result[key] = _compactColIndexOrNull(
           oldCol,
@@ -507,24 +607,24 @@ function _compactTable<T extends { length: number }>(
           newLength
         );
         break;
-      case 'SELF_INDEX_REF_OR_NULL':
-        result[key] = _compactColIndexOrNull(
+      case 'SELF_RELATIVE_PARENT':
+        result[key] = _compactColSelfPrefixOffset(
           oldCol,
           markBuffer,
           thisTableCompactionState.oldIndexToNewIndexPlusOne,
           newLength
         );
         break;
-      case 'INDEX_REF_OR_NEG_ONE':
-        result[key] = _compactColIndexOrNegOne(
-          oldCol,
-          markBuffer,
-          desc.referencedTable.oldIndexToNewIndexPlusOne,
-          newLength
-        );
-        break;
       case 'NO_REF':
         result[key] = _compactColCopy(oldCol, markBuffer, newLength);
+        break;
+      case 'NO_REF_TYPED':
+        result[key] = _compactColCopyTyped(
+          oldCol,
+          desc.arrayConstructor,
+          markBuffer,
+          newLength
+        );
         break;
       default:
         throw assertExhaustiveCheck(desc);
@@ -539,6 +639,22 @@ function _compactColCopy<E>(
   newLength: number
 ): E[] {
   const newCol: E[] = new Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      newCol[newIndex++] = oldCol[i];
+    }
+  }
+  return newCol;
+}
+
+function _compactColCopyTyped(
+  oldCol: ArrayLike<number>,
+  arrayConstructor: NumericArrayConstructor,
+  markBuffer: BitSet,
+  newLength: number
+) {
+  const newCol = new arrayConstructor(newLength);
   let newIndex = 0;
   for (let i = 0; i < oldCol.length; i++) {
     if (checkBit(markBuffer, i)) {
@@ -564,6 +680,43 @@ function _compactColIndex(
   return newCol;
 }
 
+function _compactColIndexInt32(
+  oldCol: Int32Array<ArrayBuffer>,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      newCol[newIndex++] = oldIndexToNewIndexPlusOne[oldCol[i]] - 1;
+    }
+  }
+  return newCol;
+}
+
+function _compactColIndexInt32GatedByFlag(
+  oldCol: number[] | Int32Array<ArrayBuffer>,
+  flagCol: number[] | Uint8Array<ArrayBuffer>,
+  flagBit: number,
+  markBuffer: BitSet,
+  oldIndexToNewIndexPlusOne: Int32Array,
+  newLength: number
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
+  let newIndex = 0;
+  for (let i = 0; i < oldCol.length; i++) {
+    if (checkBit(markBuffer, i)) {
+      newCol[newIndex++] =
+        (flagCol[i] & flagBit) !== 0
+          ? oldIndexToNewIndexPlusOne[oldCol[i]] - 1
+          : 0;
+    }
+  }
+  return newCol;
+}
+
 function _compactColIndexOrNull(
   oldCol: (number | null)[],
   markBuffer: BitSet,
@@ -582,18 +735,24 @@ function _compactColIndexOrNull(
   return newCol;
 }
 
-function _compactColIndexOrNegOne(
-  oldCol: (number | -1)[],
+function _compactColSelfPrefixOffset(
+  oldCol: Int32Array<ArrayBuffer>,
   markBuffer: BitSet,
   oldIndexToNewIndexPlusOne: Int32Array,
   newLength: number
-): (number | -1)[] {
-  const newCol: (number | -1)[] = new Array(newLength);
+): Int32Array<ArrayBuffer> {
+  const newCol = new Int32Array(newLength);
   let newIndex = 0;
   for (let i = 0; i < oldCol.length; i++) {
     if (checkBit(markBuffer, i)) {
-      const val = oldCol[i];
-      newCol[newIndex++] = val !== -1 ? oldIndexToNewIndexPlusOne[val] - 1 : -1;
+      const offset = oldCol[i];
+      if (offset === 0) {
+        newCol[newIndex] = 0;
+      } else {
+        const newParent = oldIndexToNewIndexPlusOne[i - offset] - 1;
+        newCol[newIndex] = newIndex - newParent;
+      }
+      newIndex++;
     }
   }
   return newCol;

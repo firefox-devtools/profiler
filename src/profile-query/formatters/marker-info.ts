@@ -2,17 +2,33 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
+import {
+  getSelectedThreadIndexes,
+  getAllCommittedRanges,
+} from 'firefox-profiler/selectors/url-state';
 import {
   getProfile,
   getCategories,
+  getMarkerSchema,
   getMarkerSchemaByName,
   getStringTable,
+  getCommittedRange,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
+import {
+  intervalUnionMs,
+  peakConcurrency,
+  classifyCache,
+  gatherNetworkRecords,
+  clampInterval,
+  clampedDurationMs,
+} from '../network-summary';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
+  computeStringIndexMarkerFieldsByDataType,
   formatFromMarkerSchema,
   getLabelGetter,
+  isStringIndexMarkerField,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import type { Store } from '../../types/store';
@@ -26,6 +42,7 @@ import type {
   Lib,
   IndexIntoStackTable,
   MarkerSchemaByName,
+  MarkerFormatType,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
@@ -35,22 +52,29 @@ import type {
   ThreadMarkersResult,
   ThreadNetworkResult,
   NetworkRequestEntry,
+  NetworkRequestSort,
   NetworkPhaseTimings,
   MarkerGroupData,
   DurationStats,
   RateStats,
   MarkerFilterOptions,
   FlatMarkerItem,
+  MarkerFieldValue,
   ProfileLogsResult,
+  ProfileMarkerItem,
+  ProfileMarkersResult,
+  ProfileMarkersThreadBreakdown,
 } from '../types';
 import {
-  isNetworkMarker,
   LOG_LEVEL_STRING_TO_LETTER,
   LOG_LETTER_TO_LEVEL,
   formatLogTimestamp,
   formatLogStatement,
+  resolveLogMarkerMessage,
 } from 'firefox-profiler/profile-logic/marker-data';
 import { formatFunctionNameWithLibrary } from '../function-list';
+import { FrameFlag } from 'firefox-profiler/types';
+import { getProcessName } from '../process-thread-list';
 import type {
   NetworkPayload,
   LogMarkerPayload,
@@ -146,10 +170,25 @@ export function computeRateStats(markers: Marker[]): RateStats {
   }
 
   const sorted = [...markers].sort((a, b) => a.start - b.start);
-  const gaps: number[] = [];
 
+  // Accumulate the gap statistics in a single pass. Do not build an array of
+  // gaps and spread it into Math.min/Math.max: a spread passes one argument per
+  // element, which blows the stack ("Maximum call stack size exceeded") once a
+  // marker name has more than ~100k markers in it, as happens on the parent
+  // process main thread of a long profile.
+  let minGap = Infinity;
+  let maxGap = -Infinity;
+  let gapSum = 0;
+  const gapCount = sorted.length - 1;
   for (let i = 1; i < sorted.length; i++) {
-    gaps.push(sorted[i].start - sorted[i - 1].start);
+    const gap = sorted[i].start - sorted[i - 1].start;
+    if (gap < minGap) {
+      minGap = gap;
+    }
+    if (gap > maxGap) {
+      maxGap = gap;
+    }
+    gapSum += gap;
   }
 
   const timeRange = sorted[sorted.length - 1].start - sorted[0].start;
@@ -159,9 +198,9 @@ export function computeRateStats(markers: Marker[]): RateStats {
 
   return {
     markersPerSecond,
-    minGap: Math.min(...gaps),
-    avgGap: gaps.reduce((a, b) => a + b, 0) / gaps.length,
-    maxGap: Math.max(...gaps),
+    minGap,
+    avgGap: gapSum / gapCount,
+    maxGap,
   };
 }
 
@@ -692,13 +731,24 @@ export function collectThreadMarkers(
     const categories = getCategories(state);
     const markerSchemaByName = getMarkerSchemaByName(state);
     const stringTable = getStringTable(state);
+    // Usually non-zero (earliest sample or marker across all threads), so
+    // reporting a raw marker time leaks that offset.
+    const zeroAt = getZeroAt(state);
 
-    // Get marker indexes - use search-filtered if search is active, otherwise all markers
+    // Get marker indexes scoped to the committed (zoom) range. When a search is
+    // active we use the search-filtered set, which is itself built on top of the
+    // committed-range-filtered indexes, so both paths respect the current zoom.
     const originalCount =
-      threadSelectors.getFullMarkerListIndexes(state).length;
+      threadSelectors.getCommittedRangeFilteredMarkerIndexes(state).length;
     let filteredIndexes = searchString
       ? threadSelectors.getSearchFilteredMarkerIndexes(state)
-      : threadSelectors.getFullMarkerListIndexes(state);
+      : threadSelectors.getCommittedRangeFilteredMarkerIndexes(state);
+
+    // When zoomed, show this thread's marker count over the full time range.
+    const isZoomed = getAllCommittedRanges(state).length > 0;
+    const fullRangeMarkerCount = isZoomed
+      ? threadSelectors.getFullMarkerListIndexes(state).length
+      : undefined;
 
     // Apply all marker filters
     filteredIndexes = applyMarkerFilters(
@@ -751,7 +801,7 @@ export function collectThreadMarkers(
       );
 
       // Add markerIndex to topMarkers in groups
-      customGroups = addMarkerIndexToGroups(groups);
+      customGroups = addMarkerIndexToGroups(groups, zeroAt);
     }
 
     // Aggregate by type (with optional auto-grouping)
@@ -778,12 +828,12 @@ export function collectThreadMarkers(
       topMarkers: stats.topMarkers.map((m) => ({
         handle: m.handle,
         label: m.label,
-        start: m.start,
+        start: m.start - zeroAt,
         duration: m.duration,
         hasStack: m.hasStack,
       })),
       subGroups: stats.subGroups
-        ? addMarkerIndexToGroups(stats.subGroups)
+        ? addMarkerIndexToGroups(stats.subGroups, zeroAt)
         : undefined,
       subGroupKey: stats.subGroupKey,
     }));
@@ -825,6 +875,9 @@ export function collectThreadMarkers(
     let flatMarkers: FlatMarkerItem[] | undefined;
     if (filterOptions.list) {
       flatMarkers = [];
+      // Tells us which payload fields hold string table indexes.
+      const stringIndexFieldsByDataType =
+        computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state));
       const listIndexes =
         limit !== undefined ? filteredIndexes.slice(0, limit) : filteredIndexes;
       for (const markerIndex of listIndexes) {
@@ -837,14 +890,28 @@ export function collectThreadMarkers(
         );
         const categoryName = categories[marker.category]?.name ?? 'Other';
         const label = getMarkerLabel(markerIndex);
+        const data = collectMarkerData(
+          marker,
+          markerSchemaByName,
+          stringIndexFieldsByDataType,
+          stringTable
+        );
         flatMarkers.push({
           handle,
           name: marker.name,
           label: label || marker.name,
-          start: marker.start,
+          start: marker.start - zeroAt,
           duration,
           hasStack,
           category: categoryName,
+          markerType: marker.data?.type,
+          fields: collectMarkerFields(
+            marker,
+            markerSchemaByName,
+            stringIndexFieldsByDataType,
+            stringTable
+          ),
+          data,
         });
       }
     }
@@ -855,6 +922,7 @@ export function collectThreadMarkers(
       friendlyThreadName,
       totalMarkerCount: originalCount,
       filteredMarkerCount: filteredIndexes.length,
+      fullRangeMarkerCount,
       filters,
       byType,
       byCategory,
@@ -870,9 +938,216 @@ export function collectThreadMarkers(
 }
 
 /**
+ * Hard row ceiling, applied even when the caller asks for more: above it the
+ * serialized result exceeds V8's maximum string length, or takes long enough to
+ * build that the command is unusable. Measured on a 2.47M-marker profile: 400k
+ * rows succeed, 800k had not returned after 10 minutes, 3M throws.
+ */
+export const MAX_PROFILE_MARKERS_ROWS = 100000;
+
+/**
+ * Collect markers matching a search across every thread in the profile: the
+ * cross-thread counterpart of `collectThreadMarkers`'s `--list` mode, with the
+ * thread each match was found on.
+ *
+ * Cost is O(markers in the profile): every searched thread's derived marker
+ * list has to be built once. `limit` bounds the output, not the work, because
+ * both the per-thread counts and the chronological merge need the full match
+ * set.
+ */
+export function collectProfileMarkers(
+  store: Store,
+  threadMap: ThreadMap,
+  markerMap: MarkerMap,
+  filterOptions: MarkerFilterOptions & { thread?: string } = {}
+): ProfileMarkersResult {
+  const searchString = filterOptions.searchString || '';
+  if (searchString) {
+    store.dispatch(changeMarkersSearchString(searchString));
+  }
+
+  try {
+    const state = store.getState();
+    const profile = getProfile(state);
+    const categories = getCategories(state);
+    const markerSchemaByName = getMarkerSchemaByName(state);
+    const stringTable = getStringTable(state);
+    const markerSchema = profile.meta.markerSchema;
+    const zeroAt = getZeroAt(state);
+    // Tells us which payload fields hold string table indexes. Computed once
+    // for the whole profile rather than per thread: it only depends on the
+    // schemas.
+    const stringIndexFieldsByDataType =
+      computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state));
+
+    // Unlike `thread markers`, the default is every thread rather than the
+    // selected one — matching `profile logs`.
+    const requestedThreadIndexes =
+      filterOptions.thread !== undefined
+        ? threadMap.threadIndexesForHandle(filterOptions.thread)
+        : null;
+
+    const allMatches: ProfileMarkerItem[] = [];
+    const byThread: ProfileMarkersThreadBreakdown[] = [];
+    let searchedThreadCount = 0;
+
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      if (
+        requestedThreadIndexes !== null &&
+        !requestedThreadIndexes.has(threadIndex)
+      ) {
+        continue;
+      }
+      searchedThreadCount++;
+
+      const threadIndexes = new Set([threadIndex]);
+      const threadSelectors = getThreadSelectors(threadIndexes);
+      const fullMarkerList = threadSelectors.getFullMarkerList(state);
+
+      let filteredIndexes = searchString
+        ? threadSelectors.getSearchFilteredMarkerIndexes(state)
+        : threadSelectors.getCommittedRangeFilteredMarkerIndexes(state);
+
+      filteredIndexes = applyMarkerFilters(
+        filteredIndexes,
+        fullMarkerList,
+        categories,
+        filterOptions
+      );
+
+      if (filteredIndexes.length === 0) {
+        continue;
+      }
+
+      const rawThread = profile.threads[threadIndex];
+      const threadHandle = threadMap.handleForThreadIndex(threadIndex);
+      const threadName = threadSelectors.getFriendlyThreadName(state);
+      const processName = getProcessName(rawThread);
+      const pid = String(rawThread.pid);
+
+      byThread.push({
+        threadHandle,
+        threadName,
+        processName,
+        pid,
+        count: filteredIndexes.length,
+      });
+
+      // Only build labels for threads that actually matched — the label getter
+      // is the expensive part of a row.
+      const getMarkerLabel = getLabelGetter(
+        (markerIndex: MarkerIndex) => fullMarkerList[markerIndex],
+        markerSchema,
+        markerSchemaByName,
+        categories,
+        stringTable,
+        'tableLabel'
+      );
+
+      for (const markerIndex of filteredIndexes) {
+        const marker = fullMarkerList[markerIndex];
+        const label = getMarkerLabel(markerIndex);
+        allMatches.push({
+          handle: markerMap.handleForMarker(threadIndexes, markerIndex),
+          name: marker.name,
+          label: label || marker.name,
+          start: marker.start - zeroAt,
+          duration: marker.end !== null ? marker.end - marker.start : undefined,
+          hasStack: Boolean(
+            marker.data && 'cause' in marker.data && marker.data.cause
+          ),
+          category: categories[marker.category]?.name ?? 'Other',
+          markerType: marker.data?.type,
+          fields: collectMarkerFields(
+            marker,
+            markerSchemaByName,
+            stringIndexFieldsByDataType,
+            stringTable
+          ),
+          data: collectMarkerData(
+            marker,
+            markerSchemaByName,
+            stringIndexFieldsByDataType,
+            stringTable
+          ),
+          threadHandle,
+          threadName,
+          processName,
+          pid,
+        });
+      }
+    }
+
+    allMatches.sort((a, b) => a.start - b.start);
+    byThread.sort((a, b) => b.count - a.count);
+
+    const { limit, minDuration, maxDuration, category, hasStack } =
+      filterOptions;
+    // Only the rows are capped; `totalCount` and `byThread` stay exact.
+    // Like `thread markers --list`, an unlimited query returns every match:
+    // the caller asked a question, so truncating the answer by default would
+    // silently hide matches. Only the hard ceiling applies.
+    const effectiveLimit = Math.min(
+      limit ?? MAX_PROFILE_MARKERS_ROWS,
+      MAX_PROFILE_MARKERS_ROWS
+    );
+    const markers = allMatches.slice(0, effectiveLimit);
+
+    const filters =
+      searchString ||
+      filterOptions.thread !== undefined ||
+      minDuration !== undefined ||
+      maxDuration !== undefined ||
+      category !== undefined ||
+      hasStack ||
+      limit !== undefined
+        ? {
+            thread: filterOptions.thread,
+            searchString: searchString || undefined,
+            category,
+            minDuration,
+            maxDuration,
+            hasStack,
+            limit,
+          }
+        : undefined;
+
+    return {
+      type: 'profile-markers',
+      markers,
+      totalCount: allMatches.length,
+      searchedThreadCount,
+      matchingThreadCount: byThread.length,
+      byThread,
+      filters,
+      // Either an oversized --limit or an unlimited query with more matches
+      // than the ceiling: both mean rows were dropped to keep the result
+      // serializable, and both are reported the same way.
+      maxRowsClamped:
+        allMatches.length > MAX_PROFILE_MARKERS_ROWS &&
+        (limit === undefined || limit > MAX_PROFILE_MARKERS_ROWS)
+          ? MAX_PROFILE_MARKERS_ROWS
+          : undefined,
+    };
+  } finally {
+    // Always clear the search string to avoid affecting other queries
+    if (searchString) {
+      store.dispatch(changeMarkersSearchString(''));
+    }
+  }
+}
+
+/**
  * Helper to add markerIndex to topMarkers in MarkerGroup arrays.
  */
-function addMarkerIndexToGroups(groups: MarkerGroup[]): MarkerGroupData[] {
+function addMarkerIndexToGroups(
+  groups: MarkerGroup[],
+  zeroAt: number
+): MarkerGroupData[] {
   return groups.map((group) => ({
     groupName: group.groupName,
     count: group.count,
@@ -882,12 +1157,12 @@ function addMarkerIndexToGroups(groups: MarkerGroup[]): MarkerGroupData[] {
     topMarkers: group.topMarkers.map((m) => ({
       handle: m.handle,
       label: m.label,
-      start: m.start,
+      start: m.start - zeroAt,
       duration: m.duration,
       hasStack: m.hasStack,
     })),
     subGroups: group.subGroups
-      ? addMarkerIndexToGroups(group.subGroups)
+      ? addMarkerIndexToGroups(group.subGroups, zeroAt)
       : undefined,
   }));
 }
@@ -905,28 +1180,19 @@ function collectStackTrace(
     return null;
   }
 
-  const { stackTable, frameTable, funcTable, stringTable, resourceTable } =
-    thread;
+  const { stackTable, frameTable, funcTable, stringTable } = thread;
   const frames: StackTraceData['frames'] = [];
 
-  let currentStackIndex: IndexIntoStackTable | null = stackIndex;
-  while (currentStackIndex !== null) {
+  let currentStackIndex: IndexIntoStackTable = stackIndex;
+  while (currentStackIndex !== -1) {
     const frameIndex = stackTable.frame[currentStackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const funcName = stringTable.getString(funcTable.name[funcIndex]);
-    const nameWithLibrary = formatFunctionNameWithLibrary(
-      funcIndex,
-      thread,
-      libs
-    );
+    const nameWithLibrary = formatFunctionNameWithLibrary(funcIndex, thread);
 
     let library: string | undefined;
-    const resourceIndex = funcTable.resource[funcIndex];
-    if (resourceIndex !== -1) {
-      const libIndex = resourceTable.lib[resourceIndex];
-      if (libIndex !== null && libs) {
-        library = libs[libIndex].name;
-      }
+    if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0 && libs) {
+      library = libs[frameTable.lib[frameIndex]].name;
     }
 
     frames.push({ name: funcName, nameWithLibrary, library });
@@ -972,7 +1238,13 @@ export function collectMarkerStack(
   let stack: StackTraceData | null = null;
   if (marker.data && 'cause' in marker.data && marker.data.cause) {
     const cause = marker.data.cause;
-    stack = collectStackTrace(cause.stack, thread, libs, cause.time);
+    const zeroAt = getZeroAt(state);
+    stack = collectStackTrace(
+      cause.stack,
+      thread,
+      libs,
+      cause.time !== undefined ? cause.time - zeroAt : undefined
+    );
   }
 
   return {
@@ -984,6 +1256,122 @@ export function collectMarkerStack(
     markerName: marker.name,
     stack,
   };
+}
+
+const OMITTED_PAYLOAD_KEYS = new Set(['type', 'cause']);
+
+/**
+ * Shared by `collectMarkerInfo` and the `--list` path so both report identical
+ * field values for the same marker. Unique-string, flow-id and
+ * terminating-flow-id fields report `value` as the resolved string rather than
+ * the string-table index, which also changes what `marker info --json` returns
+ * for them.
+ */
+function collectMarkerFields(
+  marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  stringIndexFieldsByDataType: Map<string, string[]>,
+  stringTable: StringTable
+): MarkerFieldValue[] | undefined {
+  const data = marker.data;
+  if (!data) {
+    return undefined;
+  }
+  const schema = markerSchemaByName[data.type];
+  if (!schema || schema.fields.length === 0) {
+    return undefined;
+  }
+
+  const fields: MarkerFieldValue[] = [];
+  for (const field of schema.fields) {
+    if (field.hidden) {
+      continue;
+    }
+
+    const rawValue = (data as any)[field.key];
+    if (rawValue !== undefined && rawValue !== null) {
+      const formattedValue = formatFromMarkerSchema(
+        data.type,
+        field.format,
+        rawValue,
+        stringTable
+      );
+      // Resolve here too, so `fields[].value` and `data[key]` never disagree
+      // about the same field on the same row.
+      const value =
+        isStringIndexMarkerField(
+          stringIndexFieldsByDataType,
+          data.type,
+          field.key
+        ) && typeof rawValue === 'number'
+          ? stringTable.getString(rawValue, '(empty)')
+          : rawValue;
+      fields.push({
+        key: field.key,
+        label: field.label || field.key,
+        value: truncateScreenshotDataUrl(value, field.format),
+        formattedValue,
+      });
+    }
+  }
+
+  return fields;
+}
+
+export type ElidedDataValue = {
+  elided: true;
+  length: number;
+  preview: string;
+};
+
+function truncateScreenshotDataUrl(
+  resolvedValue: unknown,
+  format: MarkerFormatType | undefined
+): unknown {
+  if (
+    typeof format === 'object' &&
+    format.type === 'screenshot-data-url' &&
+    typeof resolvedValue === 'string'
+  ) {
+    return {
+      elided: true,
+      length: resolvedValue.length,
+      preview: resolvedValue.slice(0, 64),
+    } satisfies ElidedDataValue;
+  }
+  return resolvedValue;
+}
+
+function collectMarkerData(
+  marker: Marker,
+  markerSchemaByName: MarkerSchemaByName,
+  stringIndexFieldsByDataType: Map<string, string[]>,
+  stringTable: StringTable
+): { [key: string]: any } | undefined {
+  const payload = marker.data;
+  if (!payload) {
+    return undefined;
+  }
+
+  const stringIndexFields = stringIndexFieldsByDataType.get(payload.type);
+  const schema = markerSchemaByName[payload.type];
+  const data: { [key: string]: any } = {};
+  for (const [key, value] of Object.entries(payload)) {
+    if (OMITTED_PAYLOAD_KEYS.has(key) || value === undefined) {
+      continue;
+    }
+    const resolved =
+      stringIndexFields?.includes(key) && typeof value === 'number'
+        ? stringTable.getString(value, '(empty)')
+        : value;
+    data[key] = truncateScreenshotDataUrl(
+      resolved,
+      schema?.fields.find((field) => field.key === key)?.format
+    );
+  }
+
+  // A payload of only `type` yields no keys here; report nothing.
+  return Object.keys(data).length > 0 ? data : undefined;
 }
 
 /**
@@ -1012,50 +1400,25 @@ export function collectMarkerInfo(
   const markerSchemaByName = getMarkerSchemaByName(state);
   const stringTable = getStringTable(state);
   const threadHandleDisplay = threadMap.handleForThreadIndexes(threadIndexes);
+  const zeroAt = getZeroAt(state);
 
-  // Get tooltip label
-  const getTooltipLabel = getLabelGetter(
-    (mi: MarkerIndex) => fullMarkerList[mi],
-    getProfile(state).meta.markerSchema,
-    markerSchemaByName,
-    categories,
-    stringTable,
-    'tooltipLabel'
-  );
-  const tooltipLabel = getTooltipLabel(markerIndex);
+  // The memoized selector, not a bare getLabelGetter: this runs once per
+  // marker, and building the getter parses every schema in the profile.
+  const tooltipLabel =
+    threadSelectors.getMarkerTooltipLabelGetter(state)(markerIndex);
 
   // Collect marker fields
-  let fields: MarkerInfoResult['fields'];
+  const fields = collectMarkerFields(
+    marker,
+    markerSchemaByName,
+    computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state)),
+    stringTable
+  );
   let schemaInfo: MarkerInfoResult['schema'];
 
   if (marker.data) {
-    const schema = markerSchemaByName[marker.data.type];
-    if (schema && schema.fields.length > 0) {
-      fields = [];
-      for (const field of schema.fields) {
-        if (field.hidden) {
-          continue;
-        }
-
-        const value = (marker.data as any)[field.key];
-        if (value !== undefined && value !== null) {
-          const formattedValue = formatFromMarkerSchema(
-            marker.data.type,
-            field.format,
-            value,
-            stringTable
-          );
-          fields.push({
-            key: field.key,
-            label: field.label || field.key,
-            value,
-            formattedValue,
-          });
-        }
-      }
-    }
-
     // Include schema description if available
+    const schema = markerSchemaByName[marker.data.type];
     if (schema?.description) {
       schemaInfo = { description: schema.description };
     }
@@ -1069,7 +1432,12 @@ export function collectMarkerInfo(
     const thread = threadSelectors.getFilteredThread(state);
     const libs = profile.libs;
 
-    const fullStack = collectStackTrace(cause.stack, thread, libs, cause.time);
+    const fullStack = collectStackTrace(
+      cause.stack,
+      thread,
+      libs,
+      cause.time !== undefined ? cause.time - zeroAt : undefined
+    );
     if (fullStack && fullStack.frames.length > 0) {
       // Truncate to 20 frames
       const truncated = fullStack.frames.length > 20;
@@ -1094,8 +1462,8 @@ export function collectMarkerInfo(
       index: marker.category,
       name: categories[marker.category]?.name ?? 'Unknown',
     },
-    start: marker.start,
-    end: marker.end,
+    start: marker.start - zeroAt,
+    end: marker.end !== null ? marker.end - zeroAt : null,
     duration: marker.end !== null ? marker.end - marker.start : undefined,
     fields,
     schema: schemaInfo,
@@ -1136,15 +1504,18 @@ function buildNetworkPhases(data: NetworkPayload): NetworkPhaseTimings {
 export function collectThreadNetwork(
   store: Store,
   threadMap: ThreadMap,
+  markerMap: MarkerMap,
   threadHandle?: string,
   filterOptions: {
     searchString?: string;
     minDuration?: number;
     maxDuration?: number;
     limit?: number;
+    sort?: NetworkRequestSort;
   } = {}
 ): ThreadNetworkResult {
   const { searchString, minDuration, maxDuration, limit } = filterOptions;
+  const sort: NetworkRequestSort = filterOptions.sort ?? 'duration';
 
   const state = store.getState();
   const threadIndexes =
@@ -1154,36 +1525,54 @@ export function collectThreadNetwork(
 
   const threadSelectors = getThreadSelectors(threadIndexes);
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
-  const fullMarkerList = threadSelectors.getFullMarkerList(state);
-  const allMarkerIndexes = threadSelectors.getFullMarkerListIndexes(state);
+  const range = getCommittedRange(state);
+  const rangeDurationMs = range.end - range.start;
 
-  // Filter to completed (STOP) network markers only.
-  // STOP markers are the merged markers that carry full timing data.
-  const stopIndexes = allMarkerIndexes.filter((i) => {
-    const m = fullMarkerList[i];
-    if (!isNetworkMarker(m)) {
-      return false;
+  // Gather the derived network records through the shared helper, so this
+  // listing and the `profile info` / `thread info` summaries agree on what a
+  // request is: all legs intersecting the range, including redirect / cancel.
+  const [representativeIndex] = threadIndexes;
+  const records = gatherNetworkRecords(
+    state,
+    representativeIndex,
+    threadIndexes,
+    range
+  );
+
+  // Completed = STATUS_STOP; in flight = STATUS_START (no stop event). Redirect
+  // and cancel legs are listed but counted as neither; the formatter flags
+  // them so they aren't read as completed requests.
+  let totalRequestCount = 0;
+  let incompleteCount = 0;
+  for (const record of records) {
+    if (record.incomplete) {
+      incompleteCount++;
+    } else if (record.data.status === 'STATUS_STOP') {
+      totalRequestCount++;
     }
-    const data = m.data as NetworkPayload;
-    return data.status === 'STATUS_STOP';
-  });
-  const totalRequestCount = stopIndexes.length;
+  }
+  const totalCandidateCount = records.length;
+
+  // Wall-clock: interval union and peak concurrency over all records
+  // intersecting the range, independent of the display filters below.
+  const inFlightIntervals = records.map((record) =>
+    clampInterval(record, range)
+  );
+  const inFlightMs = intervalUnionMs(inFlightIntervals);
 
   // Apply filters
-  let filteredIndexes = stopIndexes;
+  let filteredRecords = records;
 
   if (searchString) {
     const lowerSearch = searchString.toLowerCase();
-    filteredIndexes = filteredIndexes.filter((i) => {
-      const data = fullMarkerList[i].data as NetworkPayload;
-      return data.URI.toLowerCase().includes(lowerSearch);
-    });
+    filteredRecords = filteredRecords.filter((record) =>
+      record.data.URI.toLowerCase().includes(lowerSearch)
+    );
   }
 
   if (minDuration !== undefined || maxDuration !== undefined) {
-    filteredIndexes = filteredIndexes.filter((i) => {
-      const data = fullMarkerList[i].data as NetworkPayload;
-      const duration = data.endTime - data.startTime;
+    filteredRecords = filteredRecords.filter((record) => {
+      const duration = clampedDurationMs(record, range);
       if (minDuration !== undefined && duration < minDuration) {
         return false;
       }
@@ -1194,7 +1583,7 @@ export function collectThreadNetwork(
     });
   }
 
-  const filteredRequestCount = filteredIndexes.length;
+  const filteredRequestCount = filteredRecords.length;
 
   // Accumulate summary stats across all filtered requests (before limit)
   const phaseTotals: NetworkPhaseTimings = {};
@@ -1202,20 +1591,17 @@ export function collectThreadNetwork(
   let cacheMiss = 0;
   let cacheUnknown = 0;
 
-  for (const i of filteredIndexes) {
-    const data = fullMarkerList[i].data as NetworkPayload;
-    const cache = data.cache;
-    if (cache === 'Hit' || cache === 'MemoryHit' || cache === 'Prefetched') {
-      cacheHit++;
-    } else if (
-      cache === 'Miss' ||
-      cache === 'Unresolved' ||
-      cache === 'DiskStorage' ||
-      cache === 'Push'
-    ) {
-      cacheMiss++;
-    } else {
-      cacheUnknown++;
+  for (const record of filteredRecords) {
+    const data = record.data;
+    switch (classifyCache(data.cache)) {
+      case 'hit':
+        cacheHit++;
+        break;
+      case 'miss':
+        cacheMiss++;
+        break;
+      default:
+        cacheUnknown++;
     }
 
     const phases = buildNetworkPhases(data);
@@ -1240,26 +1626,44 @@ export function collectThreadNetwork(
     }
   }
 
-  // Apply limit after accumulating summary stats.
+  // Sort before applying the limit so a limited window shows the intended
+  // requests (slowest by default; chronological with --sort start).
+  const sortedRecords = filteredRecords.slice();
+  if (sort === 'duration') {
+    sortedRecords.sort(
+      (a, b) => clampedDurationMs(b, range) - clampedDurationMs(a, range)
+    );
+  } else {
+    sortedRecords.sort((a, b) => a.start - b.start);
+  }
+
+  // Apply limit after accumulating summary stats and sorting.
   // limit === 0 means "show all" (no limit).
-  const limitedIndexes =
+  const limitedRecords =
     limit !== undefined && limit > 0
-      ? filteredIndexes.slice(0, limit)
-      : filteredIndexes;
+      ? sortedRecords.slice(0, limit)
+      : sortedRecords;
 
   // Build per-request entries
-  const requests: NetworkRequestEntry[] = limitedIndexes.map((i) => {
-    const data = fullMarkerList[i].data as NetworkPayload;
-    const duration = data.endTime - data.startTime;
+  const requests: NetworkRequestEntry[] = limitedRecords.map((record) => {
+    const data = record.data;
+    const duration = clampedDurationMs(record, range);
 
     return {
+      markerHandle: markerMap.handleForMarker(
+        record.threadIndexes,
+        record.markerIndex
+      ),
       url: data.URI,
       httpStatus: data.responseStatus,
       httpVersion: data.httpVersion,
       cacheStatus: data.cache,
       transferSizeKB: data.count !== undefined ? data.count / 1024 : undefined,
-      startTime: data.startTime,
+      startTime: record.start,
       duration,
+      status: data.status,
+      incomplete: record.incomplete,
+      startedBeforeRecording: record.startedBeforeRecording,
       phases: buildNetworkPhases(data),
     };
   });
@@ -1272,7 +1676,10 @@ export function collectThreadNetwork(
     threadHandle: displayThreadHandle,
     friendlyThreadName,
     totalRequestCount,
+    incompleteCount,
+    totalCandidateCount,
     filteredRequestCount,
+    sort,
     filters:
       searchString !== undefined ||
       minDuration !== undefined ||
@@ -1284,6 +1691,11 @@ export function collectThreadNetwork(
       cacheHit,
       cacheMiss,
       cacheUnknown,
+      inFlightMs,
+      inFlightPercentage:
+        rangeDurationMs > 0 ? (inFlightMs / rangeDurationMs) * 100 : 0,
+      peakConcurrency: peakConcurrency(inFlightIntervals),
+      rangeDurationMs,
       phaseTotals,
     },
     requests,
@@ -1306,6 +1718,9 @@ export function collectProfileLogs(
   const profile = getProfile(state);
   const profileStartTime = profile.meta.startTime;
   const stringArray = profile.shared.stringArray;
+  // The schema tells us which payload fields hold string table indexes.
+  const stringIndexMarkerFieldsByDataType =
+    computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state));
 
   // Resolve which thread indexes to include.
   const threadIndexes: Set<number> | null =
@@ -1360,13 +1775,18 @@ export function collectProfileLogs(
       let levelLetter: string;
 
       if ('message' in logData) {
-        if (!logData.message) {
+        const rawMessage = resolveLogMarkerMessage(
+          logData.message,
+          stringArray,
+          stringIndexMarkerFieldsByDataType
+        );
+        if (!rawMessage) {
           continue;
         }
         moduleName = stringArray[markers.name[i]] ?? '';
         const levelStr = stringArray[logData.level] ?? '';
         levelLetter = LOG_LEVEL_STRING_TO_LETTER[levelStr] ?? 'D';
-        message = logData.message.trim();
+        message = rawMessage.trim();
       } else {
         if (!logData.name) {
           continue;
@@ -1410,7 +1830,8 @@ export function collectProfileLogs(
         threadName,
         logData,
         moduleName,
-        stringArray
+        stringArray,
+        stringIndexMarkerFieldsByDataType
       );
       if (formatted !== null) {
         entries.push(formatted);

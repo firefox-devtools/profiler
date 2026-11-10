@@ -5,8 +5,8 @@ import type { Milliseconds } from 'firefox-profiler/types/units';
 import type {
   CategoryList,
   CategoryColor,
-  FrameTable,
-  FuncTable,
+  RawFrameTable,
+  RawFuncTable,
   IndexIntoCategoryList,
   IndexIntoFrameTable,
   IndexIntoFuncTable,
@@ -14,20 +14,30 @@ import type {
   IndexIntoStackTable,
   ProfileMeta,
   ResourceTable,
-  RawSamplesTable,
   Profile,
   RawProfileSharedData,
   RawThread,
   RawStackTable,
 } from 'firefox-profiler/types/profile';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types/profile';
 import {
-  getEmptyFuncTable,
+  getRawFuncTableBuilder,
+  finishRawFuncTableBuilder,
   getEmptyResourceTable,
-  getEmptyFrameTable,
-  getEmptyRawStackTable,
-  getEmptySamplesTable,
-  getEmptyRawMarkerTable,
-  getEmptyNativeSymbolTable,
+  getRawFrameTableBuilder,
+  getRawStackTableBuilder,
+  finishRawFrameTableBuilder,
+  finishRawSamplesTableBuilder,
+  finishRawStackTableBuilder,
+  type RawFrameTableBuilder,
+  type RawFuncTableBuilder,
+  type RawStackTableBuilder,
+  getRawSamplesTableBuilder,
+  type RawSamplesTableBuilder,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
+  getRawNativeSymbolTableBuilder,
+  finishRawNativeSymbolTableBuilder,
   getEmptySourceTable,
   getEmptySourceLocationTable,
 } from 'firefox-profiler/profile-logic/data-structures';
@@ -94,7 +104,6 @@ class FirefoxResourceTable {
   findOrAddResource(file: report.IFile): IndexIntoResourceTable {
     let resourceIndex = this.resourcesMap.get(file.id!);
     if (!resourceIndex) {
-      this.resourceTable.lib.push(null);
       this.resourceTable.name.push(this.strings.indexForString(file.path!));
       this.resourceTable.host.push(null);
       this.resourceTable.type.push(1); // Library
@@ -110,15 +119,15 @@ class FirefoxResourceTable {
 class FirefoxFuncTable {
   strings: StringTable;
 
-  funcTable: FuncTable = getEmptyFuncTable();
+  funcTable: RawFuncTableBuilder = getRawFuncTableBuilder();
   funcMap: Map<string, IndexIntoFuncTable> = new Map();
 
   constructor(strings: StringTable) {
     this.strings = strings;
   }
 
-  toJson(): FuncTable {
-    return this.funcTable;
+  toJson(): RawFuncTable {
+    return finishRawFuncTableBuilder(this.funcTable);
   }
 
   findOrAddFunc(name: string, resourceIndex: number): IndexIntoFuncTable {
@@ -128,14 +137,14 @@ class FirefoxFuncTable {
 
     let funcIndex = this.funcMap.get(mapKey);
     if (!funcIndex) {
+      // Non-JS, native function with an associated resource.
+      this.funcTable.flags.push(FuncFlag.HasResource);
       this.funcTable.name.push(nameIndex);
-      this.funcTable.isJS.push(false);
-      this.funcTable.relevantForJS.push(false);
       this.funcTable.resource.push(resourceIndex);
-      this.funcTable.source.push(null);
-      this.funcTable.lineNumber.push(null);
-      this.funcTable.columnNumber.push(null);
-      this.funcTable.originalLocation.push(null);
+      this.funcTable.source.push(0);
+      this.funcTable.lineNumber.push(0);
+      this.funcTable.columnNumber.push(0);
+      this.funcTable.originalLocation.push(0);
 
       funcIndex = this.funcTable.length++;
       this.funcMap.set(mapKey, funcIndex);
@@ -148,15 +157,15 @@ class FirefoxFuncTable {
 class FirefoxFrameTable {
   strings: StringTable;
 
-  frameTable: FrameTable = getEmptyFrameTable();
+  frameTable: RawFrameTableBuilder = getRawFrameTableBuilder();
   frameMap: Map<string, IndexIntoFrameTable> = new Map();
 
   constructor(strings: StringTable) {
     this.strings = strings;
   }
 
-  toJson(): FrameTable {
-    return this.frameTable;
+  toJson(): RawFrameTable {
+    return finishRawFrameTableBuilder(this.frameTable);
   }
 
   findOrAddFrame(
@@ -167,16 +176,17 @@ class FirefoxFrameTable {
 
     let frameIndex = this.frameMap.get(mapKey);
     if (!frameIndex) {
-      this.frameTable.address.push(-1);
-      this.frameTable.inlineDepth.push(0);
+      this.frameTable.flags.push(FrameFlag.HasCategory);
+      this.frameTable.address.push(0);
       this.frameTable.category.push(category);
       this.frameTable.subcategory.push(0);
       this.frameTable.func.push(funcIndex);
-      this.frameTable.nativeSymbol.push(null);
-      this.frameTable.innerWindowID.push(null);
-      this.frameTable.line.push(null);
-      this.frameTable.column.push(null);
-      this.frameTable.originalLocation.push(null);
+      this.frameTable.lib.push(0);
+      this.frameTable.nativeSymbol.push(0);
+      this.frameTable.innerWindowID.push(0);
+      this.frameTable.line.push(0);
+      this.frameTable.column.push(0);
+      this.frameTable.originalLocation.push(0);
 
       frameIndex = this.frameTable.length++;
       this.frameMap.set(mapKey, frameIndex);
@@ -189,7 +199,7 @@ class FirefoxFrameTable {
 class FirefoxSampleTable {
   strings: StringTable;
 
-  stackTable: RawStackTable = getEmptyRawStackTable();
+  stackTable: RawStackTableBuilder = getRawStackTableBuilder();
   stackMap: Map<string, IndexIntoStackTable> = new Map();
 
   constructor(strings: StringTable) {
@@ -197,7 +207,7 @@ class FirefoxSampleTable {
   }
 
   toJson(): RawStackTable {
-    return this.stackTable;
+    return finishRawStackTableBuilder(this.stackTable);
   }
 
   findOrAddStack(
@@ -233,7 +243,9 @@ class FirefoxSharedData {
       frameTable: this.frameTable.toJson(),
       funcTable: this.funcTable.toJson(),
       resourceTable: this.resourceTable.toJson(),
-      nativeSymbols: getEmptyNativeSymbolTable(),
+      nativeSymbols: finishRawNativeSymbolTableBuilder(
+        getRawNativeSymbolTableBuilder()
+      ),
       sources: getEmptySourceTable(),
       stringArray: this.stringArray,
       sourceLocationTable: getEmptySourceLocationTable(),
@@ -250,7 +262,7 @@ class FirefoxThread {
 
   strings: StringTable;
 
-  sampleTable: RawSamplesTable = getEmptySamplesTable();
+  sampleTable: RawSamplesTableBuilder = getRawSamplesTableBuilder();
 
   stackTable: FirefoxSampleTable;
   frameTable: FirefoxFrameTable;
@@ -285,8 +297,8 @@ class FirefoxThread {
       isMainThread: this.isMainThread,
       pid: this.pid.toString(),
       tid: this.tid,
-      samples: this.sampleTable,
-      markers: getEmptyRawMarkerTable(),
+      samples: finishRawSamplesTableBuilder(this.sampleTable),
+      markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
     };
   }
 

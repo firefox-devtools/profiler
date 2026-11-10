@@ -34,9 +34,14 @@ import {
 function createMockContext(): SessionContext {
   return {
     selectedThreadHandle: 't-0',
-    selectedThreads: [{ threadIndex: 0, name: 'Test Thread' }],
+    selectedThreads: [
+      { threadIndex: 0, name: 'Test Thread', processName: 'Test Process' },
+    ],
+    resultThreadHandle: null,
+    resultThreads: [],
     currentViewRange: null,
     rootRange: { start: 0, end: 1000 },
+    callTreeSummaryStrategy: 'timing',
   };
 }
 
@@ -52,14 +57,15 @@ function buildTopDownResult(
   const state = store.getState();
   const threadSelectors = getThreadSelectors(0);
   const callTree = threadSelectors.getCallTree(state);
-  const libs = profile.libs;
 
-  const regularCallTree = collectCallTree(callTree, libs, options);
+  const regularCallTree = collectCallTree(callTree, options);
 
   return {
     type: 'thread-samples-top-down',
     threadHandle: 't-0',
     friendlyThreadName: 'Test Thread',
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     regularCallTree,
     context: createMockContext(),
   };
@@ -76,7 +82,6 @@ function buildBottomUpResult(
   const store = storeWithProfile(profile);
   const state = store.getState();
   const threadSelectors = getThreadSelectors(0);
-  const libs = profile.libs;
 
   // Build inverted call tree (bottom-up view)
   let collectedInvertedTree = null;
@@ -88,9 +93,7 @@ function buildBottomUpResult(
     const weightType = threadSelectors.getWeightTypeForCallTree(state);
     const samples = threadSelectors.getPreviewFilteredCtssSamples(state);
     const sampleIndexToCallNodeIndex =
-      threadSelectors.getSampleIndexToNonInvertedCallNodeIndexForFilteredThread(
-        state
-      );
+      threadSelectors.getPreviewFilteredCtssSampleCallNodes(state);
 
     const callNodeSelfAndSummary = computeCallNodeSelfAndSummary(
       samples,
@@ -118,7 +121,7 @@ function buildBottomUpResult(
       weightType
     );
 
-    collectedInvertedTree = collectCallTree(invertedTree, libs, options);
+    collectedInvertedTree = collectCallTree(invertedTree, options);
   } catch (e) {
     // Failed to create inverted tree
     console.error('Failed to create inverted call tree:', e);
@@ -128,6 +131,8 @@ function buildBottomUpResult(
     type: 'thread-samples-bottom-up',
     threadHandle: 't-0',
     friendlyThreadName: 'Test Thread',
+    callTreeSummaryStrategy: threadSelectors.getCallTreeSummaryStrategy(state),
+    weightType: threadSelectors.getWeightTypeForCallTree(state),
     invertedCallTree: collectedInvertedTree,
     context: createMockContext(),
   };

@@ -49,6 +49,9 @@ AppViewRouter--error-from-localhost-url-safari =
     bu tarayıcıda yerel makineden profilleri içe aktaramıyor. Lütfen
     bu sayfayı Safari yerine { -firefox-brand-name } veya Chrome’da açın.
     .title = Safari yerel profilleri içe aktaramıyor
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version = Bu profilde bu { -profiler-brand-name } sürümünün desteklemediği bir biçim kullanılıyor. Yeni { -profiler-brand-name } güncellemesi olup olmadığını denetlemek üzere sayfayı yenilemeyi deneyin.
 AppViewRouter--route-not-found--home =
     .specialMessage = Ulaşmaya çalıştığınız URL tanınamadı.
 
@@ -138,6 +141,13 @@ CallTree--tracing-ms-total = Çalışma süresi (ms)
     .title = “Toplam” çalışma süresi, bu fonksiyonun yığında gözlemlendiği tüm sürenin özetini içerir. Bu süre, fonksiyonun kendisinin çalıştığı süreyi ve bu fonksiyondan çağırılanların sürelerini içerir.
 CallTree--tracing-ms-self = Öz (ms)
     .title = “Öz” süre yalnızca fonksiyonun yığının sonunda olduğu süreyi içerir. Eğer fonksiyon başka fonksiyonları çağırmışsa diğer fonksiyonların süresi dahil değildir. Öz süre, programda asıl nerede zaman harcandığını anlamak için faydalıdır.
+CallTree--samples-total = Toplam (örnekler)
+    .title =
+        “Toplam” örnek sayısı, bu fonksiyonun yığın üzerinde görüldüğü her örneğin
+        bir özetini içerir. Fonksiyonun gerçekten çalıştığı süre ile bu fonksiyondan
+        çağrılan fonksiyonlarda geçirilen süre de buna dahildir.
+CallTree--bytes-total = Toplam Boyut (bayt)
+    .title = “Toplam boyut”, bu işlevin çağrı yığınında bulunduğu süre boyunca ayrılan veya serbest bırakılan tüm baytların özetini içerir. Buna hem işlevin gerçekten çalıştığı sıradaki baytlar hem de bu işlevden yapılan çağrılara ait baytlar dahildir.
 
 ## Call tree "badges" (icons) with tooltips
 ##
@@ -149,6 +159,11 @@ CallTree--tracing-ms-self = Öz (ms)
 #   $calledFunction (String) - Name of the function whose call was sometimes inlined.
 CallTree--divergent-inlining-badge =
     .title = Bazı { $calledFunction } çağrıları derleyici tarafından satır içine dönüştürüldü.
+# Variables:
+#   $calledFunction (String) - Name of the function whose call was inlined.
+#   $outerFunction (String) - Name of the outer function into which the called function was inlined.
+CallTree--inlining-badge = (satır içi)
+    .title = { $calledFunction } çağrılarına derleyici tarafından { $outerFunction } çağrıları dahil edildi.
 
 ## CallTreeSidebar
 ## This is the sidebar component that is used in Call Tree and Flame Graph panels.
@@ -238,16 +253,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Hatayı GitHub’da rapor et
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Hukuki bilgiler
-FooterLinks--Privacy = Gizlilik
-FooterLinks--Cookies = Çerezler
-FooterLinks--languageSwitcher--select =
-    .title = Dili değiştir
-FooterLinks--hide-button =
-    .title = Alt bilgi bağlantılarını gizle
-    .aria-label = Alt bilgi bağlantılarını gizle
+SettingsMenu--button =
+    .title = Ayarlar
+SettingsMenu--docs = Belgelendirme
+SettingsMenu--legal = Hukuki Bilgiler
+SettingsMenu--privacy = Gizlilik
+SettingsMenu--cookies = Çerezler
+SettingsMenu--language-switcher =
+    .title = Dil değiştir
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -288,6 +304,10 @@ Home--record-instructions =
 Home--instructions-content2 =
     Performans profilleri yalnızca <a>{ -firefox-brand-name }’un masaüstü sürümü</a> ile kaydedilebilir.
     Ancak mevcut profiller herhangi bir modern tarayıcıda görüntülenebilir.
+Home--fenix-instructions-directly =
+    { -firefox-android-brand-name } bu cihazda doğrudan profillenebilir.
+    Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını cihazda doğrudan profilleme</a> sayfasını okuyabilirsiniz.
+Home--fenix-instructions-remotely = { -firefox-brand-name }’un bilgisayar sürümünü kullanarak da { -firefox-android-brand-name }’ta uzaktan profilleme yapabilirsiniz. Daha fazla bilgi için <a>{ -firefox-android-brand-name } uygulamasını uzaktan profilleme</a> belgesine bakın.
 Home--record-instructions-start-stop = Profillemeyi durdur ve başlat
 Home--record-instructions-capture-load = Profili yakala ve yükle
 Home--profiler-motto = Performans profili kaydedin. Analiz edin. Paylaşın. Web’i daha hızlı hale getirin.
@@ -309,8 +329,11 @@ Home--chrome-extension-recording-instructions =
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Filtre terimlerini girin
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Filtre terimlerini girin (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -347,6 +370,7 @@ ListOfPublishedProfiles--uploaded-profile-information-list =
 ## This is used as a context menu for the Marker Chart, Marker Table and Network
 ## panels.
 
+MarkerContextMenu--set-selection-from-duration = Seçimi işaretçinin süresine göre ayarla
 MarkerContextMenu--start-selection-here = Seçimi buradan başlat
 MarkerContextMenu--end-selection-here = Seçimi burada sonlandır
 MarkerContextMenu--start-selection-at-marker-start = Seçimi işaretçinin <strong>başlangıcından</strong> başlat
@@ -422,8 +446,8 @@ MarkerTable--details = Ayrıntılar
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Yalnızca şununla eşleşen işaretleri göster: “{ $filter }”
     .aria-label = Yalnızca şununla eşleşen işaretleri göster: “{ $filter }”
+    .title = Yalnızca şununla eşleşen işaretleri göster: “{ $filter }”
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -432,14 +456,13 @@ MenuButtons--index--metaInfo-button =
     .label = Profil Bilgileri
 MenuButtons--index--full-view = Tam Görünüm
 MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
-MenuButtons--index--share-upload =
-    .label = Yerel profili yükle
-MenuButtons--index--share-re-upload =
-    .label = Yeniden Yükle
+MenuButtons--index--share =
+    .label = Paylaş…
+MenuButtons--index--reshare =
+    .label = Yeniden paylaş…
 MenuButtons--index--share-error-uploading =
     .label = Yükleme başarısız
 MenuButtons--index--revert = Orijinal profile geri dön
-MenuButtons--index--docs = Dokümanlar
 MenuButtons--permalink--button =
     .label = Kalıcı bağlantı
 
@@ -457,6 +480,21 @@ MenuButtons--metaInfo--resymbolicate-profile = Profili yeniden sembolleştir
 MenuButtons--metaInfo--symbolicate-profile = Profili sembolleştir
 MenuButtons--metaInfo--attempting-resymbolicate = Profil yeniden sembolleştirilmeye çalışılıyor
 MenuButtons--metaInfo--currently-symbolicating = Şu anda profil sembolleştiriliyor
+MenuButtons--metaInfo--source-maps = Kaynak haritaları:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Kaynak haritasını uygula…
+    .title = Küçültülmüş bir JavaScript paketini sembolleştirmek ve özgün işlev adları ile kaynak konumlarını geri yüklemek için diskten bir .map dosyası yükleyin.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Bu kaynak haritasının uygulanacağı paketi seçin:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Uygula
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Vazgeç
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = { $filename } için özgün kaynaklar çözümlendi.
 MenuButtons--metaInfo--cpu-model = İşlemci modeli:
 MenuButtons--metaInfo--cpu-cores = İşlemci çekirdekleri:
 MenuButtons--metaInfo--main-memory = Ana bellek:
@@ -582,9 +620,10 @@ MenuButtons--publish--renderCheckbox-label-preference = Tercih değerlerini dahi
 MenuButtons--publish--renderCheckbox-label-private-browsing = Gizli gezinti pencerelerindeki verileri dahil et
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Bu profil gizli gezinti verileri içeriyor
-MenuButtons--publish--reupload-performance-profile = Performans Profilini Yeniden Yükle
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
+MenuButtons--publish--reshare-performance-profile = Performans Profilini Yeniden Paylaş
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
+MenuButtons--publish--download-info-description = Bu profili bilgisayarınıza dosya olarak kaydedin.
 MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
 MenuButtons--publish--info-description-firefox-nightly2 = Bu profil { -firefox-nightly-brand-name }’ye ait olduğu için çoğu bilgi varsayılan olarak dahil edilmiştir.
 MenuButtons--publish--include-additional-data = Tanımlanabilir olabilecek ek verileri dahil et
@@ -593,7 +632,6 @@ MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
 MenuButtons--publish--message-something-went-wrong = Profil yüklenirken bir hata oluştu.
 MenuButtons--publish--message-try-again = Yeniden dene
-MenuButtons--publish--download = İndir
 MenuButtons--publish--compressing = Sıkıştırılıyor…
 MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata oluştu. Profil boyutunu küçültmek için bazı onay kutularının işaretini kaldırmayı deneyin.
 
@@ -628,8 +666,8 @@ PanelSearch--search-field-hint = Birden fazla terim kullanarak arama yapmak içi
 ProfileName--edit-profile-name-button =
     .title = Profil adını düzenle
 ProfileName--edit-profile-name-input =
-    .title = Profil adını düzenle
     .aria-label = Profil adı
+    .title = Profil adını düzenle
 
 ## Profile Delete Button
 
@@ -709,8 +747,8 @@ ServiceWorkerManager--updated-while-not-ready =
     yeni bir sürümü uygulandı. Sayfayı hatalı görebilirsiniz.
 ServiceWorkerManager--new-version-is-ready = Uygulamanın yeni sürümü indirildi ve kullanıma hazır.
 ServiceWorkerManager--hide-notice-button =
-    .title = Yeniden yükleme bildirimini gizle
     .aria-label = Yeniden yükleme bildirimini gizle
+    .title = Yeniden yükleme bildirimini gizle
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -725,6 +763,14 @@ StackSettings--implementation-native2 = Yerel
 # This label is displayed in the marker chart and marker table panels only.
 StackSettings--stack-implementation-label = Yığın filtresi:
 StackSettings--use-data-source-label = Veri kaynağı:
+StackSettings--call-tree-strategy-js-allocations = JavaScript atamaları
+    .title = Atanan JavaScript baytını kullanarak özetle (atamaları kaldırma)
+StackSettings--call-tree-native-allocations = Ayrılan bellek
+    .title = Ayrılan belleğin baytlarını kullanarak özetle
+StackSettings--invert-call-stack = Çağrı yığınını tersine çevir
+    .title = Bir çağrı düğümünde geçen süreye göre sırala, düğümün altlarını yok say.
+StackSettings--include-idle-samples = Boşta olan örnekleri dahil et
+    .title = Yaprak çerçevesi Boşta kategorisinde olan örnekleri gizlemek için işareti kaldırın.
 StackSettings--show-user-timing = Kullanıcı zamanlamasını göster
 StackSettings--use-stack-chart-same-widths = Her yığın için aynı genişliği kullan
 StackSettings--panel-search =
@@ -786,14 +832,13 @@ TrackNameButton--hide-track =
 TrackNameButton--hide-process =
     .title = İşlemi gizle
 
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
 
-TrackMemoryGraph--relative-memory-at-this-time = bu süredeki göreli bellek
-TrackMemoryGraph--memory-range-in-graph = grafikteki bellek aralığı
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = önceki örnekten beri yapılan atamalar ve serbest bırakmalar
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

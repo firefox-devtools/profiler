@@ -69,7 +69,7 @@ function collectSliceSubtree(
   childrenStartPerParent: Array<number | null>,
   interestingSliceIndexes: Set<number>,
   nestingDepth: number,
-  time: number[],
+  time: Float64Array<ArrayBuffer>,
   result: CpuActivityEntry[],
   tsManager: TimestampManager
 ) {

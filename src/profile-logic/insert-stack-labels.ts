@@ -4,15 +4,17 @@
 
 import type {
   IndexIntoFrameTable,
-  IndexIntoStackTable,
   RawStackTable,
   IndexIntoFuncTable,
   Profile,
   Category,
 } from '../types/profile';
+import { FrameFlag, FuncFlag } from '../types/profile';
 import {
-  shallowCloneFrameTable,
-  shallowCloneFuncTable,
+  finishRawFrameTableBuilder,
+  finishRawFuncTableBuilder,
+  getRawFrameTableBuilderWithExistingContents,
+  getRawFuncTableBuilderWithExistingContents,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
 import { updateRawThreadStacks } from 'firefox-profiler/profile-logic/profile-data';
@@ -106,8 +108,8 @@ export function insertStackLabels(
     sources,
     stringArray,
   } = profile.shared;
-  const frameTable = shallowCloneFrameTable(oldFrameTable);
-  const funcTable = shallowCloneFuncTable(oldFuncTable);
+  const frameTable = getRawFrameTableBuilderWithExistingContents(oldFrameTable);
+  const funcTable = getRawFuncTableBuilderWithExistingContents(oldFuncTable);
   const stringTable = StringTable.withBackingArray(stringArray);
 
   const rootLabelName = 'Root (unaccounted / catch-all)';
@@ -123,26 +125,26 @@ export function insertStackLabels(
   for (let i = 0; i < allLabelNames.length; i++) {
     const labelName = allLabelNames[i];
     const funcIndex = funcTable.length++;
+    funcTable.flags[funcIndex] = FuncFlag.RelevantForJS;
     funcTable.name[funcIndex] = stringTable.indexForString(labelName);
-    funcTable.resource[funcIndex] = -1;
-    funcTable.source[funcIndex] = null;
-    funcTable.lineNumber[funcIndex] = null;
-    funcTable.columnNumber[funcIndex] = null;
-    funcTable.originalLocation[funcIndex] = null;
-    funcTable.isJS[funcIndex] = false;
-    funcTable.relevantForJS[funcIndex] = true;
+    funcTable.resource[funcIndex] = 0;
+    funcTable.source[funcIndex] = 0;
+    funcTable.lineNumber[funcIndex] = 0;
+    funcTable.columnNumber[funcIndex] = 0;
+    funcTable.originalLocation[funcIndex] = 0;
 
     const frameIndex = frameTable.length++;
+    frameTable.flags[frameIndex] = FrameFlag.HasCategory;
     frameTable.func[frameIndex] = funcIndex;
     frameTable.category[frameIndex] = labelCategoryIndex;
     frameTable.subcategory[frameIndex] = 0;
-    frameTable.nativeSymbol[frameIndex] = null;
+    frameTable.lib[frameIndex] = 0;
+    frameTable.nativeSymbol[frameIndex] = 0;
     frameTable.address[frameIndex] = 0;
-    frameTable.inlineDepth[frameIndex] = 0;
-    frameTable.line[frameIndex] = null;
-    frameTable.column[frameIndex] = null;
-    frameTable.originalLocation[frameIndex] = null;
-    frameTable.innerWindowID[frameIndex] = null;
+    frameTable.line[frameIndex] = 0;
+    frameTable.column[frameIndex] = 0;
+    frameTable.originalLocation[frameIndex] = 0;
+    frameTable.innerWindowID[frameIndex] = 0;
   }
 
   // Run the function name against the substring matchers and return the first
@@ -152,8 +154,8 @@ export function insertStackLabels(
 
     // Include the filename (in brackets), if present. This allows matchers
     // like `onStateChange (chrome://browser/content/tabbrowser/`
-    const sourceIndex = funcTable.source[funcIndex];
-    if (sourceIndex !== null) {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) !== 0) {
+      const sourceIndex = funcTable.source[funcIndex];
       const filenameString = stringArray[sources.filename[sourceIndex]];
       nameString += ` (${filenameString})`;
     }
@@ -197,10 +199,10 @@ export function insertStackLabels(
   );
   let stacksToInsertCount = 0;
   for (let stackIndex = 0; stackIndex < oldStackTable.length; stackIndex++) {
-    const parentStackIndex = oldStackTable.prefix[stackIndex];
+    const prefixOffset = oldStackTable.prefixOffset[stackIndex];
     const inheritedLabelFrameIndex =
-      parentStackIndex !== null
-        ? inheritedLabelFrameIndexAtStack[parentStackIndex]
+      prefixOffset !== 0
+        ? inheritedLabelFrameIndexAtStack[stackIndex - prefixOffset]
         : null;
     const frameIndex = oldStackTable.frame[stackIndex];
     const funcIndex = oldFrameTable.func[frameIndex];
@@ -213,12 +215,13 @@ export function insertStackLabels(
       inheritedLabelFrameIndexAtStack[stackIndex] = labelFrameIndex;
       stacksToInsertCount++;
     } else if (
-      funcTable.isJS[funcIndex] ||
-      funcTable.relevantForJS[funcIndex]
+      (funcTable.flags[funcIndex] &
+        (FuncFlag.IsJS | FuncFlag.RelevantForJS)) !==
+      0
     ) {
       labelFrameIndexToInsertAtStack[stackIndex] = null;
       inheritedLabelFrameIndexAtStack[stackIndex] = null;
-    } else if (parentStackIndex === null) {
+    } else if (prefixOffset === 0) {
       labelFrameIndexToInsertAtStack[stackIndex] = rootLabelFrameIndex;
       inheritedLabelFrameIndexAtStack[stackIndex] = rootLabelFrameIndex;
       stacksToInsertCount++;
@@ -230,7 +233,7 @@ export function insertStackLabels(
 
   // Now compute the new stack table.
   const newStackCount = oldStackTable.length + stacksToInsertCount;
-  const newPrefixCol = new Array<IndexIntoStackTable | null>(newStackCount);
+  const newPrefixOffsetCol = new Int32Array(newStackCount);
   const newFrameCol = new Array<IndexIntoFrameTable>(newStackCount);
   const oldStackToNewStackPlusOne = new Int32Array(oldStackTable.length);
   let nextNewStackIndex = 0;
@@ -241,18 +244,22 @@ export function insertStackLabels(
   ) {
     const labelFrameIndexToInsert =
       labelFrameIndexToInsertAtStack[oldStackIndex];
-    const oldPrefix = oldStackTable.prefix[oldStackIndex];
+    const oldPrefixOffset = oldStackTable.prefixOffset[oldStackIndex];
+    const oldPrefix =
+      oldPrefixOffset !== 0 ? oldStackIndex - oldPrefixOffset : -1;
     let newPrefix =
-      oldPrefix !== null ? oldStackToNewStackPlusOne[oldPrefix] - 1 : null;
+      oldPrefix !== -1 ? oldStackToNewStackPlusOne[oldPrefix] - 1 : -1;
     const frameIndex = oldStackTable.frame[oldStackIndex];
     if (labelFrameIndexToInsert !== null) {
       const insertedStackIndex = nextNewStackIndex++;
-      newPrefixCol[insertedStackIndex] = newPrefix;
+      newPrefixOffsetCol[insertedStackIndex] =
+        newPrefix === -1 ? 0 : insertedStackIndex - newPrefix;
       newFrameCol[insertedStackIndex] = labelFrameIndexToInsert;
       newPrefix = insertedStackIndex;
     }
     const newStackIndex = nextNewStackIndex++;
-    newPrefixCol[newStackIndex] = newPrefix;
+    newPrefixOffsetCol[newStackIndex] =
+      newPrefix === -1 ? 0 : newStackIndex - newPrefix;
     newFrameCol[newStackIndex] = frameIndex;
     oldStackToNewStackPlusOne[oldStackIndex] = newStackIndex + 1;
   }
@@ -266,12 +273,17 @@ export function insertStackLabels(
   }
 
   const stackTable: RawStackTable = {
-    prefix: newPrefixCol,
+    prefixOffset: newPrefixOffsetCol,
     frame: newFrameCol,
     length: newStackCount,
   };
 
-  const newShared = { ...profile.shared, stackTable, frameTable, funcTable };
+  const newShared = {
+    ...profile.shared,
+    stackTable,
+    frameTable: finishRawFrameTableBuilder(frameTable),
+    funcTable: finishRawFuncTableBuilder(funcTable),
+  };
   const newThreads = updateRawThreadStacks(profile.threads, (oldStack) =>
     oldStack !== null ? oldStackToNewStackPlusOne[oldStack] - 1 : null
   );

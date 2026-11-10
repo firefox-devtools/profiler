@@ -5,7 +5,7 @@
 import { getSlices, printSliceTree } from '../../utils/slice-tree';
 
 function getSlicesEasy(threadCPUPercentage: number[]): string[] {
-  const time = threadCPUPercentage.map((_, i) => i);
+  const time = Float64Array.from(threadCPUPercentage, (_, i) => i);
   const cpuRatio = new Float64Array(threadCPUPercentage.map((p) => p / 100));
   const slices = getSlices([0.05, 0.2, 0.4, 0.6, 0.8], cpuRatio, time);
   return printSliceTree(slices);
@@ -46,7 +46,7 @@ describe('Activity slice tree', function () {
       { start: 0, end: 1, avg: 0.9, sum: 1000, parent: 0 },
     ];
 
-    expect(printSliceTree({ slices, time: [0, 1] })).toEqual([
+    expect(printSliceTree({ slices, time: Float64Array.of(0, 1) })).toEqual([
       '- 10% for 1.0ms (1 samples): 0.0ms - 1.0ms',
       '  - 90% for 1.0ms (1 samples): 0.0ms - 1.0ms',
       '- 20% for 1.0ms (1 samples): 0.0ms - 1.0ms',

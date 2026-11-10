@@ -6,20 +6,25 @@ import {
   GECKO_PROFILE_VERSION,
   PROCESSED_PROFILE_VERSION,
 } from '../app-logic/constants';
+import {
+  toFloat64ArraySetNullToZero,
+  toUint8OrUint16Array,
+  valuesFitInUint8,
+} from '../utils/typed-arrays';
 
 import type {
   RawProfileSharedData,
   RawThread,
   RawSamplesTable,
-  FrameTable,
+  RawFrameTable,
   RawStackTable,
-  FuncTable,
+  RawJsAllocationsTable,
+  RawUnbalancedNativeAllocationsTable,
+  RawBalancedNativeAllocationsTable,
+  RawFuncTable,
   RawMarkerTable,
-  JsAllocationsTable,
-  UnbalancedNativeAllocationsTable,
-  BalancedNativeAllocationsTable,
   ResourceTable,
-  NativeSymbolTable,
+  RawNativeSymbolTable,
   Profile,
   ExtensionTable,
   CategoryList,
@@ -27,13 +32,119 @@ import type {
   CallNodeTable,
   SourceTable,
   SourceLocationTable,
+  IndexIntoFrameTable,
+  IndexIntoFuncTable,
+  IndexIntoLibs,
+  IndexIntoResourceTable,
+  IndexIntoSourceTable,
+  IndexIntoStackTable,
+  IndexIntoStringTable,
+  IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
+  IndexIntoNativeSymbolTable,
+  IndexIntoSourceLocationTable,
+  InnerWindowID,
+  Address,
+  Bytes,
+  Milliseconds,
+  Tid,
+  MarkerPhase,
+  MarkerPayload,
+  WeightType,
 } from 'firefox-profiler/types';
+
+/**
+ * Builder-variants of various tables. The columns here use plain
+ * arrays so that elements can be added one-by-one by pushing to
+ * the column arrays.
+ *
+ * The "raw" variants of these arrays (i.e. what's stored in the
+ * profile files) may be using typed arrays for some of the columns,
+ * and you can't push to a typed array.
+ */
+export type RawSamplesTableBuilder = {
+  responsiveness?: Array<Milliseconds | null>;
+  eventDelay?: Array<Milliseconds | null>;
+  stack: Array<IndexIntoStackTable | null>;
+  time?: Milliseconds[];
+  timeDeltas?: Milliseconds[];
+  argumentValues?: Array<number | null>;
+  weight: null | number[];
+  weightType: WeightType;
+  threadCPUDelta?: Array<number | null>;
+  threadId?: Tid[];
+  length: number;
+};
+
+export type RawMarkerTableBuilder = {
+  data: Array<MarkerPayload | null>;
+  name: IndexIntoStringTable[];
+  startTime: Array<Milliseconds | null>;
+  endTime: Array<Milliseconds | null>;
+  phase: MarkerPhase[];
+  category: IndexIntoCategoryList[];
+  threadId?: Array<Tid | null>;
+  length: number;
+};
+
+export type RawJsAllocationsTableBuilder = {
+  time: Milliseconds[];
+  className: string[];
+  typeName: string[];
+  coarseType: string[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+export type RawUnbalancedNativeAllocationsTableBuilder = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  length: number;
+};
+
+export type RawBalancedNativeAllocationsTableBuilder = {
+  time: Milliseconds[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  memoryAddress: number[];
+  threadId: number[];
+  length: number;
+};
+
+export type RawFrameTableBuilder = {
+  flags: number[];
+  address: Address[];
+  category: IndexIntoCategoryList[];
+  subcategory: IndexIntoSubcategoryListForCategory[];
+  func: IndexIntoFuncTable[];
+  lib: IndexIntoLibs[];
+  nativeSymbol: IndexIntoNativeSymbolTable[];
+  innerWindowID: InnerWindowID[];
+  line: number[];
+  column: number[];
+  originalLocation: IndexIntoSourceLocationTable[];
+  length: number;
+};
+
+export type RawStackTableBuilder = {
+  frame: IndexIntoFrameTable[];
+  prefix: Array<IndexIntoStackTable | null>;
+  length: number;
+};
 
 /**
  * This module collects all of the creation of new empty profile data structures.
  */
 
-export function getEmptySamplesTable(): RawSamplesTable {
+export function getRawSamplesTableBuilder(): RawSamplesTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -47,7 +158,7 @@ export function getEmptySamplesTable(): RawSamplesTable {
   };
 }
 
-export function getEmptyRawStackTable(): RawStackTable {
+export function getRawStackTableBuilder(): RawStackTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -59,12 +170,138 @@ export function getEmptyRawStackTable(): RawStackTable {
   };
 }
 
+export function getRawSamplesTableBuilderFromExisting(
+  existing: RawSamplesTable
+): RawSamplesTableBuilder {
+  const builder: RawSamplesTableBuilder = {
+    stack: existing.stack.slice(),
+    weight: existing.weight === null ? null : existing.weight.slice(),
+    weightType: existing.weightType,
+    length: existing.length,
+  };
+  if (existing.responsiveness !== undefined) {
+    builder.responsiveness = existing.responsiveness.slice();
+  }
+  if (existing.eventDelay !== undefined) {
+    builder.eventDelay = existing.eventDelay.slice();
+  }
+  if (existing.time !== undefined) {
+    builder.time = Array.from(existing.time);
+  }
+  if (existing.timeDeltas !== undefined) {
+    builder.timeDeltas = Array.from(existing.timeDeltas);
+  }
+  if (existing.argumentValues !== undefined) {
+    builder.argumentValues = existing.argumentValues.slice();
+  }
+  if (existing.threadCPUDelta !== undefined) {
+    builder.threadCPUDelta = existing.threadCPUDelta.slice();
+  }
+  return builder;
+}
+
+export function finishRawSamplesTableBuilder(
+  builder: RawSamplesTableBuilder
+): RawSamplesTable {
+  return {
+    ...builder,
+    time:
+      builder.time === undefined ? undefined : new Float64Array(builder.time),
+    timeDeltas:
+      builder.timeDeltas === undefined
+        ? undefined
+        : new Float64Array(builder.timeDeltas),
+  };
+}
+
+export function getRawMarkerTableBuilder(): RawMarkerTableBuilder {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: [],
+    name: [],
+    startTime: [],
+    endTime: [],
+    phase: [],
+    category: [],
+    length: 0,
+  };
+}
+
+export function getRawMarkerTableBuilderFromExisting(
+  markerTable: RawMarkerTable
+): RawMarkerTableBuilder {
+  const builder: RawMarkerTableBuilder = {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: markerTable.data.slice(),
+    name: markerTable.name.slice(),
+    startTime: Array.from(markerTable.startTime),
+    endTime: Array.from(markerTable.endTime),
+    phase: markerTable.phase.slice(),
+    category: markerTable.category.slice(),
+    length: markerTable.length,
+  };
+  if (markerTable.threadId !== undefined) {
+    builder.threadId = markerTable.threadId.slice();
+  }
+  return builder;
+}
+
+export function finishRawMarkerTableBuilder(
+  builder: RawMarkerTableBuilder
+): RawMarkerTable {
+  return {
+    ...builder,
+    // The nulls in these columns become zeros. This is fine: whether a marker's
+    // start / end time is meaningful is determined by its phase, and the times
+    // which are not used are allowed to be arbitrary values.
+    startTime: toFloat64ArraySetNullToZero(builder.startTime),
+    endTime: toFloat64ArraySetNullToZero(builder.endTime),
+  };
+}
+
+export function getRawStackTableBuilderWithExistingContents(
+  existing: RawStackTable
+): RawStackTableBuilder {
+  const prefix = new Array<IndexIntoStackTable | null>(existing.length);
+  for (let i = 0; i < existing.length; i++) {
+    const offset = existing.prefixOffset[i];
+    prefix[i] = offset === 0 ? null : i - offset;
+  }
+  return {
+    frame: [...existing.frame],
+    prefix,
+    length: existing.length,
+  };
+}
+
+export function finishRawStackTableBuilder(
+  builder: RawStackTableBuilder
+): RawStackTable {
+  const { frame, prefix, length } = builder;
+  const prefixOffset = new Int32Array(length);
+  for (let i = 0; i < length; i++) {
+    const p = prefix[i];
+    prefixOffset[i] = p === null ? 0 : i - p;
+  }
+  return {
+    frame: new Int32Array(frame),
+    prefixOffset,
+    length,
+  };
+}
+
 /**
  * Returns an empty samples table with eventDelay field instead of responsiveness.
  * eventDelay is a new field and it replaced responsiveness. We should still
  * account for older profiles and use both of the flavors if needed.
  */
-export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
+export function getRawSamplesTableBuilderWithEventDelay(): RawSamplesTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -79,17 +316,18 @@ export function getEmptySamplesTableWithEventDelay(): RawSamplesTable {
   };
 }
 
-export function getEmptyFrameTable(): FrameTable {
+export function getRawFrameTableBuilder(): RawFrameTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
+    flags: [],
     address: [],
-    inlineDepth: [],
     category: [],
     subcategory: [],
     func: [],
+    lib: [],
     nativeSymbol: [],
     innerWindowID: [],
     line: [],
@@ -99,34 +337,74 @@ export function getEmptyFrameTable(): FrameTable {
   };
 }
 
-export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
+export function getRawFrameTableBuilderWithExistingContents(
+  frameTable: RawFrameTable
+): RawFrameTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    address: frameTable.address.slice(),
-    inlineDepth: frameTable.inlineDepth.slice(),
-    category: frameTable.category.slice(),
-    subcategory: frameTable.subcategory.slice(),
-    func: frameTable.func.slice(),
-    nativeSymbol: frameTable.nativeSymbol.slice(),
-    innerWindowID: frameTable.innerWindowID.slice(),
-    line: frameTable.line.slice(),
-    column: frameTable.column.slice(),
-    originalLocation: frameTable.originalLocation.slice(),
+    flags: Array.from(frameTable.flags),
+    address: Array.from(frameTable.address),
+    category: Array.from(frameTable.category),
+    subcategory: Array.from(frameTable.subcategory),
+    func: Array.from(frameTable.func),
+    lib: Array.from(frameTable.lib),
+    nativeSymbol: Array.from(frameTable.nativeSymbol),
+    innerWindowID: Array.from(frameTable.innerWindowID),
+    line: Array.from(frameTable.line),
+    column: Array.from(frameTable.column),
+    originalLocation: Array.from(frameTable.originalLocation),
     length: frameTable.length,
   };
 }
 
-export function getEmptyFuncTable(): FuncTable {
+export function finishRawFrameTableBuilder(
+  builder: RawFrameTableBuilder
+): RawFrameTable {
+  return {
+    ...builder,
+    flags: new Uint8Array(builder.flags),
+    address: new Uint32Array(builder.address),
+    // Category indexes are limited to 8 bits by the format.
+    category: new Uint8Array(builder.category),
+    // The profile's category list isn't available here, so derive the width
+    // from the values instead of from the largest subcategory count. This can
+    // only ever pick a narrower width than the category list would allow, so
+    // it can't overflow the derived stack table's subcategory column.
+    subcategory: toUint8OrUint16Array(
+      builder.subcategory,
+      !valuesFitInUint8(builder.subcategory)
+    ),
+    func: new Int32Array(builder.func),
+    lib: new Int32Array(builder.lib),
+    nativeSymbol: new Int32Array(builder.nativeSymbol),
+    innerWindowID: new Float64Array(builder.innerWindowID),
+    line: new Int32Array(builder.line),
+    column: new Int32Array(builder.column),
+    originalLocation: new Int32Array(builder.originalLocation),
+  };
+}
+
+export type RawFuncTableBuilder = {
+  flags: number[];
+  name: IndexIntoStringTable[];
+  resource: IndexIntoResourceTable[];
+  source: IndexIntoSourceTable[];
+  lineNumber: number[];
+  columnNumber: number[];
+  originalLocation: IndexIntoSourceLocationTable[];
+  length: number;
+};
+
+export function getRawFuncTableBuilder(): RawFuncTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    isJS: [],
-    relevantForJS: [],
+    flags: [],
     name: [],
     resource: [],
     source: [],
@@ -137,22 +415,33 @@ export function getEmptyFuncTable(): FuncTable {
   };
 }
 
-export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
+export function getRawFuncTableBuilderWithExistingContents(
+  funcTable: RawFuncTable
+): RawFuncTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
     // that they are pushing on correctly to the data structure. These pushes may not
     // be caught by the type system.
-    isJS: funcTable.isJS.slice(),
-    relevantForJS: funcTable.relevantForJS.slice(),
-    name: funcTable.name.slice(),
-    resource: funcTable.resource.slice(),
-    source: funcTable.source.slice(),
-    lineNumber: funcTable.lineNumber.slice(),
-    columnNumber: funcTable.columnNumber.slice(),
-    originalLocation: funcTable.originalLocation.slice(),
+    flags: Array.from(funcTable.flags),
+    name: Array.from(funcTable.name),
+    resource: Array.from(funcTable.resource),
+    source: Array.from(funcTable.source),
+    lineNumber: Array.from(funcTable.lineNumber),
+    columnNumber: Array.from(funcTable.columnNumber),
+    originalLocation: Array.from(funcTable.originalLocation),
     length: funcTable.length,
   };
+}
+
+export function finishRawFuncTableBuilder(
+  builder: RawFuncTableBuilder
+): RawFuncTable {
+  return { ...builder };
+}
+
+export function getEmptyRawFuncTable(): RawFuncTable {
+  return finishRawFuncTableBuilder(getRawFuncTableBuilder());
 }
 
 export function getEmptySourceLocationTable(): SourceLocationTable {
@@ -175,37 +464,15 @@ export function shallowCloneSourceLocationTable(
   };
 }
 
-export function shallowCloneNativeSymbolTable(
-  nativeSymbols: NativeSymbolTable
-): NativeSymbolTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    libIndex: nativeSymbols.libIndex.slice(),
-    address: nativeSymbols.address.slice(),
-    name: nativeSymbols.name.slice(),
-    functionSize: nativeSymbols.functionSize.slice(),
-    length: nativeSymbols.length,
-  };
-}
+export type RawNativeSymbolTableBuilder = {
+  libIndex: IndexIntoLibs[];
+  address: Address[];
+  name: IndexIntoStringTable[];
+  functionSize: Array<Bytes | -1>;
+  length: number;
+};
 
-export function getEmptyResourceTable(): ResourceTable {
-  return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    lib: [],
-    name: [],
-    host: [],
-    type: [],
-    length: 0,
-  };
-}
-
-export function getEmptyNativeSymbolTable(): NativeSymbolTable {
+export function getRawNativeSymbolTableBuilder(): RawNativeSymbolTableBuilder {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -219,23 +486,49 @@ export function getEmptyNativeSymbolTable(): NativeSymbolTable {
   };
 }
 
-export function getEmptyRawMarkerTable(): RawMarkerTable {
-  // Important!
-  // If modifying this structure, please update all callers of this function to ensure
-  // that they are pushing on correctly to the data structure. These pushes may not
-  // be caught by the type system.
+export function getRawNativeSymbolTableBuilderWithExistingContents(
+  nativeSymbols: RawNativeSymbolTable
+): RawNativeSymbolTableBuilder {
   return {
-    data: [],
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    libIndex: Array.from(nativeSymbols.libIndex),
+    address: Array.from(nativeSymbols.address),
+    name: Array.from(nativeSymbols.name),
+    functionSize: Array.from(nativeSymbols.functionSize),
+    length: nativeSymbols.length,
+  };
+}
+
+export function finishRawNativeSymbolTableBuilder(
+  builder: RawNativeSymbolTableBuilder
+): RawNativeSymbolTable {
+  return {
+    libIndex: new Int32Array(builder.libIndex),
+    // Uint32Array, like frameTable.address, so that the two can be compared.
+    address: new Uint32Array(builder.address),
+    name: new Int32Array(builder.name),
+    functionSize: new Int32Array(builder.functionSize),
+    length: builder.length,
+  };
+}
+
+export function getEmptyResourceTable(): ResourceTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
     name: [],
-    startTime: [],
-    endTime: [],
-    phase: [],
-    category: [],
+    host: [],
+    type: [],
     length: 0,
   };
 }
 
-export function getEmptyJsAllocationsTable(): JsAllocationsTable {
+export function getEmptyRawJsAllocationsTable(): RawJsAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -257,7 +550,7 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllocationsTable {
+export function getEmptyRawUnbalancedNativeAllocationsTable(): RawUnbalancedNativeAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -275,7 +568,7 @@ export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllo
  * The native allocation tables come in two varieties. Get one of the members of the
  * union.
  */
-export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocationsTable {
+export function getEmptyRawBalancedNativeAllocationsTable(): RawBalancedNativeAllocationsTableBuilder {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -291,21 +584,30 @@ export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocati
   };
 }
 
-export function shallowCloneRawMarkerTable(
-  markerTable: RawMarkerTable
-): RawMarkerTable {
+export function finishRawJsAllocationsTableBuilder(
+  builder: RawJsAllocationsTableBuilder
+): RawJsAllocationsTable {
   return {
-    // Important!
-    // If modifying this structure, please update all callers of this function to ensure
-    // that they are pushing on correctly to the data structure. These pushes may not
-    // be caught by the type system.
-    data: markerTable.data.slice(),
-    name: markerTable.name.slice(),
-    startTime: markerTable.startTime.slice(),
-    endTime: markerTable.endTime.slice(),
-    phase: markerTable.phase.slice(),
-    category: markerTable.category.slice(),
-    length: markerTable.length,
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
+}
+
+export function finishRawUnbalancedNativeAllocationsTableBuilder(
+  builder: RawUnbalancedNativeAllocationsTableBuilder
+): RawUnbalancedNativeAllocationsTable {
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
+  };
+}
+
+export function finishRawBalancedNativeAllocationsTableBuilder(
+  builder: RawBalancedNativeAllocationsTableBuilder
+): RawBalancedNativeAllocationsTable {
+  return {
+    ...builder,
+    time: new Float64Array(builder.time),
   };
 }
 
@@ -364,6 +666,7 @@ export function getEmptySourceTable(): SourceTable {
     startColumn: [],
     sourceMapURL: [],
     content: [],
+    generatedSource: [],
     length: 0,
   };
 }
@@ -381,8 +684,10 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
     pid: '0',
     tid: 0,
     // Creating samples with event delay since it's the new samples table.
-    samples: getEmptySamplesTableWithEventDelay(),
-    markers: getEmptyRawMarkerTable(),
+    samples: finishRawSamplesTableBuilder(
+      getRawSamplesTableBuilderWithEventDelay()
+    ),
+    markers: finishRawMarkerTableBuilder(getRawMarkerTableBuilder()),
   };
 
   return {
@@ -393,11 +698,13 @@ export function getEmptyThread(overrides?: Partial<RawThread>): RawThread {
 
 export function getEmptySharedData(): RawProfileSharedData {
   return {
-    stackTable: getEmptyRawStackTable(),
-    frameTable: getEmptyFrameTable(),
-    funcTable: getEmptyFuncTable(),
+    stackTable: finishRawStackTableBuilder(getRawStackTableBuilder()),
+    frameTable: finishRawFrameTableBuilder(getRawFrameTableBuilder()),
+    funcTable: getEmptyRawFuncTable(),
     resourceTable: getEmptyResourceTable(),
-    nativeSymbols: getEmptyNativeSymbolTable(),
+    nativeSymbols: finishRawNativeSymbolTableBuilder(
+      getRawNativeSymbolTableBuilder()
+    ),
     sources: getEmptySourceTable(),
     stringArray: [],
     sourceLocationTable: getEmptySourceLocationTable(),

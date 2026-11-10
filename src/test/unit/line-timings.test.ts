@@ -20,6 +20,7 @@ import type {
   IndexIntoCategoryList,
   LineNumber,
 } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 describe('getStackLineInfo', function () {
   it('computes results for all stacks', function () {
@@ -134,14 +135,16 @@ describe('getLineTimings for getStackLineInfo', function () {
     const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable, samples, stringTable } = thread;
 
-    // Manually set frameTable.line to null for the leaf frame
+    // Manually clear the HasLine flag for the leaf frame
     // to simulate a case where frame line info is missing
     const leafFrame = stackTable.frame[stackTable.length - 1];
-    frameTable.line[leafFrame] = null;
+    frameTable.flags[leafFrame] &= ~FrameFlag.HasLine;
+    frameTable.line[leafFrame] = 0;
 
     // Set funcTable.lineNumber to a value for the func of that frame
     const func = frameTable.func[leafFrame];
     funcTable.lineNumber[func] = 35;
+    funcTable.flags[func] |= FuncFlag.HasLine;
 
     const fileStringIndex = stringTable.indexForString('file.js');
     const fileSourceIndex = thread.sources.filename.indexOf(fileStringIndex);
@@ -182,6 +185,7 @@ describe('getLineTimings for getStackLineInfo', function () {
     thread.sources.filename.push(originalFilenameIndex);
     thread.sources.sourceMapURL.push(null);
     thread.sources.content.push(null);
+    thread.sources.generatedSource.push(null);
     thread.sources.length++;
 
     // For both funcs, add a sourceLocationTable entry pointing at the original
@@ -200,6 +204,8 @@ describe('getLineTimings for getStackLineInfo', function () {
     sourceLocationTable.length += 2;
     funcTable.originalLocation[funcAIndex] = funcAOriginalLocationIdx;
     funcTable.originalLocation[funcBIndex] = funcBOriginalLocationIdx;
+    funcTable.flags[funcAIndex] |= FuncFlag.HasOriginalLocation;
+    funcTable.flags[funcBIndex] |= FuncFlag.HasOriginalLocation;
 
     const stackLineInfo = getStackLineInfo(
       stackTable,
@@ -383,14 +389,16 @@ describe('getTotalLineTimingsForCallNode', function () {
     const [thread] = derivedThreads;
     const { stackTable, frameTable, funcTable } = thread;
 
-    // Manually set frameTable.line to null for the leaf frame
+    // Manually clear the HasLine flag for the leaf frame
     // to simulate a case where frame line info is missing
     const leafFrame = stackTable.frame[stackTable.length - 1];
-    frameTable.line[leafFrame] = null;
+    frameTable.flags[leafFrame] &= ~FrameFlag.HasLine;
+    frameTable.line[leafFrame] = 0;
 
     // Set funcTable.lineNumber to a value for the func of that frame
     const func = frameTable.func[leafFrame];
     funcTable.lineNumber[func] = 35;
+    funcTable.flags[func] |= FuncFlag.HasLine;
 
     // Compute the line timings for the child call node.
     // The fallback should use funcTable.lineNumber[func] = 35

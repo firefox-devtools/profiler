@@ -42,9 +42,11 @@ export type Pid = string;
 
 /**
  * The stack table stores the tree of stack nodes of a thread.
- * The shape of the tree is encoded in the prefix column: Root stack nodes have
- * null as their prefix, and every non-root stack has the stack index of its
- * "caller" / "parent" as its prefix.
+ * The shape of the tree is encoded in the `prefixOffset` column: for each stack
+ * at index `i`, the parent stack is at index `i - prefixOffset[i]`. A value of
+ * `0` means "this stack is a root" (it has no parent). All values are
+ * non-negative because the stack table is stored in topological order: parents
+ * always come before their children.
  * Every stack node also has a frame and a category.
  * A "call stack" is a list of frames. Every stack index in the stack table
  * represents such a call stack; the "list of frames" is obtained by walking
@@ -60,8 +62,13 @@ export type Pid = string;
  * to storing them as actual lists of frames.
  */
 export type RawStackTable = {
-  frame: IndexIntoFrameTable[];
-  prefix: Array<IndexIntoStackTable | null>;
+  frame: IndexIntoFrameTable[] | Int32Array<ArrayBuffer>;
+
+  // 0 for roots, > 0 for non-roots.
+  // We use Int32Array instead of Uint32Array so that Spidermonkey
+  // doesn't need to check for i32 overflow on element access.
+  prefixOffset: number[] | Int32Array<ArrayBuffer>;
+
   length: number;
 };
 
@@ -119,9 +126,9 @@ export type RawSamplesTable = {
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<Milliseconds | null>;
   stack: Array<IndexIntoStackTable | null>;
-  time?: Milliseconds[];
+  time?: Milliseconds[] | Float64Array<ArrayBuffer>;
   // If the `time` column is not present, then the `timeDeltas` column must be present.
-  timeDeltas?: Milliseconds[];
+  timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer>;
   argumentValues?: Array<number | null>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
@@ -135,18 +142,17 @@ export type RawSamplesTable = {
   // The first value is ignored - it's not meaningful because there is no previous
   // sample.
   threadCPUDelta?: Array<number | null>;
-  // This property isn't present in normal threads. However it's present for
-  // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[];
   length: number;
 };
 
 /**
  * JS allocations are recorded as a marker payload, but in profile processing they
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ *
+ * There is also a derived `JsAllocationsTable` type, see profile-derived.js.
  */
-export type JsAllocationsTable = {
-  time: Milliseconds[];
+export type RawJsAllocationsTable = {
+  time: Milliseconds[] | Float64Array<ArrayBuffer>;
   className: string[];
   typeName: string[]; // Currently only 'JSObject'
   coarseType: string[]; // Currently only 'Object',
@@ -163,8 +169,8 @@ export type JsAllocationsTable = {
  * This variant is the original version of the table, before the memory address
  * and threadId were added.
  */
-export type UnbalancedNativeAllocationsTable = {
-  time: Milliseconds[];
+export type RawUnbalancedNativeAllocationsTable = {
+  time: Milliseconds[] | Float64Array<ArrayBuffer>;
   // "weight" is used here rather than "bytes", so that this type can be
   // used as a SamplesLikeTable.
   weight: Bytes[];
@@ -177,8 +183,8 @@ export type UnbalancedNativeAllocationsTable = {
 /**
  * The memory address and thread ID were added later.
  */
-export type BalancedNativeAllocationsTable =
-  UnbalancedNativeAllocationsTable & {
+export type RawBalancedNativeAllocationsTable =
+  RawUnbalancedNativeAllocationsTable & {
     memoryAddress: number[];
     threadId: number[];
   };
@@ -188,10 +194,12 @@ export type BalancedNativeAllocationsTable =
  * are moved to the Thread. This allows them to be part of the stack processing pipeline.
  * Currently they include native allocations and deallocations. However, both
  * of them are sampled independently, so they will be unbalanced if summed togther.
+ *
+ * There is also a derived `NativeAllocationsTable` type, see profile-derived.js.
  */
-export type NativeAllocationsTable =
-  | UnbalancedNativeAllocationsTable
-  | BalancedNativeAllocationsTable;
+export type RawNativeAllocationsTable =
+  | RawUnbalancedNativeAllocationsTable
+  | RawBalancedNativeAllocationsTable;
 
 /**
  * Markers represent arbitrary events that happen within the browser. They have a
@@ -208,8 +216,16 @@ export type NativeAllocationsTable =
 export type RawMarkerTable = {
   data: Array<MarkerPayload | null>;
   name: IndexIntoStringTable[];
-  startTime: Array<number | null>;
-  endTime: Array<number | null>;
+  // The start and end time of the marker. Depending on the `phase` of the marker,
+  // sometimes only one of the properties is used:
+  // - Instant (0): only startTime
+  // - Interval (1): both startTime and endTime are used
+  // - IntervalStart (2): only startTime
+  // - IntervalEnd (3): only endTime
+  //
+  // Unused start / end times are meaningless and can be set to any arbitrary value.
+  startTime: Array<number | null> | Float64Array<ArrayBuffer>;
+  endTime: Array<number | null> | Float64Array<ArrayBuffer>;
   phase: MarkerPhase[];
   category: IndexIntoCategoryList[];
   // This property isn't present in normal threads. However it's present for
@@ -219,12 +235,50 @@ export type RawMarkerTable = {
 };
 
 /**
+ * Bit flags for the `flags` column of the RawFrameTable / FrameTable.
+ * Each flag indicates whether the corresponding column carries a meaningful
+ * value for that frame; when a flag bit is unset, the value in the associated
+ * column is ignored.
+ */
+// This is a const enum so that esbuild can constant-fold its uses.
+export const enum FrameFlag {
+  // Set when this frame is one of the "inline" expansions of a native address.
+  IsInlined = 1 << 0,
+  // Set when `address` and `lib` are meaningful. These two columns are gated by
+  // a single flag because an address is only ever meaningful together with the
+  // library it is relative to.
+  HasAddress = 1 << 1,
+  // Set when `category` and `subcategory` are meaningful. Otherwise the
+  // stack nodes using this frame inherit their category/subcategory from their
+  // parent stack node (or from the default category, if there is no parent).
+  HasCategory = 1 << 2,
+  // Set when `nativeSymbol` is meaningful.
+  HasNativeSymbol = 1 << 3,
+  // Set when `line` is meaningful.
+  HasLine = 1 << 4,
+  // Set when `column` is meaningful.
+  HasColumn = 1 << 5,
+  // Set when `originalLocation` is meaningful.
+  HasOriginalLocation = 1 << 6,
+}
+
+// A bitfield containing `FrameFlag` values, OR'd together.
+export type FrameFlags = number;
+
+/**
  * Frames contain the context information about the function execution at the moment in
  * time. The caller/callee relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {
+export type RawFrameTable = {
+  // A bitfield with one bit per optional column, drawn from `FrameFlag`.
+  // For each row, the flag bit tells you whether the value in the
+  // corresponding column is meaningful. When a bit is unset, the value in the
+  // corresponding column has no meaning; producers can store any value there
+  // (typically 0) and consumers must ignore it.
+  flags: number[] | Uint8Array<ArrayBuffer>;
+
   // If this is a frame for native code, the address is the address of the frame's
-  // assembly instruction,  relative to the native library that contains it.
+  // assembly instruction,  relative to the native library given by `lib`.
   //
   // For frames obtained from stack walking, the address points into the call instruction.
   // It is not a return address, it is a "nudged" return address (i.e. return address
@@ -232,22 +286,32 @@ export type FrameTable = {
   // is performed at the end of profile processing. See the big comment above
   // nudgeReturnAddresses for more details.
   //
-  // The library which this address is relative to is given by the frame's nativeSymbol:
-  // frame -> nativeSymbol -> lib.
-  address: Array<Address | -1>;
+  // Only meaningful when `HasAddress` is set in `flags`.
+  //
+  // This uses `Uint32Array` rather than `Int32Array` so that it can hold offsets for
+  // binaries larger than 2GiB.
+  address: Address[] | Uint32Array<ArrayBuffer>;
 
-  // The inline depth for this frame. If there is an inline stack at an address,
-  // we create multiple frames with the same address, one for each depth.
-  // The outermost frame always has depth 0.
+  // The native library that this frame's code is in, and which `address` is
+  // relative to. Only meaningful when `HasAddress` is set in `flags`; frames
+  // which aren't native code (JS frames, label frames) or whose library is
+  // unknown leave `HasAddress` unset.
+  lib: IndexIntoLibs[] | Int32Array<ArrayBuffer>;
+
+  // The `IsInlined` flag indicates whether this frame is an inline expansion.
+  //
+  // If there is an inline stack at an address, we create multiple frames with
+  // the same address; the outermost one has `IsInlined` unset, and the inner
+  // expansions have `IsInlined` set.
   //
   // Example:
-  // If the raw stack is 0x10 -> 0x20 -> 0x30, and symbolication adds two inline frames
-  // for 0x10, no inline frame for 0x20, and one inline frame for 0x30, then the
-  // symbolicated stack will be the following:
+  // If the raw stack is 0x10 -> 0x20 -> 0x30, and symbolication adds two inline
+  // frames for 0x10, no inline frame for 0x20, and one inline frame for 0x30,
+  // then the symbolicated stack will be the following:
   //
   // func:        outer1 -> inline1a -> inline1b -> outer2 -> outer3 -> inline3a
   // address:     0x10   -> 0x10     -> 0x10     -> 0x20   -> 0x30   -> 0x30
-  // inlineDepth:    0   ->    1     ->    2     ->    0   ->    0   ->    1
+  // IsInlined:    no    ->   yes    ->   yes    ->   no   ->   no   ->  yes
   //
   // Background:
   // When a compiler performs an inlining optimization, it removes a call to a function
@@ -255,53 +319,64 @@ export type FrameTable = {
   // function. But it remembers which instructions were the result of this inlining,
   // so that information about the inlined function can be recovered from the debug
   // information during symbolication, based on the instruction address.
-  // The compiler can choose to do inlining multiple levels deep: An instruction can
-  // be the result of a whole "inline stack" of functions.
-  // Before symbolication, all frames have depth 0. During symbolication, we resolve
-  // addresses to inline stacks, and create extra frames with non-zero depths as needed.
+  // Before symbolication, no frames have `IsInlined` set. During symbolication, we
+  // resolve addresses to inline stacks, and create extra frames with `IsInlined`
+  // set as needed.
   //
-  // The frames of an inline stack at an address all have the same address and the same
-  // nativeSymbol, but each has a different func and line.
-  inlineDepth: number[];
+  // The frames of an inline stack at an address all have the same address and the
+  // same nativeSymbol, but each has a different func and line.
 
-  // The category of the frame. This is used to calculate the category of the stack nodes
-  // which use this frame:
-  // - If the frame has a null category, the stack node inherits its parent node's category
-  //   and subcategory. If there is no parent node, we use the "default category" (see ProfileMeta.categories).
-  // - If the frame has a non-null category, this category and subcategory is used for the stack node.
-  category: (IndexIntoCategoryList | null)[];
+  // The category of the frame. This is used to calculate the category of the
+  // stack nodes which use this frame:
+  // - If `HasCategory` is unset, the stack node inherits its parent node's
+  //   category and subcategory. If there is no parent node, we use the
+  //   "default category" (see ProfileMeta.categories).
+  // - If `HasCategory` is set, this category and subcategory is used for the
+  //   stack node.
+  //
+  // Category indexes are limited to 8 bits: the derived stack table stores the
+  // category it computes from this column in a Uint8Array.
+  category: IndexIntoCategoryList[] | Uint8Array<ArrayBuffer>;
 
-  // The subcategory of a frame. This is used to calculate the subcategory of the stack nodes
-  // which use this frame.
-  // Must be non-null if the frame's category is non-null.
-  // Ignored if the frame's category is null.
-  // 0 is always a valid value and refers to the "Other" subcategory (see Category.subcategories).
-  subcategory: (IndexIntoSubcategoryListForCategory | null)[];
+  // The subcategory of a frame. Only meaningful when `HasCategory` is set.
+  // 0 is always a valid value and refers to the "Other" subcategory (see
+  // Category.subcategories).
+  //
+  // Stored with 8 or 16 bits depending on the largest subcategory count in
+  // ProfileMeta.categories, the same way the derived stack table stores its own
+  // subcategory column.
+  subcategory:
+    | IndexIntoSubcategoryListForCategory[]
+    | Uint8Array<ArrayBuffer>
+    | Uint16Array<ArrayBuffer>;
 
   // The frame's function.
-  func: IndexIntoFuncTable[];
+  func: IndexIntoFuncTable[] | Int32Array<ArrayBuffer>;
 
-  // The symbol index (referring into this thread's nativeSymbols table) corresponding
-  // to symbol that covers the frame address of this frame. Only non-null for native
-  // frames (e.g. C / C++ / Rust code). Null before symbolication.
-  nativeSymbol: (IndexIntoNativeSymbolTable | null)[];
+  // The symbol index (referring into this thread's nativeSymbols table)
+  // corresponding to the symbol that covers the frame address of this frame.
+  // Only meaningful when `HasNativeSymbol` is set. Only set for native frames
+  // (e.g. C / C++ / Rust code), and only after symbolication.
+  nativeSymbol: IndexIntoNativeSymbolTable[] | Int32Array<ArrayBuffer>;
 
-  // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
-  // It's used to determine which JS frame belongs to which web page so we can display
-  // that information and filter for single tab profiling.
-  // `0` for non-JS frames and the JS frames that failed to get the ID. `0` means "null value"
-  // because that's what Firefox platform DOM side assigns when it fails to get the ID or
-  // something bad happens during that process. It's not `null` or `-1` because that information
-  // is being stored as `uint64_t` there.
-  innerWindowID: (InnerWindowID | null)[];
+  // Inner window ID of JS frames. JS frames can be correlated to a Page through
+  // this value. It's used to determine which JS frame belongs to which web page
+  // so we can display that information and filter for single tab profiling.
+  // `0` for non-JS frames and the JS frames that failed to get the ID. `0` means
+  // "no innerWindowID"; on the Firefox platform side it's stored as `uint64_t`
+  // so there is no natural null representation, and code should treat `0` as
+  // "unset".
+  innerWindowID: InnerWindowID[] | Float64Array<ArrayBuffer>;
 
-  line: (number | null)[];
-  column: (number | null)[];
+  // Only meaningful when `HasLine` is set.
+  line: number[] | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasColumn` is set.
+  column: number[] | Int32Array<ArrayBuffer>;
 
-  // Index into the sourceLocationTable, or null if not source-mapped.
-  // Points to the original source file, line, and column for this frame's
-  // execution point.
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  // Index into the sourceLocationTable, pointing at the original source file,
+  // line, and column for this frame's execution point. Only meaningful when
+  // `HasOriginalLocation` is set.
+  originalLocation: IndexIntoSourceLocationTable[] | Int32Array<ArrayBuffer>;
 
   length: number;
 };
@@ -323,36 +398,70 @@ export type FrameTable = {
  * were created upfront to become orphaned, as the frames that originally referred
  * to them get reassigned to the canonical func for their actual function.
  */
-export type FuncTable = {
-  // The function name.
-  name: Array<IndexIntoStringTable>;
+/**
+ * Bit flags for the `flags` column of the RawFuncTable / FuncTable.
+ * Each flag indicates whether the corresponding column carries a meaningful
+ * value for that func; when a flag bit is unset, the value in the associated
+ * column is ignored.
+ */
+export const FuncFlag = {
+  // Set when this func is a JavaScript function.
+  IsJS: 1 << 0,
+  // Set when this func should be treated as "relevant for JS" (e.g. DOM API
+  // label funcs). Non-JavaScript functions can be marked as "relevant for JS"
+  // so that they show up in JavaScript stack views. IsJS implies RelevantForJS
+  // in practice but the bit is stored explicitly.
+  RelevantForJS: 1 << 1,
+  // Set when `resource` is meaningful (i.e. this func has an associated
+  // resource, not the sentinel).
+  HasResource: 1 << 2,
+  // Set when `source` is meaningful (this func has an associated source file).
+  HasSource: 1 << 3,
+  // Set when `lineNumber` is meaningful.
+  HasLine: 1 << 4,
+  // Set when `columnNumber` is meaningful.
+  HasColumn: 1 << 5,
+  // Set when `originalLocation` is meaningful.
+  HasOriginalLocation: 1 << 6,
+} as const;
 
-  // isJS and relevantForJS describe the function type. Non-JavaScript functions
-  // can be marked as "relevant for JS" so that for example DOM API label functions
-  // will show up in any JavaScript stack views.
-  // It may be worth combining these two fields into one:
-  // https://github.com/firefox-devtools/profiler/issues/2543
-  isJS: Array<boolean>;
-  relevantForJS: Array<boolean>;
+export type FuncFlags = number;
+
+export type RawFuncTable = {
+  // A bitfield with one bit per optional column, drawn from `FuncFlag`.
+  // For each row, the flag bit tells you whether the value in the
+  // corresponding column is meaningful. When a bit is unset, the value in the
+  // corresponding column has no meaning; producers can store any value there
+  // (typically 0) and consumers must ignore it.
+  flags: number[] | Uint8Array<ArrayBuffer>;
+
+  // The function name.
+  name: Array<IndexIntoStringTable> | Int32Array<ArrayBuffer>;
 
   // The resource describes "Which bag of code did this function come from?".
   // For JS functions, the resource is of type addon, webhost, otherhost, or url.
   // For native functions, the resource is of type library.
-  // For labels and for other unidentified functions, we set the resource to -1.
-  resource: Array<IndexIntoResourceTable | -1>;
+  // Only meaningful when `HasResource` is set in `flags`.
+  resource: Array<IndexIntoResourceTable> | Int32Array<ArrayBuffer>;
 
-  // These are non-null for JS functions only. The line and column describe the
-  // location of the *start* of the JS function. As for the information about which
+  // These are set for JS functions, and for any other function whose start
+  // position was supplied by symbolication. The line and column describe the
+  // location of the *start* of the function. As for the information about
   // which lines / columns inside the function were actually hit during execution,
   // that information is stored in the frameTable, not in the funcTable.
-  source: Array<IndexIntoSourceTable | null>;
-  lineNumber: Array<number | null>;
-  columnNumber: Array<number | null>;
+  // Only meaningful when `HasSource` is set.
+  source: Array<IndexIntoSourceTable> | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasLine` is set.
+  lineNumber: Array<number> | Int32Array<ArrayBuffer>;
+  // Only meaningful when `HasColumn` is set.
+  columnNumber: Array<number> | Int32Array<ArrayBuffer>;
 
-  // Index into the sourceLocationTable, or null if not source-mapped.
-  // Points to the original source file, line, and column for this function's
-  // definition.
-  originalLocation: Array<IndexIntoSourceLocationTable | null>;
+  // Index into the sourceLocationTable, pointing at the original source file,
+  // line, and column for this function's definition. Only meaningful when
+  // `HasOriginalLocation` is set.
+  originalLocation:
+    | Array<IndexIntoSourceLocationTable>
+    | Int32Array<ArrayBuffer>;
 
   length: number;
 };
@@ -366,16 +475,19 @@ export type FuncTable = {
  * considered a "symbol table" - normally, a "symbol table" is something that
  * contains *all* symbols of a given library. But this table only contains a
  * subset of those symbols, and mixes symbols from multiple libraries.
+ *
+ * Each column may be stored as a regular array or as a typed array.
  */
-export type NativeSymbolTable = {
+export type RawNativeSymbolTable = {
   // The library that this native symbol is in.
-  libIndex: Array<IndexIntoLibs>;
+  libIndex: Array<IndexIntoLibs> | Int32Array<ArrayBuffer>;
   // The library-relative offset of this symbol.
-  address: Array<Address>;
+  address: Array<Address> | Uint32Array<ArrayBuffer>;
   // The symbol name, demangled.
-  name: Array<IndexIntoStringTable>;
-  // The size of the function's machine code (if known), in bytes.
-  functionSize: Array<Bytes | null>;
+  name: Array<IndexIntoStringTable> | Int32Array<ArrayBuffer>;
+  // The size of the function's machine code, in bytes.
+  // The sentinel `-1` means "size unknown".
+  functionSize: Array<Bytes | -1> | Int32Array<ArrayBuffer>;
 
   length: number;
 };
@@ -390,12 +502,12 @@ export const enum ResourceType {
 }
 
 /**
- * The ResourceTable holds additional information about functions. It tends to contain
- * sparse arrays. Multiple functions can point to the same resource.
+ * "Resources" are groupings of functions - for example, these functions came
+ * from JS code from add-on X, or from JS files hosted at a certain origin,
+ * or from a native library with some name.
  */
 export type ResourceTable = {
   length: number;
-  lib: Array<IndexIntoLibs | null>;
   name: Array<IndexIntoStringTable>;
   host: Array<IndexIntoStringTable | null>;
   type: ResourceType[];
@@ -523,14 +635,13 @@ export type JsTracerTable = {
 };
 
 export type RawCounterSamplesTable = {
-  time?: Milliseconds[];
-  timeDeltas?: Milliseconds[];
+  time?: Milliseconds[] | Float64Array<ArrayBuffer>;
+  timeDeltas?: Milliseconds[] | Float64Array<ArrayBuffer>;
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[];
   // The count of the data, for instance for memory this would be bytes.
   count: number[];
-  argumentValues?: Array<number | null>;
   length: number;
 };
 
@@ -757,8 +868,8 @@ export type RawThread = {
   pid: Pid;
   tid: Tid;
   samples: RawSamplesTable;
-  jsAllocations?: JsAllocationsTable;
-  nativeAllocations?: NativeAllocationsTable;
+  jsAllocations?: RawJsAllocationsTable;
+  nativeAllocations?: RawNativeAllocationsTable;
   markers: RawMarkerTable;
   jsTracer?: JsTracerTable;
   // If present and true, this thread was launched for a private browsing session only.
@@ -1052,6 +1163,13 @@ export type SourceTable = {
   // Original source file contents from source map sourcesContent, or null if
   // not available. Stored for offline source view when a profile is shared.
   content: Array<string | null>;
+  // For original sources found through a source map: the source of the
+  // generated file (the bundle) whose source map listed this source. The
+  // filename is then the URL as written in that source map, which may be
+  // relative. An original source is identified by this pair: two bundles can
+  // list the same URL for different files. null for all other sources.
+  // A generated source always comes before its original sources in the table.
+  generatedSource: Array<IndexIntoSourceTable | null>;
 };
 
 /**
@@ -1075,10 +1193,10 @@ export type SourceLocationTable = {
 
 export type RawProfileSharedData = {
   stackTable: RawStackTable;
-  frameTable: FrameTable;
-  funcTable: FuncTable;
+  frameTable: RawFrameTable;
+  funcTable: RawFuncTable;
   resourceTable: ResourceTable;
-  nativeSymbols: NativeSymbolTable;
+  nativeSymbols: RawNativeSymbolTable;
   // Strings for profiles are collected into a single table, and are referred to by
   // their index by other tables.
   stringArray: string[];

@@ -2,8 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import type { MarkerSchema } from 'firefox-profiler/types';
+import { addPIICategoriesToMarkerSchemas } from 'firefox-profiler/profile-logic/marker-schema';
 
-export const markerSchemaForTests: MarkerSchema[] = [
+export const FILE_IO_TABLE_LABEL =
+  "{marker.data.source ? '(' : ''}{marker.data.source}{marker.data.source ? ') ' : ''}{marker.data.operation}{marker.data.filename ? ' — ' : ''}{marker.data.filename}";
+
+const markerSchemaForTestsWithoutPII: MarkerSchema[] = [
   {
     name: 'GCMajor',
     display: ['marker-chart', 'marker-table', 'timeline-memory'],
@@ -27,6 +31,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
   },
   {
     name: 'FileIO',
+    tableLabel: FILE_IO_TABLE_LABEL,
     display: ['marker-chart', 'marker-table'],
     fields: [
       {
@@ -114,8 +119,10 @@ export const markerSchemaForTests: MarkerSchema[] = [
     fields: [
       { key: 'module', label: 'Module', format: 'string' },
       { key: 'name', label: 'Name', format: 'string' },
-      // New format: level is a string table index ("Error"/"Warning"/"Info"/"Debug"/"Verbose").
+      // New format: level ("Error"/"Warning"/"Info"/"Debug"/"Verbose") and
+      // message are string table indexes.
       { key: 'level', label: 'Level', format: 'unique-string' },
+      { key: 'message', label: 'Message', format: 'unique-string' },
     ],
   },
   {
@@ -191,3 +198,7 @@ export const markerSchemaForTests: MarkerSchema[] = [
     ],
   },
 ];
+
+export const markerSchemaForTests = addPIICategoriesToMarkerSchemas(
+  markerSchemaForTestsWithoutPII
+);

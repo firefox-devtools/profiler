@@ -5,8 +5,12 @@
   display: flex;
 
   /* If .Details is squished to a very small size between the sidebar and/or bottom bar,
-     don't spill out our contents over those other elements. */
+     don't spill out our contents over those other elements. overflow: clip isn't a
+     scroll container though, so it doesn't zero out the flex automatic minimum size:
+     without min-width: 0, a wide child forces .Details past its container width and
+     overflows the whole viewport. */
   overflow: clip;
+  min-width: 0;
   flex: 1;
   flex-direction: column;
 }

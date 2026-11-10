@@ -18,6 +18,7 @@ import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { CURRENT_URL_VERSION } from '../../app-logic/url-handling';
+import { serializeProfileToJsonString } from '../../profile-logic/process-profile';
 import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { profilePublished } from 'firefox-profiler/actions/publish';
 import {
@@ -35,7 +36,7 @@ describe('UrlManager', function () {
   autoMockFullNavigation();
 
   function getSerializableProfile() {
-    return getProfileFromTextSamples('A').profile;
+    return serializeProfileToJsonString(getProfileFromTextSamples('A').profile);
   }
 
   function setup(urlPath?: string) {

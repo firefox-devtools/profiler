@@ -37,9 +37,11 @@ To get started clone the repo and get the web application started.
 1.  Run `git clone git@github.com:firefox-devtools/profiler.git`
 2.  Run `cd profiler`
 3.  Run `yarn install`, this will install all of the dependencies.
-4.  Run `yarn start`, this will start up the development server.
+4.  Run `yarn start` to serve a production build with live rebuilds and no service worker.
 5.  Point your browser to [http://localhost:4242](http://localhost:4242).
 6.  If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
+
+Use `yarn start-dev` for an unminified development build with React diagnostics on port `4241`. Use `yarn start-prod` to build and serve the deployable version, including its service worker, on port `4243`.
 
 This project uses [TypeScript](https://www.typescriptlang.org/).
 
@@ -75,7 +77,7 @@ When working on a new feature and code changes, it's important that things work 
 - Locally when running
   - `yarn test-all` - Test all the things!
   - `yarn test` - Run the tests in [`./src/test/`](./src/test/).
-  - `yarn lint` - Run oxfmt, stylelint, and eslint to check for correct code formatting.
+  - `yarn lint` - Run oxfmt, stylelint, and oxlint to check for correct code formatting.
   - `yarn ts` - Check for TypeScript type correctness.
   - `yarn license-check` - Check the dependencies' licenses.
 - `git push` and `git commit`

@@ -879,7 +879,10 @@ describe('actions/receive-profile', function () {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
-      window.fetchMock.get(expectedUrl, _getSimpleProfile());
+      window.fetchMock.get(
+        expectedUrl,
+        serializeProfileToJsonString(_getSimpleProfile())
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -939,7 +942,7 @@ describe('actions/receive-profile', function () {
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetchMock
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, _getSimpleProfile());
+        .get(expectedUrl, serializeProfileToJsonString(_getSimpleProfile()));
 
       const store = blankStore();
       const views = (
@@ -1026,7 +1029,10 @@ describe('actions/receive-profile', function () {
 
     it('can retrieve a profile from the web and save it to state', async function () {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetchMock.get(expectedUrl, _getSimpleProfile());
+      window.fetchMock.get(
+        expectedUrl,
+        serializeProfileToJsonString(_getSimpleProfile())
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1063,7 +1069,7 @@ describe('actions/receive-profile', function () {
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetchMock
         .getOnce(expectedUrl, 403)
-        .get(expectedUrl, _getSimpleProfile());
+        .get(expectedUrl, serializeProfileToJsonString(_getSimpleProfile()));
 
       const store = blankStore();
       const views = (
@@ -1526,7 +1532,9 @@ describe('actions/receive-profile', function () {
           ])
         );
       }
-      window.fetchMock.getOnce('*', profile1).getOnce('*', profile2);
+      window.fetchMock
+        .getOnce('*', serializeProfileToJsonString(profile1))
+        .getOnce('*', serializeProfileToJsonString(profile2));
 
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([url1, url2]));
@@ -1603,7 +1611,6 @@ describe('actions/receive-profile', function () {
 
       const expectedThreads = [
         expect.objectContaining({
-          ...profile1.threads[0],
           pid: '0 from profile 1',
           tid: '0 from profile 1',
           isMainThread: true,
@@ -1743,29 +1750,27 @@ describe('actions/receive-profile', function () {
       //Get profiles with one screenshot track
       const profile1 = getProfileWithMarkers([
         [
-          'CompositorScreenshot',
+          'CompositorScreenshot 0',
           0,
           null,
           {
             type: 'CompositorScreenshot',
             url: 0, // Some arbitrary string.
             windowID: '0',
-            windowWidth: 300,
-            windowHeight: 150,
+            windowSize: { width: 300, height: 150 },
           },
         ],
       ]);
       const profile2 = getProfileWithMarkers([
         [
-          'CompositorScreenshot',
+          'CompositorScreenshot 1',
           0,
           null,
           {
             type: 'CompositorScreenshot',
             url: 0, // Some arbitrary string.
             windowID: '1',
-            windowWidth: 300,
-            windowHeight: 150,
+            windowSize: { width: 300, height: 150 },
           },
         ],
       ]);
@@ -1790,10 +1795,48 @@ describe('actions/receive-profile', function () {
       ]);
     });
 
+    it('includes the screenshot track when only one profile has screenshot markers', async function () {
+      const store = blankStore();
+      const profile1 = getProfileWithMarkers([]);
+      const profile2 = getProfileWithMarkers([
+        [
+          'CompositorScreenshot 1',
+          0,
+          null,
+          {
+            type: 'CompositorScreenshot',
+            url: 0, // Some arbitrary string.
+            windowID: '1',
+            windowSize: { width: 300, height: 150 },
+          },
+        ],
+      ]);
+      const { resultProfile } = await setup(
+        {
+          profile1: profile1,
+          profile2: profile2,
+        },
+        {
+          url1: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+          url2: 'https://fakeurl.com/public/fakehash1/?thread=0&v=3',
+        }
+      );
+
+      store.dispatch(viewProfile(resultProfile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [screenshots]',
+        'show [thread Empty default] SELECTED',
+        'show [thread Empty default]',
+        'show [thread Diff between 1 and 2 comparison]',
+      ]);
+    });
+
     it('gives a fatal error when the selected thread index is out of bounds', async function () {
       const { dispatch, getState } = blankStore();
       const { profile1, profile2 } = getSomeProfiles();
-      window.fetchMock.getOnce('*', profile1).getOnce('*', profile2);
+      window.fetchMock
+        .getOnce('*', serializeProfileToJsonString(profile1))
+        .getOnce('*', serializeProfileToJsonString(profile2));
 
       await dispatch(
         retrieveProfilesToCompare([
@@ -1813,13 +1856,19 @@ describe('actions/receive-profile', function () {
       location: Partial<Location>,
       requiredProfile: number = 1
     ) {
-      const profile = _getSimpleProfile();
+      const simpleProfile = _getSimpleProfile();
+      // Create a profile object we can use with fetchMock, which uses
+      // JSON.stringify internally. `simpleProfile` contains typed arrays which
+      // wouldn't survive JSON.stringfy, so we feed the pre-serialized JSON
+      // string to the fetch mock directly.
+      const profileJson = serializeProfileToJsonString(simpleProfile);
+      const profile = JSON.parse(profileJson);
       const geckoProfile = createGeckoProfile();
 
       // Add mock fetch response for the required number of times.
       // Usually it's 1 but it can be also 2 for `compare` dataSource.
       for (let i = 0; i < requiredProfile; i++) {
-        window.fetchMock.getOnce('*', profile);
+        window.fetchMock.getOnce('*', profileJson);
       }
 
       const geckoProfiler = {

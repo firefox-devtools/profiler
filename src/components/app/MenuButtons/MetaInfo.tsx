@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Localized } from '@fluent/react';
 
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
+import { ApplySourceMapButton } from './ApplySourceMapButton';
 import {
   getProfile,
   getSymbolicationStatus,
@@ -313,6 +314,7 @@ class MetaInfoPanelImpl extends React.PureComponent<Props, State> {
           </>
         ) : null}
         {this.renderSymbolication()}
+        <ApplySourceMapButton />
       </div>
     );
   }

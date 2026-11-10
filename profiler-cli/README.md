@@ -30,21 +30,26 @@ Run `profiler-cli --help` for the full options reference.
 
 ```bash
 profiler-cli load <PATH>                   # Start daemon and load profile (file or http/https URL)
+profiler-cli load <PATH> --with-samply     # Same, but serve the file via "samply load" and symbolicate with its symbol server
 profiler-cli profile info                  # Print profile summary [--all] [--search <term>]
+profiler-cli profile meta                  # Print profile metadata (application, platform, recording settings)
 profiler-cli profile logs                  # Print Log markers in MOZ_LOG format [--thread] [--module] [--level] [--search] [--limit]
+profiler-cli profile markers               # Search markers across all threads [--search] [--thread] [--category] [--min-duration] [--max-duration] [--has-stack] [--limit]
+profiler-cli profile save <path>           # Save the loaded profile to a file or directory [--force]
+profiler-cli thread list                   # List all threads as a flat table [--sort] [--search] [--limit]
 profiler-cli thread info                   # Print detailed thread information
 profiler-cli thread select <handle>        # Select a thread (e.g., t-0, t-1)
-profiler-cli thread samples                # Show hot functions list for current thread
+profiler-cli thread samples                # Show hot functions list and category breakdown for current thread
 profiler-cli thread samples-top-down       # Show top-down call tree (where CPU time is spent)
 profiler-cli thread samples-bottom-up      # Show bottom-up call tree (what calls hot functions)
 profiler-cli thread markers                # List markers with aggregated statistics [--list for flat per-marker view]
 profiler-cli thread functions              # List all functions with CPU percentages
-profiler-cli thread network                # Show network requests with timing phases [--search] [--min-duration] [--max-duration] [--limit]
+profiler-cli thread network                # Show network requests with timing phases [--search] [--min-duration] [--max-duration] [--limit] [--sort]
 profiler-cli thread page-load              # Show page load summary (navigation timing, resources, CPU, jank)
-profiler-cli marker info <handle>          # Show detailed marker information (e.g., m-1234)
+profiler-cli marker info <handle>...       # Show detailed marker information; accepts several handles and ranges (e.g., m-1234, m-1234..m-1240)
 profiler-cli marker stack <handle>         # Show full stack trace for a marker
 profiler-cli function expand <handle>      # Show full untruncated function name (e.g., f-123)
-profiler-cli function info <handle>        # Show detailed function information
+profiler-cli function info <handle>        # Show detailed function information and category breakdown
 profiler-cli function annotate <handle>    # Show annotated source/assembly with timing data [--mode src|asm|all] [--context 2|file|N] [--symbol-server <url>]
 profiler-cli zoom push <range>             # Push a zoom range (e.g., 2.7,3.1 or ts-g,ts-G or m-158)
 profiler-cli zoom pop                      # Pop the most recent zoom range
@@ -52,14 +57,36 @@ profiler-cli zoom clear                    # Clear all zoom ranges (return to fu
 profiler-cli filter push <filter-flag>     # Push a sticky sample filter (see filter flags below)
 profiler-cli filter pop [N]                # Pop the last N filters (default: 1)
 profiler-cli filter list                   # List active filters for current thread
-profiler-cli filter clear                  # Remove all filters for current thread
+profiler-cli filter clear                  # Remove current thread filters and session call tree search
+profiler-cli sourcemap sources             # List bundle sources eligible for a source map (src-N handles)
+profiler-cli sourcemap apply <path>        # Apply a .map file to de-minify JS stacks [--to <src-N>]
 profiler-cli status                        # Show session status (selected thread, zoom ranges, filters)
+profiler-cli permalink                     # Print a profiler.firefox.com URL for the current view [--short]
 profiler-cli stop                          # Stop current daemon
 profiler-cli stop <id>                     # Stop a specific session
 profiler-cli stop --all                    # Stop all sessions
 profiler-cli session list                  # List all running daemon sessions (* marks current)
 profiler-cli session use <id>              # Switch the current session
 ```
+
+### Symbolicating with samply
+
+Some profiles are not symbolicated yet when they are saved, for example those
+recorded with `samply record --save-only`, and symbolication as well as the
+assembly view then need a symbol server that can see the local binaries.
+`--with-samply` runs `samply load` in the background for the lifetime of the
+session to provide that server:
+
+```bash
+samply record --save-only -o profile.json ./my-program
+profiler-cli load profile.json --with-samply
+profiler-cli function annotate f-12 --mode asm
+```
+
+samply is resolved from `PROFILER_CLI_SAMPLY_PATH` if set, then `PATH`, then
+`$MOZBUILD_STATE_PATH/samply` (default `~/.mozbuild/samply`), where
+`./mach bootstrap` installs it. The samply process is stopped together with the
+session.
 
 ### Multiple sessions
 
@@ -81,17 +108,21 @@ profiler-cli thread info --thread t-0      # View info for specific thread witho
 | Flag                   | Description                                                                                                                                              |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `--thread <handle>`    | Specify thread (e.g., `t-0`)                                                                                                                             |
-| `--search <term>`      | Filter results by substring. For samples commands, comma-separates multiple terms that all must match (AND); `\|` is literal, not OR.                    |
+| `--search <term>`      | Filter by substring; `thread markers` also takes `field:value` (see its `--help`).                                                                       |
 | `--include-idle`       | Include idle samples (excluded by default in samples commands)                                                                                           |
 | `--json`               | Output as JSON (for use with `jq`, etc.)                                                                                                                 |
 | `--limit <N>`          | Limit number of results shown                                                                                                                            |
 | `--max-lines <N>`      | Limit call tree nodes for `samples-top-down`/`samples-bottom-up` (default: 100)                                                                          |
+| `--sort <order>`       | Order `thread network` requests: `duration` (default, slowest first) or `start` (chronological)                                                          |
 | `--scoring <strategy>` | Call tree scoring: `exponential-0.95`, `exponential-0.9` (default), `exponential-0.8`, `harmonic-0.1`, `harmonic-0.5`, `harmonic-1.0`, `percentage-only` |
 | `--navigation <N>`     | Select which navigation to show in `thread page-load` (1-based, default: last completed)                                                                 |
 | `--jank-limit <N>`     | Max jank periods to show in `thread page-load` (default: 10, 0 = show all)                                                                               |
 | `--list`               | Show a flat chronological list of individual markers (for `thread markers`)                                                                              |
 | `--all`                | Show all threads in `profile info` (overrides default top-5 limit)                                                                                       |
+| `--to <src-N>`         | Target source for `sourcemap apply`, skipping auto-matching (from `sourcemap sources`)                                                                   |
 | `--session <id>`       | Use a specific session instead of the current one                                                                                                        |
+| `--permalink`          | Also print a profiler.firefox.com URL for the view the command shows (published profiles only)                                                           |
+| `--short-permalink`    | Like `--permalink`, shortened through share.firefox.dev                                                                                                  |
 
 ## Sample Filter Flags
 
@@ -113,6 +144,25 @@ For `filter push`, exactly one flag per push. For ephemeral use, multiple flags 
 ## Session Storage
 
 Sessions are stored in `~/.profiler-cli/` (or `$PROFILER_CLI_SESSION_DIR` to override).
+
+Each session keeps a metadata file, a Unix domain socket (a named pipe on Windows), and a daemon log in that directory. The daemon log is the first place to look when a session misbehaves, and `profiler-cli` prints its path in error messages.
+
+## Running in a sandbox
+
+`profiler-cli` runs its daemon in a separate process and talks to it over a Unix domain socket in the session directory, so a sandbox has to allow two things:
+
+- writing to the session directory, and
+- creating and connecting to Unix domain sockets inside it.
+
+If the home directory is not writable, point the CLI somewhere it can write:
+
+```bash
+export PROFILER_CLI_SESSION_DIR=/tmp/profiler-cli
+```
+
+Keep that path short. Unix socket paths are limited to 104 bytes on macOS and 108 on Linux, and the session directory is part of the socket path.
+
+If Unix domain sockets are blocked outright, allow them in the sandbox policy or run `profiler-cli` outside the sandbox.
 
 ## Contributing
 

@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     εισαγάγει προφίλ από τη συσκευή σε αυτό το πρόγραμμα περιήγησης.
     Ανοίξτε αυτήν τη σελίδα στο { -firefox-brand-name } ή το Chrome.
     .title = Το Safari δεν μπορεί να εισαγάγει τοπικά προφίλ
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Αυτό το προφίλ χρησιμοποιεί μια μορφή που δεν υποστηρίζεται από αυτήν την έκδοση του { -profiler-brand-name }.
+    Δοκιμάστε να ανανεώσετε τη σελίδα για να ελέγξετε αν διατίθεται ενημέρωση για το { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = Δεν αναγνωρίστηκε το URL που προσπαθήσατε να μεταβείτε.
 
@@ -293,16 +298,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Αναφορά σφάλματος στο GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Νομικά
-FooterLinks--Privacy = Απόρρητο
-FooterLinks--Cookies = Cookie
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Ρυθμίσεις
+SettingsMenu--docs = Τεκμηρίωση
+SettingsMenu--legal = Νομικά
+SettingsMenu--privacy = Απόρρητο
+SettingsMenu--cookies = Cookie
+SettingsMenu--language-switcher =
     .title = Αλλαγή γλώσσας
-FooterLinks--hide-button =
-    .title = Απόκρυψη συνδέσμων υποσέλιδου
-    .aria-label = Απόκρυψη συνδέσμων υποσέλιδου
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -387,8 +393,11 @@ Home--chrome-extension-recording-instructions =
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Εισαγάγετε όρους φίλτρου
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Εισαγάγετε όρους φίλτρου (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -501,8 +510,8 @@ MarkerTable--details = Λεπτομέρειες
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
     .aria-label = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
+    .title = Εμφάνιση μόνο των αντίστοιχων δεικτών: «{ $filter }»
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -511,14 +520,15 @@ MenuButtons--index--metaInfo-button =
     .label = Πληροφορίες προφίλ
 MenuButtons--index--full-view = Πλήρης προβολή
 MenuButtons--index--cancel-upload = Ακύρωση μεταφόρτωσης
-MenuButtons--index--share-upload =
-    .label = Μεταφόρτωση τοπικού προφίλ
-MenuButtons--index--share-re-upload =
-    .label = Νέα μεταφόρτωση
+MenuButtons--index--save =
+    .label = Αποθήκευση…
+MenuButtons--index--share =
+    .label = Κοινή χρήση…
+MenuButtons--index--reshare =
+    .label = Νέα κοινή χρήση…
 MenuButtons--index--share-error-uploading =
     .label = Σφάλμα μεταφόρτωσης
 MenuButtons--index--revert = Επιστροφή στο αρχικό προφίλ
-MenuButtons--index--docs = Έγγραφα
 MenuButtons--permalink--button =
     .label = Μόνιμος σύνδεσμος
 
@@ -536,6 +546,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Επανασυμβολισμός 
 MenuButtons--metaInfo--symbolicate-profile = Συμβολισμός προφίλ
 MenuButtons--metaInfo--attempting-resymbolicate = Απόπειρα επανασυμβολισμού προφίλ
 MenuButtons--metaInfo--currently-symbolicating = Γίνεται συμβολισμός προφίλ αυτήν τη στιγμή
+MenuButtons--metaInfo--source-maps = Χάρτες πηγής:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Εφαρμογή χάρτη πηγής…
+    .title = Φόρτωση αρχείου .map από το δίσκο για συμβολισμό ενός πακέτου JavaScript σε ελαχιστοποίηση, ανάκτησης ονομάτων αρχικών συναρτήσεων και τοποθεσιών πηγής.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Επιλέξτε σε ποιο πακέτο θα εφαρμοστεί αυτός ο χάρτης πηγής:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Εφαρμογή
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Ακύρωση
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Οι αρχικές πηγές επιλύθηκαν για { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Καμία θέση στοίβας στο { $filename } δεν ταιριάζει με αυτόν τον χάρτη πηγής.
+MenuButtons--metaInfo--source-map-error-invalid = Το επιλεγμένο αρχείο δεν είναι συμβατή πηγή χάρτη.
+MenuButtons--metaInfo--source-map-error-no-eligible = Αυτό το προφίλ δεν έχει πακέτα JS με URL χαρτών πηγής.
+MenuButtons--metaInfo--source-map-error-failed = Δεν ήταν δυνατή η εφαρμογή αυτού του χάρτη πηγής στο προφίλ.
 MenuButtons--metaInfo--cpu-model = Μοντέλο CPU:
 MenuButtons--metaInfo--cpu-cores = Πυρήνες CPU:
 MenuButtons--metaInfo--main-memory = Κύρια μνήμη:
@@ -661,9 +693,15 @@ MenuButtons--publish--renderCheckbox-label-preference = Συμπερίληψη �
 MenuButtons--publish--renderCheckbox-label-private-browsing = Συμπερίληψη δεδομένων από τα παράθυρα ιδιωτικής περιήγησης
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Αυτό το προφίλ περιέχει δεδομένα ιδιωτικής περιήγησης
-MenuButtons--publish--reupload-performance-profile = Νέα μεταφόρτωση προφίλ επιδόσεων
+MenuButtons--publish--renderCheckbox-label-argument-values = Συμπερίληψη τιμών ορίσματος της λειτουργίας καταγραφής εκτέλεσης JavaScript
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Αυτό το προφίλ περιέχει τιμές ορίσματος συνάρτησης που έχουν καταγραφεί από τη σελίδα, οι οποίες ενδέχεται να περιλαμβάνουν προσωπικά δεδομένα.
 MenuButtons--publish--share-performance-profile = Κοινή χρήση προφίλ επιδόσεων
+MenuButtons--publish--reshare-performance-profile = Νέα κοινή χρήση προφίλ επιδόσεων
+MenuButtons--publish--save-performance-profile = Αποθήκευση προφίλ επιδόσεων
+MenuButtons--publish--local-profile-description = Αυτό το προφίλ δεν έχει μεταφορτωθεί και θα χαθεί όταν κλείσετε αυτήν την καρτέλα. Για να το διατηρήσετε, αποθηκεύστε το στον υπολογιστή σας ή μεταφορτώστε το με την επιλογή «Κοινή χρήση».
 MenuButtons--publish--info-description = Ανεβάστε το προφίλ σας και κάντε το προσβάσιμο σε οποιονδήποτε έχει τον σύνδεσμο.
+MenuButtons--publish--download-info-description = Αποθηκεύστε αυτό το προφίλ ως αρχείο στον υπολογιστή σας.
 MenuButtons--publish--info-description-default = Από προεπιλογή, αφαιρούνται τα προσωπικά σας δεδομένα.
 MenuButtons--publish--info-description-firefox-nightly2 = Αυτό το προφίλ είναι από το { -firefox-nightly-brand-name }, επομένως συμπεριλαμβάνονται οι περισσότερες πληροφορίες από προεπιλογή.
 MenuButtons--publish--include-additional-data = Συμπερίληψη επιπλέον δεδομένων που ίσως να είναι αναγνωρίσιμα
@@ -672,7 +710,7 @@ MenuButtons--publish--upload-title = Μεταφόρτωση προφίλ…
 MenuButtons--publish--cancel-upload = Ακύρωση μεταφόρτωσης
 MenuButtons--publish--message-something-went-wrong = Ωχ όχι, κάτι πήγε στραβά κατά τη μεταφόρτωση του προφίλ.
 MenuButtons--publish--message-try-again = Δοκιμή ξανά
-MenuButtons--publish--download = Λήψη
+MenuButtons--publish--save = Αποθήκευση
 MenuButtons--publish--compressing = Συμπίεση…
 MenuButtons--publish--error-while-compressing = Σφάλμα κατά τη συμπίεση, δοκιμάστε να καταργήσετε μερικές επιλογές για να μειώσετε το μέγεθος του προφίλ.
 
@@ -707,8 +745,8 @@ PanelSearch--search-field-hint = Ξέρατε ότι μπορείτε να χρ�
 ProfileName--edit-profile-name-button =
     .title = Επεξεργασία ονόματος προφίλ
 ProfileName--edit-profile-name-input =
-    .title = Επεξεργασία ονόματος προφίλ
     .aria-label = Όνομα προφίλ
+    .title = Επεξεργασία ονόματος προφίλ
 
 ## Profile Delete Button
 
@@ -788,8 +826,8 @@ ServiceWorkerManager--updated-while-not-ready =
     αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
 ServiceWorkerManager--hide-notice-button =
-    .title = Απόκρυψη σημείωσης επαναφόρτωσης
     .aria-label = Απόκρυψη σημείωσης επαναφόρτωσης
+    .title = Απόκρυψη σημείωσης επαναφόρτωσης
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -886,9 +924,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = σχετική μνήμη αυτήν τη στιγμή
-TrackMemoryGraph--memory-range-in-graph = εύρος μνήμης στο γράφημα
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = κατανομές και αποδεσμεύσεις από το προηγούμενο δείγμα
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = σχετική μνήμη τη συγκεκριμένη στιγμή
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = εύρος μνήμης στο γράφημα
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = εκχωρήσεις και αποδεσμεύσεις από το προηγούμενο δείγμα
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -934,6 +989,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Μέση ισχύς στην τρέχουσα επιλογή
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Μέση ισχύς στην τρέχουσα επιλογή
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

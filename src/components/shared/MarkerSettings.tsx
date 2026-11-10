@@ -227,6 +227,7 @@ class MarkerSettingsImpl extends PureComponent<Props, State> {
             title="Only display markers that match a certain name"
             currentSearchString={searchString}
             onSearch={this._onSearch}
+            alsoFocusOnF={true}
           />
         </Localized>
         <Localized id="MarkerSettings--marker-filters" attrs={{ title: true }}>

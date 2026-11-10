@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     { -profiler-brand-name } importera profiler från den lokala datorn i den här webbläsaren. Öppna
     den här sidan i { -firefox-brand-name } eller Chrome istället.
     .title = Safari kan inte importera lokala profiler
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Den här profilen använder ett format som inte stöds av den här versionen av { -profiler-brand-name }.
+    Testa att uppdatera sidan för att kontrollera om det finns en tillgänglig uppdatering för { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = Webbadressen du försökte nå kändes inte igen.
 
@@ -292,16 +297,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Rapportera felet på GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Juridisk information
-FooterLinks--Privacy = Sekretesspolicy
-FooterLinks--Cookies = Kakor
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Inställningar
+SettingsMenu--docs = Dokumentation
+SettingsMenu--legal = Juridisk information
+SettingsMenu--privacy = Sekretess
+SettingsMenu--cookies = Kakor
+SettingsMenu--language-switcher =
     .title = Ändra språk
-FooterLinks--hide-button =
-    .title = Dölj sidfotslänkar
-    .aria-label = Dölj sidfotslänkar
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -387,8 +393,11 @@ Home--chrome-extension-recording-instructions =
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Ange filtervillkor
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Ange filtertermer (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -501,8 +510,8 @@ MarkerTable--details = Detaljer
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Visa endast markörer som matchar: "{ $filter }"
     .aria-label = Visa endast markörer som matchar: "{ $filter }"
+    .title = Visa endast markörer som matchar: "{ $filter }"
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -511,14 +520,15 @@ MenuButtons--index--metaInfo-button =
     .label = Profilinfo
 MenuButtons--index--full-view = Helbild
 MenuButtons--index--cancel-upload = Avbryt uppladdning
-MenuButtons--index--share-upload =
-    .label = Ladda upp lokal profil
-MenuButtons--index--share-re-upload =
-    .label = Ladda upp igen
+MenuButtons--index--save =
+    .label = Spara…
+MenuButtons--index--share =
+    .label = Dela…
+MenuButtons--index--reshare =
+    .label = Dela vidare…
 MenuButtons--index--share-error-uploading =
     .label = Fel vid uppladdning
 MenuButtons--index--revert = Återgå till originalprofil
-MenuButtons--index--docs = Dokument
 MenuButtons--permalink--button =
     .label = Permalänk
 
@@ -536,6 +546,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Symbolisera profilen igen
 MenuButtons--metaInfo--symbolicate-profile = Symbolisera profil
 MenuButtons--metaInfo--attempting-resymbolicate = Försöker att symbolisera profilen på nytt
 MenuButtons--metaInfo--currently-symbolicating = Profilen symboliseras för närvarande
+MenuButtons--metaInfo--source-maps = Källkartor:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Tillämpa källkarta…
+    .title = Ladda en .map-fil från disk för att symbolisera ett minifierat JavaScript-paket, för att återställa ursprungliga funktionsnamn och källplatser.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Välj vilket paket denna källkarta ska gälla för:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Tillämpa
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Avbryt
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Ursprungliga källor lösta för { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Inga stackpositioner i { $filename } matchade denna källkarta.
+MenuButtons--metaInfo--source-map-error-invalid = Den valda filen är inte en giltig källkarta.
+MenuButtons--metaInfo--source-map-error-no-eligible = Den här profilen har inga JS-paket med källmappnings-URL:er.
+MenuButtons--metaInfo--source-map-error-failed = Det gick inte att tillämpa denna källkarta på profilen.
 MenuButtons--metaInfo--cpu-model = CPU-modell:
 MenuButtons--metaInfo--cpu-cores = CPU-kärnor:
 MenuButtons--metaInfo--main-memory = Huvudminne:
@@ -661,9 +693,15 @@ MenuButtons--publish--renderCheckbox-label-preference = Inkludera preferensvärd
 MenuButtons--publish--renderCheckbox-label-private-browsing = Inkludera data från privata surffönster
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Den här profilen innehåller privata webbläsardata
-MenuButtons--publish--reupload-performance-profile = Ladda upp prestandaprofilen igen
+MenuButtons--publish--renderCheckbox-label-argument-values = Inkludera argumentvärden för JavaScript-körningsspårningsfunktion
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Den här profilen innehåller värden för funktionsargument inspelade från sidan, vilka kan innehålla personuppgifter
 MenuButtons--publish--share-performance-profile = Dela prestandaprofil
+MenuButtons--publish--reshare-performance-profile = Dela vidare prestandaprofil
+MenuButtons--publish--save-performance-profile = Spara prestandaprofil
+MenuButtons--publish--local-profile-description = Den här profilen har inte laddats upp och försvinner när du stänger fliken. Om du vill behålla den kan du antingen spara den på datorn eller ladda upp den via Dela.
 MenuButtons--publish--info-description = Ladda upp din profil och gör den tillgänglig för alla med länken.
+MenuButtons--publish--download-info-description = Spara den här profilen som en fil på din dator.
 MenuButtons--publish--info-description-default = Som standard tas dina personuppgifter bort.
 MenuButtons--publish--info-description-firefox-nightly2 = Den här profilen är från { -firefox-nightly-brand-name }, så den mesta information ingår som standard.
 MenuButtons--publish--include-additional-data = Inkludera ytterligare data som kan identifieras
@@ -672,7 +710,7 @@ MenuButtons--publish--upload-title = Laddar upp profil…
 MenuButtons--publish--cancel-upload = Avbryt uppladdning
 MenuButtons--publish--message-something-went-wrong = Hoppsan, något gick fel när du laddade upp profilen.
 MenuButtons--publish--message-try-again = Försök igen
-MenuButtons--publish--download = Hämta
+MenuButtons--publish--save = Spara
 MenuButtons--publish--compressing = Komprimerar…
 MenuButtons--publish--error-while-compressing = Fel vid komprimering, försök avmarkera några kryssrutor för att minska profilstorleken.
 
@@ -707,8 +745,8 @@ PanelSearch--search-field-hint = Visste du att du kan använda komma (,) för at
 ProfileName--edit-profile-name-button =
     .title = Redigera profilnamn
 ProfileName--edit-profile-name-input =
-    .title = Redigera profilnamn
     .aria-label = Profilnamn
+    .title = Redigera profilnamn
 
 ## Profile Delete Button
 
@@ -788,8 +826,8 @@ ServiceWorkerManager--updated-while-not-ready =
     var helt laddad. Du kan se fel.
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
 ServiceWorkerManager--hide-notice-button =
-    .title = Dölj omladdningsmeddelandet
     .aria-label = Dölj omladdningsmeddelandet
+    .title = Dölj omladdningsmeddelandet
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -886,9 +924,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = relativa minnet vid denna tidpunkt
-TrackMemoryGraph--memory-range-in-graph = minnesintervall i grafen
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allokeringar och deallokeringar sedan föregående prov
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = relativt minne vid denna tidpunkt
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = minnesområde i grafen
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allokeringar och avallokeringar sedan föregående urval
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -934,6 +989,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Genomsnittlig effekt i det aktuella valet
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Genomsnittlig effekt i det aktuella valet
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

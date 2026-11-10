@@ -19,6 +19,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 
 import type { Profile } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 describe('jsTracerFixed', function () {
   function fixTiming(events: TestDefinedJsTracerEvent[]) {
@@ -349,6 +350,11 @@ describe('selectors/getJsTracerTiming', function () {
         const fooLine = 3;
         const fooColumn = 5;
         const { shared } = profile;
+        const jsFuncFlags =
+          FuncFlag.IsJS |
+          FuncFlag.HasLine |
+          FuncFlag.HasColumn |
+          FuncFlag.HasSource;
 
         shared.funcTable.lineNumber[foo] = fooLine;
         shared.funcTable.columnNumber[foo] = fooColumn;
@@ -357,6 +363,7 @@ describe('selectors/getJsTracerTiming', function () {
           shared.sources,
           fooUrlIndex
         );
+        shared.funcTable.flags[foo] |= jsFuncFlags;
 
         const bar = funcNamesDict['Bar.js'];
         const barLine = 7;
@@ -368,6 +375,7 @@ describe('selectors/getJsTracerTiming', function () {
           shared.sources,
           barUrlIndex
         );
+        shared.funcTable.flags[bar] |= jsFuncFlags;
 
         const baz = funcNamesDict['Baz.js'];
         // Use bar's line and column information.
@@ -378,6 +386,7 @@ describe('selectors/getJsTracerTiming', function () {
           shared.sources,
           bazUrlIndex
         );
+        shared.funcTable.flags[baz] |= jsFuncFlags;
 
         // Manually update the JS tracer events to point to the right column numbers.
         jsTracer.line[2] = fooLine;

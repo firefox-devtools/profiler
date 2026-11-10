@@ -6,6 +6,7 @@ on:
       - main
       - production
   pull_request:
+  merge_group:
 
 jobs:
   lint:
@@ -39,6 +40,9 @@ jobs:
         # We use workerIdleMemoryLimit to work around a memory issue with node.
         # See https://github.com/facebook/jest/issues/11956
         run: yarn test --coverage --logHeapUsage -w=4 --workerIdleMemoryLimit=1.5G
+
+      - name: Run deployment script tests
+        run: yarn test-deploy-prod
 
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
@@ -87,7 +91,7 @@ jobs:
           path: node-tools-dist/
 
       - name: Build profiler-cli
-        run: yarn build-profiler-cli
+        run: yarn build-cli
 
       - name: Upload profiler-cli artifact
         if: matrix.os == 'ubuntu-latest'

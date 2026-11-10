@@ -2,8 +2,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
-  getEmptySamplesTableWithEventDelay,
-  getEmptyRawMarkerTable,
+  getRawSamplesTableBuilderWithEventDelay,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
+  finishRawFrameTableBuilder,
+  finishRawFuncTableBuilder,
+  finishRawSamplesTableBuilder,
+  finishRawStackTableBuilder,
+  getRawFuncTableBuilderWithExistingContents,
+  getRawStackTableBuilderWithExistingContents,
+  getRawFrameTableBuilderWithExistingContents,
+  type RawSamplesTableBuilder,
 } from './data-structures';
 import { StringTable } from '../utils/string-table';
 import { ensureExists } from '../utils/types';
@@ -20,6 +29,7 @@ import type {
   JsTracerTiming,
   Microseconds,
 } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 // See the function below for more information.
 type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
@@ -37,13 +47,16 @@ function getScriptLocationToFuncIndex({
 }: RawProfileSharedData): ScriptLocationToFuncIndex {
   const scriptLocationToFuncIndex: ScriptLocationToFuncIndex = new Map();
   for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-    if (!funcTable.isJS[funcIndex]) {
+    const funcFlags = funcTable.flags[funcIndex];
+    if ((funcFlags & FuncFlag.IsJS) === 0) {
       continue;
     }
-    const line = funcTable.lineNumber[funcIndex];
-    const column = funcTable.columnNumber[funcIndex];
-    const sourceIndex = funcTable.source[funcIndex];
-    if (column !== null && line !== null && sourceIndex !== null) {
+    const requiredFlags =
+      FuncFlag.HasLine | FuncFlag.HasColumn | FuncFlag.HasSource;
+    if ((funcFlags & requiredFlags) === requiredFlags) {
+      const line = funcTable.lineNumber[funcIndex];
+      const column = funcTable.columnNumber[funcIndex];
+      const sourceIndex = funcTable.source[funcIndex];
       const urlIndex = sources.filename[sourceIndex];
       const fileName = stringArray[urlIndex];
       const key = `${fileName}:${line}:${column}`;
@@ -499,12 +512,12 @@ export function convertJsTracerToThreadWithoutSamples(
   thread: RawThread;
   stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable>;
 } {
-  const samples: RawSamplesTable = {
-    ...getEmptySamplesTableWithEventDelay(),
+  const samples: RawSamplesTableBuilder = {
+    ...getRawSamplesTableBuilderWithEventDelay(),
     weight: [],
     weightType: 'tracing-ms',
   };
-  const markers = getEmptyRawMarkerTable();
+  const markers = getRawMarkerTableBuilder();
 
   const thread: RawThread = {
     ...fromThread,
@@ -512,7 +525,15 @@ export function convertJsTracerToThreadWithoutSamples(
     samples,
   };
 
-  const { funcTable, frameTable, stackTable } = shared;
+  const funcTable = getRawFuncTableBuilderWithExistingContents(
+    shared.funcTable
+  );
+  const frameTable = getRawFrameTableBuilderWithExistingContents(
+    shared.frameTable
+  );
+  const stackTable = getRawStackTableBuilderWithExistingContents(
+    shared.stackTable
+  );
 
   // Keep a stack of js tracer events, and end timings, that will be used to find
   // the stack prefixes. Once a JS tracer event starts past another event end, the
@@ -564,14 +585,13 @@ export function convertJsTracerToThreadWithoutSamples(
       if (generatedFuncIndex === undefined) {
         // Create a new function only if the event string is different.
         funcIndex = funcTable.length++;
+        funcTable.flags.push(FuncFlag.RelevantForJS);
         funcTable.name.push(eventStringIndex);
-        funcTable.isJS.push(false);
-        funcTable.resource.push(-1);
-        funcTable.relevantForJS.push(true);
-        funcTable.source.push(null);
-        funcTable.lineNumber.push(null);
-        funcTable.columnNumber.push(null);
-        funcTable.originalLocation.push(null);
+        funcTable.resource.push(0);
+        funcTable.source.push(0);
+        funcTable.lineNumber.push(0);
+        funcTable.columnNumber.push(0);
+        funcTable.originalLocation.push(0);
 
         funcMap.set(eventStringIndex, funcIndex);
       } else {
@@ -594,15 +614,24 @@ export function convertJsTracerToThreadWithoutSamples(
 
     // Every event gets a unique frame entry.
     const frameIndex = frameTable.length++;
+    let flags = FrameFlag.HasCategory;
+    if (line !== null) {
+      flags |= FrameFlag.HasLine;
+    }
+    if (column !== null) {
+      flags |= FrameFlag.HasColumn;
+    }
+    frameTable.flags.push(flags);
     frameTable.address.push(blankStringIndex);
-    frameTable.inlineDepth.push(0);
     frameTable.category.push(otherCategory);
+    frameTable.subcategory.push(0);
     frameTable.func.push(funcIndex);
-    frameTable.nativeSymbol.push(null);
+    frameTable.lib.push(0);
+    frameTable.nativeSymbol.push(0);
     frameTable.innerWindowID.push(0);
-    frameTable.line.push(line);
-    frameTable.column.push(column);
-    frameTable.originalLocation.push(null);
+    frameTable.line.push(line ?? 0);
+    frameTable.column.push(column ?? 0);
+    frameTable.originalLocation.push(0);
 
     // Each event gets a stack table entry.
     const stackIndex = stackTable.length++;
@@ -619,6 +648,13 @@ export function convertJsTracerToThreadWithoutSamples(
     (unmatchedEventIndexes as any)[unmatchedIndex] = tracerEventIndex;
     unmatchedEventEnds[unmatchedIndex] = end;
   }
+
+  // Write the augmented stackTable, frameTable and funcTable back to the shared data.
+  shared.stackTable = finishRawStackTableBuilder(stackTable);
+  shared.frameTable = finishRawFrameTableBuilder(frameTable);
+  shared.funcTable = finishRawFuncTableBuilder(funcTable);
+  thread.samples = finishRawSamplesTableBuilder(samples);
+  thread.markers = finishRawMarkerTableBuilder(markers);
 
   return { thread, stackMap };
 }
@@ -790,7 +826,7 @@ export function getSelfTimeSamplesFromJsTracer(
   const isNearlyEqual = (a: number, b: number) => Math.abs(a - b) < epsilon;
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
-  const samples = getEmptySamplesTableWithEventDelay();
+  const samples = getRawSamplesTableBuilderWithEventDelay();
   const sampleWeights: number[] = [];
   samples.weight = sampleWeights;
 
@@ -995,5 +1031,5 @@ export function getSelfTimeSamplesFromJsTracer(
     );
   }
 
-  return samples;
+  return finishRawSamplesTableBuilder(samples);
 }

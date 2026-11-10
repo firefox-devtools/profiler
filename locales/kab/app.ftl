@@ -105,17 +105,6 @@ Details--open-sidebar-button =
 Details--close-sidebar-button =
     .title = Mdel agalis adisan
 
-## Footer Links
-
-FooterLinks--legal = Usḍif
-FooterLinks--Privacy = Tabaḍnit
-FooterLinks--Cookies = Inagan n tuqqna
-FooterLinks--languageSwitcher--select =
-    .title = Snifel tutlayt
-FooterLinks--hide-button =
-    .title = Ffer iseɣwan n uḍar n usebter
-    .aria-label = Ffer iseɣwan n uḍar n usebter
-
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
 ## page.
@@ -144,12 +133,6 @@ Home--additional-content-content = Tzemreḍ <strong>ad tzuɣreḍ syen sers</st
 Home--compare-recordings-info = Tzemreḍ daɣen ad tsenmehleḍ iseklasen. <a>Ldi agrudem n usnemhel.</a>
 Home--your-recent-uploaded-recordings-title = Iseklasen-ik·im i d-yulin melmi kan
 Home--install-chrome-extension = Sbedd aseɣẓan  n Chrome
-
-## IdleSearchField
-## The component that is used for all the search inputs in the application.
-
-IdleSearchField--search-input =
-    .placeholder = Sekcem awalen n yimsizdeg
 
 ## ListOfPublishedProfiles
 ## This is the component that displays all the profiles the user has uploaded.
@@ -203,14 +186,9 @@ MenuButtons--index--metaInfo-button =
     .label = Talɣut n umaɣnu
 MenuButtons--index--full-view = Askan aččuran
 MenuButtons--index--cancel-upload = Sefsex asali
-MenuButtons--index--share-upload =
-    .label = Sali amaɣnu adigan
-MenuButtons--index--share-re-upload =
-    .label = Ales asali
 MenuButtons--index--share-error-uploading =
     .label = Tuccḍa deg usali
 MenuButtons--index--revert = Uɣal ɣer umaɣnu aɣbalu
-MenuButtons--index--docs = Tasemlit
 MenuButtons--permalink--button =
     .label = Permalink
 
@@ -290,14 +268,12 @@ MenuButtons--publish--renderCheckbox-label-preference = Seddu azalen n usmenyif
 MenuButtons--publish--renderCheckbox-label-private-browsing = Seddu isefka seg yisfuyla n tunigin tusligt
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Amaɣnu-a yegber isefka n tunigin tusligt
-MenuButtons--publish--reupload-performance-profile = Ales asali n umaɣnu n temlellit
 MenuButtons--publish--share-performance-profile = Bḍu amaɣnu n usmenyif
 MenuButtons--publish--info-description-default = S wudem amezwer, isefka-ik·im udmawanen ttwakksen.
 MenuButtons--publish--button-upload = Sali
 MenuButtons--publish--upload-title = Asali n umaɣnu…
 MenuButtons--publish--cancel-upload = Sefsex asali
 MenuButtons--publish--message-try-again = Ɛreḍ tikelt-nniḍen
-MenuButtons--publish--download = Sader
 MenuButtons--publish--compressing = Tussda…
 
 ## Timestamp formatting primitive
@@ -374,8 +350,8 @@ ServiceWorkerManager--pending-button = Snes syen ales asali
 ServiceWorkerManager--installed-button = Ales asali n usnas
 ServiceWorkerManager--new-version-is-ready = Lqem amaynut n usnas yettwasader, yewjed i useqqdec
 ServiceWorkerManager--hide-notice-button =
-    .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
     .aria-label = Ffer alɣu-a d-yulin i tikkelt-nniḍen
+    .title = Ffer alɣu-a d-yulin i tikkelt-nniḍen
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -410,13 +386,6 @@ TrackContextMenu--no-results-found = Ulac igmaḍ yettwafen i “<span>{ $search
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = Ffer asesfer
-
-## TrackMemoryGraph
-## This is used to show the memory graph of that process in the timeline part of
-## the UI. To learn more about it, visit:
-## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
-
-TrackMemoryGraph--relative-memory-at-this-time = takatut tamassaɣt deg wakud-a
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,

@@ -7,18 +7,22 @@
  */
 
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import type { CommandResult } from './protocol';
+import type { CommandResult, PermalinkOutcome } from './protocol';
 import {
   formatStatusResult,
+  formatPermalinkResult,
   formatFunctionExpandResult,
   formatFunctionInfoResult,
   formatFunctionAnnotateResult,
   formatViewRangeResult,
   formatFilterStackResult,
   formatThreadInfoResult,
+  formatThreadListResult,
   formatMarkerStackResult,
   formatMarkerInfoResult,
+  formatMarkerInfoMultiResult,
   formatProfileInfoResult,
+  formatProfileMetaResult,
   formatThreadSamplesResult,
   formatThreadSamplesTopDownResult,
   formatThreadSamplesBottomUpResult,
@@ -26,8 +30,15 @@ import {
   formatThreadFunctionsResult,
   formatThreadNetworkResult,
   formatProfileLogsResult,
+  formatProfileMarkersResult,
   formatThreadPageLoadResult,
   formatThreadSelectResult,
+  formatStrategySelectResult,
+  formatCounterListResult,
+  formatCounterInfoResult,
+  formatSourceMapSourcesResult,
+  formatApplySourceMapResult,
+  formatProfileSaveResult,
 } from './formatters';
 
 /**
@@ -36,15 +47,34 @@ import {
  */
 export function formatOutput(
   result: string | CommandResult,
-  jsonFlag: boolean
+  jsonFlag: boolean,
+  permalink?: PermalinkOutcome
 ): string {
   if (jsonFlag) {
-    if (typeof result === 'string') {
-      return JSON.stringify({ type: 'text', result }, null, 2);
+    const object =
+      typeof result === 'string' ? { type: 'text', result } : result;
+    if (permalink === undefined) {
+      return JSON.stringify(object, null, 2);
     }
-    return JSON.stringify(result, null, 2);
+    const withPermalink =
+      'error' in permalink
+        ? { ...object, permalink: null, permalinkError: permalink.error }
+        : { ...object, permalink: formatPermalinkResult(permalink) };
+    return JSON.stringify(withPermalink, null, 2);
   }
 
+  const text = formatText(result);
+  if (permalink === undefined) {
+    return text;
+  }
+  const permalinkLine =
+    'error' in permalink
+      ? `Permalink unavailable: ${permalink.error}`
+      : `Permalink: ${formatPermalinkResult(permalink)}`;
+  return `${text}\n\n${permalinkLine}`;
+}
+
+function formatText(result: string | CommandResult): string {
   if (typeof result === 'string') {
     return result;
   }
@@ -52,6 +82,8 @@ export function formatOutput(
   switch (result.type) {
     case 'status':
       return formatStatusResult(result);
+    case 'permalink':
+      return formatPermalinkResult(result);
     case 'filter-stack':
       return formatFilterStackResult(result);
     case 'function-expand':
@@ -64,12 +96,18 @@ export function formatOutput(
       return formatViewRangeResult(result);
     case 'thread-info':
       return formatThreadInfoResult(result);
+    case 'thread-list':
+      return formatThreadListResult(result);
     case 'marker-stack':
       return formatMarkerStackResult(result);
     case 'marker-info':
       return formatMarkerInfoResult(result);
+    case 'marker-info-multi':
+      return formatMarkerInfoMultiResult(result);
     case 'profile-info':
       return formatProfileInfoResult(result);
+    case 'profile-meta':
+      return formatProfileMetaResult(result);
     case 'thread-samples':
       return formatThreadSamplesResult(result);
     case 'thread-samples-top-down':
@@ -84,10 +122,27 @@ export function formatOutput(
       return formatThreadNetworkResult(result);
     case 'profile-logs':
       return formatProfileLogsResult(result);
+    case 'profile-markers':
+      return formatProfileMarkersResult(result);
+    case 'profile-save':
+      return formatProfileSaveResult(result);
     case 'thread-page-load':
       return formatThreadPageLoadResult(result);
     case 'thread-select':
       return formatThreadSelectResult(result);
+    case 'strategy-select':
+      return formatStrategySelectResult(result);
+    case 'counter-list':
+      return formatCounterListResult(result);
+    case 'counter-info':
+      return formatCounterInfoResult(result);
+    case 'sourcemap-sources':
+      return formatSourceMapSourcesResult(result);
+    case 'sourcemap-applied':
+    case 'sourcemap-unchanged':
+    case 'sourcemap-ambiguous':
+    case 'sourcemap-error':
+      return formatApplySourceMapResult(result);
     default:
       throw assertExhaustiveCheck(result);
   }

@@ -7,6 +7,7 @@
  *
  * Usage:
  *   profiler-cli load <PATH> [--session <id>]          Start a new daemon and load a profile
+ *   profiler-cli load <PATH> --with-samply             Same, symbolicating through "samply load"
  *   profiler-cli profile info [--session <id>]         Print profile summary
  *   profiler-cli thread info [--thread <handle>]       Print thread information
  *   profiler-cli thread samples [--thread <handle>]    Show thread call tree and top functions
@@ -15,7 +16,7 @@
  *   profiler-cli session use <id>                      Switch the current session
  *
  * Build:
- *   yarn build-profiler-cli
+ *   yarn build-cli
  *
  * Run:
  *   profiler-cli <command>                              (if profiler-cli is in PATH)
@@ -31,14 +32,21 @@ import { startDaemon } from './daemon';
 import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
 import { formatOutput } from './output';
-import { addGlobalOptions } from './commands/shared';
+import {
+  addGlobalOptions,
+  addSessionOption,
+  runCommand,
+} from './commands/shared';
 import { VERSION } from './constants';
 import { registerProfileCommand } from './commands/profile';
 import { registerThreadCommand } from './commands/thread';
 import { registerMarkerCommand } from './commands/marker';
 import { registerFunctionCommand } from './commands/function';
+import { registerCounterCommand } from './commands/counter';
+import { registerStrategyCommand } from './commands/strategy';
 import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
+import { registerSourcemapCommand } from './commands/sourcemap';
 import { registerSessionCommand } from './commands/session';
 
 // Read session directory from environment (only place this is read)
@@ -60,15 +68,27 @@ async function main(): Promise<void> {
     const symbolServerIdx = rawArgs.indexOf('--symbol-server');
     const symbolServerUrl =
       symbolServerIdx !== -1 ? rawArgs[symbolServerIdx + 1] : undefined;
+    const withSamply = rawArgs.includes('--with-samply');
     if (!profilePath) {
       console.error('Error: Profile path required for daemon mode');
       process.exit(1);
     }
-    await startDaemon(SESSION_DIR, profilePath, sessionId, symbolServerUrl);
+    await startDaemon(
+      SESSION_DIR,
+      profilePath,
+      sessionId,
+      symbolServerUrl,
+      withSamply
+    );
     return;
   }
 
-  const program = new Command();
+  const program = addSessionOption(new Command());
+  program.hook('preAction', (rootCommand, actionCommand) => {
+    if (actionCommand.opts().session === undefined) {
+      actionCommand.setOptionValue('session', rootCommand.opts().session);
+    }
+  });
   program
     .name('profiler-cli')
     .description('Profiler CLI — query Firefox profiles from the terminal')
@@ -80,14 +100,22 @@ async function main(): Promise<void> {
       `
 Examples:
   profiler-cli load profile.json.gz
+  profiler-cli load profile.json --with-samply
   profiler-cli profile info
+  profiler-cli thread list
   profiler-cli thread info
   profiler-cli thread samples
   profiler-cli thread functions --search GC --min-self 1
   profiler-cli thread markers --search DOMEvent --category Graphics
+  profiler-cli profile markers --search CompositorScreenshot
+  profiler-cli counter list
+  profiler-cli counter info c-0
   profiler-cli zoom push 2.7,3.1
   profiler-cli filter push --excludes-function f-184
+  profiler-cli sourcemap sources
+  profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
+  profiler-cli permalink
   profiler-cli stop --all`
     );
 
@@ -107,16 +135,21 @@ Examples:
         '--symbol-server <url>',
         'Symbol server URL for symbolication (overrides URL param and default Mozilla server)'
       )
+      .option(
+        '--with-samply',
+        'Serve the profile through "samply load" and use its symbol server for the lifetime of the session (samply from PROFILER_CLI_SAMPLY_PATH, PATH, or ~/.mozbuild/samply)'
+      )
   ).action(async (profilePath: string, opts) => {
     console.log(`Loading profile from ${profilePath}...`);
     const sessionId = await startNewDaemon(
       SESSION_DIR,
       profilePath,
       opts.session,
-      opts.symbolServer
+      opts.symbolServer,
+      opts.withSamply ?? false
     );
     console.log(`Session started: ${sessionId}`);
-    const status = await sendCommand(
+    const { result: status } = await sendCommand(
       SESSION_DIR,
       { command: 'status' },
       sessionId
@@ -132,12 +165,23 @@ Examples:
         'Show session status (selected thread, zoom ranges, filters)'
       )
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(SESSION_DIR, { command: 'status' }, opts);
+  });
+
+  // profiler-cli permalink
+  addGlobalOptions(
+    program
+      .command('permalink')
+      .description(
+        'Print a profiler.firefox.com URL for the current view of an already published profile'
+      )
+      .option('--short', 'Shorten the URL through share.firefox.dev')
+  ).action(async (opts) => {
+    await runCommand(
       SESSION_DIR,
-      { command: 'status' },
-      opts.session
+      { command: 'permalink', short: opts.short ?? false },
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // profiler-cli stop [id]
@@ -151,9 +195,21 @@ Examples:
   ).action(async (idArg: string | undefined, opts) => {
     if (opts.all) {
       const sessionIds = listSessions(SESSION_DIR);
-      await Promise.all(
+      // Settled, so one session that refuses to stop does not hide the others.
+      const results = await Promise.allSettled(
         sessionIds.map((id: string) => stopDaemon(SESSION_DIR, id))
       );
+      const failures = results.filter((r) => r.status === 'rejected');
+      for (const failure of failures) {
+        console.error(
+          `Error: ${failure.reason instanceof Error ? failure.reason.message : failure.reason}`
+        );
+      }
+      if (failures.length !== 0) {
+        throw new Error(
+          `Could not stop ${failures.length} of ${sessionIds.length} sessions.`
+        );
+      }
     } else {
       const sessionId = idArg ?? opts.session;
       await stopDaemon(SESSION_DIR, sessionId);
@@ -180,8 +236,11 @@ Examples:
   registerThreadCommand(program, SESSION_DIR);
   registerMarkerCommand(program, SESSION_DIR);
   registerFunctionCommand(program, SESSION_DIR);
+  registerCounterCommand(program, SESSION_DIR);
+  registerStrategyCommand(program, SESSION_DIR);
   registerZoomCommand(program, SESSION_DIR);
   registerFilterCommand(program, SESSION_DIR);
+  registerSourcemapCommand(program, SESSION_DIR);
   registerSessionCommand(program, SESSION_DIR);
 
   try {

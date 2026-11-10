@@ -2,7 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-import { buildProcessThreadList } from 'firefox-profiler/profile-query/process-thread-list';
+import {
+  buildProcessThreadList,
+  getFriendlyProcessName,
+  getProcessName,
+} from 'firefox-profiler/profile-query/process-thread-list';
+import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
 
 import type { ThreadInfo } from 'firefox-profiler/profile-query/process-thread-list';
 
@@ -432,5 +437,123 @@ describe('buildProcessThreadList', function () {
       combinedCpuMs: 150, // 50 + 40 + 30 + 20 + 10
       maxCpuMs: 50,
     });
+  });
+});
+
+/**
+ * The fallback `getFriendlyProcessName` uses for a process with no GeckoMain
+ * thread to carry a label. The back end omits `processName` for some process
+ * types, so those fall back to a label for the bare `processType`.
+ */
+describe('getProcessName', function () {
+  it('names a process that the back end did not name', function () {
+    expect(
+      getProcessName(getEmptyThread({ name: 'GeckoMain', processType: 'gpu' }))
+    ).toBe('GPU Process');
+    expect(
+      getProcessName(getEmptyThread({ name: 'GeckoMain', processType: 'rdd' }))
+    ).toBe('Remote Data Decoder');
+  });
+
+  it('names an isolated content process after the site it hosts', function () {
+    expect(
+      getProcessName(
+        getEmptyThread({
+          name: 'GeckoMain',
+          processType: 'tab',
+          processName: 'Web Content',
+          'eTLD+1': 'example.com',
+        })
+      )
+    ).toBe('example.com');
+  });
+
+  it('prefers the name the back end supplied over the process type', function () {
+    // A supplied processName is already friendly, and most processes have one.
+    expect(
+      getProcessName(
+        getEmptyThread({
+          name: 'GeckoMain',
+          processType: 'gpu',
+          processName: 'WebExtensions',
+        })
+      )
+    ).toBe('WebExtensions');
+  });
+
+  it('falls back to the raw type, then to "unknown"', function () {
+    expect(
+      getProcessName(
+        getEmptyThread({ name: 'GeckoMain', processType: 'nonesuch' })
+      )
+    ).toBe('nonesuch');
+    expect(
+      getProcessName(getEmptyThread({ name: 'GeckoMain', processType: '' }))
+    ).toBe('unknown');
+  });
+});
+
+/**
+ * `profile info` and the thread banner both name processes with this, so the
+ * two outputs cannot disagree. A content process is the interesting case: its
+ * label comes from the eTLD+1 rather than from `processName`, and gets an
+ * "(n/m)" suffix when several processes share a domain.
+ */
+describe('getFriendlyProcessName', function () {
+  function geckoMain(pid: string, extra: object = {}) {
+    return getEmptyThread({
+      name: 'GeckoMain',
+      processType: 'tab',
+      pid,
+      ...extra,
+    });
+  }
+
+  it('prefers the eTLD+1 over a generic processName', function () {
+    const thread = geckoMain('1', {
+      processName: 'Web Content',
+      'eTLD+1': 'example.com',
+    });
+    expect(getFriendlyProcessName([thread], thread)).toBe('example.com');
+  });
+
+  it('numbers processes that share a domain', function () {
+    const a = geckoMain('1', { 'eTLD+1': 'example.com' });
+    const b = geckoMain('2', { 'eTLD+1': 'example.com' });
+    const threads = [a, b];
+    expect(getFriendlyProcessName(threads, a)).toBe('example.com (1/2)');
+    expect(getFriendlyProcessName(threads, b)).toBe('example.com (2/2)');
+  });
+
+  it('takes the label from the process\u2019 GeckoMain thread', function () {
+    // A non-main thread carries neither the eTLD+1 nor the process name, so the
+    // label has to come from its process' GeckoMain thread.
+    const main = geckoMain('1', { 'eTLD+1': 'example.com' });
+    const worker = getEmptyThread({
+      name: 'StyleThread',
+      processType: 'tab',
+      pid: '1',
+    });
+    expect(getFriendlyProcessName([main, worker], worker)).toBe('example.com');
+  });
+
+  it('falls back to the process name when the process has no GeckoMain thread', function () {
+    const orphan = getEmptyThread({
+      name: 'StyleThread',
+      processType: 'gpu',
+      pid: '9',
+    });
+    expect(getFriendlyProcessName([orphan], orphan)).toBe('GPU Process');
+
+    // The fallback names such a process after its site too, so a content
+    // process reads the same whether or not its GeckoMain thread is present.
+    const orphanTab = getEmptyThread({
+      name: 'StyleThread',
+      processType: 'tab',
+      processName: 'Web Content',
+      'eTLD+1': 'example.com',
+      pid: '10',
+    });
+    expect(getFriendlyProcessName([orphanTab], orphanTab)).toBe('example.com');
   });
 });

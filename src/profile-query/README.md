@@ -45,6 +45,7 @@ The library is built on top of the Firefox Profiler's Redux store and selectors:
 - **MarkerMap**: Maps marker handles (e.g., `m-0`, `m-1`) to marker indexes within threads
 - **FilterStack**: Manages per-thread stacks of sample filters (backed by Redux transforms)
 - **Function handles**: Canonical handles like `f-123` refer to shared `profile.shared.funcTable` indices and are stable across sessions for the same processed profile data
+- **Source handles**: Handles like `src-3` refer to `profile.shared.sources` indices and, like function handles, are stable across sessions for the same profile
 - **Formatters**: Format query results into structured result objects
 
 All query results are returned as typed result objects containing structured data. The CLI layer in `profiler-cli` is responsible for formatting these into human-readable text.

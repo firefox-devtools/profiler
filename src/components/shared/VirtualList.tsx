@@ -380,7 +380,7 @@ export class VirtualList<Item> extends React.PureComponent<
    * * offsetX is how much the horizontal position is offset by fixed columns, if applicable.
    */
   /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   scrollItemIntoView(
     itemIndex: number,
     itemX: CssPixels,
@@ -438,7 +438,7 @@ export class VirtualList<Item> extends React.PureComponent<
   }
 
   /* This method is used by users of this component. */
-  /* eslint-disable-next-line react/no-unused-class-component-methods */
+  // oxlint-disable-next-line react-js/no-unused-class-component-methods
   focus() {
     const container = this._container.current;
     if (container) {

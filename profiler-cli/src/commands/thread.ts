@@ -7,20 +7,30 @@
  */
 
 import type { Command } from 'commander';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
-import { parseEphemeralFilters } from '../utils/parse';
+import { parseEphemeralFilters, parseLimitArg } from '../utils/parse';
 import {
   addGlobalOptions,
   addSampleFilterOptions,
+  addStrategyOption,
   parseIntArg,
   parseFloatArg,
+  parseOptionalStrategyArg,
+  runCommand,
 } from './shared';
 import type {
   CallTreeScoringStrategy,
   MarkerFilterOptions,
   FunctionFilterOptions,
+  ThreadListOptions,
+  ThreadListSort,
 } from '../protocol';
+
+const VALID_THREAD_LIST_SORTS: ThreadListSort[] = [
+  'cpu',
+  'index',
+  'markers',
+  'name',
+];
 
 const VALID_SCORING_STRATEGIES: CallTreeScoringStrategy[] = [
   'exponential-0.95',
@@ -33,15 +43,17 @@ const VALID_SCORING_STRATEGIES: CallTreeScoringStrategy[] = [
 ];
 
 function addSamplesOptions(cmd: Command): Command {
-  return addSampleFilterOptions(
-    addGlobalOptions(cmd)
-      .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-      .option('--include-idle', 'Include idle samples in percentages')
-      .option(
-        '--search <term>',
-        'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
-      )
-      .option('--limit <N>', 'Limit the number of results shown')
+  return addStrategyOption(
+    addSampleFilterOptions(
+      addGlobalOptions(cmd)
+        .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+        .option('--include-idle', 'Include idle samples in percentages')
+        .option(
+          '--search <term>',
+          'Keep samples containing this substring in any frame. Comma-separates multiple terms, all must match (AND).'
+        )
+        .option('--limit <N>', 'Limit the number of results shown')
+    )
   );
 }
 
@@ -49,7 +61,7 @@ function addCallTreeOptions(cmd: Command): Command {
   return addSamplesOptions(cmd)
     .option('--max-lines <N>', 'Maximum nodes in call tree (default: 100)')
     .option(
-      '--scoring <strategy>',
+      '--scoring <name>',
       `Call tree scoring strategy: ${VALID_SCORING_STRATEGIES.join(', ')}`
     );
 }
@@ -82,11 +94,85 @@ function parseCallTreeOptions(opts: {
   return result;
 }
 
+/** Add the flags and action of `thread list` to its command. */
+function addThreadListCommand(cmd: Command, sessionDir: string): Command {
+  return addGlobalOptions(
+    cmd
+      .description(
+        'List all threads as a flat table (handle, name, process, pid, CPU, markers)'
+      )
+      .option(
+        '--sort <order>',
+        `Sort by: ${VALID_THREAD_LIST_SORTS.join(', ')} (default: cpu)`
+      )
+      .option(
+        '--search <term>',
+        'Filter by thread name, process name, eTLD+1, pid or tid'
+      )
+      .option('--limit <N>', 'Show at most N threads (default: all, 0 = all)')
+      .addHelpText(
+        'after',
+        `
+Columns: thread handle, thread name, owning process (with its eTLD+1 when known),
+pid, CPU time, and marker count. "*" marks the currently selected thread.
+
+CPU time and marker count always cover the whole profile, never the current zoom,
+so the table stays a stable inventory to navigate from. This means a row's marker
+count can exceed what "thread markers --thread <handle>" reports, since that
+command follows the committed range.
+
+All threads are listed by default; pass --limit to shorten the table.
+
+Examples:
+  profiler-cli thread list                     All threads, busiest first
+  profiler-cli thread list --sort markers      By marker count instead of CPU
+  profiler-cli thread list --sort name         By process name, then thread name
+  profiler-cli thread list --search Compositor Only matching threads
+  profiler-cli thread list --limit 10          First 10 rows only
+
+Use "profile info" instead when you want threads grouped under their process, with
+process lifetimes, counters, and CPU activity over time.`
+      )
+  ).action(async (opts) => {
+    const threadListOptions: ThreadListOptions = {};
+
+    if (opts.sort !== undefined) {
+      if (!(VALID_THREAD_LIST_SORTS as string[]).includes(opts.sort)) {
+        console.error(
+          `Error: --sort must be one of: ${VALID_THREAD_LIST_SORTS.join(', ')}`
+        );
+        process.exit(1);
+      }
+      threadListOptions.sort = opts.sort as ThreadListSort;
+    }
+    if (opts.search !== undefined) {
+      threadListOptions.searchString = opts.search;
+    }
+    if (opts.limit !== undefined) {
+      threadListOptions.limit = parseIntArg(
+        '--limit',
+        opts.limit,
+        0,
+        'Error: --limit must be a non-negative integer (0 = show all)'
+      );
+    }
+
+    await runCommand(
+      sessionDir,
+      { command: 'thread', subcommand: 'list', threadListOptions },
+      opts
+    );
+  });
+}
+
 export function registerThreadCommand(
   program: Command,
   sessionDir: string
 ): void {
   const thread = program.command('thread').description('Thread-level commands');
+
+  // thread list
+  addThreadListCommand(thread.command('list'), sessionDir);
 
   // thread info
   addGlobalOptions(
@@ -95,12 +181,11 @@ export function registerThreadCommand(
       .description('Print detailed thread information')
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'thread', subcommand: 'info', thread: opts.thread },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread select
@@ -111,12 +196,11 @@ export function registerThreadCommand(
       .option('--thread <handle>', 'Thread handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const threadHandle = handleArg ?? opts.thread;
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'thread', subcommand: 'select', thread: threadHandle },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread samples
@@ -126,7 +210,7 @@ export function registerThreadCommand(
       .description('Show hot functions list for a thread')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -134,11 +218,11 @@ export function registerThreadCommand(
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread samples-top-down
@@ -148,7 +232,7 @@ export function registerThreadCommand(
       .description('Show top-down call tree (where CPU time is spent)')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -156,12 +240,12 @@ export function registerThreadCommand(
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread samples-bottom-up
@@ -171,7 +255,7 @@ export function registerThreadCommand(
       .description('Show bottom-up call tree (what calls hot functions)')
   ).action(async (opts) => {
     const sampleFilters = parseEphemeralFilters(opts);
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -179,12 +263,12 @@ export function registerThreadCommand(
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
         search: opts.search,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         callTreeOptions: parseCallTreeOptions(opts),
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread markers
@@ -193,7 +277,12 @@ export function registerThreadCommand(
       .command('markers')
       .description('List markers with aggregated statistics')
       .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-      .option('--search <term>', 'Filter by substring')
+      .option(
+        '--search <term>',
+        'Filter markers. A bare term matches the marker name, category, payload ' +
+          'type and payload field values; "field:value" narrows to one field, ' +
+          '"-field:value" excludes, comma separates terms (OR). See "search syntax" below'
+      )
       .option(
         '--category <name>',
         'Filter by category name (case-insensitive substring match)'
@@ -207,7 +296,7 @@ export function registerThreadCommand(
         'Filter by maximum duration in milliseconds'
       )
       .option('--has-stack', 'Show only markers with stack traces')
-      .option('--limit <N>', 'Limit the number of results shown')
+      .option('--limit <N>', 'Limit the number of results shown (0 = no limit)')
       .option(
         '--group-by <keys>',
         'Group by custom keys (e.g. "type,name" or "type,field:eventType")'
@@ -221,6 +310,30 @@ export function registerThreadCommand(
         'Number of top markers to include per group in JSON output (default: 5)'
       )
       .option('--list', 'Show a flat chronological list of individual markers')
+      .addHelpText(
+        'after',
+        `
+--search syntax (as on profiler.firefox.com's marker search box):
+
+  bare term      matches the marker name, category, payload type AND every
+                 payload field value -- so "--search FAIL" also hits messages
+                 containing "Failed"
+  field:value    narrows to one field
+  -field:value   excludes; a bare "-term" is NOT a negation, the "-" is literal
+  a,b            comma separates: positives OR'd, then exclusions applied
+
+  "field" is the payload key from "marker info <handle> --json" fields[].key, not
+  the label that "marker info" prints (Glean: "id:abi", not "metric:abi"). An
+  unrecognized field is not an error -- the term is just matched literally.
+
+  "name:" is not a name-only filter: "name" is also a payload key on Text and
+  TextStack markers, so it matches their detail text too.
+
+Examples:
+  profiler-cli thread markers --search "eventType:keydown"
+  profiler-cli thread markers --search "-name:CompositorScreenshot"
+  profiler-cli thread markers --search "name:DOMEvent,-eventType:keydown"`
+      )
   ).action(async (opts) => {
     let markerFilters: MarkerFilterOptions | undefined;
 
@@ -274,15 +387,13 @@ export function registerThreadCommand(
           'Error: --max-duration must be a positive number (in milliseconds)'
         );
       }
-      if (opts.limit !== undefined) {
-        markerFilters.limit = parseIntArg('--limit', opts.limit, 1);
-      }
+      markerFilters.limit = parseLimitArg('--limit', opts.limit);
       if (opts.topN !== undefined) {
         markerFilters.topN = parseIntArg('--top-n', opts.topN, 1);
       }
     }
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -290,9 +401,8 @@ export function registerThreadCommand(
         thread: opts.thread,
         markerFilters,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread network
@@ -310,17 +420,29 @@ export function registerThreadCommand(
         '--max-duration <ms>',
         'Filter by maximum total request duration in milliseconds'
       )
-      .option('--limit <N>', 'Max requests to show (default: 20, 0 = show all)')
+      .option('--limit <N>', 'Max requests to show (default: 20, 0 = no limit)')
+      .option(
+        '--sort <order>',
+        'Sort requests by "duration" (default, slowest first) or "start" (chronological)'
+      )
   ).action(async (opts) => {
     const networkFilters: {
       searchString?: string;
       minDuration?: number;
       maxDuration?: number;
       limit?: number;
+      sort?: 'start' | 'duration';
     } = {};
 
     if (opts.search !== undefined) {
       networkFilters.searchString = opts.search;
+    }
+    if (opts.sort !== undefined) {
+      if (opts.sort !== 'start' && opts.sort !== 'duration') {
+        console.error('Error: --sort must be "start" or "duration"');
+        process.exit(1);
+      }
+      networkFilters.sort = opts.sort;
     }
     if (opts.minDuration !== undefined) {
       networkFilters.minDuration = parseFloatArg(
@@ -341,17 +463,12 @@ export function registerThreadCommand(
       );
     }
     if (opts.limit !== undefined) {
-      networkFilters.limit = parseIntArg(
-        '--limit',
-        opts.limit,
-        0,
-        'Error: --limit must be a non-negative integer (0 = show all)'
-      );
+      networkFilters.limit = parseLimitArg('--limit', opts.limit) ?? 0;
     } else {
       networkFilters.limit = 20;
     }
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -359,9 +476,8 @@ export function registerThreadCommand(
         thread: opts.thread,
         networkFilters,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread page-load
@@ -393,15 +509,13 @@ export function registerThreadCommand(
       );
     }
     if (opts.jankLimit !== undefined) {
-      pageLoadOptions.jankLimit = parseIntArg(
-        '--jank-limit',
-        opts.jankLimit,
-        0,
-        'Error: --jank-limit must be a non-negative integer (0 = show all)'
-      );
+      // `collectPageLoad` does `jankLimit ?? 10`, so forwarding `undefined`
+      // here would silently reinstate that default; 0 is its show-all sentinel.
+      pageLoadOptions.jankLimit =
+        parseLimitArg('--jank-limit', opts.jankLimit) ?? 0;
     }
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
@@ -409,25 +523,29 @@ export function registerThreadCommand(
         thread: opts.thread,
         pageLoadOptions,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 
   // thread functions
-  addSampleFilterOptions(
-    addGlobalOptions(
-      thread
-        .command('functions')
-        .description('List all functions with CPU percentages')
-        .option('--thread <handle>', 'Thread handle (e.g. t-0)')
-        .option('--search <term>', 'Filter by substring')
-        .option(
-          '--min-self <percent>',
-          'Filter by minimum self time percentage'
-        )
-        .option('--limit <N>', 'Limit the number of results shown')
-        .option('--include-idle', 'Include idle samples in percentages')
+  addStrategyOption(
+    addSampleFilterOptions(
+      addGlobalOptions(
+        thread
+          .command('functions')
+          .description('List all functions with CPU percentages')
+          .option('--thread <handle>', 'Thread handle (e.g. t-0)')
+          .option('--search <term>', 'Filter by substring')
+          .option(
+            '--min-self <percent>',
+            'Filter by minimum self time percentage'
+          )
+          .option(
+            '--limit <N>',
+            'Limit the number of results shown (0 = no limit)'
+          )
+          .option('--include-idle', 'Include idle samples in percentages')
+      )
     )
   ).action(async (opts) => {
     let functionFilters: FunctionFilterOptions | undefined;
@@ -450,25 +568,23 @@ export function registerThreadCommand(
           'Error: --min-self must be a number between 0 and 100 (percentage)'
         );
       }
-      if (opts.limit !== undefined) {
-        functionFilters.limit = parseIntArg('--limit', opts.limit, 1);
-      }
+      functionFilters.limit = parseLimitArg('--limit', opts.limit);
     }
 
     const sampleFilters = parseEphemeralFilters(opts);
 
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       {
         command: 'thread',
         subcommand: 'functions',
         thread: opts.thread,
         includeIdle: opts.includeIdle || undefined,
+        strategy: parseOptionalStrategyArg(opts.strategy),
         functionFilters,
         sampleFilters: sampleFilters.length ? sampleFilters : undefined,
       },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }

@@ -22,6 +22,7 @@ import {
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
   changeSelectedMarker,
+  changeMarkerTableSort,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -43,6 +44,7 @@ import type {
   IndexIntoSourceTable,
   BottomBoxInfo,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import getNiceProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
 import {
@@ -53,6 +55,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getCounterForThread,
+  addTabInformationToProfile,
 } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import {
@@ -60,6 +63,10 @@ import {
   encodeUintSetForUrlComponent,
 } from '../utils/uintarray-encoding';
 import { getProfile } from '../selectors/profile';
+import {
+  getRawMarkerTableBuilderFromExisting,
+  finishRawMarkerTableBuilder,
+} from '../profile-logic/data-structures';
 import { SYMBOL_SERVER_URL } from '../app-logic/constants';
 import { getThreadsKey } from '../profile-logic/profile-data';
 import { StringTable } from 'firefox-profiler/utils/string-table';
@@ -493,6 +500,62 @@ describe('search strings', function () {
   });
 });
 
+describe('marker table sort', function () {
+  function _getStoreOnMarkerTable() {
+    const store = _getStoreWithURL();
+    store.dispatch(changeSelectedTab('marker-table'));
+    return store;
+  }
+
+  it('omits the default sort from the URL', function () {
+    const { getState } = _getStoreOnMarkerTable();
+    expect(getQueryStringFromState(getState())).not.toContain('markerSort');
+  });
+
+  it('serializes a non-default sort with primary first', function () {
+    const { getState, dispatch } = _getStoreOnMarkerTable();
+    // duration desc primary, name asc tiebreaker
+    dispatch(
+      changeMarkerTableSort([
+        { column: 'duration', ascending: false },
+        { column: 'name', ascending: true },
+      ])
+    );
+    expect(getQueryStringFromState(getState())).toContain(
+      'markerSort=duration-desc~name-asc'
+    );
+  });
+
+  it('round-trips a non-default sort through the URL', function () {
+    const { getState, dispatch } = _getStoreOnMarkerTable();
+    dispatch(changeMarkerTableSort([{ column: 'duration', ascending: false }]));
+    const url = urlFromState(getState().urlState);
+    const restored = stateFromLocation({
+      pathname: new URL(url, 'http://localhost').pathname,
+      search: new URL(url, 'http://localhost').search,
+      hash: '',
+    });
+    expect(restored.profileSpecific.markerTableSort).toEqual([
+      { column: 'duration', ascending: false },
+    ]);
+  });
+
+  it('falls back to the default when the URL has an invalid column', function () {
+    const { getState } = _getStoreWithURL({
+      pathname: '/public/abc/marker-table/',
+      search: '?markerSort=bogus-desc',
+    });
+    expect(getState().urlState.profileSpecific.markerTableSort).toBeNull();
+  });
+
+  it('omits the sort from the URL on the marker chart panel', function () {
+    const { getState, dispatch } = _getStoreWithURL();
+    dispatch(changeSelectedTab('marker-chart'));
+    dispatch(changeMarkerTableSort([{ column: 'duration', ascending: false }]));
+    expect(getQueryStringFromState(getState())).not.toContain('markerSort');
+  });
+});
+
 describe('profileName', function () {
   it('serializes the profileName in the URL', function () {
     const { getState, dispatch } = _getStoreWithURL();
@@ -854,9 +917,8 @@ describe('url upgrading', function () {
         G.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.DrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.DrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['B.js'],
@@ -906,9 +968,8 @@ describe('url upgrading', function () {
         E.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.BrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.BrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['C.js'],
@@ -957,9 +1018,8 @@ describe('url upgrading', function () {
         F.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.BrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.BrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['D.js'],
@@ -1007,9 +1067,8 @@ describe('url upgrading', function () {
         G.js            E.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.CrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.CrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['B.js'],
@@ -1057,9 +1116,8 @@ describe('url upgrading', function () {
         G.js            E.js
       `);
 
-      profile.shared.funcTable.relevantForJS[
-        funcNamesDictPerThread.BrelevantForJs
-      ] = true;
+      profile.shared.funcTable.flags[funcNamesDictPerThread.BrelevantForJs] |=
+        FuncFlag.RelevantForJS;
 
       const callNodePathBefore = [
         funcNamesDictPerThread['C.js'],
@@ -1299,12 +1357,15 @@ describe('url upgrading', function () {
       const stringTable = StringTable.withBackingArray(
         profile.shared.stringArray
       );
-      mainThread.markers.name.push(stringTable.indexForString('IPC'));
-      mainThread.markers.phase.push(0);
-      mainThread.markers.startTime.push(0);
-      mainThread.markers.endTime.push(null);
-      mainThread.markers.category.push(0);
-      mainThread.markers.data.push({
+      const mainThreadMarkers = getRawMarkerTableBuilderFromExisting(
+        mainThread.markers
+      );
+      mainThreadMarkers.name.push(stringTable.indexForString('IPC'));
+      mainThreadMarkers.phase.push(0);
+      mainThreadMarkers.startTime.push(0);
+      mainThreadMarkers.endTime.push(null);
+      mainThreadMarkers.category.push(0);
+      mainThreadMarkers.data.push({
         type: 'IPC',
         startTime: 0,
         endTime: 1,
@@ -1316,7 +1377,8 @@ describe('url upgrading', function () {
         phase: 'endpoint',
         sync: false,
       } as any);
-      mainThread.markers.length++;
+      mainThreadMarkers.length++;
+      mainThread.markers = finishRawMarkerTableBuilder(mainThreadMarkers);
 
       const memoryCounter = getCounterForThread(mainThread, 0);
       memoryCounter.category = 'Memory';
@@ -1968,7 +2030,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex,
       nativeSymbols: [],
       initialNativeSymbol: null,
@@ -2003,7 +2064,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       'hg:hg.mozilla.org/mozilla-central:xpcom/threads/nsThread.cpp:5bb3e281dc9ec8a619c781d52882adb1cacf20bb';
     const sourceIndex = getSourceIndex(sourceFile);
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex,
       nativeSymbols: [],
       initialNativeSymbol: null,
@@ -2034,7 +2094,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       functionSizeIsKnown: false,
     };
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex: null,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
@@ -2079,7 +2138,6 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
       functionSizeIsKnown: false,
     };
     const bottomBoxInfo: BottomBoxInfo = {
-      libIndex: 0,
       sourceIndex,
       nativeSymbols: [nativeSymbolInfo],
       initialNativeSymbol: 0,
@@ -2103,33 +2161,46 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
 });
 
 describe('tab selector', function () {
-  function setup() {
-    const store = _getStoreWithURL();
-    return store;
+  function getProfileWithTabs() {
+    const profile = getProfileWithNiceTracks();
+    const {
+      firstTabTabID,
+      secondTabTabID,
+      parentInnerWindowIDsWithChildren,
+      secondTabInnerWindowIDs,
+    } = addTabInformationToProfile(profile);
+    // Thread 0 belongs to the first tab and thread 1 to the second tab.
+    profile.threads[0].usedInnerWindowIDs = [parentInnerWindowIDsWithChildren];
+    profile.threads[1].usedInnerWindowIDs = [secondTabInnerWindowIDs[0]];
+    return { profile, firstTabTabID, secondTabTabID };
+  }
+
+  function setup(search = '') {
+    const { profile, firstTabTabID, secondTabTabID } = getProfileWithTabs();
+    const store = _getStoreWithURL({ search }, profile);
+    return { ...store, firstTabTabID, secondTabTabID };
   }
 
   it('can serialize the tabFilter properly', function () {
-    const { dispatch, getState } = setup();
+    const { dispatch, getState, firstTabTabID, secondTabTabID } = setup();
 
     // Change the tab filter.
-    let tabID = 123;
-    dispatch(changeTabFilter(tabID));
+    dispatch(changeTabFilter(firstTabTabID));
 
     // Check if the state update happened properly.
-    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(firstTabTabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toBe(true);
 
     // Check if the URL update happened properly.
     let queryString = getQueryStringFromState(getState());
-    expect(queryString).toContain(`tabID=${tabID}`);
+    expect(queryString).toContain(`tabID=${firstTabTabID}`);
 
     // Change it again and check.
-    tabID = 321;
-    dispatch(changeTabFilter(tabID));
-    expect(urlStateSelectors.getTabFilter(getState())).toBe(tabID);
+    dispatch(changeTabFilter(secondTabTabID));
+    expect(urlStateSelectors.getTabFilter(getState())).toBe(secondTabTabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toBe(true);
     queryString = getQueryStringFromState(getState());
-    expect(queryString).toContain(`tabID=${tabID}`);
+    expect(queryString).toContain(`tabID=${secondTabTabID}`);
   });
 
   it('null value does not appear in the url', function () {
@@ -2149,10 +2220,10 @@ describe('tab selector', function () {
   });
 
   it('can unserialize the tabFilter from URLs', () => {
-    const tabID = 123;
-    const { getState } = _getStoreWithURL({ search: `?tabID=${tabID}` });
+    const { secondTabTabID } = getProfileWithTabs();
+    const { getState } = setup(`?tabID=${secondTabTabID}`);
 
-    expect(urlStateSelectors.getTabFilter(getState())).toEqual(tabID);
+    expect(urlStateSelectors.getTabFilter(getState())).toEqual(secondTabTabID);
     expect(urlStateSelectors.hasTabFilter(getState())).toEqual(true);
   });
 });

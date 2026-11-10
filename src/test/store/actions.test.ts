@@ -201,16 +201,17 @@ describe('selectors/getFlameGraphTiming', function () {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
 
-    return flameGraphTiming.map(({ callNode, end, length, start }) => {
+    const flameGraphTimingRows = flameGraphTiming.getAllRowsForTesting();
+
+    return flameGraphTimingRows.map(({ callNode, end, length, start }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
         const funcName = funcNames[funcIndex];
         lines.push(
           `${funcName} (${parseFloat(start[i].toFixed(2))}:${parseFloat(
@@ -235,16 +236,16 @@ describe('selectors/getFlameGraphTiming', function () {
     const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(
       store.getState()
     );
-    const callNodeTable = callNodeInfo.getCallNodeTable();
     const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
       store.getState()
     );
+    const flameGraphTimingRows = flameGraphTiming.getAllRowsForTesting();
 
-    return flameGraphTiming.map(({ selfRelative, callNode, length }) => {
+    return flameGraphTimingRows.map(({ selfRelative, callNode, length }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
-        const funcIndex = callNodeTable.func[callNodeIndex];
+        const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
         const funcName = funcNames[funcIndex];
         lines.push(`${funcName} (${selfRelative[i]})`);
       }
@@ -314,6 +315,45 @@ describe('selectors/getFlameGraphTiming', function () {
       'A (0:0.25) | D (0.25:1)',
       'B (0:0.25) | E (0.25:0.5) | F (0.5:1)',
       'C (0:0.25) | G (0.5:0.75)',
+    ]);
+  });
+
+  it('computes inverted stacks without combining unrelated same-name nodes', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A
+      B  B  C
+      C     D
+    `);
+
+    const store = storeWithProfile(profile);
+    store.dispatch(changeInvertCallstack(true));
+
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
+      'B (0:0.33) | C (0.33:0.67) | D (0.67:1)',
+      'A (0:0.33) | B (0.33:0.67) | C (0.67:1)',
+      'A (0.33:0.67) | A (0.67:1)',
+    ]);
+  });
+
+  it('orders inverted siblings with the same function name by file name', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      X             Y
+      B[file:b.js]  B[file:a.js]
+    `);
+
+    const store = storeWithProfile(profile);
+    store.dispatch(changeInvertCallstack(true));
+
+    // The root B from a.js comes first, so its caller Y comes first too.
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
+      'B (0:0.5) | B (0.5:1)',
+      'Y (0:0.5) | X (0.5:1)',
     ]);
   });
 

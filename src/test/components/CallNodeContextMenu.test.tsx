@@ -28,6 +28,7 @@ import { updateBrowserConnectionStatus } from 'firefox-profiler/actions/app';
 import { simulateWebChannel } from '../fixtures/mocks/web-channel';
 import { retrieveProfileFromBrowser } from '../../actions/receive-profile';
 import type { GeckoProfile } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 describe('calltree/CallNodeContextMenu', function () {
   // Provide a store with a useful profile to assert context menu operations off of.
@@ -71,15 +72,19 @@ describe('calltree/CallNodeContextMenu', function () {
 
     const { funcTable } = profile.shared;
 
+    const jsFuncFlags =
+      FuncFlag.HasSource | FuncFlag.HasLine | FuncFlag.HasColumn;
     const funcIndexA = funcNames.indexOf('A.js');
     funcTable.source[funcIndexA] = sourceIndex;
     funcTable.lineNumber[funcIndexA] = 1;
     funcTable.columnNumber[funcIndexA] = 111;
+    funcTable.flags[funcIndexA] |= jsFuncFlags;
 
     const funcIndexB = funcNames.indexOf('B.js');
     funcTable.source[funcIndexB] = sourceIndex;
     funcTable.lineNumber[funcIndexB] = 2;
     funcTable.columnNumber[funcIndexB] = 222;
+    funcTable.flags[funcIndexB] |= jsFuncFlags;
 
     const store = storeWithProfile(profile);
     store.dispatch(changeRightClickedCallNode(0, [funcIndexA, funcIndexB]));

@@ -16,10 +16,32 @@
  * process-thread-list.test.ts.
  */
 
+import * as fs from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
-import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
-import { getProfileRootRange } from 'firefox-profiler/selectors/profile';
+import { MAX_PROFILE_MARKERS_ROWS } from 'firefox-profiler/profile-query/formatters/marker-info';
+import {
+  addRawMarkersToThread,
+  getProfileFromTextSamples,
+  getCounterForThread,
+  getCounterForThreadWithSamples,
+  getProfileWithMarkers,
+  getNetworkMarkers,
+} from '../../fixtures/profiles/processed-profile';
+import {
+  INSTANT,
+  INTERVAL_END,
+  INTERVAL_START,
+} from 'firefox-profiler/app-logic/constants';
+import {
+  getProfile,
+  getProfileRootRange,
+} from 'firefox-profiler/selectors/profile';
 import { storeWithProfile } from '../../fixtures/stores';
+import { profilePublished } from 'firefox-profiler/actions/publish';
+import { triggerLoadingFromUrl } from 'firefox-profiler/actions/receive-profile';
+import { changeIncludeIdleSamples } from 'firefox-profiler/actions/profile-view';
 
 describe('ProfileQuerier', function () {
   describe('pushViewRange', function () {
@@ -121,9 +143,8 @@ describe('ProfileQuerier', function () {
       const popResult = await querier.popViewRange();
       expect(popResult.message).toContain('Popped view range');
 
-      // Samples should be back to baseline (or at least different from ranged)
       const afterPopSamples = await querier.threadSamples();
-      expect(afterPopSamples).not.toBe(rangedSamples);
+      expect(afterPopSamples).toEqual(baselineSamples);
     });
 
     it('shows non-empty output after pushing a range with samples', async function () {
@@ -205,6 +226,109 @@ describe('ProfileQuerier', function () {
       const hasD = rangedFunctions2.includes('D');
       const hasE = rangedFunctions2.includes('E');
       expect(hasD || hasE).toBe(true);
+    });
+  });
+
+  describe('view range query results', function () {
+    let querier: ProfileQuerier;
+
+    beforeEach(function () {
+      const { profile } = getProfileFromTextSamples(`
+        1000  1010  1020
+        A     A     A
+        B     B     B
+        C     D     E
+      `);
+      const store = storeWithProfile(profile);
+      querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+    });
+
+    async function collectQueries(search?: string) {
+      return {
+        samples: await querier.threadSamples('t-0', true, search),
+        functions: await querier.threadFunctions(
+          't-0',
+          { searchString: search },
+          true
+        ),
+        topDown: await querier.threadSamplesTopDown(
+          't-0',
+          undefined,
+          true,
+          search
+        ),
+        bottomUp: await querier.threadSamplesBottomUp(
+          't-0',
+          undefined,
+          true,
+          search
+        ),
+      };
+    }
+
+    it.each(['pop', 'clear'] as const)(
+      '%s restores full-profile query results and searches',
+      async function (action) {
+        const baseline = await collectQueries();
+        const baselineSearch = await collectQueries('C');
+        expect(baselineSearch.functions.functions.map((f) => f.name)).toEqual([
+          'C',
+        ]);
+        expect(baselineSearch.samples.topFunctionsBySelf).toContainEqual(
+          expect.objectContaining({ name: 'C', selfSamples: 1 })
+        );
+        expect(baselineSearch.topDown.regularCallTree.totalSamples).toBe(1);
+        expect(baselineSearch.bottomUp.invertedCallTree?.totalSamples).toBe(1);
+
+        await querier.pushViewRange('5ms,21ms');
+        const narrowed = await collectQueries();
+        expect(narrowed.samples.topFunctionsBySelf).not.toContainEqual(
+          expect.objectContaining({ name: 'C' })
+        );
+        const narrowedSearch = await collectQueries('C');
+        expect(narrowedSearch.samples.topFunctionsByTotal).toEqual([]);
+        expect(narrowedSearch.functions.functions).toEqual([]);
+        expect(narrowedSearch.topDown.regularCallTree.children).toEqual([]);
+        expect(narrowedSearch.bottomUp.invertedCallTree?.children).toEqual([]);
+
+        if (action === 'pop') {
+          await querier.popViewRange();
+        } else {
+          await querier.clearViewRange();
+        }
+        expect((await querier.getStatus()).viewRanges).toEqual([]);
+        expect(await collectQueries()).toEqual(baseline);
+        expect(await collectQueries('C')).toEqual(baselineSearch);
+
+        await querier.pushViewRange('0ms,15ms');
+        await querier.popViewRange();
+        expect(await collectQueries()).toEqual(baseline);
+        expect(await collectQueries('C')).toEqual(baselineSearch);
+      }
+    );
+
+    it('pop restores the preceding zoom and clear restores the full profile', async function () {
+      const baseline = await collectQueries();
+      await querier.pushViewRange('0ms,15ms');
+      const outer = await collectQueries();
+      const outerSearch = await collectQueries('C');
+
+      await querier.pushViewRange('5ms,15ms');
+      await collectQueries();
+      await collectQueries('C');
+      await querier.popViewRange();
+      expect((await querier.getStatus()).viewRanges).toHaveLength(1);
+      expect(await collectQueries()).toEqual(outer);
+      expect(await collectQueries('C')).toEqual(outerSearch);
+
+      await querier.pushViewRange('5ms,15ms');
+      await collectQueries();
+      await querier.clearViewRange();
+      expect((await querier.getStatus()).viewRanges).toEqual([]);
+      expect(await collectQueries()).toEqual(baseline);
     });
   });
 
@@ -344,6 +468,265 @@ describe('ProfileQuerier', function () {
     });
   });
 
+  describe('counters', function () {
+    function profileWithMemoryCounter() {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+        B  B  B
+      `);
+      const counter = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+        hasCountNumber: true,
+      });
+      profile.counters = [counter];
+      return { profile, counter };
+    }
+
+    function querierFor(profile: Parameters<typeof storeWithProfile>[0]) {
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('counterList returns a schema-driven summary per counter', async function () {
+      const { profile, counter } = profileWithMemoryCounter();
+      const result = await querierFor(profile).counterList();
+
+      expect(result.counters).toHaveLength(1);
+      expect(result.counters[0].counterHandle).toBe('c-0');
+      expect(result.counters[0].label).toBe('Memory');
+      expect(result.counters[0].pid).toBe(counter.pid);
+      expect(result.counters[0].processIndex).toBeGreaterThanOrEqual(0);
+      expect(result.counters[0].processName).toBeTruthy();
+      expect(
+        result.counters[0].stats.some((s) => s.source === 'count-range')
+      ).toBe(true);
+    });
+
+    it('orders counters by display.sortWeight, not profile order', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+      `);
+      // Listed Memory-first, but Bandwidth (sortWeight 10) should sort before
+      // Memory (sortWeight 20), matching the timeline track order.
+      const memory = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+      });
+      const bandwidth = getCounterForThread(profile.threads[0], 0, {
+        name: 'eth0',
+        category: 'Bandwidth',
+      });
+      profile.counters = [memory, bandwidth];
+
+      const result = await querierFor(profile).counterList();
+
+      expect(result.counters.map((c) => c.label)).toEqual([
+        'Bandwidth',
+        'Memory',
+      ]);
+      expect(result.counters.map((c) => c.counterHandle)).toEqual([
+        'c-1',
+        'c-0',
+      ]);
+    });
+
+    it('profileInfo nests each counter under its owning process', async function () {
+      const { profile, counter } = profileWithMemoryCounter();
+      const info = await querierFor(profile).profileInfo();
+
+      const owningProcess = info.processes.find((p) => p.pid === counter.pid);
+      expect(owningProcess).toBeDefined();
+      expect(owningProcess!.counters?.map((c) => c.counterHandle)).toEqual([
+        'c-0',
+      ]);
+    });
+
+    it('counterInfo resolves a counter by handle', async function () {
+      const { profile } = profileWithMemoryCounter();
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.counterHandle).toBe('c-0');
+      expect(info.description).toBe('My Description');
+      expect(info.sampleCount).toBeGreaterThan(0);
+    });
+
+    it('counterInfo throws for an unknown handle', async function () {
+      const { profile } = profileWithMemoryCounter();
+      await expect(querierFor(profile).counterInfo('c-9')).rejects.toThrow(
+        'Unknown counter c-9'
+      );
+    });
+
+    it('returns no counters for a profile without any', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2
+        A  A  A
+      `);
+
+      const querier = querierFor(profile);
+      const list = await querier.counterList();
+
+      expect(list.counters).toEqual([]);
+      await expect(querier.counterInfo('c-0')).rejects.toThrow(
+        'Unknown counter c-0'
+      );
+    });
+
+    it('reports counter values over time', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4  5  6  7  8  9
+        A  A  A  A  A  A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        {
+          count: [0, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000],
+          length: 10,
+        },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.overTime.length).toBeGreaterThan(0);
+      // Accumulated counters report a per-bucket level, delta, and share of peak.
+      expect(info.overTime.every((b) => b.delta !== undefined)).toBe(true);
+      expect(info.overTime.every((b) => b.percentage !== undefined)).toBe(true);
+      expect(info.overTime[0].startTimeName).toMatch(/^ts-/);
+      // Memory only grows here, so the last level is at least the first.
+      const first = info.overTime[0].value;
+      const last = info.overTime[info.overTime.length - 1].value;
+      expect(last).toBeGreaterThanOrEqual(first);
+      // The sparkline is of fixed width.
+      expect(info.graph.length).toBe(50);
+    });
+
+    it('renders a zero delta as a bare "0", without sign or unit', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4
+        A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: [0, 0, 0, 0, 0], length: 5 },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      // Memory never changes here, so every bucket's delta is zero.
+      expect(info.overTime.length).toBeGreaterThan(0);
+      for (const bucket of info.overTime) {
+        expect(bucket.delta).toBe(0);
+        expect(bucket.formattedDelta).toBe('0');
+      }
+    });
+
+    it('gives the graph a fixed width, wider than the over-time buckets', async function () {
+      const columns = Array.from({ length: 60 }, (_, i) => i);
+      const { profile } = getProfileFromTextSamples(
+        `${columns.join('  ')}\n${columns.map(() => 'A').join('  ')}`
+      );
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: columns.map(() => 1000), length: 60 },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.overTime.length).toBe(10);
+      expect(info.graph.length).toBe(50);
+    });
+
+    it('reports a per-bucket amount (no delta) for rate counters', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  1  2  3  4  5  6  7  8  9
+        A  A  A  A  A  A  A  A  A  A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        { count: [0, 10, 20, 30, 40, 50, 60, 70, 80, 90], length: 10 },
+        'eth0',
+        'Bandwidth'
+      );
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.graphType).toBe('line-rate');
+      expect(info.overTime.length).toBeGreaterThan(0);
+      // Rate counters report an amount per bucket (no level/delta) and a share
+      // of the range total.
+      expect(info.overTime.every((b) => b.delta === undefined)).toBe(true);
+      expect(info.overTime.every((b) => b.percentage !== undefined)).toBe(true);
+      expect(info.graph.length).toBeGreaterThan(0);
+    });
+
+    it('reports range times relative to the profile start, not double-offset', async function () {
+      // Profile that does not start at zero.
+      const { profile } = getProfileFromTextSamples(`
+        1000  1010  1020
+        A     A     A
+      `);
+      const counter = getCounterForThread(profile.threads[0], 0, {
+        name: 'malloc',
+        category: 'Memory',
+      });
+      profile.counters = [counter];
+
+      const info = await querierFor(profile).counterInfo('c-0');
+
+      expect(info.rangeStart).not.toBeNull();
+      // The first sample sits at the profile start, so this is 0, not 1000.
+      expect(info.rangeStart).toBe(0);
+      expect(info.context.rootRange.start).toBe(1000);
+    });
+
+    it('excludes the padded boundary samples when zoomed', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        0  10  20  30  40
+        A  A   A   A   A
+      `);
+      const counter = getCounterForThreadWithSamples(
+        profile.threads[0],
+        0,
+        {
+          time: [0, 10, 20, 30, 40],
+          count: [0, 100, 100, 100, 100],
+          length: 5,
+        },
+        'malloc',
+        'Memory'
+      );
+      profile.counters = [counter];
+
+      const querier = querierFor(profile);
+      const startName = querier._timestampManager.nameForTimestamp(15);
+      const endName = querier._timestampManager.nameForTimestamp(35);
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const info = await querier.counterInfo('c-0');
+
+      // Only the samples at 20 and 30 are inside [15, 35]; the boundary samples
+      // at 10 and 40 (which the counter selectors pad the range with) are not.
+      expect(info.rangeSampleCount).toBe(2);
+    });
+  });
+
   describe('threadSamples', function () {
     it('searches all roots when choosing the heaviest stack', async function () {
       const { profile } = getProfileFromTextSamples(`
@@ -364,6 +747,930 @@ describe('ProfileQuerier', function () {
         'X',
         'Y',
       ]);
+    });
+  });
+
+  describe('networkActivity', function () {
+    function querierWithNetwork() {
+      const markers = [
+        ...getNetworkMarkers({
+          id: 1,
+          uri: 'https://a.com/x',
+          startTime: 0,
+          fetchStart: 0,
+          endTime: 40,
+        }),
+        ...getNetworkMarkers({
+          id: 2,
+          uri: 'https://b.com/y',
+          startTime: 20,
+          fetchStart: 20,
+          endTime: 100,
+        }),
+      ];
+      const profile = getProfileWithMarkers(markers);
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('profileInfo includes networkActivity when network markers exist', async function () {
+      const info = await querierWithNetwork().profileInfo();
+      expect(info.networkActivity).not.toBeNull();
+      expect(info.networkActivity!.requestCount).toBe(2);
+      expect(info.networkActivity!.slowest.length).toBeGreaterThan(0);
+      expect(info.networkActivity!.slowest[0].markerHandle).toMatch(/^m-\d+$/);
+    });
+
+    it('threadInfo includes networkActivity for a thread with network markers', async function () {
+      const info = await querierWithNetwork().threadInfo('t-0');
+      expect(info.networkActivity).not.toBeNull();
+      expect(info.networkActivity!.requestCount).toBe(2);
+    });
+
+    it('networkActivity is null when the profile has no network markers', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        A  A  A
+      `);
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      const info = await querier.profileInfo();
+      expect(info.networkActivity).toBeNull();
+      const threadInfo = await querier.threadInfo('t-0');
+      expect(threadInfo.networkActivity).toBeNull();
+    });
+
+    it('zoom narrows the in-flight numbers', async function () {
+      const querier = querierWithNetwork();
+      const full = await querier.profileInfo();
+      const fullInFlight = full.networkActivity!.inFlightMs;
+
+      // Zoom into a sub-range that only partly overlaps the requests.
+      await querier.pushViewRange('50ms,80ms');
+      const zoomed = await querier.profileInfo();
+
+      expect(zoomed.networkActivity!.inFlightMs).toBeLessThan(fullInFlight);
+    });
+  });
+
+  describe('threadMarkers', function () {
+    function querierWithMarkers() {
+      const profile = getProfileWithMarkers([
+        ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+        ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+        ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+        ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { querier: new ProfileQuerier(store, rootRange), rootRange };
+    }
+
+    it('restricts the default marker list to the committed (zoom) range', async function () {
+      const { querier, rootRange } = querierWithMarkers();
+
+      const full = await querier.threadMarkers('t-0');
+      expect(full.totalMarkerCount).toBe(4);
+      expect(full.filteredMarkerCount).toBe(4);
+      // Not zoomed: no full-range baseline is reported.
+      expect(full.fullRangeMarkerCount).toBeUndefined();
+
+      // Zoom to a window that only contains the marker at 20ms.
+      const startName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 2
+      );
+      const endName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 18
+      );
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const zoomed = await querier.threadMarkers('t-0');
+      expect(zoomed.totalMarkerCount).toBe(1);
+      expect(zoomed.filteredMarkerCount).toBe(1);
+      // Zoomed: the whole-profile baseline is surfaced alongside the in-view count.
+      expect(zoomed.fullRangeMarkerCount).toBe(4);
+      const zoomedNames = zoomed.byType.map((t) => t.markerName);
+      expect(zoomedNames).toContain('Beta');
+      expect(zoomedNames).not.toContain('Alpha');
+      expect(zoomedNames).not.toContain('Delta');
+    });
+
+    it('restricts the --list output to the committed (zoom) range', async function () {
+      const { querier, rootRange } = querierWithMarkers();
+
+      const startName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 2
+      );
+      const endName = querier._timestampManager.nameForTimestamp(
+        rootRange.start + 18
+      );
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const zoomed = await querier.threadMarkers('t-0', { list: true });
+      const listedNames = zoomed.flatMarkers!.map((m) => m.name);
+      expect(listedNames).toEqual(['Beta']);
+    });
+  });
+
+  describe('saveProfile', function () {
+    it('strips embedded source contents like the web download', async function () {
+      const { profile } = getProfileFromTextSamples(`
+        A
+        B
+      `);
+      const { stringArray } = profile.shared;
+      profile.shared.sources = {
+        length: 1,
+        id: [null],
+        filename: [stringArray.push('app.js') - 1],
+        startLine: [1],
+        startColumn: [1],
+        sourceMapURL: [null],
+        content: ['console.log("secret");'],
+        generatedSource: [null],
+      };
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'profiler-save-'));
+      try {
+        const outPath = path.join(dir, 'out.json');
+        const result = await querier.saveProfile(outPath, false);
+        expect(result.format).toBe('json');
+
+        const saved = JSON.parse(fs.readFileSync(outPath, 'utf-8'));
+        expect(saved.shared.sources.content).toEqual([null]);
+        expect(saved.shared.sources.length).toBe(1);
+        // The in-memory profile is untouched.
+        expect(getProfile(store.getState()).shared.sources.content).toEqual([
+          'console.log("secret");',
+        ]);
+      } finally {
+        fs.rmSync(dir, { recursive: true, force: true });
+      }
+    });
+  });
+
+  describe('permalink', function () {
+    function querierWithSamples() {
+      const { profile } = getProfileFromTextSamples(`
+        0   10  20
+        A   A   A
+        B   B   B
+        C   D   E
+      `);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { store, querier: new ProfileQuerier(store, rootRange) };
+    }
+
+    it('rejects profiles that are not reachable by URL', async function () {
+      const { querier } = querierWithSamples();
+      await expect(querier.permalink()).rejects.toThrow(
+        'Publishing from profiler-cli is not supported yet'
+      );
+    });
+
+    it('builds a public URL that carries the session state', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(profilePublished('abc123', 'my profile', null));
+      await querier.threadSelect('t-0');
+      await querier.pushViewRange('5,25');
+      querier.filterPush({ type: 'merge', funcIndexes: [0] });
+
+      const result = await querier.permalink();
+      expect(result.shortUrl).toBeNull();
+      const url = new URL(result.url);
+      expect(url.origin).toBe('https://profiler.firefox.com');
+      expect(url.pathname).toBe('/public/abc123/calltree/');
+      expect(url.searchParams.get('thread')).toBe('0');
+      // Zoom ranges are given in seconds and serialized as start + duration in ms.
+      expect(url.searchParams.get('range')).toBe('5000m20000');
+      expect(url.searchParams.get('transforms')).toBe('mf-0');
+      expect(url.searchParams.get('profileName')).toBe('my profile');
+    });
+
+    it('layers ephemeral view settings on top of the session state', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(profilePublished('abc123', 'my profile', null));
+      // The CLI loader excludes idle samples by default, unlike the web.
+      store.dispatch(changeIncludeIdleSamples(false));
+
+      const result = await querier.permalink({
+        tab: 'calltree',
+        callTreeSearch: 'A',
+        includeIdle: true,
+        invertCallstack: true,
+        sampleFilters: [{ type: 'merge', funcIndexes: [1] }],
+      });
+      const url = new URL(result.url);
+      expect(url.searchParams.get('search')).toBe('A');
+      expect(url.searchParams.has('hideIdleSamples')).toBe(false);
+      expect(url.searchParams.has('invertCallstack')).toBe(true);
+      expect(url.searchParams.get('transforms')).toBe('mf-1');
+
+      // None of it leaks into the session.
+      const status = await querier.getStatus();
+      expect(status.filterStacks).toEqual([]);
+      const plain = new URL((await querier.permalink()).url);
+      expect(plain.searchParams.get('search')).toBeNull();
+      expect(plain.searchParams.has('hideIdleSamples')).toBe(true);
+      expect(plain.searchParams.has('invertCallstack')).toBe(false);
+    });
+
+    it('links to a marker view with the marker selected in its thread', async function () {
+      const profile = getProfileWithMarkers(
+        [['Parent marker', 10, null, { type: 'tracing', category: 'Test' }]],
+        [['GPU marker', 20, null, { type: 'tracing', category: 'Test' }]]
+      );
+      const store = storeWithProfile(profile);
+      store.dispatch(profilePublished('abc123', 'p', null));
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+      await querier.threadSelect('t-0');
+      const markers = await querier.threadMarkers('t-1', { list: true });
+      const handle = markers.flatMarkers![0].handle;
+
+      const result = await querier.permalink({
+        tab: 'marker-table',
+        markerHandle: handle,
+        markerSearch: 'GPU',
+      });
+      const url = new URL(result.url);
+      expect(url.pathname).toBe('/public/abc123/marker-table/');
+      expect(url.searchParams.get('thread')).toBe('1');
+      expect(url.searchParams.get('marker')).toBe('0');
+      expect(url.searchParams.get('markerSearch')).toBe('GPU');
+    });
+
+    it('supports from-url profiles', async function () {
+      const { store, querier } = querierWithSamples();
+      store.dispatch(
+        triggerLoadingFromUrl('https://example.com/profiles/p.json.gz')
+      );
+
+      const result = await querier.permalink();
+      expect(result.url).toStartWith(
+        'https://profiler.firefox.com/from-url/https%3A%2F%2Fexample.com%2Fprofiles%2Fp.json.gz/calltree/'
+      );
+    });
+  });
+
+  describe('session context', function () {
+    /**
+     * Two GeckoMain threads in two processes: t-0 in the parent process and t-1
+     * in the GPU process. Both threads are named "GeckoMain", so the process is
+     * the only thing that tells them apart.
+     */
+    function querierWithTwoProcesses() {
+      const profile = getProfileWithMarkers(
+        [['Parent marker', 10, null, { type: 'tracing', category: 'Test' }]],
+        [['GPU marker', 20, null, { type: 'tracing', category: 'Test' }]]
+      );
+      profile.threads[0].name = 'GeckoMain';
+      profile.threads[0].pid = '111';
+      profile.threads[0].processType = 'default';
+      profile.threads[1].name = 'GeckoMain';
+      profile.threads[1].pid = '222';
+      profile.threads[1].processType = 'gpu';
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return new ProfileQuerier(store, rootRange);
+    }
+
+    it('names the process of each thread in the context', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      const { context } = await querier.profileInfo();
+      expect(context.selectedThreadHandle).toBe('t-0');
+      // The thread name alone ("GeckoMain") does not say which process this is.
+      expect(context.selectedThreads).toEqual([
+        { threadIndex: 0, name: 'GeckoMain', processName: 'Parent Process' },
+      ]);
+    });
+
+    it('reports --thread alongside the untouched selection', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      const result = await querier.threadMarkers('t-1');
+      // The body reports t-1, so the result-scoped fields must too, while the
+      // selection stays on t-0 because `--thread` does not select anything.
+      expect(result.threadHandle).toBe('t-1');
+      expect(result.context.resultThreadHandle).toBe('t-1');
+      expect(result.context.resultThreads).toEqual([
+        { threadIndex: 1, name: 'GeckoMain', processName: 'GPU Process' },
+      ]);
+      expect(result.context.selectedThreadHandle).toBe('t-0');
+      expect(result.context.selectedThreads).toEqual([
+        { threadIndex: 0, name: 'GeckoMain', processName: 'Parent Process' },
+      ]);
+    });
+
+    it('reports the queried marker thread alongside the selection', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      // Find the handle of the marker living in the GPU process thread.
+      const markers = await querier.threadMarkers('t-1', { list: true });
+      const gpuMarker = markers.flatMarkers!.find(
+        (m) => m.name === 'GPU marker'
+      );
+      expect(gpuMarker).toBeDefined();
+
+      const info = await querier.markerInfo(gpuMarker!.handle);
+      expect(info.threadHandle).toBe('t-1');
+      expect(info.context.resultThreadHandle).toBe('t-1');
+      expect(info.context.resultThreads).toEqual([
+        { threadIndex: 1, name: 'GeckoMain', processName: 'GPU Process' },
+      ]);
+      expect(info.context.selectedThreadHandle).toBe('t-0');
+    });
+
+    it('leaves the result-scoped fields empty without --thread', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-1');
+
+      const { context } = await querier.threadMarkers();
+      expect(context.selectedThreadHandle).toBe('t-1');
+      expect(context.resultThreadHandle).toBeNull();
+      expect(context.resultThreads).toEqual([]);
+    });
+
+    it('leaves the result-scoped fields empty when --thread names the selected thread', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-1');
+
+      // Passing the thread that is already selected is not a divergence, so the
+      // header must not grow a redundant "Selected:" segment.
+      const { context } = await querier.threadMarkers('t-1');
+      expect(context.selectedThreadHandle).toBe('t-1');
+      expect(context.resultThreadHandle).toBeNull();
+      expect(context.resultThreads).toEqual([]);
+    });
+
+    it('reports "profile logs --thread" alongside the selection', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      const { context } = await querier.profileLogs({ thread: 't-1' });
+      expect(context.resultThreadHandle).toBe('t-1');
+      expect(context.resultThreads).toEqual([
+        { threadIndex: 1, name: 'GeckoMain', processName: 'GPU Process' },
+      ]);
+      expect(context.selectedThreadHandle).toBe('t-0');
+    });
+
+    it('reports the selected thread for "profile logs" across all threads', async function () {
+      const querier = querierWithTwoProcesses();
+      await querier.threadSelect('t-0');
+
+      // Without --thread, "profile logs" spans every thread, so the selected
+      // thread stays the right thing to report.
+      const { context } = await querier.profileLogs();
+      expect(context.selectedThreadHandle).toBe('t-0');
+      expect(context.resultThreadHandle).toBeNull();
+    });
+  });
+
+  describe('threadList', function () {
+    // Three threads in two processes, with deliberately non-monotonic CPU so
+    // sorting is observable: t-0 idles, t-1 is the busiest, t-2 is in between.
+    function querierWithThreads() {
+      const { profile } = getProfileFromTextSamples(
+        'A  A  A',
+        'B  B  B',
+        'C  C  C'
+      );
+      profile.meta.sampleUnits = {
+        time: 'ms',
+        eventDelay: 'ms',
+        threadCPUDelta: 'µs',
+      };
+
+      const setup = [
+        {
+          name: 'GeckoMain',
+          processName: 'Parent Process',
+          pid: '111',
+          tid: 1,
+          // First delta is ignored (no preceding interval), so this is 1ms.
+          cpuDelta: [5000, 500, 500],
+          instantMarkers: 1,
+          // Threads with only instant markers can't tell a derived marker count
+          // apart from the raw marker table length, so the busiest thread gets a
+          // start/end pair: 2 raw rows that derive into 1 marker.
+          intervalPairs: 0,
+        },
+        {
+          name: 'Renderer',
+          processName: 'GPU Process',
+          pid: '222',
+          tid: 2,
+          cpuDelta: [0, 4000, 4000],
+          instantMarkers: 2,
+          intervalPairs: 1,
+        },
+        {
+          name: 'Compositor',
+          processName: 'Parent Process',
+          pid: '111',
+          tid: 3,
+          cpuDelta: [0, 1000, 1000],
+          instantMarkers: 2,
+          intervalPairs: 0,
+        },
+      ];
+
+      profile.threads.forEach((thread, index) => {
+        const { name, processName, pid, tid, cpuDelta } = setup[index];
+        const { instantMarkers, intervalPairs } = setup[index];
+        thread.name = name;
+        thread.processName = processName;
+        thread.pid = pid;
+        thread.tid = tid;
+        thread.samples.threadCPUDelta = cpuDelta;
+        addRawMarkersToThread(thread, profile.shared, [
+          ...Array.from({ length: instantMarkers }, (_, i) => ({
+            name: `Marker${index}-${i}`,
+            startTime: i + 1,
+            endTime: null,
+            phase: INSTANT,
+          })),
+          ...Array.from({ length: intervalPairs }, (_, i) => [
+            {
+              name: `Interval${index}-${i}`,
+              startTime: i + 1,
+              endTime: null,
+              phase: INTERVAL_START,
+            },
+            {
+              name: `Interval${index}-${i}`,
+              startTime: null,
+              endTime: i + 2,
+              phase: INTERVAL_END,
+            },
+          ]).flat(),
+        ]);
+      });
+
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    it('lists every thread as a flat table, busiest first by default', async function () {
+      const result = await querierWithThreads().threadList();
+
+      expect(result.type).toBe('thread-list');
+      expect(result.totalThreadCount).toBe(3);
+      expect(result.processCount).toBe(2);
+      expect(result.sort).toBe('cpu');
+      expect(result.hiddenByLimit).toBe(0);
+      // Sorted by CPU: t-1 (8ms) > t-2 (2ms) > t-0 (1ms).
+      expect(result.threads.map((t) => t.threadHandle)).toEqual([
+        't-1',
+        't-2',
+        't-0',
+      ]);
+
+      const [renderer] = result.threads;
+      expect(renderer.name).toBe('Renderer');
+      expect(renderer.processName).toBe('GPU Process');
+      expect(renderer.pid).toBe('222');
+      expect(renderer.tid).toBe(2);
+      expect(renderer.cpuMs).toBeCloseTo(8);
+      expect(renderer.markerCount).toBe(3);
+      // The default selection is the first thread, not the busiest one.
+      expect(result.threads.map((t) => t.selected)).toEqual([
+        false,
+        false,
+        true,
+      ]);
+    });
+
+    it('supports the index, markers and name orderings', async function () {
+      const querier = querierWithThreads();
+
+      expect(
+        (await querier.threadList({ sort: 'index' })).threads.map(
+          (t) => t.threadHandle
+        )
+      ).toEqual(['t-0', 't-1', 't-2']);
+      expect(
+        (await querier.threadList({ sort: 'markers' })).threads.map(
+          (t) => t.markerCount
+        )
+      ).toEqual([3, 2, 1]);
+      // By process name first, then thread name.
+      expect(
+        (await querier.threadList({ sort: 'name' })).threads.map(
+          (t) => `${t.processName}/${t.name}`
+        )
+      ).toEqual([
+        'GPU Process/Renderer',
+        'Parent Process/Compositor',
+        'Parent Process/GeckoMain',
+      ]);
+    });
+
+    it('filters with a search string over name, process name, pid and tid', async function () {
+      const querier = querierWithThreads();
+
+      const byThreadName = await querier.threadList({
+        searchString: 'compositor',
+      });
+      expect(byThreadName.threads.map((t) => t.threadHandle)).toEqual(['t-2']);
+      expect(byThreadName.searchQuery).toBe('compositor');
+      // The unfiltered totals stay visible so the table says what it hid.
+      expect(byThreadName.totalThreadCount).toBe(3);
+
+      const byProcess = await querier.threadList({ searchString: 'Parent' });
+      expect(byProcess.threads.map((t) => t.threadHandle)).toEqual([
+        't-2',
+        't-0',
+      ]);
+
+      const byPid = await querier.threadList({ searchString: '222' });
+      expect(byPid.threads.map((t) => t.threadHandle)).toEqual(['t-1']);
+
+      const noMatch = await querier.threadList({ searchString: 'nonesuch' });
+      expect(noMatch.threads).toEqual([]);
+    });
+
+    it('applies --limit and reports how many rows it hid', async function () {
+      const querier = querierWithThreads();
+
+      const limited = await querier.threadList({ limit: 2 });
+      expect(limited.threads.map((t) => t.threadHandle)).toEqual([
+        't-1',
+        't-2',
+      ]);
+      expect(limited.hiddenByLimit).toBe(1);
+
+      // 0 means "no limit", like `thread network --limit 0`.
+      const unlimited = await querier.threadList({ limit: 0 });
+      expect(unlimited.threads).toHaveLength(3);
+      expect(unlimited.hiddenByLimit).toBe(0);
+    });
+
+    it('reports the same marker count as threadMarkers for the same thread', async function () {
+      const querier = querierWithThreads();
+
+      const list = await querier.threadList();
+      for (const item of list.threads) {
+        const markers = await querier.threadMarkers(item.threadHandle);
+        expect(item.markerCount).toBe(markers.totalMarkerCount);
+      }
+    });
+
+    it('counts derived markers, not raw marker table rows', async function () {
+      const querier = querierWithThreads();
+      const rawMarkerCounts = getProfile(querier._store.getState()).threads.map(
+        (thread) => thread.markers.length
+      );
+
+      const list = await querier.threadList();
+      const renderer = list.threads.find((t) => t.threadHandle === 't-1');
+
+      // t-1 carries 2 instant markers plus one start/end pair: 4 raw rows that
+      // derive into 3 markers. Counting `thread.markers.length` instead would
+      // report 4 and disagree with `thread markers`, which reports 3.
+      expect(rawMarkerCounts[1]).toBe(4);
+      expect(renderer!.markerCount).toBe(3);
+      expect(renderer!.markerCount).not.toBe(rawMarkerCounts[1]);
+    });
+  });
+
+  describe('profileMarkers', function () {
+    // Three threads. The searched marker ("Gamma") exists only on t-2, which is
+    // never the default selection — that is the "which process handled this?"
+    // case `thread markers` cannot answer without a per-thread shell loop.
+    function querierWithThreads() {
+      const profile = getProfileWithMarkers(
+        [['Alpha', 10, null]],
+        [['Beta', 20, null]],
+        [
+          ['Gamma', 30, 40],
+          ['Gamma', 50, null],
+        ]
+      );
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { querier: new ProfileQuerier(store, rootRange), rootRange };
+    }
+
+    it('finds markers on a thread that is not the selected one', async function () {
+      const { querier } = querierWithThreads();
+
+      // Sanity check: the default (selected) thread has no Gamma at all, which
+      // is why a cross-thread search is needed.
+      const selectedOnly = await querier.threadMarkers(undefined, {
+        searchString: 'Gamma',
+        list: true,
+      });
+      expect(selectedOnly.filteredMarkerCount).toBe(0);
+
+      const result = await querier.profileMarkers({ searchString: 'Gamma' });
+      expect(result.type).toBe('profile-markers');
+      expect(result.totalCount).toBe(2);
+      expect(result.searchedThreadCount).toBe(3);
+      expect(result.matchingThreadCount).toBe(1);
+      expect(result.markers.map((m) => m.name)).toEqual(['Gamma', 'Gamma']);
+      // Every row carries the thread it was found on — the added column.
+      expect(result.markers.map((m) => m.threadHandle)).toEqual(['t-2', 't-2']);
+      expect(result.byThread).toEqual([
+        expect.objectContaining({ threadHandle: 't-2', count: 2 }),
+      ]);
+    });
+
+    it('returns the same row fields as `thread markers --list`', async function () {
+      const { querier } = querierWithThreads();
+
+      const list = await querier.threadMarkers('t-2', {
+        searchString: 'Gamma',
+        list: true,
+      });
+      const cross = await querier.profileMarkers({ searchString: 'Gamma' });
+
+      expect(list.flatMarkers).toHaveLength(2);
+      // The shared FlatMarkerItem fields must agree row for row; the
+      // cross-thread result adds thread/process identity on top.
+      expect(
+        cross.markers.map(
+          ({ threadHandle, threadName, processName, pid, ...flat }) => flat
+        )
+      ).toEqual(list.flatMarkers);
+    });
+
+    it('aggregates matches across every thread and sorts chronologically', async function () {
+      const profile = getProfileWithMarkers(
+        [['Shared', 30, null]],
+        [['Shared', 10, null]],
+        [['Shared', 20, null]]
+      );
+      const store = storeWithProfile(profile);
+      const querier = new ProfileQuerier(
+        store,
+        getProfileRootRange(store.getState())
+      );
+
+      const result = await querier.profileMarkers({ searchString: 'Shared' });
+      expect(result.totalCount).toBe(3);
+      expect(result.matchingThreadCount).toBe(3);
+      // Merged into one timeline regardless of which thread each came from.
+      expect(result.markers.map((m) => m.threadHandle)).toEqual([
+        't-1',
+        't-2',
+        't-0',
+      ]);
+      // Reported relative to zeroAt (the earliest marker, at 10ms).
+      expect(result.markers.map((m) => m.start)).toEqual([0, 10, 20]);
+    });
+
+    it('restricts the sweep with a thread handle', async function () {
+      const { querier } = querierWithThreads();
+
+      const result = await querier.profileMarkers({
+        searchString: 'Gamma',
+        thread: 't-0',
+      });
+      expect(result.searchedThreadCount).toBe(1);
+      expect(result.totalCount).toBe(0);
+      expect(result.markers).toEqual([]);
+    });
+
+    it('limits the rows returned but keeps the counts exact', async function () {
+      const { querier } = querierWithThreads();
+
+      const result = await querier.profileMarkers({
+        searchString: 'Gamma',
+        limit: 1,
+      });
+      expect(result.markers).toHaveLength(1);
+      // The per-thread breakdown still reports both matches, so the
+      // "which thread?" answer is never truncated by --limit.
+      expect(result.totalCount).toBe(2);
+      expect(result.byThread[0].count).toBe(2);
+    });
+
+    it('returns every match when no limit is given', async function () {
+      const { querier } = querierWithThreads();
+
+      // No default cap, matching `thread markers --list`: a filtered query
+      // answers in full rather than silently dropping matches.
+      const result = await querier.profileMarkers({ searchString: 'Gamma' });
+      expect(result.markers).toHaveLength(2);
+      expect(result.totalCount).toBe(2);
+      expect(result.maxRowsClamped).toBeUndefined();
+    });
+
+    it('does not report a clamp when no rows were dropped', async function () {
+      const { querier } = querierWithThreads();
+
+      // A limit beyond MAX_PROFILE_MARKERS_ROWS cannot be delivered (the reply
+      // would exceed V8's max string length), but this fixture has only 4
+      // markers, so nothing is actually lost and nothing is reported.
+      const result = await querier.profileMarkers({
+        limit: MAX_PROFILE_MARKERS_ROWS + 1,
+      });
+      expect(result.maxRowsClamped).toBeUndefined();
+      expect(result.totalCount).toBe(4);
+      expect(result.markers).toHaveLength(4);
+    });
+
+    it('leaves a limit within the maximum untouched', async function () {
+      const { querier } = querierWithThreads();
+
+      const result = await querier.profileMarkers({ limit: 2 });
+      expect(result.maxRowsClamped).toBeUndefined();
+      expect(result.markers).toHaveLength(2);
+    });
+
+    it('respects the committed (zoom) range', async function () {
+      const { querier } = querierWithThreads();
+
+      // Marker starts are absolute: 10 (t-0), 20 (t-1), 30 and 50 (t-2).
+      // Zoom past everything but the instant Gamma at 50ms.
+      const startName = querier._timestampManager.nameForTimestamp(45);
+      const endName = querier._timestampManager.nameForTimestamp(55);
+      await querier.pushViewRange(`${startName},${endName}`);
+
+      const result = await querier.profileMarkers({ searchString: 'Gamma' });
+      // Only the instant Gamma at 50ms is in view. Its reported start is
+      // relative to zeroAt (the earliest marker, at 10ms), so 40 rather than 50.
+      expect(result.totalCount).toBe(1);
+      expect(result.markers[0].start).toBe(40);
+    });
+
+    it('does not leak its search string into later queries', async function () {
+      const { querier } = querierWithThreads();
+
+      await querier.profileMarkers({ searchString: 'Gamma' });
+
+      // A follow-up unfiltered query must see every marker again.
+      const after = await querier.profileMarkers({});
+      expect(after.totalCount).toBe(4);
+      expect(after.matchingThreadCount).toBe(3);
+    });
+  });
+
+  describe('markerInfoMulti', function () {
+    async function querierWithMarkerHandles() {
+      const profile = getProfileWithMarkers([
+        ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+        ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+        ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+        ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+      ]);
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      const querier = new ProfileQuerier(store, rootRange);
+      // Listing the markers is what hands out the m-N handles.
+      const list = await querier.threadMarkers('t-0', { list: true });
+      return {
+        querier,
+        handles: list.flatMarkers!.map((m) => m.handle),
+      };
+    }
+
+    it('returns one record per handle, in the requested order', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([handles[2], handles[0]]);
+
+      expect(result.type).toBe('marker-info-multi');
+      expect(result.requested).toEqual([handles[2], handles[0]]);
+      expect(result.markers.map((m) => m.name)).toEqual(['Gamma', 'Alpha']);
+      expect(result.errors).toEqual([]);
+    });
+
+    it('expands an inclusive range of handles', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([
+        `${handles[0]}..${handles[2]}`,
+      ]);
+
+      expect(result.requested).toEqual(handles.slice(0, 3));
+      expect(result.markers.map((m) => m.name)).toEqual([
+        'Alpha',
+        'Beta',
+        'Gamma',
+      ]);
+    });
+
+    it('reports an unknown handle per handle and still returns the others', async function () {
+      const { querier, handles } = await querierWithMarkerHandles();
+
+      const result = await querier.markerInfoMulti([
+        handles[0],
+        'm-9999',
+        handles[1],
+      ]);
+
+      expect(result.markers.map((m) => m.name)).toEqual(['Alpha', 'Beta']);
+      expect(result.errors).toEqual([
+        { markerHandle: 'm-9999', error: 'Unknown marker m-9999' },
+      ]);
+    });
+
+    it('rejects a malformed handle spec outright', async function () {
+      const { querier } = await querierWithMarkerHandles();
+
+      await expect(querier.markerInfoMulti(['not-a-handle'])).rejects.toThrow(
+        'Invalid marker handle not-a-handle'
+      );
+    });
+
+    describe('range provenance', function () {
+      // Handle numbering continues across listings, so a range running off the
+      // end of the first thread's listing resolves into the second thread's.
+      async function querierWithTwoListings() {
+        const profile = getProfileWithMarkers(
+          [
+            ['Alpha', 10, null, { type: 'tracing', category: 'Test' }],
+            ['Beta', 20, null, { type: 'tracing', category: 'Test' }],
+          ],
+          [
+            ['Gamma', 30, null, { type: 'tracing', category: 'Test' }],
+            ['Delta', 40, null, { type: 'tracing', category: 'Test' }],
+          ]
+        );
+        const store = storeWithProfile(profile);
+        const rootRange = getProfileRootRange(store.getState());
+        const querier = new ProfileQuerier(store, rootRange);
+        const first = await querier.threadMarkers('t-0', { list: true });
+        const second = await querier.threadMarkers('t-1', { list: true });
+        return {
+          querier,
+          firstHandles: first.flatMarkers!.map((m) => m.handle),
+          secondHandles: second.flatMarkers!.map((m) => m.handle),
+        };
+      }
+
+      it('warns when a range straddles two threads', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+        const spec = `${firstHandles[1]}..${secondHandles[0]}`;
+
+        const result = await querier.markerInfoMulti([spec]);
+
+        // Every handle resolves, so this would otherwise look like a success.
+        expect(result.errors).toEqual([]);
+        expect(result.rangeSpansThreadsWarning).toEqual({
+          ranges: [spec],
+          threadHandles: ['t-0', 't-1'],
+        });
+      });
+
+      it('does not warn for a range inside one thread', async function () {
+        const { querier, firstHandles } = await querierWithTwoListings();
+
+        const result = await querier.markerInfoMulti([
+          `${firstHandles[0]}..${firstHandles[1]}`,
+        ]);
+
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
+
+      it('does not warn when a single-thread range sits next to a handle on another thread', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+
+        // The range is entirely within t-0; only the extra bare handle is on
+        // t-1. Judging the warning on every resolved marker rather than on the
+        // range's own markers made this warn about a range that never spanned
+        // anything.
+        const spec = `${firstHandles[0]}..${firstHandles[1]}`;
+        const result = await querier.markerInfoMulti([spec, secondHandles[0]]);
+
+        expect(result.errors).toEqual([]);
+        expect(result.markers).toHaveLength(3);
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
+
+      it('does not warn for an explicit list of handles from two threads', async function () {
+        const { querier, firstHandles, secondHandles } =
+          await querierWithTwoListings();
+
+        // Typing both handles out is a deliberate comparison, not an accident
+        // of numbering, so it must not be second-guessed.
+        const result = await querier.markerInfoMulti([
+          firstHandles[0],
+          secondHandles[0],
+        ]);
+
+        expect(result.markers).toHaveLength(2);
+        expect(result.rangeSpansThreadsWarning).toBeUndefined();
+      });
     });
   });
 });

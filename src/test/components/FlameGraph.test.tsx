@@ -48,6 +48,7 @@ import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
 import type { CssPixels } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
@@ -80,17 +81,47 @@ describe('FlameGraph', function () {
     expect(drawCalls.length).toBeGreaterThan(0);
   });
 
-  it('ignores invertCallstack and always displays non-inverted', () => {
-    const { getState, dispatch } = setupFlameGraph();
+  it('respects invertCallstack and toggles icicle graph mode', () => {
+    const { getState, dispatch, flushRafCalls } = setupFlameGraph();
     expect(getInvertCallstack(getState())).toBe(false);
+
+    const initialDrawCalls = flushDrawLog();
+
     act(() => {
       dispatch(changeInvertCallstack(true));
     });
-    expect(getInvertCallstack(getState())).toBe(false);
+    expect(getInvertCallstack(getState())).toBe(true);
+    flushRafCalls();
+
+    const icicleDrawCalls = flushDrawLog();
+    expect(icicleDrawCalls.length).toBeGreaterThan(0);
+    expect(icicleDrawCalls).not.toEqual(initialDrawCalls);
+
     act(() => {
       dispatch(changeInvertCallstack(false));
     });
     expect(getInvertCallstack(getState())).toBe(false);
+  });
+
+  it('shows traced timing in icicle graph tooltips', () => {
+    const {
+      dispatch,
+      flushRafCalls,
+      getTooltip,
+      moveMouse,
+      findFillTextPosition,
+    } = setupFlameGraph();
+    flushDrawLog();
+
+    act(() => {
+      dispatch(changeInvertCallstack(true));
+    });
+    flushRafCalls();
+
+    moveMouse(findFillTextPosition('E'));
+    expect(
+      within(ensureExists(getTooltip())).getByText('1.0ms (33%)')
+    ).toBeInTheDocument();
   });
 
   it('shows a tooltip when hovering', () => {
@@ -135,7 +166,7 @@ describe('FlameGraph', function () {
     const valueElement = ensureExists(resourceLabel.nextSibling);
 
     // See https://github.com/testing-library/jest-dom/issues/306
-    // eslint-disable-next-line jest-dom/prefer-to-have-text-content
+    // oxlint-disable-next-line jest-dom/prefer-to-have-text-content
     expect(valueElement.textContent).toBe('libxul.so');
     // But also do a good old snapshot.
     expect(tooltip).toMatchSnapshot();
@@ -326,6 +357,8 @@ function setupFlameGraph() {
     funcTable.lineNumber[funcIndex] = funcIndex + 10;
     funcTable.columnNumber[funcIndex] = funcIndex + 100;
     funcTable.source[funcIndex] = defaultSourceIndex;
+    funcTable.flags[funcIndex] |=
+      FuncFlag.HasLine | FuncFlag.HasColumn | FuncFlag.HasSource;
   }
 
   funcTable.source[funcNamesDict.B] = bSourceIndex;
@@ -443,5 +476,6 @@ function setupFlameGraph() {
     getContextMenu,
     clickMenuItem,
     findFillTextPosition,
+    flushRafCalls,
   };
 }

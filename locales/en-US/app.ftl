@@ -54,6 +54,12 @@ AppViewRouter--error-from-localhost-url-safari =
     this page in { -firefox-brand-name } or Chrome instead.
     .title = Safari cannot import local profiles
 
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    This profile uses a format that is not supported by this version of { -profiler-brand-name }.
+    Try refreshing the page to check if there is an update available for { -profiler-brand-name }.
+
 AppViewRouter--route-not-found--home =
     .specialMessage = The URL you tried to reach was not recognized.
 
@@ -422,8 +428,11 @@ Home--chrome-extension-recording-instructions = Once installed, use the extensio
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Enter filter terms
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Enter filter terms (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -567,11 +576,14 @@ MenuButtons--index--metaInfo-button =
 
 MenuButtons--index--full-view = Full View
 MenuButtons--index--cancel-upload = Cancel Upload
-MenuButtons--index--share-upload =
-    .label = Upload Local Profile
+MenuButtons--index--save =
+    .label = Save…
 
-MenuButtons--index--share-re-upload =
-    .label = Re-upload
+MenuButtons--index--share =
+    .label = Share…
+
+MenuButtons--index--reshare =
+    .label = Re-share…
 
 MenuButtons--index--share-error-uploading =
     .label = Error uploading
@@ -595,6 +607,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symbolicate profile
 MenuButtons--metaInfo--symbolicate-profile = Symbolicate profile
 MenuButtons--metaInfo--attempting-resymbolicate = Attempting to re-symbolicate profile
 MenuButtons--metaInfo--currently-symbolicating = Currently symbolicating profile
+MenuButtons--metaInfo--source-maps = Source maps:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Apply source map…
+    .title = Load a .map file from disk to symbolicate a minified JavaScript bundle, to recover original function names and source locations.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Choose which bundle this source map applies to:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Apply
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Cancel
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Original sources resolved for { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = No stack positions in { $filename } matched this source map.
+MenuButtons--metaInfo--source-map-error-invalid = The selected file is not a valid source map.
+MenuButtons--metaInfo--source-map-error-no-eligible = This profile has no JS bundles with source map URLs.
+MenuButtons--metaInfo--source-map-error-failed = Could not apply this source map to the profile.
 MenuButtons--metaInfo--cpu-model = CPU model:
 MenuButtons--metaInfo--cpu-cores = CPU cores:
 MenuButtons--metaInfo--main-memory = Main memory:
@@ -724,9 +758,15 @@ MenuButtons--publish--renderCheckbox-label-preference = Include preference value
 MenuButtons--publish--renderCheckbox-label-private-browsing = Include the data from private browsing windows
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = This profile contains private browsing data
-MenuButtons--publish--reupload-performance-profile = Re-upload Performance Profile
+MenuButtons--publish--renderCheckbox-label-argument-values = Include JavaScript execution tracing function argument values
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = This profile contains function argument values recorded from the page, which may include personal data
 MenuButtons--publish--share-performance-profile = Share Performance Profile
+MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
+MenuButtons--publish--save-performance-profile = Save Performance Profile
+MenuButtons--publish--local-profile-description = This profile hasn’t been uploaded and will be lost when you close this tab. To keep it, either save it to your computer or upload it using Share.
 MenuButtons--publish--info-description = Upload your profile and make it accessible to anyone with the link.
+MenuButtons--publish--download-info-description = Save this profile as a file on your computer.
 MenuButtons--publish--info-description-default = By default, your personal data is removed.
 MenuButtons--publish--info-description-firefox-nightly2 = This profile is from { -firefox-nightly-brand-name }, so by default most information is included.
 MenuButtons--publish--include-additional-data = Include additional data that may be identifiable
@@ -735,7 +775,7 @@ MenuButtons--publish--upload-title = Uploading profile…
 MenuButtons--publish--cancel-upload = Cancel Upload
 MenuButtons--publish--message-something-went-wrong = Uh oh, something went wrong when uploading the profile.
 MenuButtons--publish--message-try-again = Try again
-MenuButtons--publish--download = Download
+MenuButtons--publish--save = Save
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
 

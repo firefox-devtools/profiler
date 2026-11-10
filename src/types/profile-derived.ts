@@ -19,17 +19,11 @@ import type {
   Tid,
   ProcessType,
   PausedRange,
-  JsAllocationsTable,
-  NativeAllocationsTable,
   RawMarkerTable,
-  FrameTable,
-  FuncTable,
   ResourceTable,
-  NativeSymbolTable,
   JsTracerTable,
   IndexIntoStackTable,
   WeightType,
-  IndexIntoFrameTable,
   SourceTable,
   IndexIntoSourceTable,
   CounterDisplayConfig,
@@ -131,7 +125,7 @@ export type SamplesTable = {
   // This is optional because older profiles didn't have that field.
   eventDelay?: Array<Milliseconds | null>;
   stack: Array<IndexIntoStackTable | null>;
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[];
@@ -150,9 +144,6 @@ export type SamplesTable = {
   category: Uint8Array;
   // The subcategory of each sample's stack in the unfiltered thread.
   subcategory: Uint16Array | Uint8Array;
-  // This property isn't present in normal threads. However it's present for
-  // merged threads, so that we know the origin thread for these samples.
-  threadId?: Tid[];
   argumentValues?: Array<number | null>;
   length: number;
 };
@@ -166,7 +157,7 @@ export type SampleCategoriesAndSubcategories = {
 
 export type SamplesLikeTable = {
   stack: Array<IndexIntoStackTable | null>;
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // An optional weight array. If not present, then the weight is assumed to be 1.
   // See the WeightType type for more information.
   weight: null | number[];
@@ -176,7 +167,7 @@ export type SamplesLikeTable = {
 };
 
 export type CounterSamplesTable = {
-  time: Milliseconds[];
+  time: Float64Array<ArrayBuffer>;
   // The number of times the Counter's "number" was changed since the previous sample.
   // This property was mandatory until the format version 42, it was made optional in 43.
   number?: number[];
@@ -185,6 +176,55 @@ export type CounterSamplesTable = {
   argumentValues?: Array<number | null>;
   length: number;
 };
+
+/**
+ * The `JsAllocationsTable` type of the derived thread.
+ *
+ * Differs from `RawJsAllocationsTable` in that the `time` column is always a
+ * `Float64Array`.
+ */
+export type JsAllocationsTable = {
+  time: Float64Array<ArrayBuffer>;
+  className: string[];
+  typeName: string[];
+  coarseType: string[];
+  weight: Bytes[];
+  weightType: 'bytes';
+  inNursery: boolean[];
+  stack: Array<IndexIntoStackTable | null>;
+  length: number;
+};
+
+/**
+ * The `UnbalancedNativeAllocationsTable` type of the derived thread.
+ *
+ * Differs from `RawUnbalancedNativeAllocationsTable` in that the `time` column
+ * is always a `Float64Array`.
+ */
+export type UnbalancedNativeAllocationsTable = {
+  time: Float64Array<ArrayBuffer>;
+  weight: Bytes[];
+  weightType: 'bytes';
+  stack: Array<IndexIntoStackTable | null>;
+  argumentValues?: Array<number | null>;
+  length: number;
+};
+
+/**
+ * The `BalancedNativeAllocationsTable` type of the derived thread.
+ */
+export type BalancedNativeAllocationsTable =
+  UnbalancedNativeAllocationsTable & {
+    memoryAddress: number[];
+    threadId: number[];
+  };
+
+/**
+ * The `NativeAllocationsTable` type of the derived thread.
+ */
+export type NativeAllocationsTable =
+  | UnbalancedNativeAllocationsTable
+  | BalancedNativeAllocationsTable;
 
 export type Counter = {
   name: string;
@@ -200,7 +240,8 @@ export type Counter = {
  * The `StackTable` type of the derived thread.
  *
  * The only difference from the `RawStackTable` is that the `StackTable` has a
- * `category` and a `subcategory` column.
+ * `category` and a `subcategory` column, and that the `StackTable` always uses
+ * a typed array for the `frame` column.
  *
  * The category of a stack node is always non-null and is derived from a stack's
  * frame and its prefix. Frames can have null categories, stacks cannot. If a
@@ -225,14 +266,79 @@ export type Counter = {
  * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
 export type StackTable = {
-  // Same as in RawStackTable
-  frame: IndexIntoFrameTable[];
-  prefix: Array<IndexIntoStackTable | null>;
+  frame: Int32Array;
+  // Maps each stack to its parent stack, or -1 if it is a root.
+  prefix: Int32Array;
   length: number;
 
   // Derived from RawStackTable + FrameTable
   category: Uint8Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoCategoryList>
   subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>; // represents a Map<IndexIntoStackTable, IndexIntoSubcategoryListForCategory>
+};
+
+/**
+ * The `FrameTable` type of the derived thread.
+ *
+ * Differs from `RawFrameTable` in that all columns are always stored as typed
+ * arrays. In `RawFrameTable`, these columns may be either regular arrays or
+ * typed arrays, since regular arrays are convenient during construction.
+ *
+ * See the comment on `RawFrameTable` for the semantics of the `flags` column
+ * and how it relates to the other columns.
+ *
+ * The `category` and `subcategory` columns use the same widths as the ones on
+ * the `StackTable`, since the stack table's columns are computed from these.
+ */
+export type FrameTable = {
+  flags: Uint8Array<ArrayBuffer>;
+  address: Uint32Array<ArrayBuffer>;
+  category: Uint8Array<ArrayBuffer>;
+  subcategory: Uint8Array<ArrayBuffer> | Uint16Array<ArrayBuffer>;
+  func: Int32Array<ArrayBuffer>;
+  lib: Int32Array<ArrayBuffer>;
+  nativeSymbol: Int32Array<ArrayBuffer>;
+  innerWindowID: Float64Array<ArrayBuffer>;
+  line: Int32Array<ArrayBuffer>;
+  column: Int32Array<ArrayBuffer>;
+  originalLocation: Int32Array<ArrayBuffer>;
+  length: number;
+};
+
+/**
+ * The `FuncTable` type of the derived thread.
+ *
+ * Differs from `RawFuncTable` in that all columns are always stored as typed
+ * arrays. In `RawFuncTable`, these columns may be either regular arrays or
+ * typed arrays, since regular arrays are convenient during construction.
+ *
+ * See the comment on `RawFuncTable` for the semantics of the `flags` column
+ * and how it relates to the other columns.
+ */
+export type FuncTable = {
+  flags: Uint8Array<ArrayBuffer>;
+  name: Int32Array<ArrayBuffer>;
+  resource: Int32Array<ArrayBuffer>;
+  source: Int32Array<ArrayBuffer>;
+  lineNumber: Int32Array<ArrayBuffer>;
+  columnNumber: Int32Array<ArrayBuffer>;
+  originalLocation: Int32Array<ArrayBuffer>;
+  length: number;
+};
+
+/**
+ * The `NativeSymbolTable` type of the derived thread.
+ *
+ * Differs from `RawNativeSymbolTable` in that all columns are always stored as
+ * typed arrays, and `functionSize` uses `-1` as the sentinel for "size unknown"
+ * (rather than `null`).
+ */
+export type NativeSymbolTable = {
+  libIndex: Int32Array<ArrayBuffer>;
+  address: Uint32Array<ArrayBuffer>;
+  name: Int32Array<ArrayBuffer>;
+  // `-1` means "size unknown".
+  functionSize: Int32Array<ArrayBuffer>;
+  length: number;
 };
 
 /**
@@ -627,7 +733,7 @@ export type GlobalTrack =
     }
   | {
       readonly type: 'screenshots';
-      readonly id: string;
+      readonly markerName: string;
       readonly threadIndex: ThreadIndex;
     }
   | { readonly type: 'visual-progress' }
@@ -676,25 +782,67 @@ export type RemoveProfileInformation = {
   readonly shouldRemovePreferenceValues: boolean;
   // Remove the private browsing data if it's true.
   readonly shouldRemovePrivateBrowsingData: boolean;
+  // Remove the argument values captured by the JS execution tracer if it's true.
+  readonly shouldRemoveArgumentValues: boolean;
 };
 
 /**
- * This const enum is used to decide how to highlight and stripe areas in the
- * timeline.
+ * The activity graph draws one fill per category per bucket. Every sample
+ * contributes to exactly one bucket. This is only about how a sample is
+ * *drawn*: unlike SampleRelationToNode, it makes no distinction between a
+ * node's self samples and its non-self samples, because both are drawn with
+ * the selection highlight fill.
  */
-export const enum SelectedState {
-  // Samples can be filtered through various operations, like searching, or
-  // call tree transforms.
-  FilteredOutByTransform,
-  // This sample is selected because either the tip or an ancestor call node matches
-  // the currently selected call node.
-  Selected,
-  // This call node is not selected, and the stacks are ordered before the selected
-  // call node as sorted by the getTreeOrderComparator.
-  UnselectedOrderedBeforeSelected,
-  // This call node is not selected, and the stacks are ordered after the selected
-  // call node as sorted by the getTreeOrderComparator.
-  UnselectedOrderedAfterSelected,
+export const enum FillBucket {
+  FilteredOutByTransform = 0,
+  Selected = 1,
+  UnselectedOrderedBeforeSelected = 2,
+  UnselectedOrderedAfterSelected = 3,
+}
+
+// The bit in a SampleRelationToNode which says that the sample's stack *ends*
+// at the node, rather than just passing through it. It is deliberately above
+// the bits used by FillBucket, so that a relation's fill bucket can be
+// recovered with a single mask - see SampleRelations.fillBucket.
+const SELF_FLAG = 1 << 2;
+
+// Masks a SampleRelationToNode down to its FillBucket.
+export const FILL_BUCKET_MASK = 3;
+
+/**
+ * Describes how a sample relates to one particular call node. Usually that node
+ * is the selected call node, but the same relation is useful for other nodes,
+ * too, e.g. for the hovered node in the flame graph.
+ *
+ * "Total" means that the sample's stack runs through the node, so the sample
+ * counts towards the node's total time. "AndSelf" additionally means that the
+ * sample's stack *ends* at the node, so it also counts towards the node's self
+ * time. Keeping those two apart lets the sidebar and the flame graph tooltip
+ * compute their timings from the same array that the activity graph uses to
+ * decide how to highlight and stripe its areas.
+ *
+ * "Before" and "After" describe samples which are unrelated to the node, and
+ * order them relative to it as sorted by getTreeOrderComparator. The activity
+ * graph relies on that ordering so that samples from the same subtree clump
+ * together in the graph.
+ *
+ * Every member is written as its FillBucket, optionally with SELF_FLAG on top.
+ * That is what makes SampleRelations.fillBucket a single mask rather than a
+ * table lookup, so keep new members in that form.
+ */
+export const enum SampleRelationToNode {
+  // The sample was filtered out, e.g. by a search or by a call tree transform.
+  FilteredOut = FillBucket.FilteredOutByTransform,
+  // The sample's stack runs through the node but does not end at it, so the
+  // sample counts towards the node's total time but not its self time.
+  TotalButNotSelf = FillBucket.Selected,
+  // The sample's stack ends at the node, so the sample counts towards both the
+  // node's total time and its self time.
+  TotalAndSelf = FillBucket.Selected | SELF_FLAG,
+  // The sample is unrelated to the node, and ordered before it.
+  Before = FillBucket.UnselectedOrderedBeforeSelected,
+  // The sample is unrelated to the node, and ordered after it.
+  After = FillBucket.UnselectedOrderedAfterSelected,
 }
 
 /**
@@ -729,6 +877,9 @@ export type CallNodeSelfAndSummary = {
   // The sum of absolute values in callNodeSelf.
   // This is used for computing the percentages displayed in the call tree.
   rootTotalSummary: number;
+  // The total used as the 100% reference for flame graph box widths.
+  // Usually equals rootTotalSummary.
+  flameGraphWidthTotal: number;
 };
 
 /**
@@ -785,7 +936,6 @@ export type NativeSymbolInfo = {
  * assembly view) is updated.
  */
 export type BottomBoxInfo = {
-  libIndex: IndexIntoLibs | null;
   sourceIndex: IndexIntoSourceTable | null;
   nativeSymbols: NativeSymbolInfo[];
   initialNativeSymbol: number | null; // index into `nativeSymbols`

@@ -20,8 +20,9 @@
 
 import { SourceMapGenerator } from 'source-map';
 
-import { runSourceMapSymbolicationCore } from '../../profile-logic/source-map-symbolication';
+import { runSourceMapSymbolicationCore } from '../../profile-logic/source-maps/symbolication';
 import { loadProfile } from '../../actions/receive-profile';
+import { applySourceMapFile } from '../../actions/source-map-symbolication';
 import {
   getSourceMapSymbolicationStatus,
   getRawProfileSharedData,
@@ -34,10 +35,11 @@ import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profil
 
 import type { BrowserConnection } from '../../app-logic/browser-connection';
 import type { Profile } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
   WorkerInput,
   WorkerOutput,
-} from '../../profile-logic/source-map-worker-types';
+} from '../../profile-logic/source-maps/worker-types';
 import type { RawSourceMap } from 'source-map';
 
 // Original source file. Indentation and blank lines matter: the mappings
@@ -131,6 +133,8 @@ function makeProfileWithJsSources(sources: SourceDescriptor[]): Profile {
   for (let i = 0; i < sources.length; i++) {
     funcTable.lineNumber[i] = 1;
     funcTable.columnNumber[i] = 10;
+    funcTable.flags[i] |= FuncFlag.HasLine | FuncFlag.HasColumn;
+    frameTable.flags[i] |= FrameFlag.HasLine | FrameFlag.HasColumn;
     frameTable.line[i] = 1;
     frameTable.column[i] = 15;
   }
@@ -468,6 +472,155 @@ describe('receive-profile -> JS source map symbolication', function () {
         type: 'AVAILABLE',
         code: ORIGINAL_SOURCE,
       });
+    });
+  });
+
+  describe('applySourceMapFile (file upload path)', function () {
+    // Load a profile into a store without any auto source-map symbolication
+    // (browser connection can't fetch maps), so applySourceMapFile drives the
+    // whole flow.
+    async function loadWithoutAutoSymbolication(profile: Profile) {
+      const browserConnection = makeMockBrowserConnection({
+        supportsSourceMapFetching: false,
+      });
+      const { dispatch, getState } = blankStore();
+      await dispatch(loadProfile(profile, { browserConnection }));
+      return { dispatch, getState };
+    }
+
+    it('applies a matching map to the single eligible source', async function () {
+      const profile = makeProfileWithJsSources([
+        {
+          filename: 'bundle.js',
+          id: null,
+          sourceMapURL: 'https://example.com/bundle.js.map',
+        },
+      ]);
+      const { dispatch, getState } =
+        await loadWithoutAutoSymbolication(profile);
+
+      const map = buildSourceMap('bundle.js');
+      const result = await dispatch(
+        applySourceMapFile('bundle.js.map', JSON.stringify(map))
+      );
+
+      expect(result).toEqual({
+        type: 'applied',
+        filename: 'bundle.js',
+        sourceIndex: expect.any(Number),
+      });
+
+      const { funcTable, frameTable, stringArray } =
+        getRawProfileSharedData(getState());
+      expect(stringArray[funcTable.name[0]]).toBe('greet');
+      expect(frameTable.originalLocation[0]).not.toBeNull();
+    });
+
+    it('returns ambiguous for two eligible sources with a non-matching name, then applies after a pick', async function () {
+      const profile = makeProfileWithJsSources([
+        {
+          filename: 'a.js',
+          id: null,
+          sourceMapURL: 'https://example.com/a.js.map',
+        },
+        {
+          filename: 'b.js',
+          id: null,
+          sourceMapURL: 'https://example.com/b.js.map',
+        },
+      ]);
+      const { dispatch, getState } =
+        await loadWithoutAutoSymbolication(profile);
+
+      // A bundle filename that matches neither source filename nor either
+      // sourceMapURL basename, so auto-matching genuinely can't decide.
+      const map = buildSourceMap('nomatch.js');
+      const fileContents = JSON.stringify(map);
+      const result = await dispatch(
+        applySourceMapFile('unrelated.map', fileContents)
+      );
+
+      expect(result.type).toBe('ambiguous');
+
+      // Profile unchanged so far.
+      let { funcTable, stringArray } = getRawProfileSharedData(getState());
+      expect(stringArray[funcTable.name[0]]).toBe('Ajs');
+
+      if (result.type !== 'ambiguous') {
+        throw new Error('expected ambiguous');
+      }
+      expect(result.reason).toBe('no-matches');
+      const candidateForA = result.candidates.find(
+        (c) => c.filename === 'a.js'
+      );
+      expect(candidateForA).toBeDefined();
+
+      const applied = await dispatch(
+        applySourceMapFile(
+          'unrelated.map',
+          fileContents,
+          candidateForA!.sourceIndex
+        )
+      );
+      expect(applied).toEqual({
+        type: 'applied',
+        filename: 'a.js',
+        sourceIndex: candidateForA!.sourceIndex,
+      });
+
+      ({ funcTable, stringArray } = getRawProfileSharedData(getState()));
+      expect(stringArray[funcTable.name[0]]).toBe('greet');
+    });
+
+    it('returns invalid-source-map for garbage text', async function () {
+      const profile = makeProfileWithJsSources([
+        {
+          filename: 'bundle.js',
+          id: null,
+          sourceMapURL: 'https://example.com/bundle.js.map',
+        },
+      ]);
+      const { dispatch } = await loadWithoutAutoSymbolication(profile);
+
+      const result = await dispatch(
+        applySourceMapFile('bundle.js.map', 'not a source map')
+      );
+      expect(result).toEqual({ type: 'error', error: 'invalid-source-map' });
+    });
+
+    it('is a no-op when the same map is applied twice', async function () {
+      const profile = makeProfileWithJsSources([
+        {
+          filename: 'bundle.js',
+          id: null,
+          sourceMapURL: 'https://example.com/bundle.js.map',
+        },
+      ]);
+      const { dispatch, getState } =
+        await loadWithoutAutoSymbolication(profile);
+
+      const fileContents = JSON.stringify(buildSourceMap('bundle.js'));
+      await dispatch(applySourceMapFile('bundle.js.map', fileContents));
+
+      const firstName =
+        getRawProfileSharedData(getState()).stringArray[
+          getRawProfileSharedData(getState()).funcTable.name[0]
+        ];
+      expect(firstName).toBe('greet');
+
+      const secondResult = await dispatch(
+        applySourceMapFile('bundle.js.map', fileContents)
+      );
+      // Re-applying is idempotent: applySourceMapSymbolicationResponse skips
+      // already-populated rows, so nothing new is applied and the action
+      // reports 'no-match' while leaving the profile untouched.
+      expect(secondResult.type).toBe('no-match');
+
+      const secondName =
+        getRawProfileSharedData(getState()).stringArray[
+          getRawProfileSharedData(getState()).funcTable.name[0]
+        ];
+      expect(secondName).toBe('greet');
     });
   });
 });

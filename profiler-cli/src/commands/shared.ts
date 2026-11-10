@@ -9,6 +9,58 @@
 import type { Command } from 'commander';
 import { Option } from 'commander';
 import { collectStrings } from '../utils/parse';
+import { sendCommand } from '../client';
+import { formatOutput } from '../output';
+import { CALL_TREE_SUMMARY_STRATEGIES } from 'firefox-profiler/profile-logic/profile-data';
+import type {
+  ClientCommand,
+  CallTreeSummaryStrategy,
+  CommandResult,
+  PermalinkFormat,
+} from '../protocol';
+
+/**
+ * Options shared by every command action via `addGlobalOptions`.
+ */
+export type GlobalOptions = {
+  session?: string;
+  json?: boolean;
+  permalink?: boolean;
+  shortPermalink?: boolean;
+};
+
+/** Which permalink, if any, the global flags ask for. */
+export function permalinkFormat(
+  opts: GlobalOptions
+): PermalinkFormat | undefined {
+  if (opts.shortPermalink) {
+    return 'short';
+  }
+  if (opts.permalink) {
+    return 'long';
+  }
+  return undefined;
+}
+
+/**
+ * Send a command to the daemon and print the formatted result. Centralizes the
+ * `sendCommand` + `formatOutput` tail that every command action shares, so no
+ * call site can forget to pass `opts.session` or honor `opts.json`.
+ */
+export async function runCommand(
+  sessionDir: string,
+  command: ClientCommand,
+  opts: GlobalOptions
+): Promise<string | CommandResult> {
+  const { result, permalink } = await sendCommand(
+    sessionDir,
+    command,
+    opts.session,
+    { permalink: permalinkFormat(opts) }
+  );
+  console.log(formatOutput(result, opts.json ?? false, permalink));
+  return result;
+}
 
 /**
  * Parse a string as an integer and exit with an error if it is not a valid
@@ -53,6 +105,43 @@ export function parseFloatArg(
 }
 
 /**
+ * Parse a strategy name and exit with an error if it is not a valid strategy.
+ */
+export function parseStrategyArg(
+  flagName: string,
+  value: string
+): CallTreeSummaryStrategy {
+  if (!(CALL_TREE_SUMMARY_STRATEGIES as string[]).includes(value)) {
+    console.error(
+      `Error: ${flagName} must be one of: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}`
+    );
+    process.exit(1);
+  }
+  return value as CallTreeSummaryStrategy;
+}
+
+/**
+ * As parseStrategyArg, but for the optional --strategy flag.
+ */
+export function parseOptionalStrategyArg(
+  value: string | undefined
+): CallTreeSummaryStrategy | undefined {
+  return value === undefined
+    ? undefined
+    : parseStrategyArg('--strategy', value);
+}
+
+/**
+ * Add the --strategy option to a command.
+ */
+export function addStrategyOption(cmd: Command): Command {
+  return cmd.option(
+    '--strategy <name>',
+    `Data source to summarize: ${CALL_TREE_SUMMARY_STRATEGIES.join(', ')}. Allocation strategies report bytes instead of samples.`
+  );
+}
+
+/**
  * Returns true if the given subcommand was explicitly typed by the user.
  * Used to decide whether to print a "other subcommands" hint after a default action.
  *
@@ -66,15 +155,29 @@ export function wasExplicit(parent: string, subcommand: string): boolean {
 }
 
 /**
+ * Add the --session option to a command.
+ */
+export function addSessionOption(cmd: Command): Command {
+  return cmd.option(
+    '--session <id>',
+    'Use a specific session (default: current session)'
+  );
+}
+
+/**
  * Add --session and --json options to a command.
  */
 export function addGlobalOptions(cmd: Command): Command {
-  return cmd
+  return addSessionOption(cmd)
+    .option('--json', 'Output results as JSON')
     .option(
-      '--session <id>',
-      'Use a specific session (default: current session)'
+      '--permalink',
+      'Also print a profiler.firefox.com URL for the view this command shows'
     )
-    .option('--json', 'Output results as JSON');
+    .option(
+      '--short-permalink',
+      'Like --permalink, but shortened through share.firefox.dev'
+    );
 }
 
 /**

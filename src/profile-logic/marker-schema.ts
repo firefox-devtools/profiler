@@ -12,6 +12,7 @@ import {
   formatTimestamp,
   formatMicroseconds,
   formatNanoseconds,
+  formatHexadecimal,
 } from '../utils/format-numbers';
 import { ensureExists } from '../utils/types';
 import type {
@@ -20,6 +21,7 @@ import type {
   MarkerSchema,
   MarkerSchemaByName,
   MarkerSchemaField,
+  MarkerSchemaPIICategory,
   Marker,
   MarkerIndex,
   MarkerPayload,
@@ -28,12 +30,84 @@ import type {
 } from 'firefox-profiler/types';
 import type { StringTable } from '../utils/string-table';
 
+// Profiles recorded by Gecko versions without PII annotations use these defaults.
+const markerSchemaPIICategoriesBySchemaName = new Map<
+  string,
+  Map<string, MarkerSchemaPIICategory[]>
+>([
+  [
+    'Network',
+    new Map([
+      ['URI', ['url']],
+      ['RedirectURI', ['url']],
+      ['isPrivateBrowsing', ['private-browsing']],
+    ]),
+  ],
+  ['Text', new Map([['name', ['url']]])],
+  ['PreferenceRead', new Map([['prefValue', ['preference-value']]])],
+]);
+
+export function addPIICategoriesToMarkerSchema(
+  markerSchema: MarkerSchema
+): MarkerSchema {
+  const piiCategoriesByField = markerSchemaPIICategoriesBySchemaName.get(
+    markerSchema.name
+  );
+  if (!piiCategoriesByField) {
+    return markerSchema;
+  }
+
+  const fields = markerSchema.fields.map((field) => {
+    const containsPII = piiCategoriesByField.get(field.key);
+    return containsPII && !field.containsPII
+      ? { ...field, containsPII }
+      : field;
+  });
+  const existingFieldKeys = new Set(fields.map(({ key }) => key));
+  for (const [key, containsPII] of piiCategoriesByField) {
+    if (!existingFieldKeys.has(key)) {
+      fields.push({ key, format: 'string', hidden: true, containsPII });
+    }
+  }
+
+  return { ...markerSchema, fields };
+}
+
+export function addPIICategoriesToMarkerSchemas(
+  markerSchemas: MarkerSchema[]
+): MarkerSchema[] {
+  return markerSchemas.map(addPIICategoriesToMarkerSchema);
+}
+
+export const extensionTextMarkerSchema: MarkerSchema = {
+  name: 'ExtensionText',
+  tableLabel:
+    "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+  chartLabel:
+    "{marker.data.extensionId}{marker.data.extensionId ? ', ' : ''}{marker.data.name}",
+  display: ['marker-chart', 'marker-table'],
+  fields: [
+    {
+      key: 'extensionId',
+      label: 'Extension ID',
+      format: 'string',
+      containsPII: ['extension-id'],
+    },
+    {
+      key: 'name',
+      label: 'Details',
+      format: 'string',
+      containsPII: ['url'],
+    },
+  ],
+};
+
 /**
  * The marker schema comes from Gecko, and is embedded in the profile. However,
  * we may want to define schemas that are front-end only. This is the location
  * to do that. The schema will get merged in with the Gecko schema.
  */
-export const markerSchemaFrontEndOnly: MarkerSchema[] = [
+const markerSchemaFrontEndOnlyWithoutPII: MarkerSchema[] = [
   {
     name: 'Jank',
     display: ['marker-table', 'marker-chart'],
@@ -67,7 +141,7 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
     // `display` property is used to decide where to display these markers, and
     // we need it to hide them from the marker chart.
     name: 'Network',
-    display: ['marker-table', 'marker-chart'],
+    display: ['marker-table', 'marker-chart', 'timeline-network'],
     chartLabel: '{marker.data.URI}',
     fields: [
       {
@@ -82,9 +156,25 @@ export const markerSchemaFrontEndOnly: MarkerSchema[] = [
         label: 'Response Status',
         hidden: true,
       },
+      {
+        format: 'string',
+        key: 'secPurpose',
+        label: 'Sec-Purpose',
+        hidden: true,
+      },
+      {
+        format: 'string',
+        key: 'deliveryType',
+        label: 'Delivery Type',
+        hidden: true,
+      },
     ],
   },
 ];
+
+export const markerSchemaFrontEndOnly = addPIICategoriesToMarkerSchemas(
+  markerSchemaFrontEndOnlyWithoutPII
+);
 
 /**
  * This function takes the intended marker schema for a marker field, and applies
@@ -250,8 +340,7 @@ export function parseLabel(
           }
 
           const value = (marker.data as any)[payloadKey];
-          if (value === undefined || value === null) {
-            // This would return "undefined" or "null" otherwise.
+          if (value === undefined || value === null || value === '') {
             return '';
           }
           return format
@@ -280,36 +369,13 @@ export function parseLabel(
 
 type LabelKey = 'tooltipLabel' | 'tableLabel' | 'chartLabel' | 'copyLabel';
 
-// If no label making rule, these functions provide the fallbacks for how
-// to label things. It also allows for a place to do some custom handling
-// in the cases where the marker schema is not enough.
+// If no label making rule, these functions provide the fallbacks for how to label things.
 const fallbacks: Record<LabelKey, (marker: any) => string> = {
   tooltipLabel: (marker) => marker.name,
 
   chartLabel: (_marker) => '',
 
-  tableLabel: (marker: Marker) => {
-    let description = '';
-
-    if (marker.data) {
-      const data = marker.data;
-      switch (data.type) {
-        case 'FileIO':
-          if (data.source) {
-            description = `(${data.source}) `;
-          }
-          description += data.operation;
-          if (data.filename) {
-            description = data.operation
-              ? `${description} — ${data.filename}`
-              : data.filename;
-          }
-          break;
-        default:
-      }
-    }
-    return description;
-  },
+  tableLabel: (_marker) => '',
 
   copyLabel: (marker) => marker.name,
 };
@@ -553,9 +619,12 @@ export function formatFromMarkerSchema(
         rows.push(...cellRows);
         return rows.map((row) => `(${row.join(', ')})`).join(',');
       }
+      case 'screenshot-data-url':
+        // Don't expand a base64-encoded image into text output.
+        return '(screenshot)';
       default:
         throw new Error(
-          `Unknown format type ${JSON.stringify(format.type as never)}`
+          `Unknown format type ${JSON.stringify(format as never)}`
         );
     }
   }
@@ -587,6 +656,8 @@ export function formatFromMarkerSchema(
       return formatNumber(value, 0, 0);
     case 'decimal':
       return formatNumber(value);
+    case 'hexadecimal':
+      return formatHexadecimal(value);
     case 'percentage':
       return formatPercent(value);
     case 'pid':
@@ -606,6 +677,8 @@ export function formatFromMarkerSchema(
           formatFromMarkerSchema(markerType, 'string', v, stringTable)
         )
         .join(', ');
+    case 'screenshot-size':
+      return `${value.width}px × ${value.height}px`;
     default:
       console.warn(
         `A marker schema of type "${markerType}" had an unknown format ${JSON.stringify(
@@ -639,11 +712,16 @@ export function markerPayloadMatchesSearch(
       continue;
     }
 
-    if (
-      payloadField.format === 'unique-string' ||
-      payloadField.format === 'flow-id' ||
-      payloadField.format === 'terminating-flow-id'
-    ) {
+    const { format } = payloadField;
+    if (typeof format === 'object' && format.type === 'screenshot-data-url') {
+      // Searching a base64-encoded image isn't useful.
+      continue;
+    }
+    if (format === 'screenshot-size') {
+      value = formatFromMarkerSchema(data.type, format, value, stringTable);
+    }
+
+    if (isStringIndexFormat(format)) {
       if (typeof value !== 'number') {
         console.warn(
           `In marker ${marker.name}, the key ${payloadField.key} has an invalid value "${value}" as a unique string, it isn't a number.`
@@ -669,6 +747,22 @@ export function markerPayloadMatchesSearch(
 }
 
 /**
+ * Whether this field format means the payload holds a string table index.
+ */
+export function isStringIndexFormat(
+  format: MarkerFormatType | undefined
+): boolean {
+  if (typeof format === 'object') {
+    return format.type === 'screenshot-data-url';
+  }
+  return (
+    format === 'unique-string' ||
+    format === 'flow-id' ||
+    format === 'terminating-flow-id'
+  );
+}
+
+/**
  * Returns a map of marker schema name -> array of field keys, listing any fields
  * that contain indexes into the string table. If a marker schema has no such
  * fields, then we don't put an entry for it in the returned map.
@@ -678,20 +772,11 @@ export function computeStringIndexMarkerFieldsByDataType(
 ): Map<string, string[]> {
   const stringIndexMarkerFieldsByDataType = new Map<string, string[]>();
 
-  // 'CompositorScreenshot' markers currently don't have a schema (#5303),
-  // hardcode the url field (which is a string index) until they do.
-  stringIndexMarkerFieldsByDataType.set('CompositorScreenshot', ['url']);
-
   for (const schema of markerSchemas) {
     const { name, fields } = schema;
     const stringIndexFields = [];
     for (const field of fields) {
-      if (
-        (field.format === 'unique-string' ||
-          field.format === 'flow-id' ||
-          field.format === 'terminating-flow-id') &&
-        field.key
-      ) {
+      if (isStringIndexFormat(field.format) && field.key) {
         stringIndexFields.push(field.key);
       }
     }
@@ -700,4 +785,19 @@ export function computeStringIndexMarkerFieldsByDataType(
     }
   }
   return stringIndexMarkerFieldsByDataType;
+}
+
+/**
+ * Whether the schema of this marker data type declares the given payload field
+ * as a string table index. Takes the map computed by
+ * `computeStringIndexMarkerFieldsByDataType`.
+ */
+export function isStringIndexMarkerField(
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>,
+  dataType: string,
+  fieldKey: string
+): boolean {
+  return (
+    stringIndexMarkerFieldsByDataType.get(dataType)?.includes(fieldKey) ?? false
+  );
 }

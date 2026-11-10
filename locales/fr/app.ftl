@@ -46,6 +46,11 @@ AppViewRouter--error-compare = Impossible de récupérer les profils.
 # https://profiler.firefox.com/from-url/http%3A%2F%2F127.0.0.1%3A3000%2Fprofile.json/
 AppViewRouter--error-from-localhost-url-safari = En raison d’une <a>limitation spécifique à Safari</a>, { -profiler-brand-name } ne peut pas importer de profils depuis la machine locale dans ce navigateur. Veuillez ouvrir cette page dans { -firefox-brand-name } ou Chrome à la place.
     .title = Safari ne peut pas importer de profils locaux
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Ce profil utilise un format qui n’est pas pris en charge par cette version de { -profiler-brand-name }.
+    Essayez d’actualiser la page pour vérifier si une mise à jour est disponible pour { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = L’URL que vous avez tenté d’atteindre n’a pas été trouvée
 
@@ -75,6 +80,15 @@ CallNodeContextMenu--transform-focus-function = Focus sur la fonction
     .title = { CallNodeContextMenu--transform-focus-function-title }
 CallNodeContextMenu--transform-focus-function-inverted = Focus sur la fonction (inversé)
     .title = { CallNodeContextMenu--transform-focus-function-title }
+
+## The translation for "self" in these strings should match the translation used
+## in CallTree--samples-self and CallTree--bytes-self. Alternatively it can be
+## translated as "self values" or "self time" (though "self time" is less desirable
+## because this menu item is also shown in "bytes" mode).
+
+CallNodeContextMenu--transform-focus-self-title = Le focus sur « soi-même » fonctionne comme le focus sur une fonction, mais ne conserve que les échantillons qui contribuent directement à l’exécution propre de la fonction. Les échantillons provenant des fonctions appelées sont ignorés, et l’arbre d’appels est recentré sur la fonction ciblée.
+CallNodeContextMenu--transform-focus-self = Focus sur soi-même uniquement
+    .title = { CallNodeContextMenu--transform-focus-self-title }
 
 ##
 
@@ -224,16 +238,17 @@ ErrorBoundary--report-error-to-developers-description = Merci de signaler ce pro
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = Signaler l’erreur sur GitHub
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Mentions légales
-FooterLinks--Privacy = Confidentialité
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Paramètres
+SettingsMenu--docs = Documentation
+SettingsMenu--legal = Mentions légales
+SettingsMenu--privacy = Vie privée
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Changer de langue
-FooterLinks--hide-button =
-    .title = Masquer les liens de pied de page
-    .aria-label = Masquer les liens de pied de page
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -305,8 +320,11 @@ Home--chrome-extension-recording-instructions = Une fois l’extension installé
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Saisissez le filtre
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Saisissez le filtre (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -419,8 +437,8 @@ MarkerTable--details = Détails
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Afficher uniquement les marqueurs correspondant à « { $filter } »
     .aria-label = Afficher uniquement les marqueurs correspondant à « { $filter } »
+    .title = Afficher uniquement les marqueurs correspondant à « { $filter } »
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -429,14 +447,15 @@ MenuButtons--index--metaInfo-button =
     .label = Informations du profil
 MenuButtons--index--full-view = Vue complète
 MenuButtons--index--cancel-upload = Annuler l’envoi
-MenuButtons--index--share-upload =
-    .label = Envoyer le profil local
-MenuButtons--index--share-re-upload =
-    .label = Envoyer à nouveau
+MenuButtons--index--save =
+    .label = Enregistrer…
+MenuButtons--index--share =
+    .label = Partager…
+MenuButtons--index--reshare =
+    .label = Repartager…
 MenuButtons--index--share-error-uploading =
     .label = Erreur lors de l’envoi
 MenuButtons--index--revert = Revenir au profil d’origine
-MenuButtons--index--docs = Documentation
 MenuButtons--permalink--button =
     .label = Lien permanent
 
@@ -454,6 +473,10 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symboliser le profil
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolique
 MenuButtons--metaInfo--attempting-resymbolicate = Tenter de re-symboliser le profil
 MenuButtons--metaInfo--currently-symbolicating = Re-symbolisation du profil en cours
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Appliquer
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Annuler
 MenuButtons--metaInfo--cpu-model = Modèle de processeur :
 MenuButtons--metaInfo--cpu-cores = Cœurs de processeur :
 MenuButtons--metaInfo--main-memory = Mémoire principale :
@@ -515,6 +538,8 @@ MenuButtons--metaInfo--buffer-duration-seconds =
 MenuButtons--metaInfo--buffer-duration-unlimited = Illimitée
 MenuButtons--metaInfo--application = Application
 MenuButtons--metaInfo--name-and-version = Nom et version :
+# The time between application startup and when the profiler was started
+MenuButtons--metaInfo--application-uptime2 = Disponibilité :
 MenuButtons--metaInfo--update-channel = Canal de mise à jour :
 MenuButtons--metaInfo--build-id = Identifiant de compilation :
 MenuButtons--metaInfo--build-type = Type de compilation :
@@ -577,9 +602,12 @@ MenuButtons--publish--renderCheckbox-label-preference = Inclure les valeurs des 
 MenuButtons--publish--renderCheckbox-label-private-browsing = Inclure les données des fenêtres de navigation privée
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Ce profil contient des données de navigation privée
-MenuButtons--publish--reupload-performance-profile = Envoyer à nouveau le profil de performances
 MenuButtons--publish--share-performance-profile = Partager le profil de performance
+MenuButtons--publish--reshare-performance-profile = Repartager le profil de performances
+MenuButtons--publish--save-performance-profile = Enregistrer le profil de performances
+MenuButtons--publish--local-profile-description = Ce profil n’a pas été mis en ligne et sera perdu lorsque vous fermerez cet onglet. Pour le conserver, enregistrez-le sur votre ordinateur ou mettez-le en ligne via Partager.
 MenuButtons--publish--info-description = Envoyez votre profil et rendez-le accessible à toute personne disposant du lien.
+MenuButtons--publish--download-info-description = Enregistrez ce profil dans un fichier sur votre ordinateur.
 MenuButtons--publish--info-description-default = Par défaut, vos données personnelles sont supprimées.
 MenuButtons--publish--info-description-firefox-nightly2 = Ce profil provient de { -firefox-nightly-brand-name }, donc par défaut la plupart des informations sont incluses.
 MenuButtons--publish--include-additional-data = Inclure des données supplémentaires qui peuvent être identifiables
@@ -588,7 +616,7 @@ MenuButtons--publish--upload-title = Envoi du profil…
 MenuButtons--publish--cancel-upload = Annuler l’envoi
 MenuButtons--publish--message-something-went-wrong = Oups, une erreur s’est produite lors de l’envoi du profil.
 MenuButtons--publish--message-try-again = Réessayer
-MenuButtons--publish--download = Télécharger
+MenuButtons--publish--save = Enregistrer
 MenuButtons--publish--compressing = Compression…
 MenuButtons--publish--error-while-compressing = Erreur lors de la compression, essayez de décocher certaines cases pour réduire la taille du profil.
 
@@ -623,8 +651,8 @@ PanelSearch--search-field-hint = Saviez-vous que vous pouvez utiliser la virgule
 ProfileName--edit-profile-name-button =
     .title = Modifier le nom du profil
 ProfileName--edit-profile-name-input =
-    .title = Modifier le nom du profil
     .aria-label = Nom du profil
+    .title = Modifier le nom du profil
 
 ## Profile Delete Button
 
@@ -700,8 +728,8 @@ ServiceWorkerManager--installed-button = Recharger l’application
 ServiceWorkerManager--updated-while-not-ready = Une nouvelle version de l’application a été appliquée avant que cette page ne soit complètement chargée. Vous pourriez constater des dysfonctionnements.
 ServiceWorkerManager--new-version-is-ready = Une nouvelle version de l’application a été téléchargée et est prête à être utilisée.
 ServiceWorkerManager--hide-notice-button =
-    .title = Masquer l’avis de rechargement
     .aria-label = Masquer l’avis de rechargement
+    .title = Masquer l’avis de rechargement
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -730,6 +758,8 @@ StackSettings--call-tree-strategy-native-deallocations-sites = Sites de désallo
     .title = Résumer en utilisant les octets de la mémoire désallouée, par le site où la mémoire a été désallouée
 StackSettings--invert-call-stack = Inverser la pile d’appels
     .title = Trier par le temps passé dans un nœud d’appel, en ignorant ses enfants.
+StackSettings--include-idle-samples = Inclure les échantillons inactifs
+    .title = Décocher cette case pour masquer les échantillons dont la trame de feuille appartient à la catégorie « Inactifs ».
 StackSettings--show-user-timing = Afficher le temps utilisateur
 StackSettings--use-stack-chart-same-widths = Utiliser la même largeur pour chaque pile
 StackSettings--panel-search =
@@ -796,9 +826,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = mémoire relative à ce moment
-TrackMemoryGraph--memory-range-in-graph = plage mémoire dans le graphique
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = allocations et désallocations depuis l’échantillon précédent
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = mémoire relative à ce moment-là
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = plage de mémoire dans le graphique
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allocations et désallocations depuis l’échantillon précédent
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = Processeur
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -845,6 +892,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
     .label = Puissance moyenne pour la sélection actuelle
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
+    .label = Énergie moyenne dans la sélection actuelle
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
 # Variables:
@@ -979,6 +1031,12 @@ TransformNavigator--focus-subtree = Focus sur le nœud : { $item }
 # Variables:
 #   $item (String) - Name of the function that transform applied to.
 TransformNavigator--focus-function = Focus : { $item }
+# "Focus self" transform.
+# See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-on-function-self
+# Also see the translation note above CallNodeContextMenu--transform-focus-self.
+# Variables:
+#   $item (String) - Name of the function that transform applied to.
+TransformNavigator--focus-self = Focus sur soi-même : { $item }
 # "Focus category" transform. The word "Focus" has the meaning of an adjective here.
 # See: https://profiler.firefox.com/docs/#/./guide-filtering-call-trees?id=focus-category
 # Variables:

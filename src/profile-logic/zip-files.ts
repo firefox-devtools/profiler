@@ -5,6 +5,7 @@
 import { ensureIsValidTabSlug, objectEntries } from '../utils/types';
 import type JSZip from 'jszip';
 import type { JSZipObject } from 'jszip';
+import type { SortableColumn } from '../components/shared/TreeView';
 export type IndexIntoZipFileTable = number;
 
 /**
@@ -111,6 +112,12 @@ export class ZipFileTree {
 
     // null IndexIntoZipFileTable have no children
     this._parentToChildren.set(null, this._computeChildrenArray(null));
+  }
+
+  // The natural directory-tree order is the intended order, so no columns
+  // are user-sortable.
+  getSortableColumns(): SortableColumn[] {
+    return [];
   }
 
   getRoots(): IndexIntoZipFileTable[] {

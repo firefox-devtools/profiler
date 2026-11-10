@@ -98,3 +98,52 @@
 .moreInfoValue {
   overflow-x: scroll;
 }
+
+.metaInfoSourceMapRow {
+  margin-top: 8px;
+}
+
+.metaInfoSourceMapFileInput {
+  display: none;
+}
+
+.metaInfoSourceMapStatus {
+  display: flex;
+  color: var(--grey-50);
+
+  /* Keep the (possibly long) filename wrapping within the value column instead
+   * of flowing back under the label on the second line. overflow-wrap is
+   * inherited, so it reaches the message text node too. */
+  overflow-wrap: anywhere;
+}
+
+.metaInfoSourceMapStatus .metaInfoLabel {
+  flex-shrink: 0;
+}
+
+.metaInfoSourceMapError {
+  color: var(--red-60);
+}
+
+.metaInfoSourceMapPickerBody {
+  display: inline-block;
+  min-width: 0;
+}
+
+.metaInfoSourceMapPickerLabel {
+  margin-bottom: 4px;
+}
+
+.metaInfoSourceMapPickerSelect {
+  width: 100%;
+}
+
+.metaInfoSourceMapPickerButtons {
+  display: flex;
+  margin-top: 6px;
+  gap: 8px;
+}
+
+.metaInfoSourceMapPickerButtons > button {
+  flex: 1;
+}

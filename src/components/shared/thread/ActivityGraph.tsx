@@ -24,6 +24,7 @@ import type {
   Milliseconds,
   CssPixels,
 } from 'firefox-profiler/types';
+import type { SampleRelations } from 'firefox-profiler/profile-logic/profile-data';
 import type {
   ActivityFillGraphQuerier,
   CpuRatioInTimeRange,
@@ -43,7 +44,7 @@ export type Props = {
     sampleIndex: IndexIntoSamplesTable | null
   ) => void;
   readonly categories: CategoryList;
-  readonly sampleSelectedStates: Uint8Array;
+  readonly sampleRelations: SampleRelations;
   readonly treeOrderSampleComparator: (
     a: IndexIntoSamplesTable,
     b: IndexIntoSamplesTable
@@ -62,6 +63,7 @@ type State = {
   hoveredPixelState: null | HoveredPixelState;
   mouseX: CssPixels;
   mouseY: CssPixels;
+  previousThread: Thread | null;
 };
 
 class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
@@ -71,7 +73,18 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
     hoveredPixelState: null,
     mouseX: 0,
     mouseY: 0,
+    previousThread: null,
   };
+
+  static getDerivedStateFromProps(props: Props, state: State) {
+    if (props.rangeFilteredThread !== state.previousThread) {
+      return {
+        previousThread: props.rangeFilteredThread,
+        hoveredPixelState: null,
+      };
+    }
+    return null;
+  }
 
   _onMouseLeave = () => {
     this.setState({ hoveredPixelState: null });
@@ -131,7 +144,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
       sampleIndexOffset,
-      sampleSelectedStates,
+      sampleRelations,
       treeOrderSampleComparator,
       implementationFilter,
       width,
@@ -158,7 +171,7 @@ class ThreadActivityGraphImpl extends React.PureComponent<Props, State> {
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
           sampleIndexOffset={sampleIndexOffset}
-          sampleSelectedStates={sampleSelectedStates}
+          sampleRelations={sampleRelations}
           treeOrderSampleComparator={treeOrderSampleComparator}
           categories={categories}
           passFillsQuerier={this._setFillsQuerier}

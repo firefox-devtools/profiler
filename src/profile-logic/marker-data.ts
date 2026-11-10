@@ -3,7 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import {
   getDefaultCategories,
-  getEmptyRawMarkerTable,
+  getRawMarkerTableBuilder,
+  finishRawMarkerTableBuilder,
+  type RawMarkerTableBuilder,
 } from './data-structures';
 import { getFriendlyThreadName, getTimeRangeForThread } from './profile-data';
 import {
@@ -22,6 +24,8 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 import {
   getSchemaFromMarker,
+  isStringIndexFormat,
+  isStringIndexMarkerField,
   markerPayloadMatchesSearch,
   markerSchemaFrontEndOnly,
 } from './marker-schema';
@@ -41,18 +45,18 @@ import type {
   IPCSharedData,
   IPCMarkerPayload,
   NetworkPayload,
-  PrefMarkerPayload,
-  TextMarkerPayload,
   StartEndRange,
   IndexedArray,
   DerivedMarkerInfo,
   MarkerSchema,
+  MarkerSchemaPIICategory,
   MarkerSchemaByName,
   MarkerDisplayLocation,
   Tid,
   LogMarkerPayload,
   ThreadIndex,
   Profile,
+  RemoveProfileInformation,
 } from 'firefox-profiler/types';
 
 /**
@@ -403,7 +407,8 @@ export function correlateIPCMarkers(
       switch (phase) {
         case 'endpoint':
         // We don't have a 'phase' field in the older profiles, in that case
-        // their phase is 'endpoint'. (fallthrough)
+        // their phase is 'endpoint'.
+        // falls through
         case undefined:
           return 0;
         case 'transferStart':
@@ -419,7 +424,8 @@ export function correlateIPCMarkers(
           return 3;
         case 'endpoint':
         // We don't have a 'phase' field in the older profiles, in that case
-        // their phase is 'endpoint'. (fallthrough)
+        // their phase is 'endpoint'.
+        // falls through
         case undefined:
           return 4;
         case 'transferStart':
@@ -557,7 +563,6 @@ export function correlateIPCMarkers(
  *   the thread range. For the reverse situation, it's set to the start.
  *
  * There is also some special handling of different markers.
- *   - CompositorScreenshot - They are turned from Instant markers to Interval markers
  *   - IPC - They are matched up.
  *   - Network - They have different network phases.
  *
@@ -612,13 +617,9 @@ export function deriveMarkersFromRawMarkerTable(
     return {
       ...startData,
       ...endData,
-    };
+    } as MarkerPayload;
   }
 
-  // We don't add a screenshot marker as we find it, because to know its
-  // duration we need to wait until the next one or the end of the profile. So
-  // we keep it here.
-  const previousScreenshotMarkers: Map<string, MarkerIndex> = new Map();
   for (
     let rawMarkerIndex = 0;
     rawMarkerIndex < rawMarkers.length;
@@ -721,51 +722,6 @@ export function deriveMarkersFromRawMarkerTable(
                 incomplete: true,
               });
             }
-          }
-
-          continue;
-        }
-
-        case 'CompositorScreenshot': {
-          // Screenshot markers are already ordered. In the raw marker table,
-          // they're Instant markers, but since they're valid until the following
-          // raw marker of the same type and the same window, we convert them to
-          // Interval markers with a a start and end time.
-
-          const { windowID } = data;
-          const previousScreenshotMarker =
-            previousScreenshotMarkers.get(windowID);
-          if (previousScreenshotMarker !== undefined) {
-            previousScreenshotMarkers.delete(windowID);
-            const previousStartTime = ensureExists(
-              rawMarkers.startTime[previousScreenshotMarker],
-              'Expected to find a start time for a screenshot marker.'
-            );
-            const thisStartTime = ensureExists(
-              maybeStartTime,
-              'The CompositorScreenshot is assumed to have a start time.'
-            );
-            const data = rawMarkers.data[previousScreenshotMarker];
-            const markerThreadId = rawMarkers.threadId
-              ? rawMarkers.threadId[previousScreenshotMarker]
-              : null;
-            addMarker([previousScreenshotMarker], {
-              start: previousStartTime,
-              end: thisStartTime,
-              name: 'CompositorScreenshot',
-              category,
-              threadId: markerThreadId,
-              data,
-            });
-          }
-          if (stringArray[name] === 'CompositorScreenshotWindowDestroyed') {
-            // This marker is added when a window is destroyed. In this case we
-            // don't want to store it as the start of the next compositor
-            // marker. But we do want to keep it, so we break out of the
-            // switch/case so that the standard processing happens.
-            break;
-          } else {
-            previousScreenshotMarkers.set(windowID, rawMarkerIndex);
           }
 
           continue;
@@ -988,24 +944,6 @@ export function deriveMarkersFromRawMarkerTable(
     });
   }
 
-  // And we also need to add the "last screenshot markers".
-  for (const previousScreenshotMarker of previousScreenshotMarkers.values()) {
-    const start = ensureExists(
-      rawMarkers.startTime[previousScreenshotMarker],
-      'Expected to find a CompositorScreenshot marker with a start time.'
-    );
-    addMarker([previousScreenshotMarker], {
-      start,
-      end: Math.max(endOfThread, start),
-      name: 'CompositorScreenshot',
-      category: rawMarkers.category[previousScreenshotMarker],
-      threadId: rawMarkers.threadId
-        ? rawMarkers.threadId[previousScreenshotMarker]
-        : null,
-      data: rawMarkers.data[previousScreenshotMarker],
-    });
-  }
-
   return { markers, markerIndexToRawMarkerIndexes };
 }
 
@@ -1113,7 +1051,7 @@ export function filterRawMarkerTableToRange(
   rangeStart: number,
   rangeEnd: number
 ): RawMarkerTable {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newMarkerTable = getRawMarkerTableBuilder();
   if (markerTable.threadId) {
     newMarkerTable.threadId = [];
   }
@@ -1138,7 +1076,7 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.length++;
   }
 
-  return newMarkerTable;
+  return finishRawMarkerTableBuilder(newMarkerTable);
 }
 
 /**
@@ -1187,10 +1125,10 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   markersToDelete: Set<IndexIntoRawMarkerTable>,
   filterRange: StartEndRange | null
 ): {
-  rawMarkerTable: RawMarkerTable;
+  rawMarkerTable: RawMarkerTableBuilder;
   oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>;
 } {
-  const newMarkerTable = getEmptyRawMarkerTable();
+  const newMarkerTable = getRawMarkerTableBuilder();
   const newThreadId: (Tid | null)[] = [];
   if (oldMarkerTable.threadId) {
     newMarkerTable.threadId = newThreadId;
@@ -1432,107 +1370,134 @@ export function getColorClassNameForMimeType(
   }
 }
 
-export function groupScreenshotsById(
-  getMarker: (markerIndex: MarkerIndex) => Marker,
-  markerIndexes: MarkerIndex[]
-): Map<string, Marker[]> {
-  const idToScreenshotMarkers = new Map<string, Marker[]>();
-  for (const markerIndex of markerIndexes) {
-    const marker = getMarker(markerIndex);
-    const { data } = marker;
-    if (data && data.type === 'CompositorScreenshot') {
-      let markers = idToScreenshotMarkers.get(data.windowID);
-      if (markers === undefined) {
-        markers = [];
-        idToScreenshotMarkers.set(data.windowID, markers);
+function _shouldSanitizePIICategory(
+  category: MarkerSchemaPIICategory,
+  PIIToBeRemoved: RemoveProfileInformation
+): boolean {
+  switch (category) {
+    case 'url':
+      return PIIToBeRemoved.shouldRemoveUrls;
+    case 'extension-id':
+      return PIIToBeRemoved.shouldRemoveExtensions;
+    case 'preference-value':
+      return PIIToBeRemoved.shouldRemovePreferenceValues;
+    case 'private-browsing':
+      return PIIToBeRemoved.shouldRemovePrivateBrowsingData;
+    default:
+      throw assertExhaustiveCheck(category);
+  }
+}
+
+function _updateMarkerPayloadField(
+  markerPayload: MarkerPayload,
+  key: string,
+  isStringIndex: boolean,
+  stringTable: StringTable,
+  transform: (text: string) => string
+): MarkerPayload {
+  const value = (markerPayload as any)[key];
+  if (!isStringIndex) {
+    return { ...markerPayload, [key]: transform(value) } as any;
+  }
+
+  const stringIndex = value as IndexIntoStringTable;
+  if (!stringTable.hasIndex(stringIndex)) {
+    return markerPayload;
+  }
+  const text = stringTable.getString(stringIndex);
+  const newText = transform(text);
+  if (newText === text) {
+    return markerPayload;
+  }
+  return {
+    ...markerPayload,
+    [key]: stringTable.indexForString(newText),
+  } as any;
+}
+
+/** Apply a marker schema's PII rules to its payload. */
+export function sanitizeMarkerFromSchema(
+  markerSchema: MarkerSchema,
+  markerPayload: MarkerPayload,
+  stringTable: StringTable,
+  PIIToBeRemoved: RemoveProfileInformation
+): {
+  markerPayload: MarkerPayload;
+  shouldRemoveMarker: boolean;
+} {
+  let shouldRemoveMarker = false;
+
+  for (const { key, format, containsPII = [] } of markerSchema.fields) {
+    const hasField = key in markerPayload;
+
+    if (hasField) {
+      // The casts are needed because TypeScript cannot refine the payload union
+      // using a schema field that is only known at runtime.
+      if (PIIToBeRemoved.shouldRemoveUrls && format === 'url') {
+        markerPayload = {
+          ...markerPayload,
+          [key]: removeURLs((markerPayload as any)[key]),
+        } as any;
+      } else if (PIIToBeRemoved.shouldRemoveUrls && format === 'file-path') {
+        markerPayload = {
+          ...markerPayload,
+          [key]: removeFilePath((markerPayload as any)[key]),
+        } as any;
+      } else if (
+        PIIToBeRemoved.shouldRemoveUrls &&
+        format === 'sanitized-string'
+      ) {
+        markerPayload = {
+          ...markerPayload,
+          [key]: '<sanitized>',
+        } as any;
+      }
+    }
+
+    const isStringIndex = isStringIndexFormat(format);
+    for (const category of containsPII) {
+      if (!_shouldSanitizePIICategory(category, PIIToBeRemoved)) {
+        continue;
       }
 
-      markers.push(marker);
+      switch (category) {
+        case 'url':
+          if (hasField) {
+            markerPayload = _updateMarkerPayloadField(
+              markerPayload,
+              key,
+              isStringIndex,
+              stringTable,
+              removeURLs
+            );
+          }
+          break;
+        case 'extension-id':
+          if (hasField) {
+            markerPayload = { ...markerPayload };
+            delete (markerPayload as any)[key];
+          }
+          break;
+        case 'preference-value':
+          markerPayload = _updateMarkerPayloadField(
+            markerPayload,
+            key,
+            isStringIndex,
+            stringTable,
+            () => ''
+          );
+          break;
+        case 'private-browsing':
+          shouldRemoveMarker ||=
+            hasField && Boolean((markerPayload as any)[key]);
+          break;
+        default:
+          assertExhaustiveCheck(category);
+      }
     }
   }
 
-  return idToScreenshotMarkers;
-}
-
-export function removeNetworkMarkerURLs(
-  payload: NetworkPayload
-): NetworkPayload {
-  return { ...payload, URI: '', RedirectURI: '' };
-}
-
-export function removePrefMarkerPreferenceValues(
-  payload: PrefMarkerPayload
-): PrefMarkerPayload {
-  return { ...payload, prefValue: '' };
-}
-
-/**
- * Sanitize Text marker's name property for potential URLs.
- */
-export function sanitizeTextMarker(
-  payload: TextMarkerPayload
-): TextMarkerPayload {
-  return {
-    ...payload,
-    name: removeURLs(payload.name),
-  };
-}
-
-/**
- * Sanitize Extension Text marker's name property for potential add-on ids.
- */
-export function sanitizeExtensionTextMarker(
-  markerName: string,
-  payload: TextMarkerPayload
-): TextMarkerPayload {
-  if (['ExtensionParent', 'ExtensionChild'].includes(markerName)) {
-    return {
-      ...payload,
-      name: payload.name.replace(/^.*, (api_(call|event): )/, '$1'),
-    };
-  }
-
-  if (markerName === 'Extension Suspend') {
-    return {
-      ...payload,
-      name: payload.name.replace(/ by .*$/, ''),
-    };
-  }
-
-  return payload;
-}
-
-export function sanitizeFromMarkerSchema(
-  markerSchema: MarkerSchema,
-  markerPayload: MarkerPayload
-): MarkerPayload {
-  for (const { key, format } of markerSchema.fields) {
-    if (!(key in markerPayload)) {
-      continue;
-    }
-
-    // We're typing the result of the sanitization with `any` because Flow
-    // doesn't like much our enormous enum of non-exact objects that's used as
-    // MarkerPayload type, and this code is too generic for Flow in this context.
-    if (format === 'url') {
-      markerPayload = {
-        ...markerPayload,
-        [key]: removeURLs((markerPayload as any)[key]),
-      } as any;
-    } else if (format === 'file-path') {
-      markerPayload = {
-        ...markerPayload,
-        [key]: removeFilePath((markerPayload as any)[key]),
-      } as any;
-    } else if (format === 'sanitized-string') {
-      markerPayload = {
-        ...markerPayload,
-        [key]: '<sanitized>',
-      } as any;
-    }
-  }
-
-  return markerPayload;
+  return { markerPayload, shouldRemoveMarker };
 }
 
 /**
@@ -1590,10 +1555,10 @@ export function filterMarkerByDisplayLocation(
  * Compute the Screenshot image's thumbnail size.
  */
 export function computeScreenshotSize(
-  payload: { windowWidth: number; windowHeight: number },
+  windowSize: { width: number; height: number },
   maximumSize: number
 ): { readonly width: number; readonly height: number } {
-  const { windowWidth, windowHeight } = payload;
+  const { width: windowWidth, height: windowHeight } = windowSize;
 
   // Coefficient should be according to bigger side.
   const coefficient =
@@ -1731,6 +1696,31 @@ export function formatLogTimestamp(absoluteMs: number): string {
 }
 
 /**
+ * Resolve a new format Log marker's message. The schema tells us whether the
+ * payload holds the message inline or as an index into the string table, which
+ * is what newer profiles do.
+ */
+export function resolveLogMarkerMessage(
+  message: string | IndexIntoStringTable,
+  stringArray: string[],
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
+): string {
+  // The casts below follow the storage layout the schema declares, which
+  // TypeScript can't verify from the payload type alone.
+  if (
+    !isStringIndexMarkerField(
+      stringIndexMarkerFieldsByDataType,
+      'Log',
+      'message'
+    )
+  ) {
+    return message as string;
+  }
+
+  return stringArray[message as IndexIntoStringTable] ?? '';
+}
+
+/**
  * Format a Log marker payload into a MOZ_LOG canonical line.
  *
  * Returns null if the entry has no message content and should be skipped.
@@ -1750,15 +1740,21 @@ export function formatLogStatement(
   threadName: string,
   data: LogMarkerPayload,
   moduleName: string,
-  stringArray: string[]
+  stringArray: string[],
+  stringIndexMarkerFieldsByDataType: Map<string, string[]>
 ): string | null {
   if ('message' in data) {
-    if (!data.message) {
+    const message = resolveLogMarkerMessage(
+      data.message,
+      stringArray,
+      stringIndexMarkerFieldsByDataType
+    );
+    if (!message) {
       return null;
     }
     const levelStr = stringArray[data.level] ?? '';
     const levelLetter = LOG_LEVEL_STRING_TO_LETTER[levelStr] ?? 'D';
-    return `${timestampStr} - [${processName} ${pid}: ${threadName}]: ${levelLetter}/${moduleName} ${data.message.trim()}`;
+    return `${timestampStr} - [${processName} ${pid}: ${threadName}]: ${levelLetter}/${moduleName} ${message.trim()}`;
   }
   if (!data.name) {
     return null;

@@ -1,7 +1,8 @@
-// Older versions of husky use `GIT_PARAMS`, newer versions use `HUSKY_GIT_PARAMS`.
-// To make it easier to move between branches, we support both for now. We can
-// remove this thin compatibility layer later.
-const gitParams = process.env.GIT_PARAMS || process.env.HUSKY_GIT_PARAMS;
+// Husky 9 passes git hook arguments as positional parameters. Older husky
+// versions used the `HUSKY_GIT_PARAMS` environment variable, which we keep
+// as a fallback for now to make it easier to move between branches.
+const gitParams =
+  process.argv.slice(2).join(' ') || process.env.HUSKY_GIT_PARAMS;
 const [origHead, head, flag] = gitParams.split(' ');
 
 // Flag is 1 if we moved between branches. Flag is 0 if we merely checked out a file from another branch.

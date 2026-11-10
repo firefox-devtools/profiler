@@ -12,7 +12,6 @@ import {
   type FunctionData,
 } from '../../../profile-query/function-list';
 import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
-import type { Lib } from 'firefox-profiler/types';
 
 function createMockTree(functions: FunctionData[]) {
   return {
@@ -24,12 +23,11 @@ function createMockTree(functions: FunctionData[]) {
 describe('function-list', function () {
   describe('extractFunctionData', function () {
     it('extracts function data from a tree', function () {
-      const { profile, derivedThreads } = getProfileFromTextSamples(`
+      const { derivedThreads } = getProfileFromTextSamples(`
         foo
         bar
       `);
       const [thread] = derivedThreads;
-      const libs: Lib[] = profile.libs;
 
       const functions: FunctionData[] = [
         {
@@ -51,7 +49,7 @@ describe('function-list', function () {
       ];
 
       const tree = createMockTree(functions);
-      const result = extractFunctionData(tree, thread, libs);
+      const result = extractFunctionData(tree, thread);
 
       expect(result).toEqual(functions);
     });

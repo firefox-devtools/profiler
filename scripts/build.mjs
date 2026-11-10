@@ -15,7 +15,11 @@ async function build() {
 
   // Build the worker first so we can read its output path from the metafile
   // and inject it into the main bundle via SOURCE_MAP_WORKER_PATH.
-  const workerResult = await esbuild.build(sourceMapWorkerConfig);
+  const workerResult = await esbuild.build({
+    ...sourceMapWorkerConfig,
+    entryNames:
+      process.env.NODE_ENV === 'production' ? '[name]-[hash]' : '[name]',
+  });
 
   const buildResult = await esbuild.build({
     ...mainBundleConfig,

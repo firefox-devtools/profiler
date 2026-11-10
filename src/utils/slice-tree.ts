@@ -13,7 +13,7 @@ export type Slice = {
 function addIndexIntervalsExceedingThreshold(
   threshold: number,
   cpuRatio: Float64Array,
-  time: number[],
+  time: Float64Array<ArrayBuffer>,
   items: Slice[],
   parent: number | null,
   startIndex: number = 0,
@@ -74,13 +74,13 @@ function addIndexIntervalsExceedingThreshold(
 
 export type SliceTree = {
   slices: Slice[];
-  time: number[];
+  time: Float64Array<ArrayBuffer>;
 };
 
 export function getSlices(
   thresholds: number[],
   cpuRatio: Float64Array,
-  time: number[],
+  time: Float64Array<ArrayBuffer>,
   startIndex: number = 0,
   endIndex: number = cpuRatio.length - 1
 ): SliceTree {
@@ -114,7 +114,7 @@ export function getSlices(
   return { slices, time };
 }
 
-function sliceToString(slice: Slice, time: number[]): string {
+function sliceToString(slice: Slice, time: Float64Array<ArrayBuffer>): string {
   const { avg, start, end } = slice;
   const startTime = time[start];
   const endTime = time[end];
@@ -130,7 +130,7 @@ function appendSliceSubtree(
   childrenStartPerParent: Array<number | null>,
   interestingSliceIndexes: Set<number>,
   nestingDepth: number,
-  time: number[],
+  time: Float64Array<ArrayBuffer>,
   s: string[]
 ) {
   for (let i = startIndex; i < slices.length; i++) {

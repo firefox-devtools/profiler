@@ -14,7 +14,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -24,7 +24,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -34,7 +34,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -44,7 +44,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -54,7 +54,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -64,7 +64,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -74,7 +74,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -84,7 +84,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -94,7 +94,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -104,7 +104,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>
@@ -114,7 +114,7 @@ exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
     >
       <img
         class="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
+        src="CompositorScreenshot 0"
         style="width: 100px; height: 50px;"
       />
     </div>

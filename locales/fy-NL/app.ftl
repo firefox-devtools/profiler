@@ -49,6 +49,11 @@ AppViewRouter--error-from-localhost-url-safari =
     profilen fan de lokale kompjûter yn dizze browser ymportearje. Iepenje yn stee dêrfan
     dizze side yn { -firefox-brand-name } of Chrome.
     .title = Safari kan geen lokale profielen importeren
+# This error message is displayed when the profile is in a newer format version
+# than this build of the Profiler is able to read.
+AppViewRouter--error-profile-version =
+    Dit profyl brûkt in yndieling dy’t net troch dizze ferzje fan { -profiler-brand-name } stipe wurdt.
+    Probearje de side te ferfarskjen om te kontrolearjen oft der in fernijing beskikber is foar { -profiler-brand-name }.
 AppViewRouter--route-not-found--home =
     .specialMessage = De URL dy’t jo probearre te berikken, waard net werkend.
 
@@ -297,16 +302,17 @@ ErrorBoundary--report-error-to-developers-description =
 # This is used in a call to action button, displayed inside the error box.
 ErrorBoundary--report-error-on-github = De flater op GitHub melde
 
-## Footer Links
+## Settings Menu
+## The settings popup opened from the cog icon in the top bar.
 
-FooterLinks--legal = Juridysk
-FooterLinks--Privacy = Privacy
-FooterLinks--Cookies = Cookies
-FooterLinks--languageSwitcher--select =
+SettingsMenu--button =
+    .title = Ynstellingen
+SettingsMenu--docs = Dokumintaasje
+SettingsMenu--legal = Juridysk
+SettingsMenu--privacy = Privacy
+SettingsMenu--cookies = Cookies
+SettingsMenu--language-switcher =
     .title = Taal wizigje
-FooterLinks--hide-button =
-    .title = Fuottekstkeppelingen ferstopje
-    .aria-label = Fuottekstkeppelingen ferstopje
 
 ## FullTimeline
 ## The timeline component of the full view in the analysis UI at the top of the
@@ -392,8 +398,11 @@ Home--chrome-extension-recording-instructions =
 ## IdleSearchField
 ## The component that is used for all the search inputs in the application.
 
-IdleSearchField--search-input =
-    .placeholder = Fier filtertermen yn
+# `/` here overrides Firefox's Type Ahead Find shortcut, which would
+# otherwise trigger an unhelpful find bar on top of the profiler UI.
+# The shortcut itself is not localizable.
+IdleSearchField--search-input2 =
+    .placeholder = Fier filtertermen yn (/)
 
 ## JsTracerSettings
 ## JSTracer is an experimental feature and it's currently disabled. See Bug 1565788.
@@ -506,8 +515,8 @@ MarkerTable--details = Details
 # Variables:
 #   $filter (String) - Search string that will be used to filter the markers.
 MarkerTooltip--filter-button-tooltip =
-    .title = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
     .aria-label = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
+    .title = Allinnich markearringen toane dy’t oerienkomme mei: ‘{ $filter }’
 
 ## MenuButtons
 ## These strings are used for the buttons at the top of the profile viewer.
@@ -516,14 +525,15 @@ MenuButtons--index--metaInfo-button =
     .label = Profylynfo
 MenuButtons--index--full-view = Folslein byld
 MenuButtons--index--cancel-upload = Opladen annulearje
-MenuButtons--index--share-upload =
-    .label = Lokaal profyl oplade
-MenuButtons--index--share-re-upload =
-    .label = Opnij oplade
+MenuButtons--index--save =
+    .label = Bewarje…
+MenuButtons--index--share =
+    .label = Diele…
+MenuButtons--index--reshare =
+    .label = Opnij diele…
 MenuButtons--index--share-error-uploading =
     .label = Flater by it opladen
 MenuButtons--index--revert = Tebek nei orizjineel profyl
-MenuButtons--index--docs = Dokuminten
 MenuButtons--permalink--button =
     .label = Permalink
 
@@ -541,6 +551,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Profyl opnij symbolisearje
 MenuButtons--metaInfo--symbolicate-profile = Profyl symbolisearje
 MenuButtons--metaInfo--attempting-resymbolicate = Besykjen ta opnij symbolisearjen profyl
 MenuButtons--metaInfo--currently-symbolicating = Profyl wurdt symbolisearre
+MenuButtons--metaInfo--source-maps = Boarnekaarten:
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Boarnekaart tapasse…
+    .title = In .map-bestân fan jo skiif lade om in minimalisearre JavaScript-bondel te symbolisearjen, om oarspronklike funksjenammen en boarnelokaasjes te werstellen.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Kies op hokker bondel dizze boarnekaart fan tapassing is:
+# Button to confirm the chosen source and apply the source map to it.
+MenuButtons--metaInfo--source-map-apply = Tapasse
+# Button to dismiss the source chooser without symbolicating.
+MenuButtons--metaInfo--source-map-cancel = Annulearje
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Oarspronklike boarnen foar { $filename } oplost.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Gjin inkelde stapelposysje yn { $filename } komt oerien mei dizze boarnekaart.
+MenuButtons--metaInfo--source-map-error-invalid = It selektearre bestân is gjin jildige boarnekaart.
+MenuButtons--metaInfo--source-map-error-no-eligible = Dit profyl hat gjin JS-bondels mei boarnekaart-URL’s.
+MenuButtons--metaInfo--source-map-error-failed = Kin dizze boarnekaart net tapasse op it profyl.
 MenuButtons--metaInfo--cpu-model = CPU-model:
 MenuButtons--metaInfo--cpu-cores = CPU-kearnen:
 MenuButtons--metaInfo--main-memory = Haadûnthâld:
@@ -666,9 +698,15 @@ MenuButtons--publish--renderCheckbox-label-preference = Foarkarswearden opnimme
 MenuButtons--publish--renderCheckbox-label-private-browsing = De gegevens fan priveenavigaasjefinsters opnimme
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Dit profyl befettet priveenavigaasjegegevens
-MenuButtons--publish--reupload-performance-profile = Prestaasjeprofyl opnij oplade
+MenuButtons--publish--renderCheckbox-label-argument-values = Argumintwearden fan JavaScript-útfieringstrasearringfunksje opnimme
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Dit profyl befettet funksjeargumintwearden, dy’t fan de side opnommen binne, dy't persoanlike gegevens befetsje kin
 MenuButtons--publish--share-performance-profile = Prestaasjeprofyl diele
+MenuButtons--publish--reshare-performance-profile = Prestaasjeprofyl opnij diele
+MenuButtons--publish--save-performance-profile = Prestaasjeprofyl bewarje
+MenuButtons--publish--local-profile-description = Dit profyl is net oplaad en sil ferlern gean as jo dit ljepblêd slute. Om it te behâlden, bewarje it op jo kompjûter of laad it op mei Diele.
 MenuButtons--publish--info-description = Laad jo profyl op en meitsje it mei de keppeling tagonklik foar elkenien.
+MenuButtons--publish--download-info-description = Dit profyl as in bestân op jo kompjûter bewarje.
 MenuButtons--publish--info-description-default = Standert wurde jo persoanlike gegevens fuortsmiten.
 MenuButtons--publish--info-description-firefox-nightly2 = Dit profyl is fan { -firefox-nightly-brand-name }, dus standert wurde de measte gegevens opnommen.
 MenuButtons--publish--include-additional-data = Oanfoljende gegevens dy’t identifisearber wêze kinne tafoegje
@@ -677,7 +715,7 @@ MenuButtons--publish--upload-title = Profyl oplade…
 MenuButtons--publish--cancel-upload = Opladen annulearje
 MenuButtons--publish--message-something-went-wrong = Och heden, der is wat misgien by it opladen fan it profyl.
 MenuButtons--publish--message-try-again = Opnij probearje
-MenuButtons--publish--download = Downloade
+MenuButtons--publish--save = Bewarje
 MenuButtons--publish--compressing = Komprimearje…
 MenuButtons--publish--error-while-compressing = Flater by it komprimearjen. Probearje guon seleksjefakjes út te skeakeljen om de profylgrutte te ferlytsjen.
 
@@ -712,8 +750,8 @@ PanelSearch--search-field-hint = Wisten jo dat jo de komma (,) brûke kinne om m
 ProfileName--edit-profile-name-button =
     .title = De profylnamme bewurkje
 ProfileName--edit-profile-name-input =
-    .title = De profylnamme bewurkje
     .aria-label = Profylnamme
+    .title = De profylnamme bewurkje
 
 ## Profile Delete Button
 
@@ -793,8 +831,8 @@ ServiceWorkerManager--updated-while-not-ready =
     folslein laden wie. Jo kinne fersteuringen sjen.
 ServiceWorkerManager--new-version-is-ready = In nije ferzje fan de tapassing is download en is klear foar gebrûk.
 ServiceWorkerManager--hide-notice-button =
-    .title = Melding opnij lade ferstopje
     .aria-label = Melding opnij lade ferstopje
+    .title = Melding opnij lade ferstopje
 
 ## StackSettings
 ## This is the settings component that is used in Call Tree, Flame Graph and Stack
@@ -891,9 +929,26 @@ TrackNameButton--hide-process =
 ## the UI. To learn more about it, visit:
 ## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
 
-TrackMemoryGraph--relative-memory-at-this-time = relatyf ûnthâld op dit stuit
-TrackMemoryGraph--memory-range-in-graph = ûnthâldberik yn grafyk
-TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample = tawizingen en fuortsmiten tawizingen sûnt de foarige stekproef
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = relatyf ûnthâld op dit stuit
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = ûnthâldberik yn grafyk
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = allokaasjes en de-allokaasjes sûnt de foarige opname
+
+## TrackProcessCPUGraph
+## This is used to show the CPU usage of a process over time in the timeline.
+
+# Variables:
+#   $value (String) - the CPU usage at this sample (e.g. "50%")
+TrackProcessCPUGraph--cpu = { $value }
+    .label = CPU
 
 ## TrackPower
 ## This is used to show the power used by the CPU and other chips in a computer,
@@ -939,6 +994,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Gemiddeld fermogen yn de aktuele seleksje
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } µW
     .label = Gemiddeld fermogen yn de aktuele seleksje
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

@@ -17,10 +17,9 @@ import {
 } from './utils';
 
 import type {
-  FilterStackResult,
+  ProfileMetaResult,
   SessionMetadata,
-  StatusResult,
-  ThreadSamplesResult,
+  ThreadListResult,
   WithContext,
 } from '../../protocol';
 
@@ -62,6 +61,31 @@ describe('profiler-cli basic functionality', () => {
     expect(files).toContain('current.txt');
   });
 
+  it('permalink refuses a profile loaded from a local file', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, ['permalink']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('Publishing from profiler-cli is not supported');
+  });
+
+  it('--permalink reports why no link is available without failing the command', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const text = await cli(ctx, ['profile', 'info', '--permalink']);
+    expect(text.stdout).toContain('Permalink unavailable:');
+    expect(text.stdout).toContain(
+      'Publishing from profiler-cli is not supported'
+    );
+
+    const json = await cli(ctx, ['profile', 'info', '--permalink', '--json']);
+    const parsed = JSON.parse(json.stdout);
+    expect(parsed.type).toBe('profile-info');
+    expect(parsed.permalink).toBeNull();
+    expect(parsed.permalinkError).toContain('not supported yet');
+  });
+
   it('profile info works after load', async () => {
     await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
 
@@ -69,6 +93,28 @@ describe('profiler-cli basic functionality', () => {
 
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('This profile contains');
+  });
+
+  it('profile meta works after load', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cli(ctx, ['profile', 'meta']);
+
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('Recording:');
+    expect(result.stdout).toContain('Sampling interval:');
+  });
+
+  it('profile meta --json returns typed structured output', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cli(ctx, ['profile', 'meta', '--json']);
+
+    expect(result.exitCode).toBe(0);
+    const meta = JSON.parse(result.stdout) as WithContext<ProfileMetaResult>;
+    expect(meta.type).toBe('profile-meta');
+    expect(typeof meta.product).toBe('string');
+    expect(typeof meta.interval).toBe('number');
   });
 
   it('thread select works immediately after load', async () => {
@@ -79,6 +125,33 @@ describe('profiler-cli basic functionality', () => {
     expect(result.exitCode).toBe(0);
     expect(result.stdout).toContain('Selected thread');
     expect(result.stdout).toContain('t-0');
+  });
+
+  it('thread list prints a flat table', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const list = await cli(ctx, ['thread', 'list']);
+    expect(list.exitCode).toBe(0);
+    expect(list.stdout).toContain('HANDLE');
+    expect(list.stdout).toContain('MARKERS');
+    expect(list.stdout).toContain('t-0');
+
+    const json = await cli(ctx, ['thread', 'list', '--json']);
+    const result = JSON.parse(json.stdout) as WithContext<ThreadListResult>;
+    expect(result.type).toBe('thread-list');
+    expect(result.threads.length).toBe(result.totalThreadCount);
+    expect(result.sort).toBe('cpu');
+    expect(result.threads[0].threadHandle).toBe('t-0');
+    expect(typeof result.threads[0].markerCount).toBe('number');
+  });
+
+  it('thread list rejects an unknown --sort', async () => {
+    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
+
+    const result = await cliFail(ctx, ['thread', 'list', '--sort', 'bogus']);
+    expect(result.exitCode).not.toBe(0);
+    const output = String(result.stdout || '') + String(result.stderr || '');
+    expect(output).toContain('--sort must be one of');
   });
 
   it('stop cleans up session', async () => {
@@ -117,187 +190,6 @@ describe('profiler-cli basic functionality', () => {
     const result2 = await cli(ctx, ['profile', 'info']);
     expect(result2.exitCode).toBe(0);
     expect(result2.stdout).toEqual(result1.stdout);
-  });
-
-  it('numeric zero marker filters are preserved instead of being ignored', async () => {
-    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-
-    const minDurationResult = await cli(ctx, [
-      'thread',
-      'markers',
-      '--json',
-      '--min-duration',
-      '0',
-    ]);
-    expect(minDurationResult.stdout).toContain('"minDuration": 0');
-
-    const maxDurationResult = await cli(ctx, [
-      'thread',
-      'markers',
-      '--json',
-      '--max-duration',
-      '0',
-    ]);
-    expect(maxDurationResult.stdout).toContain('"maxDuration": 0');
-  });
-
-  it('numeric zero function filters are preserved instead of being ignored', async () => {
-    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-
-    const result = await cli(ctx, [
-      'thread',
-      'functions',
-      '--json',
-      '--min-self',
-      '0',
-    ]);
-
-    expect(result.stdout).toContain('"minSelf": 0');
-  });
-
-  it('sticky filters are isolated per thread and reported in status', async () => {
-    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-    await cli(ctx, ['thread', 'select', 't-0']);
-
-    await cli(ctx, ['filter', 'push', '--merge', 'f-1,f-2']);
-
-    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
-    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
-
-    expect(filterList.type).toBe('filter-stack');
-    expect(filterList.threadHandle).toBe('t-0');
-    // Multi-func push collapses into one entry backed by multiple transforms.
-    expect(filterList.filters).toHaveLength(1);
-    expect(filterList.filters[0].transforms).toEqual([
-      { type: 'merge-function', funcIndex: 1 },
-      { type: 'merge-function', funcIndex: 2 },
-    ]);
-    expect(filterList.filters[0].description).toBe('merge: f-1, f-2');
-
-    const statusResult = await cli(ctx, ['status', '--json']);
-    const status = JSON.parse(statusResult.stdout) as StatusResult;
-
-    expect(status.type).toBe('status');
-    expect(status.filterStacks).toHaveLength(1);
-    expect(status.filterStacks[0]).toEqual(
-      expect.objectContaining({
-        threadHandle: 't-0',
-        filters: [
-          expect.objectContaining({
-            transforms: [
-              { type: 'merge-function', funcIndex: 1 },
-              { type: 'merge-function', funcIndex: 2 },
-            ],
-          }),
-        ],
-      })
-    );
-
-    await cli(ctx, ['thread', 'select', 't-1']);
-
-    const otherThreadFilterListResult = await cli(ctx, [
-      'filter',
-      'list',
-      '--json',
-    ]);
-    const otherThreadFilterList = JSON.parse(
-      otherThreadFilterListResult.stdout
-    ) as FilterStackResult;
-
-    expect(otherThreadFilterList.threadHandle).toBe('t-1');
-    expect(otherThreadFilterList.filters).toHaveLength(0);
-
-    const explicitThreadFilterListResult = await cli(ctx, [
-      'filter',
-      'list',
-      '--thread',
-      't-0',
-      '--json',
-    ]);
-    const explicitThreadFilterList = JSON.parse(
-      explicitThreadFilterListResult.stdout
-    ) as FilterStackResult;
-
-    expect(explicitThreadFilterList.threadHandle).toBe('t-0');
-    expect(explicitThreadFilterList.filters).toHaveLength(1);
-    expect(explicitThreadFilterList.filters[0].transforms).toEqual([
-      { type: 'merge-function', funcIndex: 1 },
-      { type: 'merge-function', funcIndex: 2 },
-    ]);
-
-    // One pop removes the whole entry (both underlying transforms).
-    await cli(ctx, ['filter', 'pop', '--thread', 't-0']);
-    const afterPopResult = await cli(ctx, [
-      'filter',
-      'list',
-      '--thread',
-      't-0',
-      '--json',
-    ]);
-    const afterPop = JSON.parse(afterPopResult.stdout) as FilterStackResult;
-    expect(afterPop.filters).toHaveLength(0);
-  });
-
-  it('filter push supports --during-marker with --search', async () => {
-    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-    await cli(ctx, ['thread', 'select', 't-0']);
-
-    await cli(ctx, ['filter', 'push', '--during-marker', '--search', 'Reflow']);
-
-    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
-    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
-
-    expect(filterList.filters).toHaveLength(1);
-    expect(filterList.filters[0].transforms).toEqual([
-      { type: 'filter-samples', filterType: 'marker-search', filter: 'Reflow' },
-    ]);
-    expect(filterList.filters[0].description).toBe(
-      'during marker matching: "Reflow"'
-    );
-  });
-
-  it('ephemeral sample filters do not persist into session state', async () => {
-    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-
-    const samplesResult = await cli(ctx, [
-      'thread',
-      'samples',
-      '--json',
-      '--merge',
-      'f-1',
-    ]);
-    const samples = JSON.parse(
-      samplesResult.stdout
-    ) as WithContext<ThreadSamplesResult>;
-
-    expect(samples.type).toBe('thread-samples');
-    expect(samples.ephemeralFilters).toEqual([
-      { type: 'merge', funcIndexes: [1] },
-    ]);
-    expect(samples.activeFilters).toBeUndefined();
-
-    const filterListResult = await cli(ctx, ['filter', 'list', '--json']);
-    const filterList = JSON.parse(filterListResult.stdout) as FilterStackResult;
-    expect(filterList.filters).toHaveLength(0);
-
-    const statusResult = await cli(ctx, ['status', '--json']);
-    const status = JSON.parse(statusResult.stdout) as StatusResult;
-    expect(status.filterStacks).toHaveLength(0);
-  });
-
-  it('max-lines=0 is rejected instead of silently falling back to the default', async () => {
-    await cli(ctx, ['load', 'src/test/fixtures/upgrades/processed-1.json']);
-
-    const result = await cliFail(ctx, [
-      'thread',
-      'samples-top-down',
-      '--max-lines',
-      '0',
-    ]);
-
-    expect(result.exitCode).not.toBe(0);
-    const output = String(result.stdout || '') + String(result.stderr || '');
-    expect(output).toContain('--max-lines must be a positive integer');
   });
 
   it('build hash mismatch stops the daemon before cleaning up the session', async () => {

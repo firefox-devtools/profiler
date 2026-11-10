@@ -56,6 +56,7 @@ import type {
   Page,
   SamplesLikeTable,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -147,7 +148,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const isJS = funcTable.isJS[funcIndex];
+    const isJS = (funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0;
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
     const name = isJS ? functionCall : getFunctionName(functionCall);
@@ -184,10 +185,10 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const sourceIndex = funcTable.source[funcIndex];
-    if (sourceIndex === null) {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
       return null;
     }
+    const sourceIndex = funcTable.source[funcIndex];
     const stringIndex = sources.filename[sourceIndex];
     return stringTable.getString(stringIndex);
   }
@@ -208,8 +209,15 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     } = rightClickedCallNodeInfo;
 
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const line = funcTable.lineNumber[funcIndex];
-    const column = funcTable.columnNumber[funcIndex];
+    const funcFlags = funcTable.flags[funcIndex];
+    const line =
+      (funcFlags & FuncFlag.HasLine) !== 0
+        ? funcTable.lineNumber[funcIndex]
+        : null;
+    const column =
+      (funcFlags & FuncFlag.HasColumn) !== 0
+        ? funcTable.columnNumber[funcIndex]
+        : null;
     return { line, column };
   }
 
@@ -530,21 +538,22 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
     if (funcIndex === undefined) {
       return null;
     }
-    const isJS = funcTable.isJS[funcIndex];
+    const funcFlags = funcTable.flags[funcIndex];
+    const isJS = (funcFlags & FuncFlag.IsJS) !== 0;
 
     if (isJS) {
-      const sourceIndex = funcTable.source[funcIndex];
-      if (sourceIndex === null) {
+      if ((funcFlags & FuncFlag.HasSource) === 0) {
         return null;
       }
+      const sourceIndex = funcTable.source[funcIndex];
 
       const fileNameIndex = sources.filename[sourceIndex];
       return stringTable.getString(fileNameIndex);
     }
-    const resourceIndex = funcTable.resource[funcIndex];
-    if (resourceIndex === -1) {
+    if ((funcFlags & FuncFlag.HasResource) === 0) {
       return null;
     }
+    const resourceIndex = funcTable.resource[funcIndex];
     const resNameStringIndex = resourceTable.name[resourceIndex];
     return stringTable.getString(resNameStringIndex);
   }
@@ -608,7 +617,7 @@ class CallNodeContextMenuImpl extends React.PureComponent<Props> {
 
     const categoryIndex = callNodeInfo.categoryForNode(callNodeIndex);
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const isJS = funcTable.isJS[funcIndex];
+    const isJS = (funcTable.flags[funcIndex] & FuncFlag.IsJS) !== 0;
     const hasCategory = categoryIndex !== -1;
     // This could be the C++ library, or the JS filename.
     const nameForResource = this.getNameForSelectedResource();

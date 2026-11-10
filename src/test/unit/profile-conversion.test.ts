@@ -8,29 +8,16 @@ import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
+import {
+  assertProfileIntegrity,
+  profileImportSnapshot,
+} from '../fixtures/profile-summary';
 
 import type {
   TracingEventUnion,
   CpuProfileEvent,
 } from '../../profile-logic/import/chrome';
 import type { Profile } from 'firefox-profiler/types';
-
-function checkProfileContainsUniqueTid(profile: Profile) {
-  const foundTids = new Set<unknown>();
-
-  for (const thread of profile.threads) {
-    const { tid } = thread;
-    if (tid === undefined) {
-      throw new Error('Found an undefined tid!');
-    }
-
-    if (foundTids.has(tid)) {
-      console.error(`Found a duplicate tid ${tid}!`);
-    }
-
-    foundTids.add(tid);
-  }
-}
 
 describe('converting Linux perf profile', function () {
   async function loadProfile(filename: string): Promise<Profile> {
@@ -57,8 +44,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/test.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a simple perf profile', async function () {
@@ -66,8 +53,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/simple-perf.txt.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a perf profile of gzip', async function () {
@@ -75,8 +62,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/gzip.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a perf profile of graphviz with a header', async function () {
@@ -84,8 +71,8 @@ describe('converting Linux perf profile', function () {
       'src/test/fixtures/upgrades/graphviz.perf.gz'
     );
     expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -100,8 +87,8 @@ describe('converting dhat profiles', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -127,8 +114,8 @@ describe('converting Google Chrome profile', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a chrome profile with an invalid "endTime" entry', async () => {
@@ -168,8 +155,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function () {
@@ -182,8 +169,8 @@ describe('converting Google Chrome profile', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a single CpuProfile, e.g. from node', async function () {
@@ -218,8 +205,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a profile with DevTools timestamp in filename', async function () {
@@ -235,8 +222,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a profile using the chrome tracing format', async function () {
@@ -252,8 +239,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a profile with the chrome array format', async function () {
@@ -269,8 +256,8 @@ describe('converting Google Chrome profile', function () {
       throw new Error('Unable to parse the profile.');
     }
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a chrome profile using markers of different types', async function () {
@@ -396,7 +383,7 @@ describe('converting Google Chrome profile', function () {
       .getFullMarkerListIndexes(state)
       .map(mainGetMarker);
 
-    checkProfileContainsUniqueTid(profile);
+    assertProfileIntegrity(profile);
     expect(markers.map(({ name }) => name)).toEqual([
       'RunTask',
       'RunTask Complete',
@@ -415,6 +402,206 @@ describe('converting Google Chrome profile', function () {
     });
     expect(markers).toMatchSnapshot();
   });
+
+  it('captures source map URLs from ScriptCatchup events', async function () {
+    // Traces recorded with the "v8-source-rundown" category (on by default in
+    // the DevTools Performance panel) include a ScriptCatchup event per parsed
+    // script that declares its source map URL. Build a small trace with a CPU
+    // profile plus these events and check they land in the source table
+    // verbatim (relative URLs stay relative, matching Gecko profiles).
+    const chromeProfile = {
+      traceEvents: [
+        {
+          args: { data: { startTime: 0 } },
+          cat: 'disabled-by-default-v8.cpu_profiler',
+          id: '0x1',
+          name: 'Profile',
+          ph: 'P',
+          pid: 1000,
+          tid: 1,
+          ts: 0,
+        },
+        {
+          args: {
+            data: {
+              cpuProfile: {
+                nodes: [
+                  {
+                    callFrame: { functionName: '(root)', scriptId: 0 },
+                    id: 1,
+                  },
+                  {
+                    callFrame: {
+                      functionName: 'relative',
+                      scriptId: 7,
+                      url: 'https://example.com/app.js',
+                      lineNumber: 10,
+                      columnNumber: 5,
+                    },
+                    id: 2,
+                    parent: 1,
+                  },
+                  {
+                    callFrame: {
+                      functionName: 'absolute',
+                      scriptId: 8,
+                      url: 'https://example.com/vendor.js',
+                      lineNumber: 20,
+                      columnNumber: 3,
+                    },
+                    id: 3,
+                    parent: 1,
+                  },
+                  {
+                    callFrame: {
+                      functionName: 'inline',
+                      scriptId: 9,
+                      url: 'https://example.com/inline.js',
+                      lineNumber: 1,
+                      columnNumber: 1,
+                    },
+                    id: 4,
+                    parent: 1,
+                  },
+                  {
+                    callFrame: {
+                      functionName: 'nomap',
+                      scriptId: 10,
+                      url: 'https://example.com/nomap.js',
+                      lineNumber: 2,
+                      columnNumber: 2,
+                    },
+                    id: 5,
+                    parent: 1,
+                  },
+                ],
+                samples: [2, 3, 4, 5],
+              },
+              timeDeltas: [0, 500, 500, 500],
+            },
+          },
+          cat: 'disabled-by-default-v8.cpu_profiler',
+          id: '0x1',
+          name: 'ProfileChunk',
+          ph: 'P',
+          pid: 1000,
+          tid: 1,
+          ts: 1,
+        },
+        // A source map URL relative to the script URL should be kept verbatim.
+        {
+          args: {
+            data: {
+              isolate: 'iso1',
+              scriptId: 7,
+              url: 'https://example.com/app.js',
+              sourceMapUrl: '/app.js.map',
+            },
+          },
+          cat: 'disabled-by-default-devtools.v8-source-rundown',
+          name: 'ScriptCatchup',
+          ph: 'X',
+          pid: 1000,
+          tid: 1,
+          ts: 0,
+        },
+        // An absolute source map URL should be kept as-is.
+        {
+          args: {
+            data: {
+              isolate: 'iso1',
+              scriptId: 8,
+              url: 'https://example.com/vendor.js',
+              sourceMapUrl: 'https://cdn.example.com/vendor.js.map',
+            },
+          },
+          cat: 'disabled-by-default-devtools.v8-source-rundown',
+          name: 'ScriptCatchup',
+          ph: 'X',
+          pid: 1000,
+          tid: 1,
+          ts: 0,
+        },
+        // An inline (data:) source map URL should be kept as-is.
+        {
+          args: {
+            data: {
+              isolate: 'iso1',
+              scriptId: 9,
+              url: 'https://example.com/inline.js',
+              sourceMapUrl: 'data:application/json;base64,e30=',
+            },
+          },
+          cat: 'disabled-by-default-devtools.v8-source-rundown',
+          name: 'ScriptCatchup',
+          ph: 'X',
+          pid: 1000,
+          tid: 1,
+          ts: 0,
+        },
+        // A script without a source map URL should leave the field null.
+        {
+          args: {
+            data: {
+              isolate: 'iso1',
+              scriptId: 10,
+              url: 'https://example.com/nomap.js',
+            },
+          },
+          cat: 'disabled-by-default-devtools.v8-source-rundown',
+          name: 'ScriptCatchup',
+          ph: 'X',
+          pid: 1000,
+          tid: 1,
+          ts: 0,
+        },
+        // A ScriptCatchup for a script that isn't referenced by the CPU profile
+        // should be harmless (no source is created for it).
+        {
+          args: {
+            data: {
+              isolate: 'iso1',
+              scriptId: 3,
+              url: 'extensions::SafeBuiltins',
+              sourceMapUrl: '/should-be-ignored.map',
+            },
+          },
+          cat: 'disabled-by-default-devtools.v8-source-rundown',
+          name: 'ScriptCatchup',
+          ph: 'X',
+          pid: 1000,
+          tid: 1,
+          ts: 0,
+        },
+      ],
+    };
+
+    const profile = await unserializeProfileOfArbitraryFormat(
+      JSON.stringify(chromeProfile)
+    );
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    assertProfileIntegrity(profile);
+
+    const { sources, stringArray } = profile.shared;
+    const getSourceMapURL = (filename: string): string | null => {
+      const sourceIndex = sources.filename.findIndex(
+        (i) => stringArray[i] === filename
+      );
+      const sourceMapURLIndex = sources.sourceMapURL[sourceIndex];
+      return sourceMapURLIndex === null ? null : stringArray[sourceMapURLIndex];
+    };
+
+    expect(getSourceMapURL('https://example.com/app.js')).toBe('/app.js.map');
+    expect(getSourceMapURL('https://example.com/vendor.js')).toBe(
+      'https://cdn.example.com/vendor.js.map'
+    );
+    expect(getSourceMapURL('https://example.com/inline.js')).toBe(
+      'data:application/json;base64,e30='
+    );
+    expect(getSourceMapURL('https://example.com/nomap.js')).toBe(null);
+  });
 });
 
 describe('converting ART trace', function () {
@@ -430,8 +617,8 @@ describe('converting ART trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a streaming ART trace', async function () {
@@ -446,8 +633,8 @@ describe('converting ART trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -464,8 +651,8 @@ describe('converting Simpleperf trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('successfully imports a simpleperf trace with cpu-clock', async function () {
@@ -480,8 +667,8 @@ describe('converting Simpleperf trace', function () {
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
     }
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });
 
@@ -518,8 +705,8 @@ describe('converting flamegraph profile', function () {
     expect(thread.name).toBe('Program');
     expect(thread.samples.length).toBe(18); // 10 + 5 + 3 samples
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
   it('should import a flamegraph profile with Java frames', async function () {
@@ -541,7 +728,7 @@ describe('converting flamegraph profile', function () {
     expect(
       profile.shared.stringArray.find((s) => s.includes('[j]'))
     ).toBeUndefined();
-    checkProfileContainsUniqueTid(profile);
+    assertProfileIntegrity(profile);
   });
 
   it('should handle empty lines in flamegraph', async function () {
@@ -555,7 +742,7 @@ describe('converting flamegraph profile', function () {
     const thread = profile.threads[0];
     // 2 + 1 stacks
     expect(thread.samples.length).toBe(3);
-    checkProfileContainsUniqueTid(profile);
+    assertProfileIntegrity(profile);
   });
 
   it('should import a real-world flamegraph file', async function () {
@@ -577,7 +764,7 @@ describe('converting flamegraph profile', function () {
     expect(thread.name).toBe('Program');
     expect(thread.samples.length).toBeGreaterThan(0);
 
-    checkProfileContainsUniqueTid(profile);
-    expect(profile).toMatchSnapshot();
+    assertProfileIntegrity(profile);
+    expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 });

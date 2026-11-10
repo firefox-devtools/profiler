@@ -9,7 +9,7 @@ import { AppLocalizationProvider } from 'firefox-profiler/components/app/AppLoca
 
 import { blankStore } from 'firefox-profiler/test/fixtures/stores';
 import { fireFullClick } from 'firefox-profiler/test/fixtures/utils';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 beforeEach(() => {
   // Serve locale files from the filesystem so the AppLocalizationProvider can
@@ -45,9 +45,13 @@ function setup() {
 }
 
 async function openMenu() {
-  const button = await screen.findByRole('button', { name: 'Settings' });
+  // Find the cog button and wait for the panel to open in a
+  // language-agnostic way: before the menu opens there is only a single
+  // button, and the language switcher combobox only appears once the panel
+  // is shown. This avoids depending on localized label text.
+  const button = await screen.findByRole('button');
   fireFullClick(button);
-  await screen.findByText('Legal');
+  await screen.findByRole('combobox');
 }
 
 it('renders the cog button in its closed state', async () => {
@@ -89,6 +93,9 @@ it('makes it possible to switch the language and persists it', async () => {
   option.selected = true;
   fireEvent.change(select);
   expect(localStorage.getItem('requestedLocales')).toBe(JSON.stringify(['de']));
+  await waitFor(() =>
+    expect(document.documentElement).toHaveAttribute('lang', 'de')
+  );
 });
 
 it('uses the previously requested locale at startup', async () => {

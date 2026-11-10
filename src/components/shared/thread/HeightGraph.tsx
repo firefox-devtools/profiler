@@ -15,14 +15,14 @@ import type {
   IndexIntoSamplesTable,
   Milliseconds,
 } from 'firefox-profiler/types';
-import { SelectedState } from 'firefox-profiler/types';
+import type { SampleRelations } from 'firefox-profiler/profile-logic/profile-data';
 
 type Props = {
   readonly heightFunc: (param: IndexIntoSamplesTable) => number | null;
   readonly maxValue: number;
   readonly className: string;
   readonly thread: Thread;
-  readonly sampleSelectedStates: Uint8Array;
+  readonly sampleRelations: SampleRelations;
   readonly interval: Milliseconds;
   readonly rangeStart: Milliseconds;
   readonly rangeEnd: Milliseconds;
@@ -64,7 +64,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       thread,
-      sampleSelectedStates,
+      sampleRelations,
       interval,
       rangeStart,
       rangeEnd,
@@ -130,8 +130,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
         continue;
       }
 
-      const state = sampleSelectedStates[i] as SelectedState;
-      if (state === SelectedState.FilteredOutByTransform) {
+      if (sampleRelations.isFilteredOut(i)) {
         continue;
       }
 
@@ -144,7 +143,7 @@ export class ThreadHeightGraph extends PureComponent<Props> {
 
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
       let samplesBucket;
-      if (state === SelectedState.Selected) {
+      if (sampleRelations.contributesToTotal(i)) {
         samplesBucket = highlightedSamples;
       } else {
         const categoryIndex = thread.samples.category[i];

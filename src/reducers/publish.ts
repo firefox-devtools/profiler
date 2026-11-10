@@ -7,6 +7,7 @@ import { getShouldSanitizeByDefault } from '../profile-logic/sanitize';
 
 import type {
   CheckedSharingOptions,
+  SharingMode,
   PublishState,
   UploadState,
   UploadPhase,
@@ -25,6 +26,7 @@ function _getSanitizingSharingOptions(): CheckedSharingOptions {
     includeExtension: false,
     includePreferenceValues: false,
     includePrivateBrowsingData: false,
+    includeArgumentValues: false,
   };
 }
 
@@ -39,24 +41,39 @@ function _getMostlyNonSanitizingSharingOptions(): CheckedSharingOptions {
     includePreferenceValues: true,
     // We always want to sanitize the private browsing data by default
     includePrivateBrowsingData: false,
+    // We always want to sanitize the argument values by default since they may contain PII
+    includeArgumentValues: false,
   };
 }
 
-const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
-  state = _getSanitizingSharingOptions(),
+// Both modes reference the same object until one is edited, so an untouched
+// profile is only encoded once.
+function _sharingOptionsForBothModes(
+  options: CheckedSharingOptions
+): Record<SharingMode, CheckedSharingOptions> {
+  return { download: options, upload: options };
+}
+
+const checkedSharingOptions: Reducer<
+  Record<SharingMode, CheckedSharingOptions>
+> = (
+  state = _sharingOptionsForBothModes(_getSanitizingSharingOptions()),
   action
 ) => {
   switch (action.type) {
     case 'PROFILE_LOADED': {
-      const newState = getShouldSanitizeByDefault(action.profile)
+      const options = getShouldSanitizeByDefault(action.profile)
         ? _getSanitizingSharingOptions()
         : _getMostlyNonSanitizingSharingOptions();
-      return newState;
+      return _sharingOptionsForBothModes(options);
     }
     case 'UPDATE_SHARING_OPTION':
       return {
         ...state,
-        [action.slug]: action.value,
+        [action.mode]: {
+          ...state[action.mode],
+          [action.slug]: action.value,
+        },
       };
     default:
       return state;
@@ -219,8 +236,8 @@ const sanitizedProfileEncodingState: Reducer<SanitizedProfileEncodingState> = (
 ): SanitizedProfileEncodingState => {
   switch (action.type) {
     case 'SANITIZED_PROFILE_ENCODING_STARTED': {
-      const { sanitizedProfile } = action;
-      return { phase: 'ENCODING', sanitizedProfile };
+      const { sanitizedProfile, encodingPromise } = action;
+      return { phase: 'ENCODING', sanitizedProfile, encodingPromise };
     }
     case 'SANITIZED_PROFILE_ENCODING_COMPLETED': {
       const { sanitizedProfile, profileData } = action;

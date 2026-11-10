@@ -29,7 +29,10 @@ This means:
 - Developers working on the CLI use the root package.json dependencies
 - The `package.json` in this directory is for npm publishing only, not for development
 
-To publish, see [`docs-developer/deploying.md`](../docs-developer/deploying.md#publishing-profiler-cli-to-npm).
+To publish, see [`docs-developer/deploying.md`](../docs-developer/deploying.md#4-publish-profiler-cli-to-npm).
+The CLI release is part of the regular profiler deploy: the version bump lands on
+`main` before the deploy, and the npm publish plus the GitHub release happen right
+after it.
 
 ## Development Workflow
 
@@ -45,7 +48,7 @@ All test scripts automatically set `PROFILER_CLI_SESSION_DIR="./.profiler-cli-de
 **Build:**
 
 ```bash
-yarn build-profiler-cli # Creates ./dist/profiler-cli.js
+yarn build-cli # Creates ./dist/profiler-cli.js
 ```
 
 **Unit tests:**
@@ -139,9 +142,7 @@ export type AllocationInfoResult = {
 
 ```typescript
 import { Command } from 'commander';
-import { sendCommand } from '../client';
-import { addGlobalOptions } from './shared';
-import { formatOutput } from '../output';
+import { addGlobalOptions, runCommand } from './shared';
 
 export function registerAllocationCommand(
   program: Command,
@@ -157,12 +158,11 @@ export function registerAllocationCommand(
       .description('Show allocation summary')
       .option('--thread <handle>', 'Thread to query')
   ).action(async (opts) => {
-    const result = await sendCommand(
+    await runCommand(
       sessionDir,
       { command: 'allocation', subcommand: 'info', thread: opts.thread },
-      opts.session
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false));
   });
 }
 ```
@@ -175,7 +175,7 @@ Add a case to `processMessage()`:
 case 'allocation':
   switch (command.subcommand) {
     case 'info':
-      return this.querier!.allocationInfo(command.thread);
+      return this.querier.allocationInfo(command.thread);
     default:
       throw assertExhaustiveCheck(command);
   }

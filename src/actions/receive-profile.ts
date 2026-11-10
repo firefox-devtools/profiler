@@ -77,8 +77,9 @@ import {
   hasUsefulSamples,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { doSourceMapSymbolication } from './source-map-symbolication';
+import type { SourceMapSymbolicationResult } from './source-map-symbolication';
 
-import type { RawSourceMap } from 'source-map';
+import type { SourceMap } from 'firefox-profiler/profile-logic/source-maps/store';
 import type {
   RequestedLib,
   ImplementationFilter,
@@ -254,7 +255,8 @@ export function finalizeProfileView(
     // funcs aren't in those sets), and the JS apply step reads current
     // shared state at dispatch time so it composes with whatever native
     // has committed by then. Requires WebChannel version 7+.
-    let sourceMapSymbolicationPromise: Promise<void> | null = null;
+    let sourceMapSymbolicationPromise: Promise<SourceMapSymbolicationResult> | null =
+      null;
     if (browserConnection !== null && browserConnection.supportsGetSourceMap) {
       sourceMapSymbolicationPromise = doResolveSourceMaps(
         profile,
@@ -847,7 +849,7 @@ async function doResolveSourceMaps(
   browserConnection: BrowserConnection,
   dispatch: Dispatch
 ): Promise<{
-  resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap>;
+  resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap>;
   compiledSources: Map<IndexIntoSourceTable, string>;
 }> {
   const { sources, stringArray } = profile.shared;
@@ -870,7 +872,7 @@ async function doResolveSourceMaps(
   }
 
   // Fetch source maps and compiled sources in parallel, ignoring individual failures.
-  const resolvedSourceMaps: Map<IndexIntoSourceTable, RawSourceMap> = new Map();
+  const resolvedSourceMaps: Map<IndexIntoSourceTable, SourceMap> = new Map();
   const compiledSources: Map<IndexIntoSourceTable, string> = new Map();
 
   dispatch({ type: 'START_SOURCE_MAP_FETCHING' });
@@ -1156,7 +1158,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-function _fileReader(input: File) {
+export function _fileReader(input: File) {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of

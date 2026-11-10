@@ -89,7 +89,6 @@ describe('PathSet', function () {
     const resultValues: CallNodePath[] = [];
     set.forEach(function (value1, value2, thisSet) {
       // @ts-expect-error TS2683: 'this' implicitly has type 'any' because it does not have a type annotation.
-      // eslint-disable-next-line @babel/no-invalid-this
       expect(this).toBe(undefined);
       expect(value1).toBe(value2);
       expect(thisSet).toBe(set);

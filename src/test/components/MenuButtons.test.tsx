@@ -95,6 +95,26 @@ describe('app/MenuButtons', function () {
     return { profile };
   }
 
+  function createArgumentValuesProfile(updateChannel = 'release') {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.meta.updateChannel = updateChannel;
+    const [thread] = profile.threads;
+    thread.samples.argumentValues = [null, 6];
+    // A real values buffer recorded by the JS execution tracer.
+    thread.tracedValuesBuffer = 'AgAAABIAAQAAAAwHAAAAAAYAAAABAAcAAQAAABE=';
+    thread.tracedObjectShapes = [['MouseEvent']];
+    return { profile };
+  }
+
+  // Gecko emits the `argumentValues` column even when the JS execution tracer
+  // wasn't running, so most profiles carry an all-null column and no buffer.
+  function createEmptyArgumentValuesProfile(updateChannel = 'release') {
+    const { profile } = getProfileFromTextSamples('A  B');
+    profile.meta.updateChannel = updateChannel;
+    profile.threads[0].samples.argumentValues = [null, null];
+    return { profile };
+  }
+
   function createPreferenceReadProfile(updateChannel = 'release') {
     const profile = getProfileWithMarkers([
       [
@@ -210,9 +230,9 @@ describe('app/MenuButtons', function () {
       const setupResult = setup(storeWithProfile(profile));
 
       const getPublishButton = () =>
-        screen.getByText(/^(Re-upload|Upload Local Profile)$/);
+        screen.getByText(/^(Share…|Re-share…|Error uploading)$/);
       const findPublishButton = () =>
-        screen.findByText(/^(Re-upload|Upload Local Profile)$/);
+        screen.findByText(/^(Share…|Re-share…|Error uploading)$/);
       const getCancelButton = () => screen.getByText('Cancel Upload');
       const getPanelForm = () =>
         ensureExists(
@@ -233,10 +253,20 @@ describe('app/MenuButtons', function () {
         screen.getByRole('checkbox', {
           name: /Include the data from other tabs/,
         });
+      const queryArgumentValuesCheckbox = () =>
+        screen.queryByRole('checkbox', {
+          name: /Include JavaScript execution tracing function argument values/,
+        });
       const getPanel = () => screen.getByTestId('PublishPanel-container');
+      // The Share button opens the panel with the Upload CTA and the submit form.
       const openPublishPanel = async () => {
         fireFullClick(getPublishButton());
-        await screen.findByText(/^(Share|Re-upload) Performance Profile$/);
+        await screen.findByText(/^(Share|Re-share) Performance Profile$/);
+      };
+      // The Save button opens the same panel but with the Save CTA.
+      const openDownloadPanel = async () => {
+        fireFullClick(screen.getByText('Save…'));
+        await screen.findByText('Save Performance Profile');
       };
 
       return {
@@ -250,7 +280,9 @@ describe('app/MenuButtons', function () {
         queryPrivateBrowsingCheckbox,
         getPrivateBrowsingCheckbox,
         getRemoveOtherTabsCheckbox,
+        queryArgumentValuesCheckbox,
         openPublishPanel,
+        openDownloadPanel,
         resolveUpload,
         rejectUpload,
       };
@@ -286,29 +318,66 @@ describe('app/MenuButtons', function () {
 
     it('matches the snapshot for the opened panel for a nightly profile', async () => {
       const { profile } = createSimpleProfile('nightly');
-      const { getPanel, openPublishPanel } = setupForPublish(profile);
-      await openPublishPanel();
-      await screen.findByRole('link', { name: /Download/ });
+      const { getPanel, openDownloadPanel } = setupForPublish(profile);
+      await openDownloadPanel();
+      await screen.findByRole('link', { name: /Save/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', async () => {
       const { profile } = createSimpleProfile('release');
+      const { getPanel, openDownloadPanel } = setupForPublish(profile);
+      await openDownloadPanel();
+      await screen.findByRole('link', { name: /Save/ });
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the opened share panel', async () => {
+      const { profile } = createSimpleProfile('release');
       const { getPanel, openPublishPanel } = setupForPublish(profile);
       await openPublishPanel();
-      await screen.findByRole('link', { name: /Download/ });
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the menu buttons and the opened panel for an already uploaded profile', async () => {
       const { profile } = createSimpleProfile();
-      const { getPanel, container, navigateToHash, openPublishPanel } =
+      const { getPanel, container, navigateToHash, openDownloadPanel } =
         setupForPublish(profile);
       navigateToHash('VALID_HASH');
       expect(container).toMatchSnapshot();
-      await openPublishPanel();
-      await screen.findByRole('link', { name: /Download/ });
+      await openDownloadPanel();
+      await screen.findByRole('link', { name: /Save/ });
       expect(getPanel()).toMatchSnapshot();
+    });
+
+    describe.each(['save', 'share'] as const)('%s panel', (panel) => {
+      it.each([
+        ['/from-browser', true],
+        ['/from-post-message', true],
+        ['/unpublished', true],
+        ['/from-file', false],
+        ['/from-url/https%3A%2F%2Fexample.com%2Fprofile.json', false],
+        ['/from-url/http%3A%2F%2Flocalhost%2Fprofile.json', false],
+        ['/public/VALID_HASH', false],
+      ] as const)(
+        'shows the in-memory notice for %s: %s',
+        async (pathname, shouldShowNotice) => {
+          const { dispatch, openDownloadPanel, openPublishPanel } =
+            setupForPublish();
+          act(() => {
+            dispatch(
+              updateUrlState(
+                stateFromLocation({ pathname, search: '', hash: '' })
+              )
+            );
+          });
+          await (panel === 'save' ? openDownloadPanel() : openPublishPanel());
+          const notice = screen.queryByText(
+            /This profile hasn’t been uploaded and will be lost when you close this tab/
+          );
+          expect(notice !== null).toBe(shouldShowNotice);
+        }
+      );
     });
 
     it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', async () => {
@@ -361,6 +430,48 @@ describe('app/MenuButtons', function () {
         setupForPublish(profile);
       await openPublishPanel();
       expect(queryPrivateBrowsingCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('shows the argument values checkbox when the JS tracer recorded them', async () => {
+      const { profile } = createArgumentValuesProfile();
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+
+      const argumentValuesCheckbox = queryArgumentValuesCheckbox();
+      expect(argumentValuesCheckbox).toBeInTheDocument();
+      // The values may contain PII, so sharing them has to be opt-in, and the
+      // checkbox carries a warning icon saying why.
+      expect(argumentValuesCheckbox).not.toBeChecked();
+      expect(
+        screen.getByTitle(/may include personal data/)
+      ).toBeInTheDocument();
+    });
+
+    it('does not show the argument values checkbox when the profile has none', async () => {
+      const { profile } = createSimpleProfile();
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('does not show the argument values checkbox for an empty argumentValues column', async () => {
+      const { profile } = createEmptyArgumentValuesProfile();
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
+    });
+
+    it('does not show the argument values checkbox in nightly either', async () => {
+      // Nightly starts from the mostly-non-sanitizing defaults, so this guards
+      // against the checkbox appearing through that path.
+      const { profile } = createEmptyArgumentValuesProfile('nightly');
+      const { queryArgumentValuesCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
     });
 
     it('can publish and revert', async () => {
@@ -437,15 +548,28 @@ describe('app/MenuButtons', function () {
       );
       expect(getPanel()).toMatchSnapshot();
     });
+
+    it('keeps Save available but locks the options while uploading', async () => {
+      const { openPublishPanel, getPanelForm, openDownloadPanel } =
+        setupForPublish();
+      await openPublishPanel();
+      fireEvent.submit(getPanelForm());
+
+      // The Save button stays in the toolbar while the upload is running.
+      await openDownloadPanel();
+      expect(
+        screen.getByRole('checkbox', { name: /Include hidden threads/ })
+      ).toBeDisabled();
+    });
   });
 
   describe('<MetaInfoPanel>', function () {
     async function setupForMetaInfoPanel(profile: Profile) {
-      jest
-        .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(function (this: Date) {
-          return 'toLocaleString ' + this.toUTCString();
-        });
+      jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function (
+        this: Date
+      ) {
+        return 'toLocaleString ' + this.toUTCString();
+      });
 
       const store = blankStore();
 
@@ -491,10 +615,9 @@ describe('app/MenuButtons', function () {
         screen.getByText(/Buffer capacity/).nextSibling
       );
 
-      /* This rule needs to be disabled because `renderedCapacity` is a text
-       * code, and this triggers
+      /* `renderedCapacity` is a text code, so toHaveTextContent would hit
        * https://github.com/testing-library/jest-dom/issues/306 */
-      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      // oxlint-disable-next-line jest-dom/prefer-to-have-text-content
       expect(renderedCapacity.textContent).toBe('1GB');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });
@@ -512,10 +635,9 @@ describe('app/MenuButtons', function () {
         screen.getByText(/Device:/).nextSibling
       );
 
-      /* This rule needs to be disabled because `renderedDevice` is a text
-       * code, and this triggers
+      /* `renderedDevice` is a text code, so toHaveTextContent would hit
        * https://github.com/testing-library/jest-dom/issues/306 */
-      /* eslint-disable-next-line jest-dom/prefer-to-have-text-content */
+      // oxlint-disable-next-line jest-dom/prefer-to-have-text-content
       expect(renderedDevice.textContent).toBe('Android Device');
       expect(getMetaInfoPanel()).toMatchSnapshot();
     });

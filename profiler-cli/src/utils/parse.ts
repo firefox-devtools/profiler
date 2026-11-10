@@ -33,6 +33,27 @@ export function parseFuncList(value: string): number[] {
 }
 
 /**
+ * Parse a `--limit`-style flag. Returns `undefined` for `0` and for an omitted
+ * value, which downstream consumers treat as "no limit".
+ */
+export function parseLimitArg(
+  flagName: string,
+  value: string | undefined
+): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  const v = parseInt(value, 10);
+  if (isNaN(v) || v < 0) {
+    console.error(
+      `Error: ${flagName} must be a non-negative integer (0 = no limit)`
+    );
+    process.exit(1);
+  }
+  return v === 0 ? undefined : v;
+}
+
+/**
  * Options bag produced by Commander for commands that support ephemeral sample filters.
  * Keys are camelCase because Commander normalises hyphenated option names.
  */

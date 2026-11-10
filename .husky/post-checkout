@@ -1,0 +1,1 @@
+node bin/post-checkout.js "$@"

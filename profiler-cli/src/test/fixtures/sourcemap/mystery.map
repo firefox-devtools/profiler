@@ -1,0 +1,1 @@
+{"version":3,"sources":["hello.js"],"names":["greet"],"mappings":"AAAAA,SAASA,KACP","file":"mystery.js","sourcesContent":["function greet(name) {\n  return \"Hello, \" + name;\n}\n"]}
