@@ -11581,17 +11581,17 @@ stylelint-config-idiomatic-order@^10.0.0:
   dependencies:
     stylelint-order "^6.0.2"
 
-stylelint-config-recommended@^18.0.0:
-  version "18.0.0"
-  resolved "https://registry.yarnpkg.com/stylelint-config-recommended/-/stylelint-config-recommended-18.0.0.tgz#1d86be73565c3cd5e6babb8abcc932012a86bd76"
-  integrity sha512-mxgT2XY6YZ3HWWe3Di8umG6aBmWmHTblTgu/f10rqFXnyWxjKWwNdjSWkgkwCtxIKnqjSJzvFmPT5yabVIRxZg==
+stylelint-config-recommended@^19.0.0:
+  version "19.0.0"
+  resolved "https://registry.yarnpkg.com/stylelint-config-recommended/-/stylelint-config-recommended-19.0.0.tgz#c1140fbb426c6ddc4a3559b6a37d9a901f0ab28d"
+  integrity sha512-Y15XB19RManqBOpbRC42tF8R/Hfe314xYLzedRlnnYxYzZ0777RakDQIGcqYfrz9jWGoVyjaGTdpSl9F+roOOw==
 
-stylelint-config-standard@^40.0.0:
-  version "40.0.0"
-  resolved "https://registry.yarnpkg.com/stylelint-config-standard/-/stylelint-config-standard-40.0.0.tgz#6bb72b94f8be434cdf2902ba26b2167d572c5414"
-  integrity sha512-EznGJxOUhtWck2r6dJpbgAdPATIzvpLdK9+i5qPd4Lx70es66TkBPljSg4wN3Qnc6c4h2n+WbUrUynQ3fanjHw==
+stylelint-config-standard@^41.0.0:
+  version "41.0.0"
+  resolved "https://registry.yarnpkg.com/stylelint-config-standard/-/stylelint-config-standard-41.0.0.tgz#606bd88de93883c609786e3473d8dfed35c6bcb7"
+  integrity sha512-EJIvMOMARieBOLhw2yzN7BaVFiIY2Ex8CkbXahxP6tQZK41+N8OVUo57Uvx9iTr862h+thqDoDH7vQbeth1ryg==
   dependencies:
-    stylelint-config-recommended "^18.0.0"
+    stylelint-config-recommended "^19.0.0"
 
 stylelint-order@^6.0.2:
   version "6.0.4"
