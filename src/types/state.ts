@@ -262,7 +262,12 @@ export type PublishState = {
   // `null` means the user hasn't touched the selection yet, in which case the
   // default selection applies.
   readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  // Per sharing mode, so that work finishing for one panel doesn't replace
+  // what the other one shows.
+  readonly sanitizedProfileEncodingState: Record<
+    SharingMode,
+    SanitizedProfileEncodingState
+  >;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;

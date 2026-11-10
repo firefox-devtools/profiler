@@ -430,7 +430,10 @@ export const PublishPanel = explicitConnect<
     hasSourceCodeToShare: getHasSourceCodeToShare(state),
     checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
     downloadFileName: getFilenameString(state),
-    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
+    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(
+      state,
+      ownProps.mode
+    ),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
