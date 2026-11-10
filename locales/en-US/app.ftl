@@ -608,6 +608,8 @@ ChatDrawer--new-chat-button = New chat
 ChatDrawer--settings-button = Settings
 ChatDrawer--close-button =
     .title = Close
+ChatDrawer--error-boundary-message =
+    .message = Uh oh, some unknown error happened in the chat.
 
 ChatProviderSettings--provider-label = Provider
 ChatProviderSettings--provider-anthropic = Anthropic

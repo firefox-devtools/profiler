@@ -3,6 +3,7 @@
  * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
 import { PureComponent, Suspense, lazy } from 'react';
+import { Localized } from '@fluent/react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { ResizableWithSplitter } from 'firefox-profiler/components/shared/ResizableWithSplitter';
@@ -17,6 +18,7 @@ import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 import { BeforeUnloadManager } from './BeforeUnloadManager';
 import { KeyboardShortcut } from './KeyboardShortcut';
+import { LocalizedErrorBoundary } from './ErrorBoundary';
 
 import { returnToZipFileList } from 'firefox-profiler/actions/zipped-profiles';
 import { Timeline } from 'firefox-profiler/components/timeline';
@@ -155,9 +157,16 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <AssemblyCodeFetcher />
         </div>
         {isChatOpen && isChatFeatureEnabled() ? (
-          <Suspense fallback={null}>
-            <ChatDrawer />
-          </Suspense>
+          <Localized
+            id="ChatDrawer--error-boundary-message"
+            attrs={{ message: true }}
+          >
+            <LocalizedErrorBoundary message="Uh oh, some unknown error happened in the chat.">
+              <Suspense fallback={null}>
+                <ChatDrawer />
+              </Suspense>
+            </LocalizedErrorBoundary>
+          </Localized>
         ) : null}
       </KeyboardShortcut>
     );
