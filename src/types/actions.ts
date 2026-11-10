@@ -779,6 +779,8 @@ type ChatAction =
       readonly type: 'CHAT_PROVIDER_CHANGED';
       readonly preset: ChatProviderPreset;
       readonly hasCredentials: boolean;
+      // Whether the current conversation can't continue with the new settings.
+      readonly startsNewConversation: boolean;
     }
   | { readonly type: 'RESET_CHAT' }
   | {

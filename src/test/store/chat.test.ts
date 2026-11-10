@@ -255,6 +255,42 @@ describe('profile chat', function () {
     expect(getChatHasCredentials(store.getState())).toBe(true);
   });
 
+  it('starts a new chat when the model or the server changes', async function () {
+    const store = setup();
+    const settings = {
+      apiKey: 'sk-test',
+      baseURL: TEST_OPENAI_BASE_URL,
+      model: 'test-model',
+    };
+    store.dispatch(saveChatProviderSettings('custom', settings));
+    const sendHi = async () => {
+      mockChatCompletionsApi([{ text: 'Hi', finishReason: 'stop' }]);
+      await store.dispatch(sendChatMessage('Hi'));
+      window.fetchMock.removeRoutes();
+      expect(getChatTranscript(store.getState())).toHaveLength(2);
+    };
+
+    await sendHi();
+    store.dispatch(
+      saveChatProviderSettings('custom', { ...settings, apiKey: 'sk-other' })
+    );
+    expect(getChatTranscript(store.getState())).toHaveLength(2);
+
+    store.dispatch(
+      saveChatProviderSettings('custom', { ...settings, model: 'other-model' })
+    );
+    expect(getChatTranscript(store.getState())).toEqual([]);
+
+    await sendHi();
+    store.dispatch(
+      saveChatProviderSettings('custom', {
+        ...settings,
+        baseURL: 'https://other.test/v1',
+      })
+    );
+    expect(getChatTranscript(store.getState())).toEqual([]);
+  });
+
   it('runs a full turn through an OpenAI-compatible server', async function () {
     const store = setup();
     store.dispatch(

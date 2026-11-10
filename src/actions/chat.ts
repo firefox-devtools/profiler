@@ -63,15 +63,23 @@ export function resetChat(): ThunkAction<void> {
 }
 
 /**
- * Store the settings of a provider and select it. Selecting another provider
- * starts a new chat.
+ * Store the settings of a provider and select it. Selecting another provider,
+ * model or server starts a new chat.
  */
 export function saveChatProviderSettings(
   preset: ChatProviderPreset,
   settings: ChatProviderSettings
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    if (preset !== getChatProviderPreset(getState())) {
+    const previousSettings = getStoredProviderSettings(preset);
+    // Conversations aren't translated between providers, and some of their
+    // content, such as encrypted reasoning, is only accepted by the model and
+    // server that produced it.
+    const startsNewConversation =
+      preset !== getChatProviderPreset(getState()) ||
+      settings.model !== previousSettings.model ||
+      getBaseURL(preset, settings) !== getBaseURL(preset, previousSettings);
+    if (startsNewConversation) {
       dispatch(cancelChatTurn());
     }
     storeProviderSettings(preset, settings);
@@ -80,6 +88,7 @@ export function saveChatProviderSettings(
       type: 'CHAT_PROVIDER_CHANGED',
       preset,
       hasCredentials: hasCompleteSettings(preset, settings),
+      startsNewConversation,
     });
   };
 }
@@ -99,6 +108,7 @@ export function forgetChatApiKey(
         type: 'CHAT_PROVIDER_CHANGED',
         preset,
         hasCredentials: hasCompleteSettings(preset, settings),
+        startsNewConversation: false,
       });
     }
   };
@@ -121,6 +131,7 @@ export function sendChatMessage(text: string): ThunkAction<Promise<void>> {
         type: 'CHAT_PROVIDER_CHANGED',
         preset,
         hasCredentials: hasCompleteSettings(preset, settings),
+        startsNewConversation: preset !== getChatProviderPreset(getState()),
       });
       return;
     }

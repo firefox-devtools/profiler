@@ -94,10 +94,9 @@ const chat: Reducer<ChatState> = (state = _getInitialState(), action) => {
         providerPreset: action.preset,
         hasCredentials: action.hasCredentials,
       };
-      // Conversations aren't translated between providers.
-      return action.preset === state.providerPreset
-        ? newState
-        : _startNewConversation(newState);
+      return action.startsNewConversation
+        ? _startNewConversation(newState)
+        : newState;
     }
     case 'RESET_CHAT':
     case 'PROFILE_LOADED':
