@@ -8,6 +8,7 @@ import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors';
+import { ensureExists } from 'firefox-profiler/utils/types';
 import {
   assertProfileIntegrity,
   profileImportSnapshot,
@@ -93,18 +94,17 @@ describe('converting dhat profiles', function () {
 });
 
 describe('converting Google Chrome profile', function () {
-  it('successfully imports a chunked profile (one that uses Profile + ProfileChunk trace events)', async function () {
-    // Mock out image loading behavior as the screenshots rely on the Image loading
-    // behavior.
-    jest
-      .spyOn(Image.prototype, 'addEventListener')
-      // @ts-expect-error - TypeScript thinks addEventListener takes ...unknown[]
-      .mockImplementation((name: string, callback: () => void) => {
-        if (name === 'load') {
-          callback();
-        }
-      });
+  // The importer also runs in Node for profiler-cli, where Image doesn't exist.
+  const originalImage = window.Image;
+  beforeEach(() => {
+    // @ts-expect-error - Image isn't optional on window.
+    delete window.Image;
+  });
+  afterEach(() => {
+    window.Image = originalImage;
+  });
 
+  it('successfully imports a chunked profile (one that uses Profile + ProfileChunk trace events)', async function () {
     const fs = require('fs');
     const zlib = require('zlib');
     const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.chrome.gz');
@@ -118,18 +118,41 @@ describe('converting Google Chrome profile', function () {
     expect(profileImportSnapshot(profile)).toMatchSnapshot();
   });
 
-  it('successfully imports a chrome profile with an invalid "endTime" entry', async () => {
-    // Mock out image loading behavior as the screenshots rely on the Image loading
-    // behavior.
-    jest
-      .spyOn(Image.prototype, 'addEventListener')
-      // @ts-expect-error - TypeScript thinks addEventListener takes ...unknown[]
-      .mockImplementation((name: string, callback: () => void) => {
-        if (name === 'load') {
-          callback();
-        }
-      });
+  it('imports screenshot sizes and skips invalid screenshots', async function () {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.chrome.gz');
+    const events: TracingEventUnion[] = JSON.parse(
+      zlib.gunzipSync(buffer).toString('utf8')
+    );
+    // Add a screenshot that isn't a valid JPEG, it should be skipped.
+    const firstScreenshot = ensureExists(
+      events.find((event) => event.name === 'Screenshot')
+    );
+    events.push({
+      ...firstScreenshot,
+      ts: firstScreenshot.ts + 1,
+      args: { snapshot: btoa('not a jpeg') },
+    } as TracingEventUnion);
 
+    const profile = await unserializeProfileOfArbitraryFormat(
+      JSON.stringify(events)
+    );
+
+    // Only the start markers carry the screenshot url and size.
+    const screenshotMarkers = profile.threads
+      .flatMap((thread) => thread.markers.data)
+      .filter(
+        (data) =>
+          data?.type === 'CompositorScreenshot' && data.url !== undefined
+      );
+    expect(screenshotMarkers).toHaveLength(30);
+    for (const data of screenshotMarkers) {
+      expect(data).toMatchObject({ windowSize: { width: 440, height: 498 } });
+    }
+  });
+
+  it('successfully imports a chrome profile with an invalid "endTime" entry', async () => {
     const fs = require('fs');
     const zlib = require('zlib');
     const compressedBuffer = fs.readFileSync(
