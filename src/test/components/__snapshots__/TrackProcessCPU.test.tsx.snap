@@ -3,7 +3,7 @@
 exports[`TrackProcessCPU draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackCounterGraphDot"
-  style="left: 15px; top: 18.6px; background-color: rgb(74, 74, 79);"
+  style="left: 15px; top: 16.933333333333334px; background-color: rgb(74, 74, 79);"
 />
 `;
 
@@ -61,22 +61,22 @@ Array [
   Array [
     "lineTo",
     15,
-    17.866666666666667,
+    16.933333333333334,
   ],
   Array [
     "lineTo",
     20,
-    1,
+    3,
   ],
   Array [
     "lineTo",
     30,
-    1,
+    3,
   ],
   Array [
     "lineTo",
     40,
-    19.4,
+    18.2,
   ],
   Array [
     "lineTo",
@@ -86,17 +86,17 @@ Array [
   Array [
     "lineTo",
     60,
-    17.1,
+    16.3,
   ],
   Array [
     "lineTo",
     70,
-    21.7,
+    20.1,
   ],
   Array [
     "lineTo",
     80,
-    21.7,
+    20.1,
   ],
   Array [
     "stroke",

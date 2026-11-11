@@ -8,6 +8,7 @@ import { fireEvent } from '@testing-library/react';
 
 import { render } from 'firefox-profiler/test/fixtures/testing-library';
 import { TrackCounter } from '../../components/timeline/TrackCounter';
+import { TRACK_COUNTER_GRAPH_HEIGHT } from '../../app-logic/constants';
 import { ensureExists } from '../../utils/types';
 
 import {
@@ -168,6 +169,17 @@ describe('TrackMemory', function () {
     expect(getMemoryDot()).toBeTruthy();
     moveMouseAtCounter(7, 0);
     expect(getMemoryDot()).toBeTruthy();
+  });
+
+  it('keeps the entire hover dot inside the vertical graph bounds', () => {
+    const { moveMouseAtCounter, getMemoryDot } = setup();
+    for (let index = 0; index < SAMPLE_COUNT; index++) {
+      moveMouseAtCounter(index, 0.25);
+      const dot = ensureExists(getMemoryDot()) as HTMLElement;
+      const center = parseFloat(dot.style.top);
+      expect(center - 3).toBeGreaterThanOrEqual(0);
+      expect(center + 3).toBeLessThanOrEqual(TRACK_COUNTER_GRAPH_HEIGHT);
+    }
   });
 
   it('draws a dot that matches the snapshot', function () {
