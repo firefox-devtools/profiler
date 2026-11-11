@@ -47,6 +47,9 @@ import type {
   TableViewOptions,
   DecodedInstruction,
   ProfileEncodingResult,
+  CallNodeArea,
+  FuncPanelName,
+  FuncPanelViewType,
 } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
@@ -190,7 +193,7 @@ type ProfileAction =
     }
   | {
       readonly type: 'CHANGE_SELECTED_CALL_NODE';
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly threadsKey: ThreadsKey;
       readonly selectedCallNodePath: CallNodePath;
       readonly optionalExpandedToCallNodePath: CallNodePath | undefined;
@@ -210,6 +213,7 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE';
       readonly threadsKey: ThreadsKey;
+      readonly area: CallNodeArea;
       readonly callNodePath: CallNodePath | null;
     }
   | {
@@ -223,7 +227,7 @@ type ProfileAction =
   | {
       readonly type: 'CHANGE_EXPANDED_CALL_NODES';
       readonly threadsKey: ThreadsKey;
-      readonly isInverted: boolean;
+      readonly area: CallNodeArea;
       readonly expandedCallNodePaths: Array<CallNodePath>;
     }
   | {
@@ -581,6 +585,16 @@ type UrlStateAction =
   | {
       readonly type: 'CHANGE_FUNCTION_LIST_SORT';
       readonly sort: SingleColumnSortState[] | null;
+    }
+  | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN';
+      readonly section: FuncPanelName;
+      readonly isOpen: boolean;
+    }
+  | {
+      readonly type: 'CHANGE_FUNC_PANEL_VIEW';
+      readonly panel: FuncPanelName;
+      readonly view: FuncPanelViewType;
     }
   | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';

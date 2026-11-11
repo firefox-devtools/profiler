@@ -36,6 +36,8 @@ import {
   changeExpandedCallNodes,
   changeImplementationFilter,
   changeSelectedFunctionIndex,
+  changeFuncPanelSelectedCallNode,
+  changeFuncPanelExpandedCallNodes,
 } from '../../actions/profile-view';
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -471,6 +473,47 @@ describe('doSymbolicateProfile', function () {
       expect(selectedThreadSelectors.getSelectedFunctionIndex(getState())).toBe(
         symbolicatedFunc
       );
+    });
+
+    it('symbolicates the function list panel paths', async function () {
+      const {
+        store: { dispatch, getState },
+        profile,
+        symbolStore,
+        funcNamesToFuncIndexes,
+      } = init();
+
+      const threadsKey = 0;
+      const [rootFunc, calleeFunc] = funcNamesToFuncIndexes([
+        '0x0000',
+        '0x2000',
+      ]);
+      dispatch(changeSelectedFunctionIndex(threadsKey, rootFunc));
+      dispatch(
+        changeFuncPanelSelectedCallNode('callees', threadsKey, [
+          rootFunc,
+          calleeFunc,
+        ])
+      );
+      dispatch(
+        changeFuncPanelExpandedCallNodes('callees', threadsKey, [[rootFunc]])
+      );
+
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      const [firstSymbol, lastSymbol] = funcNamesToFuncIndexes([
+        'first symbol',
+        'last symbol',
+      ]);
+      expect(
+        selectedThreadSelectors.getCalleesSelectedCallNodePath(getState())
+      ).toEqual([firstSymbol, lastSymbol]);
+      assertSetContainsOnly(
+        selectedThreadSelectors.getCalleesExpandedCallNodePaths(getState()),
+        [[firstSymbol]]
+      );
+      expect(
+        selectedThreadSelectors.getCallersSelectedCallNodePath(getState())
+      ).toEqual([firstSymbol]);
     });
   });
 

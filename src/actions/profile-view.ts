@@ -79,6 +79,10 @@ import type {
   SelectionContext,
   BottomBoxInfo,
   IndexIntoFuncTable,
+  CallNodeArea,
+  FuncPanelName,
+  FuncPanelWithCallNodeArea,
+  FuncPanelViewType,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -126,12 +130,33 @@ export function changeSelectedCallNode(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_SELECTED_CALL_NODE',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       selectedCallNodePath,
       optionalExpandedToCallNodePath,
       threadsKey,
       context,
     });
+  };
+}
+
+const FUNC_PANEL_AREAS: Record<FuncPanelWithCallNodeArea, CallNodeArea> = {
+  callees: 'CALLEES',
+  callers: 'CALLERS',
+};
+
+export function changeFuncPanelSelectedCallNode(
+  panel: FuncPanelWithCallNodeArea,
+  threadsKey: ThreadsKey,
+  selectedCallNodePath: CallNodePath,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CALL_NODE',
+    area: FUNC_PANEL_AREAS[panel],
+    selectedCallNodePath,
+    optionalExpandedToCallNodePath: [],
+    threadsKey,
+    context,
   };
 }
 
@@ -159,11 +184,15 @@ export function changeSelectedFunctionIndex(
 export function changeRightClickedCallNode(
   threadsKey: ThreadsKey,
   callNodePath: CallNodePath | null
-): Action {
-  return {
-    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
-    threadsKey,
-    callNodePath,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const isInverted = getInvertCallstack(getState());
+    dispatch({
+      type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      threadsKey,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
+      callNodePath,
+    });
   };
 }
 
@@ -175,6 +204,19 @@ export function changeRightClickedFunctionIndex(
     type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
     threadsKey,
     functionIndex,
+  };
+}
+
+export function changeFuncPanelRightClickedCallNode(
+  panel: FuncPanelWithCallNodeArea,
+  threadsKey: ThreadsKey,
+  callNodePath: CallNodePath | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadsKey,
+    area: FUNC_PANEL_AREAS[panel],
+    callNodePath,
   };
 }
 
@@ -1650,12 +1692,26 @@ export function changeExpandedCallNodes(
     const isInverted = getInvertCallstack(getState());
     dispatch({
       type: 'CHANGE_EXPANDED_CALL_NODES',
-      isInverted,
+      area: isInverted ? 'INVERTED_TREE' : 'NON_INVERTED_TREE',
       threadsKey,
       expandedCallNodePaths,
     });
   };
 }
+
+export function changeFuncPanelExpandedCallNodes(
+  panel: FuncPanelWithCallNodeArea,
+  threadsKey: ThreadsKey,
+  expandedCallNodePaths: Array<CallNodePath>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CALL_NODES',
+    area: FUNC_PANEL_AREAS[panel],
+    threadsKey,
+    expandedCallNodePaths,
+  };
+}
+
 export function changeSelectedMarker(
   threadsKey: ThreadsKey,
   selectedMarker: MarkerIndex | null,
@@ -1735,6 +1791,28 @@ export function changeFunctionListSort(
   return {
     type: 'CHANGE_FUNCTION_LIST_SORT',
     sort,
+  };
+}
+
+export function changeFunctionListSectionOpen(
+  section: FuncPanelName,
+  isOpen: boolean
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SECTION_OPEN',
+    section,
+    isOpen,
+  };
+}
+
+export function changeFuncPanelView(
+  panel: FuncPanelName,
+  view: FuncPanelViewType
+): Action {
+  return {
+    type: 'CHANGE_FUNC_PANEL_VIEW',
+    panel,
+    view,
   };
 }
 

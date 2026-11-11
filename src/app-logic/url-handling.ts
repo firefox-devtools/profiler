@@ -23,6 +23,10 @@ import {
   toValidCallTreeSummaryStrategy,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { oneLine } from 'common-tags';
+import {
+  FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  FUNC_PANEL_VIEWS_DEFAULT,
+} from './constants';
 import type {
   UrlState,
   DataSource,
@@ -43,6 +47,9 @@ import type {
   MarkerIndex,
   SelectedMarkersPerThread,
   SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
+  FuncPanelName,
+  FuncPanelViewsState,
 } from 'firefox-profiler/types';
 import { FuncFlag } from 'firefox-profiler/types';
 import {
@@ -213,6 +220,8 @@ type CallTreeQuery = BaseQuery & {
   hideIdleSamples: null | undefined;
   ctSummary: string;
   functionListSort?: string; // "total-desc~self-asc" — primary first
+  funcListSections?: string; // "descendants,self" — comma-separated open sections
+  funcPanelViews?: string; // "callees:call-tree,callers:call-tree" — non-default panel views
   selectedFunc?: number; // Selected function index for the current thread, e.g. 42
 };
 
@@ -264,6 +273,8 @@ type Query = BaseQuery & {
 
   // Function list specific
   functionListSort?: string;
+  funcListSections?: string;
+  funcPanelViews?: string;
   selectedFunc?: number;
 
   // Network specific
@@ -426,6 +437,12 @@ export function getQueryStringFromUrlState(urlState: UrlState): string {
       if (selectedTab === 'function-list') {
         query.functionListSort = convertColumnSortToString(
           urlState.profileSpecific.functionListSort
+        );
+        query.funcListSections = convertFunctionListSectionsOpenToString(
+          urlState.profileSpecific.functionListSectionsOpen
+        );
+        query.funcPanelViews = convertFuncPanelViewsToString(
+          urlState.profileSpecific.funcPanelViews
         );
         const selectedFunc =
           selectedThreadsKey !== null
@@ -725,6 +742,10 @@ export function stateFromLocation(
         query.functionListSort,
         VALID_FUNCTION_LIST_SORT_COLUMNS
       ),
+      functionListSectionsOpen: convertFunctionListSectionsOpenFromString(
+        query.funcListSections
+      ),
+      funcPanelViews: convertFuncPanelViewsFromString(query.funcPanelViews),
     },
   };
 }
@@ -769,6 +790,86 @@ function convertColumnSortFromString(
     parsed.push({ column, ascending: dir === 'asc' });
   }
   return parsed;
+}
+
+// FunctionList section disclosure-box open/closed state. The URL stores a
+// comma-separated list of the open sections; the param is omitted when the
+// state matches the default (only "callees" open). The value "none" is
+// used as a sentinel for the all-closed case so the param is non-empty.
+const FUNC_PANEL_NAMES: ReadonlyArray<FuncPanelName> = [
+  'callees',
+  'callers',
+  'selfTime',
+];
+
+function convertFunctionListSectionsOpenToString(
+  state: FunctionListSectionsOpenState
+): string | undefined {
+  const matchesDefault = FUNC_PANEL_NAMES.every(
+    (name) => state[name] === FUNCTION_LIST_SECTIONS_OPEN_DEFAULT[name]
+  );
+  if (matchesDefault) {
+    return undefined;
+  }
+  const open = FUNC_PANEL_NAMES.filter((name) => state[name]);
+  return open.length === 0 ? 'none' : open.join(',');
+}
+
+function convertFunctionListSectionsOpenFromString(
+  raw: string | null | void
+): FunctionListSectionsOpenState {
+  if (raw === undefined || raw === null) {
+    return { ...FUNCTION_LIST_SECTIONS_OPEN_DEFAULT };
+  }
+  const result: FunctionListSectionsOpenState = {
+    callees: false,
+    callers: false,
+    selfTime: false,
+  };
+  if (raw === 'none' || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    if (part === 'callees' || part === 'callers' || part === 'selfTime') {
+      result[part] = true;
+    }
+  }
+  return result;
+}
+
+// Visualization choice for the callees, callers and self time panels of the
+// FunctionList tab. The URL stores a comma-separated list of "panel:view"
+// pairs for panels whose view differs from the default (flame-graph), e.g.
+// "callees:call-tree". The param is omitted when all panels use the default.
+function convertFuncPanelViewsToString(
+  state: FuncPanelViewsState
+): string | undefined {
+  const parts: string[] = [];
+  for (const panel of FUNC_PANEL_NAMES) {
+    if (state[panel] !== FUNC_PANEL_VIEWS_DEFAULT[panel]) {
+      parts.push(`${panel}:${state[panel]}`);
+    }
+  }
+  return parts.length === 0 ? undefined : parts.join(',');
+}
+
+function convertFuncPanelViewsFromString(
+  raw: string | null | void
+): FuncPanelViewsState {
+  const result: FuncPanelViewsState = { ...FUNC_PANEL_VIEWS_DEFAULT };
+  if (raw === undefined || raw === null || raw === '') {
+    return result;
+  }
+  for (const part of raw.split(',')) {
+    const [panel, view] = part.split(':');
+    if (
+      (panel === 'callees' || panel === 'callers' || panel === 'selfTime') &&
+      (view === 'flame-graph' || view === 'call-tree')
+    ) {
+      result[panel] = view;
+    }
+  }
+  return result;
 }
 
 function convertGlobalTrackOrderFromString(
