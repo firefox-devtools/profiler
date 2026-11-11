@@ -12,7 +12,7 @@ import type {
 import {
   formatFunctionInfoResult,
   formatThreadSamplesResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 
 function createMockContext(): SessionContext {
   return {

@@ -11,6 +11,7 @@ import {
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import type { MixedObject } from 'firefox-profiler/types';
+import { getIsChatFeatureEnabled } from 'firefox-profiler/selectors/chat';
 
 describe('console-accessible values on the window object', function () {
   // Coerce the window into a generic object, as these values aren't defined
@@ -165,6 +166,21 @@ describe('console-accessible values on the window object', function () {
       1970-01-01 00:00:00.210000000 UTC - [Unknown Process 0: Empty]: D/AudioStream AudioStream init
       1970-01-01 00:00:00.220000000 UTC - [Unknown Process 0: Empty]: V/VideoSink VideoSink::VideoSink
     `);
+  });
+
+  it('enables and disables the profile chat', function () {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+    const store = storeWithSimpleProfile();
+    const target = addDataToWindowObject(store.getState, store.dispatch, {});
+    expect(getIsChatFeatureEnabled(store.getState())).toBe(false);
+
+    target.experimental.enableProfileChat();
+    expect(getIsChatFeatureEnabled(store.getState())).toBe(true);
+    expect(window.localStorage.getItem('profiler.chat.enabled')).toBe('true');
+
+    target.experimental.disableProfileChat();
+    expect(getIsChatFeatureEnabled(store.getState())).toBe(false);
+    expect(window.localStorage.getItem('profiler.chat.enabled')).toBeNull();
   });
 
   describe('totalMarkerDuration', function () {

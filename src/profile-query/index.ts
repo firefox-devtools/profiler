@@ -5,20 +5,10 @@
 /*
  * This implements a library for querying the contents of a profile.
  *
- * To use it it first needs to be built:
- *   yarn build-profile-query
- *
- * Then it can be used from an interactive node session:
- *
- * % node
- * > const { ProfileQuerier } = (await import('./dist/profile-query.js')).default;
- * undefined
- * > const p1 = await ProfileQuerier.load("/Users/mstange/Downloads/merged-profile.json.gz");
- * > const p2 = await ProfileQuerier.load("https://profiler.firefox.com/from-url/http%3A%2F%2Fexample.com%2Fprofile.json/");
- * > const p3 = await ProfileQuerier.load("https://share.firefox.dev/4oLEjCw");
+ * This module is browser-safe: it only talks to a Redux store. Loading a
+ * profile from disk or a URL, saving it, and reading source map files live in
+ * `./node.ts`, see the usage notes there.
  */
-
-import * as fs from 'fs';
 
 import {
   getProfile,
@@ -55,34 +45,25 @@ import { ThreadMap } from './thread-map';
 import { getFriendlyProcessName } from './process-thread-list';
 import { parseFunctionHandle } from './function-map';
 import { getSourceHandle, parseSourceHandle } from './source-handle';
-import {
-  runSourceMapSymbolicationNode,
-  toSourceMapLocation,
-} from './source-map';
+import { toSourceMapLocation } from './source-map';
+import type { SourceMapRunner } from 'firefox-profiler/profile-logic/source-maps/worker-types';
 import {
   applySourceMapFile,
   type ApplySourceMapFileResult,
 } from 'firefox-profiler/actions/source-map-symbolication';
-import {
-  basename,
-  type EligibleSource,
-} from 'firefox-profiler/profile-logic/source-maps/matching';
+import type { EligibleSource } from 'firefox-profiler/profile-logic/source-maps/matching';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { encodeProfileForFilename } from 'firefox-profiler/profile-logic/profile-file-encoding';
 import {
-  getFilenameString,
   getCheckedSharingOptions,
   getSanitizedProfile,
 } from 'firefox-profiler/selectors/publish';
 import { updateSharingOption } from 'firefox-profiler/actions/publish';
-import * as path from 'path';
 import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
 import {
   MarkerMap,
   expandMarkerHandleSpecsDetailed,
   type MarkerId,
 } from './marker-map';
-import { loadProfileFromFileOrUrl, type LoadOptions } from './loader';
 import { collectProfileInfo } from './formatters/profile-info';
 import { collectProfileMeta } from './formatters/profile-meta';
 import {
@@ -113,6 +94,7 @@ import { functionAnnotate as computeFunctionAnnotate } from './function-annotate
 import { withCallTreeSummaryStrategy } from './call-tree-strategy';
 import type {
   IndexIntoSourceTable,
+  Profile,
   StartEndRange,
   ThreadIndex,
   ThreadsKey,
@@ -161,7 +143,7 @@ import type {
   SampleFilterSpec,
   FilterStackResult,
   FilterEntry,
-  ProfileSaveResult,
+  QuerierStore,
 } from './types';
 import type { CallTreeCollectionOptions } from './formatters/call-tree';
 
@@ -170,7 +152,6 @@ import {
   computeFuncTableFromRawFuncTable,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { FuncFlag } from 'firefox-profiler/types';
-import type { Store } from '../types/store';
 
 function toSourceEntry(source: EligibleSource): SourceEntry {
   return {
@@ -196,7 +177,7 @@ type EphemeralViewOptions = {
 };
 
 export class ProfileQuerier {
-  _store: Store;
+  _store: QuerierStore;
   _processIndexMap: Map<string, number>;
   _timestampManager: TimestampManager;
   _threadMap: ThreadMap;
@@ -215,7 +196,7 @@ export class ProfileQuerier {
    */
   _pushGroupSizes: Map<ThreadsKey, number[]>;
 
-  constructor(store: Store, rootRange: StartEndRange) {
+  constructor(store: QuerierStore, rootRange: StartEndRange) {
     this._store = store;
     this._processIndexMap = new Map();
     this._timestampManager = new TimestampManager(rootRange);
@@ -277,17 +258,6 @@ export class ProfileQuerier {
       }
     }
     return groups;
-  }
-
-  static async load(
-    filePathOrUrl: string,
-    options: LoadOptions = {}
-  ): Promise<ProfileQuerier> {
-    const { store, rootRange } = await loadProfileFromFileOrUrl(
-      filePathOrUrl,
-      options
-    );
-    return new ProfileQuerier(store, rootRange);
   }
 
   async profileInfo(
@@ -711,16 +681,10 @@ export class ProfileQuerier {
   }
 
   /**
-   * Write the loaded profile to `absPath`, matching the web app's Download
-   * button with every sharing option checked (only embedded source contents
-   * are removed). A directory target gets a file named like the web download.
+   * The profile as the web app's Download button produces it with every
+   * sharing option checked (only embedded source contents are removed).
    */
-  async saveProfile(
-    absPath: string,
-    force: boolean
-  ): Promise<WithContext<ProfileSaveResult>> {
-    // Same pipeline as the web app's Download button with every sharing
-    // option checked.
+  getProfileForDownload(): Profile {
     const options = getCheckedSharingOptions(
       this._store.getState(),
       'download'
@@ -730,90 +694,24 @@ export class ProfileQuerier {
         this._store.dispatch(updateSharingOption('download', slug, true));
       }
     }
-    const state = this._store.getState();
-    const profile = getSanitizedProfile(state, 'download').profile;
-
-    const wantsDirectory = absPath.endsWith('/') || absPath.endsWith(path.sep);
-    const targetStat = fs.statSync(absPath, { throwIfNoEntry: false });
-
-    let outPath = absPath;
-    if (targetStat?.isDirectory()) {
-      outPath = path.join(absPath, `${getFilenameString(state)}.gz`);
-    } else if (wantsDirectory) {
-      throw new Error(`Directory not found: ${absPath}`);
-    } else if (!fs.statSync(path.dirname(absPath), { throwIfNoEntry: false })) {
-      throw new Error(`Directory not found: ${path.dirname(absPath)}`);
-    }
-
-    const alreadyExistsError = () =>
-      new Error(`${outPath} already exists. Pass --force to overwrite it.`);
-
-    // Cheap early check so a large profile isn't encoded just to fail below.
-    // The 'wx' flag makes the real check atomic with the write.
-    if (!force && fs.statSync(outPath, { throwIfNoEntry: false })) {
-      throw alreadyExistsError();
-    }
-
-    const { bytes, format } = await encodeProfileForFilename(profile, outPath);
-
-    try {
-      fs.writeFileSync(outPath, bytes, { flag: force ? 'w' : 'wx' });
-    } catch (e) {
-      if ((e as NodeJS.ErrnoException).code === 'EEXIST') {
-        throw alreadyExistsError();
-      }
-      throw new Error(
-        `Could not write profile to ${outPath}: ${
-          e instanceof Error ? e.message : String(e)
-        }`
-      );
-    }
-
-    return {
-      type: 'profile-save',
-      path: outPath,
-      format,
-      bytes: bytes.byteLength,
-      context: this._getContext(),
-    };
+    return getSanitizedProfile(this._store.getState(), 'download').profile;
   }
 
   /**
-   * Apply a `.map` file (read from `absPath`) to the profile. Mirrors the web
-   * app's "Apply source map…" flow via the shared `applySourceMapFile` thunk,
-   * injecting the Node runner since the daemon has no Web Worker. When
-   * `sourceHandle` is set the auto-match step is skipped and the map is applied
-   * to that source directly.
+   * Apply the contents of a `.map` file to the profile. Mirrors the web app's
+   * "Apply source map…" flow via the shared `applySourceMapFile` thunk, with an
+   * injected runner for environments without a Web Worker. When `sourceIndex`
+   * is set the auto-match step is skipped and the map is applied to that
+   * source directly.
    */
-  async applySourceMap(
-    absPath: string,
-    sourceHandle?: string
+  protected async _applySourceMapContents(
+    filename: string,
+    contents: string,
+    sourceIndex: IndexIntoSourceTable | undefined,
+    runner: SourceMapRunner
   ): Promise<WithContext<ApplySourceMapResult>> {
-    // Resolved before reading the file so a bad `--to` fails without touching
-    // the filesystem.
-    const sourceIndex =
-      sourceHandle !== undefined
-        ? this._resolveTargetSource(sourceHandle)
-        : undefined;
-
-    let contents: string;
-    try {
-      contents = fs.readFileSync(absPath, 'utf8');
-    } catch (e) {
-      throw new Error(
-        `Could not read source map file ${absPath}: ${
-          e instanceof Error ? e.message : String(e)
-        }`
-      );
-    }
-
     const result = await this._store.dispatch(
-      applySourceMapFile(
-        basename(absPath),
-        contents,
-        sourceIndex,
-        runSourceMapSymbolicationNode
-      )
+      applySourceMapFile(filename, contents, sourceIndex, runner)
     );
 
     return {
@@ -829,7 +727,7 @@ export class ProfileQuerier {
    * auto-match step's `no-eligible-sources` guard and then de-minifies nothing,
    * which reads as a successful apply.
    */
-  private _resolveTargetSource(sourceHandle: string): IndexIntoSourceTable {
+  protected _resolveTargetSource(sourceHandle: string): IndexIntoSourceTable {
     const state = this._store.getState();
     const sourceIndex = parseSourceHandle(
       sourceHandle,
@@ -1235,7 +1133,7 @@ export class ProfileQuerier {
 
   /** Describe a set of threads for a context header: handle plus per-thread names. */
   private _describeThreads(
-    state: ReturnType<Store['getState']>,
+    state: ReturnType<QuerierStore['getState']>,
     threadIndexes: Set<ThreadIndex>
   ): { handle: string | null; threads: ContextThreadInfo[] } {
     const profile = getProfile(state);
@@ -1254,7 +1152,7 @@ export class ProfileQuerier {
     return { handle, threads };
   }
 
-  private _buildBaseStatus(state: ReturnType<Store['getState']>) {
+  private _buildBaseStatus(state: ReturnType<QuerierStore['getState']>) {
     const rootRange = getProfileRootRange(state);
     const committedRanges = getAllCommittedRanges(state);
     const { handle: selectedThreadHandle, threads: selectedThreads } =
@@ -1287,7 +1185,7 @@ export class ProfileQuerier {
    *
    * Commands collecting context after restoring a one-shot --strategy pass it as `effectiveStrategy`.
    */
-  private _getContext(
+  protected _getContext(
     effectiveStrategy?: CallTreeSummaryStrategy,
     resultThreadIndexes?: Set<ThreadIndex>
   ): SessionContext {
@@ -1323,7 +1221,7 @@ export class ProfileQuerier {
   }
 
   private _getEffectiveStrategy(
-    state: ReturnType<Store['getState']>
+    state: ReturnType<QuerierStore['getState']>
   ): CallTreeSummaryStrategy {
     const threadIndexes = getSelectedThreadIndexes(state);
     if (threadIndexes.size === 0) {

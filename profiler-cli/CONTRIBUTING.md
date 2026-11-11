@@ -13,6 +13,16 @@
 
 `ProfileQuerier` lives in `src/profile-query/` in the main profiler repo. The CLI daemon is just an IPC wrapper around it — query logic belongs in `src/profile-query/`, not in `daemon.ts`.
 
+**Shared command layer:** The command definitions are shared with the web app's profile chat (see `docs-developer/profile-chat.md`), which runs pq commands in the page. They live in `src/profile-query/cli/`:
+
+- `protocol.ts`: `ClientCommand` and `CommandResult`
+- `commands/`: the commander definitions. Actions call `ctx.run(command, opts)` on a `CommandContext` that the entry point injects. Here it sends the command to the daemon and prints the result. In the web app it runs the command on the page's own store.
+- `parse.ts`: argument parsers. They throw a `CliUsageError` instead of exiting.
+- `execute.ts`: `executeClientCommand`, the dispatch from a `ClientCommand` to `ProfileQuerier`
+- `formatters.ts`, `output.ts`, `permalink-view.ts`
+
+These files must not use Node APIs. Anything that touches the file system goes through `CommandContext.fileSystem` and the `FileSystemCommands` that `ProfileQuerierNode` (`src/profile-query/node.ts`) implements. What stays in `profiler-cli/src/` is the daemon, the client, sessions and the session-level commands (`load`, `stop`, `session`, `guide`, `schemas`).
+
 ## Build & Distribution
 
 This package uses a **bundled distribution approach**:
@@ -76,7 +86,7 @@ Two-phase startup:
 
 **IPC protocol (protocol.ts):**
 
-See `src/protocol.ts` for the authoritative `ClientMessage`, `ClientCommand`, and `ServerResponse` type definitions.
+See `src/protocol.ts` for the authoritative `ClientMessage` and `ServerResponse` type definitions, and `src/profile-query/cli/protocol.ts` in the main repo for `ClientCommand`.
 
 **Session validation (session.ts):**
 
@@ -117,9 +127,9 @@ where `<namespace-hash>` is derived from the session directory path to avoid cro
 
 ## Adding New Commands
 
-Each command group lives in its own file under `commands/`. To add a new command, modify the following files. The example below adds a hypothetical `profiler-cli allocation info` command.
+Each command group lives in its own file under `src/profile-query/cli/commands/` in the main repo. To add a new command, modify the following files. The example below adds a hypothetical `profiler-cli allocation info` command.
 
-### Step 1: Define types in `protocol.ts`
+### Step 1: Define types in `src/profile-query/cli/protocol.ts`
 
 Add to the `ClientCommand` union, define a result type, and add it to `CommandResult`:
 
@@ -138,15 +148,17 @@ export type AllocationInfoResult = {
 | WithContext<AllocationInfoResult>
 ```
 
-### Step 2: Create `commands/allocation.ts`
+### Step 2: Create `src/profile-query/cli/commands/allocation.ts`
+
+Report invalid arguments by throwing a `CliUsageError` from `src/profile-query/cli/parse.ts`, never with `process.exit`, because the same code runs in the browser.
 
 ```typescript
-import { Command } from 'commander';
-import { addGlobalOptions, runCommand } from './shared';
+import type { Command } from 'commander';
+import { addGlobalOptions, type CommandContext } from './shared';
 
 export function registerAllocationCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const allocation = program
     .command('allocation')
@@ -158,8 +170,7 @@ export function registerAllocationCommand(
       .description('Show allocation summary')
       .option('--thread <handle>', 'Thread to query')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'allocation', subcommand: 'info', thread: opts.thread },
       opts
     );
@@ -167,15 +178,15 @@ export function registerAllocationCommand(
 }
 ```
 
-### Step 3: Handle the command in `daemon.ts`
+### Step 3: Handle the command in `src/profile-query/cli/execute.ts`
 
-Add a case to `processMessage()`:
+Add a case to `executeClientCommand()`:
 
 ```typescript
 case 'allocation':
   switch (command.subcommand) {
     case 'info':
-      return this.querier.allocationInfo(command.thread);
+      return querier.allocationInfo(command.thread);
     default:
       throw assertExhaustiveCheck(command);
   }
@@ -192,7 +203,7 @@ async allocationInfo(threadHandle?: string): Promise<WithContext<AllocationInfoR
 }
 ```
 
-### Step 5: Add a formatter in `formatters.ts` and wire it into `output.ts`
+### Step 5: Add a formatter in `src/profile-query/cli/formatters.ts` and wire it into `output.ts`
 
 ```typescript
 // formatters.ts
@@ -212,8 +223,8 @@ case 'allocation-info':
 ### Step 6: Register the command and update docs
 
 ```typescript
-// index.ts — add alongside the other register* calls
-registerAllocationCommand(program, SESSION_DIR);
+// src/profile-query/cli/commands/index.ts — add to registerQueryCommands
+registerAllocationCommand(program, ctx);
 ```
 
 Then:
@@ -223,7 +234,7 @@ Then:
 
 ## Known Gaps
 
-These commands are parsed and routed but throw "unimplemented" in the daemon:
+These commands are parsed and routed but throw "unimplemented" in `executeClientCommand`:
 
 - `profile threads`
 - `marker select`

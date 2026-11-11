@@ -9,8 +9,7 @@
 
 import { getLastSelectedCallTreeSummaryStrategy } from 'firefox-profiler/selectors/url-state';
 import { changeCallTreeSummaryStrategy } from '../actions/profile-view';
-import type { Store } from '../types/store';
-import type { CallTreeSummaryStrategy } from './types';
+import type { QuerierStore, CallTreeSummaryStrategy } from './types';
 
 /**
  * Set the call tree summary strategy around a computation, then restore the
@@ -19,7 +18,7 @@ import type { CallTreeSummaryStrategy } from './types';
  * command can observe it.
  */
 export function withCallTreeSummaryStrategy<T>(
-  store: Store,
+  store: QuerierStore,
   strategy: CallTreeSummaryStrategy | undefined,
   fn: () => T
 ): T {

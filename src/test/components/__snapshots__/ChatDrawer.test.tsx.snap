@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`ChatDrawer runs a turn, showing the commands and the answer 1`] = `
+<aside
+  aria-labelledby="chatDrawerTitle"
+  class="chatDrawer"
+>
+  <header
+    class="chatDrawerHeader"
+  >
+    <h2
+      class="chatDrawerTitle"
+      id="chatDrawerTitle"
+    >
+      Ask about this profile
+    </h2>
+    <button
+      class="chatDrawerHeaderButton photon-button photon-button-micro"
+      type="button"
+    >
+      New chat
+    </button>
+    <button
+      class="chatDrawerHeaderButton photon-button photon-button-micro"
+      type="button"
+    >
+      Settings
+    </button>
+    <button
+      class="chatDrawerCloseButton photon-button photon-button-ghost"
+      title="Close"
+      type="button"
+    />
+  </header>
+  <div
+    aria-busy="false"
+    class="chatTranscript"
+    role="log"
+  >
+    <div
+      class="chatMessage chatMessageUser"
+    >
+      What is the worker doing?
+    </div>
+    <div
+      class="chatMessage chatMessageAssistant"
+    >
+      <div
+        class="chatMarkdown"
+      >
+        <p>
+          Looking at the worker.
+        </p>
+      </div>
+    </div>
+    <details
+      class="chatToolCall"
+      open=""
+    >
+      <summary
+        class="chatToolCallSummary"
+      >
+        <code>
+          pq 
+          thread select t-1
+        </code>
+      </summary>
+      <pre
+        class="chatToolCallOutput"
+      >
+        Selected thread: t-1 (DOM Worker, Parent Process)
+      </pre>
+    </details>
+    <details
+      class="chatToolCall chatToolCallError"
+    >
+      <summary
+        class="chatToolCallSummary"
+      >
+        <code>
+          pq 
+          thread select t-99
+        </code>
+      </summary>
+      <pre
+        class="chatToolCallOutput"
+      >
+        Error: Unknown thread t-99
+      </pre>
+    </details>
+    <div
+      class="chatMessage chatMessageAssistant"
+    >
+      <div
+        class="chatMarkdown"
+      >
+        <p>
+          All samples are in 
+          <strong>
+            Ygc
+          </strong>
+          .
+        </p>
+      </div>
+    </div>
+  </div>
+  <div
+    class="chatComposer"
+  >
+    <div
+      class="chatComposerBox"
+    >
+      <textarea
+        class="chatComposerInput"
+        placeholder="Ask about this profile"
+        rows="3"
+      />
+      <div
+        class="chatComposerActions"
+      >
+        <span
+          class="chatComposerHint"
+        >
+          Enter to send, Shift+Enter for a new line
+        </span>
+        <button
+          class="chatComposerButton chatComposerSendButton photon-button photon-button-micro"
+          disabled=""
+          type="button"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
+`;

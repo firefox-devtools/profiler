@@ -56,8 +56,37 @@
 }
 
 .buttonWithPanel.open > .menuButtonsButton,
+.menuButtonsButton.menuButtonsChatButtonOpen,
 .menuButtonsButton:hover:active {
   background-color: var(--internal-active-background-color);
+}
+
+.menuButtonsChatButtonWorking::before {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: menuButtonsChatButtonPulse 1s ease-in-out infinite alternate;
+  background-color: var(--blue-50);
+  content: '';
+  margin-inline-end: 6px;
+  vertical-align: middle;
+}
+
+@keyframes menuButtonsChatButtonPulse {
+  from {
+    opacity: 0.3;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menuButtonsChatButtonWorking::before {
+    animation: none;
+  }
 }
 
 /* Use this class if a button has an icon */

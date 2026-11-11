@@ -9,15 +9,14 @@ import {
 } from 'firefox-profiler/profile-logic/profile-metainfo';
 import { formatFromMarkerSchema } from 'firefox-profiler/profile-logic/marker-schema';
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import type { Store } from '../../types/store';
-import type { ProfileMetaResult } from '../types';
+import type { QuerierStore, ProfileMetaResult } from '../types';
 
 /**
  * Collect the profile's `meta` field into a structured, grouped result. This
  * mirrors what the "Profile Info" panel renders in the web UI, reusing the same
  * formatting helpers so the CLI and the UI stay consistent.
  */
-export function collectProfileMeta(store: Store): ProfileMetaResult {
+export function collectProfileMeta(store: QuerierStore): ProfileMetaResult {
   const { meta } = getProfile(store.getState());
 
   const result: ProfileMetaResult = {

@@ -6,7 +6,7 @@ import {
   formatThreadNetworkResult,
   formatThreadInfoResult,
   formatProfileInfoResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 import type {
   ThreadNetworkResult,
   ThreadInfoResult,

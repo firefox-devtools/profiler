@@ -6,17 +6,17 @@ import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
 import { getCategories } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { isNetworkMarker } from 'firefox-profiler/profile-logic/marker-data';
-import type { Store } from '../../types/store';
-import type { ThreadMap } from '../thread-map';
-import type { TimestampManager } from '../timestamps';
-import type { MarkerMap } from '../marker-map';
 import type {
+  QuerierStore,
   ThreadPageLoadResult,
   PageLoadResourceEntry,
   PageLoadCategoryEntry,
   JankPeriod,
   JankFunction,
 } from '../types';
+import type { ThreadMap } from '../thread-map';
+import type { TimestampManager } from '../timestamps';
+import type { MarkerMap } from '../marker-map';
 import type { NetworkPayload } from 'firefox-profiler/types/markers';
 import type { Thread, CategoryList } from 'firefox-profiler/types';
 
@@ -189,7 +189,7 @@ function countCategoriesInRange(
 // ===== Main collector =====
 
 export function collectThreadPageLoad(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   timestampManager: TimestampManager,
   markerMap: MarkerMap,

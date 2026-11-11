@@ -20,6 +20,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { ProfileQuerier } from 'firefox-profiler/profile-query';
+import { ProfileQuerierNode } from 'firefox-profiler/profile-query/node';
 import { MAX_PROFILE_MARKERS_ROWS } from 'firefox-profiler/profile-query/formatters/marker-info';
 import {
   addRawMarkersToThread,
@@ -892,7 +893,7 @@ describe('ProfileQuerier', function () {
         generatedSource: [null],
       };
       const store = storeWithProfile(profile);
-      const querier = new ProfileQuerier(
+      const querier = new ProfileQuerierNode(
         store,
         getProfileRootRange(store.getState())
       );

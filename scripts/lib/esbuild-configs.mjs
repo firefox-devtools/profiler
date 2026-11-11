@@ -11,6 +11,7 @@ import copy from 'esbuild-plugin-copy';
 import {
   externalChromeUrlsPlugin,
   circularDependencyPlugin,
+  commanderNodeShimsPlugin,
   generateHtmlPlugin,
 } from './esbuild-plugins.mjs';
 
@@ -30,6 +31,7 @@ const baseConfig = {
     '.jpg': 'file',
     '.svg': 'dataurl',
     '.worker.js': 'file',
+    '.txt': 'text',
   },
   alias: {
     'firefox-profiler': './src',
@@ -92,6 +94,7 @@ export const mainBundleConfig = {
   plugins: [
     externalChromeUrlsPlugin(),
     circularDependencyPlugin(),
+    commanderNodeShimsPlugin({ projectRoot }),
     wasmLoader(),
     copy({
       resolveFrom: projectRoot,
@@ -101,6 +104,7 @@ export const mainBundleConfig = {
         { from: ['res/contribute.json'], to: ['dist'] },
         { from: ['res/robots.txt'], to: ['dist'] },
         { from: ['res/service-worker-compat.js'], to: ['dist'] },
+        { from: ['res/oauth/*'], to: ['dist/oauth'] },
         { from: ['res/img/favicon.png'], to: ['dist/res/img'] },
         { from: ['docs-user/**/*'], to: ['dist/docs'] },
         { from: ['locales/**/*'], to: ['dist/locales'] },

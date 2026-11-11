@@ -6,16 +6,13 @@
  * `profiler-cli sourcemap` command.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
 import type { Command } from 'commander';
-import { addGlobalOptions, runCommand, permalinkFormat } from './shared';
-import { sendCommand } from '../client';
-import { formatOutput } from '../output';
+import { CliUsageError } from 'firefox-profiler/profile-query/cli/parse';
+import { addGlobalOptions, type CommandContext } from './shared';
 
 export function registerSourcemapCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const sourcemap = program
     .command('sourcemap')
@@ -28,12 +25,13 @@ export function registerSourcemapCommand(
         'List bundle sources eligible for a source map (src-N handles)'
       )
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
-      { command: 'sourcemap', subcommand: 'sources' },
-      opts
-    );
+    await ctx.run({ command: 'sourcemap', subcommand: 'sources' }, opts);
   });
+
+  const { fileSystem } = ctx;
+  if (fileSystem === null) {
+    return;
+  }
 
   addGlobalOptions(
     sourcemap
@@ -46,25 +44,20 @@ export function registerSourcemapCommand(
   ).action(async (mapPath: string, opts) => {
     // Resolve to an absolute path here: the daemon runs with a different cwd,
     // so it can only read the file by absolute path (mirrors the load flow).
-    const absolutePath = path.resolve(mapPath);
-    if (!fs.existsSync(absolutePath)) {
-      console.error(`Error: Source map file not found: ${absolutePath}`);
-      process.exitCode = 1;
-      return;
+    const absolutePath = fileSystem.resolvePath(mapPath);
+    if (!fileSystem.exists(absolutePath)) {
+      throw new CliUsageError(`Source map file not found: ${absolutePath}`);
     }
 
-    const { result, permalink } = await sendCommand(
-      sessionDir,
+    const result = await ctx.run(
       {
         command: 'sourcemap',
         subcommand: 'apply',
         path: absolutePath,
         to: opts.to,
       },
-      opts.session,
-      { permalink: permalinkFormat(opts) }
+      opts
     );
-    console.log(formatOutput(result, opts.json ?? false, permalink));
 
     // `ambiguous` (needs disambiguation) and `error` are failures, so exit
     // non-zero and let scripts branch on them. `applied` / `unchanged` exit 0.
@@ -73,7 +66,7 @@ export function registerSourcemapCommand(
       (result.type === 'sourcemap-ambiguous' ||
         result.type === 'sourcemap-error')
     ) {
-      process.exitCode = 1;
+      ctx.setFailed();
     }
   });
 }

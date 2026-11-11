@@ -592,9 +592,102 @@ MenuButtons--index--share-error-uploading =
     .label = Error uploading
 
 MenuButtons--index--revert = Revert to Original Profile
+MenuButtons--index--ask-about-profile = Ask about this profile
+# Shown when the chat is still answering after its drawer was closed.
+MenuButtons--index--ask-about-profile-working = Ask about this profile
+    .title = The chat is still working on an answer.
 
 MenuButtons--permalink--button =
     .label = Permalink
+
+## ChatDrawer
+## The experimental chat drawer that answers questions about the profile, using
+## an AI model that inspects the profile with profiler-cli commands. The model
+## comes from a provider the user picks: Anthropic, OpenAI, OpenRouter, a model
+## running on the user's computer, or another server compatible with the OpenAI
+## API. "Anthropic", "OpenAI", "OpenRouter", "Ollama" and "LM Studio" are
+## company or product names
+## and "profiler-cli" a program name, they should not be translated.
+
+ChatDrawer--title = Ask about this profile
+ChatDrawer--new-chat-button = New chat
+ChatDrawer--settings-button = Settings
+ChatDrawer--close-button =
+    .title = Close
+ChatDrawer--error-boundary-message =
+    .message = Uh oh, some unknown error happened in the chat.
+
+ChatProviderSettings--provider-label = Provider
+ChatProviderSettings--provider-anthropic = Anthropic
+ChatProviderSettings--provider-openai = OpenAI
+ChatProviderSettings--provider-openrouter = OpenRouter
+ChatProviderSettings--provider-local = Local model (Ollama, LM Studio)
+ChatProviderSettings--provider-custom = Other OpenAI-compatible server
+ChatProviderSettings--description-anthropic = Enter an <a>Anthropic API key</a> to ask questions about this profile.
+ChatProviderSettings--description-openai = Enter an <a>OpenAI API key</a> and pick a model to ask questions about this profile.
+ChatProviderSettings--description-openrouter = Connect your OpenRouter account to create an API key for this site, or paste an existing <a>OpenRouter key</a>. OpenRouter gives access to models from many providers.
+ChatProviderSettings--description-local = Use a model running on this computer, through its OpenAI-compatible API. The model needs to support tool calling and a long context. Ollama needs to allow requests from this site, see the <a>documentation</a>.
+ChatProviderSettings--description-custom = Use any server that implements the OpenAI Chat Completions API, such as a company gateway. The model needs to support tool calling.
+ChatProviderSettings--privacy-anthropic = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to Anthropic.
+ChatProviderSettings--privacy-openai = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to OpenAI.
+ChatProviderSettings--privacy-openrouter = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to OpenRouter and to the provider of the model you pick. You can revoke the key in your <a>OpenRouter settings</a>.
+ChatProviderSettings--privacy-local = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them stay on this computer, unless the URL points to another machine.
+ChatProviderSettings--privacy-custom = Settings are stored in this browser only. Your questions and the parts of the profile needed to answer them, such as function names, URLs and marker data, are sent to the server at this URL.
+ChatProviderSettings--connect-openrouter-button = Connect OpenRouter
+ChatProviderSettings--connect-waiting = Finish signing in to OpenRouter in the window that opened.
+ChatProviderSettings--connect-popup-blocked = The OpenRouter window was blocked. Allow pop-ups for this site, or paste a key instead.
+ChatProviderSettings--connect-cancelled = The OpenRouter sign-in was cancelled.
+# Variables:
+#   $message (String) - The error message, in English.
+ChatProviderSettings--connect-error = Could not connect OpenRouter: { $message }
+ChatProviderSettings--base-url-label = Server URL
+ChatProviderSettings--api-key-label = API key
+ChatProviderSettings--api-key-optional-label = API key (optional)
+ChatProviderSettings--model-label = Model
+ChatProviderSettings--model-input =
+    .placeholder = Model name
+ChatProviderSettings--models-loading = Loading the model list…
+# Variables:
+#   $message (String) - The error message, in English.
+ChatProviderSettings--models-error = Could not load the model list ({ $message }). Type the model name instead.
+ChatProviderSettings--save-button = Save
+ChatProviderSettings--cancel-button = Cancel
+ChatProviderSettings--forget-key-button = Forget key
+
+ChatComposer--input =
+    .placeholder = Ask about this profile
+ChatComposer--hint = Enter to send, Shift+Enter for a new line
+ChatComposer--send-button = Send
+ChatComposer--stop-button = Stop
+
+ChatTranscript--empty = Ask a question about this profile, for example “Which functions take the most time on the main thread?”
+ChatTranscript--thinking = Thinking…
+ChatTranscript--notice-cancelled = Stopped.
+ChatTranscript--notice-max-tokens = The response was cut off because it got too long.
+ChatTranscript--notice-tool-limit = Stopped after too many profiler commands. Ask a narrower question, or send “continue”.
+ChatTranscript--notice-refusal = The response was declined.
+# Variables:
+#   $explanation (String) - The reason given by the AI model, in English.
+ChatTranscript--notice-refusal-with-explanation = The response was declined: { $explanation }
+
+# Variables:
+#   $provider (String) - The provider name, such as "Anthropic", or a host name, such as "localhost:11434".
+#   $message (String) - The error message from the provider, in English.
+ChatError--auth-rejected = { $provider } rejected the API key: { $message } Open “Settings” to enter a different one.
+# Variables:
+#   $provider (String) - The provider name, such as "Anthropic", or a host name, such as "localhost:11434".
+ChatError--rate-limited = { $provider } is rate limiting requests. Wait a bit and try again.
+# Variables:
+#   $message (String) - The error message from the provider, in English.
+ChatError--permission = This API key is not allowed to use the model: { $message }
+# Variables:
+#   $provider (String) - The provider name, such as "Anthropic", or a host name, such as "localhost:11434".
+#   $message (String) - The network error message, in English.
+ChatError--connection-failed = Could not reach { $provider }: { $message }
+ChatError--connection-local-hint = Check that the server is running and allows requests from this site. For Ollama, set OLLAMA_ORIGINS.
+# Variables:
+#   $message (String) - The error message, in English.
+ChatError--other = Something went wrong: { $message }
 
 ## MetaInfo panel
 ## These strings are used in the panel containing the meta information about

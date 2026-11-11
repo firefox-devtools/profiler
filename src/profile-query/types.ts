@@ -12,6 +12,8 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import type {
   Transform,
   CallTreeSummaryStrategy,
+  Dispatch,
+  GetState,
   CounterGraphType,
   CounterTooltipDataSource,
   NetworkStatus,
@@ -20,6 +22,15 @@ import type {
 } from 'firefox-profiler/types';
 
 export type { CallTreeSummaryStrategy, WeightType };
+
+/**
+ * The part of a Redux store that ProfileQuerier needs. A thunk can pass
+ * `{ getState, dispatch }` to query the live app store.
+ */
+export type QuerierStore = {
+  getState: GetState;
+  dispatch: Dispatch;
+};
 
 // ===== Utility types =====
 

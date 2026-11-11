@@ -44,9 +44,9 @@ import type {
   FunctionAsmAnnotation,
   SourceAnnotationResult,
   AsmAnnotationsResult,
+  QuerierStore,
 } from './types';
 import { withCallTreeSummaryStrategy } from './call-tree-strategy';
-import type { Store } from '../types/store';
 
 class NodeExternalCommunicationDelegate implements ExternalCommunicationDelegate {
   async fetchUrlResponse(url: string, postData?: string): Promise<Response> {
@@ -378,7 +378,7 @@ async function fetchAsmAnnotations(
 }
 
 export async function functionAnnotate(
-  store: Store,
+  store: QuerierStore,
   threadMap: ThreadMap,
   archiveCache: Map<string, Promise<Uint8Array>>,
   functionHandle: string,

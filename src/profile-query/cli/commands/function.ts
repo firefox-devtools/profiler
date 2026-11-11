@@ -11,12 +11,12 @@ import {
   addGlobalOptions,
   addStrategyOption,
   parseOptionalStrategyArg,
-  runCommand,
+  type CommandContext,
 } from './shared';
 
 export function registerFunctionCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const fn = program.command('function').description('Function-level commands');
 
@@ -27,8 +27,7 @@ export function registerFunctionCommand(
       .option('--function <handle>', 'Function handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'function', subcommand: 'expand', function: funcHandle },
       opts
     );
@@ -41,8 +40,7 @@ export function registerFunctionCommand(
       .option('--function <handle>', 'Function handle')
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       { command: 'function', subcommand: 'info', function: funcHandle },
       opts
     );
@@ -73,8 +71,7 @@ export function registerFunctionCommand(
     )
   ).action(async (handleArg: string | undefined, opts) => {
     const funcHandle = handleArg ?? opts.function;
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'function',
         subcommand: 'annotate',

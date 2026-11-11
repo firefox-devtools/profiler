@@ -17,7 +17,6 @@ const BUILD_HASH = Date.now().toString(36);
 const profilerCliConfig = {
   ...nodeBaseConfig,
   entryPoints: ['profiler-cli/src/index.ts'],
-  loader: { ...nodeBaseConfig.loader, '.txt': 'text' },
   outfile: 'profiler-cli/dist/profiler-cli.js',
   minify: true,
   banner: {

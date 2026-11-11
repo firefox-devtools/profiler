@@ -37,6 +37,12 @@ import {
   dismissNewlyPublished,
   profileRemotelyDeleted,
 } from 'firefox-profiler/actions/app';
+import { openChat, closeChat } from 'firefox-profiler/actions/chat';
+import {
+  getIsChatFeatureEnabled,
+  getIsChatOpen,
+  getIsChatTurnRunning,
+} from 'firefox-profiler/selectors/chat';
 
 import {
   getAbortFunction,
@@ -73,12 +79,17 @@ type StateProps = {
   readonly hasPrePublishedState: boolean;
   readonly abortFunction: () => void;
   readonly currentProfileUploadedInformation: UploadedProfileInformation | null;
+  readonly isChatFeatureEnabled: boolean;
+  readonly isChatOpen: boolean;
+  readonly isChatTurnRunning: boolean;
 };
 
 type DispatchProps = {
   readonly dismissNewlyPublished: typeof dismissNewlyPublished;
   readonly revertToPrePublishedState: typeof revertToPrePublishedState;
   readonly profileRemotelyDeleted: typeof profileRemotelyDeleted;
+  readonly openChat: typeof openChat;
+  readonly closeChat: typeof closeChat;
 };
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -93,6 +104,21 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     // Clear out the newly published notice from the URL.
     this.props.dismissNewlyPublished();
   }
+
+  override componentDidUpdate(prevProps: Props) {
+    // When the chat drawer closes with the focus inside, the focus is lost with
+    // it, so bring it back to the button that opens the chat.
+    if (
+      prevProps.isChatOpen &&
+      !this.props.isChatOpen &&
+      (document.activeElement === null ||
+        document.activeElement === document.body)
+    ) {
+      this._chatButtonRef.current?.focus();
+    }
+  }
+
+  _chatButtonRef = React.createRef<HTMLButtonElement>();
 
   _getUploadedStatus(dataSource: DataSource, profileUrl: string) {
     switch (dataSource) {
@@ -350,9 +376,52 @@ class MenuButtonsImpl extends React.PureComponent<Props, State> {
     );
   }
 
+  _onChatButtonClick = () => {
+    const { isChatOpen, openChat, closeChat } = this.props;
+    if (isChatOpen) {
+      closeChat();
+    } else {
+      openChat();
+    }
+  };
+
+  _renderChatButton() {
+    const { isChatFeatureEnabled, isChatOpen, isChatTurnRunning } = this.props;
+    if (!isChatFeatureEnabled) {
+      return null;
+    }
+    // The chat keeps working when its drawer is closed, and changes the view
+    // as it runs commands, so say so.
+    const isWorkingInBackground = isChatTurnRunning && !isChatOpen;
+    return (
+      <Localized
+        id={
+          isWorkingInBackground
+            ? 'MenuButtons--index--ask-about-profile-working'
+            : 'MenuButtons--index--ask-about-profile'
+        }
+        attrs={{ title: true }}
+      >
+        <button
+          ref={this._chatButtonRef}
+          type="button"
+          className={classNames('menuButtonsButton', {
+            menuButtonsChatButtonOpen: isChatOpen,
+            menuButtonsChatButtonWorking: isWorkingInBackground,
+          })}
+          aria-pressed={isChatOpen}
+          onClick={this._onChatButtonClick}
+        >
+          Ask about this profile
+        </button>
+      </Localized>
+    );
+  }
+
   override render() {
     return (
       <>
+        {this._renderChatButton()}
         {this._renderRevertProfile()}
         {this._renderMetaInfoButton()}
         {this._renderPublishPanel()}
@@ -378,11 +447,16 @@ export const MenuButtons = explicitConnect<OwnProps, StateProps, DispatchProps>(
       abortFunction: getAbortFunction(state),
       currentProfileUploadedInformation:
         getCurrentProfileUploadedInformation(state),
+      isChatFeatureEnabled: getIsChatFeatureEnabled(state),
+      isChatOpen: getIsChatOpen(state),
+      isChatTurnRunning: getIsChatTurnRunning(state),
     }),
     mapDispatchToProps: {
       dismissNewlyPublished,
       revertToPrePublishedState,
       profileRemotelyDeleted,
+      openChat,
+      closeChat,
     },
     component: MenuButtonsImpl,
   }

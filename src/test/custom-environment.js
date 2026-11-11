@@ -42,6 +42,13 @@ export default class CustomTestEnvironment extends TestEnvironment {
     this.global.CompressionStream = CompressionStream;
     this.global.DecompressionStream = DecompressionStream;
 
+    if ('BroadcastChannel' in this.global) {
+      throw new Error(
+        'BroadcastChannel is already present in the global scope, please update custom-environment.js.'
+      );
+    }
+    this.global.BroadcastChannel = BroadcastChannel;
+
     // Mock window.matchMedia for dark mode tests
     Object.defineProperty(this.global, 'matchMedia', {
       writable: true,

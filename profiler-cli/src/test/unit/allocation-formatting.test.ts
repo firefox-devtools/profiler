@@ -35,7 +35,7 @@ import {
   formatThreadSamplesResult,
   formatThreadFunctionsResult,
   formatThreadInfoResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 
 function createStore(
   profile: Profile,

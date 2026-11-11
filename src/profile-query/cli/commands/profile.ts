@@ -6,15 +6,17 @@
  * `profiler-cli profile` command.
  */
 
-import * as path from 'path';
 import type { Command } from 'commander';
-import type { MarkerFilterOptions } from '../protocol';
-import { parseLimitArg } from '../utils/parse';
-import { addGlobalOptions, parseFloatArg, runCommand } from './shared';
+import type { MarkerFilterOptions } from 'firefox-profiler/profile-query/cli/protocol';
+import {
+  CliUsageError,
+  parseLimitArg,
+} from 'firefox-profiler/profile-query/cli/parse';
+import { addGlobalOptions, parseFloatArg, type CommandContext } from './shared';
 
 export function registerProfileCommand(
   program: Command,
-  sessionDir: string
+  ctx: CommandContext
 ): void {
   const profile = program
     .command('profile')
@@ -30,8 +32,7 @@ export function registerProfileCommand(
       )
       .option('--search <term>', 'Filter by substring')
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'profile',
         subcommand: 'info',
@@ -49,8 +50,7 @@ export function registerProfileCommand(
         'Print profile metadata (application, platform, recording settings)'
       )
   ).action(async (opts) => {
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'profile',
         subcommand: 'meta',
@@ -113,7 +113,7 @@ export function registerProfileCommand(
         opts.minDuration,
         0,
         Infinity,
-        'Error: --min-duration must be a positive number (in milliseconds)'
+        '--min-duration must be a positive number (in milliseconds)'
       );
     }
     if (opts.maxDuration !== undefined) {
@@ -122,27 +122,25 @@ export function registerProfileCommand(
         opts.maxDuration,
         0,
         Infinity,
-        'Error: --max-duration must be a positive number (in milliseconds)'
+        '--max-duration must be a positive number (in milliseconds)'
       );
     }
     // Without a filter this sweeps every marker in the profile and the first
     // rows are whichever markers thread 0 happened to record first, which
     // answers nothing. `--limit` is an explicit opt-in to that browsing mode.
     if (Object.keys(markerFilters).length === 0 && opts.limit === undefined) {
-      console.error(
-        'Error: profile markers needs a filter: --search, --category, --min-duration, --max-duration, --has-stack, or --thread.\n' +
+      throw new CliUsageError(
+        'profile markers needs a filter: --search, --category, --min-duration, --max-duration, --has-stack, or --thread.\n' +
           'Or pass --limit <N> to browse without a filter, showing the first N rows.\n' +
           'For a thread inventory use "profile info"; to browse one thread use "thread markers".'
       );
-      process.exit(1);
     }
 
     if (opts.limit !== undefined) {
       markerFilters.limit = parseLimitArg('--limit', opts.limit);
     }
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'profile',
         subcommand: 'markers',
@@ -153,31 +151,33 @@ export function registerProfileCommand(
     );
   });
 
-  addGlobalOptions(
-    profile
-      .command('save <path>')
-      .description(
-        "Save the loaded profile like the web app's Download button. Format follows the extension (.json, .json.gz, .jslb, .jslb.gz). A directory target gets a .json.gz named after the profile."
-      )
-      .option('--force', 'Overwrite the file if it already exists')
-  ).action(async (outPath: string, opts) => {
-    // Resolved here: the daemon runs with a different cwd. A trailing slash is
-    // kept so the daemon knows a directory was meant.
-    let absPath = path.resolve(outPath);
-    if (outPath.endsWith('/') || outPath.endsWith(path.sep)) {
-      absPath += path.sep;
-    }
-    await runCommand(
-      sessionDir,
-      {
-        command: 'profile',
-        subcommand: 'save',
-        path: absPath,
-        force: opts.force ?? false,
-      },
-      opts
-    );
-  });
+  const { fileSystem } = ctx;
+  if (fileSystem !== null) {
+    addGlobalOptions(
+      profile
+        .command('save <path>')
+        .description(
+          "Save the loaded profile like the web app's Download button. Format follows the extension (.json, .json.gz, .jslb, .jslb.gz). A directory target gets a .json.gz named after the profile."
+        )
+        .option('--force', 'Overwrite the file if it already exists')
+    ).action(async (outPath: string, opts) => {
+      // Resolved here: the daemon runs with a different cwd. A trailing slash is
+      // kept so the daemon knows a directory was meant.
+      let absPath = fileSystem.resolvePath(outPath);
+      if (outPath.endsWith('/') || outPath.endsWith(fileSystem.sep)) {
+        absPath += fileSystem.sep;
+      }
+      await ctx.run(
+        {
+          command: 'profile',
+          subcommand: 'save',
+          path: absPath,
+          force: opts.force ?? false,
+        },
+        opts
+      );
+    });
+  }
 
   const VALID_LOG_LEVELS = ['error', 'warn', 'info', 'debug', 'verbose'];
 
@@ -195,10 +195,9 @@ export function registerProfileCommand(
       .option('--limit <N>', 'Limit to first N entries (0 = no limit)')
   ).action(async (opts) => {
     if (opts.level !== undefined && !VALID_LOG_LEVELS.includes(opts.level)) {
-      console.error(
-        `Error: --level must be one of: ${VALID_LOG_LEVELS.join(', ')}`
+      throw new CliUsageError(
+        `--level must be one of: ${VALID_LOG_LEVELS.join(', ')}`
       );
-      process.exit(1);
     }
 
     const limit = parseLimitArg('--limit', opts.limit);
@@ -210,8 +209,7 @@ export function registerProfileCommand(
       opts.search !== undefined ||
       limit !== undefined;
 
-    await runCommand(
-      sessionDir,
+    await ctx.run(
       {
         command: 'profile',
         subcommand: 'logs',

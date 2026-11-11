@@ -39,6 +39,9 @@ import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
+import type { BetaMessageParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+import type { ResponseInputItem } from 'openai/resources/responses/responses';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
@@ -439,6 +442,106 @@ export type CodeState = {
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
 };
 
+/**
+ * Profile chat state. Nothing here is URL state: a reload starts a new chat.
+ */
+export type ChatStatus = 'idle' | 'streaming' | 'running-tool' | 'error';
+
+// How a chat turn ended.
+export type ChatTurnOutcome =
+  | { readonly type: 'done' }
+  | { readonly type: 'cancelled' }
+  | { readonly type: 'max-tokens' }
+  | { readonly type: 'tool-limit' }
+  | { readonly type: 'refusal'; readonly explanation: string | null };
+
+// Why a chat turn failed.
+// `provider` is the name shown in the message, e.g. "OpenAI" or
+// "localhost:11434".
+export type ChatError =
+  | {
+      readonly type: 'auth';
+      readonly provider: string;
+      readonly message: string;
+    }
+  | { readonly type: 'rate-limit'; readonly provider: string }
+  | { readonly type: 'permission'; readonly message: string }
+  | {
+      readonly type: 'connection';
+      readonly provider: string;
+      readonly message: string;
+    }
+  | {
+      readonly type: 'api';
+      readonly status: number | null;
+      readonly message: string;
+    }
+  | { readonly type: 'unknown'; readonly message: string };
+
+// The conversation exactly as sent to the API, in the provider's own message
+// format. Append-only.
+export type ChatConversation =
+  | { readonly format: 'anthropic'; readonly messages: BetaMessageParam[] }
+  | {
+      readonly format: 'openai-chat';
+      readonly messages: ChatCompletionMessageParam[];
+    }
+  | {
+      readonly format: 'openai-responses';
+      readonly messages: ResponseInputItem[];
+    };
+
+export type ChatConversationFormat = ChatConversation['format'];
+
+// The provider choices in the chat settings. Each one uses one conversation
+// format, see src/app-logic/profile-chat/provider-settings.ts.
+export type ChatProviderPreset =
+  | 'anthropic'
+  | 'openai'
+  | 'openrouter'
+  | 'local'
+  | 'custom';
+
+export type ChatState = {
+  // Whether the experimental chat is shown at all.
+  readonly isFeatureEnabled: boolean;
+  readonly isOpen: boolean;
+  readonly status: ChatStatus;
+  // Shown when the last turn failed.
+  readonly error: ChatError | null;
+  // Shown when the last turn ended early, e.g. cancelled or cut off.
+  readonly notice: ChatTurnOutcome | null;
+  readonly conversation: ChatConversation;
+  // Text of the response that is currently streaming in.
+  readonly streamingText: string;
+  readonly providerPreset: ChatProviderPreset;
+  // Whether the settings of the selected provider are complete.
+  readonly hasCredentials: boolean;
+  // Incremented whenever the conversation is reset, so that a turn that is
+  // still running for the previous conversation can't write into the new one.
+  readonly conversationId: number;
+  // The message being written, kept here so that closing the drawer keeps it.
+  readonly draft: string;
+};
+
+/**
+ * One entry of the chat transcript as rendered, derived from the conversation.
+ */
+export type ChatTranscriptItem =
+  | { readonly type: 'user'; readonly text: string }
+  | { readonly type: 'assistant'; readonly text: string }
+  | {
+      readonly type: 'tool-call';
+      readonly id: string;
+      // The profiler-cli command line the model ran.
+      readonly command: string;
+      // Null while the command is still running.
+      readonly result: {
+        readonly text: string;
+        readonly isError: boolean;
+      } | null;
+    };
+
 export type State = {
   readonly app: AppState;
   readonly profileView: ProfileViewState;
@@ -447,4 +550,5 @@ export type State = {
   readonly zippedProfiles: ZippedProfilesState;
   readonly publish: PublishState;
   readonly code: CodeState;
+  readonly chat: ChatState;
 };

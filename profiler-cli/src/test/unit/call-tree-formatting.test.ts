@@ -15,7 +15,7 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   formatThreadSamplesTopDownResult,
   formatThreadSamplesBottomUpResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 import type { CallTreeCollectionOptions } from 'firefox-profiler/profile-query/formatters/call-tree';
 import {
   getCallTree,

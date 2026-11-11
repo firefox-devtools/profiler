@@ -23,6 +23,7 @@
  *   ./profiler-cli/dist/profiler-cli.js <command>  (direct invocation)
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 import { Command } from 'commander';
@@ -31,28 +32,53 @@ import schemasText from '../schemas.txt';
 import { startDaemon } from './daemon';
 import { startNewDaemon, stopDaemon, sendCommand } from './client';
 import { listSessions } from './session';
-import { formatOutput } from './output';
+import { formatOutput } from 'firefox-profiler/profile-query/cli/output';
 import {
   addGlobalOptions,
   addSessionOption,
-  runCommand,
-} from './commands/shared';
+} from 'firefox-profiler/profile-query/cli/commands/shared';
+import {
+  permalinkFormat,
+  registerQueryCommands,
+  registerStatusCommands,
+  type CommandContext,
+} from 'firefox-profiler/profile-query/cli/commands';
 import { VERSION } from './constants';
-import { registerProfileCommand } from './commands/profile';
-import { registerThreadCommand } from './commands/thread';
-import { registerMarkerCommand } from './commands/marker';
-import { registerFunctionCommand } from './commands/function';
-import { registerCounterCommand } from './commands/counter';
-import { registerStrategyCommand } from './commands/strategy';
-import { registerZoomCommand } from './commands/zoom';
-import { registerFilterCommand } from './commands/filter';
-import { registerSourcemapCommand } from './commands/sourcemap';
 import { registerSessionCommand } from './commands/session';
 
 // Read session directory from environment (only place this is read)
 const SESSION_DIR =
   process.env.PROFILER_CLI_SESSION_DIR ||
   path.join(os.homedir(), '.profiler-cli');
+
+/**
+ * Runs the shared query commands by sending them to the daemon and printing
+ * the results to the terminal.
+ */
+const cliCommandContext: CommandContext = {
+  async run(command, opts) {
+    const { result, permalink } = await sendCommand(
+      SESSION_DIR,
+      command,
+      opts.session,
+      { permalink: permalinkFormat(opts) }
+    );
+    console.log(formatOutput(result, opts.json ?? false, permalink));
+    return result;
+  },
+  print(text) {
+    console.log(text);
+  },
+  setFailed() {
+    process.exitCode = 1;
+  },
+  args: process.argv.slice(2),
+  fileSystem: {
+    resolvePath: (p) => path.resolve(p),
+    exists: (p) => fs.existsSync(p),
+    sep: path.sep,
+  },
+};
 
 async function main(): Promise<void> {
   const rawArgs = process.argv.slice(2);
@@ -157,32 +183,7 @@ Examples:
     console.log(formatOutput(status, opts.json ?? false));
   });
 
-  // profiler-cli status
-  addGlobalOptions(
-    program
-      .command('status')
-      .description(
-        'Show session status (selected thread, zoom ranges, filters)'
-      )
-  ).action(async (opts) => {
-    await runCommand(SESSION_DIR, { command: 'status' }, opts);
-  });
-
-  // profiler-cli permalink
-  addGlobalOptions(
-    program
-      .command('permalink')
-      .description(
-        'Print a profiler.firefox.com URL for the current view of an already published profile'
-      )
-      .option('--short', 'Shorten the URL through share.firefox.dev')
-  ).action(async (opts) => {
-    await runCommand(
-      SESSION_DIR,
-      { command: 'permalink', short: opts.short ?? false },
-      opts
-    );
-  });
+  registerStatusCommands(program, cliCommandContext);
 
   // profiler-cli stop [id]
   addGlobalOptions(
@@ -232,15 +233,7 @@ Examples:
       console.log(schemasText);
     });
 
-  registerProfileCommand(program, SESSION_DIR);
-  registerThreadCommand(program, SESSION_DIR);
-  registerMarkerCommand(program, SESSION_DIR);
-  registerFunctionCommand(program, SESSION_DIR);
-  registerCounterCommand(program, SESSION_DIR);
-  registerStrategyCommand(program, SESSION_DIR);
-  registerZoomCommand(program, SESSION_DIR);
-  registerFilterCommand(program, SESSION_DIR);
-  registerSourcemapCommand(program, SESSION_DIR);
+  registerQueryCommands(program, cliCommandContext);
   registerSessionCommand(program, SESSION_DIR);
 
   try {

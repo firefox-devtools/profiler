@@ -8,7 +8,7 @@ import {
   formatMarkerInfoResult,
   formatMarkerInfoMultiResult,
   formatMarkerStackResult,
-} from '../../formatters';
+} from 'firefox-profiler/profile-query/cli/formatters';
 import type {
   ThreadMarkersResult,
   FlatMarkerItem,

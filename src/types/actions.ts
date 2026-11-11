@@ -4,6 +4,21 @@
 
 import type JSZip from 'jszip';
 import type {
+  ChatConversation,
+  ChatError,
+  ChatProviderPreset,
+  ChatTurnOutcome,
+  UrlState,
+  UploadState,
+  State,
+  UploadedProfileInformation,
+  SourceCodeLoadingError,
+  ApiQueryError,
+  TableViewOptions,
+  DecodedInstruction,
+  ProfileEncodingResult,
+} from './state';
+import type {
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -37,17 +52,6 @@ import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { CallNodeInfo } from '../profile-logic/call-node-info';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type {
-  UrlState,
-  UploadState,
-  State,
-  UploadedProfileInformation,
-  SourceCodeLoadingError,
-  ApiQueryError,
-  TableViewOptions,
-  DecodedInstruction,
-  ProfileEncodingResult,
-} from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 import type { BrowserConnectionStatus } from '../app-logic/browser-connection';
 
@@ -788,6 +792,50 @@ type AppAction = {
   readonly browserConnectionStatus: BrowserConnectionStatus;
 };
 
+type ChatAction =
+  | {
+      readonly type: 'CHANGE_CHAT_FEATURE_ENABLED';
+      readonly isEnabled: boolean;
+    }
+  | { readonly type: 'OPEN_CHAT' }
+  | { readonly type: 'CLOSE_CHAT' }
+  | {
+      readonly type: 'CHAT_PROVIDER_CHANGED';
+      readonly preset: ChatProviderPreset;
+      readonly hasCredentials: boolean;
+      // Whether the current conversation can't continue with the new settings.
+      readonly startsNewConversation: boolean;
+    }
+  | { readonly type: 'RESET_CHAT' }
+  | { readonly type: 'UPDATE_CHAT_DRAFT'; readonly text: string }
+  | {
+      readonly type: 'CHAT_TURN_STARTED';
+      readonly conversationId: number;
+      // The user message, in the format of the conversation.
+      readonly messages: ChatConversation;
+    }
+  | {
+      readonly type: 'CHAT_STREAMING_TEXT';
+      readonly conversationId: number;
+      readonly text: string;
+    }
+  | {
+      readonly type: 'CHAT_MESSAGES_APPENDED';
+      readonly conversationId: number;
+      readonly messages: ChatConversation;
+      readonly isRunningTools: boolean;
+    }
+  | {
+      readonly type: 'CHAT_TURN_FINISHED';
+      readonly conversationId: number;
+      readonly outcome: ChatTurnOutcome;
+    }
+  | {
+      readonly type: 'CHAT_TURN_FAILED';
+      readonly conversationId: number;
+      readonly error: ChatError;
+    };
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -800,4 +848,5 @@ export type Action =
   | CurrentProfileUploadedInformationAction
   | SourcesAction
   | AssemblyAction
-  | AppAction;
+  | AppAction
+  | ChatAction;

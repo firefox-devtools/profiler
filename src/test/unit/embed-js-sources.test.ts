@@ -8,7 +8,7 @@ import {
   embedJsSources,
 } from '../../profile-logic/embed-js-sources';
 import type { SourceReader } from '../../profile-logic/embed-js-sources';
-import { runSourceMapSymbolicationNode } from '../../profile-query/source-map';
+import { runSourceMapSymbolicationNode } from '../../profile-query/source-map-node';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type { Profile } from 'firefox-profiler/types';

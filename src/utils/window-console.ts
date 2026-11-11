@@ -29,6 +29,7 @@ import {
   formatLogStatement,
 } from 'firefox-profiler/profile-logic/marker-data';
 import { computeStringIndexMarkerFieldsByDataType } from 'firefox-profiler/profile-logic/marker-schema';
+import { setChatFeatureEnabled } from 'firefox-profiler/actions/chat';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -46,6 +47,8 @@ export type ExtraPropertiesOnWindowForConsole = {
     enableEventDelayTracks(): void;
     enableCPUGraphs(): void;
     enableProcessCPUTracks(): void;
+    enableProfileChat(): void;
+    disableProfileChat(): void;
   };
   togglePseudoLocalization: (pseudoStrategy?: string) => void;
   toggleTimelineType: (timelineType?: string) => void;
@@ -157,6 +160,22 @@ export function addDataToWindowObject(
           💡 As an experimental feature their presence isn't persisted as a URL parameter like the other things.
         `);
       }
+    },
+
+    enableProfileChat() {
+      dispatch(setChatFeatureEnabled(true));
+      console.log(stripIndent`
+        ✅ The profile chat is now enabled. Open it with the "Ask about this profile" button at the top.
+        👉 Note that this is an experimental feature that might still have bugs.
+        💡 It stays enabled in this browser until you call window.experimental.disableProfileChat().
+      `);
+    },
+
+    disableProfileChat() {
+      dispatch(setChatFeatureEnabled(false));
+      console.log(stripIndent`
+        ✅ The profile chat is now disabled. Its provider settings and API keys are kept.
+      `);
     },
   };
 

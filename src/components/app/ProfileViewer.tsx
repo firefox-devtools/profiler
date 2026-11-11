@@ -2,7 +2,8 @@
  * license, v. 2.0. if a copy of the mpl was not distributed with this
  * file, you can obtain one at http://mozilla.org/mpl/2.0/. */
 
-import { PureComponent } from 'react';
+import { PureComponent, Suspense, lazy } from 'react';
+import { Localized } from '@fluent/react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 
 import { ResizableWithSplitter } from 'firefox-profiler/components/shared/ResizableWithSplitter';
@@ -17,11 +18,16 @@ import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
 import { BeforeUnloadManager } from './BeforeUnloadManager';
 import { KeyboardShortcut } from './KeyboardShortcut';
+import { LocalizedErrorBoundary } from './ErrorBoundary';
 
 import { returnToZipFileList } from 'firefox-profiler/actions/zipped-profiles';
 import { Timeline } from 'firefox-profiler/components/timeline';
 import { getHasZipFile } from 'firefox-profiler/selectors/zipped-profiles';
 import { getIsBottomBoxOpen } from 'firefox-profiler/selectors/url-state';
+import {
+  getIsChatFeatureEnabled,
+  getIsChatOpen,
+} from 'firefox-profiler/selectors/chat';
 import {
   getUploadProgress,
   getUploadPhase,
@@ -39,6 +45,14 @@ import type { ConnectedProps } from 'firefox-profiler/utils/connect';
 
 import './ProfileViewer.css';
 
+// The chat is experimental and brings in a markdown renderer, so it's only
+// loaded when opened.
+const ChatDrawer = lazy(() =>
+  import('firefox-profiler/components/chat/ChatDrawer').then((module) => ({
+    default: module.ChatDrawer,
+  }))
+);
+
 type StateProps = {
   readonly hasZipFile: boolean;
   readonly uploadProgress: number;
@@ -47,6 +61,8 @@ type StateProps = {
   readonly hasSanitizedProfile: boolean;
   readonly icons: IconsWithClassNames;
   readonly isBottomBoxOpen: boolean;
+  readonly isChatFeatureEnabled: boolean;
+  readonly isChatOpen: boolean;
 };
 
 type DispatchProps = {
@@ -66,6 +82,8 @@ class ProfileViewerImpl extends PureComponent<Props> {
       hasSanitizedProfile,
       icons,
       isBottomBoxOpen,
+      isChatFeatureEnabled,
+      isChatOpen,
     } = this.props;
 
     return (
@@ -142,6 +160,18 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <SourceCodeFetcher />
           <AssemblyCodeFetcher />
         </div>
+        {isChatOpen && isChatFeatureEnabled ? (
+          <Localized
+            id="ChatDrawer--error-boundary-message"
+            attrs={{ message: true }}
+          >
+            <LocalizedErrorBoundary message="Uh oh, some unknown error happened in the chat.">
+              <Suspense fallback={null}>
+                <ChatDrawer />
+              </Suspense>
+            </LocalizedErrorBoundary>
+          </Localized>
+        ) : null}
       </KeyboardShortcut>
     );
   }
@@ -156,6 +186,8 @@ export const ProfileViewer = explicitConnect<{}, StateProps, DispatchProps>({
     hasSanitizedProfile: getHasSanitizedProfile(state),
     icons: getIconsWithClassNames(state),
     isBottomBoxOpen: getIsBottomBoxOpen(state),
+    isChatFeatureEnabled: getIsChatFeatureEnabled(state),
+    isChatOpen: getIsChatOpen(state),
   }),
   mapDispatchToProps: {
     returnToZipFileList,

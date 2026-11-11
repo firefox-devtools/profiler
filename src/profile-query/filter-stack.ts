@@ -17,8 +17,7 @@
  */
 
 import { addTransformToStack } from '../actions/profile-view';
-import type { SampleFilterSpec } from './types';
-import type { Store } from '../types/store';
+import type { SampleFilterSpec, QuerierStore } from './types';
 import type { ThreadsKey, Transform } from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
@@ -137,7 +136,7 @@ export function describeTransformGroup(transforms: Transform[]): string {
  * Used by `filter push` (sticky) and by ephemeral-filter application.
  */
 export function pushSpecTransforms(
-  store: Store,
+  store: QuerierStore,
   threadsKey: ThreadsKey,
   spec: SampleFilterSpec
 ): number {
