@@ -9,6 +9,11 @@
   overflow-y: auto;
 }
 
+.timelineTrackContextMenu.react-contextmenu {
+  /* Overlay scrollbars do not reserve a gutter, so leave room for them. */
+  padding-right: 15px;
+}
+
 .timelineTrackContextMenuItem {
   display: flex;
 }
