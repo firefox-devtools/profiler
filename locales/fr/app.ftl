@@ -491,6 +491,11 @@ MenuButtons--metaInfo--source-map-cancel = Annuler
 # Variable:
 #   $filename (String) - The bundle source the source map was applied to.
 MenuButtons--metaInfo--source-map-success = Sources d'origine résolues pour { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Aucune position de pile dans { $filename } ne correspond à cette carte source.
+MenuButtons--metaInfo--source-map-error-invalid = Le fichier sélectionné n’est pas une carte source valide.
 MenuButtons--metaInfo--cpu-model = Modèle de processeur :
 MenuButtons--metaInfo--cpu-cores = Cœurs de processeur :
 MenuButtons--metaInfo--main-memory = Mémoire principale :
