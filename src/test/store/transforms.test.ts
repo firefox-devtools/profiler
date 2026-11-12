@@ -23,11 +23,13 @@ import {
   changeInvertCallstack,
   changeImplementationFilter,
   changeSelectedCallNode,
+  changeSelectedFunctionIndex,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import * as AppActions from '../../actions/app';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import type { Transform } from 'firefox-profiler/types';
 
 describe('"focus-subtree" transform', function () {
   describe('on a call tree', function () {
@@ -2628,6 +2630,244 @@ describe('expanded and selected CallNodePaths on inverted trees', function () {
         [Z, X],
       ]
     );
+  });
+});
+
+describe('selecting a neighbor when the selected call node disappears', function () {
+  function setup() {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, C, D, E, F }],
+    } = getProfileFromTextSamples(`
+      A  A  A  A
+      B  B  B  B
+      C  C  D  E
+      F  G
+    `);
+    const store = storeWithProfile(profile);
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(store.getState()))
+    ).toEqual([
+      '- A (total: 4, self: —)',
+      '  - B (total: 4, self: —)',
+      '    - C (total: 2, self: —)',
+      '      - F (total: 1, self: 1)',
+      '      - G (total: 1, self: 1)',
+      '    - D (total: 1, self: 1)',
+      '    - E (total: 1, self: 1)',
+    ]);
+    return { ...store, A, B, C, D, E, F };
+  }
+
+  it('keeps the selected node if it survives', function () {
+    const { dispatch, getState, A, B, C, D } = setup();
+    dispatch(changeSelectedCallNode(0, [A, B, C]));
+    dispatch(addTransformToStack(0, { type: 'drop-function', funcIndex: D }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, C]
+    );
+  });
+
+  it('selects the next row when the selected function is dropped', function () {
+    const { dispatch, getState, A, B, C, D } = setup();
+    dispatch(changeSelectedCallNode(0, [A, B, C]));
+    dispatch(addTransformToStack(0, { type: 'drop-function', funcIndex: C }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, D]
+    );
+  });
+
+  it('selects the previous row when the last row is dropped', function () {
+    const { dispatch, getState, A, B, D, E } = setup();
+    dispatch(changeSelectedCallNode(0, [A, B, E]));
+    dispatch(addTransformToStack(0, { type: 'drop-function', funcIndex: E }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, D]
+    );
+  });
+
+  it('selects the caller when the selected node is merged', function () {
+    const { dispatch, getState, A, B, C } = setup();
+    dispatch(changeSelectedCallNode(0, [A, B, C]));
+    dispatch(addTransformToStack(0, { type: 'merge-function', funcIndex: C }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B]
+    );
+    // Merging again continues with the next caller.
+    dispatch(addTransformToStack(0, { type: 'merge-function', funcIndex: B }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A]
+    );
+  });
+
+  it('selects the heaviest caller when a node in the inverted tree is merged', function () {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, X }],
+    } = getProfileFromTextSamples(`
+      A  A  A  A
+      B  B  B  C
+      X  X  X  X
+    `);
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeInvertCallstack(true));
+    dispatch(changeSelectedCallNode(0, [X]));
+    dispatch(addTransformToStack(0, { type: 'merge-function', funcIndex: X }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [B]
+    );
+    dispatch(addTransformToStack(0, { type: 'merge-function', funcIndex: B }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A]
+    );
+  });
+
+  it('selects the node in the position of a merged root', function () {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, C }],
+    } = getProfileFromTextSamples(`
+      A  A  A  B
+      C  C  D
+    `);
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeSelectedCallNode(0, [A]));
+    dispatch(addTransformToStack(0, { type: 'merge-function', funcIndex: A }));
+    // The roots are now C, B and D. C took the place of A.
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [C]
+    );
+  });
+
+  it('uses the same rule outside of the call tree tab', function () {
+    const { dispatch, getState, A, B, C, D } = setup();
+    dispatch(AppActions.changeSelectedTab('marker-chart'));
+    dispatch(changeSelectedCallNode(0, [A, B, C]));
+    dispatch(addTransformToStack(0, { type: 'drop-function', funcIndex: C }));
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, B, D]
+    );
+  });
+
+  it('selects the sibling in the position of a node whose parent is dropped', function () {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, C, D }],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  B  B  D  E
+      C  C
+    `);
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeSelectedCallNode(0, [A, B, C]));
+    dispatch(addTransformToStack(0, { type: 'drop-function', funcIndex: B }));
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 2, self: —)',
+        '  - D (total: 1, self: 1)',
+        '  - E (total: 1, self: 1)',
+      ]
+    );
+    // B was the first child of A, so we select the new first child.
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [A, D]
+    );
+  });
+
+  it('selects by position in the inverted tree, where roots get re-sorted', function () {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ R, P }],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A  A  A  A  A  A  A  A  A  A  A  A
+      R  R  R  R  R  R  R  R  R  R  P  P  P  P  Q  Q
+                  S  S  S  S                 S
+    `);
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeInvertCallstack(true));
+    const getRoots = () =>
+      formatTree(selectedThreadSelectors.getCallTree(getState())).filter(
+        (line) => line.startsWith('-')
+      );
+    expect(getRoots()).toEqual([
+      '- R (total: 6, self: 6)',
+      '- S (total: 5, self: 5)',
+      '- P (total: 3, self: 3)',
+      '- Q (total: 2, self: 2)',
+    ]);
+    dispatch(changeSelectedCallNode(0, [R]));
+    dispatch(addTransformToStack(0, { type: 'drop-function', funcIndex: R }));
+    // S was below R, but most of its samples were dropped along with R, so it
+    // moved down the list. P took the place of R.
+    expect(getRoots()).toEqual([
+      '- P (total: 3, self: 3)',
+      '- Q (total: 2, self: 2)',
+      '- S (total: 1, self: 1)',
+    ]);
+    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+      [P]
+    );
+  });
+});
+
+describe('selecting a neighbor when the selected function disappears', function () {
+  function setup() {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A  A  A  A  A  A  A  A
+      X  X  X  X  X  X  C  C  D  D
+      Y  Y  Y  Y           E  F  Y
+    `);
+    const store = storeWithProfile(profile);
+    const nameForFunc = (func: number | null) =>
+      Object.keys(funcNames).find((name) => funcNames[name] === func);
+    const getRowNames = () =>
+      selectedThreadSelectors
+        .getFunctionListTree(store.getState())
+        .getRoots()
+        .map(nameForFunc);
+    const getSelectedName = () =>
+      nameForFunc(
+        selectedThreadSelectors.getSelectedFunctionIndex(store.getState())
+      );
+    const selectAndApply = (name: string, transform: Transform) => {
+      store.dispatch(changeSelectedFunctionIndex(0, funcNames[name]));
+      store.dispatch(addTransformToStack(0, transform));
+    };
+    expect(getRowNames()).toEqual(['A', 'X', 'Y', 'C', 'D', 'E', 'F']);
+    return { funcNames, getRowNames, getSelectedName, selectAndApply };
+  }
+
+  it('keeps the selected function if it survives', function () {
+    const { funcNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('D', { type: 'drop-function', funcIndex: funcNames.C });
+    expect(getSelectedName()).toBe('D');
+  });
+
+  it('selects the function that moves into the row of the dropped function', function () {
+    const { funcNames, getRowNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('X', { type: 'drop-function', funcIndex: funcNames.X });
+    // Y was below X, but most of its samples were dropped along with X, so it
+    // moved down the list. C took the place of X.
+    expect(getRowNames()).toEqual(['A', 'C', 'D', 'Y', 'E', 'F']);
+    expect(getSelectedName()).toBe('C');
+  });
+
+  it('selects the function that moves into the row of the merged function', function () {
+    const { funcNames, getRowNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('X', { type: 'merge-function', funcIndex: funcNames.X });
+    expect(getRowNames()).toEqual(['A', 'Y', 'C', 'D', 'E', 'F']);
+    expect(getSelectedName()).toBe('Y');
+  });
+
+  it('selects the last function when the last function is dropped', function () {
+    const { funcNames, getRowNames, getSelectedName, selectAndApply } = setup();
+    selectAndApply('F', { type: 'drop-function', funcIndex: funcNames.F });
+    const rows = getRowNames();
+    expect(rows).not.toContain('F');
+    expect(getSelectedName()).toBe(rows[rows.length - 1]);
   });
 });
 

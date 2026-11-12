@@ -628,6 +628,46 @@ export function applyTransformToCallNodePath(
   }
 }
 
+/**
+ * Find the function that represents funcIndex after the transform has been
+ * applied. This returns null if the transform removes the function, for example
+ * when it merges or drops it. Transforms can also make functions disappear
+ * because none of their samples are left, so callers need to check whether the
+ * returned function is still present in the transformed data.
+ */
+export function applyTransformToFuncIndex(
+  funcIndex: IndexIntoFuncTable,
+  transform: Transform,
+  transformedThread: Thread
+): IndexIntoFuncTable | null {
+  switch (transform.type) {
+    case 'merge-function':
+    case 'drop-function':
+      return funcIndex === transform.funcIndex ? null : funcIndex;
+    case 'collapse-resource': {
+      const { funcTable } = transformedThread;
+      const hasResource =
+        (funcTable.flags[funcIndex] & FuncFlag.HasResource) !== 0;
+      return hasResource &&
+        funcTable.resource[funcIndex] === transform.resourceIndex
+        ? transform.collapsedFuncIndex
+        : funcIndex;
+    }
+    case 'focus-subtree':
+    case 'focus-function':
+    case 'focus-self':
+    case 'focus-category':
+    case 'merge-call-node':
+    case 'collapse-direct-recursion':
+    case 'collapse-recursion':
+    case 'collapse-function-subtree':
+    case 'filter-samples':
+      return funcIndex;
+    default:
+      throw assertExhaustiveCheck(transform);
+  }
+}
+
 function _removePrefixPathFromCallNodePath(
   prefixPath: CallNodePath,
   callNodePath: CallNodePath
