@@ -159,6 +159,8 @@ CallTree--inlining-badge = （內聯）
 
 CallTreeSidebar--select-a-node = 選擇節點來顯示該節點的相關資訊。
 CallTreeSidebar--call-node-details = 呼叫節點詳細資訊
+CallTreeSidebar--select-a-function = 選擇函數來顯示該函數的相關資訊。
+CallTreeSidebar--function-details = 函數詳情
 
 ## CallTreeSidebar timing information
 ##
@@ -767,6 +769,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = 呼叫樹
+TabBar--function-list-tab = 函數清單
 TabBar--flame-graph-tab = 火焰圖
 TabBar--stack-chart-tab = 堆疊圖
 TabBar--marker-chart-tab = 標記圖
