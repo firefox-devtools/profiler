@@ -210,6 +210,8 @@ CallTree--inlining-badge = (встроенный)
 
 CallTreeSidebar--select-a-node = Выберите узел, чтобы отобразить информацию о нем.
 CallTreeSidebar--call-node-details = Подробности вызова узла
+CallTreeSidebar--select-a-function = Выберите функцию, чтобы отобразить информацию о ней.
+CallTreeSidebar--function-details = Сведения о функции
 
 ## CallTreeSidebar timing information
 ##
@@ -874,6 +876,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Дерево вызовов
+TabBar--function-list-tab = Список функций
 TabBar--flame-graph-tab = График сгорания
 TabBar--stack-chart-tab = Диаграмма стека
 TabBar--marker-chart-tab = Диаграмма маркеров
