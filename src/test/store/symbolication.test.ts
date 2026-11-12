@@ -35,6 +35,7 @@ import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
   changeImplementationFilter,
+  changeSelectedFunctionIndex,
 } from '../../actions/profile-view';
 import { formatTree, formatStack } from '../fixtures/utils';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -447,6 +448,28 @@ describe('doSymbolicateProfile', function () {
       assertSetContainsOnly(
         getExpandedCallNodePaths(getState()),
         [['first symbol']].map(funcNamesToFuncIndexes)
+      );
+    });
+
+    it('symbolicates the selected function', async function () {
+      const {
+        store: { dispatch, getState },
+        profile,
+        symbolStore,
+        funcNamesToFuncIndexes,
+      } = init();
+
+      const [unsymbolicatedFunc] = funcNamesToFuncIndexes(['0x0000']);
+      dispatch(changeSelectedFunctionIndex(0, unsymbolicatedFunc));
+      expect(selectedThreadSelectors.getSelectedFunctionIndex(getState())).toBe(
+        unsymbolicatedFunc
+      );
+
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      const [symbolicatedFunc] = funcNamesToFuncIndexes(['first symbol']);
+      expect(symbolicatedFunc).not.toBe(unsymbolicatedFunc);
+      expect(selectedThreadSelectors.getSelectedFunctionIndex(getState())).toBe(
+        symbolicatedFunc
       );
     });
   });

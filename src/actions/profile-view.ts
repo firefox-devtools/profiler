@@ -32,6 +32,8 @@ import {
   getLocalTrackOrder,
   getSelectedTab,
   getHiddenLocalTracks,
+  getHiddenLocalTracksByPid,
+  getLocalTrackOrderByPid,
   getInvertCallstack,
   getHash,
 } from 'firefox-profiler/selectors/url-state';
@@ -43,6 +45,7 @@ import {
 import { sendAnalytics } from 'firefox-profiler/utils/analytics';
 import { objectShallowEquals } from 'firefox-profiler/utils/index';
 import {
+  getVisibleThreads,
   getTrackReferenceFromTid,
   getTrackReferenceFromThreadIndex,
 } from 'firefox-profiler/profile-logic/tracks';
@@ -75,6 +78,7 @@ import type {
   TableViewOptions,
   SelectionContext,
   BottomBoxInfo,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 import {
   funcHasDirectRecursiveCall,
@@ -132,6 +136,22 @@ export function changeSelectedCallNode(
 }
 
 /**
+ * Select a function for a given thread in the function list.
+ */
+export function changeSelectedFunctionIndex(
+  threadsKey: ThreadsKey,
+  selectedFunctionIndex: IndexIntoFuncTable | null,
+  context: SelectionContext = { source: 'auto' }
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_FUNCTION',
+    selectedFunctionIndex,
+    threadsKey,
+    context,
+  };
+}
+
+/**
  * This action is used when the user right clicks on a call node (in panels such
  * as the call tree, the flame chart, or the stack chart). It's especially used
  * to display the context menu.
@@ -144,6 +164,17 @@ export function changeRightClickedCallNode(
     type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
     threadsKey,
     callNodePath,
+  };
+}
+
+export function changeRightClickedFunctionIndex(
+  threadsKey: ThreadsKey,
+  functionIndex: IndexIntoFuncTable | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_FUNCTION',
+    threadsKey,
+    functionIndex,
   };
 }
 
@@ -204,6 +235,38 @@ export function selectSelfCallNode(
       // In the non-inverted tree, we want to select the self node.
       dispatch(changeSelectedCallNode(threadsKey, callNodePath.reverse()));
     }
+  };
+}
+
+/**
+ * Like selectSelfCallNode, but selects the function of the self call node
+ * instead. Used when the function list tab is active.
+ */
+export function selectSelfFunction(
+  threadsKey: ThreadsKey,
+  sampleIndex: IndexIntoSamplesTable | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (sampleIndex === null || sampleIndex < 0) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const sampleCallNodes =
+      threadSelectors.getSampleCallNodesForFilteredThread(getState());
+    if (sampleIndex >= sampleCallNodes.length) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const nonInvertedSelfCallNode = sampleCallNodes[sampleIndex];
+    if (nonInvertedSelfCallNode === null) {
+      dispatch(changeSelectedFunctionIndex(threadsKey, null));
+      return;
+    }
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+    const funcIndex =
+      callNodeInfo.getCallNodeTable().func[nonInvertedSelfCallNode];
+    dispatch(changeSelectedFunctionIndex(threadsKey, funcIndex));
   };
 }
 
@@ -656,6 +719,48 @@ export function selectTrackWithModifiers(
     } else {
       dispatch(setOneTrackSelection(clickedTrackInformation, selectedTab));
     }
+  };
+}
+
+/** Select all visible thread tracks without changing which tracks are shown. */
+export function selectAllVisibleTracks(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const state = getState();
+    const selectedThreadIndexes = new Set(
+      getVisibleThreads(
+        {
+          globalTracks: getGlobalTracks(state),
+          globalTrackOrder: getGlobalTrackOrder(state),
+          localTracksByPid: getLocalTracksByPid(state),
+          localTrackOrderByPid: getLocalTrackOrderByPid(state),
+        },
+        {
+          hiddenGlobalTracks: getHiddenGlobalTracks(state),
+          hiddenLocalTracksByPid: getHiddenLocalTracksByPid(state),
+        }
+      )
+    );
+    if (selectedThreadIndexes.size === 0) {
+      return;
+    }
+
+    let selectedTab = getSelectedTab(state);
+    if (selectedTab === 'network-chart') {
+      selectedTab = getLastVisibleThreadTabSlug(state);
+    }
+    const visibleTabs = getThreadSelectors(selectedThreadIndexes).getUsefulTabs(
+      state
+    );
+    if (!visibleTabs.includes(selectedTab)) {
+      selectedTab = visibleTabs[0];
+    }
+
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndexes,
+      selectedTab,
+      lastNonShiftClickInformation: null,
+    });
   };
 }
 
@@ -1624,6 +1729,15 @@ export function changeMarkerTableSort(
   };
 }
 
+export function changeFunctionListSort(
+  sort: SingleColumnSortState[] | null
+): Action {
+  return {
+    type: 'CHANGE_FUNCTION_LIST_SORT',
+    sort,
+  };
+}
+
 export function changeNetworkSearchString(searchString: string): Action {
   return {
     type: 'CHANGE_NETWORK_SEARCH_STRING',
@@ -2032,27 +2146,76 @@ export function handleCallNodeTransformShortcut(
     if (event.metaKey || event.ctrlKey || event.altKey) {
       return;
     }
-    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
-    const unfilteredThread = threadSelectors.getThread(getState());
-    const implementation = getImplementationFilter(getState());
-    const inverted = getInvertCallstack(getState());
-    const callNodePath = callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
     const funcIndex = callNodeInfo.funcForNode(callNodeIndex);
-    const category = callNodeInfo.categoryForNode(callNodeIndex);
-
-    const callNodeTable = callNodeInfo.getCallNodeTable();
 
     switch (event.key) {
-      case 'F':
+      case 'F': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        const inverted = getInvertCallstack(getState());
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'focus-subtree',
-            callNodePath: callNodePath,
+            callNodePath,
             implementation,
             inverted,
           })
         );
         break;
+      }
+      case 'M': {
+        const callNodePath =
+          callNodeInfo.getCallNodePathFromIndex(callNodeIndex);
+        const implementation = getImplementationFilter(getState());
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'merge-call-node',
+            callNodePath,
+            implementation,
+          })
+        );
+        break;
+      }
+      case 'g': {
+        const category = callNodeInfo.categoryForNode(callNodeIndex);
+        dispatch(
+          addTransformToStack(threadsKey, {
+            type: 'focus-category',
+            category,
+          })
+        );
+        break;
+      }
+      default:
+        dispatch(
+          handleFunctionTransformShortcut(
+            event,
+            threadsKey,
+            callNodeInfo,
+            funcIndex
+          )
+        );
+    }
+  };
+}
+
+export function handleFunctionTransformShortcut(
+  event: React.KeyboardEvent<HTMLElement>,
+  threadsKey: ThreadsKey,
+  callNodeInfo: CallNodeInfo,
+  funcIndex: IndexIntoFuncTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (event.metaKey || event.ctrlKey || event.altKey) {
+      return;
+    }
+    const threadSelectors = getThreadSelectorsFromThreadsKey(threadsKey);
+    const implementation = getImplementationFilter(getState());
+    const callNodeTable = callNodeInfo.getCallNodeTable();
+    const unfilteredThread = threadSelectors.getThread(getState());
+
+    switch (event.key) {
       case 'f':
         dispatch(
           addTransformToStack(threadsKey, {
@@ -2066,15 +2229,6 @@ export function handleCallNodeTransformShortcut(
           addTransformToStack(threadsKey, {
             type: 'focus-self',
             funcIndex,
-            implementation,
-          })
-        );
-        break;
-      case 'M':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'merge-call-node',
-            callNodePath: callNodePath,
             implementation,
           })
         );
@@ -2133,7 +2287,7 @@ export function handleCallNodeTransformShortcut(
         }
         break;
       }
-      case 'c': {
+      case 'c':
         dispatch(
           addTransformToStack(threadsKey, {
             type: 'collapse-function-subtree',
@@ -2141,17 +2295,8 @@ export function handleCallNodeTransformShortcut(
           })
         );
         break;
-      }
-      case 'g':
-        dispatch(
-          addTransformToStack(threadsKey, {
-            type: 'focus-category',
-            category,
-          })
-        );
-        break;
       default:
-      // This did not match a call tree transform.
+      // This did not match a function transform.
     }
   };
 }

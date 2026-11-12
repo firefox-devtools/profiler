@@ -23,6 +23,7 @@ import type {
   Pid,
   TabID,
   IndexIntoSourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 
 import type {
@@ -83,6 +84,11 @@ export type RightClickedCallNode = {
   readonly callNodePath: CallNodePath;
 };
 
+export type RightClickedFunction = {
+  readonly threadsKey: ThreadsKey;
+  readonly functionIndex: IndexIntoFuncTable;
+};
+
 export type MarkerReference = {
   readonly threadsKey: ThreadsKey;
   readonly markerIndex: MarkerIndex;
@@ -90,6 +96,10 @@ export type MarkerReference = {
 
 export type SelectedMarkersPerThread = {
   [key: ThreadsKey]: MarkerIndex | null;
+};
+
+export type SelectedFunctionsPerThread = {
+  [key: ThreadsKey]: IndexIntoFuncTable | null;
 };
 
 /**
@@ -108,6 +118,7 @@ export type ProfileViewState = {
     lastNonShiftClick: LastNonShiftClickInformation | null;
     rightClickedTrack: TrackReference | null;
     rightClickedCallNode: RightClickedCallNode | null;
+    rightClickedFunction: RightClickedFunction | null;
     rightClickedMarker: MarkerReference | null;
     hoveredMarker: MarkerReference | null;
     mouseTimePosition: Milliseconds | null;
@@ -386,7 +397,9 @@ export type ProfileSpecificUrlState = {
   legacyThreadOrder: ThreadIndex[] | null;
   legacyHiddenThreads: ThreadIndex[] | null;
   selectedMarkers: SelectedMarkersPerThread;
+  selectedFunctions: SelectedFunctionsPerThread;
   markerTableSort: SingleColumnSortState[] | null;
+  functionListSort: SingleColumnSortState[] | null;
 };
 
 export type UrlState = {

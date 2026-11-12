@@ -42,6 +42,7 @@ import type {
   CallNodeSelfAndSummary,
   State,
   CallNodeTableBitSet,
+  IndexIntoFuncTable,
 } from 'firefox-profiler/types';
 import type {
   CallNodeInfo,
@@ -212,6 +213,21 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  // The selected function comes from the URL, so it can be out of bounds.
+  const getSelectedFunctionIndex: Selector<IndexIntoFuncTable | null> = (
+    state
+  ) => {
+    const funcIndex = UrlState.getSelectedFunction(state, threadsKey);
+    if (
+      funcIndex === null ||
+      funcIndex < 0 ||
+      funcIndex >= threadSelectors.getThread(state).funcTable.length
+    ) {
+      return null;
+    }
+    return funcIndex;
+  };
+
   const getSelectedCallNodePath: Selector<CallNodePath> = createSelector(
     threadSelectors.getViewOptions,
     UrlState.getInvertCallstack,
@@ -346,6 +362,32 @@ export function getStackAndSampleSelectorsPerThread(
       );
     }
   );
+
+  const getSampleRelationsForFunctionListTab: Selector<SampleRelations> =
+    createSelector(
+      getSampleCallNodesForFilteredThread,
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      (sampleCallNodes, callNodeTable, selectedFunctionIndex) =>
+        ProfileData.getSampleRelationsToFunction(
+          sampleCallNodes,
+          selectedFunctionIndex,
+          callNodeTable
+        )
+    );
+
+  const getPreviewFilteredCtssSampleRelationsToSelectedFunction: Selector<SampleRelations> =
+    createSelector(
+      getPreviewFilteredCtssSampleCallNodes,
+      _getCallNodeTable,
+      getSelectedFunctionIndex,
+      (sampleCallNodes, callNodeTable, selectedFunctionIndex) =>
+        ProfileData.getSampleRelationsToFunction(
+          sampleCallNodes,
+          selectedFunctionIndex,
+          callNodeTable
+        )
+    );
 
   const getTreeOrderComparatorInFilteredThread: Selector<
     (
@@ -657,6 +699,23 @@ export function getStackAndSampleSelectorsPerThread(
       }
     );
 
+  const getRightClickedFunctionIndex: Selector<null | IndexIntoFuncTable> =
+    createSelector(
+      ProfileSelectors.getProfileViewOptions,
+      (profileViewOptions) => {
+        const rightClickedFunctionInfo =
+          profileViewOptions.rightClickedFunction;
+        if (
+          rightClickedFunctionInfo !== null &&
+          threadsKey === rightClickedFunctionInfo.threadsKey
+        ) {
+          return rightClickedFunctionInfo.functionIndex;
+        }
+
+        return null;
+      }
+    );
+
   return {
     unfilteredSamplesRange,
     getWeightTypeForCallTree,
@@ -667,12 +726,15 @@ export function getStackAndSampleSelectorsPerThread(
     getAssemblyViewStackAddressInfo,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getSelectedFunctionIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSampleCallNodesForFilteredThread,
     getSampleRelationsToSelectedNodeInFilteredThread,
+    getSampleRelationsForFunctionListTab,
     getPreviewFilteredCtssSampleCallNodes,
     getPreviewFilteredCtssSampleRelations,
+    getPreviewFilteredCtssSampleRelationsToSelectedFunction,
     getSelectedCallNodeIsInvertedRoot,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
@@ -690,5 +752,6 @@ export function getStackAndSampleSelectorsPerThread(
     getNonInvertedFilteredCallNodeMaxDepthPlusOne,
     getFlameGraphTiming,
     getRightClickedCallNodeIndex,
+    getRightClickedFunctionIndex,
   };
 }
