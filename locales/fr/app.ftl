@@ -496,6 +496,8 @@ MenuButtons--metaInfo--source-map-success = Sources d'origine résolues pour { $
 #   $filename (String) - The bundle source the source map was applied to.
 MenuButtons--metaInfo--source-map-no-match = Aucune position de pile dans { $filename } ne correspond à cette carte source.
 MenuButtons--metaInfo--source-map-error-invalid = Le fichier sélectionné n’est pas une carte source valide.
+MenuButtons--metaInfo--source-map-error-no-eligible = Ce profil ne contient aucun paquet JS disposant d’URL de carte source.
+MenuButtons--metaInfo--source-map-error-failed = Impossible d’appliquer cette carte source au profil.
 MenuButtons--metaInfo--cpu-model = Modèle de processeur :
 MenuButtons--metaInfo--cpu-cores = Cœurs de processeur :
 MenuButtons--metaInfo--main-memory = Mémoire principale :
@@ -621,6 +623,7 @@ MenuButtons--publish--renderCheckbox-label-preference = Inclure les valeurs des 
 MenuButtons--publish--renderCheckbox-label-private-browsing = Inclure les données des fenêtres de navigation privée
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Ce profil contient des données de navigation privée
+MenuButtons--publish--renderCheckbox-label-argument-values = Inclure les valeurs des arguments de fonction dans le traçage de l’exécution JavaScript
 MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
     .title = Ce profil contient des valeurs d’arguments de fonctions recueillies sur la page, susceptibles d’inclure des données personnelles
 MenuButtons--publish--share-performance-profile = Partager le profil de performance
