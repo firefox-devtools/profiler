@@ -210,7 +210,8 @@ CallTree--inlining-badge = (incorporate)
     .title = Le appellos a { $calledFunction } era incorporate in { $outerFunction } per le compilator.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Eliger un nodo pro monstrar informationes re illo.
 CallTreeSidebar--call-node-details = Detalios de nodo de appello

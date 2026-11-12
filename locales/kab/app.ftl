@@ -65,7 +65,8 @@ CallNodeContextMenu--copy-stack = Nqel tanebdant
 CallNodeContextMenu--show-the-function-in-devtools = Sken tawuri deg yifecka n usnefli
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Fren takerrist i uskan n talɣut fell-as.
 CallTreeSidebar--call-node-details = Talqayt n tkerrist n usiwel

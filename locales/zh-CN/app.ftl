@@ -152,7 +152,8 @@ CallTree--inlining-badge = （内联）
     .title = 编译器已将一些对 { $calledFunction } 函数的调用内联到 { $outerFunction } 函数。
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = 选择节点即可显示它的相关信息。
 CallTreeSidebar--call-node-details = 调用节点详情

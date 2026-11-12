@@ -213,7 +213,8 @@ CallTree--inlining-badge = (inline pleatst)
     .title = Oanroppen nei { $calledFunction } binne inline yn { $outerFunction } pleatst troch de compiler.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selektearje in node om ynformaasje oer te toanen.
 CallTreeSidebar--call-node-details = Details oanropnode

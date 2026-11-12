@@ -209,7 +209,8 @@ CallTree--inlining-badge = (ενσωματωμένη)
     .title = Οι κλήσεις στη { $calledFunction } ενσωματώθηκαν στη { $outerFunction } από τον μεταγλωττιστή.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
 CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλήσης
