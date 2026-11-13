@@ -215,6 +215,10 @@ export type StatusResult = {
     start: number;
     end: number;
   };
+  selectedMarker?: Pick<
+    MarkerInfoResult,
+    'markerHandle' | 'markerIndex' | 'name' | 'start' | 'duration'
+  >;
   /** Filter stacks for all threads that have active filters */
   filterStacks: Array<{
     threadsKey: string | number;
