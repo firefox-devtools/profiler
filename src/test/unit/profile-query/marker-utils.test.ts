@@ -451,6 +451,36 @@ describe('marker-info utility functions', function () {
       expect(level?.value).toBe(m.data!.level);
     });
 
+    it('formats a unique-string field whose payload holds the string itself', function () {
+      const profile = getProfileWithMarkers([
+        ['INFO', 0, null, { type: 'Log', level: 'x', message: 'x' }],
+      ]);
+      // The fixture interns unique-string fields, so put the strings back the
+      // way Firefox's test harness writes them.
+      Object.assign(profile.threads[0].markers.data[0]!, {
+        level: 'INFO',
+        message: 'expecting a popup',
+      });
+      const store = storeWithProfile(profile);
+
+      const result = collectThreadMarkers(
+        store,
+        new ThreadMap(),
+        new MarkerMap(),
+        undefined,
+        { list: true }
+      );
+
+      expect(result.flatMarkers![0].fields).toEqual([
+        expect.objectContaining({ key: 'level', formattedValue: 'INFO' }),
+        expect.objectContaining({
+          key: 'message',
+          value: 'expecting a popup',
+          formattedValue: 'expecting a popup',
+        }),
+      ]);
+    });
+
     it('auto-groups by a schema-declared enum-like field (schema-driven)', function () {
       // With --auto-group and enough markers of the same name, pick a field
       // from the schema (not ad-hoc Object.keys heuristics) whose format is
