@@ -1671,6 +1671,61 @@ export function adjustProfilerOverheadTimestamps<
 }
 
 /**
+ * Return a copy of the marker payload with its timestamp fields shifted by
+ * the given delta.
+ */
+export function adjustMarkerPayloadTimestamps<T extends MarkerPayload>(
+  data: T,
+  delta: Milliseconds
+): T {
+  const newData = immutableUpdate(data);
+  if ('startTime' in newData && typeof newData.startTime === 'number') {
+    newData.startTime += delta;
+  }
+  if ('endTime' in newData && typeof newData.endTime === 'number') {
+    newData.endTime += delta;
+  }
+  if ('cause' in newData && newData.cause && newData.cause.time !== undefined) {
+    newData.cause = { ...newData.cause, time: newData.cause.time + delta };
+  }
+  if (newData.type === 'Network') {
+    if (typeof newData.domainLookupStart === 'number') {
+      newData.domainLookupStart += delta;
+    }
+    if (typeof newData.domainLookupEnd === 'number') {
+      newData.domainLookupEnd += delta;
+    }
+    if (typeof newData.connectStart === 'number') {
+      newData.connectStart += delta;
+    }
+    if (typeof newData.tcpConnectEnd === 'number') {
+      newData.tcpConnectEnd += delta;
+    }
+    if (typeof newData.secureConnectionStart === 'number') {
+      newData.secureConnectionStart += delta;
+    }
+    if (typeof newData.connectEnd === 'number') {
+      newData.connectEnd += delta;
+    }
+    if (typeof newData.requestStart === 'number') {
+      newData.requestStart += delta;
+    }
+    if (typeof newData.responseStart === 'number') {
+      newData.responseStart += delta;
+    }
+    if (typeof newData.responseEnd === 'number') {
+      newData.responseEnd += delta;
+    }
+  }
+  // Note: When adding code for new fields here, you may need to fix up
+  // existing processed profiles that were missing the relevant adjustments.
+  // This should be done by adding an upgrader in processed-profile-versioning.js.
+  // In fact, that file already includes code duplicated from this function
+  // for at least two cases where we forgot to do the adjustment initially.
+  return newData;
+}
+
+/**
  * Adjust all timestamp fields by the given delta. This is needed when
  * integrating subprocess profiles into the parent process profile; each
  * profile's process has its own timebase, and we don't want to keep
@@ -1697,60 +1752,9 @@ export function adjustMarkerTimestamps(
     ...markers,
     startTime: adjustTimes(markers.startTime),
     endTime: adjustTimes(markers.endTime),
-    data: markers.data.map((data) => {
-      if (!data) {
-        return data;
-      }
-      const newData = immutableUpdate(data);
-      if ('startTime' in newData && typeof newData.startTime === 'number') {
-        newData.startTime += delta;
-      }
-      if ('endTime' in newData && typeof newData.endTime === 'number') {
-        newData.endTime += delta;
-      }
-      if (
-        'cause' in newData &&
-        newData.cause &&
-        newData.cause.time !== undefined
-      ) {
-        newData.cause.time += delta;
-      }
-      if (newData.type === 'Network') {
-        if (typeof newData.domainLookupStart === 'number') {
-          newData.domainLookupStart += delta;
-        }
-        if (typeof newData.domainLookupEnd === 'number') {
-          newData.domainLookupEnd += delta;
-        }
-        if (typeof newData.connectStart === 'number') {
-          newData.connectStart += delta;
-        }
-        if (typeof newData.tcpConnectEnd === 'number') {
-          newData.tcpConnectEnd += delta;
-        }
-        if (typeof newData.secureConnectionStart === 'number') {
-          newData.secureConnectionStart += delta;
-        }
-        if (typeof newData.connectEnd === 'number') {
-          newData.connectEnd += delta;
-        }
-        if (typeof newData.requestStart === 'number') {
-          newData.requestStart += delta;
-        }
-        if (typeof newData.responseStart === 'number') {
-          newData.responseStart += delta;
-        }
-        if (typeof newData.responseEnd === 'number') {
-          newData.responseEnd += delta;
-        }
-      }
-      // Note: When adding code for new fields here, you may need to fix up
-      // existing processed profiles that were missing the relevant adjustments.
-      // This should be done by adding an upgrader in processed-profile-versioning.js.
-      // In fact, that file already includes code duplicated from this function
-      // for at least two cases where we forgot to do the adjustment initially.
-      return newData;
-    }),
+    data: markers.data.map((data) =>
+      data ? adjustMarkerPayloadTimestamps(data, delta) : data
+    ),
   };
 }
 
