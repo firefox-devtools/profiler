@@ -79,6 +79,42 @@ export function addPIICategoriesToMarkerSchemas(
   return markerSchemas.map(addPIICategoriesToMarkerSchema);
 }
 
+// Profiles recorded by Gecko versions without marker schema styles use these
+// defaults.
+const markerSchemaStylesBySchemaName = new Map<
+  string,
+  Pick<MarkerSchema, 'color' | 'timelineStyle'>
+>([
+  ['GCMajor', { color: 'orange', timelineStyle: { squareCorners: true } }],
+  ['GCSlice', { color: 'orange', timelineStyle: { top: 6 } }],
+  ['GCMinor', { color: 'orange', timelineStyle: { top: 6 } }],
+  // Yellow distinguishes CC from GC.
+  ['CC', { color: 'yellow', timelineStyle: { squareCorners: true } }],
+  ['CCSlice', { color: 'yellow', timelineStyle: { top: 6 } }],
+  ['FileIO', { color: 'blue' }],
+  ['Styles', { color: 'teal', timelineStyle: { top: 7 } }],
+  // BHR markers are displayed in the timeline only if jank markers are
+  // unavailable. Let's style them like Jank markers.
+  [
+    'BHR-detected hang',
+    { color: 'red', timelineStyle: { squareCorners: true, borders: true } },
+  ],
+]);
+
+export function addStyleToMarkerSchema(
+  markerSchema: MarkerSchema
+): MarkerSchema {
+  const style = markerSchemaStylesBySchemaName.get(markerSchema.name);
+  if (!style) {
+    return markerSchema;
+  }
+  return {
+    ...markerSchema,
+    color: markerSchema.color ?? style.color,
+    timelineStyle: markerSchema.timelineStyle ?? style.timelineStyle,
+  };
+}
+
 export const extensionTextMarkerSchema: MarkerSchema = {
   name: 'ExtensionText',
   tableLabel:
@@ -113,6 +149,8 @@ const markerSchemaFrontEndOnlyWithoutPII: MarkerSchema[] = [
     display: ['marker-table', 'marker-chart'],
     tooltipLabel: 'Jank – event processing delay',
     tableLabel: 'Event processing delay',
+    color: 'red',
+    timelineStyle: { squareCorners: true, borders: true },
     fields: [],
     description: oneLine`
       Jank markers show when the main event loop of a thread has been busy. It is

@@ -193,6 +193,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   /**
    * Get the fill, stroke, and text colors for a marker based on its schema and data.
    * If the marker schema has a colorField, use that field's value.
+   * Otherwise use the marker schema's color.
    * Fall back to default blue if no color is specified.
    */
   _getMarkerColors(
@@ -223,6 +224,14 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       if (typeof fieldValue === 'string' && isValidGraphColor(fieldValue)) {
         color = fieldValue as GraphColor;
       }
+    }
+
+    if (
+      color === null &&
+      schema?.color !== undefined &&
+      isValidGraphColor(schema.color)
+    ) {
+      color = schema.color;
     }
 
     if (color) {

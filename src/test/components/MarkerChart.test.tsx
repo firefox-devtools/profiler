@@ -52,7 +52,7 @@ import {
 import { mockRaf } from '../fixtures/mocks/request-animation-frame';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 
-import type { CssPixels, Profile } from 'firefox-profiler/types';
+import type { CssPixels, GraphColor, Profile } from 'firefox-profiler/types';
 
 // Constants matching those in Canvas.tsx
 const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
@@ -800,7 +800,10 @@ describe('MarkerChart', function () {
   });
 
   describe('Colored markers', () => {
-    function setupColoredMarkerTest(markers: TestDefinedMarker[]) {
+    function setupColoredMarkerTest(
+      markers: TestDefinedMarker[],
+      schemaColor?: string
+    ) {
       const profile = getProfileWithMarkers(markers);
 
       // Add marker schema with colorField to the profile
@@ -818,6 +821,7 @@ describe('MarkerChart', function () {
             },
           ],
           colorField: 'statusColor',
+          color: schemaColor as GraphColor | undefined,
         },
       ];
 
@@ -917,6 +921,39 @@ describe('MarkerChart', function () {
 
       // Should fall back to default blue since the color is invalid
       expect(fillColors).toEqual(expect.arrayContaining([DEFAULT_FILL_COLOR]));
+    });
+
+    it('uses the schema color for markers without color data', () => {
+      const fillColors = setupColoredMarkerTest(
+        [['Test without color', 0, 5, { type: 'Test', status: 'unknown' }]],
+        'orange'
+      );
+      expect(fillColors).toContain(getFillColor('orange'));
+      expect(fillColors).not.toContain(DEFAULT_FILL_COLOR);
+    });
+
+    it('prefers the colorField value over the schema color', () => {
+      const fillColors = setupColoredMarkerTest(
+        [
+          [
+            'Green Test',
+            0,
+            5,
+            { type: 'Test', status: 'success', statusColor: 'green' },
+          ],
+        ],
+        'orange'
+      );
+      expect(fillColors).toContain(getFillColor('green'));
+      expect(fillColors).not.toContain(getFillColor('orange'));
+    });
+
+    it('ignores an invalid schema color', () => {
+      const fillColors = setupColoredMarkerTest(
+        [['Test without color', 0, 5, { type: 'Test', status: 'unknown' }]],
+        'not-a-valid-color'
+      );
+      expect(fillColors).toContain(DEFAULT_FILL_COLOR);
     });
   });
 });

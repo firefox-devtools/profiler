@@ -3810,6 +3810,29 @@ const _upgraders: {
       sources.generatedSource = new Array(sources.length).fill(null);
     }
   },
+  [78]: (profile: any) => {
+    // Marker schemas gained optional `color` and `timelineStyle` fields. The
+    // schemas of marker types that had a built-in timeline style get it here.
+    const stylesBySchemaName = new Map<string, object>([
+      ['GCMajor', { color: 'orange', timelineStyle: { squareCorners: true } }],
+      ['GCSlice', { color: 'orange', timelineStyle: { top: 6 } }],
+      ['GCMinor', { color: 'orange', timelineStyle: { top: 6 } }],
+      ['CC', { color: 'yellow', timelineStyle: { squareCorners: true } }],
+      ['CCSlice', { color: 'yellow', timelineStyle: { top: 6 } }],
+      ['FileIO', { color: 'blue' }],
+      ['Styles', { color: 'teal', timelineStyle: { top: 7 } }],
+      [
+        'BHR-detected hang',
+        { color: 'red', timelineStyle: { squareCorners: true, borders: true } },
+      ],
+    ]);
+    for (const schema of profile.meta.markerSchema ?? []) {
+      const style = stylesBySchemaName.get(schema.name);
+      if (style) {
+        Object.assign(schema, style);
+      }
+    }
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };

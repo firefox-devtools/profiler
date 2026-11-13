@@ -1281,6 +1281,8 @@ describe('Marker schema conversion', function () {
           { key: 'status', label: 'Status', format: 'string' },
           { key: 'color', label: 'Color', format: 'string' },
         ],
+        color: 'orange',
+        timelineStyle: { top: 3, squareCorners: true },
         colorField: 'color',
       }
     );
@@ -1296,6 +1298,8 @@ describe('Marker schema conversion', function () {
     expect(schemaMinimal?.tooltipLabel).toBeUndefined();
     expect(schemaMinimal?.tableLabel).toBeUndefined();
     expect(schemaMinimal?.chartLabel).toBeUndefined();
+    expect(schemaMinimal?.color).toBeUndefined();
+    expect(schemaMinimal?.timelineStyle).toBeUndefined();
     expect(schemaMinimal?.colorField).toBeUndefined();
     expect(schemaMinimal?.graphs).toBeUndefined();
     expect(schemaMinimal?.isStackBased).toBeUndefined();
@@ -1318,11 +1322,42 @@ describe('Marker schema conversion', function () {
     expect(schemaWithGraphs?.isStackBased).toBe(false);
     expect(schemaWithGraphs?.colorField).toBeUndefined();
 
-    // Test colorField is preserved
+    // Test color, timelineStyle and colorField are preserved
     const schemaWithColor = processedProfile.meta.markerSchema.find(
       (s) => s.name === 'TestMarkerWithColor'
     );
     expect(schemaWithColor).toBeDefined();
+    expect(schemaWithColor?.color).toBe('orange');
+    expect(schemaWithColor?.timelineStyle).toEqual({
+      top: 3,
+      squareCorners: true,
+    });
     expect(schemaWithColor?.colorField).toBe('color');
+  });
+
+  it('adds default styles to marker schemas without them', function () {
+    const geckoProfile = createGeckoProfile();
+    geckoProfile.meta.markerSchema.push(
+      { name: 'GCMajor', display: ['timeline-memory'], data: [] },
+      {
+        name: 'GCSlice',
+        display: ['timeline-memory'],
+        data: [],
+        color: 'magenta',
+      }
+    );
+
+    const schemasByName = Object.fromEntries(
+      processGeckoProfile(geckoProfile).meta.markerSchema.map((schema) => [
+        schema.name,
+        schema,
+      ])
+    );
+    expect(schemasByName.GCMajor.color).toBe('orange');
+    expect(schemasByName.GCMajor.timelineStyle).toEqual({
+      squareCorners: true,
+    });
+    expect(schemasByName.GCSlice.color).toBe('magenta');
+    expect(schemasByName.GCSlice.timelineStyle).toEqual({ top: 6 });
   });
 });
