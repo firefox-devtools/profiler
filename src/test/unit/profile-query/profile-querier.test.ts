@@ -229,6 +229,82 @@ describe('ProfileQuerier', function () {
     });
   });
 
+  // Reported times are ms since the profile start, never raw timestamps.
+  describe('time base', function () {
+    function setup() {
+      const { profile } = getProfileFromTextSamples(`
+        1000  1005  1010  1015  1020
+        A     A     A     A     A
+      `);
+      const [thread] = profile.threads;
+      thread.registerTime = 1002;
+      thread.unregisterTime = 1018;
+      thread.processStartupTime = 1001;
+      thread.processShutdownTime = 1019;
+      profile.counters = [
+        getCounterForThreadWithSamples(
+          thread,
+          0,
+          {
+            time: [1000, 1005, 1010, 1015, 1020],
+            count: [0, 1000, 1000, 1000, 1000],
+            length: 5,
+          },
+          'malloc',
+          'Memory'
+        ),
+      ];
+      const store = storeWithProfile(profile);
+      const rootRange = getProfileRootRange(store.getState());
+      return { querier: new ProfileQuerier(store, rootRange), rootRange };
+    }
+
+    it('reports view ranges relative to the profile start', async function () {
+      const { querier, rootRange } = setup();
+
+      const pushed = await querier.pushViewRange('5ms,15ms');
+      expect(pushed.range).toMatchObject({ start: 5, end: 15 });
+      expect((await querier.getStatus()).viewRanges).toEqual([
+        expect.objectContaining({ start: 5, end: 15 }),
+      ]);
+      expect(
+        (await querier.threadSamples()).context.currentViewRange
+      ).toMatchObject({ start: 5, end: 15 });
+
+      const popped = await querier.popViewRange();
+      expect(popped.range).toMatchObject({ start: 5, end: 15 });
+
+      const cleared = await querier.clearViewRange();
+      expect(cleared.range).toMatchObject({
+        start: 0,
+        end: rootRange.end - rootRange.start,
+      });
+    });
+
+    it('reports thread and process lifetimes relative to the profile start', async function () {
+      const { querier } = setup();
+
+      const threadInfo = await querier.threadInfo();
+      expect(threadInfo.createdAt).toBe(2);
+      expect(threadInfo.endedAt).toBe(18);
+
+      const [process] = (await querier.profileInfo()).processes;
+      expect(process.startTime).toBe(1);
+      expect(process.endTime).toBe(19);
+    });
+
+    it('reports counter buckets relative to the profile start', async function () {
+      const { querier, rootRange } = setup();
+
+      const { overTime } = await querier.counterInfo('c-0');
+
+      expect(overTime[0].startTime).toBe(0);
+      expect(overTime[overTime.length - 1].endTime).toBe(
+        rootRange.end - rootRange.start
+      );
+    });
+  });
+
   describe('view range query results', function () {
     let querier: ProfileQuerier;
 

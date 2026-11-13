@@ -11,6 +11,7 @@ import {
   getDefaultCategory,
   getProfile,
   getThreadCPUTimeMs,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import { getProcessName } from '../process-thread-list';
 import { collectSliceTree } from '../cpu-activity';
@@ -169,11 +170,12 @@ export function collectThreadInfo(
   const threadSelectors = getThreadSelectors(threadIndexes);
   const thread = threadSelectors.getRawThread(state);
   const friendlyThreadName = threadSelectors.getFriendlyThreadName(state);
+  const zeroAt = getZeroAt(state);
   const cpuActivitySlices =
     threadSelectors.getRangeFilteredActivitySlices(state);
   const cpuActivity =
     cpuActivitySlices !== null
-      ? collectSliceTree(cpuActivitySlices, timestampManager)
+      ? collectSliceTree(cpuActivitySlices, timestampManager, zeroAt)
       : null;
 
   const networkActivity = computeThreadNetworkSummary(
@@ -192,9 +194,10 @@ export function collectThreadInfo(
     name: thread.name,
     friendlyName: friendlyThreadName,
     tid: thread.tid,
-    createdAt: thread.registerTime,
+    createdAt: thread.registerTime - zeroAt,
     createdAtName: timestampManager.nameForTimestamp(thread.registerTime),
-    endedAt: thread.unregisterTime,
+    endedAt:
+      thread.unregisterTime !== null ? thread.unregisterTime - zeroAt : null,
     endedAtName:
       thread.unregisterTime !== null
         ? timestampManager.nameForTimestamp(thread.unregisterTime)

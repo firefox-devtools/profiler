@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { getSelectedThreadIndexes } from 'firefox-profiler/selectors/url-state';
-import { getCategories } from 'firefox-profiler/selectors/profile';
+import { getCategories, getZeroAt } from 'firefox-profiler/selectors/profile';
 import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import { isNetworkMarker } from 'firefox-profiler/profile-logic/marker-data';
 import type { Store } from '../../types/store';
@@ -484,7 +484,7 @@ export function collectThreadPageLoad(
     url: nav.url,
     navigationIndex: clampedIndex,
     navigationTotal: navTotal,
-    navStartMs: navStart,
+    navStartMs: navStart - getZeroAt(state),
     milestones: nav.milestones.map((m) => ({
       name: m.name,
       timeMs: m.timeMs,
