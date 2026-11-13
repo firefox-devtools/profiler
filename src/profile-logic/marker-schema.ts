@@ -638,7 +638,11 @@ export function formatFromMarkerSchema(
     case 'unique-string':
     case 'flow-id':
     case 'terminating-flow-id':
-      return stringTable.getString(value, '(empty)');
+      // Some markers carry the string itself where their schema declares a
+      // string table index, e.g. the Log markers of Firefox's test harness.
+      return typeof value === 'string'
+        ? value || '(empty)'
+        : stringTable.getString(value, '(empty)');
     case 'duration':
     case 'time':
       return formatTimestamp(value);
