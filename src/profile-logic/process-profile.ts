@@ -1717,6 +1717,19 @@ export function adjustMarkerPayloadTimestamps<T extends MarkerPayload>(
       newData.responseEnd += delta;
     }
   }
+  // Only derived markers have these fields.
+  if ('fetchStart' in newData && typeof newData.fetchStart === 'number') {
+    newData.fetchStart += delta;
+  }
+  if ('sendStartTime' in newData && typeof newData.sendStartTime === 'number') {
+    newData.sendStartTime += delta;
+  }
+  if ('sendEndTime' in newData && typeof newData.sendEndTime === 'number') {
+    newData.sendEndTime += delta;
+  }
+  if ('recvEndTime' in newData && typeof newData.recvEndTime === 'number') {
+    newData.recvEndTime += delta;
+  }
   // Note: When adding code for new fields here, you may need to fix up
   // existing processed profiles that were missing the relevant adjustments.
   // This should be done by adding an upgrader in processed-profile-versioning.js.

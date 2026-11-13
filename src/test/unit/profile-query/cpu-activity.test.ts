@@ -12,10 +12,10 @@ describe('profile-query cpu activity', function () {
       { start: 1, end: 3, avg: 0.75, sum: 40, parent: 0 },
       { start: 2, end: 3, avg: 1, sum: 20, parent: 1 },
     ];
-    const time = Float64Array.of(0, 10, 20, 30, 40);
-    const tsManager = new TimestampManager({ start: 0, end: 40 });
+    const time = Float64Array.of(100, 110, 120, 130, 140);
+    const tsManager = new TimestampManager({ start: 100, end: 140 });
 
-    const result = collectSliceTree({ slices, time }, tsManager);
+    const result = collectSliceTree({ slices, time }, tsManager, 100);
 
     expect(result).toHaveLength(3);
     expect(result).toEqual([
@@ -44,7 +44,7 @@ describe('profile-query cpu activity', function () {
     const tsManager = new TimestampManager({ start: 0, end: 10 });
 
     expect(
-      collectSliceTree({ slices: [], time: new Float64Array() }, tsManager)
+      collectSliceTree({ slices: [], time: new Float64Array() }, tsManager, 0)
     ).toEqual([]);
   });
 });
