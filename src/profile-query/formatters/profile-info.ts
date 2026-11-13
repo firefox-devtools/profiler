@@ -6,6 +6,7 @@ import {
   getProfile,
   getThreadCPUTimeMs,
   getRangeFilteredCombinedThreadActivitySlices,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import { getProfileNameWithDefault } from 'firefox-profiler/selectors/url-state';
 import {
@@ -72,6 +73,7 @@ export function collectProfileInfo(
 ): ProfileInfoResult {
   const state = store.getState();
   const profile = getProfile(state);
+  const zeroAt = getZeroAt(state);
   const profileName = getProfileNameWithDefault(state);
   const processCount = new Set(profile.threads.map((t) => t.pid)).size;
   const threadCPUTimeMs = getThreadCPUTimeMs(state);
@@ -148,9 +150,15 @@ export function collectProfileInfo(
         name: processItem.name,
         etld1: processItem.etld1,
         cpuMs: processItem.cpuMs,
-        startTime: processItem.startTime,
+        startTime:
+          processItem.startTime !== undefined
+            ? processItem.startTime - zeroAt
+            : undefined,
         startTimeName,
-        endTime: processItem.endTime,
+        endTime:
+          processItem.endTime !== null && processItem.endTime !== undefined
+            ? processItem.endTime - zeroAt
+            : processItem.endTime,
         endTimeName,
         threads: processItem.threads.map((thread) => ({
           threadIndex: thread.threadIndex,
@@ -170,7 +178,7 @@ export function collectProfileInfo(
     getRangeFilteredCombinedThreadActivitySlices(state);
   const cpuActivity =
     combinedCpuActivity !== null
-      ? collectSliceTree(combinedCpuActivity, timestampManager)
+      ? collectSliceTree(combinedCpuActivity, timestampManager, zeroAt)
       : null;
 
   const networkActivity = computeProfileNetworkSummary(

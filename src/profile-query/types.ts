@@ -985,7 +985,7 @@ export type ThreadPageLoadResult = {
   url: string | null;
   navigationIndex: number; // 1-based
   navigationTotal: number;
-  navStartMs: number; // absolute profile time of nav start
+  navStartMs: number; // nav start, ms since the profile start
   milestones: NavigationMilestone[];
   // Resources
   resourceCount: number;
@@ -1058,7 +1058,7 @@ export type CounterListResult = {
  * the tooltip schema. `delta` is present only for accumulated counters.
  */
 export type CounterTimeBucket = {
-  startTime: number; // absolute time of the bucket start
+  startTime: number; // bucket start, ms since the profile start
   startTimeName: string; // e.g. "ts-0"
   startTimeStr: string; // human-readable, relative to profile start, e.g. "1.4s"
   endTime: number;

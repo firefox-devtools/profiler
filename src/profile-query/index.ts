@@ -546,9 +546,9 @@ export class ProfileQuerier {
       type: 'view-range',
       action: 'push',
       range: {
-        start: startTimestamp,
+        start: relativeStart,
         startName,
-        end: endTimestamp,
+        end: relativeEnd,
         endName,
       },
       message,
@@ -592,9 +592,9 @@ export class ProfileQuerier {
       type: 'view-range',
       action: 'pop',
       range: {
-        start: absoluteStart,
+        start: poppedRange.start,
         startName,
-        end: absoluteEnd,
+        end: poppedRange.end,
         endName,
       },
       message,
@@ -618,9 +618,9 @@ export class ProfileQuerier {
         type: 'view-range',
         action: 'pop',
         range: {
-          start: rootRange.start,
+          start: 0,
           startName,
-          end: rootRange.end,
+          end: rootRange.end - rootRange.start,
           endName,
         },
         message: `Already at full profile view: ${startName} (${this._timestampManager.timestampString(rootRange.start)}) to ${endName} (${this._timestampManager.timestampString(rootRange.end)})`,
@@ -640,9 +640,9 @@ export class ProfileQuerier {
       type: 'view-range',
       action: 'pop',
       range: {
-        start: rootRange.start,
+        start: 0,
         startName,
-        end: rootRange.end,
+        end: rootRange.end - rootRange.start,
         endName,
       },
       message,
@@ -1265,9 +1265,9 @@ export class ProfileQuerier {
       const absoluteStart = range.start + zeroAt;
       const absoluteEnd = range.end + zeroAt;
       return {
-        start: absoluteStart,
+        start: range.start,
         startName: this._timestampManager.nameForTimestamp(absoluteStart),
-        end: absoluteEnd,
+        end: range.end,
         endName: this._timestampManager.nameForTimestamp(absoluteEnd),
       };
     });

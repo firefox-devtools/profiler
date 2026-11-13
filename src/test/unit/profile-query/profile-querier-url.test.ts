@@ -142,7 +142,7 @@ describe('ProfileQuerier URL view state', function () {
     const samples = await raw.threadSamples('t-0', true);
     expect(samples.categoryBreakdown.totalSamples).toBe(2);
     expect(samples.context.currentViewRange).toEqual(
-      expect.objectContaining({ start: 1005, end: 1021 })
+      expect.objectContaining({ start: 5, end: 21 })
     );
     expect(await linked.threadSamples('t-0', true)).toEqual(samples);
     expect(await linked.threadSamplesTopDown('t-0', undefined, true)).toEqual(

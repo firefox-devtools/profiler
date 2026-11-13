@@ -1333,6 +1333,42 @@ describe('marker time base', function () {
     expect(infoResult.start).toBe(30);
     expect(infoResult.stack!.capturedAt).toBe(30);
   });
+
+  function setupWithNetworkRequest() {
+    return setupWithMarkers(
+      getNetworkMarkers({
+        startTime: ZERO_AT,
+        fetchStart: ZERO_AT + 10,
+        endTime: ZERO_AT + 30,
+        payload: { responseStart: ZERO_AT + 20 },
+      })
+    );
+  }
+
+  it('reports payload timestamps in data relative to the profile start', function () {
+    const { store, threadMap, markerMap } = setupWithNetworkRequest();
+    const listData = () =>
+      collectThreadMarkers(store, threadMap, markerMap, undefined, {
+        list: true,
+      }).flatMarkers![0].data;
+
+    expect(listData()).toMatchObject({
+      startTime: 0,
+      fetchStart: 10,
+      responseStart: 20,
+      endTime: 30,
+    });
+    // Listing again gives the same times: the store's payload isn't shifted.
+    expect(listData()).toMatchObject({ startTime: 0, endTime: 30 });
+  });
+
+  it('reports network request startTime relative to the profile start', function () {
+    const { store, threadMap, markerMap } = setupWithNetworkRequest();
+
+    const result = collectThreadNetwork(store, threadMap, markerMap);
+
+    expect(result.requests[0].startTime).toBe(0);
+  });
 });
 
 describe('collectThreadNetwork', function () {
