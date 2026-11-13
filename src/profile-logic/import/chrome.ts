@@ -36,6 +36,7 @@ import {
   convertScreenshotMarkersToStartEnd,
 } from '../process-screenshot-markers';
 import { GlobalDataCollector } from '../global-data-collector';
+import { base64StringToBytes } from 'firefox-profiler/utils/base64';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -760,7 +761,7 @@ async function processTracingEvents(
 
   assertStackOrdering(stackTable);
 
-  await extractScreenshots(
+  extractScreenshots(
     threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
@@ -873,14 +874,14 @@ async function processTracingEvents(
   return profile;
 }
 
-async function extractScreenshots(
+function extractScreenshots(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ScreenshotEvent[],
   stringTable: StringTable
-): Promise<void> {
+): void {
   if (screenshots.length === 0) {
     // No screenshots were found, exit early.
     return;
@@ -904,12 +905,12 @@ async function extractScreenshots(
   }
 
   for (const screenshot of screenshots) {
-    const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
-    const size = await getImageSize(urlString);
+    const size = getJpegSizeFromBase64(screenshot.args.snapshot);
     if (size === null) {
       // The image could not be processed, do not add it.
       continue;
     }
+    const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
     markers.data.push({
       type: 'CompositorScreenshot',
       url: stringTable.indexForString(urlString),
@@ -927,28 +928,67 @@ async function extractScreenshots(
   }
 }
 
+// JPEG markers are 2 bytes: 0xFF followed by the marker type.
+const JPEG_START_OF_IMAGE = 0xffd8;
+const JPEG_START_OF_SCAN = 0xffda;
+// The Start Of Frame markers (SOF0 to SOF15) hold the image size. DHT, JPG and
+// DAC share that range without being SOF markers.
+const JPEG_SOF0 = 0xffc0;
+const JPEG_SOF15 = 0xffcf;
+const JPEG_NON_SOF_MARKERS = [0xffc4, 0xffc8, 0xffcc];
+
 /**
- * Decode a base64 image, and extract the width and height values. These are pre-computed
- * for Gecko profiles, but not for Chrome profiles.
+ * Decode a base64 JPEG image, and extract the width and height values from its
+ * header. These are pre-computed for Gecko profiles, but not for Chrome
+ * profiles. Chrome always encodes its trace screenshots as JPEG. This doesn't
+ * use the DOM Image API so that it also works in Node, e.g. in profiler-cli.
  */
-function getImageSize(
-  url: string
-): Promise<null | { width: number; height: number }> {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.src = url;
+function getJpegSizeFromBase64(
+  base64: string
+): null | { width: number; height: number } {
+  let view;
+  try {
+    view = new DataView(base64StringToBytes(base64));
+  } catch {
+    return null;
+  }
 
-    image.addEventListener('load', () => {
-      resolve({
-        width: image.width,
-        height: image.height,
-      });
-    });
+  if (view.byteLength < 2 || view.getUint16(0) !== JPEG_START_OF_IMAGE) {
+    return null;
+  }
 
-    image.addEventListener('error', () => {
-      resolve(null);
-    });
-  });
+  // Each segment is a 2-byte marker, followed by a 2-byte length that doesn't
+  // include the marker.
+  let offset = 2;
+  while (offset + 4 <= view.byteLength) {
+    const marker = view.getUint16(offset);
+    if (marker >> 8 !== 0xff) {
+      // Not a marker, the file is corrupt.
+      return null;
+    }
+    if (marker === JPEG_START_OF_SCAN) {
+      // The image data starts here, there is no frame header.
+      return null;
+    }
+    const isStartOfFrame =
+      marker >= JPEG_SOF0 &&
+      marker <= JPEG_SOF15 &&
+      !JPEG_NON_SOF_MARKERS.includes(marker);
+    if (isStartOfFrame) {
+      // After the marker and length come the sample precision (1 byte), then
+      // the height (2 bytes) and the width (2 bytes).
+      if (offset + 9 > view.byteLength) {
+        return null;
+      }
+      return {
+        height: view.getUint16(offset + 5),
+        width: view.getUint16(offset + 7),
+      };
+    }
+    offset += 2 + view.getUint16(offset + 2);
+  }
+
+  return null;
 }
 
 /**
