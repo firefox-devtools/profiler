@@ -63,23 +63,10 @@ export function sanitizePII(
   maybePIIToBeRemoved: RemoveProfileInformation | null,
   markerSchemaByName: MarkerSchemaByName
 ): SanitizeProfileResult {
-  // FIXME: Currently we always sanitize the source contents while publishing.
-  // But we should have a sharing option in the publish panel to be able to
-  // include sources. This needs to happen before the early return below, so
-  // that the source contents are removed even when no other PII removal is
-  // requested.
-  const unconditionallySanitizedShared = {
-    ...profile.shared,
-    sources: {
-      ...profile.shared.sources,
-      content: Array(profile.shared.sources.content.length).fill(null),
-    },
-  };
-
   if (maybePIIToBeRemoved === null) {
-    // Nothing else is sanitized, but the source contents are still removed.
+    // The user opted into sharing everything, so there's nothing to do.
     return {
-      profile: { ...profile, shared: unconditionallySanitizedShared },
+      profile,
       isSanitized: false,
       translationMaps: null,
       committedRanges: null,
@@ -137,7 +124,7 @@ export function sanitizePII(
   }
   const stringTable = StringTable.withBackingArray(stringArray);
   const newShared = {
-    ...unconditionallySanitizedShared,
+    ...profile.shared,
     stringArray,
   };
 

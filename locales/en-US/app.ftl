@@ -764,6 +764,121 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
 MenuButtons--publish--renderCheckbox-label-argument-values = Include JavaScript execution tracing function argument values
 MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
     .title = This profile contains function argument values recorded from the page, which may include personal data
+MenuButtons--publish--renderCheckbox-label-source-code = Include source code
+# This is shown next to the "Include source code" checkbox while it is
+# unchecked, so that the amount of source code on offer is visible without
+# having to turn the option on.
+# Variables:
+#   $fileCount (Number) - Number of source files that could be shared
+#   $size (String) - Pretty-printed total size of those files, e.g. "12 kB"
+MenuButtons--publish--source-code-available =
+    { $fileCount ->
+        [one] ({ $fileCount } file available, { $size } uncompressed)
+       *[other] ({ $fileCount } files available, { $size } uncompressed)
+    }
+# Same place as the previous string, when some of the files haven't been
+# downloaded yet. Only downloaded files can be included.
+# Variables:
+#   $fileCount (Number) - Number of source files whose contents we have
+#   $totalFileCount (Number) - Number of source files that could be shared
+#   $size (String) - Pretty-printed total size of the files we have, e.g. "12 kB"
+MenuButtons--publish--source-code-partially-downloaded =
+    { $totalFileCount ->
+        [one] ({ $fileCount } of { $totalFileCount } file downloaded, { $size } uncompressed)
+       *[other] ({ $fileCount } of { $totalFileCount } files downloaded, { $size } uncompressed)
+    }
+# Same place as the previous string, when none of the files have been downloaded
+# yet. The checkbox is disabled if none of them can be downloaded either.
+# Variables:
+#   $totalFileCount (Number) - Number of source files that could be shared
+MenuButtons--publish--source-code-none-downloaded =
+    { $totalFileCount ->
+        [one] ({ $totalFileCount } file, none downloaded yet)
+       *[other] ({ $totalFileCount } files, none downloaded yet)
+    }
+# Shown in the size column of the file tree for files whose contents we don't
+# have yet. They are downloaded when sharing, if picked.
+MenuButtons--publish--source-code-not-downloaded = Not downloaded
+# Shown in the size column of the file tree for files that we tried to download
+# during this session and couldn't.
+MenuButtons--publish--source-code-download-failed = Download failed
+# Shown in the size column of the file tree for files that can't be downloaded
+# from here, and for directories where none of the files can be.
+MenuButtons--publish--source-code-unavailable = Unavailable
+    .title = Downloading requires the browser that recorded the profile or a local symbol server.
+# This labels the row of ready-made file selections shown above the file tree of
+# the "Include source code" option.
+MenuButtons--publish--source-code-preset-legend = Include:
+# Selects only the source file that the source view is currently showing.
+MenuButtons--publish--source-code-preset-current-file = Current file
+# Selects the source files that the currently selected threads run code from.
+MenuButtons--publish--source-code-preset-selected-threads = Selected threads
+# Selects every source file that was fetched or came with the profile, and that
+# can be shared.
+MenuButtons--publish--source-code-preset-all-available-files = All available files
+# A checkbox next to the presets. When checked, "Selected threads" and "All
+# available files" only pick files whose contents are already downloaded, so
+# that sharing doesn't download anything more.
+MenuButtons--publish--source-code-downloaded-only = Only already downloaded files
+# Not something the user can pick. This is shown as the selected option once the
+# user has edited the file tree so that it no longer matches any of the others.
+MenuButtons--publish--source-code-preset-custom = Custom
+# Shown under the "Include source code" checkbox in the upload panel, next to a
+# warning icon, since the uploaded profile is public.
+MenuButtons--publish--source-code-rights-notice = These files will be public. Only include code you have the right to share.
+# The status line underneath the file tree of the "Include source code"
+# option: how much source code the picked files add to the shared profile.
+# Variables:
+#   $fileCount (Number) - Number of picked source files whose contents we have
+#   $size (String) - Pretty-printed total size of those contents, e.g. "12 kB"
+MenuButtons--publish--source-code-status =
+    { $fileCount ->
+        [one] { $fileCount } file, { $size } uncompressed.
+       *[other] { $fileCount } files, { $size } uncompressed.
+    }
+# Shown on a line of its own under the previous string when some of the picked
+# files still have to be downloaded. A "Download now" button comes after it.
+# Variables:
+#   $fileCount (Number) - Number of picked source files whose contents we don't have
+MenuButtons--publish--source-code-status-to-download =
+    { $fileCount ->
+        [one] { $fileCount } file will be downloaded when sharing.
+       *[other] { $fileCount } files will be downloaded when sharing.
+    }
+# Replaces the previous string in the Save panel, where the Save button stays
+# disabled until the picked files are downloaded.
+# Variables:
+#   $fileCount (Number) - Number of picked source files whose contents we don't have
+MenuButtons--publish--source-code-status-to-download-before-saving =
+    { $fileCount ->
+        [one] { $fileCount } file must be downloaded before saving.
+       *[other] { $fileCount } files must be downloaded before saving.
+    }
+MenuButtons--publish--source-code-download-now = Download now
+# Replaces the status line while the download is underway.
+# Variables:
+#   $completedCount (Number) - Number of source files downloaded so far
+#   $totalCount (Number) - Number of source files being downloaded
+MenuButtons--publish--source-code-downloading = Downloading source files… ({ $completedCount } of { $totalCount })
+MenuButtons--publish--source-code-cancel-download = Cancel
+# Shown under the upload error message when the upload stopped because some of
+# the picked source files couldn't be downloaded.
+# Variables:
+#   $failedCount (Number) - Number of picked source files that couldn't be downloaded
+MenuButtons--publish--source-code-fetch-failed =
+    { $failedCount ->
+        [one] { $failedCount } of the picked source files could not be downloaded. It has been left out, so uploading again will share the rest.
+       *[other] { $failedCount } of the picked source files could not be downloaded. They have been left out, so uploading again will share the rest.
+    }
+# The tooltip of an info icon at the end of the status line, when some of the
+# listed files can't be picked because they can't be downloaded from here.
+# Variables:
+#   $unavailableCount (Number) - Number of listed files that can't be downloaded from here
+MenuButtons--publish--source-code-left-out-unavailable =
+    { $unavailableCount ->
+        [one] { $unavailableCount } file can’t be downloaded from here. Downloading it requires the browser that recorded the profile or a local symbol server.
+       *[other] { $unavailableCount } files can’t be downloaded from here. Downloading them requires the browser that recorded the profile or a local symbol server.
+    }
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
 MenuButtons--publish--save-performance-profile = Save Performance Profile

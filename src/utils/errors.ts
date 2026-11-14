@@ -18,3 +18,19 @@ export class TemporaryError extends Error {
     this.attempt = attempt;
   }
 }
+
+/**
+ * Stops an upload when some of the source files picked for sharing could not
+ * be downloaded.
+ */
+export class SourceCodeFetchError extends Error {
+  failedCount: number;
+
+  constructor(failedCount: number) {
+    super(`${failedCount} of the picked source files could not be downloaded.`);
+    // Workaround for a babel issue when extending Errors
+    (this as any).__proto__ = SourceCodeFetchError.prototype;
+    this.name = 'SourceCodeFetchError';
+    this.failedCount = failedCount;
+  }
+}

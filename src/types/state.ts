@@ -250,11 +250,39 @@ export type SanitizedProfileEncodingState =
 
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  // The source files the user picked in the publish panel, per sharing mode.
+  // `null` means the user hasn't touched the selection yet, in which case the
+  // default selection applies.
+  readonly sourceFileSelection: Record<
+    SharingMode,
+    ReadonlySet<IndexIntoSourceTable> | null
+  >;
+  // Whether the presets should only pick files whose contents we already
+  // have, per sharing mode, rather than also the ones that would be fetched.
+  readonly sourceSharingDownloadedOnly: Record<SharingMode, boolean>;
+  // Per sharing mode, so that work finishing for one panel doesn't replace
+  // what the other one shows.
+  readonly sanitizedProfileEncodingState: Record<
+    SharingMode,
+    SanitizedProfileEncodingState
+  >;
+  readonly sourceCodeFetch: Record<SharingMode, SourceCodeFetchState>;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
   readonly prePublishedState: State | null;
+};
+
+/**
+ * The progress of fetching the source files picked in the publish panel, which
+ * happens when sharing or on request.
+ */
+export type SourceCodeFetchState = {
+  readonly isFetching: boolean;
+  readonly totalCount: number;
+  readonly completedCount: number;
+  // Bumped when a fetch is cancelled, so that the in-flight one can tell.
+  readonly generation: number;
 };
 
 export type ZippedProfilesState = {

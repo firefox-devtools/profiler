@@ -21,7 +21,14 @@
   position: absolute;
   top: var(--internal-offset-from-top);
   right: calc(var(--internal-offset-from-right) * -1);
-  min-width: var(--internal-width);
+
+  /* Panels that don't set --width shrink to fit their content. The ones that do
+   * get that exact width, so that a long unbreakable string inside can't stretch
+   * the panel. */
+  width: var(--internal-width);
+
+  /* No arrow panel grows wider than the window. */
+  max-width: calc(100vw - 40px);
   border: 0.5px solid var(--internal-border-color);
   border-radius: 5px;
   background: var(--internal-background-color);

@@ -671,17 +671,45 @@ type PublishAction =
       readonly value: boolean;
     }
   | {
+      readonly type: 'UPDATE_SOURCE_FILES_TO_SHARE';
+      readonly mode: SharingMode;
+      readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+    }
+  | {
+      readonly type: 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY';
+      readonly mode: SharingMode;
+      readonly value: boolean;
+    }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_STARTED';
+      readonly mode: SharingMode;
+      readonly totalCount: number;
+    }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_PROGRESS';
+      readonly mode: SharingMode;
+      readonly completedCount: number;
+    }
+  | { readonly type: 'SOURCE_CODE_FETCH_FINISHED'; readonly mode: SharingMode }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_CANCELLED';
+      readonly mode: SharingMode;
+    }
+  | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly encodingPromise: Promise<ProfileEncodingResult>;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly profileData: Blob;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_FAILED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly error: Error;
     }
