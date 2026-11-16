@@ -565,10 +565,10 @@ describe('dialectForFilename', () => {
     expect(dialectForFilename('foo.jsx')).toBe('jsx');
   });
 
-  it('returns empty string for plain js extensions', () => {
-    expect(dialectForFilename('foo.js')).toBe('');
-    expect(dialectForFilename('foo.mjs')).toBe('');
-    expect(dialectForFilename('noext')).toBe('');
+  it('returns jsx for plain js extensions, which can contain JSX', () => {
+    expect(dialectForFilename('foo.js')).toBe('jsx');
+    expect(dialectForFilename('foo.mjs')).toBe('jsx');
+    expect(dialectForFilename('noext')).toBe('jsx');
   });
 
   it('matches case-insensitively', () => {
