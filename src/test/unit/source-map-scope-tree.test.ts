@@ -6,8 +6,8 @@ import { stripIndent } from 'common-tags';
 import {
   parseJsScopeTree,
   findInnermostFunctionScope,
-  dialectForFilename,
 } from '../../profile-logic/source-maps/scope-tree';
+import { dialectForFilename } from '../../profile-logic/js-format/dialect';
 
 describe('parseJsScopeTree', () => {
   it('returns an empty array for empty source', () => {
