@@ -3,9 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import { stripIndent } from 'common-tags';
+import { TreeFragment } from '@lezer/common';
 
-import { formatJsCode } from '../../profile-logic/js-format/formatter';
-import { applyFormatEdits } from '../../profile-logic/js-format/formatted-source';
+import {
+  computeFormatEdits,
+  countCommonFormatEdits,
+  formatJsCode,
+  formatJsCodeIncrementally,
+} from '../../profile-logic/js-format/formatter';
+import {
+  applyFormatEdits,
+  updateFormatEdits,
+} from '../../profile-logic/js-format/formatted-source';
+import type { FormatEdits } from '../../profile-logic/js-format/types';
+import { parserForDialect } from '../../profile-logic/source-maps/scope-tree';
 import type { JsDialect } from '../../profile-logic/js-format/dialect';
 
 function format(code: string, dialect: JsDialect = ''): string {
@@ -16,7 +27,8 @@ function removeWhitespace(code: string): string {
   return code.replace(/\s+/g, '');
 }
 
-// Some minified code.
+// Some minified code, which is repeated to get code that's long enough for
+// partial parses.
 const MINIFIED_CODE =
   'function f(a,b){if(a)return b;else{for(let i=0;i<a;i++)b+=i}return a?b:-b}' +
   'var o={x:1,y:[1,2],z(){return`t ${o.x}`}},p=/re{1}/g;a(),b(),c();' +
@@ -318,6 +330,87 @@ describe('formatJsCode', function () {
   });
 });
 
+describe('formatting partial syntax trees', function () {
+  const code = MINIFIED_CODE.repeat(200);
+
+  // Formats the code from partial trees which end at every `step` characters,
+  // like formatJsCodeIncrementally does, and applies the corrections. Returns
+  // the final edits, the edits for the final tree, and the number of steps
+  // which corrected earlier edits.
+  function formatPartialTrees(code: string, step: number, margin: number) {
+    const parser = parserForDialect('');
+    let edits: FormatEdits = new Int32Array(0);
+    let correctionCount = 0;
+    let fragments: readonly TreeFragment[] = [];
+    for (let stop = step; ; stop += step) {
+      const parse = parser.startParse(code, fragments);
+      const isLastStep = stop >= code.length;
+      if (!isLastStep) {
+        parse.stopAt(stop);
+      }
+      let tree;
+      while ((tree = parse.advance()) === null) {
+        // Keep parsing.
+      }
+      const rangeEnd = isLastStep ? code.length + 1 : stop - margin;
+      const newEdits = computeFormatEdits(code, tree, rangeEnd);
+      const keptEditCount = countCommonFormatEdits(edits, newEdits);
+      if (keptEditCount * 3 < edits.length) {
+        correctionCount++;
+      }
+      edits = updateFormatEdits(
+        edits,
+        keptEditCount,
+        newEdits.slice(keptEditCount * 3)
+      );
+      if (isLastStep) {
+        return {
+          edits: [...edits],
+          finalTreeEdits: [...computeFormatEdits(code, tree, rangeEnd)],
+          correctionCount,
+        };
+      }
+      fragments = TreeFragment.addTree(tree, fragments, true);
+    }
+  }
+
+  it('computes the same edits from partial trees as from the full tree', function () {
+    const { edits } = formatPartialTrees(code, 5000, 500);
+    expect(edits).toEqual([...formatJsCode(code, '')]);
+  });
+
+  it('corrects the edits from a wrong partial tree', function () {
+    // The partial tree ends before the `)`. It has an ObjectExpression, which
+    // gets one property per line. The full tree has an ObjectPattern in the
+    // ParamList of an ArrowFunction, which stays on one line.
+    const code = 'x=({a,b})=>a+b;';
+    const { edits, finalTreeEdits, correctionCount } = formatPartialTrees(
+      code,
+      code.indexOf(')'),
+      0
+    );
+    expect(correctionCount).toBe(1);
+    expect(edits).toEqual(finalTreeEdits);
+    expect(edits).toEqual([...formatJsCode(code, '')]);
+  });
+
+  it('reports the same edits incrementally as in one go', function () {
+    let edits: FormatEdits = new Int32Array(0);
+    const doneFlags: boolean[] = [];
+    formatJsCodeIncrementally(
+      code,
+      '',
+      (keptEditCount, newEdits, _formattedUpTo, isDone) => {
+        edits = updateFormatEdits(edits, keptEditCount, newEdits);
+        doneFlags.push(isDone);
+      }
+    );
+    expect([...edits]).toEqual([...formatJsCode(code, '')]);
+    expect(doneFlags[doneFlags.length - 1]).toBeTrue();
+    expect(doneFlags.slice(0, -1)).not.toContain(true);
+  });
+});
+
 describe('applyFormatEdits', function () {
   it('maps positions in the original code to formatted lines', function () {
     const code = 'a();b();\nc({x:1})';
@@ -353,5 +446,14 @@ describe('applyFormatEdits', function () {
     expect(formatted.getFormattedLine(3, 5)).toBe(4);
     expect(formatted.getFormattedLine(4, 1)).toBe(5);
     expect(formatted.getFormattedLine(4, 4)).toBe(6);
+  });
+
+  it('shows the unformatted rest of partially-formatted code', function () {
+    const code = 'a();b();c();d()';
+    const edits = formatJsCode(code, '');
+    // Only keep the first edit, as if the formatting was still in progress.
+    const formatted = applyFormatEdits(code, edits.slice(0, 3));
+    expect(formatted.lines).toEqual(['a();', 'b();c();d()']);
+    expect(formatted.getFormattedLine(1, 12)).toBe(2);
   });
 });

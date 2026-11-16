@@ -87,6 +87,18 @@ function _getLineStarts(code: string): number[] {
   }
 }
 
+// Computing the line starts of the original code takes a few milliseconds for
+// a large bundle. Cache the result for the most recent code, because the
+// formatted source is recomputed for each progress update of the formatting.
+let _lineStartsCache: { code: string; lineStarts: number[] } | null = null;
+
+function _getCachedLineStarts(code: string): number[] {
+  if (_lineStartsCache === null || _lineStartsCache.code !== code) {
+    _lineStartsCache = { code, lineStarts: _getLineStarts(code) };
+  }
+  return _lineStartsCache.lineStarts;
+}
+
 const _whitespaceStrings: Map<number, string> = new Map();
 
 function _getWhitespaceString(ws: number): string {
@@ -96,6 +108,21 @@ function _getWhitespaceString(ws: number): string {
     _whitespaceStrings.set(ws, str);
   }
   return str;
+}
+
+/**
+ * Returns the edits after a step of formatJsCodeIncrementally: the first
+ * keptEditCount edits of prevEdits, followed by the new edits.
+ */
+export function updateFormatEdits(
+  prevEdits: FormatEdits,
+  keptEditCount: number,
+  edits: FormatEdits
+): FormatEdits {
+  const result = new Int32Array(keptEditCount * 3 + edits.length);
+  result.set(prevEdits.subarray(0, keptEditCount * 3));
+  result.set(edits, keptEditCount * 3);
+  return result;
 }
 
 export function applyFormatEdits(
@@ -148,7 +175,7 @@ export function applyFormatEdits(
   appendOriginal(pos, code.length);
   lines.push(currentLine);
 
-  const originalLineStarts = _getLineStarts(code);
+  const originalLineStarts = _getCachedLineStarts(code);
   return {
     lines,
     getFormattedLine(line: number, column: number | null): number {
