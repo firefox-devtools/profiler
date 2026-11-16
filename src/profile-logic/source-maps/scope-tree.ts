@@ -636,7 +636,7 @@ function _walkChildren(
 
 const _configuredParsers = new Map<JsDialect, typeof lezerJsParser>();
 
-function _parserForDialect(dialect: JsDialect): typeof lezerJsParser {
+export function parserForDialect(dialect: JsDialect): typeof lezerJsParser {
   if (!dialect) {
     return lezerJsParser;
   }
@@ -660,7 +660,7 @@ export function parseJsScopeTree(
   sourceText: string,
   dialect: JsDialect = ''
 ): FunctionScope[] {
-  const tree = _parserForDialect(dialect).parse(sourceText);
+  const tree = parserForDialect(dialect).parse(sourceText);
   const topLevel: FunctionScope[] = [];
   _walkChildren(tree.topNode, sourceText, topLevel);
   return topLevel;
