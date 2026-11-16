@@ -31,8 +31,8 @@
  *  - Strings, template strings, regular expressions, comments and JSX are
  *    kept as they are.
  *
- * This module imports @lezer/javascript, so the main bundle must not import
- * it.
+ * This module imports @lezer/javascript, so it should only be used in the
+ * format worker and in tests.
  */
 
 import { TreeFragment } from '@lezer/common';

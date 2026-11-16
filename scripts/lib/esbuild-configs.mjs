@@ -84,6 +84,7 @@ export const mainBundleConfig = {
     // In dev, the worker is not hashed so the path is predictable.
     // In production, build.mjs overrides this after building the worker first.
     SOURCE_MAP_WORKER_PATH: JSON.stringify('/source-map.worker.js'),
+    FORMAT_WORKER_PATH: JSON.stringify('/format.worker.js'),
     'process.env.ENABLE_SERVICE_WORKER': JSON.stringify(
       process.env.ENABLE_SERVICE_WORKER || 'true'
     ),
@@ -139,12 +140,35 @@ export const sourceMapWorkerConfig = {
   plugins: [wasmLoader()],
 };
 
-export function getSourceMapWorkerPath(metafile) {
-  const [entryPoint] = sourceMapWorkerConfig.entryPoints;
+// Format worker bundle configuration, for formatting JS code in the source
+// view. Built in the same way as the source map worker, see above.
+export const formatWorkerConfig = {
+  ...baseConfig,
+  entryPoints: ['src/profile-logic/js-format/format.worker.ts'],
+  outdir: 'dist',
+  format: 'iife',
+  platform: 'browser',
+  target: browserslistToEsbuild(),
+  sourcemap: true,
+  splitting: false,
+  entryNames: '[name]',
+  metafile: true,
+};
+
+function _getWorkerPath(workerConfig, metafile) {
+  const [entryPoint] = workerConfig.entryPoints;
   const [outputPath] = Object.entries(metafile.outputs).find(
     ([, output]) => output.entryPoint === entryPoint
   );
   return '/' + path.basename(outputPath);
+}
+
+export function getSourceMapWorkerPath(metafile) {
+  return _getWorkerPath(sourceMapWorkerConfig, metafile);
+}
+
+export function getFormatWorkerPath(metafile) {
+  return _getWorkerPath(formatWorkerConfig, metafile);
 }
 
 // Photon styling build configuration

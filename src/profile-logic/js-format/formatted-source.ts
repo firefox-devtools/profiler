@@ -111,8 +111,8 @@ function _getWhitespaceString(ws: number): string {
 }
 
 /**
- * Returns the edits after a step of formatJsCodeIncrementally: the first
- * keptEditCount edits of prevEdits, followed by the new edits.
+ * Returns the edits after a progress message from the format worker: the
+ * first keptEditCount edits of prevEdits, followed by the new edits.
  */
 export function updateFormatEdits(
   prevEdits: FormatEdits,
