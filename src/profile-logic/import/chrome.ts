@@ -36,6 +36,8 @@ import {
   convertScreenshotMarkersToStartEnd,
 } from '../process-screenshot-markers';
 import { GlobalDataCollector } from '../global-data-collector';
+import { base64StringToBytes } from 'firefox-profiler/utils/base64';
+import { getJpegSize } from 'firefox-profiler/utils/jpeg-size';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -760,7 +762,7 @@ async function processTracingEvents(
 
   assertStackOrdering(stackTable);
 
-  await extractScreenshots(
+  extractScreenshots(
     threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
@@ -873,14 +875,14 @@ async function processTracingEvents(
   return profile;
 }
 
-async function extractScreenshots(
+function extractScreenshots(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<RawThread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ScreenshotEvent[],
   stringTable: StringTable
-): Promise<void> {
+): void {
   if (screenshots.length === 0) {
     // No screenshots were found, exit early.
     return;
@@ -904,12 +906,21 @@ async function extractScreenshots(
   }
 
   for (const screenshot of screenshots) {
-    const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
-    const size = await getImageSize(urlString);
+    // Unlike Gecko, Chrome doesn't record the screenshot sizes. Its trace
+    // screenshots are always JPEG.
+    let size = null;
+    try {
+      size = getJpegSize(
+        new Uint8Array(base64StringToBytes(screenshot.args.snapshot))
+      );
+    } catch {
+      // The snapshot isn't valid base64.
+    }
     if (size === null) {
       // The image could not be processed, do not add it.
       continue;
     }
+    const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
     markers.data.push({
       type: 'CompositorScreenshot',
       url: stringTable.indexForString(urlString),
@@ -925,30 +936,6 @@ async function extractScreenshots(
     markers.category.push(graphicsIndex);
     markers.length++;
   }
-}
-
-/**
- * Decode a base64 image, and extract the width and height values. These are pre-computed
- * for Gecko profiles, but not for Chrome profiles.
- */
-function getImageSize(
-  url: string
-): Promise<null | { width: number; height: number }> {
-  return new Promise((resolve) => {
-    const image = new Image();
-    image.src = url;
-
-    image.addEventListener('load', () => {
-      resolve({
-        width: image.width,
-        height: image.height,
-      });
-    });
-
-    image.addEventListener('error', () => {
-      resolve(null);
-    });
-  });
 }
 
 /**
