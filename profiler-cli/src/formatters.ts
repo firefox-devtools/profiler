@@ -56,6 +56,7 @@ import type {
   ApplySourceMapResult,
   ProfileSaveResult,
 } from './protocol';
+import type { StartEndRange } from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 import { truncateFunctionName } from '../../src/profile-query/function-list';
 import { describeSpec } from '../../src/profile-query/filter-stack';
@@ -88,7 +89,10 @@ const INLINE_LEGEND =
 
 const BAR_WIDTH = 28;
 
-function createTimestampFormatter(context: SessionContext) {
+function createTimestampFormatter(context: {
+  currentViewRange: StartEndRange | null;
+  rootRange: StartEndRange;
+}) {
   const range = context.currentViewRange ?? context.rootRange;
   // Resolve a thousandth of the view, with at least millisecond precision
   // and a nanosecond floor to avoid exposing floating-point noise.
@@ -305,9 +309,23 @@ export function formatStatusResult(result: StatusResult): string {
       ? '\n' + filterLines.join('\n')
       : '\n  Filters: none';
 
+  let markerLine = '';
+  if (result.selectedMarker) {
+    const marker = result.selectedMarker;
+    const formatTimestamp = createTimestampFormatter({
+      currentViewRange: result.viewRanges[result.viewRanges.length - 1] ?? null,
+      rootRange: result.rootRange,
+    });
+    const durationStr =
+      marker.duration !== undefined
+        ? formatDuration(marker.duration)
+        : 'instant';
+    markerLine = `\n  Selected marker: ${marker.markerHandle} ${marker.name} t=${formatTimestamp(marker.start)} (${durationStr})`;
+  }
+
   return `\
 Session Status:
-  Selected thread: ${threadInfo}
+  Selected thread: ${threadInfo}${markerLine}
   View range: ${rangesInfo}
   Data source: ${result.callTreeSummaryStrategy}${filterSection}`;
 }
