@@ -451,7 +451,7 @@ describe('applyFormatEdits', function () {
   it('shows the unformatted rest of partially-formatted code', function () {
     const code = 'a();b();c();d()';
     const edits = formatJsCode(code, '');
-    // Only keep the first edit, as if the formatting was still in progress.
+    // Only keep the first edit, as if the worker was still busy.
     const formatted = applyFormatEdits(code, edits.slice(0, 3));
     expect(formatted.lines).toEqual(['a();', 'b();c();d()']);
     expect(formatted.getFormattedLine(1, 12)).toBe(2);

@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+import type { JsDialect } from './dialect';
+
 /**
  * Formatting JS source code ("pretty printing") only ever changes the
  * whitespace between tokens. So the result of formatting is described by a
@@ -28,3 +30,32 @@ export const FORMAT_WS_INDENT_MASK = 0xffff;
 
 // The string for one level of indentation.
 export const FORMAT_INDENT = '  ';
+
+export type FormatWorkerInput = {
+  code: string;
+  dialect: JsDialect;
+};
+
+/**
+ * The worker formats the code from front to back and sends a message after
+ * each step, so that the source view can show partially-formatted code while
+ * the worker is busy. The code before `formattedUpTo` is formatted; the code
+ * after it is still unformatted.
+ *
+ * A step can correct the edits of earlier steps. So each message says how
+ * many of the edits from earlier messages are still valid, and contains the
+ * edits which come after them; see updateFormatEdits. After the last
+ * message, the edits are final.
+ */
+export type FormatWorkerOutput =
+  | {
+      type: 'progress';
+      keptEditCount: number;
+      edits: FormatEdits;
+      formattedUpTo: number;
+      isDone: boolean;
+    }
+  | {
+      type: 'error';
+      message: string;
+    };
