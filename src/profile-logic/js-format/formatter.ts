@@ -35,6 +35,7 @@
  * it.
  */
 
+import { TreeFragment } from '@lezer/common';
 import type { Tree, TreeCursor } from '@lezer/common';
 
 import { parserForDialect } from 'firefox-profiler/profile-logic/source-maps/scope-tree';
@@ -382,9 +383,17 @@ function _needsSpace(
 }
 
 /**
- * Computes the format edits for `code`, using the syntax tree `tree`.
+ * Computes the format edits for `code`, using the syntax tree `tree`. Only
+ * the edits for the gaps which end before rangeEnd are returned. The tree can
+ * be a partial tree which only covers the code up to some position. Then the
+ * edits can differ from the edits for the full tree, because the nodes in the
+ * partial tree can be incomplete or have a different type.
  */
-export function computeFormatEdits(code: string, tree: Tree): FormatEdits {
+export function computeFormatEdits(
+  code: string,
+  tree: Tree,
+  rangeEnd: number
+): FormatEdits {
   const edits = new FormatEditsBuilder();
   const cursor: TreeCursor = tree.cursor();
   const stack: Frame[] = [
@@ -416,6 +425,9 @@ export function computeFormatEdits(code: string, tree: Tree): FormatEdits {
   let column = 0;
 
   function pushWhitespace(from: number, to: number, ws: number) {
+    if (to >= rangeEnd) {
+      return;
+    }
     // Only push an edit if the whitespace changes.
     if (ws === FORMAT_WS_NONE) {
       if (to === from) {
@@ -746,6 +758,9 @@ export function computeFormatEdits(code: string, tree: Tree): FormatEdits {
   }
   outer: for (;;) {
     const { name, from, to } = cursor;
+    if (from >= rangeEnd) {
+      break;
+    }
     const parent = stack[stack.length - 1];
     // Skip empty nodes, such as the error nodes that Lezer inserts.
     if (to > from) {
@@ -781,9 +796,136 @@ export function computeFormatEdits(code: string, tree: Tree): FormatEdits {
 }
 
 /**
- * Formats the code.
+ * Formats the code in one go. This is used by tests.
  */
 export function formatJsCode(code: string, dialect: JsDialect): FormatEdits {
   const tree = parserForDialect(dialect).parse(code);
-  return computeFormatEdits(code, tree);
+  return computeFormatEdits(code, tree, code.length + 1);
+}
+
+/**
+ * Returns the number of edits at the start of `a` and `b` which are the same.
+ */
+export function countCommonFormatEdits(a: FormatEdits, b: FormatEdits): number {
+  const length = Math.min(a.length, b.length);
+  let i = 0;
+  while (i < length && a[i] === b[i]) {
+    i++;
+  }
+  return Math.floor(i / 3);
+}
+
+// Each step leaves the last PARTIAL_TREE_MARGIN characters of its partial
+// syntax tree unformatted. A later step formats them.
+//
+// The nodes near the end of a partial tree are often incomplete, so the edits
+// for them are often wrong. Later steps correct such edits, but each
+// correction makes the displayed code jump. The margin keeps most of these
+// wrong edits from ever being shown. Some examples, where `|` marks the end
+// of the partial tree:
+//
+// 1. A long call:
+//
+//      f(aaaa,aaaa,aaaa,aaaa|,aaaa,aaaa, ... ,aaaa,b);
+//
+//    In the partial tree, the ArgList ends at the `|`. So it looks short, and
+//    the arguments stay on one line. Once a later step has parsed the whole
+//    call, the ArgList is longer than MAX_LINE_LENGTH, and each argument goes
+//    on its own line.
+//
+// 2. A conditional expression, which is the most common case in minified
+//    code:
+//
+//      return typeof t!="object"?null:(t=g&&t[g]||t["@@iterator"],typeof t=|
+//
+//    The conditional expression looks short, so the partial tree gives:
+//
+//      return typeof t != "object" ? null : (t = g && t[g] || ...
+//
+//    With the rest of the code, it is too long for one line, so the `?` and
+//    the `:` start new lines:
+//
+//      return typeof t != "object"
+//        ? null
+//        : (t = g && t[g] || t["@@iterator"], typeof t == "function" ? t : null)
+//
+//    This also changes the indentation of everything inside the `:` branch.
+//
+// 3. A node whose type depends on code after the end of the tree:
+//
+//      x=({a,b}|)=>a+b;
+//
+//    Without the `=>`, the parser takes `({a,b})` for a
+//    ParenthesizedExpression around an ObjectExpression, which gets one
+//    property per line. Once the `=>` is parsed, it is the ParamList of an
+//    ArrowFunction, with an ObjectPattern, which stays on one line.
+const PARTIAL_TREE_MARGIN = 500;
+
+// The minimum time to parse before reporting progress, in milliseconds.
+const MIN_STEP_DURATION = 50;
+
+/**
+ * Formats the code in steps, and calls onProgress after each step. The code
+ * is parsed incrementally. After each step, the format edits are computed by
+ * walking the partial syntax tree from the start, because the formatting
+ * state depends on all the code before it. To keep this overhead low, each
+ * step parses for at least four times as long as the last walk took.
+ *
+ * The edits of a step can differ from the edits of the previous step, if the
+ * partial syntax tree of the previous step was wrong. So onProgress gets the
+ * number of edits from the previous step which are still valid, and the edits
+ * which replace the rest of them. After the last step, the edits are the
+ * edits for the full syntax tree.
+ */
+export function formatJsCodeIncrementally(
+  code: string,
+  dialect: JsDialect,
+  onProgress: (
+    keptEditCount: number,
+    edits: FormatEdits,
+    formattedUpTo: number,
+    isDone: boolean
+  ) => void
+) {
+  const parser = parserForDialect(dialect);
+  let fragments: readonly TreeFragment[] = [];
+  let prevEdits: FormatEdits = new Int32Array(0);
+  let formattedUpTo = 0;
+  let stepDuration = MIN_STEP_DURATION;
+  for (;;) {
+    const parse = parser.startParse(code, fragments);
+    const stepStart = performance.now();
+    let tree: Tree | null;
+    while ((tree = parse.advance()) === null) {
+      if (
+        parse.stoppedAt === null &&
+        performance.now() - stepStart > stepDuration
+      ) {
+        parse.stopAt(parse.parsedPos);
+      }
+    }
+    const isDone = parse.stoppedAt === null;
+    const rangeEnd = isDone
+      ? code.length + 1
+      : tree.length - PARTIAL_TREE_MARGIN;
+    if (isDone || rangeEnd > formattedUpTo) {
+      const walkStart = performance.now();
+      const edits = computeFormatEdits(code, tree, rangeEnd);
+      const walkDuration = performance.now() - walkStart;
+      stepDuration = Math.max(MIN_STEP_DURATION, walkDuration * 4);
+      const keptEditCount = countCommonFormatEdits(prevEdits, edits);
+      formattedUpTo = Math.min(rangeEnd, code.length);
+      onProgress(
+        keptEditCount,
+        edits.slice(keptEditCount * 3),
+        formattedUpTo,
+        isDone
+      );
+      prevEdits = edits;
+    }
+    if (isDone) {
+      return;
+    }
+    fragments = TreeFragment.addTree(tree, fragments, true);
+  }
 }
