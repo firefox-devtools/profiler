@@ -358,7 +358,7 @@ export function getMozbuildStatePath(): string {
   );
 }
 
-function realpathOrSelf(filePath: string): string {
+export function realpathOrSelf(filePath: string): string {
   try {
     return fs.realpathSync(filePath);
   } catch {
@@ -367,22 +367,28 @@ function realpathOrSelf(filePath: string): string {
 }
 
 /**
- * Whether the profiler-cli script at `scriptPath` is the copy that
- * `./mach bootstrap` installed from Firefox's in-tree toolchain.
+ * Whether `filePath` is somewhere below `dir`, after resolving symlinks.
  */
-export function isInstalledByMachBootstrap(scriptPath: string): boolean {
-  const toolDir = realpathOrSelf(
-    path.join(getMozbuildStatePath(), 'profiler-cli')
-  );
-  const relative = path.relative(toolDir, realpathOrSelf(scriptPath));
+export function isPathInside(dir: string, filePath: string): boolean {
+  const relative = path.relative(realpathOrSelf(dir), realpathOrSelf(filePath));
   return (
     relative !== '' && !relative.startsWith('..') && !path.isAbsolute(relative)
   );
 }
 
 /**
+ * Whether the profiler-cli script at `scriptPath` is the copy that
+ * `./mach bootstrap` installed from Firefox's in-tree toolchain.
+ */
+export function isInstalledByMachBootstrap(scriptPath: string): boolean {
+  return isPathInside(
+    path.join(getMozbuildStatePath(), 'profiler-cli'),
+    scriptPath
+  );
+}
+
+/**
  * Explain that a profile is too new for this build and how to update it.
- * The bootstrapped copy can only be updated through "./mach bootstrap".
  */
 export function describeProfileVersionError(
   error: ProfileVersionError,
@@ -393,12 +399,13 @@ export function describeProfileVersionError(
   if (isInstalledByMachBootstrap(scriptPath)) {
     return [
       versionLine,
-      'This profiler-cli was installed by "./mach bootstrap". Update your Firefox checkout to the latest main branch and run "./mach bootstrap" again.',
+      'This profiler-cli was installed by "./mach bootstrap". Run "profiler-cli self-update" to get the latest build from Firefox CI. If that is still too old, Firefox has not picked up a profiler-cli with this format yet.',
     ].join('\n');
   }
   return [
     versionLine,
     'Update to the latest version with:',
-    `  npm install -g ${packageName}@latest`,
+    '  profiler-cli self-update',
+    `or: npm install -g ${packageName}@latest`,
   ].join('\n');
 }
