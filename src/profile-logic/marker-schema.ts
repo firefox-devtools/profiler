@@ -676,6 +676,9 @@ export function formatFromMarkerSchema(
     case 'unique-string':
     case 'flow-id':
     case 'terminating-flow-id':
+    case 'causal-flow-id':
+    case 'causal-flow-terminating-id':
+    case 'causal-flow-nonterminating-id':
       return stringTable.getString(value, '(empty)');
     case 'duration':
     case 'time':
@@ -796,7 +799,10 @@ export function isStringIndexFormat(
   return (
     format === 'unique-string' ||
     format === 'flow-id' ||
-    format === 'terminating-flow-id'
+    format === 'terminating-flow-id' ||
+    format === 'causal-flow-id' ||
+    format === 'causal-flow-terminating-id' ||
+    format === 'causal-flow-nonterminating-id'
   );
 }
 

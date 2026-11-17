@@ -6,6 +6,10 @@ Note that this is not an exhaustive list. Processed profile format upgraders can
 
 ## Processed profile format
 
+### Version 79
+
+Three new marker schema field format types have been added: `causal-flow-id`, `causal-flow-terminating-id` and `causal-flow-nonterminating-id`, with string index values (like `flow-id`). They are flow ids that also express explicit cause/effect links between markers on any thread: the trigger, the effect that ends the flow, and an effect that leaves it open. No upgrade is needed.
+
 ### Version 78
 
 An optional `color` field has been added to the marker schema. It holds a graph color name (such as `blue` or `orange`) and sets the color of markers of this type in timeline marker tracks and in the marker chart.
@@ -342,6 +346,10 @@ We've also cleaned up the ResourceTable format:
 Older versions are not documented in this changelog but can be found in [processed-profile-versioning.ts](../src/profile-logic/processed-profile-versioning.ts).
 
 ## Gecko profile format
+
+### Version 38
+
+Three new marker schema field format types have been added: `causal-flow-id`, `causal-flow-terminating-id` and `causal-flow-nonterminating-id`, with string index values (like `flow-id`). They are flow ids that also express explicit cause/effect links between markers on any thread: the trigger, the effect that ends the flow, and an effect that leaves it open. No upgrade is needed.
 
 ### Version 37
 

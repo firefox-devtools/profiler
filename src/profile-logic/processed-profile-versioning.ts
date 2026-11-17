@@ -3833,6 +3833,14 @@ const _upgraders: {
       }
     }
   },
+  [79]: (_profile: any) => {
+    // This version bump added three new marker schema field format types:
+    // "causal-flow-id", "causal-flow-terminating-id" and "causal-flow-nonterminating-id".
+    // Older frontends will not be able to display these fields.
+    // No upgrade is needed, as older versions of Firefox would not generate
+    // marker data with the new field types, and no modification is needed in the
+    // frontend to display older formats.
+  },
   // If you add a new upgrader here, please document the change in
   // `docs-developer/CHANGELOG-formats.md`.
 };
