@@ -154,10 +154,13 @@ CallTree--inlining-badge = (regroupés)
     .title = Les appels à { $calledFunction } ont été regroupés dans { $outerFunction } par le compilateur.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Sélectionnez un nœud pour afficher des informations le concernant.
 CallTreeSidebar--call-node-details = Détails du nœud d’appel
+CallTreeSidebar--select-a-function = Sélectionnez une fonction pour afficher des informations la concernant.
+CallTreeSidebar--function-details = Informations sur la fonction
 
 ## CallTreeSidebar timing information
 ##
@@ -473,10 +476,28 @@ MenuButtons--metaInfo--resymbolicate-profile = Re-symboliser le profil
 MenuButtons--metaInfo--symbolicate-profile = Profil symbolique
 MenuButtons--metaInfo--attempting-resymbolicate = Tenter de re-symboliser le profil
 MenuButtons--metaInfo--currently-symbolicating = Re-symbolisation du profil en cours
+MenuButtons--metaInfo--source-maps = Cartographie du code source :
+# The trailing ellipsis indicates that clicking the button opens a file picker.
+MenuButtons--metaInfo--apply-source-map = Appliquer le mappage du code source…
+    .title = Charge un fichier .map du disque pour symboliser un paquet JavaScript minifié, afin de récupérer les noms des fonctions et les emplacements des sources.
+# Shown when the uploaded map could match more than one source and the user has
+# to choose which one it applies to.
+MenuButtons--metaInfo--source-map-choose-bundle = Choisir le paquet auquel s’applique cette carte source :
 # Button to confirm the chosen source and apply the source map to it.
 MenuButtons--metaInfo--source-map-apply = Appliquer
 # Button to dismiss the source chooser without symbolicating.
 MenuButtons--metaInfo--source-map-cancel = Annuler
+# Shown after symbolication finished and original sources were resolved.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-success = Sources d'origine résolues pour { $filename }.
+# Shown after symbolication finished but no stack positions matched the map.
+# Variable:
+#   $filename (String) - The bundle source the source map was applied to.
+MenuButtons--metaInfo--source-map-no-match = Aucune position de pile dans { $filename } ne correspond à cette carte source.
+MenuButtons--metaInfo--source-map-error-invalid = Le fichier sélectionné n’est pas une carte source valide.
+MenuButtons--metaInfo--source-map-error-no-eligible = Ce profil ne contient aucun paquet JS disposant d’URL de carte source.
+MenuButtons--metaInfo--source-map-error-failed = Impossible d’appliquer cette carte source au profil.
 MenuButtons--metaInfo--cpu-model = Modèle de processeur :
 MenuButtons--metaInfo--cpu-cores = Cœurs de processeur :
 MenuButtons--metaInfo--main-memory = Mémoire principale :
@@ -602,6 +623,9 @@ MenuButtons--publish--renderCheckbox-label-preference = Inclure les valeurs des 
 MenuButtons--publish--renderCheckbox-label-private-browsing = Inclure les données des fenêtres de navigation privée
 MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Ce profil contient des données de navigation privée
+MenuButtons--publish--renderCheckbox-label-argument-values = Inclure les valeurs des arguments de fonction dans le traçage de l’exécution JavaScript
+MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
+    .title = Ce profil contient des valeurs d’arguments de fonctions recueillies sur la page, susceptibles d’inclure des données personnelles
 MenuButtons--publish--share-performance-profile = Partager le profil de performance
 MenuButtons--publish--reshare-performance-profile = Repartager le profil de performances
 MenuButtons--publish--save-performance-profile = Enregistrer le profil de performances
@@ -769,6 +793,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbre d’appels
+TabBar--function-list-tab = Liste des fonctions
 TabBar--flame-graph-tab = Graphique en flammes
 TabBar--stack-chart-tab = Graphique en piles
 TabBar--marker-chart-tab = Graphique des marqueurs

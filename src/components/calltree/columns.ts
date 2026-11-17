@@ -128,3 +128,47 @@ export function treeColumnsForWeightType(
       throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
   }
 }
+
+function withSelfPercentColumn(
+  columns: MaybeResizableColumn<CallNodeDisplayData>[]
+): MaybeResizableColumn<CallNodeDisplayData>[] {
+  const selfPercentColumn = {
+    propName: 'selfPercent',
+    titleL10nId: '',
+    initialWidth: 55,
+    hideDividerAfter: true,
+  };
+  const selfColumnIndex = columns.findIndex((c) => c.propName === 'self');
+  const selfColumn = {
+    ...columns[selfColumnIndex],
+    headerWidthAdjustment: selfPercentColumn.initialWidth,
+  };
+  const newColumns = columns.slice();
+  newColumns[selfColumnIndex] = selfColumn;
+  newColumns.splice(selfColumnIndex, 0, selfPercentColumn);
+  return newColumns;
+}
+
+export const functionListColumnsForTracingMs: MaybeResizableColumn<CallNodeDisplayData>[] =
+  withSelfPercentColumn(treeColumnsForTracingMs);
+export const functionListColumnsForSamples: MaybeResizableColumn<CallNodeDisplayData>[] =
+  withSelfPercentColumn(treeColumnsForSamples);
+export const functionListColumnsForBytes: MaybeResizableColumn<CallNodeDisplayData>[] =
+  withSelfPercentColumn(treeColumnsForBytes);
+
+// Like `treeColumnsForWeightType`, but for the FunctionList table (which has
+// an extra selfPercent column compared to the call-tree variants).
+export function functionListColumnsForWeightType(
+  weightType: WeightType
+): MaybeResizableColumn<CallNodeDisplayData>[] {
+  switch (weightType) {
+    case 'tracing-ms':
+      return functionListColumnsForTracingMs;
+    case 'samples':
+      return functionListColumnsForSamples;
+    case 'bytes':
+      return functionListColumnsForBytes;
+    default:
+      throw assertExhaustiveCheck(weightType, 'Unhandled WeightType.');
+  }
+}

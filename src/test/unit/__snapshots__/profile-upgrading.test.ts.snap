@@ -40,7 +40,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 77,
+    "preprocessedProfileVersion": 78,
     "processType": 0,
     "product": "Firefox",
     "sampleUnits": undefined,
@@ -7419,6 +7419,7 @@ Object {
     "interval": 1,
     "markerSchema": Array [
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -7426,8 +7427,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -7435,8 +7440,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -7444,8 +7453,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "yellow",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -7453,9 +7466,13 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
+        "color": "blue",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -7505,6 +7522,7 @@ Object {
         "name": "MediaSample",
       },
       Object {
+        "color": "teal",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -7538,6 +7556,9 @@ Object {
           },
         ],
         "name": "Styles",
+        "timelineStyle": Object {
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -7795,7 +7816,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 77,
+    "preprocessedProfileVersion": 78,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8840,6 +8861,7 @@ Object {
     "interval": 1,
     "markerSchema": Array [
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -8847,8 +8869,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -8856,8 +8882,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -8865,8 +8895,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "yellow",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -8874,9 +8908,13 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
+        "color": "blue",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -8926,6 +8964,7 @@ Object {
         "name": "MediaSample",
       },
       Object {
+        "color": "teal",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -8959,6 +8998,9 @@ Object {
           },
         ],
         "name": "Styles",
+        "timelineStyle": Object {
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -9216,7 +9258,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 77,
+    "preprocessedProfileVersion": 78,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10429,6 +10471,7 @@ Object {
     "interval": 1,
     "markerSchema": Array [
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -10436,8 +10479,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMajor",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -10445,8 +10492,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCMinor",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "orange",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -10454,8 +10505,12 @@ Object {
         ],
         "fields": Array [],
         "name": "GCSlice",
+        "timelineStyle": Object {
+          "top": 6,
+        },
       },
       Object {
+        "color": "yellow",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -10463,9 +10518,13 @@ Object {
         ],
         "fields": Array [],
         "name": "CC",
+        "timelineStyle": Object {
+          "squareCorners": true,
+        },
         "tooltipLabel": "Cycle Collect",
       },
       Object {
+        "color": "blue",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -10515,6 +10574,7 @@ Object {
         "name": "MediaSample",
       },
       Object {
+        "color": "teal",
         "display": Array [
           "marker-chart",
           "marker-table",
@@ -10548,6 +10608,9 @@ Object {
           },
         ],
         "name": "Styles",
+        "timelineStyle": Object {
+          "top": 7,
+        },
       },
       Object {
         "display": Array [
@@ -10834,7 +10897,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 77,
+    "preprocessedProfileVersion": 78,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

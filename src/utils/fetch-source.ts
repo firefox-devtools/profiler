@@ -165,8 +165,7 @@ export async function fetchSource(
         const stream = new UntarFileStream(bytes.buffer);
         const textDecoder = new TextDecoder();
 
-        while (stream.hasNext()) {
-          const entry = stream.next();
+        for (let entry = stream.next(); entry !== null; entry = stream.next()) {
           if (entry.name === pathInArchive && entry.buffer !== null) {
             const source = textDecoder.decode(entry.buffer);
             return { type: 'SUCCESS', source };

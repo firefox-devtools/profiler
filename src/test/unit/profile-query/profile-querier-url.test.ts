@@ -59,6 +59,30 @@ describe('ProfileQuerier URL view state', function () {
     ).toBe('B');
   });
 
+  it('reports the imported selected marker in status', async function () {
+    const querier = await ProfileQuerier.load(
+      `${PROFILER_URL}/marker-chart/?marker=0&thread=0&v=17`
+    );
+    const { selectedMarker } = await querier.getStatus();
+    expect(selectedMarker).toEqual({
+      markerHandle: 'm-1',
+      markerIndex: 0,
+      name: 'Test marker',
+      start: 10,
+      duration: 5,
+    });
+    const info = await querier.markerInfo(selectedMarker!.markerHandle);
+    expect(info.markerIndex).toBe(0);
+
+    await querier.threadSelect('t-1');
+    expect((await querier.getStatus()).selectedMarker).toBeUndefined();
+  });
+
+  it('reports no selected marker when the URL has none', async function () {
+    const querier = await loadWithSearch();
+    expect((await querier.getStatus()).selectedMarker).toBeUndefined();
+  });
+
   it('clears imported search even when the transform stack is empty', async function () {
     const querier = await loadWithSearch();
     expect(querier.filterList().filters).toEqual([]);

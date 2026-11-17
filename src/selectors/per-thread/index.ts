@@ -270,3 +270,78 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     getTimingsForSidebar,
   };
 })();
+
+export type FunctionSelectors = {
+  readonly getName: Selector<string>;
+  readonly getLib: Selector<string>;
+  readonly getTimingsForSidebar: Selector<TimingsForPath>;
+};
+
+/**
+ * The equivalent of selectedNodeSelectors for the function selected in the
+ * function list.
+ */
+export const selectedFunctionSelectors: FunctionSelectors = (() => {
+  const getName: Selector<string> = createSelector(
+    selectedThreadSelectors.getSelectedFunctionIndex,
+    selectedThreadSelectors.getFilteredThread,
+    (funcIndex, { stringTable, funcTable }) => {
+      if (funcIndex === null) {
+        return '';
+      }
+      return stringTable.getString(funcTable.name[funcIndex]);
+    }
+  );
+
+  const getLib: Selector<string> = createSelector(
+    selectedThreadSelectors.getSelectedFunctionIndex,
+    selectedThreadSelectors.getFilteredThread,
+    ProfileSelectors.getSourceTable,
+    (
+      funcIndex,
+      {
+        stringTable,
+        frameTable,
+        funcTable,
+        resourceTable,
+        sourceLocationTable,
+      },
+      sources
+    ) => {
+      if (funcIndex === null) {
+        return '';
+      }
+      return ProfileData.getOriginAnnotationForFunc(
+        funcIndex,
+        null,
+        frameTable,
+        funcTable,
+        resourceTable,
+        stringTable,
+        sources,
+        sourceLocationTable
+      );
+    }
+  );
+
+  const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
+    ProfileSelectors.getCategories,
+    selectedThreadSelectors.getPreviewFilteredCtssSamples,
+    selectedThreadSelectors.getPreviewFilteredCtssSampleCategoriesAndSubcategories,
+    selectedThreadSelectors.getPreviewFilteredCtssSampleRelationsToSelectedFunction,
+    (categories, samples, sampleCategoriesAndSubcategories, sampleRelations) =>
+      ProfileData.getCallNodeTimings(
+        categories,
+        samples,
+        sampleCategoriesAndSubcategories,
+        sampleRelations,
+        false
+      )
+  );
+
+  return {
+    getName,
+    getLib,
+    getTimingsForSidebar,
+  };
+})();

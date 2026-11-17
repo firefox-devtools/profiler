@@ -23,6 +23,7 @@ import { autoMockFullNavigation } from '../fixtures/mocks/window-navigation';
 import { profilePublished } from 'firefox-profiler/actions/publish';
 import {
   changeCallTreeSearchString,
+  changeSelectedFunctionIndex,
   setDataSource,
 } from 'firefox-profiler/actions/profile-view';
 import { getProfileOrNull } from '../../selectors/profile';
@@ -273,6 +274,36 @@ describe('UrlManager', function () {
     // Look again at this search.
     act(() => window.history.forward());
     expect(getCurrentSearchString(getState())).toBe('B');
+  });
+
+  it('replaces the history entry when only the selected function changes', async () => {
+    window.fetchMock.get('*', getSerializableProfile());
+
+    const urlPath = '/public/FAKE_HASH/function-list/';
+    const searchString = 'v=' + CURRENT_URL_VERSION;
+
+    const { createUrlManager, waitUntilUrlSetupPhase, dispatch } = setup(
+      urlPath + '?' + searchString
+    );
+    createUrlManager();
+    await waitUntilUrlSetupPhase('done');
+    expect(window.history.length).toBe(1);
+
+    act(() => {
+      dispatch(changeSelectedFunctionIndex(0, 0));
+    });
+    expect(window.location.search).toContain('selectedFunc=0');
+    act(() => {
+      dispatch(changeSelectedFunctionIndex(0, null));
+    });
+    expect(window.location.search).not.toContain('selectedFunc');
+    expect(window.history.length).toBe(1);
+
+    // Other changes still push a new history entry.
+    act(() => {
+      dispatch(changeCallTreeSearchString('A'));
+    });
+    expect(window.history.length).toBe(2);
   });
 
   it('allows navigating back and forward when moving between content pages', async () => {

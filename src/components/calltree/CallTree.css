@@ -7,8 +7,9 @@
   text-align: right;
 }
 
-/* The header for the totalPercent column is not visible */
-.treeViewHeaderColumn.totalPercent {
+/* The headers for the percent columns are not visible */
+.treeViewHeaderColumn.totalPercent,
+.treeViewHeaderColumn.selfPercent {
   display: none;
 }
 
@@ -26,6 +27,7 @@
 .treeViewRowColumn.total,
 .treeViewRowColumn.totalPercent,
 .treeViewRowColumn.self,
+.treeViewRowColumn.selfPercent,
 .treeViewRowColumn.timestamp {
   text-align: right;
 }

@@ -6,7 +6,12 @@ import type {
   CallNodeTable,
   FuncTable,
   IndexIntoCallNodeTable,
+  IndexIntoFuncTable,
+  SourceTable,
+  SourceLocationTable,
+  ResourceTable,
 } from 'firefox-profiler/types';
+import { FuncFlag } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
   CallTreeTimingsInverted,
@@ -14,7 +19,7 @@ import type {
 } from './call-tree';
 import type { CallNodeInfoInverted } from './call-node-info';
 
-import { bisectionRightByStrKey } from 'firefox-profiler/utils/bisect';
+import { bisectionRightBy } from 'firefox-profiler/utils/bisect';
 
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
@@ -200,7 +205,8 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
  * The call nodes are ordered in the same order that they'll be displayed in the
  * flame graph:
  *
- *  - Siblings are ordered by function name.
+ *  - Siblings are ordered by function name. Siblings with the same function
+ *    name are ordered by the other criteria of makeFlameGraphFuncComparator.
  *  - Siblings are grouped, i.e. all nodes with the same prefix are next to each other.
  *  - The order of these groups with respect to each other is determined by how
  *    their prefix call nodes are ordered in the previous row.
@@ -229,20 +235,125 @@ class FlameGraphTimingNonInverted implements FlameGraphTiming {
  */
 export type FlameGraphRows = IndexIntoCallNodeTable[][];
 
+function compareStrings(a: string, b: string): number {
+  if (a < b) {
+    return -1;
+  }
+  if (a > b) {
+    return 1;
+  }
+  return 0;
+}
+
+// Compares two functions. Returns a negative number if funcA comes first.
+export type FlameGraphFuncComparator = (
+  funcA: IndexIntoFuncTable,
+  funcB: IndexIntoFuncTable
+) => number;
+
+/**
+ * Returns a comparator for ordering siblings in the flame graph. Functions
+ * are ordered by name. Functions with the same name are ordered by file name,
+ * then by original (source-mapped) file name, then by the line and column
+ * where the function starts, then by resource name. The function index is the
+ * final tie-breaker, so that two different functions never compare equal.
+ */
+export function makeFlameGraphFuncComparator(
+  funcTable: FuncTable,
+  resourceTable: ResourceTable,
+  sources: SourceTable,
+  sourceLocationTable: SourceLocationTable,
+  stringTable: StringTable
+): FlameGraphFuncComparator {
+  function getFuncName(funcIndex: IndexIntoFuncTable): string {
+    return stringTable.getString(funcTable.name[funcIndex]);
+  }
+
+  // Returns the file name of a function, or the empty string if the function
+  // has no source.
+  function getFuncFileName(funcIndex: IndexIntoFuncTable): string {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasSource) === 0) {
+      return '';
+    }
+    return stringTable.getString(sources.filename[funcTable.source[funcIndex]]);
+  }
+
+  function hasOriginalLocation(funcIndex: IndexIntoFuncTable): boolean {
+    return (funcTable.flags[funcIndex] & FuncFlag.HasOriginalLocation) !== 0;
+  }
+
+  // Returns the original (source-mapped) file name of a function, or the empty
+  // string if the function has no original location.
+  function getFuncOriginalFileName(funcIndex: IndexIntoFuncTable): string {
+    if (!hasOriginalLocation(funcIndex)) {
+      return '';
+    }
+    const location = funcTable.originalLocation[funcIndex];
+    return stringTable.getString(
+      sources.filename[sourceLocationTable.source[location]]
+    );
+  }
+
+  // Returns the line where a function starts, preferring the original
+  // location. Returns 0 if the line is unknown.
+  function getFuncStartLine(funcIndex: IndexIntoFuncTable): number {
+    if (hasOriginalLocation(funcIndex)) {
+      return sourceLocationTable.line[funcTable.originalLocation[funcIndex]];
+    }
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasLine) !== 0) {
+      return funcTable.lineNumber[funcIndex];
+    }
+    return 0;
+  }
+
+  // Returns the column where a function starts, preferring the original
+  // location. Returns 0 if the column is unknown.
+  function getFuncStartColumn(funcIndex: IndexIntoFuncTable): number {
+    if (hasOriginalLocation(funcIndex)) {
+      return sourceLocationTable.column[funcTable.originalLocation[funcIndex]];
+    }
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasColumn) !== 0) {
+      return funcTable.columnNumber[funcIndex];
+    }
+    return 0;
+  }
+
+  // Returns the resource name of a function, for example the library name of a
+  // native function, or the empty string if the function has no resource.
+  function getFuncResourceName(funcIndex: IndexIntoFuncTable): string {
+    if ((funcTable.flags[funcIndex] & FuncFlag.HasResource) === 0) {
+      return '';
+    }
+    return stringTable.getString(
+      resourceTable.name[funcTable.resource[funcIndex]]
+    );
+  }
+
+  return (funcA, funcB) =>
+    compareStrings(getFuncName(funcA), getFuncName(funcB)) ||
+    compareStrings(getFuncFileName(funcA), getFuncFileName(funcB)) ||
+    compareStrings(
+      getFuncOriginalFileName(funcA),
+      getFuncOriginalFileName(funcB)
+    ) ||
+    getFuncStartLine(funcA) - getFuncStartLine(funcB) ||
+    getFuncStartColumn(funcA) - getFuncStartColumn(funcB) ||
+    compareStrings(getFuncResourceName(funcA), getFuncResourceName(funcB)) ||
+    funcA - funcB;
+}
+
 /**
  * Compute the FlameGraphRows. The result is independent of timing information.
  */
 export function computeFlameGraphRows(
   callNodeTable: CallNodeTable,
-  funcTable: FuncTable,
-  stringTable: StringTable
+  compareFuncs: FlameGraphFuncComparator
 ): FlameGraphRows {
   if (callNodeTable.length === 0) {
     return [[]];
   }
 
   const { func, nextSibling, subtreeRangeEnd, maxDepth } = callNodeTable;
-  const funcTableNameColumn = funcTable.name;
 
   // flameGraphRows is what we'll return from this function.
   //
@@ -293,14 +404,12 @@ export function computeFlameGraphRows(
         rowAtThisDepth.push(currentSibling);
       } else {
         // There are other siblings already present in rowAtThisDepth[siblingIndexRangeStart..].
-        // Do an ordered insert, to keep siblings ordered by function name.
+        // Do an ordered insert, to keep siblings ordered by compareFuncs.
         // assert(siblingIndexRangeStart < siblingIndexRangeEnd)
         const thisFunc = func[currentSibling];
-        const funcName = stringTable.getString(funcTableNameColumn[thisFunc]);
-        const insertionIndex = bisectionRightByStrKey(
+        const insertionIndex = bisectionRightBy(
           rowAtThisDepth,
-          funcName,
-          (cn) => stringTable.getString(funcTableNameColumn[func[cn]]),
+          (cn) => compareFuncs(func[cn], thisFunc),
           siblingIndexRangeStart,
           siblingIndexRangeEnd
         );
@@ -410,8 +519,7 @@ const MIN_INVERTED_FLAME_GRAPH_BOX_WIDTH = 1 / 16384;
 class FlameGraphTimingInverted implements FlameGraphTiming {
   _callNodeInfo: CallNodeInfoInverted;
   _callTreeTimings: CallTreeTimingsInverted;
-  _funcTable: FuncTable;
-  _stringTable: StringTable;
+  _compareFuncs: FlameGraphFuncComparator;
   _nonRootTimingCache: Map<IndexIntoCallNodeTable, InvertedNodeTiming> =
     new Map();
   _timingRows: FlameGraphTimingRow[] = [];
@@ -421,13 +529,11 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
   constructor(
     callNodeInfo: CallNodeInfoInverted,
     callTreeTimings: CallTreeTimingsInverted,
-    funcTable: FuncTable,
-    stringTable: StringTable
+    compareFuncs: FlameGraphFuncComparator
   ) {
     this._callNodeInfo = callNodeInfo;
     this._callTreeTimings = callTreeTimings;
-    this._funcTable = funcTable;
-    this._stringTable = stringTable;
+    this._compareFuncs = compareFuncs;
 
     const { rootTotalSummary } = callTreeTimings;
     this._rowCount =
@@ -466,24 +572,15 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
     return _getBoxWidth(this, depth, indexInRow);
   }
 
-  _compareCallNodesByFuncName = (
+  _compareCallNodesByFunc = (
     a: IndexIntoCallNodeTable,
     b: IndexIntoCallNodeTable
   ): number => {
     const callNodeInfo = this._callNodeInfo;
-    const { name } = this._funcTable;
-    const stringTable = this._stringTable;
-    const funcA = callNodeInfo.funcForNode(a);
-    const funcB = callNodeInfo.funcForNode(b);
-    const funcNameA = stringTable.getString(name[funcA]);
-    const funcNameB = stringTable.getString(name[funcB]);
-    if (funcNameA < funcNameB) {
-      return -1;
-    }
-    if (funcNameA > funcNameB) {
-      return 1;
-    }
-    return funcA - funcB;
+    return this._compareFuncs(
+      callNodeInfo.funcForNode(a),
+      callNodeInfo.funcForNode(b)
+    );
   };
 
   _getNodeTiming(nodeIndex: IndexIntoCallNodeTable): InvertedNodeTiming {
@@ -538,7 +635,7 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
         displayedChildren.push(child);
       }
     }
-    displayedChildren.sort(this._compareCallNodesByFuncName);
+    displayedChildren.sort(this._compareCallNodesByFunc);
     return displayedChildren;
   }
 
@@ -555,7 +652,7 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
     for (let i = 0; i < sortedRoots.length; i++) {
       roots.push(sortedRoots[i]);
     }
-    roots.sort(this._compareCallNodesByFuncName);
+    roots.sort(this._compareCallNodesByFunc);
 
     const rootRowItems: InvertedFlameGraphRowItem[] = [];
     let currentRootStart = 0;
@@ -632,13 +729,11 @@ class FlameGraphTimingInverted implements FlameGraphTiming {
 export function getInvertedFlameGraphTiming(
   callNodeInfo: CallNodeInfoInverted,
   callTreeTimings: CallTreeTimingsInverted,
-  funcTable: FuncTable,
-  stringTable: StringTable
+  compareFuncs: FlameGraphFuncComparator
 ): FlameGraphTiming {
   return new FlameGraphTimingInverted(
     callNodeInfo,
     callTreeTimings,
-    funcTable,
-    stringTable
+    compareFuncs
   );
 }

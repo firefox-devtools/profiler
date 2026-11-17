@@ -208,10 +208,13 @@ CallTree--inlining-badge = (infogad)
     .title = Anrop till { $calledFunction } infogades i { $outerFunction } av kompilatorn.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Välj en nod för att visa information om den.
 CallTreeSidebar--call-node-details = Detaljer anropsnod
+CallTreeSidebar--select-a-function = Välj en funktion för att se information om den.
+CallTreeSidebar--function-details = Funktionsdetaljer
 
 ## CallTreeSidebar timing information
 ##
@@ -867,6 +870,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Anropsträd
+TabBar--function-list-tab = Funktionslista
 TabBar--flame-graph-tab = Flamgraf
 TabBar--stack-chart-tab = Stapeldiagram
 TabBar--marker-chart-tab = Markördiagram

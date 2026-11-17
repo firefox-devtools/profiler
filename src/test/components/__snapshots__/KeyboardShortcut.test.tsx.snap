@@ -279,6 +279,25 @@ exports[`app/KeyboardShortcut matches the snapshot when open 1`] = `
             <div
               class="appKeyboardShortcutsLabel"
             >
+              Select all visible threads
+            </div>
+            <kbd
+              class="appKeyboardShortcutsShortcut"
+            >
+              ctrl
+            </kbd>
+            <kbd
+              class="appKeyboardShortcutsShortcut"
+            >
+              a
+            </kbd>
+          </div>
+          <div
+            class="appKeyboardShortcutsRow"
+          >
+            <div
+              class="appKeyboardShortcutsLabel"
+            >
               Select multiple threads
             </div>
             <kbd

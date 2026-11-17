@@ -17,7 +17,10 @@ import { getProfileOrNull } from './profile';
 
 export const getSourceCodeCache: Selector<
   Map<IndexIntoSourceTable, SourceCodeStatus>
-> = (state) => state.code.sourceCodeCache;
+> = (state) => state.code.sourceCodeCache.statuses;
+
+export const getSourceCodeCacheGeneration: Selector<number> = (state) =>
+  state.code.sourceCodeCache.generation;
 
 export const getSourceViewCode: Selector<SourceCodeStatus | void> =
   createSelector(

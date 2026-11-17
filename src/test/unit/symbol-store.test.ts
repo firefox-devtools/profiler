@@ -270,6 +270,10 @@ describe('SymbolStore', function () {
         debugName: '',
         breakpadId: 'empty-debugname',
       },
+      {
+        debugName: '[vdso]',
+        breakpadId: 'dont-care',
+      },
     ];
 
     const symbolTable = new Map([
@@ -291,6 +295,9 @@ describe('SymbolStore', function () {
           const { debugName, breakpadId } = request.lib;
           expect(debugName).not.toEqual('');
           expect(breakpadId).not.toEqual('');
+          // Pseudo-libraries must be filtered out before reaching the server,
+          // otherwise they cause the whole batched request to be rejected.
+          expect(debugName.startsWith('[')).toBe(false);
           await fakeSymbolStore.getSymbols(
             [request],
             (lib, results) => {
@@ -367,7 +374,7 @@ describe('SymbolStore', function () {
     // Empty debugNames or breakpadIds should cause errors. And if symbols are
     // not available from any source, all errors along the way should be included
     // in the reported error.
-    expect([...failedLibs]).toBeArrayOfSize(3);
+    expect([...failedLibs]).toBeArrayOfSize(4);
     expect(failedLibs.get('empty-breakpadid')).toEqual(
       expect.objectContaining({
         message: expect.stringContaining('Invalid debugName or breakpadId'),
@@ -376,6 +383,14 @@ describe('SymbolStore', function () {
     expect(failedLibs.get('')).toEqual(
       expect.objectContaining({
         message: expect.stringContaining('Invalid debugName or breakpadId'),
+      })
+    );
+
+    // Pseudo-libraries such as [vdso] should fail without being sent to any
+    // symbol source, so they can't take down the rest of the batch.
+    expect(failedLibs.get('[vdso]')).toEqual(
+      expect.objectContaining({
+        message: expect.stringContaining('Cannot symbolicate pseudo-library'),
       })
     );
 

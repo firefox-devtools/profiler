@@ -154,10 +154,13 @@ CallTree--inlining-badge = (incorporata)
     .title = Le chiamate a { $calledFunction } sono state incorporate in { $outerFunction } dal compilatore.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Seleziona un nodo per visualizzare informazioni su di esso.
 CallTreeSidebar--call-node-details = Dettagli nodo di chiamata
+CallTreeSidebar--select-a-function = Seleziona una funzione per visualizzarne i dettagli.
+CallTreeSidebar--function-details = Dettagli funzione
 
 ## CallTreeSidebar timing information
 ##
@@ -778,6 +781,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Albero delle chiamate
+TabBar--function-list-tab = Elenco funzioni
 TabBar--flame-graph-tab = Grafico a fiamma
 TabBar--stack-chart-tab = Grafico a pila
 TabBar--marker-chart-tab = Grafico a marker

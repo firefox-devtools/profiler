@@ -338,6 +338,25 @@ describe('selectors/getFlameGraphTiming', function () {
     ]);
   });
 
+  it('orders inverted siblings with the same function name by file name', function () {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      X             Y
+      B[file:b.js]  B[file:a.js]
+    `);
+
+    const store = storeWithProfile(profile);
+    store.dispatch(changeInvertCallstack(true));
+
+    // The root B from a.js comes first, so its caller Y comes first too.
+    expect(getHumanReadableFlameGraphRanges(store, funcNames)).toEqual([
+      'B (0:0.5) | B (0.5:1)',
+      'Y (0:0.5) | X (0.5:1)',
+    ]);
+  });
+
   it('contains totalTime, selfTime and selfRelative', function () {
     const {
       profile,

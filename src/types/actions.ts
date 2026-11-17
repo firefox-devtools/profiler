@@ -17,6 +17,7 @@ import type {
   RawFrameTable,
   SourceLocationTable,
   SourceTable,
+  IndexIntoFuncTable,
 } from './profile';
 import type {
   Thread,
@@ -196,6 +197,12 @@ type ProfileAction =
       readonly context: SelectionContext;
     }
   | {
+      readonly type: 'CHANGE_SELECTED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly selectedFunctionIndex: IndexIntoFuncTable | null;
+      readonly context: SelectionContext;
+    }
+  | {
       readonly type: 'UPDATE_TRACK_THREAD_HEIGHT';
       readonly height: CssPixels;
       readonly threadsKey: ThreadsKey;
@@ -204,6 +211,11 @@ type ProfileAction =
       readonly type: 'CHANGE_RIGHT_CLICKED_CALL_NODE';
       readonly threadsKey: ThreadsKey;
       readonly callNodePath: CallNodePath | null;
+    }
+  | {
+      readonly type: 'CHANGE_RIGHT_CLICKED_FUNCTION';
+      readonly threadsKey: ThreadsKey;
+      readonly functionIndex: IndexIntoFuncTable | null;
     }
   | {
       readonly type: 'FOCUS_CALL_TREE';
@@ -567,6 +579,10 @@ type UrlStateAction =
       readonly sort: SingleColumnSortState[] | null;
     }
   | {
+      readonly type: 'CHANGE_FUNCTION_LIST_SORT';
+      readonly sort: SingleColumnSortState[] | null;
+    }
+  | {
       readonly type: 'CHANGE_NETWORK_SEARCH_STRING';
       readonly searchString: string;
     }
@@ -719,25 +735,29 @@ type CurrentProfileUploadedInformationAction = {
   readonly uploadedProfileInformation: UploadedProfileInformation | null;
 };
 
-type SourcesAction =
+export type SourcesAction =
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_URL';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly url: string;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION';
       readonly sourceIndex: IndexIntoSourceTable;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_SUCCESS';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly code: string;
+      readonly generation: number;
     }
   | {
       readonly type: 'SOURCE_CODE_LOADING_ERROR';
       readonly sourceIndex: IndexIntoSourceTable;
       readonly errors: SourceCodeLoadingError[];
+      readonly generation: number;
     };
 
 // nativeSymbolKey == `${lib.debugName}/${lib.breakpadID}/${nativeSymbolInfo.address.toString(16)}`

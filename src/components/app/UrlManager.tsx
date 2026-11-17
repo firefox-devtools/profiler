@@ -17,6 +17,7 @@ import {
   urlFromState,
   stateFromLocation,
   getIsHistoryReplaceState,
+  isSelectionOnlyUrlChange,
 } from 'firefox-profiler/app-logic/url-handling';
 import { createBrowserConnection } from 'firefox-profiler/app-logic/browser-connection';
 import { retrieveProfileForRawUrl } from 'firefox-profiler/actions/receive-profile';
@@ -213,7 +214,7 @@ class UrlManagerImpl extends React.PureComponent<Props> {
     window.removeEventListener('popstate', this._updateState);
   }
 
-  override componentDidUpdate() {
+  override componentDidUpdate(prevProps: Props) {
     const { urlSetupPhase, phase, urlState } = this.props;
     if (urlSetupPhase !== 'done') {
       // Do not change the history before the url setup is done, because the URL
@@ -232,10 +233,15 @@ class UrlManagerImpl extends React.PureComponent<Props> {
 
     const oldUrl = window.location.pathname + window.location.search;
     const newUrl = urlFromState(urlState);
-    if (!window.history.state || getIsHistoryReplaceState()) {
+    if (
+      !window.history.state ||
+      getIsHistoryReplaceState() ||
+      (newUrl !== oldUrl &&
+        isSelectionOnlyUrlChange(prevProps.urlState, urlState))
+    ) {
       // Replace the URL state if we've specifically flagged to replace the URL
       // state. This happens during the loading process. Also do it if we don't
-      // have an history state yet.
+      // have an history state yet, or if only the selection changed.
       window.history.replaceState(urlState, document.title, newUrl);
     } else if (newUrl !== oldUrl) {
       // Push the URL state when we haven't set a flag to only replace the state.

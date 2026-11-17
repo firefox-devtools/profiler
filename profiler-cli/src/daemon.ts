@@ -32,6 +32,7 @@ import {
   writeStartupError,
 } from './session';
 import {
+  describeProfileVersionError,
   describeSessionDirFailure,
   describeSocketListenError,
   describeStaleSocketFailure,
@@ -58,12 +59,10 @@ function formatProfileLoadError(error: unknown): string {
     error instanceof ProfileVersionError ||
     (error instanceof Error && error.name === 'ProfileVersionError')
   ) {
-    const versionError = error as ProfileVersionError;
-    return (
-      `This profile is version ${versionError.profileVersion}, but this profiler-cli only ` +
-      `supports up to version ${versionError.supportedVersion} of the ${versionError.formatName} profile format.\n` +
-      `Update to the latest version with:\n` +
-      `  npm install -g ${PACKAGE_NAME}@latest`
+    return describeProfileVersionError(
+      error as ProfileVersionError,
+      PACKAGE_NAME,
+      process.argv[1]
     );
   }
   return error instanceof Error ? error.message : String(error);

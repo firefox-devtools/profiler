@@ -19,6 +19,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getTreeOrderComparator,
   getSampleRelationsToNode,
+  getSampleRelationsToFunction,
   SampleRelations,
   extractProfileFilterPageData,
   findAddressProofForFile,
@@ -1316,6 +1317,181 @@ describe('getSampleRelationsToNode', function () {
       expect(comparator(1, 1)).toBe(0);
       expect(comparator(4, 4)).toBe(0);
     });
+  });
+});
+
+describe('getSampleRelationsToFunction', function () {
+  function setup(textSamples: string) {
+    const {
+      derivedThreads,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(textSamples);
+    const [thread] = derivedThreads;
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      0
+    );
+    const sampleCallNodes = getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    );
+    return {
+      callNodeTable: callNodeInfo.getCallNodeTable(),
+      sampleCallNodes,
+      funcNamesDict,
+    };
+  }
+
+  it('marks all non-filtered samples as contributing when nothing is selected', function () {
+    const { callNodeTable, sampleCallNodes } = setup(`
+      A  A  A
+      B  C
+    `);
+    const relations = getSampleRelationsToFunction(
+      sampleCallNodes,
+      null,
+      callNodeTable
+    );
+    expect([0, 1, 2].map((i) => relations.contributesToTotal(i))).toEqual([
+      true,
+      true,
+      true,
+    ]);
+  });
+
+  it('marks samples whose stack contains the function as total, and those ending in it as self', function () {
+    //   0  1  2  3  4
+    //   A  A  A  A  A
+    //   B  D  B  D  D
+    //   C  E  F  G
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { B, D },
+    } = setup(`
+      A  A  A  A  A
+      B  D  B  D  D
+      C  E  F  G
+    `);
+
+    // Selecting function B: samples 0, 2 have B in their stack.
+    expect(
+      getSampleRelationsToFunction(
+        sampleCallNodes,
+        B,
+        callNodeTable
+      ).toArrayForTesting()
+    ).toEqual([
+      SampleRelationToNode.TotalButNotSelf,
+      SampleRelationToNode.Before,
+      SampleRelationToNode.TotalButNotSelf,
+      SampleRelationToNode.Before,
+      SampleRelationToNode.Before,
+    ]);
+
+    // Selecting function D: samples 1, 3, 4 have D in their stack, and
+    // sample 4 ends in D.
+    expect(
+      getSampleRelationsToFunction(
+        sampleCallNodes,
+        D,
+        callNodeTable
+      ).toArrayForTesting()
+    ).toEqual([
+      SampleRelationToNode.Before,
+      SampleRelationToNode.TotalButNotSelf,
+      SampleRelationToNode.Before,
+      SampleRelationToNode.TotalButNotSelf,
+      SampleRelationToNode.TotalAndSelf,
+    ]);
+  });
+
+  it('marks filtered-out samples as FilteredOut', function () {
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { B },
+    } = setup(`
+      A  A  A
+      B  C
+    `);
+    // Manually null out sample 2's call node, as if it was filtered out.
+    sampleCallNodes[2] = null;
+
+    expect(
+      getSampleRelationsToFunction(
+        sampleCallNodes,
+        B,
+        callNodeTable
+      ).toArrayForTesting()
+    ).toEqual([
+      SampleRelationToNode.TotalAndSelf,
+      SampleRelationToNode.Before,
+      SampleRelationToNode.FilteredOut,
+    ]);
+  });
+
+  it('matches samples whose ancestor call node contains the function, not just the leaf', function () {
+    //   0  1
+    //   A  A
+    //   B  C
+    //   D
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { A, B },
+    } = setup(`
+      A  A
+      B  C
+      D
+    `);
+
+    // A is an ancestor of everything.
+    expect(
+      getSampleRelationsToFunction(
+        sampleCallNodes,
+        A,
+        callNodeTable
+      ).toArrayForTesting()
+    ).toEqual([
+      SampleRelationToNode.TotalButNotSelf,
+      SampleRelationToNode.TotalButNotSelf,
+    ]);
+
+    // B is only in the path A->B->D.
+    expect(
+      getSampleRelationsToFunction(
+        sampleCallNodes,
+        B,
+        callNodeTable
+      ).toArrayForTesting()
+    ).toEqual([
+      SampleRelationToNode.TotalButNotSelf,
+      SampleRelationToNode.Before,
+    ]);
+  });
+
+  it('counts recursive samples as self when the leaf is the function', function () {
+    const {
+      callNodeTable,
+      sampleCallNodes,
+      funcNamesDict: { A },
+    } = setup(`
+      A  A
+      B  B
+      A
+    `);
+    expect(
+      getSampleRelationsToFunction(
+        sampleCallNodes,
+        A,
+        callNodeTable
+      ).toArrayForTesting()
+    ).toEqual([
+      SampleRelationToNode.TotalAndSelf,
+      SampleRelationToNode.TotalButNotSelf,
+    ]);
   });
 });
 

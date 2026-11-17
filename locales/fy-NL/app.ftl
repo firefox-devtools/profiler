@@ -213,10 +213,13 @@ CallTree--inlining-badge = (inline pleatst)
     .title = Oanroppen nei { $calledFunction } binne inline yn { $outerFunction } pleatst troch de compiler.
 
 ## CallTreeSidebar
-## This is the sidebar component that is used in Call Tree and Flame Graph panels.
+## This is the sidebar component that is used in Call Tree, Function List and
+## Flame Graph panels.
 
 CallTreeSidebar--select-a-node = Selektearje in node om ynformaasje oer te toanen.
 CallTreeSidebar--call-node-details = Details oanropnode
+CallTreeSidebar--select-a-function = Selektearje in funksje om ynformaasje oer te toanen.
+CallTreeSidebar--function-details = Funksjedetails
 
 ## CallTreeSidebar timing information
 ##
@@ -285,9 +288,9 @@ DebugWarning--warning-message =
 ## used at the bottom part of the UI.
 
 Details--open-sidebar-button =
-    .title = De sidebalke iepenje
+    .title = De sydbalke iepenje
 Details--close-sidebar-button =
-    .title = De sidebalke slute
+    .title = De sydbalke slute
 Details--error-boundary-message =
     .message = Uh oh, der is in ûnbekende flater yn dit paniel bard.
 
@@ -872,6 +875,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Oanropstruktuer
+TabBar--function-list-tab = Funksjelist
 TabBar--flame-graph-tab = Flamgrafyk
 TabBar--stack-chart-tab = Stackdiagram
 TabBar--marker-chart-tab = Markearingsdiagram
