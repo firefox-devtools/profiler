@@ -1374,9 +1374,32 @@ export class ProfileQuerier {
       selectedThreads,
       viewRanges,
       rootRange,
+      selectedMarker: this._describeSelectedMarker(state),
       filterStacks,
       callTreeSummaryStrategy: this._getEffectiveStrategy(state),
       callTreeSearch: getCurrentSearchString(state) || undefined,
+    };
+  }
+
+  private _describeSelectedMarker(
+    state: ReturnType<Store['getState']>
+  ): StatusResult['selectedMarker'] {
+    const threadIndexes = getSelectedThreadIndexes(state);
+    if (threadIndexes.size === 0) {
+      return undefined;
+    }
+    const threadSelectors = getThreadSelectors(threadIndexes);
+    const markerIndex = threadSelectors.getSelectedMarkerIndex(state);
+    if (markerIndex === null) {
+      return undefined;
+    }
+    const marker = threadSelectors.getFullMarkerList(state)[markerIndex];
+    return {
+      markerHandle: this._markerMap.handleForMarker(threadIndexes, markerIndex),
+      markerIndex,
+      name: marker.name,
+      start: marker.start - getProfileRootRange(state).start,
+      duration: marker.end !== null ? marker.end - marker.start : undefined,
     };
   }
 
