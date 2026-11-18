@@ -1,0 +1,54 @@
+name: Bundle size report
+
+# The CI workflow builds each pull request with a read-only token, and uploads
+# the sizes it measured as an artifact. This workflow runs afterwards from the
+# main branch, with the permission to comment. It reads the names and numbers
+# of the artifact as data, renders the report with the code of the main
+# branch, and posts it on the pull request.
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: bundle-size-report-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: false
+
+jobs:
+  bundle-size-report:
+    if: github.event.workflow_run.event == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      # The artifact stays outside of the checkout.
+      - name: Download the sizes of the pull request
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@v7
+        with:
+          name: bundle-size-report
+          path: ${{ runner.temp }}/bundle-size-report
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Checkout the scripts
+        if: steps.download.outcome == 'success'
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts
+            scripts/lib
+
+      - name: Post the bundle size report
+        if: steps.download.outcome == 'success'
+        run: node .github/scripts/post-bundle-size-report.mjs "$REPORT_DIR"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPORT_DIR: ${{ runner.temp }}/bundle-size-report

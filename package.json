@@ -60,7 +60,7 @@
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "cross-env LC_ALL=C TZ=UTC NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test-deploy-prod": "node --test bin/deploy-prod.test.mts",
-    "test-bundle-size": "node --test scripts/report-bundle-size.test.mjs",
+    "test-bundle-size": "node --test scripts/report-bundle-size.test.mjs .github/scripts/post-bundle-size-report.test.mjs",
     "test-cli": "yarn build-cli && node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_PROJECTS=cli,cli-integration jest",
     "postinstall": "patch-package",
     "prepare": "husky"

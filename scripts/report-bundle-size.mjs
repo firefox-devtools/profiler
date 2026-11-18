@@ -5,9 +5,12 @@
 // Reports the size of the production build. Run `yarn build-prod` first.
 //
 // Usage: yarn bundle-size [--baseline <file>] [--output <file>]
+//                         [--changed-files <file>]
 //
-//   --baseline <file>  Sizes written earlier with --output, to compare with.
-//   --output <file>    Write the sizes as JSON.
+//   --baseline <file>       Sizes written earlier with --output, to compare with.
+//   --output <file>         Write the sizes as JSON.
+//   --changed-files <file>  Paths changed by a pull request, one per line.
+//                           The measure is skipped when all are documentation.
 //
 // The bundles are listed in bundle-size.config.json. An entry can set a
 // "limit" in bytes on its uncompressed size, and the script fails above it.
@@ -167,15 +170,45 @@ function readEntries(projectRoot) {
   return entries;
 }
 
+const DOCUMENTATION_FOLDERS = /^docs-(user|developer)\//;
+// The folders copied into the build.
+const BUILD_FOLDERS = /^(res|locales)\//;
+
+export function isDocumentationOnly(paths) {
+  return (
+    paths.length > 0 &&
+    paths.every(
+      (file) =>
+        DOCUMENTATION_FOLDERS.test(file) ||
+        (file.endsWith('.md') && !BUILD_FOLDERS.test(file))
+    )
+  );
+}
+
 async function main() {
   const {
-    values: { baseline: baselinePath, output: outputPath },
+    values: {
+      baseline: baselinePath,
+      output: outputPath,
+      'changed-files': changedFilesPath,
+    },
   } = parseArgs({
     options: {
       baseline: { type: 'string' },
       output: { type: 'string' },
+      'changed-files': { type: 'string' },
     },
   });
+
+  if (changedFilesPath && fs.existsSync(changedFilesPath)) {
+    const changedFiles = fs
+      .readFileSync(changedFilesPath, 'utf8')
+      .split('\n')
+      .filter(Boolean);
+    if (isDocumentationOnly(changedFiles)) {
+      return;
+    }
+  }
 
   const projectRoot = path.join(
     path.dirname(fileURLToPath(import.meta.url)),

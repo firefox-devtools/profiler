@@ -18,6 +18,7 @@ import {
   getAssetName,
   getEntrySize,
   groupAssets,
+  isDocumentationOnly,
 } from './report-bundle-size.mjs';
 
 const entries = [
@@ -300,4 +301,20 @@ test('describeCostHint shows the whole cost for a change under 1 kB', () => {
     describeCostHint(entries, baseline),
     'compile time: ~35ms; eval: ~12ms; memory: ~5.5MB'
   );
+});
+
+test('isDocumentationOnly is about the documentation outside of the app', () => {
+  assert.equal(
+    isDocumentationOnly([
+      'docs-user/guide.md',
+      'docs-developer/a.png',
+      'README.md',
+    ]),
+    true
+  );
+  assert.equal(isDocumentationOnly(['README.md', 'src/index.tsx']), false);
+  // These folders are copied into the build.
+  assert.equal(isDocumentationOnly(['res/photon/README.md']), false);
+  assert.equal(isDocumentationOnly(['locales/README.md']), false);
+  assert.equal(isDocumentationOnly([]), false);
 });

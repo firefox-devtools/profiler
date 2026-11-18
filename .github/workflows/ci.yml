@@ -126,9 +126,22 @@ jobs:
           path: build-meta/bundle-size.json
           key: bundle-size-${{ steps.bundle-size-base.outputs.sha }}
 
+      # Without this list, the sizes are measured as for any pull request.
+      - name: List the files of the pull request
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'pull_request'
+        continue-on-error: true
+        run: mkdir -p build-meta && gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files?per_page=100" --paginate --jq '.[].filename' > build-meta/changed-files.txt
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # A pull request about documentation leaves the measured files as they
+      # are: the script sees it from its files, and the "documentation" label
+      # says it too. The sizes of a pull request go to the artifact of its
+      # report.
+
       - name: Profiler Bundle Size Reporter
-        if: matrix.os == 'ubuntu-latest'
-        run: yarn bundle-size --baseline build-meta/bundle-size.json --output build-meta/bundle-size.json
+        if: matrix.os == 'ubuntu-latest' && !contains(github.event.pull_request.labels.*.name, 'documentation')
+        run: yarn bundle-size --baseline build-meta/bundle-size.json --output ${{ github.event_name == 'pull_request' && 'build-meta/bundle-size-report/sizes.json' || 'build-meta/bundle-size.json' }} --changed-files build-meta/changed-files.txt
 
       - name: Save the bundle size for future comparisons
         if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -136,6 +149,26 @@ jobs:
         with:
           path: build-meta/bundle-size.json
           key: bundle-size-${{ github.sha }}
+
+      # The "Bundle size report" workflow renders these sizes on the pull
+      # request. These steps also run when a size is over its limit.
+      - name: Gather the sizes for the bundle size report
+        if: always() && github.event_name == 'pull_request' && hashFiles('build-meta/bundle-size-report/sizes.json') != ''
+        run: |
+          echo "$PULL_REQUEST" > build-meta/bundle-size-report/pull-request-number
+          if [ -f build-meta/bundle-size.json ]; then
+            cp build-meta/bundle-size.json build-meta/bundle-size-report/baseline.json
+          fi
+        env:
+          PULL_REQUEST: ${{ github.event.pull_request.number }}
+
+      - name: Upload the sizes for the bundle size report
+        if: always() && github.event_name == 'pull_request' && hashFiles('build-meta/bundle-size-report/sizes.json') != ''
+        continue-on-error: true
+        uses: actions/upload-artifact@v7
+        with:
+          name: bundle-size-report
+          path: build-meta/bundle-size-report/
 
   licence-check:
     runs-on: ${{ matrix.os }}
