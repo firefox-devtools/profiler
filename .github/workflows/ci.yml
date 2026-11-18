@@ -44,6 +44,9 @@ jobs:
       - name: Run deployment script tests
         run: yarn test-deploy-prod
 
+      - name: Run bundle size script tests
+        run: yarn test-bundle-size
+
       - name: Upload coverage to Codecov
         if: matrix.os == 'ubuntu-latest'
         uses: codecov/codecov-action@v5

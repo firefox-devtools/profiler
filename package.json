@@ -52,7 +52,7 @@
     "start-photon": "node scripts/run-photon-dev-server.mjs",
     "test": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_PROJECTS=browser jest",
     "test-node": "node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_ENVIRONMENT=node jest",
-    "test-all": "run-p --max-parallel 4 test-cli test ts lint license-check test-alex test-lockfile test-deploy-prod",
+    "test-all": "run-p --max-parallel 4 test-cli test ts lint license-check test-alex test-lockfile test-deploy-prod test-bundle-size",
     "test-build-coverage": "yarn test --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
@@ -60,6 +60,7 @@
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "cross-env LC_ALL=C TZ=UTC NODE_ENV=test node --inspect-brk node_modules/.bin/jest --runInBand",
     "test-deploy-prod": "node --test bin/deploy-prod.test.mts",
+    "test-bundle-size": "node --test scripts/report-bundle-size.test.mjs",
     "test-cli": "yarn build-cli && node bin/output-fixing-commands.js cross-env LC_ALL=C TZ=UTC NODE_ENV=test JEST_PROJECTS=cli,cli-integration jest",
     "postinstall": "patch-package",
     "prepare": "husky"
