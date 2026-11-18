@@ -103,6 +103,40 @@ jobs:
           name: profiler-cli
           path: profiler-cli/dist/
 
+      # The bundle size steps come last, so that the builds above always run.
+      # A pull request is built merged with the tip of its base branch, the
+      # first parent of the merge commit. Its sizes are the ones to compare
+      # with, saved below by the runs on main.
+      - name: Find the commit to compare the bundle size with
+        id: bundle-size-base
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          if [ "$EVENT_NAME" = pull_request ]; then
+            BASE_SHA=$(git cat-file -p HEAD | sed -n 's/^parent //p' | head -1)
+          fi
+          echo "sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.merge_group.base_sha || github.event.before }}
+
+      - name: Restore the bundle size of that commit
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache/restore@v6
+        with:
+          path: build-meta/bundle-size.json
+          key: bundle-size-${{ steps.bundle-size-base.outputs.sha }}
+
+      - name: Profiler Bundle Size Reporter
+        if: matrix.os == 'ubuntu-latest'
+        run: yarn bundle-size --baseline build-meta/bundle-size.json --output build-meta/bundle-size.json
+
+      - name: Save the bundle size for future comparisons
+        if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v6
+        with:
+          path: build-meta/bundle-size.json
+          key: bundle-size-${{ github.sha }}
+
   licence-check:
     runs-on: ${{ matrix.os }}
     strategy:
