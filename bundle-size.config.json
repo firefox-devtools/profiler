@@ -1,0 +1,10 @@
+[
+  {
+    "name": "Main bundle",
+    "path": "dist/index-*.js"
+  },
+  {
+    "name": "Source map worker",
+    "path": "dist/source-map.worker-*.js"
+  }
+]

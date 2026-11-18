@@ -20,6 +20,7 @@
     "build-photon": "cross-env NODE_ENV=production node scripts/build-photon.mjs",
     "build-sw": "workbox generateSW workbox-config.js",
     "build-prod:quiet": "yarn build-prod",
+    "bundle-size": "node scripts/report-bundle-size.mjs",
     "build-node-tools": "cross-env NODE_ENV=production node scripts/build-node-tools.mjs",
     "build-profile-query": "cross-env NODE_ENV=production node scripts/build-profile-query.mjs",
     "build-profile-query:quiet": "yarn build-profile-query",
