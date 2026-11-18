@@ -20,7 +20,12 @@
  */
 import { EditorView, lineNumbers } from '@codemirror/view';
 import { EditorState, Compartment, Text } from '@codemirror/state';
-import { type LanguageSupport, syntaxHighlighting } from '@codemirror/language';
+import {
+  LanguageDescription,
+  type LanguageSupport,
+  syntaxHighlighting,
+} from '@codemirror/language';
+import { languages } from '@codemirror/language-data';
 import { classHighlighter } from '@lezer/highlight';
 import { cpp } from '@codemirror/lang-cpp';
 import { rust } from '@codemirror/lang-rust';
@@ -47,10 +52,18 @@ const highlightedLineConf = new Compartment();
 // startLine changes.
 const lineNumbersConf = new Compartment();
 
-// Detect the right language based on the file extension.
-function _languageExtForPath(path: string | null): LanguageSupport | [] {
+// Paths with a URL scheme, like https:// or file://, belong to web content.
+const URL_SCHEME_REGEXP = /^[a-z][a-z0-9+.-]*:\/\//i;
+
+// Detect the right language based on the file extension. For local paths,
+// languages other than the ones bundled here come from
+// @codemirror/language-data as a LanguageDescription, which is loaded on
+// demand into its own chunk.
+function _languageForPath(
+  path: string | null
+): LanguageSupport | LanguageDescription | null {
   if (path === null) {
-    return [];
+    return null;
   }
   if (path.endsWith('.rs')) {
     return rust();
@@ -58,13 +71,18 @@ function _languageExtForPath(path: string | null): LanguageSupport | [] {
   if (path.endsWith('.tsx')) {
     return javascript({ typescript: true, jsx: true });
   }
-  if (path.endsWith('.ts')) {
+  if (path.endsWith('.ts') || path.endsWith('.mts') || path.endsWith('.cts')) {
     return javascript({ typescript: true });
   }
   if (path.endsWith('.jsx')) {
     return javascript({ jsx: true });
   }
-  if (path.endsWith('.js') || path.endsWith('.jsm') || path.endsWith('.mjs')) {
+  if (
+    path.endsWith('.js') ||
+    path.endsWith('.jsm') ||
+    path.endsWith('.mjs') ||
+    path.endsWith('.cjs')
+  ) {
     return javascript();
   }
   if (
@@ -73,11 +91,23 @@ function _languageExtForPath(path: string | null): LanguageSupport | [] {
     path.endsWith('.cpp') ||
     path.endsWith('.cxx') ||
     path.endsWith('.h') ||
+    path.endsWith('.hh') ||
     path.endsWith('.hpp') ||
+    path.endsWith('.hxx') ||
     path.endsWith('.m') ||
     path.endsWith('.mm')
   ) {
     return cpp();
+  }
+
+  // Web content keeps the JavaScript fallback below: inline scripts share the
+  // page URL, which can end in .html, .md or .php, or in a query string.
+  if (!URL_SCHEME_REGEXP.test(path)) {
+    const fileName = path.slice(path.search(/[^/\\]*$/));
+    const description = LanguageDescription.matchFilename(languages, fileName);
+    if (description !== null) {
+      return description;
+    }
   }
 
   // Fallback to JavaScript highlighting. Inline scripts share the page URL, so
@@ -95,6 +125,17 @@ function _toDoc(text: string | string[]): string | Text {
   return typeof text === 'string' ? text : Text.of(text);
 }
 
+// A language that still has to be loaded shows the source without
+// highlighting until SourceViewEditor._loadLanguage applies it.
+function _languageExt(
+  language: LanguageSupport | LanguageDescription | null
+): LanguageSupport | [] {
+  if (language instanceof LanguageDescription) {
+    return language.support ?? [];
+  }
+  return language ?? [];
+}
+
 // Creates a lineNumbers extension that displays line numbers offset by startLine - 1.
 function _lineNumbersForStartLine(startLine: number) {
   if (startLine <= 1) {
@@ -107,6 +148,7 @@ function _lineNumbersForStartLine(startLine: number) {
 
 export class SourceViewEditor {
   _view: EditorView;
+  _language: LanguageSupport | LanguageDescription | null;
 
   // Create a CodeMirror editor and add it as a child element of domParent.
   // The text can be a string or an array of lines.
@@ -119,12 +161,13 @@ export class SourceViewEditor {
     domParent: Element,
     onFindBarChange: (findBar: CodeFindBarPortal | null) => void
   ) {
+    this._language = _languageForPath(path);
     let state = EditorState.create({
       doc: _toDoc(initialText),
       extensions: [
         timingsExtension,
         lineNumbersConf.of(_lineNumbersForStartLine(startLine)),
-        languageConf.of(_languageExtForPath(path)),
+        languageConf.of(_languageExt(this._language)),
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
         createCodeViewerExtension(onFindBarChange),
@@ -137,12 +180,43 @@ export class SourceViewEditor {
       state,
       parent: domParent,
     });
+    this._loadLanguage();
   }
 
   updateLanguageForFilePath(path: string | null) {
+    this._language = _languageForPath(path);
     this._view.dispatch({
-      effects: languageConf.reconfigure(_languageExtForPath(path)),
+      effects: languageConf.reconfigure(_languageExt(this._language)),
     });
+    this._loadLanguage();
+  }
+
+  // Load the current language if it isn't loaded yet, and apply it unless the
+  // file path changed to another language in the meantime.
+  _loadLanguage() {
+    const language = this._language;
+    if (!(language instanceof LanguageDescription) || language.support) {
+      return;
+    }
+    language.load().then(
+      (support) => this._applyLoadedLanguage(language, support),
+      (error) => {
+        console.error(`Couldn't load the ${language.name} language`, error);
+        // Fall back to JavaScript highlighting, as for unknown file types.
+        this._applyLoadedLanguage(language, javascript());
+      }
+    );
+  }
+
+  _applyLoadedLanguage(
+    language: LanguageDescription,
+    support: LanguageSupport
+  ) {
+    if (this._language === language) {
+      this._view.dispatch({
+        effects: languageConf.reconfigure(support),
+      });
+    }
   }
 
   setContents(text: string | string[]) {

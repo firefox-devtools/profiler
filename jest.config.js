@@ -18,7 +18,7 @@ const browserEnvConfig = {
   // Transform ESM modules to CommonJS for Jest
   // These packages ship as pure ESM and need to be transformed by Babel
   transformIgnorePatterns: [
-    '/node_modules/(?!(query-string|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander)/)',
+    '/node_modules/(?!(query-string|iongraph-web|split-on-first|filter-obj|fetch-mock|devtools-reps|json-slabs|commander|@codemirror/language-data)/)',
   ],
 
   // Mock static assets (images, CSS, etc.)
@@ -26,6 +26,12 @@ const browserEnvConfig = {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ftl)$':
       '<rootDir>/src/test/fixtures/mocks/file-mock.ts',
     '\\.(css|less)$': '<rootDir>/src/test/fixtures/mocks/style-mock.ts',
+    // The CommonJS build of @codemirror/language-data loads each language with
+    // a native import(), which Jest can't run from CommonJS without
+    // --experimental-vm-modules. Babel turns the ESM build's import() calls
+    // into require() calls (see transformIgnorePatterns above).
+    '^@codemirror/language-data$':
+      '<rootDir>/node_modules/@codemirror/language-data/dist/index.js',
   },
 
   globals: {
