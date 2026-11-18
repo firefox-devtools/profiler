@@ -12,13 +12,14 @@ import {
   getDataSource,
   getProfileUrl,
 } from 'firefox-profiler/selectors/url-state';
-import { getView } from 'firefox-profiler/selectors/app';
+import { getView, getUrlSetupPhase } from 'firefox-profiler/selectors/app';
 import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
 import type {
   State as AppState,
   DataSource,
   Phase,
   SymbolicationStatus,
+  UrlSetupPhase,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -30,6 +31,7 @@ type StateProps = {
   readonly profileUrl: string;
   readonly phase: Phase;
   readonly symbolicationStatus: SymbolicationStatus;
+  readonly urlSetupPhase: UrlSetupPhase;
 };
 type Props = ConnectedProps<{}, StateProps, {}>;
 
@@ -149,7 +151,8 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       // In another page, the user clicked on the "Apply and reload" button.
 
       const ready =
-        !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
+        this.props.urlSetupPhase === 'done' &&
+        (!this._hasDataSourceProfile() || this._isProfileLoadedAndReady());
 
       this.setState({
         installStatus: 'controlling',
@@ -235,7 +238,13 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   // This function checks whether we can safely update the service worker,
   // using the state of the running application.
   _canUpdateServiceWorker(): boolean {
-    const { dataSource, profileUrl } = this.props;
+    const { dataSource, profileUrl, urlSetupPhase } = this.props;
+
+    if (urlSetupPhase !== 'done') {
+      // The dataSource isn't known before the URL setup is done. It still has
+      // its default value 'none'.
+      return false;
+    }
 
     // We use a switch here, to make sure that when somebody adds a new
     // dataSource, we'll get a flow error if they forget to update here. This is
@@ -497,6 +506,7 @@ export const ServiceWorkerManager = explicitConnect<{}, StateProps, {}>({
     dataSource: getDataSource(state),
     profileUrl: getProfileUrl(state),
     symbolicationStatus: getSymbolicationStatus(state),
+    urlSetupPhase: getUrlSetupPhase(state),
   }),
   component: ServiceWorkerManagerImpl,
 });

@@ -12,7 +12,7 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
-import { updateUrlState } from '../../actions/app';
+import { updateUrlState, urlSetupDone } from '../../actions/app';
 import {
   viewProfile,
   startSymbolicating,
@@ -69,7 +69,7 @@ describe('app/ServiceWorkerManager', () => {
     delete (navigator as any).serviceWorker;
   });
 
-  function setup() {
+  function setup({ isUrlSetupDone = true } = {}) {
     // Comment out this spy when you want to debug this test file.
     jest.spyOn(console, 'log').mockImplementation(() => {});
 
@@ -189,6 +189,9 @@ describe('app/ServiceWorkerManager', () => {
     }
 
     const store = blankStore();
+    if (isUrlSetupDone) {
+      store.dispatch(urlSetupDone());
+    }
 
     const renderResult = render(
       <Provider store={store}>
@@ -273,6 +276,52 @@ describe('app/ServiceWorkerManager', () => {
 
       // And we should now reload automatically when the SW is fully updated.
       instance.dispatchEvent('controlling');
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('before the URL setup is done', () => {
+    it('does not propose to apply an update', () => {
+      process.env.NODE_ENV = 'production';
+
+      const { dispatch, getReloadButton, getWorkboxInstance } = setup({
+        isUrlSetupDone: false,
+      });
+      const instance = getWorkboxInstance();
+
+      // There's a new update! But the dataSource isn't known yet.
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+      expect(screen.queryByText(/reload/i)).not.toBeInTheDocument();
+
+      // We're in the home.
+      act(() => {
+        dispatch(urlSetupDone());
+      });
+      expect(getReloadButton()).toHaveTextContent('Apply and reload');
+    });
+
+    it('reloads after an error if another tab applied an update while the profile was loading', () => {
+      process.env.NODE_ENV = 'production';
+
+      const { dispatch, getWorkboxInstance, navigateToFromUrlLoadingPage } =
+        setup({ isUrlSetupDone: false });
+      navigateToFromUrlLoadingPage('https://example.com/profile.json');
+      const instance = getWorkboxInstance();
+
+      // Another tab applies an update while this tab loads the profile.
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+      instance.dispatchEvent('controlling');
+      expect(
+        screen.getByText(/was applied before this page was fully loaded/)
+      ).toBeInTheDocument();
+      expect(window.location.reload).not.toHaveBeenCalled();
+
+      // Then the profile fails to load. The new version might fix it.
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
       expect(window.location.reload).toHaveBeenCalledTimes(1);
     });
   });
