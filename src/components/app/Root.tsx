@@ -39,8 +39,11 @@ export class Root extends PureComponent<RootProps> {
             >
               <LocalizedErrorBoundary message="Uh oh, some unknown error happened in profiler.firefox.com.">
                 <DragAndDrop>
+                  {/* The ServiceWorkerManager is outside of the UrlManager so
+                      that it listens to the service worker events while the
+                      profile loads. */}
+                  <ServiceWorkerManager />
                   <UrlManager>
-                    <ServiceWorkerManager />
                     <ProfileLoader />
                     <AppViewRouter />
                     <WindowTitle />
