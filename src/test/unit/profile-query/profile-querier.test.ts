@@ -42,6 +42,10 @@ import { storeWithProfile } from '../../fixtures/stores';
 import { profilePublished } from 'firefox-profiler/actions/publish';
 import { triggerLoadingFromUrl } from 'firefox-profiler/actions/receive-profile';
 import { changeIncludeIdleSamples } from 'firefox-profiler/actions/profile-view';
+import { mergeProfilesForDiffing } from 'firefox-profiler/profile-logic/merge-compare';
+import { stateFromLocation } from 'firefox-profiler/app-logic/url-handling';
+import { getFunctionHandle } from 'firefox-profiler/profile-query/function-map';
+import type { Profile } from 'firefox-profiler/types';
 
 describe('ProfileQuerier', function () {
   describe('pushViewRange', function () {
@@ -1672,5 +1676,105 @@ describe('ProfileQuerier', function () {
         expect(result.rangeSpansThreadsWarning).toBeUndefined();
       });
     });
+  });
+
+  describe('functionInfo', function () {
+    function setupQuerier(profile: Profile) {
+      const store = storeWithProfile(profile);
+      return new ProfileQuerier(store, getProfileRootRange(store.getState()));
+    }
+
+    function getFuncHandleByName(profile: Profile, funcName: string) {
+      const { funcTable, stringArray } = profile.shared;
+      const funcIndexes = [];
+      for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+        if (stringArray[funcTable.name[funcIndex]] === funcName) {
+          funcIndexes.push(funcIndex);
+        }
+      }
+      expect(funcIndexes).toHaveLength(1);
+      return getFunctionHandle(funcIndexes[0]);
+    }
+
+    it('returns no libraries for a function without native frames', async function () {
+      const { profile } = getProfileFromTextSamples('A  B');
+      const querier = setupQuerier(profile);
+
+      const result = await querier.functionInfo(
+        getFuncHandleByName(profile, 'A')
+      );
+
+      expect(result.libraries).toEqual([]);
+      expect(result.fullName).toBe('A');
+    });
+
+    it('returns a single library once, even with several frames in it', async function () {
+      // Two different addresses give two frames for the same func and lib.
+      const { profile } = getProfileFromTextSamples(
+        'A[lib:libxul.so][address:10]  A[lib:libxul.so][address:20]'
+      );
+      expect(profile.shared.frameTable.length).toBe(2);
+      const querier = setupQuerier(profile);
+
+      const result = await querier.functionInfo(
+        getFuncHandleByName(profile, 'A')
+      );
+
+      expect(result.libraries).toEqual([
+        {
+          name: 'libxul.so',
+          path: '/path/to/libxul.so',
+          debugName: 'libxul.so',
+          debugPath: '/path/to/libxul.so',
+          breakpadId: 'SOMETHING_FAKE',
+        },
+      ]);
+      expect(result.fullName).toBe('libxul.so!A');
+    });
+
+    // https://github.com/firefox-devtools/profiler/issues/6270
+    // Comparing two builds of libxul gives one func with frames from both
+    // builds. Before, functionInfo returned whichever build came first, which
+    // depended on the order of the input profiles.
+    it.each([
+      ['A then B', false, ['SOMETHING_FAKE', 'A_DIFFERENT_BUILD']],
+      ['B then A', true, ['A_DIFFERENT_BUILD', 'SOMETHING_FAKE']],
+    ])(
+      'returns both builds of a library in a comparison profile (%s)',
+      async function (_order, reverse, expectedBreakpadIds) {
+        const profileA = getProfileFromTextSamples(
+          'A[lib:libxul.so][address:10]'
+        ).profile;
+        const profileB = getProfileFromTextSamples(
+          'A[lib:libxul.so][address:10]'
+        ).profile;
+        profileB.libs[0] = {
+          ...profileB.libs[0],
+          breakpadId: 'A_DIFFERENT_BUILD',
+        };
+        const profileState = stateFromLocation({
+          pathname: '/public/fakehash1/',
+          search: '?thread=0&v=3',
+          hash: '',
+        });
+        const profiles = reverse ? [profileB, profileA] : [profileA, profileB];
+        const { profile } = mergeProfilesForDiffing(profiles, [
+          profileState,
+          profileState,
+        ]);
+        const querier = setupQuerier(profile);
+
+        const result = await querier.functionInfo(
+          getFuncHandleByName(profile, 'A')
+        );
+
+        // Both builds are returned, in frame table order.
+        expect(result.libraries.map((lib) => lib.breakpadId)).toEqual(
+          expectedBreakpadIds
+        );
+        // The full name comes from the shared resource, not from either build.
+        expect(result.fullName).toBe('libxul.so!A');
+      }
+    );
   });
 });

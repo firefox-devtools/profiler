@@ -5,6 +5,7 @@
 import type {
   Thread,
   Lib,
+  IndexIntoLibs,
   RawFrameTable,
   FuncTable,
   ResourceTable,
@@ -13,25 +14,32 @@ import { ResourceType, FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import { getFunctionHandle } from './function-map';
 
 /**
- * Look up the Lib record for a function, or undefined if none is associated.
+ * Collect the Lib records of all the address-bearing frames of a function, in
+ * frame table order and without duplicates. Returns an empty array if the
+ * function has no native frames.
  *
- * For funcs which are shared across frames from multiple different libs, this
- * will return the first match.
+ * A func can have frames from several libs. For example, when comparing two
+ * builds of the same library, both builds share one resource and therefore one
+ * func, but each build keeps its own lib.
+ *
+ * This is a single pass over the frame table.
  */
-export function getAnyLibForFunc(
+export function getLibsForFunc(
   funcIndex: number,
   frameTable: RawFrameTable,
   libs: Lib[]
-): Lib | undefined {
+): Lib[] {
+  // Sets iterate in insertion order, so this keeps the frame table order.
+  const libIndexes = new Set<IndexIntoLibs>();
   for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
-    if (frameTable.func[frameIndex] !== funcIndex) {
-      continue;
-    }
-    if ((frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0) {
-      return libs[frameTable.lib[frameIndex]];
+    if (
+      frameTable.func[frameIndex] === funcIndex &&
+      (frameTable.flags[frameIndex] & FrameFlag.HasAddress) !== 0
+    ) {
+      libIndexes.add(frameTable.lib[frameIndex]);
     }
   }
-  return undefined;
+  return Array.from(libIndexes, (libIndex) => libs[libIndex]);
 }
 
 /**
