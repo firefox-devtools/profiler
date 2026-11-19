@@ -3,7 +3,7 @@
 exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackCounterGraphDot"
-  style="left: 20px; top: 2.697563250235465px; background-color: rgb(215, 110, 0);"
+  style="left: 20px; top: 4.343904239769742px; background-color: rgb(215, 110, 0);"
 />
 `;
 
@@ -112,47 +112,47 @@ Array [
   Array [
     "moveTo",
     0,
-    22.809689638253786,
+    21.01670013594878,
   ],
   Array [
     "lineTo",
     10,
-    13.109212153841828,
+    13.003262214043248,
   ],
   Array [
     "lineTo",
     20,
-    2.626831448142319,
+    4.343904239769742,
   ],
   Array [
     "lineTo",
     30,
-    1,
+    3,
   ],
   Array [
     "lineTo",
     40,
-    9.7244191403193,
+    10.207128855046378,
   ],
   Array [
     "lineTo",
     50,
-    20.778898146210928,
+    19.339089772956854,
   ],
   Array [
     "lineTo",
     60,
-    24,
+    22,
   ],
   Array [
     "lineTo",
     70,
-    16.42625851218512,
+    15.74343094484858,
   ],
   Array [
     "lineTo",
     80,
-    16.42625851218512,
+    15.74343094484858,
   ],
   Array [
     "stroke",
