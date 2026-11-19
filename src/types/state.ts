@@ -57,11 +57,10 @@ export type SourceMapSymbolicationStatus =
   | 'INACTIVE'
   | 'FETCHING'
   | 'SYMBOLICATING';
+
 export type ThreadViewOptions = {
-  readonly selectedNonInvertedCallNodePath: CallNodePath;
-  readonly selectedInvertedCallNodePath: CallNodePath;
-  readonly expandedNonInvertedCallNodePaths: PathSet;
-  readonly expandedInvertedCallNodePaths: PathSet;
+  readonly selectedCallNodePaths: Record<CallNodeArea, CallNodePath>;
+  readonly expandedCallNodePaths: Record<CallNodeArea, PathSet>;
   readonly selectedNetworkMarker: MarkerIndex | null;
   // Track the number of transforms to detect when they change via browser
   // navigation. This helps us know when to reset paths that may be invalid
@@ -79,8 +78,23 @@ export type TableViewOptions = {
 
 export type TableViewOptionsPerTab = { [K in TabSlug]: TableViewOptions };
 
+export type CallNodeArea =
+  | 'NON_INVERTED_TREE'
+  | 'INVERTED_TREE'
+  | 'CALLERS'
+  | 'CALLEES';
+
+// The panels of the function list.
+export type FuncPanelName = 'callees' | 'callers' | 'selfTime';
+
+// Function-list panels with their own selected/expanded/right-clicked call
+// node path. The self time panel has no such state of its own: it shares it
+// with the main tree.
+export type FuncPanelWithCallNodeArea = Exclude<FuncPanelName, 'selfTime'>;
+
 export type RightClickedCallNode = {
   readonly threadsKey: ThreadsKey;
+  readonly area: CallNodeArea;
   readonly callNodePath: CallNodePath;
 };
 
@@ -400,7 +414,15 @@ export type ProfileSpecificUrlState = {
   selectedFunctions: SelectedFunctionsPerThread;
   markerTableSort: SingleColumnSortState[] | null;
   functionListSort: SingleColumnSortState[] | null;
+  functionListSectionsOpen: FunctionListSectionsOpenState;
+  funcPanelViews: FuncPanelViewsState;
 };
+
+export type FunctionListSectionsOpenState = { [K in FuncPanelName]: boolean };
+
+export type FuncPanelViewType = 'flame-graph' | 'call-tree';
+
+export type FuncPanelViewsState = { [K in FuncPanelName]: FuncPanelViewType };
 
 export type UrlState = {
   readonly dataSource: DataSource;

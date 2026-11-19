@@ -6,6 +6,10 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries, objectMap } from '../utils/types';
 import { tabSlugs, tabsShowingSampleData } from '../app-logic/tabs-handling';
+import {
+  FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  FUNC_PANEL_VIEWS_DEFAULT,
+} from '../app-logic/constants';
 
 import type {
   ThreadIndex,
@@ -25,6 +29,8 @@ import type {
   TabID,
   SelectedMarkersPerThread,
   SelectedFunctionsPerThread,
+  FunctionListSectionsOpenState,
+  FuncPanelViewsState,
 } from 'firefox-profiler/types';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -216,6 +222,30 @@ const functionListSort: Reducer<SingleColumnSortState[] | null> = (
   switch (action.type) {
     case 'CHANGE_FUNCTION_LIST_SORT':
       return action.sort;
+    default:
+      return state;
+  }
+};
+
+const functionListSectionsOpen: Reducer<FunctionListSectionsOpenState> = (
+  state = FUNCTION_LIST_SECTIONS_OPEN_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNCTION_LIST_SECTION_OPEN':
+      return { ...state, [action.section]: action.isOpen };
+    default:
+      return state;
+  }
+};
+
+const funcPanelViews: Reducer<FuncPanelViewsState> = (
+  state = FUNC_PANEL_VIEWS_DEFAULT,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_FUNC_PANEL_VIEW':
+      return { ...state, [action.panel]: action.view };
     default:
       return state;
   }
@@ -885,6 +915,8 @@ const profileSpecific = combineReducers({
   selectedFunctions,
   markerTableSort,
   functionListSort,
+  functionListSectionsOpen,
+  funcPanelViews,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
   // first retrieve the profile, so they can't be upgraded by the normal url upgrading
