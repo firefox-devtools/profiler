@@ -25,6 +25,7 @@ import {
   computeNativeSymbolTableFromRawNativeSymbolTable,
   reserveFunctionsForCollapsedResources,
   computeSamplesTableFromRawSamplesTable,
+  computeSourceAddressProofs,
 } from '../profile-logic/profile-data';
 import type { IPCMarkerCorrelations } from '../profile-logic/marker-data';
 import {
@@ -41,6 +42,8 @@ import type { EligibleSource } from '../profile-logic/source-maps/matching';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 import type {
+  AddressProof,
+  IndexIntoSourceTable,
   Profile,
   RawProfileSharedData,
   StackTable,
@@ -1157,6 +1160,12 @@ export const getSourceViewFile: Selector<string | null> = createSelector(
       : null;
   }
 );
+
+// A frame address per source, which the symbolication API needs to serve a
+// native file.
+export const getSourceAddressProofs: Selector<
+  Map<IndexIntoSourceTable, AddressProof>
+> = createSelector(getProfile, computeSourceAddressProofs);
 
 export const getSourceViewSourceId: Selector<string | null> = createSelector(
   getSourceTable,

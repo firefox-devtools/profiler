@@ -52,9 +52,7 @@ export async function fetchSource(
     // at https://github.com/mstange/profiler-get-symbols/blob/master/API.md#sourcev1
     // This API is used both by the browser connection's querySymbolicationApi method
     // as well as by the local symbol server.
-    const symbolServerUrlForFallback = _serverMightSupportSource(
-      symbolServerUrl
-    )
+    const symbolServerUrlForFallback = serverMightSupportSource(symbolServerUrl)
       ? symbolServerUrl
       : null;
     const { debugName, breakpadId, address } = addressProof;
@@ -209,6 +207,6 @@ function convertResponseJsonToSourceCode(responseJson: any): string {
 // local symbol servers. Check the symbol server URL to avoid hammering the
 // official Mozilla symbolication server with requests it can't handle.
 // This check can be removed once it adds support for /source/v1.
-function _serverMightSupportSource(symbolServerUrl: string): boolean {
+export function serverMightSupportSource(symbolServerUrl: string): boolean {
   return isLocalURL(symbolServerUrl);
 }

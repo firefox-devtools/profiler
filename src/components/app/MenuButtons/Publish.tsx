@@ -5,6 +5,7 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import {
+  publishPanelOpened,
   updateSharingOption,
   attemptToPublish,
   resetUploadState,
@@ -27,9 +28,14 @@ import {
   getUploadError,
   getShouldSanitizeByDefault,
   getSanitizedProfileEncodingState,
+  getHasSourceCodeToShare,
+  getSourceCodeFetchState,
+  getSourceFilesToFetch,
 } from 'firefox-profiler/selectors/publish';
+import { PublishSourceCodeSection } from './PublishSourceCode';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
 import explicitConnect, {
@@ -40,6 +46,7 @@ import type {
   Profile,
   CheckedSharingOptions,
   SharingMode,
+  SourceCodeFetchState,
   StartEndRange,
   UploadPhase,
   SanitizedProfileEncodingState,
@@ -60,6 +67,9 @@ type StateProps = {
   readonly shouldShowPreferenceOption: boolean;
   readonly profileContainsPrivateBrowsingInformation: boolean;
   readonly profileHasJSTracingArgumentValues: boolean;
+  readonly hasSourceCodeToShare: boolean;
+  readonly sourceCodeFetchState: SourceCodeFetchState;
+  readonly hasSourceFilesToFetch: boolean;
   readonly checkedSharingOptions: CheckedSharingOptions;
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
@@ -72,6 +82,7 @@ type StateProps = {
 };
 
 type DispatchProps = {
+  readonly publishPanelOpened: typeof publishPanelOpened;
   readonly updateSharingOption: typeof updateSharingOption;
   readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
   readonly attemptToPublish: typeof attemptToPublish;
@@ -82,6 +93,7 @@ type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   override componentDidMount(): void {
+    this.props.publishPanelOpened(this.props.mode);
     this.props.encodeSanitizedProfile(this.props.mode);
   }
 
@@ -131,6 +143,9 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       shouldShowPreferenceOption,
       profileContainsPrivateBrowsingInformation,
       profileHasJSTracingArgumentValues,
+      hasSourceCodeToShare,
+      hasSourceFilesToFetch,
+      sourceCodeFetchState,
       sanitizedProfileEncodingState,
       downloadFileName,
       shouldSanitizeByDefault,
@@ -252,6 +267,9 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                   />
                 )
               : null}
+            {hasSourceCodeToShare ? (
+              <PublishSourceCodeSection mode={mode} />
+            ) : null}
           </div>
           {sanitizedProfileEncodingState.phase === 'ERROR' ? (
             <div className="photon-message-bar photon-message-bar-error photon-message-bar-inner-content">
@@ -269,12 +287,18 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
                 primary
                 downloadFileName={downloadFileName}
                 sanitizedProfileEncodingState={sanitizedProfileEncodingState}
+                isWaitingForSourceFiles={hasSourceFilesToFetch}
               />
             ) : (
               <button
                 type="submit"
                 className="photon-button photon-button-primary publishPanelButton publishPanelButtonsUpload"
-                disabled={sanitizedProfileEncodingState.phase === 'ERROR'}
+                // The upload fetches the picked files itself, so it waits for
+                // a "Fetch now" that is still running.
+                disabled={
+                  sanitizedProfileEncodingState.phase === 'ERROR' ||
+                  sourceCodeFetchState.isFetching
+                }
               >
                 <span className="publishPanelButtonsSvg publishPanelButtonsSvgUpload" />
                 <Localized id="MenuButtons--publish--button-upload">
@@ -304,6 +328,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
       abortFunction,
       downloadFileName,
       sanitizedProfileEncodingState,
+      sourceCodeFetchState,
     } = this.props;
 
     return (
@@ -318,7 +343,19 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             </Localized>
           </div>
           <div className="publishPanelUploadPercentage">
-            {uploadProgressString}
+            {sourceCodeFetchState.isFetching ? (
+              <Localized
+                id="MenuButtons--publish--source-code-fetching"
+                vars={{
+                  completedCount: sourceCodeFetchState.completedCount,
+                  totalCount: sourceCodeFetchState.totalCount,
+                }}
+              >
+                <span />
+              </Localized>
+            ) : (
+              uploadProgressString
+            )}
           </div>
           <div className="publishPanelUploadBar">
             <div
@@ -361,6 +398,17 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
     } else if (typeof error === 'string') {
       message = error;
     }
+    const errorDetails =
+      error instanceof SourceCodeFetchError ? (
+        <Localized
+          id="MenuButtons--publish--source-code-fetch-failed"
+          vars={{ failedCount: error.failedCount }}
+        >
+          <span>{message}</span>
+        </Localized>
+      ) : (
+        message
+      );
 
     return (
       <div
@@ -383,7 +431,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
             </Localized>
           </button>
         </div>
-        <div className="publishPanelError">{message}</div>
+        <div className="publishPanelError">{errorDetails}</div>
       </div>
     );
   }
@@ -420,9 +468,15 @@ export const PublishPanel = explicitConnect<
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
+    hasSourceCodeToShare: getHasSourceCodeToShare(state),
+    sourceCodeFetchState: getSourceCodeFetchState(state, ownProps.mode),
+    hasSourceFilesToFetch: getSourceFilesToFetch(state, ownProps.mode).size > 0,
     checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
     downloadFileName: getFilenameString(state),
-    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(state),
+    sanitizedProfileEncodingState: getSanitizedProfileEncodingState(
+      state,
+      ownProps.mode
+    ),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgress(state),
     uploadProgressString: getUploadProgressString(state),
@@ -431,6 +485,7 @@ export const PublishPanel = explicitConnect<
     abortFunction: getAbortFunction(state),
   }),
   mapDispatchToProps: {
+    publishPanelOpened,
     updateSharingOption,
     encodeSanitizedProfile,
     attemptToPublish,
@@ -443,6 +498,9 @@ type DownloadButtonProps = {
   readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
   readonly downloadFileName: string;
   readonly primary?: boolean;
+  // Saving only writes out the encoded profile, so it has to wait until the
+  // picked source files are downloaded.
+  readonly isWaitingForSourceFiles?: boolean;
 };
 
 type WarningIndicatorProps = {
@@ -463,12 +521,24 @@ function WarningIndicator({ l10nId, title }: WarningIndicatorProps) {
  */
 class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
   override render() {
-    const { sanitizedProfileEncodingState, downloadFileName, primary } =
-      this.props;
+    const {
+      sanitizedProfileEncodingState,
+      downloadFileName,
+      primary,
+      isWaitingForSourceFiles,
+    } = this.props;
     const className = classNames(
       'photon-button publishPanelButton publishPanelButtonsDownload',
       { 'photon-button-primary publishPanelButtonsDownloadPrimary': primary }
     );
+
+    if (isWaitingForSourceFiles) {
+      return (
+        <button type="button" className={className} disabled>
+          <Localized id="MenuButtons--publish--save">Save</Localized>
+        </button>
+      );
+    }
 
     switch (sanitizedProfileEncodingState.phase) {
       case 'DONE': {
