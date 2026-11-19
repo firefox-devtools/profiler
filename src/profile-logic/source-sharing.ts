@@ -6,6 +6,7 @@ import {
   getDownloadRecipeForSourceFile,
   parseFileNameFromSymbolication,
 } from 'firefox-profiler/utils/special-paths';
+import type { ParsedFileNameFromSymbolication } from 'firefox-profiler/utils/special-paths';
 import {
   assertExhaustiveCheck,
   ensureExists,
@@ -76,6 +77,19 @@ export function computeSourceContentsForSharing(
 // root in the tree, named after the product, rather than one root per scheme.
 const INTERNAL_URL_SCHEMES = new Set(['chrome', 'resource', 'moz-src']);
 
+// Whether symbolication named a file after the browser's own repository,
+// rather than one of the third-party repositories it builds from, like Rust's.
+// Official builds name them after hg.mozilla.org or the Firefox GitHub
+// repository.
+function _isFirefoxRepo(repo: string): boolean {
+  return (
+    repo.startsWith('hg.mozilla.org/') ||
+    repo === 'github.com/mozilla-firefox/firefox'
+  );
+}
+
+const GECKO_GENERATED_SOURCES_BUCKET = 'gecko-generated-sources';
+
 function _splitPath(path: string): string[] {
   return path.split('/').filter((s) => s !== '');
 }
@@ -90,10 +104,39 @@ const URL_ORIGIN_REGEX = /^([a-z][a-z0-9+.-]*):\/\/([^/]*)(\/.*)?$/i;
  * the generated file they were mapped from.
  */
 function _pathSegmentsForFilename(
-  path: string,
+  parsedFile: ParsedFileNameFromSymbolication,
   productName: string,
   bundleUrl: string | null
 ): { pathSegments: string[]; isFromWebSite: boolean } {
+  if (parsedFile.type === 'hg' || parsedFile.type === 'git') {
+    const { repo } = parsedFile;
+    return {
+      pathSegments: [
+        _isFirefoxRepo(repo) ? productName : repo,
+        ..._splitPath(parsedFile.path),
+      ],
+      isFromWebSite: false,
+    };
+  }
+
+  // The browser's build-generated files, like the WebIDL bindings. Their paths
+  // are relative to the build directory, so they stay apart from the
+  // repository's files.
+  if (
+    parsedFile.type === 's3' &&
+    parsedFile.bucket === GECKO_GENERATED_SOURCES_BUCKET
+  ) {
+    return {
+      pathSegments: [
+        productName,
+        parsedFile.bucket,
+        ..._splitPath(parsedFile.path),
+      ],
+      isFromWebSite: false,
+    };
+  }
+
+  const { path } = parsedFile;
   // Files inside the browser's omni.ja archive, which is the packaged form of
   // the chrome:// and resource:// files. The install path in front of it is
   // noise.
@@ -321,7 +364,7 @@ export function computeSourceCodeSharingCandidates(
   const sourceIndexes = Array.from(sourcesOnStacks).sort((a, b) => a - b);
   return sourceIndexes.map((sourceIndex) => {
     const filename = stringArray[sources.filename[sourceIndex]];
-    const path = parseFileNameFromSymbolication(filename).path;
+    const parsedFile = parseFileNameFromSymbolication(filename);
     const generated = originalToGenerated.get(sourceIndex);
     const bundleUrl =
       generated !== undefined
@@ -331,8 +374,8 @@ export function computeSourceCodeSharingCandidates(
         : null;
     return {
       sourceIndex,
-      path,
-      ..._pathSegmentsForFilename(path, productName, bundleUrl),
+      path: parsedFile.path,
+      ..._pathSegmentsForFilename(parsedFile, productName, bundleUrl),
       isPubliclyDownloadable: _isPubliclyDownloadable(filename),
     };
   });
