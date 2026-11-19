@@ -10,6 +10,16 @@ npm install -g @firefox-devtools/profiler-cli@latest
 
 Requires Node.js >= 24.
 
+`./mach bootstrap` in a Firefox checkout also installs profiler-cli into `~/.mozbuild`.
+
+### Updating
+
+```bash
+profiler-cli self-update
+```
+
+npm installs are updated with npm. Copies installed by `./mach bootstrap` are replaced with the latest profiler-cli toolchain build from Firefox CI, which only changes when Firefox updates its pinned profiler revision. Running sessions keep using the old version until they are restarted.
+
 ## Quick Start
 
 ```bash
