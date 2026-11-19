@@ -773,6 +773,9 @@ export type SourceCodeSharingCandidate = {
   path: string;
   // `path`, split into the segments shown in the file tree.
   pathSegments: string[];
+  // Whether `pathSegments` start with a web site: the file's own URL, or the
+  // URL of the bundle a source map produced it from.
+  isFromWebSite: boolean;
   // Whether the path has a download recipe, so that the file can be fetched
   // from the web.
   isPubliclyDownloadable: boolean;
@@ -799,6 +802,7 @@ export type SourceCodeSharingFile = {
   sourceIndex: IndexIntoSourceTable;
   path: string;
   pathSegments: string[];
+  isFromWebSite: boolean;
   availability: SourceCodeAvailability;
   // The size of the file contents before the upload is compressed, or null when
   // we don't have them. This is the length in UTF-16 code units, which matches
