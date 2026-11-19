@@ -1399,7 +1399,7 @@ describe('app/MenuButtons', function () {
 
       // nsAppShell.mm is the leaf, so its root has all the self time.
       expect(getSourceFileTreeLabels()).toEqual([
-        'widget/cocoa/nsAppShell.mm',
+        'Firefox/widget/cocoa/nsAppShell.mm',
         'home/user/moz/dom/base/nsDocument.cpp',
       ]);
       expect(getSourceCodeSummaryLines()).toEqual([

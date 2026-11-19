@@ -278,7 +278,7 @@ describe('computeSourceCodeSharingCandidates', function () {
       {
         sourceIndex: publicSourceIndex,
         path: 'widget/cocoa/nsAppShell.mm',
-        pathSegments: ['widget', 'cocoa', 'nsAppShell.mm'],
+        pathSegments: ['Firefox', 'widget', 'cocoa', 'nsAppShell.mm'],
         isFromWebSite: false,
         isPubliclyDownloadable: true,
       },
@@ -362,6 +362,40 @@ describe('computeSourceCodeSharingCandidates', function () {
       true,
       false,
       false,
+    ]);
+  });
+
+  it('groups the native files by repository or crate, with the browser repository and generated files under the same root', function () {
+    const { profile } = getProfileFromTextSamples(`
+      A[file:hg:hg.mozilla.org/mozilla-central:js/src/vm/Interpreter.cpp:abc]
+      B[file:hg:hg.mozilla.org/try:gfx/2d/DrawTargetSkia.cpp:abc]
+      C[file:git:github.com/mozilla-firefox/firefox:xpcom/base/nsCOMPtr.h:abc]
+      D[file:git:github.com/rust-lang/rust:library/std/src/thread/mod.rs:abc]
+      E[file:cargo:github.com-1ecc6299db9ec823:tokio-1.6.1:src/runtime/task/mod.rs]
+      F[file:s3:gecko-generated-sources:abc123/dom/bindings/NodeBinding.cpp:]
+    `);
+
+    const candidates = computeSourceCodeSharingCandidates(profile);
+    expect(candidates.map((c) => c.pathSegments)).toEqual([
+      ['Firefox', 'js', 'src', 'vm', 'Interpreter.cpp'],
+      ['Firefox', 'gfx', '2d', 'DrawTargetSkia.cpp'],
+      ['Firefox', 'xpcom', 'base', 'nsCOMPtr.h'],
+      [
+        'github.com/rust-lang/rust',
+        'library',
+        'std',
+        'src',
+        'thread',
+        'mod.rs',
+      ],
+      ['tokio-1.6.1', 'src', 'runtime', 'task', 'mod.rs'],
+      [
+        'Firefox',
+        'gecko-generated-sources',
+        'dom',
+        'bindings',
+        'NodeBinding.cpp',
+      ],
     ]);
   });
 
