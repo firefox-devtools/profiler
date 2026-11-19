@@ -32,12 +32,14 @@ function exec(
   options: {
     env?: Record<string, string>;
     timeout?: number;
+    input?: string;
   } = {}
 ): Promise<CommandResult> {
   return new Promise((resolve, reject) => {
     const proc = spawn(command, args, {
       env: { ...process.env, ...options.env },
     });
+    proc.stdin?.end(options.input ?? '');
 
     let stdout = '';
     let stderr = '';
@@ -152,11 +154,14 @@ export async function cli(
   args: string[],
   options?: {
     timeout?: number;
+    // Written to stdin, which is closed afterwards.
+    input?: string;
   }
 ): Promise<CommandResult> {
   const result = await exec(process.execPath, [CLI_BIN, ...args], {
     env: ctx.env,
     timeout: options?.timeout ?? 30000,
+    input: options?.input,
   });
 
   if (result.exitCode !== 0) {
