@@ -8,11 +8,30 @@ import {
   GutterMarker,
   gutter,
   gutterLineClass,
+  keymap,
+  runScopeHandlers,
 } from '@codemirror/view';
-import type { EditorState } from '@codemirror/state';
-import { StateField, StateEffect, RangeSet } from '@codemirror/state';
+import type { Panel } from '@codemirror/view';
+import {
+  EditorState,
+  StateField,
+  StateEffect,
+  RangeSet,
+} from '@codemirror/state';
+import {
+  search,
+  SearchQuery,
+  getSearchQuery,
+  setSearchQuery,
+  openSearchPanel,
+  closeSearchPanel,
+  findNext,
+  findPrevious,
+  selectNextOccurrence,
+} from '@codemirror/search';
 
 import type { LineTimings } from 'firefox-profiler/types';
+import type { CodeFindBarProps } from 'firefox-profiler/components/shared/CodeFindBar';
 
 import { emptyLineTimings } from 'firefox-profiler/profile-logic/line-timings';
 
@@ -192,5 +211,101 @@ export const timingsExtension = [
   nonZeroLineGutterHighlighter,
   nonZeroLineDecorationHighlighter,
 ];
+
+// A subset of CodeMirror's searchKeymap. We leave out Mod-Alt-G (gotoLine)
+// because it counts lines from 1, while our line numbers can start at a
+// different line. We also leave out Mod-Shift-L (selectSelectionMatches).
+const findKeymap = [
+  { key: 'Mod-f', run: openSearchPanel, scope: 'editor search-panel' },
+  {
+    key: 'F3',
+    run: findNext,
+    shift: findPrevious,
+    scope: 'editor search-panel',
+    preventDefault: true,
+  },
+  {
+    key: 'Mod-g',
+    run: findNext,
+    shift: findPrevious,
+    scope: 'editor search-panel',
+    preventDefault: true,
+  },
+  { key: 'Escape', run: closeSearchPanel, scope: 'editor search-panel' },
+  { key: 'Mod-d', run: selectNextOccurrence, preventDefault: true },
+];
+
+// The find bar's DOM element and props, for rendering a CodeFindBar into it
+// with a React portal.
+export type CodeFindBarPortal = {
+  readonly dom: HTMLElement;
+  readonly props: CodeFindBarProps;
+};
+
+// Creates CodeMirror's search panel, which is an empty element. The React
+// component that owns the editor renders a CodeFindBar into it, so that the
+// find bar gets the app's React context, for example for localization.
+// onFindBarChange is called when the panel opens, when the search query
+// changes, and with null when the panel closes.
+function createFindBarPanel(
+  view: EditorView,
+  onFindBarChange: (findBar: CodeFindBarPortal | null) => void
+): Panel {
+  const dom = document.createElement('div');
+  let query = getSearchQuery(view.state);
+  const notify = () =>
+    onFindBarChange({ dom, props: getCodeFindBarProps(view) });
+  return {
+    dom,
+    top: true,
+    mount: notify,
+    update(update) {
+      const newQuery = getSearchQuery(update.state);
+      if (!newQuery.eq(query)) {
+        query = newQuery;
+        notify();
+      }
+    },
+    destroy: () => onFindBarChange(null),
+  };
+}
+
+// Adjustments to make a CodeMirror editor work as a non-editable code viewer.
+export function createCodeViewerExtension(
+  onFindBarChange: (findBar: CodeFindBarPortal | null) => void
+) {
+  return [
+    EditorState.readOnly.of(true),
+    EditorView.editable.of(false),
+    // Allow tabbing to the view (to an element *inside* the scroller so that
+    // the up / down keys trigger scrolling), and take focus on mousedown.
+    EditorView.contentAttributes.of({ tabindex: '0' }),
+    // CodeMirror only renders the lines in and near the viewport, so the
+    // browser's find-in-page can't find text outside of it. CodeMirror's
+    // search searches the whole document. The find bar opens with Ctrl/Cmd+F
+    // while the editor has focus.
+    search({
+      createPanel: (view) => createFindBarPanel(view, onFindBarChange),
+    }),
+    keymap.of(findKeymap),
+  ];
+}
+
+// Returns the props for a CodeFindBar that searches in the view.
+export function getCodeFindBarProps(view: EditorView): CodeFindBarProps {
+  const { search, caseSensitive, regexp, wholeWord } = getSearchQuery(
+    view.state
+  );
+  return {
+    query: { search, caseSensitive, regexp, wholeWord },
+    onQueryChange: (query) => {
+      view.dispatch({ effects: setSearchQuery.of(new SearchQuery(query)) });
+    },
+    onFindNext: () => findNext(view),
+    onFindPrevious: () => findPrevious(view),
+    onClose: () => closeSearchPanel(view),
+    onKeyDown: (event) => runScopeHandlers(view, event, 'search-panel'),
+  };
+}
 
 export { createHighlightedLineExtension };

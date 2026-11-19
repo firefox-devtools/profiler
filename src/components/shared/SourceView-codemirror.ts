@@ -32,6 +32,8 @@ import {
   timingsExtension,
   updateTimingsEffect,
   createHighlightedLineExtension,
+  createCodeViewerExtension,
+  type CodeFindBarPortal,
 } from 'firefox-profiler/utils/codemirror-shared';
 
 // This "compartment" allows us to swap the syntax highlighting language when
@@ -84,15 +86,6 @@ function _languageExtForPath(path: string | null): LanguageSupport | [] {
   return javascript();
 }
 
-// Adjustments to make a CodeMirror editor work as a non-editable code viewer.
-const codeViewerExtension = [
-  EditorState.readOnly.of(true),
-  EditorView.editable.of(false),
-  // Allow tabbing to the view (to an element *inside* the scroller so that the
-  // up / down keys trigger scrolling), and take focus on mousedown.
-  EditorView.contentAttributes.of({ tabindex: '0' }),
-];
-
 // Creates a lineNumbers extension that displays line numbers offset by startLine - 1.
 function _lineNumbersForStartLine(startLine: number) {
   if (startLine <= 1) {
@@ -113,7 +106,8 @@ export class SourceViewEditor {
     timings: LineTimings,
     highlightedLine: number | null,
     startLine: number,
-    domParent: Element
+    domParent: Element,
+    onFindBarChange: (findBar: CodeFindBarPortal | null) => void
   ) {
     let state = EditorState.create({
       doc: initialText,
@@ -123,7 +117,7 @@ export class SourceViewEditor {
         languageConf.of(_languageExtForPath(path)),
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
-        codeViewerExtension,
+        createCodeViewerExtension(onFindBarChange),
       ],
     });
     state = state.update({

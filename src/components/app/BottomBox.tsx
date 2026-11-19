@@ -169,6 +169,11 @@ class BottomBoxImpl extends React.PureComponent<Props> {
   }
 
   _onKeyDown = (event: KeyboardEvent) => {
+    // Ignore keys that something else already handled, for example the
+    // Escape key that closes the find bar in the source view.
+    if (event.defaultPrevented) {
+      return;
+    }
     if (event.key === 'Escape' && this.props.isFullscreen) {
       this.props.toggleBottomBoxFullscreen();
     }
