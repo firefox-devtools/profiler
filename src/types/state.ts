@@ -39,6 +39,7 @@ import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
 import type { SingleColumnSortState } from '../components/shared/TreeView';
 import type JSZip from 'jszip';
+import type { FormatEdits } from '../profile-logic/js-format/types';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path';
 import type { UploadedProfileInformation as ImportedUploadedProfileInformation } from '../app-logic/uploaded-profiles-db';
@@ -270,11 +271,19 @@ export type SourceViewState = {
   scrollGeneration: number;
   // Optional line number to scroll to in the source view.
   scrollToLineNumber?: number;
+  // Optional column number on scrollToLineNumber. This is used to find the
+  // right line when the source view is pretty-printed.
+  scrollToColumnNumber?: number;
   // Index into source table. Contains information (filename and uuid) about the
   // source. Null if a function without a file path was double clicked.
   sourceIndex: IndexIntoSourceTable | null;
   // The line number of the highlighted line in the source view.
   highlightedLine: number | null;
+  // The column number on the highlighted line, if known.
+  highlightedColumn: number | null;
+  // Whether JS code is pretty-printed in the source view. This stays the same
+  // when a different source is shown.
+  isPrettyPrinted: boolean;
 };
 
 export type AssemblyViewState = {
@@ -434,9 +443,25 @@ export type SourceCodeCacheState = {
   readonly statuses: Map<IndexIntoSourceTable, SourceCodeStatus>;
 };
 
+// The result of pretty-printing a source, see FormatEdits. While the format
+// worker is busy, isDone is false and the edits only cover the start of the
+// code.
+export type SourceFormattingStatus = {
+  readonly edits: FormatEdits;
+  readonly isDone: boolean;
+};
+
+export type SourceFormattingCacheState = {
+  // Bumped on PROFILE_LOADED, like SourceCodeCacheState.generation. The
+  // formatting actions carry the value from when formatting started.
+  readonly generation: number;
+  readonly statuses: Map<IndexIntoSourceTable, SourceFormattingStatus>;
+};
+
 export type CodeState = {
   readonly sourceCodeCache: SourceCodeCacheState;
   readonly assemblyCodeCache: Map<string, AssemblyCodeStatus>;
+  readonly sourceFormattingCache: SourceFormattingCacheState;
 };
 
 export type State = {

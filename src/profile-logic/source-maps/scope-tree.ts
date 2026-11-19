@@ -83,6 +83,7 @@
 import { parser as lezerJsParser } from '@lezer/javascript';
 
 import { bisectionRightByKey } from 'firefox-profiler/utils/bisect';
+import type { JsDialect } from 'firefox-profiler/profile-logic/js-format/dialect';
 
 // Derive SyntaxNode from the parser to avoid version conflicts with nested
 // @lezer/common copies in node_modules (they have incompatible private fields).
@@ -633,15 +634,9 @@ function _walkChildren(
 // Public API
 // ---------------------------------------------------------------------------
 
-// @lezer/javascript ships TS and JSX as opt-in dialects. The base parser only
-// understands plain JS, so a `.ts` or `.tsx` source feeding back through
-// `sourcesContent` produces Error nodes for every type annotation or JSX
-// element. Always configure the matching dialect for original sources.
-export type JsDialect = '' | 'ts' | 'jsx' | 'ts jsx';
-
 const _configuredParsers = new Map<JsDialect, typeof lezerJsParser>();
 
-function _parserForDialect(dialect: JsDialect): typeof lezerJsParser {
+export function parserForDialect(dialect: JsDialect): typeof lezerJsParser {
   if (!dialect) {
     return lezerJsParser;
   }
@@ -651,29 +646,6 @@ function _parserForDialect(dialect: JsDialect): typeof lezerJsParser {
     _configuredParsers.set(dialect, parser);
   }
   return parser;
-}
-
-/**
- * Map a source filename to the Lezer dialect needed to parse it. Looks at the
- * file extension only. Accepts URL-style source paths (the typical content of
- * a source map's `sources[]`).
- */
-export function dialectForFilename(filename: string): JsDialect {
-  const lower = filename.toLowerCase();
-  if (lower.endsWith('.tsx')) {
-    return 'ts jsx';
-  }
-  if (lower.endsWith('.jsx')) {
-    return 'jsx';
-  }
-  if (
-    lower.endsWith('.ts') ||
-    lower.endsWith('.mts') ||
-    lower.endsWith('.cts')
-  ) {
-    return 'ts';
-  }
-  return '';
 }
 
 /**
@@ -688,7 +660,7 @@ export function parseJsScopeTree(
   sourceText: string,
   dialect: JsDialect = ''
 ): FunctionScope[] {
-  const tree = _parserForDialect(dialect).parse(sourceText);
+  const tree = parserForDialect(dialect).parse(sourceText);
   const topLevel: FunctionScope[] = [];
   _walkChildren(tree.topNode, sourceText, topLevel);
   return topLevel;
