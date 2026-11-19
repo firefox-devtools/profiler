@@ -393,17 +393,17 @@ Function ${result.functionHandle}:
     output += `\n  Resource: ${result.resource.name}`;
   }
 
-  if (result.library) {
-    output += `\n  Library: ${result.library.name}`;
-    output += `\n  Library path: ${result.library.path}`;
-    if (result.library.debugName) {
-      output += `\n  Debug name: ${result.library.debugName}`;
+  for (const library of result.libraries) {
+    output += `\n  Library: ${library.name}`;
+    output += `\n  Library path: ${library.path}`;
+    if (library.debugName) {
+      output += `\n  Debug name: ${library.debugName}`;
     }
-    if (result.library.debugPath) {
-      output += `\n  Debug path: ${result.library.debugPath}`;
+    if (library.debugPath) {
+      output += `\n  Debug path: ${library.debugPath}`;
     }
-    if (result.library.breakpadId) {
-      output += `\n  Breakpad ID: ${result.library.breakpadId}`;
+    if (library.breakpadId) {
+      output += `\n  Breakpad ID: ${library.breakpadId}`;
     }
   }
 

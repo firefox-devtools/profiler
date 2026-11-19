@@ -291,18 +291,17 @@ export type FunctionInfoResult = {
     name: string;
     index: number;
   };
-  // The library of this function, if any.
-  // Note that, these days, funcs can be associated with multiple
-  // libraries, so this isn't the best representation anymore. In those
-  // cases this will be set to one of them, but it's arbitrary which one.
-  // See https://github.com/firefox-devtools/profiler/issues/6270
-  library?: {
+  // The libraries of this function's native frames, in frame table order and
+  // without duplicates. A func can have frames from several libraries, for
+  // example from two builds of the same library when comparing profiles.
+  // This is empty if the function has no native frames.
+  libraries: Array<{
     name: string;
     path: string;
     debugName?: string;
     debugPath?: string;
     breakpadId?: string;
-  };
+  }>;
   categoryBreakdown: FunctionCategoryBreakdowns;
 };
 

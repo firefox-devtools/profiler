@@ -105,6 +105,7 @@ function makeFunctionInfoResult(
     fullName: 'libxul.so!nsBlockFrame::Reflow',
     isJS: false,
     relevantForJS: false,
+    libraries: [],
     categoryBreakdown,
     context: createMockContext(),
   };

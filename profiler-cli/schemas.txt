@@ -283,7 +283,7 @@ profiler-cli function info --json
     type: "function-info",
     functionHandle, funcIndex, name, fullName, isJS, relevantForJS,
     resource?: { name, index },
-    library?: { name, path, debugName?, debugPath?, breakpadId? },
+    libraries: [{ name, path, debugName?, debugPath?, breakpadId? }],
     categoryBreakdown: {
       threadHandle, friendlyThreadName, threadSamples,
       running: CategoryBreakdown & { samples, percentageOfThread },
