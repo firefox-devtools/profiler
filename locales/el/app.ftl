@@ -212,8 +212,10 @@ CallTree--inlining-badge = (ενσωματωμένη)
 ## This is the sidebar component that is used in Call Tree, Function List and
 ## Flame Graph panels.
 
-CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
+CallTreeSidebar--select-a-node = Επιλέξτε έναν κόμβο για να δείτε πληροφορίες σχετικά με αυτόν.
 CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλήσης
+CallTreeSidebar--select-a-function = Επιλέξτε μια συνάρτηση για να δείτε πληροφορίες σχετικά με αυτή.
+CallTreeSidebar--function-details = Λεπτομέρειες συνάρτησης
 
 ## CallTreeSidebar timing information
 ##
@@ -494,7 +496,7 @@ MarkerSettings--copy-table-exceeed-max-rows = Ο αριθμός σειρών υ�
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
-MarkerSidebar--select-a-marker = Επιλέξτε σημάδι για προβολή πληροφοριών σχετικά με αυτό.
+MarkerSidebar--select-a-marker = Επιλέξτε έναν δείκτη για να δείτε πληροφορίες σχετικά με αυτόν.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -868,6 +870,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Δέντρο κλήσεων
+TabBar--function-list-tab = Λίστα συναρτήσεων
 TabBar--flame-graph-tab = Γράφημα φλόγας
 TabBar--stack-chart-tab = Διάγραμμα στοιβών
 TabBar--marker-chart-tab = Διάγραμμα δεικτών
