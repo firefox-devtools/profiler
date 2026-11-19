@@ -1,16 +1,12 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+import { GREY_20, GREY_30, GREY_60, BLUE_60, GREY_70 } from 'photon-colors';
 import {
-  GREY_20,
-  GREY_30,
-  GREY_60,
-  GREY_90,
-  BLUE_60,
-  BLUE_80,
-  GREY_70,
-} from 'photon-colors';
-import { getForegroundColor, getBackgroundColor } from '../../utils/colors';
+  getForegroundColor,
+  getBackgroundColor,
+  getContrastingTextColor,
+} from '../../utils/colors';
 import { isDarkMode, lightDark } from '../../utils/dark-mode';
 import * as React from 'react';
 import {
@@ -20,7 +16,11 @@ import {
 import { ChartCanvas } from 'firefox-profiler/components/shared/chart/Canvas';
 import { TooltipMarker } from 'firefox-profiler/components/tooltip/Marker';
 import TextMeasurement from 'firefox-profiler/utils/text-measurement';
-import { bisectionRight } from 'firefox-profiler/utils/bisect';
+import { bisectionLeft, bisectionRight } from 'firefox-profiler/utils/bisect';
+import {
+  snap,
+  snapValueToMultipleOf,
+} from 'firefox-profiler/utils/device-pixels';
 import memoize from 'memoize-immutable';
 import type {
   updatePreviewSelection,
@@ -38,6 +38,7 @@ import { TIMELINE_MARGIN_LEFT } from 'firefox-profiler/app-logic/constants';
 import type {
   Milliseconds,
   CssPixels,
+  DevicePixels,
   UnitIntervalOfProfileRange,
   ThreadsKey,
   Marker,
@@ -53,9 +54,6 @@ import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 import { getStartEndRangeForMarker } from 'firefox-profiler/utils';
 import {
   getStrokeColor,
-  getFillColor,
-  getDotColor,
-  getTextColor,
   isValidGraphColor,
 } from 'firefox-profiler/profile-logic/graph-color';
 import { getSchemaFromMarker } from 'firefox-profiler/profile-logic/marker-schema';
@@ -67,15 +65,6 @@ import type {
 } from '../shared/chart/Canvas';
 
 import type { WrapFunctionInDispatch } from 'firefox-profiler/utils/connect';
-
-type MarkerDrawingInformation = {
-  readonly x: CssPixels;
-  readonly y: CssPixels;
-  readonly w: CssPixels;
-  readonly h: CssPixels;
-  readonly isInstantMarker: boolean;
-  readonly markerIndex: MarkerIndex;
-};
 
 type OwnProps = {
   readonly rangeStart: Milliseconds;
@@ -110,8 +99,34 @@ const TEXT_OFFSET_TOP = 11;
 const TEXT_OFFSET_START = 3;
 const MARKER_DOT_RADIUS = 0.25;
 const LABEL_PADDING = 5;
-const MARKER_BORDER_COLOR = '#2c77d1';
-const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
+const DEFAULT_FILL_COLOR = '#5aaaf8'; // Medium blue for non-highlighted
+// The gap at the right edge of interval markers, in device pixels.
+const MARKER_GAP = 0.8;
+const FONT_SIZE = 10;
+
+/**
+ * The chart geometry in device pixels. It's computed once per drawCanvas call
+ * and shared by the functions that draw the individual rows.
+ */
+type DeviceCoordinates = {
+  readonly cssToDeviceScale: number;
+  readonly containerWidth: DevicePixels;
+  readonly containerHeight: DevicePixels;
+  // The left edge of the area in which markers are drawn. The marker names are
+  // drawn to the left of it.
+  readonly marginLeft: DevicePixels;
+  // The right edge of the separators and of the bucket headers.
+  readonly separatorRight: DevicePixels;
+  // The times at marginLeft and at the right edge of the container.
+  readonly timeAtMarginLeft: Milliseconds;
+  readonly timeAtContainerRight: Milliseconds;
+  readonly devicePixelsPerMs: number;
+  readonly viewportTop: DevicePixels;
+  // This is not snapped to an integer. See _getRowTop.
+  readonly rowHeight: DevicePixels;
+  // One CSS pixel, rounded to whole device pixels.
+  readonly lineWidth: DevicePixels;
+};
 
 function getSeparatorColor() {
   return lightDark(GREY_20, GREY_70);
@@ -125,27 +140,64 @@ function getBucketBorderColor() {
   return lightDark(GREY_30, GREY_60);
 }
 
-function getHighlightRowBackgroundColor() {
-  return 'rgba(40, 122, 169, 0.2)';
+export function getHighlightRowBackgroundColor() {
+  return '#287aa933';
 }
 
-function getDefaultMarkerColors(isHighlighted: boolean) {
-  if (isDarkMode()) {
-    return {
-      fillColor: isHighlighted ? 'hsl(208, 81%, 52%)' : 'hsl(208, 88%, 32%)',
-      strokeColor: isHighlighted ? 'hsl(208, 82%, 58%)' : 'hsl(208, 71%, 40%)',
-      textColor: isHighlighted ? GREY_90 : GREY_20,
-    };
+function getMarkerFillColor(
+  color: GraphColor | null,
+  isHighlighted: boolean
+): string {
+  if (color !== null) {
+    // Markers have no border, so use a more opaque fill than getFillColor,
+    // which the timeline graphs use.
+    return isHighlighted ? getStrokeColor(color) : getStrokeColor(color) + 'bb';
   }
-  return {
-    fillColor: isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR,
-    strokeColor: isHighlighted ? BLUE_80 : MARKER_BORDER_COLOR,
-    textColor: isHighlighted ? 'white' : 'black', // White text on dark blue, black text on light blue
-  };
+  if (isDarkMode()) {
+    return isHighlighted ? '#218be8' : '#1366ae';
+  }
+  return isHighlighted ? BLUE_60 : DEFAULT_FILL_COLOR;
+}
+
+/**
+ * Instant markers are drawn as diamonds that are about half as wide as they
+ * are high. The width is odd, so that the diamond's middle column can be
+ * centered on the marker's timestamp.
+ */
+function getInstantMarkerDiamondWidth(
+  contentHeight: DevicePixels
+): DevicePixels {
+  return 2 * Math.floor(contentHeight / 4) + 1;
+}
+
+// Maps "fillColor backgroundColor" to the text color for this combination.
+const _textColorCache: Map<string, string> = new Map();
+
+/**
+ * Get the fill and text colors for a marker. `color` is the marker's color
+ * from its schema's colorField, or null for the default blue. The text is
+ * black or white, whichever has the higher contrast with the fill.
+ */
+export function getMarkerColors(
+  color: GraphColor | null,
+  isHighlighted: boolean
+): { fillColor: string; textColor: string } {
+  const fillColor = getMarkerFillColor(color, isHighlighted);
+  const backgroundColor = getBackgroundColor();
+  const key = fillColor + ' ' + backgroundColor;
+  let textColor = _textColorCache.get(key);
+  if (textColor === undefined) {
+    textColor = getContrastingTextColor(fillColor, backgroundColor);
+    _textColorCache.set(key, textColor);
+  }
+  return { fillColor, textColor };
 }
 
 class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   _textMeasurement: TextMeasurement | null = null;
+  _textMeasurementCssToDeviceScale: number = 1;
+  // Pre-rendered instant marker diamonds, see _getInstantMarkerImage.
+  _instantMarkerImages: Map<string, HTMLCanvasElement> = new Map();
 
   override componentDidUpdate(prevProps: Props) {
     const viewportDidMount =
@@ -191,7 +243,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
   };
 
   /**
-   * Get the fill, stroke, and text colors for a marker based on its schema and data.
+   * Get the fill and text colors for a marker based on its schema and data.
    * If the marker schema has a colorField, use that field's value.
    * Otherwise use the marker schema's color.
    * Fall back to default blue if no color is specified.
@@ -201,7 +253,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     isHighlighted: boolean
   ): {
     fillColor: string;
-    strokeColor: string;
     textColor: string;
   } {
     const { getMarker, markerSchemaByName } = this.props;
@@ -234,22 +285,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       color = schema.color;
     }
 
-    if (color) {
-      if (isHighlighted) {
-        return {
-          fillColor: getStrokeColor(color),
-          strokeColor: getDotColor(color),
-          textColor: getTextColor(color), // Use appropriate contrast color when highlighted
-        };
-      }
-      return {
-        fillColor: getFillColor(color),
-        strokeColor: getStrokeColor(color),
-        textColor: getForegroundColor(), // Always use black/white text for unselected markers
-      };
-    }
-    // Fall back to default blue colors
-    return getDefaultMarkerColors(isHighlighted);
+    return getMarkerColors(color, isHighlighted);
   }
 
   drawCanvas = (
@@ -257,99 +293,583 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     scale: ChartCanvasScale,
     hoverInfo: ChartCanvasHoverInfo<MarkerIndex>
   ) => {
-    const {
-      rowHeight,
-      markerTimingAndBuckets,
-      rightClickedMarkerIndex,
-      viewport: {
-        viewportTop,
-        viewportBottom,
-        containerWidth,
-        containerHeight,
-      },
-    } = this.props;
+    const { markerTimingAndBuckets, rightClickedMarkerIndex } = this.props;
     const {
       hoveredItem: hoveredMarker,
       prevHoveredItem: prevHoveredMarker,
       isHoveredOnlyDifferent,
     } = hoverInfo;
 
-    const { cssToUserScale } = scale;
-    if (cssToUserScale !== 1) {
+    const { cssToDeviceScale, cssToUserScale } = scale;
+    if (cssToDeviceScale !== cssToUserScale) {
       throw new Error(
-        'StackChartCanvasImpl sets scaleCtxToCssPixels={true}, so canvas user space units should be equal to CSS pixels.'
+        'MarkerChartCanvasImpl sets scaleCtxToCssPixels={false}, so canvas user space units should be equal to device pixels.'
       );
     }
 
-    // Convert CssPixels to Stack Depth
-    const startRow = Math.floor(viewportTop / rowHeight);
-    const endRow = Math.min(
-      Math.ceil(viewportBottom / rowHeight),
-      markerTimingAndBuckets.length
-    );
+    // The font property resets automatically whenever the canvas size is
+    // changed, so we set it on every call.
+    ctx.font = `${FONT_SIZE * cssToDeviceScale}px sans-serif`;
+
+    const coords = this._getDeviceCoordinates(cssToDeviceScale);
     const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
       markerTimingAndBuckets
     );
-    const rightClickedRow: number | void =
+    const hoveredRow =
+      hoveredMarker === null ? null : markerIndexToTimingRow[hoveredMarker];
+    const rightClickedRow =
       rightClickedMarkerIndex === null
-        ? undefined
+        ? null
         : markerIndexToTimingRow[rightClickedMarkerIndex];
-    const newRow: number | void =
-      hoveredMarker === null
-        ? undefined
-        : markerIndexToTimingRow[hoveredMarker];
-
-    // Common properties that won't be changed later.
-    ctx.lineWidth = 1;
 
     if (isHoveredOnlyDifferent) {
-      // Only re-draw the rows that have been updated if only the hovering information
-      // is different.
-      const oldRow: number | void =
+      // Only the hover state changed. Redraw just the rows of the previously
+      // and the newly hovered markers.
+      const prevHoveredRow =
         prevHoveredMarker === null
-          ? undefined
+          ? null
           : markerIndexToTimingRow[prevHoveredMarker];
+      if (hoveredRow !== null) {
+        this._drawRow(
+          ctx,
+          coords,
+          hoveredRow,
+          hoveredMarker,
+          hoveredRow,
+          rightClickedRow
+        );
+      }
+      if (prevHoveredRow !== null && prevHoveredRow !== hoveredRow) {
+        this._drawRow(
+          ctx,
+          coords,
+          prevHoveredRow,
+          hoveredMarker,
+          hoveredRow,
+          rightClickedRow
+        );
+      }
+      return;
+    }
 
-      if (newRow !== undefined) {
-        this.clearRow(ctx, newRow);
-        this.highlightRow(ctx, newRow);
-        this.drawMarkers(ctx, hoveredMarker, newRow, newRow + 1);
-        this.drawSeparatorsAndLabels(ctx, newRow, newRow + 1, true);
-      }
-      if (oldRow !== undefined && oldRow !== newRow) {
-        if (oldRow !== rightClickedRow) {
-          this.clearRow(ctx, oldRow);
-        }
-        this.drawMarkers(ctx, hoveredMarker, oldRow, oldRow + 1);
-        this.drawSeparatorsAndLabels(ctx, oldRow, oldRow + 1);
-      }
-    } else {
-      ctx.fillStyle = getBackgroundColor();
-      ctx.fillRect(0, 0, containerWidth, containerHeight);
-      if (rightClickedRow !== undefined) {
-        this.highlightRow(ctx, rightClickedRow);
-      } else if (newRow !== undefined) {
-        this.highlightRow(ctx, newRow);
-      }
-      this.drawMarkers(ctx, hoveredMarker, startRow, endRow);
-      this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+    const { containerWidth, containerHeight, rowHeight, viewportTop } = coords;
+    ctx.fillStyle = getBackgroundColor();
+    ctx.fillRect(0, 0, containerWidth, containerHeight);
+
+    const rowCount = markerTimingAndBuckets.length;
+    const startRow = Math.max(0, Math.floor(viewportTop / rowHeight));
+    const endRow = Math.min(
+      Math.ceil((viewportTop + containerHeight) / rowHeight) + 1,
+      rowCount
+    );
+    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+      this._drawRow(
+        ctx,
+        coords,
+        rowIndex,
+        hoveredMarker,
+        hoveredRow,
+        rightClickedRow
+      );
+    }
+
+    // Continue the vertical separator between the labels and the markers
+    // below the last row.
+    const rowsBottom = Math.max(0, this._getRowTop(coords, rowCount));
+    if (rowsBottom < containerHeight) {
+      const { marginLeft, lineWidth } = coords;
+      ctx.fillStyle = getSeparatorColor();
+      ctx.fillRect(
+        marginLeft - lineWidth,
+        rowsBottom,
+        lineWidth,
+        containerHeight - rowsBottom
+      );
     }
   };
 
-  highlightRow = (ctx: CanvasRenderingContext2D, row: number) => {
+  _getDeviceCoordinates(cssToDeviceScale: number): DeviceCoordinates {
     const {
+      rangeStart,
+      rangeEnd,
       rowHeight,
-      viewport: { viewportTop, containerWidth },
+      marginLeft,
+      marginRight,
+      viewport: {
+        containerWidth,
+        containerHeight,
+        viewportLeft,
+        viewportRight,
+        viewportTop,
+      },
     } = this.props;
 
-    ctx.fillStyle = getHighlightRowBackgroundColor();
-    ctx.fillRect(
-      0, // To include the labels also
-      row * rowHeight - viewportTop,
-      containerWidth,
-      rowHeight - 1 // Subtract 1 for borders.
+    // Round the same way as ChartCanvas does when it sizes the canvas.
+    const deviceContainerWidth = Math.floor(containerWidth * cssToDeviceScale);
+    const deviceContainerHeight = Math.floor(
+      containerHeight * cssToDeviceScale
     );
-  };
+    const deviceMarginLeft = snap(marginLeft * cssToDeviceScale);
+    const deviceMarginRight = snap(marginRight * cssToDeviceScale);
+    const deviceInnerWidth =
+      deviceContainerWidth - deviceMarginLeft - deviceMarginRight;
+
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const timeAtMarginLeft: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
+    const viewportDuration: Milliseconds =
+      rangeLength * (viewportRight - viewportLeft);
+    const devicePixelsPerMs =
+      viewportDuration > 0 ? deviceInnerWidth / viewportDuration : 0;
+    const timeAtContainerRight: Milliseconds =
+      devicePixelsPerMs > 0
+        ? timeAtMarginLeft +
+          (deviceContainerWidth - deviceMarginLeft) / devicePixelsPerMs
+        : timeAtMarginLeft;
+
+    return {
+      cssToDeviceScale,
+      containerWidth: deviceContainerWidth,
+      containerHeight: deviceContainerHeight,
+      marginLeft: deviceMarginLeft,
+      separatorRight: deviceContainerWidth - deviceMarginRight,
+      timeAtMarginLeft,
+      timeAtContainerRight,
+      devicePixelsPerMs,
+      viewportTop: snap(viewportTop * cssToDeviceScale),
+      rowHeight: rowHeight * cssToDeviceScale,
+      lineWidth: Math.max(1, snap(cssToDeviceScale)),
+    };
+  }
+
+  /**
+   * Rows are snapped to device pixels individually, relative to the top of the
+   * chart, so that each row keeps its height while scrolling.
+   */
+  _getRowTop(coords: DeviceCoordinates, rowIndex: number): DevicePixels {
+    return snap(rowIndex * coords.rowHeight) - coords.viewportTop;
+  }
+
+  /**
+   * Draw everything inside the row's area: the background, the markers, the
+   * label and the separators. This fully covers what was drawn there before,
+   * so a single row can be redrawn when only the hover state changes.
+   *
+   * Each row draws the separator at its bottom edge. The separator at the top
+   * edge of the first row is drawn using CSS.
+   */
+  _drawRow(
+    ctx: CanvasRenderingContext2D,
+    coords: DeviceCoordinates,
+    rowIndex: number,
+    hoveredMarker: MarkerIndex | null,
+    hoveredRow: number | null,
+    rightClickedRow: number | null
+  ) {
+    const { markerTimingAndBuckets } = this.props;
+    const { containerWidth, marginLeft, separatorRight, lineWidth } = coords;
+    const rowTop = this._getRowTop(coords, rowIndex);
+    const separatorTop = this._getRowTop(coords, rowIndex + 1) - lineWidth;
+    const contentHeight = separatorTop - rowTop;
+    const textTop = rowTop + snap(TEXT_OFFSET_TOP * coords.cssToDeviceScale);
+    const labelPadding = snap(LABEL_PADDING * coords.cssToDeviceScale);
+
+    const row = markerTimingAndBuckets[rowIndex];
+    if (typeof row === 'string') {
+      // This is a bucket header. Its top border is the separator of the
+      // previous row.
+      ctx.fillStyle = getBucketBackgroundColor();
+      ctx.fillRect(0, rowTop, separatorRight, contentHeight);
+      ctx.fillStyle = getBucketBorderColor();
+      ctx.fillRect(0, separatorTop, separatorRight, lineWidth);
+      ctx.fillStyle = getForegroundColor();
+      ctx.fillText(row, marginLeft + labelPadding, textTop);
+      return;
+    }
+
+    ctx.fillStyle = getBackgroundColor();
+    ctx.fillRect(0, rowTop, containerWidth, contentHeight);
+    if (rowIndex === hoveredRow || rowIndex === rightClickedRow) {
+      ctx.fillStyle = getHighlightRowBackgroundColor();
+      ctx.fillRect(0, rowTop, containerWidth, contentHeight);
+    }
+
+    // The clip operation forbids drawing in the label zone.
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(marginLeft, rowTop, containerWidth - marginLeft, contentHeight);
+    ctx.clip();
+    this._drawMarkersInRow(
+      ctx,
+      coords,
+      row,
+      rowTop,
+      contentHeight,
+      hoveredMarker
+    );
+    ctx.restore();
+
+    // Draw the separators. If the next row is a bucket header, this separator
+    // is the header's top border.
+    ctx.fillStyle = getSeparatorColor();
+    ctx.fillRect(marginLeft - lineWidth, rowTop, lineWidth, contentHeight);
+    const nextRow = markerTimingAndBuckets[rowIndex + 1];
+    ctx.fillStyle =
+      typeof nextRow === 'string'
+        ? getBucketBorderColor()
+        : getSeparatorColor();
+    ctx.fillRect(0, separatorTop, separatorRight, lineWidth);
+
+    // Draw the marker name in the left margin, for the first row of each name.
+    const prevRow = rowIndex > 0 ? markerTimingAndBuckets[rowIndex - 1] : null;
+    if (
+      prevRow === null ||
+      typeof prevRow === 'string' ||
+      prevRow.name !== row.name
+    ) {
+      const textMeasurement = this._getTextMeasurement(
+        ctx,
+        coords.cssToDeviceScale
+      );
+      const countString =
+        rowIndex === hoveredRow
+          ? ` (${this.countMarkersInBucketStartingAtRow(rowIndex)})`
+          : '';
+      const maxLabelWidth =
+        snap(TIMELINE_MARGIN_LEFT * coords.cssToDeviceScale) -
+        labelPadding -
+        (countString ? textMeasurement.getTextWidth(countString) : 0);
+      const fittedText =
+        textMeasurement.getFittedText(row.name, maxLabelWidth) + countString;
+      ctx.fillStyle = getForegroundColor();
+      ctx.fillText(fittedText, labelPadding, textTop);
+    }
+  }
+
+  _drawMarkersInRow(
+    ctx: CanvasRenderingContext2D,
+    coords: DeviceCoordinates,
+    markerTiming: MarkerTiming,
+    rowTop: DevicePixels,
+    contentHeight: DevicePixels,
+    hoveredMarker: MarkerIndex | null
+  ) {
+    const { rightClickedMarkerIndex, selectedMarkerIndex } = this.props;
+    const {
+      marginLeft,
+      timeAtMarginLeft,
+      timeAtContainerRight,
+      devicePixelsPerMs,
+    } = coords;
+
+    // Only draw the markers that are horizontally within view. The markers in
+    // a row don't overlap, so both the start and the end times are sorted.
+    // Instant markers can be drawn as diamonds that extend beyond their
+    // timestamp, so include markers that are up to half a diamond width out of
+    // view.
+    const diamondWidth = getInstantMarkerDiamondWidth(contentHeight);
+    const diamondHalfWidthInTime =
+      devicePixelsPerMs > 0 ? diamondWidth / 2 / devicePixelsPerMs : 0;
+    const startIndex = bisectionLeft(
+      markerTiming.end,
+      timeAtMarginLeft - diamondHalfWidthInTime
+    );
+    const endIndex = bisectionLeft(
+      markerTiming.start,
+      timeAtContainerRight + diamondHalfWidthInTime
+    );
+
+    // Track the right edge of the last drawn marker, so that we can avoid
+    // drawing markers which would be completely covered by the previous one.
+    let prevMarkerRight: DevicePixels = -Infinity;
+    // Highlighted markers are drawn after the normal markers so that they
+    // stand out more. This stores [timing index, left, right] triples.
+    const highlightedMarkers: number[] = [];
+
+    for (let i = startIndex; i < endIndex; i++) {
+      const markerIndex = markerTiming.index[i];
+      const isHighlighted =
+        markerIndex === hoveredMarker ||
+        markerIndex === selectedMarkerIndex ||
+        markerIndex === rightClickedMarkerIndex;
+      const startTime = markerTiming.start[i];
+      const endTime = markerTiming.end[i];
+      const leftUnsnapped =
+        marginLeft + (startTime - timeAtMarginLeft) * devicePixelsPerMs;
+
+      if (startTime === endTime) {
+        // This is an instant marker. It's drawn as a diamond centered on x.
+        const x = snap(leftUnsnapped);
+        const diamondLeft = x - (diamondWidth - 1) / 2;
+        const diamondRight = diamondLeft + diamondWidth;
+        if (isHighlighted) {
+          // Highlighted instant markers are always drawn as whole diamonds,
+          // so that they stand out even in a dense cluster.
+          highlightedMarkers.push(i, diamondLeft, diamondRight);
+          continue;
+        }
+
+        // Clip the diamond so that it doesn't overlap its neighbors, because
+        // overlapping diamonds fuse into a blob. The clip edges are aligned
+        // like the edges of interval markers.
+        let left = diamondLeft;
+        let right = diamondRight;
+        let hasGap = false;
+        if (i > 0) {
+          left = Math.max(
+            left,
+            snapValueToMultipleOf(
+              this._getBoundaryBetweenMarkers(markerTiming, i - 1, coords),
+              2
+            )
+          );
+        }
+        if (i + 1 < markerTiming.length) {
+          const boundary = snapValueToMultipleOf(
+            this._getBoundaryBetweenMarkers(markerTiming, i, coords),
+            2
+          );
+          if (boundary < right) {
+            right = boundary;
+            hasGap = true;
+          }
+        }
+        if (right <= left) {
+          // The neighbors are so close that nothing is left of the diamond.
+          // Keep a slice that's two device pixels wide, so that it stays
+          // visible.
+          right = left + 2;
+          hasGap = true;
+        }
+
+        if (right <= prevMarkerRight) {
+          continue;
+        }
+        left = Math.max(left, prevMarkerRight);
+        prevMarkerRight = right;
+        this._drawInstantMarker(
+          ctx,
+          coords,
+          x,
+          left,
+          hasGap ? right - MARKER_GAP : right,
+          rowTop,
+          contentHeight,
+          markerIndex,
+          false
+        );
+        continue;
+      }
+
+      // Snap the left and right edges to the nearest multiple of two device
+      // pixels, like the flame graph does. If both edges snap to the same
+      // value, make the box two device pixels wide, so that short markers stay
+      // visible.
+      let left = snapValueToMultipleOf(leftUnsnapped, 2);
+      let right = snapValueToMultipleOf(
+        marginLeft + (endTime - timeAtMarginLeft) * devicePixelsPerMs,
+        2
+      );
+      if (right === left) {
+        right = left + 2;
+      }
+
+      if (isHighlighted) {
+        highlightedMarkers.push(i, left, right);
+        continue;
+      }
+
+      // Markers which got enlarged by the snapping can overlap the next
+      // marker. Let the earlier marker win, and skip markers which are
+      // entirely covered.
+      if (right <= prevMarkerRight) {
+        continue;
+      }
+      left = Math.max(left, prevMarkerRight);
+      prevMarkerRight = right;
+      this._drawIntervalMarker(
+        ctx,
+        coords,
+        left,
+        right,
+        rowTop,
+        contentHeight,
+        markerIndex,
+        false
+      );
+    }
+
+    for (let j = 0; j < highlightedMarkers.length; j += 3) {
+      const i = highlightedMarkers[j];
+      const left = highlightedMarkers[j + 1];
+      const right = highlightedMarkers[j + 2];
+      const markerIndex = markerTiming.index[i];
+      if (markerTiming.start[i] === markerTiming.end[i]) {
+        this._drawInstantMarker(
+          ctx,
+          coords,
+          (left + right - 1) / 2,
+          left,
+          right,
+          rowTop,
+          contentHeight,
+          markerIndex,
+          true
+        );
+      } else {
+        this._drawIntervalMarker(
+          ctx,
+          coords,
+          left,
+          right,
+          rowTop,
+          contentHeight,
+          markerIndex,
+          true
+        );
+      }
+    }
+  }
+
+  // Note: we used a long argument list instead of an object parameter on
+  // purpose, to reduce GC pressure while drawing.
+  _drawIntervalMarker(
+    ctx: CanvasRenderingContext2D,
+    coords: DeviceCoordinates,
+    left: DevicePixels,
+    right: DevicePixels,
+    rowTop: DevicePixels,
+    contentHeight: DevicePixels,
+    markerIndex: MarkerIndex,
+    isHighlighted: boolean
+  ) {
+    const { marginLeft, cssToDeviceScale } = coords;
+    const { fillColor, textColor } = this._getMarkerColors(
+      markerIndex,
+      isHighlighted
+    );
+
+    // Markers are drawn as flat boxes without a border. Leave a small gap at
+    // the right edge, so that adjacent markers can be told apart.
+    ctx.fillStyle = fillColor;
+    ctx.fillRect(left, rowTop, right - left - MARKER_GAP, contentHeight);
+
+    // Draw the text label, constrained to the visible part of the marker.
+    // TODO - L10N RTL.
+    const visibleLeft = Math.max(left, marginLeft);
+    const textPadding = snap(TEXT_OFFSET_START * cssToDeviceScale);
+    const textWidth = right - visibleLeft - 2 * textPadding;
+    const textMeasurement = this._getTextMeasurement(ctx, cssToDeviceScale);
+    if (textWidth > textMeasurement.minWidth) {
+      const fittedText = textMeasurement.getFittedText(
+        this.props.getMarkerLabel(markerIndex),
+        textWidth
+      );
+      if (fittedText) {
+        ctx.fillStyle = textColor;
+        ctx.fillText(
+          fittedText,
+          visibleLeft + textPadding,
+          rowTop + snap(TEXT_OFFSET_TOP * cssToDeviceScale)
+        );
+      }
+    }
+  }
+
+  /**
+   * Return the position, in unsnapped device pixels, of the boundary between
+   * the marker at `index` and the next marker in the row. Instant markers are
+   * clipped at this boundary. Between two instant markers, it's halfway
+   * between them. Next to an interval marker, it's the interval marker's edge.
+   */
+  _getBoundaryBetweenMarkers(
+    markerTiming: MarkerTiming,
+    index: number,
+    coords: DeviceCoordinates
+  ): DevicePixels {
+    const { marginLeft, timeAtMarginLeft, devicePixelsPerMs } = coords;
+    const prevStart = markerTiming.start[index];
+    const prevEnd = markerTiming.end[index];
+    const nextStart = markerTiming.start[index + 1];
+    const nextEnd = markerTiming.end[index + 1];
+    let boundaryTime;
+    if (prevStart === prevEnd && nextStart === nextEnd) {
+      boundaryTime = (prevStart + nextStart) / 2;
+    } else if (prevStart === prevEnd) {
+      boundaryTime = nextStart;
+    } else {
+      boundaryTime = prevEnd;
+    }
+    return marginLeft + (boundaryTime - timeAtMarginLeft) * devicePixelsPerMs;
+  }
+
+  // x indicates the center of this marker. Only the part of the diamond
+  // between clipLeft and clipRight is drawn.
+  // rowTop indicates the top of the row
+  // contentHeight indicates the available height in the row
+  _drawInstantMarker(
+    ctx: CanvasRenderingContext2D,
+    coords: DeviceCoordinates,
+    x: DevicePixels,
+    clipLeft: DevicePixels,
+    clipRight: DevicePixels,
+    rowTop: DevicePixels,
+    contentHeight: DevicePixels,
+    markerIndex: MarkerIndex,
+    isHighlighted: boolean
+  ) {
+    const { fillColor } = this._getMarkerColors(markerIndex, isHighlighted);
+    const image = this._getInstantMarkerImage(
+      fillColor,
+      contentHeight,
+      coords.lineWidth
+    );
+    // The image has an odd width, so its middle column is at x.
+    const imageLeft = x - (image.width - 1) / 2;
+    const width = clipRight - clipLeft;
+    ctx.drawImage(
+      image,
+      clipLeft - imageLeft,
+      0,
+      width,
+      contentHeight,
+      clipLeft,
+      rowTop,
+      width,
+      contentHeight
+    );
+  }
+
+  /**
+   * Drawing diamonds as paths is slow when there are many of them, so render
+   * each diamond once into a small canvas and copy it with drawImage.
+   */
+  _getInstantMarkerImage(
+    fillColor: string,
+    contentHeight: DevicePixels,
+    lineWidth: DevicePixels
+  ): HTMLCanvasElement {
+    const key = `${fillColor} ${contentHeight} ${lineWidth}`;
+    let image = this._instantMarkerImages.get(key);
+    if (image === undefined) {
+      image = document.createElement('canvas');
+      const width = getInstantMarkerDiamondWidth(contentHeight);
+      image.width = width;
+      image.height = contentHeight;
+      const ctx = image.getContext('2d')!;
+      // Leave a gap of one line width above and below the diamond.
+      ctx.fillStyle = fillColor;
+      ctx.beginPath();
+      ctx.moveTo(0, contentHeight / 2);
+      ctx.lineTo(width / 2, lineWidth);
+      ctx.lineTo(width, contentHeight / 2);
+      ctx.lineTo(width / 2, contentHeight - lineWidth);
+      ctx.closePath();
+      ctx.fill();
+      this._instantMarkerImages.set(key, image);
+    }
+    return image;
+  }
 
   /**
    * When re-drawing markers, it's helpful to isolate the operations to a single row
@@ -385,285 +905,21 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
     { cache: new WeakMap() }
   );
 
-  // Note: we used a long argument list instead of an object parameter on
-  // purpose, to reduce GC pressure while drawing.
-  drawOneMarker(
-    ctx: CanvasRenderingContext2D,
-    x: CssPixels,
-    y: CssPixels,
-    w: CssPixels,
-    h: CssPixels,
-    isInstantMarker: boolean,
-    markerIndex: MarkerIndex,
-    isHighlighted: boolean = false
-  ) {
-    if (isInstantMarker) {
-      this.drawOneInstantMarker(ctx, x, y, h, markerIndex, isHighlighted);
-    } else {
-      this.drawOneIntervalMarker(ctx, x, y, w, h, markerIndex, isHighlighted);
-    }
-  }
-
-  drawOneIntervalMarker(
-    ctx: CanvasRenderingContext2D,
-    x: CssPixels,
-    y: CssPixels,
-    w: CssPixels,
-    h: CssPixels,
-    markerIndex: MarkerIndex,
-    isHighlighted: boolean
-  ) {
-    const { marginLeft, getMarkerLabel } = this.props;
-    const { fillColor, strokeColor, textColor } = this._getMarkerColors(
-      markerIndex,
-      isHighlighted
-    );
-
-    if (w <= 2) {
-      // This is an interval marker small enough that if we drew it as a
-      // rectangle, we wouldn't see any inside part. With a width of 2 pixels,
-      // the rectangle-with-borders would only be borders. With less than 2
-      // pixels, the borders would collapse.
-      // So let's draw it directly as a rect.
-      ctx.fillStyle = strokeColor;
-
-      // w is rounded in the caller, but let's make sure it's at least 1.
-      w = Math.max(w, 1);
-      ctx.fillRect(x, y + 1, w, h - 2);
-    } else {
-      // This is a bigger interval marker.
-      const textMeasurement = this._getTextMeasurement(ctx);
-
-      ctx.fillStyle = fillColor;
-      ctx.strokeStyle = strokeColor;
-
-      ctx.beginPath();
-
-      // We want the rectangle to have a clear margin, that's why we increment y
-      // and decrement h (twice, for both margins).
-      // We also add "0.5" more so that the stroke is properly on a pixel.
-      // Indeed strokes are drawn on both sides equally, so half a pixel on each
-      // side in this case.
-      ctx.rect(
-        x + 0.5, // + 0.5 for the stroke
-        y + 1 + 0.5, // + 1 for the top margin, + 0.5 for the stroke
-        w - 1, // - 1 to account for left and right strokes.
-        h - 2 - 1 // + 2 accounts for top and bottom margins, + 1 accounts for top and bottom strokes
-      );
-      ctx.fill();
-      ctx.stroke();
-
-      // Draw the text label
-      // TODO - L10N RTL.
-      // Constrain the x coordinate to the leftmost area.
-      const x2: CssPixels =
-        x < marginLeft ? marginLeft + TEXT_OFFSET_START : x + TEXT_OFFSET_START;
-      const visibleWidth = x < marginLeft ? w - marginLeft + x : w;
-      const w2: CssPixels = visibleWidth - 2 * TEXT_OFFSET_START;
-
-      if (w2 > textMeasurement.minWidth) {
-        const fittedText = textMeasurement.getFittedText(
-          getMarkerLabel(markerIndex),
-          w2
-        );
-        if (fittedText) {
-          ctx.fillStyle = textColor;
-          ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
-        }
-      }
-    }
-  }
-
-  // x indicates the center of this marker
-  // y indicates the top of the row
-  // h indicates the available height in the row
-  drawOneInstantMarker(
-    ctx: CanvasRenderingContext2D,
-    x: CssPixels,
-    y: CssPixels,
-    h: CssPixels,
-    markerIndex: MarkerIndex,
-    isHighlighted: boolean
-  ) {
-    const { fillColor, strokeColor } = this._getMarkerColors(
-      markerIndex,
-      isHighlighted
-    );
-    ctx.fillStyle = fillColor;
-    ctx.strokeStyle = strokeColor;
-
-    // We're drawing a diamond shape, whose height is h - 2, and width is h / 2.
-    ctx.beginPath();
-    ctx.moveTo(x - h / 4, y + h / 2);
-    ctx.lineTo(x, y + 1.5);
-    ctx.lineTo(x + h / 4, y + h / 2);
-    ctx.lineTo(x, y + h - 1.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-  }
-
-  drawMarkers(
-    ctx: CanvasRenderingContext2D,
-    hoveredItem: MarkerIndex | null,
-    startRow: number,
-    endRow: number
-  ) {
-    const {
-      rangeStart,
-      rangeEnd,
-      markerTimingAndBuckets,
-      rowHeight,
-      marginLeft,
-      marginRight,
-      rightClickedMarkerIndex,
-      selectedMarkerIndex,
-      viewport: {
-        containerWidth,
-        containerHeight,
-        viewportLeft,
-        viewportRight,
-        viewportTop,
-      },
-    } = this.props;
-
-    const { devicePixelRatio } = window;
-    const markerContainerWidth = containerWidth - marginLeft - marginRight;
-
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange =
-      viewportRight - viewportLeft;
-
-    // Decide which samples to actually draw
-    const timeAtViewportLeft: Milliseconds =
-      rangeStart + rangeLength * viewportLeft;
-    const timeAtViewportRightPlusMargin: Milliseconds =
-      rangeStart +
-      rangeLength * viewportRight +
-      // This represents the amount of seconds in the right margin:
-      marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
-
-    const highlightedMarkers: MarkerDrawingInformation[] = [];
-
-    // We'll restore the context at the end, so that the clip region will be
-    // removed.
-    ctx.save();
-    // The clip operation forbids drawing in the label zone.
-    ctx.beginPath();
-    ctx.rect(marginLeft, 0, markerContainerWidth, containerHeight);
-    ctx.clip();
-
-    // Only draw the stack frames that are vertically within view.
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
-      const markerTiming = markerTimingAndBuckets[rowIndex];
-
-      if (!markerTiming || typeof markerTiming === 'string') {
-        // This marker timing either didn't exist, or was a bucket.
-        continue;
-      }
-
-      // Track the last drawn marker X position, so that we can avoid overdrawing.
-      let previousMarkerDrawnAtX: number | null = null;
-
-      for (let i = 0; i < markerTiming.length; i++) {
-        const startTimestamp = markerTiming.start[i];
-        const endTimestamp = markerTiming.end[i];
-        const isInstantMarker = startTimestamp === endTimestamp;
-
-        // Only draw samples that are in bounds.
-        if (
-          endTimestamp >= timeAtViewportLeft &&
-          startTimestamp < timeAtViewportRightPlusMargin
-        ) {
-          const startTime: UnitIntervalOfProfileRange =
-            (startTimestamp - rangeStart) / rangeLength;
-          const endTime: UnitIntervalOfProfileRange =
-            (endTimestamp - rangeStart) / rangeLength;
-
-          let x: CssPixels =
-            ((startTime - viewportLeft) * markerContainerWidth) /
-              viewportLength +
-            marginLeft;
-          const y: CssPixels = rowIndex * rowHeight - viewportTop;
-          let w: CssPixels =
-            ((endTime - startTime) * markerContainerWidth) / viewportLength;
-          const h: CssPixels = rowHeight - 1;
-
-          x = Math.round(x * devicePixelRatio) / devicePixelRatio;
-          w = Math.round(w * devicePixelRatio) / devicePixelRatio;
-
-          const markerIndex = markerTiming.index[i];
-
-          const isHighlighted =
-            rightClickedMarkerIndex === markerIndex ||
-            hoveredItem === markerIndex ||
-            selectedMarkerIndex === markerIndex;
-
-          if (isHighlighted) {
-            highlightedMarkers.push({
-              x,
-              y,
-              w,
-              h,
-              isInstantMarker,
-              markerIndex,
-            });
-          } else if (
-            // Always render non-dot markers and markers that are larger than
-            // one pixel.
-            w > 1 ||
-            // Do not render dot markers that occupy the same pixel, as this can take
-            // a lot of time, and not change the visual display of the chart.
-            x !== previousMarkerDrawnAtX
-          ) {
-            previousMarkerDrawnAtX = x;
-            this.drawOneMarker(ctx, x, y, w, h, isInstantMarker, markerIndex);
-          }
-        }
-      }
-    }
-
-    // We draw highlighted markers after the normal markers so that they stand
-    // out more.
-    highlightedMarkers.forEach((highlightedMarker) => {
-      this.drawOneMarker(
-        ctx,
-        highlightedMarker.x,
-        highlightedMarker.y,
-        highlightedMarker.w,
-        highlightedMarker.h,
-        highlightedMarker.isInstantMarker,
-        highlightedMarker.markerIndex,
-        true /* isHighlighted */
-      );
-    });
-
-    ctx.restore();
-  }
-
-  clearRow(ctx: CanvasRenderingContext2D, rowIndex: number) {
-    const {
-      rowHeight,
-      viewport: { viewportTop, containerWidth },
-    } = this.props;
-
-    ctx.fillStyle = getBackgroundColor();
-    ctx.fillRect(
-      0,
-      rowIndex * rowHeight - viewportTop,
-      containerWidth,
-      rowHeight - 1 // Subtract 1 for borders.
-    );
-  }
-
   /**
    * Lazily create the text measurement tool, as a valid 2d rendering context must
-   * exist before it is created.
+   * exist before it is created. We also need to recreate it when the scale
+   * changes, because we are working with device coordinates.
    */
-  _getTextMeasurement(ctx: CanvasRenderingContext2D): TextMeasurement {
-    if (!this._textMeasurement) {
+  _getTextMeasurement(
+    ctx: CanvasRenderingContext2D,
+    cssToDeviceScale: number
+  ): TextMeasurement {
+    if (
+      !this._textMeasurement ||
+      this._textMeasurementCssToDeviceScale !== cssToDeviceScale
+    ) {
       this._textMeasurement = new TextMeasurement(ctx);
+      this._textMeasurementCssToDeviceScale = cssToDeviceScale;
     }
     return this._textMeasurement;
   }
@@ -718,92 +974,6 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
       count += countMarkersInRange(markerTiming);
     }
     return count;
-  }
-
-  drawSeparatorsAndLabels(
-    ctx: CanvasRenderingContext2D,
-    startRow: number,
-    endRow: number,
-    drawMarkerCount: boolean = false
-  ) {
-    const {
-      markerTimingAndBuckets,
-      rowHeight,
-      marginLeft,
-      marginRight,
-      viewport: { viewportTop, containerWidth, containerHeight },
-    } = this.props;
-
-    const usefulContainerWidth = containerWidth - marginRight;
-
-    // Draw separators
-    ctx.fillStyle = getSeparatorColor();
-    ctx.fillRect(marginLeft - 1, 0, 1, containerHeight);
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // `- 1` at the end, because the top separator is not drawn in the canvas,
-      // it's drawn using CSS' border property. And canvas positioning is 0-based.
-      const y = (rowIndex + 1) * rowHeight - viewportTop - 1;
-      ctx.fillRect(0, y, usefulContainerWidth, 1);
-    }
-
-    const textMeasurement = this._getTextMeasurement(ctx);
-
-    // Draw the marker names in the left margin.
-    ctx.fillStyle = getForegroundColor();
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      const markerTiming = markerTimingAndBuckets[rowIndex];
-      if (typeof markerTiming === 'string') {
-        continue;
-      }
-      // Draw the marker name.
-      const { name } = markerTiming;
-      const prevItem = markerTimingAndBuckets[rowIndex - 1];
-      if (
-        rowIndex > 0 &&
-        typeof prevItem !== 'string' &&
-        name === prevItem.name
-      ) {
-        continue;
-      }
-
-      const y = rowIndex * rowHeight - viewportTop;
-
-      const countString = drawMarkerCount
-        ? ` (${this.countMarkersInBucketStartingAtRow(rowIndex)})`
-        : '';
-      const fittedText =
-        textMeasurement.getFittedText(
-          name,
-          TIMELINE_MARGIN_LEFT -
-            LABEL_PADDING -
-            (countString ? textMeasurement.getTextWidth(countString) : 0)
-        ) + countString;
-
-      ctx.fillText(fittedText, LABEL_PADDING, y + TEXT_OFFSET_TOP);
-    }
-
-    // Draw the bucket names.
-    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
-      const bucketName = markerTimingAndBuckets[rowIndex];
-      if (typeof bucketName !== 'string') {
-        continue;
-      }
-      const y = rowIndex * rowHeight - viewportTop;
-
-      // Draw the backgound.
-      ctx.fillStyle = getBucketBackgroundColor();
-      ctx.fillRect(0, y - 1, usefulContainerWidth, rowHeight);
-
-      // Draw the borders./*
-      ctx.fillStyle = getBucketBorderColor();
-      ctx.fillRect(0, y - 1, usefulContainerWidth, 1);
-      ctx.fillRect(0, y + rowHeight - 1, usefulContainerWidth, 1);
-
-      // Draw the text.
-      ctx.fillStyle = getForegroundColor();
-      ctx.fillText(bucketName, LABEL_PADDING + marginLeft, y + TEXT_OFFSET_TOP);
-    }
   }
 
   hitTest = (x: CssPixels, y: CssPixels): MarkerIndex | null => {
@@ -1110,7 +1280,7 @@ class MarkerChartCanvasImpl extends React.PureComponent<Props> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
-        scaleCtxToCssPixels={true}
+        scaleCtxToCssPixels={false}
         onSelectItem={this.onSelectItem}
         onDoubleClickItem={this.onDoubleClickMarker}
         onRightClick={this.onRightClickMarker}
