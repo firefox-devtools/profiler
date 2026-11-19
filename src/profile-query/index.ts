@@ -1551,16 +1551,10 @@ export class ProfileQuerier {
       breakpadId: lib.breakpadId,
     }));
 
-    // Take the library name from the func's resource, not from one of its
-    // libs. A func has a single resource, so the name doesn't depend on which
-    // lib comes first in the frame table. This matches functionExpand.
-    const libName = getLibNameForFunc(
-      funcIndex,
-      funcTable,
-      resourceTable,
-      stringArray
-    );
-    const fullName = libName ? `${libName}!${funcName}` : funcName;
+    // The libs of a func share its library resource, so they also share a
+    // name, and the first one gives the same prefix as any other.
+    const fullName =
+      libraries.length > 0 ? `${libraries[0].name}!${funcName}` : funcName;
 
     return {
       type: 'function-info',

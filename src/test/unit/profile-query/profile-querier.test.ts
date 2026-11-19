@@ -1708,6 +1708,21 @@ describe('ProfileQuerier', function () {
       expect(result.fullName).toBe('A');
     });
 
+    it('does not prefix fullName for a library function without native frames', async function () {
+      // [lib:] without [address:] gives the func a library resource, but no
+      // frame has an address, so there is no lib to report.
+      const { profile } = getProfileFromTextSamples('A[lib:libxul.so]');
+      const querier = setupQuerier(profile);
+
+      const result = await querier.functionInfo(
+        getFuncHandleByName(profile, 'A')
+      );
+
+      expect(result.resource?.name).toBe('libxul.so');
+      expect(result.libraries).toEqual([]);
+      expect(result.fullName).toBe('A');
+    });
+
     it('returns a single library once, even with several frames in it', async function () {
       // Two different addresses give two frames for the same func and lib.
       const { profile } = getProfileFromTextSamples(
@@ -1772,7 +1787,8 @@ describe('ProfileQuerier', function () {
         expect(result.libraries.map((lib) => lib.breakpadId)).toEqual(
           expectedBreakpadIds
         );
-        // The full name comes from the shared resource, not from either build.
+        // Both builds have the same name, so the prefix doesn't depend on
+        // the order.
         expect(result.fullName).toBe('libxul.so!A');
       }
     );
