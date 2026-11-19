@@ -85,20 +85,24 @@ function _splitPath(path: string): string[] {
 const URL_ORIGIN_REGEX = /^([a-z][a-z0-9+.-]*):\/\/([^/]*)(\/.*)?$/i;
 
 /**
- * The tree segments for a file. `bundleUrl` is set for files that a source
- * map produced, and is the URL of the generated file they were mapped from.
+ * The tree segments for a file, and whether they put it under a web site.
+ * `bundleUrl` is set for files that a source map produced, and is the URL of
+ * the generated file they were mapped from.
  */
 function _pathSegmentsForFilename(
   path: string,
   productName: string,
   bundleUrl: string | null
-): string[] {
+): { pathSegments: string[]; isFromWebSite: boolean } {
   // Files inside the browser's omni.ja archive, which is the packaged form of
   // the chrome:// and resource:// files. The install path in front of it is
   // noise.
   const omniJarMatch = /^jar:.*\bomni\.ja!(\/.*)$/i.exec(path);
   if (omniJarMatch !== null) {
-    return [productName, 'omni.ja', ..._splitPath(omniJarMatch[1])];
+    return {
+      pathSegments: [productName, 'omni.ja', ..._splitPath(omniJarMatch[1])],
+      isFromWebSite: false,
+    };
   }
 
   let segments;
@@ -107,7 +111,14 @@ function _pathSegmentsForFilename(
   if (originMatch !== null) {
     const [, scheme, host, rest] = originMatch;
     if (INTERNAL_URL_SCHEMES.has(scheme.toLowerCase())) {
-      return [productName, `${scheme}://${host}`, ..._splitPath(rest ?? '')];
+      return {
+        pathSegments: [
+          productName,
+          `${scheme}://${host}`,
+          ..._splitPath(rest ?? ''),
+        ],
+        isFromWebSite: false,
+      };
     }
     segments = [`${scheme}://${host}`, ..._splitPath(rest ?? '')];
     isWebUrl = /^https?$/i.test(scheme) && host !== '';
@@ -123,9 +134,10 @@ function _pathSegmentsForFilename(
   // of those say which site the code ran on, so they go under the site that
   // served the bundle, as they are.
   const bundleOrigin = _siteOrigin(bundleUrl);
-  return bundleOrigin !== null && !isWebUrl
-    ? [bundleOrigin, ...segments]
-    : segments;
+  if (bundleOrigin === null || isWebUrl) {
+    return { pathSegments: segments, isFromWebSite: isWebUrl };
+  }
+  return { pathSegments: [bundleOrigin, ...segments], isFromWebSite: true };
 }
 
 // "<scheme>://<host>" for URLs with a host, which is what tells sites apart.
@@ -320,7 +332,7 @@ export function computeSourceCodeSharingCandidates(
     return {
       sourceIndex,
       path,
-      pathSegments: _pathSegmentsForFilename(path, productName, bundleUrl),
+      ..._pathSegmentsForFilename(path, productName, bundleUrl),
       isPubliclyDownloadable: _isPubliclyDownloadable(filename),
     };
   });
@@ -418,6 +430,7 @@ export function computeSourceCodeSharingFiles(
       sourceIndex,
       path: candidate.path,
       pathSegments: candidate.pathSegments,
+      isFromWebSite: candidate.isFromWebSite,
       availability,
       uncompressedSize: fileContents !== undefined ? fileContents.length : null,
     };
@@ -509,7 +522,9 @@ type TreeSourceIndexes = {
 };
 
 /**
- * Turn the flat file list into a tree. The roots are ordered by
+ * Turn the flat file list into a tree. The roots for web sites come first,
+ * since the browser's own code usually outweighs them, even though the site
+ * is what was profiled. Within each group the roots are ordered by
  * `rootPathSegmentWeights`, heaviest first. Below them, rows are in
  * alphabetical order, directories first, so that they stay put while files
  * get fetched.
@@ -519,7 +534,11 @@ export function buildSourceFileTree(
   rootPathSegmentWeights: Map<string, number>
 ): SourceFileTreeNode[] {
   const root = _newPartialTreeNode('');
+  const webSiteRoots = new Set<string>();
   for (const file of files) {
+    if (file.isFromWebSite) {
+      webSiteRoots.add(file.pathSegments[0]);
+    }
     let node = root;
     for (const segment of file.pathSegments) {
       let child = node.children.get(segment);
@@ -544,10 +563,16 @@ export function buildSourceFileTree(
   };
 
   const roots = Array.from(root.children.values(), (child) => ({
+    isWebSite: webSiteRoots.has(child.segment),
     weight: rootPathSegmentWeights.get(child.segment) ?? 0,
     node: _finishTreeNode(child, '', sourceIndexes),
   }));
-  roots.sort((a, b) => b.weight - a.weight || _compareTreeRows(a.node, b.node));
+  roots.sort(
+    (a, b) =>
+      Number(b.isWebSite) - Number(a.isWebSite) ||
+      b.weight - a.weight ||
+      _compareTreeRows(a.node, b.node)
+  );
   return roots.map(({ node }) => node);
 }
 

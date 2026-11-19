@@ -272,12 +272,14 @@ describe('computeSourceCodeSharingCandidates', function () {
           'base',
           'nsGlobalWindow.cpp',
         ],
+        isFromWebSite: false,
         isPubliclyDownloadable: false,
       },
       {
         sourceIndex: publicSourceIndex,
         path: 'widget/cocoa/nsAppShell.mm',
         pathSegments: ['widget', 'cocoa', 'nsAppShell.mm'],
+        isFromWebSite: false,
         isPubliclyDownloadable: true,
       },
     ]);
@@ -353,6 +355,14 @@ describe('computeSourceCodeSharingCandidates', function () {
       ],
       ['C:', 'Users', 'me', 'win.cpp'],
     ]);
+    expect(candidates.map((c) => c.isFromWebSite)).toEqual([
+      false,
+      false,
+      false,
+      true,
+      false,
+      false,
+    ]);
   });
 
   it('puts source-mapped files under the site that served their bundle', function () {
@@ -411,6 +421,7 @@ describe('computeSourceCodeSharingCandidates', function () {
       ['https://example.com', 'webpack://my-app', '.', 'src', 'index.js'],
       ['https://cdn.example.org', 'lib.js'],
     ]);
+    expect(candidates.every((c) => c.isFromWebSite)).toBe(true);
   });
 
   it('splits URLs so that the "//" does not become an empty segment', function () {
@@ -568,6 +579,7 @@ describe('computeSourceCodeSharingFiles', function () {
         sourceIndex: localSourceIndex,
         path: LOCAL_FILE,
         pathSegments: candidates[0].pathSegments,
+        isFromWebSite: false,
         availability: 'UNAVAILABLE',
         uncompressedSize: null,
       },
@@ -575,6 +587,7 @@ describe('computeSourceCodeSharingFiles', function () {
         sourceIndex: publicSourceIndex,
         path: 'widget/cocoa/nsAppShell.mm',
         pathSegments: candidates[1].pathSegments,
+        isFromWebSite: false,
         availability: 'FETCHABLE',
         uncompressedSize: null,
       },
@@ -634,6 +647,7 @@ describe('buildSourceFileTree', function () {
         sourceIndex: index,
         path,
         pathSegments: path.split('/').filter((s) => s !== ''),
+        isFromWebSite: false,
         availability,
         uncompressedSize: availability === 'DOWNLOADED' ? 1 : null,
       };
@@ -701,6 +715,32 @@ describe('buildSourceFileTree', function () {
       '  x.cpp',
       '  y.cpp',
       'other/w.cpp',
+    ]);
+  });
+
+  it('puts the web sites before the heavier roots', function () {
+    const files = makeFiles([
+      'js/src/a.cpp',
+      'site.example/app.js',
+      'gfx/b.cpp',
+      'other.example/lib.js',
+    ]);
+    files[1].isFromWebSite = true;
+    files[3].isFromWebSite = true;
+    const tree = buildSourceFileTree(
+      files,
+      new Map([
+        ['js', 10],
+        ['gfx', 20],
+        ['site.example', 2],
+        ['other.example', 1],
+      ])
+    );
+    expect(formatTree(tree)).toEqual([
+      'site.example/app.js',
+      'other.example/lib.js',
+      'gfx/b.cpp',
+      'js/src/a.cpp',
     ]);
   });
 
