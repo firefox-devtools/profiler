@@ -770,7 +770,8 @@ export type ProfilerOverheadStats = {
   minThread: Microseconds;
   overheadDurations: Microseconds;
   overheadPercentage: Microseconds;
-  profiledDuration: Microseconds;
+  // Unlike the other durations, this one is in milliseconds (a Gecko quirk).
+  profiledDuration: Milliseconds;
   samplingCount: Microseconds;
 };
 

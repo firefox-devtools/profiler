@@ -6,6 +6,7 @@ import { Localized } from '@fluent/react';
 
 import {
   formatMicroseconds,
+  formatMilliseconds,
   formatPercent,
 } from 'firefox-profiler/utils/format-numbers';
 
@@ -31,9 +32,8 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
     // These 3 values only have single values, so we are not using ProfilerStats class for them.
     // Weightedly accumulated value of `overheadDurations. It's used to calculate mean value.
     let overheadDurations = 0;
-    // Weightedly accumulated value of `overheadPercentage. It's used to calculate mean value.
-    let overheadPercentage = 0;
-    // Weightedly accumulated value of `profiledDuration. It's used to calculate mean value.
+    // Weightedly accumulated value of `profiledDuration`. It's used to calculate
+    // mean value. Unlike the other durations, Gecko provides it in milliseconds.
     let profiledDuration = 0;
     // Total sampling count is used to calculate mean values of the 3
     // statistics values above.
@@ -69,7 +69,6 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
 
       // Calculation the single values without any loop, it's not worth it.
       overheadDurations += statistics.overheadDurations * samplingCount;
-      overheadPercentage += statistics.overheadPercentage * samplingCount;
       profiledDuration += statistics.profiledDuration * samplingCount;
       totalSamplingCount += samplingCount;
 
@@ -89,6 +88,14 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
         currentStat.accumulate(min, max, mean, samplingCount);
       }
     }
+
+    // We don't use the `overheadPercentage` provided by Gecko because it
+    // divides microseconds by milliseconds and is therefore 1000x too large.
+    // Instead compute it from the mean overhead (µs) and profiled duration (ms).
+    const overheadPercentage =
+      profiledDuration === 0
+        ? 0
+        : overheadDurations / (profiledDuration * 1000);
 
     return calculatedStats.size > 0 ? (
       <details>
@@ -147,7 +154,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
                 </Localized>
               </span>
               <span className="metaInfoValueRight">
-                {formatPercent(overheadPercentage / totalSamplingCount)}
+                {formatPercent(overheadPercentage)}
               </span>
             </div>
           ) : null}
@@ -159,7 +166,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
                 </Localized>
               </span>
               <span className="metaInfoValueRight">
-                {formatMicroseconds(profiledDuration / totalSamplingCount)}
+                {formatMilliseconds(profiledDuration / totalSamplingCount)}
               </span>
             </div>
           ) : null}

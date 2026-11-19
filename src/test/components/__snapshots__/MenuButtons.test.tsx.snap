@@ -743,7 +743,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <span
             class="metaInfoValueRight"
           >
-            26,433%
+            26%
           </span>
         </div>
         <div
@@ -757,7 +757,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
           <span
             class="metaInfoValueRight"
           >
-            6.0μs
+            6.0ms
           </span>
         </div>
       </div>
@@ -1105,7 +1105,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <span
             class="metaInfoValueRight"
           >
-            26,433%
+            26%
           </span>
         </div>
         <div
@@ -1119,7 +1119,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
           <span
             class="metaInfoValueRight"
           >
-            6.0μs
+            6.0ms
           </span>
         </div>
       </div>
@@ -1467,7 +1467,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with uptime 1`] = 
           <span
             class="metaInfoValueRight"
           >
-            26,433%
+            26%
           </span>
         </div>
         <div
@@ -1481,7 +1481,7 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with uptime 1`] = 
           <span
             class="metaInfoValueRight"
           >
-            6.0μs
+            6.0ms
           </span>
         </div>
       </div>
