@@ -48,6 +48,7 @@ import { registerZoomCommand } from './commands/zoom';
 import { registerFilterCommand } from './commands/filter';
 import { registerSourcemapCommand } from './commands/sourcemap';
 import { registerSessionCommand } from './commands/session';
+import { selfUpdate } from './self-update';
 
 // Read session directory from environment (only place this is read)
 const SESSION_DIR =
@@ -116,7 +117,8 @@ Examples:
   profiler-cli sourcemap apply bundle.js.map
   profiler-cli status
   profiler-cli permalink
-  profiler-cli stop --all`
+  profiler-cli stop --all
+  profiler-cli self-update`
     );
 
   // Unknown commands
@@ -230,6 +232,17 @@ Examples:
     .description('Show JSON output schemas for all commands')
     .action(() => {
       console.log(schemasText);
+    });
+
+  // profiler-cli self-update
+  program
+    .command('self-update')
+    .description(
+      'Update profiler-cli through npm, or from Firefox CI if it was installed by "./mach bootstrap"'
+    )
+    .option('--force', 'Reinstall even if this is already the latest version')
+    .action(async (opts) => {
+      await selfUpdate(SESSION_DIR, { force: opts.force ?? false });
     });
 
   registerProfileCommand(program, SESSION_DIR);

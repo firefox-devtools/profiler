@@ -12,7 +12,7 @@ import {
 } from 'firefox-profiler/test/fixtures/testing-library';
 import { ServiceWorkerManager } from '../../components/app/ServiceWorkerManager';
 import { stateFromLocation } from '../../app-logic/url-handling';
-import { updateUrlState } from '../../actions/app';
+import { updateUrlState, urlSetupDone } from '../../actions/app';
 import {
   viewProfile,
   startSymbolicating,
@@ -69,9 +69,51 @@ describe('app/ServiceWorkerManager', () => {
     delete (navigator as any).serviceWorker;
   });
 
-  function setup() {
+  function setup({ isUrlSetupDone = true } = {}) {
     // Comment out this spy when you want to debug this test file.
     jest.spyOn(console, 'log').mockImplementation(() => {});
+
+    // A fake ServiceWorkerRegistration. Workbox doesn't emit an event when an
+    // update starts installing, so the component listens to the registration.
+    const updateFoundListeners = new Set<() => void>();
+    const registration: {
+      installing: ServiceWorker | null;
+      addEventListener: jest.Mock;
+    } = {
+      installing: null,
+      addEventListener: jest.fn((eventName, callback) => {
+        if (eventName === 'updatefound') {
+          updateFoundListeners.add(callback);
+        }
+      }),
+    };
+
+    // Simulates the browser starting to install a new service worker. It
+    // returns a function that changes the state of this worker.
+    function startInstallingServiceWorker() {
+      const stateChangeListeners = new Set<() => void>();
+      const worker = {
+        state: 'installing',
+        addEventListener: jest.fn((eventName, callback) => {
+          if (eventName === 'statechange') {
+            stateChangeListeners.add(callback);
+          }
+        }),
+      };
+      registration.installing = worker as any;
+      for (const listener of updateFoundListeners) {
+        act(() => listener());
+      }
+      return (state: string) => {
+        worker.state = state;
+        if (registration.installing === (worker as any)) {
+          registration.installing = null;
+        }
+        for (const listener of stateChangeListeners) {
+          act(() => listener());
+        }
+      };
+    }
 
     (Workbox as unknown as jest.Mock).mockImplementation(() => {
       // Constructor
@@ -79,18 +121,18 @@ describe('app/ServiceWorkerManager', () => {
       // We reimplement the event system so that we can dispatchEvent in tests
       const listenersMap = new Map<any, any>();
       return {
-        register: jest.fn(),
+        register: jest.fn(() => Promise.resolve(registration)),
         messageSkipWaiting: jest.fn(),
         addEventListener: jest.fn((eventName, callback) => {
           const listeners = listenersMap.get(eventName) ?? new Set();
           listeners.add(callback);
           listenersMap.set(eventName, listeners);
         }),
-        dispatchEvent: (eventName: string) => {
+        dispatchEvent: (eventName: string, event: object = {}) => {
           const listeners = listenersMap.get(eventName) ?? new Set();
           for (const listener of listeners) {
             act(() => {
-              listener();
+              listener(event);
             });
           }
         },
@@ -147,6 +189,9 @@ describe('app/ServiceWorkerManager', () => {
     }
 
     const store = blankStore();
+    if (isUrlSetupDone) {
+      store.dispatch(urlSetupDone());
+    }
 
     const renderResult = render(
       <Provider store={store}>
@@ -164,6 +209,11 @@ describe('app/ServiceWorkerManager', () => {
       navigateToFromUrlLoadingPage,
       dispatch: store.dispatch,
       getWorkboxInstance,
+      registration,
+      startInstallingServiceWorker,
+      // register() is asynchronous.
+      waitForRegistration: () =>
+        act(() => getWorkboxInstance().register.mock.results[0].value),
     };
   }
 
@@ -194,7 +244,6 @@ describe('app/ServiceWorkerManager', () => {
       expect(instance.register).toHaveBeenCalled();
 
       // There's a new update!
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -211,7 +260,6 @@ describe('app/ServiceWorkerManager', () => {
       expect(container).toBeEmptyDOMElement();
 
       // But getting a new update should display the notice again.
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
       expect(container.firstChild).toMatchSnapshot();
@@ -228,6 +276,52 @@ describe('app/ServiceWorkerManager', () => {
 
       // And we should now reload automatically when the SW is fully updated.
       instance.dispatchEvent('controlling');
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('before the URL setup is done', () => {
+    it('does not propose to apply an update', () => {
+      process.env.NODE_ENV = 'production';
+
+      const { dispatch, getReloadButton, getWorkboxInstance } = setup({
+        isUrlSetupDone: false,
+      });
+      const instance = getWorkboxInstance();
+
+      // There's a new update! But the dataSource isn't known yet.
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+      expect(screen.queryByText(/reload/i)).not.toBeInTheDocument();
+
+      // We're in the home.
+      act(() => {
+        dispatch(urlSetupDone());
+      });
+      expect(getReloadButton()).toHaveTextContent('Apply and reload');
+    });
+
+    it('reloads after an error if another tab applied an update while the profile was loading', () => {
+      process.env.NODE_ENV = 'production';
+
+      const { dispatch, getWorkboxInstance, navigateToFromUrlLoadingPage } =
+        setup({ isUrlSetupDone: false });
+      navigateToFromUrlLoadingPage('https://example.com/profile.json');
+      const instance = getWorkboxInstance();
+
+      // Another tab applies an update while this tab loads the profile.
+      instance.dispatchEvent('installed');
+      instance.dispatchEvent('waiting');
+      instance.dispatchEvent('controlling');
+      expect(
+        screen.getByText(/was applied before this page was fully loaded/)
+      ).toBeInTheDocument();
+      expect(window.location.reload).not.toHaveBeenCalled();
+
+      // Then the profile fails to load. The new version might fix it.
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
       expect(window.location.reload).toHaveBeenCalledTimes(1);
     });
   });
@@ -253,7 +347,6 @@ describe('app/ServiceWorkerManager', () => {
       expect(instance.register).toHaveBeenCalled();
 
       // There's a new update!
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -289,7 +382,6 @@ describe('app/ServiceWorkerManager', () => {
 
       const instance = getWorkboxInstance();
       // There's a new update!
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -318,7 +410,6 @@ describe('app/ServiceWorkerManager', () => {
 
       const instance = getWorkboxInstance();
       // There's a new update!
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -350,7 +441,6 @@ describe('app/ServiceWorkerManager', () => {
       });
 
       const instance = getWorkboxInstance();
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -390,7 +480,6 @@ describe('app/ServiceWorkerManager', () => {
       const instance = getWorkboxInstance();
 
       // We don't display anything if there's an update ready.
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
@@ -417,7 +506,6 @@ describe('app/ServiceWorkerManager', () => {
       const instance = getWorkboxInstance();
 
       // We don't display anything if there's an update ready.
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
@@ -462,7 +550,6 @@ describe('app/ServiceWorkerManager', () => {
       expect(instance.register).toHaveBeenCalled();
 
       // There's a new update!
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -500,7 +587,6 @@ describe('app/ServiceWorkerManager', () => {
       expect(instance.register).toHaveBeenCalled();
 
       // There's a new update!
-      instance.dispatchEvent('installing');
       instance.dispatchEvent('installed');
       instance.dispatchEvent('waiting');
 
@@ -510,10 +596,17 @@ describe('app/ServiceWorkerManager', () => {
   });
 
   describe('automatic reloading', () => {
-    it('reloads the application automatically if there is an error and there is a pending version', () => {
+    it('reloads the application automatically if there is an error and there is a pending version', async () => {
       process.env.NODE_ENV = 'production';
+      (navigator as any).serviceWorker.controller = {};
 
-      const { dispatch, getWorkboxInstance } = setup();
+      const {
+        dispatch,
+        getWorkboxInstance,
+        startInstallingServiceWorker,
+        waitForRegistration,
+      } = setup();
+      await waitForRegistration();
 
       const instance = getWorkboxInstance();
 
@@ -522,12 +615,69 @@ describe('app/ServiceWorkerManager', () => {
       });
       expect(window.location.reload).not.toHaveBeenCalled();
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
+      expect(screen.queryByText(/being installed/)).not.toBeInTheDocument();
+
       // Dispatch the events that an update is ready.
-      instance.dispatchEvent('installing');
-      instance.dispatchEvent('installed');
-      instance.dispatchEvent('waiting');
+      const setWorkerState = startInstallingServiceWorker();
+      expect(screen.getByText(/being installed/)).toBeInTheDocument();
+      setWorkerState('installed');
+      instance.dispatchEvent('installed', { isUpdate: true });
+      instance.dispatchEvent('waiting', { isUpdate: true });
       expect(instance.messageSkipWaiting).toHaveBeenCalled();
-      expect(window.location.reload).toHaveBeenCalled();
+      // We need to wait until the new version controls the page, otherwise the
+      // reload could load the old version again.
+      expect(window.location.reload).not.toHaveBeenCalled();
+      expect(screen.getByText(/being installed/)).toBeInTheDocument();
+
+      instance.dispatchEvent('controlling');
+      expect(window.location.reload).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the updating notice if the update started before the registration completed', async () => {
+      process.env.NODE_ENV = 'production';
+      (navigator as any).serviceWorker.controller = {};
+
+      const { dispatch, registration, waitForRegistration } = setup();
+      registration.installing = { addEventListener: jest.fn() } as any;
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
+      expect(screen.queryByText(/being installed/)).not.toBeInTheDocument();
+
+      await waitForRegistration();
+      expect(screen.getByText(/being installed/)).toBeInTheDocument();
+    });
+
+    it('does not show the updating notice for the first installation', async () => {
+      process.env.NODE_ENV = 'production';
+
+      const { dispatch, startInstallingServiceWorker, waitForRegistration } =
+        setup();
+      await waitForRegistration();
+
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
+      startInstallingServiceWorker();
+      expect(screen.queryByText(/being installed/)).not.toBeInTheDocument();
+    });
+
+    it('hides the updating notice if the installation fails', async () => {
+      process.env.NODE_ENV = 'production';
+      (navigator as any).serviceWorker.controller = {};
+
+      const { dispatch, startInstallingServiceWorker, waitForRegistration } =
+        setup();
+      await waitForRegistration();
+
+      act(() => {
+        dispatch(fatalError(new Error('Error while loading profile')));
+      });
+      const setWorkerState = startInstallingServiceWorker();
+      expect(screen.getByText(/being installed/)).toBeInTheDocument();
+      setWorkerState('redundant');
+      expect(screen.queryByText(/being installed/)).not.toBeInTheDocument();
+      expect(window.location.reload).not.toHaveBeenCalled();
     });
 
     it('reloads the application automatically if there is an error and there is a ready version happening then', () => {
@@ -559,12 +709,19 @@ describe('app/ServiceWorkerManager', () => {
       expect(window.location.reload).toHaveBeenCalled();
     });
 
-    it('does not reload if the dataSource is from-file', () => {
+    it('does not reload if the dataSource is from-file', async () => {
       process.env.NODE_ENV = 'production';
+      (navigator as any).serviceWorker.controller = {};
 
-      const { navigateToFileLoadingPage, dispatch, getWorkboxInstance } =
-        setup();
+      const {
+        navigateToFileLoadingPage,
+        dispatch,
+        getWorkboxInstance,
+        startInstallingServiceWorker,
+        waitForRegistration,
+      } = setup();
       navigateToFileLoadingPage();
+      await waitForRegistration();
 
       const instance = getWorkboxInstance();
 
@@ -573,9 +730,10 @@ describe('app/ServiceWorkerManager', () => {
       });
       expect(window.location.reload).not.toHaveBeenCalled();
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
-      instance.dispatchEvent('installing');
-      instance.dispatchEvent('installed');
-      instance.dispatchEvent('waiting');
+      startInstallingServiceWorker();
+      expect(screen.queryByText(/being installed/)).not.toBeInTheDocument();
+      instance.dispatchEvent('installed', { isUpdate: true });
+      instance.dispatchEvent('waiting', { isUpdate: true });
       expect(instance.messageSkipWaiting).not.toHaveBeenCalled();
       expect(window.location.reload).not.toHaveBeenCalled();
     });
