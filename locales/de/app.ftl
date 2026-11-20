@@ -809,6 +809,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Eine neue Version dieser Anwendung wurde installiert, bevor
     die Seite vollständig geladen war. Es kann zu Fehlfunktionen kommen.
 ServiceWorkerManager--new-version-is-ready = Eine neue Version der Anwendung wurde heruntergeladen und ist einsatzbereit.
+ServiceWorkerManager--updating-after-error = Eine neue Version der Anwendung wird installiert. Sobald sie verfügbar ist, wird die Seite automatisch neu geladen.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Hinweis zum erneuten Laden ausblenden
     .title = Hinweis zum erneuten Laden ausblenden
