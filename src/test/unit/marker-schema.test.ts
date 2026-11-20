@@ -452,6 +452,7 @@ describe('marker schema formatting', function () {
       ['unique-string', null], // Should be "(empty)"
       ['unique-string', undefined], // Should be "(empty)"
       ['unique-string', 42], // Should be "(empty)"
+      ['unique-string', 'Inline string'], // A string instead of an index is used as is
     ];
 
     expect(
@@ -548,6 +549,7 @@ describe('marker schema formatting', function () {
         "unique-string - (empty)",
         "unique-string - (empty)",
         "unique-string - (empty)",
+        "unique-string - Inline string",
       ]
     `);
   });
