@@ -10,7 +10,8 @@ SessionContext (present on all command results):
     resultThreadHandle: threadHandle | null,
     resultThreads: [{ threadIndex, name, processName }],
     currentViewRange: { start, startName, end, endName } | null,
-    rootRange: { start, end },
+    rootRange: { start, end },  // raw profile timestamps; "ms since profile
+                                // start" times count from rootRange.start
     callTreeSummaryStrategy: CallTreeSummaryStrategy,
     callTreeSearch?
   }
@@ -237,8 +238,9 @@ profiler-cli thread markers --json
                           // "value" is the payload value with string-table
                           // indexes resolved to strings, so it always agrees
                           // with "data" for the same key
-      data?               // raw payload, minus "type" and "cause"; an image
-                          // blob becomes { elided: true, length, preview }
+      data?               // payload, minus "type" and "cause"; timestamps
+                          // are ms since profile start, and an image blob
+                          // becomes { elided: true, length, preview }
     }
 
 profiler-cli thread functions --json

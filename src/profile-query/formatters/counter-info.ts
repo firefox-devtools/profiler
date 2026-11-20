@@ -443,7 +443,9 @@ function collectCounterOverTime(
   if (counterBuckets === null) {
     return [];
   }
-  const meta = getMeta(store.getState());
+  const state = store.getState();
+  const meta = getMeta(state);
+  const zeroAt = getZeroAt(state);
   const { kind, format, countRange, totalSum, buckets } = counterBuckets;
 
   return buckets.map((bucket): CounterTimeBucket => {
@@ -476,10 +478,10 @@ function collectCounterOverTime(
       percentage !== undefined ? formatPercent(percentage) : undefined;
 
     return {
-      startTime: bucket.startTime,
+      startTime: bucket.startTime - zeroAt,
       startTimeName: timestampManager.nameForTimestamp(bucket.startTime),
       startTimeStr: timestampManager.timestampString(bucket.startTime),
-      endTime: bucket.endTime,
+      endTime: bucket.endTime - zeroAt,
       endTimeName: timestampManager.nameForTimestamp(bucket.endTime),
       endTimeStr: timestampManager.timestampString(bucket.endTime),
       value: bucket.value,
