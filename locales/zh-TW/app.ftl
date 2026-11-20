@@ -727,6 +727,7 @@ ServiceWorkerManager--updated-while-not-ready =
     
     您可能會遇到某些不正常的部分。
 ServiceWorkerManager--new-version-is-ready = 已下載新版本的應用程式，準備好可以使用。
+ServiceWorkerManager--updating-after-error = 正在安裝新版應用程式。安裝完成後，頁面將自動重新載入。
 ServiceWorkerManager--hide-notice-button =
     .aria-label = 隱藏重新載入通知
     .title = 隱藏重新載入通知
