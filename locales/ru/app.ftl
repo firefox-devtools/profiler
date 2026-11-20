@@ -834,6 +834,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Перед полной загрузки это страницы была применена новая
     версия приложения. Вы можете столкнуться с неисправностями.
 ServiceWorkerManager--new-version-is-ready = Новая версия приложения скачана и готова к использованию.
+ServiceWorkerManager--updating-after-error = Устанавливается новая версия приложения. Страница будет перезагружена автоматически по завершении установки.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Скрыть уведомление о перезагрузке
     .title = Скрыть уведомление о перезагрузке
