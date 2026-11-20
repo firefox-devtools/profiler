@@ -6,7 +6,7 @@
 // and various allocation call trees. It is only shown when the profile includes
 // allocation data.
 
-import { PureComponent } from 'react';
+import { useLocalization } from '@fluent/react';
 import { Localized } from '@fluent/react';
 
 import { changeCallTreeSummaryStrategy } from 'firefox-profiler/actions/profile-view';
@@ -48,42 +48,46 @@ const STRATEGY_L10N_IDS: Record<CallTreeSummaryStrategy, string> = {
     'StackSettings--call-tree-strategy-native-deallocations-sites',
 };
 
-class CallTreeStrategySettingImpl extends PureComponent<Props> {
-  _onCallTreeSummaryStrategyChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    this.props.changeCallTreeSummaryStrategy(
+function CallTreeStrategySettingImpl({
+  availableCallTreeSummaryStrategies,
+  callTreeSummaryStrategy,
+  changeCallTreeSummaryStrategy,
+}: Props) {
+  const { l10n } = useLocalization();
+
+  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    changeCallTreeSummaryStrategy(
       toValidCallTreeSummaryStrategy(e.currentTarget.value)
     );
   };
 
-  override render() {
-    const { availableCallTreeSummaryStrategies, callTreeSummaryStrategy } =
-      this.props;
+  const selectedTitle = l10n.getString(
+    STRATEGY_L10N_IDS[callTreeSummaryStrategy]
+  );
 
-    return (
-      <>
-        <label>
-          <Localized id="StackSettings--use-data-source-label" />{' '}
-          <select
-            className="stackSettingsSelect"
-            onChange={this._onCallTreeSummaryStrategyChange}
-            value={callTreeSummaryStrategy}
-          >
-            {availableCallTreeSummaryStrategies.map((strategy) => (
-              <Localized
-                id={STRATEGY_L10N_IDS[strategy]}
-                attrs={{ title: true }}
-                key={strategy}
-              >
-                <option value={strategy}></option>
-              </Localized>
-            ))}
-          </select>
-        </label>
-      </>
-    );
-  }
+  return (
+    <>
+      <label>
+        <Localized id="StackSettings--use-data-source-label" />{' '}
+        <select
+          className="stackSettingsSelect"
+          onChange={handleChange}
+          value={callTreeSummaryStrategy}
+          title={selectedTitle}
+        >
+          {availableCallTreeSummaryStrategies.map((strategy) => (
+            <Localized
+              id={STRATEGY_L10N_IDS[strategy]}
+              attrs={{ title: true }}
+              key={strategy}
+            >
+              <option value={strategy}></option>
+            </Localized>
+          ))}
+        </select>
+      </label>
+    </>
+  );
 }
 
 export const CallTreeStrategySetting = explicitConnect<
