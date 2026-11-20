@@ -739,6 +739,7 @@ ServiceWorkerManager--pending-button = Applica e ricarica
 ServiceWorkerManager--installed-button = Ricarica l’applicazione
 ServiceWorkerManager--updated-while-not-ready = È stata applicata una nuova versione dell’applicazione prima che la pagina fosse completamente caricata. Potrebbero verificarsi dei malfunzionamenti.
 ServiceWorkerManager--new-version-is-ready = È stata scaricata una nuova versione dell’applicazione ed è pronta per l’uso.
+ServiceWorkerManager--updating-after-error = Installazione di una nuova versione dell’applicazione in corso. La pagina verrà ricaricata automaticamente non appena sarà pronta.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Nascondi l’avviso di ricarica
     .title = Nascondi l’avviso di ricarica
