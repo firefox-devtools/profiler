@@ -817,6 +817,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Un nove version del application ha essite applicate ante que iste pagina
     ha essite plenmente cargate. Tu pote vider mal-functionamentos.
 ServiceWorkerManager--new-version-is-ready = Un nove version del application ha essite discargate e es preste a usar.
+ServiceWorkerManager--updating-after-error = Un nove version del application es installate. Le pagina se recargara automaticamente quando illo es preste.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Celar le aviso de recargamento
     .title = Celar le aviso de recargamento
