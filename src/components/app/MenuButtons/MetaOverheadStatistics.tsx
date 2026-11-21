@@ -33,7 +33,7 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
     // Weightedly accumulated value of `overheadDurations. It's used to calculate mean value.
     let overheadDurations = 0;
     // Weightedly accumulated value of `profiledDuration`. It's used to calculate
-    // mean value. Unlike the other durations, Gecko provides it in milliseconds.
+    // mean value. Unlike the other durations, it is in milliseconds (since Firefox 86).
     let profiledDuration = 0;
     // Total sampling count is used to calculate mean values of the 3
     // statistics values above.
@@ -122,16 +122,22 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
                 Min
               </Localized>
             </div>
-            {[...calculatedStats].map(([key, val]) => (
-              <React.Fragment key={key}>
-                <Localized id={statKeysL10nId[key]} attrs={{ title: true }}>
-                  <div></div>
-                </Localized>
-                <div>{formatMicroseconds(val.mean)}</div>
-                <div>{formatMicroseconds(val.max)}</div>
-                <div>{formatMicroseconds(val.min)}</div>
-              </React.Fragment>
-            ))}
+            {[...calculatedStats].map(([key, val]) => {
+              // The interval statistics are in milliseconds, all the others
+              // are in microseconds.
+              const format =
+                key === 'Interval' ? formatMilliseconds : formatMicroseconds;
+              return (
+                <React.Fragment key={key}>
+                  <Localized id={statKeysL10nId[key]} attrs={{ title: true }}>
+                    <div></div>
+                  </Localized>
+                  <div>{format(val.mean)}</div>
+                  <div>{format(val.max)}</div>
+                  <div>{format(val.min)}</div>
+                </React.Fragment>
+              );
+            })}
           </div>
 
           {overheadDurations !== 0 ? (

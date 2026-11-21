@@ -695,13 +695,13 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot 1`] = `
             Interval
           </div>
           <div>
-            857μs
+            857ms
           </div>
           <div>
-            1,000μs
+            1,000ms
           </div>
           <div>
-            0μs
+            0ms
           </div>
           <div
             title="Time to acquire the lock before sampling."
@@ -1057,13 +1057,13 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with device inform
             Interval
           </div>
           <div>
-            857μs
+            857ms
           </div>
           <div>
-            1,000μs
+            1,000ms
           </div>
           <div>
-            0μs
+            0ms
           </div>
           <div
             title="Time to acquire the lock before sampling."
@@ -1419,13 +1419,13 @@ exports[`app/MenuButtons <MetaInfoPanel> matches the snapshot with uptime 1`] = 
             Interval
           </div>
           <div>
-            857μs
+            857ms
           </div>
           <div>
-            1,000μs
+            1,000ms
           </div>
           <div>
-            0μs
+            0ms
           </div>
           <div
             title="Time to acquire the lock before sampling."
