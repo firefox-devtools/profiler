@@ -457,6 +457,8 @@ MenuButtons--index--metaInfo-button =
     .label = Profil Bilgileri
 MenuButtons--index--full-view = Tam Görünüm
 MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
+MenuButtons--index--save =
+    .label = Kaydet…
 MenuButtons--index--share =
     .label = Paylaş…
 MenuButtons--index--reshare =
@@ -623,6 +625,7 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Bu profil gizli gezinti verileri içeriyor
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
 MenuButtons--publish--reshare-performance-profile = Performans Profilini Yeniden Paylaş
+MenuButtons--publish--save-performance-profile = Performans profilini kaydet
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
 MenuButtons--publish--download-info-description = Bu profili bilgisayarınıza dosya olarak kaydedin.
 MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
@@ -633,6 +636,7 @@ MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
 MenuButtons--publish--message-something-went-wrong = Profil yüklenirken bir hata oluştu.
 MenuButtons--publish--message-try-again = Yeniden dene
+MenuButtons--publish--save = Kaydet
 MenuButtons--publish--compressing = Sıkıştırılıyor…
 MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata oluştu. Profil boyutunu küçültmek için bazı onay kutularının işaretini kaldırmayı deneyin.
 
@@ -885,6 +889,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Geçerli seçimdeki ortalama güç
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Geçerli seçimdeki ortalama güç
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.
