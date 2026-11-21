@@ -828,6 +828,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Εφαρμόστηκε μια νέα έκδοση της εφαρμογής προτού φορτωθεί πλήρως
     αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
+ServiceWorkerManager--updating-after-error = Γίνεται εγκατάσταση μιας νέας έκδοσης της εφαρμογής. Η σελίδα θα ανανεωθεί αυτόματα όταν είναι έτοιμη.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Απόκρυψη σημείωσης επαναφόρτωσης
     .title = Απόκρυψη σημείωσης επαναφόρτωσης
