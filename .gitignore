@@ -16,3 +16,9 @@ webpack.local-config.js
 *.rej
 .idea/
 .profiler-cli-dev/
+
+# Personal coding agent instructions and settings
+AGENTS.local.md
+AGENTS.override.md
+CLAUDE.local.md
+.claude/settings.local.json
