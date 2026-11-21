@@ -828,6 +828,7 @@ ServiceWorkerManager--updated-while-not-ready =
     En ny version av applikationen tillämpades innan den här sidan
     var helt laddad. Du kan se fel.
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
+ServiceWorkerManager--updating-after-error = En ny version av appen installeras. Sidan laddas om automatiskt när installationen är klar.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Dölj omladdningsmeddelandet
     .title = Dölj omladdningsmeddelandet
