@@ -833,6 +833,7 @@ ServiceWorkerManager--updated-while-not-ready =
     A new version of the application was applied before this page
     was fully loaded. You might see malfunctions.
 ServiceWorkerManager--new-version-is-ready = A new version of the application has been downloaded and is ready to use.
+ServiceWorkerManager--updating-after-error = A new version of the application is being installed. The page will reload automatically when it’s ready.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Hide the reload notice
     .title = Hide the reload notice
