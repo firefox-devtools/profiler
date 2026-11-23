@@ -28,7 +28,7 @@ On desktop, the profile is then opened in the Firefox Profiler, like a profile c
 
 ## Looking at the logs in a profile
 
-Each log message is recorded as a `Log` marker on the thread that emitted it. You can find them in the [Marker Table](./guide-ui-tour-panels.md#the-marker-table) of the corresponding thread. Use the search field to filter the markers, for example by module name such as `nsHttp`, or by any text contained in the log message.
+Each log message is recorded as a marker of type `Log` on the thread that emitted it, named after its log module. You can find them in the [Marker Table](./guide-ui-tour-panels.md#the-marker-table) of the corresponding thread. Use the search field to filter the markers, for example by module name such as `nsHttp`, or by any text contained in the log message.
 
 If you prefer to read the logs in the regular `MOZ_LOG` text format, open the web console of the browser while viewing the profile and run:
 
