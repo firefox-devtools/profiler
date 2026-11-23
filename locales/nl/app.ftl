@@ -833,6 +833,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Er is een nieuwe versie van de toepassing toegepast voordat deze pagina
     volledig was geladen. U kunt verstoringen zien.
 ServiceWorkerManager--new-version-is-ready = Een nieuwe versie van de toepassing is gedownload en klaar voor gebruik.
+ServiceWorkerManager--updating-after-error = Er wordt een nieuwe versie van de toepassing geïnstalleerd. De pagina wordt automatisch opnieuw geladen als deze gereed is.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Melding opnieuw laden verbergen
     .title = Melding opnieuw laden verbergen
