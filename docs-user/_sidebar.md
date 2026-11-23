@@ -8,6 +8,7 @@
   - [Profiling Firefox for Android](./guide-profiling-firefox-android.md)
     - [Remote Profiling](./guide-remote-profiling.md)
     - [Profiling directly on the device](./guide-profiling-android-directly-on-device.md)
+  - [Recording logs with about:logging](./guide-about-logging.md)
   - [Memory Allocations](./memory-allocations.md)
   - [Removing Profiler](./guide-removing-profiler.md)
 - [Advanced Topics](./advanced-topics.md)
