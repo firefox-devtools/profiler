@@ -10,6 +10,7 @@ import { render, screen } from 'firefox-profiler/test/fixtures/testing-library';
 
 import { updatePreviewSelection } from 'firefox-profiler/actions/profile-view';
 import { TrackCounter } from '../../components/timeline/TrackCounter';
+import { TRACK_COUNTER_GRAPH_HEIGHT } from '../../app-logic/constants';
 import { ensureExists } from '../../utils/types';
 
 import {
@@ -184,6 +185,17 @@ describe('TrackPower', function () {
     expect(getPowerDot()).toBeTruthy();
     moveMouseAtCounter(7, 0);
     expect(getPowerDot()).toBeTruthy();
+  });
+
+  it('keeps the hover dot inside the vertical graph bounds for rate samples', () => {
+    const { moveMouseAtCounter, getPowerDot } = setup();
+    for (const index of [0, 1, 3, 5, 7]) {
+      moveMouseAtCounter(index, 0.25);
+      const dot = ensureExists(getPowerDot()) as HTMLElement;
+      const center = parseFloat(dot.style.top);
+      expect(center - 3).toBeGreaterThanOrEqual(0);
+      expect(center + 3).toBeLessThanOrEqual(TRACK_COUNTER_GRAPH_HEIGHT);
+    }
   });
 
   it('draws a dot that matches the snapshot', function () {
