@@ -43,6 +43,8 @@ import {
   updateTimingsEffect,
   StringMarker,
   createHighlightedLineExtension,
+  createCodeViewerExtension,
+  type CodeFindBarPortal,
 } from 'firefox-profiler/utils/codemirror-shared';
 
 // An "effect" is like a redux action. This effect is used to replace the value
@@ -190,7 +192,8 @@ export class AssemblyViewEditor {
     initialAssemblyCode: DecodedInstruction[],
     addressTimings: AddressTimings,
     highlightedAddress: Address | null,
-    domParent: Element
+    domParent: Element,
+    onFindBarChange: (findBar: CodeFindBarPortal | null) => void
   ) {
     this._addressToLineMap = new AddressToLineMap(
       getInstructionAddresses(initialAssemblyCode)
@@ -209,8 +212,7 @@ export class AssemblyViewEditor {
         instructionAddressGutter,
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
-        EditorState.readOnly.of(true),
-        EditorView.editable.of(false),
+        createCodeViewerExtension(onFindBarChange),
       ],
     });
     const lineTimings = addressTimingsToLineTimings(

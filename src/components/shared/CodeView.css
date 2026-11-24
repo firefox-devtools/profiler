@@ -14,6 +14,16 @@
   --codeview-linenum-foreground-color: ##aaa;
   --codeview-nonzero-background-color: #edf6ff;
   --codeview-highlight-background-color: #fffbcc;
+  --codeview-search-match-background-color: color-mix(
+    in srgb,
+    var(--yellow-50) 40%,
+    transparent
+  );
+  --codeview-search-selected-match-background-color: color-mix(
+    in srgb,
+    var(--orange-50) 50%,
+    transparent
+  );
 
   display: flex;
   min-height: 0;
@@ -50,6 +60,16 @@
     --codeview-linenum-foreground-color: var(--grey-30);
     --codeview-nonzero-background-color: var(--grey-80);
     --codeview-highlight-background-color: var(--yellow-90);
+    --codeview-search-match-background-color: color-mix(
+      in srgb,
+      var(--yellow-60) 35%,
+      transparent
+    );
+    --codeview-search-selected-match-background-color: color-mix(
+      in srgb,
+      var(--orange-60) 60%,
+      transparent
+    );
     --theme-highlight-keyword: var(--magenta-65);
     --theme-highlight-type: var(--purple-40);
     --theme-highlight-variable: var(--blue-40);
@@ -172,6 +192,77 @@
   overflow-wrap: normal;
   word-break: normal;
   word-spacing: normal;
+}
+
+/**
+ * The panel area above the code, which contains the find bar, and the search
+ * matches. CodeMirror's base theme always uses light colors, because we don't
+ * tell CodeMirror about our dark mode. The base theme's selectors are scoped
+ * by generated class names. The ".codeView .cm-editor" prefix makes these
+ * rules more specific than the base theme's.
+ */
+.codeView .cm-editor {
+  .cm-panels {
+    background-color: var(--codeview-header-background-color);
+    color: var(--codeview-foreground-color);
+  }
+
+  .cm-panels-top {
+    border-bottom: 1px solid var(--codeview-header-border-color);
+  }
+
+  .cm-searchMatch {
+    background-color: var(--codeview-search-match-background-color);
+  }
+
+  .cm-searchMatch-selected {
+    background-color: var(--codeview-search-selected-match-background-color);
+  }
+}
+
+.codeFindBar {
+  --internal-close-icon: url(../../../res/img/svg/close-dark.svg);
+
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 4px;
+  gap: 4px 8px;
+}
+
+:root.dark-mode .codeFindBar {
+  --internal-close-icon: url(../../../res/img/svg/close-light.svg);
+}
+
+.codeFindBarInput {
+  width: 20em;
+  height: 24px;
+
+  /* Inputs don't inherit the font by default. */
+  font: inherit;
+}
+
+/* Override the 13px font size from .photon-button-default, so that the
+ * buttons match the input and the checkbox labels. Also drop its 132px
+ * minimum width, which is too wide for a compact bar. */
+.codeFindBar .photon-button {
+  min-width: 0;
+  font-size: inherit;
+}
+
+.codeFindBarLabel {
+  display: flex;
+  align-items: center;
+}
+
+.codeFindBarCloseButton {
+  width: 24px;
+  height: 24px;
+  background-image: var(--internal-close-icon);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px;
+  margin-inline-start: auto;
 }
 
 /**

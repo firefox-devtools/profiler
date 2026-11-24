@@ -2,11 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
 import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
+
+import type { CodeFindBarPortal } from 'firefox-profiler/utils/codemirror-shared';
+import { CodeFindBar } from './CodeFindBar';
 
 import './CodeView.css';
 
@@ -70,7 +74,15 @@ function remapTimingsToRelative(
   return { totalLineHits, selfLineHits };
 }
 
-export class SourceView extends React.PureComponent<SourceViewProps> {
+type SourceViewState = {
+  readonly findBar: CodeFindBarPortal | null;
+};
+
+export class SourceView extends React.PureComponent<
+  SourceViewProps,
+  SourceViewState
+> {
+  override state: SourceViewState = { findBar: null };
   _ref = React.createRef<HTMLDivElement>();
   _editor: SourceViewEditor | null = null;
 
@@ -127,11 +139,19 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     return '\n'.repeat(this._getMaxLineNumber());
   }
 
+  _onFindBarChange = (findBar: CodeFindBarPortal | null) => {
+    this.setState({ findBar });
+  };
+
   override render() {
+    const { findBar } = this.state;
     return (
       <div className="sourceView codeView">
         <SourceViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
+        {findBar
+          ? createPortal(<CodeFindBar {...findBar.props} />, findBar.dom)
+          : null}
       </div>
     );
   }
@@ -156,7 +176,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         remapTimingsToRelative(this.props.timings, this.props.startLine),
         this._getRelativeHighlightedLine(),
         this.props.startLine,
-        domParent
+        domParent,
+        this._onFindBarChange
       );
       this._editor = editor;
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
