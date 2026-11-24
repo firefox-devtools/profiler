@@ -1143,6 +1143,18 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Fermer la vue du code source
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Rechercher
+    .placeholder = Rechercher
+CodeFindBar--previous-button = Précédente
+    .title = Rechercher l’occurrence précédente (Maj+Entrée)
+CodeFindBar--next-button = Suivante
+    .title = Rechercher la prochaine occurrence (Entrée)
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
