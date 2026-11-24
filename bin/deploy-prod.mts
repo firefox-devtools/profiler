@@ -8,10 +8,10 @@
 // document whenever the deployment process changes.
 
 import type { spawnSync as nodeSpawnSync } from 'child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import { tmpdir } from 'os';
-import { basename, join } from 'path';
+import { basename, join, resolve } from 'path';
 import { createInterface } from 'readline/promises';
 import { fileURLToPath } from 'url';
 import open from 'open';
@@ -86,6 +86,7 @@ type PullRequestInfo = PullRequestReference & {
   reviewRequests: { login: string }[];
   reviews: GitHubReview[];
   headRefOid: string;
+  mergeCommit: { oid: string } | null;
   body: string;
   title: string;
 };
@@ -108,10 +109,18 @@ type DeploymentRemotes = {
 
 type DeploymentResult = {
   commit: string;
+  mergeCommit: string | null;
   body: string;
   date: string;
   url: string | null;
 };
+
+type FirefoxCheckout = {
+  path: string;
+  upstream: string;
+};
+
+class DeploymentCancelled extends Error {}
 
 type TemporaryCheckout = {
   path: string;
@@ -120,6 +129,8 @@ type TemporaryCheckout = {
 
 const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 const repository = 'firefox-devtools/profiler';
+const toolchainsPath = 'taskcluster/kinds/fetch/toolchains.yml';
+const bugFilingScript = '.agents/skills/bug-filing/file-bug.py';
 const reviewers = ['canova', 'mstange', 'fatadel'];
 const pollIntervalMs = 10_000;
 const versionPattern =
@@ -270,7 +281,7 @@ async function ask(question: string, defaultValue = ''): Promise<string> {
 async function confirm(action: string): Promise<void> {
   const answer = await ask(`${action}\nType "y" to continue:`);
   if (answer.toLowerCase() !== 'y') {
-    throw new Error('Stopped without performing that action.');
+    throw new DeploymentCancelled('Stopped without performing that action.');
   }
 }
 
@@ -683,7 +694,7 @@ function getPullRequest(number: number): PullRequestInfo {
       'view',
       String(number),
       '--json',
-      'number,url,state,reviewDecision,reviewRequests,reviews,headRefOid,body,title'
+      'number,url,state,reviewDecision,reviewRequests,reviews,headRefOid,mergeCommit,body,title'
     )
   ) as PullRequestInfo;
 }
@@ -1584,6 +1595,7 @@ export async function handleDeploymentPullRequest(
     );
     return {
       commit: gitOutput('rev-parse', `${upstream}/main`),
+      mergeCommit: null,
       body,
       date,
       url: null,
@@ -1607,6 +1619,7 @@ export async function handleDeploymentPullRequest(
     );
     return {
       commit: originalHead,
+      mergeCommit: null,
       body,
       date,
       url: pullRequest.url,
@@ -1621,13 +1634,20 @@ export async function handleDeploymentPullRequest(
     );
   }
 
-  await mergePullRequest(pullRequest, 'merge', {
+  const mergedInfo = await mergePullRequest(pullRequest, 'merge', {
     subject: `${title} (#${pullRequest.number})`,
     body,
     expectedHeadOid: originalHead,
   });
+  const mergeCommit = mergedInfo.mergeCommit?.oid;
+  if (!mergeCommit || !/^[0-9a-f]{40}$/.test(mergeCommit)) {
+    throw new Error(
+      `GitHub did not report a merge commit for ${pullRequest.url}.`
+    );
+  }
   return {
     commit: originalHead,
+    mergeCommit,
     body,
     date,
     url: pullRequest.url,
@@ -1649,6 +1669,261 @@ async function waitForPublishedUrl(
       console.error(error.message);
     }
   }
+}
+
+/**
+ * Build Bugzilla fields for the deployed Firefox Profiler toolchain update.
+ */
+function buildToolchainBugFields(
+  date: string,
+  mergeCommit: string,
+  cliVersion: string
+): Record<string, string> {
+  return {
+    product: 'Core',
+    component: 'Gecko Profiler',
+    bug_type: 'task',
+    short_desc: 'Update the Firefox Profiler toolchain',
+    status_whiteboard: '[fp]',
+    version: 'unspecified',
+    rep_platform: 'Unspecified',
+    op_sys: 'Unspecified',
+    comment: [
+      `Update the Firefox Profiler toolchain to the ${date} deploy.`,
+      `This revision includes profiler-cli ${cliVersion}.`,
+      '',
+      `https://github.com/${repository}/commit/${mergeCommit}`,
+    ].join('\n'),
+  };
+}
+
+/**
+ * Validate and normalize a Mozilla Bugzilla bug link.
+ */
+export function validateToolchainBugUrl(input: string): string {
+  const id =
+    /^https:\/\/bugzilla\.mozilla\.org\/show_bug\.cgi\?id=(\d+)(?:#.*)?$/.exec(
+      input
+    )?.[1];
+  if (!id) {
+    throw new Error(
+      'Enter the created bug URL from https://bugzilla.mozilla.org/show_bug.cgi?id=...'
+    );
+  }
+  return `https://bugzilla.mozilla.org/show_bug.cgi?id=${id}`;
+}
+
+/**
+ * Replace the Firefox Profiler revision in the toolchain configuration.
+ *
+ * Require one exact fetch block and preserve all surrounding YAML verbatim.
+ */
+export function updateFirefoxProfilerRevision(
+  contents: string,
+  revision: string
+): string {
+  if (!/^[0-9a-f]{40}$/.test(revision)) {
+    throw new Error(
+      'The Firefox toolchain requires a full production merge commit SHA.'
+    );
+  }
+  const blocks = contents.match(
+    /^firefox-profiler:\r?\n(?:[ \t][^\n]*\n|\r?\n)*/gm
+  );
+  if (
+    blocks?.length !== 1 ||
+    !/^ {8}repo: https:\/\/github\.com\/firefox-devtools\/profiler\r?$/m.test(
+      blocks[0]
+    )
+  ) {
+    throw new Error(
+      `Could not identify the firefox-profiler fetch in ${toolchainsPath}.`
+    );
+  }
+  const block = blocks[0];
+  const revisionLine = /^( {8}revision: )[0-9a-f]{40}(\r?)$/gm;
+  if ([...block.matchAll(revisionLine)].length !== 1) {
+    throw new Error(
+      `Expected one firefox-profiler revision in ${toolchainsPath}.`
+    );
+  }
+  return contents.replace(
+    block,
+    block.replace(revisionLine, `$1${revision}$2`)
+  );
+}
+
+/**
+ * Reject a Firefox checkout with uncommitted changes.
+ */
+function ensureCleanFirefoxCheckout(path: string): void {
+  logAction(`Checking for a clean Firefox working copy at ${path}.`);
+  const status = gitOutput('-C', path, 'status', '--porcelain', '-unormal');
+  if (status) {
+    throw new Error(`The Firefox working copy must be clean:\n\n${status}`);
+  }
+}
+
+/**
+ * Resolve and validate MOZILLA_CENTRAL.
+ */
+function firefoxCheckoutPath(): string {
+  const configuredPath = process.env.MOZILLA_CENTRAL;
+  if (!configuredPath?.trim()) {
+    throw new Error(
+      'Set MOZILLA_CENTRAL to the path of your Firefox Git checkout before running deploy-prod.'
+    );
+  }
+  const path = resolve(configuredPath);
+  for (const file of [toolchainsPath, bugFilingScript]) {
+    if (!statSync(join(path, file), { throwIfNoEntry: false })?.isFile()) {
+      throw new Error(
+        `MOZILLA_CENTRAL must point to a Firefox checkout containing ${file}: ${path}`
+      );
+    }
+  }
+  return path;
+}
+
+/**
+ * Check Firefox toolchain prerequisites and discover the canonical remote.
+ */
+export function prepareFirefoxCheckout(path: string): FirefoxCheckout {
+  logAction('Checking the Firefox toolchain update prerequisites.');
+  run('python3', ['--version']);
+  // Invoking moz-phab, even with --version, can trigger its automatic updater.
+  const mozPhabPath =
+    process.platform === 'win32'
+      ? run('where.exe', ['moz-phab'], { capture: true, allowFailure: true })
+      : run('/bin/sh', ['-c', 'command -v moz-phab'], {
+          capture: true,
+          allowFailure: true,
+        });
+  if (!mozPhabPath) {
+    throw new Error(
+      "The Phabricator CLI 'moz-phab' is not installed or is not on PATH."
+    );
+  }
+  ensureCleanFirefoxCheckout(path);
+  const upstream = findGitHubRemote(
+    gitOutput('-C', path, 'remote', '-v'),
+    'mozilla-firefox/firefox',
+    'fetch'
+  );
+  if (!upstream) {
+    throw new Error(
+      'The Firefox checkout needs a fetch remote for mozilla-firefox/firefox.'
+    );
+  }
+  return { path, upstream };
+}
+
+/**
+ * Attempt the Firefox toolchain update and offer recovery after command failures.
+ */
+export async function updateFirefoxToolchain(
+  date: string,
+  mergeCommit: string,
+  cliVersion: string,
+  checkout: FirefoxCheckout
+): Promise<void> {
+  try {
+    await submitFirefoxToolchain(date, mergeCommit, cliVersion, checkout);
+  } catch (error) {
+    if (error instanceof DeploymentCancelled) {
+      throw error;
+    }
+    console.error(`Firefox toolchain update failed: ${error.message}`);
+    await confirm(
+      'Complete it manually by following "Update the Firefox Profiler toolchain in Firefox" in docs-developer/deploying.md. Continue with CLI publication and announcements?'
+    );
+  }
+}
+
+/**
+ * File the toolchain bug and submit its Firefox revision.
+ */
+async function submitFirefoxToolchain(
+  date: string,
+  mergeCommit: string,
+  cliVersion: string,
+  checkout: FirefoxCheckout
+): Promise<void> {
+  logAction('Preparing the Firefox Profiler toolchain bug and revision.');
+  const { path, upstream } = checkout;
+  ensureCleanFirefoxCheckout(path);
+  logAction(`Fetching Firefox main from '${upstream}'.`);
+  git('-C', path, 'fetch', upstream, 'main');
+  const baseCommit = gitOutput('-C', path, 'rev-parse', 'FETCH_HEAD');
+  const contents = gitOutput(
+    '-C',
+    path,
+    'show',
+    `${baseCommit}:${toolchainsPath}`
+  );
+  const updated = updateFirefoxProfilerRevision(`${contents}\n`, mergeCommit);
+  if (updated === `${contents}\n`) {
+    console.log(
+      'Firefox main already uses this production merge commit. Skipping the toolchain update.'
+    );
+    return;
+  }
+  await confirm(
+    `Create a branch for the toolchain bug from Firefox main in ${path} and update ${toolchainsPath}? This will switch that checkout's branch after you create the bug.`
+  );
+  console.log('Review and create the toolchain bug in your browser.');
+  run('python3', [
+    join(path, bugFilingScript),
+    ...Object.entries(
+      buildToolchainBugFields(date, mergeCommit, cliVersion)
+    ).map(([field, value]) => `${field}=${value}`),
+  ]);
+  const bugUrl = await waitForPublishedUrl(
+    'Paste the created Bugzilla bug URL:',
+    validateToolchainBugUrl
+  );
+  const bugId = new URL(bugUrl).searchParams.get('id')!;
+  const branch = `update-firefox-profiler-${bugId}`;
+  ensureCleanFirefoxCheckout(path);
+  git('-C', path, 'checkout', '-b', branch, baseCommit);
+  logAction(`Updating the Firefox Profiler toolchain to ${mergeCommit}.`);
+  const toolchainsFile = join(path, toolchainsPath);
+  writeFileSync(
+    toolchainsFile,
+    updateFirefoxProfilerRevision(
+      readFileSync(toolchainsFile, 'utf8'),
+      mergeCommit
+    )
+  );
+  git('-C', path, 'diff', '--', toolchainsPath);
+  const message = `Bug ${bugId} - Update the Firefox Profiler toolchain to the ${date} deploy r?#profiler-reviewers\n\nThis revision includes profiler-cli ${cliVersion}.\n`;
+  console.log(message);
+  await confirm('Commit this Firefox toolchain update?');
+  git('-C', path, 'add', '--', toolchainsPath);
+  withTemporaryFile(
+    'profiler-toolchain-',
+    'commit-message.txt',
+    message,
+    (messagePath) => {
+      git('-C', path, 'commit', '--file', messagePath);
+    }
+  );
+  const commit = gitOutput('-C', path, 'rev-parse', 'HEAD');
+  logAction(`Submitting the Firefox toolchain revision for ${bugUrl}.`);
+  await confirm(
+    'Submit this commit with moz-phab? It will create a Phabricator revision and amend the local commit with its URL.'
+  );
+  run('moz-phab', [
+    'submit',
+    '--path',
+    path,
+    '--single',
+    '--interactive',
+    commit,
+  ]);
+  console.log(
+    `The toolchain revision for ${bugUrl} still needs review and landing. Submission alone does not update Firefox.`
+  );
 }
 
 /**
@@ -1943,18 +2218,21 @@ export async function main(
   args: string[] = process.argv.slice(2)
 ): Promise<void> {
   const { dryRun } = parseArguments(args);
+  const firefoxPath = dryRun ? null : firefoxCheckoutPath();
   console.log(
     `Firefox Profiler production deployment${dryRun ? ' (dry run)' : ''}`
   );
   await confirm(
     dryRun
-      ? 'Start the dry run? This script will fetch recent changes, but it will not change working trees, GitHub, npm, or Discourse.'
-      : 'Start the deployment? This script will fetch recent changes and use temporary clones for the CLI version bump and publication, keeping your Profiler branch and working tree unchanged. Commits and remote changes will still require separate confirmation.'
+      ? 'Start the dry run? This script will fetch recent changes, but it will not change working trees, GitHub, npm, Discourse, Bugzilla, or Phabricator.'
+      : 'Start the deployment? This script will fetch recent changes and use temporary clones for the CLI version bump and publication, keeping your Profiler branch and working tree unchanged. It will create a branch in the Firefox checkout. Commits and remote changes will still require separate confirmation.'
   );
   const login = ensureGhAvailableAndLoggedIn();
   console.log(`Authenticated to GitHub as ${login}.`);
   ensureCleanWorkingCopy();
   const { upstream, fork: forkRemote } = discoverDeploymentRemotes(login);
+  const firefoxCheckout =
+    firefoxPath === null ? null : prepareFirefoxCheckout(firefoxPath);
   fetchDeploymentBranches(upstream);
   const l10nPlan = await handleL10nPullRequest(login, upstream, dryRun);
   const cliPlan = await handleVersionBumpPullRequest(
@@ -1976,6 +2254,18 @@ export async function main(
     plannedChanges,
     l10nPlan.plannedLocalizers
   );
+  if (firefoxCheckout && deployment.mergeCommit) {
+    await updateFirefoxToolchain(
+      deployment.date,
+      deployment.mergeCommit,
+      cliPlan.version,
+      firefoxCheckout
+    );
+  } else {
+    console.log(
+      '[dry-run] Would file the Firefox toolchain bug and submit the toolchain revision with moz-phab.'
+    );
+  }
   const release = await finishDeployment(
     deployment.commit,
     cliPlan,
@@ -1985,7 +2275,7 @@ export async function main(
   await announceDeployment(deployment, release, dryRun);
   if (dryRun) {
     console.log(
-      'Dry run completed. No GitHub, npm, or Discourse changes, local branches, commits, tags, or working-tree changes were created.'
+      'Dry run completed. No GitHub, npm, Discourse, Bugzilla, or Phabricator changes, local branches, commits, tags, or working-tree changes were created.'
     );
     return;
   }

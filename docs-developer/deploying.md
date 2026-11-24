@@ -19,7 +19,7 @@ the deploy, the last two happen **after** the web version is live:
 
 1. [Merge l10n into main](#1-merge-l10n-into-main), if there are localization changes.
 2. [Bump the profiler-cli version](#2-bump-the-profiler-cli-version).
-3. [Deploy main to production](#3-deploy-main-to-production).
+3. [Deploy main to production](#3-deploy-main-to-production), then [submit the Firefox toolchain update](#update-the-firefox-profiler-toolchain-in-firefox).
 4. [Publish profiler-cli to npm](#4-publish-profiler-cli-to-npm).
 5. [Tag the CLI release and create the GitHub release page](#5-tag-the-cli-release-and-create-the-github-release-page).
 
@@ -31,10 +31,13 @@ format version bumps, for example, only reach CLI users through a new release.
 When in doubt, publish. We are not running out of version numbers.
 
 All of these steps can be run interactively with the script below. It asks for
-confirmation before every change it makes.
+confirmation before every change it makes. `MOZILLA_CENTRAL` is your Firefox
+Git checkout. It is used for the
+[toolchain update](#update-the-firefox-profiler-toolchain-in-firefox), which
+also needs `python3` and a configured `moz-phab`.
 
 ```
-yarn deploy-prod
+MOZILLA_CENTRAL=/path/to/firefox yarn deploy-prod
 ```
 
 To see what the script would do without changing anything, run:
@@ -91,6 +94,29 @@ git repository.
 Once it's done the new version should be deployed automatically. You can follow the
 process on [Netlify's dashboard](https://app.netlify.com/sites/perf-html/deploys)
 if you have access.
+
+### Update the Firefox Profiler toolchain in Firefox
+
+As soon as the production pull request is merged, create a Bugzilla task in
+**Core > Gecko Profiler**, titled **Update the Firefox Profiler toolchain**, with
+`[fp]` in the whiteboard. Include the deployment date, CLI version, and the
+production merge commit link. See [an example bug](https://bugzilla.mozilla.org/show_bug.cgi?id=2086867).
+
+In a clean Firefox checkout, start a new branch from the latest `main`. Update
+only the `firefox-profiler` revision in
+`taskcluster/kinds/fetch/toolchains.yml` to the production pull request's **merge
+commit SHA**, not its `main` head SHA. Commit with this message:
+
+```text
+Bug BUG_ID - Update the Firefox Profiler toolchain to the DATE deploy r?REVIEWER
+
+This revision includes profiler-cli VERSION.
+```
+
+Submit that one commit with `moz-phab submit --single --interactive`. See
+[an example revision](https://phabricator.services.mozilla.com/D337805).
+Land the reviewed revision through the Firefox landing process. This update
+also applies to web-only deployments.
 
 ### Helpful git commands to write the main changes
 

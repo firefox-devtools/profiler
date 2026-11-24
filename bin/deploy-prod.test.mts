@@ -18,7 +18,7 @@ import {
   writeFileSync,
 } from 'fs';
 import { tmpdir } from 'os';
-import { delimiter, join } from 'path';
+import { delimiter, dirname, join } from 'path';
 import { describe, test } from 'node:test';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { promisify } from 'util';
@@ -40,7 +40,9 @@ import {
   parseGitHubRepositoryUrl,
   reviewersFor,
   runRemoteMutation,
+  updateFirefoxProfilerRevision,
   validateAnnouncementUrl,
+  validateToolchainBugUrl,
 } from './deploy-prod.mts';
 
 function writeFakeCommand(
@@ -170,6 +172,73 @@ test('parseArguments enables dry-run mode and rejects unknown arguments', () => 
   assert.throws(() => parseArguments(['--unknown']), /Unknown argument/);
 });
 
+describe(
+  'live deployments validate MOZILLA_CENTRAL before prompting or running commands',
+  { concurrency: true, timeout: 30_000 },
+  () => {
+    for (const configuration of ['missing', 'valid']) {
+      test(
+        `${configuration}`,
+        { concurrency: true, timeout: 30_000 },
+        async () => {
+          const directory = mkdtempSync(
+            join(tmpdir(), 'deploy-checkout-test-')
+          );
+          try {
+            if (configuration === 'valid') {
+              mkdirSync(join(directory, 'taskcluster', 'kinds', 'fetch'), {
+                recursive: true,
+              });
+              writeFileSync(
+                join(
+                  directory,
+                  'taskcluster',
+                  'kinds',
+                  'fetch',
+                  'toolchains.yml'
+                ),
+                ''
+              );
+              mkdirSync(join(directory, '.agents', 'skills', 'bug-filing'), {
+                recursive: true,
+              });
+              writeFileSync(
+                join(
+                  directory,
+                  '.agents',
+                  'skills',
+                  'bug-filing',
+                  'file-bug.py'
+                ),
+                ''
+              );
+            }
+            const { status, stdout, stderr } = await runDeploymentTest(
+              'await deployment.main([]);',
+              {
+                ...process.env,
+                MOZILLA_CENTRAL: configuration === 'missing' ? '' : directory,
+              },
+              configuration === 'valid' ? [['Type "y" to continue:', 'n']] : []
+            );
+            assert.equal(status, 1, `${stdout}\n${stderr}`);
+            assert.doesNotMatch(stdout, /\[exec\]/);
+            if (configuration === 'valid') {
+              assert.match(stdout, /Start the deployment/);
+              assert.match(stderr, /Stopped without performing that action/);
+            } else {
+              assert.doesNotMatch(stdout, /Start the deployment/);
+              assert.match(stderr, /MOZILLA_CENTRAL/);
+            }
+          } finally {
+            rmSync(directory, { recursive: true, force: true });
+          }
+        }
+      );
+    }
+  }
+);
+
 test('runRemoteMutation only prints commands in dry-run mode', () => {
   const logs: unknown[][] = [];
   const originalLog = console.log;
@@ -189,7 +258,76 @@ test('runRemoteMutation only prints commands in dry-run mode', () => {
   ]);
 });
 
+test(
+  'Firefox preflight locates moz-phab without executing it',
+  { timeout: 30_000 },
+  async () => {
+    const directory = mkdtempSync(join(tmpdir(), 'deploy-preflight-test-'));
+    const executedPath = join(directory, 'moz-phab-executed');
+    writeFakeCommand(
+      directory,
+      'python3',
+      '#!/usr/bin/env node\nprocess.exit(0);\n'
+    );
+    writeFakeCommand(
+      directory,
+      'git',
+      `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] !== '-C') throw new Error('Unexpected Git arguments');
+if (args[2] === 'remote') {
+  process.stdout.write('canonical\\tgit@github.com:mozilla-firefox/firefox.git (fetch)');
+} else if (args[2] !== 'status') {
+  throw new Error('Unexpected Git command');
+}
+`
+    );
+    writeFakeCommand(
+      directory,
+      'moz-phab',
+      `#!/usr/bin/env node
+import { writeFileSync } from 'node:fs';
+writeFileSync(${JSON.stringify(executedPath)}, 'executed');
+process.exit(99);
+`
+    );
+    try {
+      const { status, stdout, stderr } = await runDeploymentTest(
+        `const checkout = deployment.prepareFirefoxCheckout(${JSON.stringify(directory)});
+           if (checkout.upstream !== 'canonical') throw new Error('Incorrect checkout');`,
+        {
+          ...environmentWithPath(directory),
+          PATH: [
+            directory,
+            dirname(process.execPath),
+            ...(process.platform === 'win32'
+              ? [join(process.env.SystemRoot!, 'System32')]
+              : []),
+          ].join(delimiter),
+        },
+        []
+      );
+      assert.equal(status, 0, `${stdout}\n${stderr}`);
+      assert.equal(existsSync(executedPath), false);
+      assert.doesNotMatch(stdout, /\[exec\] moz-phab/);
+      assert.doesNotMatch(stdout, /Phabricator reviewer username/);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  }
+);
+
 describe('deployment workflows', { concurrency: true, timeout: 30_000 }, () => {
+  test(
+    'the production merge feeds a single Firefox toolchain revision',
+    { concurrency: true, timeout: 30_000 },
+    () => testProductionToolchainUpdate('success')
+  );
+  test(
+    'toolchain recovery: fetch failure',
+    { concurrency: true, timeout: 30_000 },
+    () => testProductionToolchainUpdate('fetch failure')
+  );
   for (const publishCli of [true, false]) {
     test(
       `dry run without mutations, publish CLI: ${publishCli}`,
@@ -282,7 +420,7 @@ process.exit(90);
 `
         );
 
-        for (const command of ['npm', 'yarn']) {
+        for (const command of ['npm', 'yarn', 'moz-phab', 'python3']) {
           writeFakeCommand(
             binDirectory,
             command,
@@ -300,6 +438,7 @@ process.exit(90);
             "await deployment.main(['--dry-run']);",
             {
               ...environmentWithPath(binDirectory),
+              MOZILLA_CENTRAL: '',
               DEPLOY_PROD_TEST_VIOLATIONS: violationsPath,
               DEPLOY_PROD_TEST_SKIP_CLI: publishCli ? '' : '1',
               TEMP: temporaryDirectory,
@@ -349,6 +488,7 @@ process.exit(90);
             stdout,
             /paste this announcement body:\n\nThe latest version/
           );
+          assert.match(stdout, /Would file the Firefox toolchain bug/);
           assert.match(stdout, /Would wait for you to review and publish/);
           assert.match(stdout, /Dry run completed/);
           assert.equal(
@@ -370,6 +510,7 @@ test('announcement composer formats changes and preserves credits and links', ()
   const url = new URL(
     buildAnnouncementUrl({
       commit: 'abc',
+      mergeCommit: null,
       date: 'November 4, 2026',
       body: buildDeploymentBody(
         '[Example Author] Fix A & B (#123)\n[Example Contributor] [Panel] Add a feature (#124)',
@@ -418,6 +559,7 @@ test('announcement composer preserves custom Markdown in edited deployment notes
   const url = new URL(
     buildAnnouncementUrl({
       commit: 'abc',
+      mergeCommit: null,
       date: 'November 17, 2026',
       body: notes,
       url: null,
@@ -706,6 +848,298 @@ if (args[0] === 'install') {
     }
   }
 );
+
+test('toolchain bug URLs must identify a Mozilla Bugzilla bug', () => {
+  assert.equal(
+    validateToolchainBugUrl(
+      'https://bugzilla.mozilla.org/show_bug.cgi?id=123#c0'
+    ),
+    'https://bugzilla.mozilla.org/show_bug.cgi?id=123'
+  );
+  for (const url of [
+    'https://example.org/show_bug.cgi?id=123',
+    'https://bugzilla.mozilla.org/enter_bug.cgi?id=123',
+    'https://bugzilla.mozilla.org/show_bug.cgi',
+    '123',
+  ]) {
+    assert.throws(
+      () => validateToolchainBugUrl(url),
+      /Enter the created bug URL from https:\/\/bugzilla.mozilla.org\/show_bug.cgi\?id=/
+    );
+  }
+});
+
+const toolchainsFixture = [
+  'another-toolchain:',
+  '    fetch:',
+  `        revision: ${'a'.repeat(40)}`,
+  '',
+  'firefox-profiler:',
+  '    description: firefox profiler source code',
+  '    fetch:',
+  '        type: git',
+  '        repo: https://github.com/firefox-devtools/profiler',
+  `        revision: ${'a'.repeat(40)}`,
+  '',
+  'last-toolchain:',
+  '    fetch:',
+  `        revision: ${'a'.repeat(40)}`,
+  '',
+].join('\n');
+
+test('only the Firefox Profiler revision changes, preserving surrounding YAML', () => {
+  const mergeCommit = '1234567890abcdef1234567890abcdef12345678';
+  for (const newline of ['\n', '\r\n']) {
+    const contents = toolchainsFixture.replaceAll('\n', newline);
+    const updated = updateFirefoxProfilerRevision(contents, mergeCommit);
+    assert.equal(updated.replace(mergeCommit, 'a'.repeat(40)), contents);
+    assert.ok(
+      updated.includes(
+        `repo: https://github.com/firefox-devtools/profiler${newline}        revision: ${mergeCommit}`
+      )
+    );
+    assert.equal(updateFirefoxProfilerRevision(updated, mergeCommit), updated);
+  }
+  for (const contents of [
+    toolchainsFixture.replace('firefox-profiler:', 'renamed-toolchain:'),
+    toolchainsFixture.replace('firefox-devtools/profiler', 'example/toolchain'),
+    toolchainsFixture.replaceAll(
+      `revision: ${'a'.repeat(40)}`,
+      'revision: main'
+    ),
+    `${toolchainsFixture}${toolchainsFixture}`,
+  ]) {
+    assert.throws(() => updateFirefoxProfilerRevision(contents, mergeCommit));
+  }
+  assert.throws(() =>
+    updateFirefoxProfilerRevision(
+      toolchainsFixture,
+      '<production-merge-commit>'
+    )
+  );
+});
+
+async function testProductionToolchainUpdate(
+  scenario: 'success' | 'fetch failure'
+): Promise<void> {
+  const testMerge = scenario === 'success';
+  const failFetch = scenario === 'fetch failure';
+  const directory = mkdtempSync(join(tmpdir(), 'deploy-toolchain-test-'));
+  const firefoxPath = join(directory, 'firefox checkout');
+  const toolchainsPath = join(
+    firefoxPath,
+    'taskcluster',
+    'kinds',
+    'fetch',
+    'toolchains.yml'
+  );
+  mkdirSync(join(firefoxPath, 'taskcluster', 'kinds', 'fetch'), {
+    recursive: true,
+  });
+  writeFileSync(toolchainsPath, toolchainsFixture);
+  const mainCommit = '1'.repeat(40);
+  const mergeCommit = '2'.repeat(40);
+  const firefoxBase = '3'.repeat(40);
+  const firefoxCommit = '4'.repeat(40);
+  writeFakeCommand(
+    directory,
+    'git',
+    `#!/usr/bin/env node
+import { appendFileSync, readFileSync, writeFileSync } from 'fs';
+import { join } from 'path';
+const args = process.argv.slice(2);
+appendFileSync(join(process.env.TEST_DIRECTORY, 'commands'), JSON.stringify(['git', ...args]) + '\\n');
+if (args[0] === '-C') {
+  if (args[1] !== ${JSON.stringify(firefoxPath)}) throw new Error('Wrong Firefox checkout');
+  const command = args[2];
+  if (command === 'fetch' && ${failFetch}) process.exit(1);
+  if (['status', 'fetch', 'checkout', 'diff', 'add'].includes(command)) process.exit(0);
+  if (command === 'rev-parse') {
+    process.stdout.write(args[3] === 'FETCH_HEAD' ? '${firefoxBase}' : '${firefoxCommit}');
+  } else if (command === 'show') {
+    process.stdout.write(readFileSync(${JSON.stringify(toolchainsPath)}, 'utf8'));
+  } else if (command === 'commit') {
+    writeFileSync(join(process.env.TEST_DIRECTORY, 'message'), readFileSync(args[4], 'utf8'));
+  } else {
+    throw new Error('Unexpected Firefox command: ' + args.join(' '));
+  }
+} else if (args[0] === 'fetch') {
+  process.exit(0);
+} else if (args[0] === 'var') {
+  process.stdout.write('node -e ""');
+} else if (args[0] === 'log') {
+  if (!args.includes('--grep')) process.stdout.write('[Example Merger] Improve the profiler');
+} else {
+  throw new Error('Unexpected Profiler command: ' + args.join(' '));
+}
+`
+  );
+  writeFakeCommand(
+    directory,
+    'gh',
+    `#!/usr/bin/env node
+import { appendFileSync, existsSync, writeFileSync } from 'fs';
+import { join } from 'path';
+const args = process.argv.slice(2);
+appendFileSync(join(process.env.TEST_DIRECTORY, 'commands'), JSON.stringify(['gh', ...args]) + '\\n');
+if (args[0] !== 'pr') throw new Error('Unexpected command');
+const mergedPath = join(process.env.TEST_DIRECTORY, 'merged');
+if (args[1] === 'list') process.stdout.write('[]');
+else if (args[1] === 'create') process.stdout.write('https://github.com/firefox-devtools/profiler/pull/123');
+else if (args[1] === 'checks') process.exit(0);
+else if (args[1] === 'merge') writeFileSync(mergedPath, 'merged');
+else if (args[1] === 'view') process.stdout.write(JSON.stringify({
+  number: 123,
+  url: 'https://github.com/firefox-devtools/profiler/pull/123',
+  state: existsSync(mergedPath) ? 'MERGED' : 'OPEN',
+  headRefOid: '${mainCommit}',
+  mergeCommit: existsSync(mergedPath) ? { oid: '${mergeCommit}' } : null,
+}));
+else throw new Error('Unexpected command: ' + args.join(' '));
+`
+  );
+  writeFakeCommand(
+    directory,
+    'python3',
+    `#!/usr/bin/env node
+import { appendFileSync } from 'fs';
+import { join } from 'path';
+appendFileSync(join(process.env.TEST_DIRECTORY, 'commands'), JSON.stringify(['python3', ...process.argv.slice(2)]) + '\\n');
+`
+  );
+  writeFakeCommand(
+    directory,
+    'moz-phab',
+    `#!/usr/bin/env node
+import { appendFileSync } from 'fs';
+import { join } from 'path';
+appendFileSync(join(process.env.TEST_DIRECTORY, 'commands'), JSON.stringify(['moz-phab', ...process.argv.slice(2)]) + '\\n');
+`
+  );
+  try {
+    const answers: [string, string][] = [];
+    const confirm = () => answers.push(['Type "y" to continue:', 'y']);
+    if (testMerge) {
+      confirm();
+      confirm();
+    }
+    confirm();
+    if (!failFetch) {
+      answers.push(
+        [
+          'Paste the created Bugzilla bug URL:',
+          'https://example.org/show_bug.cgi?id=123',
+        ],
+        [
+          'Paste the created Bugzilla bug URL:',
+          'https://bugzilla.mozilla.org/show_bug.cgi?id=123',
+        ]
+      );
+      confirm();
+      confirm();
+    }
+    const { status, stdout, stderr } = await runDeploymentTest(
+      `
+      const result = ${testMerge ? "await deployment.handleDeploymentPullRequest('canonical', false, [], [])" : JSON.stringify({ commit: mainCommit, mergeCommit, date: 'November 24, 2026', body: '[Example Merger] Improve the profiler', url: null })};
+      if (result.commit !== '${mainCommit}' || result.mergeCommit !== '${mergeCommit}') throw new Error('Wrong deployment commits');
+      await deployment.updateFirefoxToolchain(result.date, result.mergeCommit, '0.13.0', {
+        path: ${JSON.stringify(firefoxPath)}, upstream: 'mozilla',
+      });
+      console.log('Continuing independent release steps.');
+      `,
+      { ...environmentWithPath(directory), TEST_DIRECTORY: directory },
+      answers
+    );
+    const commands = readFileSync(join(directory, 'commands'), 'utf8')
+      .trim()
+      .split('\n')
+      .map((line) => JSON.parse(line) as string[]);
+    assert.equal(status, 0, `${stdout}\n${stderr}`);
+    assert.doesNotMatch(stderr, /Unexpected browser launch/);
+    assert.match(stdout, /Continuing independent release steps/);
+    if (failFetch) {
+      assert.match(stderr, /Firefox toolchain update failed/);
+      assert.match(stdout, /Continue with CLI publication and announcements/);
+      assert.ok(
+        commands.every(
+          (args) =>
+            args[0] !== 'python3' &&
+            args[0] !== 'moz-phab' &&
+            !args.includes('checkout')
+        )
+      );
+      assert.equal(readFileSync(toolchainsPath, 'utf8'), toolchainsFixture);
+      return;
+    }
+    assert.doesNotMatch(
+      stdout,
+      /Continue with CLI publication and announcements/
+    );
+    assert.match(stderr, /Enter the created bug URL/);
+    assert.equal(
+      readFileSync(toolchainsPath, 'utf8'),
+      updateFirefoxProfilerRevision(toolchainsFixture, mergeCommit)
+    );
+    assert.match(stdout, /still needs review and landing/);
+    const message = readFileSync(join(directory, 'message'), 'utf8');
+    assert.match(
+      message,
+      /^Bug 123 - Update the Firefox Profiler toolchain to the .+ deploy r\?#profiler-reviewers\n\nThis revision includes profiler-cli 0\.13\.0\.\n$/
+    );
+    const bugCommand = commands.find(([command]) => command === 'python3');
+    assert.equal(
+      bugCommand?.[1],
+      join(firefoxPath, '.agents', 'skills', 'bug-filing', 'file-bug.py')
+    );
+    assert.ok(bugCommand?.includes('product=Core'));
+    assert.ok(bugCommand?.includes('component=Gecko Profiler'));
+    assert.ok(
+      bugCommand?.includes('short_desc=Update the Firefox Profiler toolchain')
+    );
+    // On Windows the fake python3 is a .cmd file, and cmd.exe cuts an argument
+    // at its first newline.
+    if (process.platform !== 'win32') {
+      assert.ok(
+        bugCommand?.some(
+          (argument) =>
+            argument.startsWith('comment=') &&
+            argument.includes(`/commit/${mergeCommit}`)
+        )
+      );
+    }
+    assert.ok(
+      commands.some(
+        (args) =>
+          JSON.stringify(args) ===
+          JSON.stringify([
+            'git',
+            '-C',
+            firefoxPath,
+            'checkout',
+            '-b',
+            'update-firefox-profiler-123',
+            firefoxBase,
+          ])
+      )
+    );
+    assert.deepEqual(commands.at(-1), [
+      'moz-phab',
+      'submit',
+      '--path',
+      firefoxPath,
+      '--single',
+      '--interactive',
+      firefoxCommit,
+    ]);
+    assert.equal(
+      commands.filter(([command]) => command === 'moz-phab').length,
+      1
+    );
+    assert.ok(!commands.some((args) => args.includes('push')));
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
 
 test('announcement links must point to a published Mozilla Discourse topic', () => {
   for (const url of [
