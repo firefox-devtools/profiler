@@ -833,6 +833,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Der is in nije ferzje fan de tapassing tapast eardat dizze side
     folslein laden wie. Jo kinne fersteuringen sjen.
 ServiceWorkerManager--new-version-is-ready = In nije ferzje fan de tapassing is download en is klear foar gebrûk.
+ServiceWorkerManager--updating-after-error = Der wurdt in nije ferzje fan de tapassing ynstallearre. De side wurdt automatysk opnij laden as dizze ree is.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Melding opnij lade ferstopje
     .title = Melding opnij lade ferstopje
@@ -1223,6 +1224,27 @@ BottomBox--show-fullscreen =
     .title = Folslein skerm
 SourceView--close-button =
     .title = Boarnewerjefte slute
+
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Sykje
+    .placeholder = Sykje
+CodeFindBar--previous-button = Foarige
+    .title = Sykje de foarige oerienkomst (Shift+Enter)
+CodeFindBar--next-button = Folgjende
+    .title = Sykje de folgjende oerienkomst (Enter)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Haadlettergefoelich
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Reguliere ekspresje
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Hiele wurden
+CodeFindBar--close-button =
+    .title = De sykbalke slute
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
