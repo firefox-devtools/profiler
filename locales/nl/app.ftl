@@ -1232,6 +1232,10 @@ SourceView--close-button =
 CodeFindBar--search-field =
     .aria-label = Zoeken
     .placeholder = Zoeken
+CodeFindBar--previous-button = Vorige
+    .title = De vorige overeenkomst zoeken (Shift+Enter)
+CodeFindBar--next-button = Volgende
+    .title = De volgende overeenkomst zoeken (Enter)
 # Checkbox label. If checked, only matches with the same uppercase and lowercase
 # letters are found.
 CodeFindBar--match-case = Hoofdlettergevoelig
