@@ -73,6 +73,13 @@ type PullRequestListItem = PullRequestReference & {
   headRepositoryOwner?: { login: string } | null;
 };
 
+type AssociatedPullRequest = {
+  user: { login: string } | null;
+  merged_at: string | null;
+  merge_commit_sha: string | null;
+  base: { ref: string; repo: { full_name: string } };
+};
+
 type GitHubReview = {
   author?: { login?: string } | null;
   state: string;
@@ -560,6 +567,56 @@ export function combineDeploymentChanges(
 ): string {
   return [committedChanges.trim(), ...plannedChanges]
     .filter(Boolean)
+    .join('\n');
+}
+
+/**
+ * Collect deployment commits with their pull request authors, falling back to Git authors.
+ */
+export function collectDeploymentChanges(range: string): string {
+  logAction(
+    'Collecting deployment changes and resolving their pull request authors.'
+  );
+  const commits = gitOutput(
+    'log',
+    range,
+    '--first-parent',
+    '--format=format:%H%x00%an%x00%s',
+    '--reverse'
+  );
+  return commits
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      const [commit, gitAuthor, subject] = line.split('\0');
+      const pages = JSON.parse(
+        run(
+          'gh',
+          [
+            'api',
+            `repos/${repository}/commits/${commit}/pulls`,
+            '--method',
+            'GET',
+            '--paginate',
+            '--slurp',
+          ],
+          { capture: true }
+        )
+      ) as AssociatedPullRequest[][];
+      const pullRequests = pages
+        .flat()
+        .filter(
+          (pullRequest) =>
+            pullRequest.merged_at &&
+            pullRequest.base.ref === 'main' &&
+            pullRequest.base.repo.full_name === repository
+        );
+      const pullRequest =
+        pullRequests.find(
+          ({ merge_commit_sha }) => merge_commit_sha === commit
+        ) ?? (pullRequests.length === 1 ? pullRequests[0] : undefined);
+      return `[${pullRequest?.user?.login ?? gitAuthor}] ${subject}`;
+    })
     .join('\n');
 }
 
@@ -1514,15 +1571,7 @@ export async function handleDeploymentPullRequest(
   fetchDeploymentBranches(upstream);
   const range = `${upstream}/production..${upstream}/main`;
   const changes = combineDeploymentChanges(
-    gitOutput(
-      'log',
-      range,
-      '--first-parent',
-      '--oneline',
-      '--no-decorate',
-      '--format=format:[%an] %s',
-      '--reverse'
-    ),
+    collectDeploymentChanges(range),
     plannedChanges
   );
 

@@ -319,6 +319,11 @@ process.exit(99);
 
 describe('deployment workflows', { concurrency: true, timeout: 30_000 }, () => {
   test(
+    'deployment changes credit the introducing PR author and preserve commit order and subjects',
+    { concurrency: true, timeout: 30_000 },
+    testDeploymentAuthors
+  );
+  test(
     'the production merge feeds a single Firefox toolchain revision',
     { concurrency: true, timeout: 30_000 },
     () => testProductionToolchainUpdate('success')
@@ -379,7 +384,7 @@ if (command === 'show-ref') {
 }
 if (command === 'log') {
   if (process.env.DEPLOY_PROD_TEST_SKIP_CLI && !args.includes('--grep')) {
-    process.stdout.write('[Example Author] Improve the web UI (#123)');
+    process.stdout.write('0123456789abcdef0123456789abcdef01234567\\0Example Author\\0Improve the web UI (#123)');
   }
   process.exit(0);
 }
@@ -408,6 +413,10 @@ if (args[0] === '--version' || (args[0] === 'auth' && args[1] === 'status')) {
 }
 if (args[0] === 'api' && args[1] === 'user') {
   process.stdout.write('example-maintainer\\n');
+  process.exit(0);
+}
+if (args[0] === 'api' && args[1] === 'repos/firefox-devtools/profiler/commits/0123456789abcdef0123456789abcdef01234567/pulls' && args[args.indexOf('--method') + 1] === 'GET') {
+  process.stdout.write('[[]]');
   process.exit(0);
 }
 if (args[0] === 'pr' && args[1] === 'list') {
@@ -968,7 +977,7 @@ if (args[0] === '-C') {
 } else if (args[0] === 'var') {
   process.stdout.write('node -e ""');
 } else if (args[0] === 'log') {
-  if (!args.includes('--grep')) process.stdout.write('[Example Merger] Improve the profiler');
+  if (!args.includes('--grep')) process.stdout.write('${mainCommit}\\0Example Merger\\0Improve the profiler');
 } else {
   throw new Error('Unexpected Profiler command: ' + args.join(' '));
 }
@@ -982,6 +991,15 @@ import { appendFileSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 const args = process.argv.slice(2);
 appendFileSync(join(process.env.TEST_DIRECTORY, 'commands'), JSON.stringify(['gh', ...args]) + '\\n');
+if (args[0] === 'api' && args[1] === 'repos/firefox-devtools/profiler/commits/${mainCommit}/pulls') {
+  process.stdout.write(JSON.stringify([[{
+    user: { login: 'example-contributor' },
+    merged_at: '2026-01-01T12:00:00Z',
+    merge_commit_sha: '${mainCommit}',
+    base: { ref: 'main', repo: { full_name: 'firefox-devtools/profiler' } },
+  }]]));
+  process.exit(0);
+}
 if (args[0] !== 'pr') throw new Error('Unexpected command');
 const mergedPath = join(process.env.TEST_DIRECTORY, 'merged');
 if (args[1] === 'list') process.stdout.write('[]');
@@ -1040,8 +1058,9 @@ appendFileSync(join(process.env.TEST_DIRECTORY, 'commands'), JSON.stringify(['mo
     }
     const { status, stdout, stderr } = await runDeploymentTest(
       `
-      const result = ${testMerge ? "await deployment.handleDeploymentPullRequest('canonical', false, [], [])" : JSON.stringify({ commit: mainCommit, mergeCommit, date: 'November 24, 2026', body: '[Example Merger] Improve the profiler', url: null })};
+      const result = ${testMerge ? "await deployment.handleDeploymentPullRequest('canonical', false, [], [])" : JSON.stringify({ commit: mainCommit, mergeCommit, date: 'November 24, 2026', body: '[example-contributor] Improve the profiler', url: null })};
       if (result.commit !== '${mainCommit}' || result.mergeCommit !== '${mergeCommit}') throw new Error('Wrong deployment commits');
+      if (!result.body.includes('[example-contributor] Improve the profiler') || result.body.includes('Example Merger')) throw new Error('Wrong deployment attribution');
       await deployment.updateFirefoxToolchain(result.date, result.mergeCommit, '0.13.0', {
         path: ${JSON.stringify(firefoxPath)}, upstream: 'mozilla',
       });
@@ -1394,6 +1413,115 @@ test('combineDeploymentChanges includes changes simulated by a dry run', () => {
     ].join('\n')
   );
 });
+
+async function testDeploymentAuthors(): Promise<void> {
+  const directory = mkdtempSync(join(tmpdir(), 'deploy-authors-test-'));
+  const commits = Array.from({ length: 7 }, (_, index) =>
+    String(index + 1).repeat(40)
+  );
+  const pullRequest = (commit: string, login: string | null) => ({
+    user: login === null ? null : { login },
+    merged_at: '2026-01-01T12:00:00Z',
+    merge_commit_sha: commit,
+    base: { ref: 'main', repo: { full_name: 'firefox-devtools/profiler' } },
+  });
+  const associations = {
+    [commits[0]]: [
+      [pullRequest('a'.repeat(40), 'later-pr-author')],
+      [pullRequest(commits[0], 'queue-contributor')],
+    ],
+    [commits[1]]: [[pullRequest(commits[1], 'squash-contributor')]],
+    [commits[2]]: [[pullRequest('b'.repeat(40), 'rebase-contributor')]],
+    [commits[3]]: [[]],
+    [commits[4]]: [[pullRequest(commits[4], null)]],
+    [commits[5]]: [
+      [
+        pullRequest('c'.repeat(40), 'first-author'),
+        pullRequest('d'.repeat(40), 'second-author'),
+      ],
+    ],
+    [commits[6]]: [
+      [
+        {
+          ...pullRequest(commits[6], 'release-maintainer'),
+          base: {
+            ref: 'production',
+            repo: { full_name: 'firefox-devtools/profiler' },
+          },
+        },
+        { ...pullRequest(commits[6], 'open-pr-author'), merged_at: null },
+        {
+          ...pullRequest(commits[6], 'fork-author'),
+          base: { ref: 'main', repo: { full_name: 'example-user/profiler' } },
+        },
+      ],
+    ],
+  };
+  const subjects = [
+    'Merge pull request #12 from example-user/feature',
+    'Fix a regression discussed in #999 (#22)',
+    'Add a rebased change',
+    'Revert a change from #12',
+    'Fix a bug (#33)',
+    'Shared commit with ambiguous associations',
+    'Direct change included in other pull requests',
+  ];
+  const log = commits
+    .map((commit, index) => [commit, 'Git Author', subjects[index]].join('\0'))
+    .join('\n');
+  writeFakeCommand(
+    directory,
+    'git',
+    `#!/usr/bin/env node
+import assert from 'node:assert/strict';
+const args = process.argv.slice(2);
+assert.deepEqual(args, ['log', args[1], '--first-parent', '--format=format:%H%x00%an%x00%s', '--reverse']);
+if (args[1] !== 'empty') process.stdout.write(${JSON.stringify(log)});
+`
+  );
+  writeFakeCommand(
+    directory,
+    'gh',
+    `#!/usr/bin/env node
+import assert from 'node:assert/strict';
+const args = process.argv.slice(2);
+const commit = args[1].split('/').at(-2);
+assert.deepEqual(args, ['api', 'repos/firefox-devtools/profiler/commits/' + commit + '/pulls', '--method', 'GET', '--paginate', '--slurp']);
+if (process.env.TEST_API_FAIL) process.exit(1);
+const associations = ${JSON.stringify(associations)};
+if (!(commit in associations)) throw new Error('Unexpected commit lookup');
+process.stdout.write(JSON.stringify(associations[commit]));
+`
+  );
+  try {
+    const authors = [
+      'queue-contributor',
+      'squash-contributor',
+      'rebase-contributor',
+      'Git Author',
+      'Git Author',
+      'Git Author',
+      'Git Author',
+    ];
+    const expected = subjects
+      .map((subject, index) => `[${authors[index]}] ${subject}`)
+      .join('\n');
+    const { status, stdout, stderr } = await runDeploymentTest(
+      `
+      import assert from 'node:assert/strict';
+      assert.equal(deployment.collectDeploymentChanges('production..main'), ${JSON.stringify(expected)});
+      assert.equal(deployment.collectDeploymentChanges('empty'), '');
+      process.env.TEST_API_FAIL = '1';
+      assert.throws(() => deployment.collectDeploymentChanges('production..main'), /exited with status 1/);
+      `,
+      environmentWithPath(directory),
+      []
+    );
+    assert.equal(status, 0, `${stdout}\n${stderr}`);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
 
 test('reviewersFor excludes a maintainer running the script', () => {
   assert.deepEqual(reviewersFor('fatadel'), ['canova', 'mstange']);
