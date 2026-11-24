@@ -28,7 +28,7 @@ This document pertains to how C++ samples are captured, and how they are process
 0x16  }
 ```
 
-We'll use line numbers and code addresses interchangably here in order to simplify things. In reality, each line in the code above will probably generate multiple instructions, and each of those instructions will take up more than a single byte.
+We'll use line numbers and code addresses interchangeably here in order to simplify things. In reality, each line in the code above will probably generate multiple instructions, and each of those instructions will take up more than a single byte.
 
 ### Frames
 

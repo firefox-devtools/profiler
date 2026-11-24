@@ -15,7 +15,7 @@ Changes to the profile format need to happen in this order:
 
 ## Background on upgrading
 
-Firefox generates profiles in a function called `StreamJSON` in [tools/profiler/core/platform.cpp](http://searchfox.org/mozilla-central/rev/7cb75d87753de9103253e34bc85592e26378f506/tools/profiler/core/platform.cpp#1259). This code is the authorative "description" of the current profile format.
+Firefox generates profiles in a function called `StreamJSON` in [tools/profiler/core/platform.cpp](http://searchfox.org/mozilla-central/rev/7cb75d87753de9103253e34bc85592e26378f506/tools/profiler/core/platform.cpp#1259). This code is the authoritative "description" of the current profile format.
 
 Sometimes the profile format changes. Maybe we want to add new information that wasn't there before, or maybe we found a better way to represent existing information.
 
