@@ -1225,6 +1225,23 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Bronweergave sluiten
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Zoeken
+    .placeholder = Zoeken
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Hoofdlettergevoelig
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Reguliere expressie
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Hele woorden
+CodeFindBar--close-button =
+    .title = De zoekbalk sluiten
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
