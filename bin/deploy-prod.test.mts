@@ -3,23 +3,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 import assert from 'assert/strict';
-import { spawn } from 'child_process';
+import { execFile, spawn, spawnSync } from 'child_process';
 import {
   chmodSync,
+  copyFileSync,
   existsSync,
   mkdtempSync,
   mkdirSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'fs';
 import { tmpdir } from 'os';
 import { delimiter, join } from 'path';
-import { test } from 'node:test';
-import { fileURLToPath } from 'url';
+import { describe, test } from 'node:test';
+import { fileURLToPath, pathToFileURL } from 'url';
+import { promisify } from 'util';
 
 import {
+  buildAnnouncementUrl,
   buildDeploymentBody,
   bumpMinorVersion,
   checkWaitArguments,
@@ -35,6 +40,7 @@ import {
   parseGitHubRepositoryUrl,
   reviewersFor,
   runRemoteMutation,
+  validateAnnouncementUrl,
 } from './deploy-prod.mts';
 
 function writeFakeCommand(
@@ -54,6 +60,79 @@ function writeFakeCommand(
   const path = join(directory, name);
   writeFileSync(path, source);
   chmodSync(path, 0o755);
+}
+
+function environmentWithPath(directory: string): NodeJS.ProcessEnv {
+  const environment = Object.fromEntries(
+    Object.entries(process.env).filter(
+      ([name]) => name.toLowerCase() !== 'path'
+    )
+  );
+  return {
+    ...environment,
+    PATH: `${directory}${delimiter}${process.env.PATH ?? ''}`,
+  };
+}
+
+async function runDeploymentTest(
+  source: string,
+  environment: NodeJS.ProcessEnv,
+  answers: [string, string][],
+  moduleUrl = new URL('./deploy-prod.mts', import.meta.url)
+): Promise<{ status: number | null; stdout: string; stderr: string }> {
+  const child = spawn(
+    process.execPath,
+    [
+      '--input-type=module',
+      '--eval',
+      `
+    import { registerHooks } from 'node:module';
+    registerHooks({
+      resolve(specifier, context, nextResolve) {
+        if (specifier === 'open') {
+          return { url: 'data:text/javascript,export default async () => { throw new Error("Unexpected browser launch"); };', shortCircuit: true };
+        }
+        return nextResolve(specifier, context);
+      },
+    });
+    const deployment = await import(${JSON.stringify(moduleUrl.href)});
+    ${source}
+  `,
+    ],
+    { env: environment }
+  );
+  let stdout = '';
+  let stderr = '';
+  let nextAnswer = 0;
+  let promptOffset = 0;
+  child.stdout.setEncoding('utf8');
+  child.stderr.setEncoding('utf8');
+  child.stdout.on('data', (chunk) => {
+    stdout += chunk;
+    const answer = answers[nextAnswer];
+    if (!answer) {
+      return;
+    }
+    const index = stdout.indexOf(answer[0], promptOffset);
+    if (index !== -1) {
+      promptOffset = index + answer[0].length;
+      nextAnswer++;
+      child.stdin.write(`${answer[1]}\n`);
+    }
+  });
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk;
+  });
+  const timer = setTimeout(() => child.kill(), 30_000);
+  try {
+    const status = await new Promise<number | null>((resolve, reject) => {
+      child.on('error', reject);
+      child.on('close', resolve);
+    });
+    return { status, stdout, stderr };
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 test('checkWaitArguments only filters required checks when requested', () => {
@@ -110,23 +189,28 @@ test('runRemoteMutation only prints commands in dry-run mode', () => {
   ]);
 });
 
-test('dry run completes without invoking mutation commands', async () => {
-  const directory = mkdtempSync(join(tmpdir(), 'deploy-prod-test-'));
-  const binDirectory = join(directory, 'bin');
-  const temporaryDirectory = join(directory, 'tmp');
-  const violationsPath = join(directory, 'violations');
-  mkdirSync(binDirectory);
-  mkdirSync(temporaryDirectory);
+describe('deployment workflows', { concurrency: true, timeout: 30_000 }, () => {
+  for (const publishCli of [true, false]) {
+    test(
+      `dry run without mutations, publish CLI: ${publishCli}`,
+      { concurrency: true, timeout: 30_000 },
+      async () => {
+        const directory = mkdtempSync(join(tmpdir(), 'deploy-prod-test-'));
+        const binDirectory = join(directory, 'bin');
+        const temporaryDirectory = join(directory, 'tmp');
+        const violationsPath = join(directory, 'violations');
+        mkdirSync(binDirectory);
+        mkdirSync(temporaryDirectory);
 
-  writeFakeCommand(
-    binDirectory,
-    'git',
-    `#!/usr/bin/env node
+        writeFakeCommand(
+          binDirectory,
+          'git',
+          `#!/usr/bin/env node
 import { appendFileSync } from 'fs';
 
 const args = process.argv.slice(2);
 const command = args[0];
-const mutations = new Set(['add', 'branch', 'checkout', 'commit', 'merge', 'pull', 'push', 'reset', 'switch', 'tag']);
+const mutations = new Set(['add', 'branch', 'checkout', 'clone', 'commit', 'merge', 'pull', 'push', 'reset', 'switch', 'tag']);
 if (mutations.has(command)) {
   appendFileSync(process.env.DEPLOY_PROD_TEST_VIOLATIONS, \`git \${args.join(' ')}\\n\`);
   process.exit(90);
@@ -136,6 +220,10 @@ if (command === 'status' || command === 'fetch' || command === 'diff') {
   process.exit(0);
 }
 if (command === 'remote') {
+  if (args[1] === 'get-url') {
+    process.stdout.write('https://github.com/firefox-devtools/profiler.git');
+    process.exit(0);
+  }
   process.stdout.write([
     'origin\\tgit@github.com:example-maintainer/perf.html.git (fetch)',
     'origin\\tgit@github.com:example-maintainer/perf.html.git (push)',
@@ -145,13 +233,16 @@ if (command === 'remote') {
   process.exit(0);
 }
 if (command === 'show') {
-  process.stdout.write(JSON.stringify({ version: '0.12.0' }));
+  process.stdout.write(JSON.stringify({ name: '@firefox-devtools/profiler-cli', version: '0.12.0' }));
   process.exit(0);
 }
 if (command === 'show-ref') {
   process.exit(1);
 }
 if (command === 'log') {
+  if (process.env.DEPLOY_PROD_TEST_SKIP_CLI && !args.includes('--grep')) {
+    process.stdout.write('[Example Author] Improve the web UI (#123)');
+  }
   process.exit(0);
 }
 if (command === 'var') {
@@ -165,12 +256,12 @@ if (command === 'rev-parse') {
 
 throw new Error(\`Unexpected git command: \${args.join(' ')}\`);
 `
-  );
+        );
 
-  writeFakeCommand(
-    binDirectory,
-    'gh',
-    `#!/usr/bin/env node
+        writeFakeCommand(
+          binDirectory,
+          'gh',
+          `#!/usr/bin/env node
 import { appendFileSync } from 'fs';
 
 const args = process.argv.slice(2);
@@ -189,88 +280,497 @@ if (args[0] === 'pr' && args[1] === 'list') {
 appendFileSync(process.env.DEPLOY_PROD_TEST_VIOLATIONS, \`gh \${args.join(' ')}\\n\`);
 process.exit(90);
 `
-  );
+        );
 
-  for (const command of ['npm', 'yarn']) {
-    writeFakeCommand(
-      binDirectory,
-      command,
-      `#!/usr/bin/env node
+        for (const command of ['npm', 'yarn']) {
+          writeFakeCommand(
+            binDirectory,
+            command,
+            `#!/usr/bin/env node
 import { appendFileSync } from 'fs';
 
 appendFileSync(process.env.DEPLOY_PROD_TEST_VIOLATIONS, \`${command} \${process.argv.slice(2).join(' ')}\\n\`);
 process.exit(90);
 `
+          );
+        }
+
+        try {
+          const { status, stdout, stderr } = await runDeploymentTest(
+            "await deployment.main(['--dry-run']);",
+            {
+              ...environmentWithPath(binDirectory),
+              DEPLOY_PROD_TEST_VIOLATIONS: violationsPath,
+              DEPLOY_PROD_TEST_SKIP_CLI: publishCli ? '' : '1',
+              TEMP: temporaryDirectory,
+              TMPDIR: temporaryDirectory,
+              TMP: temporaryDirectory,
+            },
+            [
+              ['Type "y" to continue:', 'y'],
+              [
+                'Profiler CLI version (main 0.12.0, production 0.12.0): [0.13.0]',
+                publishCli ? '' : '0.12.0',
+              ],
+            ]
+          );
+          assert.equal(status, 0, stderr);
+          assert.doesNotMatch(stderr, /Unexpected browser launch/);
+          if (publishCli) {
+            assert.match(stdout, /Bump profiler-cli version to 0\.13\.0/);
+            assert.match(
+              stdout,
+              /Would publish @firefox-devtools\/profiler-cli@0\.13\.0 to npm/
+            );
+            assert.match(
+              stdout,
+              /Would run: git push https:\/\/github.com\/firefox-devtools\/profiler.git <version-bump-commit>:refs\/tags\/profiler-cli-v0.13.0/
+            );
+            assert.match(
+              stdout,
+              /Would run: gh release create profiler-cli-v0.13.0 --verify-tag/
+            );
+            assert.match(stdout, /DRY-RUN\/0/);
+          } else {
+            assert.doesNotMatch(
+              stdout,
+              /gh release create|refs\/tags\/|yarn publish-cli/
+            );
+          }
+          assert.match(stdout, /Would open the prefilled announcement/);
+          const fallback = stdout.match(
+            /If the prefilled link fails, open (\S+) and paste/
+          );
+          assert.ok(fallback);
+          const fallbackUrl = new URL(fallback[1]);
+          assert.equal(fallbackUrl.searchParams.has('body'), false);
+          assert.equal(fallbackUrl.searchParams.get('category_id'), '521');
+          assert.match(
+            stdout,
+            /paste this announcement body:\n\nThe latest version/
+          );
+          assert.match(stdout, /Would wait for you to review and publish/);
+          assert.match(stdout, /Dry run completed/);
+          assert.equal(
+            existsSync(violationsPath)
+              ? readFileSync(violationsPath, 'utf8')
+              : '',
+            ''
+          );
+          assert.deepEqual(readdirSync(temporaryDirectory), []);
+        } finally {
+          rmSync(directory, { recursive: true, force: true });
+        }
+      }
     );
   }
+});
 
-  try {
-    const environment = Object.fromEntries(
-      Object.entries(process.env).filter(
-        ([name]) => name.toLowerCase() !== 'path'
-      )
-    );
-    const child = spawn(
-      process.execPath,
-      [
-        fileURLToPath(new URL('./deploy-prod.mts', import.meta.url)),
-        '--dry-run',
-      ],
-      {
-        env: {
-          ...environment,
-          DEPLOY_PROD_TEST_VIOLATIONS: violationsPath,
-          PATH: `${binDirectory}${delimiter}${process.env.PATH ?? ''}`,
-          TEMP: temporaryDirectory,
-          TMPDIR: temporaryDirectory,
-          TMP: temporaryDirectory,
-        },
-      }
-    );
-    let stdout = '';
-    let stderr = '';
-    let confirmed = false;
-    let selectedVersion = false;
-    child.stdout.setEncoding('utf8');
-    child.stderr.setEncoding('utf8');
-    child.stdout.on('data', (chunk) => {
-      stdout += chunk;
-      if (!confirmed && stdout.includes('Type "y" to continue:')) {
-        confirmed = true;
-        child.stdin.write('y\n');
-      }
-      if (
-        confirmed &&
-        !selectedVersion &&
-        stdout.includes(
-          'Profiler CLI version (main 0.12.0, production 0.12.0): [0.13.0]'
+test('announcement composer formats changes and preserves credits and links', () => {
+  const url = new URL(
+    buildAnnouncementUrl({
+      commit: 'abc',
+      date: 'November 4, 2026',
+      body: buildDeploymentBody(
+        '[Example Author] Fix A & B (#123)\n[Example Contributor] [Panel] Add a feature (#124)',
+        ['fr: Éxample', 'de: Example Localizer']
+      ),
+      url: 'https://github.com/firefox-devtools/profiler/pull/456',
+    })
+  );
+  assert.equal(url.origin, 'https://discourse.mozilla.org');
+  assert.equal(url.pathname, '/new-topic');
+  assert.equal(url.searchParams.get('category_id'), '521');
+  assert.equal(url.searchParams.get('tags'), 'firefox-profiler');
+  assert.equal(
+    url.searchParams.get('title'),
+    'Firefox Profiler Deployment (November 4, 2026)'
+  );
+  const body = url.searchParams.get('body')!;
+  assert.equal(
+    body,
+    [
+      'The latest version of the [Firefox Profiler](https://profiler.firefox.com) is now live! Check out the full changelog below to see what’s changed:',
+      '',
+      '**Highlights:**',
+      '',
+      '<!-- Move notable changes from Other Changes here and remove this comment before publishing. -->',
+      '',
+      '**Other Changes:**',
+      '',
+      '- [Example Author] Fix A & B ([#123](https://github.com/firefox-devtools/profiler/pull/123))',
+      '- [Example Contributor] [Panel] Add a feature ([#124](https://github.com/firefox-devtools/profiler/pull/124))',
+      '',
+      'Big thanks to our amazing localizers for making this release possible:',
+      '',
+      'fr: Éxample',
+      'de: Example Localizer',
+      '',
+      'Find out more about the Firefox Profiler on [profiler.firefox.com](https://profiler.firefox.com)! If you have any questions, join the discussion on our [Matrix channel](https://chat.mozilla.org/#/room/#profiler:mozilla.org)!',
+      '',
+    ].join('\n')
+  );
+});
+
+test('announcement composer preserves custom Markdown in edited deployment notes', () => {
+  const notes =
+    'Custom notes\n\n- [Example Author] **Fix** (#123)\n\n[Documentation](https://example.org)';
+  const url = new URL(
+    buildAnnouncementUrl({
+      commit: 'abc',
+      date: 'November 17, 2026',
+      body: notes,
+      url: null,
+    })
+  );
+  assert.ok(
+    url.searchParams
+      .get('body')!
+      .includes(
+        notes.replace(
+          '(#123)',
+          '([#123](https://github.com/firefox-devtools/profiler/pull/123))'
         )
-      ) {
-        selectedVersion = true;
-        child.stdin.write('\n');
+      )
+  );
+});
+
+describe(
+  'CLI operations preserve the source checkout',
+  { concurrency: true, timeout: 30_000 },
+  () => {
+    for (const scenario of ['bump', 'publish', 'tag hook failure']) {
+      test(`${scenario}`, { concurrency: true, timeout: 30_000 }, async () => {
+        // The native variant also expands Windows short names, which Git does
+        // for the hook's working directory.
+        const directory = realpathSync.native(
+          mkdtempSync(join(tmpdir(), 'deploy-checkout-test-'))
+        );
+        const source = join(directory, 'source');
+        const binDirectory = join(directory, 'bin');
+        const temporaryDirectory = join(directory, 'tmp');
+        for (const path of [source, binDirectory, temporaryDirectory]) {
+          mkdirSync(path);
+        }
+        const globalConfig = join(directory, 'gitconfig');
+        writeFileSync(globalConfig, '');
+        const environment = {
+          ...environmentWithPath(binDirectory),
+          GIT_CONFIG_GLOBAL: globalConfig,
+          TEST_DIRECTORY: directory,
+          TEST_SCENARIO: scenario,
+          TMPDIR: temporaryDirectory,
+          TEMP: temporaryDirectory,
+          TMP: temporaryDirectory,
+        };
+        const gitIn = async (
+          cwd: string,
+          ...args: string[]
+        ): Promise<string> => {
+          const { stdout } = await promisify(execFile)('git', args, {
+            cwd,
+            env: environment,
+            encoding: 'utf8',
+          });
+          return stdout.trim();
+        };
+        const git = (...args: string[]): Promise<string> =>
+          gitIn(source, ...args);
+        try {
+          await git('init', '--initial-branch=main');
+          await git('config', 'user.name', 'Example Maintainer');
+          await git('config', 'user.email', 'maintainer@example.com');
+          writeFileSync(join(source, '.gitignore'), 'node_modules\n.hooks/\n');
+          mkdirSync(join(source, 'profiler-cli'));
+          const manifestPath = join(source, 'profiler-cli', 'package.json');
+          writeFileSync(
+            manifestPath,
+            JSON.stringify({
+              name: '@firefox-devtools/profiler-cli',
+              version: '0.11.0',
+            }) + '\n'
+          );
+          await git('add', '.');
+          await git('commit', '-m', 'Create the deployment fixture');
+          writeFileSync(
+            manifestPath,
+            JSON.stringify({
+              name: '@firefox-devtools/profiler-cli',
+              version: '0.12.0',
+            }) + '\n'
+          );
+          await git('add', '.');
+          await git('commit', '-m', 'Bump the fixture CLI version');
+          const deployedCommit = await git('rev-parse', 'HEAD');
+          const canonical = join(directory, 'canonical.git');
+          const fork = join(directory, 'fork.git');
+          await git('clone', '--bare', source, canonical);
+          await git('clone', '--bare', source, fork);
+          await git('remote', 'add', 'canonical', canonical);
+          await git('remote', 'add', 'personal', fork);
+          await git('fetch', 'canonical');
+          writeFileSync(
+            join(source, 'local-main-only'),
+            'Unmerged local work\n'
+          );
+          await git('add', 'local-main-only');
+          await git('commit', '-m', 'Add local main work');
+          const localMainCommit = await git('rev-parse', 'HEAD');
+          await git('remote', 'set-url', '--push', 'canonical', fork);
+          await git('checkout', '-b', 'deployment-script');
+          mkdirSync(join(source, 'bin'));
+          const modulePath = join(source, 'bin', 'deploy-prod.mts');
+          copyFileSync(
+            fileURLToPath(new URL('./deploy-prod.mts', import.meta.url)),
+            modulePath
+          );
+          writeFileSync(
+            manifestPath,
+            JSON.stringify({
+              name: '@firefox-devtools/profiler-cli',
+              version: '99.0.0',
+            }) + '\n'
+          );
+          await git('add', '.');
+          await git('commit', '-m', 'Add unmerged deployment changes');
+          symlinkSync(
+            fileURLToPath(new URL('../node_modules', import.meta.url)),
+            join(source, 'node_modules'),
+            'junction'
+          );
+          const originalHead = await git('rev-parse', 'HEAD');
+          const originalIndex = await git('ls-files', '--stage');
+          const originalManifest = readFileSync(manifestPath, 'utf8');
+          mkdirSync(join(source, '.hooks'));
+          await git('config', 'core.hooksPath', '.hooks');
+          const isBump = scenario === 'bump';
+          const hookPath = join(
+            source,
+            '.hooks',
+            isBump ? 'pre-commit' : 'pre-push'
+          );
+          writeFileSync(
+            hookPath,
+            '#!/bin/sh\nnode "$TEST_DIRECTORY/check-hook.mjs"\n'
+          );
+          chmodSync(hookPath, 0o755);
+          writeFileSync(
+            join(directory, 'check-hook.mjs'),
+            `
+import assert from 'node:assert/strict';
+import { appendFileSync, existsSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { join } from 'node:path';
+appendFileSync(join(process.env.TEST_DIRECTORY, 'hooks'), process.cwd() + '\\n');
+if (${!isBump}) {
+  assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), '${deployedCommit}');
+  assert.ok(existsSync('node_modules'));
+}
+if (process.env.TEST_SCENARIO === 'tag hook failure') process.exit(1);
+`
+          );
+          writeFakeCommand(
+            binDirectory,
+            'gh',
+            `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] !== 'pr') throw new Error('Unexpected GitHub mutation');
+if (args[1] === 'list') process.stdout.write('[]');
+else if (args[1] === 'create') process.stdout.write('https://github.com/firefox-devtools/profiler/pull/123');
+else throw new Error('Unexpected GitHub command');
+`
+          );
+          writeFakeCommand(
+            binDirectory,
+            'yarn',
+            `#!/usr/bin/env node
+import assert from 'node:assert/strict';
+import { appendFileSync, mkdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
+const args = process.argv.slice(2);
+assert.notEqual(process.cwd(), ${JSON.stringify(source)});
+assert.equal(execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(), '${deployedCommit}');
+assert.equal(JSON.parse(readFileSync('profiler-cli/package.json', 'utf8')).version, '0.12.0');
+appendFileSync(join(process.env.TEST_DIRECTORY, 'yarn-commands'), JSON.stringify({ args, cwd: process.cwd() }) + '\\n');
+if (args[0] === 'install') {
+  assert.deepEqual(args, ['install', '--frozen-lockfile']);
+  mkdirSync('node_modules');
+} else if (args[0] !== 'publish-cli') throw new Error('Unexpected Yarn command');
+`
+          );
+          const operation = isBump
+            ? "await deployment.createVersionBumpPullRequest('0.13.0', 'example-maintainer', 'personal', 'canonical', false);"
+            : `await deployment.finishDeployment('${deployedCommit}', { shouldPublishCli: true, version: '0.12.0', plannedChange: null }, 'canonical', false);`;
+          const { status, stdout, stderr } = await runDeploymentTest(
+            operation,
+            environment,
+            Array.from(
+              { length: 3 },
+              () => ['Type "y" to continue:', 'y'] as [string, string]
+            ),
+            pathToFileURL(modulePath)
+          );
+          const failed = scenario === 'tag hook failure';
+          assert.equal(status, failed ? 1 : 0, `${stdout}\n${stderr}`);
+          assert.equal(
+            await git('branch', '--show-current'),
+            'deployment-script'
+          );
+          assert.equal(await git('rev-parse', 'HEAD'), originalHead);
+          assert.equal(await git('rev-parse', 'main'), localMainCommit);
+          assert.equal(await git('ls-files', '--stage'), originalIndex);
+          assert.equal(readFileSync(manifestPath, 'utf8'), originalManifest);
+          assert.equal(await git('status', '--porcelain'), '');
+          assert.equal(await git('branch', '--list', 'bump-cli-0.13.0'), '');
+          const clones = readdirSync(temporaryDirectory).filter((name) =>
+            name.startsWith('profiler-deploy-')
+          );
+          assert.equal(clones.length, failed ? 1 : 0, JSON.stringify(clones));
+          if (failed) {
+            assert.match(stderr, /temporary Profiler clone is kept/);
+          }
+          const hookCwd = readFileSync(join(directory, 'hooks'), 'utf8').trim();
+          assert.ok(hookCwd.startsWith(temporaryDirectory));
+          if (!isBump) {
+            assert.equal(
+              await gitIn(canonical, 'tag', '--list'),
+              failed ? '' : 'profiler-cli-v0.12.0'
+            );
+            if (!failed) {
+              assert.equal(
+                await gitIn(canonical, 'rev-parse', 'profiler-cli-v0.12.0'),
+                deployedCommit
+              );
+            }
+            assert.equal(await gitIn(fork, 'tag', '--list'), '');
+            assert.equal(await git('tag', '--list'), '');
+          }
+          if (isBump) {
+            assert.equal(
+              await gitIn(fork, 'rev-parse', 'bump-cli-0.13.0^'),
+              deployedCommit
+            );
+            assert.equal(
+              await gitIn(
+                fork,
+                'show',
+                '--format=',
+                '--name-only',
+                'bump-cli-0.13.0'
+              ),
+              'profiler-cli/package.json'
+            );
+            assert.equal(
+              await gitIn(fork, 'log', '-1', '--format=%B', 'bump-cli-0.13.0'),
+              'Bump profiler-cli version to 0.13.0'
+            );
+            assert.equal(
+              await gitIn(
+                fork,
+                'log',
+                '-1',
+                '--format=%an <%ae>',
+                'bump-cli-0.13.0'
+              ),
+              'Example Maintainer <maintainer@example.com>'
+            );
+            assert.equal(
+              JSON.parse(
+                await gitIn(
+                  fork,
+                  'show',
+                  'bump-cli-0.13.0:profiler-cli/package.json'
+                )
+              ).version,
+              '0.13.0'
+            );
+          } else {
+            const commands = readFileSync(
+              join(directory, 'yarn-commands'),
+              'utf8'
+            )
+              .trim()
+              .split('\n')
+              .map((line) => JSON.parse(line));
+            assert.deepEqual(
+              commands.map(({ args }) => args),
+              [['install', '--frozen-lockfile'], ['publish-cli']]
+            );
+            assert.equal(new Set(commands.map(({ cwd }) => cwd)).size, 1);
+          }
+        } finally {
+          rmSync(directory, { recursive: true, force: true });
+        }
+      });
+    }
+  }
+);
+
+test('announcement links must point to a published Mozilla Discourse topic', () => {
+  for (const url of [
+    'https://discourse.mozilla.org/t/example/123',
+    'https://discourse.mozilla.org/t/123',
+    'https://discourse.mozilla.org/t/example/123/1',
+  ]) {
+    assert.equal(validateAnnouncementUrl(url), url);
+  }
+  for (const url of [
+    'https://example.org/t/example/123',
+    'https://discourse.mozilla.org/new-topic',
+    'http://discourse.mozilla.org/t/123',
+    'https://user@discourse.mozilla.org/t/123',
+    'not a URL',
+    '',
+  ]) {
+    assert.throws(
+      () => validateAnnouncementUrl(url),
+      /Enter the published topic URL from https:\/\/discourse.mozilla.org\/t\//
+    );
+  }
+});
+
+test('CLI tag targets the version change, not a later manifest edit', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'deploy-prod-tag-test-'));
+  writeFakeCommand(
+    directory,
+    'git',
+    `#!/usr/bin/env node
+const args = process.argv.slice(2);
+if (args[0] === 'log') {
+  process.stdout.write('later-manifest-edit\\nversion-bump\\n');
+} else if (args[0] === 'show') {
+  const ref = args[1].split(':')[0];
+  const versions = {
+    deployed: '0.13.0',
+    'later-manifest-edit': '0.13.0',
+    'later-manifest-edit^': '0.13.0',
+    'version-bump': '0.13.0',
+    'version-bump^': '0.12.0',
+  };
+  if (!(ref in versions)) throw new Error('Unexpected ref: ' + ref);
+  process.stdout.write(JSON.stringify({ version: versions[ref] }));
+} else {
+  throw new Error('Unexpected command: ' + args.join(' '));
+}
+`
+  );
+  try {
+    const source = `
+      import assert from 'node:assert/strict';
+      import { findCliVersionCommit } from ${JSON.stringify(new URL('./deploy-prod.mts', import.meta.url).href)};
+      assert.equal(findCliVersionCommit('deployed', '0.13.0'), 'version-bump');
+      assert.throws(() => findCliVersionCommit('deployed', '0.14.0'), /does not contain/);
+    `;
+    const result = spawnSync(
+      process.execPath,
+      ['--input-type=module', '--eval', source],
+      {
+        encoding: 'utf8',
+        env: environmentWithPath(directory),
       }
-    });
-    child.stderr.on('data', (chunk) => {
-      stderr += chunk;
-    });
-
-    const status = await new Promise((resolve, reject) => {
-      child.on('error', reject);
-      child.on('close', resolve);
-    });
-
-    assert.equal(status, 0, stderr);
-    assert.match(stdout, /Bump profiler-cli version to 0\.13\.0/);
-    assert.match(
-      stdout,
-      /Would publish @firefox-devtools\/profiler-cli@0\.13\.0 to npm/
     );
-    assert.match(stdout, /Dry run completed/);
-    assert.equal(
-      existsSync(violationsPath) ? readFileSync(violationsPath, 'utf8') : '',
-      ''
-    );
-    assert.deepEqual(readdirSync(temporaryDirectory), []);
+    assert.equal(result.status, 0, result.stderr);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

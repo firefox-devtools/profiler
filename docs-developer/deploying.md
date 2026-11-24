@@ -30,40 +30,18 @@ change outside `profiler-cli/` can still affect it. Processed or Gecko profile
 format version bumps, for example, only reach CLI users through a new release.
 When in doubt, publish. We are not running out of version numbers.
 
-The first four steps can be run interactively with:
+All of these steps can be run interactively with the script below. It asks for
+confirmation before every change it makes.
 
 ```
 yarn deploy-prod
 ```
 
-The script checks the local environment, creates the l10n and CLI version pull
-requests, waits for their reviews and required checks, creates the production
-pull request with generated release notes, waits for its checks, and publishes
-the CLI when needed after production is merged and you confirm that the Netlify
-deployment is live. The `production` branch has no required checks, so the
-script waits for every reported check on that pull request. If one fails, it
-asks whether to continue. It automatically finds the remote that fetches from
-`firefox-devtools/profiler` and the remote that pushes to your fork; the
-temporary CLI version branch is pushed only to the latter. Before changing the
-working copy, it asks whether to proceed. It also asks for confirmation before
-every commit, push, pull request change, merge, and npm publication. If `main`
-already has a CLI version that `production` does not, that version is the
-default. Enter the current CLI version to skip the version-bump pull request. If
-`production` already has that version, CLI publication is skipped as well. Step
-5 still needs to be completed manually.
-
-To inspect the complete workflow without changing GitHub or npm, run:
+To see what the script would do without changing anything, run:
 
 ```
 yarn deploy-prod --dry-run
 ```
-
-Dry-run mode fetches recent changes, asks for the CLI version, and opens the
-generated deployment notes in your editor without changing the current branch
-or working tree. It includes simulated l10n and CLI version changes in those
-notes, but only prints the branch pushes, pull request changes, merges, and npm
-publication it would perform. It does not create local branches or commits, or
-change GitHub or npm.
 
 ## 1. Merge l10n into main
 
@@ -227,6 +205,12 @@ commits, and link to the deploy announcement for this deploy on
 [Discourse](https://discourse.mozilla.org/c/firefox-tooling-announcements/521).
 Have a look at a [previous release](https://github.com/firefox-devtools/profiler/releases/tag/profiler-cli-v0.8.0)
 for the expected shape.
+
+## Announce the deployment on Discourse
+
+Create a topic in [Firefox Tooling Announcements](https://discourse.mozilla.org/c/firefox-tooling-announcements/521)
+with the `firefox-profiler` tag, using [this deployment announcement](https://discourse.mozilla.org/t/firefox-profiler-deployment-november-17-2026/150309)
+as a template.
 
 ## How to revert to a previous version
 
