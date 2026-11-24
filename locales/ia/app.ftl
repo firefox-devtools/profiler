@@ -1209,6 +1209,14 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Clauder le vista fonte
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Cercar
+    .placeholder = Cercar
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
