@@ -1154,6 +1154,15 @@ CodeFindBar--previous-button = Précédente
     .title = Rechercher l’occurrence précédente (Maj+Entrée)
 CodeFindBar--next-button = Suivante
     .title = Rechercher la prochaine occurrence (Entrée)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Respecter la casse
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Expression régulière
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Mots entiers
+CodeFindBar--close-button =
+    .title = Fermer la barre de recherche
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
