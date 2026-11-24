@@ -1131,6 +1131,27 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Chiudi la vista sorgente
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Trova
+    .placeholder = Trova
+CodeFindBar--previous-button = Precedente
+    .title = Trova la corrispondenza precedente (Shift+Invio)
+CodeFindBar--next-button = Successivo
+    .title = Trova la corrispondenza successiva (Invio)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Maiuscole/minuscole
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Espressione regolare
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Parole intere
+CodeFindBar--close-button =
+    .title = Chiudi la barra di ricerca
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
