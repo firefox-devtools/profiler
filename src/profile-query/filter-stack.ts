@@ -19,8 +19,21 @@
 import { addTransformToStack } from '../actions/profile-view';
 import type { SampleFilterSpec } from './types';
 import type { Store } from '../types/store';
-import type { ThreadsKey, Transform } from 'firefox-profiler/types';
+import type {
+  ImplementationFilter,
+  ThreadsKey,
+  Transform,
+} from 'firefox-profiler/types';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+
+function describeFocusSelf(
+  funcIndex: number,
+  implementation: ImplementationFilter
+): string {
+  return implementation === 'combined'
+    ? `focus-self: f-${funcIndex}`
+    : `focus-self: f-${funcIndex} (${implementation})`;
+}
 
 /**
  * Build a human-readable description for a filter spec.
@@ -33,6 +46,8 @@ export function describeSpec(spec: SampleFilterSpec): string {
       return `merge: f-${spec.funcIndexes.join(', f-')}`;
     case 'root-at':
       return `root-at: f-${spec.funcIndex}`;
+    case 'focus-self':
+      return describeFocusSelf(spec.funcIndex, spec.implementation);
     case 'during-marker':
       return `during marker matching: "${spec.searchString}"`;
     case 'includes-function':
@@ -65,6 +80,8 @@ function describeSingleTransform(transform: Transform): string {
       return `merge: f-${transform.funcIndex}`;
     case 'focus-function':
       return `root-at: f-${transform.funcIndex}`;
+    case 'focus-self':
+      return describeFocusSelf(transform.funcIndex, transform.implementation);
     case 'filter-samples':
       switch (transform.filterType) {
         case 'marker-search':
@@ -84,8 +101,6 @@ function describeSingleTransform(transform: Transform): string {
     // URL-only / web-app transforms: generic description.
     case 'focus-subtree':
       return `focus-subtree: ${transform.callNodePath.map((f) => `f-${f}`).join(' → ')}${transform.inverted ? ' (inverted)' : ''}`;
-    case 'focus-self':
-      return `focus-self: f-${transform.funcIndex}`;
     case 'merge-call-node':
       return `merge-call-node: ${transform.callNodePath.map((f) => `f-${f}`).join(' → ')}`;
     case 'collapse-resource':
@@ -163,6 +178,16 @@ export function pushSpecTransforms(
         addTransformToStack(threadsKey, {
           type: 'focus-function',
           funcIndex: spec.funcIndex,
+        })
+      );
+      return 1;
+    }
+    case 'focus-self': {
+      store.dispatch(
+        addTransformToStack(threadsKey, {
+          type: 'focus-self',
+          funcIndex: spec.funcIndex,
+          implementation: spec.implementation,
         })
       );
       return 1;

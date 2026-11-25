@@ -1171,3 +1171,42 @@ export const getSourceViewStartLine: Selector<number> = createSelector(
   (sources, sourceIndex) =>
     sourceIndex !== null ? sources.startLine[sourceIndex] : 1
 );
+
+export const getSourceViewStartColumn: Selector<number> = createSelector(
+  getSourceTable,
+  UrlState.getSourceViewSourceIndex,
+  (sources, sourceIndex) =>
+    sourceIndex !== null ? sources.startColumn[sourceIndex] : 1
+);
+
+export const getGeneratedSourceViewFile: Selector<string | null> =
+  createSelector(
+    getSourceTable,
+    getStringTable,
+    UrlState.getGeneratedSourceViewSourceIndex,
+    (sources, stringTable, sourceIndex) => {
+      if (sourceIndex === null) {
+        return null;
+      }
+
+      const fileNameStrIndex = sources.filename[sourceIndex];
+      return fileNameStrIndex !== null && fileNameStrIndex !== undefined
+        ? stringTable.getString(fileNameStrIndex)
+        : null;
+    }
+  );
+
+export const getGeneratedSourceViewStartLine: Selector<number> = createSelector(
+  getSourceTable,
+  UrlState.getGeneratedSourceViewSourceIndex,
+  (sources, sourceIndex) =>
+    sourceIndex !== null ? sources.startLine[sourceIndex] : 1
+);
+
+export const getGeneratedSourceViewStartColumn: Selector<number> =
+  createSelector(
+    getSourceTable,
+    UrlState.getGeneratedSourceViewSourceIndex,
+    (sources, sourceIndex) =>
+      sourceIndex !== null ? sources.startColumn[sourceIndex] : 1
+  );

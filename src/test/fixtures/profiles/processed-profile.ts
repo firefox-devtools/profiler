@@ -36,6 +36,7 @@ import {
 } from 'firefox-profiler/app-logic/constants';
 
 import type {
+  IndexIntoSourceTable,
   Profile,
   RawProfileSharedData,
   RawThread,
@@ -63,7 +64,7 @@ import type {
   MarkerSchema,
   MixedObject,
 } from 'firefox-profiler/types';
-import { FrameFlag } from 'firefox-profiler/types';
+import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import {
   deriveMarkersFromRawMarkerTable,
   IPCMarkerCorrelations,
@@ -649,6 +650,7 @@ export type ProfileWithDicts = {
  *  - [lib:*] - The library name, affects frameTable.lib + funcTable.resource + resourceTable + libs
  *  - [file:*] - The filename, affects funcTable.source + sourceTable
  *  - [line:*] - The line, affects frameTable.line
+ *  - [col:*] - The column, affects frameTable.column
  *  - [address:*] - The frame address, affects frameTable.address
  *  - [inl:*] - A non-zero value marks the frame as inlined, i.e. it sets the IsInlined bit of frameTable.flags
  *  - [sym:<name>:<hex_address>:<hex_size>] - The native symbol, affects frameTable.nativeSymbol (keyed on <name>)
@@ -901,6 +903,17 @@ function _findLineNumberFromFuncName(
   return null;
 }
 
+function _findColumnNumberFromFuncName(
+  funcNameWithModifier: string
+): number | null {
+  const findColumnNumberResult = /\[col:([0-9]+)\]/.exec(funcNameWithModifier);
+  if (findColumnNumberResult) {
+    return +findColumnNumberResult[1];
+  }
+
+  return null;
+}
+
 function _findAddressFromFuncName(
   funcNameWithModifier: string
 ): Address | null {
@@ -1005,6 +1018,7 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
       const lineNumber = _findLineNumberFromFuncName(funcNameWithModifier);
+      const columnNumber = _findColumnNumberFromFuncName(funcNameWithModifier);
       const parsedAddress =
         _findAddressFromFuncName(funcNameWithModifier) ??
         (funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1);
@@ -1053,6 +1067,9 @@ function _buildThreadFromTextOnlyStacks(
       if (lineNumber !== null) {
         flags |= FrameFlag.HasLine;
       }
+      if (columnNumber !== null) {
+        flags |= FrameFlag.HasColumn;
+      }
       const address = parsedAddress === -1 ? 0 : parsedAddress;
       // `lib` is gated by HasAddress, so a [lib:] without an address doesn't
       // make it onto the frame. This matches the real pipeline, which only ever
@@ -1063,6 +1080,7 @@ function _buildThreadFromTextOnlyStacks(
       const storedCategory = category ?? 0;
       const storedNativeSymbol = nativeSymbol ?? 0;
       const storedLineNumber = lineNumber ?? 0;
+      const storedColumnNumber = columnNumber ?? 0;
 
       // Attempt to find a frame that satisfies the given funcIndex,
       // category, and line number.
@@ -1073,6 +1091,7 @@ function _buildThreadFromTextOnlyStacks(
           flags === frameTable.flags[i] &&
           storedCategory === frameTable.category[i] &&
           storedLineNumber === frameTable.line[i] &&
+          storedColumnNumber === frameTable.column[i] &&
           address === frameTable.address[i] &&
           storedNativeSymbol === frameTable.nativeSymbol[i] &&
           storedLib === frameTable.lib[i]
@@ -1092,7 +1111,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.innerWindowID.push(0);
         frameTable.nativeSymbol.push(storedNativeSymbol);
         frameTable.line.push(storedLineNumber);
-        frameTable.column.push(0);
+        frameTable.column.push(storedColumnNumber);
         frameTable.originalLocation.push(0);
         frameIndex = frameTable.length++;
       }
@@ -2309,4 +2328,67 @@ export function addCpuUsageValues(
     threadCPUDelta: threadCPUDeltaUnit,
   };
   profile.threads[0].samples.threadCPUDelta = threadCPUDelta;
+}
+
+/**
+ * Simulate source map symbolication: map the funcs and frames in
+ * `compiledFile` to a new source `originalFile`. Each compiled line N becomes
+ * the original line `10 * N`, and each func starts at original line 1. The
+ * compiled code can be supplied as `compiledCode`, so that the profile
+ * contains it like a profile with embedded JS sources.
+ */
+export function addFakeSourceMapToProfile(
+  profile: Profile,
+  compiledFile: string,
+  originalFile: string,
+  compiledCode: string | null = null,
+  originalCode: string | null = null
+): {
+  compiledSourceIndex: IndexIntoSourceTable;
+  originalSourceIndex: IndexIntoSourceTable;
+} {
+  const { sources, frameTable, funcTable, sourceLocationTable } =
+    profile.shared;
+  const stringTable = StringTable.withBackingArray(profile.shared.stringArray);
+  const compiledSourceIndex = sources.filename.indexOf(
+    stringTable.indexForString(compiledFile)
+  );
+  if (compiledSourceIndex === -1) {
+    throw new Error(`The profile has no source for ${compiledFile}.`);
+  }
+  sources.content[compiledSourceIndex] = compiledCode;
+  const originalSourceIndex = sources.length;
+  sources.id.push(null);
+  sources.filename.push(stringTable.indexForString(originalFile));
+  sources.startLine.push(1);
+  sources.startColumn.push(1);
+  sources.sourceMapURL.push(null);
+  sources.content.push(originalCode);
+  sources.length++;
+
+  const addOriginalLocation = (line: number) => {
+    sourceLocationTable.source.push(originalSourceIndex);
+    sourceLocationTable.line.push(line);
+    sourceLocationTable.column.push(1);
+    return sourceLocationTable.length++;
+  };
+  for (let func = 0; func < funcTable.length; func++) {
+    if (funcTable.source[func] === compiledSourceIndex) {
+      funcTable.originalLocation[func] = addOriginalLocation(1);
+      funcTable.flags[func] |= FuncFlag.HasOriginalLocation;
+    }
+  }
+  for (let frame = 0; frame < frameTable.length; frame++) {
+    const func = frameTable.func[frame];
+    if (
+      funcTable.source[func] === compiledSourceIndex &&
+      (frameTable.flags[frame] & FrameFlag.HasLine) !== 0
+    ) {
+      frameTable.originalLocation[frame] = addOriginalLocation(
+        10 * frameTable.line[frame]
+      );
+      frameTable.flags[frame] |= FrameFlag.HasOriginalLocation;
+    }
+  }
+  return { compiledSourceIndex, originalSourceIndex };
 }

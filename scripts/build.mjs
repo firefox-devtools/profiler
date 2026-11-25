@@ -6,33 +6,47 @@ import esbuild from 'esbuild';
 import {
   mainBundleConfig,
   sourceMapWorkerConfig,
-  getSourceMapWorkerPath,
+  formatWorkerConfig,
+  benchmarkCompareWorkerConfig,
+  getWorkerPath,
 } from './lib/esbuild-configs.mjs';
 import { cleanDist, saveMetafile } from './lib/build-utils.mjs';
 
 async function build() {
   cleanDist();
 
-  // Build the worker first so we can read its output path from the metafile
-  // and inject it into the main bundle via SOURCE_MAP_WORKER_PATH.
-  const workerResult = await esbuild.build({
-    ...sourceMapWorkerConfig,
-    entryNames:
-      process.env.NODE_ENV === 'production' ? '[name]-[hash]' : '[name]',
-  });
+  // Build the workers first so we can read their output paths from their
+  // metafiles and inject them into the main bundle as defines.
+  const entryNames =
+    process.env.NODE_ENV === 'production' ? '[name]-[hash]' : '[name]';
+  const [sourceMapWorker, formatWorker, benchmarkCompareWorker] =
+    await Promise.all([
+      esbuild.build({ ...sourceMapWorkerConfig, entryNames }),
+      esbuild.build({ ...formatWorkerConfig, entryNames }),
+      esbuild.build({ ...benchmarkCompareWorkerConfig, entryNames }),
+    ]);
 
   const buildResult = await esbuild.build({
     ...mainBundleConfig,
     define: {
       ...mainBundleConfig.define,
       SOURCE_MAP_WORKER_PATH: JSON.stringify(
-        getSourceMapWorkerPath(workerResult.metafile)
+        getWorkerPath(sourceMapWorkerConfig, sourceMapWorker.metafile)
+      ),
+      BENCHMARK_COMPARE_WORKER_PATH: JSON.stringify(
+        getWorkerPath(
+          benchmarkCompareWorkerConfig,
+          benchmarkCompareWorker.metafile
+        )
+      ),
+      FORMAT_WORKER_PATH: JSON.stringify(
+        getWorkerPath(formatWorkerConfig, formatWorker.metafile)
       ),
     },
   });
 
   saveMetafile(buildResult);
-  console.log('✅ Main browser build and source map worker completed');
+  console.log('✅ Main browser build and workers completed');
 }
 
 build().catch(console.error);
