@@ -223,6 +223,9 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
   _keysDown: Set<NavigationKey> = new Set<NavigationKey>();
   _deltaToZoomFactor = (delta: number) => Math.pow(ZOOM_SPEED, delta);
   _dragX: number = 0;
+  // The clientX of the most recent mouse move over the viewport, or null if the
+  // mouse is not over the viewport. Keyboard zooming centers on this position.
+  _lastMouseClientX: number | null = null;
   _dragY: number = 0;
 
   constructor(props: ChartViewportImplProps<OwnProps>) {
@@ -462,11 +465,7 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
     // Allow different handlers to make the zoom faster or slower.
     zoomModifier: number = 1
   ) {
-    const {
-      hasZoomedViaMousewheel,
-      setHasZoomedViaMousewheel,
-      viewportProps: { marginLeft, marginRight },
-    } = this.props;
+    const { hasZoomedViaMousewheel, setHasZoomedViaMousewheel } = this.props;
     if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
       setHasZoomedViaMousewheel();
     }
@@ -480,13 +479,42 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
     );
     const zoomFactor = this._deltaToZoomFactor(deltaY * zoomModifier);
 
-    const mouseX = event.clientX;
+    this.zoomRangeSelection(
+      this._getZoomCenterForClientX(event.clientX),
+      zoomFactor
+    );
+  }
+
+  /**
+   * Convert a mouse clientX into a zoom center, i.e. a number between 0 and 1
+   * indicating the position within the inner box of the chart.
+   */
+  _getZoomCenterForClientX(clientX: number): number {
+    const { marginLeft, marginRight } = this.props.viewportProps;
     const { containerLeft, containerWidth } = this.state;
     const viewportPixelWidth = containerWidth - marginLeft - marginRight;
-    const mouseCenter =
-      (mouseX - containerLeft - marginLeft) / viewportPixelWidth;
-    this.zoomRangeSelection(mouseCenter, zoomFactor);
+    return (clientX - containerLeft - marginLeft) / viewportPixelWidth;
   }
+
+  /**
+   * Keyboard zooming centers on the mouse if it is over the chart's inner box,
+   * and on the middle of the chart otherwise.
+   */
+  _getKeyboardZoomCenter(): number {
+    if (this._lastMouseClientX === null) {
+      return 0.5;
+    }
+    const center = this._getZoomCenterForClientX(this._lastMouseClientX);
+    return center >= 0 && center <= 1 ? center : 0.5;
+  }
+
+  _onMouseMove = (event: React.MouseEvent<HTMLElement>) => {
+    this._lastMouseClientX = event.clientX;
+  };
+
+  _onMouseLeave = () => {
+    this._lastMouseClientX = null;
+  };
 
   zoomRangeSelection = (
     // A number between 0 and 1 indicating the horizontal position of the
@@ -629,10 +657,16 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
     for (const navigationKey of this._keysDown.values()) {
       switch (navigationKey) {
         case 'zoomIn':
-          this.zoomRangeSelection(0.5, this._deltaToZoomFactor(-delta));
+          this.zoomRangeSelection(
+            this._getKeyboardZoomCenter(),
+            this._deltaToZoomFactor(-delta)
+          );
           break;
         case 'zoomOut':
-          this.zoomRangeSelection(0.5, this._deltaToZoomFactor(delta));
+          this.zoomRangeSelection(
+            this._getKeyboardZoomCenter(),
+            this._deltaToZoomFactor(delta)
+          );
           break;
         case 'up':
           this.moveViewport(0, delta);
@@ -824,6 +858,8 @@ class ChartViewportImpl<OwnProps> extends React.PureComponent<
       <div
         className={viewportClassName}
         onMouseDown={this._mouseDownListener}
+        onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
         onKeyDown={this._keyDownListener}
         onKeyUp={this._keyUpListener}
         onBlur={this._onBlur}

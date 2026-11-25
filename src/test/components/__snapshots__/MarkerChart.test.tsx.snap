@@ -238,8 +238,8 @@ exports[`MarkerChart persists the selected marker tooltips properly 1`] = `
 exports[`MarkerChart renders the hoveredItem markers properly 1`] = `
 Array [
   Array [
-    "set lineWidth",
-    1,
+    "set font",
+    "10px sans-serif",
   ],
   Array [
     "set fillStyle",
@@ -254,7 +254,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "rgba(40, 122, 169, 0.2)",
+    "#287aa933",
   ],
   Array [
     "fillRect",
@@ -272,9 +272,9 @@ Array [
   Array [
     "rect",
     150,
-    0,
-    200,
-    300,
+    128,
+    215,
+    15,
   ],
   Array [
     "clip",
@@ -284,28 +284,15 @@ Array [
     "#0060df",
   ],
   Array [
-    "set strokeStyle",
-    "#002275",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    172.5,
-    129.5,
-    66,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
+    "fillRect",
+    172,
+    128,
+    65.2,
+    15,
   ],
   Array [
     "set fillStyle",
-    "white",
+    "#ffffff",
   ],
   Array [
     "fillText",
@@ -323,9 +310,13 @@ Array [
   Array [
     "fillRect",
     149,
-    0,
+    128,
     1,
-    300,
+    15,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
   ],
   Array [
     "fillRect",
@@ -335,12 +326,12 @@ Array [
     1,
   ],
   Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
     "measureText",
     " (1)",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
   ],
   Array [
     "fillText",
@@ -627,18 +618,8 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
 exports[`MarkerChart renders the normal marker chart and matches the snapshot 2`] = `
 Array [
   Array [
-    "scale",
-    1,
-    1,
-  ],
-  Array [
-    "scale",
-    2,
-    2,
-  ],
-  Array [
-    "set lineWidth",
-    1,
+    "set font",
+    "20px sans-serif",
   ],
   Array [
     "set fillStyle",
@@ -648,8 +629,51 @@ Array [
     "fillRect",
     0,
     0,
-    365,
-    300,
+    730,
+    600,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    700,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "fillRect",
+    0,
+    30,
+    700,
+    2,
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Other",
+    310,
+    22,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    32,
+    730,
+    30,
   ],
   Array [
     "save",
@@ -659,44 +683,40 @@ Array [
   ],
   Array [
     "rect",
-    150,
-    0,
-    200,
     300,
+    32,
+    430,
+    30,
   ],
   Array [
     "clip",
   ],
   Array [
     "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
+    "#5aaaf8",
   ],
   Array [
     "beginPath",
   ],
   Array [
     "moveTo",
-    190.75,
-    23.5,
+    0,
+    15,
   ],
   Array [
     "lineTo",
-    194.5,
-    17.5,
+    7.5,
+    2,
   ],
   Array [
     "lineTo",
-    198.25,
-    23.5,
+    15,
+    15,
   ],
   Array [
     "lineTo",
-    194.5,
-    29.5,
+    7.5,
+    28,
   ],
   Array [
     "closePath",
@@ -705,279 +725,19 @@ Array [
     "fill",
   ],
   Array [
-    "stroke",
-  ],
-  Array [
-    "measureText",
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
-  ],
-  Array [
-    "measureText",
-    "…",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    150.5,
-    33.5,
-    110,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "measureText",
-    "",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    272.5,
-    33.5,
-    65.5,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    150.5,
-    49.5,
-    110,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    206,
-    65.5,
-    54.5,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "measureText",
-    "click",
-  ],
-  Array [
-    "set fillStyle",
-    "black",
-  ],
-  Array [
-    "fillText",
-    "click",
-    208.5,
-    75,
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    250.5,
-    81.5,
-    10,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    150.5,
-    97.5,
-    32.5,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    224.25,
-    119.5,
-  ],
-  Array [
-    "lineTo",
-    228,
-    113.5,
-  ],
-  Array [
-    "lineTo",
-    231.75,
-    119.5,
-  ],
-  Array [
-    "lineTo",
-    228,
-    125.5,
-  ],
-  Array [
-    "closePath",
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    172.5,
-    129.5,
-    65.5,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "measureText",
-    "Marker B",
-  ],
-  Array [
-    "set fillStyle",
-    "black",
-  ],
-  Array [
-    "fillText",
-    "Marker B",
-    175,
-    139,
-  ],
-  Array [
-    "set fillStyle",
-    "#8ac4ff",
-  ],
-  Array [
-    "set strokeStyle",
-    "#2c77d1",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "rect",
-    206,
-    145.5,
-    110,
-    12,
-  ],
-  Array [
-    "fill",
-  ],
-  Array [
-    "stroke",
+    "drawImage",
+    <canvas
+      height="30"
+      width="15"
+    />,
+    0,
+    0,
+    15,
+    30,
+    382,
+    32,
+    15,
+    30,
   ],
   Array [
     "restore",
@@ -988,172 +748,10 @@ Array [
   ],
   Array [
     "fillRect",
-    149,
-    0,
-    1,
-    300,
-  ],
-  Array [
-    "fillRect",
-    0,
-    15,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    31,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    47,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    63,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    79,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    95,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    111,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    127,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    143,
-    350,
-    1,
-  ],
-  Array [
-    "fillRect",
-    0,
-    159,
-    350,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "measureText",
-    "Dot marker E",
-  ],
-  Array [
-    "fillText",
-    "Dot marker E",
-    5,
-    27,
-  ],
-  Array [
-    "measureText",
-    "Marker A",
-  ],
-  Array [
-    "fillText",
-    "Marker A",
-    5,
-    43,
-  ],
-  Array [
-    "measureText",
-    "Marker G type DOMEvent",
-  ],
-  Array [
-    "fillText",
-    "Marker G type DOMEvent",
-    5,
-    75,
-  ],
-  Array [
-    "measureText",
-    "Marker H with no end",
-  ],
-  Array [
-    "fillText",
-    "Marker H with no end",
-    5,
-    91,
-  ],
-  Array [
-    "measureText",
-    "Marker H with no start",
-  ],
-  Array [
-    "fillText",
-    "Marker H with no start",
-    5,
-    107,
-  ],
-  Array [
-    "measureText",
-    "Non-interval marker F without data",
-  ],
-  Array [
-    "measureText",
-    "Non-interval marker F withou",
-  ],
-  Array [
-    "fillText",
-    "Non-interval marker F withou…",
-    5,
-    123,
-  ],
-  Array [
-    "measureText",
-    "UserTiming",
-  ],
-  Array [
-    "fillText",
-    "UserTiming",
-    5,
-    139,
-  ],
-  Array [
-    "measureText",
-    "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D",
-  ],
-  Array [
-    "measureText",
-    "Very very very very very ver",
-  ],
-  Array [
-    "fillText",
-    "Very very very very very ver…",
-    5,
-    155,
+    298,
+    32,
+    2,
+    30,
   ],
   Array [
     "set fillStyle",
@@ -1162,27 +760,21 @@ Array [
   Array [
     "fillRect",
     0,
-    -1,
-    350,
-    16,
+    62,
+    700,
+    2,
   ],
   Array [
-    "set fillStyle",
-    "#d7d7db",
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
   ],
   Array [
-    "fillRect",
-    0,
-    -1,
-    350,
-    1,
+    "measureText",
+    "…",
   ],
   Array [
-    "fillRect",
-    0,
-    15,
-    350,
-    1,
+    "measureText",
+    "Dot marker E",
   ],
   Array [
     "set fillStyle",
@@ -1190,9 +782,673 @@ Array [
   ],
   Array [
     "fillText",
-    "Other",
-    155,
-    11,
+    "Dot marker E",
+    10,
+    54,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    64,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    64,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    300,
+    64,
+    221.2,
+    30,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    544,
+    64,
+    133.2,
+    30,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    64,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    94,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "Marker A",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker A",
+    10,
+    86,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    96,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    96,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    300,
+    96,
+    221.2,
+    30,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    96,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    126,
+    700,
+    2,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    128,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    128,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    412,
+    128,
+    109.2,
+    30,
+  ],
+  Array [
+    "measureText",
+    "click",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "click",
+    418,
+    150,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    128,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    158,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "Marker G type DOMEvent",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker G type DOMEvent",
+    10,
+    150,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    160,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    160,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    500,
+    160,
+    21.2,
+    30,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    160,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    190,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "Marker H with no end",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker H with no end",
+    10,
+    182,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    192,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    192,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    300,
+    192,
+    65.2,
+    30,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    192,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    222,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "Marker H with no start",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker H with no start",
+    10,
+    214,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    224,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    224,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "drawImage",
+    <canvas
+      height="30"
+      width="15"
+    />,
+    0,
+    0,
+    15,
+    30,
+    449,
+    224,
+    15,
+    30,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    224,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    254,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "Non-interval marker F without data",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Non-interval marker F without data",
+    10,
+    246,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    256,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    256,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    344,
+    256,
+    133.2,
+    30,
+  ],
+  Array [
+    "measureText",
+    "Marker B",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Marker B",
+    350,
+    278,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    256,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    286,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "UserTiming",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "UserTiming",
+    10,
+    278,
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    288,
+    730,
+    30,
+  ],
+  Array [
+    "save",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "rect",
+    300,
+    288,
+    430,
+    30,
+  ],
+  Array [
+    "clip",
+  ],
+  Array [
+    "set fillStyle",
+    "#5aaaf8",
+  ],
+  Array [
+    "fillRect",
+    412,
+    288,
+    221.2,
+    30,
+  ],
+  Array [
+    "restore",
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    288,
+    2,
+    30,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    0,
+    318,
+    700,
+    2,
+  ],
+  Array [
+    "measureText",
+    "Very very very very very very Very very very very very very Very very very very very very Very very very very very very Very very very very very very long Marker D",
+  ],
+  Array [
+    "measureText",
+    "Very very very very very very Very very very very very ve",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "Very very very very very very Very very very very very ve…",
+    10,
+    310,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf0",
+  ],
+  Array [
+    "fillRect",
+    298,
+    320,
+    2,
+    280,
   ],
 ]
 `;

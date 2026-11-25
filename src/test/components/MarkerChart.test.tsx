@@ -4,7 +4,7 @@
 
 import { Provider } from 'react-redux';
 import { BLUE_60 } from 'photon-colors';
-import { getFillColor } from 'firefox-profiler/profile-logic/graph-color';
+import { getStrokeColor } from 'firefox-profiler/profile-logic/graph-color';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -15,7 +15,10 @@ import {
   fireEvent,
   act,
 } from 'firefox-profiler/test/fixtures/testing-library';
-import { changeMarkersSearchString } from '../../actions/profile-view';
+import {
+  changeMarkersSearchString,
+  changeSelectedMarker,
+} from '../../actions/profile-view';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
@@ -28,7 +31,8 @@ import { ensureExists } from '../../utils/types';
 import { selectedThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import type {
   DrawOperation,
-  MoveToOperation,
+  DrawImageOperation,
+  FillRectOperation,
 } from '../fixtures/mocks/canvas-context';
 import {
   autoMockCanvasContext,
@@ -55,7 +59,7 @@ import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import type { CssPixels, GraphColor, Profile } from 'firefox-profiler/types';
 
 // Constants matching those in Canvas.tsx
-const DEFAULT_FILL_COLOR = '#8ac4ff'; // Light blue for non-highlighted
+const DEFAULT_FILL_COLOR = '#5aaaf8'; // Medium blue for non-highlighted
 
 const MARKERS: TestDefinedMarker[] = [
   ['Marker A', 0, 10],
@@ -97,6 +101,23 @@ const MARKERS: TestDefinedMarker[] = [
   ],
   getUserTiming('Marker B', 2, 6),
 ];
+
+/**
+ * Return the horizontal extent of the instant marker diamonds in the draw log,
+ * and whether they're drawn whole or clipped.
+ */
+function getDrawnDiamonds(drawLog: DrawOperation[]) {
+  return drawLog
+    .filter<DrawImageOperation>(
+      // @ts-expect-error "must be a type predicate"
+      ([operation]) => operation === 'drawImage'
+    )
+    .map(([, image, , , , , left, , width]) => ({
+      left,
+      right: left + width,
+      isWhole: width === image.width,
+    }));
+}
 
 function setupWithProfile(profile: Profile) {
   const flushRafCalls = mockRaf();
@@ -199,14 +220,24 @@ describe('MarkerChart', function () {
     const rowName = 'TestMarker';
 
     const markers: TestDefinedMarker[] = [
-      // DIAMOND [RENDERED]: This marker defines the start of our range.
+      // DIAMOND [RENDERED]: This marker defines the start of our range. It's
+      // far from the other markers, so it's drawn as a whole diamond.
       [rowName, 0],
-      // DIAMOND [RENDERED]: This is the first instant marker, so it's rendered.
+      // CLIPPED DIAMOND [RENDERED]: This instant marker is close to the next
+      // one, so only the left part of its diamond is drawn.
       [rowName, 5000],
+      // CLIPPED DIAMOND [RENDERED]: The next instant markers are so close that
+      // nothing is left of this marker's diamond. It's drawn as a slice that's
+      // two pixels wide.
+      [rowName, 5001],
+      // CLIPPED DIAMOND [NOT-RENDERED]: This marker's slice would be drawn on
+      // the same pixels as the previous one, so it's not rendered.
+      [rowName, 5001.5],
       // RECTANGLE [RENDERED]: This marker has a duration, but it's very small,
       // so it's rendered as a small rectangle. It's rendered because it's the the first.
       [rowName, 5001, 5001.1],
-      // DIAMOND [NOT-RENDERED]: The second instant marker, so it's not rendered.
+      // CLIPPED DIAMOND [RENDERED]: This is the last instant marker of the
+      // cluster, so only the right part of its diamond is drawn.
       [rowName, 5002],
       // RECTANGLE [NOT-RENDERED]: This marker has a duration, but it's very small, and would get
       // rendered as 1 pixel wide rectangle if it was rendered. But it's not because it's close to
@@ -216,6 +247,7 @@ describe('MarkerChart', function () {
       // at the same location as a small marker
       [rowName, 5002.1, 7000],
       // DIAMOND [RENDERED]: Add a final marker that's quite far away to have a big time range.
+      // It's far from the other markers, so it's drawn as a whole diamond.
       [rowName, 15000],
     ];
 
@@ -225,39 +257,69 @@ describe('MarkerChart', function () {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 3 diamonds (initial instant marker, first "middle"
-    // instant marker, and last marker). We use the moveTo operation as a proxy
-    // to know that a diamond is drawn.
-    const diamondOperations = drawCalls.filter<MoveToOperation>(
+    // Check which diamonds are drawn, and whether they're whole or clipped.
+    // Diamonds are drawn with drawImage.
+    const diamonds = getDrawnDiamonds(drawCalls);
+    expect(diamonds.map(({ isWhole }) => isWhole)).toEqual([
+      true,
+      false,
+      false,
+      false,
+      true,
+    ]);
+
+    // Check that the clipped diamonds don't overlap.
+    for (let i = 1; i < diamonds.length; i++) {
+      expect(diamonds[i].left).toBeGreaterThanOrEqual(diamonds[i - 1].right);
+    }
+
+    // Interval markers are drawn as rectangles in the marker area, which is
+    // to the right of the left margin. This filters out the row backgrounds
+    // and the vertical separator, which are to the left of the marker area.
+    const intervalMarkerOperations = drawCalls.filter<FillRectOperation>(
       // @ts-expect-error "must be a type predicate"
-      ([operation]) => operation === 'moveTo'
+      ([operation, x]) => operation === 'fillRect' && x >= TIMELINE_MARGIN_LEFT
     );
-    expect(diamondOperations).toHaveLength(3);
+    // Check that we have a narrow rectangle for the first small interval
+    // marker, and a wide one for the later longer marker.
+    expect(
+      intervalMarkerOperations.map(([, , , w]) => (w <= 2 ? 'narrow' : 'wide'))
+    ).toEqual(['narrow', 'wide']);
 
-    // Check that all X, Y values are different
-    const diamondOperationsXY = new Set(
-      diamondOperations.map(([, x, y]) => `${Math.round(x)};${Math.round(y)}`)
-    );
-    expect(diamondOperationsXY.size).toBe(3);
+    // @ts-expect-error - "property must be optional"
+    delete window.devicePixelRatio;
+  });
 
-    // Check that we have a fillRect operation for the first small interval
-    // marker. We filter also using w or h to filter out the initial clearing
-    // fillRect operation as well as the separators.
-    const fillRectOperations = drawCalls.filter(
-      ([operation, , , w, h]) =>
-        operation === 'fillRect' &&
-        w !== containerWidth - TIMELINE_MARGIN_RIGHT &&
-        h !== containerHeight
-    );
-    expect(fillRectOperations).toHaveLength(1);
+  it('draws a selected instant marker as a whole diamond even in a cluster', () => {
+    window.devicePixelRatio = 1;
+    const rowName = 'TestMarker';
+    const profile = getProfileWithMarkers([
+      [rowName, 0],
+      // These two instant markers are too close to be drawn as whole
+      // diamonds.
+      [rowName, 5000],
+      [rowName, 5100],
+      [rowName, 15000],
+    ]);
+    const { flushRafCalls, dispatch, getState } = setupWithProfile(profile);
+    flushRafCalls();
 
-    // Check that the rect operation for the later longer marker is present.
-    const rectOperations = drawCalls.filter(
-      ([operation]) => operation === 'rect'
+    const countWholeDiamonds = () =>
+      getDrawnDiamonds(flushDrawLog()).filter(({ isWhole }) => isWhole).length;
+    expect(countWholeDiamonds()).toBe(2);
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerIndex = ensureExists(
+      selectedThreadSelectors
+        .getFullMarkerListIndexes(getState())
+        .find((index) => getMarker(index).start === 5000)
     );
-    // We'll actually have 2 rect operations, because we also have a rect first
-    // for the initial `clip` operation, and one for the longer marker.
-    expect(rectOperations).toHaveLength(2);
+    act(() => {
+      dispatch(changeSelectedMarker(0, markerIndex));
+    });
+    flushRafCalls();
+
+    expect(countWholeDiamonds()).toBe(3);
 
     // @ts-expect-error - "property must be optional"
     delete window.devicePixelRatio;
@@ -772,7 +834,7 @@ describe('MarkerChart', function () {
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
-      expect(text).toEqual(['Dot marker E', 'Other']);
+      expect(text).toEqual(['Other', 'Dot marker E']);
     });
   });
 
@@ -876,9 +938,9 @@ describe('MarkerChart', function () {
       // The colors should include our marker colors with transparency
       expect(fillColors).toEqual(
         expect.arrayContaining([
-          getFillColor('green'),
-          getFillColor('red'),
-          getFillColor('yellow'),
+          getStrokeColor('green') + 'bb',
+          getStrokeColor('red') + 'bb',
+          getStrokeColor('yellow') + 'bb',
         ])
       );
     });
@@ -928,7 +990,7 @@ describe('MarkerChart', function () {
         [['Test without color', 0, 5, { type: 'Test', status: 'unknown' }]],
         'orange'
       );
-      expect(fillColors).toContain(getFillColor('orange'));
+      expect(fillColors).toContain(getStrokeColor('orange') + 'bb');
       expect(fillColors).not.toContain(DEFAULT_FILL_COLOR);
     });
 
@@ -944,8 +1006,8 @@ describe('MarkerChart', function () {
         ],
         'orange'
       );
-      expect(fillColors).toContain(getFillColor('green'));
-      expect(fillColors).not.toContain(getFillColor('orange'));
+      expect(fillColors).toContain(getStrokeColor('green') + 'bb');
+      expect(fillColors).not.toContain(getStrokeColor('orange') + 'bb');
     });
 
     it('ignores an invalid schema color', () => {
