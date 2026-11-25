@@ -1218,6 +1218,8 @@ CodeFindBar--search-field =
     .placeholder = Cercar
 # Checkbox label. If checked, only matches that are whole words are found.
 CodeFindBar--whole-word = Parolas integre
+CodeFindBar--close-button =
+    .title = Clauder le barra de recerca
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
