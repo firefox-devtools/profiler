@@ -14,7 +14,8 @@ import {
 } from './data-structures';
 import {
   CallNodeInfoNonInverted,
-  CallNodeInfoInverted,
+  LazyInvertedCallNodeInfo,
+  CallersCallNodeInfo,
 } from './call-node-info';
 import { computeThreadCPUPercent } from './cpu';
 import {
@@ -118,7 +119,11 @@ import type {
   SampleCategoriesAndSubcategories,
   SourceLocationTable,
 } from 'firefox-profiler/types';
-import type { CallNodeInfo, SuffixOrderIndex } from './call-node-info';
+import type {
+  CallNodeInfo,
+  CallNodeInfoInverted,
+  SuffixOrderIndex,
+} from './call-node-info';
 import {
   toFloat64Array,
   toInt32Array,
@@ -205,10 +210,13 @@ export function computeCallNodeTable(
   }
 
   const hierarchy = _computeCallNodeTableHierarchy(stackTable, frameTable);
-  const dfsOrder = _computeCallNodeTableDFSOrder(hierarchy);
-  const { stackIndexToCallNodeIndex } = dfsOrder;
+  const { stackIndexToCallNodeIndex } = hierarchy;
+  const dfsOrder = _computeCallNodeTableDFSOrder(
+    hierarchy,
+    stackIndexToCallNodeIndex
+  );
   const frameInlinedIntoCol = _computeFrameTableInlinedIntoColumn(frameTable);
-  const extraColumns = _computeCallNodeTableExtraColumns(
+  const extraColumns = _computeCallNodeTableExtraColumnsFromStacks(
     stackTable,
     frameTable,
     stackIndexToCallNodeIndex,
@@ -252,7 +260,6 @@ type CallNodeTableHierarchy = {
   // there are no call nodes.
   firstRoot: IndexIntoCallNodeTable;
   length: number;
-  stackIndexToCallNodeIndex: Int32Array;
 };
 
 /**
@@ -263,7 +270,6 @@ type CallNodeTableHierarchy = {
  */
 type CallNodeTableDFSOrder = {
   length: number;
-  stackIndexToCallNodeIndex: Int32Array;
   nextSiblingSorted: Int32Array;
   subtreeRangeEndSorted: Uint32Array;
   prefixSorted: Int32Array;
@@ -272,7 +278,7 @@ type CallNodeTableDFSOrder = {
 };
 
 /**
- * The return type of _computeCallNodeTableExtraColumns.
+ * The return type of the call node table extra-column helpers.
  *
  * We compute these columns once we know the final size and order of the call
  * node table.
@@ -317,7 +323,7 @@ type CallNodeTableExtraColumns = {
 function _computeCallNodeTableHierarchy(
   stackTable: StackTable,
   frameTable: FrameTable
-): CallNodeTableHierarchy {
+): CallNodeTableHierarchy & { stackIndexToCallNodeIndex: Int32Array } {
   const stackIndexToCallNodeIndex = new Int32Array(stackTable.length);
 
   // The callNodeTable components.
@@ -463,21 +469,15 @@ function _computeCallNodeTableHierarchy(
  * column and allows other parts of the codebase to perform cheap "is descendant"
  * checks.
  *
- * Sibling nodes are ordered by func, though this happens in
- * _computeCallNodeTableHierarchy. (This function just keeps the same order of
- * siblings as what's in the `hierarchy` argument.)
+ * Sibling nodes are ordered by func in the hierarchy builder. This function
+ * keeps that order and remaps the supplied old call node indexes in place.
+ * An index of -1 means that the source node was dropped.
  */
 function _computeCallNodeTableDFSOrder(
-  hierarchy: CallNodeTableHierarchy
+  hierarchy: CallNodeTableHierarchy,
+  oldCallNodeIndexesToRemap: Int32Array
 ): CallNodeTableDFSOrder {
-  const {
-    prefix,
-    firstChild,
-    firstRoot,
-    nextSibling,
-    length,
-    stackIndexToCallNodeIndex,
-  } = hierarchy;
+  const { prefix, firstChild, firstRoot, nextSibling, length } = hierarchy;
 
   const prefixSorted = new Int32Array(length);
   const nextSiblingSorted = new Int32Array(length);
@@ -493,7 +493,6 @@ function _computeCallNodeTableDFSOrder(
       depthSorted,
       maxDepth,
       length,
-      stackIndexToCallNodeIndex,
     };
   }
 
@@ -555,9 +554,11 @@ function _computeCallNodeTableDFSOrder(
     }
   }
 
-  for (let i = 0; i < stackIndexToCallNodeIndex.length; i++) {
-    stackIndexToCallNodeIndex[i] =
-      oldIndexToNewIndex[stackIndexToCallNodeIndex[i]];
+  for (let i = 0; i < oldCallNodeIndexesToRemap.length; i++) {
+    const oldIndex = oldCallNodeIndexesToRemap[i];
+    if (oldIndex !== -1) {
+      oldCallNodeIndexesToRemap[i] = oldIndexToNewIndex[oldIndex];
+    }
   }
 
   return {
@@ -567,21 +568,19 @@ function _computeCallNodeTableDFSOrder(
     depthSorted,
     maxDepth,
     length,
-    stackIndexToCallNodeIndex,
   };
 }
 
 /**
  * Used as part of creating the call node table.
  *
- * This function computes the remaining columns that haven't been computed by
- * any other parts of call node table creation.
+ * This function computes the remaining columns from the stack and frame tables.
  *
  * We only compute these columns once we know the final size and order of the
  * call node table, so that we can immediately put values in the right spot in
  * the fixed-size typed array columns.
  */
-function _computeCallNodeTableExtraColumns(
+function _computeCallNodeTableExtraColumnsFromStacks(
   stackTable: StackTable,
   frameTable: FrameTable,
   stackIndexToCallNodeIndex: Int32Array,
@@ -661,6 +660,86 @@ function _computeCallNodeTableExtraColumns(
 }
 
 /**
+ * Compute the same columns from an existing call node table. The callees
+ * hierarchy can merge or drop original call nodes, so categories and inlining
+ * information must be combined for nodes that map to the same destination.
+ */
+function _computeCallNodeTableExtraColumnsFromCallNodes(
+  originalCallNodeTable: CallNodeTable,
+  oldCallNodeToNewCallNode: Int32Array,
+  callNodeCount: number,
+  defaultCategory: IndexIntoCategoryList
+): CallNodeTableExtraColumns {
+  const originalCallNodeTableCategoryCol = originalCallNodeTable.category;
+  const originalCallNodeTableSubcategoryCol = originalCallNodeTable.subcategory;
+  const funcCol = new Int32Array(callNodeCount);
+  const categoryCol = new Int32Array(callNodeCount);
+  const subcategoryCol = new Int32Array(callNodeCount);
+  const innerWindowIDCol = new Float64Array(callNodeCount);
+  const inlinedIntoCol = new Int32Array(callNodeCount);
+
+  const haveFilled = new Uint8Array(callNodeCount);
+
+  for (let i = 0; i < originalCallNodeTable.length; i++) {
+    const category = originalCallNodeTableCategoryCol[i];
+    const subcategory = originalCallNodeTableSubcategoryCol[i];
+    const inlinedIntoSymbol =
+      originalCallNodeTable.sourceFramesInlinedIntoSymbol[i];
+
+    const callNodeIndex = oldCallNodeToNewCallNode[i];
+    if (callNodeIndex === -1) {
+      continue;
+    }
+
+    if (haveFilled[callNodeIndex] === 0) {
+      funcCol[callNodeIndex] = originalCallNodeTable.func[i];
+
+      categoryCol[callNodeIndex] = category;
+      subcategoryCol[callNodeIndex] = subcategory;
+      inlinedIntoCol[callNodeIndex] = inlinedIntoSymbol;
+
+      const innerWindowID = originalCallNodeTable.innerWindowID[i];
+      if (innerWindowID !== null && innerWindowID !== 0) {
+        // Set innerWindowID when it's not zero. Otherwise the value is already
+        // zero because typed arrays are initialized to zero.
+        innerWindowIDCol[callNodeIndex] = innerWindowID;
+      }
+
+      haveFilled[callNodeIndex] = 1;
+    } else {
+      // Resolve category conflicts, by resetting a conflicting subcategory or
+      // category to the default category.
+      if (categoryCol[callNodeIndex] !== category) {
+        // Conflicting origin stack categories -> default category + subcategory.
+        categoryCol[callNodeIndex] = defaultCategory;
+        subcategoryCol[callNodeIndex] = 0;
+      } else if (subcategoryCol[callNodeIndex] !== subcategory) {
+        // Conflicting origin stack subcategories -> "Other" subcategory.
+        subcategoryCol[callNodeIndex] = 0;
+      }
+
+      // Resolve "inlined into" conflicts. This can happen if you have two
+      // function calls A -> B where only one of the B calls is inlined, or
+      // if you use call tree transforms in such a way that a function B which
+      // was inlined into two different callers (A -> B, C -> B) gets collapsed
+      // into one call node.
+      if (inlinedIntoCol[callNodeIndex] !== inlinedIntoSymbol) {
+        // Conflicting inlining: -1.
+        inlinedIntoCol[callNodeIndex] = -1;
+      }
+    }
+  }
+
+  return {
+    funcCol,
+    categoryCol,
+    subcategoryCol,
+    innerWindowIDCol,
+    inlinedIntoCol,
+  };
+}
+
+/**
  * Generate the inverted CallNodeInfo for a thread.
  */
 export function getInvertedCallNodeInfo(
@@ -668,11 +747,33 @@ export function getInvertedCallNodeInfo(
   defaultCategory: IndexIntoCategoryList,
   funcCount: number
 ): CallNodeInfoInverted {
-  return new CallNodeInfoInverted(
+  return new LazyInvertedCallNodeInfo(
     callNodeInfo.getCallNodeTable(),
     callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
     defaultCategory,
     funcCount
+  );
+}
+
+/**
+ * Generate the callers CallNodeInfo for a thread and a selected function.
+ *
+ * Unlike getInvertedCallNodeInfo, this builds the entire inverted subtree
+ * upfront, restricted to the selected function's entry points. It's the
+ * dedicated structure for the "callers panel" view.
+ */
+export function getCallersCallNodeInfo(
+  callNodeInfo: CallNodeInfo,
+  defaultCategory: IndexIntoCategoryList,
+  funcCount: number,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallNodeInfoInverted {
+  return new CallersCallNodeInfo(
+    callNodeInfo.getCallNodeTable(),
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex(),
+    defaultCategory,
+    funcCount,
+    selectedFuncIndex
   );
 }
 
@@ -5208,5 +5309,244 @@ export function computeStackTableFromRawStackTable(
     subcategory: subcategoryColumn,
     prefix,
     length: rawStackTable.length,
+  };
+}
+
+export function createCalleesCallNodeInfo(
+  callNodeInfo: CallNodeInfo,
+  selectedFunc: IndexIntoFuncTable | null,
+  stackTable: StackTable,
+  frameTable: FrameTable,
+  funcCount: number,
+  defaultCategory: IndexIntoCategoryList
+): CallNodeInfo {
+  const originalCallNodeTable = callNodeInfo.getCallNodeTable();
+  const originalStackIndexToCallNodeIndex =
+    callNodeInfo.getStackIndexToNonInvertedCallNodeIndex();
+  const { callNodeTable, stackIndexToCallNodeIndex } =
+    _computeCalleesCallNodeTable(
+      selectedFunc,
+      originalCallNodeTable,
+      originalStackIndexToCallNodeIndex,
+      stackTable,
+      frameTable,
+      funcCount,
+      defaultCategory
+    );
+  return new CallNodeInfoNonInverted(callNodeTable, stackIndexToCallNodeIndex);
+}
+
+/**
+ * Like `_computeCallNodeTableHierarchy`, but iterates an existing call node
+ * table rather than the stack table, applying the callees transform: every
+ * occurrence of `selectedFuncIndex` becomes a root, and original nodes outside
+ * a selected-func subtree are dropped.
+ *
+ * Multiple original nodes can collapse into one new node — every selected-func
+ * instance merges into a single root, and their descendants can further merge
+ * when they share a (mapped-prefix, func) pair. We therefore need the same
+ * "find existing sibling or insert in sorted order" logic the regular hierarchy
+ * builder uses, including the `lastUsed` hot path and early-out/late-enter on
+ * the sorted sibling lists.
+ */
+function _computeCalleesCallNodeTableHierarchy(
+  originalCallNodeTable: CallNodeTable,
+  selectedFuncIndex: IndexIntoFuncTable | null
+): CallNodeTableHierarchy & {
+  originalCallNodeToCallNodeIndex: Int32Array;
+} {
+  const prefix = new Array<IndexIntoCallNodeTable>();
+  const firstChild = new Array<IndexIntoCallNodeTable>();
+  const nextSibling = new Array<IndexIntoCallNodeTable>();
+  const func = new Array<IndexIntoFuncTable>();
+
+  const originalCallNodeToCallNodeIndex = new Int32Array(
+    originalCallNodeTable.length
+  );
+
+  let length = 0;
+
+  // An extra column that only gets used while the table is built up: For each
+  // node A, lastUsedChild[A] is the child of A that we most recently matched
+  // or inserted. It is -1 while A has no children.
+  const lastUsedChild: Array<IndexIntoCallNodeTable> = [];
+
+  // The root counterparts to firstChild / lastUsedChild for the "virtual"
+  // parent -1.
+  let firstRoot = -1;
+  let lastUsedRoot = -1;
+
+  for (let i = 0; i < originalCallNodeTable.length; i++) {
+    const funcIndex = originalCallNodeTable.func[i];
+
+    const originalPrefixCallNode = originalCallNodeTable.prefix[i];
+    // We know that at this point the following condition holds:
+    // assert(originalPrefixCallNode === -1 || originalPrefixCallNode < i);
+    const prefixCallNode =
+      funcIndex === selectedFuncIndex || originalPrefixCallNode === -1
+        ? -1
+        : originalCallNodeToCallNodeIndex[originalPrefixCallNode];
+
+    if (prefixCallNode === -1 && funcIndex !== selectedFuncIndex) {
+      originalCallNodeToCallNodeIndex[i] = -1;
+      continue;
+    }
+
+    const firstSibling =
+      prefixCallNode === -1 ? firstRoot : firstChild[prefixCallNode];
+
+    // Locate this (prefixCallNode, funcIndex) in the sorted sibling list.
+    // Either we find an existing match and reuse it, or we find the insertion
+    // point for a new node. When we need to insert, prevSibling is the node
+    // our new node should be linked after, or -1 if it should become the new
+    // head of the sibling list.
+    let callNodeIndex = -1;
+    let prevSibling = -1; // used for insertion, if callNodeIndex === -1
+
+    if (firstSibling !== -1) {
+      // Get the sibling that we used most recently for this parent.
+      // We know lastUsed is !== -1 because we know there is at least one sibling.
+      const lastUsed =
+        prefixCallNode === -1 ? lastUsedRoot : lastUsedChild[prefixCallNode];
+
+      if (funcIndex === func[lastUsed]) {
+        // Hot path: same func as the last child we touched for this parent.
+        callNodeIndex = lastUsed;
+      } else {
+        // We'll have to scan (at least part of) the list of siblings.
+        let sibling = firstSibling;
+        if (funcIndex > func[lastUsed]) {
+          // Since the list of siblings is ordered by func, we now know that can
+          // skip the part of the list that's before lastUsed.
+          // If lastUsed is the tail, sibling starts at -1 and we append without
+          // scanning.
+          prevSibling = lastUsed;
+          sibling = nextSibling[lastUsed];
+        }
+        while (sibling !== -1) {
+          const siblingFunc = func[sibling];
+          if (siblingFunc === funcIndex) {
+            // Found a match!
+            callNodeIndex = sibling;
+            break;
+          }
+          if (siblingFunc > funcIndex) {
+            // No match, and we can stop scanning here due to the ordering.
+            // We'll insert the new node before `sibling`; prevSibling is
+            // already its predecessor.
+            break;
+          }
+          prevSibling = sibling;
+          sibling = nextSibling[sibling];
+        }
+      }
+    }
+
+    if (callNodeIndex !== -1) {
+      originalCallNodeToCallNodeIndex[i] = callNodeIndex;
+      if (prefixCallNode === -1) {
+        lastUsedRoot = callNodeIndex;
+      } else {
+        lastUsedChild[prefixCallNode] = callNodeIndex;
+      }
+      continue;
+    }
+
+    // New call node.
+    callNodeIndex = length++;
+    originalCallNodeToCallNodeIndex[i] = callNodeIndex;
+
+    prefix[callNodeIndex] = prefixCallNode;
+    func[callNodeIndex] = funcIndex;
+    firstChild[callNodeIndex] = -1;
+    lastUsedChild[callNodeIndex] = -1;
+
+    // Splice the new node into the sibling list.
+    if (prevSibling === -1) {
+      // Insert at head.
+      nextSibling[callNodeIndex] = firstSibling;
+      if (prefixCallNode === -1) {
+        firstRoot = callNodeIndex;
+      } else {
+        firstChild[prefixCallNode] = callNodeIndex;
+      }
+    } else {
+      // Insert after prevSibling.
+      nextSibling[callNodeIndex] = nextSibling[prevSibling];
+      nextSibling[prevSibling] = callNodeIndex;
+    }
+
+    if (prefixCallNode === -1) {
+      lastUsedRoot = callNodeIndex;
+    } else {
+      lastUsedChild[prefixCallNode] = callNodeIndex;
+    }
+  }
+
+  return {
+    prefix,
+    firstRoot,
+    firstChild,
+    nextSibling,
+    originalCallNodeToCallNodeIndex,
+    length,
+  };
+}
+
+function _computeCalleesCallNodeTable(
+  selectedFuncIndex: IndexIntoFuncTable | null,
+  originalCallNodeTable: CallNodeTable,
+  stackIndexToOriginalCallNodeIndex: Int32Array,
+  _stackTable: StackTable,
+  _frameTable: FrameTable,
+  _funcCount: number,
+  defaultCategory: IndexIntoCategoryList
+): CallNodeTableAndStackMap {
+  if (originalCallNodeTable.length === 0) {
+    return {
+      callNodeTable: getEmptyCallNodeTable(),
+      stackIndexToCallNodeIndex: new Int32Array(0),
+    };
+  }
+
+  const hierarchy = _computeCalleesCallNodeTableHierarchy(
+    originalCallNodeTable,
+    selectedFuncIndex
+  );
+  const { originalCallNodeToCallNodeIndex } = hierarchy;
+  const dfsOrder = _computeCallNodeTableDFSOrder(
+    hierarchy,
+    originalCallNodeToCallNodeIndex
+  );
+  const stackIndexToCallNodeIndex = new Int32Array(
+    stackIndexToOriginalCallNodeIndex.length
+  );
+  for (let i = 0; i < stackIndexToCallNodeIndex.length; i++) {
+    stackIndexToCallNodeIndex[i] =
+      originalCallNodeToCallNodeIndex[stackIndexToOriginalCallNodeIndex[i]];
+  }
+  const extraColumns = _computeCallNodeTableExtraColumnsFromCallNodes(
+    originalCallNodeTable,
+    originalCallNodeToCallNodeIndex,
+    hierarchy.length,
+    defaultCategory
+  );
+
+  const callNodeTable = {
+    prefix: dfsOrder.prefixSorted,
+    nextSibling: dfsOrder.nextSiblingSorted,
+    subtreeRangeEnd: dfsOrder.subtreeRangeEndSorted,
+    func: extraColumns.funcCol,
+    category: extraColumns.categoryCol,
+    subcategory: extraColumns.subcategoryCol,
+    innerWindowID: extraColumns.innerWindowIDCol,
+    sourceFramesInlinedIntoSymbol: extraColumns.inlinedIntoCol,
+    depth: dfsOrder.depthSorted,
+    maxDepth: dfsOrder.maxDepth,
+    length: hierarchy.length,
+  };
+  return {
+    callNodeTable,
+    stackIndexToCallNodeIndex,
   };
 }
