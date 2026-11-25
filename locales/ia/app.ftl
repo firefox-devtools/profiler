@@ -1216,6 +1216,8 @@ SourceView--close-button =
 CodeFindBar--search-field =
     .aria-label = Cercar
     .placeholder = Cercar
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Parolas integre
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
