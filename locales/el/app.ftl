@@ -1220,6 +1220,27 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Κλείσιμο προβολής πηγής
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Εύρεση
+    .placeholder = Εύρεση
+CodeFindBar--previous-button = Προηγούμενο
+    .title = Εύρεση προηγούμενης αντιστοιχίας (Shift+Enter)
+CodeFindBar--next-button = Επόμενο
+    .title = Εύρεση επόμενης αντιστοιχίας (Enter)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Ταίριασμα πεζών-κεφαλαίων
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Κανονική έκφραση
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Ολόκληρες λέξεις
+CodeFindBar--close-button =
+    .title = Κλείσιμο γραμμής εύρεσης
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
