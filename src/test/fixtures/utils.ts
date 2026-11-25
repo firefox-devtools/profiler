@@ -7,6 +7,7 @@ import {
   computeCallNodeSelfAndSummary,
   computeCallTreeTimings,
   computeFunctionListTimings,
+  computeCallersTimings,
   type CallTree,
 } from 'firefox-profiler/profile-logic/call-tree';
 import { getEmptyThread } from 'firefox-profiler/profile-logic/data-structures';
@@ -14,6 +15,7 @@ import {
   computeCallNodeFuncIsDuplicate,
   getCallNodeInfo,
   getInvertedCallNodeInfo,
+  getCallersCallNodeInfo,
   getSampleIndexToCallNodeIndex,
   getOriginAnnotationForFunc,
   createThreadFromDerivedTables,
@@ -24,6 +26,7 @@ import {
   computeSamplesTableFromRawSamplesTable,
   computeJsAllocationsTableFromRawJsAllocationsTable,
   computeNativeAllocationsTableFromRawNativeAllocationsTable,
+  createCalleesCallNodeInfo,
 } from 'firefox-profiler/profile-logic/profile-data';
 import { getProfileWithDicts } from './profiles/processed-profile';
 import { StringTable } from '../../utils/string-table';
@@ -286,6 +289,111 @@ export function functionListTreeFromProfile(
     ensureExists(profile.meta.categories),
     thread.samples,
     { type: 'FUNCTION_LIST', timings: functionListTimings },
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "callees panel" CallTree for a profile and a selected
+ * function. The callees panel shows the call subtrees that are rooted at the
+ * selected function, i.e. it answers "where is this function called from / what
+ * does it call".
+ */
+export function calleesTreeFromProfile(
+  profile: Profile,
+  selectedFuncName: string,
+  threadIndex: number = 0
+): CallTree {
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const selectedFunc =
+    thread.funcTable.name.findIndex(
+      (i) => thread.stringTable.getString(i) === selectedFuncName
+    ) ?? null;
+  const calleesCallNodeInfo = createCalleesCallNodeInfo(
+    callNodeInfo,
+    selectedFunc === -1 ? null : selectedFunc,
+    thread.stackTable,
+    thread.frameTable,
+    thread.funcTable.length,
+    defaultCategory
+  );
+  const selfAndSummary = computeCallNodeSelfAndSummary(
+    thread.samples,
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      calleesCallNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    ),
+    calleesCallNodeInfo.getCallNodeTable().length
+  );
+  const timings = computeCallTreeTimings(calleesCallNodeInfo, selfAndSummary);
+  return getCallTree(
+    thread,
+    calleesCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    thread.samples,
+    timings,
+    'samples'
+  );
+}
+
+/**
+ * This function creates the "callers panel" CallTree for a profile and a selected
+ * function. The callers panel is an inverted call tree where each root's total
+ * counts only samples where the selected function appears in the call stack.
+ *
+ * Pass `null` (or a name that does not exist in the thread) to exercise the
+ * "no function selected" path.
+ */
+export function callersTreeFromProfile(
+  profile: Profile,
+  selectedFuncName: string | null,
+  threadIndex: number = 0
+): CallTree {
+  const { derivedThreads, defaultCategory } = getProfileWithDicts(profile);
+  const thread = derivedThreads[threadIndex];
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    defaultCategory
+  );
+  const selectedFunc =
+    selectedFuncName === null
+      ? -1
+      : (thread.funcTable.name.findIndex(
+          (i) => thread.stringTable.getString(i) === selectedFuncName
+        ) ?? -1);
+  const selectedFuncIndex = selectedFunc === -1 ? null : selectedFunc;
+  const callersCallNodeInfo = getCallersCallNodeInfo(
+    callNodeInfo,
+    defaultCategory,
+    thread.funcTable.length,
+    selectedFuncIndex
+  );
+  const selfAndSummary = computeCallNodeSelfAndSummary(
+    thread.samples,
+    getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
+      callNodeInfo.getStackIndexToNonInvertedCallNodeIndex()
+    ),
+    callNodeInfo.getCallNodeTable().length
+  );
+  const timings = computeCallersTimings(
+    callersCallNodeInfo,
+    selfAndSummary,
+    selectedFuncIndex
+  );
+  return getCallTree(
+    thread,
+    callersCallNodeInfo,
+    ensureExists(profile.meta.categories),
+    thread.samples,
+    timings,
     'samples'
   );
 }
