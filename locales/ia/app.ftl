@@ -1216,6 +1216,15 @@ SourceView--close-button =
 CodeFindBar--search-field =
     .aria-label = Cercar
     .placeholder = Cercar
+CodeFindBar--previous-button = Previe
+    .title = Trovar le concordantia precedente (Majusc+Entrar)
+CodeFindBar--next-button = Successive
+    .title = Trovar le concordantia successive (Entrar)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Concordar litteras majuscule/minuscule
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Expression regular
 # Checkbox label. If checked, only matches that are whole words are found.
 CodeFindBar--whole-word = Parolas integre
 CodeFindBar--close-button =
