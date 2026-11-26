@@ -39,34 +39,60 @@ export function dialectForFilename(filename: string): JsDialect {
   return 'jsx';
 }
 
-const NON_JS_EXTENSIONS = [
-  '.rs',
-  '.c',
-  '.cc',
-  '.cpp',
-  '.cxx',
-  '.h',
-  '.hpp',
-  '.m',
-  '.mm',
-  '.json',
-  // Svelte and Vue components contain JS, but they can't be pretty-printed,
-  // because the formatter replaces the text between JS tokens, and in a
-  // component, that text includes the markup.
-  '.svelte',
-  '.vue',
+const JS_EXTENSIONS = [
+  '.js',
+  '.mjs',
+  '.cjs',
+  '.jsm',
+  '.jsx',
+  '.ts',
+  '.mts',
+  '.cts',
+  '.tsx',
 ];
+
+// Extensions of pages whose inline scripts can be pretty-printed. An inline
+// script has the URL of its page as its path.
+const PAGE_EXTENSIONS = [
+  '.html',
+  '.htm',
+  '.xhtml',
+  '.xht',
+  '.shtml',
+  '.php',
+  '.asp',
+  '.aspx',
+  '.jsp',
+];
+
+// Matches the scheme of a URL, like https:, chrome:, about: or webpack:.
+// Requiring two characters keeps Windows drive letters out.
+const URL_SCHEME_REGEXP = /^[a-z][a-z0-9+.-]+:/;
 
 /**
  * Returns the dialect to use for formatting the source at this path, or null
- * if the source isn't JavaScript. Like the syntax highlighting in the source
- * view, this treats unknown file types as JavaScript, because inline scripts
- * share the page URL and don't have a .js extension.
+ * if the source isn't JavaScript. Files with a JS or TS extension can be
+ * formatted. URLs that look like pages, with a page extension or none at all,
+ * can be formatted too, because they are the paths of inline scripts.
+ *
+ * Svelte and Vue components aren't formatted even though they contain JS,
+ * because the formatter replaces the text between JS tokens, and in a
+ * component, that text includes the markup.
  */
 export function getFormatDialectForPath(path: string): JsDialect | null {
-  const lower = path.toLowerCase();
-  if (NON_JS_EXTENSIONS.some((extension) => lower.endsWith(extension))) {
-    return null;
+  let lower = path.toLowerCase();
+  const isUrl = URL_SCHEME_REGEXP.test(lower);
+  if (isUrl) {
+    lower = lower.replace(/[?#].*$/, '');
   }
-  return dialectForFilename(lower);
+  const fileName = lower.slice(lower.lastIndexOf('/') + 1);
+  const dotIndex = fileName.lastIndexOf('.');
+  const extension = dotIndex === -1 ? '' : fileName.slice(dotIndex);
+  if (JS_EXTENSIONS.includes(extension)) {
+    return dialectForFilename(fileName);
+  }
+  if (isUrl && (extension === '' || PAGE_EXTENSIONS.includes(extension))) {
+    return 'jsx';
+  }
+  return null;
 }

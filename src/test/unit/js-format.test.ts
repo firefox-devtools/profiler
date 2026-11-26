@@ -478,19 +478,47 @@ describe('createSourceViewFormatting', function () {
 });
 
 describe('getFormatDialectForPath', function () {
-  it('returns the dialect for JS files, and null for other files', function () {
+  it('returns the dialect for files with a JS or TS extension', function () {
     expect(getFormatDialectForPath('https://example.com/bundle.js')).toBe(
       'jsx'
     );
-    expect(getFormatDialectForPath('https://example.com/')).toBe('jsx');
+    expect(getFormatDialectForPath('https://example.com/app.mjs?v=3')).toBe(
+      'jsx'
+    );
+    expect(getFormatDialectForPath('resource://gre/Foo.sys.mjs')).toBe('jsx');
+    expect(getFormatDialectForPath('webpack:///./src/utils.ts')).toBe('ts');
     expect(getFormatDialectForPath('src/app.tsx')).toBe('ts jsx');
+    expect(getFormatDialectForPath('/home/me/app/index.cjs')).toBe('jsx');
+  });
+
+  it('treats page URLs as JS, because inline scripts use them as path', function () {
+    expect(getFormatDialectForPath('https://example.com/')).toBe('jsx');
+    expect(getFormatDialectForPath('https://example.com/search?q=a.b')).toBe(
+      'jsx'
+    );
+    expect(getFormatDialectForPath('https://example.com/index.php')).toBe(
+      'jsx'
+    );
+    expect(
+      getFormatDialectForPath('chrome://browser/content/browser.xhtml')
+    ).toBe('jsx');
+    expect(getFormatDialectForPath('about:newtab')).toBe('jsx');
+  });
+
+  it('returns null for files in other languages', function () {
     expect(getFormatDialectForPath('src/main.cpp')).toBeNull();
     expect(getFormatDialectForPath('src/lib.rs')).toBeNull();
+    expect(getFormatDialectForPath('src/app/main.py')).toBeNull();
+    expect(getFormatDialectForPath('/usr/include/c++/v1/vector')).toBeNull();
+    expect(getFormatDialectForPath('C:\\src\\main.cpp')).toBeNull();
     expect(getFormatDialectForPath('iongraph.json')).toBeNull();
+    expect(getFormatDialectForPath('https://example.com/data.json')).toBeNull();
+    expect(getFormatDialectForPath('https://example.com/style.css')).toBeNull();
+    expect(getFormatDialectForPath('webpack:///./src/Main.elm')).toBeNull();
   });
 
   it("returns null for Svelte and Vue components, which can't be pretty-printed", function () {
     expect(getFormatDialectForPath('../src/App.svelte')).toBeNull();
-    expect(getFormatDialectForPath('../src/App.vue')).toBeNull();
+    expect(getFormatDialectForPath('webpack:///./src/App.vue')).toBeNull();
   });
 });
