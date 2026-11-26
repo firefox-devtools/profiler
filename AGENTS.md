@@ -45,10 +45,19 @@ Import aliases: `firefox-profiler` -> `src/`, `firefox-profiler-res` -> `res/`.
 - Index types should have semantic names like `IndexIntoCallNodeTable`, not plain `number`.
 - Don't create a new file for a single small function unless it's a logically separate module.
 - Anything that should survive a reload or be shareable belongs in URL state, and shape changes need a `CURRENT_URL_VERSION` bump plus an upgrader in `src/app-logic/url-handling.ts`.
-- User-facing strings go through Fluent (`<Localized>` or `localize()`). When changing the text of a string that is already on `main`, always rename its key so the change is picked up. Strings that only exist on your branch can be edited in place. Only edit `locales/en-US/app.ftl`. Other locales come from Pontoon. IDs follow `ComponentName--string-summary`. See `locales/README.md` for when to add comments for variables and context.
 - Test behavior, not implementation details. Don't add unit tests that just restate the code.
 - Build test profiles with `getProfileFromTextSamples()` from `src/test/fixtures/profiles/processed-profile.ts` instead of writing them by hand. Store tests create a store with `storeWithProfile()` from `src/test/fixtures/stores.ts`, dispatch actions and assert on selectors. Component tests use React Testing Library through `src/test/fixtures/testing-library.tsx`.
 - Timeline, flame graph and stack chart render to canvas, so component tests assert on draw calls or snapshots rather than DOM text.
+
+## Localization
+
+User-facing strings go through Fluent (`<Localized>` or `localize()`). Only edit `locales/en-US/app.ftl`. Other locales come from Pontoon. IDs follow `ComponentName--string-summary`.
+
+- When the meaning of a string that is already on `main` changes, including what one of its variables means, or when an attribute (like `.title`) is added or removed, rename its key so the change is picked up. Strings that only exist on your branch can be edited in place.
+- Localizers see one string at a time in Pontoon, so every comment must make sense on its own. Never write "same as the previous string" or "see above".
+- Document every variable under a `# Variables:` line as `#   $name (Type) - meaning`. A variable name must mean the same thing in every string of a group.
+- Don't comment strings that are already clear. Add a comment when a short string doesn't tell where it's shown or what it refers to.
+- Translations can be much longer than English. Let text wrap, or in single-line controls like tabs, truncate or scroll.
 
 ## Code comments
 
