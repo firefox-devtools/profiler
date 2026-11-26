@@ -644,6 +644,7 @@ export function stateFromLocation(
     highlightedLine: null,
     highlightedColumn: null,
     isPrettyPrinted: query.sourceViewPretty !== undefined,
+    prefersPrettyPrinting: query.sourceViewPretty !== undefined,
   };
   const assemblyView: AssemblyViewState = {
     isOpen: false,

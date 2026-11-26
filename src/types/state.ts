@@ -281,9 +281,13 @@ export type SourceViewState = {
   highlightedLine: number | null;
   // The column number on the highlighted line, if known.
   highlightedColumn: number | null;
-  // Whether JS code is pretty-printed in the source view. This stays the same
-  // when a different source is shown.
+  // Whether the source view shows the source pretty-printed. This is only
+  // true if the source can be pretty-printed, and it's the value in the URL.
   isPrettyPrinted: boolean;
+  // Whether the user turned pretty-printing on. Unlike isPrettyPrinted, this
+  // stays the same when a source that can't be pretty-printed is shown, so
+  // that pretty-printing comes back for the next JS source.
+  prefersPrettyPrinting: boolean;
 };
 
 export type AssemblyViewState = {

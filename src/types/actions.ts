@@ -371,10 +371,12 @@ type ProfileAction =
       readonly highlightedInstructionAddress: number | null;
       readonly scrollToColumnNumber?: number;
       readonly highlightedColumnNumber?: number;
+      readonly canPrettyPrint: boolean;
     }
   | {
       readonly type: 'SET_SOURCE_VIEW_PRETTY_PRINT';
       readonly isPrettyPrinted: boolean;
+      readonly canPrettyPrint: boolean;
     }
   | {
       readonly type: 'OPEN_ASSEMBLY_VIEW';

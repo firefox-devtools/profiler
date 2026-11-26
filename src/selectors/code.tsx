@@ -9,6 +9,7 @@ import type {
   SourceCodeStatus,
   SourceFormattingStatus,
   Selector,
+  State,
 } from 'firefox-profiler/types';
 import {
   getSourceViewSourceIndex,
@@ -18,6 +19,8 @@ import {
 import {
   getProfileOrNull,
   getSourceViewFile,
+  getSourceTable,
+  getStringTable,
   getSourceViewStartLine,
   getSourceViewStartColumn,
 } from './profile';
@@ -71,6 +74,26 @@ function _getFormatDialectForFile(file: string | null): JsDialect | null {
     return null;
   }
   return getFormatDialectForPath(parseFileNameFromSymbolication(file).path);
+}
+
+/**
+ * Returns whether the source can be pretty-printed. Unlike
+ * getSourceViewFormatDialect, this works for any source, not just for the one
+ * in the source view.
+ */
+export function getCanPrettyPrintSource(
+  state: State,
+  sourceIndex: IndexIntoSourceTable | null
+): boolean {
+  if (sourceIndex === null) {
+    return false;
+  }
+  const fileNameStrIndex = getSourceTable(state).filename[sourceIndex];
+  if (fileNameStrIndex === null || fileNameStrIndex === undefined) {
+    return false;
+  }
+  const file = getStringTable(state).getString(fileNameStrIndex);
+  return _getFormatDialectForFile(file) !== null;
 }
 
 export const getSourceViewFormatDialect: Selector<JsDialect | null> =
