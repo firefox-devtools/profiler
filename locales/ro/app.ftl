@@ -218,6 +218,8 @@ CallTree--inlining-badge = (încorporate)
 
 CallTreeSidebar--select-a-node = Selectează un nod pentru afișarea informațiilor despre el.
 CallTreeSidebar--call-node-details = Detalii nod de apelare
+CallTreeSidebar--select-a-function = Selectează o funcție pentru afișarea informațiilor despre ea.
+CallTreeSidebar--function-details = Detalii funcție
 
 ## CallTreeSidebar timing information
 ##
@@ -884,6 +886,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Arbore de apelare
+TabBar--function-list-tab = Listă de funcții
 TabBar--flame-graph-tab = Grafic în flăcări
 TabBar--stack-chart-tab = Grafic în stive
 TabBar--marker-chart-tab = Grafic de marcaje

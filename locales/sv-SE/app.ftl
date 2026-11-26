@@ -828,6 +828,7 @@ ServiceWorkerManager--updated-while-not-ready =
     En ny version av applikationen tillämpades innan den här sidan
     var helt laddad. Du kan se fel.
 ServiceWorkerManager--new-version-is-ready = En ny version av applikationen har laddats ner och är redo att användas.
+ServiceWorkerManager--updating-after-error = En ny version av appen installeras. Sidan laddas om automatiskt när installationen är klar.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Dölj omladdningsmeddelandet
     .title = Dölj omladdningsmeddelandet
@@ -1218,6 +1219,27 @@ BottomBox--show-fullscreen =
     .title = Helskärm
 SourceView--close-button =
     .title = Stäng källvyn
+
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Sök
+    .placeholder = Sök
+CodeFindBar--previous-button = Föregående
+    .title = Hitta föregående matchning (Shift+Enter)
+CodeFindBar--next-button = Nästa
+    .title = Hitta nästa matchning (Enter)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Skiftlägeskänslig
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Reguljärt uttryck
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Hela ord
+CodeFindBar--close-button =
+    .title = Stäng sökfältet
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.

@@ -166,6 +166,8 @@ CallTree--inlining-badge = (incorporada)
 
 CallTreeSidebar--select-a-node = Selecciona un nodo para mostrar información sobre él.
 CallTreeSidebar--call-node-details = Detalles del nodo de llamada
+CallTreeSidebar--select-a-function = Selecciona una función para mostrar información sobre ella.
+CallTreeSidebar--function-details = Detalles de la función
 
 ## CallTreeSidebar timing information
 ##
@@ -793,6 +795,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Árbol de llamadas
+TabBar--function-list-tab = Lista de funciones
 TabBar--flame-graph-tab = Gráfico de flamas
 TabBar--stack-chart-tab = Gráfico de barras apiladas
 TabBar--marker-chart-tab = Gráfico de marcas
