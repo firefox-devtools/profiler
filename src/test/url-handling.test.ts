@@ -18,6 +18,7 @@ import {
   setDataSource,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  setSourceViewPrettyPrint,
   changeShowUserTimings,
   changeStackChartSameWidths,
   changeIncludeIdleSamples,
@@ -2125,6 +2126,69 @@ describe('URL persistence of bottom box (source view and assembly view)', functi
     expect(
       urlStateSelectors.getAssemblyViewNativeSymbol(newStore.getState())
     ).toBeNull();
+  });
+
+  describe('pretty-printing', function () {
+    function setupWithJsAndCppSources() {
+      const { profile } = getProfileFromTextSamples(`
+        A[file:bundle.js]  B[file:main.cpp]
+      `);
+      const store = _getStoreWithURL({}, profile);
+      const stringTable = StringTable.withBackingArray(
+        profile.shared.stringArray
+      );
+      const openSource = (sourceFile: string) => {
+        const sourceIndex = profile.shared.sources.filename.indexOf(
+          stringTable.indexForString(sourceFile)
+        );
+        store.dispatch(
+          updateBottomBoxContentsAndMaybeOpen('calltree', {
+            sourceIndex,
+            nativeSymbols: [],
+            initialNativeSymbol: null,
+            highlightedLineNumber: null,
+            highlightedInstructionAddress: null,
+          })
+        );
+      };
+      return { ...store, openSource };
+    }
+
+    it('persists pretty-printing of the source view', function () {
+      const { dispatch, getState, openSource } = setupWithJsAndCppSources();
+      openSource('bundle.js');
+      expect(getQueryStringFromState(getState())).not.toContain('Pretty');
+
+      dispatch(setSourceViewPrettyPrint(true));
+      expect(getQueryStringFromState(getState())).toContain('sourceViewPretty');
+      let newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+      expect(
+        urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+      ).toBeTrue();
+
+      dispatch(setSourceViewPrettyPrint(false));
+      newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+      expect(
+        urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+      ).toBeFalse();
+    });
+
+    it('leaves pretty-printing out of the URL while a non-JS source is shown', function () {
+      const { dispatch, getState, openSource } = setupWithJsAndCppSources();
+      openSource('bundle.js');
+      dispatch(setSourceViewPrettyPrint(true));
+
+      openSource('main.cpp');
+      expect(getQueryStringFromState(getState())).not.toContain('Pretty');
+      const newStore = _getStoreFromStateAfterUrlRoundtrip(getState());
+      expect(
+        urlStateSelectors.getSourceViewIsPrettyPrinted(newStore.getState())
+      ).toBeFalse();
+
+      // Pretty-printing comes back for the next JS source.
+      openSource('bundle.js');
+      expect(getQueryStringFromState(getState())).toContain('sourceViewPretty');
+    });
   });
 
   it('keeps a closed bottom box closed, even if a source file was loaded before', function () {

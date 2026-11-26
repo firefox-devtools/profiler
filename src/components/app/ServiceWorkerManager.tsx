@@ -12,13 +12,14 @@ import {
   getDataSource,
   getProfileUrl,
 } from 'firefox-profiler/selectors/url-state';
-import { getView } from 'firefox-profiler/selectors/app';
+import { getView, getUrlSetupPhase } from 'firefox-profiler/selectors/app';
 import { getSymbolicationStatus } from 'firefox-profiler/selectors/profile';
 import type {
   State as AppState,
   DataSource,
   Phase,
   SymbolicationStatus,
+  UrlSetupPhase,
 } from 'firefox-profiler/types';
 
 import type { ConnectedProps } from 'firefox-profiler/utils/connect';
@@ -30,6 +31,7 @@ type StateProps = {
   readonly profileUrl: string;
   readonly phase: Phase;
   readonly symbolicationStatus: SymbolicationStatus;
+  readonly urlSetupPhase: UrlSetupPhase;
 };
 type Props = ConnectedProps<{}, StateProps, {}>;
 
@@ -38,6 +40,9 @@ type State = {
   installStatus: InstallStatus;
   isNoticeDisplayed: boolean;
   updatedWhileNotReady: boolean;
+  // True while the browser downloads the assets of a new version, after a
+  // previous version was already installed.
+  isUpdateInstalling: boolean;
 };
 
 /**
@@ -84,6 +89,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     installStatus: 'idle',
     isNoticeDisplayed: false,
     updatedWhileNotReady: false,
+    isUpdateInstalling: false,
   };
 
   _workbox: Workbox | null = null;
@@ -106,12 +112,10 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       // - step 8.21 in https://w3c.github.io/ServiceWorker/#update-algorithm
       updateViaCache: 'none',
     }));
-    wb.register();
-
-    wb.addEventListener('installing', () => {
-      console.log(
-        '[ServiceWorker] An update has been found and the browser is downloading the new assets.'
-      );
+    wb.register().then((registration) => {
+      if (registration) {
+        this._watchUpdateInstallation(registration);
+      }
     });
 
     wb.addEventListener('installed', () => {
@@ -127,6 +131,7 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       this.setState({
         installStatus: 'pending',
         isNoticeDisplayed: true,
+        isUpdateInstalling: false,
       });
     });
 
@@ -146,7 +151,8 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
       // In another page, the user clicked on the "Apply and reload" button.
 
       const ready =
-        !this._hasDataSourceProfile() || this._isProfileLoadedAndReady();
+        this.props.urlSetupPhase === 'done' &&
+        (!this._hasDataSourceProfile() || this._isProfileLoadedAndReady());
 
       this.setState({
         installStatus: 'controlling',
@@ -154,6 +160,33 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
         updatedWhileNotReady: !ready,
       });
     });
+  }
+
+  // Workbox never emits its 'installing' event: it only starts listening to the
+  // state changes of a new service worker once that worker is already
+  // installing. That's why we watch the registration directly.
+  _watchUpdateInstallation(registration: ServiceWorkerRegistration) {
+    const onUpdateFound = () => {
+      const installingWorker = registration.installing;
+      // Without a controller, this is the first installation, not an update.
+      if (!installingWorker || !navigator.serviceWorker.controller) {
+        return;
+      }
+      console.log(
+        '[ServiceWorker] An update has been found and the browser is downloading the new assets.'
+      );
+      this.setState({ isUpdateInstalling: true });
+      installingWorker.addEventListener('statechange', () => {
+        if (installingWorker.state === 'redundant') {
+          // The installation failed, or the new service worker was superseded.
+          this.setState({ isUpdateInstalling: false });
+        }
+      });
+    };
+
+    registration.addEventListener('updatefound', onUpdateFound);
+    // The installation might have started before register() resolved.
+    onUpdateFound();
   }
 
   _hasDataSourceProfile(): boolean {
@@ -205,7 +238,13 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   // This function checks whether we can safely update the service worker,
   // using the state of the running application.
   _canUpdateServiceWorker(): boolean {
-    const { dataSource, profileUrl } = this.props;
+    const { dataSource, profileUrl, urlSetupPhase } = this.props;
+
+    if (urlSetupPhase !== 'done') {
+      // The dataSource isn't known before the URL setup is done. It still has
+      // its default value 'none'.
+      return false;
+    }
 
     // We use a switch here, to make sure that when somebody adds a new
     // dataSource, we'll get a flow error if they forget to update here. This is
@@ -254,21 +293,40 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
     }
   }
 
-  override componentDidUpdate() {
+  // If we got a fatal error, a new version of the application might fix it,
+  // for example when the profile uses a format version that this version
+  // doesn't understand. In that case we update automatically.
+  _shouldUpdateBecauseOfError(): boolean {
     const { phase, dataSource } = this.props;
-    const { installStatus } = this.state;
-
-    if (
-      this._workbox &&
-      installStatus !== 'idle' &&
+    return (
+      this._workbox !== null &&
       phase === 'FATAL_ERROR' &&
-      dataSource !== 'from-file' // we can't reload and keep the context for this dataSource.
-    ) {
-      // If we got a fatal error and a new version of the application is
-      // available, let's try to reload automatically, as this might fix the
-      // fatal error.
-      this._workbox.messageSkipWaiting();
-      this.reloadPage();
+      // We can't reload and keep the context for this dataSource.
+      dataSource !== 'from-file'
+    );
+  }
+
+  override componentDidUpdate() {
+    if (!this._shouldUpdateBecauseOfError()) {
+      return;
+    }
+
+    switch (this.state.installStatus) {
+      case 'pending':
+        // The new version is waiting. Activate it; the 'controlling' handler
+        // reloads the page once the new version controls it. Reloading before
+        // that could load the old version again.
+        this.applyServiceWorkerUpdate();
+        break;
+      case 'controlling':
+        // Another tab already applied the new version.
+        this.reloadPage();
+        break;
+      case 'idle':
+      case 'activating':
+        break;
+      default:
+        throw assertExhaustiveCheck(this.state.installStatus);
     }
   }
 
@@ -338,7 +396,35 @@ class ServiceWorkerManagerImpl extends PureComponent<Props, State> {
   }
 
   override render() {
-    const { isNoticeDisplayed, updatedWhileNotReady } = this.state;
+    const {
+      isNoticeDisplayed,
+      updatedWhileNotReady,
+      isUpdateInstalling,
+      installStatus,
+    } = this.state;
+
+    if (
+      this._shouldUpdateBecauseOfError() &&
+      (isUpdateInstalling || installStatus !== 'idle')
+    ) {
+      // Tell the user that the error page will go away on its own, so that
+      // they don't reload manually. A manual reload keeps the old version.
+      return (
+        <div className="serviceworker-ready-notice-wrapper">
+          {/* We use the wrapper to horizontally center the notice */}
+          <div className="photon-message-bar serviceworker-ready-notice">
+            <div className="photon-message-bar-inner-content">
+              <div className="photon-message-bar-inner-text">
+                <Localized id="ServiceWorkerManager--updating-after-error">
+                  A new version of the application is being installed. The page
+                  will reload automatically when it’s ready.
+                </Localized>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     if (!isNoticeDisplayed) {
       return null;
@@ -420,6 +506,7 @@ export const ServiceWorkerManager = explicitConnect<{}, StateProps, {}>({
     dataSource: getDataSource(state),
     profileUrl: getProfileUrl(state),
     symbolicationStatus: getSymbolicationStatus(state),
+    urlSetupPhase: getUrlSetupPhase(state),
   }),
   component: ServiceWorkerManagerImpl,
 });

@@ -171,6 +171,8 @@ CallTree--inlining-badge = (satır içi)
 
 CallTreeSidebar--select-a-node = Hakkındaki bilgileri görüntülemek için bir düğüm seçin.
 CallTreeSidebar--call-node-details = Çağrı düğümü ayrıntıları
+CallTreeSidebar--select-a-function = Hakkında bilgileri görüntülemek için bir fonksiyon seçin.
+CallTreeSidebar--function-details = Fonksiyon ayrıntıları
 
 ## CallTreeSidebar timing information
 ##
@@ -457,6 +459,8 @@ MenuButtons--index--metaInfo-button =
     .label = Profil Bilgileri
 MenuButtons--index--full-view = Tam Görünüm
 MenuButtons--index--cancel-upload = Yüklemeyi İptal Et
+MenuButtons--index--save =
+    .label = Kaydet…
 MenuButtons--index--share =
     .label = Paylaş…
 MenuButtons--index--reshare =
@@ -623,6 +627,7 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
     .title = Bu profil gizli gezinti verileri içeriyor
 MenuButtons--publish--share-performance-profile = Performans Profilini Paylaş
 MenuButtons--publish--reshare-performance-profile = Performans Profilini Yeniden Paylaş
+MenuButtons--publish--save-performance-profile = Performans profilini kaydet
 MenuButtons--publish--info-description = Profilinizi yükleyerek bağlantıya sahip herkesin erişmesini sağlayın.
 MenuButtons--publish--download-info-description = Bu profili bilgisayarınıza dosya olarak kaydedin.
 MenuButtons--publish--info-description-default = Varsayılan olarak kişisel verileriniz kaldırılır.
@@ -633,6 +638,7 @@ MenuButtons--publish--upload-title = Profil yükleniyor…
 MenuButtons--publish--cancel-upload = Yüklemeyi iptal et
 MenuButtons--publish--message-something-went-wrong = Profil yüklenirken bir hata oluştu.
 MenuButtons--publish--message-try-again = Yeniden dene
+MenuButtons--publish--save = Kaydet
 MenuButtons--publish--compressing = Sıkıştırılıyor…
 MenuButtons--publish--error-while-compressing = Sıkıştırma sırasında hata oluştu. Profil boyutunu küçültmek için bazı onay kutularının işaretini kaldırmayı deneyin.
 
@@ -747,6 +753,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Bu sayfa tam olarak yüklenmeden önce uygulamanın
     yeni bir sürümü uygulandı. Sayfayı hatalı görebilirsiniz.
 ServiceWorkerManager--new-version-is-ready = Uygulamanın yeni sürümü indirildi ve kullanıma hazır.
+ServiceWorkerManager--updating-after-error = Uygulamanın yeni sürümü yükleniyor. Hazır olduğunda sayfa otomatik olarak yeniden yüklenecek.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Yeniden yükleme bildirimini gizle
     .title = Yeniden yükleme bildirimini gizle
@@ -781,6 +788,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Çağrı Ağacı
+TabBar--function-list-tab = Fonksiyon listesi
 TabBar--flame-graph-tab = Alev Grafiği
 TabBar--stack-chart-tab = Yığın Grafiği
 TabBar--marker-chart-tab = İşaret Grafiği
@@ -832,6 +840,24 @@ TrackNameButton--hide-track =
 # This button appears when hovering a global track name and is displayed as an X icon.
 TrackNameButton--hide-process =
     .title = İşlemi gizle
+
+## TrackMemoryGraph
+## This is used to show the memory graph of that process in the timeline part of
+## the UI. To learn more about it, visit:
+## https://profiler.firefox.com/docs/#/./memory-allocations?id=memory-track
+
+# Variables:
+#   $value (String) - the relative memory at this time (e.g. "5MB")
+TrackMemoryGraph--relative-memory-at-this-time2 = { $value }
+    .label = bu süredeki göreli bellek
+# Variables:
+#   $value (String) - the memory range across the graph (e.g. "5MB")
+TrackMemoryGraph--memory-range-in-graph2 = { $value }
+    .label = grafikteki bellek aralığı
+# Variables:
+#   $value (String) - count of allocations and deallocations since the previous sample
+TrackMemoryGraph--allocations-and-deallocations-since-the-previous-sample2 = { $value }
+    .label = önceki örnekten beri yapılan atamalar ve serbest bırakmalar
 
 ## TrackProcessCPUGraph
 ## This is used to show the CPU usage of a process over time in the timeline.
@@ -885,6 +911,11 @@ TrackPower--tooltip-average-power-watt = { $value } W
 # Variables:
 #   $value (String) - the power value at this location
 TrackPower--tooltip-average-power-milliwatt = { $value } mW
+    .label = Geçerli seçimdeki ortalama güç
+# This is used in the tooltip when the power value uses the microwatt unit.
+# Variables:
+#   $value (String) - the power value at this location
+TrackPower--tooltip-average-power-microwatt = { $value } μW
     .label = Geçerli seçimdeki ortalama güç
 # This is used in the tooltip when the energy used in the current range uses the
 # kilowatt-hour unit.

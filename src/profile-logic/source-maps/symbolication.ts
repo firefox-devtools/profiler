@@ -74,11 +74,8 @@ import {
   shallowCloneSourceLocationTable,
 } from 'firefox-profiler/profile-logic/data-structures';
 import { StringTable } from 'firefox-profiler/utils/string-table';
-import {
-  parseJsScopeTree,
-  findInnermostFunctionScope,
-  dialectForFilename,
-} from './scope-tree';
+import { parseJsScopeTree, findInnermostFunctionScope } from './scope-tree';
+import { dialectForFilename } from 'firefox-profiler/profile-logic/js-format/dialect';
 import {
   buildLineOffsets,
   offsetToLineCol,

@@ -26,7 +26,7 @@ export interface CommandResult {
  * Execute a command and return stdout, stderr, and exit code.
  * Simple replacement for execa that works with Jest without ESM complications.
  */
-function exec(
+export function exec(
   command: string,
   args: string[],
   options: {

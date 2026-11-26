@@ -212,8 +212,10 @@ CallTree--inlining-badge = (ενσωματωμένη)
 ## This is the sidebar component that is used in Call Tree, Function List and
 ## Flame Graph panels.
 
-CallTreeSidebar--select-a-node = Επιλέξτε κόμβο για προβολή πληροφοριών σχετικά με αυτόν.
+CallTreeSidebar--select-a-node = Επιλέξτε έναν κόμβο για να δείτε πληροφορίες σχετικά με αυτόν.
 CallTreeSidebar--call-node-details = Λεπτομέρειες κόμβου κλήσης
+CallTreeSidebar--select-a-function = Επιλέξτε μια συνάρτηση για να δείτε πληροφορίες σχετικά με αυτή.
+CallTreeSidebar--function-details = Λεπτομέρειες συνάρτησης
 
 ## CallTreeSidebar timing information
 ##
@@ -494,7 +496,7 @@ MarkerSettings--copy-table-exceeed-max-rows = Ο αριθμός σειρών υ�
 ## MarkerSidebar
 ## This is the sidebar component that is used in Marker Table panel.
 
-MarkerSidebar--select-a-marker = Επιλέξτε σημάδι για προβολή πληροφοριών σχετικά με αυτό.
+MarkerSidebar--select-a-marker = Επιλέξτε έναν δείκτη για να δείτε πληροφορίες σχετικά με αυτόν.
 
 ## MarkerTable
 ## This is the component for Marker Table panel.
@@ -826,6 +828,7 @@ ServiceWorkerManager--updated-while-not-ready =
     Εφαρμόστηκε μια νέα έκδοση της εφαρμογής προτού φορτωθεί πλήρως
     αυτή η σελίδα. Ενδέχεται να δείτε δυσλειτουργίες.
 ServiceWorkerManager--new-version-is-ready = Έγινε λήψη μιας νέας έκδοσης της εφαρμογής και είναι έτοιμη για χρήση.
+ServiceWorkerManager--updating-after-error = Γίνεται εγκατάσταση μιας νέας έκδοσης της εφαρμογής. Η σελίδα θα ανανεωθεί αυτόματα όταν είναι έτοιμη.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Απόκρυψη σημείωσης επαναφόρτωσης
     .title = Απόκρυψη σημείωσης επαναφόρτωσης
@@ -868,6 +871,7 @@ StackSettings--panel-search =
 ## Tab Bar for the bottom half of the analysis UI.
 
 TabBar--calltree-tab = Δέντρο κλήσεων
+TabBar--function-list-tab = Λίστα συναρτήσεων
 TabBar--flame-graph-tab = Γράφημα φλόγας
 TabBar--stack-chart-tab = Διάγραμμα στοιβών
 TabBar--marker-chart-tab = Διάγραμμα δεικτών
@@ -1215,6 +1219,27 @@ BottomBox--show-fullscreen =
     .title = Πλήρης οθόνη
 SourceView--close-button =
     .title = Κλείσιμο προβολής πηγής
+
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Εύρεση
+    .placeholder = Εύρεση
+CodeFindBar--previous-button = Προηγούμενο
+    .title = Εύρεση προηγούμενης αντιστοιχίας (Shift+Enter)
+CodeFindBar--next-button = Επόμενο
+    .title = Εύρεση επόμενης αντιστοιχίας (Enter)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Ταίριασμα πεζών-κεφαλαίων
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Κανονική έκφραση
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Ολόκληρες λέξεις
+CodeFindBar--close-button =
+    .title = Κλείσιμο γραμμής εύρεσης
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.

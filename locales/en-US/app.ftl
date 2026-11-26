@@ -897,6 +897,8 @@ ServiceWorkerManager--updated-while-not-ready =
     was fully loaded. You might see malfunctions.
 ServiceWorkerManager--new-version-is-ready =
     A new version of the application has been downloaded and is ready to use.
+ServiceWorkerManager--updating-after-error =
+    A new version of the application is being installed. The page will reload automatically when it’s ready.
 ServiceWorkerManager--hide-notice-button =
     .title = Hide the reload notice
     .aria-label = Hide the reload notice
@@ -1342,6 +1344,27 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Close the source view
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .placeholder = Find
+    .aria-label = Find
+CodeFindBar--previous-button = Previous
+    .title = Find the previous match (Shift+Enter)
+CodeFindBar--next-button = Next
+    .title = Find the next match (Enter)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Match case
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Regular expression
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Whole words
+CodeFindBar--close-button =
+    .title = Close the find bar
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
@@ -1423,6 +1446,16 @@ SourceView--not-in-browser-error-when-obtaining-js-source =
     The browser was unable to obtain the source file for { $url } with sourceUuid { $sourceUuid }: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
+
+# The {} toggle button for pretty-printing the JavaScript code in the source
+# view, while the code is shown as it is. Pretty-printing adds line breaks and
+# indentation to make minified code easier to read.
+SourceView--pretty-print-show-button =
+    .title = Pretty print the code
+
+# The {} toggle button for pretty-printing, while the code is pretty-printed.
+SourceView--pretty-print-hide-button =
+    .title = Show the code without pretty printing
 
 # The toggle button for the assembly view, while the assembly view is hidden.
 # Assembly refers to the low-level programming language.

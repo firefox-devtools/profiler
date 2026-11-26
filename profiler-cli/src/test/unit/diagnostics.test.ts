@@ -255,18 +255,20 @@ describe('profiler-cli diagnostics', function () {
       );
       expect(message).toContain('version 78');
       expect(message).toContain('up to version 77 of the processed');
+      expect(message).toContain('profiler-cli self-update');
       expect(message).toContain(`npm install -g ${PACKAGE}@latest`);
       expect(message).not.toContain('mach bootstrap');
     });
 
-    it('points bootstrapped installs at mach bootstrap', function () {
+    it('points bootstrapped installs at self-update from Firefox CI', function () {
       const message = describeProfileVersionError(
         error,
         PACKAGE,
         path.join(tmpDir, 'mozbuild', 'profiler-cli', 'dist', 'profiler-cli.js')
       );
       expect(message).toContain('version 78');
-      expect(message).toContain('./mach bootstrap');
+      expect(message).toContain('profiler-cli self-update');
+      expect(message).toContain('Firefox CI');
       expect(message).not.toContain('npm install -g');
     });
 

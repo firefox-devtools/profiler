@@ -751,6 +751,7 @@ ServiceWorkerManager--pending-button = Appliquer et recharger
 ServiceWorkerManager--installed-button = Recharger l’application
 ServiceWorkerManager--updated-while-not-ready = Une nouvelle version de l’application a été appliquée avant que cette page ne soit complètement chargée. Vous pourriez constater des dysfonctionnements.
 ServiceWorkerManager--new-version-is-ready = Une nouvelle version de l’application a été téléchargée et est prête à être utilisée.
+ServiceWorkerManager--updating-after-error = Une nouvelle version de l’application est en cours d’installation. La page se rechargera automatiquement dès qu’elle sera prête.
 ServiceWorkerManager--hide-notice-button =
     .aria-label = Masquer l’avis de rechargement
     .title = Masquer l’avis de rechargement
@@ -1141,6 +1142,27 @@ BottomBox--show-fullscreen =
     .title = Plein écran
 SourceView--close-button =
     .title = Fermer la vue du code source
+
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Rechercher
+    .placeholder = Rechercher
+CodeFindBar--previous-button = Précédente
+    .title = Rechercher l’occurrence précédente (Maj+Entrée)
+CodeFindBar--next-button = Suivante
+    .title = Rechercher la prochaine occurrence (Entrée)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Respecter la casse
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Expression régulière
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Mots entiers
+CodeFindBar--close-button =
+    .title = Fermer la barre de recherche
 
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.

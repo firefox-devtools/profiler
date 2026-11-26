@@ -2,11 +2,15 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
+import { createPortal } from 'react-dom';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
 import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
+
+import type { CodeFindBarPortal } from 'firefox-profiler/utils/codemirror-shared';
+import { CodeFindBar } from './CodeFindBar';
 
 import './CodeView.css';
 
@@ -39,6 +43,10 @@ for understanding where time was actually spent in a program."
 type SourceViewProps = {
   readonly timings: LineTimings;
   readonly sourceCode: string;
+  // The lines of the pretty-printed code, or null if the code is shown as it
+  // is. If this is non-null, it's displayed instead of sourceCode, and all
+  // line numbers in the other props refer to the pretty-printed lines.
+  readonly formattedLines: string[] | null;
   readonly filePath: string | null;
   readonly scrollGeneration: number;
   readonly scrollToLineNumber?: number;
@@ -70,7 +78,15 @@ function remapTimingsToRelative(
   return { totalLineHits, selfLineHits };
 }
 
-export class SourceView extends React.PureComponent<SourceViewProps> {
+type SourceViewState = {
+  readonly findBar: CodeFindBarPortal | null;
+};
+
+export class SourceView extends React.PureComponent<
+  SourceViewProps,
+  SourceViewState
+> {
+  override state: SourceViewState = { findBar: null };
   _ref = React.createRef<HTMLDivElement>();
   _editor: SourceViewEditor | null = null;
 
@@ -101,7 +117,10 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
   }
 
   _getMaxLineNumber() {
-    const { sourceCode, timings, startLine } = this.props;
+    const { sourceCode, formattedLines, timings, startLine } = this.props;
+    if (formattedLines !== null) {
+      return formattedLines.length;
+    }
     const sourceLines = sourceCode.split('\n');
     let maxLineNumber = sourceLines.length;
     if (maxLineNumber <= 1) {
@@ -119,19 +138,30 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
     return maxLineNumber;
   }
 
-  _getSourceCodeOrFallback() {
-    const { sourceCode } = this.props;
+  _getSourceCodeOrFallback(): string | string[] {
+    const { sourceCode, formattedLines } = this.props;
+    if (formattedLines !== null) {
+      return formattedLines;
+    }
     if (sourceCode !== '') {
       return sourceCode;
     }
     return '\n'.repeat(this._getMaxLineNumber());
   }
 
+  _onFindBarChange = (findBar: CodeFindBarPortal | null) => {
+    this.setState({ findBar });
+  };
+
   override render() {
+    const { findBar } = this.state;
     return (
       <div className="sourceView codeView">
         <SourceViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
+        {findBar
+          ? createPortal(<CodeFindBar {...findBar.props} />, findBar.dom)
+          : null}
       </div>
     );
   }
@@ -156,7 +186,8 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
         remapTimingsToRelative(this.props.timings, this.props.startLine),
         this._getRelativeHighlightedLine(),
         this.props.startLine,
-        domParent
+        domParent,
+        this._onFindBarChange
       );
       this._editor = editor;
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
@@ -183,19 +214,29 @@ export class SourceView extends React.PureComponent<SourceViewProps> {
       this._editor.setStartLine(this.props.startLine);
     }
 
-    let contentsChanged = false;
-    if (
+    const sourceChanged =
       this.props.sourceCode !== prevProps.sourceCode ||
       (this.props.sourceCode === '' &&
         prevProps.sourceCode === '' &&
-        this.props.timings !== prevProps.timings)
-    ) {
+        this.props.timings !== prevProps.timings);
+    const formattingChanged =
+      this.props.formattedLines !== prevProps.formattedLines;
+    if (sourceChanged || formattingChanged) {
       this._editor.setContents(this._getSourceCodeOrFallback());
-      contentsChanged = true;
     }
 
+    // While the code is being pretty-printed, the formatted lines are updated
+    // a few times. Only scroll again if the scroll target moved, so that the
+    // user can scroll in the meantime.
+    const formattingToggled =
+      (this.props.formattedLines === null) !==
+      (prevProps.formattedLines === null);
+    const scrollTargetMoved =
+      this.props.scrollToLineNumber !== prevProps.scrollToLineNumber;
     if (
-      contentsChanged ||
+      sourceChanged ||
+      formattingToggled ||
+      (formattingChanged && scrollTargetMoved) ||
       this.props.scrollGeneration !== prevProps.scrollGeneration
     ) {
       // If an explicit line number is provided, scroll to it. Otherwise, scroll to the hotspot.
