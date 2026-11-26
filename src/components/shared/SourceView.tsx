@@ -5,9 +5,11 @@ import * as React from 'react';
 import { createPortal } from 'react-dom';
 
 import { ensureExists } from 'firefox-profiler/utils/types';
+import classNames from 'classnames';
 import type { LineTimings } from 'firefox-profiler/types';
 
 import type { SourceViewEditor } from './SourceView-codemirror';
+import type { FormattedLineLabels } from 'firefox-profiler/profile-logic/js-format/formatted-source';
 
 import type { CodeFindBarPortal } from 'firefox-profiler/utils/codemirror-shared';
 import { CodeFindBar } from './CodeFindBar';
@@ -47,6 +49,12 @@ type SourceViewProps = {
   // is. If this is non-null, it's displayed instead of sourceCode, and all
   // line numbers in the other props refer to the pretty-printed lines.
   readonly formattedLines: string[] | null;
+  // The labels for the line number gutter of the pretty-printed code, or null
+  // if the code is shown as it is.
+  readonly formattedLineLabels: FormattedLineLabels | null;
+  // Whether the code can be pretty-printed. Then the line number gutter has
+  // the same width in both modes, so that the code doesn't shift sideways.
+  readonly canPrettyPrint: boolean;
   readonly filePath: string | null;
   readonly scrollGeneration: number;
   readonly scrollToLineNumber?: number;
@@ -156,7 +164,11 @@ export class SourceView extends React.PureComponent<
   override render() {
     const { findBar } = this.state;
     return (
-      <div className="sourceView codeView">
+      <div
+        className={classNames('sourceView', 'codeView', {
+          sourceViewPrettyPrintable: this.props.canPrettyPrint,
+        })}
+      >
         <SourceViewHeader />
         <div className="codeMirrorContainer" ref={this._ref}></div>
         {findBar
@@ -186,6 +198,7 @@ export class SourceView extends React.PureComponent<
         remapTimingsToRelative(this.props.timings, this.props.startLine),
         this._getRelativeHighlightedLine(),
         this.props.startLine,
+        this.props.formattedLineLabels,
         domParent,
         this._onFindBarChange
       );
@@ -210,8 +223,14 @@ export class SourceView extends React.PureComponent<
     }
 
     const startLineChanged = this.props.startLine !== prevProps.startLine;
-    if (startLineChanged) {
-      this._editor.setStartLine(this.props.startLine);
+    if (
+      startLineChanged ||
+      this.props.formattedLineLabels !== prevProps.formattedLineLabels
+    ) {
+      this._editor.setLineNumbers(
+        this.props.startLine,
+        this.props.formattedLineLabels
+      );
     }
 
     const sourceChanged =

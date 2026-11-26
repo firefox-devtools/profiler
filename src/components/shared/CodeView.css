@@ -178,6 +178,17 @@
   text-overflow: ellipsis;
 }
 
+/* Use a wider line number gutter for files that can be pretty printed. When
+ * pretty printing is active, we show both line and column numbers in the
+ * gutter, and column numbers can be long. We use the wider width even when
+ * pretty printing is not currently active, so that there's no horizontal
+ * shift when the pretty print button is clicked. */
+.sourceViewPrettyPrintable .cm-lineNumbers .cm-gutterElement {
+  overflow: hidden;
+  width: 70px;
+  text-overflow: ellipsis;
+}
+
 .cm-nonZeroLine {
   background-color: var(--codeview-nonzero-background-color);
 }
