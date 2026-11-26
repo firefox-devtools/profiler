@@ -18,7 +18,12 @@
  *    a cm-nonZeroLine class to them. This highlight line goes across the entire
  *    width of the editor, it covers both the gutter and the main area.
  */
-import { EditorView, lineNumbers } from '@codemirror/view';
+import {
+  EditorView,
+  GutterMarker,
+  gutter,
+  lineNumbers,
+} from '@codemirror/view';
 import { EditorState, Compartment, Text } from '@codemirror/state';
 import { type LanguageSupport, syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
@@ -28,6 +33,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import clamp from 'clamp';
 
 import type { LineTimings } from 'firefox-profiler/types';
+import type { FormattedLineLabels } from 'firefox-profiler/profile-logic/js-format/formatted-source';
 import {
   timingsExtension,
   updateTimingsEffect,
@@ -44,7 +50,7 @@ const languageConf = new Compartment();
 const highlightedLineConf = new Compartment();
 
 // This "compartment" allows us to reconfigure the line number formatter when
-// startLine changes.
+// startLine or the line labels change.
 const lineNumbersConf = new Compartment();
 
 // Detect the right language based on the file extension.
@@ -95,8 +101,47 @@ function _toDoc(text: string | string[]): string | Text {
   return typeof text === 'string' ? text : Text.of(text);
 }
 
-// Creates a lineNumbers extension that displays line numbers offset by startLine - 1.
-function _lineNumbersForStartLine(startLine: number) {
+class LineLabelMarker extends GutterMarker {
+  label: string;
+
+  constructor(label: string) {
+    super();
+    this.label = label;
+  }
+
+  override eq(other: LineLabelMarker) {
+    return this.label === other.label;
+  }
+
+  override toDOM() {
+    return document.createTextNode(this.label);
+  }
+}
+
+// Creates a gutter which shows pretty-printed lines with the positions in the
+// original code where they start. It has the class of the line number gutter,
+// so that it looks the same.
+function _formattedLineNumbers(lineLabels: FormattedLineLabels) {
+  return gutter({
+    class: 'cm-lineNumbers',
+    lineMarker(view, line) {
+      const label = lineLabels.getLabel(
+        view.state.doc.lineAt(line.from).number
+      );
+      return new LineLabelMarker(label);
+    },
+  });
+}
+
+// Creates the line number gutter. Line numbers are offset by startLine - 1,
+// unless the code is pretty-printed and has line labels.
+function _lineNumbersExt(
+  startLine: number,
+  lineLabels: FormattedLineLabels | null
+) {
+  if (lineLabels !== null) {
+    return _formattedLineNumbers(lineLabels);
+  }
   if (startLine <= 1) {
     return lineNumbers();
   }
@@ -116,6 +161,7 @@ export class SourceViewEditor {
     timings: LineTimings,
     highlightedLine: number | null,
     startLine: number,
+    lineLabels: FormattedLineLabels | null,
     domParent: Element,
     onFindBarChange: (findBar: CodeFindBarPortal | null) => void
   ) {
@@ -123,7 +169,7 @@ export class SourceViewEditor {
       doc: _toDoc(initialText),
       extensions: [
         timingsExtension,
-        lineNumbersConf.of(_lineNumbersForStartLine(startLine)),
+        lineNumbersConf.of(_lineNumbersExt(startLine, lineLabels)),
         languageConf.of(_languageExtForPath(path)),
         highlightedLineConf.of(createHighlightedLineExtension(highlightedLine)),
         syntaxHighlighting(classHighlighter),
@@ -175,10 +221,12 @@ export class SourceViewEditor {
     });
   }
 
-  setStartLine(startLine: number) {
-    // Reconfigure the line numbers extension to display the new offset.
+  setLineNumbers(startLine: number, lineLabels: FormattedLineLabels | null) {
+    // Reconfigure the line numbers extension to display the new numbers.
     this._view.dispatch({
-      effects: lineNumbersConf.reconfigure(_lineNumbersForStartLine(startLine)),
+      effects: lineNumbersConf.reconfigure(
+        _lineNumbersExt(startLine, lineLabels)
+      ),
     });
   }
 

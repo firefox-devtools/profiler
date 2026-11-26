@@ -30,7 +30,34 @@ export type FormattedSource = {
   // start of the code, like in the source view. If the column is null, this
   // returns the formatted line for the start of the original line.
   getFormattedLine(line: number, column: number | null): number;
+  // Returns where the 1-based formatted line starts in the original code.
+  getOriginalLineStart(formattedLine: number): OriginalLineStart;
 };
+
+/**
+ * The 1-based line and column in the original code where a formatted line
+ * starts.
+ */
+export type OriginalLineStart = {
+  readonly line: number;
+  readonly column: number;
+  // Whether the formatted line starts with the first token of the original
+  // line, so that the line alone describes the start.
+  readonly isAtLineStart: boolean;
+};
+
+// Returns whether only spaces and tabs are in code[from, to).
+function _isBlank(code: string, from: number, to: number): boolean {
+  // Search backwards: in minified code, the character before a token is
+  // almost never blank, so this usually stops right away.
+  for (let i = to - 1; i >= from; i--) {
+    const char = code.charCodeAt(i);
+    if (char !== 32 && char !== 9) {
+      return false;
+    }
+  }
+  return true;
+}
 
 /**
  * Finds the line breaks in a string, in the same way as CodeMirror does:
@@ -102,6 +129,22 @@ function _getCachedLineStarts(code: string): number[] {
   return _lineStartsCache.lineStarts;
 }
 
+// The offsets of the line starts after the line breaks in code[from, to).
+function _getLineStartsInGap(
+  finder: LineBreakFinder,
+  from: number,
+  to: number
+): number[] {
+  const lineStarts = [];
+  let lineBreak = finder.next(from);
+  while (lineBreak !== -1 && lineBreak < to) {
+    const lineStart = lineBreak + finder.lengthAt(lineBreak);
+    lineStarts.push(lineStart);
+    lineBreak = finder.next(lineStart);
+  }
+  return lineStarts;
+}
+
 const _whitespaceStrings: Map<number, string> = new Map();
 
 function _getWhitespaceString(ws: number): string {
@@ -135,7 +178,8 @@ export function applyFormatEdits(
   const lines: string[] = [];
   // The offset in the original code where each formatted line starts, for all
   // lines after the first one. Lines which start with indentation from an
-  // edit start at the end of the edited gap.
+  // edit start at the end of the edited gap. Empty lines from an edit start
+  // at the matching empty line in the gap.
   const formattedLineStarts: number[] = [];
   const finder = new LineBreakFinder(code);
   let currentLine = '';
@@ -166,9 +210,17 @@ export function applyFormatEdits(
       currentLine += ' ';
     } else if (ws !== FORMAT_WS_NONE) {
       const lineBreaks = ws >> FORMAT_WS_NEWLINES_SHIFT;
+      const gapLineStarts = _getLineStartsInGap(finder, from, to);
       for (let j = 0; j < lineBreaks; j++) {
         lines.push(currentLine);
-        formattedLineStarts.push(to);
+        // Match the empty lines from the end of the gap, so that the last
+        // one matches the last empty line in the gap.
+        const gapLineIndex = gapLineStarts.length - lineBreaks + j;
+        formattedLineStarts.push(
+          j < lineBreaks - 1 && gapLineIndex >= 0
+            ? gapLineStarts[gapLineIndex]
+            : to
+        );
         currentLine = '';
       }
       currentLine = _getWhitespaceString(ws);
@@ -196,8 +248,29 @@ export function applyFormatEdits(
       }
       return 1 + bisectionRight(formattedLineStarts, offset);
     },
+    getOriginalLineStart(formattedLine: number): OriginalLineStart {
+      const index = formattedLine - 1;
+      const offset = index === 0 ? 0 : formattedLineStarts[index - 1];
+      const lineIndex = bisectionRight(originalLineStarts, offset) - 1;
+      const lineStart = originalLineStarts[lineIndex];
+      return {
+        line: lineIndex + 1,
+        column: offset - lineStart + 1,
+        isAtLineStart: _isBlank(code, lineStart, offset),
+      };
+    },
   };
 }
+
+/**
+ * The labels in the line number gutter of pretty-printed code. Each label
+ * says where the formatted line starts in the original file, for example
+ * "12" or "12:345", so that they match the positions in the profile.
+ */
+export type FormattedLineLabels = {
+  // Returns the label for a 1-based formatted line.
+  getLabel(formattedLine: number): string;
+};
 
 /**
  * What the source view needs to show pretty-printed code.
@@ -213,7 +286,30 @@ export type SourceViewFormatting = {
   // column numbers from the profile, which are relative to the start of the
   // file, not to the start of the source. This matters for inline scripts.
   readonly mapPositionToLine: PositionToLineMapper;
+  readonly lineLabels: FormattedLineLabels;
 };
+
+function _createLineLabels(
+  formattedSource: FormattedSource,
+  startLine: number,
+  startColumn: number
+): FormattedLineLabels {
+  function getLabel(formattedLine: number): string {
+    const start = formattedSource.getOriginalLineStart(formattedLine);
+    const line = start.line + startLine - 1;
+    // The first line of an inline script can start in the middle of a line
+    // of the page.
+    const isInFirstLine = start.line === 1;
+    if (start.isAtLineStart && (!isInFirstLine || startColumn === 1)) {
+      return String(line);
+    }
+    const column = isInFirstLine
+      ? start.column + startColumn - 1
+      : start.column;
+    return `${line}:${column}`;
+  }
+  return { getLabel };
+}
 
 export function createSourceViewFormatting(
   code: string,
@@ -233,5 +329,6 @@ export function createSourceViewFormatting(
           : column;
       return formattedSource.getFormattedLine(relativeLine, relativeColumn);
     },
+    lineLabels: _createLineLabels(formattedSource, startLine, startColumn),
   };
 }

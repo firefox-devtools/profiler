@@ -475,6 +475,45 @@ describe('createSourceViewFormatting', function () {
     expect(formatting.mapPositionToLine(10, 13)).toBe(2);
     expect(formatting.mapPositionToLine(11, 1)).toBe(3);
   });
+
+  function getLabels(code: string, startLine = 1, startColumn = 1) {
+    const { lines, lineLabels } = createSourceViewFormatting(
+      code,
+      { edits: formatJsCode(code, ''), isDone: true },
+      startLine,
+      startColumn
+    );
+    return lines.map((_, i) => lineLabels.getLabel(i + 1));
+  }
+
+  it('labels the lines with the positions where they start in the file', function () {
+    expect(getLabels('function a(){if(x){y()}}var c=1;\nd()')).toEqual([
+      '1',
+      '1:14',
+      '1:20',
+      '1:23',
+      '1:24',
+      '1:25',
+      '2',
+    ]);
+  });
+
+  it('only labels lines with a column if they start in the middle of a line', function () {
+    expect(
+      getLabels('class A {\n    foo() {\n        bar();\n    }\n}')
+    ).toEqual(['1', '2', '3', '4', '5']);
+  });
+
+  it('labels the lines of inline scripts with positions in the page', function () {
+    expect(getLabels('a();b();\nc()', 10, 9)).toEqual(['10:9', '10:13', '11']);
+    expect(getLabels('a();b();\nc()', 10, 1)).toEqual(['10', '10:5', '11']);
+  });
+
+  it('labels empty lines with the empty lines in the original code', function () {
+    const code = 'a();\n\n    b();\n\n\n\n    c();';
+    expect(format(code)).toBe('a();\n\nb();\n\nc();');
+    expect(getLabels(code)).toEqual(['1', '2', '3', '6', '7']);
+  });
 });
 
 describe('getFormatDialectForPath', function () {

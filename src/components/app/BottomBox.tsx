@@ -42,7 +42,10 @@ import {
   getSourceViewFormatDialect,
   getSourceViewFormatting,
 } from 'firefox-profiler/selectors/code';
-import type { SourceViewFormatting } from 'firefox-profiler/profile-logic/js-format/formatted-source';
+import type {
+  SourceViewFormatting,
+  FormattedLineLabels,
+} from 'firefox-profiler/profile-logic/js-format/formatted-source';
 import {
   getSourceViewFile,
   getSourceViewStartLine,
@@ -98,6 +101,7 @@ type Props = ConnectedProps<{}, StateProps, DispatchProps>;
 
 type DisplayedLines = {
   formattedLines: string[] | null;
+  formattedLineLabels: FormattedLineLabels | null;
   startLine: number;
   scrollToLineNumber?: number;
   highlightedLine: number | null;
@@ -119,14 +123,16 @@ function _getDisplayedLines(
   if (formatting === null) {
     return {
       formattedLines: null,
+      formattedLineLabels: null,
       startLine,
       scrollToLineNumber,
       highlightedLine,
     };
   }
-  const { lines, mapPositionToLine } = formatting;
+  const { lines, mapPositionToLine, lineLabels } = formatting;
   return {
     formattedLines: lines,
+    formattedLineLabels: lineLabels,
     startLine: 1,
     scrollToLineNumber:
       scrollToLineNumber !== undefined
@@ -353,6 +359,8 @@ class BottomBoxImpl extends React.PureComponent<Props> {
                 timings={globalLineTimings}
                 sourceCode={sourceCode}
                 formattedLines={sourceViewLines.formattedLines}
+                formattedLineLabels={sourceViewLines.formattedLineLabels}
+                canPrettyPrint={sourceViewCanPrettyPrint}
                 filePath={path}
                 scrollGeneration={sourceViewScrollGeneration}
                 scrollToLineNumber={sourceViewLines.scrollToLineNumber}
