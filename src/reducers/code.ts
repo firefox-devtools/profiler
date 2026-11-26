@@ -9,9 +9,11 @@ import type {
   SourcesAction,
   AssemblyCodeStatus,
   CodeState,
+  SourceFormattingCacheState,
 } from 'firefox-profiler/types';
 import { combineReducers } from 'redux';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
+import { updateFormatEdits } from 'firefox-profiler/profile-logic/js-format/formatted-source';
 
 const sourceCodeCache: Reducer<SourceCodeCacheState> = (
   state = { generation: 0, statuses: new Map() },
@@ -40,7 +42,18 @@ const sourceCodeCache: Reducer<SourceCodeCacheState> = (
   }
 };
 
-function _getSourceCodeStatus(action: SourcesAction): SourceCodeStatus {
+function _getSourceCodeStatus(
+  action: Extract<
+    SourcesAction,
+    {
+      type:
+        | 'SOURCE_CODE_LOADING_BEGIN_URL'
+        | 'SOURCE_CODE_LOADING_BEGIN_BROWSER_CONNECTION'
+        | 'SOURCE_CODE_LOADING_SUCCESS'
+        | 'SOURCE_CODE_LOADING_ERROR';
+    }
+  >
+): SourceCodeStatus {
   switch (action.type) {
     case 'SOURCE_CODE_LOADING_BEGIN_URL':
       return { type: 'LOADING', source: { type: 'URL', url: action.url } };
@@ -95,9 +108,64 @@ const assemblyCodeCache: Reducer<Map<string, AssemblyCodeStatus>> = (
   }
 };
 
+const sourceFormattingCache: Reducer<SourceFormattingCacheState> = (
+  state = { generation: 0, statuses: new Map() },
+  action
+) => {
+  switch (action.type) {
+    case 'SOURCE_FORMATTING_BEGIN': {
+      if (action.generation !== state.generation) {
+        return state;
+      }
+      const statuses = new Map(state.statuses);
+      statuses.set(action.sourceIndex, {
+        edits: new Int32Array(0),
+        isDone: false,
+      });
+      return { ...state, statuses };
+    }
+    case 'SOURCE_FORMATTING_PROGRESS': {
+      const { sourceIndex, keptEditCount, edits, isDone, generation } = action;
+      if (generation !== state.generation) {
+        // The worker was formatting a source of another profile, which may
+        // have the same index as a source that is being formatted now.
+        return state;
+      }
+      const oldStatus = state.statuses.get(sourceIndex);
+      if (oldStatus === undefined) {
+        return state;
+      }
+      const newEdits = updateFormatEdits(oldStatus.edits, keptEditCount, edits);
+      const statuses = new Map(state.statuses);
+      statuses.set(sourceIndex, { edits: newEdits, isDone });
+      return { ...state, statuses };
+    }
+    case 'SANITIZED_PROFILE_PUBLISHED': {
+      if (!action.translationMaps) {
+        return state;
+      }
+      const { oldSourceToNewSourcePlusOne } = action.translationMaps;
+      const statuses = new Map();
+      for (const [sourceIndex, status] of state.statuses) {
+        const newSourceIndexPlusOne = oldSourceToNewSourcePlusOne[sourceIndex];
+        if (newSourceIndexPlusOne !== 0) {
+          statuses.set(newSourceIndexPlusOne - 1, status);
+        }
+      }
+      return { ...state, statuses };
+    }
+    case 'PROFILE_LOADED':
+      // The source indexes only mean something for the profile they came from.
+      return { generation: state.generation + 1, statuses: new Map() };
+    default:
+      return state;
+  }
+};
+
 const code: Reducer<CodeState> = combineReducers({
   sourceCodeCache,
   assemblyCodeCache,
+  sourceFormattingCache,
 });
 
 export default code;
