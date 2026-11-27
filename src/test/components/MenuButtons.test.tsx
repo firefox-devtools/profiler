@@ -1209,10 +1209,15 @@ describe('app/MenuButtons', function () {
       enableSourceCode();
       expect(getSourcePresetLabels()).toEqual([
         'Current file',
+        'Web code from the selected threads',
         'Files from the selected threads',
         'All files',
       ]);
       expect(getSourcePresetOption('Current file')).toBeDisabled();
+      // The profile only has native files, so there's no web code either.
+      expect(
+        getSourcePresetOption('Web code from the selected threads')
+      ).toBeDisabled();
       // Turning the option on starts from the narrowest preset.
       expect(getCheckedSourcePreset()).toBe('Files from the selected threads');
 
@@ -1274,6 +1279,7 @@ describe('app/MenuButtons', function () {
       expect(querySourceCodeCheckbox()).toBeChecked();
       expect(getSourcePresetLabels()).toEqual([
         'Current file',
+        'Web code from the selected threads',
         'Files from the selected threads',
         'All files',
       ]);

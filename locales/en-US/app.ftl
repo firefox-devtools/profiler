@@ -805,6 +805,10 @@ MenuButtons--publish--source-code-rights-notice = These files will be public. On
 MenuButtons--publish--source-code-preset-label = Include:
 # The file shown in the source view.
 MenuButtons--publish--source-code-preset-current-file = Current file
+# The JavaScript files of web pages and extensions that ran on the threads
+# selected in the timeline, and the files their source maps produced. Leaves
+# out the browser's own code and native code.
+MenuButtons--publish--source-code-preset-web-code = Web code from the selected threads
 # The files with code that runs on the threads selected in the timeline.
 MenuButtons--publish--source-code-preset-selected-threads = Files from the selected threads
 MenuButtons--publish--source-code-preset-all-files = All files

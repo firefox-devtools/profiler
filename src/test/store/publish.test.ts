@@ -91,6 +91,7 @@ import {
   commitRange,
   updateBottomBoxContentsAndMaybeOpen,
   closeBottomBox,
+  changeSelectedThreads,
 } from '../../actions/profile-view';
 import { changeTabFilter, loadProfile } from '../../actions/receive-profile';
 
@@ -537,6 +538,40 @@ describe('getRemoveProfileInformation', function () {
       dispatch(updateSharingOption('upload', 'includeUrls', true));
       expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
         new Set([0, 1])
+      );
+    });
+
+    it('offers the web code of the selected threads, and starts from it', function () {
+      const { profile } = getProfileFromTextSamples(
+        `
+          page[file:https://example.com/app.js]
+          addon[file:moz-extension://8e5a1b2c/content.js]
+          internal[file:resource://gre/modules/Foo.sys.mjs]
+          native[file:${LOCAL_FILE}]
+        `,
+        `other[file:https://example.org/other.js]`
+      );
+      profile.shared.sources.content.fill(SOURCE);
+      const { getState, dispatch } = storeWithProfile(profile);
+      dispatch(changeSelectedThreads(new Set([0])));
+      const pathsOf = (sourceIndexes: ReadonlySet<IndexIntoSourceTable>) =>
+        getSourceCodeSharingFiles(getState(), 'upload')
+          .filter(({ sourceIndex }) => sourceIndexes.has(sourceIndex))
+          .map(({ path }) => path);
+
+      // The browser's own code, native code and the other thread stay out.
+      expect(
+        pathsOf(getSourceFilesForPresets(getState(), 'upload')['web-code'])
+      ).toEqual([
+        'https://example.com/app.js',
+        'moz-extension://8e5a1b2c/content.js',
+      ]);
+
+      // Nothing is open in the source view, so turning the option on starts
+      // from the web code.
+      dispatch(turnOnSourceCodeSharing('upload'));
+      expect(getActiveSourceSharingPreset(getState(), 'upload')).toBe(
+        'web-code'
       );
     });
   });

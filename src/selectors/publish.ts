@@ -238,6 +238,29 @@ export const getSourceFilesForSelectedThreads: DangerousSelectorWithArguments<
   )
 );
 
+const getWebCodeSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
+  createSelector(
+    getSourceCodeSharingCandidates,
+    (candidates) =>
+      new Set(
+        candidates
+          .filter((candidate) => candidate.isWebCode)
+          .map((candidate) => candidate.sourceIndex)
+      )
+  );
+
+// The "Web code from the selected threads" preset.
+const getSourceFilesForWebCode: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceFilesForSelectedThreads(state, mode),
+    getWebCodeSources,
+    _intersect
+  )
+);
+
 const getSourceTreeRootWeights: Selector<Map<string, number>> = createSelector(
   getProfile,
   getStackTable,
@@ -329,10 +352,12 @@ export const getSourceFilesForPresets: DangerousSelectorWithArguments<
 > = _perSharingMode((mode) =>
   createSelector(
     (state: State) => getSourceFilesForCurrentFile(state, mode),
+    (state: State) => getSourceFilesForWebCode(state, mode),
     (state: State) => getSourceFilesForSelectedThreads(state, mode),
     (state: State) => getShareableSources(state, mode),
     (
       currentFile,
+      webCode,
       selectedThreads,
       allFiles
     ): Record<
@@ -340,6 +365,7 @@ export const getSourceFilesForPresets: DangerousSelectorWithArguments<
       ReadonlySet<IndexIntoSourceTable>
     > => ({
       'current-file': currentFile,
+      'web-code': webCode,
       'selected-threads': selectedThreads,
       'all-files': allFiles,
     })

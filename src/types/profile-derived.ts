@@ -785,6 +785,9 @@ export type SourceCodeSharingCandidate = {
   // Whether the file, or the bundle a source map produced it from, comes from
   // an extension.
   isFromExtension: boolean;
+  // Whether this is the code of a web page or an extension: the file, or the
+  // bundle a source map produced it from, has a web or extension URL.
+  isWebCode: boolean;
 };
 
 /**
@@ -898,6 +901,7 @@ export type SourceCodeSharingSummary = {
  */
 export type OfferedSourceSharingPreset =
   | 'current-file'
+  | 'web-code'
   | 'selected-threads'
   | 'all-files';
 

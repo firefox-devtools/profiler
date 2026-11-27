@@ -72,6 +72,7 @@ export function computeSourceContentsForSharing(
 const INTERNAL_URL_SCHEMES = new Set(['chrome', 'resource', 'moz-src']);
 
 const EXTENSION_URL_REGEX = /^moz-extension:\/\//i;
+const WEB_CODE_URL_REGEX = /^(?:https?|file|moz-extension):\/\//i;
 
 function _splitPath(path: string): string[] {
   return path.split('/').filter((s) => s !== '');
@@ -358,6 +359,7 @@ export function computeSourceCodeSharingCandidates(
       isFromSourceMap: generated !== undefined,
       hasRemovableUrl: names.some((name) => removeURLs(name) !== name),
       isFromExtension: names.some((name) => EXTENSION_URL_REGEX.test(name)),
+      isWebCode: names.some((name) => WEB_CODE_URL_REGEX.test(name)),
     });
   }
   return candidates;
@@ -789,7 +791,7 @@ export function setSharedSourceCode(
 
 // The presets the publish panel offers, narrowest first.
 export const OFFERED_SOURCE_SHARING_PRESETS: readonly OfferedSourceSharingPreset[] =
-  ['current-file', 'selected-threads', 'all-files'];
+  ['current-file', 'web-code', 'selected-threads', 'all-files'];
 
 // The narrowest preset that selects any file, or null if they're all empty.
 export function findNarrowestNonEmptyPreset(

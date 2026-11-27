@@ -278,6 +278,7 @@ describe('computeSourceCodeSharingCandidates', function () {
         isFromSourceMap: false,
         hasRemovableUrl: false,
         isFromExtension: false,
+        isWebCode: false,
       },
     ]);
   });
@@ -457,20 +458,32 @@ describe('computeSourceCodeSharingCandidates', function () {
       'app.js',
     ]);
   });
+
+  it('tells the code of web pages and extensions apart', function () {
+    const candidates = setupWithWebAndExtensionFiles();
+    // The source-mapped file counts too, since its bundle came from the page.
+    expect(
+      filePaths(candidates.filter((candidate) => candidate.isWebCode))
+    ).toEqual([
+      'https://example.com/bundle.js',
+      'moz-extension://8e5a1b2c/content.js',
+      '/src/app.ts',
+    ]);
+  });
 });
 
-describe('filterSourceCodeSharingCandidates', function () {
-  function setupWithWebAndExtensionFiles() {
-    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A[file:https://example.com/bundle.js]
-      B[file:moz-extension://8e5a1b2c/content.js]
-      C[file:${LOCAL_FILE}]
-    `);
-    const [{ A }] = funcNamesDictPerThread;
-    addOriginalFiles(profile, A, '/src/app.ts', '/src/inlined.ts');
-    return computeSourceCodeSharingCandidates(profile);
-  }
+function setupWithWebAndExtensionFiles() {
+  const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+    A[file:https://example.com/bundle.js]
+    B[file:moz-extension://8e5a1b2c/content.js]
+    C[file:${LOCAL_FILE}]
+  `);
+  const [{ A }] = funcNamesDictPerThread;
+  addOriginalFiles(profile, A, '/src/app.ts', '/src/inlined.ts');
+  return computeSourceCodeSharingCandidates(profile);
+}
 
+describe('filterSourceCodeSharingCandidates', function () {
   function sharingOptions(
     includeUrls: boolean,
     includeExtension: boolean
