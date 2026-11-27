@@ -803,12 +803,6 @@ NetworkSettings--panel-search =
 #   $date (Date) - The date to display in a shorter way
 NumberFormat--short-date = { SHORTDATE($date) }
 
-## PanelSearch
-## The component that is used for all the search input hints in the application.
-
-PanelSearch--search-field-hint =
-    Did you know you can use the comma (,) to search using several terms?
-
 ## Profile Name Button
 
 ProfileName--edit-profile-name-button =

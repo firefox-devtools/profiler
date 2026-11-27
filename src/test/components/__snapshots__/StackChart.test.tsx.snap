@@ -229,11 +229,6 @@ exports[`CombinedChart renders combined stack chart 1`] = `
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -748,11 +743,6 @@ exports[`MarkerChart matches the snapshots for the component and draw log 1`] = 
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -1321,11 +1311,6 @@ exports[`StackChart matches the snapshot and can display a tooltip with the same
               />
             </form>
           </label>
-          <div
-            class="panelSearchFieldIntroduction isHidden"
-          >
-            Did you know you can use the comma (,) to search using several terms?
-          </div>
         </div>
       </div>
       <ol
@@ -2041,11 +2026,6 @@ exports[`StackChart matches the snapshot and can display a tooltip: dom 1`] = `
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -2590,11 +2570,6 @@ exports[`StackChart works when the user selects the JS allocations option 1`] = 
               />
             </form>
           </label>
-          <div
-            class="panelSearchFieldIntroduction isHidden"
-          >
-            Did you know you can use the comma (,) to search using several terms?
-          </div>
         </div>
       </div>
       <ol

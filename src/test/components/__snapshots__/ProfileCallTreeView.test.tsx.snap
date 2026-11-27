@@ -151,11 +151,6 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -958,11 +953,6 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -1765,11 +1755,6 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -2560,11 +2545,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -3355,11 +3335,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -3968,11 +3943,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -4132,11 +4102,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -4296,11 +4261,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -4507,11 +4467,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -5269,11 +5224,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -6031,11 +5981,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree with filen
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -6577,11 +6522,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -7339,11 +7279,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -8029,11 +7964,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -8719,11 +8649,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -9266,11 +9191,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
@@ -9813,11 +9733,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
   <ol
