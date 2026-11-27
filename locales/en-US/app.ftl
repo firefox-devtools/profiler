@@ -1486,3 +1486,18 @@ AssemblyView--position-label = { $current } of { $total }
 ## See: https://profiler.firefox.com/uploaded-recordings/
 
 UploadedRecordingsHome--title = Uploaded Recordings
+
+## ZipFileViewer
+## This is shown when a profile is loaded from a zip archive. It lists the
+## profiles in the archive, so that the user can choose one to open.
+
+ZipFileViewer--choose-profile = Choose a profile from this archive
+ZipFileViewer--back-to-archive-list = ← Back to archive list
+ZipFileViewer--error-no-archive = Error: No archive file was found.
+ZipFileViewer--loading-profile = Loading the profile from the archive…
+# Variables:
+#   $path (String) - Path of the profile inside the archive, for example "/profile.json".
+ZipFileViewer--error-unable-to-load = Unable to load the profile at this path: <path>{ $path }</path>
+# Variables:
+#   $path (String) - Path of the file inside the archive, for example "/profile.json".
+ZipFileViewer--error-file-not-found = Failed to find a file in the zip at the following path: <path>{ $path }</path>

@@ -14,6 +14,8 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
+import { updateUrlState } from '../../actions/app';
+import { ensureExists } from '../../utils/types';
 import { autoMockCanvasContext } from '../fixtures/mocks/canvas-context';
 import { autoMockElementSize } from '../fixtures/mocks/element-size';
 import { waitUntilState, fireFullClick } from '../fixtures/utils';
@@ -90,6 +92,28 @@ describe('calltree/ZipFileTree', function () {
     await setup();
 
     expect(screen.getByText('profile.pdf')).toBeInTheDocument();
+  });
+
+  it('keeps an untrusted path from the URL inside its element', async () => {
+    const { container, dispatch, getState } = await setup();
+    const path = 'evil</path> <b>trust me</b>.json';
+    act(() => {
+      dispatch(
+        updateUrlState({
+          ...UrlStateSelectors.getUrlState(getState()),
+          pathInZipFile: path,
+        })
+      );
+    });
+
+    expect(
+      screen.getByText(/Failed to find a file in the zip/)
+    ).toBeInTheDocument();
+    const pathElement = ensureExists(
+      container.querySelector('.zipFileViewerUntrustedFilePath')
+    );
+    expect(pathElement).toHaveTextContent('/' + path);
+    expect(container.querySelector('b')).toBe(null);
   });
 
   describe('clicking on a profile link', function () {

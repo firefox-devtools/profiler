@@ -2,6 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 import * as React from 'react';
+import { Localized } from '@fluent/react';
 import explicitConnect from 'firefox-profiler/utils/connect';
 import { DragAndDropOverlay } from './DragAndDrop';
 import {
@@ -113,6 +114,17 @@ const ZipFileRow = explicitConnect<
 });
 
 /**
+ * Fluent inserts variables before it parses the markup of a message, so escape
+ * the untrusted path to keep it as plain text inside its element.
+ */
+function escapeFluentMarkup(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
  * This component is a viewer for zip files. It was built to load
  * multiple profiles recorded from Talos so that a user could navigate
  * to a particular one. However, it is a general purpose zip file
@@ -199,7 +211,9 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         <div className="zipFileViewerSection">
           <header className="zipFileViewerHeader">
             <h1>Firefox Profiler</h1>
-            <p>Choose a profile from this archive</p>
+            <Localized id="ZipFileViewer--choose-profile">
+              <p>Choose a profile from this archive</p>
+            </Localized>
           </header>
           <div className="zipFileViewerMessage">{message}</div>
           <DragAndDropOverlay />
@@ -210,14 +224,15 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
 
   _renderBackButton() {
     return (
-      <button
-        key="backButton"
-        type="button"
-        className="homeSectionInstallButton"
-        onClick={this.props.returnToZipFileList}
-      >
-        ← Back to archive list
-      </button>
+      <Localized id="ZipFileViewer--back-to-archive-list" key="backButton">
+        <button
+          type="button"
+          className="homeSectionInstallButton"
+          onClick={this.props.returnToZipFileList}
+        >
+          ← Back to archive list
+        </button>
+      </Localized>
     );
   }
 
@@ -243,6 +258,13 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
       return null;
     }
     const { phase } = zipFileState;
+    const displayedPath = '/' + (pathInZipFile ?? '');
+    // This is text that comes from the URL, make sure it looks visually
+    // distinct for guarding against someone doing anything too funky
+    // with it.
+    const untrustedFilePath = (
+      <span className="zipFileViewerUntrustedFilePath" />
+    );
 
     switch (phase) {
       case 'NO_ZIP_FILE':
@@ -250,7 +272,9 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
           'Loaded the ZipFileViewer component when there is no archive file.'
         );
         return this._renderMessage(
-          <span>Error: No archive file was found.</span>
+          <Localized id="ZipFileViewer--error-no-archive">
+            <span>Error: No archive file was found.</span>
+          </Localized>
         );
       case 'LIST_FILES_IN_ZIP_FILE':
         return (
@@ -258,7 +282,9 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
             <div className="zipFileViewerSection">
               <header className="zipFileViewerHeader">
                 <h1>Firefox Profiler</h1>
-                <p>Choose a profile from this archive</p>
+                <Localized id="ZipFileViewer--choose-profile">
+                  <p>Choose a profile from this archive</p>
+                </Localized>
               </header>
               <TreeView
                 maxNodeDepth={zipFileMaxDepth}
@@ -281,37 +307,43 @@ class ZipFileViewerImpl extends React.PureComponent<Props> {
         );
       case 'PROCESS_PROFILE_FROM_ZIP_FILE':
         return this._renderMessage(
-          <span>Loading the profile from the archive...</span>
+          <Localized id="ZipFileViewer--loading-profile">
+            <span>Loading the profile from the archive…</span>
+          </Localized>
         );
       case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
         return this._renderMessage([
-          <p key="message">Unable to load the profile at this path:</p>,
-          <span className="zipFileViewerUntrustedFilePath" key="path">
-            /
-            {
-              // This is text that comes from the URL, make sure it looks visually
-              // distinct for guarding against someone doing anything too funky
-              // with it.
-              pathInZipFile
-            }
-          </span>,
+          <Localized
+            id="ZipFileViewer--error-unable-to-load"
+            key="message"
+            vars={{ path: escapeFluentMarkup(displayedPath) }}
+            elems={{ path: untrustedFilePath }}
+          >
+            <p>
+              Unable to load the profile at this path:{' '}
+              <span className="zipFileViewerUntrustedFilePath">
+                {displayedPath}
+              </span>
+            </p>
+          </Localized>,
           <p key="error">{zipFileErrorMessage}</p>,
           this._renderBackButton(),
         ]);
       case 'FILE_NOT_FOUND_IN_ZIP_FILE':
         return this._renderMessage([
-          <span key="message">
-            Failed to find a file in the zip at the following path:
-          </span>,
-          <span className="zipFileViewerUntrustedFilePath" key="path">
-            /
-            {
-              // This is text that comes from the URL, make sure it looks visually
-              // distinct for guarding against someone doing anything too funky
-              // with it.
-              pathInZipFile
-            }
-          </span>,
+          <Localized
+            id="ZipFileViewer--error-file-not-found"
+            key="message"
+            vars={{ path: escapeFluentMarkup(displayedPath) }}
+            elems={{ path: untrustedFilePath }}
+          >
+            <p>
+              Failed to find a file in the zip at the following path:{' '}
+              <span className="zipFileViewerUntrustedFilePath">
+                {displayedPath}
+              </span>
+            </p>
+          </Localized>,
           this._renderBackButton(),
         ]);
       case 'VIEW_PROFILE_IN_ZIP_FILE':
