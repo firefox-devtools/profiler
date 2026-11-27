@@ -123,7 +123,7 @@ const { UploadAbortedError } = jest.requireActual(
 );
 
 function offeredPresets(state: State) {
-  const filesForPresets = getSourceFilesForPresets(state);
+  const filesForPresets = getSourceFilesForPresets(state, 'upload');
   return OFFERED_SOURCE_SHARING_PRESETS.filter(
     (preset) => filesForPresets[preset].size > 0
   );
@@ -460,11 +460,11 @@ describe('getRemoveProfileInformation', function () {
       const { profile } = getProfileFromTextSamples(`A[file:${LOCAL_FILE}]`);
       const { getState, dispatch } = storeWithProfile(profile);
 
-      expect(getHasSourceCodeToShare(getState())).toBe(true);
-      expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+      expect(getHasSourceCodeToShare(getState(), 'upload')).toBe(true);
+      expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
         { path: LOCAL_FILE, uncompressedSize: null },
       ]);
-      expect(getSourceCodeSharingStats(getState())).toMatchObject({
+      expect(getSourceCodeSharingStats(getState(), 'upload')).toMatchObject({
         shareableFileCount: 0,
       });
       // There's nothing to pick yet, so nothing to offer either.
@@ -483,10 +483,10 @@ describe('getRemoveProfileInformation', function () {
           getSourceCodeCacheGeneration(getState())
         )
       );
-      expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+      expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
         { path: LOCAL_FILE, uncompressedSize: SOURCE.length },
       ]);
-      expect(getSourceCodeSharingStats(getState())).toMatchObject({
+      expect(getSourceCodeSharingStats(getState(), 'upload')).toMatchObject({
         shareableFileCount: 1,
       });
       expect(offeredPresets(getState())).toEqual([
@@ -512,6 +512,32 @@ describe('getRemoveProfileInformation', function () {
       expect(
         getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
       ).toEqual([null]);
+    });
+
+    it('keeps the code of web pages out of a profile shared without URLs', function () {
+      const { profile } = getProfileFromTextSamples(`
+        A[file:https://example.com/app.js]
+        B[file:${LOCAL_FILE}]
+      `);
+      profile.shared.sources.content[0] = 'function app() {}';
+      profile.shared.sources.content[1] = SOURCE;
+      const { getState, dispatch } = storeWithProfile(profile);
+      dispatch(updateSharingOption('upload', 'includeUrls', true));
+      dispatch(updateSourceFilesToShare('upload', new Set([0, 1])));
+
+      dispatch(updateSharingOption('upload', 'includeUrls', false));
+      expect(
+        getSourceCodeSharingFiles(getState(), 'upload').map(({ path }) => path)
+      ).toEqual([LOCAL_FILE]);
+      expect(
+        getSanitizedProfile(getState(), 'upload').profile.shared.sources.content
+      ).toEqual([null, SOURCE]);
+
+      // The web page's file is still picked once URLs are back.
+      dispatch(updateSharingOption('upload', 'includeUrls', true));
+      expect(getSourceFilesToShare(getState(), 'upload')).toEqual(
+        new Set([0, 1])
+      );
     });
   });
 });
@@ -796,7 +822,7 @@ describe('attemptToPublish', function () {
 
       it('offers a native file for fetching once the browser connection is there', function () {
         const { getState } = setupWithBrowserConnection();
-        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           {
             path: LOCAL_FILE,
             availability: 'FETCHABLE',
@@ -821,14 +847,14 @@ describe('attemptToPublish', function () {
           dispatch(updateUrlState({ ...getUrlState(getState()), dataSource }));
 
         setDataSource('from-browser');
-        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           { availability: 'FETCHABLE' },
         ]);
 
         // The browser keeps the JS sources of a capture for the tab it opened,
         // so a profile loaded from a file can't get them.
         setDataSource('from-file');
-        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           { availability: 'UNAVAILABLE' },
         ]);
       });
@@ -847,7 +873,7 @@ describe('attemptToPublish', function () {
           moduleOffset: '0x1234',
           file: LOCAL_FILE,
         });
-        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           {
             availability: 'DOWNLOADED',
             uncompressedSize: NATIVE_SOURCE.length,
@@ -886,7 +912,7 @@ describe('attemptToPublish', function () {
         expect(error).toHaveProperty('failedCount', 1);
         // The file is marked as failed and drops out of the selection, so
         // that the next attempt goes through.
-        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           { availability: 'FAILED' },
         ]);
         expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
@@ -926,7 +952,7 @@ describe('attemptToPublish', function () {
           failedCount: 0,
           wasCancelled: true,
         });
-        expect(getSourceCodeSharingFiles(getState())).toMatchObject([
+        expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           { availability: 'DOWNLOADED' },
         ]);
         // The saved file has to pick up the late result too.

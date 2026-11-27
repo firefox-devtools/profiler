@@ -779,6 +779,12 @@ export type SourceCodeSharingCandidate = {
   isFromWebSite: boolean;
   // Whether a source map produced this file from a generated file.
   isFromSourceMap: boolean;
+  // Whether the file's name, or the URL of the bundle a source map produced it
+  // from, has a URL that sharing without URLs removes.
+  hasRemovableUrl: boolean;
+  // Whether the file, or the bundle a source map produced it from, comes from
+  // an extension.
+  isFromExtension: boolean;
 };
 
 /**

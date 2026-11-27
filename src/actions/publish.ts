@@ -78,7 +78,7 @@ export function publishPanelOpened(mode: SharingMode): ThunkAction<void> {
     dispatch({
       type: 'PUBLISH_PANEL_OPENED',
       mode,
-      defaultSourceFiles: getDefaultSourceFilesToShare(getState()),
+      defaultSourceFiles: getDefaultSourceFilesToShare(getState(), mode),
     });
   };
 }
@@ -404,7 +404,7 @@ export function encodeSanitizedProfile(
  */
 export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
   return (dispatch, getState) => {
-    const filesForPresets = getSourceFilesForPresets(getState());
+    const filesForPresets = getSourceFilesForPresets(getState(), mode);
     const preset = findNarrowestNonEmptyPreset(filesForPresets);
     if (preset === null) {
       return;

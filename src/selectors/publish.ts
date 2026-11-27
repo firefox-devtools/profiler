@@ -31,6 +31,7 @@ import {
   computeShareableSources,
   computeSourceCodeSharingCandidates,
   computeSourceCodeSharingFiles,
+  filterSourceCodeSharingCandidates,
   computeSourceCodeSharingStats,
   computeSourceCodeSharingSummary,
   computeSourceContentsForSharing,
@@ -173,38 +174,68 @@ const getFailedSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
     return failed;
   });
 
-export const getSourceCodeSharingFiles: Selector<SourceCodeSharingFile[]> =
+// The files listed in the panel. The sharing options leave out the ones whose
+// contents would give away what they remove.
+export const getSourceCodeSharingFiles: DangerousSelectorWithArguments<
+  SourceCodeSharingFile[],
+  SharingMode
+> = _perSharingMode((mode) =>
   createSelector(
     getSourceCodeSharingCandidates,
+    (state: State) => getCheckedSharingOptions(state, mode),
     getSourceContentsForSharing,
     getFetchableSources,
     getFailedSources,
-    computeSourceCodeSharingFiles
-  );
-
-// The files the user can pick: downloaded, or fetchable when sharing.
-const getShareableSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
-  createSelector(getSourceCodeSharingFiles, computeShareableSources);
-
-export const getSourceCodeSharingStats: Selector<SourceCodeSharingStats> =
-  createSelector(getSourceCodeSharingFiles, computeSourceCodeSharingStats);
-
-export const getHasSourceCodeToShare: Selector<boolean> = createSelector(
-  getSourceCodeSharingFiles,
-  (files) => files.length > 0
+    (candidates, sharingOptions, contents, fetchableSources, failedSources) =>
+      computeSourceCodeSharingFiles(
+        filterSourceCodeSharingCandidates(candidates, sharingOptions),
+        contents,
+        fetchableSources,
+        failedSources
+      )
+  )
 );
 
-export const getSourceFilesForSelectedThreads: Selector<
-  ReadonlySet<IndexIntoSourceTable>
-> = createSelector(
-  getProfile,
-  // A navigation can replace the UrlState and drop the thread selection.
-  getSelectedThreadIndexesOrNull,
-  getShareableSources,
-  (profile, threadIndexes, shareableSources) =>
-    threadIndexes === null
-      ? new Set<IndexIntoSourceTable>()
-      : computeSourcesForThreads(profile, threadIndexes, shareableSources)
+// The files the user can pick: downloaded, or fetchable when sharing.
+const getShareableSources: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceCodeSharingFiles(state, mode),
+    computeShareableSources
+  )
+);
+
+export const getSourceCodeSharingStats: DangerousSelectorWithArguments<
+  SourceCodeSharingStats,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceCodeSharingFiles(state, mode),
+    computeSourceCodeSharingStats
+  )
+);
+
+export const getHasSourceCodeToShare: DangerousSelectorWithArguments<
+  boolean,
+  SharingMode
+> = (state, mode) => getSourceCodeSharingFiles(state, mode).length > 0;
+
+export const getSourceFilesForSelectedThreads: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    getProfile,
+    // A navigation can replace the UrlState and drop the thread selection.
+    getSelectedThreadIndexesOrNull,
+    (state: State) => getShareableSources(state, mode),
+    (profile, threadIndexes, shareableSources) =>
+      threadIndexes === null
+        ? new Set<IndexIntoSourceTable>()
+        : computeSourcesForThreads(profile, threadIndexes, shareableSources)
+  )
 );
 
 const getSourceTreeRootWeights: Selector<Map<string, number>> = createSelector(
@@ -215,35 +246,42 @@ const getSourceTreeRootWeights: Selector<Map<string, number>> = createSelector(
   computeSourceTreeRootWeights
 );
 
-export const getSourceFileTree: Selector<SourceFileTreeNode[]> = createSelector(
-  getSourceCodeSharingFiles,
-  getSourceTreeRootWeights,
-  buildSourceFileTree
+export const getSourceFileTree: DangerousSelectorWithArguments<
+  SourceFileTreeNode[],
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceCodeSharingFiles(state, mode),
+    getSourceTreeRootWeights,
+    buildSourceFileTree
+  )
 );
 
 // The "Current file" preset: the file in the source view, if it's shareable.
-export const getSourceFilesForCurrentFile: Selector<
-  ReadonlySet<IndexIntoSourceTable>
-> = createSelector(
-  getShareableSources,
-  getSourceViewSourceIndex,
-  (shareableSources, sourceViewSourceIndex) =>
-    sourceViewSourceIndex !== null &&
-    shareableSources.has(sourceViewSourceIndex)
-      ? new Set([sourceViewSourceIndex])
-      : new Set<IndexIntoSourceTable>()
+export const getSourceFilesForCurrentFile: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getShareableSources(state, mode),
+    getSourceViewSourceIndex,
+    (shareableSources, sourceViewSourceIndex) =>
+      sourceViewSourceIndex !== null &&
+      shareableSources.has(sourceViewSourceIndex)
+        ? new Set([sourceViewSourceIndex])
+        : new Set<IndexIntoSourceTable>()
+  )
 );
 
 // The selection the panel starts from. The source view keeps its file after
 // the bottom box is closed, so only start from it while it's still visible.
-export const getDefaultSourceFilesToShare: Selector<
-  ReadonlySet<IndexIntoSourceTable>
-> = createSelector(
-  getIsBottomBoxOpen,
-  getSourceFilesForCurrentFile,
-  (isBottomBoxOpen, currentFileSelection) =>
-    isBottomBoxOpen ? currentFileSelection : new Set<IndexIntoSourceTable>()
-);
+export const getDefaultSourceFilesToShare: DangerousSelectorWithArguments<
+  ReadonlySet<IndexIntoSourceTable>,
+  SharingMode
+> = (state, mode) =>
+  getIsBottomBoxOpen(state)
+    ? getSourceFilesForCurrentFile(state, mode)
+    : new Set<IndexIntoSourceTable>();
 
 export const getSourceFilesToShare: DangerousSelectorWithArguments<
   ReadonlySet<IndexIntoSourceTable>,
@@ -253,7 +291,7 @@ export const getSourceFilesToShare: DangerousSelectorWithArguments<
     (state: State) =>
       getPublishState(state).sourceFileSelection[mode]?.sourceIndexes ??
       getPublishState(state).defaultSourceFiles[mode],
-    getShareableSources,
+    (state: State) => getShareableSources(state, mode),
     (storedSelection, shareableSources) =>
       _intersect(storedSelection, shareableSources)
   )
@@ -285,21 +323,27 @@ function _intersect<T>(
 }
 
 // The files behind every offered preset.
-export const getSourceFilesForPresets: Selector<
-  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>
-> = createSelector(
-  getSourceFilesForCurrentFile,
-  getSourceFilesForSelectedThreads,
-  getShareableSources,
-  (
-    currentFile,
-    selectedThreads,
-    allFiles
-  ): Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>> => ({
-    'current-file': currentFile,
-    'selected-threads': selectedThreads,
-    'all-files': allFiles,
-  })
+export const getSourceFilesForPresets: DangerousSelectorWithArguments<
+  Record<OfferedSourceSharingPreset, ReadonlySet<IndexIntoSourceTable>>,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => getSourceFilesForCurrentFile(state, mode),
+    (state: State) => getSourceFilesForSelectedThreads(state, mode),
+    (state: State) => getShareableSources(state, mode),
+    (
+      currentFile,
+      selectedThreads,
+      allFiles
+    ): Record<
+      OfferedSourceSharingPreset,
+      ReadonlySet<IndexIntoSourceTable>
+    > => ({
+      'current-file': currentFile,
+      'selected-threads': selectedThreads,
+      'all-files': allFiles,
+    })
+  )
 );
 
 // The offered preset that the selection matches, or 'custom'. Presets that
@@ -311,7 +355,7 @@ export const getActiveSourceSharingPreset: DangerousSelectorWithArguments<
 > = _perSharingMode((mode) =>
   createSelector(
     (state: State) => getSourceFilesToShare(state, mode),
-    getSourceFilesForPresets,
+    (state: State) => getSourceFilesForPresets(state, mode),
     (state: State) =>
       getPublishState(state).sourceFileSelection[mode]?.preset ?? null,
     (selection, filesForPresets, pickedPreset): SourceSharingPreset => {

@@ -12,6 +12,7 @@ import {
   computeSourceContentsForSharing,
   computeSourcesForThreads,
   computeSourceTreeRootWeights,
+  filterSourceCodeSharingCandidates,
 } from 'firefox-profiler/profile-logic/source-sharing';
 import { storeWithProfile } from 'firefox-profiler/test/fixtures/stores';
 import {
@@ -25,6 +26,7 @@ import { getEmptySourceLocationTable } from 'firefox-profiler/profile-logic/data
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 
 import type {
+  CheckedSharingOptions,
   IndexIntoSourceTable,
   Profile,
   SourceCodeAvailability,
@@ -274,6 +276,8 @@ describe('computeSourceCodeSharingCandidates', function () {
         ],
         isFromWebSite: false,
         isFromSourceMap: false,
+        hasRemovableUrl: false,
+        isFromExtension: false,
       },
     ]);
   });
@@ -452,6 +456,79 @@ describe('computeSourceCodeSharingCandidates', function () {
       'static',
       'app.js',
     ]);
+  });
+});
+
+describe('filterSourceCodeSharingCandidates', function () {
+  function setupWithWebAndExtensionFiles() {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A[file:https://example.com/bundle.js]
+      B[file:moz-extension://8e5a1b2c/content.js]
+      C[file:${LOCAL_FILE}]
+    `);
+    const [{ A }] = funcNamesDictPerThread;
+    addOriginalFiles(profile, A, '/src/app.ts', '/src/inlined.ts');
+    return computeSourceCodeSharingCandidates(profile);
+  }
+
+  function sharingOptions(
+    includeUrls: boolean,
+    includeExtension: boolean
+  ): CheckedSharingOptions {
+    return {
+      includeHiddenThreads: true,
+      includeAllTabs: true,
+      includeFullTimeRange: true,
+      includeScreenshots: true,
+      includeUrls,
+      includeExtension,
+      includePreferenceValues: true,
+      includePrivateBrowsingData: true,
+      includeArgumentValues: true,
+    };
+  }
+
+  it('keeps every file when URLs and extensions are included', function () {
+    const candidates = setupWithWebAndExtensionFiles();
+    expect(
+      filePaths(
+        filterSourceCodeSharingCandidates(
+          candidates,
+          sharingOptions(true, true)
+        )
+      )
+    ).toEqual([
+      'https://example.com/bundle.js',
+      'moz-extension://8e5a1b2c/content.js',
+      LOCAL_FILE,
+      '/src/app.ts',
+    ]);
+  });
+
+  it('leaves out the files of web pages and extensions without URLs', function () {
+    const candidates = setupWithWebAndExtensionFiles();
+    // The source-mapped file has no URL of its own, but its contents still come
+    // from the page that served the bundle.
+    expect(
+      filePaths(
+        filterSourceCodeSharingCandidates(
+          candidates,
+          sharingOptions(false, true)
+        )
+      )
+    ).toEqual([LOCAL_FILE]);
+  });
+
+  it('leaves out the files of extensions without extension information', function () {
+    const candidates = setupWithWebAndExtensionFiles();
+    expect(
+      filePaths(
+        filterSourceCodeSharingCandidates(
+          candidates,
+          sharingOptions(true, false)
+        )
+      )
+    ).toEqual(['https://example.com/bundle.js', LOCAL_FILE, '/src/app.ts']);
   });
 });
 

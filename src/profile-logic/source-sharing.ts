@@ -12,11 +12,13 @@ import {
   ensureExists,
 } from 'firefox-profiler/utils/types';
 import { checkBit, makeBitSet, setBit } from 'firefox-profiler/utils/bitset';
+import { removeURLs } from 'firefox-profiler/utils/string';
 import { getOriginalPositionForFrame } from 'firefox-profiler/profile-logic/profile-data';
 
 import { FrameFlag, FuncFlag } from 'firefox-profiler/types';
 import type {
   AddressProof,
+  CheckedSharingOptions,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoSourceLocationTable,
@@ -68,6 +70,8 @@ export function computeSourceContentsForSharing(
 // The URL schemes for files that ship inside the browser. They get a common
 // root in the tree, named after the product, rather than one root per scheme.
 const INTERNAL_URL_SCHEMES = new Set(['chrome', 'resource', 'moz-src']);
+
+const EXTENSION_URL_REGEX = /^moz-extension:\/\//i;
 
 function _splitPath(path: string): string[] {
   return path.split('/').filter((s) => s !== '');
@@ -339,20 +343,43 @@ export function computeSourceCodeSharingCandidates(
       continue;
     }
     const generated = originalToGenerated.get(sourceIndex);
+    const bundleFilename =
+      generated !== undefined ? stringArray[sources.filename[generated]] : null;
     const bundleUrl =
-      generated !== undefined
-        ? parseFileNameFromSymbolication(
-            stringArray[sources.filename[generated]]
-          ).path
+      bundleFilename !== null
+        ? parseFileNameFromSymbolication(bundleFilename).path
         : null;
+    const names =
+      bundleFilename !== null ? [filename, bundleFilename] : [filename];
     candidates.push({
       sourceIndex,
       path: parsedFile.path,
       ..._pathSegmentsForFilename(parsedFile, productName, bundleUrl),
       isFromSourceMap: generated !== undefined,
+      hasRemovableUrl: names.some((name) => removeURLs(name) !== name),
+      isFromExtension: names.some((name) => EXTENSION_URL_REGEX.test(name)),
     });
   }
   return candidates;
+}
+
+/**
+ * The candidates that the sharing options let into the shared profile. The
+ * contents of a file would give away what the options leave out: the URL of
+ * the page it ran on, or which extension it belongs to.
+ */
+export function filterSourceCodeSharingCandidates(
+  candidates: SourceCodeSharingCandidate[],
+  { includeUrls, includeExtension }: CheckedSharingOptions
+): SourceCodeSharingCandidate[] {
+  if (includeUrls && includeExtension) {
+    return candidates;
+  }
+  return candidates.filter(
+    (candidate) =>
+      (includeUrls || !candidate.hasRemovableUrl) &&
+      (includeExtension || !candidate.isFromExtension)
+  );
 }
 
 /**

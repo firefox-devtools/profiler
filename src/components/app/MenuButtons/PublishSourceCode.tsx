@@ -439,12 +439,12 @@ export const PublishSourceCodeSection = explicitConnect<
 >({
   mapStateToProps: (state, { mode }) => ({
     uploadPhase: getUploadPhase(state),
-    sourceCodeSharingStats: getSourceCodeSharingStats(state),
+    sourceCodeSharingStats: getSourceCodeSharingStats(state, mode),
     sourceFilesToFetch: getSourceFilesToFetch(state, mode),
     sourceCodeFetchState: getSourceCodeFetchState(state, mode),
-    sourceFileTree: getSourceFileTree(state),
+    sourceFileTree: getSourceFileTree(state, mode),
     sourceFilesToShare: getSourceFilesToShare(state, mode),
-    sourceFilesForPresets: getSourceFilesForPresets(state),
+    sourceFilesForPresets: getSourceFilesForPresets(state, mode),
     activeSourceSharingPreset: getActiveSourceSharingPreset(state, mode),
     sourceCodeSharingSummary: getSourceCodeSharingSummary(state, mode),
   }),

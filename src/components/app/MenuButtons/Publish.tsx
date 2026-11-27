@@ -542,7 +542,7 @@ export const PublishPanel = explicitConnect<
     profileContainsPrivateBrowsingInformation:
       getContainsPrivateBrowsingInformation(state),
     profileHasJSTracingArgumentValues: getHasJSTracingArgumentValues(state),
-    hasSourceCodeToShare: getHasSourceCodeToShare(state),
+    hasSourceCodeToShare: getHasSourceCodeToShare(state, ownProps.mode),
     sourceCodeFetchState: getSourceCodeFetchState(state, ownProps.mode),
     hasSourceFilesToFetch: getSourceFilesToFetch(state, ownProps.mode).size > 0,
     checkedSharingOptions: getCheckedSharingOptions(state, ownProps.mode),
