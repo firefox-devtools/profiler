@@ -27,7 +27,8 @@ import {
 
 export function registerSessionCommand(
   program: Command,
-  sessionDir: string
+  sessionDir: string,
+  onSessionSwitched?: (sessionId: string) => void
 ): void {
   const session = program
     .command('session')
@@ -36,7 +37,7 @@ export function registerSessionCommand(
   session
     .command('list', { isDefault: true })
     .description('List all running daemon sessions')
-    .action(async () => {
+    .action(async (_opts, cmd: Command) => {
       const sessionIds = listSessions(sessionDir);
       let numCleaned = 0;
       const runningSessionMetadata = [];
@@ -117,7 +118,7 @@ export function registerSessionCommand(
         );
       }
 
-      if (!wasExplicit('session', 'list')) {
+      if (!wasExplicit(cmd)) {
         console.log('\nOther subcommands: profiler-cli session use <id>');
       }
     });
@@ -128,12 +129,10 @@ export function registerSessionCommand(
     .action(async (sessionId: string) => {
       const metadata = await validateSession(sessionDir, sessionId);
       if (metadata === null) {
-        console.error(
-          `Error: ${await explainUnreachableSession(sessionDir, sessionId)}`
-        );
-        process.exit(1);
+        throw new Error(await explainUnreachableSession(sessionDir, sessionId));
       }
       setCurrentSession(sessionDir, sessionId);
+      onSessionSwitched?.(sessionId);
       console.log(`Switched to session ${sessionId}`);
     });
 }
