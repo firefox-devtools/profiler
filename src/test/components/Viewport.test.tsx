@@ -540,6 +540,36 @@ describe('Viewport', function () {
       );
     });
 
+    it('zooms in at the mouse position', () => {
+      const { getChartViewport, depressKey, viewportContainer } = setup();
+
+      fireEvent.mouseMove(viewportContainer(), {
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.25,
+      });
+      depressKey('KeyQ', 500);
+      const { viewportLeft, viewportRight } = getChartViewport();
+      expect(viewportLeft).toBeGreaterThan(0);
+      expect(viewportRight).toBeLessThan(1);
+      // The point under the mouse stays at the same relative position.
+      expect(
+        (0.25 - viewportLeft) / (viewportRight - viewportLeft)
+      ).toBeCloseTo(0.25, 7);
+    });
+
+    it('zooms in at center after the mouse leaves', () => {
+      const { getChartViewport, depressKey, viewportContainer } = setup();
+
+      fireEvent.mouseMove(viewportContainer(), {
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.25,
+      });
+      fireEvent.mouseLeave(viewportContainer());
+      depressKey('KeyQ', 500);
+      expect(1 - getChartViewport().viewportRight).toBeCloseTo(
+        getChartViewport().viewportLeft,
+        7
+      );
+    });
+
     it('moves viewport down and up', () => {
       const { getChartViewport, depressKey } = setup();
 
