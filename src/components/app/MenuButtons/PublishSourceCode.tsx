@@ -10,7 +10,6 @@ import {
   updateSourceFilesToShare,
   fetchSourceFilesToShare,
   cancelSourceCodeFetch,
-  setSourceSharingDownloadedOnly,
   turnOnSourceCodeSharing,
   encodeSanitizedProfile,
 } from 'firefox-profiler/actions/publish';
@@ -20,7 +19,6 @@ import {
   getSourceCodeSharingStats,
   getSourceFilesToFetch,
   getSourceCodeFetchState,
-  getSourceSharingDownloadedOnly,
   getSourceCodeSharingSummary,
   getSourceFileTree,
   getSourceFilesForPresets,
@@ -49,7 +47,7 @@ const PRESET_L10N_IDS: Record<SourceSharingPreset, string> = {
   'current-file': 'MenuButtons--publish--source-code-preset-current-file',
   'selected-threads':
     'MenuButtons--publish--source-code-preset-selected-threads',
-  'all-files': 'MenuButtons--publish--source-code-preset-all-available-files',
+  'all-files': 'MenuButtons--publish--source-code-preset-all-files',
   custom: 'MenuButtons--publish--source-code-preset-custom',
 };
 
@@ -88,7 +86,6 @@ type StateProps = {
   readonly sourceCodeSharingStats: SourceCodeSharingStats;
   readonly sourceFilesToFetch: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceCodeFetchState: SourceCodeFetchState;
-  readonly sourceSharingDownloadedOnly: boolean;
   readonly sourceFileTree: SourceFileTreeNode[];
   readonly sourceFilesToShare: ReadonlySet<IndexIntoSourceTable>;
   readonly sourceFilesForPresets: Record<
@@ -103,7 +100,6 @@ type DispatchProps = {
   readonly updateSourceFilesToShare: typeof updateSourceFilesToShare;
   readonly fetchSourceFilesToShare: typeof fetchSourceFilesToShare;
   readonly cancelSourceCodeFetch: typeof cancelSourceCodeFetch;
-  readonly setSourceSharingDownloadedOnly: typeof setSourceSharingDownloadedOnly;
   readonly turnOnSourceCodeSharing: typeof turnOnSourceCodeSharing;
   readonly encodeSanitizedProfile: typeof encodeSanitizedProfile;
 };
@@ -111,20 +107,31 @@ type DispatchProps = {
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {
-  readonly isEditingSourceFiles: boolean;
+  readonly isExpanded: boolean;
 };
 
 /**
- * The "Include source code" checkbox of the publish panel, with the presets,
- * file tree and status line that come with it once it's on.
+ * The "Include source code" checkbox of the publish panel, and below the other
+ * checkboxes, a collapsible section with the presets, file tree and status
+ * lines. The checkbox says whether any file is picked.
  */
 class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
-  // Unchecking every file keeps the option on, so that the tree stays open
-  // while the user edits it. The panel unmounts this when it closes, so it
-  // comes back off if nothing is picked.
+  // The section opens whenever the selection goes from nothing to something,
+  // so that the user sees what will be shared. That includes the default
+  // selection, which can arrive after the panel opens.
   override state: State = {
-    isEditingSourceFiles: false,
+    isExpanded: this.props.sourceFilesToShare.size > 0,
   };
+
+  override componentDidUpdate(prevProps: Props) {
+    if (
+      prevProps.sourceFilesToShare.size === 0 &&
+      this.props.sourceFilesToShare.size > 0 &&
+      !this.state.isExpanded
+    ) {
+      this.setState({ isExpanded: true });
+    }
+  }
 
   _isUploading(): boolean {
     const { uploadPhase } = this.props;
@@ -141,16 +148,12 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
         newSelection.delete(sourceIndex);
       }
     }
-    this.setState({ isEditingSourceFiles: true });
     updateSourceFilesToShare(mode, newSelection);
     this.props.encodeSanitizedProfile(mode);
   };
 
-  // Turning sharing on picks the narrowest preset rather than every file, so
-  // that opting in doesn't share more than the user looked at.
   _onToggleSourceCode = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { mode, updateSourceFilesToShare } = this.props;
-    this.setState({ isEditingSourceFiles: e.target.checked });
     if (e.target.checked) {
       this.props.turnOnSourceCodeSharing(mode);
       return;
@@ -159,48 +162,94 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
     this.props.encodeSanitizedProfile(mode);
   };
 
-  _onToggleDownloadedOnly = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.props.setSourceSharingDownloadedOnly(
-      this.props.mode,
-      e.target.checked
-    );
+  _onToggleExpanded = (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    this.setState({ isExpanded: e.currentTarget.open });
   };
 
   _onFetchSourceFiles = () => {
     this.props.fetchSourceFilesToShare(this.props.mode);
   };
 
+  // Keeps the picked files that are loaded, and unpicks the others, so that
+  // sharing doesn't load anything more.
+  _onLeaveOutUnloadedFiles = () => {
+    const {
+      mode,
+      sourceFilesToShare,
+      sourceFilesToFetch,
+      updateSourceFilesToShare,
+    } = this.props;
+    const newSelection = new Set(sourceFilesToShare);
+    for (const sourceIndex of sourceFilesToFetch) {
+      newSelection.delete(sourceIndex);
+    }
+    updateSourceFilesToShare(mode, newSelection);
+    this.props.encodeSanitizedProfile(mode);
+  };
+
   _onCancelSourceFetch = () => {
     this.props.cancelSourceCodeFetch(this.props.mode);
   };
 
-  _onPresetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  _onPresetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { mode, sourceFilesForPresets, updateSourceFilesToShare } =
       this.props;
-    // The 'custom' radio is disabled, so only offered presets get here.
+    // The 'custom' option is disabled, so only offered presets get here.
     const preset = e.target.value as OfferedSourceSharingPreset;
     updateSourceFilesToShare(mode, sourceFilesForPresets[preset], preset);
     this.props.encodeSanitizedProfile(mode);
   };
 
-  // Under the tree: what will be included, with an info icon for the files that
-  // are left out, then what still has to be downloaded, with a button to do it
-  // now. While a download runs, its progress and a cancel instead.
-  _renderStatusRow() {
+  // Under the tree, two lines that are always there, so that the panel
+  // doesn't change height and move the Upload button: what will be included,
+  // with an info icon for the files that are left out, then what still has to
+  // be loaded, with buttons to load it now or leave it out. The second line is
+  // empty when nothing has to be loaded. While loading runs, it shows the
+  // progress and a cancel button instead.
+  _renderStatusRows() {
     const {
-      mode,
-      sourceFilesToFetch,
-      sourceCodeFetchState,
       sourceCodeSharingSummary,
       sourceCodeSharingStats,
+      sourceFilesToFetch,
     } = this.props;
-    const { unavailableFileCount } = sourceCodeSharingStats;
+    const { fileCount, uncompressedSize } = sourceCodeSharingSummary;
+    // The size of the files that still have to be loaded isn't known yet.
+    let l10nId = 'MenuButtons--publish--source-code-status';
+    if (sourceFilesToFetch.size === fileCount) {
+      l10nId = 'MenuButtons--publish--source-code-status-without-size';
+    } else if (sourceFilesToFetch.size > 0) {
+      l10nId = 'MenuButtons--publish--source-code-status-at-least';
+    }
+    return (
+      <>
+        <div className="publishPanelSourceCodeStatus">
+          <span className="publishPanelSourceCodeSummary">
+            <Localized
+              id={l10nId}
+              vars={{ fileCount, size: prettyBytes(uncompressedSize) }}
+            >
+              <span />
+            </Localized>
+          </span>
+          <SourceCodeLeftOutInfo
+            unavailableCount={sourceCodeSharingStats.unavailableFileCount}
+          />
+        </div>
+        <div className="publishPanelSourceCodeStatus">
+          {this._renderFetchStatus()}
+        </div>
+      </>
+    );
+  }
+
+  _renderFetchStatus() {
+    const { mode, sourceFilesToFetch, sourceCodeFetchState } = this.props;
 
     if (sourceCodeFetchState.isFetching) {
       return (
-        <div className="publishPanelSourceCodeStatus">
+        <>
           <Localized
-            id="MenuButtons--publish--source-code-fetching"
+            id="MenuButtons--publish--source-code-loading"
             vars={{
               completedCount: sourceCodeFetchState.completedCount,
               totalCount: sourceCodeFetchState.totalCount,
@@ -213,238 +262,171 @@ class PublishSourceCodeSectionImpl extends React.PureComponent<Props, State> {
             className="photon-button photon-button-micro"
             onClick={this._onCancelSourceFetch}
           >
-            <Localized id="MenuButtons--publish--source-code-cancel-fetch">
+            <Localized id="MenuButtons--publish--source-code-cancel-load">
               Cancel
             </Localized>
           </button>
-        </div>
+        </>
       );
+    }
+
+    // The row stays, empty, so that the panel doesn't change height.
+    if (sourceFilesToFetch.size === 0) {
+      return null;
     }
 
     return (
       <>
-        <div className="publishPanelSourceCodeStatus">
-          <span className="publishPanelSourceCodeSummary">
-            <Localized
-              id="MenuButtons--publish--source-code-status"
-              vars={{
-                fileCount: sourceCodeSharingSummary.fileCount,
-                size: prettyBytes(sourceCodeSharingSummary.uncompressedSize),
-              }}
-            >
-              <span />
-            </Localized>
-          </span>
-          <SourceCodeLeftOutInfo unavailableCount={unavailableFileCount} />
-        </div>
-        {sourceFilesToFetch.size > 0 ? (
-          <div className="publishPanelSourceCodeStatus">
-            <Localized
-              id={
-                mode === 'download'
-                  ? 'MenuButtons--publish--source-code-status-to-fetch-before-saving'
-                  : 'MenuButtons--publish--source-code-status-to-fetch'
-              }
-              vars={{ fileCount: sourceFilesToFetch.size }}
-            >
-              <span className="publishPanelSourceCodeSummary" />
-            </Localized>
-            <button
-              type="button"
-              className="photon-button photon-button-micro"
-              disabled={this._isUploading()}
-              onClick={this._onFetchSourceFiles}
-            >
-              <Localized id="MenuButtons--publish--source-code-fetch-now">
-                Fetch now
-              </Localized>
-            </button>
-          </div>
-        ) : null}
+        <Localized
+          id={
+            mode === 'download'
+              ? 'MenuButtons--publish--source-code-status-to-load-when-saving'
+              : 'MenuButtons--publish--source-code-status-to-load'
+          }
+          vars={{ fileCount: sourceFilesToFetch.size }}
+        >
+          <span className="publishPanelSourceCodeSummary" />
+        </Localized>
+        <button
+          type="button"
+          className="photon-button photon-button-micro"
+          disabled={this._isUploading()}
+          onClick={this._onFetchSourceFiles}
+        >
+          <Localized id="MenuButtons--publish--source-code-load-now">
+            Load now
+          </Localized>
+        </button>
+        <button
+          type="button"
+          className="photon-button photon-button-micro"
+          disabled={this._isUploading()}
+          onClick={this._onLeaveOutUnloadedFiles}
+        >
+          <Localized id="MenuButtons--publish--source-code-leave-out">
+            Leave out
+          </Localized>
+        </button>
       </>
     );
   }
 
   _renderPresets() {
-    const {
-      mode,
-      activeSourceSharingPreset,
-      sourceFilesForPresets,
-      sourceCodeSharingStats,
-      sourceSharingDownloadedOnly,
-    } = this.props;
-
-    // The downloaded-only option only matters while some shareable file would
-    // have to be fetched.
-    const showDownloadedOnly =
-      sourceCodeSharingStats.shareableFileCount >
-      sourceCodeSharingStats.downloadedFileCount;
-
-    // Presets that would select nothing stay in place, disabled, so that the
-    // row doesn't change shape as files get fetched or the options change.
-    const presets: SourceSharingPreset[] = [...OFFERED_SOURCE_SHARING_PRESETS];
-    if (activeSourceSharingPreset === 'custom') {
-      presets.push('custom');
-    }
+    const { mode, activeSourceSharingPreset, sourceFilesForPresets } =
+      this.props;
+    const selectId = `publishPanelSourceCodePreset-${mode}`;
 
     return (
-      <>
-        <fieldset className="publishPanelSourceCodePresets">
-          <Localized id="MenuButtons--publish--source-code-preset-legend">
-            <legend className="publishPanelSourceCodePresetsLegend">
-              Include:
-            </legend>
-          </Localized>
-          {presets.map((preset) => (
-            <label
-              key={preset}
-              className={classNames(
-                'photon-label publishPanelSourceCodePresetLabel',
-                {
-                  publishPanelLabelDisabled:
-                    preset !== 'custom' &&
-                    sourceFilesForPresets[preset].size === 0,
-                }
-              )}
-            >
-              <input
-                type="radio"
-                className="photon-radio photon-radio-micro"
-                name={`sourceCodePreset-${mode}`}
-                value={preset}
-                checked={activeSourceSharingPreset === preset}
-                // "Custom" only reports the state of the tree.
-                disabled={
-                  this._isUploading() ||
-                  preset === 'custom' ||
-                  sourceFilesForPresets[preset].size === 0
-                }
-                onChange={this._onPresetChange}
-              />
-              <Localized id={PRESET_L10N_IDS[preset]} />
-            </label>
-          ))}
-        </fieldset>
-        {showDownloadedOnly ? (
-          <label className="photon-label publishPanelSourceCodeDownloadedOnly">
-            <input
-              type="checkbox"
-              className="photon-checkbox photon-checkbox-micro"
-              checked={sourceSharingDownloadedOnly}
-              // With nothing downloaded, turning it on would pick nothing.
-              disabled={
-                this._isUploading() ||
-                (!sourceSharingDownloadedOnly &&
-                  sourceCodeSharingStats.downloadedFileCount === 0)
-              }
-              onChange={this._onToggleDownloadedOnly}
-            />
-            <Localized id="MenuButtons--publish--source-code-fetched-only">
-              Only already fetched files
-            </Localized>
+      <div className="publishPanelSourceCodePresets">
+        <Localized id="MenuButtons--publish--source-code-preset-label">
+          <label
+            htmlFor={selectId}
+            className="publishPanelSourceCodePresetsLabel"
+          >
+            Include:
           </label>
-        ) : null}
-      </>
-    );
-  }
-
-  // Shown next to the checkbox while it's off, so that the amount of source
-  // code on offer is visible without turning the option on.
-  _renderAvailability() {
-    const {
-      fileCount,
-      downloadedFileCount,
-      downloadedUncompressedSize,
-      shareableFileCount,
-    } = this.props.sourceCodeSharingStats;
-    const missingFileCount = fileCount - downloadedFileCount;
-    const size = prettyBytes(downloadedUncompressedSize);
-
-    let l10nId = 'MenuButtons--publish--source-code-available';
-    if (downloadedFileCount === 0) {
-      l10nId = 'MenuButtons--publish--source-code-none-fetched';
-    } else if (missingFileCount > 0) {
-      l10nId = 'MenuButtons--publish--source-code-partially-fetched';
-    }
-
-    const availability = (
-      <Localized
-        id={l10nId}
-        vars={{
-          fileCount: downloadedFileCount,
-          totalFileCount: fileCount,
-          size,
-        }}
-      >
-        <span className="publishPanelSourceCodeAvailable" />
-      </Localized>
-    );
-    if (shareableFileCount > 0) {
-      return availability;
-    }
-    // The tooltip goes on this part only, so that it doesn't replace the
-    // checkbox's accessible name.
-    return (
-      <Localized
-        id="MenuButtons--publish--source-code-nothing-to-include"
-        attrs={{ title: true }}
-      >
-        <span>{availability}</span>
-      </Localized>
+        </Localized>
+        <select
+          id={selectId}
+          className="publishPanelSourceCodePresetSelect"
+          value={activeSourceSharingPreset}
+          disabled={this._isUploading()}
+          onChange={this._onPresetChange}
+        >
+          {OFFERED_SOURCE_SHARING_PRESETS.map((preset) => (
+            <Localized key={preset} id={PRESET_L10N_IDS[preset]}>
+              <option
+                value={preset}
+                disabled={sourceFilesForPresets[preset].size === 0}
+              />
+            </Localized>
+          ))}
+          {/* "Custom" only reports the state of the tree, so it can't be
+              picked, and it's only there while it applies. */}
+          {activeSourceSharingPreset === 'custom' ? (
+            <Localized id={PRESET_L10N_IDS.custom}>
+              <option value="custom" disabled />
+            </Localized>
+          ) : null}
+        </select>
+      </div>
     );
   }
 
   override render() {
     const { mode, sourceFileTree, sourceFilesToShare, sourceCodeSharingStats } =
       this.props;
-    const isSourceCodeSharingOn =
-      this.state.isEditingSourceFiles || sourceFilesToShare.size > 0;
+    const { isExpanded } = this.state;
+    const isSourceCodeSharingOn = sourceFilesToShare.size > 0;
     // Nothing can be shared when no file is downloaded or fetchable.
     const hasNothingToPick = sourceCodeSharingStats.shareableFileCount === 0;
 
     return (
       <>
-        <label
-          className={classNames('photon-label publishPanelDataChoicesLabel', {
-            publishPanelLabelDisabled: hasNothingToPick,
-          })}
+        {/* The tooltip goes on a wrapper rather than on the label, so that it
+            doesn't become the checkbox's accessible name. */}
+        <Localized
+          id="MenuButtons--publish--source-code-nothing-to-include"
+          attrs={{ title: hasNothingToPick }}
         >
-          <input
-            type="checkbox"
-            className="photon-checkbox photon-checkbox-default"
-            onChange={this._onToggleSourceCode}
-            checked={isSourceCodeSharingOn}
-            disabled={this._isUploading() || hasNothingToPick}
-          />
-          <span>
-            <Localized id="MenuButtons--publish--renderCheckbox-label-source-code" />
-            {isSourceCodeSharingOn ? null : this._renderAvailability()}
-          </span>
-        </label>
-        {isSourceCodeSharingOn ? (
-          <>
-            {mode === 'upload' ? (
-              <div className="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content publishPanelSourceCodeNotice">
-                <Localized id="MenuButtons--publish--source-code-rights-notice">
-                  <div className="photon-message-bar-inner-text">
-                    These files will be public. Only include code you have the
-                    right to share.
-                  </div>
-                </Localized>
-              </div>
-            ) : null}
-            {this._renderPresets()}
-            <div className="publishPanelSourceFileTreeContainer">
-              <SourceFileTree
-                nodes={sourceFileTree}
-                selectedSourceIndexes={sourceFilesToShare}
-                disabled={this._isUploading()}
-                onToggle={this._onToggleSourceFiles}
+          <div className="publishPanelDataChoices">
+            <label
+              className={classNames(
+                'photon-label publishPanelDataChoicesLabel',
+                { publishPanelLabelDisabled: hasNothingToPick }
+              )}
+            >
+              <input
+                type="checkbox"
+                className="photon-checkbox photon-checkbox-default"
+                onChange={this._onToggleSourceCode}
+                checked={isSourceCodeSharingOn}
+                disabled={this._isUploading() || hasNothingToPick}
               />
+              <span>
+                <Localized id="MenuButtons--publish--renderCheckbox-label-source-code" />
+              </span>
+            </label>
+          </div>
+        </Localized>
+        <details
+          className="publishPanelSourceCodeDetails"
+          open={isExpanded}
+          onToggle={this._onToggleExpanded}
+        >
+          <summary className="publishPanelSourceCodeDetailsSummary">
+            <Localized id="MenuButtons--publish--source-code-details-heading">
+              <h3 className="photon-title-10 publishPanelSourceCodeDetailsHeading">
+                Embedded source code
+              </h3>
+            </Localized>
+          </summary>
+          {/* The tree can be long, so it's only rendered while it's visible. */}
+          {isExpanded ? (
+            <div className="publishPanelSourceCodeDetailsContent">
+              {mode === 'upload' ? (
+                <div className="photon-message-bar photon-message-bar-warning photon-message-bar-inner-content publishPanelSourceCodeNotice">
+                  <Localized id="MenuButtons--publish--source-code-rights-notice">
+                    <div className="photon-message-bar-inner-text">
+                      These files will be public. Only include code you have the
+                      right to share.
+                    </div>
+                  </Localized>
+                </div>
+              ) : null}
+              {this._renderPresets()}
+              <div className="publishPanelSourceFileTreeContainer">
+                <SourceFileTree
+                  nodes={sourceFileTree}
+                  selectedSourceIndexes={sourceFilesToShare}
+                  disabled={this._isUploading()}
+                  onToggle={this._onToggleSourceFiles}
+                />
+              </div>
+              {this._renderStatusRows()}
             </div>
-            {this._renderStatusRow()}
-          </>
-        ) : null}
+          ) : null}
+        </details>
       </>
     );
   }
@@ -460,10 +442,9 @@ export const PublishSourceCodeSection = explicitConnect<
     sourceCodeSharingStats: getSourceCodeSharingStats(state),
     sourceFilesToFetch: getSourceFilesToFetch(state, mode),
     sourceCodeFetchState: getSourceCodeFetchState(state, mode),
-    sourceSharingDownloadedOnly: getSourceSharingDownloadedOnly(state, mode),
     sourceFileTree: getSourceFileTree(state),
     sourceFilesToShare: getSourceFilesToShare(state, mode),
-    sourceFilesForPresets: getSourceFilesForPresets(state, mode),
+    sourceFilesForPresets: getSourceFilesForPresets(state),
     activeSourceSharingPreset: getActiveSourceSharingPreset(state, mode),
     sourceCodeSharingSummary: getSourceCodeSharingSummary(state, mode),
   }),
@@ -471,7 +452,6 @@ export const PublishSourceCodeSection = explicitConnect<
     updateSourceFilesToShare,
     fetchSourceFilesToShare,
     cancelSourceCodeFetch,
-    setSourceSharingDownloadedOnly,
     turnOnSourceCodeSharing,
     encodeSanitizedProfile,
   },

@@ -268,9 +268,6 @@ export type PublishState = {
   // `null` means the user hasn't touched the selection yet, in which case the
   // default selection applies.
   readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
-  // Whether the presets should only pick files whose contents we already
-  // have, per sharing mode, rather than also the ones that would be fetched.
-  readonly sourceSharingDownloadedOnly: Record<SharingMode, boolean>;
   // Per sharing mode, so that work finishing for one panel doesn't replace
   // what the other one shows.
   readonly sanitizedProfileEncodingState: Record<

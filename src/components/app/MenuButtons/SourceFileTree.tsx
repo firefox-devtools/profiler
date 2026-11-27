@@ -8,6 +8,7 @@ import classNames from 'classnames';
 import { Localized } from '@fluent/react';
 
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
+import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
 
 import type {
   IndexIntoSourceTable,
@@ -87,16 +88,33 @@ function _renderSize(node: SourceFileTreeNode) {
     return prettyBytes(node.uncompressedSize);
   }
   if (node.fetchableFileCount > 0) {
-    return (
-      <Localized id="MenuButtons--publish--source-code-not-fetched">
-        Not fetched
-      </Localized>
-    );
+    switch (node.fetchSource) {
+      case 'BROWSER':
+        return (
+          <Localized id="MenuButtons--publish--source-code-from-browser">
+            From Firefox
+          </Localized>
+        );
+      case 'SYMBOL_SERVER':
+        return (
+          <Localized id="MenuButtons--publish--source-code-from-symbol-server">
+            From symbol server
+          </Localized>
+        );
+      case null:
+        return (
+          <Localized id="MenuButtons--publish--source-code-not-loaded">
+            Not loaded yet
+          </Localized>
+        );
+      default:
+        throw assertExhaustiveCheck(node.fetchSource);
+    }
   }
   if (node.availability === 'FAILED') {
     return (
-      <Localized id="MenuButtons--publish--source-code-file-fetch-failed">
-        Fetch failed
+      <Localized id="MenuButtons--publish--source-code-file-load-failed">
+        Couldn’t load
       </Localized>
     );
   }
@@ -105,7 +123,7 @@ function _renderSize(node: SourceFileTreeNode) {
       id="MenuButtons--publish--source-code-unavailable"
       attrs={{ title: true }}
     >
-      <span title="Fetching requires the browser that recorded the profile or a local symbol server.">
+      <span title="Loading it requires the browser that recorded the profile or a local symbol server.">
         Unavailable
       </span>
     </Localized>
@@ -211,6 +229,11 @@ class SourceFileTreeRow extends React.PureComponent<
             >
               {node.label}
             </span>
+            {node.isFromSourceMap ? (
+              <Localized id="MenuButtons--publish--source-code-from-source-map">
+                <span className="sourceFileTreeBadge">from source map</span>
+              </Localized>
+            ) : null}
             <span className="sourceFileTreeSize">{_renderSize(node)}</span>
           </label>
         </div>

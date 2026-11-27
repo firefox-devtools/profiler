@@ -26,6 +26,7 @@ import type {
   Profile,
   RawThread,
   SourceCodeAvailability,
+  SourceCodeFetchSource,
   SourceCodeSharingCandidate,
   SourceCodeSharingFile,
   SourceCodeSharingStats,
@@ -35,15 +36,6 @@ import type {
   StackTable,
   ThreadIndex,
 } from 'firefox-profiler/types';
-
-// Files with a public download URL can be fetched from anywhere, without the
-// browser connection or a local symbol server.
-function _isPubliclyDownloadable(filename: string): boolean {
-  const recipe = getDownloadRecipeForSourceFile(
-    parseFileNameFromSymbolication(filename)
-  );
-  return recipe.type !== 'NO_KNOWN_CORS_URL';
-}
 
 /**
  * The source contents we have on hand, from the profile or fetched during this
@@ -77,19 +69,6 @@ export function computeSourceContentsForSharing(
 // root in the tree, named after the product, rather than one root per scheme.
 const INTERNAL_URL_SCHEMES = new Set(['chrome', 'resource', 'moz-src']);
 
-// Whether symbolication named a file after the browser's own repository,
-// rather than one of the third-party repositories it builds from, like Rust's.
-// Official builds name them after hg.mozilla.org or the Firefox GitHub
-// repository.
-function _isFirefoxRepo(repo: string): boolean {
-  return (
-    repo.startsWith('hg.mozilla.org/') ||
-    repo === 'github.com/mozilla-firefox/firefox'
-  );
-}
-
-const GECKO_GENERATED_SOURCES_BUCKET = 'gecko-generated-sources';
-
 function _splitPath(path: string): string[] {
   return path.split('/').filter((s) => s !== '');
 }
@@ -108,30 +87,11 @@ function _pathSegmentsForFilename(
   productName: string,
   bundleUrl: string | null
 ): { pathSegments: string[]; isFromWebSite: boolean } {
-  if (parsedFile.type === 'hg' || parsedFile.type === 'git') {
-    const { repo } = parsedFile;
+  // Every hg file and most git files have a public download URL, so they
+  // aren't candidates. Only git files from unknown hosts get here.
+  if (parsedFile.type === 'git') {
     return {
-      pathSegments: [
-        _isFirefoxRepo(repo) ? productName : repo,
-        ..._splitPath(parsedFile.path),
-      ],
-      isFromWebSite: false,
-    };
-  }
-
-  // The browser's build-generated files, like the WebIDL bindings. Their paths
-  // are relative to the build directory, so they stay apart from the
-  // repository's files.
-  if (
-    parsedFile.type === 's3' &&
-    parsedFile.bucket === GECKO_GENERATED_SOURCES_BUCKET
-  ) {
-    return {
-      pathSegments: [
-        productName,
-        parsedFile.bucket,
-        ..._splitPath(parsedFile.path),
-      ],
+      pathSegments: [parsedFile.repo, ..._splitPath(parsedFile.path)],
       isFromWebSite: false,
     };
   }
@@ -294,26 +254,30 @@ function _computeSourcesOnStacks(
 }
 
 /**
- * The sources whose contents could be fetched from here. Native files go
- * through the symbolication API, which needs an address proof and either the
- * browser connection or a local symbol server. JS files come straight from
- * the browser, by their source id, but only in the tab that captured the
- * profile.
+ * The sources whose contents could be fetched from here, and where they would
+ * be fetched from first. Native files go through the symbolication API, which
+ * needs an address proof and either the browser connection or a local symbol
+ * server, and which tries the browser first. JS files come straight from the
+ * browser, by their source id, but only in the tab that captured the profile.
  */
 export function computeFetchableSources(
   profile: Profile,
   addressProofs: Map<IndexIntoSourceTable, AddressProof>,
-  canQuerySourceApi: boolean,
+  hasBrowserConnection: boolean,
+  canQuerySymbolServer: boolean,
   canGetJSSourcesFromBrowser: boolean
-): Set<IndexIntoSourceTable> {
-  const fetchable = new Set<IndexIntoSourceTable>();
+): Map<IndexIntoSourceTable, SourceCodeFetchSource> {
+  const fetchable = new Map<IndexIntoSourceTable, SourceCodeFetchSource>();
   const { sources } = profile.shared;
   for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+    const hasAddressProof = addressProofs.has(sourceIndex);
     if (
-      (canQuerySourceApi && addressProofs.has(sourceIndex)) ||
+      (hasAddressProof && hasBrowserConnection) ||
       (canGetJSSourcesFromBrowser && sources.id[sourceIndex] !== null)
     ) {
-      fetchable.add(sourceIndex);
+      fetchable.set(sourceIndex, 'BROWSER');
+    } else if (hasAddressProof && canQuerySymbolServer) {
+      fetchable.set(sourceIndex, 'SYMBOL_SERVER');
     }
   }
   return fetchable;
@@ -362,9 +326,18 @@ export function computeSourceCodeSharingCandidates(
   const originalToGenerated = _computeOriginalToGeneratedSource(profile);
 
   const sourceIndexes = Array.from(sourcesOnStacks).sort((a, b) => a - b);
-  return sourceIndexes.map((sourceIndex) => {
+  const candidates = [];
+  for (const sourceIndex of sourceIndexes) {
     const filename = stringArray[sources.filename[sourceIndex]];
     const parsedFile = parseFileNameFromSymbolication(filename);
+    // Files in public repositories or archives are at a fixed version, so the
+    // profiler loads them for anyone who opens the profile. Including them
+    // would only make the profile bigger.
+    if (
+      getDownloadRecipeForSourceFile(parsedFile).type !== 'NO_KNOWN_CORS_URL'
+    ) {
+      continue;
+    }
     const generated = originalToGenerated.get(sourceIndex);
     const bundleUrl =
       generated !== undefined
@@ -372,13 +345,14 @@ export function computeSourceCodeSharingCandidates(
             stringArray[sources.filename[generated]]
           ).path
         : null;
-    return {
+    candidates.push({
       sourceIndex,
       path: parsedFile.path,
       ..._pathSegmentsForFilename(parsedFile, productName, bundleUrl),
-      isPubliclyDownloadable: _isPubliclyDownloadable(filename),
-    };
-  });
+      isFromSourceMap: generated !== undefined,
+    });
+  }
+  return candidates;
 }
 
 /**
@@ -452,29 +426,32 @@ export function computeSourceTreeRootWeights(
 export function computeSourceCodeSharingFiles(
   candidates: SourceCodeSharingCandidate[],
   contents: Map<IndexIntoSourceTable, string>,
-  fetchableSources: ReadonlySet<IndexIntoSourceTable>,
+  fetchableSources: Map<IndexIntoSourceTable, SourceCodeFetchSource>,
   failedSources: ReadonlySet<IndexIntoSourceTable>
 ): SourceCodeSharingFile[] {
   return candidates.map((candidate) => {
     const { sourceIndex } = candidate;
     const fileContents = contents.get(sourceIndex);
     let availability: SourceCodeAvailability = 'UNAVAILABLE';
+    let fetchSource: SourceCodeFetchSource | null = null;
     if (fileContents !== undefined) {
       availability = 'DOWNLOADED';
     } else if (failedSources.has(sourceIndex)) {
       availability = 'FAILED';
-    } else if (
-      candidate.isPubliclyDownloadable ||
-      fetchableSources.has(sourceIndex)
-    ) {
-      availability = 'FETCHABLE';
+    } else {
+      fetchSource = fetchableSources.get(sourceIndex) ?? null;
+      if (fetchSource !== null) {
+        availability = 'FETCHABLE';
+      }
     }
     return {
       sourceIndex,
       path: candidate.path,
       pathSegments: candidate.pathSegments,
       isFromWebSite: candidate.isFromWebSite,
+      isFromSourceMap: candidate.isFromSourceMap,
       availability,
+      fetchSource,
       uncompressedSize: fileContents !== undefined ? fileContents.length : null,
     };
   });
@@ -484,14 +461,12 @@ export function computeSourceCodeSharingStats(
   files: SourceCodeSharingFile[]
 ): SourceCodeSharingStats {
   let downloadedFileCount = 0;
-  let downloadedUncompressedSize = 0;
   let fetchableFileCount = 0;
   let unavailableFileCount = 0;
   for (const file of files) {
     switch (file.availability) {
       case 'DOWNLOADED':
         downloadedFileCount++;
-        downloadedUncompressedSize += file.uncompressedSize ?? 0;
         break;
       case 'FETCHABLE':
         fetchableFileCount++;
@@ -506,9 +481,6 @@ export function computeSourceCodeSharingStats(
     }
   }
   return {
-    fileCount: files.length,
-    downloadedFileCount,
-    downloadedUncompressedSize,
     shareableFileCount: downloadedFileCount + fetchableFileCount,
     unavailableFileCount,
   };
@@ -681,6 +653,12 @@ function _finishTreeNode(
   let uncompressedSize = 0;
   let downloadedFileCount = 0;
   let fetchableFileCount = 0;
+  // undefined until a fetchable file is seen, null once two disagree.
+  let fetchSource: SourceCodeFetchSource | null | undefined;
+  const mergeFetchSource = (source: SourceCodeFetchSource | null) => {
+    fetchSource =
+      fetchSource === undefined || fetchSource === source ? source : null;
+  };
   for (const file of files) {
     if (
       availability === null ||
@@ -698,6 +676,7 @@ function _finishTreeNode(
         break;
       case 'FETCHABLE':
         fetchableFileCount++;
+        mergeFetchSource(file.fetchSource);
         break;
       case 'FAILED':
       case 'UNAVAILABLE':
@@ -723,6 +702,9 @@ function _finishTreeNode(
     uncompressedSize += child.uncompressedSize;
     downloadedFileCount += child.downloadedFileCount;
     fetchableFileCount += child.fetchableFileCount;
+    if (child.fetchableFileCount > 0) {
+      mergeFetchSource(child.fetchSource);
+    }
   }
 
   return {
@@ -730,10 +712,13 @@ function _finishTreeNode(
     label,
     path,
     availability,
+    isFromSourceMap:
+      files.length > 0 && files.every((file) => file.isFromSourceMap),
     sourceIndexes: sourceIndexes.buffer.subarray(start, sourceIndexes.length),
     uncompressedSize,
     downloadedFileCount,
     fetchableFileCount,
+    fetchSource: fetchSource ?? null,
     children,
   };
 }
@@ -797,14 +782,12 @@ export function computeSourceCodeSharingSummary(
   contents: Map<IndexIntoSourceTable, string>,
   selectedSourceIndexes: ReadonlySet<IndexIntoSourceTable>
 ): SourceCodeSharingSummary {
-  let fileCount = 0;
   let uncompressedSize = 0;
   for (const sourceIndex of selectedSourceIndexes) {
     const fileContents = contents.get(sourceIndex);
     if (fileContents !== undefined) {
-      fileCount++;
       uncompressedSize += fileContents.length;
     }
   }
-  return { fileCount, uncompressedSize };
+  return { fileCount: selectedSourceIndexes.size, uncompressedSize };
 }

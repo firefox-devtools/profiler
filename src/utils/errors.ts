@@ -27,7 +27,7 @@ export class SourceCodeFetchError extends Error {
   failedCount: number;
 
   constructor(failedCount: number) {
-    super(`${failedCount} of the picked source files could not be fetched.`);
+    super(`${failedCount} of the picked source files could not be loaded.`);
     // Workaround for a babel issue when extending Errors
     (this as any).__proto__ = SourceCodeFetchError.prototype;
     this.name = 'SourceCodeFetchError';

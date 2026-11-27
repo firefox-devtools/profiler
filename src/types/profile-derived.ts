@@ -765,7 +765,8 @@ export type TrackIndex = number;
 /**
  * A source file that is on a sampled stack, as far as the profile alone can
  * tell. Which candidates the publish panel offers also depends on the
- * contents fetched during the session.
+ * contents fetched during the session. Files in public repositories aren't
+ * candidates, since anyone who opens the shared profile can load them.
  */
 export type SourceCodeSharingCandidate = {
   sourceIndex: IndexIntoSourceTable;
@@ -776,16 +777,24 @@ export type SourceCodeSharingCandidate = {
   // Whether `pathSegments` start with a web site: the file's own URL, or the
   // URL of the bundle a source map produced it from.
   isFromWebSite: boolean;
-  // Whether the path has a download recipe, so that the file can be fetched
-  // from the web.
-  isPubliclyDownloadable: boolean;
+  // Whether a source map produced this file from a generated file.
+  isFromSourceMap: boolean;
 };
+
+/**
+ * Where the contents of a FETCHABLE source file would come from. This is the
+ * first place that fetching tries:
+ * - BROWSER: the browser that recorded the profile, through its connection to
+ *   the profiler.
+ * - SYMBOL_SERVER: a local symbol server.
+ */
+export type SourceCodeFetchSource = 'BROWSER' | 'SYMBOL_SERVER';
 
 /**
  * Whether the contents of a source file are in hand, or could be.
  * - DOWNLOADED: we have the contents.
- * - FETCHABLE: we don't, but the web, the browser connection or a local symbol
- *   server can get them, so the file can be picked and is fetched when sharing.
+ * - FETCHABLE: we don't, but the browser connection or a local symbol server
+ *   can get them, so the file can be picked and is fetched when sharing.
  * - FAILED: a fetch was tried during this session and failed.
  * - UNAVAILABLE: nothing we can reach has this file.
  */
@@ -803,7 +812,10 @@ export type SourceCodeSharingFile = {
   path: string;
   pathSegments: string[];
   isFromWebSite: boolean;
+  isFromSourceMap: boolean;
   availability: SourceCodeAvailability;
+  // Where a FETCHABLE file would be fetched from, null for the other files.
+  fetchSource: SourceCodeFetchSource | null;
   // The size of the file contents before the upload is compressed, or null when
   // we don't have them. This is the length in UTF-16 code units, which matches
   // the UTF-8 size for ASCII.
@@ -833,6 +845,10 @@ export type SourceFileTreeNode = {
   // For a file row, the availability of the file. null for rows that only
   // stand for directories.
   availability: SourceCodeAvailability | null;
+  // Whether this is a file row whose files a source map produced. The tree
+  // marks them, since their contents usually arrive with the source map, without
+  // the user having opened them.
+  isFromSourceMap: boolean;
   // Every source index at or below this row that can be picked, so downloaded
   // or fetchable. A file row can hold several when the same path was loaded
   // with different contents. This is a view into a buffer shared by the whole
@@ -842,19 +858,17 @@ export type SourceFileTreeNode = {
   uncompressedSize: number;
   downloadedFileCount: number;
   fetchableFileCount: number;
+  // Where the fetchable files at or below this row would be fetched from, or
+  // null when there are none, or when they don't all come from one place.
+  fetchSource: SourceCodeFetchSource | null;
   children: SourceFileTreeNode[];
 };
 
 /**
- * Counts over the source files listed in the publish panel, which the text
- * around the "Include source code" checkbox is made of.
+ * Counts over the source files listed in the publish panel, which decide which
+ * of the panel's source code controls are enabled.
  */
 export type SourceCodeSharingStats = {
-  // The files listed in the panel.
-  fileCount: number;
-  // The listed files whose contents we have, and their total size.
-  downloadedFileCount: number;
-  downloadedUncompressedSize: number;
   // The listed files that can be picked, so downloaded or fetchable.
   shareableFileCount: number;
   // The listed files that nothing reachable from here can serve.
@@ -862,11 +876,13 @@ export type SourceCodeSharingStats = {
 };
 
 /**
- * How many files, and how much uncompressed source code, the publish panel's
- * current selection would add to the shared profile.
+ * How many files the publish panel's current selection would add to the shared
+ * profile, and how much uncompressed source code we already have for them.
  */
 export type SourceCodeSharingSummary = {
+  // Every picked file, including the ones that are fetched when sharing.
   fileCount: number;
+  // The size of the picked files whose contents we have.
   uncompressedSize: number;
 };
 

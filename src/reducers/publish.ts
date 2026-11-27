@@ -121,22 +121,6 @@ const sourceFileSelection: Reducer<
   }
 };
 
-// On by default, so that picking a preset doesn't download anything unless
-// the user asks for it.
-const sourceSharingDownloadedOnly: Reducer<Record<SharingMode, boolean>> = (
-  state = { download: true, upload: true },
-  action
-) => {
-  switch (action.type) {
-    case 'PROFILE_LOADED':
-      return { download: true, upload: true };
-    case 'UPDATE_SOURCE_SHARING_DOWNLOADED_ONLY':
-      return { ...state, [action.mode]: action.value };
-    default:
-      return state;
-  }
-};
-
 // This is a diagram explaining the ordering of actions for uploading
 //
 //               UPLOAD_COMPRESSION_STARTED
@@ -407,7 +391,6 @@ const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
   defaultSourceFiles,
   sourceFileSelection,
-  sourceSharingDownloadedOnly,
   sanitizedProfileEncodingState,
   sourceCodeFetch,
   upload,

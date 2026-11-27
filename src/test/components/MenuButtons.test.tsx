@@ -5,6 +5,7 @@
 import {
   fireEvent,
   screen,
+  waitFor,
   waitForElementToBeRemoved,
   act,
 } from '@testing-library/react';
@@ -344,25 +345,31 @@ describe('app/MenuButtons', function () {
           .trim();
       const querySourcePresets = () =>
         document.querySelector('.publishPanelSourceCodePresets');
+      const getSourcePresetSelect = () =>
+        ensureExists(
+          document.querySelector<HTMLSelectElement>(
+            '.publishPanelSourceCodePresetSelect'
+          )
+        );
       const getSourcePresetLabels = () =>
-        Array.from(
-          document.querySelectorAll('.publishPanelSourceCodePresetLabel'),
-          (label) => label.textContent
+        Array.from(getSourcePresetSelect().options, (option) => option.text);
+      const getCheckedSourcePreset = () =>
+        getSourcePresetSelect().selectedOptions[0]?.text ?? null;
+      const getSourcePresetOption = (label: string) =>
+        ensureExists(
+          Array.from(getSourcePresetSelect().options).find(
+            (option) => option.text === label
+          )
         );
-      const getCheckedSourcePreset = () => {
-        const checked = document.querySelector(
-          '.publishPanelSourceCodePresets input:checked'
-        );
-        return checked === null
-          ? null
-          : ensureExists(checked.closest('label')).textContent;
+      const selectSourcePreset = (label: string) => {
+        fireEvent.change(getSourcePresetSelect(), {
+          target: { value: getSourcePresetOption(label).value },
+        });
       };
-      const getSourcePresetRadio = (label: string) =>
-        screen.getByRole('radio', { name: label });
       const getSourceFileSizes = () =>
         Array.from(
           document.querySelectorAll('.sourceFileTreeSize'),
-          (element) => element.textContent
+          (element) => element.textContent?.replace(/[\u2068\u2069]/g, '')
         );
       const enableSourceCode = () => {
         fireFullClick(ensureExists(querySourceCodeCheckbox()));
@@ -434,7 +441,8 @@ describe('app/MenuButtons', function () {
         querySourcePresets,
         getSourcePresetLabels,
         getCheckedSourcePreset,
-        getSourcePresetRadio,
+        getSourcePresetOption,
+        selectSourcePreset,
         getSourceFileSizes,
         enableSourceCode,
         selectThread,
@@ -633,7 +641,7 @@ describe('app/MenuButtons', function () {
       expect(queryArgumentValuesCheckbox()).not.toBeInTheDocument();
     });
 
-    it('keeps the file picker out of the way until the option is on', async () => {
+    it('keeps the file picker collapsed until something is picked', async () => {
       const { profile } = createSourceCodeProfile();
       const {
         querySourceCodeCheckbox,
@@ -648,16 +656,21 @@ describe('app/MenuButtons', function () {
       // Nothing is open in the source view, so the option starts unchecked.
       expect(sourceCodeCheckbox).not.toBeChecked();
 
-      // There is nothing to configure yet, so no tree and no presets. The row
-      // still says how much source code is on offer.
+      // Nothing is picked, so the section starts collapsed.
       expect(getSourceFileTreeLabels()).toEqual([]);
       expect(querySourcePresets()).not.toBeInTheDocument();
-      expect(
-        screen.getByText('(2 files available, 45 B uncompressed)', {
-          // Fluent wraps variables in the isolation characters \u2068 and \u2069.
-          normalizer: (text) => text.replace(/[\u2068\u2069]/g, '').trim(),
-        })
-      ).toBeInTheDocument();
+
+      // It can be opened without picking anything. jsdom doesn't toggle a
+      // <details> on clicks on its <summary>, so open it directly.
+      act(() => {
+        ensureExists(
+          document.querySelector<HTMLDetailsElement>(
+            '.publishPanelSourceCodeDetails'
+          )
+        ).open = true;
+      });
+      await waitFor(() => expect(getSourceFileTreeLabels()).not.toEqual([]));
+      expect(sourceCodeCheckbox).not.toBeChecked();
     });
 
     it('shows the file tree once the option is on', async () => {
@@ -685,12 +698,12 @@ describe('app/MenuButtons', function () {
       await waitForEncoding();
     });
 
-    it('turns the option back off without remembering the picked files', async () => {
+    it('turns the option back off by unpicking every file', async () => {
       const { profile } = createSourceCodeProfile();
       const {
         waitForEncoding,
         querySourceCodeCheckbox,
-        getSourceFileTreeLabels,
+        getSourceTreeCheckbox,
         enableSourceCode,
         openPublishPanel,
       } = setupForPublish(profile);
@@ -698,10 +711,11 @@ describe('app/MenuButtons', function () {
 
       enableSourceCode();
       expect(querySourceCodeCheckbox()).toBeChecked();
+      expect(getSourceTreeCheckbox(LOCAL_SOURCE_FILE)).toBeChecked();
 
       enableSourceCode();
       expect(querySourceCodeCheckbox()).not.toBeChecked();
-      expect(getSourceFileTreeLabels()).toEqual([]);
+      expect(getSourceTreeCheckbox(LOCAL_SOURCE_FILE)).not.toBeChecked();
       await waitForEncoding();
     });
 
@@ -765,11 +779,6 @@ describe('app/MenuButtons', function () {
         openPublishPanel,
       } = setupForPublish(profile);
       await openPublishPanel();
-      expect(
-        screen.getByText('(1 of 4 files fetched, 25 B uncompressed)', {
-          normalizer: (text) => text.replace(/[\u2068\u2069]/g, '').trim(),
-        })
-      ).toBeInTheDocument();
       enableSourceCode();
 
       // opt/lib has more samples, so it comes first. It has nothing to pick, so
@@ -857,19 +866,17 @@ describe('app/MenuButtons', function () {
         'Unavailable',
         '25 B',
         '25 B',
-        'Not fetched',
+        'From Firefox',
       ]);
 
-      // The presets stick to downloaded files by default, so this one has to
-      // be picked by hand.
-      expect(fetchableCheckbox).not.toBeChecked();
-      fireFullClick(fetchableCheckbox);
+      // Turning sharing on picked it along with the fetched file.
+      expect(fetchableCheckbox).toBeChecked();
       expect(getSourceCodeSummaryLines()).toEqual([
-        '1 file, 25 B uncompressed.',
-        '1 file will be fetched when sharing.',
+        '2 files, at least 25 B uncompressed.',
+        '1 file will be loaded when you upload.',
       ]);
 
-      fireFullClick(screen.getByText('Fetch now'));
+      fireFullClick(screen.getByText('Load now'));
       await screen.findByText('20 B');
       expect(getJSSource).toHaveBeenCalledWith(
         'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41'
@@ -885,11 +892,12 @@ describe('app/MenuButtons', function () {
       ]);
     });
 
-    it('waits for the picked files to be downloaded before saving', async () => {
+    it('can leave out the picked files that are not loaded yet', async () => {
       const { profile } = createPartlyDownloadedSourceCodeProfile();
       profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+      const getJSSource = jest.fn(async () => 'void nsFoo::Bar() {}');
       const browserConnection = {
-        getJSSource: async () => 'void nsFoo::Bar() {}',
+        getJSSource,
         querySymbolicationApi: async () => {
           throw new Error('No source for this address');
         },
@@ -898,8 +906,11 @@ describe('app/MenuButtons', function () {
         dispatch,
         getSourceTreeCheckbox,
         getSourceCodeSummaryLines,
+        getCheckedSourcePreset,
+        getPanelForm,
+        resolveUpload,
         enableSourceCode,
-        openDownloadPanel,
+        openPublishPanel,
         waitForEncoding,
       } = setupForPublish(profile);
       act(() => {
@@ -910,23 +921,103 @@ describe('app/MenuButtons', function () {
           })
         );
       });
-      await openDownloadPanel();
+      await openPublishPanel();
       enableSourceCode();
-      fireFullClick(getSourceTreeCheckbox(OTHER_SOURCE_FILE));
+      expect(getSourceTreeCheckbox(OTHER_SOURCE_FILE)).toBeChecked();
 
+      fireFullClick(screen.getByRole('button', { name: 'Leave out' }));
+      expect(getSourceTreeCheckbox(LOCAL_SOURCE_FILE)).toBeChecked();
+      expect(getSourceTreeCheckbox(OTHER_SOURCE_FILE)).not.toBeChecked();
+      expect(getCheckedSourcePreset()).toBe('Custom');
       expect(getSourceCodeSummaryLines()).toEqual([
         '1 file, 25 B uncompressed.',
-        '1 file must be fetched before saving.',
       ]);
-      await waitForEncoding();
-      expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
-      expect(
-        screen.queryByRole('link', { name: /Save/ })
-      ).not.toBeInTheDocument();
 
-      fireFullClick(screen.getByText('Fetch now'));
-      await screen.findByText('20 B');
-      await screen.findByRole('link', { name: /Save/ });
+      // Uploading doesn't load the file that was left out.
+      await waitForEncoding();
+      fireEvent.submit(getPanelForm());
+      resolveUpload('SOME_HASH');
+      await screen.findByText(/revert/i);
+      expect(getJSSource).not.toHaveBeenCalled();
+    });
+
+    describe('saving with source files that are not loaded yet', function () {
+      let clickDownloadLink: jest.SpyInstance | null = null;
+
+      async function setupForSaving(getJSSource: () => Promise<string>) {
+        const { profile } = createPartlyDownloadedSourceCodeProfile();
+        profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
+        const browserConnection = {
+          getJSSource,
+          querySymbolicationApi: async () => {
+            throw new Error('No source for this address');
+          },
+        } as unknown as BrowserConnection;
+        const setupResult = setupForPublish(profile);
+        act(() => {
+          setupResult.dispatch(
+            updateBrowserConnectionStatus({
+              status: 'ESTABLISHED',
+              browserConnection,
+            })
+          );
+        });
+        await setupResult.openDownloadPanel();
+        setupResult.enableSourceCode();
+        await setupResult.waitForEncoding();
+        // jsdom doesn't do downloads, so catch the click on the download link.
+        clickDownloadLink = jest
+          .spyOn(HTMLAnchorElement.prototype, 'click')
+          .mockImplementation(() => {});
+        return { ...setupResult, clickDownloadLink };
+      }
+
+      afterEach(function () {
+        clickDownloadLink?.mockRestore();
+        clickDownloadLink = null;
+      });
+
+      it('loads the picked files, then saves', async () => {
+        const getJSSource = jest.fn(async () => 'void nsFoo::Bar() {}');
+        const { getSourceCodeSummaryLines, clickDownloadLink } =
+          await setupForSaving(getJSSource);
+        expect(getSourceCodeSummaryLines()).toEqual([
+          '2 files, at least 25 B uncompressed.',
+          '1 file will be loaded when you save.',
+        ]);
+
+        fireFullClick(screen.getByRole('button', { name: 'Save' }));
+        await waitFor(() => expect(clickDownloadLink).toHaveBeenCalledTimes(1));
+        expect(getJSSource).toHaveBeenCalledTimes(1);
+        const downloadLink = clickDownloadLink.mock
+          .contexts[0] as HTMLAnchorElement;
+        expect(downloadLink.download).toMatch(/\.gz$/);
+        expect(getSourceCodeSummaryLines()).toEqual([
+          '2 files, 45 B uncompressed.',
+        ]);
+      });
+
+      it('does not save when a picked file cannot be loaded', async () => {
+        const { clickDownloadLink } = await setupForSaving(async () => {
+          throw new Error('No such source');
+        });
+
+        fireFullClick(screen.getByRole('button', { name: 'Save' }));
+        expect(
+          await screen.findByText(
+            /could not be loaded. It has been left out, so saving again will include the rest/
+          )
+        ).toBeInTheDocument();
+        expect(clickDownloadLink).not.toHaveBeenCalled();
+        // The file dropped out of the selection, so Save saves the rest.
+        const saveLink = await screen.findByRole('link', { name: /Save/ });
+
+        // Once saved, the message about the failed file is out of date.
+        fireFullClick(saveLink);
+        expect(
+          screen.queryByText(/could not be loaded/)
+        ).not.toBeInTheDocument();
+      });
     });
 
     it('waits for a running download before uploading', async () => {
@@ -944,7 +1035,6 @@ describe('app/MenuButtons', function () {
       } as unknown as BrowserConnection;
       const {
         dispatch,
-        getSourceTreeCheckbox,
         getPanelForm,
         resolveUpload,
         enableSourceCode,
@@ -961,11 +1051,9 @@ describe('app/MenuButtons', function () {
       });
       await openPublishPanel();
       enableSourceCode();
-      // The presets stick to downloaded files by default.
-      fireFullClick(getSourceTreeCheckbox(OTHER_SOURCE_FILE));
 
       const uploadButton = screen.getByRole('button', { name: /Upload/ });
-      fireFullClick(screen.getByText('Fetch now'));
+      fireFullClick(screen.getByText('Load now'));
       expect(uploadButton).toBeDisabled();
 
       act(() => resolveSource('void nsFoo::Bar() {}'));
@@ -991,13 +1079,8 @@ describe('app/MenuButtons', function () {
           throw new Error('No source for this address');
         },
       } as unknown as BrowserConnection;
-      const {
-        dispatch,
-        getPanelForm,
-        getSourceTreeCheckbox,
-        enableSourceCode,
-        openPublishPanel,
-      } = setupForPublish(profile);
+      const { dispatch, getPanelForm, enableSourceCode, openPublishPanel } =
+        setupForPublish(profile);
       act(() => {
         dispatch(
           updateBrowserConnectionStatus({
@@ -1008,13 +1091,12 @@ describe('app/MenuButtons', function () {
       });
       await openPublishPanel();
       enableSourceCode();
-      fireFullClick(getSourceTreeCheckbox(OTHER_SOURCE_FILE));
       fireEvent.submit(getPanelForm());
 
       fireFullClick(await screen.findByText('Error uploading'));
       expect(
         await screen.findByText(
-          /of the picked source files could not be fetched. It has been left out/
+          /of the picked source files could not be loaded. It has been left out/
         )
       ).toBeInTheDocument();
     });
@@ -1029,112 +1111,10 @@ describe('app/MenuButtons', function () {
 
       expect(querySourceCodeCheckbox()).toBeDisabled();
       expect(
-        screen.getByText('(2 files, none fetched yet)', {
-          normalizer: (text) => text.replace(/[\u2068\u2069]/g, '').trim(),
-        })
+        screen.getByTitle(
+          /None of the source files in this profile can be included/
+        )
       ).toBeInTheDocument();
-      expect(
-        screen.getByTitle(/None of these source files can be included/)
-      ).toBeInTheDocument();
-    });
-
-    it('can keep the presets to the files that are already downloaded', async () => {
-      const { profile } = createPartlyDownloadedSourceCodeProfile();
-      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
-      const browserConnection = {
-        getJSSource: async () => 'void nsFoo::Bar() {}',
-        querySymbolicationApi: async () => {
-          throw new Error('No source for this address');
-        },
-      } as unknown as BrowserConnection;
-      const {
-        waitForEncoding,
-        dispatch,
-        getSourceTreeCheckbox,
-        getSourceCodeSummaryLines,
-        getSourcePresetLabels,
-        enableSourceCode,
-        openPublishPanel,
-      } = setupForPublish(profile);
-      act(() => {
-        dispatch(
-          updateBrowserConnectionStatus({
-            status: 'ESTABLISHED',
-            browserConnection,
-          })
-        );
-      });
-      await openPublishPanel();
-      enableSourceCode();
-
-      // On by default: "All available files" picked only the downloaded one.
-      const downloadedOnly = screen.getByRole('checkbox', {
-        name: 'Only already fetched files',
-      });
-      expect(downloadedOnly).toBeChecked();
-      const presetLabels = getSourcePresetLabels();
-      expect(getSourceTreeCheckbox(LOCAL_SOURCE_FILE)).toBeChecked();
-      expect(getSourceTreeCheckbox(OTHER_SOURCE_FILE)).not.toBeChecked();
-      expect(getSourceCodeSummaryLines()).toEqual([
-        '1 file, 25 B uncompressed.',
-      ]);
-
-      // Turning it off widens the active preset to the fetchable file, and
-      // leaves the presets where they were.
-      fireFullClick(downloadedOnly);
-      expect(getSourcePresetLabels()).toEqual(presetLabels);
-      expect(getSourceTreeCheckbox(OTHER_SOURCE_FILE)).toBeChecked();
-      expect(getSourceCodeSummaryLines()).toEqual([
-        '1 file, 25 B uncompressed.',
-        '1 file will be fetched when sharing.',
-      ]);
-      await waitForEncoding();
-    });
-
-    it('does not let the downloaded-only option turn on when nothing is downloaded', async () => {
-      const { profile } = createPartlyDownloadedSourceCodeProfile();
-      profile.shared.sources.content[0] = null;
-      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
-      const browserConnection = {
-        getJSSource: async () => 'void nsFoo::Bar() {}',
-        querySymbolicationApi: async () => {
-          throw new Error('No source for this address');
-        },
-      } as unknown as BrowserConnection;
-      const { waitForEncoding, dispatch, enableSourceCode, openPublishPanel } =
-        setupForPublish(profile);
-      act(() => {
-        dispatch(
-          updateBrowserConnectionStatus({
-            status: 'ESTABLISHED',
-            browserConnection,
-          })
-        );
-      });
-      await openPublishPanel();
-      enableSourceCode();
-
-      // Turning sharing on had to switch it off to pick the fetchable file.
-      const downloadedOnly = screen.getByRole('checkbox', {
-        name: 'Only already fetched files',
-      });
-      expect(downloadedOnly).not.toBeChecked();
-      expect(downloadedOnly).toBeDisabled();
-      await waitForEncoding();
-    });
-
-    it('does not offer the downloaded-only option when every file is downloaded', async () => {
-      const { profile } = createSourceCodeProfile();
-      const { waitForEncoding, enableSourceCode, openPublishPanel } =
-        setupForPublish(profile);
-      await openPublishPanel();
-      enableSourceCode();
-      expect(
-        screen.queryByRole('checkbox', {
-          name: 'Only already fetched files',
-        })
-      ).not.toBeInTheDocument();
-      await waitForEncoding();
     });
 
     it('warns about the distribution rights when uploading', async () => {
@@ -1192,23 +1172,17 @@ describe('app/MenuButtons', function () {
       await openPublishPanel();
       enableSourceCode();
 
+      // The option says whether anything is picked, and the tree stays open.
       fireFullClick(getSourceTreeCheckbox(LOCAL_SOURCE_FILE));
       fireFullClick(getSourceTreeCheckbox(OTHER_SOURCE_FILE));
-      expect(querySourceCodeCheckbox()).toBeChecked();
-      expect(getSourceFileTreeLabels()).not.toEqual([]);
-      expect(getSourceCodeSummaryLines()).toEqual([
-        '0 files, 0 B uncompressed.',
-      ]);
-
-      // Only the option's own checkbox closes it.
-      fireFullClick(ensureExists(querySourceCodeCheckbox()));
       expect(querySourceCodeCheckbox()).not.toBeChecked();
-      expect(getSourceFileTreeLabels()).toEqual([]);
-
-      // Closing the panel with nothing picked turns the option off.
-      enableSourceCode();
+      expect(getSourceFileTreeLabels()).not.toEqual([]);
+      expect(getSourceCodeSummaryLines()).toEqual(['0 files.']);
       fireFullClick(getSourceTreeCheckbox(LOCAL_SOURCE_FILE));
-      fireFullClick(getSourceTreeCheckbox(OTHER_SOURCE_FILE));
+      expect(querySourceCodeCheckbox()).toBeChecked();
+      fireFullClick(getSourceTreeCheckbox(LOCAL_SOURCE_FILE));
+
+      // With nothing picked, the section starts collapsed the next time.
       fireFullClick(getPublishButton());
       await waitForElementToBeRemoved(querySourceCodeCheckbox);
       await openPublishPanel();
@@ -1225,7 +1199,8 @@ describe('app/MenuButtons', function () {
         waitForEncoding,
         getSourcePresetLabels,
         getCheckedSourcePreset,
-        getSourcePresetRadio,
+        getSourcePresetOption,
+        selectSourcePreset,
         getSourceTreeCheckbox,
         enableSourceCode,
         openPublishPanel,
@@ -1234,28 +1209,24 @@ describe('app/MenuButtons', function () {
       enableSourceCode();
       expect(getSourcePresetLabels()).toEqual([
         'Current file',
-        'Selected threads',
-        'All available files',
+        'Files from the selected threads',
+        'All files',
       ]);
-      expect(getSourcePresetRadio('Current file')).toBeDisabled();
+      expect(getSourcePresetOption('Current file')).toBeDisabled();
       // Turning the option on starts from the narrowest preset.
-      expect(getCheckedSourcePreset()).toBe('Selected threads');
+      expect(getCheckedSourcePreset()).toBe('Files from the selected threads');
 
-      fireFullClick(getSourcePresetRadio('All available files'));
-      expect(getCheckedSourcePreset()).toBe('All available files');
+      selectSourcePreset('All files');
+      expect(getCheckedSourcePreset()).toBe('All files');
 
-      // Leaving out a file still offers a way back to all of them.
+      // Leaving out a file still offers a way back to all of them. "Custom"
+      // is only listed while it applies.
       fireFullClick(getSourceTreeCheckbox(LOCAL_SOURCE_FILE));
-      expect(getSourcePresetLabels()).toEqual([
-        'Current file',
-        'Selected threads',
-        'All available files',
-        'Custom',
-      ]);
       expect(getCheckedSourcePreset()).toBe('Custom');
+      expect(getSourcePresetOption('Custom')).toBeDisabled();
 
-      fireFullClick(getSourcePresetRadio('All available files'));
-      expect(getCheckedSourcePreset()).toBe('All available files');
+      selectSourcePreset('All files');
+      expect(getCheckedSourcePreset()).toBe('All files');
       await waitForEncoding();
     });
 
@@ -1278,7 +1249,7 @@ describe('app/MenuButtons', function () {
 
       // Turning the option on starts from the narrowest thing on offer, which
       // here is the selected thread's one file rather than both files.
-      expect(getCheckedSourcePreset()).toBe('Selected threads');
+      expect(getCheckedSourcePreset()).toBe('Files from the selected threads');
       expect(getSourceCodeSummary()).toBe('1 file, 20 B uncompressed.');
       await waitForEncoding();
     });
@@ -1303,8 +1274,8 @@ describe('app/MenuButtons', function () {
       expect(querySourceCodeCheckbox()).toBeChecked();
       expect(getSourcePresetLabels()).toEqual([
         'Current file',
-        'Selected threads',
-        'All available files',
+        'Files from the selected threads',
+        'All files',
       ]);
       // The current file wins over the selected thread's files, which is the
       // narrower of the two.
@@ -1350,7 +1321,7 @@ describe('app/MenuButtons', function () {
       const { profile } = createTwoThreadSourceCodeProfile();
       const {
         waitForEncoding,
-        getSourcePresetRadio,
+        selectSourcePreset,
         getCheckedSourcePreset,
         getSourceTreeCheckbox,
         selectThread,
@@ -1361,8 +1332,8 @@ describe('app/MenuButtons', function () {
       await openPublishPanel();
       enableSourceCode();
 
-      fireFullClick(getSourcePresetRadio('All available files'));
-      expect(getCheckedSourcePreset()).toBe('All available files');
+      selectSourcePreset('All files');
+      expect(getCheckedSourcePreset()).toBe('All files');
 
       // Dropping thread 1's file leaves a selection that no preset stands for.
       // Dropping the other one would land back on "Selected threads".
@@ -1370,46 +1341,45 @@ describe('app/MenuButtons', function () {
       expect(getCheckedSourcePreset()).toBe('Custom');
 
       // Picking a preset again gets back out of the custom state.
-      fireFullClick(getSourcePresetRadio('All available files'));
-      expect(getCheckedSourcePreset()).toBe('All available files');
+      selectSourcePreset('All files');
+      expect(getCheckedSourcePreset()).toBe('All files');
       await waitForEncoding();
     });
 
-    it('offers files which anybody can download from a public profile', async () => {
+    it('does not list files that anyone can download', async () => {
       const PUBLIC_FILE =
         'hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28';
       const { profile } = getProfileFromTextSamples(`
         A[file:${LOCAL_SOURCE_FILE}]
         B[file:${PUBLIC_FILE}]
       `);
-      profile.meta.updateChannel = 'release';
+      profile.shared.sources.content[0] = 'void nsDocument::Foo() {}';
 
       const {
         waitForEncoding,
         getSourceFileTreeLabels,
-        getSourceCodeSummaryLines,
-        getSourceCodeLeftOutInfo,
         enableSourceCode,
         openPublishPanel,
       } = setupForPublish(profile);
       await openPublishPanel();
-      // Neither file is downloaded and there is no browser connection, but the
-      // public file can still be fetched from the web.
       enableSourceCode();
 
-      // nsAppShell.mm is the leaf, so its root has all the self time.
+      // Anyone who opens the profile can load nsAppShell.mm from
+      // hg.mozilla.org, so it isn't offered.
       expect(getSourceFileTreeLabels()).toEqual([
-        'Firefox/widget/cocoa/nsAppShell.mm',
         'home/user/moz/dom/base/nsDocument.cpp',
       ]);
-      expect(getSourceCodeSummaryLines()).toEqual([
-        '0 files, 0 B uncompressed.',
-        '1 file will be fetched when sharing.',
-      ]);
-      expect(getSourceCodeLeftOutInfo()).toBe(
-        '1 file can’t be fetched from here. Fetching it requires the browser that recorded the profile or a local symbol server.'
-      );
       await waitForEncoding();
+    });
+
+    it('does not offer the option when every file can be downloaded by anyone', async () => {
+      const { profile } = getProfileFromTextSamples(
+        'A[file:hg:hg.mozilla.org/mozilla-central:widget/cocoa/nsAppShell.mm:997f00815e6bc28806b75448c8829f0259d2cb28]'
+      );
+      const { querySourceCodeCheckbox, openPublishPanel } =
+        setupForPublish(profile);
+      await openPublishPanel();
+      expect(querySourceCodeCheckbox()).not.toBeInTheDocument();
     });
 
     it('can publish and revert', async () => {
