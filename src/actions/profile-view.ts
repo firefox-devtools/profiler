@@ -39,6 +39,10 @@ import {
   getFunctionListSort,
 } from 'firefox-profiler/selectors/url-state';
 import {
+  getCanPrettyPrintSource,
+  getSourceViewFormatDialect,
+} from 'firefox-profiler/selectors/code';
+import {
   assertExhaustiveCheck,
   getFirstItemFromSet,
   ensureExists,
@@ -2160,7 +2164,7 @@ export function changeTableViewOptions(
 export function updateBottomBoxContentsAndMaybeOpen(
   currentTab: TabSlug,
   bottomBoxInfo: BottomBoxInfo
-): Action {
+): ThunkAction<void> {
   const {
     sourceIndex,
     nativeSymbols,
@@ -2169,6 +2173,8 @@ export function updateBottomBoxContentsAndMaybeOpen(
     scrollToInstructionAddress,
     highlightedLineNumber,
     highlightedInstructionAddress,
+    scrollToColumnNumber,
+    highlightedColumnNumber,
   } = bottomBoxInfo;
 
   const haveSource = sourceIndex !== null;
@@ -2180,18 +2186,35 @@ export function updateBottomBoxContentsAndMaybeOpen(
   // view closed - unless the only thing we have is assembly.
   const shouldOpenAssemblyView = !haveSource && haveAssembly;
 
-  return {
-    type: 'UPDATE_BOTTOM_BOX',
-    sourceIndex,
-    nativeSymbols,
-    currentNativeSymbol: initialNativeSymbol,
-    currentTab,
-    shouldOpenBottomBox,
-    shouldOpenAssemblyView,
-    scrollToLineNumber,
-    scrollToInstructionAddress,
-    highlightedLineNumber,
-    highlightedInstructionAddress,
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'UPDATE_BOTTOM_BOX',
+      sourceIndex,
+      nativeSymbols,
+      currentNativeSymbol: initialNativeSymbol,
+      currentTab,
+      shouldOpenBottomBox,
+      shouldOpenAssemblyView,
+      scrollToLineNumber,
+      scrollToInstructionAddress,
+      highlightedLineNumber,
+      highlightedInstructionAddress,
+      scrollToColumnNumber,
+      highlightedColumnNumber,
+      canPrettyPrint: getCanPrettyPrintSource(getState(), sourceIndex),
+    });
+  };
+}
+
+export function setSourceViewPrettyPrint(
+  isPrettyPrinted: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'SET_SOURCE_VIEW_PRETTY_PRINT',
+      isPrettyPrinted,
+      canPrettyPrint: getSourceViewFormatDialect(getState()) !== null,
+    });
   };
 }
 

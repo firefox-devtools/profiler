@@ -426,6 +426,26 @@ describe('getBottomBoxInfoForFunction', function () {
     expect(bottomBoxInfo.scrollToLineNumber).toBe(31);
   });
 
+  it('picks the hottest column on the hottest line', function () {
+    // Minified code puts many functions on one line, so the source view needs
+    // the column to find the right spot after pretty-printing.
+    const { derivedThreads, funcNamesDictPerThread } =
+      getProfileFromTextSamples(`
+        A[file:a.js][line:1][col:10]  A[file:a.js][line:1][col:500]  A[file:a.js][line:1][col:500]
+      `);
+    const [thread] = derivedThreads;
+    const [{ A }] = funcNamesDictPerThread;
+
+    const bottomBoxInfo = getBottomBoxInfoForFunction(
+      A,
+      thread,
+      thread.samples
+    );
+
+    expect(bottomBoxInfo.scrollToLineNumber).toBe(1);
+    expect(bottomBoxInfo.scrollToColumnNumber).toBe(500);
+  });
+
   it('opens the source view when double-clicking a function in the function list', function () {
     const { profile, derivedThreads, funcNamesDictPerThread } =
       getProfileFromTextSamples(`

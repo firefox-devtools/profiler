@@ -97,7 +97,9 @@ type OwnProps = {
   readonly rightClickedMarkerIndex: MarkerIndex | null;
   readonly shouldDisplayTooltips: () => boolean;
   readonly thread: Thread;
-  readonly updateBottomBoxContentsAndMaybeOpen: typeof updateBottomBoxContentsAndMaybeOpen;
+  readonly updateBottomBoxContentsAndMaybeOpen: WrapFunctionInDispatch<
+    typeof updateBottomBoxContentsAndMaybeOpen
+  >;
   readonly selectedTab: TabSlug;
 };
 

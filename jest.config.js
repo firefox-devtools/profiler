@@ -31,6 +31,7 @@ const browserEnvConfig = {
   globals: {
     AVAILABLE_STAGING_LOCALES: null,
     SOURCE_MAP_WORKER_PATH: 'src/test/fixtures/source-map.worker.stub.js',
+    FORMAT_WORKER_PATH: 'src/test/fixtures/format.worker.stub.js',
   },
 
   snapshotFormat: {

@@ -19,7 +19,7 @@
  *    width of the editor, it covers both the gutter and the main area.
  */
 import { EditorView, lineNumbers } from '@codemirror/view';
-import { EditorState, Compartment } from '@codemirror/state';
+import { EditorState, Compartment, Text } from '@codemirror/state';
 import { type LanguageSupport, syntaxHighlighting } from '@codemirror/language';
 import { classHighlighter } from '@lezer/highlight';
 import { cpp } from '@codemirror/lang-cpp';
@@ -86,6 +86,15 @@ function _languageExtForPath(path: string | null): LanguageSupport | [] {
   return javascript();
 }
 
+// Pretty-printed code is passed as an array of lines, most of which are
+// slices of the original code. Building the document from the lines avoids
+// building the formatted code as one big string. It's also much faster than
+// applying the formatting as many small changes, because CodeMirror copies the
+// whole line for each change, and minified code has very long lines.
+function _toDoc(text: string | string[]): string | Text {
+  return typeof text === 'string' ? text : Text.of(text);
+}
+
 // Creates a lineNumbers extension that displays line numbers offset by startLine - 1.
 function _lineNumbersForStartLine(startLine: number) {
   if (startLine <= 1) {
@@ -100,8 +109,9 @@ export class SourceViewEditor {
   _view: EditorView;
 
   // Create a CodeMirror editor and add it as a child element of domParent.
+  // The text can be a string or an array of lines.
   constructor(
-    initialText: string,
+    initialText: string | string[],
     path: string,
     timings: LineTimings,
     highlightedLine: number | null,
@@ -110,7 +120,7 @@ export class SourceViewEditor {
     onFindBarChange: (findBar: CodeFindBarPortal | null) => void
   ) {
     let state = EditorState.create({
-      doc: initialText,
+      doc: _toDoc(initialText),
       extensions: [
         timingsExtension,
         lineNumbersConf.of(_lineNumbersForStartLine(startLine)),
@@ -135,13 +145,13 @@ export class SourceViewEditor {
     });
   }
 
-  setContents(text: string) {
+  setContents(text: string | string[]) {
     // The CodeMirror way of replacing the entire contents is to insert new text
     // and overwrite the full range of existing text.
     this._view.dispatch(
       this._view.state.update({
         changes: {
-          insert: text,
+          insert: _toDoc(text),
           from: 0,
           to: this._view.state.doc.length,
         },
