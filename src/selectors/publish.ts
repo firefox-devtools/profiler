@@ -79,7 +79,6 @@ import type {
   SourceFileTreeNode,
   OfferedSourceSharingPreset,
   SourceSharingPreset,
-  Profile,
 } from 'firefox-profiler/types';
 import { getThreadSelectors } from './per-thread';
 
@@ -174,8 +173,9 @@ const getFailedSources: Selector<ReadonlySet<IndexIntoSourceTable>> =
     return failed;
   });
 
-// The files listed in the panel. The sharing options leave out the ones whose
-// contents would give away what they remove.
+// The files listed in the panel: the ones that make it into the sanitized
+// profile, without the ones whose contents would give away what the sharing
+// options remove.
 export const getSourceCodeSharingFiles: DangerousSelectorWithArguments<
   SourceCodeSharingFile[],
   SharingMode
@@ -183,12 +183,25 @@ export const getSourceCodeSharingFiles: DangerousSelectorWithArguments<
   createSelector(
     getSourceCodeSharingCandidates,
     (state: State) => getCheckedSharingOptions(state, mode),
+    (state: State) =>
+      _getSanitizedProfileWithoutSourceCode(state, mode).translationMaps,
     getSourceContentsForSharing,
     getFetchableSources,
     getFailedSources,
-    (candidates, sharingOptions, contents, fetchableSources, failedSources) =>
+    (
+      candidates,
+      sharingOptions,
+      translationMaps,
+      contents,
+      fetchableSources,
+      failedSources
+    ) =>
       computeSourceCodeSharingFiles(
-        filterSourceCodeSharingCandidates(candidates, sharingOptions),
+        filterSourceCodeSharingCandidates(
+          candidates,
+          sharingOptions,
+          translationMaps?.oldSourceToNewSourcePlusOne ?? null
+        ),
         contents,
         fetchableSources,
         failedSources
@@ -597,36 +610,48 @@ function getTracedValuesBuffersForAllThreads(
 }
 
 /**
- * The profile with only the picked source contents in it. This is kept out of
- * `sanitizePII` because it doesn't need reindexing, so it shouldn't turn an
- * unsanitized upload into a sanitized one.
- */
-const _getProfileToShare: DangerousSelectorWithArguments<Profile, SharingMode> =
-  _perSharingMode((mode) =>
-    createSelector(
-      getProfile,
-      getSourceContentsForSharing,
-      (state: State) => getSourceFilesToShare(state, mode),
-      setSharedSourceCode
-    )
-  );
-
-/**
  * Run the profile sanitization step, and also get information about how any
  * UrlState needs to be updated, with things like mapping thread indexes,
- * or providing a new committed range.
+ * or providing a new committed range. The picked source code is added
+ * afterwards, so that picking files doesn't sanitize the profile again, and so
+ * that the panel only lists the files that are still in it.
  */
-export const getSanitizedProfile: DangerousSelectorWithArguments<
+const _getSanitizedProfileWithoutSourceCode: DangerousSelectorWithArguments<
   SanitizeProfileResult,
   SharingMode
 > = _perSharingMode((mode) =>
   createSelector(
-    (state: State) => _getProfileToShare(state, mode),
+    getProfile,
     getDerivedMarkerInfoForAllThreads,
     getTracedValuesBuffersForAllThreads,
     (state: State) => getRemoveProfileInformation(state, mode),
     getMarkerSchemaByName,
     sanitizePII
+  )
+);
+
+// The sanitized profile with only the picked source contents in it. Adding
+// them doesn't reindex anything, so it doesn't turn an unsanitized upload into
+// a sanitized one.
+export const getSanitizedProfile: DangerousSelectorWithArguments<
+  SanitizeProfileResult,
+  SharingMode
+> = _perSharingMode((mode) =>
+  createSelector(
+    (state: State) => _getSanitizedProfileWithoutSourceCode(state, mode),
+    getSourceContentsForSharing,
+    (state: State) => getSourceFilesToShare(state, mode),
+    (sanitizeResult, contents, selectedSourceIndexes) => {
+      const profile = setSharedSourceCode(
+        sanitizeResult.profile,
+        contents,
+        selectedSourceIndexes,
+        sanitizeResult.translationMaps?.oldSourceToNewSourcePlusOne ?? null
+      );
+      return profile === sanitizeResult.profile
+        ? sanitizeResult
+        : { ...sanitizeResult, profile };
+    }
   )
 );
 

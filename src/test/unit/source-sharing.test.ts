@@ -507,7 +507,8 @@ describe('filterSourceCodeSharingCandidates', function () {
       filePaths(
         filterSourceCodeSharingCandidates(
           candidates,
-          sharingOptions(true, true)
+          sharingOptions(true, true),
+          null
         )
       )
     ).toEqual([
@@ -526,7 +527,8 @@ describe('filterSourceCodeSharingCandidates', function () {
       filePaths(
         filterSourceCodeSharingCandidates(
           candidates,
-          sharingOptions(false, true)
+          sharingOptions(false, true),
+          null
         )
       )
     ).toEqual([LOCAL_FILE]);
@@ -538,7 +540,8 @@ describe('filterSourceCodeSharingCandidates', function () {
       filePaths(
         filterSourceCodeSharingCandidates(
           candidates,
-          sharingOptions(true, false)
+          sharingOptions(true, false),
+          null
         )
       )
     ).toEqual(['https://example.com/bundle.js', LOCAL_FILE, '/src/app.ts']);

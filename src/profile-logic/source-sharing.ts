@@ -366,21 +366,27 @@ export function computeSourceCodeSharingCandidates(
 }
 
 /**
- * The candidates that the sharing options let into the shared profile. The
- * contents of a file would give away what the options leave out: the URL of
- * the page it ran on, or which extension it belongs to.
+ * The candidates that make it into the shared profile. Sanitizing drops the
+ * files that only the removed threads, tabs or time ranges used, which
+ * `oldSourceToNewSourcePlusOne` tells, or null when it dropped none. The
+ * sharing options also leave out the files whose contents would give away
+ * what they remove: the URL of the page a file ran on, or which extension it
+ * belongs to.
  */
 export function filterSourceCodeSharingCandidates(
   candidates: SourceCodeSharingCandidate[],
-  { includeUrls, includeExtension }: CheckedSharingOptions
+  { includeUrls, includeExtension }: CheckedSharingOptions,
+  oldSourceToNewSourcePlusOne: Int32Array | null
 ): SourceCodeSharingCandidate[] {
-  if (includeUrls && includeExtension) {
+  if (includeUrls && includeExtension && oldSourceToNewSourcePlusOne === null) {
     return candidates;
   }
   return candidates.filter(
     (candidate) =>
       (includeUrls || !candidate.hasRemovableUrl) &&
-      (includeExtension || !candidate.isFromExtension)
+      (includeExtension || !candidate.isFromExtension) &&
+      (oldSourceToNewSourcePlusOne === null ||
+        oldSourceToNewSourcePlusOne[candidate.sourceIndex] !== 0)
   );
 }
 
@@ -756,27 +762,30 @@ function _finishTreeNode(
  * Return a copy of the profile carrying the contents of the selected files and
  * nothing else, including dropping unselected contents that were already
  * embedded. Returns the profile itself if nothing changes.
+ *
+ * `contents` and `selectedSourceIndexes` use the source indexes of the profile
+ * before sanitizing. `oldSourceToNewSourcePlusOne` maps them to the ones of
+ * `profile`, or is null when sanitizing didn't reindex the sources.
  */
 export function setSharedSourceCode(
   profile: Profile,
   contents: Map<IndexIntoSourceTable, string>,
-  selectedSourceIndexes: ReadonlySet<IndexIntoSourceTable>
+  selectedSourceIndexes: ReadonlySet<IndexIntoSourceTable>,
+  oldSourceToNewSourcePlusOne: Int32Array | null
 ): Profile {
   const { sources } = profile.shared;
-  const content = sources.content.slice();
-  let changed = false;
-
-  for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
-    const newContent = selectedSourceIndexes.has(sourceIndex)
-      ? (contents.get(sourceIndex) ?? null)
-      : null;
-    if (content[sourceIndex] !== newContent) {
-      content[sourceIndex] = newContent;
-      changed = true;
+  const content: Array<string | null> = new Array(sources.length).fill(null);
+  for (const oldSourceIndex of selectedSourceIndexes) {
+    const sourceIndex =
+      oldSourceToNewSourcePlusOne === null
+        ? oldSourceIndex
+        : oldSourceToNewSourcePlusOne[oldSourceIndex] - 1;
+    if (sourceIndex !== -1) {
+      content[sourceIndex] = contents.get(oldSourceIndex) ?? null;
     }
   }
 
-  if (!changed) {
+  if (content.every((newContent, i) => newContent === sources.content[i])) {
     return profile;
   }
 

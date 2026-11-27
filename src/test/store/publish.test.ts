@@ -1183,6 +1183,24 @@ describe('attemptToPublish', function () {
         code: SOURCE,
       });
     });
+
+    it('only lists the files of the threads that are shared', function () {
+      const { dispatch, getState } = setupWithHiddenThread();
+      const listedPaths = () =>
+        getSourceCodeSharingFiles(getState(), 'upload').map(({ path }) => path);
+
+      // The hidden thread's file would be dropped along with the thread.
+      expect(listedPaths()).toEqual([LOCAL_FILE]);
+      expect(
+        getSourceFilesForPresets(getState(), 'upload')['all-files']
+      ).toEqual(new Set([1]));
+
+      dispatch(updateSharingOption('upload', 'includeHiddenThreads', true));
+      expect(listedPaths()).toEqual([
+        '/home/user/moz/mozilla-central/dom/base/nsNode.cpp',
+        LOCAL_FILE,
+      ]);
+    });
   });
 
   it('works when the server returns a bare hash instead of a JWT token', async function () {
