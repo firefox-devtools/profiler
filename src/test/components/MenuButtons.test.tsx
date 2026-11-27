@@ -997,26 +997,18 @@ describe('app/MenuButtons', function () {
         ]);
       });
 
-      it('does not save when a picked file cannot be loaded', async () => {
-        const { clickDownloadLink } = await setupForSaving(async () => {
-          throw new Error('No such source');
-        });
+      it('saves the rest when a picked file cannot be loaded', async () => {
+        const { getSourceCodeSummaryLines, clickDownloadLink } =
+          await setupForSaving(async () => {
+            throw new Error('No such source');
+          });
 
         fireFullClick(screen.getByRole('button', { name: 'Save' }));
-        expect(
-          await screen.findByText(
-            /could not be loaded. It has been left out, so saving again will include the rest/
-          )
-        ).toBeInTheDocument();
-        expect(clickDownloadLink).not.toHaveBeenCalled();
-        // The file dropped out of the selection, so Save saves the rest.
-        const saveLink = await screen.findByRole('link', { name: /Save/ });
-
-        // Once saved, the message about the failed file is out of date.
-        fireFullClick(saveLink);
-        expect(
-          screen.queryByText(/could not be loaded/)
-        ).not.toBeInTheDocument();
+        await waitFor(() => expect(clickDownloadLink).toHaveBeenCalledTimes(1));
+        // The file that couldn't be loaded dropped out of the selection.
+        expect(getSourceCodeSummaryLines()).toEqual([
+          '1 file, 25 B uncompressed.',
+        ]);
       });
     });
 
@@ -1066,39 +1058,6 @@ describe('app/MenuButtons', function () {
       await screen.findByText(/revert/i);
       // The upload found the file in hand and didn't ask for it again.
       expect(getJSSource).toHaveBeenCalledTimes(1);
-    });
-
-    it('says why the upload stopped when a picked file cannot be downloaded', async () => {
-      const { profile } = createPartlyDownloadedSourceCodeProfile();
-      profile.shared.sources.id[1] = 'ff6d24c3-b8f5-45cd-a7d3-b643b3292e41';
-      const browserConnection = {
-        getJSSource: async () => {
-          throw new Error('No such source');
-        },
-        querySymbolicationApi: async () => {
-          throw new Error('No source for this address');
-        },
-      } as unknown as BrowserConnection;
-      const { dispatch, getPanelForm, enableSourceCode, openPublishPanel } =
-        setupForPublish(profile);
-      act(() => {
-        dispatch(
-          updateBrowserConnectionStatus({
-            status: 'ESTABLISHED',
-            browserConnection,
-          })
-        );
-      });
-      await openPublishPanel();
-      enableSourceCode();
-      fireEvent.submit(getPanelForm());
-
-      fireFullClick(await screen.findByText('Error uploading'));
-      expect(
-        await screen.findByText(
-          /of the picked source files could not be loaded. It has been left out/
-        )
-      ).toBeInTheDocument();
     });
 
     it('disables the option until at least one file has been downloaded', async () => {

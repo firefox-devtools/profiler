@@ -38,7 +38,6 @@ import {
 } from 'firefox-profiler/selectors/profile';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from 'firefox-profiler/utils/types';
-import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import { extractProfileTokenFromJwt } from 'firefox-profiler/utils/jwt';
 import { withHistoryReplaceStateSync } from 'firefox-profiler/app-logic/url-handling';
 import { persistUploadedProfileInformationToDb } from 'firefox-profiler/app-logic/uploaded-profiles-db';
@@ -418,8 +417,7 @@ export function cancelSourceCodeFetch(mode: SharingMode): Action {
   return { type: 'SOURCE_CODE_FETCH_CANCELLED', mode };
 }
 
-export type SourceCodeFetchResult = {
-  failedCount: number;
+type SourceCodeFetchResult = {
   wasCancelled: boolean;
 };
 
@@ -429,7 +427,9 @@ const SOURCE_CODE_FETCH_CONCURRENCY = 6;
 /**
  * Fetch the picked source files whose contents we don't have yet into the
  * source code cache, so that the shared profile can carry them. This runs
- * before an upload, and on request from the publish panel.
+ * before an upload, and on request from the publish panel. A file that can't
+ * be fetched is marked as failed in the cache, which drops it from the
+ * selection, so that sharing goes on with the rest.
  */
 export function fetchSourceFilesToShare(
   mode: SharingMode
@@ -438,7 +438,7 @@ export function fetchSourceFilesToShare(
     const state = getState();
     const sourceIndexes = Array.from(getSourceFilesToFetch(state, mode));
     if (sourceIndexes.length === 0) {
-      return { failedCount: 0, wasCancelled: false };
+      return { wasCancelled: false };
     }
 
     const { generation } = getSourceCodeFetchState(state, mode);
@@ -453,16 +453,12 @@ export function fetchSourceFilesToShare(
     });
 
     let completedCount = 0;
-    let failedCount = 0;
     let nextIndex = 0;
 
     const fetchOne = async (sourceIndex: IndexIntoSourceTable) => {
       // The outcome goes into the cache even after a cancellation, so that
       // the source view doesn't show the file as loading forever.
-      const result = await dispatch(fetchSourceCode(sourceIndex, archiveCache));
-      if (result.type === 'ERROR') {
-        failedCount++;
-      }
+      await dispatch(fetchSourceCode(sourceIndex, archiveCache));
       if (!isCancelled()) {
         completedCount++;
         dispatch({ type: 'SOURCE_CODE_FETCH_PROGRESS', mode, completedCount });
@@ -484,10 +480,10 @@ export function fetchSourceFilesToShare(
     // fetches that were in flight still landed in the cache.
     dispatch(encodeSanitizedProfile(mode));
     if (isCancelled()) {
-      return { failedCount, wasCancelled: true };
+      return { wasCancelled: true };
     }
     dispatch({ type: 'SOURCE_CODE_FETCH_FINISHED', mode });
-    return { failedCount, wasCancelled: false };
+    return { wasCancelled: false };
   };
 }
 
@@ -553,9 +549,6 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         // which the user never agreed to share.
         dispatch({ type: 'UPLOAD_ABORTED' });
         return false;
-      }
-      if (sourceFetchResult.failedCount > 0) {
-        throw new SourceCodeFetchError(sourceFetchResult.failedCount);
       }
 
       // Share what the user agreed to when they clicked, even if the source

@@ -110,7 +110,6 @@ import type {
 } from 'firefox-profiler/types';
 
 import { decompress } from 'firefox-profiler/utils/gz';
-import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import { unserializeProfileOfArbitraryFormat } from 'firefox-profiler/profile-logic/process-profile';
 
 import { autoMockIndexedDB } from 'firefox-profiler/test/fixtures/mocks/indexeddb';
@@ -900,7 +899,7 @@ describe('attemptToPublish', function () {
         dispatch(updateSourceFilesToShare('download', new Set([0])));
 
         const result = await dispatch(fetchSourceFilesToShare('download'));
-        expect(result).toEqual({ failedCount: 0, wasCancelled: false });
+        expect(result).toEqual({ wasCancelled: false });
         expect(querySymbolicationApi).toHaveBeenCalledTimes(1);
         expect(JSON.parse(querySymbolicationApi.mock.calls[0][1])).toEqual({
           debugName: 'xul',
@@ -934,23 +933,19 @@ describe('attemptToPublish', function () {
         );
       });
 
-      it('stops the upload when a picked file cannot be downloaded', async function () {
-        const { dispatch, getState } = setupWithBrowserConnection(async () => {
+      it('uploads without the picked files that cannot be downloaded', async function () {
+        const setupResult = setupWithBrowserConnection(async () => {
           throw new Error('No such file');
         });
+        const { dispatch, getState } = setupResult;
         dispatch(updateSourceFilesToShare('upload', new Set([0])));
 
-        await dispatch(attemptToPublish());
-        expect(getUploadPhase(getState())).toBe('error');
-        const error = getUploadError(getState());
-        expect(error).toBeInstanceOf(SourceCodeFetchError);
-        expect(error).toHaveProperty('failedCount', 1);
-        // The file is marked as failed and drops out of the selection, so
-        // that the next attempt goes through.
+        expect(await getSourceContentsOfUploadedProfile(setupResult)).toEqual(
+          new Map([[LOCAL_FILE, null]])
+        );
         expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           { availability: 'FAILED' },
         ]);
-        expect(getSourceFilesToShare(getState(), 'upload')).toEqual(new Set());
       });
 
       it('starts from the narrowest preset, even when its files have to be fetched', function () {
@@ -983,10 +978,7 @@ describe('attemptToPublish', function () {
         // The late result still lands in the cache, so the file isn't stuck
         // as loading, but the fetch reports the cancellation.
         resolveFetch(NATIVE_SOURCE);
-        expect(await fetchPromise).toEqual({
-          failedCount: 0,
-          wasCancelled: true,
-        });
+        expect(await fetchPromise).toEqual({ wasCancelled: true });
         expect(getSourceCodeSharingFiles(getState(), 'upload')).toMatchObject([
           { availability: 'DOWNLOADED' },
         ]);
@@ -1083,10 +1075,7 @@ describe('attemptToPublish', function () {
         dispatch(cancelSourceCodeFetch('download'));
         resolveFetch(NATIVE_SOURCE);
 
-        expect(await fetchPromise).toEqual({
-          failedCount: 0,
-          wasCancelled: false,
-        });
+        expect(await fetchPromise).toEqual({ wasCancelled: false });
         await waitForEncodings(getState());
       });
 

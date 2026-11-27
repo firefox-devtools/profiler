@@ -36,7 +36,6 @@ import {
 import { PublishSourceCodeSection } from './PublishSourceCode';
 import { BlobUrlLink } from 'firefox-profiler/components/shared/BlobUrlLink';
 import { assertExhaustiveCheck } from 'firefox-profiler/utils/types';
-import { SourceCodeFetchError } from 'firefox-profiler/utils/errors';
 import prettyBytes from 'firefox-profiler/utils/pretty-bytes';
 
 import explicitConnect, {
@@ -93,14 +92,7 @@ type DispatchProps = {
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type PublishState = {
-  // How many picked source files couldn't be loaded the last time Save tried,
-  // which stopped it from saving.
-  readonly saveFailedCount: number;
-};
-
-class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
-  override state: PublishState = { saveFailedCount: 0 };
+class PublishPanelImpl extends React.PureComponent<PublishProps, {}> {
   _isMounted = false;
   // Revoked once the panel closes rather than right after the click, since
   // the download can still be reading from it.
@@ -124,24 +116,13 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
     }
   }
 
-  _onSave = () => {
-    this.setState({ saveFailedCount: 0 });
-  };
-
   // Saving only writes out the encoded profile, so when some picked source
   // files aren't loaded yet, load them first, then save what comes out. Like
-  // an upload, it stops when a file can't be loaded, so that the user knows
-  // it's left out.
+  // an upload, it leaves out the files that can't be loaded.
   _onSaveWithSourceFiles = async () => {
     const { mode, downloadFileName } = this.props;
-    this.setState({ saveFailedCount: 0 });
-    const { failedCount, wasCancelled } =
-      await this.props.fetchSourceFilesToShare(mode);
+    const { wasCancelled } = await this.props.fetchSourceFilesToShare(mode);
     if (!this._isMounted || wasCancelled) {
-      return;
-    }
-    if (failedCount > 0) {
-      this.setState({ saveFailedCount: failedCount });
       return;
     }
     const result =
@@ -341,16 +322,6 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
               </div>
             </div>
           ) : null}
-          {isDownload && this.state.saveFailedCount > 0 ? (
-            <div className="publishPanelError">
-              <Localized
-                id="MenuButtons--publish--source-code-save-load-failed"
-                vars={{ failedCount: this.state.saveFailedCount }}
-              >
-                <span />
-              </Localized>
-            </div>
-          ) : null}
           <div className="publishPanelButtons">
             {isDownload ? (
               <DownloadButton
@@ -361,7 +332,6 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
                   hasSourceFilesToFetch ? this._onSaveWithSourceFiles : null
                 }
                 isLoadingSourceFiles={sourceCodeFetchState.isFetching}
-                onSave={this._onSave}
               />
             ) : (
               <button
@@ -472,17 +442,6 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
     } else if (typeof error === 'string') {
       message = error;
     }
-    const errorDetails =
-      error instanceof SourceCodeFetchError ? (
-        <Localized
-          id="MenuButtons--publish--source-code-load-failed"
-          vars={{ failedCount: error.failedCount }}
-        >
-          <span>{message}</span>
-        </Localized>
-      ) : (
-        message
-      );
 
     return (
       <div
@@ -505,7 +464,7 @@ class PublishPanelImpl extends React.PureComponent<PublishProps, PublishState> {
             </Localized>
           </button>
         </div>
-        <div className="publishPanelError">{errorDetails}</div>
+        <div className="publishPanelError">{message}</div>
       </div>
     );
   }
@@ -578,8 +537,6 @@ type DownloadButtonProps = {
   readonly onSaveWithSourceFiles?: (() => void) | null;
   // While source files are loading, Save waits for them.
   readonly isLoadingSourceFiles?: boolean;
-  // Called when the encoded profile is saved as it is.
-  readonly onSave?: () => void;
 };
 
 type WarningIndicatorProps = {
@@ -606,7 +563,6 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
       primary,
       onSaveWithSourceFiles,
       isLoadingSourceFiles,
-      onSave,
     } = this.props;
     const className = classNames(
       'photon-button publishPanelButton publishPanelButtonsDownload',
@@ -638,7 +594,6 @@ class DownloadButton extends React.PureComponent<DownloadButtonProps, {}> {
             blob={profileData}
             download={`${downloadFileName}.gz`}
             className={className}
-            onClick={onSave}
           >
             <span className="publishPanelButtonsSvg publishPanelButtonsSvgDownload" />
             <Localized id="MenuButtons--publish--save">Save</Localized>{' '}

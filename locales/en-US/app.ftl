@@ -908,25 +908,6 @@ MenuButtons--publish--source-code-loading = Loading source files… ({ $complete
 # A button that stops loading the picked source files.
 MenuButtons--publish--source-code-cancel-load = Cancel
 
-## Shown when sharing stopped because some of the picked source files couldn't
-## be loaded. Those files are no longer picked, so sharing again includes only
-## the others.
-## Variables:
-##   $failedCount (Number) - Number of picked source files that couldn't be loaded
-
-# Shown under the upload error message.
-MenuButtons--publish--source-code-load-failed =
-    { $failedCount ->
-        [one] { $failedCount } of the picked source files could not be loaded. It has been left out, so uploading again will share the rest.
-       *[other] { $failedCount } of the picked source files could not be loaded. They have been left out, so uploading again will share the rest.
-    }
-# Shown above the Save button in the save panel.
-MenuButtons--publish--source-code-save-load-failed =
-    { $failedCount ->
-        [one] { $failedCount } of the picked source files could not be loaded. It has been left out, so saving again will include the rest.
-       *[other] { $failedCount } of the picked source files could not be loaded. They have been left out, so saving again will include the rest.
-    }
-
 ## NetworkSettings
 ## This is used in the network chart.
 
