@@ -29,6 +29,7 @@ import type {
   ThreadsKey,
   NativeSymbolInfo,
   ProfileIndexTranslationMaps,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { FuncToFuncsMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
@@ -680,17 +681,47 @@ type PublishAction =
       readonly value: boolean;
     }
   | {
+      readonly type: 'PUBLISH_PANEL_OPENED';
+      readonly mode: SharingMode;
+      readonly defaultSourceFiles: ReadonlySet<IndexIntoSourceTable>;
+    }
+  | {
+      readonly type: 'UPDATE_SOURCE_FILES_TO_SHARE';
+      readonly mode: SharingMode;
+      readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+      // The preset these files come from, or null for edits of the file tree.
+      readonly preset: OfferedSourceSharingPreset | null;
+    }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_STARTED';
+      readonly mode: SharingMode;
+      readonly totalCount: number;
+    }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_PROGRESS';
+      readonly mode: SharingMode;
+      readonly completedCount: number;
+    }
+  | { readonly type: 'SOURCE_CODE_FETCH_FINISHED'; readonly mode: SharingMode }
+  | {
+      readonly type: 'SOURCE_CODE_FETCH_CANCELLED';
+      readonly mode: SharingMode;
+    }
+  | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_STARTED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly encodingPromise: Promise<ProfileEncodingResult>;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_COMPLETED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly profileData: Blob;
     }
   | {
       readonly type: 'SANITIZED_PROFILE_ENCODING_FAILED';
+      readonly mode: SharingMode;
       readonly sanitizedProfile: Profile;
       readonly error: Error;
     }

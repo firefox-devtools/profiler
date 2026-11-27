@@ -1751,15 +1751,29 @@ describe('sanitizePII', function () {
     ).toEqual([true, false]);
   });
 
-  it('always removes source contents even when no PII removal is requested', function () {
+  // Whether the source contents are shared is decided before sanitization, by
+  // the selectors in src/selectors/publish.ts, so sanitization itself has to
+  // leave whatever it is handed alone.
+  it('keeps the source contents it is handed', function () {
     const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
     // There should be only one source.
     expect(profile.shared.sources.content.length).toEqual(1);
     // Pretend the source content have been loaded.
     profile.shared.sources.content[0] = 'source code';
 
+    // Ask for some unrelated sanitization, so that the whole sanitization path
+    // runs, including the compaction step.
+    const { sanitizedProfile } = setup({ shouldRemoveUrls: true }, profile);
+
+    expect(sanitizedProfile.shared.sources.content).toEqual(['source code']);
+  });
+
+  it('keeps the source contents when no PII removal is requested', function () {
+    const { profile } = getProfileFromTextSamples(`A[file:file1.js]`);
+    profile.shared.sources.content[0] = 'source code';
+
     // A null `RemoveProfileInformation` means the user kept all sharing options
-    // checked, so no other sanitization happens.
+    // checked, so nothing is sanitized at all.
     const { profile: sanitizedProfile } = sanitizePII(
       profile,
       [],
@@ -1768,9 +1782,114 @@ describe('sanitizePII', function () {
       {}
     );
 
-    expect(sanitizedProfile.shared.sources.content.length).toEqual(
-      profile.shared.sources.content.length
+    expect(sanitizedProfile.shared.sources.content).toEqual(['source code']);
+  });
+
+  function getSourceContentsByFilename(profile: Profile) {
+    const { sources, stringArray } = profile.shared;
+    const contents: Record<string, string | null> = {};
+    for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+      contents[stringArray[sources.filename[sourceIndex]]] =
+        sources.content[sourceIndex];
+    }
+    return contents;
+  }
+
+  // The panel offers files from every thread, so the contents of files that
+  // only removed data uses must go away with it.
+  it('drops the source contents of removed threads', function () {
+    const { profile } = getProfileFromTextSamples(
+      `A[file:file1.js]`,
+      `B[file:file2.js]`
     );
-    expect(sanitizedProfile.shared.sources.content[0]).toBe(null);
+    profile.shared.sources.content[0] = 'code 1';
+    profile.shared.sources.content[1] = 'code 2';
+
+    const { sanitizedProfile } = setup(
+      { shouldRemoveThreads: new Set([0]) },
+      profile
+    );
+
+    expect(getSourceContentsByFilename(sanitizedProfile)).toEqual({
+      'file2.js': 'code 2',
+    });
+  });
+
+  it('drops the source contents that only private browsing frames use', function () {
+    const {
+      profile: originalProfile,
+      funcNamesDictPerThread: [{ A, Bjs, Cjs }],
+    } = getProfileFromTextSamples(`
+      A[file:public.js]     A[file:public.js]
+      Bjs[file:private.js]  Cjs[file:public.js]
+    `);
+    const {
+      firstTabTabID: privateTabTabID,
+      firstTabInnerWindowIDs: privateTabInnerWindowIDs,
+      secondTabInnerWindowIDs: nonPrivateTabInnerWindowIDs,
+    } = addTabInformationToProfile(originalProfile);
+    markTabIdsAsPrivateBrowsing(originalProfile, [privateTabTabID]);
+    addInnerWindowIdToStacks(
+      originalProfile.shared,
+      originalProfile.threads[0],
+      [
+        {
+          innerWindowID: privateTabInnerWindowIDs[0],
+          callNodes: [[A, Bjs]],
+        },
+        {
+          innerWindowID: nonPrivateTabInnerWindowIDs[0],
+          callNodes: [[A, Cjs]],
+        },
+      ]
+    );
+
+    // The private frames also point at a source-mapped original file, which
+    // the sanitizer doesn't clear on frames.
+    const { shared } = originalProfile;
+    const { sources, sourceLocationTable, frameTable } = shared;
+    const originalSourceIndex = sources.length++;
+    sources.id.push(null);
+    sources.filename.push(
+      StringTable.withBackingArray(shared.stringArray).indexForString(
+        'private-original.ts'
+      )
+    );
+    sources.startLine.push(1);
+    sources.startColumn.push(1);
+    sources.sourceMapURL.push(null);
+    sources.content.push(null);
+    const locationIndex = sourceLocationTable.length++;
+    sourceLocationTable.source.push(originalSourceIndex);
+    sourceLocationTable.line.push(1);
+    sourceLocationTable.column.push(1);
+    for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+      if (
+        frameTable.innerWindowID[frameIndex] === privateTabInnerWindowIDs[0]
+      ) {
+        frameTable.flags[frameIndex] |= FrameFlag.HasOriginalLocation;
+        frameTable.originalLocation[frameIndex] = locationIndex;
+      }
+    }
+
+    for (let sourceIndex = 0; sourceIndex < sources.length; sourceIndex++) {
+      sources.content[sourceIndex] =
+        `code of ${shared.stringArray[sources.filename[sourceIndex]]}`;
+    }
+
+    const { sanitizedProfile } = setup(
+      { shouldRemovePrivateBrowsingData: true },
+      originalProfile
+    );
+    const { sanitizedProfile: unsanitizedProfile } = setup({}, originalProfile);
+
+    expect(getSourceContentsByFilename(unsanitizedProfile)).toEqual({
+      'public.js': 'code of public.js',
+      'private.js': 'code of private.js',
+      'private-original.ts': 'code of private-original.ts',
+    });
+    expect(getSourceContentsByFilename(sanitizedProfile)).toEqual({
+      'public.js': 'code of public.js',
+    });
   });
 });

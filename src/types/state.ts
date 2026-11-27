@@ -34,6 +34,7 @@ import type {
   MarkerIndex,
   ThreadsKey,
   NativeSymbolInfo,
+  OfferedSourceSharingPreset,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -249,13 +250,47 @@ export type SanitizedProfileEncodingState =
     }
   | { phase: 'ERROR'; sanitizedProfile: Profile; error: Error };
 
+export type SourceFileSelection = {
+  readonly sourceIndexes: ReadonlySet<IndexIntoSourceTable>;
+  // The preset the files come from, so that it stays checked when another
+  // preset happens to select the same files. null for edits of the file tree.
+  readonly preset: OfferedSourceSharingPreset | null;
+};
+
 export type PublishState = {
   readonly checkedSharingOptions: Record<SharingMode, CheckedSharingOptions>;
-  readonly sanitizedProfileEncodingState: SanitizedProfileEncodingState;
+  // Captured when the panel opens, before later source downloads can change it.
+  readonly defaultSourceFiles: Record<
+    SharingMode,
+    ReadonlySet<IndexIntoSourceTable>
+  >;
+  // The source files the user picked in the publish panel, per sharing mode.
+  // `null` means the user hasn't touched the selection yet, in which case the
+  // default selection applies.
+  readonly sourceFileSelection: Record<SharingMode, SourceFileSelection | null>;
+  // Per sharing mode, so that work finishing for one panel doesn't replace
+  // what the other one shows.
+  readonly sanitizedProfileEncodingState: Record<
+    SharingMode,
+    SanitizedProfileEncodingState
+  >;
+  readonly sourceCodeFetch: Record<SharingMode, SourceCodeFetchState>;
   readonly upload: UploadState;
   readonly isHidingStaleProfile: boolean;
   readonly hasSanitizedProfile: boolean;
   readonly prePublishedState: State | null;
+};
+
+/**
+ * The progress of fetching the source files picked in the publish panel, which
+ * happens when sharing or on request.
+ */
+export type SourceCodeFetchState = {
+  readonly isFetching: boolean;
+  readonly totalCount: number;
+  readonly completedCount: number;
+  // Bumped when a fetch is cancelled, so that the in-flight one can tell.
+  readonly generation: number;
 };
 
 export type ZippedProfilesState = {

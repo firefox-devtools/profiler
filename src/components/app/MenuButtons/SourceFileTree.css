@@ -1,0 +1,205 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.sourceFileTree {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.sourceFileTree .sourceFileTree {
+  padding-left: 12px;
+}
+
+.sourceFileTreeItem {
+  padding: 0;
+  margin: 0;
+}
+
+.sourceFileTreeRow {
+  display: flex;
+  min-height: 20px;
+  align-items: center;
+}
+
+.sourceFileTreeTwisty,
+.sourceFileTreeTwistyPlaceholder {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
+
+.sourceFileTreeTwisty::before {
+  display: block;
+  width: 0;
+  height: 0;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 6px solid currentcolor;
+  margin: 2px 0 0 3px;
+  content: '';
+
+  /* Opt-out of forced colors so the transparent borders aren't turned into opaque ones */
+  forced-color-adjust: none;
+}
+
+.sourceFileTreeTwistyExpanded::before {
+  border-top: 6px solid currentcolor;
+  border-right: 4px solid transparent;
+  border-bottom: none;
+  border-left: 4px solid transparent;
+  margin: 3px 0 0 2px;
+}
+
+.sourceFileTreeRow:hover {
+  background-color: var(--clickable-ghost-hover-background-color);
+}
+
+/* The label spans the whole row, so that clicking anywhere on it toggles the
+ * checkbox. */
+.sourceFileTreeLabel {
+  display: flex;
+  overflow: hidden;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  align-self: stretch;
+  gap: 4px;
+}
+
+/* Smaller than photon's own sizes so the rows stay compact. The default
+ * variant's icons are centered, so they scale down cleanly. */
+.sourceFileTreeLabel > .photon-checkbox {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+  margin: 0 2px;
+  background-size: 100%;
+}
+
+.sourceFileTreeName {
+  overflow: hidden;
+  color: var(--internal-dimmed-foreground-color);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sourceFileTreeBadge {
+  flex-shrink: 0;
+  padding: 0 4px;
+  border-radius: 3px;
+  background-color: var(--internal-source-file-tree-badge-background-color);
+  color: var(--internal-dimmed-foreground-color);
+  font-size: 10px;
+  line-height: 14px;
+  white-space: nowrap;
+}
+
+/* Long translations of the labels shown instead of a size wrap, rather than
+ * pushing the file name out of the row. */
+.sourceFileTreeSize {
+  max-width: 40%;
+  flex-shrink: 0;
+  padding: 0 6px 0 12px;
+  margin-left: auto;
+  color: var(--internal-dimmed-foreground-color);
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+/* Directory-only rows stay dimmed. */
+.sourceFileTreeNameFile {
+  color: inherit;
+}
+
+.publishPanelSourceCodeDetailsSummary {
+  margin: 12px 0 0;
+  cursor: default;
+}
+
+.publishPanelSourceCodeDetailsHeading {
+  display: inline;
+  margin: 0;
+}
+
+/* Spans the whole width of the panel, out to the edges of the arrow panel's
+ * padding and of the space reserved for the title icon. */
+.publishPanelSourceCodeDetailsContent {
+  padding: 8px;
+  margin: 6px -16px 0 -50px;
+  background-color: var(--internal-source-code-details-background-color);
+  box-shadow:
+    inset 0 10px 5px -10px #0002,
+    inset 0 -10px 5px -10px #0002;
+}
+
+.publishPanelSourceFileTreeContainer {
+  overflow: auto;
+  max-height: 180px;
+  border: 1px solid var(--internal-source-file-tree-border-color);
+  border-radius: 2px;
+  margin: 4px 0 0;
+}
+
+.publishPanelSourceCodeSummary {
+  margin: 4px 0 0;
+  color: var(--internal-dimmed-foreground-color);
+}
+
+.publishPanelSourceCodeStatus {
+  display: flex;
+  min-height: 24px;
+  align-items: center;
+  margin: 4px 0 0;
+  gap: 8px;
+}
+
+.publishPanelSourceCodeStatus > .publishPanelSourceCodeSummary {
+  margin: 0;
+}
+
+.publishPanelSourceCodeStatus > .photon-button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.publishPanelSourceCodeInfoIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  background: var(--internal-info-icon) center no-repeat;
+  background-size: 14px 14px;
+}
+
+/* A slimmer version of the photon message bar, with less padding and a smaller
+ * icon. */
+.publishPanelSourceCodeNotice {
+  min-height: 0;
+  padding: 3px 8px 3px 26px;
+  margin: 4px 0 0;
+  background-position: 7px 6px;
+  background-size: 12px 12px;
+}
+
+.publishPanelSourceCodeNotice > .photon-message-bar-inner-text {
+  padding: 0;
+}
+
+.publishPanelSourceCodePresets {
+  display: flex;
+  align-items: center;
+  margin: 4px 0 0;
+  gap: 6px;
+}
+
+.publishPanelSourceCodePresetsLabel {
+  color: var(--internal-dimmed-foreground-color);
+}
+
+.publishPanelSourceCodePresetSelect {
+  min-width: 0;
+}

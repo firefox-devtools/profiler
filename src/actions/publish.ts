@@ -12,7 +12,13 @@ import {
   getRemoveProfileInformation,
   getPrePublishedState,
   getSanitizedProfileEncodingState,
+  getSourceFilesToFetch,
+  getDefaultSourceFilesToShare,
+  getSourceCodeFetchState,
+  getSourceFilesForPresets,
 } from 'firefox-profiler/selectors/publish';
+import { fetchSourceCode } from './code';
+import { findNarrowestNonEmptyPreset } from 'firefox-profiler/profile-logic/source-sharing';
 import {
   getDataSource,
   getProfileNameForStorage,
@@ -60,9 +66,21 @@ import type {
   ProfileIndexTranslationMaps,
   ProfileEncodingResult,
   SharingMode,
+  IndexIntoSourceTable,
+  OfferedSourceSharingPreset,
 } from 'firefox-profiler/types';
 import { compress } from 'firefox-profiler/utils/gz';
 import { serializeProfileToJsonString } from 'firefox-profiler/profile-logic/process-profile';
+
+export function publishPanelOpened(mode: SharingMode): ThunkAction<void> {
+  return (dispatch, getState) => {
+    dispatch({
+      type: 'PUBLISH_PANEL_OPENED',
+      mode,
+      defaultSourceFiles: getDefaultSourceFilesToShare(getState(), mode),
+    });
+  };
+}
 
 export function updateSharingOption(
   mode: SharingMode,
@@ -77,34 +95,59 @@ export function updateSharingOption(
   };
 }
 
+/**
+ * Replace the set of source files whose contents will be part of the shared
+ * profile. The publish panel's file tree passes the full new set, rather than a
+ * single file, because checking a directory row toggles all the files below it.
+ * `preset` is the preset the files come from, if any.
+ */
+export function updateSourceFilesToShare(
+  mode: SharingMode,
+  sourceIndexes: ReadonlySet<IndexIntoSourceTable>,
+  preset: OfferedSourceSharingPreset | null = null
+): Action {
+  return {
+    type: 'UPDATE_SOURCE_FILES_TO_SHARE',
+    mode,
+    sourceIndexes,
+    preset,
+  };
+}
+
 export function sanitizedProfileEncodingStarted(
+  mode: SharingMode,
   sanitizedProfile: Profile,
   encodingPromise: Promise<ProfileEncodingResult>
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_STARTED',
+    mode,
     sanitizedProfile,
     encodingPromise,
   };
 }
 
 export function sanitizedProfileEncodingCompleted(
+  mode: SharingMode,
   sanitizedProfile: Profile,
   profileData: Blob
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_COMPLETED',
+    mode,
     sanitizedProfile,
     profileData,
   };
 }
 
 export function sanitizedProfileEncodingFailed(
+  mode: SharingMode,
   sanitizedProfile: Profile,
   error: Error
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_ENCODING_FAILED',
+    mode,
     sanitizedProfile,
     error,
   };
@@ -289,13 +332,18 @@ export type InflightProfileEncoding = {
  * This thunk action is synchronous.
  */
 export function encodeSanitizedProfile(
-  mode: SharingMode
+  mode: SharingMode,
+  // The state to take the profile from, when it isn't the current one.
+  stateToShare: State | null = null
 ): ThunkAction<InflightProfileEncoding> {
   return (dispatch, getState): InflightProfileEncoding => {
     const state = getState();
-    const sanitizedProfile = getSanitizedProfile(state, mode).profile;
+    const sanitizedProfile = getSanitizedProfile(
+      stateToShare ?? state,
+      mode
+    ).profile;
 
-    const encodingState = getSanitizedProfileEncodingState(state);
+    const encodingState = getSanitizedProfileEncodingState(state, mode);
     if (
       encodingState.phase === 'ENCODING' &&
       encodingState.sanitizedProfile === sanitizedProfile
@@ -331,19 +379,111 @@ export function encodeSanitizedProfile(
           serializeProfileToJsonString(sanitizedProfile)
         );
         const blob = new Blob([gzipData], { type: 'application/octet-binary' });
-        dispatch(sanitizedProfileEncodingCompleted(sanitizedProfile, blob));
+        dispatch(
+          sanitizedProfileEncodingCompleted(mode, sanitizedProfile, blob)
+        );
         return { type: 'SUCCESS', profileData: blob };
       } catch (error) {
-        dispatch(sanitizedProfileEncodingFailed(sanitizedProfile, error));
+        dispatch(sanitizedProfileEncodingFailed(mode, sanitizedProfile, error));
         console.error('Error while compressing the profile data', error);
         return { type: 'ERROR', error };
       }
     })();
 
     dispatch(
-      sanitizedProfileEncodingStarted(sanitizedProfile, encodingPromise)
+      sanitizedProfileEncodingStarted(mode, sanitizedProfile, encodingPromise)
     );
     return { sanitizedProfile, encodingPromise };
+  };
+}
+
+/**
+ * Turn the "Include source code" option on, starting from the narrowest
+ * preset that picks something, so that opting in shares as little as possible.
+ */
+export function turnOnSourceCodeSharing(mode: SharingMode): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const filesForPresets = getSourceFilesForPresets(getState(), mode);
+    const preset = findNarrowestNonEmptyPreset(filesForPresets);
+    if (preset === null) {
+      return;
+    }
+    dispatch(updateSourceFilesToShare(mode, filesForPresets[preset], preset));
+    dispatch(encodeSanitizedProfile(mode));
+  };
+}
+
+export function cancelSourceCodeFetch(mode: SharingMode): Action {
+  return { type: 'SOURCE_CODE_FETCH_CANCELLED', mode };
+}
+
+type SourceCodeFetchResult = {
+  wasCancelled: boolean;
+};
+
+// How many source files to fetch at once.
+const SOURCE_CODE_FETCH_CONCURRENCY = 6;
+
+/**
+ * Fetch the picked source files whose contents we don't have yet into the
+ * source code cache, so that the shared profile can carry them. This runs
+ * before an upload, and on request from the publish panel. A file that can't
+ * be fetched is marked as failed in the cache, which drops it from the
+ * selection, so that sharing goes on with the rest.
+ */
+export function fetchSourceFilesToShare(
+  mode: SharingMode
+): ThunkAction<Promise<SourceCodeFetchResult>> {
+  return async (dispatch, getState) => {
+    const state = getState();
+    const sourceIndexes = Array.from(getSourceFilesToFetch(state, mode));
+    if (sourceIndexes.length === 0) {
+      return { wasCancelled: false };
+    }
+
+    const { generation } = getSourceCodeFetchState(state, mode);
+    const isCancelled = () =>
+      getSourceCodeFetchState(getState(), mode).generation !== generation;
+    const archiveCache = new Map<string, Promise<Uint8Array>>();
+
+    dispatch({
+      type: 'SOURCE_CODE_FETCH_STARTED',
+      mode,
+      totalCount: sourceIndexes.length,
+    });
+
+    let completedCount = 0;
+    let nextIndex = 0;
+
+    const fetchOne = async (sourceIndex: IndexIntoSourceTable) => {
+      // The outcome goes into the cache even after a cancellation, so that
+      // the source view doesn't show the file as loading forever.
+      await dispatch(fetchSourceCode(sourceIndex, archiveCache));
+      if (!isCancelled()) {
+        completedCount++;
+        dispatch({ type: 'SOURCE_CODE_FETCH_PROGRESS', mode, completedCount });
+      }
+    };
+
+    const worker = async () => {
+      while (nextIndex < sourceIndexes.length && !isCancelled()) {
+        await fetchOne(sourceIndexes[nextIndex++]);
+      }
+    };
+    const workerCount = Math.min(
+      SOURCE_CODE_FETCH_CONCURRENCY,
+      sourceIndexes.length
+    );
+    await Promise.all(Array.from({ length: workerCount }, worker));
+
+    // The profile to share has changed, even after a cancellation since the
+    // fetches that were in flight still landed in the cache.
+    dispatch(encodeSanitizedProfile(mode));
+    if (isCancelled()) {
+      return { wasCancelled: true };
+    }
+    dispatch({ type: 'SOURCE_CODE_FETCH_FINISHED', mode });
+    return { wasCancelled: false };
   };
 }
 
@@ -359,6 +499,11 @@ export function encodeSanitizedProfile(
  */
 export function attemptToPublish(): ThunkAction<Promise<boolean>> {
   return async (dispatch, getState) => {
+    // The upload fetches the picked files itself, and two fetches at once
+    // would request the same files twice and mix up the progress.
+    if (getSourceCodeFetchState(getState(), 'upload').isFetching) {
+      return false;
+    }
     try {
       sendAnalytics({
         hitType: 'event',
@@ -386,15 +531,37 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         // Later on the promise from `startUpload` will get rejected too, and we
         // handle this in the `catch` block.
         dispatch({ type: 'UPLOAD_ABORTED' });
+        dispatch(cancelSourceCodeFetch('upload'));
         abortUpload();
       };
       dispatch(uploadCompressionStarted(abortfunction));
 
-      const sanitizedInformation = getSanitizedProfile(
-        prePublishedState,
-        'upload'
+      // Picked source files that haven't been downloaded yet go first, since
+      // the profile to share depends on them.
+      const sourceFetchResult = await dispatch(
+        fetchSourceFilesToShare('upload')
       );
-      const profileEncoding = dispatch(encodeSanitizedProfile('upload'));
+      if (uploadGeneration !== getUploadGeneration(getState())) {
+        return false;
+      }
+      if (sourceFetchResult.wasCancelled) {
+        // Another profile got loaded, and the state now describes that one,
+        // which the user never agreed to share.
+        dispatch({ type: 'UPLOAD_ABORTED' });
+        return false;
+      }
+
+      // Share what the user agreed to when they clicked, even if the source
+      // view or the sharing options changed while the files were downloading.
+      // Only the downloaded contents come from the current state.
+      const stateToShare: State = {
+        ...prePublishedState,
+        code: getState().code,
+      };
+      const sanitizedInformation = getSanitizedProfile(stateToShare, 'upload');
+      const profileEncoding = dispatch(
+        encodeSanitizedProfile('upload', stateToShare)
+      );
       const encodingResult = await profileEncoding.encodingPromise;
 
       // The previous line was async, check to make sure that this request is still valid.

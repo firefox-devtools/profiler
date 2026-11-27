@@ -763,6 +763,156 @@ export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
 /**
+ * A source file that is on a sampled stack, as far as the profile alone can
+ * tell. Which candidates the publish panel offers also depends on the
+ * contents fetched during the session. Files in public repositories aren't
+ * candidates, since anyone who opens the shared profile can load them.
+ */
+export type SourceCodeSharingCandidate = {
+  sourceIndex: IndexIntoSourceTable;
+  // The full file path, with any symbolication decorations stripped.
+  path: string;
+  // `path`, split into the segments shown in the file tree.
+  pathSegments: string[];
+  // Whether `pathSegments` start with a web site: the file's own URL, or the
+  // URL of the bundle a source map produced it from.
+  isFromWebSite: boolean;
+  // Whether a source map produced this file from a generated file.
+  isFromSourceMap: boolean;
+  // Whether the file's name, or the URL of the bundle a source map produced it
+  // from, has a URL that sharing without URLs removes.
+  hasRemovableUrl: boolean;
+  // Whether the file, or the bundle a source map produced it from, comes from
+  // an extension.
+  isFromExtension: boolean;
+  // Whether this is the code of a web page or an extension: the file, or the
+  // bundle a source map produced it from, has a web or extension URL.
+  isWebCode: boolean;
+};
+
+/**
+ * Where the contents of a FETCHABLE source file would come from. This is the
+ * first place that fetching tries:
+ * - BROWSER: the browser that recorded the profile, through its connection to
+ *   the profiler.
+ * - SYMBOL_SERVER: a local symbol server.
+ */
+export type SourceCodeFetchSource = 'BROWSER' | 'SYMBOL_SERVER';
+
+/**
+ * Whether the contents of a source file are in hand, or could be.
+ * - DOWNLOADED: we have the contents.
+ * - FETCHABLE: we don't, but the browser connection or a local symbol server
+ *   can get them, so the file can be picked and is fetched when sharing.
+ * - FAILED: a fetch was tried during this session and failed.
+ * - UNAVAILABLE: nothing we can reach has this file.
+ */
+export type SourceCodeAvailability =
+  | 'DOWNLOADED'
+  | 'FETCHABLE'
+  | 'FAILED'
+  | 'UNAVAILABLE';
+
+/**
+ * One source file offered in the publish panel.
+ */
+export type SourceCodeSharingFile = {
+  sourceIndex: IndexIntoSourceTable;
+  path: string;
+  pathSegments: string[];
+  isFromWebSite: boolean;
+  isFromSourceMap: boolean;
+  availability: SourceCodeAvailability;
+  // Where a FETCHABLE file would be fetched from, null for the other files.
+  fetchSource: SourceCodeFetchSource | null;
+  // The size of the file contents before the upload is compressed, or null when
+  // we don't have them. This is the length in UTF-16 code units, which matches
+  // the UTF-8 size for ASCII.
+  uncompressedSize: number | null;
+};
+
+/**
+ * A row in the file tree shown under the "Include source code" checkbox
+ * in the publish panel.
+ *
+ * A row can stand for a single file, for a chain of directories, or for a chain
+ * of directories ending in a file: any node which is an only child is collapsed
+ * into its parent's row, so that deep paths don't produce a row per component.
+ * A row is never both a file and a directory: when a path is both, its files
+ * get a row of their own in the directory's row.
+ */
+export type SourceFileTreeNode = {
+  // Identifies this row across renders. This is the path in the tree, which is
+  // unique within the tree. The file row of a path that is also a directory
+  // gets a trailing "/" to stay apart from it.
+  key: string;
+  // What the row displays: the segments this row covers, joined with "/".
+  label: string;
+  // For a file row, the file's path. For a directory row, the path from the
+  // root of the tree to it.
+  path: string;
+  // For a file row, the availability of the file. null for rows that only
+  // stand for directories.
+  availability: SourceCodeAvailability | null;
+  // Whether this is a file row whose files a source map produced. The tree
+  // marks them, since their contents usually arrive with the source map, without
+  // the user having opened them.
+  isFromSourceMap: boolean;
+  // Every source index at or below this row that can be picked, so downloaded
+  // or fetchable. A file row can hold several when the same path was loaded
+  // with different contents. This is a view into a buffer shared by the whole
+  // tree, so that the indexes aren't copied into every ancestor.
+  sourceIndexes: Int32Array;
+  // The size of the contents we have for the files at or below this row.
+  uncompressedSize: number;
+  downloadedFileCount: number;
+  fetchableFileCount: number;
+  // Where the fetchable files at or below this row would be fetched from, or
+  // null when there are none, or when they don't all come from one place.
+  fetchSource: SourceCodeFetchSource | null;
+  children: SourceFileTreeNode[];
+};
+
+/**
+ * Counts over the source files listed in the publish panel, which decide which
+ * of the panel's source code controls are enabled.
+ */
+export type SourceCodeSharingStats = {
+  // The listed files that can be picked, so downloaded or fetchable.
+  shareableFileCount: number;
+  // The listed files that nothing reachable from here can serve.
+  unavailableFileCount: number;
+};
+
+/**
+ * How many files the publish panel's current selection would add to the shared
+ * profile, and how much uncompressed source code we already have for them.
+ */
+export type SourceCodeSharingSummary = {
+  // Every picked file, including the ones that are fetched when sharing.
+  fileCount: number;
+  // The size of the picked files whose contents we have.
+  uncompressedSize: number;
+};
+
+/**
+ * One of the ready-made file selections offered in the publish panel, above the
+ * file tree.
+ */
+export type OfferedSourceSharingPreset =
+  | 'current-file'
+  | 'web-code'
+  | 'selected-threads'
+  | 'all-files';
+
+/**
+ * The preset the publish panel shows as checked. `custom` isn't offered, it's
+ * what the panel falls back to once the tree no longer matches any of the
+ * offered presets.
+ */
+export type SourceSharingPreset = OfferedSourceSharingPreset | 'custom';
+
+/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */

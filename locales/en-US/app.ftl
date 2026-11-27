@@ -764,6 +764,7 @@ MenuButtons--publish--renderCheckbox-label-private-browsing-warning-image =
 MenuButtons--publish--renderCheckbox-label-argument-values = Include JavaScript execution tracing function argument values
 MenuButtons--publish--renderCheckbox-label-argument-values-warning-image =
     .title = This profile contains function argument values recorded from the page, which may include personal data
+MenuButtons--publish--renderCheckbox-label-source-code = Include source code
 MenuButtons--publish--share-performance-profile = Share Performance Profile
 MenuButtons--publish--reshare-performance-profile = Re-share Performance Profile
 MenuButtons--publish--save-performance-profile = Save Performance Profile
@@ -781,6 +782,131 @@ MenuButtons--publish--message-try-again = Try again
 MenuButtons--publish--save = Save
 MenuButtons--publish--compressing = Compressing…
 MenuButtons--publish--error-while-compressing = Error while compressing, try unchecking some checkboxes to reduce the profile size.
+
+## Publish panel, "Include source code" option
+
+# The tooltip of the "Include source code" checkbox when it is disabled
+# because none of the files can be included.
+MenuButtons--publish--source-code-nothing-to-include =
+    .title = None of the source files in this profile can be included. Their contents aren’t in the profile, and they can’t be loaded from here.
+
+## Shown above the file tree of the "Include source code" option.
+
+# The heading of a collapsible section below the "Include additional data"
+# checkboxes, which holds the options of the "Include source code" checkbox:
+# which source files to include, and whether they still have to be loaded.
+MenuButtons--publish--source-code-details-heading = Embedded source code
+
+# Shown next to a warning icon in the upload panel, since the uploaded profile
+# is public.
+MenuButtons--publish--source-code-rights-notice = These files will be public. Only include code you have the right to share.
+# Labels a drop-down menu that selects a ready-made set of source files to
+# include, like the current file or all files.
+MenuButtons--publish--source-code-preset-label = Include:
+# The file shown in the source view.
+MenuButtons--publish--source-code-preset-current-file = Current file
+# The JavaScript files of web pages and extensions that ran on the threads
+# selected in the timeline, and the files their source maps produced. Leaves
+# out the browser's own code and native code.
+MenuButtons--publish--source-code-preset-web-code = Web code from the selected threads
+# The files with code that runs on the threads selected in the timeline.
+MenuButtons--publish--source-code-preset-selected-threads = Files from the selected threads
+MenuButtons--publish--source-code-preset-all-files = All files
+# Not something the user can pick. It's shown as the selected option once the
+# user has edited the file tree so that it no longer matches any of the others.
+MenuButtons--publish--source-code-preset-custom = Custom
+
+## Shown in the file tree of the "Include source code" option.
+
+# A badge next to the name of a file, for files that a source map recovered
+# from a bundled script. Their contents usually come with the source map, so
+# they are often loaded already even though the user never opened them.
+MenuButtons--publish--source-code-from-source-map = from source map
+
+## Shown in the size column of the file tree, in place of a size.
+
+# For files whose contents aren’t in the profiler yet. If picked, they are
+# loaded from the browser that recorded the profile when sharing.
+MenuButtons--publish--source-code-from-browser = From { -firefox-brand-name }
+# For files whose contents aren’t in the profiler yet. If picked, they are
+# loaded from a symbol server running on the user’s computer when sharing.
+MenuButtons--publish--source-code-from-symbol-server = From symbol server
+# For directories whose files would be loaded from different places.
+MenuButtons--publish--source-code-not-loaded = Not loaded yet
+# For files that couldn't be loaded during this session.
+MenuButtons--publish--source-code-file-load-failed = Couldn’t load
+# For files that can't be loaded from here, and for directories where none of
+# the files can be.
+MenuButtons--publish--source-code-unavailable = Unavailable
+    .title = Loading it requires the browser that recorded the profile or a local symbol server.
+
+## The first status line under the file tree of the "Include source code"
+## option: how many source files are picked, and how much source code they add
+## to the shared profile. Picked files that haven't been loaded yet count as
+## files, but their size isn't known until they are loaded.
+## Variables:
+##   $fileCount (Number) - Number of picked source files
+##   $size (String) - Pretty-printed total size of the picked files that have been loaded, e.g. "12 kB"
+
+# When every picked file has been loaded.
+MenuButtons--publish--source-code-status =
+    { $fileCount ->
+        [one] { $fileCount } file, { $size } uncompressed.
+       *[other] { $fileCount } files, { $size } uncompressed.
+    }
+# When some of the picked files haven't been loaded yet.
+MenuButtons--publish--source-code-status-at-least =
+    { $fileCount ->
+        [one] { $fileCount } file, at least { $size } uncompressed.
+       *[other] { $fileCount } files, at least { $size } uncompressed.
+    }
+# When none of the picked files has been loaded yet, so there is no size.
+MenuButtons--publish--source-code-status-without-size =
+    { $fileCount ->
+        [one] { $fileCount } file.
+       *[other] { $fileCount } files.
+    }
+# The tooltip of an info icon at the end of the status line.
+# Variables:
+#   $unavailableCount (Number) - Number of listed files that can’t be loaded from here
+MenuButtons--publish--source-code-left-out-unavailable =
+    { $unavailableCount ->
+        [one] { $unavailableCount } file can’t be loaded from here. Loading it requires the browser that recorded the profile or a local symbol server.
+       *[other] { $unavailableCount } files can’t be loaded from here. Loading them requires the browser that recorded the profile or a local symbol server.
+    }
+
+## The second status line under the file tree of the "Include source code"
+## option, about the picked source files that haven't been loaded yet. They are
+## loaded from the browser that recorded the profile, or from a symbol server
+## running on the user’s computer.
+## Variables:
+##   $fileCount (Number) - Number of picked source files that haven't been loaded yet
+
+# Shown in the upload panel, followed by the "Load now" and "Leave out" buttons.
+MenuButtons--publish--source-code-status-to-load =
+    { $fileCount ->
+        [one] { $fileCount } file will be loaded when you upload.
+       *[other] { $fileCount } files will be loaded when you upload.
+    }
+# Shown in the save panel, followed by the "Load now" and "Leave out" buttons.
+MenuButtons--publish--source-code-status-to-load-when-saving =
+    { $fileCount ->
+        [one] { $fileCount } file will be loaded when you save.
+       *[other] { $fileCount } files will be loaded when you save.
+    }
+# A button that loads the picked files right away instead of when sharing.
+MenuButtons--publish--source-code-load-now = Load now
+# A button that unchecks the picked files that aren't loaded yet, so that only
+# the ones already loaded are included.
+MenuButtons--publish--source-code-leave-out = Leave out
+# Shown while the picked files are being loaded, followed by a "Cancel" button.
+# Also shown in the upload progress while an upload waits for them.
+# Variables:
+#   $completedCount (Number) - Number of source files loaded so far
+#   $totalCount (Number) - Number of source files being loaded
+MenuButtons--publish--source-code-loading = Loading source files… ({ $completedCount } of { $totalCount })
+# A button that stops loading the picked source files.
+MenuButtons--publish--source-code-cancel-load = Cancel
 
 ## NetworkSettings
 ## This is used in the network chart.
