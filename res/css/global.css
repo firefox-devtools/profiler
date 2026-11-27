@@ -27,8 +27,6 @@
   --z-timeline-track-screenshot: 4; /* should be higher than any other timeline element */
   --z-keyboard-shortcuts: 11; /* should be highest possible value */
   --z-context-menu: 5; /* should be higher than --z-overflow-edge-indicator and --z-timeline-track-screenshot */
-  --z-panel-search: 1;
-  --z-panel-search-introduction: -1;
   --z-timeline-header: 1;
   --z-tracks-container: 0; /* should be below --z-timeline-header */
 

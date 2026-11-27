@@ -6,7 +6,6 @@ import classNames from 'classnames';
 import { IdleSearchField } from './IdleSearchField';
 
 import './PanelSearch.css';
-import { Localized } from '@fluent/react';
 
 type Props = {
   readonly className: string;
@@ -20,22 +19,11 @@ type Props = {
   readonly alsoFocusOnF?: boolean;
 };
 
-type State = { searchFieldFocused: boolean };
-
-export class PanelSearch extends React.PureComponent<Props, State> {
-  override state = { searchFieldFocused: false };
+export class PanelSearch extends React.PureComponent<Props> {
   _searchFieldWrapper = React.createRef<HTMLDivElement>();
 
   _onSearchFieldIdleAfterChange = (value: string) => {
     this.props.onSearch(value);
-  };
-
-  _onSearchFieldFocus = () => {
-    this.setState({ searchFieldFocused: true });
-  };
-
-  _onSearchFieldBlur = () => {
-    this.setState(() => ({ searchFieldFocused: false }));
   };
 
   override componentDidMount() {
@@ -92,11 +80,6 @@ export class PanelSearch extends React.PureComponent<Props, State> {
 
   override render() {
     const { label, title, currentSearchString, className } = this.props;
-    const { searchFieldFocused } = this.state;
-    const showIntroduction =
-      searchFieldFocused &&
-      currentSearchString &&
-      !currentSearchString.includes(',');
     return (
       <div
         className={classNames('panelSearchField', className)}
@@ -110,21 +93,8 @@ export class PanelSearch extends React.PureComponent<Props, State> {
             idlePeriod={200}
             defaultValue={currentSearchString}
             onIdleAfterChange={this._onSearchFieldIdleAfterChange}
-            onBlur={this._onSearchFieldBlur}
-            onFocus={this._onSearchFieldFocus}
           />
         </label>
-        <div
-          className={classNames('panelSearchFieldIntroduction', {
-            isHidden: !showIntroduction,
-            isDisplayed: showIntroduction,
-          })}
-        >
-          <Localized id="PanelSearch--search-field-hint">
-            Did you know you can use the comma (,) to search using several
-            terms?
-          </Localized>
-        </div>
       </div>
     );
   }

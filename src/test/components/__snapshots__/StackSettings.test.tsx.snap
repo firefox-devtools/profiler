@@ -108,11 +108,6 @@ exports[`StackSettings matches the snapshot 1`] = `
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
   </div>
 </div>

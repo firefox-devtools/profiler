@@ -529,11 +529,6 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
           />
         </form>
       </label>
-      <div
-        class="panelSearchFieldIntroduction isHidden"
-      >
-        Did you know you can use the comma (,) to search using several terms?
-      </div>
     </div>
     <button
       class="filterMarkersButton photon-button photon-button-ghost"
