@@ -300,7 +300,7 @@ profiler-cli marker info <handle> --json
     start, end, duration?,
     fields?: [{ key, label, value, formattedValue }],
                           // as in FlatMarkerItem above: unique-string,
-                          // flow-id and terminating-flow-id fields report
+                          // flow-id, terminating-flow-id and causal-*-id fields report
                           // "value" as the resolved string, not the index
     stack?: { frames: [{ name, nameWithLibrary }], truncated }
   }

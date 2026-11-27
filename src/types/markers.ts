@@ -56,6 +56,33 @@ export type MarkerFormatType =
   | 'terminating-flow-id'
 
   // ----------------------------------------------------
+  // Causal flow types.
+  // A causal flow ID is a flow ID that also says that one marker is the cause
+  // of another, which a plain flow ID does not. This is what critical path
+  // analysis needs: starting from a marker, it asks what made that work
+  // happen, and then asks the same about the answer. Causal flow IDs are
+  // represented like flow IDs and take part in flows in the same way.
+  //  - 'causal-flow-id': the trigger. The marker is at the place that made
+  //    the work with this ID necessary, such as where a runnable is dispatched
+  //    or an IPC message is sent. As a flow it behaves like 'flow-id'.
+  //  - 'causal-flow-terminating-id': the effect. The marker covers the work
+  //    that ran because of the ID, such as the runnable running. Its causes
+  //    are the triggers with the same ID since the previous terminating
+  //    effect. There can be several, when many requests are served by one
+  //    piece of work. Like 'terminating-flow-id' it ends the flow, so a later
+  //    use of the same ID is a different flow.
+  //  - 'causal-flow-nonterminating-id': an effect that leaves the flow open,
+  //    for work that runs more than once for the same triggers, such as a task
+  //    that yields and runs again. The triggers stay available to later
+  //    effects with the same ID.
+  // Use these only where one marker really is the reason for the other.
+  // Markers that merely belong together, such as the steps in the lifetime of
+  // a network channel, should keep using 'flow-id'.
+  | 'causal-flow-id'
+  | 'causal-flow-terminating-id'
+  | 'causal-flow-nonterminating-id'
+
+  // ----------------------------------------------------
   // Numeric types
 
   // Note: All time and durations are stored as milliseconds.

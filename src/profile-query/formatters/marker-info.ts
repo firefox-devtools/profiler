@@ -28,6 +28,7 @@ import {
   computeStringIndexMarkerFieldsByDataType,
   formatFromMarkerSchema,
   getLabelGetter,
+  isStringIndexFormat,
   isStringIndexMarkerField,
 } from 'firefox-profiler/profile-logic/marker-schema';
 import { changeMarkersSearchString } from '../../actions/profile-view';
@@ -351,15 +352,13 @@ function getGroupingValue(
     return '(no value)';
   }
   // For fields whose format stores a string-table index (unique-string /
-  // flow-id / terminating-flow-id), resolve to the interned string so groups
+  // flow-id / terminating-flow-id / causal-*-id), resolve to the interned string so groups
   // show "Error" / "click" / ... instead of integer indices.
   const schema = marker.data ? markerSchemaByName[marker.data.type] : undefined;
   const field = schema?.fields.find((f) => f.key === key.field);
   if (
     field &&
-    (field.format === 'unique-string' ||
-      field.format === 'flow-id' ||
-      field.format === 'terminating-flow-id') &&
+    isStringIndexFormat(field.format) &&
     typeof fieldValue === 'number'
   ) {
     return stringTable.getString(fieldValue, '(empty)');
@@ -375,7 +374,7 @@ function getGroupingValue(
  * Schema-driven: iterates the marker schema's declared fields rather than
  * probing the first marker's `Object.keys`, so fields absent from the first
  * marker still get considered. For fields whose format stores a string-table
- * index (`unique-string` / `flow-id` / `terminating-flow-id`), we resolve the
+ * index (`unique-string` / `flow-id` / `terminating-flow-id` / `causal-*-id`), we resolve the
  * interned string before computing cardinality — otherwise we'd see variance
  * over integer indices.
  *
