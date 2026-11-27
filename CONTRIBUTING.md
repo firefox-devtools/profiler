@@ -80,6 +80,7 @@ When working on a new feature and code changes, it's important that things work 
   - `yarn lint` - Run oxfmt, stylelint, and oxlint to check for correct code formatting.
   - `yarn ts` - Check for TypeScript type correctness.
   - `yarn license-check` - Check the dependencies' licenses.
+  - `yarn bundle-size` - Report the size of the production bundle, after running `yarn build-prod`.
 - `git push` and `git commit`
   - We have [husky](https://www.npmjs.com/package/husky) installed to run automated checks when committing and pushing.
   - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
