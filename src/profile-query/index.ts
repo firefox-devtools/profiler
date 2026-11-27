@@ -76,7 +76,7 @@ import {
 } from 'firefox-profiler/selectors/publish';
 import { updateSharingOption } from 'firefox-profiler/actions/publish';
 import * as path from 'path';
-import { getAnyLibForFunc, getLibNameForFunc } from './function-list';
+import { getLibNameForFunc, getLibsForFunc } from './function-list';
 import {
   MarkerMap,
   expandMarkerHandleSpecsDetailed,
@@ -1530,7 +1530,6 @@ export class ProfileQuerier {
     const hasResource = (funcFlags & FuncFlag.HasResource) !== 0;
 
     let resource: FunctionInfoResult['resource'];
-    let library: FunctionInfoResult['library'];
 
     if (hasResource) {
       const resourceIndex = funcTable.resource[funcIndex];
@@ -1540,22 +1539,22 @@ export class ProfileQuerier {
       };
     }
 
-    const lib = getAnyLibForFunc(
+    const libraries = getLibsForFunc(
       funcIndex,
       profile.shared.frameTable,
       profile.libs
-    );
-    if (lib) {
-      library = {
-        name: lib.name,
-        path: lib.path,
-        debugName: lib.debugName,
-        debugPath: lib.debugPath,
-        breakpadId: lib.breakpadId,
-      };
-    }
+    ).map((lib) => ({
+      name: lib.name,
+      path: lib.path,
+      debugName: lib.debugName,
+      debugPath: lib.debugPath,
+      breakpadId: lib.breakpadId,
+    }));
 
-    const fullName = lib ? `${lib.name}!${funcName}` : funcName;
+    // The libs of a func share its library resource, so they also share a
+    // name, and the first one gives the same prefix as any other.
+    const fullName =
+      libraries.length > 0 ? `${libraries[0].name}!${funcName}` : funcName;
 
     return {
       type: 'function-info',
@@ -1566,7 +1565,7 @@ export class ProfileQuerier {
       isJS,
       relevantForJS,
       resource,
-      library,
+      libraries,
       categoryBreakdown: collectFunctionCategoryBreakdowns(
         this._store,
         this._threadMap,
