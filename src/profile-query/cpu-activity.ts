@@ -17,7 +17,8 @@ export interface CpuActivityEntry {
  */
 export function collectSliceTree(
   { slices, time }: SliceTree,
-  tsManager: TimestampManager
+  tsManager: TimestampManager,
+  zeroAt: number
 ): CpuActivityEntry[] {
   if (slices.length === 0) {
     return [];
@@ -56,7 +57,8 @@ export function collectSliceTree(
     0,
     time,
     result,
-    tsManager
+    tsManager,
+    zeroAt
   );
 
   return result;
@@ -71,7 +73,8 @@ function collectSliceSubtree(
   nestingDepth: number,
   time: Float64Array<ArrayBuffer>,
   result: CpuActivityEntry[],
-  tsManager: TimestampManager
+  tsManager: TimestampManager,
+  zeroAt: number
 ) {
   for (let i = startIndex; i < slices.length; i++) {
     if (!interestingSliceIndexes.has(i)) {
@@ -90,10 +93,10 @@ function collectSliceSubtree(
     const cpuMs = duration * avg;
 
     result.push({
-      startTime,
+      startTime: startTime - zeroAt,
       startTimeName: tsManager.nameForTimestamp(startTime),
       startTimeStr: tsManager.timestampString(startTime),
-      endTime,
+      endTime: endTime - zeroAt,
       endTimeName: tsManager.nameForTimestamp(endTime),
       endTimeStr: tsManager.timestampString(endTime),
       cpuMs,
@@ -111,7 +114,8 @@ function collectSliceSubtree(
         nestingDepth + 1,
         time,
         result,
-        tsManager
+        tsManager,
+        zeroAt
       );
     }
   }

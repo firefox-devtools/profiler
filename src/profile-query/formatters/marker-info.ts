@@ -31,6 +31,7 @@ import {
   isStringIndexFormat,
   isStringIndexMarkerField,
 } from 'firefox-profiler/profile-logic/marker-schema';
+import { adjustMarkerPayloadTimestamps } from 'firefox-profiler/profile-logic/process-profile';
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import type { Store } from '../../types/store';
 import type { ThreadMap } from '../thread-map';
@@ -44,6 +45,7 @@ import type {
   IndexIntoStackTable,
   MarkerSchemaByName,
   MarkerFormatType,
+  Milliseconds,
 } from 'firefox-profiler/types';
 import type { StringTable } from 'firefox-profiler/utils/string-table';
 import type {
@@ -893,7 +895,8 @@ export function collectThreadMarkers(
           marker,
           markerSchemaByName,
           stringIndexFieldsByDataType,
-          stringTable
+          stringTable,
+          zeroAt
         );
         flatMarkers.push({
           handle,
@@ -908,7 +911,8 @@ export function collectThreadMarkers(
             marker,
             markerSchemaByName,
             stringIndexFieldsByDataType,
-            stringTable
+            stringTable,
+            zeroAt
           ),
           data,
         });
@@ -1065,13 +1069,15 @@ export function collectProfileMarkers(
             marker,
             markerSchemaByName,
             stringIndexFieldsByDataType,
-            stringTable
+            stringTable,
+            zeroAt
           ),
           data: collectMarkerData(
             marker,
             markerSchemaByName,
             stringIndexFieldsByDataType,
-            stringTable
+            stringTable,
+            zeroAt
           ),
           threadHandle,
           threadName,
@@ -1270,12 +1276,13 @@ function collectMarkerFields(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   stringIndexFieldsByDataType: Map<string, string[]>,
-  stringTable: StringTable
+  stringTable: StringTable,
+  zeroAt: Milliseconds
 ): MarkerFieldValue[] | undefined {
-  const data = marker.data;
-  if (!data) {
+  if (!marker.data) {
     return undefined;
   }
+  const data = adjustMarkerPayloadTimestamps(marker.data, -zeroAt);
   const schema = markerSchemaByName[data.type];
   if (!schema || schema.fields.length === 0) {
     return undefined;
@@ -1345,12 +1352,13 @@ function collectMarkerData(
   marker: Marker,
   markerSchemaByName: MarkerSchemaByName,
   stringIndexFieldsByDataType: Map<string, string[]>,
-  stringTable: StringTable
+  stringTable: StringTable,
+  zeroAt: Milliseconds
 ): { [key: string]: any } | undefined {
-  const payload = marker.data;
-  if (!payload) {
+  if (!marker.data) {
     return undefined;
   }
+  const payload = adjustMarkerPayloadTimestamps(marker.data, -zeroAt);
 
   const stringIndexFields = stringIndexFieldsByDataType.get(payload.type);
   const schema = markerSchemaByName[payload.type];
@@ -1411,7 +1419,8 @@ export function collectMarkerInfo(
     marker,
     markerSchemaByName,
     computeStringIndexMarkerFieldsByDataType(getMarkerSchema(state)),
-    stringTable
+    stringTable,
+    zeroAt
   );
   let schemaInfo: MarkerInfoResult['schema'];
 
@@ -1644,6 +1653,7 @@ export function collectThreadNetwork(
       : sortedRecords;
 
   // Build per-request entries
+  const zeroAt = getZeroAt(state);
   const requests: NetworkRequestEntry[] = limitedRecords.map((record) => {
     const data = record.data;
     const duration = clampedDurationMs(record, range);
@@ -1658,7 +1668,7 @@ export function collectThreadNetwork(
       httpVersion: data.httpVersion,
       cacheStatus: data.cache,
       transferSizeKB: data.count !== undefined ? data.count / 1024 : undefined,
-      startTime: record.start,
+      startTime: record.start - zeroAt,
       duration,
       status: data.status,
       incomplete: record.incomplete,

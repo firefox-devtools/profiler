@@ -6,6 +6,7 @@ import { getThreadSelectors } from 'firefox-profiler/selectors/per-thread';
 import {
   getCommittedRange,
   getProfile,
+  getZeroAt,
 } from 'firefox-profiler/selectors/profile';
 import { isNetworkMarker } from 'firefox-profiler/profile-logic/marker-data';
 import type { Store } from '../types/store';
@@ -202,6 +203,7 @@ export function clampedDurationMs(
 function toSummaryRequest(
   record: NetworkRecord,
   range: StartEndRange,
+  zeroAt: number,
   markerMap: MarkerMap,
   threadMap: ThreadMap
 ): NetworkSummaryRequest {
@@ -215,7 +217,7 @@ function toSummaryRequest(
     threadHandle: threadMap.handleForThreadIndexes(record.threadIndexes),
     url: URI,
     durationMs,
-    startTime: record.start,
+    startTime: record.start - zeroAt,
     transferSizeKB: count !== undefined ? count / 1024 : undefined,
     httpStatus: responseStatus,
     status: record.data.status,
@@ -231,6 +233,7 @@ function toSummaryRequest(
 function topSlowest(
   records: NetworkRecord[],
   range: StartEndRange,
+  zeroAt: number,
   n: number,
   markerMap: MarkerMap,
   threadMap: ThreadMap
@@ -239,7 +242,9 @@ function topSlowest(
     .slice()
     .sort((a, b) => clampedDurationMs(b, range) - clampedDurationMs(a, range))
     .slice(0, n)
-    .map((record) => toSummaryRequest(record, range, markerMap, threadMap));
+    .map((record) =>
+      toSummaryRequest(record, range, zeroAt, markerMap, threadMap)
+    );
 }
 
 function isCompleted(record: NetworkRecord): boolean {
@@ -330,7 +335,14 @@ export function computeThreadNetworkSummary(
     cacheMiss,
     cacheUnknown,
     rangeDurationMs,
-    slowest: topSlowest(records, range, 3, markerMap, threadMap),
+    slowest: topSlowest(
+      records,
+      range,
+      getZeroAt(state),
+      3,
+      markerMap,
+      threadMap
+    ),
   };
 }
 
@@ -447,7 +459,14 @@ export function computeProfileNetworkSummary(
     peakConcurrency: peakConcurrency(dedupedIntervals),
     errorCount,
     rangeDurationMs,
-    slowest: topSlowest(deduped, range, 5, markerMap, threadMap),
+    slowest: topSlowest(
+      deduped,
+      range,
+      getZeroAt(state),
+      5,
+      markerMap,
+      threadMap
+    ),
     byThread: byThread.slice(0, 5),
   };
 }
