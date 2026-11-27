@@ -3,17 +3,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-// This script automates steps 1-4 of the production deployment workflow in
+// This script automates the production deployment and announcement workflow in
 // docs-developer/deploying.md. Keep its behavior and prompts aligned with that
 // document whenever the deployment process changes.
 
 import type { spawnSync as nodeSpawnSync } from 'child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { createRequire } from 'module';
 import { tmpdir } from 'os';
-import { basename, join } from 'path';
+import { basename, join, resolve } from 'path';
 import { createInterface } from 'readline/promises';
 import { fileURLToPath } from 'url';
+import open from 'open';
 
 const { sync: spawnSync } = createRequire(import.meta.url)('cross-spawn') as {
   sync: typeof nodeSpawnSync;
@@ -22,6 +23,7 @@ const { sync: spawnSync } = createRequire(import.meta.url)('cross-spawn') as {
 type RunOptions = {
   capture?: boolean;
   allowFailure?: boolean;
+  cwd?: string;
 };
 
 type DeploymentOptions = {
@@ -46,6 +48,12 @@ type CliDeploymentPlan = {
   plannedChange: string | null;
 };
 
+type CliRelease = {
+  version: string;
+  tag: string;
+  bumpCommit: string;
+};
+
 type L10nDeploymentPlan = {
   plannedChange: string | null;
   plannedLocalizers: string[];
@@ -65,6 +73,13 @@ type PullRequestListItem = PullRequestReference & {
   headRepositoryOwner?: { login: string } | null;
 };
 
+type AssociatedPullRequest = {
+  user: { login: string } | null;
+  merged_at: string | null;
+  merge_commit_sha: string | null;
+  base: { ref: string; repo: { full_name: string } };
+};
+
 type GitHubReview = {
   author?: { login?: string } | null;
   state: string;
@@ -78,6 +93,7 @@ type PullRequestInfo = PullRequestReference & {
   reviewRequests: { login: string }[];
   reviews: GitHubReview[];
   headRefOid: string;
+  mergeCommit: { oid: string } | null;
   body: string;
   title: string;
 };
@@ -98,15 +114,37 @@ type DeploymentRemotes = {
   fork: string;
 };
 
+type DeploymentResult = {
+  commit: string;
+  mergeCommit: string | null;
+  body: string;
+  date: string;
+  url: string | null;
+};
+
+type FirefoxCheckout = {
+  path: string;
+  upstream: string;
+};
+
+class DeploymentCancelled extends Error {}
+
+type TemporaryCheckout = {
+  path: string;
+  gitArgs: string[];
+};
+
 const repoRoot = fileURLToPath(new URL('..', import.meta.url));
 const repository = 'firefox-devtools/profiler';
+const toolchainsPath = 'taskcluster/kinds/fetch/toolchains.yml';
+const bugFilingScript = '.agents/skills/bug-filing/file-bug.py';
 const reviewers = ['canova', 'mstange', 'fatadel'];
 const pollIntervalMs = 10_000;
 const versionPattern =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
 /**
- * Run a command from the repository root.
+ * Run a command from the repository root or the specified checkout.
  */
 function run(
   command: string,
@@ -117,12 +155,15 @@ function run(command: string, args: string[], options?: RunOptions): string;
 function run(
   command: string,
   args: string[],
-  { capture = false, allowFailure = false }: RunOptions = {}
+  { capture = false, allowFailure = false, cwd = repoRoot }: RunOptions = {}
 ): string | null {
   const commandLine = [command, ...args].join(' ');
-  console.log('[exec]', commandLine);
+  console.log(
+    '[exec]',
+    cwd === repoRoot ? commandLine : `(in ${cwd}) ${commandLine}`
+  );
   const result = spawnSync(command, args, {
-    cwd: repoRoot,
+    cwd,
     encoding: 'utf8',
     stdio: capture ? 'pipe' : 'inherit',
   });
@@ -161,7 +202,7 @@ export function parseArguments(args: string[]): DeploymentOptions {
 }
 
 /**
- * Run a command that changes GitHub or npm, or print it in dry-run mode.
+ * Run a command that changes a remote service, or print it in dry-run mode.
  */
 export function runRemoteMutation(
   dryRun: boolean,
@@ -247,7 +288,7 @@ async function ask(question: string, defaultValue = ''): Promise<string> {
 async function confirm(action: string): Promise<void> {
   const answer = await ask(`${action}\nType "y" to continue:`);
   if (answer.toLowerCase() !== 'y') {
-    throw new Error('Stopped without performing that action.');
+    throw new DeploymentCancelled('Stopped without performing that action.');
   }
 }
 
@@ -530,6 +571,56 @@ export function combineDeploymentChanges(
 }
 
 /**
+ * Collect deployment commits with their pull request authors, falling back to Git authors.
+ */
+export function collectDeploymentChanges(range: string): string {
+  logAction(
+    'Collecting deployment changes and resolving their pull request authors.'
+  );
+  const commits = gitOutput(
+    'log',
+    range,
+    '--first-parent',
+    '--format=format:%H%x00%an%x00%s',
+    '--reverse'
+  );
+  return commits
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      const [commit, gitAuthor, subject] = line.split('\0');
+      const pages = JSON.parse(
+        run(
+          'gh',
+          [
+            'api',
+            `repos/${repository}/commits/${commit}/pulls`,
+            '--method',
+            'GET',
+            '--paginate',
+            '--slurp',
+          ],
+          { capture: true }
+        )
+      ) as AssociatedPullRequest[][];
+      const pullRequests = pages
+        .flat()
+        .filter(
+          (pullRequest) =>
+            pullRequest.merged_at &&
+            pullRequest.base.ref === 'main' &&
+            pullRequest.base.repo.full_name === repository
+        );
+      const pullRequest =
+        pullRequests.find(
+          ({ merge_commit_sha }) => merge_commit_sha === commit
+        ) ?? (pullRequests.length === 1 ? pullRequests[0] : undefined);
+      return `[${pullRequest?.user?.login ?? gitAuthor}] ${subject}`;
+    })
+    .join('\n');
+}
+
+/**
  * Select reviewers for the authenticated user.
  */
 export function reviewersFor(login: string): string[] {
@@ -610,21 +701,11 @@ function discoverDeploymentRemotes(login: string): DeploymentRemotes {
 }
 
 /**
- * Refresh the deployment branches and update the local main branch when live.
+ * Refresh the remote deployment branches without changing the working copy.
  */
-function updateMain(upstream: string, dryRun: boolean): void {
+function fetchDeploymentBranches(upstream: string): void {
   logAction(`Fetching deployment branches from '${upstream}'.`);
   git('fetch', upstream, 'main', 'l10n', 'production');
-  if (dryRun) {
-    console.log(
-      '[dry-run] Leaving the current branch and working tree unchanged.'
-    );
-    return;
-  }
-
-  logAction(`Updating the local main branch from '${upstream}'.`);
-  git('checkout', 'main');
-  git('pull', '--ff-only', upstream, 'main');
 }
 
 /**
@@ -670,7 +751,7 @@ function getPullRequest(number: number): PullRequestInfo {
       'view',
       String(number),
       '--json',
-      'number,url,state,reviewDecision,reviewRequests,reviews,headRefOid,body,title'
+      'number,url,state,reviewDecision,reviewRequests,reviews,headRefOid,mergeCommit,body,title'
     )
   ) as PullRequestInfo;
 }
@@ -1118,20 +1199,86 @@ async function handleL10nPullRequest(
   await mergePullRequest(pullRequest, 'merge', {
     expectedHeadOid: readyInfo.headRefOid,
   });
-  logAction('Updating the local main branch after the localization merge.');
-  git('pull', '--ff-only', upstream, 'main');
+  fetchDeploymentBranches(upstream);
   return plan;
 }
 
 /**
  * Read the profiler-cli package manifest.
  */
-function readCliPackage(): CliPackage {
-  const path = join(repoRoot, 'profiler-cli', 'package.json');
+function readCliPackage(checkout: string): CliPackage {
+  const path = join(checkout, 'profiler-cli', 'package.json');
   const contents = JSON.parse(
     readFileSync(path, 'utf8')
   ) as CliPackage['contents'];
   return { path, contents };
+}
+
+/**
+ * Run an operation in a temporary clone of the requested revision.
+ *
+ * Retain failed operations' clones for inspection; cleanup cannot undo success.
+ */
+async function withTemporaryCheckout<T>(
+  ref: string,
+  action: (checkout: TemporaryCheckout) => Promise<T>
+): Promise<T> {
+  const commit = gitOutput(
+    '-C',
+    repoRoot,
+    'rev-parse',
+    '--verify',
+    `${ref}^{commit}`
+  );
+  const configPath = gitOutput(
+    '-C',
+    repoRoot,
+    'rev-parse',
+    '--path-format=absolute',
+    '--git-path',
+    'config'
+  );
+  const hooksPath = gitOutput(
+    '-C',
+    repoRoot,
+    'rev-parse',
+    '--path-format=absolute',
+    '--git-path',
+    'hooks'
+  );
+  const path = mkdtempSync(join(tmpdir(), 'profiler-deploy-'));
+  logAction(`Creating a temporary Profiler clone at ${path} for ${commit}.`);
+  const gitArgs = [
+    '-C',
+    path,
+    '-c',
+    `include.path=${configPath}`,
+    '-c',
+    `core.hooksPath=${hooksPath}`,
+    '--work-tree',
+    path,
+  ];
+  let result: T;
+  try {
+    git('clone', '--shared', '--no-checkout', '--', repoRoot, path);
+    // Keep repository-specific identity, signing, and hooks for commits and pushes.
+    git(...gitArgs, 'checkout', '--detach', commit);
+    result = await action({ path, gitArgs });
+  } catch (error) {
+    console.error(
+      `The temporary Profiler clone is kept at ${path} for inspection.`
+    );
+    throw error;
+  }
+  logAction(`Removing the temporary Profiler clone at ${path}.`);
+  try {
+    rmSync(path, { recursive: true, force: true });
+  } catch (error) {
+    console.warn(
+      `The operation succeeded, but the temporary Profiler clone could not be removed: ${error.message}. Remove ${path} manually.`
+    );
+  }
+  return result;
 }
 
 /**
@@ -1171,10 +1318,11 @@ function cliVersionAtRef(ref: string): string {
 /**
  * Create or resume the profiler-cli version pull request.
  */
-async function createVersionBumpPullRequest(
+export async function createVersionBumpPullRequest(
   version: string,
   forkOwner: string,
   forkRemote: string,
+  upstream: string,
   dryRun: boolean
 ): Promise<PullRequestReference | null> {
   const branch = `bump-cli-${version}`;
@@ -1192,13 +1340,10 @@ async function createVersionBumpPullRequest(
 
   if (dryRun && !hasLocalBranch && !hasRemoteBranch) {
     console.log(
-      `[dry-run] Would create local branch '${branch}', update profiler-cli/package.json, and commit the version bump.`
+      `[dry-run] Would create '${branch}' from '${upstream}/main' in a temporary clone, install dependencies, update profiler-cli/package.json, commit, and push the version bump.`
     );
   } else if (hasLocalBranch) {
     console.log(`Using existing local branch '${branch}'.`);
-    if (!dryRun) {
-      git('checkout', branch);
-    }
     if (cliVersionAtRef(branch) !== version) {
       throw new Error(
         `Local branch '${branch}' does not contain profiler-cli version ${version}.`
@@ -1221,28 +1366,51 @@ async function createVersionBumpPullRequest(
         `Remote branch '${branch}' does not contain profiler-cli version ${version}.`
       );
     }
-  } else {
-    console.log(`Creating local branch '${branch}'.`);
-    git('checkout', '-b', branch, 'main');
-    const { path, contents } = readCliPackage();
-    contents.version = version;
-    writeFileSync(path, `${JSON.stringify(contents, null, 2)}\n`);
-    git('diff', '--', path);
-    await confirm(`Commit the profiler-cli version bump to ${version}?`);
-    git('add', path);
-    git('commit', '-m', `Bump profiler-cli version to ${version}`);
   }
 
   if (!hasRemoteBranch) {
-    if (!dryRun) {
-      await confirm(`Push branch '${branch}' to '${forkRemote}'?`);
+    if (dryRun) {
+      if (hasLocalBranch) {
+        console.log(
+          `[dry-run] Would clone '${branch}' into a temporary directory and install dependencies before pushing.`
+        );
+      }
+      runRemoteMutation(true, 'git', [
+        'push',
+        forkRemote,
+        `${branch}:refs/heads/${branch}`,
+      ]);
+    } else {
+      const forkUrl = gitOutput('remote', 'get-url', '--push', forkRemote);
+      await withTemporaryCheckout(
+        hasLocalBranch ? branch : `${upstream}/main`,
+        async ({ path: checkout, gitArgs }) => {
+          logAction(
+            'Installing dependencies and preparing Git hooks in the temporary clone.'
+          );
+          run('yarn', ['install', '--frozen-lockfile'], { cwd: checkout });
+          if (!hasLocalBranch) {
+            git(...gitArgs, 'checkout', '-b', branch);
+            const { path, contents } = readCliPackage(checkout);
+            contents.version = version;
+            writeFileSync(path, `${JSON.stringify(contents, null, 2)}\n`);
+            git(...gitArgs, 'diff', '--', path);
+            await confirm(
+              `Commit the profiler-cli version bump to ${version}?`
+            );
+            git(...gitArgs, 'add', '--', path);
+            git(
+              ...gitArgs,
+              'commit',
+              '-m',
+              `Bump profiler-cli version to ${version}`
+            );
+          }
+          await confirm(`Push branch '${branch}' to '${forkRemote}'?`);
+          git(...gitArgs, 'push', forkUrl, `HEAD:refs/heads/${branch}`);
+        }
+      );
     }
-    runRemoteMutation(dryRun, 'git', [
-      'push',
-      '--set-upstream',
-      forkRemote,
-      branch,
-    ]);
   }
 
   pullRequest = await createPullRequest(
@@ -1299,6 +1467,7 @@ async function handleVersionBumpPullRequest(
     version,
     login,
     forkRemote,
+    upstream,
     dryRun
   );
   const requestedReviewers = reviewersFor(login);
@@ -1331,9 +1500,7 @@ async function handleVersionBumpPullRequest(
   await mergePullRequest(pullRequest, 'squash', {
     expectedHeadOid: readyInfo.headRefOid,
   });
-  logAction('Updating the local main branch after the profiler-cli merge.');
-  git('checkout', 'main');
-  git('pull', '--ff-only', upstream, 'main');
+  fetchDeploymentBranches(upstream);
   return plan;
 }
 
@@ -1360,9 +1527,9 @@ function withTemporaryFile<T>(
 }
 
 /**
- * Open the deployment pull request body in the configured Git editor.
+ * Open Markdown in the configured Git editor.
  */
-function editDeploymentBody(initialBody: string): string {
+function editMarkdown(initialBody: string): string {
   return withTemporaryFile(
     'profiler-deploy-',
     'pull-request-body.md',
@@ -1384,7 +1551,7 @@ function editDeploymentBody(initialBody: string): string {
 
       const body = readFileSync(path, 'utf8').trim();
       if (!body) {
-        throw new Error('The deployment PR body cannot be empty.');
+        throw new Error('The edited Markdown cannot be empty.');
       }
       return `${body}\n`;
     }
@@ -1394,25 +1561,17 @@ function editDeploymentBody(initialBody: string): string {
 /**
  * Create or update and merge the production deployment pull request.
  */
-async function handleDeploymentPullRequest(
+export async function handleDeploymentPullRequest(
   upstream: string,
   dryRun: boolean,
   plannedChanges: string[],
   plannedLocalizers: string[]
-): Promise<string> {
+): Promise<DeploymentResult> {
   logAction('Preparing the production deployment PR.');
-  updateMain(upstream, dryRun);
+  fetchDeploymentBranches(upstream);
   const range = `${upstream}/production..${upstream}/main`;
   const changes = combineDeploymentChanges(
-    gitOutput(
-      'log',
-      range,
-      '--first-parent',
-      '--oneline',
-      '--no-decorate',
-      '--format=format:[%an] %s',
-      '--reverse'
-    ),
+    collectDeploymentChanges(range),
     plannedChanges
   );
 
@@ -1435,8 +1594,9 @@ async function handleDeploymentPullRequest(
   ].sort((a, b) => a.localeCompare(b));
   const generatedBody = buildDeploymentBody(changes, localizers);
   console.log('\nOpening the generated deployment PR body in your editor.');
-  const body = editDeploymentBody(generatedBody);
-  const title = `Deploy ${formatDate()}`;
+  const body = editMarkdown(generatedBody);
+  const date = formatDate();
+  const title = `Deploy ${date}`;
   let pullRequest = getOpenPullRequest('production', 'main');
 
   if (pullRequest) {
@@ -1482,7 +1642,13 @@ async function handleDeploymentPullRequest(
     console.log(
       '[dry-run] Would merge the new production PR using the merge method and its body as the commit message.'
     );
-    return gitOutput('rev-parse', `${upstream}/main`);
+    return {
+      commit: gitOutput('rev-parse', `${upstream}/main`),
+      mergeCommit: null,
+      body,
+      date,
+      url: null,
+    };
   }
 
   const originalHead = getPullRequest(pullRequest.number).headRefOid;
@@ -1500,7 +1666,13 @@ async function handleDeploymentPullRequest(
       },
       true
     );
-    return originalHead;
+    return {
+      commit: originalHead,
+      mergeCommit: null,
+      body,
+      date,
+      url: pullRequest.url,
+    };
   }
 
   const finalInfo = await waitForChecks(pullRequest, { required: false });
@@ -1511,70 +1683,581 @@ async function handleDeploymentPullRequest(
     );
   }
 
-  await mergePullRequest(pullRequest, 'merge', {
+  const mergedInfo = await mergePullRequest(pullRequest, 'merge', {
     subject: `${title} (#${pullRequest.number})`,
     body,
     expectedHeadOid: originalHead,
   });
-  return originalHead;
+  const mergeCommit = mergedInfo.mergeCommit?.oid;
+  if (!mergeCommit || !/^[0-9a-f]{40}$/.test(mergeCommit)) {
+    throw new Error(
+      `GitHub did not report a merge commit for ${pullRequest.url}.`
+    );
+  }
+  return {
+    commit: originalHead,
+    mergeCommit,
+    body,
+    date,
+    url: pullRequest.url,
+  };
 }
 
 /**
- * Verify the deployed commit and publish profiler-cli when needed.
+ * Prompt for a published URL until it passes validation.
  */
-async function finishDeployment(
-  deployedMainCommit: string,
-  shouldPublishCli: boolean,
-  cliVersion: string,
-  upstream: string,
-  dryRun: boolean
-): Promise<void> {
-  logAction('Verifying the production deployment before publishing.');
-  git('fetch', upstream, 'main');
-  const currentMainCommit = gitOutput('rev-parse', `${upstream}/main`);
-  if (currentMainCommit !== deployedMainCommit) {
+async function waitForPublishedUrl(
+  prompt: string,
+  validate: (input: string) => string
+): Promise<string> {
+  for (;;) {
+    const input = await ask(prompt);
+    try {
+      return validate(input);
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+}
+
+/**
+ * Build Bugzilla fields for the deployed Firefox Profiler toolchain update.
+ */
+function buildToolchainBugFields(
+  date: string,
+  mergeCommit: string,
+  cliVersion: string
+): Record<string, string> {
+  return {
+    product: 'Core',
+    component: 'Gecko Profiler',
+    bug_type: 'task',
+    short_desc: 'Update the Firefox Profiler toolchain',
+    status_whiteboard: '[fp]',
+    version: 'unspecified',
+    rep_platform: 'Unspecified',
+    op_sys: 'Unspecified',
+    comment: [
+      `Update the Firefox Profiler toolchain to the ${date} deploy.`,
+      `This revision includes profiler-cli ${cliVersion}.`,
+      '',
+      `https://github.com/${repository}/commit/${mergeCommit}`,
+    ].join('\n'),
+  };
+}
+
+/**
+ * Validate and normalize a Mozilla Bugzilla bug link.
+ */
+export function validateToolchainBugUrl(input: string): string {
+  const id =
+    /^https:\/\/bugzilla\.mozilla\.org\/show_bug\.cgi\?id=(\d+)(?:#.*)?$/.exec(
+      input
+    )?.[1];
+  if (!id) {
     throw new Error(
-      `main moved to ${currentMainCommit} after the deployment candidate ${deployedMainCommit} was selected. ` +
-        'Refusing to finish a deployment from a different commit.'
+      'Enter the created bug URL from https://bugzilla.mozilla.org/show_bug.cgi?id=...'
     );
   }
+  return `https://bugzilla.mozilla.org/show_bug.cgi?id=${id}`;
+}
+
+/**
+ * Replace the Firefox Profiler revision in the toolchain configuration.
+ *
+ * Require one exact fetch block and preserve all surrounding YAML verbatim.
+ */
+export function updateFirefoxProfilerRevision(
+  contents: string,
+  revision: string
+): string {
+  if (!/^[0-9a-f]{40}$/.test(revision)) {
+    throw new Error(
+      'The Firefox toolchain requires a full production merge commit SHA.'
+    );
+  }
+  const blocks = contents.match(
+    /^firefox-profiler:\r?\n(?:[ \t][^\n]*\n|\r?\n)*/gm
+  );
+  if (
+    blocks?.length !== 1 ||
+    !/^ {8}repo: https:\/\/github\.com\/firefox-devtools\/profiler\r?$/m.test(
+      blocks[0]
+    )
+  ) {
+    throw new Error(
+      `Could not identify the firefox-profiler fetch in ${toolchainsPath}.`
+    );
+  }
+  const block = blocks[0];
+  const revisionLine = /^( {8}revision: )[0-9a-f]{40}(\r?)$/gm;
+  if ([...block.matchAll(revisionLine)].length !== 1) {
+    throw new Error(
+      `Expected one firefox-profiler revision in ${toolchainsPath}.`
+    );
+  }
+  return contents.replace(
+    block,
+    block.replace(revisionLine, `$1${revision}$2`)
+  );
+}
+
+/**
+ * Reject a Firefox checkout with uncommitted changes.
+ */
+function ensureCleanFirefoxCheckout(path: string): void {
+  logAction(`Checking for a clean Firefox working copy at ${path}.`);
+  const status = gitOutput('-C', path, 'status', '--porcelain', '-unormal');
+  if (status) {
+    throw new Error(`The Firefox working copy must be clean:\n\n${status}`);
+  }
+}
+
+/**
+ * Resolve and validate MOZILLA_CENTRAL.
+ */
+function firefoxCheckoutPath(): string {
+  const configuredPath = process.env.MOZILLA_CENTRAL;
+  if (!configuredPath?.trim()) {
+    throw new Error(
+      'Set MOZILLA_CENTRAL to the path of your Firefox Git checkout before running deploy-prod.'
+    );
+  }
+  const path = resolve(configuredPath);
+  for (const file of [toolchainsPath, bugFilingScript]) {
+    if (!statSync(join(path, file), { throwIfNoEntry: false })?.isFile()) {
+      throw new Error(
+        `MOZILLA_CENTRAL must point to a Firefox checkout containing ${file}: ${path}`
+      );
+    }
+  }
+  return path;
+}
+
+/**
+ * Check Firefox toolchain prerequisites and discover the canonical remote.
+ */
+export function prepareFirefoxCheckout(path: string): FirefoxCheckout {
+  logAction('Checking the Firefox toolchain update prerequisites.');
+  run('python3', ['--version']);
+  // Invoking moz-phab, even with --version, can trigger its automatic updater.
+  const mozPhabPath =
+    process.platform === 'win32'
+      ? run('where.exe', ['moz-phab'], { capture: true, allowFailure: true })
+      : run('/bin/sh', ['-c', 'command -v moz-phab'], {
+          capture: true,
+          allowFailure: true,
+        });
+  if (!mozPhabPath) {
+    throw new Error(
+      "The Phabricator CLI 'moz-phab' is not installed or is not on PATH."
+    );
+  }
+  ensureCleanFirefoxCheckout(path);
+  const upstream = findGitHubRemote(
+    gitOutput('-C', path, 'remote', '-v'),
+    'mozilla-firefox/firefox',
+    'fetch'
+  );
+  if (!upstream) {
+    throw new Error(
+      'The Firefox checkout needs a fetch remote for mozilla-firefox/firefox.'
+    );
+  }
+  return { path, upstream };
+}
+
+/**
+ * Attempt the Firefox toolchain update and offer recovery after command failures.
+ */
+export async function updateFirefoxToolchain(
+  date: string,
+  mergeCommit: string,
+  cliVersion: string,
+  checkout: FirefoxCheckout
+): Promise<void> {
+  try {
+    await submitFirefoxToolchain(date, mergeCommit, cliVersion, checkout);
+  } catch (error) {
+    if (error instanceof DeploymentCancelled) {
+      throw error;
+    }
+    console.error(`Firefox toolchain update failed: ${error.message}`);
+    await confirm(
+      'Complete it manually by following "Update the Firefox Profiler toolchain in Firefox" in docs-developer/deploying.md. Continue with CLI publication and announcements?'
+    );
+  }
+}
+
+/**
+ * File the toolchain bug and submit its Firefox revision.
+ */
+async function submitFirefoxToolchain(
+  date: string,
+  mergeCommit: string,
+  cliVersion: string,
+  checkout: FirefoxCheckout
+): Promise<void> {
+  logAction('Preparing the Firefox Profiler toolchain bug and revision.');
+  const { path, upstream } = checkout;
+  ensureCleanFirefoxCheckout(path);
+  logAction(`Fetching Firefox main from '${upstream}'.`);
+  git('-C', path, 'fetch', upstream, 'main');
+  const baseCommit = gitOutput('-C', path, 'rev-parse', 'FETCH_HEAD');
+  const contents = gitOutput(
+    '-C',
+    path,
+    'show',
+    `${baseCommit}:${toolchainsPath}`
+  );
+  const updated = updateFirefoxProfilerRevision(`${contents}\n`, mergeCommit);
+  if (updated === `${contents}\n`) {
+    console.log(
+      'Firefox main already uses this production merge commit. Skipping the toolchain update.'
+    );
+    return;
+  }
+  await confirm(
+    `Create a branch for the toolchain bug from Firefox main in ${path} and update ${toolchainsPath}? This will switch that checkout's branch after you create the bug.`
+  );
+  console.log('Review and create the toolchain bug in your browser.');
+  run('python3', [
+    join(path, bugFilingScript),
+    ...Object.entries(
+      buildToolchainBugFields(date, mergeCommit, cliVersion)
+    ).map(([field, value]) => `${field}=${value}`),
+  ]);
+  const bugUrl = await waitForPublishedUrl(
+    'Paste the created Bugzilla bug URL:',
+    validateToolchainBugUrl
+  );
+  const bugId = new URL(bugUrl).searchParams.get('id')!;
+  const branch = `update-firefox-profiler-${bugId}`;
+  ensureCleanFirefoxCheckout(path);
+  git('-C', path, 'checkout', '-b', branch, baseCommit);
+  logAction(`Updating the Firefox Profiler toolchain to ${mergeCommit}.`);
+  const toolchainsFile = join(path, toolchainsPath);
+  writeFileSync(
+    toolchainsFile,
+    updateFirefoxProfilerRevision(
+      readFileSync(toolchainsFile, 'utf8'),
+      mergeCommit
+    )
+  );
+  git('-C', path, 'diff', '--', toolchainsPath);
+  const message = `Bug ${bugId} - Update the Firefox Profiler toolchain to the ${date} deploy r?#profiler-reviewers\n\nThis revision includes profiler-cli ${cliVersion}.\n`;
+  console.log(message);
+  await confirm('Commit this Firefox toolchain update?');
+  git('-C', path, 'add', '--', toolchainsPath);
+  withTemporaryFile(
+    'profiler-toolchain-',
+    'commit-message.txt',
+    message,
+    (messagePath) => {
+      git('-C', path, 'commit', '--file', messagePath);
+    }
+  );
+  const commit = gitOutput('-C', path, 'rev-parse', 'HEAD');
+  logAction(`Submitting the Firefox toolchain revision for ${bugUrl}.`);
+  await confirm(
+    'Submit this commit with moz-phab? It will create a Phabricator revision and amend the local commit with its URL.'
+  );
+  run('moz-phab', [
+    'submit',
+    '--path',
+    path,
+    '--single',
+    '--interactive',
+    commit,
+  ]);
+  console.log(
+    `The toolchain revision for ${bugUrl} still needs review and landing. Submission alone does not update Firefox.`
+  );
+}
+
+/**
+ * Publish and tag the CLI from one checkout of the deployed commit.
+ */
+export async function finishDeployment(
+  deployedMainCommit: string,
+  cliPlan: CliDeploymentPlan,
+  upstream: string,
+  dryRun: boolean
+): Promise<CliRelease | null> {
+  logAction('Confirming the Netlify deployment is live before publishing.');
 
   if (dryRun) {
-    console.log(
-      `[dry-run] Would check out main and pull the merged deployment changes from '${upstream}'.`
-    );
     console.log(
       `[dry-run] Would ask for confirmation that the Netlify production deployment for ${deployedMainCommit} is live.`
     );
   } else {
-    git('checkout', 'main');
-    git('pull', '--ff-only', upstream, 'main');
     await confirm(
       `Confirm that the Netlify production deployment for ${deployedMainCommit} is live?`
     );
   }
 
-  if (!shouldPublishCli) {
+  if (!cliPlan.shouldPublishCli) {
     console.log(
       'The profiler-cli version is unchanged from production. Skipping npm publication.'
     );
-    return;
+    return null;
   }
 
-  const { contents } = readCliPackage();
+  const cliVersion = cliPlan.version;
+  const release = {
+    version: cliVersion,
+    tag: `profiler-cli-v${cliVersion}`,
+    bumpCommit:
+      dryRun && cliPlan.plannedChange
+        ? '<version-bump-commit>'
+        : findCliVersionCommit(deployedMainCommit, cliVersion),
+  };
+  // A remote can fetch upstream but push to a fork. Publish the tag to its fetch URL.
+  const canonicalUrl = gitOutput('remote', 'get-url', upstream);
+  const pushArgs = [
+    'push',
+    canonicalUrl,
+    `${release.bumpCommit}:refs/tags/${release.tag}`,
+  ];
+  const contents = JSON.parse(
+    gitOutput('show', `${deployedMainCommit}:profiler-cli/package.json`)
+  ) as CliPackage['contents'];
   if (dryRun) {
+    console.log(
+      `[dry-run] Would create a temporary clone at ${deployedMainCommit} and install dependencies.`
+    );
     console.log(
       `[dry-run] Would publish ${contents.name}@${cliVersion} to npm.`
     );
+    runRemoteMutation(true, 'yarn', ['publish-cli']);
+    runRemoteMutation(true, 'git', pushArgs);
+    return release;
+  }
+  if (contents.version !== cliVersion) {
+    throw new Error(
+      `Expected profiler-cli version ${cliVersion}, found ${contents.version}.`
+    );
+  }
+  await confirm(`Publish ${contents.name}@${contents.version} to npm?`);
+  await withTemporaryCheckout(deployedMainCommit, async ({ path, gitArgs }) => {
+    logAction(
+      'Installing dependencies for the deployed CLI in the temporary clone.'
+    );
+    run('yarn', ['install', '--frozen-lockfile'], { cwd: path });
+    logAction(
+      `Publishing ${contents.name}@${contents.version} from ${deployedMainCommit}.`
+    );
+    run('yarn', ['publish-cli'], { cwd: path });
+    logAction(`Tagging ${release.tag} at its version-bump commit.`);
+    await confirm(
+      `Publish tag '${release.tag}' at ${release.bumpCommit} to ${canonicalUrl}?`
+    );
+    git(...gitArgs, ...pushArgs);
+  });
+  return release;
+}
+
+/**
+ * Find the commit that introduces the deployed CLI version on main.
+ */
+export function findCliVersionCommit(
+  deployedCommit: string,
+  version: string
+): string {
+  if (cliVersionAtRef(deployedCommit) !== version) {
+    throw new Error(
+      `The deployed commit does not contain profiler-cli ${version}.`
+    );
+  }
+  const commits = gitOutput(
+    'log',
+    '--first-parent',
+    '--format=%H',
+    deployedCommit,
+    '--',
+    'profiler-cli/package.json'
+  )
+    .split('\n')
+    .filter(Boolean);
+  for (const commit of commits) {
+    if (
+      cliVersionAtRef(commit) === version &&
+      cliVersionAtRef(`${commit}^`) !== version
+    ) {
+      return commit;
+    }
+  }
+  throw new Error(
+    `Could not find the version-bump commit for profiler-cli ${version}.`
+  );
+}
+
+/**
+ * Prepare the announcement in Discourse's browser composer.
+ */
+export function buildAnnouncementUrl(deployment: DeploymentResult): string {
+  const body = [
+    'The latest version of the [Firefox Profiler](https://profiler.firefox.com) is now live! Check out the full changelog below to see what’s changed:',
+    '',
+    '**Highlights:**',
+    '',
+    '<!-- Move notable changes from Other Changes here and remove this comment before publishing. -->',
+    '',
+    deployment.body
+      .trim()
+      .replace(/^Changes:$/m, '**Other Changes:**')
+      .replace(/^\[[^\]\n]+\] .+$/gm, '- $&')
+      .replace(
+        /^And special thanks to our localizers:$/m,
+        'Big thanks to our amazing localizers for making this release possible:'
+      )
+      .replace(
+        /\(#(\d+)\)/g,
+        `([#$1](https://github.com/${repository}/pull/$1))`
+      ),
+    '',
+    'Find out more about the Firefox Profiler on [profiler.firefox.com](https://profiler.firefox.com)! If you have any questions, join the discussion on our [Matrix channel](https://chat.mozilla.org/#/room/#profiler:mozilla.org)!',
+    '',
+  ].join('\n');
+  const url = new URL('https://discourse.mozilla.org/new-topic');
+  url.search = new URLSearchParams({
+    title: `Firefox Profiler Deployment (${deployment.date})`,
+    body,
+    category_id: '521',
+    tags: 'firefox-profiler',
+  }).toString();
+  return url.href;
+}
+
+/**
+ * Accept a published Mozilla Discourse topic link.
+ */
+export function validateAnnouncementUrl(input: string): string {
+  const url = URL.canParse(input) ? new URL(input) : null;
+  if (
+    !url ||
+    url.origin !== 'https://discourse.mozilla.org' ||
+    url.username ||
+    url.password ||
+    !/^\/t\/(?:[^/]+\/)?\d+(?:\/\d+)?\/?$/.test(url.pathname)
+  ) {
+    throw new Error(
+      'Enter the published topic URL from https://discourse.mozilla.org/t/...'
+    );
+  }
+  return url.href;
+}
+
+/**
+ * Announce the deployment and publish edited release notes.
+ */
+async function announceDeployment(
+  deployment: DeploymentResult,
+  release: CliRelease | null,
+  dryRun: boolean
+): Promise<void> {
+  logAction('Preparing the Discourse deployment announcement.');
+  const composerUrl = buildAnnouncementUrl(deployment);
+  const fallbackUrl = new URL(composerUrl);
+  const announcementBody = fallbackUrl.searchParams.get('body');
+  fallbackUrl.searchParams.delete('body');
+  console.log(
+    `If the prefilled link fails, open ${fallbackUrl.href} and paste this announcement body:\n\n${announcementBody}`
+  );
+  let announcementUrl = 'https://discourse.mozilla.org/t/DRY-RUN/0';
+  if (dryRun) {
+    console.log(
+      `[dry-run] Would open the prefilled announcement in your browser:\n${composerUrl}`
+    );
+    console.log(
+      '[dry-run] Would wait for you to review and publish the announcement, then paste its URL.'
+    );
   } else {
-    if (contents.version !== cliVersion) {
-      throw new Error(
-        `Expected profiler-cli version ${cliVersion}, found ${contents.version}.`
+    console.log(
+      'Review the announcement, fill in Highlights, and publish it in your browser.'
+    );
+    console.log(composerUrl);
+    console.log('[exec] open browser with Discourse composer');
+    try {
+      await open(composerUrl);
+    } catch (error) {
+      console.warn(
+        `Could not open the browser: ${error.message}. Use the short composer link and announcement body above.`
       );
     }
-    await confirm(`Publish ${contents.name}@${contents.version} to npm?`);
+    announcementUrl = await waitForPublishedUrl(
+      'Paste the published Discourse topic URL:',
+      validateAnnouncementUrl
+    );
   }
-  runRemoteMutation(dryRun, 'yarn', ['publish-cli']);
+
+  if (!release) {
+    return;
+  }
+  const { tag, bumpCommit, version } = release;
+  logAction(`Preparing the GitHub release notes for ${tag}.`);
+  const generateArgs = [
+    'api',
+    `repos/${repository}/releases/generate-notes`,
+    '--method',
+    'POST',
+    '-f',
+    `tag_name=${tag}`,
+    '-f',
+    `target_commitish=${bumpCommit}`,
+    '--jq',
+    '.body',
+  ];
+  let generatedNotes: string;
+  if (dryRun) {
+    console.log(
+      '[dry-run] Would generate release notes:',
+      ['gh', ...generateArgs].join(' ')
+    );
+    generatedNotes = deployment.body;
+  } else {
+    generatedNotes = run('gh', generateArgs, { capture: true });
+  }
+  console.log(
+    'Opening release notes in your editor. Fill in Highlights and remove noisy changes.'
+  );
+  const body = editMarkdown(
+    [
+      '## Highlights',
+      '',
+      '<!-- Describe notable CLI commands or behavior changes; remove this comment before publishing. -->',
+      '',
+      generatedNotes.trim(),
+      '',
+      `**📢 Deploy announcement:** [Firefox Profiler Deployment (${deployment.date})](${announcementUrl})`,
+      '',
+    ].join('\n')
+  );
+  console.log(body);
+  if (!dryRun) {
+    await confirm(`Publish the GitHub release '${tag}' with these notes?`);
+  }
+  withTemporaryFile(
+    'profiler-deploy-release-',
+    'release-notes.md',
+    body,
+    (path) => {
+      ghMutation(
+        dryRun,
+        'release',
+        'create',
+        tag,
+        '--verify-tag',
+        '--title',
+        tag,
+        '--notes-file',
+        path,
+        ...(parseVersion(version)?.prerelease
+          ? ['--prerelease', '--latest=false']
+          : ['--latest'])
+      );
+    }
+  );
 }
 
 /**
@@ -1584,19 +2267,22 @@ export async function main(
   args: string[] = process.argv.slice(2)
 ): Promise<void> {
   const { dryRun } = parseArguments(args);
+  const firefoxPath = dryRun ? null : firefoxCheckoutPath();
   console.log(
     `Firefox Profiler production deployment${dryRun ? ' (dry run)' : ''}`
   );
   await confirm(
     dryRun
-      ? 'Start the dry run? This script will fetch recent changes, but it will not change the working tree, GitHub, or npm.'
-      : 'Start the deployment? This script will switch branches, pull recent changes, and may create a local version-bump branch. Commits and remote changes will still require separate confirmation.'
+      ? 'Start the dry run? This script will fetch recent changes, but it will not change working trees, GitHub, npm, Discourse, Bugzilla, or Phabricator.'
+      : 'Start the deployment? This script will fetch recent changes and use temporary clones for the CLI version bump and publication, keeping your Profiler branch and working tree unchanged. It will create a branch in the Firefox checkout. Commits and remote changes will still require separate confirmation.'
   );
   const login = ensureGhAvailableAndLoggedIn();
   console.log(`Authenticated to GitHub as ${login}.`);
   ensureCleanWorkingCopy();
   const { upstream, fork: forkRemote } = discoverDeploymentRemotes(login);
-  updateMain(upstream, dryRun);
+  const firefoxCheckout =
+    firefoxPath === null ? null : prepareFirefoxCheckout(firefoxPath);
+  fetchDeploymentBranches(upstream);
   const l10nPlan = await handleL10nPullRequest(login, upstream, dryRun);
   const cliPlan = await handleVersionBumpPullRequest(
     login,
@@ -1611,29 +2297,41 @@ export async function main(
   if (cliPlan.plannedChange) {
     plannedChanges.push(cliPlan.plannedChange);
   }
-  const deployedMainCommit = await handleDeploymentPullRequest(
+  const deployment = await handleDeploymentPullRequest(
     upstream,
     dryRun,
     plannedChanges,
     l10nPlan.plannedLocalizers
   );
-  await finishDeployment(
-    deployedMainCommit,
-    cliPlan.shouldPublishCli,
-    cliPlan.version,
+  if (firefoxCheckout && deployment.mergeCommit) {
+    await updateFirefoxToolchain(
+      deployment.date,
+      deployment.mergeCommit,
+      cliPlan.version,
+      firefoxCheckout
+    );
+  } else {
+    console.log(
+      '[dry-run] Would file the Firefox toolchain bug and submit the toolchain revision with moz-phab.'
+    );
+  }
+  const release = await finishDeployment(
+    deployment.commit,
+    cliPlan,
     upstream,
     dryRun
   );
+  await announceDeployment(deployment, release, dryRun);
   if (dryRun) {
     console.log(
-      'Dry run completed. No GitHub or npm changes, local branches, commits, or working-tree changes were created.'
+      'Dry run completed. No GitHub, npm, Discourse, Bugzilla, or Phabricator changes, local branches, commits, tags, or working-tree changes were created.'
     );
     return;
   }
   console.log(
     cliPlan.shouldPublishCli
-      ? 'Deployment and profiler-cli publication completed.'
-      : 'Deployment completed without profiler-cli publication.'
+      ? 'Deployment, announcement, and profiler-cli release completed.'
+      : 'Deployment and announcement completed without a new profiler-cli release.'
   );
 }
 
