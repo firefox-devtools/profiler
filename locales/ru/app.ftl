@@ -410,7 +410,7 @@ JsTracerSettings--show-only-self-time = Показывать только соб
 # Variables:
 #   $smallProfileName (String) - Shortened name for the published Profile.
 ListOfPublishedProfiles--published-profiles-link =
-    .title = Щёлкните здесь, чтобы загрузить профиль { $smallProfileName }
+    .title = Щёлкните здесь, чтобы загрузить профиль «{ $smallProfileName }»
 ListOfPublishedProfiles--published-profiles-delete-button-disabled = Удалить
     .title = Этот профиль невозможно удалить, поскольку у нас нет информации для авторизации.
 ListOfPublishedProfiles--uploaded-profile-information-list-empty = Профиль ещё не загружен!
@@ -1310,6 +1310,14 @@ SourceView--not-in-browser-error-when-obtaining-js-source = Браузер не 
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The {} toggle button for pretty-printing the JavaScript code in the source
+# view, while the code is shown as it is. Pretty-printing adds line breaks and
+# indentation to make minified code easier to read.
+SourceView--pretty-print-show-button =
+    .title = Форматировать код
+# The {} toggle button for pretty-printing, while the code is pretty-printed.
+SourceView--pretty-print-hide-button =
+    .title = Показать код без форматирования
 # The toggle button for the assembly view, while the assembly view is hidden.
 # Assembly refers to the low-level programming language.
 AssemblyView--show-button =
