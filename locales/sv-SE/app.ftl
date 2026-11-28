@@ -1304,6 +1304,14 @@ SourceView--not-in-browser-error-when-obtaining-js-source = Webbläsaren kunde i
 
 ## Toggle buttons in the top right corner of the bottom box
 
+# The {} toggle button for pretty-printing the JavaScript code in the source
+# view, while the code is shown as it is. Pretty-printing adds line breaks and
+# indentation to make minified code easier to read.
+SourceView--pretty-print-show-button =
+    .title = Formatera koden för bättre läsbarhet
+# The {} toggle button for pretty-printing, while the code is pretty-printed.
+SourceView--pretty-print-hide-button =
+    .title = Visa koden utan formatering
 # The toggle button for the assembly view, while the assembly view is hidden.
 # Assembly refers to the low-level programming language.
 AssemblyView--show-button =
