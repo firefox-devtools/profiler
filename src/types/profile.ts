@@ -752,25 +752,26 @@ export type RawCounter = {
 export type ProfilerOverheadStats = {
   maxCleaning: Microseconds;
   maxCounter: Microseconds;
-  maxInterval: Microseconds;
+  maxInterval: Milliseconds;
   maxLockings: Microseconds;
   maxOverhead: Microseconds;
   maxThread: Microseconds;
   meanCleaning: Microseconds;
   meanCounter: Microseconds;
-  meanInterval: Microseconds;
+  meanInterval: Milliseconds;
   meanLockings: Microseconds;
   meanOverhead: Microseconds;
   meanThread: Microseconds;
   minCleaning: Microseconds;
   minCounter: Microseconds;
-  minInterval: Microseconds;
+  minInterval: Milliseconds;
   minLockings: Microseconds;
   minOverhead: Microseconds;
   minThread: Microseconds;
   overheadDurations: Microseconds;
   overheadPercentage: Microseconds;
-  profiledDuration: Microseconds;
+  // Unlike the other durations, this one is in milliseconds (since Firefox 86).
+  profiledDuration: Milliseconds;
   samplingCount: Microseconds;
 };
 
