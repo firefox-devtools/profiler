@@ -170,7 +170,7 @@
     "jest-extended": "^7.0.0",
     "local-web-server": "^5.4.2",
     "lockfile-lint": "^5.1.0",
-    "npm-run-all2": "^8.0.4",
+    "npm-run-all2": "^9.1.0",
     "open": "^11.0.4",
     "oxfmt": "^0.75.0",
     "oxlint": "1.90.0",
