@@ -1131,6 +1131,27 @@ BottomBox--show-fullscreen =
 SourceView--close-button =
     .title = Kaynak görünümünü kapat
 
+## Find bar
+## The find bar is opened with Ctrl+F or Cmd+F in the source view and in the
+## assembly view.
+
+CodeFindBar--search-field =
+    .aria-label = Bul
+    .placeholder = Bul
+CodeFindBar--previous-button = Önceki
+    .title = Önceki eşleşmeyi bul (Shift+Enter)
+CodeFindBar--next-button = Sonraki
+    .title = Sonraki eşleşmeyi bul (Enter)
+# Checkbox label. If checked, only matches with the same uppercase and lowercase
+# letters are found.
+CodeFindBar--match-case = Büyük-küçük harfe duyarlı
+# Checkbox label. If checked, the search text is a regular expression.
+CodeFindBar--regexp = Düzenli ifade
+# Checkbox label. If checked, only matches that are whole words are found.
+CodeFindBar--whole-word = Tam sözcükler
+CodeFindBar--close-button =
+    .title = Bul çubuğunu kapat
+
 ## Code loading errors
 ## These are displayed both in the source view and in the assembly view.
 ## The string IDs here currently all start with SourceView for historical reasons.
@@ -1184,6 +1205,13 @@ SourceView--not-in-archive-error-when-obtaining-source = { $pathInArchive } dosy
 #   $url (String) - The URL from which the "archive" file was downloaded.
 #   $parsingErrorMessage (String) - The raw internal error message during parsing, not localized
 SourceView--archive-parsing-error-when-obtaining-source = { $url } adresindeki arşiv ayrıştırılamadı: { $parsingErrorMessage }
+# Displayed below SourceView--cannot-obtain-source, if a JS file could not be found in
+# the browser.
+# Variables:
+#   $url (String) - The URL of the JS source file.
+#   $sourceUuid (number) - The UUID of the JS source file.
+#   $errorMessage (String) - The raw internal error message, not localized
+SourceView--not-in-browser-error-when-obtaining-js-source = Tarayıcı, { $url } URL’sine ait sourceUuid değeri { $sourceUuid } olan kaynak dosyayı alamadı: { $errorMessage }.
 
 ## Toggle buttons in the top right corner of the bottom box
 
